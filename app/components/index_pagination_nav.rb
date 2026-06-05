@@ -91,7 +91,11 @@ class Components::IndexPaginationNav < Components::Base
     )
     url = pagination_link_url(page)
     a(href: url, class: classes) do
-      link_icon(direction, title: direction.to_s.upcase.to_sym.t, class: "px-2")
+      render(Components::LinkIcon.new(
+               type: direction,
+               title: direction.to_s.upcase.to_sym.t,
+               html_class: "px-2"
+             ))
     end
   end
 
@@ -141,7 +145,7 @@ class Components::IndexPaginationNav < Components::Base
   def render_goto_button
     span(class: "input-group-btn") do
       button(type: :submit, class: "btn btn-outline-default px-2") do
-        link_icon(:goto, title: :GOTO.l)
+        render(Components::LinkIcon.new(type: :goto, title: :GOTO.l))
       end
     end
   end

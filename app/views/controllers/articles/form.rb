@@ -19,8 +19,11 @@ module Views::Controllers::Articles
       text_field(:title, label: "#{:article_title.t}:",
                          data: { autofocus: true }) do |field_component|
         field_component.with_append do
-          help_block do
-            "#{:form_article_title_help.t} #{:field_textile_link.t}"
+          render(Components::HelpBlock.new) do
+            trusted_html(
+              [:form_article_title_help.t,
+               :field_textile_link.t].safe_join(" ")
+            )
           end
         end
       end
@@ -30,8 +33,8 @@ module Views::Controllers::Articles
       textarea_field(:body, label: "#{:article_body.t}:",
                             rows: 10) do |field_component|
         field_component.with_append do
-          help_block do
-            :field_textile_link.t
+          render(Components::HelpBlock.new) do
+            trusted_html(:field_textile_link.t)
           end
         end
       end

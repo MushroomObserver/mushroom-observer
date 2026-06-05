@@ -29,7 +29,7 @@ class Components::ShowPrevNextNav < Components::Base
 
     a(href: href, class: class_names("icon-link", classes), title: title,
       data: { toggle: "tooltip", title: title }) do
-      link_icon(dir, class: "px-2")
+      render(Components::LinkIcon.new(type: dir, html_class: "px-2"))
       span(class: "sr-only") { title }
     end
   end
@@ -42,7 +42,7 @@ class Components::ShowPrevNextNav < Components::Base
 
     a(href: href, class: class_names("icon-link", classes), title: title,
       data: { toggle: "tooltip", title: title }) do
-      link_icon(icon, class: "px-2")
+      render(Components::LinkIcon.new(type: icon, html_class: "px-2"))
       span(class: "sr-only") { title }
     end
   end

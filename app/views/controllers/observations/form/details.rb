@@ -69,7 +69,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              controller_id: "observation_location_autocompleter",
              data: { map_target: "placeInput", action: exif_action }
            )) do |field|
-      field.with_help { observation_location_help }
+      field.with_help { render(Components::ObservationLocationHelp.new) }
     end
   end
 

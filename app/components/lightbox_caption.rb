@@ -125,7 +125,9 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_location
     if @user
-      location_link(@obs.where, @obs.location, nil, true)
+      render(Components::LocationLink.new(
+               where: @obs.where, location: @obs.location, click: true
+             ))
     else
       plain(@obs.where)
     end
@@ -173,7 +175,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_user(obs_user)
     if @user
-      user_link(obs_user)
+      render(Components::UserLink.new(user: obs_user))
     else
       plain(obs_user.unique_text_name)
     end
@@ -186,10 +188,12 @@ class Components::LightboxCaption < Components::Base
 
   def render_contact_link(_obs_user)
     plain(" [")
-    modal_link_to(
-      "observation_email",
-      *Tab::Observation::SendQuestion.new(observation: @obs).to_a
-    )
+    name, path, opts = Tab::Observation::SendQuestion.new(
+      observation: @obs
+    ).to_a
+    render(Components::ModalLink.new(
+             "observation_email", name, path, **(opts || {})
+           ))
     plain("]")
   end
 

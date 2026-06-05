@@ -12,19 +12,13 @@ module ObjectLinkHelper
   #
   #   Where: <%= location_link(obs.where, obs.location) %>
   #
+  # Kept for ERB callers. Phlex callers should
+  # `render(Components::LocationLink.new(...))` directly instead.
   def location_link(where, location, count = nil, click = false)
-    if location
-      location = Location.find(location) unless location.is_a?(AbstractModel)
-      link_string = where_string(location.name, count)
-      link_string += " [#{:click_for_map.t}]" if click
-      link_to(link_string, location_path(id: location.id),
-              { class: "show_location_link show_location_link_#{location.id}" })
-    else
-      link_string = where_string(where, count)
-      link_string += " [#{:SEARCH.t}]" if click
-      link_to(link_string, observations_path(where: where),
-              { class: "index_observations_at_where_link" })
-    end
+    render(Components::LocationLink.new(
+             where: where, location: location,
+             count: count, click: click
+           ))
   end
 
   # Wrap both formats of location.name in spans,
@@ -66,34 +60,26 @@ module ObjectLinkHelper
   #   # If you don't have a full User instance handy:
   #   Modified by: <%= user_link(login, user_id) %>
   #
+  # Kept for ERB callers and a handful of Phlex spots that build
+  # SafeBuffer strings via `safe_join` (where rendering a component
+  # mid-string-build is awkward). Phlex callers in regular template
+  # context should `render(Components::UserLink.new(...))` directly.
   def user_link(user, name = nil, args = {})
-    if !user
-      return :unknown_user_name.t
-    elsif user.is_a?(Integer)
-      name ||= "#{:USER.t} ##{user}"
-      user_id = user
-    elsif user
-      name ||= user.unique_text_name
-      user_id = user.id
-    end
-
-    link_to(
-      name, user_path(user_id),
-      args.merge(
-        { class: class_names("user_link_#{user_id}", args[:class]) }
-      )
-    )
+    render(Components::UserLink.new(user: user, name: name,
+                                    attributes: args))
   end
 
   # Wrap object's name in link to the object, return nil if no object
   #   Project: <%= project_link(draft_name.project) %>
   #   Species List: <%= species_list_link(observation.species_lists.first) %>
+  # Kept for the two remaining ERB callers
+  # (`images/show/_info_panel.html.erb`, `field_slips/_field_slip.html.erb`).
+  # Phlex callers should `render(Components::ObjectLink.new(...))`
+  # directly instead.
   def link_to_object(object, name = nil)
     return nil unless object
 
-    unique_class = "#{object.type_tag}_link_#{object.id}"
-    link_to(name || object.title.t, object.show_link_args,
-            { class: unique_class })
+    render(Components::ObjectLink.new(object: object, name: name))
   end
 
   def observation_herbarium_record_link(obs)

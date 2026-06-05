@@ -96,7 +96,9 @@ module Views::Controllers::Occurrences::Projects
       ul(class: "list-unstyled mt-2") do
         projects.each do |project|
           li(class: "d-flex align-items-center mb-1") do
-            show_title_id_badge(project, "rss-id mr-3")
+            render(Components::IdBadge.new(
+                     object: project, extra_class: "rss-id mr-3"
+                   ))
             a(href: project_path(project)) { plain(project.title) }
           end
         end

@@ -59,7 +59,7 @@ class Components::FormLocationMap < Components::Base
       data: toggle_button_data,
       aria: { expanded: "false", controls: @id }
     ) do
-      link_icon(:globe)
+      render(Components::LinkIcon.new(type: :globe))
       span(class: "map-show mx-2") { :form_observations_open_map.l }
       span(class: "map-hide mx-2") { :form_observations_hide_map.l }
     end

@@ -22,27 +22,17 @@ module PanelHelper
     content_tag(element, string, args)
   end
 
-  # make a help-block styled element, like a div, p
+  # Kept for ERB callers. Phlex callers should
+  # `render(Components::HelpBlock.new(...))` directly.
   def help_block(element = :div, string = "", **args, &block)
-    content = block ? capture(&block) : string
-    html_options = {
-      class: class_names("help-block", args[:class])
-    }.deep_merge(args.except(:class))
-
-    content_tag(element, html_options) { content }
+    render(Components::HelpBlock.new(element, string, **args), &block)
   end
 
-  # draw a help block with an arrow. `direction` is "up", "down", or nil
-  # (no arrow). Production callers never pass mobile: — the arrow is
-  # always xs-hidden.
+  # Kept for ERB callers. Phlex callers should
+  # `render(Components::HelpBlock.new(well: true, arrow: …))` directly.
   def help_block_with_arrow(direction = nil, **args, &block)
-    div_class = "well well-sm mb-3 help-block position-relative"
-    div_class += " mt-3" if direction == "up"
-
-    tag.div(class: div_class, id: args[:id]) do
-      concat(capture(&block).to_s)
-      concat(tag.div("", class: "arrow-#{direction} hidden-xs")) if direction
-    end
+    render(Components::HelpBlock.new(well: true, arrow: direction, **args),
+           &block)
   end
 
   # Wraps a Bootstrap-collapse div around a help block. Only the
