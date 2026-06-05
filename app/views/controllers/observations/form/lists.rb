@@ -16,7 +16,7 @@
 #   submitted species_list_ids on failure-reload; nil on normal
 #   render.
 class Views::Controllers::Observations::Form::Lists < Views::Base
-  prop :form, _Any
+  prop :form, ::Components::ApplicationForm
   prop :observation, Observation
   prop :lists, _Array(SpeciesList)
   prop :submitted_list_ids, _Nilable(_Array(String)), default: nil

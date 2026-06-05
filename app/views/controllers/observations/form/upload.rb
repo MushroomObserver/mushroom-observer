@@ -7,7 +7,7 @@
 # @param form [Components::ApplicationForm] the parent form
 # @param good_images [Array<Image>] already uploaded images
 class Views::Controllers::Observations::Form::Upload < Views::Base
-  prop :form, _Any
+  prop :form, ::Components::ApplicationForm
   prop :good_images, _Array(Image), default: -> { [] }
 
   def view_template

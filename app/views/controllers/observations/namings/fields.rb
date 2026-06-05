@@ -17,10 +17,10 @@
 # @param name_help [String] help text for the name field
 # @param unfocused [Boolean] if true, don't autofocus any field
 class Views::Controllers::Observations::Namings::Fields < Views::Base
-  prop :form, _Any
+  prop :form, ::Components::ApplicationForm
   prop :vote, _Nilable(Vote), default: -> { Vote.new }
   prop :given_name, String, default: ""
-  prop :reasons, _Nilable(Hash), default: nil
+  prop :reasons, _Nilable(_Hash(Integer, ::Naming::Reason)), default: nil
   prop :show_reasons, _Boolean, default: true
   prop :context, _Nilable(String), default: nil
   prop :create, _Boolean, default: true

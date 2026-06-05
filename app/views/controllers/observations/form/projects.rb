@@ -27,7 +27,7 @@
 # @param error_checked_projects [Array<Project>] projects with constraint errors
 # @param suspect_checked_projects [Array<Project>] projects with warnings
 class Views::Controllers::Observations::Form::Projects < Views::Base
-  prop :form, _Any
+  prop :form, ::Components::ApplicationForm
   prop :observation, Observation
   prop :user, User
   prop :button_name, String

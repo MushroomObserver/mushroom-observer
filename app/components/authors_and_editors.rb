@@ -21,7 +21,13 @@ module Components
   #   ))
   #
   class AuthorsAndEditors < Base
-    prop :obj, _Any # Any object with type_tag
+    # Concrete callers are `Description` (`NameDescription` and
+    # `LocationDescription` subclasses), `Name`, `Location`, and
+    # `GlossaryTerm`. Duck-typed via `_Interface(:type_tag)` so
+    # tests can substitute lightweight stubs that don't carry the
+    # full AR object graph the description / non-description
+    # branches each consume.
+    prop :obj, _Interface(:type_tag)
     prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
          default: -> { [] }
     prop :user, _Nilable(User)

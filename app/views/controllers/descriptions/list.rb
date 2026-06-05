@@ -22,9 +22,9 @@ module Views::Controllers::Descriptions
     register_value_helper :reviewer?
 
     prop :user, _Nilable(::User), default: nil
-    prop :object, _Any
-    prop :type, Symbol
-    prop :current, _Nilable(_Any), default: nil
+    prop :object, _Union(::Name, ::Location)
+    prop :type, _Union(:name, :location)
+    prop :current, _Nilable(::Description), default: nil
     # When the object has no visible descriptions, emit this text
     # instead. Callers pass the type-specific i18n message
     # (`:show_name_no_descriptions.t`, etc.) — pre-translated so the

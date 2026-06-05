@@ -13,9 +13,9 @@
 # @param herbarium_id [Integer] default herbarium ID
 # @param accession_number [String] default accession number
 class Views::Controllers::Observations::Form::Specimen < Views::Base
-  prop :form, _Any
+  prop :form, ::Components::ApplicationForm
   prop :observation, Observation
-  prop :mode, _Nilable(Symbol), default: :create
+  prop :mode, _Nilable(_Union(:create, :update)), default: :create
   prop :field_code, _Nilable(String), default: nil
   prop :field_code_locked, _Boolean, default: false
   prop :collectors_name, _Nilable(String), default: nil

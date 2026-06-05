@@ -18,7 +18,12 @@ module Components
   #
   class ObjectFooter < Base
     prop :user, _Nilable(User)
-    prop :obj, _Any # Any versioned or non-versioned object
+    # Polymorphic across many model classes (Article, Description,
+    # FieldSlip, GlossaryTerm, Image, Location, Name, Observation,
+    # Occurrence, Sequence) with branches gated by `@obj.respond_to?`.
+    # Duck-typed on `created_at` — the one accessor the component
+    # always reaches.
+    prop :obj, _Interface(:created_at)
     prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
          default: -> { [] }
 

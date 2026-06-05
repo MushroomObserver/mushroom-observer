@@ -7,11 +7,11 @@ class Components::IndexPaginationNav < Components::Base
 
   prop :pagination_data, _Nilable(PaginationData)
   prop :position, Symbol, default: -> { :top }
-  prop :args, Hash, default: -> { {} }
+  prop :args, _Hash(Symbol, _Any), default: -> { {} }
   # These need to be passed from the helper which has access to request/params
   prop :request_url, String     # Full URL with query params for link generation
   prop :form_action_url, String # URL without query params for form actions
-  prop :q_params, _Nilable(Hash)
+  prop :q_params, _Nilable(_Hash(Symbol, _Any))
   prop :letter_param, _Nilable(String)
 
   def view_template
