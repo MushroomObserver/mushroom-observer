@@ -1018,6 +1018,9 @@
   # descriptions in the show_name page.
   description_part_title_public: Public [:DESCRIPTION]
   description_part_title_user: "[USER]'s [:DESCRIPTION]"
+  description_part_title_project: "[USER]'s Draft"
+  description_part_title_source: "[:DESCRIPTION]"
+  description_part_title_foreign: "[:DESCRIPTION]"
 
   # Name/location description types. These are used when listing the available
   # descriptions in the show_name page, but this time the optional text field was
