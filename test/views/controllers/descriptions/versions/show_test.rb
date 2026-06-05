@@ -62,7 +62,7 @@ class Views::Controllers::Descriptions::Versions::ShowTest <
     # Renders without raising — the version table just gets an empty
     # versions array.
     html = render(view)
-    assert_includes(html, "#{@desc.version}")
+    assert_includes(html, @desc.version.to_s)
   end
 
   # -- title_permission_label branches --------------------------
