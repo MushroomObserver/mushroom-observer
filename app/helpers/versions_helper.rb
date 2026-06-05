@@ -1,45 +1,13 @@
 # frozen_string_literal: true
 
-# helpers which create html which links to prior version(s)
+# helpers which create html which links to prior version(s).
+#
+# `show_previous_version` + its private composers were replaced by
+# `Components::PreviousVersion` — see that component for the
+# "Version: N / Previous Version" line. Only the version-table
+# composers remain here (consumed by `_version_table.erb`).
 module VersionsHelper
-  # New: Must pass in @versions to avoid these and other helpers doing
-  # duplicate version lookups, which are slow.
-  #
-  # Just shows the current version number and a link to see the previous.
-  #
-  #   <%= show_previous_version(name, versions) %>
-  #
-  #   # Renders just this:
-  #   Version: N <br/>
-  #   Previous Version: N-1<br/>
-  #
-  def show_previous_version(obj, versions)
-    previous_version = versions&.last(2)&.first
-    if !previous_version || previous_version&.version == obj.version
-      current_version_html(obj)
-    elsif previous_version
-      previous_version_link(previous_version, obj)
-    end
-  end
-
   private
-
-  def previous_version_link(previous_version, obj)
-    str = "#{:show_name_previous_version.t} #{previous_version.version}"
-    current_version_html(obj) +
-      # FIX THIS: Send the path helper the id and version param.
-      link_to(str,
-              { controller: "#{obj.show_controller}/versions",
-                action: :show, id: obj.id,
-                version: previous_version.version },
-              class: "previous_version_link") +
-      safe_br
-  end
-
-  def current_version_html(obj)
-    # disable cop because interpolation outputs a string, not a safe_buffer
-    :VERSION.t + ": " + obj.version.to_s + safe_br # rubocop:disable Style/StringConcatenation
-  end
 
   def build_version_table(obj, versions, args)
     versions.reverse.map do |ver|

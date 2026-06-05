@@ -159,7 +159,7 @@ module Names
       login
       get(:show, params: params)
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_description_details_and_alts_panel")
+      assert_select("#description_details_and_alts")
     end
 
     def test_next_description
@@ -298,7 +298,7 @@ module Names
       login(draft.user.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_description_details_and_alts_panel")
+      assert_select("#description_details_and_alts")
     end
 
     # Ensure that an admin can see a draft they don't own,
@@ -309,7 +309,7 @@ module Names
       login(mary.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_description_details_and_alts_panel")
+      assert_select("#description_details_and_alts")
 
       # Admin should see all description_change_links buttons
       did = draft.id
@@ -331,7 +331,7 @@ module Names
       login(katrina.login)
       get(:show, params: { id: draft.id })
       assert_template("names/descriptions/show")
-      assert_template("descriptions/_description_details_and_alts_panel")
+      assert_select("#description_details_and_alts")
     end
 
     # Ensure that a non-member cannot see a draft

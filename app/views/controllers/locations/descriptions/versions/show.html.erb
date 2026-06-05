@@ -1,5 +1,19 @@
 <%
-desc_title = description_title(@user, @description)
+# Textile-processed partial title with rough-permissions suffix.
+# See the name-version sibling for why this is inlined here.
+result = @description.partial_format_name
+permit = if @description.parent.description_id == @description.id
+           :default.l
+         elsif @description.public
+           :public.l
+         elsif @description.is_reader?(@user) || in_admin_mode?
+           :restricted.l
+         else
+           :private.l
+         end
+result += " (#{permit})" unless /(^| )#{permit}( |$)/i.match?(result)
+desc_title = result.t
+
 add_page_title(:show_past_location_description_title.t(
   num: @description.version, name: desc_title
 ))
@@ -14,6 +28,9 @@ add_context_nav(Tab::LocationDescription::VersionActions.new(
       versions: @versions
     ) %>
 
-<%= render(partial: "descriptions/description_details_and_alts_panel") %>
+<%= render(Views::Controllers::Descriptions::DetailsAndAltsPanel.new(
+      description: @description, user: @user,
+      versions: @versions, projects: @projects
+    )) %>
 
 <%= render(Components::ObjectFooter.new(user: @user, obj: @description, versions: @versions)) %>

@@ -48,8 +48,7 @@ column_classes(:six)
             ) %>
       </div>
       <div class="py-5px mb-3">
-        <%= render(partial: "shared/form_license_badge",
-                   locals: { license: @image.license }) %>
+        <%= render(Components::LicenseBadge.new(license: @image.license)) %>
       </div>
     </div>
   <% end %>

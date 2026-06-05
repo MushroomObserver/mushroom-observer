@@ -11,10 +11,6 @@
 # `DescriptionsHelper#list_descriptions` — the alt-description
 # list now renders through `Views::Controllers::Descriptions::List`
 # (the Phlex view that replaced the helper chain in #4438).
-#
-# With `_name_info` gone, `list_descriptions` no longer has any
-# callers — the entire `DescriptionsHelper` filter / sort / link /
-# mod-link chain can be deleted in a follow-up.
 class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil

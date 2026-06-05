@@ -20,7 +20,7 @@ module Descriptions
                        action: :show,
                        id: desc.location_id }],
                     params)
-      assert_template(:show)
+      assert_response(:success)
 
       # Remove Rolf from reviewers group.
       user_groups(:reviewers).users.delete(rolf)
@@ -39,7 +39,7 @@ module Descriptions
 
       # Rolf should be able to do it now.
       get(:show, params: params)
-      assert_template(:show)
+      assert_response(:success)
 
       # Rolf giveth with one hand...
       post(:create, params: params.merge(add: mary.id))
@@ -52,6 +52,12 @@ module Descriptions
       assert_redirected_to(description_authors_path)
       desc.reload
       assert_user_arrays_equal([rolf], desc.authors)
+
+      # Add via the namespaced FormObject param shape that the
+      # add-author autocompleter form submits.
+      post(:create, params: params.merge(add_author: { user: mary.id }))
+      desc.reload
+      assert_user_arrays_equal([mary, rolf], desc.authors, :sort)
     end
 
     def test_review_name
@@ -62,7 +68,7 @@ module Descriptions
 
       # Make sure it lets reviewers get to page.
       requires_login(:show, params)
-      assert_template(:show)
+      assert_response(:success)
 
       # Remove Rolf from reviewers group.
       user_groups(:reviewers).users.delete(rolf)
@@ -78,7 +84,7 @@ module Descriptions
 
       # Rolf should be able to do it again now.
       get(:show, params: params)
-      assert_template(:show)
+      assert_response(:success)
 
       # Rolf giveth with one hand...
       post(:create, params: params.merge(add: mary.id))

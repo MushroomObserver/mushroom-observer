@@ -63,7 +63,9 @@ column_classes(:seven_five)
     <% end %>
 
     <% footer = tag.div(id: "name_previous_export") do
-      concat(show_previous_version(@name, @versions))
+      concat(render(Components::PreviousVersion.new(
+        obj: @name, versions: @versions
+      )))
       concat(export_status_controls(@name))
     end %>
 

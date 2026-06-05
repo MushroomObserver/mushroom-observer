@@ -9,10 +9,8 @@
 # pre-Phlex `DescriptionsHelper#list_descriptions` +
 # `#sort_description_list` + `#make_list_links` + `#description_link`
 # + `#description_title` + `DescriptionIconsHelper#description_mod_links`
-# composed. The helper still exists for one remaining caller in
-# `tabs/observations_helper.rb#obs_name_description_tabs`; once the
-# `_name_info.erb` partial migrates to Phlex (which will inline that
-# composer too), the helper chain can be deleted entirely.
+# composed. Both helper files have since been deleted (this view + the
+# sibling `DetailsAndAltsPanel` own every chain they used to compose).
 module Views::Controllers::Descriptions
   class List < Views::Base
     # `reviewer?` is description-domain only — it gates visibility

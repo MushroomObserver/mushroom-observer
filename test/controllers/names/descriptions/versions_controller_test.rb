@@ -16,7 +16,7 @@ module Names::Descriptions
       assert(new_versions > old_versions)
       get(:show, params: { id: desc.id })
       assert_template("names/descriptions/versions/show")
-      assert_template("descriptions/_description_details_and_alts_panel")
+      assert_select("#description_details_and_alts")
     end
   end
 end
