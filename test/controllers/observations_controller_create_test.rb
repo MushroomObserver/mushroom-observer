@@ -1353,11 +1353,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
   def test_collector_to_observation
     login("katrina")
-    get(:new, params: { notes: { Collector: mary.textile_name } })
+    get(:new, params: { collector: mary.textile_name })
 
-    # Collector value should populate the notes textarea
-    assert_select("textarea[name='observation[notes][Collector]']",
-                  text: /#{Regexp.escape(mary.textile_name)}/)
+    # Collector value prefills the collector field (its own column, #4211)
+    assert_select("input[name='observation[collector]'][value=?]",
+                  mary.textile_name)
   end
 
   # Prove that notes are saved with template keys first, in the order listed in

@@ -1322,25 +1322,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Textile-marked-up collector for field-slip rendering: a `_user_`
   # link when an MO user is known, else the plain `collector` string,
-  # else the legacy notes-derived value (for rows predating the column).
+  # else nil (a field slip with no recorded collector renders blank).
+  # The `collector` column is the single source of truth (#4211); the
+  # legacy notes[:Collector] fallback was removed once the column was
+  # backfilled and notes stripped (script/migrate_collector_notes.rb).
   def collector_textile
     return collector_user.textile_name if collector_user
-    return collector if collector.present?
 
-    collector_from_notes
-  end
-
-  # Legacy fallback for the field-slip "collector" line on rows that
-  # predate the `collector` column. Reads the value out of notes,
-  # finally defaulting to the entering user.
-  def collector_from_notes
-    return notes[:Collector] if notes.include?(:Collector)
-    return notes[:collector] if notes.include?(:collector)
-    return notes[:"Collector's_Name"] if notes.include?(:"Collector's_Name")
-    return notes[:"Collector's_name"] if notes.include?(:"Collector's_name")
-    return notes[:"Collector(s)"] if notes.include?(:"Collector(s)")
-
-    user.textile_name
+    collector
   end
 
   # True when the collector identity differs from the user who entered

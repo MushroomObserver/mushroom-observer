@@ -266,11 +266,9 @@ module ObservationsHelper
   end
 
   def observation_details_notes(obs:)
-    # When the collector column is populated it renders on its own
-    # show-page line, so suppress the duplicate notes key (kept in notes
-    # for imported-snapshot fidelity). Legacy rows without the column
-    # still render the Collector note as before. See #4211.
-    notes = obs.collector.present? ? obs.notes.except(:Collector) : obs.notes
+    # Collector lives in its own column and show-page line, never in
+    # notes (#4211, migrate_collector_notes.rb stripped the old key).
+    notes = obs.notes
     return "" if notes == Observation.no_notes
     return "#{:NOTES.t}:\n#{notes[:Other]}".tpl if notes.keys == [:Other]
 

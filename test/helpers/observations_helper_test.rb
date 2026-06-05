@@ -109,29 +109,16 @@ class ObservationsHelperTest < ActionView::TestCase
            "Entered by should link to the entering user")
   end
 
-  def test_notes_suppresses_collector_key
+  def test_notes_render_without_collector_special_casing
+    # Collector lives in its own column/line now; notes render as-is with
+    # no Collector-key suppression (#4211).
     obs = observations(:minimal_unknown_obs)
-    obs.collector = obs.user.unique_text_name # column populated -> suppress
-    obs.notes = { Collector: "_user mary_", Substrate: "wood",
-                  Other: "field notes here" }
+    obs.notes = { Substrate: "wood", Other: "field notes here" }
 
     text = Nokogiri::HTML.fragment(observation_details_notes(obs: obs)).
            at_css("#observation_notes").text
 
     assert_includes(text, "field notes here")
     assert_includes(text, "wood")
-    assert_not_includes(text, "Collector")
-  end
-
-  def test_notes_keeps_collector_key_for_legacy_rows
-    obs = observations(:minimal_unknown_obs)
-    obs.collector = nil # no column value -> legacy row, keep notes key
-    obs.notes = { Collector: "Jane Forager", Other: "field notes here" }
-
-    text = Nokogiri::HTML.fragment(observation_details_notes(obs: obs)).
-           at_css("#observation_notes").text
-
-    assert_includes(text, "Jane Forager")
-    assert_includes(text, "Collector")
   end
 end

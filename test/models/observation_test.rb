@@ -2419,10 +2419,9 @@ class ObservationTest < UnitTestCase
     assert_equal("Jane Forager", obs.collector_textile)
   end
 
-  def test_collector_textile_legacy_notes_fallback
-    obs = Observation.new(user: mary, collector: nil,
-                          notes: { Collector: "_user mary_" })
-    assert_equal("_user mary_", obs.collector_textile)
+  def test_collector_textile_blank_when_no_collector
+    obs = Observation.new(user: mary, collector: nil)
+    assert_nil(obs.collector_textile)
   end
 
   def test_collector_unrecorded_field_slip_blank

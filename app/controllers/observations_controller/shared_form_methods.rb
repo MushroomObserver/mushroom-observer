@@ -56,6 +56,8 @@ module ObservationsController::SharedFormMethods
     return Observation.no_notes unless notes_param_present?
 
     symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    # Collector has its own column; never let it live in notes (#4211).
+    symbolized.delete(:Collector)
     symbolized.compact_blank!
   end
 
@@ -74,7 +76,7 @@ module ObservationsController::SharedFormMethods
   end
 
   def init_specimen_vars
-    @collectors_name   = params.dig(:notes, :Collector) || @user.legal_name
+    @collectors_name   = params[:collector].presence || @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
     @herbarium_id      = @user.preferred_herbarium&.id
