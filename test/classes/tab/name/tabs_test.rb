@@ -139,11 +139,16 @@ module Tab::Name
     end
 
     def test_eol_external_link
+      eol_url = "https://eol.org/pages/67890"
+      Triple.create!(subject: @name.show_url,
+                     predicate: @name.eol_predicate,
+                     object: eol_url)
       tab = Tab::Name::Eol.new(name: @name)
 
-      assert_equal("EOL", tab.title)
-      assert_equal(@name.eol_url, tab.path)
-      assert_equal(:_blank, tab.html_options[:target])
+      assert_equal("EOL", tab.title, "EOL tab title")
+      assert_equal(eol_url, tab.path, "EOL tab path delegates to eol_url")
+      assert_equal(:_blank, tab.html_options[:target],
+                   "EOL tab opens in new tab")
     end
 
     def test_gbif_external_link
