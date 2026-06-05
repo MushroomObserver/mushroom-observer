@@ -204,10 +204,16 @@ module ObservationsHelper
 
   def observation_details_who(obs:, user:)
     tag.p(class: "obs-who", id: "observation_who") do
-      concat(observation_collector_html(obs: obs, user: user))
-      if obs.collector_differs_from_creator?
-        concat(tag.br)
+      if obs.collector_unrecorded?
+        # Field-slip obs with no recorded collector: don't claim the
+        # entering recorder as collector — show only "Entered by:".
         concat(observation_entered_by_html(obs: obs, user: user))
+      else
+        concat(observation_collector_html(obs: obs, user: user))
+        if obs.collector_differs_from_creator?
+          concat(tag.br)
+          concat(observation_entered_by_html(obs: obs, user: user))
+        end
       end
     end
   end

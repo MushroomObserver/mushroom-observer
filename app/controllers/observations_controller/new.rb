@@ -39,9 +39,11 @@ module ObservationsController::New
       @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
     end
     @observation.place_name = params[:place_name]
-    # Prefill the editable collector with the entering user; they record
-    # someone else here when entering on a collector's behalf (#4211).
-    @observation.collector = @user.unique_text_name
+    # Prefill the editable collector: the field-slip collector when one
+    # came through (the redirect carries it), else the entering user, who
+    # records someone else here when entering on a collector's behalf.
+    @observation.collector = params[:collector].presence ||
+                             @user.unique_text_name
     init_naming_and_vote
     @names       = nil
     @valid_names = nil

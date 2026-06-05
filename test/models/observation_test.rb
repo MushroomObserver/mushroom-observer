@@ -2424,4 +2424,46 @@ class ObservationTest < UnitTestCase
                           notes: { Collector: "_user mary_" })
     assert_equal("_user mary_", obs.collector_textile)
   end
+
+  def test_collector_unrecorded_field_slip_blank
+    obs = observations(:minimal_unknown_obs)
+    assert(obs.field_slip_id.present?, "fixture should have a field slip")
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert(obs.collector_unrecorded?)
+  end
+
+  def test_collector_unrecorded_false_when_collector_present
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(collector: "Jane Forager", collector_user_id: nil)
+    assert_not(obs.collector_unrecorded?)
+  end
+
+  def test_collector_unrecorded_false_without_field_slip
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert_nil(obs.field_slip_id)
+    assert_not(obs.collector_unrecorded?)
+  end
+
+  def test_build_observation_skips_collector_default
+    obs = Observation.build_observation(
+      locations(:burbank), names(:fungi), {}, Time.zone.now, mary
+    )
+    assert_nil(obs.collector,
+               "field-slip-built obs must not auto-claim the recorder")
+    assert_nil(obs.collector_user_id)
+  end
+
+  def test_collector_attrs_user
+    attrs = Observation.collector_attrs(rolf)
+    assert_equal(rolf.unique_text_name, attrs[:collector])
+    assert_equal(rolf.id, attrs[:collector_user_id])
+  end
+
+  def test_collector_attrs_string_and_nil
+    assert_equal({ collector: "Jane Forager" },
+                 Observation.collector_attrs("Jane Forager"))
+    assert_equal({}, Observation.collector_attrs(""))
+    assert_equal({}, Observation.collector_attrs(nil))
+  end
 end

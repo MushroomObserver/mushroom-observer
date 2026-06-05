@@ -97,7 +97,8 @@ class FieldSlipsController < ApplicationController
                     field_code: @field_slip.code,
                     place_name: place_name,
                     date: extract_date,
-                    notes: field_slip_notes.compact_blank!
+                    notes: field_slip_notes.compact_blank!,
+                    collector: field_slip_collector_string
                   ))
     else
       sync_selected_observations
@@ -147,7 +148,8 @@ class FieldSlipsController < ApplicationController
                     place_name: place_name,
                     date: extract_date,
                     notes: field_slip_notes.compact_blank!,
-                    species_list: params[:species_list]
+                    species_list: params[:species_list],
+                    collector: field_slip_collector_string
                   ))
     else
       attach_selected_observations
@@ -184,6 +186,18 @@ class FieldSlipsController < ApplicationController
 
   def field_slip_notes
     FieldSlipNotesBuilder.new(params, @field_slip).assemble
+  end
+
+  # Resolved field-slip collector: a User, a free-text String, or nil.
+  # Stored in the observation's collector column, not in notes (#4211).
+  def field_slip_collector
+    FieldSlipNotesBuilder.new(params, @field_slip).collector
+  end
+
+  # Display string for the resolved collector, for carrying through the
+  # new-observation form redirect.
+  def field_slip_collector_string
+    Observation.collector_attrs(field_slip_collector)[:collector]
   end
 
   def recent_edit_observations

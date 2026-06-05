@@ -161,6 +161,13 @@
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   attr_accessor :current_user
 
+  # Transient flag: when set, the before_create default that copies the
+  # entering user into `collector` is skipped. Field-slip-originated
+  # observations set this so a foray recorder is never auto-claimed as
+  # the collector (the collector is written on the physical slip). See
+  # build_observation and default_collector_to_creator.
+  attr_accessor :skip_collector_default
+
   include Scopes
 
   belongs_to :thumb_image, class_name: "Image",
@@ -269,6 +276,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
+  # Only the field-slip flow builds observations this way, so the
+  # collector default-to-creator is always skipped: a foray recorder is
+  # never auto-claimed as collector. The caller assigns the resolved
+  # field-slip collector to the column afterward; a blank one stays blank
+  # (suppressed on the show page). See #4211.
   def self.build_observation(location, name, notes, date, current_user = nil)
     return nil unless location
 
@@ -276,8 +288,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     now = Time.zone.now
     user = current_user || User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
-                when: date,
-                user:, location:, name:, notes: })
+                when: date, user:, location:, name:, notes:,
+                skip_collector_default: true })
     return nil unless obs
 
     obs.user_log(user, :log_observation_created)
@@ -291,6 +303,20 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     )
     Observation::NamingConsensus.new(obs).user_calc_consensus(user)
     obs
+  end
+
+  # Normalize a resolved collector (User, free-text String, or nil) into
+  # the column attributes. A User sets both the display string and the FK;
+  # a string sets the free-text column; nil leaves both blank.
+  def self.collector_attrs(collector)
+    case collector
+    when User
+      { collector: collector.unique_text_name, collector_user_id: collector.id }
+    when String
+      collector.blank? ? {} : { collector: collector }
+    else
+      {}
+    end
   end
 
   def location?
@@ -1331,6 +1357,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # True when no collector identity is recorded and the observation came
+  # from a field slip — a foray recorder entered it but the collector was
+  # not captured here (it is written on the physical slip). The show page
+  # suppresses the "Collector:" line in this case rather than falsely
+  # claiming the entering user, leaving only "Entered by:". See #4211.
+  def collector_unrecorded?
+    collector.blank? && collector_user_id.nil? && field_slip_id.present?
+  end
+
   def field_slip_name
     return notes[:Field_Slip_ID] if notes.include?(:Field_Slip_ID)
 
@@ -1474,7 +1509,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # still null) never silently rewrites it. Imports and explicit form
   # values arrive non-blank and skip this. See #4211.
   def default_collector_to_creator
-    return if collector.present?
+    return if collector.present? || skip_collector_default
 
     self.collector = user&.unique_text_name
     self.collector_user_id = user_id

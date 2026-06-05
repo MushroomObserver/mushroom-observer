@@ -76,6 +76,21 @@ class ObservationsHelperTest < ActionView::TestCase
     assert_includes(text, obs.user.unique_text_name)
   end
 
+  def test_who_collector_unrecorded_suppresses_collector_line
+    # Field-slip obs with no recorded collector: no "Collector:" line at
+    # all, only "Entered by:" — don't claim the recorder as collector.
+    obs = observations(:minimal_unknown_obs)
+    assert(obs.field_slip_id.present?, "fixture should have a field slip")
+    obs.collector = nil
+    obs.collector_user_id = nil
+
+    text = who_text(observation_details_who(obs: obs, user: nil))
+
+    assert_not_includes(text, :COLLECTOR.l)
+    assert_includes(text, :ENTERED_BY.l)
+    assert_includes(text, obs.user.unique_text_name)
+  end
+
   def test_who_collector_user_renders_link_and_entered_by
     obs = observations(:minimal_unknown_obs)
     collector = users(:rolf)
