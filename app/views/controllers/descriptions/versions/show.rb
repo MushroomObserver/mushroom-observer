@@ -50,11 +50,15 @@ module Views::Controllers::Descriptions::Versions
     # Subclass extension points -----------------------------------
 
     def page_title_key
-      raise(NotImplementedError, "Subclass must implement page_title_key")
+      raise(NotImplementedError.new(
+              "Subclass must implement page_title_key"
+            ))
     end
 
     def version_actions
-      raise(NotImplementedError, "Subclass must implement version_actions")
+      raise(NotImplementedError.new(
+              "Subclass must implement version_actions"
+            ))
     end
 
     # Hook for any per-type setup that has to run before the body
@@ -73,9 +77,8 @@ module Views::Controllers::Descriptions::Versions
         begin
           result = @description.partial_format_name
           permit = title_permission_label
-          unless /(^| )#{permit}( |$)/i.match?(result)
-            result += " (#{permit})"
-          end
+          result += " (#{permit})" unless
+            /(^| )#{permit}( |$)/i.match?(result)
           result.t
         end
     end

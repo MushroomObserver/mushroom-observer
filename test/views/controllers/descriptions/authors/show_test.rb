@@ -54,7 +54,8 @@ class Views::Controllers::Descriptions::Authors::ShowTest <
                       ))
 
     note_text = :review_authors_note.t.strip_html
-    assert_includes(ActionView::Base.full_sanitizer.sanitize(name_html), note_text)
-    assert_not_includes(ActionView::Base.full_sanitizer.sanitize(loc_html), note_text)
+    sanitize = ActionView::Base.full_sanitizer.method(:sanitize)
+    assert_includes(sanitize.call(name_html), note_text)
+    assert_not_includes(sanitize.call(loc_html), note_text)
   end
 end

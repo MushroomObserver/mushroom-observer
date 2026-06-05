@@ -34,7 +34,8 @@ module Views::Controllers::Versions
 
     def render_table
       render(Components::Table.new(
-               @versions.reverse, show_headers: false,
+               @versions.reverse,
+               show_headers: false,
                class: "table-hover mb-0"
              )) do |t|
         t.column("") { |ver| render_date_cell(ver) }
