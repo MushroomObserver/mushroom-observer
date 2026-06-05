@@ -16,6 +16,10 @@ module Locations::Descriptions
       @location = @description.location
       @description.revert_to(params[:version].to_i)
       @versions = @description.versions
+
+      render(Views::Controllers::Locations::Descriptions::Versions::Show.new(
+               description: @description, user: @user, versions: @versions
+             ))
     end
   end
 end

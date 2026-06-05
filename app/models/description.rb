@@ -246,7 +246,8 @@ class Description < AbstractModel
   # Return an Array of source type Strings, e.g. "public", "project", etc.
   # as would `NameDescription.source_types.keys`. However, the below order is
   # different. It is a preferred order, and is how these will be listed in
-  # the show_name descriptions panel, list_descriptions.
+  # the show-name descriptions panel
+  # (`Views::Controllers::Descriptions::List#sort_descriptions`).
   ALL_SOURCE_TYPES = [
     "public",    # Public ones created by any user.
     "foreign",   # Foreign "public" description(s) written on another server.

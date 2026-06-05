@@ -9,7 +9,9 @@ module Descriptions
     def show
       set_object_and_authors
       if @authors.member?(@user) || @user.in_group?("reviewers")
-        @users = [] # User.order("login, name").to_a
+        render(Views::Controllers::Descriptions::Authors::Show.new(
+                 object: @object, authors: @authors
+               ))
       else
         parent = @object.parent
         flash_error(:review_authors_denied.t)
@@ -19,7 +21,8 @@ module Descriptions
 
     def create
       set_object_and_authors
-      new_author = params[:add] ? User.find(params[:add]) : nil
+      add_id = params[:add] || params.dig(:add_author, :user)
+      new_author = add_id.present? ? User.find(add_id) : nil
       return unless new_author && !@authors.member?(new_author)
 
       @object.add_author(new_author)

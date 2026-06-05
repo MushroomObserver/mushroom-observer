@@ -17,11 +17,23 @@ module Descriptions::Moves
       @description = @src
 
       # render the form, if have permission
-      return if in_admin_mode? || @src.is_reader?(@user)
+      if in_admin_mode? || @src.is_reader?(@user)
+        render(phlex_moves_new_class.new(
+                 description: @description, user: @user
+               ))
+        return
+      end
 
       # Doesn't have permission to see source.
       flash_error(:runtime_description_private.t)
       redirect_to(@src.parent.show_link_args)
+    end
+
+    # Each consuming controller (`Names::Descriptions::MovesController`,
+    # `Locations::Descriptions::MovesController`) names its Phlex
+    # action view from its own controller_path.
+    def phlex_moves_new_class
+      "Views::Controllers::#{controller_path.camelize}::New".constantize
     end
 
     # POST method. Moves the description to a new parent object.

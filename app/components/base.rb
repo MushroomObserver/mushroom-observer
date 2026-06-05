@@ -23,7 +23,6 @@ class Components::Base < Phlex::HTML
   register_output_helper :user_link, mark_safe: true
   register_output_helper :modal_link_to, mark_safe: true
   register_output_helper :link_icon, mark_safe: true
-  register_output_helper :make_table, mark_safe: true
   register_output_helper :help_block_with_arrow, mark_safe: true
   register_output_helper :help_block, mark_safe: true
   register_output_helper :observation_location_help, mark_safe: true

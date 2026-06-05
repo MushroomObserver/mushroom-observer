@@ -190,8 +190,9 @@ class NamesController < ApplicationController
   #   @first_child
   # notes:
   # descriptions:
-  #   description_links = list_descriptions(user: @user, object: @name,
-  #                                         type: :name)
+  #   render(Views::Controllers::Descriptions::List.new(
+  #            user: @user, object: @name, type: :name
+  #          ))
   # projects:
   #   @projects
 

@@ -17,11 +17,9 @@ column_classes(:six)
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>
-    <%= render(
-          "controllers/shared/version_table",
-          obj: @glossary_term,
-          versions: @versions
-        ) %>
+    <%= render(Views::Controllers::Versions::Table.new(
+          obj: @glossary_term, versions: @versions
+        )) %>
   <% end %>
 <% end %>
 <!--.row-->

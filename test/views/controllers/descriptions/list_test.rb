@@ -79,11 +79,14 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
       flunk("Need a Name fixture with multiple NameDescriptions")
   end
 
-  # Drive the helper through the view-context binding (the test class
-  # itself doesn't have direct access to helper methods).
+  # Inline the visibility filter that `List#visible?` applies. We
+  # used to call the (now-deleted) `DescriptionsHelper#list_descriptions`
+  # here; the visibility rule is the same — non-empty notes, or the
+  # current user is the desc's owner, or it's public.
   def list_descriptions_for(name)
-    @controller.view_context.list_descriptions(
-      user: @user, object: name, type: :name
-    )&.size || 0
+    name.descriptions.count do |desc|
+      desc.notes? || desc.user == @user ||
+        desc.source_type == :public
+    end
   end
 end

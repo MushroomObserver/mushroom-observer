@@ -18,7 +18,12 @@ module Descriptions::Merges
       @description = @src
 
       # render the form, if have permission
-      return if in_admin_mode? || @src.is_reader?(@user)
+      if in_admin_mode? || @src.is_reader?(@user)
+        klass = "Views::Controllers::#{controller_path.camelize}::New".
+                constantize
+        render(klass.new(description: @description, user: @user))
+        return
+      end
 
       # Doesn't have permission to see source.
       flash_error(:runtime_description_private.t)
@@ -82,7 +87,9 @@ module Descriptions::Merges
 
       flash_error(:runtime_edit_description_denied.t)
       @description = @src
-      render("new")
+      klass = "Views::Controllers::#{controller_path.camelize}::New".
+              constantize
+      render(klass.new(description: @description, user: @user))
       false
     end
 
@@ -137,7 +144,17 @@ module Descriptions::Merges
       merge_description_notes
       @merge = true
       @old_desc_id = @src.id
-      render("#{@src.show_controller}/edit")
+      # Dispatch to the parent controller's Phlex Edit view —
+      # `names/descriptions/edit` or `locations/descriptions/edit`,
+      # derived from `@src.show_controller`. The model-side
+      # `show_controller` returns a leading-slash string (e.g.
+      # `/names/descriptions`); strip it before camelizing.
+      controller_segment = @src.show_controller.to_s.sub(%r{^/}, "")
+      klass = "Views::Controllers::#{controller_segment.camelize}::Edit".
+              constantize
+      render(klass.new(description: @description, user: @user,
+                       licenses: @licenses, merge: @merge,
+                       old_desc_id: @old_desc_id))
     end
 
     # Tentatively merge the fields by sticking src's notes after dest's wherever
