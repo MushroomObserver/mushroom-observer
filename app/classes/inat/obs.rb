@@ -98,8 +98,10 @@ class Inat
       # Observation form requires a "normalized" key (no spaces) for Notes parts
       snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
 
-      { Collector: collector,
-        snapshot_key => snapshot,
+      # The collector goes to the observation's `collector` column (set
+      # from #collector by Inat::MoObservationBuilder), not into notes.
+      # See #4211.
+      { snapshot_key => snapshot,
         Other: cleaned_description }
     end
 

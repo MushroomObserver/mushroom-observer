@@ -147,21 +147,15 @@ class ObservationLabels::Fields
   end
 
   def collector_value
-    notes_collector || collection_number_collector || observer
+    column_collector || collection_number_collector || observer
   end
 
-  def notes_collector
-    notes_collector = observation.notes[:Collector]
-    return unless notes_collector
+  # The collector lives in the observation's column now (#4211): a linked
+  # MO user's name when known, else the free-text collector string.
+  def column_collector
+    return observation.collector_user.name if observation.collector_user
 
-    collector_identifier = extract_user_string_regex(notes_collector)
-    user = User.find_by(login: collector_identifier)
-    user&.name || collector_identifier
-  end
-
-  def extract_user_string_regex(input)
-    match = input.match(/\A_user (.+)_\z/)
-    match ? match[1] : input
+    observation.collector.presence
   end
 
   def collection_number_collector

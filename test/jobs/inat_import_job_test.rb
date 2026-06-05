@@ -75,8 +75,8 @@ class InatImportJobTest < ActiveJob::TestCase
            "Notes should indicate if there were no iNat 'Observation Fields'")
 
     assert(obs.collector.present?, "Import should populate the collector")
-    assert_equal(obs.notes[:Collector], obs.collector,
-                 "Import should copy the iNat collector into the column")
+    assert_not(obs.notes.key?(:Collector),
+               "Collector lives in the column, not notes (#4211)")
     assert_nil(obs.collector_user_id,
                "Imported collector leaves the FK null until claimed (#4217)")
 

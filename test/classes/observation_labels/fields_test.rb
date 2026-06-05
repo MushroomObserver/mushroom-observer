@@ -18,4 +18,19 @@ class FieldsTest < UnitTestCase
     assert_not_includes(similar_obs,
                         observations(:megacollybia_platyphylla_obs))
   end
+
+  def test_column_collector
+    obs = observations(:minimal_unknown_obs)
+    fields = ObservationLabels::Fields.new(obs)
+
+    obs.collector_user = users(:rolf)
+    assert_equal(users(:rolf).name, fields.send(:column_collector))
+
+    obs.collector_user = nil
+    obs.collector = "Jane Forager"
+    assert_equal("Jane Forager", fields.send(:column_collector))
+
+    obs.collector = nil
+    assert_nil(fields.send(:column_collector))
+  end
 end
