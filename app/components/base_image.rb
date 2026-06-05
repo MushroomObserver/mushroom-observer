@@ -50,8 +50,8 @@ class Components::BaseImage < Components::Base
 
   # Image fitting and data
   prop :fit, Fit, default: :cover
-  prop :data, Hash, default: -> { {} }
-  prop :data_sizes, Hash, default: -> { {} }
+  prop :data, _Hash(Symbol, _Any), default: -> { {} }
+  prop :data_sizes, _Hash(String, Integer), default: -> { {} }
 
   # Lightbox and observation context
   prop :obs, _Union(Observation, Hash), default: -> { {} }

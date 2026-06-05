@@ -370,8 +370,13 @@ class NamesLookupFieldGroupTest < ComponentTestCase
   private
 
   def create_component(modifier_fields: [])
-    # Create a mock namespace
+    # `NamesLookupFieldGroup` requires `:names_namespace` to respond
+    # to `:field` (the prop's `_Interface` contract). Bare
+    # `Minitest::Mock.new` doesn't until an expectation is set, so
+    # seed one even when the test never actually renders — the
+    # construction typecheck runs regardless.
     names_ns = Minitest::Mock.new
+    names_ns.expect(:field, nil, [Symbol])
 
     Components::NamesLookupFieldGroup.new(
       names_namespace: names_ns,

@@ -12,7 +12,11 @@ module Views::Controllers::VisualGroups
     prop :filter, _Nilable(String)
     prop :status, String
     prop :pagination_data, _Nilable(PaginationData)
-    prop :subset, _Array(_Any), default: -> { [] }
+    # Each row is `[Image, included]` where `included` is the
+    # boolean from `visual_group_images.included` — `true`, `false`,
+    # or `nil` for the `:any` raw-SQL branch.
+    prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean))),
+         default: -> { [] }
 
     STATUSES = [
       ["needs_review", :visual_group_needs_review],

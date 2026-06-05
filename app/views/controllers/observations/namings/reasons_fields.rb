@@ -7,8 +7,14 @@
 # @param reasons [Hash] the naming reasons from Naming#init_reasons
 # @param naming_ns [Superform::Namespace] the naming namespace
 class Views::Controllers::Observations::Namings::ReasonsFields < Views::Base
-  prop :reasons, Hash
-  prop :naming_ns, _Any
+  prop :reasons, _Hash(Integer, ::Naming::Reason)
+  # Either a `Superform::Namespace` (when the parent `Fields` view
+  # wraps in `namespace(:naming)`) or the form itself (when
+  # `add_namespace: false` skips the wrap and passes `@form`
+  # directly — `Superform::Rails::Form` delegates `#field` /
+  # `#namespace` to its root namespace). Duck-typed to keep test
+  # stubs that only implement those two methods working.
+  prop :naming_ns, _Interface(:field, :namespace)
 
   def view_template
     @naming_ns.namespace(:reasons) do |reasons_ns|

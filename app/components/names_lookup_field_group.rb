@@ -17,9 +17,12 @@
 class Components::NamesLookupFieldGroup < Components::Base
   include Components::ApplicationForm::AutocompleterPrefill
 
-  prop :names_namespace, _Any
+  # Duck-typed: only `#field` is called. Accepts a
+  # `Superform::Namespace`, a `Superform::Rails::Form`, or any
+  # stub that responds to `#field` (test mocks).
+  prop :names_namespace, _Interface(:field)
   prop :query, Query
-  prop :modifier_fields, _Array(Object)
+  prop :modifier_fields, _Array(_Union(Symbol, _Array(Symbol)))
 
   def view_template
     render_lookup_autocompleter

@@ -24,15 +24,20 @@
 # wrapper.
 #
 class Components::InlineModLinks < Components::Base
-  prop :target, _Any
+  # Target is polymorphic; the supported classes are exactly the
+  # keys of `TARGET_HANDLERS` below.
+  prop :target, _Union(::CollectionNumber, ::HerbariumRecord,
+                       ::Sequence, ::ExternalLink,
+                       ::Naming, ::Comment, ::Description)
   prop :observation, _Nilable(::Observation), default: nil
   prop :user, _Nilable(::User), default: nil
   prop :indent, _Boolean, default: true
   # Extra inline links to render BEFORE the edit/destroy pair —
   # currently used by `Sequences` for the "[archive]" link when
   # the sequence has a deposit URL. Each item must be a renderable
-  # (Phlex component instance or SafeBuffer).
-  prop :extras, _Array(_Nilable(_Any)), default: -> { [] }
+  # (Phlex component instance or SafeBuffer string).
+  prop :extras, _Array(_Nilable(_Union(Phlex::SGML, String))),
+       default: -> { [] }
 
   # Per-target dispatch table. Keys: model class. Values: hash
   # of method-symbols this component calls to derive the

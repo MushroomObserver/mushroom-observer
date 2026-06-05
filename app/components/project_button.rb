@@ -7,8 +7,10 @@
 # `Components::CrudButton::Get` in btn-frame text-link mode with the
 # `btn-lg` size + `my-3 mr-3` row spacing both consumers need.
 class Components::ProjectButton < Components::Base
-  prop :name, _Any
-  prop :target, _Any
+  prop :name, String
+  # Anything `link_to`-like accepts: a URL string, a `[controller,
+  # action, params...]` hash, or a model the route helper can resolve.
+  prop :target, _Union(String, Hash, ::AbstractModel)
 
   def view_template
     render(Components::CrudButton::Get.new(

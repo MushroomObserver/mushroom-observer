@@ -10,7 +10,7 @@ class Components::RegionWithBoxFields < Components::Base
   register_output_helper :make_map
 
   prop :query, Query
-  prop :form_namespace, _Any
+  prop :form_namespace, ::Components::ApplicationForm
 
   def view_template
     div(id: map_element_id, data: map_controller_data) do

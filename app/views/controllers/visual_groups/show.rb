@@ -10,7 +10,7 @@ module Views::Controllers::VisualGroups
     prop :user, _Nilable(User)
     prop :filter, _Nilable(String)
     prop :pagination_data, _Nilable(PaginationData)
-    prop :subset, _Array(_Any)
+    prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean)))
 
     def view_template
       add_show_title(@visual_group)

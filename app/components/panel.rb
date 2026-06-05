@@ -55,7 +55,7 @@ class Components::Panel < Components::Base
 
   prop :panel_class, _Nilable(String), default: nil
   prop :panel_id, _Nilable(String), default: nil
-  prop :attributes, Hash, default: -> { {} }
+  prop :attributes, _Hash(Symbol, _Any), default: -> { {} }
   # Set collapsible: :true on component, plus panel.with_body(collapse: true)
   prop :collapsible, _Nilable(_Boolean), default: nil
   # Normally :collapse_target should be an id selector, like "#collapse_target".

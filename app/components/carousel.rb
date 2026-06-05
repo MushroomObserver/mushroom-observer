@@ -18,7 +18,10 @@
 #   )
 class Components::Carousel < Components::Base
   # Properties
-  prop :images, Array do |value|
+  # Nil entries are filtered at render time (`next unless image`),
+  # so callers can mix nils in (e.g. a sparse Image[] from a query
+  # that left some slots empty).
+  prop :images, _Array(_Nilable(::Image)) do |value|
     value.respond_to?(:to_a) ? value.to_a : value
   end
   prop :user, _Nilable(User)

@@ -19,7 +19,7 @@ class Components::FormCarousel < Components::Base
   prop :user, _Nilable(User)
   prop :carousel_id, String, default: "observation_upload_images_carousel"
   prop :obs_thumb_id, _Nilable(Integer), default: nil
-  prop :exif_data, Hash, default: -> { {} }
+  prop :exif_data, _Hash(Integer, _Hash(Symbol, _Any?)), default: -> { {} }
 
   def view_template
     div(

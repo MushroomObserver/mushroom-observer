@@ -73,7 +73,7 @@ class Components::Modal < Components::Base
   # Extra CSS class(es) appended to the modal root, e.g. `modal-form`
   # (used by `ModalTurboForm` for turbo-stream form modals).
   prop :extra_class, _Nilable(String), default: nil
-  prop :extra_data, Hash, default: -> { {} }
+  prop :extra_data, _Hash(Symbol, _Any), default: -> { {} }
   # Override the auto-generated DOM ids for the title and body
   # elements. Defaults are `<id>_title` and `<id>_body`; pass
   # explicit values when external CSS/JS/turbo-stream targets rely

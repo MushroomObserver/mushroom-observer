@@ -26,8 +26,8 @@ class Components::FormNotes < Components::Base
   # `value` is the current value, `label` is shown above the textarea.
   Part = Data.define(:key, :value, :label)
 
-  prop :form, _Any
-  prop :parts, Array
+  prop :form, ::Components::ApplicationForm
+  prop :parts, _Array(Part)
   # Panel id; also used to derive `#{panel_id}_inner` (collapse
   # target) and `#{panel_id}_fields` (the inner div the textareas
   # live in).
@@ -42,7 +42,7 @@ class Components::FormNotes < Components::Base
   # Pass a Proc when the help emits Phlex DSL (e.g. `p { ... }`)
   # so rendering is deferred to the right buffer. A plain
   # String/SafeBuffer also works for static content.
-  prop :above_help, _Nilable(_Any), default: nil
+  prop :above_help, _Nilable(_Union(String, Proc)), default: nil
 
   def view_template
     render(panel) do |p|
