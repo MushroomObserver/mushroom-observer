@@ -38,7 +38,8 @@ module Tab::Image
 
       assert_equal("EOL", tab.title, "EOL tab title")
       assert_equal(eol_url, tab.path, "EOL tab path delegates to eol_url")
-      assert_equal("_blank", tab.html_options[:target], "EOL tab opens in new tab")
+      assert_equal("_blank", tab.html_options[:target],
+                   "EOL tab opens in new tab")
     end
 
     def test_commercial_inquiry
