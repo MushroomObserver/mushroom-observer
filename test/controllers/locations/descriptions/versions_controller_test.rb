@@ -15,10 +15,7 @@ module Locations::Descriptions
       new_versions = desc.versions.length
       assert(new_versions > old_versions)
       get(:show, params: { id: desc.id })
-      assert_template(
-        "locations/descriptions/versions/show",
-        partial: "descriptions/_description_details_and_alts_panel"
-      )
+      assert_select("#description_details_and_alts")
     end
   end
 end

@@ -17,10 +17,8 @@ column_classes(:seven_five)
   <% end %>
 <% end %>
 
-<%= render(
-      "controllers/shared/version_table",
-      obj: @location,
-      versions: @versions
-    ) %>
+<%= render(Views::Controllers::Versions::Table.new(
+      obj: @location, versions: @versions
+    )) %>
 
 <%= render(Components::ObjectFooter.new(user: @user, obj: @location, versions: @versions)) %>

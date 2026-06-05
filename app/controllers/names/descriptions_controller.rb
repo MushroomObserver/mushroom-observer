@@ -85,24 +85,43 @@ module Names
 
     def show
       return unless find_description!
-
-      case params[:flow]
-      when "next"
-        redirect_to_next_object(:next, NameDescription, params[:id].to_s)
-      when "prev"
-        redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
-      end
+      return if handle_show_flow_redirect
 
       @name = @description.name
       return unless description_parent_exists?(@name)
       return unless user_has_permission_to_see_description?
 
+      gather_show_ivars
+      return if performed?
+
+      render(Views::Controllers::Names::Descriptions::Show.new(
+               description: @description, user: @user,
+               versions: @versions, projects: @projects
+             ))
+    end
+
+    private
+
+    def handle_show_flow_redirect
+      case params[:flow]
+      when "next"
+        redirect_to_next_object(:next, NameDescription, params[:id].to_s)
+        true
+      when "prev"
+        redirect_to_next_object(:prev, NameDescription, params[:id].to_s)
+        true
+      end
+    end
+
+    def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this(@name)
       @versions = @description.versions
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
+
+    public
 
     ############################################################################
     #
@@ -118,6 +137,12 @@ module Names
 
       # Render a blank form.
       initialize_description_source
+      return if performed?
+
+      render(Views::Controllers::Names::Descriptions::New.new(
+               name: @name, description: @description,
+               user: @user, licenses: @licenses
+             ))
     end
 
     def create
@@ -145,7 +170,9 @@ module Names
     end
 
     def render_edit
-      render("edit", location: edit_name_description_path(@name.id))
+      render(Views::Controllers::Names::Descriptions::Edit.new(
+               description: @description, user: @user, licenses: @licenses
+             ), location: edit_name_description_path(@name.id))
     end
 
     # called by :create
@@ -178,6 +205,10 @@ module Names
 
       find_description_parent
       find_licenses
+
+      render(Views::Controllers::Names::Descriptions::Edit.new(
+               description: @description, user: @user, licenses: @licenses
+             ))
     end
 
     def update

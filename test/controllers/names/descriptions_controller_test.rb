@@ -158,7 +158,7 @@ module Names
       params = { "id" => desc.id.to_s }
       login
       get(:show, params: params)
-      assert_template("names/descriptions/show")
+      assert_select("#description_details_and_alts")
       assert_select("#description_details_and_alts")
     end
 
@@ -193,7 +193,7 @@ module Names
       login
       get(:show, params: { id: desc.id })
       assert_no_flash
-      assert_template("names/descriptions/show")
+      assert_select("#description_details_and_alts")
     end
 
     # This is a bit confusing: create and edit draft are handled here,
@@ -208,7 +208,7 @@ module Names
       }
       requires_login(:new, params, user.login)
       if success
-        assert_template("names/descriptions/new")
+        assert_select("form")
         assert_select("#name_description_form")
       else
         assert_redirected_to(project_path(project.id))
@@ -228,7 +228,7 @@ module Names
       }
       requires_login(:edit, params, user.login)
       if success
-        assert_template("names/descriptions/edit")
+        assert_select("form")
         assert_select("#name_description_form")
       elsif reader
         assert_redirected_to(name_description_path(draft.id))
@@ -256,7 +256,7 @@ module Names
       }
       put_requires_login(:update, params, user.login)
       if permission && !success
-        assert_template("names/descriptions/edit")
+        assert_select("form")
         assert_select("#name_description_form")
       elsif draft.is_reader?(user)
         assert_redirected_to(name_description_path(draft.id))
@@ -297,7 +297,7 @@ module Names
       draft = name_descriptions(:draft_coprinus_comatus)
       login(draft.user.login)
       get(:show, params: { id: draft.id })
-      assert_template("names/descriptions/show")
+      assert_select("#description_details_and_alts")
       assert_select("#description_details_and_alts")
     end
 
@@ -308,7 +308,7 @@ module Names
       assert_not_equal(draft.user, mary)
       login(mary.login)
       get(:show, params: { id: draft.id })
-      assert_template("names/descriptions/show")
+      assert_select("#description_details_and_alts")
       assert_select("#description_details_and_alts")
 
       # Admin should see all description_change_links buttons
@@ -330,7 +330,7 @@ module Names
       assert_not_equal(draft.user, katrina)
       login(katrina.login)
       get(:show, params: { id: draft.id })
-      assert_template("names/descriptions/show")
+      assert_select("#description_details_and_alts")
       assert_select("#description_details_and_alts")
     end
 
@@ -432,7 +432,7 @@ module Names
       login("rolf") # member
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
-      assert_template("names/descriptions/new")
+      assert_select("form")
       assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
@@ -464,7 +464,7 @@ module Names
       login("katrina") # member
       project = projects(:eol_project)
       get(:new, params: params.merge(project: project.id))
-      assert_template("names/descriptions/new")
+      assert_select("form")
       assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
@@ -488,7 +488,7 @@ module Names
       # Test clone of private description if can read.
       login("dick") # reader
       get(:new, params: params.merge(clone: other.id))
-      assert_template("names/descriptions/new")
+      assert_select("form")
       assert_select("#name_description_form")
       desc = assigns(:description)
       assert_equal("user", desc.source_type)

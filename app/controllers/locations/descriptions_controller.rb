@@ -74,24 +74,43 @@ module Locations
 
     def show
       return unless find_description!
-
-      case params[:flow]
-      when "next"
-        redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
-      when "prev"
-        redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
-      end
+      return if handle_show_flow_redirect
 
       @location = @description.location
       return unless description_parent_exists?(@location)
       return unless user_has_permission_to_see_description?
 
+      gather_show_ivars
+      return if performed?
+
+      render(Views::Controllers::Locations::Descriptions::Show.new(
+               description: @description, user: @user,
+               versions: @versions, projects: @projects
+             ))
+    end
+
+    private
+
+    def handle_show_flow_redirect
+      case params[:flow]
+      when "next"
+        redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
+        true
+      when "prev"
+        redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
+        true
+      end
+    end
+
+    def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this(@location)
       @versions = @description.versions
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
+
+    public
 
     def new
       find_location
@@ -101,6 +120,12 @@ module Locations
 
       # Render a blank form.
       initialize_description_source
+      return if performed?
+
+      render(Views::Controllers::Locations::Descriptions::New.new(
+               location: @location, description: @description,
+               user: @user, licenses: @licenses
+             ))
     end
 
     def create
@@ -127,6 +152,10 @@ module Locations
 
       find_description_parent
       find_licenses
+
+      render(Views::Controllers::Locations::Descriptions::Edit.new(
+               description: @description, user: @user, licenses: @licenses
+             ))
     end
 
     def update
@@ -161,11 +190,16 @@ module Locations
     end
 
     def render_new
-      render("new", location: new_location_description_path(@location.id))
+      render(Views::Controllers::Locations::Descriptions::New.new(
+               location: @location, description: @description,
+               user: @user, licenses: @licenses
+             ), location: new_location_description_path(@location.id))
     end
 
     def render_edit
-      render("edit", location: edit_location_description_path(@location.id))
+      render(Views::Controllers::Locations::Descriptions::Edit.new(
+               description: @description, user: @user, licenses: @licenses
+             ), location: edit_location_description_path(@location.id))
     end
 
     # called by :create
