@@ -22,19 +22,6 @@ module PanelHelper
     content_tag(element, string, args)
   end
 
-  # Kept for ERB callers. Phlex callers should
-  # `render(Components::HelpBlock.new(...))` directly.
-  def help_block(element = :div, string = "", **args, &block)
-    render(Components::HelpBlock.new(element, string, **args), &block)
-  end
-
-  # Kept for ERB callers. Phlex callers should
-  # `render(Components::HelpBlock.new(well: true, arrow: …))` directly.
-  def help_block_with_arrow(direction = nil, **args, &block)
-    render(Components::HelpBlock.new(well: true, arrow: direction, **args),
-           &block)
-  end
-
   # Wraps a Bootstrap-collapse div around a help block. Only the
   # block-form / no-direction shape is actually used today.
   def collapse_help_block(**args, &block)

@@ -64,4 +64,15 @@ class HelpBlockTest < ComponentTestCase
     assert_html(html, "div#h1")
     assert_html(html, "div[data-x='v']")
   end
+
+  def test_renders_empty_wrapper_when_neither_string_nor_block
+    # Defensive — when a caller forgets to supply content, the
+    # wrapper still renders (it's a no-op `emit_content` —
+    # `block` is nil AND `@string` is nil, so neither branch
+    # fires). Pins the no-content path so a future refactor
+    # doesn't accidentally start raising.
+    html = render(Components::HelpBlock.new(:p))
+
+    assert_html(html, "p.help-block")
+  end
 end

@@ -39,11 +39,5 @@ module Views::Controllers::Articles
         end
       end
     end
-
-    def help_block
-      # rubocop:disable Rails/OutputSafety
-      div(class: "help-block") { raw(yield.html_safe) }
-      # rubocop:enable Rails/OutputSafety
-    end
   end
 end
