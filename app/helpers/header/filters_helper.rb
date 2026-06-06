@@ -5,7 +5,6 @@
 #  add_query_filters(query)         # content_for(:filters)
 #                                     builds filter caption explaining
 #                                     index results, if filtered
-#  add_filter_help(filters_applied) # content_for(:filter_help)
 #
 module Header
   module FiltersHelper
@@ -25,19 +24,6 @@ module Header
                       query_alph: query.record.id.alphabetize }) do
         concat(filter_caption_truncated(query))
         concat(filter_caption_full(query))
-      end
-    end
-
-    # Used by several indexes that can be filtered based on user prefs
-    def add_filter_help(filters_applied)
-      return unless filters_applied
-
-      content_for(:filter_help) do
-        render(Components::HelpTooltip.new(
-                 label: "(#{:filtered.t})",
-                 title: :rss_filtered_mouseover.t,
-                 extra_class: "filter-help"
-               ))
       end
     end
 
