@@ -78,6 +78,14 @@ class LocationsHelperTest < ActionView::TestCase
     assert_nil(find_species_list(fake_query))
   end
 
+  def test_show_obs_link_title_with_count
+    loc = locations(:obs_default_location)
+    expected = "#{:show_location_observations.t} (#{loc.observations.size})"
+
+    assert_equal(expected, show_obs_link_title_with_count(loc),
+                 "Expected observation count in parentheses after label")
+  end
+
   def test_find_species_list_with_single_species_list_returns_it
     spl = species_lists(:first_species_list)
     fake_query = Struct.new(:params).new(

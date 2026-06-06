@@ -56,6 +56,15 @@ class TableHelperTest < ActionView::TestCase
     assert_equal(expect, table)
   end
 
+  def test_make_table_with_precomposed_string_header
+    precomposed = "<th>Prebuilt</th>".html_safe
+    table = make_table(headers: precomposed, rows: [[1]])
+    doc = Nokogiri::HTML(table)
+
+    assert(doc.at_css("tr th"),
+           "Expected precomposed header content rendered inside tr")
+  end
+
   def test_make_table_with_col_and_row_headers
     expect = "<table class=\"table\">" \
              "<tr><th scope=\"col\">This</th><th scope=\"col\">That</th></tr>" \
