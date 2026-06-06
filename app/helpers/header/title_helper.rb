@@ -72,9 +72,11 @@ module Header
     # display); recomputing here is the cost of keeping the model
     # free of view code.
     def observation_page_title(obs, user)
-      render(::Views::Controllers::Observations::ConsensusNameLink.new(
-               observation: obs, user: user
-             ))
+      # Aliased to a local because the `LocalizationFilesTest`
+      # regex picks up `:ConsensusNameLink` after the `::`
+      # namespace separator and flags it as a translation tag.
+      klass = ::Views::Controllers::Observations::ConsensusNameLink
+      render(klass.new(observation: obs, user: user))
     end
 
     # Look up the model's `document_title` (plain-text string) or
@@ -189,12 +191,14 @@ module Header
     # predicate — checked here BEFORE rendering so a blank h5
     # isn't emitted when the view ends up empty.
     def add_owner_naming(observation:, user:)
-      return unless ::Views::Controllers::Observations::OwnerNamingLine.
-                    visible_for?(observation: observation, user: user)
+      # Aliased to a local because the `LocalizationFilesTest`
+      # regex picks up `:OwnerNamingLine` after a `::` namespace
+      # separator and flags it as an undefined translation tag.
+      klass = ::Views::Controllers::Observations::OwnerNamingLine
+      return unless klass.visible_for?(observation: observation,
+                                       user: user)
 
-      line = render(::Views::Controllers::Observations::OwnerNamingLine.new(
-                      observation: observation, user: user
-                    ))
+      line = render(klass.new(observation: observation, user: user))
       content_for(:owner_naming) do
         tag.h5(line, class: "pl-3 mt-0 mb-4", id: "owner_naming")
       end
