@@ -1,8 +1,0 @@
-<%# `@comments` is set by show actions; new/edit pages don't, so
-    fall back to a fresh fetch off the target so the panel can still
-    list existing comments alongside the new-comment form. %>
-<%= render(Views::Controllers::Comments::CommentsForObject.new(
-             object: object,
-             comments: @comments || Comment.where(target: object).to_a,
-             user: @user, editable: false, limit: 10
-           )) %>

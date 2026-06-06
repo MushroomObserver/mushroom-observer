@@ -9,7 +9,8 @@ class CommentsControllerTest < FunctionalTestCase
   def test_index
     login
     get(:index)
-    assert_template("index")
+    assert_response(:success)
+    assert_select("body.comments__index")
   end
 
   def test_index_by_non_default_sort_order
@@ -135,7 +136,8 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: user.id })
 
-    assert_template("index")
+    assert_response(:success)
+    assert_select("body.comments__index")
     assert_page_title(:COMMENTS.l)
     assert_displayed_filters("#{:query_for_user.l}: #{user.name}")
     assert_session_query_record_is_correct
@@ -178,10 +180,11 @@ class CommentsControllerTest < FunctionalTestCase
   #########################################################
 
   def test_show_comment
+    comment = comments(:minimal_unknown_obs_comment_1)
     login
-    get(:show,
-        params: { id: comments(:minimal_unknown_obs_comment_1).id })
-    assert_template("show")
+    get(:show, params: { id: comment.id })
+    assert_response(:success)
+    assert_select("body.comments__show")
   end
 
   def test_new_comment

@@ -86,6 +86,28 @@ module Views::Controllers::Comments
       assert_no_html(html, "h4")
     end
 
+    def test_show_name_with_deleted_target_falls_back_to_deleted_text
+      # `target_name_link` and `target_type` are wrapped in
+      # `rescue StandardError` so a comment outliving its target
+      # (deleted observation, etc.) still renders in the comments
+      # index. Stub the target to raise on the access path the
+      # heading uses.
+      raising_target = ::Object.new
+      def raising_target.user_unique_format_name(*)
+        raise(StandardError.new("target gone"))
+      end
+
+      def raising_target.class
+        raise(StandardError.new("target gone"))
+      end
+      @comment.define_singleton_method(:target) { raising_target }
+
+      html = render_item(show_name: true)
+
+      assert_includes(html, :comment_list_deleted.t)
+      assert_includes(html, :runtime_object_deleted.to_s)
+    end
+
     # ---- avatar -----------------------------------------------------
 
     def test_avatar_image_rendered_when_user_has_image
