@@ -45,6 +45,15 @@ module Header
       assert_equal(:PUBLICATION.l, document_title_for(pub))
     end
 
+    def test_fallback_title_localizes_type_tag
+      # Struct has no `document_title`, so `document_title_for` routes
+      # through `fallback_title` — the path publications(:one_pub)
+      # skips because Publication defines its own `document_title`.
+      obj = Struct.new(:type_tag).new(:observation)
+      assert_equal(:OBSERVATION.l, fallback_title(obj),
+                   "Expected localized upcased type_tag from fallback_title")
+    end
+
     def test_show_document_title_composes_type_id_and_plain_name
       obs = observations(:minimal_unknown_obs)
       title = show_document_title(document_title_for(obs), obs)
