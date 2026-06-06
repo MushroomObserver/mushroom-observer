@@ -301,7 +301,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # Rails layouts emit from `controller_name__action_name`
     # instead of `assert_template`.
     assert_select("body.observations__show")
-    assert_template("comments/_comments_for_object")
+    assert_select("#comments_for_object")
     # Phlex panels — assert against their stable IDs (no template
     # lookup): _name_info / _observation_details / _namings /
     # _thumbnail_map / _associated_observations / _species_lists.

@@ -13,8 +13,10 @@ flash_error(@error) if @error && @objects.empty?
   if @objects.any?
     tag.div(class: "list-group") do
       @objects.each do |comment|
-        concat(render(partial: "comments/comment", object: comment,
-                      locals: { show_name: true, controls: @user.nil? }))
+        concat(render(Views::Controllers::Comments::CommentRow.new(
+                        comment: comment, user: @user, show_name: true,
+                        editable: @user.nil?
+                      )))
       end
     end
   end
