@@ -17,85 +17,18 @@ module ObservationsHelper
   # NOTE: Must pass owner naming, or it will be recalculated on every obs.
   # Only used for the page <title> element. #title is composed from parts.
   def observation_show_title(obs:, show_owner_naming: nil, user: nil)
-    obs_title_consensus_name_link(
-      name: obs.name, show_owner_naming:, user:
+    ::Observations::ConsensusNameLink.for(
+      name: obs.name, user: user, show_owner_naming: show_owner_naming
     )
   end
 
-  # name portion of Observation title.
-  def obs_title_consensus_name_link(name:, user:, show_owner_naming: nil)
-    if name.deprecated &&
-       (prefer_name = name.best_preferred_synonym).present?
-      obs_title_with_preferred_synonym_link(name, prefer_name, user)
-    else
-      obs_title_name_link(name, show_owner_naming, user)
-    end
-  end
-
-  def obs_title_with_preferred_synonym_link(name, prefer_name, user)
-    if user
-      [
-        ::Observations::DisplayNameBriefAuthorsLink.for(
-          user: user, name: name,
-          class: "obs_consensus_deprecated_synonym_link_#{name.id}"
-        ),
-        # Differentiate deprecated consensus from preferred name
-        obs_consensus_id_flag,
-        obs_title_preferred_synonym(user, prefer_name)
-      ]
-    else
-      [
-        name.user_display_name_brief_authors(user).t.small_author,
-        # Differentiate deprecated consensus from preferred name
-        obs_consensus_id_flag,
-        prefer_name.user_display_name_without_authors(user).t
-      ]
-    end.safe_join(" ")
-  end
-
-  def obs_title_preferred_synonym(user, prefer_name)
-    tag.span(class: "smaller") do
-      [
-        "(",
-        link_to_display_name_without_authors(
-          user, prefer_name,
-          class: "obs_preferred_synonym_link_#{prefer_name.id}"
-        ),
-        ")"
-      ].safe_join
-    end
-  end
-
-  def obs_title_name_link(name, show_owner_naming, user)
-    text = [
-      if user
-        ::Observations::DisplayNameBriefAuthorsLink.for(
-          user: user, name: name,
-          class: "obs_consensus_naming_link_#{name.id}"
-        )
-      else
-        name.user_display_name_brief_authors(user).t.small_author
-      end
-    ]
-    # Differentiate this Name from observer's preferred by printing "(Site ID)"
-    text << obs_consensus_id_flag if show_owner_naming
-    text.safe_join(" ")
-  end
-
-  def obs_consensus_id_flag
-    tag.span("(#{:show_observation_site_id.t})", class: "small text-nowrap")
-  end
+  # Title-builder chain extracted to `Observations::ConsensusNameLink`
+  # — composes `DisplayNameBriefAuthorsLink` and
+  # `DisplayNameWithoutAuthorsLink` POROs; handles deprecated /
+  # owner-preferred branches. See `app/classes/observations/`.
 
   # `owner_naming_line` + `owner_preferred_naming` extracted to
   # `Observations::OwnerNamingLine`.
-  # `link_to_display_name_brief_authors` extracted to
-  # `Observations::DisplayNameBriefAuthorsLink`
-  # (both under `app/classes/observations/`).
-
-  def link_to_display_name_without_authors(user, name, **)
-    link_to(name.user_display_name_without_authors(user).t,
-            name_path(id: name.id), **)
-  end
 
   def observation_location_help
     loc1 = "Albion, Mendocino Co., California, USA"

@@ -17,7 +17,7 @@ class ObservationsHelperTest < ActionView::TestCase
       link_to(current_name.display_name_brief_authors.t.small_author,
               name_path(id: current_name.id),
               class: "obs_consensus_naming_link_#{current_name.id}"),
-      obs_title_consensus_name_link(name: current_name, user:),
+      ::Observations::ConsensusNameLink.for(name: current_name, user:),
       "Observation of a current Name should link to that Name"
     )
 
@@ -26,20 +26,23 @@ class ObservationsHelperTest < ActionView::TestCase
     Observation.new(
       name: deprecated_name, user: user, when: Time.current, where: location
     )
+    title = ::Observations::ConsensusNameLink.for(
+      name: deprecated_name, user: user
+    )
     assert_match(
       ::Observations::DisplayNameBriefAuthorsLink.for(
         user: user, name: deprecated_name,
         class: "obs_consensus_deprecated_synonym_link_#{deprecated_name.id}"
       ),
-      obs_title_consensus_name_link(name: deprecated_name, user:).unescape_html,
+      title.unescape_html,
       "Observation of deprecated Name should link to it"
     )
     assert_match(
-      link_to_display_name_without_authors(
-        user, current_name,
+      ::Observations::DisplayNameWithoutAuthorsLink.for(
+        user: user, name: current_name,
         class: "obs_preferred_synonym_link_#{current_name.id}"
       ),
-      obs_title_consensus_name_link(name: deprecated_name, user:).unescape_html,
+      title.unescape_html,
       "Observation of deprecated Name should link to preferred Name"
     )
   end
