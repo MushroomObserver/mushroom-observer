@@ -126,7 +126,13 @@ module Observations::Namings
 
       put(:update, params:, format: :turbo_stream)
       assert_template("observations/show/_section_update")
-      assert_template("observations/show/_namings")
+      # Namings panel converted to Phlex
+      # (Views::Controllers::Observations::Show::Namings); the
+      # section-update dispatcher renders the class directly rather
+      # than via an ERB partial, so `assert_template` doesn't see
+      # the old `_namings` partial. Assert the rendered turbo-stream
+      # targets the namings container instead.
+      assert_select("turbo-stream[target='observation_namings']")
 
       post_vote_change_basic_assertions(obs:, nam:)
     end

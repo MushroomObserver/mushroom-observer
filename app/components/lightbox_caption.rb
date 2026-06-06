@@ -69,13 +69,25 @@ class Components::LightboxCaption < Components::Base
 
   def render_identify_ui
     div(class: "obs-identify mb-3", id: "observation_identify_#{@obs.id}") do
-      propose_naming_link(
-        @obs.id,
-        context: "lightgallery",
-        btn_class: "btn btn-primary d-inline-block"
-      )
+      render_propose_naming_modal
       render_reviewed_toggle if @observation_view
     end
+  end
+
+  # Tab::Naming::New carries `icon: :add` by default; lightbox
+  # wants the text-only "Propose" button so the icon: gets nilled
+  # in the merge.
+  def render_propose_naming_modal
+    title, path, opts = Tab::Naming::New.new(
+      observation_id: @obs.id,
+      text: :create_naming.t,
+      context: "lightgallery",
+      btn_class: "btn btn-primary d-inline-block"
+    ).to_a
+    render(Components::ModalLink.new(
+             "obs_#{@obs.id}_naming", title, path,
+             **opts, icon: nil
+           ))
   end
 
   def render_reviewed_toggle

@@ -18,31 +18,25 @@ section_panels = {
   "collection_numbers" => Views::Controllers::Observations::Show::CollectionNumbersPanel,
   "herbarium_records" => Views::Controllers::Observations::Show::HerbariumRecordsPanel,
   "sequences" => Views::Controllers::Observations::Show::SequencesPanel,
-  "external_links" => Views::Controllers::Observations::Show::ExternalLinksPanel
+  "external_links" => Views::Controllers::Observations::Show::ExternalLinksPanel,
+  "namings" => Views::Controllers::Observations::Show::Namings
 }.freeze
 
 panel_class = section_panels[identifier]
-if panel_class
-  panel_props = { obs: obs, user: user }
-  if identifier == "external_links"
-    # Convert AR::Relation to Array for the Phlex prop's
-    # `_Array(::ExternalSite)` type check (Relation isn't an Array).
-    panel_props.merge!(sites: sites&.to_a, siblings: siblings || [])
-  else
-    panel_props[:has_sibling_records] = false
-  end
+panel_props = { obs: obs, user: user }
+if identifier == "external_links"
+  # Convert AR::Relation to Array for the Phlex prop's
+  # `_Array(::ExternalSite)` type check (Relation isn't an Array).
+  panel_props.merge!(sites: sites&.to_a, siblings: siblings || [])
+elsif identifier == "namings"
+  panel_props[:consensus] = consensus
+else
+  panel_props[:has_sibling_records] = false
 end
 %>
 
 <%= turbo_stream.replace("observation_#{identifier}") do
-  if panel_class
-    render(panel_class.new(**panel_props))
-  else
-    # Fallback for identifiers still rendered as ERB partials
-    # (e.g. `namings`, fed by Observations::Namings::VotesController).
-    render(partial: "observations/show/#{identifier}", layout: false,
-           locals: local_assigns.except(:identifier))
-  end
+  render(panel_class.new(**panel_props)) if panel_class
 end %>
 
 <%= turbo_stream.update("page_flash") do

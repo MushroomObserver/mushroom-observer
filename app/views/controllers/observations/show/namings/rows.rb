@@ -10,23 +10,23 @@
 # children too.
 #
 # Replaces `app/views/controllers/observations/show/namings/_rows.erb`.
-module Views::Controllers::Observations::Show::Namings
-  class Rows < ::Views::Base
-    prop :user, ::User
-    prop :consensus, ::Observation::NamingConsensus
+class Views::Controllers::Observations::Show::Namings::Rows < Views::Base
+  prop :user, ::User
+  prop :consensus, ::Observation::NamingConsensus
 
-    def view_template
-      render(::Components::ListGroup.new(
-               id: "namings_table_rows", flush: true
-             )) do |list|
-        @consensus.merged_namings.each do |merged_naming|
-          list.item do
-            render(Row.new(naming: merged_naming, user: @user,
-                           consensus: @consensus))
-          end
+  def view_template
+    render(::Components::ListGroup.new(
+             id: "namings_table_rows", flush: true
+           )) do |list|
+      @consensus.merged_namings.each do |merged_naming|
+        list.item do
+          render(Views::Controllers::Observations::Show::Namings::Row.new(
+                   naming: merged_naming, user: @user,
+                   consensus: @consensus
+                 ))
         end
-        list.empty { plain(:show_namings_no_names_yet.t) }
       end
+      list.empty { trusted_html(:show_namings_no_names_yet.t) }
     end
   end
 end
