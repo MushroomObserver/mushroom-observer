@@ -457,7 +457,10 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     post(:update, params:, format: :turbo_stream)
 
-    assert_template("observations/show/_section_update")
+    # _section_update.erb deleted; controllers now render two
+    # turbo_stream actions inline (replace + page_flash update).
+    assert_select("turbo-stream[target='observation_herbarium_records']")
+    assert_select("turbo-stream[target='page_flash']")
     assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)
   end
 

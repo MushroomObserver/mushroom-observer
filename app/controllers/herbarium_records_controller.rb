@@ -477,10 +477,11 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_herbarium_records_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "herbarium_records",
-                obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "herbarium_records",
+      panel: Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 

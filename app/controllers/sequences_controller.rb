@@ -304,9 +304,11 @@ class SequencesController < ApplicationController
   end
 
   def render_sequences_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "sequences", obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "sequences",
+      panel: Views::Controllers::Observations::Show::SequencesPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 
