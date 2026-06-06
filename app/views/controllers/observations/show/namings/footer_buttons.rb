@@ -43,17 +43,17 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # the tab manually here to merge `icon: nil` over its
   # html_options.
   def render_propose_button
-    tab = ::Tab::Naming::New.new(
+    title, path, opts = propose_naming_tab.to_a
+    ModalLink("obs_#{@obs.id}_naming", title, path, **opts, icon: nil)
+  end
+
+  def propose_naming_tab
+    ::Tab::Naming::New.new(
       observation_id: @obs.id,
       text: :show_namings_propose_new_name.t,
       context: "namings_table",
       btn_class: "btn btn-default btn-sm d-none d-sm-inline-block"
     )
-    title, path, opts = tab.to_a
-    render(::Components::ModalLink.new(
-             "obs_#{@obs.id}_naming", title, path,
-             **opts, icon: nil
-           ))
   end
 
   # Gating mirrors the legacy helper: a thumb image must exist (so

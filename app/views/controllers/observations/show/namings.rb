@@ -18,11 +18,9 @@ class Views::Controllers::Observations::Show::Namings < Views::Base
   prop :consensus, ::Observation::NamingConsensus
 
   def view_template
-    render(::Components::Panel.new(
-             panel_id: "observation_namings",
-             panel_class: "namings-table mb-4",
-             attributes: { data: panel_data }
-           )) do |panel|
+    Panel(panel_id: "observation_namings",
+          panel_class: "namings-table mb-4",
+          attributes: { data: panel_data }) do |panel|
       register_panel_slots(panel)
     end
   end

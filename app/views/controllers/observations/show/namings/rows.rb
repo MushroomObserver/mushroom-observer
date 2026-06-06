@@ -10,23 +10,25 @@
 # children too.
 #
 # Replaces `app/views/controllers/observations/show/namings/_rows.erb`.
-class Views::Controllers::Observations::Show::Namings::Rows < Views::Base
-  prop :user, ::User
-  prop :consensus, ::Observation::NamingConsensus
+# Reopen the parent `Namings` class so the nested `Rows` body can
+# refer to its sibling `Row` by short name. Without this nesting,
+# the lexical scope chain doesn't include `Namings`, and `Row.new`
+# would need the full `Views::Controllers::…::Namings::Row` path.
+class Views::Controllers::Observations::Show::Namings
+  class Rows < Views::Base
+    prop :user, ::User
+    prop :consensus, ::Observation::NamingConsensus
 
-  def view_template
-    render(::Components::ListGroup.new(
-             id: "namings_table_rows", flush: true
-           )) do |list|
-      @consensus.merged_namings.each do |merged_naming|
-        list.item do
-          render(Views::Controllers::Observations::Show::Namings::Row.new(
-                   naming: merged_naming, user: @user,
-                   consensus: @consensus
-                 ))
+    def view_template
+      ListGroup(id: "namings_table_rows", flush: true) do |list|
+        @consensus.merged_namings.each do |merged_naming|
+          list.item do
+            render(Row.new(naming: merged_naming, user: @user,
+                           consensus: @consensus))
+          end
         end
+        list.empty { trusted_html(:show_namings_no_names_yet.t) }
       end
-      list.empty { trusted_html(:show_namings_no_names_yet.t) }
     end
   end
 end

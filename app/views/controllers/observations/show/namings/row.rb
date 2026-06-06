@@ -125,9 +125,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_mod_links(naming)
     div(class: "text-nowrap") do
-      render(::Components::InlineModLinks.new(
-               target: naming, user: @user, indent: false
-             ))
+      InlineModLinks(target: naming, user: @user, indent: false)
     end
   end
 
@@ -161,12 +159,12 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_single_proposer_link
     proposer = @naming.user
-    render(::Components::UserLink.new(
-             user: proposer, name: proposer.login,
-             attributes: {
-               class: "btn btn-link text-wrap text-left px-0"
-             }
-           ))
+    UserLink(user: proposer, name: proposer.login,
+             attributes: { class: proposer_link_classes })
+  end
+
+  def proposer_link_classes
+    "btn btn-link text-wrap text-left px-0"
   end
 
   # ---- vote tally cell ------------------------------------------
@@ -199,15 +197,15 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_vote_percent_link
-    render(::Components::ModalLink.new(
-             "naming_votes_#{primary.id}",
-             "#{@naming.vote_percent.round}%",
-             observation_naming_votes_path(
-               observation_id: primary.observation_id,
-               naming_id: primary.id
-             ),
-             class: "vote-percent btn btn-link px-0"
-           ))
+    ModalLink("naming_votes_#{primary.id}",
+              "#{@naming.vote_percent.round}%",
+              vote_percent_modal_path,
+              class: "vote-percent btn btn-link px-0")
+  end
+
+  def vote_percent_modal_path
+    observation_naming_votes_path(observation_id: primary.observation_id,
+                                  naming_id: primary.id)
   end
 
   def render_num_votes
