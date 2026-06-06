@@ -51,5 +51,26 @@ module Header
 
       assert_equal("#{:ALL.l}, #{:OBSERVATIONS.l}", result)
     end
+
+    def test_confidence_val_as_label_with_array_joins_with_dash
+      vals = [0.6, 1.0]
+      expected = vals.map { |v| Vote.confidence(v.to_f) }.join(" – ")
+
+      assert_equal(expected, confidence_val_as_label(vals),
+                   "Expected array of confidence values joined by em-dash")
+    end
+
+    def test_confidence_val_as_label_with_scalar
+      assert_equal(Vote.confidence(0.6), confidence_val_as_label(0.6),
+                   "Expected single confidence label for scalar input")
+    end
+
+    def test_filter_truncate_joined_string_truncates_long_string
+      long_str = "Amanita muscaria, " * 6 # > 100 chars
+      result = filter_truncate_joined_string(long_str, [])
+
+      assert_equal("#{long_str[0...97]}...", result,
+                   "Expected string longer than 100 chars to be truncated")
+    end
   end
 end
