@@ -88,10 +88,22 @@ module Observations::Namings
       raise("Bad value.") unless value
 
       @consensus = ::Observation::NamingConsensus.new(observation)
+      owner_pref_before = @consensus.owner_preference
       @consensus.change_vote(@naming, value, @user)
       propagate_vote_to_siblings(@naming, value, @consensus)
       @observation = load_observation_naming_includes # reload
+      @owner_pref_changed = owner_pref_changed?(owner_pref_before)
       respond_to_new_votes
+    end
+
+    # The owner-pref line on the obs-show title is in the page
+    # chrome (separate `content_for(:owner_naming)` from the
+    # namings panel turbo target). `render_namings_section_update`
+    # uses this flag to choose between a panel-only swap and a
+    # full-page redirect that re-renders the title chrome.
+    def owner_pref_changed?(before)
+      ::Observation::NamingConsensus.new(@observation).owner_preference&.id !=
+        before&.id
     end
 
     def find_merged_naming
@@ -134,10 +146,13 @@ module Observations::Namings
       end
     end
 
-    # Re-render the whole obs template if the consensus changed. This will
-    # update the title and the name info panel. Otherwise, just update namings.
+    # Re-render the whole obs template if either the consensus or
+    # the obs owner's preferred name changed — both live in the
+    # page chrome (page title + `content_for(:owner_naming)`)
+    # which the namings-panel turbo_stream target can't reach.
+    # Otherwise, just update the namings panel in place.
     def render_namings_section_update
-      if @consensus.consensus_changed
+      if @consensus.consensus_changed || @owner_pref_changed
         redirect_to(@observation.show_link_args) and return
       end
 

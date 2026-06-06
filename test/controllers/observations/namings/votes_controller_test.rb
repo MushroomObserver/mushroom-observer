@@ -151,6 +151,37 @@ module Observations::Namings
       post_vote_change_basic_assertions(obs:, nam:)
     end
 
+    # When the obs owner's preferred name changes after a vote
+    # (consensus may or may not change), `render_namings_section_update`
+    # must redirect to the obs show page so the page chrome's title
+    # and `content_for(:owner_naming)` line both refresh. Without
+    # the redirect, only the namings panel gets the turbo_stream
+    # swap and the owner-pref `<h5>` stays stale until a manual
+    # reload.
+    def test_vote_change_redirects_when_owner_preference_changes
+      obs = observations(:owner_only_favorite_ne_consensus)
+      owner = obs.user
+      consensus = ::Observation::NamingConsensus.new(obs)
+      assert_equal(names(:tremella_mesenterica), consensus.owner_preference,
+                   "fixture: owner's favorite starts as tremella_mesenterica")
+
+      # Drop owner's existing favorite to make room for a higher
+      # vote on a new naming below.
+      old_favorite = namings(:tremella_mesenterica_naming)
+      consensus.change_vote(old_favorite, Vote.next_best_vote, owner)
+      new_naming = ::Naming.create!(observation: obs, name: names(:fungi),
+                                    user: owner)
+      new_vote = ::Vote.create!(naming: new_naming, observation: obs,
+                                user: owner, value: Vote.min_pos_vote)
+      params = { vote: { value: Vote.maximum_vote.to_s },
+                 id: new_vote.id, naming_id: new_naming.id,
+                 observation_id: obs.id, context: "namings_table" }
+
+      login(owner.login)
+      put(:update, params:, format: :turbo_stream)
+      assert_redirected_to(obs.show_link_args)
+    end
+
     def vote_change_basic_setup
       obs = observations(:coprinus_comatus_obs)
       nam = namings(:coprinus_comatus_naming)
