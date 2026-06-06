@@ -1,0 +1,20 @@
+name: Request Copilot Review
+
+on:
+  pull_request:
+    types: [ready_for_review]
+
+jobs:
+  request-review:
+    if: github.event.pull_request.user.login == 'nimmolo'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Request Copilot review
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --add-reviewer "Copilot" \
+            --repo ${{ github.repository }}
