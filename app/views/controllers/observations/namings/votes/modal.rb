@@ -21,8 +21,12 @@ module Views::Controllers::Observations::Namings::Votes
 
     def view_template
       render(Components::Modal.new(
-               id: @modal_id, title: @title, user: @user
+               id: @modal_id, user: @user
              )) do |modal|
+        modal.with_title_content do
+          trusted_html(@title)
+          trusted_html(@naming.display_name_brief_authors.t.small_author)
+        end
         modal.with_body do
           render(Table.new(naming: @naming))
         end
