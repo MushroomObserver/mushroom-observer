@@ -64,7 +64,9 @@ module Views::Controllers::Observations
     end
 
     def render_preferred_synonym_span
-      span(class: "smaller") do
+      # `obs-preferred-synonym` is the contract class — tests assert
+      # presence/absence via it. `smaller` is cosmetic.
+      span(class: "smaller obs-preferred-synonym") do
         plain("(")
         render(DisplayNameWithoutAuthorsLink.new(
                  name: preferred_synonym, user: @user,
@@ -102,9 +104,11 @@ module Views::Controllers::Observations
     end
 
     # The "(Site ID)" decoration that differentiates a consensus
-    # name from an adjacent owner-preferred name.
+    # name from an adjacent owner-preferred name. `obs-site-id-flag`
+    # is the contract class for tests; `small text-nowrap` is
+    # cosmetic.
     def render_site_id_flag
-      span(class: "small text-nowrap") do
+      span(class: "small text-nowrap obs-site-id-flag") do
         plain("(#{:show_observation_site_id.t})")
       end
     end

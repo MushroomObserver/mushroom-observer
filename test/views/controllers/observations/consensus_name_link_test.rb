@@ -41,7 +41,7 @@ module Views::Controllers::Observations
       # preference here).
       assert_no_html(html, "a.obs_consensus_deprecated_synonym_link_" \
                            "#{obs.name.id}")
-      assert_no_html(html, "span.small.text-nowrap")
+      assert_no_html(html, ".obs-site-id-flag")
     end
 
     def test_current_name_logged_out_renders_textile_name_only
@@ -64,10 +64,10 @@ module Views::Controllers::Observations
 
       assert_html(html,
                   "a.obs_consensus_deprecated_synonym_link_#{obs.name.id}")
-      assert_html(html, "span.small.text-nowrap",
+      assert_html(html, ".obs-site-id-flag",
                   text: :show_observation_site_id.t.as_displayed)
       assert_html(html,
-                  "span.smaller a.obs_preferred_synonym_link_#{preferred.id}")
+                  ".obs-preferred-synonym a.obs_preferred_synonym_link_#{preferred.id}")
     end
 
     def test_deprecated_name_logged_out_renders_textile_only_chain
@@ -79,7 +79,7 @@ module Views::Controllers::Observations
       # No `<a>` tags at all logged-out — just textile-rendered
       # name + flag + textile-rendered preferred synonym.
       assert_no_html(html, "a")
-      assert_html(html, "span.small.text-nowrap",
+      assert_html(html, ".obs-site-id-flag",
                   text: :show_observation_site_id.t.as_displayed)
       assert_includes(html, preferred.user_display_name_without_authors(nil).t)
     end
@@ -93,7 +93,7 @@ module Views::Controllers::Observations
       html = render(ConsensusNameLink.new(observation: obs, user: @user))
 
       assert_html(html, "a.obs_consensus_naming_link_#{obs.name.id}")
-      assert_html(html, "span.small.text-nowrap",
+      assert_html(html, ".obs-site-id-flag",
                   text: :show_observation_site_id.t.as_displayed)
     end
 
@@ -104,7 +104,7 @@ module Views::Controllers::Observations
       html = render(ConsensusNameLink.new(observation: obs, user: @user))
 
       assert_html(html, "a.obs_consensus_naming_link_#{obs.name.id}")
-      assert_no_html(html, "span.small.text-nowrap")
+      assert_no_html(html, ".obs-site-id-flag")
     end
 
     def test_owner_preference_with_view_opt_in_logged_out_omits_flag
@@ -116,7 +116,7 @@ module Views::Controllers::Observations
       html = render(ConsensusNameLink.new(observation: obs, user: nil))
 
       assert_no_html(html, "a")
-      assert_no_html(html, "span.small.text-nowrap")
+      assert_no_html(html, ".obs-site-id-flag")
     end
 
     private
