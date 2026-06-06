@@ -1,3 +1,8 @@
+# Trigger a Copilot review when a @nimmolo PR becomes Ready for Review
+# using tokens from jdc's Copilot account
+# Uses GitHub token stored in the repository ecrets
+# to authenticate the request to add '@copilot' as a reviewer on the PR
+
 name: Request Copilot Review
 
 on:
