@@ -200,17 +200,10 @@ module Views::Controllers::Projects
     end
 
     def render_comments
-      trusted_html(
-        view_context.render(
-          partial: "comments/comments_for_object",
-          locals: {
-            object: @project,
-            comments: @comments,
-            controls: @user,
-            limit: nil
-          }
-        )
-      )
+      render(::Views::Controllers::Comments::CommentsForObject.new(
+               object: @project, comments: @comments, user: @user,
+               editable: @user.present?, limit: nil
+             ))
     end
   end
 end

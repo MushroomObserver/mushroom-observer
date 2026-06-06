@@ -1,9 +1,0 @@
-<%
-add_page_title(:comment_edit_title.t(name: @target.unique_format_name))
-add_context_nav(Tab::Comment::FormEdit.new(comment: @comment))
-%>
-
-<!--[form:comment]-->
-<%= render(Views::Controllers::Comments::Form.new(@comment, local: true)) %>
-<!--[eoform:comment]-->
-<%= render(partial: "comments/object", object: @target) %>

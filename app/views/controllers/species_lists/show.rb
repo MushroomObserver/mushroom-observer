@@ -143,16 +143,11 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
-    # `comments/comments_for_object` is still ERB — same wrap-in-
-    # `trusted_html` pattern as `render_list_search` above.
     def render_comments
-      trusted_html(
-        view_context.render(
-          partial: "comments/comments_for_object",
-          locals: { object: @species_list, comments: @comments,
-                    controls: @user, limit: nil }
-        )
-      )
+      render(::Views::Controllers::Comments::CommentsForObject.new(
+               object: @species_list, comments: @comments, user: @user,
+               editable: @user.present?, limit: nil
+             ))
     end
   end
 end

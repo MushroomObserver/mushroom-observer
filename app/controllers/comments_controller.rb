@@ -24,6 +24,16 @@ class CommentsController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `comments/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::Comments::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user, error: @error
+           ))
+  end
+
   private
 
   def default_sort_order
@@ -118,7 +128,11 @@ class CommentsController < ApplicationController
     end
 
     @target = @comment.target
-    allowed_to_see!(@target)
+    return unless allowed_to_see!(@target)
+
+    render(Views::Controllers::Comments::Show.new(
+             comment: @comment, target: @target, user: @user
+           ))
   end
 
   private
@@ -166,7 +180,7 @@ class CommentsController < ApplicationController
     @comment = Comment.new(target: @target)
 
     respond_to do |format|
-      format.html
+      format.html { render_phlex_new }
       format.turbo_stream { render_modal_comment_form }
     end
   end
@@ -209,7 +223,7 @@ class CommentsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_comment_form }
-      format.html
+      format.html { render_phlex_edit }
     end
   end
 
@@ -248,6 +262,18 @@ class CommentsController < ApplicationController
   end
 
   private
+
+  def render_phlex_new
+    render(Views::Controllers::Comments::New.new(
+             comment: @comment, target: @target, user: @user
+           ))
+  end
+
+  def render_phlex_edit
+    render(Views::Controllers::Comments::Edit.new(
+             comment: @comment, target: @target, user: @user
+           ))
+  end
 
   # The identifier needs to be more specific for an edit form, because
   # we give users the option to edit any number of their own comments on a
@@ -292,7 +318,7 @@ class CommentsController < ApplicationController
   def reload_form
     respond_to do |format|
       format.turbo_stream { reload_modal_form }
-      format.html { render(:new) }
+      format.html { render_phlex_new }
     end
   end
 

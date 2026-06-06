@@ -158,16 +158,11 @@ module Views::Controllers::Observations
                          consensus: @consensus))
     end
 
-    # Same situation for `_comments_for_object.erb` — separate
-    # subsystem (Comments), separate conversion PR.
     def render_comments
-      trusted_html(
-        view_context.render(
-          partial: "comments/comments_for_object",
-          locals: { object: @observation, comments: @comments,
-                    controls: @user, limit: nil }
-        )
-      )
+      render(::Views::Controllers::Comments::CommentsForObject.new(
+               object: @observation, comments: @comments, user: @user,
+               editable: @user.present?, limit: nil
+             ))
     end
 
     def show_source_credit?
