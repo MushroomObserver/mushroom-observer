@@ -128,10 +128,11 @@ module Observations::Namings
         redirect_to(@observation.show_link_args) and return
       end
 
-      render(
-        partial: "observations/show/section_update",
-        locals: { identifier: "namings", obs: @observation,
-                  user: @user, consensus: @consensus }
+      render_obs_section_update(
+        identifier: "namings",
+        panel: Views::Controllers::Observations::Show::Namings.new(
+          obs: @observation, user: @user, consensus: @consensus
+        )
       ) and return
     end
 

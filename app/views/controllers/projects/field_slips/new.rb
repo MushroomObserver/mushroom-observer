@@ -27,9 +27,9 @@ module Views::Controllers::Projects::FieldSlips
     def page_title
       [
         :field_slips_for_project_title.t,
-        link_to_object(@project),
+        capture { render(Components::ObjectLink.new(object: @project)) },
         :PROJECT.t
-      ].join(" ")
+      ].safe_join(" ")
     end
 
     def default_count

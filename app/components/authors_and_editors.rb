@@ -120,19 +120,7 @@ module Components
 
     # Wrap user name in link to show_user.
     def render_user_link(user, name = nil)
-      return plain(:unknown_user_name.t) unless user
-
-      if user.is_a?(Integer)
-        name ||= "#{:USER.t} ##{user}"
-        user_id = user
-      else
-        name ||= user.unique_text_name
-        user_id = user.id
-      end
-
-      a(href: user_path(user_id), class: "user_link_#{user_id}") do
-        plain(name)
-      end
+      render(Components::UserLink.new(user: user, name: name))
     end
   end
 end

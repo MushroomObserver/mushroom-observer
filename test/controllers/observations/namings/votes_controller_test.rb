@@ -125,8 +125,11 @@ module Observations::Namings
       params = params.merge(context: "namings_table")
 
       put(:update, params:, format: :turbo_stream)
-      assert_template("observations/show/_section_update")
-      assert_template("observations/show/_namings")
+      # `_section_update.erb` deleted; controllers now emit the
+      # two turbo_stream actions inline (panel replace + flash
+      # update).
+      assert_select("turbo-stream[target='page_flash']")
+      assert_select("turbo-stream[target='observation_namings']")
 
       post_vote_change_basic_assertions(obs:, nam:)
     end

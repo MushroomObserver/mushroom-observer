@@ -1,5 +1,5 @@
 <%= tag.div(class: "list-group-item") do %>
-  <%= tag.span(show_title_id_badge(name, "rss-id mr-4")) %>
+  <%= tag.span(render(Components::IdBadge.new(object: name, extra_class: "rss-id mr-4"))) %>
   <%= tag.span(
     data: { controller: "clipboard", clipboard_copied_value: :COPIED.l }
   ) do %>
@@ -9,7 +9,7 @@
               data: { clipboard_target: "source" })
     end %>
     <%= tag.button(
-          link_icon(:copy, text: :COPY_THIS_NAME.l),
+          render(Components::LinkIcon.new(type: :copy)),
           role: "button",
           class: "btn btn-link py-0 link-normal opacity-75",
           data: {

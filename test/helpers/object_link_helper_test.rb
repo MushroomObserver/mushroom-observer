@@ -9,33 +9,29 @@ class ObjectLinkHelperTest < ActionView::TestCase
     path = name_path(name.id)
     html_class = "name_link_#{name.id}"
 
-    link_text = "#{:NAME.l} ##{name.id}"
-    assert_equal(expected_link(path, html_class, link_text), name_link(name.id))
-
-    link_text = name.display_name_brief_authors.t
-    assert_equal(expected_link(path, html_class, link_text), name_link(name))
+    assert_link(name_link(name.id), path: path, html_class: html_class,
+                                    link_text: "#{:NAME.l} ##{name.id}")
+    assert_link(name_link(name), path: path, html_class: html_class,
+                                 link_text: name.display_name_brief_authors.t)
   end
 
   def test_link_if_object
-    # link to project, name not supplied
-    # pre  = '<a href="/projects/'
     proj = projects(:bolete_project)
     path = project_path(proj.id)
     html_class = "project_link_#{proj.id}"
-    link_text = "Bolete Project"
-    assert_equal(expected_link(path, html_class, link_text),
-                 link_to_object(projects(:bolete_project)))
-    # link to project, name supplied
-    link_text = "BP"
-    assert_equal(expected_link(path, html_class, link_text),
-                 link_to_object(projects(:bolete_project), "BP"))
-    # link to species_list
+
+    assert_link(link_to_object(proj),
+                path: path, html_class: html_class,
+                link_text: "Bolete Project")
+    assert_link(link_to_object(proj, "BP"),
+                path: path, html_class: html_class,
+                link_text: "BP")
+
     spl = species_lists(:first_species_list)
-    path = species_list_path(spl.id)
-    html_class = "species_list_link_#{spl.id}"
-    link_text = "An Observation List"
-    assert_equal(expected_link(path, html_class, link_text),
-                 link_to_object(species_lists(:first_species_list)))
+    assert_link(link_to_object(spl),
+                path: species_list_path(spl.id),
+                html_class: "species_list_link_#{spl.id}",
+                link_text: "An Observation List")
     # link to non-existent object, name not supplied
     assert_nil(link_to_object(nil), "Non-existent object should lack link.")
     # link to non-existent object, name supplied
@@ -50,11 +46,11 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
   def test_user_link_with_user
     user = users(:rolf)
-    result = user_link(user)
-    path = user_path(user.id)
-    html_class = "user_link_#{user.id}"
-    link_text = user.unique_text_name
-    assert_equal(expected_link(path, html_class, link_text), result)
+
+    assert_link(user_link(user),
+                path: user_path(user.id),
+                html_class: "user_link_#{user.id}",
+                link_text: user.unique_text_name)
   end
 
   def test_user_link_with_integer_id
@@ -149,7 +145,17 @@ class ObjectLinkHelperTest < ActionView::TestCase
 
   # - Helper Methods -----------------------------------------------------------
 
-  def expected_link(path, html_class, link_text)
-    "<a class=\"#{html_class}\" href=\"#{path}\">#{link_text}</a>"
+  # Parses the rendered `<a>` and asserts href / class / text
+  # independently. Order-insensitive on attributes — the different
+  # link helpers emit attributes in different orders (Rails
+  # `link_to` emits class first; the Phlex `Components::*Link`
+  # variants emit href first).
+  def assert_link(rendered, path:, html_class:, link_text:)
+    link = Nokogiri::HTML.fragment(rendered).at("a")
+
+    assert_not_nil(link, "Expected an <a> in:\n#{rendered}")
+    assert_equal(path, link["href"])
+    assert_equal(html_class, link["class"])
+    assert_equal(link_text, link.inner_html)
   end
 end

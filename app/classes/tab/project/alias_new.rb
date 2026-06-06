@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# "Add Alias" button rendered above the project's alias list. Uses
-# `InternalLink::Model` for the selector class; html_options carry
-# the Bootstrap button styling because this Tab is rendered as a
-# button in its context (not a plain link).
+# "Add Alias" button rendered above the project's alias list. Sets
+# `model` so the auto-derived selector class is model-aware; the
+# html_options carry the Bootstrap button styling because this Tab
+# is rendered as a button in its context (not a plain link).
 class Tab::Project::AliasNew < Tab::Base
   def initialize(project_id:, target_id:, target_type:)
     super()

@@ -232,7 +232,8 @@ module Tab::Name
 
       assert_equal(:index_fungorum_search.l, tab.title)
       assert_includes(tab.path, "indexfungorum.org/Names/Names.asp")
-      # No name → no model → plain InternalLink (not InternalLink::Model)
+      # No name → no model → plain title-derived selector class
+      # (not the model-aware flavour).
       assert_nil(tab.model)
     end
 

@@ -66,7 +66,7 @@ module Tab::Image
 
       assert_equal("Test Again", tab.title)
       assert_equal({ action: :test_add_image }, tab.path)
-      assert_equal({ class: "test_add_image_report_link" }, tab.html_options)
+      assert_includes(tab.html_options[:class], "test_add_image_report_link")
     end
   end
 end

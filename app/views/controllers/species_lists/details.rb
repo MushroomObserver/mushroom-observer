@@ -69,8 +69,10 @@ module Views::Controllers::SpeciesLists
         b { plain("#{:WHERE.t}:") }
         whitespace
         begin
-          location_link(@species_list.where, @species_list.location,
-                        nil, true)
+          render(Components::LocationLink.new(
+                   where: @species_list.where,
+                   location: @species_list.location, click: true
+                 ))
         rescue StandardError
           plain(:UNKNOWN.t)
         end
@@ -81,7 +83,7 @@ module Views::Controllers::SpeciesLists
       div do
         b { plain("#{:WHO.t}:") }
         whitespace
-        user_link(@species_list.user)
+        render(Components::UserLink.new(user: @species_list.user))
       end
     end
 
@@ -91,7 +93,7 @@ module Views::Controllers::SpeciesLists
         whitespace
         @species_list.projects.each_with_index do |project, idx|
           plain(" | ") if idx.positive?
-          link_to_object(project)
+          render(Components::ObjectLink.new(object: project))
         end
       end
     end

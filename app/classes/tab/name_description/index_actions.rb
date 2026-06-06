@@ -11,9 +11,9 @@ class Tab::NameDescription::IndexActions < Tab::Collection
 
   def tabs
     [
-      Tab::Related::Query.for(model: Name, filter: :NameDescription,
-                              current_query: @query,
-                              controller: @controller)
+      Tab::RelatedQuery.for(model: Name, filter: :NameDescription,
+                            current_query: @query,
+                            controller: @controller)
     ].compact
   end
 end

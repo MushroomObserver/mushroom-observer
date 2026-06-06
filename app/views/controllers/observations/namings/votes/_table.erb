@@ -34,7 +34,7 @@
             "(".html_safe + votes.map do |vote|
               n += 1
               if n < 4
-                user_link(vote.user, vote.user.login)
+                render(Components::UserLink.new(user: vote.user, name: vote.user.login))
               else
                 "..."
               end

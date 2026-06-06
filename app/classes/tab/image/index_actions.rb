@@ -14,7 +14,7 @@ class Tab::Image::IndexActions < Tab::Collection
 
   def tabs
     [
-      Tab::Related::Query.for(
+      Tab::RelatedQuery.for(
         model: Observation, filter: :Image,
         current_query: @query, controller: @controller
       )

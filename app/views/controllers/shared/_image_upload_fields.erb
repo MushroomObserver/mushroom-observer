@@ -15,7 +15,7 @@
   <%= select_with_label(form: f_u, field: :license_id, inline: true,
                         label: "#{:LICENSE.l}:", options: @licenses,
                         selected: @upload_license_id,
-                        append: help_block(
+                        append: render(Components::HelpBlock.new(
                           :div, ["(", :image_copyright_warning.t, ")"].safe_join
-                        )) %>
+                        ))) %>
 <% end %>

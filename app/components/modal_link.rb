@@ -23,15 +23,27 @@
 #   render(Components::ModalLink.new(
 #     "comment", "Edit", edit_comment_path(comment), icon: :edit
 #   ))
+#
+# @example From a Tab PORO (shortcut)
+#   render(Components::ModalLink.new(
+#     "user_question_email",
+#     tab: Tab::User::EmailQuestion.new(user: @show_user)
+#   ))
 class Components::ModalLink < Components::Base
   attr_reader :identifier, :name, :path, :args
 
-  def initialize(identifier, name, path, **args)
+  def initialize(identifier, name = nil, path = nil, tab: nil, **args)
     super()
     @identifier = identifier
-    @name = name
-    @path = path
-    @args = args
+    if tab
+      @name = tab.title
+      @path = tab.path
+      @args = tab.html_options
+    else
+      @name = name
+      @path = path
+      @args = args
+    end
   end
 
   def view_template

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # "Cancel" link back to the observations index, used from the
-# add/remove-from-species-list edit form. Plain InternalLink (no
-# model variant) — the original helper carried no per-model selector.
+# add/remove-from-species-list edit form. No model — the original
+# helper carried no per-model selector; auto-derived class is a
+# plain title-derived `<…>_link`.
 class Tab::SpeciesList::ObservationsIndexReturn < Tab::Base
   def initialize(q_param: nil)
     super()

@@ -23,7 +23,8 @@ module Tab::Naming
         observation_id: 42, context: "blank"
       )
       assert_equal(expected, tab.path)
-      assert_equal("btn propose-naming-link", tab.html_options[:class])
+      assert_includes(tab.html_options[:class], "btn")
+      assert_includes(tab.html_options[:class], "propose-naming-link")
       assert_equal(:add, tab.html_options[:icon])
       assert_equal(Naming, tab.model)
     end
@@ -33,7 +34,7 @@ module Tab::Naming
         observation_id: 1, text: "x", context: "y", btn_class: nil
       )
 
-      assert_equal("propose-naming-link", tab.html_options[:class])
+      assert_includes(tab.html_options[:class], "propose-naming-link")
     end
 
     def test_edit

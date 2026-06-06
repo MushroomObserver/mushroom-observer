@@ -70,7 +70,7 @@ module Views::Controllers::Projects
             trusted_html(draft.name&.display_name&.t)
           end
           plain(" (")
-          user_link(draft.user)
+          render(Components::UserLink.new(user: draft.user))
           plain(")")
           br
         end
@@ -137,15 +137,15 @@ module Views::Controllers::Projects
     end
 
     def render_trust_settings_button
-      modal_link_to(
-        "trust_settings",
-        :show_project_trust_settings.l,
-        trust_modal_project_member_path(
-          project_id: @project.id,
-          candidate: @user.id
-        ),
-        { class: action_button_class }
-      )
+      render(Components::ModalLink.new(
+               "trust_settings",
+               :show_project_trust_settings.l,
+               trust_modal_project_member_path(
+                 project_id: @project.id,
+                 candidate: @user.id
+               ),
+               class: action_button_class
+             ))
     end
 
     def render_leave_button
@@ -161,15 +161,15 @@ module Views::Controllers::Projects
     end
 
     def render_add_obs_button
-      modal_link_to(
-        "add_obs",
-        :change_member_add_obs.t,
-        add_obs_modal_project_member_path(
-          project_id: @project.id,
-          candidate: @user.id
-        ),
-        { class: action_button_class }
-      )
+      render(Components::ModalLink.new(
+               "add_obs",
+               :change_member_add_obs.t,
+               add_obs_modal_project_member_path(
+                 project_id: @project.id,
+                 candidate: @user.id
+               ),
+               class: action_button_class
+             ))
     end
 
     def render_admin_links
@@ -200,17 +200,10 @@ module Views::Controllers::Projects
     end
 
     def render_comments
-      trusted_html(
-        view_context.render(
-          partial: "comments/comments_for_object",
-          locals: {
-            object: @project,
-            comments: @comments,
-            controls: @user,
-            limit: nil
-          }
-        )
-      )
+      render(::Views::Controllers::Comments::CommentsForObject.new(
+               object: @project, comments: @comments, user: @user,
+               editable: @user.present?, limit: nil
+             ))
     end
   end
 end

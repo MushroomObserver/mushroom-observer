@@ -89,7 +89,7 @@ module Views::Controllers::Observations::Images
         cb.option(project.id,
                   checked: project_checked?(project.id)) do
           whitespace
-          trusted_html(link_to_object(project))
+          render(Components::ObjectLink.new(object: project))
         end
       end
     end

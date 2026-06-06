@@ -120,7 +120,7 @@ module Views::Controllers::Account::APIKeys
                      role: "edit_api_key",
                      target: "#edit_notes_#{key.id}_container",
                      parent: "#notes_#{key.id}" }) do
-        link_icon(:edit, title: :EDIT.l)
+        render(Components::LinkIcon.new(type: :edit, title: :EDIT.l))
       end
     end
 
@@ -172,7 +172,7 @@ module Views::Controllers::Account::APIKeys
               data: { toggle: "collapse",
                       target: "#new_key_form_container",
                       parent: "#new_key_row" }) do
-        link_icon(:add)
+        render(Components::LinkIcon.new(type: :add))
         whitespace
         plain(:account_api_keys_create_button.l)
       end

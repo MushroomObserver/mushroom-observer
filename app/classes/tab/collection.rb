@@ -34,18 +34,11 @@
 #
 #   Tab::Project::Banner.new(project: p, user: u).to_a
 #   # => [<Tab::Project::Summary …>, <Tab::Project::Observations …>, …]
-#
-#   Tab::Project::Banner.new(project: p, user: u).to_internal_links
-#   # => [<InternalLink …>, <InternalLink …>, …]
 class Tab::Collection
   include Enumerable
 
   def each(&block)
     tabs.each(&block)
-  end
-
-  def to_internal_links
-    tabs.map(&:to_internal_link)
   end
 
   private

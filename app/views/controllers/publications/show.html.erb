@@ -32,7 +32,7 @@ add_edit_icons(@publication, @user)
 
 <p>
   <b><%= :show_publication_added_by.t %></b>:
-  <%= user_link(@publication.user) %>
+  <%= render(Components::UserLink.new(user: @publication.user)) %>
   <%= @publication.created_at.web_date %><br/>
   <%= if @publication.created_at.web_date != @publication.updated_at.web_date
     :footer_last_updated_at.t(date: @publication.updated_at.web_date)

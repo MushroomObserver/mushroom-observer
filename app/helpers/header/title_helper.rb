@@ -95,17 +95,12 @@ module Header
       :"#{object.type_tag.to_s.upcase}".l
     end
 
+    # Kept for the one remaining ERB caller (`names/_name.erb`).
+    # Phlex callers should `render(Components::IdBadge.new(...))`
+    # directly instead.
     def show_title_id_badge(object, classes = "mr-4")
-      tag.button(
-        object.id || "?",
-        type: "button",
-        class: class_names("badge badge-id", classes), role: "button",
-        data: {
-          toggle: "tooltip", placement: "bottom", title: :COPY_THIS_ID.l,
-          controller: "clipboard", clipboard_target: "source",
-          action: "clipboard#copy", clipboard_copied_value: :COPIED.l
-        }
-      )
+      render(Components::IdBadge.new(object: object,
+                                     extra_class: classes))
     end
 
     # Div shows even without content to maintain layout

@@ -7,9 +7,9 @@ require("test_helper")
 # - #title (the rendered text)
 # - #path (compared against the route helper, not a hardcoded URL)
 # - #alt_title (drives the stable `*_link` selector class via
-#   InternalLink#html_class)
-# - #to_internal_link returns the InternalLink with html_options[:class]
-#   matching the `<alt_title>_link` pattern
+#   Tab::Base#derived_html_class)
+# - #html_options[:class] matching the `<alt_title>_link` pattern
+#   (composed in by `Tab::Base::HtmlOptionsComposer`)
 module Tab::Project
   class TabsTest < UnitTestCase
     # Routes are accessed via a proxy method instead of
@@ -183,15 +183,14 @@ module Tab::Project
       assert_equal(routes.projects_path(member: user.id), tab.path)
     end
 
-    # Alias tabs use InternalLink::Model. The selector-class shape
-    # mirrors what the pre-PORO helper methods produced — see
-    # InternalLink::Model#html_class. Edit case: alt_title="EDIT"
+    # Alias tabs set `model`, so the auto-derived selector class
+    # follows the model-aware flavour. Edit case: alt_title="EDIT"
     # short-circuits the model-name segment → class = "edit_link"
     # + per-id flavour "edit_link_<id>". Add case: no alt_title +
     # title="ADD" doesn't contain the model name → composes as
     # "add_project_alias_link" + Bootstrap button styling from
     # html_options.
-    def test_alias_edit_uses_internal_link_model
+    def test_alias_edit_uses_model_derived_class
       tab = Tab::Project::AliasEdit.new(
         project_id: @project.id, name: "MO", id: 42
       )
@@ -202,12 +201,12 @@ module Tab::Project
                    tab.path)
       assert_equal(:EDIT.t, tab.alt_title)
 
-      link_class = tab.to_internal_link.tab[2][:class]
+      link_class = tab.html_options[:class]
       assert_includes(link_class, "edit_link")
       assert_includes(link_class, "edit_link_42")
     end
 
-    def test_alias_new_uses_internal_link_model
+    def test_alias_new_uses_model_derived_class
       tab = Tab::Project::AliasNew.new(
         project_id: @project.id, target_id: 5, target_type: "Location"
       )
@@ -219,7 +218,7 @@ module Tab::Project
         tab.path
       )
 
-      opts = tab.to_internal_link.tab[2]
+      opts = tab.html_options
       assert_includes(opts[:class], "add_project_alias_link")
       assert_includes(opts[:class], "btn")
       assert_includes(opts[:class], "btn-default")
@@ -228,7 +227,7 @@ module Tab::Project
     private
 
     def link_class(tab)
-      tab.to_internal_link.tab[2][:class]
+      tab.html_options[:class]
     end
   end
 end

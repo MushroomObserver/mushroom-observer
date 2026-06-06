@@ -99,15 +99,6 @@ module Tab::Project
       )
     end
 
-    def test_banner_to_internal_links_returns_internal_link_objects
-      bolete = projects(:bolete_project)
-      links = Tab::Project::Banner.new(project: bolete, user: nil).
-              to_internal_links
-
-      assert_predicate(links, :any?)
-      links.each { |link| assert_kind_of(InternalLink, link) }
-    end
-
     def test_banner_enumerable_yields_tab_pororos
       bolete = projects(:bolete_project)
       collection = Tab::Project::Banner.new(project: bolete, user: nil)

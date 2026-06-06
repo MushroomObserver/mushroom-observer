@@ -15,7 +15,7 @@ obs = @sequence.observation
 
     <div class="small">
       <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
-      <%= user_link(@sequence.user) %>
+      <%= render(Components::UserLink.new(user: @sequence.user)) %>
     </div>
 
     <%= render(Components::ObjectFooter.new(user: @user, obj: @sequence)) %>

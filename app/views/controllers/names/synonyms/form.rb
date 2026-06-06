@@ -46,7 +46,9 @@ module Views::Controllers::Names::Synonyms
           div(class: "font-weight-bold my-3") do
             plain("#{:form_synonyms_current_synonyms.l}:")
           end
-          help_block(:form_synonyms_current_synonyms_help.t)
+          render(Components::HelpBlock.new(
+                   :p, :form_synonyms_current_synonyms_help.t
+                 ))
 
           @current_synonyms.each do |n|
             next if n == @name
@@ -66,7 +68,9 @@ module Views::Controllers::Names::Synonyms
           div(class: "font-weight-bold my-3") do
             plain("#{:form_synonyms_proposed_synonyms.l}:")
           end
-          help_block(:form_synonyms_proposed_synonyms_help.t)
+          render(Components::HelpBlock.new(
+                   :p, :form_synonyms_proposed_synonyms_help.t
+                 ))
 
           @proposed_synonyms.each do |n|
             next if @current_synonyms.include?(n)
@@ -92,7 +96,9 @@ module Views::Controllers::Names::Synonyms
           trusted_html(name_obj.display_name.t)
         end
       end
-      badge = view_context.show_title_id_badge(name_obj, "")
+      badge = capture do
+        render(Components::IdBadge.new(object: name_obj, extra_class: ""))
+      end
       [link, badge].safe_join(" ")
     end
 
@@ -100,12 +106,16 @@ module Views::Controllers::Names::Synonyms
       render_new_names_alert if @new_names.present?
 
       checkbox_field(:deprecate_all, label: :form_synonyms_deprecate_synonyms.l)
-      help_block(:form_synonyms_deprecate_synonyms_help.t)
+      render(Components::HelpBlock.new(
+               :p, :form_synonyms_deprecate_synonyms_help.t
+             ))
 
       textarea_field(:synonym_members,
                      label: "#{:form_synonyms_names.l}:",
                      data: { autofocus: true }) do |f|
-        f.with_between { help_block(members_help) }
+        f.with_between do
+          render(Components::HelpBlock.new(:p, members_help))
+        end
       end
     end
 
@@ -117,10 +127,6 @@ module Views::Controllers::Names::Synonyms
         end
         span(class: "help-note mr-3") { :form_synonyms_missing_names_help.t }
       end
-    end
-
-    def help_block(text)
-      p(class: "help-block") { text }
     end
 
     def members_help

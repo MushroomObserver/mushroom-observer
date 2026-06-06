@@ -203,13 +203,11 @@ class Components::InlineModLinks < Components::Base
     tab = send(handler[:tab])
     return nil unless tab
 
-    name, path, opts = tab.to_a
-    Components::ModalLink.new(modal_id, name, path, **opts)
+    Components::ModalLink.new(modal_id, tab: tab)
   end
 
   def icon_link_edit
-    content, path, opts = send(handler[:tab]).to_a
-    Components::IconLink.new(content, path, **opts)
+    Components::IconLink.new(tab: send(handler[:tab]))
   end
 
   # Modal element id. Default `"<type_tag>_<id>"` matches the

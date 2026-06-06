@@ -109,7 +109,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show, params: { id: location.id })
     assert_template("show")
     assert_template("locations/show/_notes")
-    assert_template("comments/_comments_for_object")
+    assert_select("#comments_for_object")
     assert_template("locations/show/_general_description_panel")
 
     location.reload
@@ -174,7 +174,7 @@ class LocationsControllerTest < FunctionalTestCase
   def assert_show_location
     assert_template("locations/show")
     assert_template("locations/show/_notes")
-    assert_template("comments/_comments_for_object")
+    assert_select("#comments_for_object")
     assert_template("locations/show/_general_description_panel")
   end
 

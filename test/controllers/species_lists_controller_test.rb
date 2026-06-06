@@ -238,7 +238,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:show, params: { id: list.id })
 
     assert_select("body.species_lists__show")
-    assert_template("comments/_comments_for_object")
+    assert_select("#comments_for_object")
     assert_select(
       "form:match('action', ?)",
       %r{/observations/\d+/species_lists/#{list.id}/remove},
@@ -257,7 +257,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:show, params: { id: list.id })
 
     assert_select("body.species_lists__show")
-    assert_template("comments/_comments_for_object")
+    assert_select("#comments_for_object")
     assert_select(
       "form:match('action', ?)",
       %r{/observations/\d+/species_lists/#{list.id}/remove},

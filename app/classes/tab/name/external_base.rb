@@ -8,8 +8,8 @@
 # `name:` is optional so this class also covers the search-page
 # externals (Index Fungorum search, MycoBank basic search) that
 # don't have a per-Name URL — when `name` is nil, `model` returns
-# nil and the rendered link uses plain `InternalLink` (no model
-# selector class).
+# nil and the auto-derived selector class is a plain title-derived
+# `<…>_link` (no model flavour).
 class Tab::Name::ExternalBase < Tab::Base
   def initialize(name: nil)
     super()

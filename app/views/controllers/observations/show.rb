@@ -108,10 +108,13 @@ module Views::Controllers::Observations
     def carousel_links
       return "" unless permission?(@observation)
 
-      content, path, opts = ::Tab::Observation::ReuseImages.new(
-        observation: @observation
-      ).to_a
-      capture { render(Components::IconLink.new(content, path, **opts)) }
+      capture do
+        render(Components::IconLink.new(
+                 tab: ::Tab::Observation::ReuseImages.new(
+                   observation: @observation
+                 )
+               ))
+      end
     end
 
     def render_right_column
@@ -150,29 +153,16 @@ module Views::Controllers::Observations
       render_source_credit if show_source_credit?
     end
 
-    # `_namings.erb` is still ERB (the namings table includes
-    # turbo-driven update logic that hasn't been Phlexified yet —
-    # `Observations::Namings::VotesController` feeds it via the
-    # `_section_update.erb` dispatcher).
     def render_namings
-      trusted_html(
-        view_context.render(
-          partial: "observations/show/namings",
-          locals: { obs: @observation, consensus: @consensus, user: @user }
-        )
-      )
+      render(Namings.new(obs: @observation, user: @user,
+                         consensus: @consensus))
     end
 
-    # Same situation for `_comments_for_object.erb` — separate
-    # subsystem (Comments), separate conversion PR.
     def render_comments
-      trusted_html(
-        view_context.render(
-          partial: "comments/comments_for_object",
-          locals: { object: @observation, comments: @comments,
-                    controls: @user, limit: nil }
-        )
-      )
+      render(::Views::Controllers::Comments::CommentsForObject.new(
+               object: @observation, comments: @comments, user: @user,
+               editable: @user.present?, limit: nil
+             ))
     end
 
     def show_source_credit?

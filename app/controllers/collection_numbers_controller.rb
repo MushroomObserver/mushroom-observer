@@ -409,12 +409,12 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  # ivar @observation used in the partial
   def render_collection_numbers_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "collection_numbers",
-                obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "collection_numbers",
+      panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 

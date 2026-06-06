@@ -29,8 +29,9 @@ module Views::Controllers::Locations::Show
     private
 
     def heading_links
-      content, path, opts = Tab::Description::Create.new(parent: @object).to_a
-      render(Components::IconLink.new(content, path, **opts))
+      render(Components::IconLink.new(
+               tab: Tab::Description::Create.new(parent: @object)
+             ))
     end
 
     def render_body
