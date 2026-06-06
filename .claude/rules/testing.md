@@ -355,6 +355,44 @@ that IS the contract — the class assertion stays. If the test was
 "verify the page renders some content" and the class on the
 surrounding element is incidental, drop it.
 
+### Translation strings with HTML entities — use `.as_displayed`
+
+When an `assert_html(..., text: …)` selector compares against a
+translation string, route the translated value through MO's
+`String#as_displayed` extension so HTML entities in the
+translation match what Nokogiri returns from `element.text`.
+
+Many MO translations include HTML-encoded characters — the most
+common is `&#8230;` (ellipsis) appearing in strings like
+`show_comments_and_more` (`"And %{num} more&#8230;"`). The raw
+`.t` / `.l` output keeps the entity verbatim; Nokogiri decodes it
+to `…` when extracting `.text` from the rendered DOM. A direct
+comparison then fails on the ellipsis even though the rendered
+text is correct.
+
+```ruby
+# ❌ Fails: the raw translation has `&#8230;`, Nokogiri's `.text`
+#   has `…`, the substring check rejects the mismatch.
+assert_html(html, "a[href=…]",
+            text: :show_comments_and_more.t(num: 2))
+
+# ✅ `as_displayed` normalizes to the form Nokogiri returns.
+assert_html(html, "a[href=…]",
+            text: :show_comments_and_more.t(num: 2).as_displayed)
+```
+
+`String#as_displayed` is defined in `app/extensions/string.rb`
+("Render everything humanly legible, for integration tests");
+it handles HTML entities and unwraps textile/HTML tags. Use it
+on the right-hand side of any text comparison whose source is
+a `.t` / `.l` / `.tl` / `.tpl` value.
+
+Note: `assert_includes(html, text)` compares against the raw HTML
+string, so it sees entities verbatim — no `.as_displayed` needed
+there. The rule is specific to selector-based helpers that read
+text through Nokogiri (`assert_html(..., text:)`,
+`assert_text_in_nested_selector`, etc.).
+
 ### Consolidate Assertions Per Render
 
 Render once, assert many things. Don't create separate test methods that render
