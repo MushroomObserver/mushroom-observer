@@ -16,7 +16,8 @@
 # than a direct model attribute. The controller's
 # `update_content_filter` private method writes them back to the
 # hash.
-class Components::AccountPreferencesForm < Components::ApplicationForm
+class Views::Controllers::Account::Preferences::Form <
+  Components::ApplicationForm
   # Email-section logic (EMAIL_GROUPS constant + two render methods)
   # lives in its own concern to keep this class under the
   # `Metrics/ClassLength` limit.

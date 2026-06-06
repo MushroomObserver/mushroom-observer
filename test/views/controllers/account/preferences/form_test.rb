@@ -2,7 +2,8 @@
 
 require("test_helper")
 
-class AccountPreferencesFormTest < ComponentTestCase
+class Views::Controllers::Account::Preferences::FormTest <
+  ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -213,7 +214,7 @@ class AccountPreferencesFormTest < ComponentTestCase
     # Defensive guard: an unrecognized `filter.type` would silently
     # produce no field. The form raises to surface the bug instead.
     fake = Struct.new(:type, :sym).new(:not_a_real_type, :bogus)
-    form = Components::AccountPreferencesForm.new(
+    form = Views::Controllers::Account::Preferences::Form.new(
       @user, licenses: License.available_names_and_ids(@user&.license)
     )
     assert_raises(RuntimeError) do
@@ -331,7 +332,9 @@ class AccountPreferencesFormTest < ComponentTestCase
 
   def render_form
     licenses = License.available_names_and_ids(@user&.license)
-    render(Components::AccountPreferencesForm.new(@user, licenses: licenses))
+    render(Views::Controllers::Account::Preferences::Form.new(
+             @user, licenses: licenses
+           ))
   end
 
   def prefs_path

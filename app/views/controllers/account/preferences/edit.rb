@@ -14,7 +14,7 @@ module Views::Controllers::Account::Preferences
       add_page_title(:prefs_title.t)
       add_context_nav(Tab::Account::PreferencesEditActions.new)
 
-      render(Components::AccountPreferencesForm.new(@user, licenses: @licenses))
+      render(Form.new(@user, licenses: @licenses))
     end
   end
 end

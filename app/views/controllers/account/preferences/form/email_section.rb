@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Email-prefs subsection of the account preferences form. Extracted
-# from `Components::AccountPreferencesForm` (which is `include`d
-# back) so the main form class stays under the
+# from `Views::Controllers::Account::Preferences::Form` (which is
+# `include`d back) so the main form class stays under the
 # `Metrics/ClassLength` limit and the email-specific data /
 # rendering lives next to its `EMAIL_GROUPS` constant.
-module Components::AccountPreferencesForm::EmailSection
+module Views::Controllers::Account::Preferences::Form::EmailSection
   # Five `[group_heading_key, [field_syms...]]` pairs. Each entry
   # renders a "Group Name: (please notify)" heading row followed by
   # one checkbox per field. Order matches the pre-Phlex partial.
