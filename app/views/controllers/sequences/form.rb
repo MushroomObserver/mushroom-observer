@@ -34,9 +34,12 @@ module Views::Controllers::Sequences
     end
 
     def render_locus_help
-      help_block_with_arrow("up", id: "sequence_locus_help",
-                                  class: "mt-3") do
-        :form_sequence_locus_help.t(locus_width: Sequence::LOCUS_WIDTH)
+      render(Components::HelpBlock.new(
+               arrow: :up, id: "sequence_locus_help"
+             )) do
+        trusted_html(:form_sequence_locus_help.t(
+                       locus_width: Sequence::LOCUS_WIDTH
+                     ))
       end
     end
 
@@ -92,12 +95,10 @@ module Views::Controllers::Sequences
     end
 
     def render_accession_help
-      help_block_with_arrow(
-        "up",
-        id: "sequence_accession_help",
-        class: "mt-3"
-      ) do
-        :form_sequence_accession_help.t
+      render(Components::HelpBlock.new(
+               arrow: :up, id: "sequence_accession_help"
+             )) do
+        trusted_html(:form_sequence_accession_help.t)
       end
     end
 
@@ -109,8 +110,8 @@ module Views::Controllers::Sequences
     end
 
     def render_notes_help
-      help_block_with_arrow("up", id: "textile_help", class: "mt-3") do
-        :field_textile_link.t
+      render(Components::HelpBlock.new(arrow: :up, id: "textile_help")) do
+        trusted_html(:field_textile_link.t)
       end
     end
 

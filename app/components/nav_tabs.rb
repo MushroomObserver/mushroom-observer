@@ -85,10 +85,6 @@ class Components::NavTabs < Components::Base
   #
   #     tabs.tab("Details", details_path, key: "details")
   #
-  # **InternalLink object** (the manual builder version of Tab):
-  #
-  #     tabs.tab(InternalLink.new("Details", details_path), key: "details")
-  #
   # **Array splat from a legacy `app/helpers/tabs/*_helper.rb` method**
   # (the `[title, url, html_options]` shape):
   #
@@ -97,17 +93,16 @@ class Components::NavTabs < Components::Base
   # In all shapes, `current:` (ctor) is matched against `key:` (per
   # tab) to decide which tab gets `.active`. With a Tab PORO, `key:`
   # defaults to `tab.nav_key` (the underscored demodulized class name);
-  # pass `key: ...` to override. With an InternalLink or 3-arg splat
-  # the carried `html_options[:class]` appends to `nav-link`
-  # (+ optional `link_class:`); other attrs pass through.
+  # pass `key: ...` to override. With a 3-arg splat the carried
+  # `html_options[:class]` appends to `nav-link` (+ optional
+  # `link_class:`); other attrs pass through.
   #
-  # **`html_options[:class]` from InternalLink / Tab POROs must NOT
-  # carry Bootstrap nav-tab classes** (`nav-link`, `active`, `mt-3`)
-  # — those are NavTabs' responsibility. The class slot is for
-  # identifier / behavior classes only (auto-generated `<thing>_link`
-  # for test selectors, Stimulus hooks, etc.). Tab styling is owned
-  # by the component so the same PORO renders correctly in any tab
-  # context.
+  # **`html_options[:class]` from Tab POROs must NOT carry Bootstrap
+  # nav-tab classes** (`nav-link`, `active`, `mt-3`) — those are
+  # NavTabs' responsibility. The class slot is for identifier /
+  # behavior classes only (auto-generated `<thing>_link` for test
+  # selectors, Stimulus hooks, etc.). Tab styling is owned by the
+  # component so the same PORO renders correctly in any tab context.
   #
   # @return [nil] to prevent ERB output
   def tab(text_or_link, path = nil, html_options = {}, key: nil)
@@ -132,9 +127,6 @@ class Components::NavTabs < Components::Base
       title, url, opts = text_or_link.to_a
       { text: title, path: url,
         key: key || text_or_link.nav_key, link_attrs: opts }
-    when ::InternalLink
-      title, url, opts = text_or_link.tab
-      { text: title, path: url, key: key, link_attrs: opts }
     else
       { text: text_or_link, path: path, key: key,
         link_attrs: html_options || {} }

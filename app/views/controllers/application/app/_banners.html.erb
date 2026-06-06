@@ -26,7 +26,9 @@ admin_banner_classes = "h3 text-center font-weight-bold p-2"
       )) do
         [
           tag.button(
-            link_icon(:chevron_up, title: :CLOSE.l),
+            render(Components::LinkIcon.new(
+              type: :chevron_up, title: :CLOSE.l
+            )),
             type: :button, class: "close",
             id: "dismiss-banner",
             data: { banner_target: "dismissButton",
@@ -41,7 +43,9 @@ admin_banner_classes = "h3 text-center font-weight-bold p-2"
         data: { banner_target: "container" }
       ) do
         tag.div(
-          link_icon(:chevron_down, title: :SHOW.l),
+          render(Components::LinkIcon.new(
+            type: :chevron_down, title: :SHOW.l
+          )),
           class: "show_banner_icon text-green d-block",
           data: { banner_target: "showButton" }
         )

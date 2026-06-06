@@ -192,7 +192,9 @@ class Components::FormCarouselItem < Components::BaseImage
 
     button(type: "button", class: button_classes, data: data) do
       span { :image_remove_remove.l }
-      link_icon(:remove, class: "text-danger ml-3")
+      render(Components::LinkIcon.new(
+               type: :remove, html_class: "text-danger ml-3"
+             ))
     end
   end
 end

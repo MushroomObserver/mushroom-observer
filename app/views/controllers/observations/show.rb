@@ -108,10 +108,13 @@ module Views::Controllers::Observations
     def carousel_links
       return "" unless permission?(@observation)
 
-      content, path, opts = ::Tab::Observation::ReuseImages.new(
-        observation: @observation
-      ).to_a
-      capture { render(Components::IconLink.new(content, path, **opts)) }
+      capture do
+        render(Components::IconLink.new(
+                 tab: ::Tab::Observation::ReuseImages.new(
+                   observation: @observation
+                 )
+               ))
+      end
     end
 
     def render_right_column

@@ -93,4 +93,17 @@ class IconLinkTest < ComponentTestCase
     # attrs end up on the anchor.
     assert_html(html, "a[data-my-attr='v'][data-toggle='tooltip']")
   end
+
+  # `tab:` shortcut — derive content / path / opts from a Tab PORO so
+  # ERB and Phlex callers don't have to destructure `tab.to_a`
+  # themselves. Equivalent to passing `tab.title, tab.path,
+  # **tab.html_options` positionally.
+  def test_tab_kwarg_derives_content_path_opts
+    project = projects(:eol_project)
+    tab = Tab::Project::Summary.new(project: project)
+
+    html = render(Components::IconLink.new(tab: tab))
+
+    assert_html(html, "a[href='#{tab.path}']", text: tab.title)
+  end
 end

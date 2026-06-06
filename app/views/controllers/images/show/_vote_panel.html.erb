@@ -69,7 +69,7 @@ vote = (@image.vote_cache + 0.5).to_i rescue 0
           <tbody>
             <% votes.each do |vote| %>
               <tr>
-                <td><%= vote.anonymous ? :anonymous.t : user_link(vote.user) %></td>
+                <td><%= vote.anonymous ? :anonymous.t : render(Components::UserLink.new(user: vote.user)) %></td>
                 <td><%= :"image_vote_short_#{vote.value}".t %></td>
               </tr>
             <% end %>

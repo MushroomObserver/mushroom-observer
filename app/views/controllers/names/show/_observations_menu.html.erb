@@ -6,7 +6,7 @@ tracker_tab = if NameTracker.find_by(name_id: @name.id, user_id: @user.id)
               else
                 Tab::Name::NewTracker.new(name: @name)
               end
-heading_link = icon_link_to(*tracker_tab.to_a)
+heading_link = render(Components::IconLink.new(tab: tracker_tab))
 %>
 
 <%= render(Components::Panel.new(

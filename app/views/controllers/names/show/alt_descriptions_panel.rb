@@ -20,8 +20,9 @@ module Views::Controllers::Names::Show
     private
 
     def heading_links
-      content, path, opts = Tab::Name::NewDescription.new(name: @name).to_a
-      render(Components::IconLink.new(content, path, **opts))
+      render(Components::IconLink.new(
+               tab: Tab::Name::NewDescription.new(name: @name)
+             ))
     end
 
     def render_descriptions_list

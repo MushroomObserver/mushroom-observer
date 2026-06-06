@@ -44,22 +44,24 @@ module Views::Controllers::Projects::Aliases
 
     def render_edit_link(name, id)
       span(id: "project_alias_#{id}") do
-        modal_link_to(
-          "project_alias_#{id}",
-          *::Tab::Project::AliasEdit.new(project_id: @project.id,
-                                         name: name, id: id).to_a
-        )
+        tab_name, path, opts = ::Tab::Project::AliasEdit.new(
+          project_id: @project.id, name: name, id: id
+        ).to_a
+        render(Components::ModalLink.new(
+                 "project_alias_#{id}", tab_name, path, **(opts || {})
+               ))
       end
     end
 
     def render_new_link
       span(id: "project_alias") do
-        modal_link_to(
-          "project_alias",
-          *::Tab::Project::AliasNew.new(project_id: @project.id,
-                                        target_id: @target.id,
-                                        target_type: @target.class).to_a
-        )
+        tab_name, path, opts = ::Tab::Project::AliasNew.new(
+          project_id: @project.id,
+          target_id: @target.id, target_type: @target.class
+        ).to_a
+        render(Components::ModalLink.new(
+                 "project_alias", tab_name, path, **(opts || {})
+               ))
       end
     end
   end

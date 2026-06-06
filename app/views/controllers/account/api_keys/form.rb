@@ -79,7 +79,7 @@ module Views::Controllers::Account::APIKeys
                data: { toggle: "collapse",
                        target: "##{@cancel_target}",
                        parent: "##{@cancel_parent}" }) do
-          link_icon(:cancel, title: :CANCEL.l)
+          render(Components::LinkIcon.new(type: :cancel, title: :CANCEL.l))
         end
       end
     end

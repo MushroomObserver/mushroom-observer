@@ -36,7 +36,7 @@ tag.div(
           concat(tag.span(class: "comment-author text-nowrap") do
             ["#{:BY.t}: ",
              if controls
-               user_link(user)
+               render(Components::UserLink.new(user: user))
              else
                user.unique_text_name
              end,

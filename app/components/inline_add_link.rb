@@ -23,8 +23,7 @@ class Components::InlineAddLink < Components::Base
 
   def view_template
     plain("[")
-    name, path, opts = @tab.to_a
-    render(Components::ModalLink.new(@modal_id, name, path, **opts))
+    render(Components::ModalLink.new(@modal_id, tab: @tab))
     plain("]")
   end
 end

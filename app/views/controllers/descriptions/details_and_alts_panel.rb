@@ -217,12 +217,20 @@ module Views::Controllers::Descriptions
         span(class: "ml-3") { trusted_html("&nbsp;".html_safe) }
         plain("(")
         trusted_html(:show_name_latest_review.t(
-                       date: @description.last_review&.web_time || :UNKNOWN.l,
-                       user: view_context.user_link(
-                         @description.reviewer, @description.reviewer.login
-                       )
+                       date: latest_review_date, user: reviewer_link
                      ))
         plain(")")
+      end
+    end
+
+    def latest_review_date
+      @description.last_review&.web_time || :UNKNOWN.l
+    end
+
+    def reviewer_link
+      reviewer = @description.reviewer
+      capture do
+        render(Components::UserLink.new(user: reviewer, name: reviewer.login))
       end
     end
 

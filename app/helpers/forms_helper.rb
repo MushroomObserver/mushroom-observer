@@ -446,7 +446,8 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        args[pos] = help_note(:span, "(#{key.l})") if args[pos] == key
+        args[pos] = render(Components::HelpNote.new(:span, "(#{key.l})")) \
+          if args[pos] == key
       end
     end
     args
@@ -468,12 +469,12 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     args[:between] = capture do
       tag.span(class: between_class) do
         concat(tag.span { args[:between] }) if args[:between].present?
-        concat(collapse_info_trigger(id))
+        concat(render_collapse_info_trigger(id))
       end
     end
     args[:append] = capture do
       concat(args[:append])
-      concat(collapse_help_block(id:) do
+      concat(render(Components::HelpBlock.new(collapse_id: id)) do
         concat(args[:help])
       end)
     end
@@ -483,6 +484,19 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
   def nested_field_id(args)
     [args[:form].object_name.to_s.id_of_nested_field,
      args[:field].to_s].compact_blank.join("_")
+  end
+
+  # `?` icon link that toggles the sibling `Components::HelpBlock`
+  # (rendered with `collapse_id: id`). Replaces the legacy
+  # `collapse_info_trigger` helper from `panel_helper.rb` — kept as a
+  # local helper here because this is the only caller.
+  def render_collapse_info_trigger(id)
+    link_to("##{id}",
+            class: "info-collapse-trigger",
+            role: "button", data: { toggle: "collapse" },
+            aria: { expanded: "false", controls: id }) do
+      render(Components::LinkIcon.new(type: :question))
+    end
   end
 
   # These are args that should not be passed to the field

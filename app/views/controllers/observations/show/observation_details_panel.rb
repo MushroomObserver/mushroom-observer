@@ -105,9 +105,9 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_where_link
     if @user
-      trusted_html(
-        location_link(@obs.where, @obs.location, nil, true)
-      )
+      render(Components::LocationLink.new(
+               where: @obs.where, location: @obs.location, click: true
+             ))
     else
       plain(@obs.where)
     end
@@ -155,7 +155,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_who_name
     if @user
-      trusted_html(user_link(@obs.user))
+      render(Components::UserLink.new(user: @obs.user))
     else
       plain(@obs.user.unique_text_name)
     end
@@ -168,11 +168,9 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_send_question_link
     plain(" [")
-    name, path, opts = ::Tab::Observation::SendQuestion.new(
-      observation: @obs
-    ).to_a
     render(Components::ModalLink.new(
-             "observation_email", name, path, **opts
+             "observation_email",
+             tab: ::Tab::Observation::SendQuestion.new(observation: @obs)
            ))
     plain("]")
   end
@@ -222,7 +220,9 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       span { plain("#{:PROJECTS.t}:") }
       br
       @obs.projects.each do |project|
-        div(class: "indent") { trusted_html(link_to_object(project)) }
+        div(class: "indent") do
+          render(Components::ObjectLink.new(object: project))
+        end
       end
     end
   end
@@ -230,7 +230,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { plain("#{:FIELD_SLIP.t}: ") }
-      trusted_html(link_to_object(@obs.field_slip))
+      render(Components::ObjectLink.new(object: @obs.field_slip))
     end
   end
 

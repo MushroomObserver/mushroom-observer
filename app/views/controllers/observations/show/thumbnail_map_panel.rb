@@ -35,10 +35,9 @@ class Views::Controllers::Observations::Show::ThumbnailMapPanel < Views::Base
   private
 
   def heading_links
-    content, path, opts = ::Tab::Observation::HideThumbnailMap.new(
-      observation: @obs
-    ).to_a
-    render(Components::IconLink.new(content, path, **opts))
+    render(Components::IconLink.new(
+             tab: ::Tab::Observation::HideThumbnailMap.new(observation: @obs)
+           ))
   end
 
   def render_body

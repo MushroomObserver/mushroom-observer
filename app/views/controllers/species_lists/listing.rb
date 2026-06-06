@@ -41,7 +41,9 @@ module Views::Controllers::SpeciesLists
     def render_info
       div(class: "list_info d-flex align-items-start") do
         div(class: "text-larger") do
-          show_title_id_badge(@species_list, "rss-id mr-4")
+          render(Components::IdBadge.new(
+                   object: @species_list, extra_class: "rss-id mr-4"
+                 ))
         end
         div do
           render_title_row
@@ -71,7 +73,7 @@ module Views::Controllers::SpeciesLists
         whitespace
         plain("|")
         whitespace
-        user_link(@species_list.user)
+        render(Components::UserLink.new(user: @species_list.user))
       end
     end
 

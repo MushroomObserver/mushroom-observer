@@ -53,7 +53,8 @@ module Tab::Herbarium
 
       assert_equal(:herbarium_index.t, tab.title)
       assert_equal("nonpersonal_herbaria_index", tab.alt_title)
-      # Plain InternalLink (not Model variant) — no model.
+      # No model → plain title-derived selector class (not the
+      # model-aware flavour).
       assert_nil(tab.model)
     end
 

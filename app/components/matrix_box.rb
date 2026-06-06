@@ -146,7 +146,7 @@ class Components::MatrixBox < Components::Base
 
   def render_id_badge(obj)
     whitespace
-    show_title_id_badge(obj, "rss-id")
+    render(Components::IdBadge.new(object: obj, extra_class: "rss-id"))
   end
 
   def render_occurrence_link
@@ -194,7 +194,11 @@ class Components::MatrixBox < Components::Base
     return unless @data[:where]
 
     div(class: "rss-where") do
-      small { location_link(@data[:where], @data[:location]) }
+      small do
+        render(Components::LocationLink.new(
+                 where: @data[:where], location: @data[:location]
+               ))
+      end
     end
   end
 
@@ -205,7 +209,10 @@ class Components::MatrixBox < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        user_link(@data[:who], nil, class: "rss-who")
+        render(Components::UserLink.new(
+                 user: @data[:who],
+                 attributes: { class: "rss-who" }
+               ))
       end
     end
   end

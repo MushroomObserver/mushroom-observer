@@ -53,8 +53,8 @@ module Views::Controllers::Herbaria
     end
 
     def render_personal_help
-      help_block_with_arrow("down") do
-        :edit_herbarium_this_is_personal_herbarium.tp
+      render(Components::HelpBlock.new(arrow: :down)) do
+        trusted_html(:edit_herbarium_this_is_personal_herbarium.tp)
       end
     end
 
