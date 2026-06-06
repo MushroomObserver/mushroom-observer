@@ -99,7 +99,7 @@ module Tab::Project
       )
     end
 
-def test_banner_enumerable_yields_tab_pororos
+    def test_banner_enumerable_yields_tab_pororos
       bolete = projects(:bolete_project)
       collection = Tab::Project::Banner.new(project: bolete, user: nil)
       collected = collection.map(&:class)

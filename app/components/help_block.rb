@@ -28,12 +28,13 @@ class Components::HelpBlock < Components::Base
 
   # Match the legacy helper signatures so callers can keep their
   # familiar positional/keyword shape. `arrow:` implies `well:`.
-  def initialize(element = :div, string = nil,
-                 well: false, arrow: nil, id: nil, **attributes)
-    extra_class = attributes.delete(:class)
+  def initialize(element = :div, string = nil, **kwargs)
+    extra_class = kwargs.delete(:class)
+    arrow = kwargs.delete(:arrow)
     super(element: element, string: string,
-          well: well || !arrow.nil?, arrow: arrow, id: id,
-          extra_class: extra_class, attributes: attributes)
+          well: kwargs.delete(:well) || !arrow.nil?, arrow: arrow,
+          id: kwargs.delete(:id),
+          extra_class: extra_class, attributes: kwargs)
   end
 
   def view_template(&block)

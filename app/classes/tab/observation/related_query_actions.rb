@@ -15,14 +15,14 @@ class Tab::Observation::RelatedQueryActions < Tab::Collection
   def tabs
     [
       Tab::RelatedQuery.for(model: Location, filter: :Observation,
-                              current_query: @query,
-                              controller: @controller),
+                            current_query: @query,
+                            controller: @controller),
       Tab::RelatedQuery.for(model: Name, filter: :Observation,
-                              current_query: @query,
-                              controller: @controller),
+                            current_query: @query,
+                            controller: @controller),
       Tab::RelatedQuery.for(model: Image, filter: :Observation,
-                              current_query: @query,
-                              controller: @controller)
+                            current_query: @query,
+                            controller: @controller)
     ].compact
   end
 end

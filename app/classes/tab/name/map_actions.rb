@@ -20,11 +20,11 @@ class Tab::Name::MapActions < Tab::Collection
                               name: @name.display_name
                             )),
       Tab::RelatedQuery.for(model: Location, filter: :Observation,
-                              current_query: @query,
-                              controller: @controller),
+                            current_query: @query,
+                            controller: @controller),
       Tab::RelatedQuery.for(model: Observation, filter: :Observation,
-                              current_query: @query,
-                              controller: @controller)
+                            current_query: @query,
+                            controller: @controller)
     ].compact
   end
 end
