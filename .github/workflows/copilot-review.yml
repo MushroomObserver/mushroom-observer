@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Request Copilot review
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.COPILOT_REVIEW_PAT }}
         run: |
           gh pr edit ${{ github.event.pull_request.number }} \
             --add-reviewer "Copilot" \
