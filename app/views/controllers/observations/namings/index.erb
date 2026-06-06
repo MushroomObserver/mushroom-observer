@@ -1,6 +1,7 @@
 <%=
 tag.div(id: "observation_namings") do
-  render(partial: "observations/show/namings",
-         locals: { user: @user, obs: @observation, consensus: @consensus })
+  render(Views::Controllers::Observations::Show::Namings.new(
+           obs: @observation, user: @user, consensus: @consensus
+         ))
 end
 %>

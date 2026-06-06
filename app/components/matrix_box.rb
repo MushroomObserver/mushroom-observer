@@ -23,6 +23,7 @@
 #   render MatrixBox.new(id: 123, extra_class: "text-center") do
 #     tag.div(class: "panel panel-default") { "Custom content" }
 #   end
+# rubocop:disable Metrics/ClassLength
 class Components::MatrixBox < Components::Base
   include Components::MatrixBox::RenderData
 
@@ -179,15 +180,29 @@ class Components::MatrixBox < Components::Base
         class: "vote-select-container mb-3",
         data: { vote_cache: obs.vote_cache }
       ) do
-        naming_vote_form(naming, nil, context: "matrix_box")
+        render(Views::Controllers::Observations::Namings::Votes::Form.new(
+                 naming: naming, user: @user, vote: nil,
+                 context: "matrix_box"
+               ))
       end
     else
-      propose_naming_link(
-        obs.id,
-        btn_class: "btn btn-default d-inline-block mb-3",
-        context: "matrix_box"
+      render_propose_naming_modal(
+        obs, btn_class: "btn btn-default d-inline-block mb-3"
       )
     end
+  end
+
+  # Tab::Naming::New carries `icon: :add` by default; matrix-box
+  # wants a text-only button, so the `icon: nil` override nils it
+  # out in the kwargs splat to ModalLink.
+  def render_propose_naming_modal(obs, btn_class:)
+    title, path, opts = Tab::Naming::New.new(
+      observation_id: obs.id, text: :create_naming.t,
+      context: "matrix_box", btn_class: btn_class
+    ).to_a
+    render(Components::ModalLink.new(
+             "obs_#{obs.id}_naming", title, path, **opts, icon: nil
+           ))
   end
 
   def render_where_section
@@ -331,3 +346,4 @@ class Components::MatrixBox < Components::Base
       @project.is_admin?(@user)
   end
 end
+# rubocop:enable Metrics/ClassLength

@@ -153,17 +153,9 @@ module Views::Controllers::Observations
       render_source_credit if show_source_credit?
     end
 
-    # `_namings.erb` is still ERB (the namings table includes
-    # turbo-driven update logic that hasn't been Phlexified yet —
-    # `Observations::Namings::VotesController` feeds it via the
-    # `_section_update.erb` dispatcher).
     def render_namings
-      trusted_html(
-        view_context.render(
-          partial: "observations/show/namings",
-          locals: { obs: @observation, consensus: @consensus, user: @user }
-        )
-      )
+      render(Namings.new(obs: @observation, user: @user,
+                         consensus: @consensus))
     end
 
     # Same situation for `_comments_for_object.erb` — separate

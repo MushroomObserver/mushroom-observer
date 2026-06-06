@@ -12,11 +12,6 @@ class Components::Base < Phlex::HTML
   include Phlex::Rails::Helpers::TurboFrameTag
   include Components::TrustedHtml
 
-  # Register custom output helpers (return HTML)
-  # mark_safe: true tells Phlex to trust the output without checking SafeBuffer
-  register_output_helper :naming_vote_form, mark_safe: true
-  register_output_helper :propose_naming_link, mark_safe: true
-
   # Register custom value helpers (return values)
   register_value_helper :permission?
   register_value_helper :in_admin_mode?
