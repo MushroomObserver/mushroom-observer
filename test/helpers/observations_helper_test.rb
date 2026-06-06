@@ -27,8 +27,8 @@ class ObservationsHelperTest < ActionView::TestCase
       name: deprecated_name, user: user, when: Time.current, where: location
     )
     assert_match(
-      link_to_display_name_brief_authors(
-        user, deprecated_name,
+      ::Observations::DisplayNameBriefAuthorsLink.for(
+        user: user, name: deprecated_name,
         class: "obs_consensus_deprecated_synonym_link_#{deprecated_name.id}"
       ),
       obs_title_consensus_name_link(name: deprecated_name, user:).unescape_html,

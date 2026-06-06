@@ -16,6 +16,7 @@ class Views::Base < Components::Base
   register_value_helper :add_new_title
   register_value_helper :add_edit_title
   register_value_helper :add_show_title
+  register_value_helper :add_owner_naming
   register_value_helper :add_index_title
   register_value_helper :add_context_nav
   register_value_helper :add_project_banner

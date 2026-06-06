@@ -35,8 +35,9 @@ module ObservationsHelper
   def obs_title_with_preferred_synonym_link(name, prefer_name, user)
     if user
       [
-        link_to_display_name_brief_authors(
-          user, name, class: "obs_consensus_deprecated_synonym_link_#{name.id}"
+        ::Observations::DisplayNameBriefAuthorsLink.for(
+          user: user, name: name,
+          class: "obs_consensus_deprecated_synonym_link_#{name.id}"
         ),
         # Differentiate deprecated consensus from preferred name
         obs_consensus_id_flag,
@@ -68,8 +69,9 @@ module ObservationsHelper
   def obs_title_name_link(name, show_owner_naming, user)
     text = [
       if user
-        link_to_display_name_brief_authors(
-          user, name, class: "obs_consensus_naming_link_#{name.id}"
+        ::Observations::DisplayNameBriefAuthorsLink.for(
+          user: user, name: name,
+          class: "obs_consensus_naming_link_#{name.id}"
         )
       else
         name.user_display_name_brief_authors(user).t.small_author
@@ -84,30 +86,11 @@ module ObservationsHelper
     tag.span("(#{:show_observation_site_id.t})", class: "small text-nowrap")
   end
 
-  ##### Portion of page title that includes user's naming preference #########
-
-  # Hydnum repandum (Observer Preference)
-  def owner_naming_line(name:, owner_name:, user:)
-    return unless user&.view_owner_id && owner_name && owner_name.id != name.id
-
-    [
-      owner_preferred_naming(user, owner_name).t,
-      "(#{:show_observation_owner_id.l})"
-    ].safe_join(" ")
-  end
-
-  # Note that this is called with `.t` above
-  def owner_preferred_naming(user, owner_name)
-    link_to_display_name_brief_authors(
-      user, owner_name, class: "obs_owner_naming_link_#{owner_name.id}"
-    )
-  end
-
-  # Called by more than one method
-  def link_to_display_name_brief_authors(user, name, **)
-    link_to(name.user_display_name_brief_authors(user).t.small_author,
-            name_path(id: name.id), **)
-  end
+  # `owner_naming_line` + `owner_preferred_naming` extracted to
+  # `Observations::OwnerNamingLine`.
+  # `link_to_display_name_brief_authors` extracted to
+  # `Observations::DisplayNameBriefAuthorsLink`
+  # (both under `app/classes/observations/`).
 
   def link_to_display_name_without_authors(user, name, **)
     link_to(name.user_display_name_without_authors(user).t,

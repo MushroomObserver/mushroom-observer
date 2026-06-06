@@ -74,10 +74,8 @@ module Header
     def observation_page_title(obs, user)
       observation_show_title(
         obs: obs, user: user,
-        show_owner_naming: owner_naming_line(
-          name: obs.name,
-          owner_name: ::Observation::NamingConsensus.new(obs).owner_preference,
-          user: user
+        show_owner_naming: ::Observations::OwnerNamingLine.for(
+          observation: obs, user: user
         )
       )
     end
@@ -187,12 +185,19 @@ module Header
     end
 
     # Show obs: observer's preferred naming.
-    # HTML tag is here so no empty header printed in case there is no naming
-    def add_owner_naming(naming)
-      return unless naming
+    # HTML tag is here so no empty header printed when the line
+    # shouldn't be shown. Takes the observation and viewer
+    # directly — internal `Observations::OwnerNamingLine.for(...)`
+    # decides whether to render anything and produces the
+    # html-safe string.
+    def add_owner_naming(observation:, user:)
+      line = ::Observations::OwnerNamingLine.for(
+        observation: observation, user: user
+      )
+      return unless line
 
       content_for(:owner_naming) do
-        tag.h5(naming, class: "pl-3 mt-0 mb-4", id: "owner_naming")
+        tag.h5(line, class: "pl-3 mt-0 mb-4", id: "owner_naming")
       end
     end
 
