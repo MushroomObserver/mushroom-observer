@@ -66,8 +66,8 @@ module Views::Controllers::Observations
                   "a.obs_consensus_deprecated_synonym_link_#{obs.name.id}")
       assert_html(html, ".obs-site-id-flag",
                   text: :show_observation_site_id.t.as_displayed)
-      assert_html(html,
-                  ".obs-preferred-synonym a.obs_preferred_synonym_link_#{preferred.id}")
+      assert_html(html, ".obs-preferred-synonym " \
+                        "a.obs_preferred_synonym_link_#{preferred.id}")
     end
 
     def test_deprecated_name_logged_out_renders_textile_only_chain

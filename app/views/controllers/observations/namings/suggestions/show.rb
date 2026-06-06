@@ -43,7 +43,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     # ---- suggestions list column ---------------------------------
 
     def render_suggestions_column
-      div(class: "col-sm-8 float-sm-left") do
+      div(class: "col-sm-8 float-sm-left obs-suggestions-column") do
         useful = @suggestions.reject(&:useless?).sort_by(&:max).reverse
         confident, others = useful.partition(&:confident?)
         render_suggestions_table(confident, :suggestions_title.t) \

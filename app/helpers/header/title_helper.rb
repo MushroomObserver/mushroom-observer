@@ -185,15 +185,16 @@ module Header
     # HTML tag is here so no empty header printed when the line
     # shouldn't be shown. Takes the observation and viewer
     # directly — `Views::Controllers::Observations::OwnerNamingLine`
-    # decides whether to render anything.
+    # decides whether to render anything via its `visible_for?`
+    # predicate — checked here BEFORE rendering so a blank h5
+    # isn't emitted when the view ends up empty.
     def add_owner_naming(observation:, user:)
-      line = render(
-        ::Views::Controllers::Observations::OwnerNamingLine.new(
-          observation: observation, user: user
-        )
-      )
-      return if line.blank?
+      return unless ::Views::Controllers::Observations::OwnerNamingLine.
+                    visible_for?(observation: observation, user: user)
 
+      line = render(::Views::Controllers::Observations::OwnerNamingLine.new(
+                      observation: observation, user: user
+                    ))
       content_for(:owner_naming) do
         tag.h5(line, class: "pl-3 mt-0 mb-4", id: "owner_naming")
       end
