@@ -7,6 +7,10 @@ class NamingsHelperTest < ActionView::TestCase
   include NamingsHelper
   include ObjectLinkHelper
   include LinkHelper
+  include FormsHelper
+
+  # Stub for controller method called by naming_vote_form.
+  def permission?(_naming) = true
 
   def setup
     @obs1 = observations(:minimal_unknown_obs)
@@ -122,6 +126,24 @@ class NamingsHelperTest < ActionView::TestCase
     assert_match("Sibling reason text", html)
     assert_match("MO #{@obs2.id}", html,
                  "Should include sibling observation link")
+  end
+
+  # -- naming_row_content --
+
+  # Hits the `else` branch (line 35): local = naming, for regular Naming.
+  # `permission?` is a controller method stubbed here to avoid a
+  # controller context dependency from `naming_vote_form`.
+  def test_naming_row_content_with_regular_naming
+    obs = Observation.naming_includes.find(
+      observations(:coprinus_comatus_obs).id
+    )
+    consensus = Observation::NamingConsensus.new(obs)
+    naming = namings(:coprinus_comatus_naming)
+
+    result = naming_row_content(@user, consensus, naming)
+
+    assert_equal(naming.id, result[:id],
+                 "Expected naming id in row content hash")
   end
 
   # -- naming_or_primary --
