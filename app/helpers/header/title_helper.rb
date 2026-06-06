@@ -72,8 +72,8 @@ module Header
     # display); recomputing here is the cost of keeping the model
     # free of view code.
     def observation_page_title(obs, user)
-      observation_show_title(
-        obs: obs, user: user,
+      ::Observations::ConsensusNameLink.for(
+        name: obs.name, user: user,
         show_owner_naming: ::Observations::OwnerNamingLine.for(
           observation: obs, user: user
         )

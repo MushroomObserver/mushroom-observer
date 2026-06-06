@@ -2,8 +2,10 @@
 
 require("test_helper")
 
-# test the helpers for ObservationsController
-class ObservationsHelperTest < ActionView::TestCase
+# Covers the obs-title builder chain — `ConsensusNameLink`
+# composing `DisplayNameBriefAuthorsLink` and
+# `DisplayNameWithoutAuthorsLink`.
+class Observations::ConsensusNameLinkTest < ActionView::TestCase
   def test_show_observation_name
     user = users(:rolf)
     location = locations(:albion)
