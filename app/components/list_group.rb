@@ -130,13 +130,15 @@ class Components::ListGroup < Components::Base
   end
 
   def render_item(item)
-    classes = class_names("list-group-item", item[:class])
-    send(item_element,
-         class: classes, id: item[:id], **item[:attrs],
-         &item[:block])
+    render(Components::ListGroupItem.new(
+             element: item_element, class: item[:class],
+             id: item[:id], attributes: item[:attrs]
+           ), &item[:block])
   end
 
   def render_empty
-    send(item_element, class: "list-group-item none-yet", &@empty_block)
+    render(Components::ListGroupItem.new(
+             element: item_element, class: "none-yet"
+           ), &@empty_block)
   end
 end
