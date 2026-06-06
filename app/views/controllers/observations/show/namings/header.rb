@@ -15,17 +15,16 @@
 class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   prop :obs, ::Observation
 
-  # Bottom-align column contents to the column edge regardless of
-  # the column's height. The longest header label ("Community
-  # Vote") wraps to two lines on `sm` breakpoint while the others
-  # fit on one — without bottom alignment the one-liners hover at
-  # the top of the row. `d-flex` is load-bearing: `.col` is not a
-  # flex container by default, so `flex-column` /
-  # `justify-content-end` are no-ops without it.
-  COLUMN_BEHAVIOR = "d-flex flex-column justify-content-end"
-
   def view_template
-    div(class: "row") do
+    # `align-items-end` on the row tells Bootstrap's default flex
+    # row to bottom-align its column children. The longest label
+    # ("Community Vote") wraps to two lines on the `sm` breakpoint
+    # while the others fit on one; without bottom alignment the
+    # one-liners hover at the top of the row. This is simpler and
+    # more reliable than putting flex-column / justify-content-end
+    # on each column — those approaches collide with the columns'
+    # `d-none d-sm-block` responsive-visibility classes.
+    div(class: "row d-flex align-items-end") do
       render_label_columns
       render_propose_icon_column
     end
@@ -35,7 +34,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
 
   def render_label_columns
     div(class: "col-xs-10 col-sm-11") do
-      div(class: "row") do
+      div(class: "row d-flex align-items-end") do
         render_label_column("col col-sm-4 d-block") { render_panel_title }
         render_label_column { small { trusted_html(:show_namings_user.t) } }
         render_label_column("col col-sm-2 d-none d-sm-block") do
@@ -55,7 +54,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   # consensus header is narrower (sm-2).
   def render_label_column(extra = "col col-sm-3 d-none d-sm-block",
                           &block)
-    div(class: "#{extra} #{COLUMN_BEHAVIOR}", &block)
+    div(class: extra, &block)
   end
 
   def render_panel_title
@@ -67,7 +66,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   # click opens the propose-naming modal in place rather than
   # navigating away.
   def render_propose_icon_column
-    div(class: "col-xs-2 col-sm-1 #{COLUMN_BEHAVIOR}") do
+    div(class: "col-xs-2 col-sm-1") do
       span(class: "float-right d-sm-none") do
         ModalLink("obs_#{@obs.id}_naming", tab: propose_naming_tab)
       end
