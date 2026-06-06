@@ -175,11 +175,101 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     assert_html(html, ".naming-reasons.small")
   end
 
+  # ---- MergedNaming paths --------------------------------------------
+
+  # The Row branches on `naming.is_a?(MergedNaming)` in three spots:
+  # `primary` / `local` / `user_vote` derived-state accessors, the
+  # multi-proposer "Matching Observations" link, and the
+  # source-labeled grouped reasons (`render_merged_reasons` +
+  # `render_reasons_source_label`). These tests pin one MergedNaming
+  # shape per branch by constructing the merged naming directly —
+  # going through `NamingConsensus#merged_namings` adds composition
+  # that obscures which branch is being exercised.
+
+  def test_merged_naming_with_local_naming_renders_single_proposer
+    # Local naming exists (a naming on @obs itself) →
+    # `local_naming` returns it, `user` returns its user,
+    # `multiple_proposers?` is false → single-proposer UserLink
+    # cell (and the `primary` / `local` / `user_vote` accessors
+    # all take the MergedNaming branch).
+    local_naming = create_naming_on(@obs, user: @user)
+    merged = ::Observation::MergedNaming.new([local_naming],
+                                             observation: @obs)
+
+    html = render_row(naming: merged)
+
+    assert_html(html, "a.user_link_#{@user.id}")
+    assert_includes(html, @user.login)
+  end
+
+  def test_merged_naming_with_multiple_proposers_renders_matching_obs_link
+    # No local naming, multiple users across siblings →
+    # `multiple_proposers?` true → "Matching Observations" link
+    # to the occurrence page (replaces the single-UserLink cell).
+    sibling_obs = wire_up_occurrence_with_sibling
+    sibling_one = create_naming_on(sibling_obs, user: @user)
+    sibling_two = create_naming_on(sibling_obs, user: users(:mary))
+    merged = ::Observation::MergedNaming.new([sibling_one, sibling_two],
+                                             observation: @obs)
+
+    html = render_row(naming: merged)
+
+    assert_html(
+      html, "a[href='#{routes.occurrence_path(@obs.occurrence)}']",
+      text: :show_observation_matching_observations.l
+    )
+  end
+
+  def test_merged_naming_renders_grouped_reasons_with_source_labels
+    # A sibling-obs naming with a used reason → `grouped_reasons`
+    # yields `[[sibling_obs, [reason]]]` → `render_reasons_source_label`
+    # emits the "From MO <id>:" link to the sibling observation.
+    sibling_obs = wire_up_occurrence_with_sibling
+    sibling_naming = create_naming_on(sibling_obs, user: @user,
+                                                   used_reason: "Spotted it")
+    merged = ::Observation::MergedNaming.new([sibling_naming],
+                                             observation: @obs)
+
+    html = render_row(naming: merged)
+
+    assert_html(
+      html,
+      ".naming-reasons a[href='" \
+      "#{routes.permanent_observation_path(sibling_obs.id)}']",
+      text: "MO #{sibling_obs.id}"
+    )
+  end
+
   private
 
   def render_row(naming: @naming, user: @user, consensus: @consensus)
     render(Views::Controllers::Observations::Show::Namings::Row.new(
              naming: naming, user: user, consensus: consensus
            ))
+  end
+
+  # Wire up an Occurrence linking @obs to a sibling observation
+  # and return the sibling. The Row's "Matching Observations" link
+  # reads `@naming.observation.occurrence`, so @obs needs an
+  # occurrence in the multi-proposer / sibling-reasons tests.
+  def wire_up_occurrence_with_sibling
+    sibling = observations(:detailed_unknown_obs)
+    occ = ::Occurrence.create!(user: @user, primary_observation: @obs)
+    @obs.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    sibling
+  end
+
+  # Create a naming on `obs` (focal or sibling), optionally with a
+  # used reason so it surfaces in `grouped_reasons`.
+  def create_naming_on(obs, user:, used_reason: nil)
+    naming = ::Naming.create!(observation: obs,
+                              name: names(:agaricus_campestris),
+                              user: user)
+    if used_reason
+      naming.update_reasons(1 => used_reason)
+      naming.save!
+    end
+    naming
   end
 end
