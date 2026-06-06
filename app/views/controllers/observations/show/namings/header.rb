@@ -15,11 +15,14 @@
 class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   prop :obs, ::Observation
 
-  # Behaviors shared by all five top-level columns — column
-  # contents bottom-align to the column edge regardless of the
-  # column's height (the propose-naming icon column is taller
-  # than the label columns, and we want their baselines to align).
-  COLUMN_BEHAVIOR = "flex-column justify-content-end"
+  # Bottom-align column contents to the column edge regardless of
+  # the column's height. The longest header label ("Community
+  # Vote") wraps to two lines on `sm` breakpoint while the others
+  # fit on one — without bottom alignment the one-liners hover at
+  # the top of the row. `d-flex` is load-bearing: `.col` is not a
+  # flex container by default, so `flex-column` /
+  # `justify-content-end` are no-ops without it.
+  COLUMN_BEHAVIOR = "d-flex flex-column justify-content-end"
 
   def view_template
     div(class: "row") do

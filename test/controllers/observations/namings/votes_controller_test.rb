@@ -16,7 +16,8 @@ module Observations::Namings
       login
       # First just make sure the page displays.
       get(:index, params:)
-      assert_template("observations/namings/votes/index")
+      assert_select("body.votes__index")
+      assert_select("table.table-naming-votes")
 
       votes_index_assertions(nam)
     end
@@ -29,8 +30,8 @@ module Observations::Namings
       login
       # First just make sure the page displays.
       get(:index, params:, format: :turbo_stream)
-      assert_template("shared/_modal")
-      assert_template("observations/namings/votes/_table")
+      assert_select("#modal_naming_votes_#{nam.id}")
+      assert_select("table.table-naming-votes")
 
       votes_index_assertions(nam)
     end
@@ -141,7 +142,11 @@ module Observations::Namings
       params = params.merge(context: "matrix_box")
 
       put(:update, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; the controller now renders
+      # the same 7 turbo-stream actions inline. Verify a couple of
+      # the wrapper targets so we know the stream emitted.
+      assert_select("turbo-stream[target='observation_what_#{obs.id}']")
+      assert_select("turbo-stream[target='box_title_#{obs.id}']")
 
       post_vote_change_basic_assertions(obs:, nam:)
     end

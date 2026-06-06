@@ -72,7 +72,8 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; controller emits inline streams.
+      assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       post_propose_naming_assertions(args)
     end
@@ -84,7 +85,8 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; controller emits inline streams.
+      assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       # Check that turbo_stream replace action is in response
       assert_match(
