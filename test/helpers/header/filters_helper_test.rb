@@ -57,7 +57,7 @@ module Header
       expected = vals.map { |v| Vote.confidence(v.to_f) }.join(" – ")
 
       assert_equal(expected, confidence_val_as_label(vals),
-                   "Expected array of confidence values joined by em-dash")
+                   "Expected array of confidence values joined by en-dash")
     end
 
     def test_confidence_val_as_label_with_scalar
