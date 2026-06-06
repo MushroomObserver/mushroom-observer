@@ -19,8 +19,10 @@ class Components::HelpNote < Components::Base
   prop :element, Symbol, default: :span
   prop :string, _Nilable(String), default: nil
   prop :extra_class, _Nilable(String), default: nil
-  prop :attributes, _Hash(_Union(Symbol, String), _Any?),
-       default: -> { {} }
+  # No `default:` — `#initialize` always passes `attributes:` via
+  # `super`, so the default lambda would be dead code (and a
+  # coverage gap).
+  prop :attributes, _Hash(_Union(Symbol, String), _Any?)
 
   # Match the legacy helper's positional shape — callers wrote
   # `help_note(:p, "...", class: "...")` and we want the same call

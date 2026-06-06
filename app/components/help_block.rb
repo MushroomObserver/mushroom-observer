@@ -33,8 +33,10 @@ class Components::HelpBlock < Components::Base
   prop :collapse_id, _Nilable(String), default: nil
   prop :extra_class, _Nilable(String), default: nil
   prop :id, _Nilable(String), default: nil
-  prop :attributes, _Hash(_Union(Symbol, String), _Any?),
-       default: -> { {} }
+  # No `default:` — `#initialize` always passes `attributes:` via
+  # `super`, so the default lambda would be dead code (and a
+  # coverage gap).
+  prop :attributes, _Hash(_Union(Symbol, String), _Any?)
 
   # Match the legacy helper signatures so callers can keep their
   # familiar positional/keyword shape. `arrow:` and `collapse_id:`
