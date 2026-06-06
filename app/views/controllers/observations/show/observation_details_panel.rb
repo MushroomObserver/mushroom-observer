@@ -168,11 +168,9 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_send_question_link
     plain(" [")
-    name, path, opts = ::Tab::Observation::SendQuestion.new(
-      observation: @obs
-    ).to_a
     render(Components::ModalLink.new(
-             "observation_email", name, path, **opts
+             "observation_email",
+             tab: ::Tab::Observation::SendQuestion.new(observation: @obs)
            ))
     plain("]")
   end

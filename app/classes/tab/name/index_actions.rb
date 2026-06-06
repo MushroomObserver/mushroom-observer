@@ -16,7 +16,7 @@ class Tab::Name::IndexActions < Tab::Collection
     [
       Tab::Name::New.new,
       all_tab,
-      Tab::Related::Query.for(model: Observation, filter: :Name,
+      Tab::RelatedQuery.for(model: Observation, filter: :Name,
                               current_query: @query,
                               controller: @controller)
     ].compact

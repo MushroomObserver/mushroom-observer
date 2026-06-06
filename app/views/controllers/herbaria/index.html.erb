@@ -64,7 +64,7 @@ end if @merge %>
             </td>
             <td>
               <%= if !nonpersonal && herbarium.personal_user.present?
-                    tag.span(user_link(herbarium.personal_user),
+                    tag.span(render(Components::UserLink.new(user: herbarium.personal_user)),
                             title: herbarium.personal_user.unique_text_name)
               end %>
             </td>

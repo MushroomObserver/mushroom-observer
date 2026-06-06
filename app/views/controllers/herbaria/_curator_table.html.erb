@@ -22,7 +22,7 @@
                  ) %>
           </td>
         <% end %>
-        <td><%= user_link(user, user.legal_name) %></td>
+        <td><%= render(Components::UserLink.new(user: user, name: user.legal_name)) %></td>
       </tr>
     <% end %>
   </tbody>

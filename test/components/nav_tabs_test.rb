@@ -119,19 +119,6 @@ class NavTabsTest < ComponentTestCase
     assert_html(html, "a.nav-link.field_slips_link")
   end
 
-  def test_accepts_raw_internal_link_with_html_options
-    link = InternalLink.new("Plain", "/plain",
-                            html_options: { class: "custom_class" })
-
-    html = render_with do |tabs|
-      tabs.tab(link, key: "plain")
-    end
-
-    # InternalLink branch: title + url + html_options[:class] flow through
-    # — the carried `custom_class` lands on the <a> alongside `nav-link`.
-    assert_html(html, "a.nav-link.custom_class[href='/plain']", text: "Plain")
-  end
-
   def test_add_all_appends_collection_tabs
     project = projects(:bolete_project)
     collection = Tab::Project::AdminSubtabs.new(project: project)

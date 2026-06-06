@@ -33,9 +33,9 @@ class Views::Base < Components::Base
   # trusts the returned SafeBuffer.
   register_output_helper :paginated_results, mark_safe: true
   # `controller` (the ActionController instance) is referenced from
-  # Phlex views that build `InternalLink::RelatedQuery.new(...)` to
-  # compute cross-model "related index" URLs (e.g. species-list show
-  # → Locations / Images links). ERB views have it for free; Phlex
+  # Phlex views that build `Tab::RelatedQuery.new(...)` to compute
+  # cross-model "related index" URLs (e.g. species-list show →
+  # Locations / Images links). ERB views have it for free; Phlex
   # views need it registered.
   register_value_helper :controller
 

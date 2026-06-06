@@ -37,8 +37,10 @@ is_search_page = controller.controller_name == "search"
 
           <%= fields_for(:pattern_search) do |f_s| %>
             <%= tag.div(class: form_group_class) do %>
-              <%= link_icon(:search,
-                            class: "form-control-feedback hidden-xs") %>
+              <%= render(Components::LinkIcon.new(
+                            type: :search,
+                            html_class: "form-control-feedback hidden-xs"
+                          )) %>
               <%= f_s.text_field(
                     :pattern,
                     value: session[:pattern],
@@ -63,7 +65,8 @@ is_search_page = controller.controller_name == "search"
             <%= tag.button(type: :submit,
                           class: "btn btn-outline-default px-2") do
               [
-                tag.span(link_icon(:search), class: "d-sm-none"),
+                tag.span(render(Components::LinkIcon.new(type: :search)),
+                         class: "d-sm-none"),
                 tag.span(:app_search.l, class: "hidden-xs")
               ].safe_join
             end %>

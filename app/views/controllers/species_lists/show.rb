@@ -91,19 +91,20 @@ module Views::Controllers::SpeciesLists
     def render_locations_button
       return unless related_to_locations?
 
-      url = InternalLink::RelatedQuery.new(
-        Location, :Observation, @query, controller
-      ).url
-      project_button(:LOCATIONS.l, url)
+      project_button(:LOCATIONS.l, related_query_path(Location))
     end
 
     def render_images_button
       return unless related_to_locations?
 
-      url = InternalLink::RelatedQuery.new(
-        Image, :Observation, @query, controller
-      ).url
-      project_button(:IMAGES.l, url)
+      project_button(:IMAGES.l, related_query_path(Image))
+    end
+
+    def related_query_path(model)
+      Tab::RelatedQuery.new(
+        model: model, filter: :Observation,
+        current_query: @query, controller: controller
+      ).path
     end
 
     def related_to_locations?

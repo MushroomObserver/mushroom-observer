@@ -29,6 +29,9 @@
 #   render(Components::IconLink.new("Delete", path,
 #                                   icon: :delete, button_to: true,
 #                                   data: { method: :delete }))
+#
+# @example From a Tab PORO (shortcut)
+#   render(Components::IconLink.new(tab: Tab::Name::Edit.new(name: @name)))
 class Components::IconLink < Components::Base
   LABEL_SHOW_CLASSES = "pl-2 d-none d-sm-inline font-weight-bold"
 
@@ -37,11 +40,17 @@ class Components::IconLink < Components::Base
 
   attr_reader :content, :path, :opts
 
-  def initialize(content, path, **opts)
+  def initialize(content = nil, path = nil, tab: nil, **opts)
     super()
-    @content = content
-    @path = path
-    @opts = opts
+    if tab
+      @content = tab.title
+      @path = tab.path
+      @opts = tab.html_options
+    else
+      @content = content
+      @path = path
+      @opts = opts
+    end
   end
 
   def view_template

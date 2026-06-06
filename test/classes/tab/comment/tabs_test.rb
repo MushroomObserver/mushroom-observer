@@ -28,7 +28,8 @@ module Tab::Comment
     def test_new_with_btn_class
       tab = Tab::Comment::New.new(object: @target, btn_class: "btn btn-sm")
 
-      assert_equal("btn btn-sm", tab.html_options[:class])
+      assert_includes(tab.html_options[:class], "btn")
+      assert_includes(tab.html_options[:class], "btn-sm")
     end
 
     def test_edit

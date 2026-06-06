@@ -17,9 +17,9 @@
 #     to wrap them in their own (non-dropdown) layout.
 #
 # `add_context_nav` accepts any of:
-#   - an `Array` of `InternalLink.tab` tuples `[text, url, args]`
-#     (the legacy shape; `app/helpers/tabs/*_helper.rb` methods
-#     return this)
+#   - an `Array` of `[text, url, args]` tuples (the legacy shape;
+#     `app/helpers/tabs/*_helper.rb` methods return this — same
+#     shape as `Tab::Base#to_a`)
 #   - a `Tab::Collection` (each yielded `Tab::Base` is converted
 #     via `#to_a`)
 #   - a single `Tab::Base` instance (wrapped as a one-element list)

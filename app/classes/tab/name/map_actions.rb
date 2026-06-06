@@ -19,10 +19,10 @@ class Tab::Name::MapActions < Tab::Collection
                             title: :name_map_about.t(
                               name: @name.display_name
                             )),
-      Tab::Related::Query.for(model: Location, filter: :Observation,
+      Tab::RelatedQuery.for(model: Location, filter: :Observation,
                               current_query: @query,
                               controller: @controller),
-      Tab::Related::Query.for(model: Observation, filter: :Observation,
+      Tab::RelatedQuery.for(model: Observation, filter: :Observation,
                               current_query: @query,
                               controller: @controller)
     ].compact

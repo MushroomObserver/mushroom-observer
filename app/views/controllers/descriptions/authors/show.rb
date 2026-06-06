@@ -36,7 +36,7 @@ module Views::Controllers::Descriptions::Authors
     end
 
     def render_author_row(user, type)
-      trusted_html(view_context.user_link(user))
+      render(Components::UserLink.new(user: user))
       plain(" | ")
       render(Components::CrudButton::Delete.new(
                name: :review_authors_remove_author.t,

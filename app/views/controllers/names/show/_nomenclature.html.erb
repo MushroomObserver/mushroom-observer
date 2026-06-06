@@ -3,15 +3,21 @@
 <%
 unlocked = in_admin_mode? || !name.locked
 approve = if unlocked && name.deprecated && name.correct_spelling_id.nil?
-            icon_link_to(*Tab::Name::Approve.new(name: name).to_a)
+            render(Components::IconLink.new(
+              tab: Tab::Name::Approve.new(name: name)
+            ))
           end
 deprecate = if unlocked && !name.deprecated
-              icon_link_to(*Tab::Name::Deprecate.new(name: name).to_a)
+              render(Components::IconLink.new(
+                tab: Tab::Name::Deprecate.new(name: name)
+              ))
             end
 synonyms = if unlocked
-             icon_link_to(*Tab::Name::EditSynonym.new(name: name).to_a)
+             render(Components::IconLink.new(
+               tab: Tab::Name::EditSynonym.new(name: name)
+             ))
            end
-edit = icon_link_to(*Tab::Name::Edit.new(name: name).to_a)
+edit = render(Components::IconLink.new(tab: Tab::Name::Edit.new(name: name)))
 heading_links = edit
 synonym_links = [approve, deprecate].reject(&:nil?).safe_join(" | ")
 %>

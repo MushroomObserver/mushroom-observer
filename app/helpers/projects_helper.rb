@@ -48,7 +48,7 @@ module ProjectsHelper
   end
 
   def related_observation_images_url(query)
-    Tab::Related::Query.for(
+    Tab::RelatedQuery.for(
       model: Image, filter: :Observation,
       current_query: query, controller: controller
     )&.path
