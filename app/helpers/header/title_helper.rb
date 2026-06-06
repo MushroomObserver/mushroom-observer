@@ -72,12 +72,9 @@ module Header
     # display); recomputing here is the cost of keeping the model
     # free of view code.
     def observation_page_title(obs, user)
-      ::Observations::ConsensusNameLink.for(
-        name: obs.name, user: user,
-        show_owner_naming: ::Observations::OwnerNamingLine.for(
-          observation: obs, user: user
-        )
-      )
+      render(::Views::Controllers::Observations::ConsensusNameLink.new(
+               observation: obs, user: user
+             ))
     end
 
     # Look up the model's `document_title` (plain-text string) or
@@ -187,14 +184,15 @@ module Header
     # Show obs: observer's preferred naming.
     # HTML tag is here so no empty header printed when the line
     # shouldn't be shown. Takes the observation and viewer
-    # directly — internal `Observations::OwnerNamingLine.for(...)`
-    # decides whether to render anything and produces the
-    # html-safe string.
+    # directly — `Views::Controllers::Observations::OwnerNamingLine`
+    # decides whether to render anything.
     def add_owner_naming(observation:, user:)
-      line = ::Observations::OwnerNamingLine.for(
-        observation: observation, user: user
+      line = render(
+        ::Views::Controllers::Observations::OwnerNamingLine.new(
+          observation: observation, user: user
+        )
       )
-      return unless line
+      return if line.blank?
 
       content_for(:owner_naming) do
         tag.h5(line, class: "pl-3 mt-0 mb-4", id: "owner_naming")
