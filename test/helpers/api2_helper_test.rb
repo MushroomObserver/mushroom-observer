@@ -6,6 +6,16 @@ require("builder")
 class API2HelperTest < ActionView::TestCase
   include API2Helper
 
+  def test_json_api_key_returns_hash_with_key_fields
+    api_key = api_keys(:rolfs_api_key)
+    result = json_api_key(api_key)
+
+    assert_equal(api_key.id, result[:id],
+                 "Expected api_key id in json hash")
+    assert_equal(api_key.key.to_s, result[:key],
+                 "Expected api_key key string in json hash")
+  end
+
   def test_xml_float_renders_tag_with_rounded_value
     builder = Builder::XmlMarkup.new
     xml_float(builder, "distance", 3.14159, 2)
