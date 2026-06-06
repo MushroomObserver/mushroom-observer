@@ -16,5 +16,5 @@ jobs:
           GH_TOKEN: ${{ secrets.COPILOT_REVIEW_PAT }}
         run: |
           gh pr edit ${{ github.event.pull_request.number }} \
-            --add-reviewer "Copilot" \
+            --add-reviewer "@copilot" \
             --repo ${{ github.repository }}
