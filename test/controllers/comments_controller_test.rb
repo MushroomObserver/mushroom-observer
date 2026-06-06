@@ -187,6 +187,15 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("body.comments__show")
   end
 
+  def test_show_comment_flow_next_and_prev_redirect
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login
+    get(:show, params: { id: comment.id, flow: "next" })
+    assert_response(:redirect)
+    get(:show, params: { id: comment.id, flow: "prev" })
+    assert_response(:redirect)
+  end
+
   def test_new_comment
     obs_id = observations(:minimal_unknown_obs).id
     requires_login(:new, target: obs_id, type: :Observation)
@@ -271,6 +280,52 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal(9, rolf.reload.contribution)
     obs.reload
     assert_not(obs.comments.member?(comment))
+  end
+
+  def test_update_comment_with_no_changes
+    # `comment_updated?` `!@comment.changed?` branch: notice + false.
+    comment = comments(:minimal_unknown_obs_comment_1)
+    params = { id: comment.id,
+               comment: { summary: comment.summary,
+                          comment: comment.comment } }
+    login("rolf")
+    put(:update, params: params)
+    assert_flash_text(:runtime_no_changes.t)
+  end
+
+  def test_update_comment_with_invalid_params_re_renders_form
+    # `comment_updated?` `!@comment.save` branch + reload_form
+    # HTML path.
+    comment = comments(:minimal_unknown_obs_comment_1)
+    params = { id: comment.id,
+               comment: { summary: "", comment: "Body" } }
+    login("rolf")
+    put(:update, params: params)
+    assert_response(:success)
+    assert_select("form#comment_form")
+  end
+
+  def test_create_comment_turbo_invalid_reloads_modal_form
+    # `reload_form` turbo_stream branch → `reload_modal_form`.
+    obs = observations(:minimal_unknown_obs)
+    params = { target: obs.id, type: "Observation",
+               comment: { summary: "", comment: "Body" } }
+    login
+    post(:create, params: params, format: :turbo_stream)
+    assert_response(:success)
+  end
+
+  def test_create_comment_with_invalid_params_re_renders_form
+    # `reload_form` HTML branch: missing summary fails save and
+    # falls through to `render_phlex_new`.
+    obs = observations(:minimal_unknown_obs)
+    params = { target: obs.id, type: "Observation",
+               comment: { summary: "", comment: "Body" } }
+    login
+    post(:create, params: params)
+    assert_response(:success)
+    assert_select("body.comments__create")
+    assert_select("form#comment_form")
   end
 
   def test_create_comment
