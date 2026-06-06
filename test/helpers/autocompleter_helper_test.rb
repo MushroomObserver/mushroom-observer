@@ -5,7 +5,6 @@ require("test_helper")
 class AutocompleterHelperTest < ActionView::TestCase
   include AutocompleterHelper
   include FormsHelper
-  include PanelHelper
   include LinkHelper
 
   def setup

@@ -5,7 +5,6 @@ require("test_helper")
 class FormLocationsHelperTest < ActionView::TestCase
   include FormLocationsHelper
   include FormsHelper
-  include PanelHelper
   include LinkHelper
 
   def setup
