@@ -65,14 +65,32 @@ class HelpBlockTest < ComponentTestCase
     assert_html(html, "div[data-x='v']")
   end
 
-  def test_renders_empty_wrapper_when_neither_string_nor_block
-    # Defensive — when a caller forgets to supply content, the
-    # wrapper still renders (it's a no-op `emit_content` —
-    # `block` is nil AND `@string` is nil, so neither branch
-    # fires). Pins the no-content path so a future refactor
-    # doesn't accidentally start raising.
+  def test_renders_nothing_when_neither_string_nor_block
+    # Empty wrappers are noise the form layout doesn't need; the
+    # component bails out when given neither content source.
     html = render(Components::HelpBlock.new(:p))
 
-    assert_html(html, "p.help-block")
+    assert_equal("", html.to_s.strip)
+  end
+
+  def test_collapse_id_wraps_well_in_collapse_div
+    # `collapse_id:` is the form-page "click the question icon to
+    # reveal help" shape. The collapse wrapper takes the id; an
+    # external `data-target="#<id>"` trigger toggles its
+    # `.collapse` visibility class.
+    html = render(Components::HelpBlock.new(
+                    collapse_id: "field_help_x"
+                  )) { "Help" }
+
+    assert_html(html, "div.collapse#field_help_x > " \
+                      "div.well.help-block", text: "Help")
+  end
+
+  def test_collapse_id_implies_well_even_without_explicit_kwarg
+    html = render(Components::HelpBlock.new(collapse_id: "x")) { "h" }
+
+    # No need to pass `well: true` alongside `collapse_id:` — the
+    # collapse markup only makes sense around a well.
+    assert_html(html, "div.collapse > div.well")
   end
 end

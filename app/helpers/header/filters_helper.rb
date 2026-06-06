@@ -33,10 +33,11 @@ module Header
       return unless filters_applied
 
       content_for(:filter_help) do
-        help_tooltip(
-          "(#{:filtered.t})",
-          title: :rss_filtered_mouseover.t, class: "filter-help"
-        )
+        render(Components::HelpTooltip.new(
+                 label: "(#{:filtered.t})",
+                 title: :rss_filtered_mouseover.t,
+                 extra_class: "filter-help"
+               ))
       end
     end
 
