@@ -51,6 +51,18 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     assert_html(html, ".col.col-sm-4.d-block")
   end
 
+  def test_rows_align_items_end_for_bottom_label_alignment
+    # The inner row of label columns is `d-flex align-items-end`
+    # so the one-line labels bottom-align with "Community Vote"
+    # when it wraps to two lines on the `sm` breakpoint. `d-flex`
+    # is load-bearing: MO's `.row` doesn't default to `display:
+    # flex` the way Bootstrap's does, so the `align-items` would
+    # be a no-op without it.
+    html = render_header
+
+    assert_html(html, ".row.d-flex.align-items-end", count: 2)
+  end
+
   def test_renders_propose_naming_modal_link_in_mobile_column
     # Right-gutter column carries the propose-naming icon button
     # via ModalLink (data-modal points at the propose-naming

@@ -16,7 +16,8 @@ module Observations::Namings
       login
       # First just make sure the page displays.
       get(:index, params:)
-      assert_template("observations/namings/votes/index")
+      assert_select("body.votes__index")
+      assert_select("table.table-naming-votes")
 
       votes_index_assertions(nam)
     end
@@ -29,8 +30,8 @@ module Observations::Namings
       login
       # First just make sure the page displays.
       get(:index, params:, format: :turbo_stream)
-      assert_template("shared/_modal")
-      assert_template("observations/namings/votes/_table")
+      assert_select("#modal_naming_votes_#{nam.id}")
+      assert_select("table.table-naming-votes")
 
       votes_index_assertions(nam)
     end
@@ -141,9 +142,44 @@ module Observations::Namings
       params = params.merge(context: "matrix_box")
 
       put(:update, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; the controller now renders
+      # the same 7 turbo-stream actions inline. Verify a couple of
+      # the wrapper targets so we know the stream emitted.
+      assert_select("turbo-stream[target='observation_what_#{obs.id}']")
+      assert_select("turbo-stream[target='box_title_#{obs.id}']")
 
       post_vote_change_basic_assertions(obs:, nam:)
+    end
+
+    # When the obs owner's preferred name changes after a vote
+    # (consensus may or may not change), `render_namings_section_update`
+    # must redirect to the obs show page so the page chrome's title
+    # and `content_for(:owner_naming)` line both refresh. Without
+    # the redirect, only the namings panel gets the turbo_stream
+    # swap and the owner-pref `<h5>` stays stale until a manual
+    # reload.
+    def test_vote_change_redirects_when_owner_preference_changes
+      obs = observations(:owner_only_favorite_ne_consensus)
+      owner = obs.user
+      consensus = ::Observation::NamingConsensus.new(obs)
+      assert_equal(names(:tremella_mesenterica), consensus.owner_preference,
+                   "fixture: owner's favorite starts as tremella_mesenterica")
+
+      # Drop owner's existing favorite to make room for a higher
+      # vote on a new naming below.
+      old_favorite = namings(:tremella_mesenterica_naming)
+      consensus.change_vote(old_favorite, Vote.next_best_vote, owner)
+      new_naming = ::Naming.create!(observation: obs, name: names(:fungi),
+                                    user: owner)
+      new_vote = ::Vote.create!(naming: new_naming, observation: obs,
+                                user: owner, value: Vote.min_pos_vote)
+      params = { vote: { value: Vote.maximum_vote.to_s },
+                 id: new_vote.id, naming_id: new_naming.id,
+                 observation_id: obs.id, context: "namings_table" }
+
+      login(owner.login)
+      put(:update, params:, format: :turbo_stream)
+      assert_redirected_to(obs.show_link_args)
     end
 
     def vote_change_basic_setup
