@@ -230,6 +230,52 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_newline_delimited_ids_accepted_and_normalized
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    assert_equal("Unstarted", inat_import.state,
+                 "Need an Unstarted inat_import fixture")
+    inat_ids = "368966299\n368983890\n368951839"
+    expected_ids = "368966299,368983890,368951839"
+
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_ids, inat_username: "rolf",
+                   consent: 1, confirmed: 1 })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Newline-delimited IDs should pass validation")
+    assert_equal(expected_ids, inat_import.reload.inat_ids,
+                 "Newline-delimited IDs should be normalized to " \
+                 "comma-separated")
+    assert_equal(3, inat_import.reload.importables,
+                 "importables_count should reflect the number of IDs")
+  end
+
+  def test_header_row_ignored_in_id_list
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    assert_equal("Unstarted", inat_import.state,
+                 "Need an Unstarted inat_import fixture")
+    inat_ids = "id\n368966299\n368983890\n368951839"
+    expected_ids = "368966299,368983890,368951839"
+
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_ids, inat_username: "rolf",
+                   consent: 1, confirmed: 1 })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Input with a header row should pass validation")
+    assert_equal(expected_ids, inat_import.reload.inat_ids,
+                 "Non-digit header token should be stripped from " \
+                 "stored inat_ids")
+    assert_equal(3, inat_import.reload.importables,
+                 "importables_count should not include the header row token")
+  end
+
   def test_create_too_many_ids_listed
     # generate an id list that's barely too long
     id_list = ""

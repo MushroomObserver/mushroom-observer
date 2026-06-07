@@ -190,11 +190,10 @@ class InatImportsController < ApplicationController
     params[:all] ||= new_form[:all]
   end
 
-  # Sanitize to only digits, commas, and whitespace, then trim
   def sanitize_inat_ids(ids)
     return nil if ids.nil?
 
-    ids.gsub(/[^\d,\s]/, "").strip.chomp(",").strip
+    ids.split(/[\s,]+/).grep(/\A\d+\z/).join(",")
   end
 
   # Were any listed iNat IDs previously imported?
@@ -246,7 +245,7 @@ class InatImportsController < ApplicationController
   def importables_count
     return nil if importing_all?
 
-    params[:inat_ids].split(",").length
+    inat_id_list.length
   end
 
   # Returns whether this import covers other users' observations.
