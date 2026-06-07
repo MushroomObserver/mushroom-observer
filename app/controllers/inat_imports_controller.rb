@@ -152,7 +152,7 @@ class InatImportsController < ApplicationController
   def reload_form
     render_new_form(
       username: params[:inat_username],
-      inat_ids: sanitize_inat_ids(params[:inat_ids]),
+      inat_ids: params[:inat_ids],
       all: params[:all],
       consent: params[:consent],
       import_others: params[:import_others]
@@ -190,14 +190,6 @@ class InatImportsController < ApplicationController
     merge_form_param(new_form, :consent)
     merge_form_param(new_form, :import_others)
     params[:all] ||= new_form[:all]
-  end
-
-  # For display on form reload: strip dangerous chars, preserve structure
-  # so the user can see and correct what they pasted.
-  def sanitize_inat_ids(ids)
-    return nil if ids.nil?
-
-    ids.gsub(/[^\w\s,]/, "").strip.chomp(",").strip
   end
 
   # For storage: extract only digit tokens and join with commas.
