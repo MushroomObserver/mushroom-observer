@@ -166,6 +166,39 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_illegal_inat_id.l)
   end
 
+  def test_no_numeric_ids_in_list_rejected
+    login
+    post(:create,
+         params: { inat_ids: "id\nobservation", inat_username: "anything",
+                   consent: 1 })
+
+    assert_flash_text(:runtime_illegal_inat_id.l,
+                      "Input with no numeric IDs should be rejected")
+    assert_form_action(action: :create)
+    assert_select(
+      "textarea#inat_import_inat_ids",
+      { text: "id\nobservation", count: 1 },
+      "Reloaded form should show the original input"
+    )
+  end
+
+  def test_alphanumeric_token_rejected_as_malformed_id
+    login
+    post(:create,
+         params: { inat_ids: "id\n123456a", inat_username: "anything",
+                   consent: 1 })
+
+    assert_flash_text(:runtime_illegal_inat_id.l,
+                      "Alphanumeric token (e.g. 123456a) should be " \
+                      "rejected as a malformed ID")
+    assert_form_action(action: :create)
+    assert_select(
+      "textarea#inat_import_inat_ids",
+      { text: "id\n123456a", count: 1 },
+      "Reloaded form should show the original input"
+    )
+  end
+
   def test_create_no_consent
     params = { inat_username: "anything", inat_ids: 123,
                consent: 0 }
@@ -207,26 +240,18 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Failed to save inat_ids at maximum length")
   end
 
-  def test_strips_trailing_commas_and_space_chars_from_id_list
-    inat_import = inat_imports(:rolf_inat_import)
-    user = inat_import.user
-    assert_equal("Unstarted", inat_import.state,
-                 "Need a Unstarted inat_import fixture")
-    id_list = "123,456,789, \n"
-    expected_saved_id_list = "123,456,789"
-
-    login(user.login)
-
+  def test_illegal_chars_preserved_in_reloaded_form
+    login
     post(:create,
-         params: { inat_ids: id_list,
-                   inat_username: "", # omit this to force form reload
-                   consent: 1 })
+         params: { inat_ids: "123*", inat_username: "anything", consent: 1 })
 
-    assert_form_action(action: :create)
+    assert_flash_text(:runtime_illegal_inat_id.l,
+                      "Should warn about illegal characters")
     assert_select(
       "textarea#inat_import_inat_ids",
-      { text: expected_saved_id_list, count: 1 },
-      "inat_ids textarea should have trailing commas and whitespace stripped"
+      { text: "123*", count: 1 },
+      "Reloaded form should show raw input so user can identify " \
+      "the illegal character"
     )
   end
 
