@@ -536,8 +536,11 @@ class Description < AbstractModel
   # include the title of the parent object), in plain text.  [I'm not sure
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
   def put_together_name(full_or_part)
-    source_type ||= :public
-    tag = :"description_#{full_or_part}_title_#{source_type}"
+    # NOT `source_type ||= :public` — Ruby would treat the LHS as a
+    # new local that shadows the AR reader for the rest of the
+    # method, flattening every description to the public title format.
+    type = source_type.presence || :public
+    tag = :"description_#{full_or_part}_title_#{type}"
     user_name = begin
                   user.legal_name
                 rescue StandardError
