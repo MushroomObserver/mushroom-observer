@@ -24,8 +24,15 @@ class Components::ApplicationForm < Superform::Rails::Form
     # an array of `[label, value]` tuples. Callers mix both — rank
     # passes flat strings ("Form", "Variety", ...), confidence
     # passes `[label, numeric]` tuples — so the element type is a
-    # union of those two shapes.
-    prop :options, _Array(_Union(_Nilable(String), _Tuple(String, _Any?)))
+    # union of those two shapes. The tuple value type mirrors the
+    # `value` prop above (String / Integer / Float).
+    prop :options,
+         _Array(
+           _Union(
+             _Nilable(String),
+             _Tuple(String, _Nilable(_Union(String, Integer, Float)))
+           )
+         )
     prop :value, _Nilable(_Union(String, Integer, Float)), default: nil
     prop :range_value, _Nilable(_Union(String, Integer, Float)), default: nil
     prop :label, String

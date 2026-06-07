@@ -10,9 +10,11 @@
 # Replaces `app/views/controllers/comments/index.html.erb`.
 module Views::Controllers::Comments
   class Index < Views::Base
-    prop :query, _Any
-    prop :pagination_data, _Any
-    prop :objects, _Any
+    prop :query, ::Query::Comments
+    prop :pagination_data, ::PaginationData
+    prop :objects,
+         _Union(Array, ::ActiveRecord::Relation,
+                ::ActiveRecord::Associations::CollectionProxy)
     prop :user, _Nilable(::User), default: nil
     prop :error, _Nilable(String), default: nil
 
