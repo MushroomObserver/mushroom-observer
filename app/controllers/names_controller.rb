@@ -141,9 +141,9 @@ class NamesController < ApplicationController
   def show
     case params[:flow]
     when "next"
-      redirect_to_next_object(:next, Name, params[:id].to_s)
+      redirect_to_next_object(:next, Name, params[:id].to_s) and return
     when "prev"
-      redirect_to_next_object(:prev, Name, params[:id].to_s)
+      redirect_to_next_object(:prev, Name, params[:id].to_s) and return
     end
 
     # Load Name and NameDescription along with a bunch of associated objects.
@@ -156,6 +156,18 @@ class NamesController < ApplicationController
 
     init_projects_ivar
     init_related_query_ivars
+
+    render(Views::Controllers::Names::Show.new(
+             name: @name, user: @user,
+             best_images: @best_images,
+             best_description: @best_description,
+             comments: @comments, obss: @obss,
+             has_subtaxa: @has_subtaxa,
+             subtaxa_query: @subtaxa_query,
+             children_query: @children_query,
+             first_child: @first_child,
+             projects: @projects, versions: @versions
+           ))
   end
 
   # ----------------------------------------------------------------------------
