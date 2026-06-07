@@ -190,7 +190,16 @@ class InatImportsController < ApplicationController
     params[:all] ||= new_form[:all]
   end
 
+  # For display on form reload: strip dangerous chars, preserve structure
+  # so the user can see and correct what they pasted.
   def sanitize_inat_ids(ids)
+    return nil if ids.nil?
+
+    ids.gsub(/[^\w\s,]/, "").strip.chomp(",").strip
+  end
+
+  # For storage: extract only digit tokens and join with commas.
+  def normalize_inat_ids(ids)
     return nil if ids.nil?
 
     ids.split(/[\s,]+/).grep(/\A\d+\z/).join(",")
@@ -257,7 +266,7 @@ class InatImportsController < ApplicationController
   end
 
   def clean_inat_ids
-    inat_ids = sanitize_inat_ids(params[:inat_ids])
+    inat_ids = normalize_inat_ids(params[:inat_ids])
     previous_imports = previously_imported_observations
     return inat_ids if previous_imports.none?
 
