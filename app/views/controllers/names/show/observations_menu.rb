@@ -53,48 +53,27 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   def render_observations_column
     div(class: "col-sm-6 name-section") do
       p { plain(:show_observations_of.t) }
-      div(class: "pl-3") { render_obs_link_rows }
+      ul(class: "list-unstyled pl-3") { render_obs_link_rows }
       div(class: "py-3") do
         p { render_tab_link(Tab::Name::OccurrenceMap.new(name: @name)) }
       end
     end
   end
 
-  # 5 standard obs-link rows + optional subtaxa-obs row. Each row
-  # renders as either `<p><a>label</a> (N)</p>` (count > 0) or
-  # `<p>label (0)</p>` (count == 0).
+  # The `Tab::Name::ObsLink::All` Collection owns the orchestration
+  # of "which obs-link tabs to show" (5 standard + optional
+  # subtaxa-obs). The view just iterates and renders each `<li>`.
   def render_obs_link_rows
-    obs_link_tabs.each { |tab| render_obs_row(tab) }
-    render_obs_row(subtaxa_obs_tab) if @has_subtaxa.positive?
+    Tab::Name::ObsLink::All.new(
+      name: @name, obss: @obss, controller: controller,
+      subtaxa_query: @subtaxa_query, has_subtaxa: @has_subtaxa
+    ).each { |tab| render_obs_row(tab) }
   end
 
-  OBS_LINK_TAB_SPECS = [
-    [Tab::Name::ObsLink::ThisName, :of_taxon_this_name],
-    [Tab::Name::ObsLink::OtherNames, :of_taxon_other_names],
-    [Tab::Name::ObsLink::AnyName, :of_taxon_any_name],
-    [Tab::Name::ObsLink::TaxonProposed, :where_taxon_proposed],
-    [Tab::Name::ObsLink::NameProposed, :where_name_proposed]
-  ].freeze
-  private_constant :OBS_LINK_TAB_SPECS
-
-  def obs_link_tabs
-    OBS_LINK_TAB_SPECS.map do |klass, count_method|
-      klass.new(name: @name, count: @obss.send(count_method).size,
-                controller: controller)
-    end
-  end
-
-  def subtaxa_obs_tab
-    Tab::Name::ObsLink::Subtaxa.new(
-      name: @name, count: @has_subtaxa, query: @subtaxa_query,
-      controller: controller
-    )
-  end
-
-  # Linked → `<p><a>label</a> (N)</p>` with data-attrs from the
-  # tab's `#html_options`. Unlinked → plain `<p>label (0)</p>`.
+  # Linked → `<li><a>label</a> (N)</li>` with data-attrs from the
+  # tab's `#html_options`. Unlinked → plain `<li>label (0)</li>`.
   def render_obs_row(tab)
-    p do
+    li do
       if tab.linked?
         render_obs_link(tab)
       else
@@ -127,49 +106,17 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   def render_research_links_column
     div(class: "col-sm-6 name-section") do
       p { plain("#{:research_links.l}:") }
-      div(class: "pl-3") { render_research_links }
+      ul(class: "list-unstyled pl-3") { render_research_links }
     end
   end
 
+  # The `Tab::Name::ResearchLinks` Collection owns the orchestration
+  # of which external-site tabs to show (Ascomycete-only, EOL-only,
+  # registry-only branches all live there). The view just iterates.
   def render_research_links
-    research_link_tabs.each do |tab|
-      p { render_tab_link(tab) }
+    Tab::Name::ResearchLinks.new(name: @name, user: @user).each do |tab|
+      li { render_tab_link(tab) }
     end
-  end
-
-  def research_link_tabs
-    [
-      ascomycota_tab,
-      eol_tab,
-      Tab::Name::Gbif.new(name: @name),
-      Tab::Name::UserGoogleImages.new(name: @name, user: @user),
-      Tab::Name::GoogleSearch.new(name: @name),
-      Tab::Name::Inat.new(name: @name),
-      *registry_tabs,
-      Tab::Name::NcbiNucleotide.new(name: @name),
-      Tab::Name::Wikipedia.new(name: @name)
-    ].compact
-  end
-
-  def ascomycota_tab
-    return nil unless @name.classification&.match?(/Phylum: _Ascomycota_/)
-
-    Tab::Name::AscomyceteOrg.new(name: @name)
-  end
-
-  def eol_tab
-    return nil unless @name.eol_url
-
-    Tab::Name::Eol.new(name: @name)
-  end
-
-  def registry_tabs
-    return [] unless @name.searchable_in_registry?
-
-    [
-      Tab::Name::MushroomExpert.new(name: @name),
-      Tab::Name::Mycoportal.new(name: @name)
-    ]
   end
 
   # Render a Tab PORO as an `<a>` link. `Tab::Base#to_a` returns

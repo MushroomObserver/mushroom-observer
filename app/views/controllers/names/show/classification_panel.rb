@@ -42,12 +42,20 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
 
   def render_body
     render_approved_name_and_parents
-    render_subtaxa_query_link if @first_child
-    render_action_tab(Tab::Name::RefreshClassification.for(name: @name))
-    if @first_child
-      render_action_tab(Tab::Name::PropagateClassification.for(name: @name))
+    render_link_tabs
+  end
+
+  # The `Tab::Name::ClassificationLinks` Collection owns the
+  # orchestration: which of the 4 link tabs to show given this
+  # Name's state (`first_child` + the visibility predicates on
+  # each tab). The view just iterates inside a `<ul>`.
+  def render_link_tabs
+    ul(class: "list-unstyled") do
+      Tab::Name::ClassificationLinks.new(
+        name: @name, children_query: @children_query,
+        first_child: @first_child, controller: controller
+      ).each { |tab| render_link_tab(tab) }
     end
-    render_action_tab(Tab::Name::InheritClassification.for(name: @name))
   end
 
   # --- Approved name + parents chain ----------------------------
@@ -86,38 +94,21 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
     plain(")")
   end
 
-  # --- Action links / buttons -----------------------------------
+  # --- Link / button rendering ----------------------------------
 
-  def render_subtaxa_query_link
-    tab = Tab::Name::Subtaxa.new(
-      name: @name, children_query: @children_query, controller: controller
-    )
-    p { render_tab_link(tab) }
-  end
-
-  # `.for(name:)` returns nil when the action doesn't apply for
-  # this Name's state — skip rendering.
-  def render_action_tab(tab)
-    return unless tab
-
-    p { render_tab_button_or_link(tab) }
-  end
-
-  def render_tab_button_or_link(tab)
-    text, url, opts = tab.to_a
-    if opts[:button] == :put
-      render(Components::CrudButton::Put.new(name: text, target: url))
-    else
-      a(href: url, **opts.slice(:class, :data, :target, :rel)) do
-        plain(text)
+  # Each Collection-returned tab renders inside its own `<li>`.
+  # PUT-button tabs go through `Components::CrudButton::Put`;
+  # plain-link tabs render as `<a>`.
+  def render_link_tab(tab)
+    li do
+      text, url, opts = tab.to_a
+      if opts[:button] == :put
+        render(Components::CrudButton::Put.new(name: text, target: url))
+      else
+        a(href: url, **opts.slice(:class, :data, :target, :rel)) do
+          plain(text)
+        end
       end
-    end
-  end
-
-  def render_tab_link(tab)
-    text, url, opts = tab.to_a
-    a(href: url, **opts.slice(:class, :data, :target, :rel)) do
-      plain(text)
     end
   end
 end

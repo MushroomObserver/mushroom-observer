@@ -13,7 +13,7 @@ require("test_helper")
 # The visibility predicates use `.for(name:)` / `.visible_for?(name:)`.
 # Path construction (`controller.add_q_param`) is exercised by the
 # names-show controller test.
-class Tab::Name::ClassificationActionTabsTest < UnitTestCase
+class Tab::Name::ClassificationLinkTabsTest < UnitTestCase
   def setup
     @genus = names(:coprinus)
     @species = names(:coprinus_comatus)
