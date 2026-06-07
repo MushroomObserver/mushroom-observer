@@ -1,7 +1,7 @@
 # Trigger a Copilot review when a @nimmolo PR becomes Ready for Review
-# using tokens from jdc's Copilot account
-# Uses GitHub token stored in the repository ecrets
-# to authenticate the request to add '@copilot' as a reviewer on the PR
+# using tokens from jdc's Copilot account.
+# Uses a GitHub token stored in the repository secrets
+# to authenticate the request to add '@copilot' as a reviewer on the PR.
 
 name: Request Copilot Review
 
@@ -18,8 +18,18 @@ jobs:
     steps:
       - name: Request Copilot review
         env:
-          GH_TOKEN: ${{ secrets.COPILOT_REVIEW_PAT }}
+          # Read into RAW_PAT first so the inline trim below can
+          # strip any stray whitespace before `gh` builds the
+          # Authorization header. Go's `net/http` rejects header
+          # values containing CR/LF/etc. with the cryptic
+          # "invalid header field value for \"Authorization\""
+          # error — most often caused by a trailing newline
+          # baked into the secret when it was pasted via the
+          # GitHub Secrets web UI.
+          RAW_PAT: ${{ secrets.COPILOT_REVIEW_PAT }}
         run: |
+          GH_TOKEN=$(printf '%s' "$RAW_PAT" | tr -d '\r\n ')
+          export GH_TOKEN
           gh pr edit ${{ github.event.pull_request.number }} \
-            --add-reviewer "@copilot" \
+            --add-reviewer "copilot-pull-request-reviewer" \
             --repo ${{ github.repository }}
