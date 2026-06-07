@@ -88,6 +88,8 @@ class InatImportsController < ApplicationController
   def create
     return reload_form if params[:go_back] == "1"
     return reload_form unless params_valid?
+
+    normalize_inat_ids_param!
     return confirm_import unless params[:confirmed] == "1"
 
     warn_about_listed_previous_imports
@@ -203,6 +205,15 @@ class InatImportsController < ApplicationController
     return nil if ids.nil?
 
     ids.split(/[\s,]+/).grep(/\A\d+\z/).join(",")
+  end
+
+  # Normalize params[:inat_ids] in-place once after validation so all
+  # downstream readers (estimators, confirm form, init_ivars) see a
+  # clean comma-separated digit-only string.
+  def normalize_inat_ids_param!
+    return unless listing_ids?
+
+    params[:inat_ids] = normalize_inat_ids(params[:inat_ids])
   end
 
   # Were any listed iNat IDs previously imported?
