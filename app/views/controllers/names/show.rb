@@ -31,9 +31,11 @@ module Views::Controllers::Names
     prop :best_images,
          _Nilable(_Union(Array, ::ActiveRecord::Relation)),
          default: nil
-    # `Name#best_brief_description` returns the textile source as a
-    # `String`, not a `Description` record.
-    prop :best_description, _Nilable(String), default: nil
+    # The `Description` record (eager-loaded via
+    # `Name.show_includes`). Forwarded to `BestDescriptionPanel`,
+    # which derives both the body text and the permission gates
+    # from it and self-gates if it's blank.
+    prop :description, _Nilable(::Description), default: nil
     prop :comments, _Nilable(_Array(::Comment)), default: nil
     # `obss` is `Name::Observations` — a wrapper PORO around the
     # name's observation queries. Duck-typed via the methods
@@ -87,12 +89,9 @@ module Views::Controllers::Names
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
         render_best_images_carousel if @best_images&.length&.positive?
-        if @best_description.present?
-          render(Show::BestDescriptionPanel.new(
-                   name: @name, best_description: @best_description,
-                   user: @user
-                 ))
-        end
+        render(Show::BestDescriptionPanel.new(
+                 name: @name, description: @description, user: @user
+               ))
         render(Views::Controllers::Comments::CommentsForObject.new(
                  object: @name, comments: @comments, user: @user,
                  editable: @user.present?, limit: nil
