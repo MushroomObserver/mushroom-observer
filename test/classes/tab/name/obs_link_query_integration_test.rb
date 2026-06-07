@@ -22,7 +22,7 @@ class Tab::Name::ObsLinkQueryIntegrationTest < UnitTestCase
     #                                            syn-naming)
     user        = users(:rolf)
     nam         = names(:lactarius_alpinus)
-    syn         = names(:lactarius_alpigenes)  # synonym of nam
+    syn         = names(:lactarius_alpigenes) # synonym of nam
     other_taxon = names(:suillus)
 
     nam_proposed_and_consensus = create_obs_with_namings(

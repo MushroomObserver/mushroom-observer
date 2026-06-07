@@ -47,13 +47,15 @@ module Views::Controllers::Names::Versions
 
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
-        render(Views::Controllers::Names::Show::Nomenclature.new(name: @name, user: @user))
+        render(Views::Controllers::Names::Show::Nomenclature.new(name: @name,
+                                                                 user: @user))
         render(Views::Controllers::Names::Show::LifeformPanel.new(
                  name: @name, user: @user, first_child: nil
                ))
         render_classification_panel if classification_value.present?
         if @name.has_notes?
-          render(Views::Controllers::Names::Show::NotesPanel.new(name: @name, user: @user))
+          render(Views::Controllers::Names::Show::NotesPanel.new(name: @name,
+                                                                 user: @user))
         end
       end
     end
