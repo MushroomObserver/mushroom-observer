@@ -87,11 +87,15 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
     end
   end
 
+  # Bootstrap left-margin instead of the original helper's `safe_br
+  # + safe_nbsp + safe_nbsp` indent — semantic spacing rather than
+  # smuggling layout through `&nbsp;` characters.
   def render_alias_suffix
-    br
-    plain("   (= ")
-    i { plain(@name.text_name.t.strip_html) }
-    plain(")")
+    span(class: "ml-4") do
+      plain("(= ")
+      i { plain(@name.text_name.t.strip_html) }
+      plain(")")
+    end
   end
 
   # --- Link / button rendering ----------------------------------
