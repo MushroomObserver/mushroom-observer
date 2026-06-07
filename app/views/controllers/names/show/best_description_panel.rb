@@ -2,11 +2,14 @@
 
 # "General Description" panel summarizing the name's best description
 # in textile-rendered prose. Heading links show / edit description
-# when the viewer can edit.
+# when the viewer can edit. The body comes from
+# `Name#best_brief_description` (a String); the heading-link
+# permission check needs the actual `Description` record, which we
+# pull off `@name.description` (matches the original ERB partial).
 class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
   prop :name, ::Name
   # `Name#best_brief_description` returns the textile source as a
-  # `String`, not a `Description` record.
+  # `String` (or nil).
   prop :best_description, _Nilable(String)
   prop :user, _Nilable(::User), default: nil
 
@@ -30,8 +33,14 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
     end
   end
 
+  # The Description record (NOT the brief-description String) drives
+  # the show + edit-permission gates.
+  def description_record
+    @name.description
+  end
+
   def show_link
-    return nil unless @best_description
+    return nil unless description_record
 
     Components::IconLink.new(
       tab: Tab::Name::ShowDescription.new(name: @name)
@@ -39,7 +48,8 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
   end
 
   def edit_link
-    return nil unless @best_description && permission?(@best_description)
+    return nil unless description_record &&
+                      permission?(description_record)
 
     Components::IconLink.new(
       tab: Tab::Name::EditDescription.new(name: @name)
