@@ -42,11 +42,10 @@ module Views::Controllers::Names
     # `NamesHelper#name_related_taxa_observation_links` invokes
     # (`of_taxon_this_name`, `of_taxon_other_names`, etc.).
     prop :obss, _Interface(:of_taxon_this_name)
-    # `has_subtaxa` is set to `0` by `init_related_query_ivars` and
-    # later set to a positive Integer when there are subtaxa. The
-    # ERB used `if @has_subtaxa` (always truthy for Integers — even
-    # `0`), so the original code always rendered the subtaxa link;
-    # the Phlex view preserves that.
+    # `has_subtaxa` is set to `0` by `init_related_query_ivars` and later set
+    # to a positive Integer when there are subtaxa. The show view treats
+    # `0` as “no subtaxa” and only renders the subtaxa-observations link
+    # when this value is positive.
     prop :has_subtaxa, Integer, default: 0
     prop :subtaxa_query, _Nilable(::Query::Observations), default: nil
     prop :children_query, _Nilable(::Query::Names), default: nil
