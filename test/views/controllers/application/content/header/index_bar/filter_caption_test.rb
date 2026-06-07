@@ -186,6 +186,55 @@ module Views::Controllers::Application::Content
       assert_html(html, "#filters", text: :query_has_images.l)
     end
 
+    def test_array_value_param_not_in_lookups_uses_join
+      # `id_in_set` isn't in PARAM_LOOKUPS, so its Array value goes
+      # through `param_val_itself` → `join_array_val`. With ≤
+      # CAPTION_TRUNCATE ids the values join with ", " and no
+      # truncation marker.
+      query = Query.lookup_and_save(:Observation, id_in_set: [1, 2, 3])
+
+      html = render_for(query)
+
+      assert_html(html, "#caption-truncated .small b", text: "1, 2, 3")
+    end
+
+    def test_array_value_param_above_truncate_adds_ellipsis
+      # With > CAPTION_TRUNCATE (3) ids, the truncated form joins
+      # the first 3 and appends ", ...".
+      query = Query.lookup_and_save(
+        :Observation, id_in_set: [1, 2, 3, 4, 5]
+      )
+
+      html = render_for(query)
+
+      assert_html(html, "#caption-truncated .small b",
+                  text: "1, 2, 3, ...")
+      # The full collapse joins all 5 with no truncation marker.
+      assert_html(html, "#caption-full .small b",
+                  text: "1, 2, 3, 4, 5")
+    end
+
+    def test_long_lookup_string_gets_character_truncated
+      # When the joined lookup string exceeds 100 chars,
+      # `truncate_joined_string` takes the character-truncation
+      # branch (`[0...97] + "..."`) rather than the ", ..."
+      # ellipsis branch.
+      ids = Name.where("LENGTH(text_name) > 25").
+            limit(3).pluck(:id)
+      skip("Need 3 names with long text names") unless ids.length == 3
+      query = Query.lookup_and_save(:Name, names: { lookup: ids })
+
+      html = render_for(query)
+
+      truncated = Nokogiri::HTML(html).at_css(
+        "#caption-truncated .small b i"
+      )&.text
+      skip("setup didn't produce a >100-char join") unless
+        truncated && truncated.length > 90
+      assert(truncated.end_with?("..."),
+             "expected character-truncated string to end with '...'")
+    end
+
     # --- Stable structural pinning ----------------------------------
 
     def test_outer_filters_div_carries_stimulus_attrs

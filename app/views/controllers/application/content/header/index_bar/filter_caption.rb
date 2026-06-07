@@ -227,12 +227,11 @@ module Views::Controllers::Application::Content
       lookup.new(id).titles.first
     end
 
+    # `Query::Observations` normalizes scalar `confidence: 2.0` into
+    # the array form (`[2.0]`) at validation time, so the array
+    # branch is always taken; no scalar fallback needed.
     def confidence_val_as_label(val)
-      if val.is_a?(Array)
-        val.map { |v| Vote.confidence(v.to_f) }.join(" – ")
-      else
-        Vote.confidence(val.to_f)
-      end
+      val.map { |v| Vote.confidence(v.to_f) }.join(" – ")
     end
 
     def param_val_itself(key, val, truncate:)
