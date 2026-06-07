@@ -6,7 +6,7 @@ on [MyCoPortal] (MCP).
 
 ## Summary
 
-1. [Determine the starting date](#determine-the-starting-date).
+1. [Determine the starting date](#determine-the-starting-date-and-highest-image-already-imported).
 2. [Create import files](#create-import-files).
 3. [Import the files to MCP](#import-the-files-to-mcp).
 
@@ -15,9 +15,27 @@ on [MyCoPortal] (MCP).
 
 ## Details
 
-### Determine the starting date
+### Overview of initial goal
 
-* Login to [MyCoPortal] with an account which has privileges to manage the MUOB collection.
+The initial goal is: create two import files: a data file and and image file.
+
+* The data file contains Observation data (other than images) for all
+qualifying Observations (high enough confidence, etc.)
+which were created or modified after our last update of MCP records.
+* The image files has image data limited to:
+  * the Observations in the data file,
+  * but only for images created after the last image (by image id)
+imported to MCP.
+
+It is important to limit the image file for two reasons:
+
+* MCP will end up with duplicate images if the image file includes
+images which were already uploaded.
+* It expedites the update.
+
+### Determine the starting date and highest image already imported
+
+* Login to [MyCoPortal] with an account with privileges to manage the MUOB collection.
 * Go to the [MUOB Collection Profile].
 * Toggle "**Manager's Control Panel**" to reveal `Administration Control Panel`.
 
@@ -43,10 +61,17 @@ The list will begin like this:
 
 * Open that file and scroll to the bottom.
 
-> [!IMPORTANT]
- Note the MUOB number after the final `Processing Catalog Number`.
- This is the `Observation.id` of the most-recent Observation imported to MCP in
- the last incremental update.
+[!IMPORTANT]
+ Note two things from the Image Mapping File:
+
+1. The MUOB number after the final `Processing Catalog Number`.
+This is the `Observation.id` of the most-recent Observation imported to MCP
+in the last incremental update.
+
+2. The `created_at` timestamp of the most-recently-processed image entry
+(shown on the line beginning with the last `#N:` entry, or from the file
+metadata). This is the **images since** cutoff you will use when creating
+the image list file.
 
 ### Create import files
 
@@ -86,6 +111,10 @@ out of the data import file.
 #### Create image list file
 
 * Select "**MyCoPortal Images**"
+* In the **Images since** field, paste the `created_at` timestamp you noted
+  from the Image Mapping File (e.g. `2025-06-07 20:16:51`).
+  The report will include only images uploaded to MO after that moment,
+  which avoids re-sending images MCP already has.
 * **Download**
 * Wait until your browser shows the SaveAs popup
   (Should be faster than the data file.)
@@ -166,3 +195,26 @@ to those MO Observations which
 While it's possible to completely replace the MUOB collection,
 it's desirable to limit the data and images involved.
 This generally speeds the process.
+
+#### Data Report Filtering
+
+The **MyCoPortal Data** report automatically omits and transforms certain
+observations:
+
+**Omitted entirely:**
+
+* Observations whose consensus name is `Duplicate`, `Mixed collection`,
+  `Non-fungal`, `Slime-flux`, `Undetermined`, `Eukarya`, or `Eukaryota`.
+* Observations whose consensus name belongs to a kingdom other than
+  Fungi or Protozoa (the proxy kingdom for slime molds).
+
+**Reduced to genus level** (`scientificName` = genus,
+`identificationQualifier` = `aff. <rank>`, `taxonRemarks` = full name):
+
+* Names at infrageneric ranks (Stirps, Series, Subsection, Section,
+  Subgenus).
+* Unpublished names whose author contains `nom. prov.`, `comb. prov.`,
+  `nom. ined.`, `nom. inedit`, or similar.
+* Code names beginning with `Gen.` (e.g. `Gen. 'Mycena' sp.
+  'acicula-PNW01'`); the unquoted genus is extracted as the
+  `scientificName`.

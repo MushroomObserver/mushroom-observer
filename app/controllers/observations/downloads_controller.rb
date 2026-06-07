@@ -16,10 +16,7 @@ module Observations
       raise("no robots!") if browser.bot? # failsafe only!
 
       update_stored_query(@query) # also stores query in session
-      download = params.fetch(:download, ActionController::Parameters.new).
-                 permit(:format, :encoding)
-      @format = download[:format] || "raw"
-      @encoding = download[:encoding] || "UTF-8"
+      parse_download_params
       download_observations_switch
     end
 
@@ -34,6 +31,20 @@ module Observations
     end
 
     private
+
+    def parse_download_params
+      download = params.fetch(:download, ActionController::Parameters.new).
+                 permit(:format, :encoding, :since)
+      @format = download[:format] || "raw"
+      @encoding = download[:encoding] || "UTF-8"
+      @since = parse_since(download[:since])
+    end
+
+    def parse_since(value)
+      Time.zone.parse(value) if value.present?
+    rescue ArgumentError, TypeError
+      nil
+    end
 
     def too_many_results
       flash_error(:download_observations_too_many_results.t)
@@ -56,7 +67,8 @@ module Observations
 
     def create_and_render_report
       report = create_report(
-        query: @query, format: @format, encoding: @encoding, user: @user
+        query: @query, format: @format, encoding: @encoding,
+        user: @user, since: @since
       )
       render_report(report)
     end
