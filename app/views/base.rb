@@ -27,7 +27,12 @@ class Views::Base < Components::Base
   register_value_helper :add_sorter
   register_value_helper :container_class
   register_value_helper :column_classes
-  register_value_helper :content_for
+  # `Phlex::Rails::Helpers::ContentFor` exposes both `content_for(...)`
+  # (read/write the buffer) and `content_for?(...)` (presence check)
+  # in Phlex views. Page-chrome views (`Header`, `PageTitle`) need
+  # `content_for?` for conditional rendering.
+  include Phlex::Rails::Helpers::ContentFor
+
   register_value_helper :flash_error
   # `paginated_results` takes a block and emits the surrounding
   # pagination HTML around it — output helper, mark_safe so Phlex

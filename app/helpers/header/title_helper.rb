@@ -100,26 +100,6 @@ module Header
                                      extra_class: classes))
     end
 
-    # Div shows even without content to maintain layout
-    def show_page_edit_icons
-      classes = %w[
-        nav d-flex align-items-center justify-content-end mt-0 h4 object_edit
-      ]
-
-      tag.ul(class: class_names(classes)) do
-        content_for(:edit_icons)
-      end
-    end
-
-    # Div shows even without content to maintain layout
-    def show_page_interest_icons
-      classes = %w[nav navbar-flex interest-eyes h4 my-0]
-
-      tag.ul(class: class_names(classes)) do
-        content_for(:interest_icons)
-      end
-    end
-
     # The record title as a string, preceded by the object type and id:
     # "Observation 23435: Amanita novinupta"
     def show_document_title(string, object)
