@@ -123,6 +123,36 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.owner_preference)
   end
 
+  # Pins the model-layer flow that drives the title's
+  # "Observer Preference" line (`OwnerNamingLine.visible_for?` →
+  # `NamingConsensus#owner_preference`): when the owner proposes
+  # a NEW naming and casts a higher vote on it than on their
+  # previous favorite, `owner_preference` should reflect the
+  # new naming's name on the very next call. (UI-side: the
+  # title isn't currently re-rendered after a vote
+  # turbo_stream, so the visible title stays stale until a full
+  # page reload — that's pre-existing behavior, not changed by
+  # the obs-title Phlex refactor.)
+  def test_owner_preference_updates_when_higher_vote_on_new_naming
+    obs = observations(:owner_only_favorite_ne_consensus)
+    consensus = ::Observation::NamingConsensus.new(obs)
+    assert_equal(names(:tremella_mesenterica), consensus.owner_preference)
+
+    # Drop the existing favorite to a lower-than-max vote so the
+    # new naming can outrank it without exceeding `Vote.maximum_vote`.
+    owner = obs.user
+    old_favorite = namings(:tremella_mesenterica_naming)
+    consensus.change_vote(old_favorite, Vote.next_best_vote, owner)
+    new_naming = ::Naming.create!(observation: obs, name: names(:fungi),
+                                  user: owner)
+    consensus.change_vote(new_naming, Vote.maximum_vote, owner)
+
+    refreshed = ::Observation::NamingConsensus.new(obs.reload)
+    assert_equal(names(:fungi), refreshed.owner_preference,
+                 "owner_preference should track the highest-voted " \
+                 "owner naming, not preserve the first favorite")
+  end
+
   def test_change_vote_weakened_favorite
     vote = votes(:owner_only_favorite_ne_consensus)
     change_vote(vote.observation, vote.naming, Vote.min_pos_vote, vote.user)

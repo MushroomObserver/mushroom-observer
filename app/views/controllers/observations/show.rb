@@ -14,14 +14,13 @@
 # below: namings table + comments on the left, thumbnail map on
 # the right (logged-in only).
 #
-# Inlines `ObservationsHelper#owner_naming_line` +
-# `#owner_preferred_naming` (only callsites lived in this template);
-# `link_to_display_name_brief_authors` stays registered (used
-# widely).
+# `owner_naming_line` is now `Observations::OwnerNamingLine`;
+# `link_to_display_name_brief_authors` is now
+# `Observations::DisplayNameBriefAuthorsLink`. The PORO callsites
+# are inside `add_owner_naming` (`title_helper.rb`) and the
+# obs-title chain in `observations_helper.rb`.
 module Views::Controllers::Observations
   class Show < Views::Base
-    register_value_helper :add_owner_naming
-    register_value_helper :link_to_display_name_brief_authors
     register_output_helper :flash_notices_html, mark_safe: true
     # `tpl` on a SafeBuffer goes through MO's textile path; needed
     # for `@observation.source_credit.tpl` below. Not a Phlex
@@ -62,7 +61,7 @@ module Views::Controllers::Observations
 
     def add_chrome
       add_show_title(@observation, user: @user)
-      add_owner_naming(owner_naming_line)
+      add_owner_naming(observation: @observation, user: @user)
       if @user
         add_pager_for(@observation)
         add_interest_icons(@user, @observation)
@@ -70,22 +69,6 @@ module Views::Controllers::Observations
       end
       container_class(:double)
       column_classes(:eight_four)
-    end
-
-    # Inlined from `ObservationsHelper#owner_naming_line` (+
-    # `#owner_preferred_naming`). Returns `nil` when the obs's
-    # owner hasn't proposed a different name than the current
-    # consensus, or when the viewer hasn't opted in to seeing
-    # owner IDs.
-    def owner_naming_line
-      return unless @user&.view_owner_id && @owner_name &&
-                    @owner_name.id != @observation.name.id
-
-      link = link_to_display_name_brief_authors(
-        @user, @owner_name,
-        class: "obs_owner_naming_link_#{@owner_name.id}"
-      )
-      [link.t, "(#{:show_observation_owner_id.l})"].safe_join(" ")
     end
 
     # ---- main row: carousel | obs details / name / lists -----
