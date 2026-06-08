@@ -522,28 +522,33 @@ module GeneralExtensions
   end
 
   # Catches drift between a controller's `index_sort_options` table
-  # and what `Query` actually accepts. `Query` takes `order_by:
-  # <key>` and asks the model's `order_by` scope to dispatch — the
-  # dispatcher in `AbstractModel::OrderingScopes#order_by` checks
-  # for a private `order_by_<key>` method on the model and
-  # silently falls back to `id: :desc` when none exists. Without
-  # this assertion, a typo in the controller's tuples renders a
-  # sort dropdown that secretly does nothing.
+  # and what `Query` actually accepts, by asking Query to validate
+  # each key directly. `Query::Modules::Validation#validate_order_by!`
+  # rejects any key that doesn't map to a `Model.order_by_<key>`
+  # private scope. (Before that validation existed, the dispatcher
+  # in `AbstractModel::OrderingScopes#order_by` silently fell back
+  # to `id: :desc`, so a typo in the tuples rendered a sort
+  # dropdown that secretly did nothing.)
   #
-  # The check lives on the model (that's where the scope is
-  # registered), but conceptually you can think of it as "does
-  # Query::Foo accept this order_by?" — the answer is the same.
+  # The runtime check inside `check_index_sorted_by` would
+  # eventually surface the same failure — its assertions would
+  # fail when the controller's `get(:index, params: { by: <bad> })`
+  # didn't render — but the message wouldn't pinpoint the bad
+  # key. Pinning each key here gives a clearer diagnostic.
   def assert_each_sort_key_resolves(sort_keys)
     model = sort_options_model_class
     return unless model
 
     sort_keys.each do |key|
-      base = key.to_s.delete_prefix("reverse_")
-      assert(model.private_methods(false).include?(:"order_by_#{base}"),
-             "Query::#{model.name.pluralize} doesn't accept " \
-             "order_by: `#{base}` — no `#{model}.order_by_#{base}` " \
-             "scope. #{@controller.class}#index_sort_options offers " \
-             "`#{base}` but it routes to nothing.")
+      query = Query.lookup(model.name.to_sym, order_by: key.to_s)
+      query.valid?
+      next if query.errors[:base].blank?
+
+      flunk(
+        "#{@controller.class}#index_sort_options offers `#{key}` " \
+        "but Query::#{model.name.pluralize} rejected it: " \
+        "#{query.errors[:base].join(" | ")}"
+      )
     end
   end
 
