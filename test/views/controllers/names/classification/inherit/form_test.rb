@@ -19,29 +19,29 @@ module Views::Controllers::Names::Classification::Inherit
       assert_includes(html, :inherit_classification_parent_name.l)
     end
 
-    def test_form_with_options
+    def test_form_with_candidates
       name = names(:coprinus_comatus)
-      options = [names(:agaricus_campestris), names(:boletus_edulis)]
+      candidates = [names(:agaricus_campestris), names(:boletus_edulis)]
       html = render_form(
         name: name,
-        options: options,
+        candidates: candidates,
         message: :inherit_classification_multiple_matches
       )
 
       # Warning alert with radio options
       assert_html(html, "div.alert-warning")
-      options.each do |opt|
-        assert_html(html, "input[type='radio'][value='#{opt.id}']")
+      candidates.each do |c|
+        assert_html(html, "input[type='radio'][value='#{c.id}']")
       end
     end
 
     private
 
-    def render_form(name:, parent: nil, options: nil, message: nil)
+    def render_form(name:, parent: nil, candidates: nil, message: nil)
       render(Form.new(
                name: name,
                parent: parent,
-               options: options,
+               candidates: candidates,
                message: message
              ))
     end
