@@ -7,11 +7,18 @@ require("test_helper")
 # types — never `_Any` when the type is known").
 #
 # Scans every `app/components/**/*.rb` and `app/views/**/*.rb` file
-# for `prop … _Any …` lines and fails on uses outside the one
-# sanctioned context: `_Hash(Key, _Any)` (and its nilable cousin
-# `_Hash(Key, _Any?)`). The Hash carve-out covers HTML-attribute
-# pass-throughs (`attributes`, `data`, `args`, `extra_data`, …)
-# where the value type genuinely is arbitrary.
+# for `prop … _Any …` declarations and fails on uses outside the
+# one sanctioned context: `_Hash(Key, _Any)` (and its nilable
+# cousin `_Hash(Key, _Any?)`). The Hash carve-out covers
+# HTML-attribute pass-throughs (`attributes`, `data`, `args`,
+# `extra_data`, …) where the value type genuinely is arbitrary.
+#
+# Multi-line aware: a `prop` declaration whose type expression
+# wraps across lines is collected up to its paren-balanced end,
+# and each `_Any` token's innermost enclosing `_Foo(...)` call is
+# checked — only `_Hash(...)` is exempt. A future contributor who
+# tucks `_Any` deep inside a multi-line `_Union(...)` won't slip
+# past this guard.
 #
 # Why we draw the line at `_Any`:
 #
@@ -33,55 +40,195 @@ class NoAnyPhlexPropsTest < ActiveSupport::TestCase
     app/views/**/*.rb
   ].freeze
 
-  # Match `prop :name, …` lines that contain `_Any` (with or
-  # without `?`). Captures the file and line for the failure
-  # message; classification happens below.
-  PROP_RE = /^\s*prop\s+:\w+\s*,/
+  # A `prop :…, …` declaration. The type expression follows the
+  # comma; collected up to its paren-balanced end.
+  PROP_START_RE = /^\s*prop\s+:\w+\s*,/
 
-  # A `_Any` token is sanctioned when the line also contains
-  # `_Hash(...)` somewhere before it — i.e. the `_Any` is the
-  # value-type slot of a Hash declaration. The simple "line
-  # contains `_Hash(`" check is sufficient because Hash and
-  # non-Hash `_Any` props don't co-occur on the same prop line in
-  # MO's codebase.
-  HASH_GUARD_RE = /_Hash\(/
+  # `_Foo(` opens a named-type call; we track the name so we can
+  # check whether a `_Any` token inside it is the value slot of a
+  # `_Hash`.
+  NAMED_OPEN_RE = /\A_([A-Z]\w*)\s*\(/
+
+  # `_Any` or `_Any?` — the offender pattern.
+  ANY_TOKEN_RE = /\A_Any\??\b/
 
   def test_no_bare_any_phlex_props
     offenders = scan_for_bare_any_props
     assert_empty(offenders, build_failure_message(offenders))
   end
 
+  # --- Unit tests for the scanner itself ------------------------
+
+  def test_scanner_flags_bare_any
+    assert_bad("prop :foo, _Any")
+    assert_bad("prop :foo, _Nilable(_Any), default: nil")
+    assert_bad("prop :foo, _Array(_Any)")
+  end
+
+  def test_scanner_allows_hash_value_any
+    assert_clean("prop :foo, _Hash(Symbol, _Any), default: -> { {} }")
+    assert_clean("prop :foo, _Hash(_Union(Symbol, String), _Any?)")
+  end
+
+  def test_scanner_flags_any_outside_hash_in_multiline_prop
+    # Multi-line: `_Any` inside `_Union` (not `_Hash`) — must
+    # flag even though the type expression wraps across lines.
+    assert_bad(<<~RUBY)
+      prop :foo, _Union(
+        _Hash(Symbol, _Any),
+        _Nilable(_Any)
+      )
+    RUBY
+  end
+
+  def test_scanner_allows_nested_hash_any_in_multiline_prop
+    # Multi-line: every `_Any` here is the value slot of a
+    # `_Hash(...)`. Should pass.
+    assert_clean(<<~RUBY)
+      prop :exif_data,
+           _Hash(Integer, _Hash(Symbol, _Any?)),
+           default: -> { {} }
+    RUBY
+  end
+
+  def test_scanner_allows_bare_any_inside_hash_across_lines
+    # The `_Any` is the value of `_Hash`, but on a different
+    # physical line from the `_Hash(` token. The old line-based
+    # scanner would have OK'd this only via the line-contains-
+    # `_Hash(` heuristic; the new walker validates via the
+    # paren stack.
+    assert_clean(<<~RUBY)
+      prop :attrs,
+           _Hash(
+             _Union(Symbol, String),
+             _Any?
+           )
+    RUBY
+  end
+
+  def test_scanner_flags_any_in_tuple_inside_array_across_lines
+    # `_Any?` here is inside `_Tuple` inside `_Array` —
+    # neither has `_Hash` as the immediate enclosing call, so
+    # the offender lives deep inside a multi-line declaration.
+    assert_bad(<<~RUBY)
+      prop :options, _Array(
+        _Union(
+          _Nilable(String),
+          _Tuple(String, _Any?)
+        )
+      )
+    RUBY
+  end
+
   private
 
-  # Returns `{ "relative/path.rb" => [[line_no, snippet], …] }`
-  # for every file with a non-Hash `_Any` prop declaration.
+  def assert_bad(snippet)
+    lines = snippet.lines
+    offenders = scan_file("test.rb", lines)
+    assert_not_empty(offenders,
+                     "expected scanner to flag:\n#{snippet}")
+  end
+
+  def assert_clean(snippet)
+    lines = snippet.lines
+    offenders = scan_file("test.rb", lines)
+    assert_empty(offenders, "expected scanner to allow:\n#{snippet}")
+  end
+
+  # Returns `[{ path:, line:, snippet: }, …]` for every `_Any`
+  # outside a `_Hash(…)` value slot.
   def scan_for_bare_any_props
     files = PHLEX_GLOBS.flat_map { |g| Rails.root.glob(g) }
-    files.each_with_object({}) do |path, acc|
+    files.flat_map do |path|
       rel = Pathname.new(path).relative_path_from(Rails.root).to_s
-      hits = File.foreach(path).with_index(1).filter_map do |line, n|
-        next unless prop_line_with_any?(line)
-        next if hash_value_any?(line)
-
-        [n, line.rstrip]
-      end
-      acc[rel] = hits if hits.any?
+      lines = File.readlines(path)
+      scan_file(rel, lines)
     end
   end
 
-  def prop_line_with_any?(line)
-    line.match?(PROP_RE) && line.include?("_Any")
+  def scan_file(rel, lines)
+    offenders = []
+    i = 0
+    while i < lines.length
+      unless lines[i].match?(PROP_START_RE)
+        i += 1
+        next
+      end
+      statement, lines_consumed, start_line = collect_statement(lines, i)
+      bad_count = bad_any_count(statement)
+      if bad_count.positive?
+        offenders << {
+          path: rel,
+          line: start_line,
+          snippet: statement.strip.lines.first.strip
+        }
+      end
+      i += lines_consumed
+    end
+    offenders
   end
 
-  def hash_value_any?(line)
-    line.match?(HASH_GUARD_RE)
+  # Walks forward from `start_idx` collecting lines until the
+  # `prop` statement's parens are balanced. Returns the joined
+  # text, the number of lines consumed, and the 1-based starting
+  # line number.
+  def collect_statement(lines, start_idx)
+    text = +""
+    j = start_idx
+    depth = 0
+    loop do
+      line = lines[j]
+      text << line
+      depth += line.count("(") - line.count(")")
+      j += 1
+      break if depth <= 0 || j >= lines.length
+    end
+    [text, j - start_idx, start_idx + 1]
+  end
+
+  # Walks the statement's type expression with a paren stack;
+  # each opening paren remembers the `_Foo` name if any. A
+  # `_Any` token is bad unless its innermost named ancestor is
+  # `_Hash`.
+  def bad_any_count(statement)
+    stack = [] # entries are `_Foo` strings or "" for bare "("
+    i = 0
+    bad = 0
+    while i < statement.length
+      rest = statement[i..]
+      if (m = NAMED_OPEN_RE.match(rest))
+        stack.push("_#{m[1]}")
+        i += m.end(0)
+      elsif statement[i] == "("
+        stack.push("")
+        i += 1
+      elsif statement[i] == ")"
+        stack.pop
+        i += 1
+      elsif (m = ANY_TOKEN_RE.match(rest))
+        bad += 1 unless inside_hash?(stack)
+        i += m.end(0)
+      else
+        i += 1
+      end
+    end
+    bad
+  end
+
+  def inside_hash?(stack)
+    stack.reverse_each do |name|
+      next if name.empty?
+
+      return name == "_Hash"
+    end
+    false
   end
 
   def build_failure_message(offenders)
     return "" if offenders.empty?
 
-    rendered = offenders.flat_map do |path, lines|
-      lines.map { |(n, snippet)| "  #{path}:#{n}: #{snippet.strip}" }
+    rendered = offenders.map do |o|
+      "  #{o[:path]}:#{o[:line]}: #{o[:snippet]}"
     end
     <<~MSG
       Bare `_Any` prop declarations found in Phlex view/component files.
