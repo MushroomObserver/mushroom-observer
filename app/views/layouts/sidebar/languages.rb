@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Views::Layouts::Sidebar
+class Views::Layouts::Sidebar
   # Renders the language dropdown in the sidebar.
   #
   # @example Basic usage
@@ -10,7 +10,7 @@ module Views::Layouts::Sidebar
   #   ))
   class Languages < ::Components::Base
     # `:browser` is unused inside this view but kept for API
-    # symmetry with `ApplicationSidebar`, which threads both
+    # symmetry with `Sidebar`, which threads both
     # `browser:` and `request:` through to here. Duck-typed for the
     # same reason as the parent (tests pass a Struct stub).
     prop :browser, _Interface(:bot?)

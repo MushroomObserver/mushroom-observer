@@ -9,7 +9,9 @@
     add_page_title("This is a test page, let's give it a much longer title just to see what happens when we do something like this")
 
     add_interest_icons(@user, Observation.first)
-    add_context_nav(admin_test_tabs)
+    # `admin_test_tabs` was an undefined helper — drop the call.
+    # If anyone resurrects this `if false` test page, swap in a real
+    # `Tab::*` constructor here.
   %>
 
   <% left_content do %>

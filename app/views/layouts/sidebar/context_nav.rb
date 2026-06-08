@@ -1,19 +1,32 @@
 # frozen_string_literal: true
 
-# Mobile (`xs`-only) sidebar version of the context-nav menu —
-# rendered into `content_for(:context_nav_mobile)` by
-# `add_context_nav(links)`. Renders the same `[text, url, args]`
-# tuples as `TopBar`, flattened into indented rows under a heading
-# (no dropdown). Dispatches each tuple through
-# `LinkRendering#render_crud_button_or_link` so `button: :destroy` /
-# `:post` / `:put` / `:patch` actually render as their respective
-# forms — pre-Phlex `sidebar_nav_link` collapsed every tuple to a
-# plain `active_link_to`, which meant mobile users couldn't trigger
-# destroy / post actions from the sidebar at all. Fixed here.
-class Components::ContextNav::Sidebar < Components::Base
-  include Components::ContextNav::LinkRendering
+# The per-page "Actions" block inside the mobile (`xs`-only)
+# offcanvas sidebar — the mobile equivalent of the top-nav's
+# Actions dropdown. The visible heading reads
+# `:app_context_actions.t` ("Actions:"). Rendered into
+# `content_for(:context_nav_mobile)` by `add_context_nav(links)`.
+#
+# The desktop-only counterpart lives at
+# `Views::Layouts::TopNav::ContextNav` — on desktop the top nav
+# IS the context nav; on mobile the sidebar holds it.
+#
+# Renders the same `[text, url, args]` tuples as the top-nav
+# variant, flattened into indented rows under a heading (no
+# dropdown). Dispatches each tuple through
+# `Views::Layouts::ContextNav::LinkRendering#render_crud_button_or_link`
+# so `button: :destroy` / `:post` / `:put` / `:patch` render as
+# their respective forms — pre-Phlex `sidebar_nav_link` collapsed
+# every tuple to a plain `active_link_to`, which meant mobile users
+# couldn't trigger destroy / post actions from the sidebar at all.
+# Fixed here.
+class Views::Layouts::Sidebar::ContextNav < Views::Base
+  include Views::Layouts::ContextNav::LinkRendering
 
-  CSS_CLASSES = Views::Layouts::Sidebar::CSS_CLASSES
+  # Lexical-parent namespace (`Views::Layouts::Sidebar`) provides
+  # the same CSS class set that the desktop sidebar partials
+  # (`Admin`, `Login`, `Section`, etc.) apply via the `classes:`
+  # prop.
+  CSS_CLASSES = ::Views::Layouts::Sidebar::CSS_CLASSES
 
   def initialize(links:)
     super()

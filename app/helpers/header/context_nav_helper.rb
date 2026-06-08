@@ -6,11 +6,12 @@
 # Two entry points:
 #
 #   - `add_context_nav(links)` (most callers) — populates both
-#     `content_for(:context_nav)` (top-bar dropdown) and
-#     `content_for(:context_nav_mobile)` (mobile sidebar). The actual
-#     markup lives in `Components::ContextNav::TopBar` and
-#     `Components::ContextNav::Sidebar`; this helper just sets the
-#     `content_for` blocks the layout reads.
+#     `content_for(:context_nav)` (top-nav dropdown) and
+#     `content_for(:context_nav_mobile)` (mobile sidebar). The
+#     actual markup lives in `Views::Layouts::TopNav::ContextNav`
+#     and `Views::Layouts::Sidebar::ContextNav` (each next to the
+#     layout container it renders into); this helper just sets
+#     the `content_for` blocks the layout reads.
 #   - `context_nav_links(links)` (a few ERB callers — see
 #     `users/show/_profile.erb`) — returns an array of pre-rendered
 #     HTML strings for each link tuple, useful when the caller wants
@@ -32,15 +33,19 @@ module Header
       return unless links&.compact&.any?
 
       links = links.compact
-      top_bar_html = render(Components::ContextNav::TopBar.new(links: links))
-      sidebar_html = render(Components::ContextNav::Sidebar.new(links: links))
-      content_for(:context_nav) { top_bar_html }
+      top_nav_html = render(
+        Views::Layouts::TopNav::ContextNav.new(links: links)
+      )
+      sidebar_html = render(
+        Views::Layouts::Sidebar::ContextNav.new(links: links)
+      )
+      content_for(:context_nav) { top_nav_html }
       content_for(:context_nav_mobile) { sidebar_html }
     end
 
     # Convert Tab::Base / Tab::Collection inputs to the legacy
     # `[text, url, args]` tuple array shape the rest of this helper
-    # (and `Components::ContextNav::TopBar` / `Sidebar`) consume.
+    # (and the two `ContextNav` Phlex classes) apply.
     # Pass-through for nil and Array (legacy callers unchanged).
     def normalize_context_nav_links(links)
       case links
@@ -64,7 +69,7 @@ module Header
 
     # Convert one `[text, url, args]` tuple into a Rails-helper HTML
     # string. The Phlex equivalent that EMITS into a Phlex buffer
-    # lives in `Components::ContextNav::LinkRendering`.
+    # lives in `Views::Layouts::ContextNav::LinkRendering`.
     def context_nav_link(link, extra_args = {})
       str, url, args = link
       args ||= {}
@@ -83,7 +88,7 @@ module Header
 
     # Helper-context dispatch — produces an HTML string (`SafeBuffer`)
     # for one link. Mirrors
-    # `Components::ContextNav::LinkRendering#render_crud_button_or_link`,
+    # `Views::Layouts::ContextNav::LinkRendering#render_crud_button_or_link`,
     # which emits the same shape into a Phlex buffer.
     def crud_button_or_link(str, url, args, kwargs)
       case args[:button]
