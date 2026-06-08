@@ -32,7 +32,10 @@ class CollectorNotesMigration
   VARIANT_KEYS = [:collector, :"Collector's_Name", :"Collector's_name",
                   :"Collector(s)"].freeze
   SEED_KEYS = [COLLECTOR_KEY, *VARIANT_KEYS].freeze
-  USER_MARKUP = /_user\s+(.+?)_/
+  # Greedy capture up to the LAST underscore so logins containing
+  # underscores survive (e.g. "_user tyler_irvin_" -> "tyler_irvin",
+  # not "tyler"). See #4211 review.
+  USER_MARKUP = /_user\s+(.+)_/
   SEEDED_LOG = Rails.root.join("log/collector_notes_seeded.tsv")
   UNRESOLVED_LOG = Rails.root.join("log/collector_notes_unresolved.tsv")
 

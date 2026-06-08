@@ -19,7 +19,9 @@ all_obs = field_slip_all_observations(field_slip)
 
     <% if obs %>
     <strong><%= :DATE.t %>: </strong><%= obs.when %><br />
-    <strong><%= :COLLECTOR.t %>: </strong><%= obs.collector_textile&.tl %><br />
+    <% if obs.collector_textile %>
+    <strong><%= :COLLECTOR.t %>: </strong><%= obs.collector_textile.tl %><br />
+    <% end %>
     <strong><%= :LOCATION.t %>: </strong><%= render(Components::LocationLink.new(where: obs.where, location: obs.location, click: true)) %><br />
     <strong><%= :NOTES.t %>:</strong>
     <div class="ml-5 mb-3">

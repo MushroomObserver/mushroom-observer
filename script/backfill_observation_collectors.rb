@@ -26,7 +26,10 @@
 
 class ObservationCollectorBackfill
   BATCH_SIZE = 1_000
-  USER_MARKUP = /_user\s+(.+?)_/
+  # Greedy capture up to the LAST underscore so logins containing
+  # underscores survive (e.g. "_user tyler_irvin_" -> "tyler_irvin",
+  # not "tyler"). See #4211 review.
+  USER_MARKUP = /_user\s+(.+)_/
   UNRESOLVED_LOG = Rails.root.join("log/collector_backfill_unresolved.tsv")
 
   def initialize

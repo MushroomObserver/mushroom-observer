@@ -141,7 +141,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     slip = FieldSlip.find_by(code: code)
-    assert_equal(rolf.textile_name, slip.collector)
+    assert_equal(rolf.unique_text_name, slip.collector)
     assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end

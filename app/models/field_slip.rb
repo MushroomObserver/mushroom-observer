@@ -219,8 +219,11 @@ class FieldSlip < AbstractModel
     obs&.location
   end
 
+  # Plain collector string for the form's autocompleter input (the
+  # observation's `collector` column, in "Name (login)" form). Display
+  # views use Observation#collector_textile for markup/links. See #4211.
   def collector
-    observation&.collector_textile
+    observation&.collector
   end
 
   def date
