@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Helpers for the Names index. Name-show page logic previously in this helper
-# (obs-counting/query links + classification action links) now lives in Tab POROs
-# under `Tab::Name::*` and Phlex views under `Views::Controllers::Names::Show::*`.
+# Helpers for the Names index. Name-show page logic previously in
+# this helper (obs-counting/query links + classification action
+# links) now lives in Tab POROs under `Tab::Name::*` and Phlex
+# views under `Views::Controllers::Names::Show::*`.
 module NamesHelper
   # Sort options passed to `add_sorter` from the Names index. When
   # the active query is itself ordered by rss_log, "Updated" maps
