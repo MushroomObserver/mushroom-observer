@@ -77,11 +77,13 @@ class Components::Dropdown < Components::Base
   def render_toggle
     a(class: "dropdown-toggle", id: @id,
       role: "button",
+      href: "#",
       data: { toggle: "dropdown" },
       aria: { haspopup: "true", expanded: "false" }) do
       span { plain(@label) }
       span(class: "caret ml-2")
     end
+  end
   end
 
   def render_menu(sections)
