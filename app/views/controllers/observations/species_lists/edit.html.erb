@@ -15,15 +15,22 @@ content_padding(:panels)
 end %>
 
 <%= content_padded do %>
+  <%# Listing emits contents only — the `.list-group-item` wrapper %>
+  <%# is provided here, mirroring what `Components::ListGroup#item` %>
+  <%# does for the `species_lists/index` Phlex view. %>
+  <% listing_item_class = "list-group-item d-flex " \
+                          "justify-content-between align-items-start" %>
   <% if @obs_lists.any? %>
     <%= tag.h5("#{:species_list_manage_belongs_to.l}:", class: "mt-3") %>
     <%= tag.div(class: "list-group") do %>
       <% @obs_lists.each do |species_list| %>
-        <%= render(Views::Controllers::SpeciesLists::Listing.new(
-                     species_list: species_list,
-                     observation: @observation,
-                     remove: permission?(species_list)
-                   )) %>
+        <%= tag.div(class: listing_item_class) do %>
+          <%= render(Views::Controllers::SpeciesLists::Listing.new(
+                       species_list: species_list,
+                       observation: @observation,
+                       remove: permission?(species_list)
+                     )) %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
@@ -32,11 +39,13 @@ end %>
     <%= tag.h5("#{:species_list_manage_doesnt_contain.l}:", class: "mt-3") %>
     <%= tag.div(class: "list-group") do %>
       <% @other_lists.each do |species_list| %>
-        <%= render(Views::Controllers::SpeciesLists::Listing.new(
-                     species_list: species_list,
-                     observation: @observation,
-                     add: permission?(species_list)
-                   )) %>
+        <%= tag.div(class: listing_item_class) do %>
+          <%= render(Views::Controllers::SpeciesLists::Listing.new(
+                       species_list: species_list,
+                       observation: @observation,
+                       add: permission?(species_list)
+                     )) %>
+        <% end %>
       <% end %>
     <% end %>
   <% end %>
