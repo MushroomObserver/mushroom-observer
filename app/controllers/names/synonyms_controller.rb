@@ -20,6 +20,7 @@ module Names
       return if abort_if_name_locked!(@name)
 
       init_ivars_for_edit
+      render_edit_phlex
     end
 
     def update
@@ -116,7 +117,19 @@ module Names
       @proposed_synonyms = @synonym_name_ids.filter_map do |id|
         Name.safe_find(id)
       end
-      render(:edit, location: edit_synonyms_of_name_path(@name.id))
+      render_edit_phlex(
+        location: edit_synonyms_of_name_path(@name.id)
+      )
+    end
+
+    def render_edit_phlex(**render_opts)
+      render(Views::Controllers::Names::Synonyms::Edit.new(
+               name: @name, list_members: @list_members,
+               deprecate_all: @deprecate_all,
+               proposed_synonyms: @proposed_synonyms,
+               new_names: @new_names
+             ),
+             **render_opts)
     end
 
     # Helper used by change_synonyms. Deprecates a single name. Returns true

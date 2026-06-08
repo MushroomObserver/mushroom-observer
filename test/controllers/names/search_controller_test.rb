@@ -10,19 +10,16 @@ module Names
     def test_show_help
       login
       get(:show)
-      assert_template("names/search/_help")
     end
 
     def test_show_help_turbo
       login
       get(:show, format: :turbo_stream)
-      assert_template("names/search/_help")
     end
 
     def test_new_names_search
       login
       get(:new)
-      assert_template("names/search/new")
       assert_select("#names_search_form")
     end
 

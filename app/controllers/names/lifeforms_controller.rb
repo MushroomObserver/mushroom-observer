@@ -6,7 +6,9 @@ module Names
     before_action :login_required
 
     def edit
-      find_name!
+      return unless find_name!
+
+      render(Views::Controllers::Names::Lifeforms::Edit.new(name: @name))
     end
 
     def update

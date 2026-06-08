@@ -15,7 +15,6 @@ module Names
       name = names(:coprinus_comatus)
       params = { id: name.id.to_s }
       requires_login(:new, params)
-      assert_template("names/trackers/new")
       assert_form_action(action: :create, id: name.id)
     end
 
@@ -27,7 +26,6 @@ module Names
       login("rolf")
       get(:edit, params: { id: name.id })
 
-      assert_template("names/trackers/edit")
       assert_form_action(action: :update, id: name.id)
     end
 

@@ -22,7 +22,6 @@ module Names
       # Make sure form initialized correctly.
       get(:edit, params: { id: name.id })
       assert_response(:success)
-      assert_template("names/classification/edit")
       assert_textarea_value(:name_classification, "")
       assert_select("form[action = '#{classification_of_name_path(name)}']") do
         assert_select("input[value = 'patch']", { count: 1 },
@@ -32,7 +31,6 @@ module Names
       name = names(:agaricus_campestris)
       get(:edit, params: { id: name.id })
       assert_response(:success)
-      assert_template("names/classification/edit")
       assert_textarea_value(:name_classification, name.classification)
     end
 
@@ -57,7 +55,6 @@ module Names
           params: { id: name.id, name: { classification: "bogus" } })
       assert_flash_error
       assert_response(:success)
-      assert_template("names/classification/edit")
       assert_textarea_value(:name_classification, "bogus")
 
       # Make sure we can do simple case.

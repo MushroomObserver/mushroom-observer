@@ -9,8 +9,9 @@ module Names::Classification
     # form
     def new
       return unless find_name!
+      return unless make_sure_name_is_at_or_above_genus!(@name)
 
-      nil unless make_sure_name_is_at_or_above_genus!(@name)
+      render_new
     end
 
     # POST callback
@@ -36,7 +37,13 @@ module Names::Classification
     private
 
     def render_new
-      render("new", location: form_to_inherit_classification_of_name_path)
+      render(Views::Controllers::Names::Classification::Inherit::New.new(
+               name: @name,
+               parent_text_name: @parent_text_name,
+               options: @options,
+               message: @message
+             ),
+             location: form_to_inherit_classification_of_name_path)
     end
 
     include Names::Classification::SharedPrivateMethods

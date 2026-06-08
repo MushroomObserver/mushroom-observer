@@ -25,7 +25,6 @@ module Names::Classification
       get(:new, params: { id: name.id })
       assert_no_flash
       assert_response(:success)
-      assert_template("names/classification/inherit/new")
     end
 
     def test_post_inherit_classification
@@ -43,7 +42,6 @@ module Names::Classification
            params: { id: name.id, inherit_classification: { parent: "" } })
       assert_flash_error
       assert_response(:success)
-      assert_template("names/classification/inherit/new")
 
       # Test reload if parent field has no match and no alternate spellings.
       post(:create,
@@ -51,7 +49,6 @@ module Names::Classification
                      inherit_classification: { parent: "cakjdncaksdbcsdkn" } })
       assert_flash_error
       assert_response(:success)
-      assert_template("names/classification/inherit/new")
       assert_input_value("inherit_classification_parent", "cakjdncaksdbcsdkn")
 
       # Test reload if parent field misspelled.
@@ -60,7 +57,6 @@ module Names::Classification
                      inherit_classification: { parent: "Agariclaes" } })
       assert_no_flash
       assert_response(:success)
-      assert_template("names/classification/inherit/new")
       assert_not_blank(assigns(:message))
       assert_not_empty(assigns(:options))
       assert_select("label", text: "Agaricales")
@@ -81,7 +77,6 @@ module Names::Classification
                      inherit_classification: { parent: "Agaricaceae" } })
       assert_no_flash
       assert_response(:success)
-      assert_template("names/classification/inherit/new")
       assert_not_blank(assigns(:message))
       assert_not_empty(assigns(:options))
       assert_select("input[type=radio][value='#{parent1.id}']", count: 1)
@@ -98,7 +93,6 @@ module Names::Classification
                      } })
       assert_flash_error
       assert_response(:success)
-      assert_template("names/classification/inherit/new")
 
       # Make it less ambiguous, so it will select the original Agaricaceae.
       Name.update(parent2.id, classification: "")

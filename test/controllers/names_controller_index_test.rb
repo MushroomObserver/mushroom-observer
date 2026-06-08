@@ -368,7 +368,6 @@ class NamesControllerIndexTest < FunctionalTestCase
     # Straightforward index of all names, showing first 10.
     login
     get(:test_index, params: { num_per_page: 10, q: pagination_query_param })
-    assert_template("names/index")
 
     name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
@@ -389,7 +388,6 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:test_index,
         params: { num_per_page: 10, page: 2, q: pagination_query_param })
-    assert_template("names/index")
 
     name_links = css_select(".list-group.name-index a")
     assert_equal(10, name_links.length)
@@ -412,7 +410,6 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L", q: pagination_query_param })
-    assert_template("names/index")
     assert_select("#content")
     name_links = css_select(".list-group.name-index a")
     assert_equal(l_names.size, name_links.length)
@@ -433,7 +430,6 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L", q: pagination_query_param })
-    assert_template("names/index")
     name_links = css_select(".list-group.name-index a")
 
     assert_equal(l_names.size, name_links.length)
@@ -454,7 +450,6 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size, letter: "L",
                                page: 2, q: pagination_query_param })
-    assert_template("names/index")
     name_links = css_select(".list-group.name-index a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))

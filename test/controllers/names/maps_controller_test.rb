@@ -15,21 +15,18 @@ module Names
     def test_map_names
       login
       get(:show, params: { id: names(:agaricus_campestris).id })
-      assert_template("names/maps/show")
     end
 
     # name with Observations that don't have Locations
     def test_map_names_no_loc
       login
       get(:show, params: { id: names(:coprinus_comatus).id })
-      assert_template("names/maps/show")
     end
 
     # name with no Observations
     def test_map_names_no_obs
       login
       get(:show, params: { id: names(:conocybe_filaris).id })
-      assert_template("names/maps/show")
     end
 
     # Regression: the Occurrence Map for a name must not inherit a
@@ -48,7 +45,6 @@ module Names
 
       get(:show, params: { id: names(:agaricus_campestris).id })
 
-      assert_template("names/maps/show")
       assert_not(assigns(:query).params.key?(:in_box),
                  "Names map query must not inherit in_box from the " \
                  "session — should be a fresh name-only query (#4139)")
@@ -69,7 +65,6 @@ module Names
             q: { in_box: { north: 40, south: 30, east: -70, west: -80 } }
           })
 
-      assert_template("names/maps/show")
       assert_equal(
         { north: 40.0, south: 30.0, east: -70.0, west: -80.0 },
         assigns(:query).params[:in_box].transform_values(&:to_f).symbolize_keys,
