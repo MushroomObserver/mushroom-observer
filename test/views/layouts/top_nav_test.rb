@@ -7,6 +7,22 @@ require("test_helper")
 # helpers. The deleted helper test file had no Phlex equivalent;
 # these tests pin the behaviour those helpers used to cover.
 class Views::Layouts::TopNavTest < ComponentTestCase
+  # Subclass with `render_search_row` neutralized — the search-bar /
+  # identify-filter partials resolve through Rails view-paths that
+  # aren't on the test controller's `append_view_path`. We render the
+  # subclass instead of monkey-patching the real class, so the change
+  # doesn't leak across the test process (an earlier version that
+  # `define_method`'d on `Views::Layouts::TopNav` directly silently
+  # broke the search-bar's `<select>` in every test that ran after
+  # this file).
+  class TopNavWithoutSearchRow < Views::Layouts::TopNav
+    private
+
+    def render_search_row
+      nil
+    end
+  end
+
   def setup
     super
     @user = users(:rolf)
@@ -14,11 +30,6 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     stub_controller_path!("observations")
     define_action_methods!([:new, :index, :show])
     stub_rubric_methods!
-    # Bypass the partial render at the bottom of the nav — the
-    # search-bar / identify-filter partials still resolve through the
-    # Rails view-paths machinery and aren't on the test controller's
-    # `append_view_path`. These tests focus on the top row.
-    skip_search_row!
   end
 
   # ---- nav_create (+ Add button) -------------------------------------
@@ -154,7 +165,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
   private
 
   def top_nav(user:, query: nil)
-    Views::Layouts::TopNav.new(user: user, query: query)
+    TopNavWithoutSearchRow.new(user: user, query: query)
   end
 
   # Override controller_name on the test controller so methods like
@@ -193,12 +204,5 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
   def define_singleton_action_name!(action)
     controller.define_singleton_method(:action_name) { action }
-  end
-
-  # Replace the search-bar partial render with a no-op so tests don't
-  # depend on the view-paths state for partials outside the test
-  # controller's lookup paths.
-  def skip_search_row!
-    Views::Layouts::TopNav.define_method(:render_search_row) { nil }
   end
 end
