@@ -32,10 +32,9 @@ module Views::Controllers::Application::Content
 
     private
 
-    # Inlined from `Header::FiltersHelper#add_filter_help` — the only
-    # caller was `_header.html.erb`, and Phlex needs the call to live
-    # in a context that can `content_for`. The helper version stays
-    # in place for now; this method overshadows its single use here.
+    # Inlined from the former `Header::FiltersHelper#add_filter_help` —
+    # `_header.html.erb` was the only caller, and Phlex needs this to run
+    # in a context that can `content_for`.
     def maybe_set_filter_help
       return unless @any_content_filters_applied
 
