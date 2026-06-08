@@ -15,15 +15,14 @@
 # `filter_caption_nested_params`, `filter_caption_plain_param`,
 # plus the lookup string helpers and the four constants). The helper
 # module now retains only `add_query_filters` (the public API the
-# 80 index action templates call) and `type_tags_to_label` (covered
-# by its own unit test).
+# 80 index action templates call).
 module Views::Controllers::Application::Content
   class Header::IndexBar::FilterCaption < Views::Base
-    # `type_tags_to_label` stays in `Header::FiltersHelper` so its
-    # existing `Header::FiltersHelperTest` keeps covering the
-    # SENTINEL_TYPE_TAGS branches; register it here to call via the
-    # helper chain rather than duplicating the constant + method.
-    register_value_helper :type_tags_to_label
+    # `type` param sentinels (no plural form) — use `:ALL` / `:NONE`
+    # directly. The `none` sentinel arises when the controller
+    # sanitizes invalid type tags down to `"none"`.
+    SENTINEL_TYPE_TAGS = { "all" => :ALL, "none" => :NONE }.freeze
+
     # The following params store IDs; the captions are more legible
     # if they print a relevant "name" or "title" of the record.
     # This indexes which `Lookup::<class>` to use.
@@ -44,7 +43,13 @@ module Views::Controllers::Application::Content
       by_author: :Users,
       by_editor: :Users,
       collectors: :Users,
-      members: :Users
+      members: :Users,
+      # Both User-typed too — without these the caption fell
+      # through to the raw-value path and printed the user id
+      # ("editable_by_user: 1") instead of the proper title
+      # ("editable_by_user: Nathan Wilson (nathan)").
+      editable_by_user: :Users,
+      needs_naming: :Users
     }.freeze
     # The captions with these sub-params make more sense without keys:
     CAPTION_IGNORE_KEYS = [:lookup, :id].freeze
@@ -274,6 +279,17 @@ module Views::Controllers::Application::Content
       else
         joined_vals
       end
+    end
+
+    # Space-separated RssLog type tag list ("species_list project") →
+    # localized labels joined by ", ". `SENTINEL_TYPE_TAGS` covers
+    # `"all"` / `"none"` (which have no plural); everything else
+    # goes through `tag.pluralize.upcase.to_sym.t` (order matters
+    # — `upcase.pluralize` would yield `:SPECIES_LISTs`).
+    def type_tags_to_label(val)
+      val.split.map do |tag|
+        (SENTINEL_TYPE_TAGS[tag] || tag.pluralize.upcase.to_sym).t
+      end.join(", ")
     end
   end
 end
