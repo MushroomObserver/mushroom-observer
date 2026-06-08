@@ -12,10 +12,13 @@ module Views::Controllers::SpeciesLists
       @observation = observations(:minimal_unknown_obs)
     end
 
+    # Listing renders contents only — the `list-group-item` wrapper
+    # comes from `Components::ListGroup#item` in the Index view, so
+    # standalone-render output should NOT have it.
     def test_renders_basic_row
       html = render_listing
 
-      assert_html(html, ".list-group-item.d-flex")
+      assert_no_html(html, ".list-group-item")
       assert_html(html, ".list_info")
       # rss-id badge with species_list id
       assert_html(html, ".rss-id")

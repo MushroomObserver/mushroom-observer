@@ -16,14 +16,12 @@ module Views::Controllers::SpeciesLists
       @project = project
     end
 
+    # Row contents only — the surrounding `<div class="list-group-item
+    # d-flex justify-content-between align-items-start">` is emitted by
+    # `Components::ListGroup#item` in the Index view.
     def view_template
-      div(
-        class: "list-group-item d-flex justify-content-between " \
-               "align-items-start"
-      ) do
-        render_info
-        render_manage_section if @remove || @add
-      end
+      render_info
+      render_manage_section if @remove || @add
     end
 
     private

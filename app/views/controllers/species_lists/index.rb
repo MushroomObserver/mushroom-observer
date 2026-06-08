@@ -34,11 +34,19 @@ module Views::Controllers::SpeciesLists
     def render_list
       return unless @objects.any?
 
-      div(class: "list-group") do
+      # The d-flex / justify-content-between / align-items-start
+      # classes used to live on `Listing`'s outer wrapper. After
+      # moving the row wrapping into `Components::ListGroup#item`,
+      # those layout classes ride on the item itself.
+      render(Components::ListGroup.new) do |list|
         @objects.each do |species_list|
-          render(Views::Controllers::SpeciesLists::Listing.new(
-                   species_list: species_list, project: @project
-                 ))
+          list.item(
+            class: "d-flex justify-content-between align-items-start"
+          ) do
+            render(Listing.new(
+                     species_list: species_list, project: @project
+                   ))
+          end
         end
       end
     end
