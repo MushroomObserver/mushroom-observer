@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
-# One species_list "listing" row — used by `index.html.erb` and the
-# observation-attach edit page. Title row + place / user row on the
-# left, optional REMOVE / ADD button on the right (mutually exclusive,
-# driven by which page the listing renders on).
+# One species_list "listing" row, rendered inside a
+# `Components::ListGroup#item`. Used by:
+#   - `Views::Controllers::SpeciesLists::Index#render_list` (the
+#     species_lists index page)
+#   - `observations/species_lists/edit.html.erb` (the
+#     "manage species lists for this observation" page)
+# Title row + place / user row on the left, optional REMOVE / ADD
+# button on the right (mutually exclusive, driven by which page the
+# listing renders on). Emits contents only — no list-group-item
+# wrapper of its own; the surrounding ListGroup item provides it.
 module Views::Controllers::SpeciesLists
   class Listing < Views::Base
     def initialize(species_list:, observation: nil,
