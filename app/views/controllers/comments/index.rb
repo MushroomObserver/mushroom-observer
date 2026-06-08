@@ -21,7 +21,9 @@ module Views::Controllers::Comments
     def view_template
       container_class(:text_image)
       add_index_title(@query)
-      add_sorter(@query, sort_options)
+      # Sort table lives on the controller — single source of truth
+      # for view rendering and `check_index_sorting`.
+      add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
       flash_error(@error) if @error && @objects.empty?
 
@@ -29,16 +31,6 @@ module Views::Controllers::Comments
     end
 
     private
-
-    # Inlined from the former `CommentsHelper#comments_index_sorts`
-    # — the only caller of that helper was the index template.
-    def sort_options
-      [
-        ["user",       :sort_by_user.t],
-        ["created_at", :sort_by_posted.t],
-        ["updated_at", :sort_by_updated_at.t]
-      ].freeze
-    end
 
     def render_list
       return unless @objects.any?

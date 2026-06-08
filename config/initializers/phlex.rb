@@ -25,16 +25,20 @@ Rails.autoloaders.main.push_dir(
   Rails.root.join("app/components"), namespace: Components
 )
 
-# Make every top-level `Tabs::*Helper` module callable from any Phlex
-# view (no `helpers.*` proxy, no per-class `register_value_helper`).
-# This runs inside `to_prepare` so it works both at boot (after
-# eager-load in production) and on every code reload (development).
+# Auto-include every top-level `Tabs::*Helper` module into
+# `Views::Base` so they're callable from any Phlex view without
+# `helpers.*` or per-class `register_value_helper`. Guards
+# `defined?(Tabs)` because the `tabs/` helpers directory is
+# currently empty — there are no top-level Tabs helpers right
+# now, so referencing the constant unguarded would NameError.
 #
 # Nested helpers under `Tabs::Sidebar::*`, `Tabs::Locations::*`,
-# `Tabs::Names::*` are NOT included here — they stay scoped to their
-# specific callers (e.g. `Views::Layouts::ApplicationSidebar` includes
-# `Tabs::Sidebar::AdminHelper` etc. explicitly).
+# `Tabs::Names::*` are NOT included here — they stay scoped to
+# their specific callers (e.g. `Views::Layouts::ApplicationSidebar`
+# includes `Tabs::Sidebar::AdminHelper` etc. explicitly).
 Rails.application.config.to_prepare do
+  next unless defined?(Tabs)
+
   Tabs.constants.each do |name|
     next unless name.to_s.end_with?("Helper")
 

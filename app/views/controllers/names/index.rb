@@ -47,7 +47,10 @@ module Views::Controllers::Names
           query: @query, controller: controller
         )
       )
-      add_sorter(@query, sort_options)
+      # Sort table lives on the controller —
+      # `NamesController#index_sort_options` — single source of
+      # truth for view rendering and `check_index_sorting`.
+      add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data, @test_pagination_args)
 
       flash_error(@error) if @error && @objects.empty?
@@ -88,24 +91,6 @@ module Views::Controllers::Names
           end
         end
       end
-    end
-
-    # Sort options passed to `add_sorter`. When the active query
-    # is itself ordered by rss_log, "Updated" maps to the rss_log
-    # timestamp instead of the name's updated_at.
-    #
-    # (The pre-relocate version in `NamesHelper` compared against
-    # the Symbol `:rss_log`, but `query.params[:order_by]` is
-    # stored as a String — the predicate never fired. Fixed when
-    # moving here so the documented intent actually takes effect.)
-    def sort_options
-      rss_log = @query.params&.dig(:order_by) == "rss_log"
-      [
-        ["name",                                :sort_by_name.t],
-        ["created_at",                          :sort_by_created_at.t],
-        [rss_log ? "rss_log" : "updated_at",    :sort_by_updated_at.t],
-        ["num_views",                           :sort_by_num_views.t]
-      ]
     end
   end
 end

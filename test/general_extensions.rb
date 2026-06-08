@@ -479,7 +479,9 @@ module GeneralExtensions
   #
   def check_index_sorting
     login
-    index_sorts.each do |sort_order|
+    sorts = index_sorts
+    assert_each_sort_key_resolves(sorts)
+    sorts.each do |sort_order|
       check_index_sorted_by(sort_order, do_login: false)
     end
   end
@@ -499,32 +501,61 @@ module GeneralExtensions
     assert_sorted_by(sort_order.to_s)
   end
 
-  # Checks for a consistently named helper method like "users_index_sorts"
-  # otherwise returns empty array.
+  # Reads sort options from `@controller.index_sort_options` (a
+  # public instance method every index controller now exposes).
+  # Does an initial `get(:index)` so the controller's `@query` is
+  # populated — needed by controllers whose options depend on
+  # query context (e.g. names/locations/species_lists/herbaria
+  # which swap `updated_at` ↔ `rss_log` based on the active query,
+  # users/contributors which read in_admin_mode?).
   def index_sorts
-    helpers_defined = @controller.helpers.respond_to?(sorts_helper_method)
-    assert(helpers_defined, "#{sorts_helper_method} not defined in helpers")
-    return [] unless helpers_defined
+    assert_respond_to(@controller, :index_sort_options,
+                      "#{@controller.class} must define a public " \
+                      "#index_sort_options to drive check_index_sorting")
+    get(:index) if @controller.instance_variable_get(:@query).nil?
 
-    originals = @controller.helpers.send(sorts_helper_method).dup
+    originals = @controller.index_sort_options.dup
     originals.map! { |key, _label| key.to_sym }
     originals.delete(:id)
     reverses = originals.dup.map! { |key| :"reverse_#{key}" }
     originals + reverses
   end
 
-  def sorts_helper_method
-    @sorts_helper_method ||= :"#{helper_class}_index_sorts"
+  # Catches drift between a controller's `index_sort_options` table
+  # and what `Query` actually accepts. `Query` takes `order_by:
+  # <key>` and asks the model's `order_by` scope to dispatch — the
+  # dispatcher in `AbstractModel::OrderingScopes#order_by` checks
+  # for a private `order_by_<key>` method on the model and
+  # silently falls back to `id: :desc` when none exists. Without
+  # this assertion, a typo in the controller's tuples renders a
+  # sort dropdown that secretly does nothing.
+  #
+  # The check lives on the model (that's where the scope is
+  # registered), but conceptually you can think of it as "does
+  # Query::Foo accept this order_by?" — the answer is the same.
+  def assert_each_sort_key_resolves(sort_keys)
+    model = sort_options_model_class
+    return unless model
+
+    sort_keys.each do |key|
+      base = key.to_s.delete_prefix("reverse_")
+      assert(model.private_methods(false).include?(:"order_by_#{base}"),
+             "Query::#{model.name.pluralize} doesn't accept " \
+             "order_by: `#{base}` — no `#{model}.order_by_#{base}` " \
+             "scope. #{@controller.class}#index_sort_options offers " \
+             "`#{base}` but it routes to nothing.")
+    end
   end
 
-  # Contributors index uses the same sorts as Users
-  def helper_class
-    @helper_class ||= case (name = @controller.controller_name)
-                      when "contributors"
-                        "users"
-                      else
-                        name
-                      end
+  # Derives the model class that backs the controller's index, by
+  # asking the controller for `controller_model_name` (defined on
+  # `ApplicationController::Indexes`). Returns nil when the
+  # controller doesn't expose one or the class doesn't exist —
+  # in that case the resolution assertion is silently skipped.
+  def sort_options_model_class
+    return nil unless @controller.respond_to?(:controller_model_name)
+
+    @controller.send(:controller_model_name).safe_constantize
   end
 
   def assert_sorted_by(by, text = /.*/,

@@ -53,11 +53,6 @@ class ApplicationController < ActionController::Base
   before_action :track_translations
   before_action :set_languages
 
-  # `names_index_sorts` is consumed by test infrastructure
-  # (`GeneralExtensions#index_sorts` → `check_index_sorting`).
-  # The runtime sort list is owned by the Phlex view.
-  helper :names
-
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
     skip_before_action(:verify_authenticity_token)
