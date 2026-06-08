@@ -38,8 +38,10 @@ class Inat
             "&page=2&per_page=50&order=desc&order_by=created_at"
       result = URLNormalizer.new(url).normalize
 
-      assert_equal("project_id=291058", result,
-                   "Should strip page, per_page, order, order_by; keep id_above")
+      assert_equal(
+        "project_id=291058", result,
+        "Should strip user-supplied page, per_page, order, order_by params"
+      )
     end
 
     def test_preserves_id_above_param
