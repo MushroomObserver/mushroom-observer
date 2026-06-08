@@ -28,6 +28,7 @@ class Views::Base < Components::Base
   register_value_helper :container_class
   register_value_helper :column_classes
   register_value_helper :content_for
+  register_value_helper :content_padding
   register_value_helper :flash_error
   # `paginated_results` takes a block and emits the surrounding
   # pagination HTML around it — output helper, mark_safe so Phlex
