@@ -84,7 +84,6 @@ class Components::Dropdown < Components::Base
       span(class: "caret ml-2")
     end
   end
-  end
 
   def render_menu(sections)
     ul(id: @menu_id, class: "dropdown-menu",
