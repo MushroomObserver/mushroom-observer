@@ -238,7 +238,6 @@ class NamesControllerCreateTest < FunctionalTestCase
     }
     login(rolf.login)
     post(:create, params: params)
-    assert_template("names/new")
     assert_select("#name_form")
     # Should fail and no name should get created
     assert_nil(Name.find_by(text_name: text_name))

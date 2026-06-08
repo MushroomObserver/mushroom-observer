@@ -12,6 +12,7 @@ module Names::Synonyms
       return if abort_if_name_locked!(@name)
 
       init_ivars_for_new
+      render_new
     end
 
     def create
@@ -55,7 +56,17 @@ module Names::Synonyms
     end
 
     def render_new
-      render(:new, location: form_to_deprecate_synonym_of_name_path)
+      render(Views::Controllers::Names::Synonyms::Deprecate::New.new(
+               name: @name,
+               given_name: @given_name,
+               misspelling: @misspelling,
+               comment: @comment,
+               names: @names,
+               valid_names: @valid_names,
+               suggest_corrections: @suggest_corrections || false,
+               parent_deprecated: @parent_deprecated
+             ),
+             location: form_to_deprecate_synonym_of_name_path)
     end
 
     def suggest_alternate_spellings

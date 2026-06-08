@@ -15,6 +15,23 @@ class NamesController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view`
+  # to render the Phlex Index view directly with the controller-
+  # populated ivars as explicit props. Replaces the implicit
+  # `render(action: :index)` lookup of `index.html.erb` (deleted).
+  def render_index_view
+    args = {
+      query: @query, pagination_data: @pagination_data,
+      objects: @objects, user: @user, error: @error,
+      help: @help, has_descriptions: @has_descriptions || false,
+      name_suggestions: @name_suggestions
+    }
+    # Only set when populated, so the view's `default: -> { {} }`
+    # fires for the common case (only `test_index` sets the ivar).
+    args[:test_pagination_args] = @test_pagination_args if @test_pagination_args
+    render(Views::Controllers::Names::Index.new(**args))
+  end
+
   private
 
   def default_sort_order
@@ -283,6 +300,7 @@ class NamesController < ApplicationController
 
   def new
     init_create_name_form
+    render_new_form
   end
 
   def create
@@ -300,6 +318,7 @@ class NamesController < ApplicationController
     return unless find_name!
 
     init_edit_name_form
+    render_edit_form
   end
 
   def update
@@ -336,7 +355,27 @@ class NamesController < ApplicationController
     @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
-    render("new", location: new_name_path)
+    render(phlex_new_form, location: new_name_path)
+  end
+
+  def render_new_form
+    render(phlex_new_form)
+  end
+
+  def render_edit_form
+    render(Views::Controllers::Names::Edit.new(
+             name: @name, user: @user,
+             name_string: @name_string,
+             misspelling: @misspelling,
+             correct_spelling: @correct_spelling
+           ))
+  end
+
+  def phlex_new_form
+    Views::Controllers::Names::New.new(
+      name: @name, user: @user,
+      name_string: @name_string, approved_rank: @approved_rank
+    )
   end
 
   def init_edit_name_form

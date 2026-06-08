@@ -14,7 +14,6 @@ module Names::Lifeforms
       # Prove that getting to the form requires a login, and that it starts off
       # with all boxes unchecked.
       requires_login(:edit, id: name.id)
-      assert_template("names/lifeforms/propagate/edit")
       Name.all_lifeforms.each do |word|
         if word == "lichen"
           assert_input_value("propagate_lifeform_add_#{word}", "")

@@ -168,6 +168,24 @@ tests passed but no longer verified the panel rendered at all.
 Re-deriving the coverage from the rendered HTML is the contract;
 the partial path was an implementation detail.
 
+**Do the assert_template swap BEFORE running the controller tests
+on the converted action.** When you Phlexify an action template,
+the moment the corresponding `.html.erb` leaves the disk every
+`assert_template("controller/action")` against that view starts
+returning a confusing "expecting <…> but rendering with
+<[layout partials]>" failure. Grep the test directory for matching
+`assert_template` calls in the same commit that deletes the ERB,
+swap each to its CSS-identifier equivalent, then run the suite.
+You'll save yourself a churn-y red CI pass.
+
+For full-action-template swaps, the layout's body class
+(`<body class="<controller_name>__<action_name>">`) gives a
+stable per-action identifier — `body.names__new`,
+`body.observations__index`, etc. Use that when the rendered
+view doesn't have a stronger page-specific id / class to pin
+against. Same shape as the integration-test `assert_selector(
+"body.observations__show")` calls already used elsewhere.
+
 ## Decide first: reusable or single-use?
 
 The first decision when converting an ERB helper / partial / template to

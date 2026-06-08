@@ -8,7 +8,9 @@ module Names
 
     # Form
     def edit
-      nil unless find_name!
+      return unless find_name!
+
+      render_edit
     end
 
     # PUT callback
@@ -26,7 +28,10 @@ module Names
     private
 
     def render_edit
-      render(:edit, location: edit_classification_of_name_path(@name))
+      render(Views::Controllers::Names::Classification::Edit.new(
+               name: @name
+             ),
+             location: edit_classification_of_name_path(@name))
     end
 
     include Names::Classification::SharedPrivateMethods
