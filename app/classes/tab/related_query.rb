@@ -9,7 +9,12 @@
 # guard — returns nil when no bridge exists between filter and
 # target. Call `.new(...)` directly only when the caller has
 # already verified the bridge applies.
-class Tab::RelatedQuery < Tab::Base
+#
+# Inherits `Tab::QueryLink`'s memoized `#query` + `#path` =
+# `controller.add_q_param(target_params, query)`. Subclass-side
+# state: the model + filter + current_query that drive the
+# `Query.current_or_related_query(...)` bridge.
+class Tab::RelatedQuery < Tab::QueryLink
   def self.for(model:, filter:, current_query:, controller:)
     return nil unless current_query &&
                       ::Query.related?(model.name.to_sym, filter)
@@ -19,23 +24,25 @@ class Tab::RelatedQuery < Tab::Base
   end
 
   def initialize(model:, filter:, current_query:, controller:)
-    super()
+    super(controller: controller)
     @model = model
     @filter = filter
     @current_query = current_query
-    @controller = controller
   end
 
   def title
     :show_objects.t(type: @model.type_tag)
   end
 
-  def path
-    @controller.add_q_param(
-      { controller: @model.show_controller, action: @model.index_action },
-      ::Query.current_or_related_query(
-        @model.name.to_sym, @filter, @current_query
-      )
+  private
+
+  def build_query
+    ::Query.current_or_related_query(
+      @model.name.to_sym, @filter, @current_query
     )
+  end
+
+  def target_params
+    { controller: @model.show_controller, action: @model.index_action }
   end
 end

@@ -141,9 +141,9 @@ class NamesController < ApplicationController
   def show
     case params[:flow]
     when "next"
-      redirect_to_next_object(:next, Name, params[:id].to_s)
+      redirect_to_next_object(:next, Name, params[:id].to_s) and return
     when "prev"
-      redirect_to_next_object(:prev, Name, params[:id].to_s)
+      redirect_to_next_object(:prev, Name, params[:id].to_s) and return
     end
 
     # Load Name and NameDescription along with a bunch of associated objects.
@@ -156,6 +156,18 @@ class NamesController < ApplicationController
 
     init_projects_ivar
     init_related_query_ivars
+
+    render(Views::Controllers::Names::Show.new(
+             name: @name, user: @user,
+             best_images: @best_images,
+             description: @name.description,
+             comments: @comments, obss: @obss,
+             has_subtaxa: @has_subtaxa,
+             subtaxa_query: @subtaxa_query,
+             children_query: @children_query,
+             first_child: @first_child,
+             projects: @projects, versions: @versions
+           ))
   end
 
   # ----------------------------------------------------------------------------
@@ -172,7 +184,7 @@ class NamesController < ApplicationController
   # carousel:
   #   @best_images
   # best_description:
-  #   @best_description
+  #   @name.description (eager-loaded via Name.show_includes)
   # comments:
   #   comments_for_object
   # observations_menu:
@@ -256,10 +268,6 @@ class NamesController < ApplicationController
     # This initiates a query for the images of only the most confident obs
     @best_images = @obss.best_images
 
-    # This seems like it queries the NameDescription table.
-    # Would be better to eager load descriptions and derive @best_description
-    # from them. Can also derive @projects from this.
-    @best_description = @name.best_brief_description
     # Save a lookup in comments_for_object
     @comments = @name.comments&.sort_by(&:created_at)&.reverse
   end

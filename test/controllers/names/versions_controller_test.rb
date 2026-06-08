@@ -9,13 +9,13 @@ module Names
     def test_show_past_name
       login
       get(:show, params: { id: names(:coprinus_comatus).id })
-      assert_template("names/versions/show")
+      assert_select("#nomenclature")
     end
 
     def test_show_past_name_with_misspelling
       login
       get(:show, params: { id: names(:petigera).id })
-      assert_template("names/versions/show")
+      assert_select("#nomenclature")
     end
 
     def test_show_past_name_version_table_panel

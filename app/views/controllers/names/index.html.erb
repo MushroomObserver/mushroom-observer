@@ -13,7 +13,7 @@ flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @objects.empty? && @name_suggestions.any? %>
-  <%= render(partial: "names/show/name_suggestions",
+  <%= render(partial: "names/name_suggestions",
              locals: { names: @name_suggestions }) %>
 <% end %>
 
