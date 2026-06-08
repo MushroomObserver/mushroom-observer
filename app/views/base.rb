@@ -28,11 +28,15 @@ class Views::Base < Components::Base
   register_value_helper :container_class
   register_value_helper :column_classes
   register_value_helper :content_for
+  register_value_helper :content_padding
   register_value_helper :flash_error
   # `paginated_results` takes a block and emits the surrounding
   # pagination HTML around it — output helper, mark_safe so Phlex
   # trusts the returned SafeBuffer.
   register_output_helper :paginated_results, mark_safe: true
+  # `content_padded` wraps its block in `<div class="p-3 …">` and
+  # returns the SafeBuffer — same shape as `paginated_results`.
+  register_output_helper :content_padded, mark_safe: true
   # `controller` (the ActionController instance) is referenced from
   # Phlex views that build `Tab::RelatedQuery.new(...)` to compute
   # cross-model "related index" URLs (e.g. species-list show →
