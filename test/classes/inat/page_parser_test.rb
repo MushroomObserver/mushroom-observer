@@ -108,6 +108,39 @@ class Inat
                    "order_by should be id for pagination")
     end
 
+    def test_next_page_url_mode_returns_parsed_json
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058"
+      end
+      parser = PageParser.new(import)
+      body = { "results" => [], "total_results" => 0 }.to_json
+
+      stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+        to_return(status: 200, body: body)
+
+      result = parser.next_page
+
+      assert_equal({ "results" => [], "total_results" => 0 }, result,
+                   "next_page should return parsed JSON in URL mode")
+    end
+
+    def test_next_url_request_rescues_rest_client_exception
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058"
+      end
+      parser = PageParser.new(import)
+
+      stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+        to_return(status: 401, body: '{"error":"Unauthorized"}')
+
+      result = parser.next_page
+
+      assert_nil(result,
+                 "next_page should return nil when API returns an error")
+      assert_not_empty(import.response_errors,
+                       "API error should be logged to import.response_errors")
+    end
+
     def test_url_id_above_used_for_first_page
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058&id_above=500"
