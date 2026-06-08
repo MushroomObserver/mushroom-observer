@@ -55,11 +55,62 @@ module ObservationsController::New
     @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
     check_location
+    render_new_view
   end
 
   ##############################################################################
 
   private
+
+  def render_new_view
+    render(Views::Controllers::Observations::New.new(**new_view_attrs))
+  end
+
+  def new_view_attrs
+    new_view_obs_attrs.merge(new_view_naming_attrs).
+      merge(new_view_specimen_attrs).merge(new_view_project_attrs).
+      merge(field_code: @field_code,
+            field_code_locked: @field_code_locked || false,
+            q_param: q_param)
+  end
+
+  def new_view_obs_attrs
+    {
+      observation: @observation, user: @user, location: @location,
+      good_images: @good_images || [], exif_data: @exif_data || {},
+      given_name: @given_name, place_name: @place_name,
+      default_place_name: @default_place_name,
+      dubious_where_reasons: @dubious_where_reasons
+    }
+  end
+
+  def new_view_naming_attrs
+    {
+      vote: @vote, names: @names, valid_names: @valid_names,
+      reasons: @reasons,
+      suggest_corrections: @suggest_corrections || false,
+      parent_deprecated: @parent_deprecated || false
+    }
+  end
+
+  def new_view_specimen_attrs
+    {
+      collectors_name: @collectors_name,
+      collectors_number: @collectors_number,
+      herbarium_name: @herbarium_name, herbarium_id: @herbarium_id,
+      accession_number: @accession_number
+    }
+  end
+
+  def new_view_project_attrs
+    {
+      projects: @projects || [],
+      submitted_project_ids: @submitted_project_ids,
+      lists: @lists || [], submitted_list_ids: @submitted_list_ids,
+      error_checked_projects: @error_checked_projects || [],
+      suspect_checked_projects: @suspect_checked_projects || []
+    }
+  end
 
   def init_naming_and_vote
     @naming      = Naming.new

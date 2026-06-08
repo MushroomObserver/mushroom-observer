@@ -114,11 +114,11 @@ class Views::Layouts::TopNav < Views::Base
             search_type_help_types_value: SEARCH_HELP_TYPES,
             search_type_form_types_value: SEARCH_FORM_TYPES
           }) do
-        # Both inner search-bar variants are still ERB — will be
-        # Phlex in a follow-up PR. Phlex's `partial(...)` wrapper
-        # is how a Phlex component renders a Rails partial.
+        # `_search_bar.html.erb` stays ERB for now — rendered via
+        # Phlex's `partial(...)` wrapper. The identify-search variant
+        # is the Phlex `Identify::FormFilter` view.
         if controller.controller_name == "identify"
-          render(partial("observations/identify/form_identify_filter"))
+          render(::Views::Controllers::Observations::Identify::FormFilter.new)
         else
           render(partial("application/top_nav/search_bar",
                          search_help_types: SEARCH_HELP_TYPES,

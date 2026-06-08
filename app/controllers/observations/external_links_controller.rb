@@ -19,7 +19,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
-        format.html
+        format.html { render_new_html }
       end
     end
 
@@ -40,7 +40,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_external_link_form }
-        format.html
+        format.html { render_edit_html }
       end
     end
 
@@ -173,6 +173,26 @@ module Observations
           redirect_to(permanent_observation_path(@observation)) and return
         end
       end
+    end
+
+    def render_new_html
+      render(Views::Controllers::Observations::ExternalLinks::New.new(
+               external_link: @external_link,
+               observation: @observation,
+               sites: @sites.to_a,
+               site: @site,
+               user: @user
+             ))
+    end
+
+    def render_edit_html
+      render(Views::Controllers::Observations::ExternalLinks::Edit.new(
+               external_link: @external_link,
+               observation: @observation,
+               site: @site,
+               back: @back,
+               user: @user
+             ))
     end
 
     def render_modal_external_link_form

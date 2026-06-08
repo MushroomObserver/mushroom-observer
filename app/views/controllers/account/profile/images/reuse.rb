@@ -1,0 +1,34 @@
+# frozen_string_literal: true
+
+# Action template for `Account::Profile::ImagesController#reuse` —
+# the "pick an existing image as your profile picture" page. Renders
+# the shared `ImagesToReuseForm`.
+module Views::Controllers::Account::Profile::Images
+  class Reuse < Views::Base
+    prop :user, ::User
+    prop :objects, _Any
+    prop :pagination_data, _Any
+    prop :all_users, _Boolean, default: false
+
+    def view_template
+      container_class(:full)
+      add_page_title(:image_reuse_title.t(name: @user.legal_name))
+
+      render(::Views::Controllers::Shared::ImagesToReuseForm.new(
+               form_action: form_action,
+               user: @user,
+               objects: @objects,
+               pagination_data: @pagination_data,
+               all_users: @all_users
+             ))
+    end
+
+    private
+
+    def form_action
+      { controller: "/account/profile/images",
+        action: :attach,
+        id: @user.id }
+    end
+  end
+end

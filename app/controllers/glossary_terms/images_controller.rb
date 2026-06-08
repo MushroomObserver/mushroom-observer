@@ -6,11 +6,21 @@
 
 module GlossaryTerms
   class ImagesController < ApplicationController
+    include ::ImageReusable
+
     before_action :login_required
 
     # reuse_image_for_glossary_term
     def reuse
       @object = GlossaryTerm.safe_find(params[:id])
+      load_images_to_reuse
+      render(Views::Controllers::GlossaryTerms::Images::Reuse.new(
+               object: @object,
+               user: @user,
+               objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ))
     end
 
     # reuse image form buttons POST here
@@ -18,12 +28,7 @@ module GlossaryTerms
       @object = GlossaryTerm.safe_find(params[:id])
 
       image = Image.safe_find(params[:img_id])
-      unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        render(:reuse,
-               location: reuse_images_for_glossary_term_path(params[:img_id]))
-        return
-      end
+      return render_reuse_with_invalid_id_error unless image
 
       attach_image_to_glossary_term(image)
     end
@@ -35,6 +40,22 @@ module GlossaryTerms
     # The actual grid of attachable images (partial) is a shared layout.
     # CRUD refactor makes each image link POST to create or edit.
 
+    def render_reuse_with_invalid_id_error
+      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+      render_reuse_page
+    end
+
+    def render_reuse_page
+      load_images_to_reuse
+      render(
+        Views::Controllers::GlossaryTerms::Images::Reuse.new(
+          object: @object, user: @user, objects: @reuse_images,
+          pagination_data: @reuse_pagination, all_users: @reuse_all_users
+        ),
+        location: reuse_images_for_glossary_term_path(params[:img_id])
+      )
+    end
+
     def attach_image_to_glossary_term(image = nil)
       if image &&
          @object.add_image(image) &&
@@ -43,8 +64,7 @@ module GlossaryTerms
         redirect_to(glossary_term_path(@object.id))
       else
         flash_error(:runtime_no_save.t(:glossary_term)) if image
-        render(:reuse,
-               location: reuse_images_for_glossary_term_path(params[:img_id]))
+        render_reuse_page
       end
     end
 

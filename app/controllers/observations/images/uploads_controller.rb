@@ -12,13 +12,18 @@ module Observations::Images
     # with the obs.
     # This action returns formatted HTML (upload image template) for one image
     # to the Stimulus form-images_controller. This is added to the page
-    # when uploading multiple images on create observation.
+    # when uploading multiple images on create observation. Returns two
+    # turbo_stream actions: prepend a FormCarouselItem to `#added_images`
+    # and a CarouselThumbnail to `#added_thumbnails`.
     # was multi_image_template
     def new
       @user = User.current = session_user # || raise("Must be logged in.")
       @licenses = License.available_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now,
                          copyright_holder: @user.legal_name)
+      render(turbo_stream: [
+               prepend_form_carousel_item, prepend_carousel_thumbnail
+             ])
     end
 
     # Uploads an image object without an observation.
@@ -35,6 +40,31 @@ module Observations::Images
     end
 
     private
+
+    def prepend_form_carousel_item
+      turbo_stream.prepend(
+        "added_images",
+        ::Components::FormCarouselItem.new(
+          user: @user, image: @image,
+          img_id: params[:img_id], index: params[:index].to_i,
+          upload: true, obs_thumb_id: nil,
+          camera_info: { file_name: params[:file_name],
+                         file_size: params[:file_size] }
+        )
+      )
+    end
+
+    def prepend_carousel_thumbnail
+      turbo_stream.prepend(
+        "added_thumbnails",
+        ::Components::CarouselThumbnail.new(
+          user: @user, image: @image,
+          img_id: params[:img_id], index: params[:index].to_i,
+          upload: true,
+          carousel_id: "observation_upload_images_carousel"
+        )
+      )
+    end
 
     def render_image(image, args)
       name = args[:original_name].to_s
