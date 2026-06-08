@@ -138,6 +138,8 @@ peltigera_user_desc:
   gen_desc: "Mary's general description of _Peltigera_."
   source_type: <%= NameDescription.source_types[:user] %>
   public: 0
+  license: ccnc25
+  version: 2
   admin_groups: mary_only
   authors: mary
   reader_groups: mary_only, dick_only

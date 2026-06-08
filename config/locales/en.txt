@@ -1018,6 +1018,9 @@
   # descriptions in the show_name page.
   description_part_title_public: Public [:DESCRIPTION]
   description_part_title_user: "[USER]'s [:DESCRIPTION]"
+  description_part_title_project: "[USER]'s Draft"
+  description_part_title_source: "[:DESCRIPTION]"
+  description_part_title_foreign: "[:DESCRIPTION]"
 
   # Name/location description types. These are used when listing the available
   # descriptions in the show_name page, but this time the optional text field was
@@ -3243,13 +3246,13 @@
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
-  inat_import_list: "Comma separated list of up to about 384 observation #s"
+  inat_import_list: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
   inat_import_all: Import all my iNat observations instead of a list
   inat_import_others: Import other users' observations
   inat_import_consent: "(Required) I consent to importing my iNaturalist observations into Mushroom Observer, including any unlicensed observations and images, with my default MO license applied to any unlicensed images."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
-  runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
+  runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_list_xor_all: "Either (a) list the iNat observation(s), or (b) check \"Import all ...\" (not both)"

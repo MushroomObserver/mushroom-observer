@@ -2,7 +2,7 @@
 container_class(:full)
 add_index_title(@query)
 add_context_nav(Tab::Herbarium::Index.new(query: @query))
-add_sorter(@query, herbaria_index_sorts(query: @query))
+add_sorter(@query, controller.index_sort_options)
 add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?

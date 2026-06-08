@@ -1,19 +1,10 @@
 # frozen_string_literal: true
 
-# Non-tab helpers for project-related views: the sort-options list
-# consumed by `add_sorter` on the projects index, the project-banner
-# `content_for` setter, and the buttons row rendered above the
+# Non-tab helpers for project-related views: the project-banner
+# `content_for` setter and the buttons row rendered above the
 # project-scoped observation listing on the observations index.
+# Sort options now live on `ProjectsController#index_sort_options`.
 module ProjectsHelper
-  def projects_index_sorts
-    [
-      ["name", :sort_by_title.l],
-      ["created_at",  :sort_by_created_at.l],
-      ["updated_at",  :sort_by_updated_at.l],
-      ["summary", :sort_by_summary.l]
-    ].freeze
-  end
-
   def add_project_banner(project)
     content_for(:project_banner) do
       render(Views::Controllers::Projects::Banner.new(

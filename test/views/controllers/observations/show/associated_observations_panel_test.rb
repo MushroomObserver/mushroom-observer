@@ -16,18 +16,22 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanelTest <
     html = render(panel_with(siblings: [], occurrence: nil))
 
     assert_html(
-      html, "a[href='#{routes.new_occurrence_path(observation_id: @obs.id)}']"
+      html,
+      "a[href='#{routes.new_occurrence_path(observation_id: @obs.id)}']",
+      text: :show_observation_add_matching_observations.l
     )
-    assert_includes(html, :show_observation_add_matching_observations.l)
-    # No body when no siblings.
-    assert_no_html(html, ".panel-body ul")
+    assert_no_html(html, ".panel-body ul",
+                   "Expected no sibling list when occurrence is nil")
   end
 
   def test_siblings_render_with_occurrence_link
-    occurrence = Occurrence.joins(:observations).group("occurrences.id").
-                 having("count(observations.id) > 1").first ||
-                 skip("Need an occurrence with multiple observations")
-    siblings = occurrence.observations.to_a
+    occurrence = occurrences(:occ_field_slip_one)
+    loc = locations(:obs_default_location)
+    Observation.create!(user: users(:rolf), when: Time.zone.now,
+                        location: loc, where: loc.name,
+                        name: names(:boletus_edulis),
+                        occurrence: occurrence)
+    siblings = occurrence.observations.reload.to_a
 
     html = render(panel_with(siblings: siblings, occurrence: occurrence))
 

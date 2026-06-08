@@ -18,7 +18,9 @@ module Views::Controllers::SpeciesLists
     def view_template
       add_project_banner(@project) if @project
       add_index_title(@query)
-      add_sorter(@query, sort_options)
+      # Sort table lives on the controller — single source of
+      # truth for both view rendering and `check_index_sorting`.
+      add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
       container_class(:wide)
 
@@ -29,25 +31,22 @@ module Views::Controllers::SpeciesLists
 
     private
 
-    def sort_options
-      rss_log = @query&.params&.dig(:order_by) == "rss_log"
-      [
-        ["title",      :sort_by_title.t],
-        ["date",       :sort_by_date.t],
-        ["user",       :sort_by_user.t],
-        ["created_at", :sort_by_created_at.t],
-        [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t]
-      ]
-    end
-
     def render_list
       return unless @objects.any?
 
-      div(class: "list-group") do
+      # The d-flex / justify-content-between / align-items-start
+      # classes used to live on `Listing`'s outer wrapper. After
+      # moving the row wrapping into `Components::ListGroup#item`,
+      # those layout classes ride on the item itself.
+      render(Components::ListGroup.new) do |list|
         @objects.each do |species_list|
-          render(Views::Controllers::SpeciesLists::Listing.new(
-                   species_list: species_list, project: @project
-                 ))
+          list.item(
+            class: "d-flex justify-content-between align-items-start"
+          ) do
+            render(Listing.new(
+                     species_list: species_list, project: @project
+                   ))
+          end
         end
       end
     end

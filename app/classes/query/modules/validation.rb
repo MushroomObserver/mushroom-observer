@@ -39,7 +39,35 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       new_params[param] = val
     end
     @params = new_params
+    validate_order_by!
     assign_attributes(**@params) if @params.present?
+  end
+
+  # Pin the `order_by` param against what the model can actually
+  # honor. The `AbstractModel::OrderingScopes#order_by` dispatcher
+  # silently falls back to `all` (effectively `id: :desc`) when the
+  # supplied key has no matching `order_by_<key>` private method on
+  # the model. That silent fallback used to surface as a sort
+  # dropdown whose options did nothing — a typo in a controller's
+  # `index_sort_options` would render correctly but sort wrong.
+  # Now we add a validation error at Query construction so the
+  # mistake is loud.
+  #
+  # Mirrors the dispatcher's logic exactly: blank → fine (default
+  # order kicks in), `:none` → fine (no-op order), `reverse_X` →
+  # strip prefix then check `order_by_X`.
+  def validate_order_by!
+    key = @params[:order_by]
+    return if key.blank?
+    return if key.to_s == "none"
+
+    base = key.to_s.delete_prefix("reverse_")
+    return if model.private_methods(false).include?(:"order_by_#{base}")
+
+    @validation_errors << "Query::#{model.name.pluralize} does not " \
+                          "accept order_by: `#{key}` — no " \
+                          "`#{model}.order_by_#{base}` scope is " \
+                          "defined."
   end
 
   private

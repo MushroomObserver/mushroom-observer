@@ -12,7 +12,7 @@ all_links = if (params[:id].present? ||
             else
               true
             end
-add_sorter(@query, locations_index_sorts(query: @query), link_all: all_links)
+add_sorter(@query, controller.index_sort_options, link_all: all_links)
 @known_pages = @pagination_data
 @known_data  = @objects
 add_pagination(@pagination_data)

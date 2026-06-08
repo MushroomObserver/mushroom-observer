@@ -13,6 +13,9 @@ module Names
       return unless find_name!
 
       initialize_tracking_form_new
+      render(Views::Controllers::Names::Trackers::New.new(
+               name: @name, note_template: @note_template
+             ))
     end
 
     def create
@@ -28,6 +31,10 @@ module Names
       return redirect_to(new_tracker_of_name_path(@name)) unless @name_tracker
 
       initialize_tracking_form_edit
+      render(Views::Controllers::Names::Trackers::Edit.new(
+               name: @name, name_tracker: @name_tracker,
+               note_template: @note_template
+             ))
     end
 
     def update

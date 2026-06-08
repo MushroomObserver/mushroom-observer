@@ -9,7 +9,7 @@
 module Views::Controllers::Comments
   class Edit < Views::Base
     prop :comment, ::Comment
-    prop :target, _Any
+    prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
 
     def view_template

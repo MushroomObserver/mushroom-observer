@@ -23,12 +23,17 @@ module Views::Controllers::Comments
     include Phlex::Rails::Helpers::TurboStreamFrom
     include Phlex::Rails::Helpers::DOMID
 
-    # `object` is whatever commentable model is being shown
-    # (Observation, Name, Project, Location, SpeciesList, …); the
-    # panel only reads `.id`, `.class.name`, and uses it as the
-    # Action Cable broadcast key, so a concrete type isn't needed.
-    prop :object, _Any
-    prop :comments, _Any
+    # `object` is whatever commentable model is being shown.
+    # `Comment::ALL_TYPES` enumerates the polymorphic target set
+    # (Observation, Name, Project, Location, SpeciesList,
+    # LocationDescription, NameDescription); all inherit from
+    # `AbstractModel`.
+    prop :object, ::AbstractModel
+    prop :comments,
+         _Nilable(
+           _Union(Array, ::ActiveRecord::Relation,
+                  ::ActiveRecord::Associations::CollectionProxy)
+         )
     prop :user, _Nilable(::User), default: nil
     # When true, render the "+ Add comment" header link, per-row
     # mod-links, and the footer "and N more" link. Callers pass

@@ -7,6 +7,11 @@ module Names::Lifeforms
 
     def edit
       @name = find_or_goto_index(Name, params[:id])
+      return unless @name
+
+      render(Views::Controllers::Names::Lifeforms::Propagate::Edit.new(
+               name: @name
+             ))
     end
 
     def update

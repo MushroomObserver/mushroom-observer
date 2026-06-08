@@ -120,6 +120,14 @@ peltigera_user_desc_version_1:
   updated_at: 2010-01-02 01:01:01
   user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
   version: 1
+
+peltigera_user_desc_version_2:
+  name_description_id: <%= ActiveRecord::FixtureSet.
+   identify(:peltigera_user_desc) %>
+  updated_at: 2010-01-03 01:01:01
+  user_id: <%= ActiveRecord::FixtureSet.identify(:mary) %>
+  version: 2
+  license_id: <%= ActiveRecord::FixtureSet.identify(:ccnc25) %>
   gen_desc: "Mary's general description of _Peltigera_."
 
 peltigera_source_desc_version_1:

@@ -1,7 +1,7 @@
 <%
 container_class(:full)
 add_index_title(@query)
-add_sorter(@query, users_index_sorts(admin: in_admin_mode?))
+add_sorter(@query, controller.index_sort_options)
 add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?

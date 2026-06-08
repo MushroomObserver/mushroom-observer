@@ -24,21 +24,3 @@ Rails.autoloaders.main.push_dir(
 Rails.autoloaders.main.push_dir(
   Rails.root.join("app/components"), namespace: Components
 )
-
-# Make every top-level `Tabs::*Helper` module callable from any Phlex
-# view (no `helpers.*` proxy, no per-class `register_value_helper`).
-# This runs inside `to_prepare` so it works both at boot (after
-# eager-load in production) and on every code reload (development).
-#
-# Nested helpers under `Tabs::Sidebar::*`, `Tabs::Locations::*`,
-# `Tabs::Names::*` are NOT included here — they stay scoped to their
-# specific callers (e.g. `Views::Layouts::ApplicationSidebar` includes
-# `Tabs::Sidebar::AdminHelper` etc. explicitly).
-Rails.application.config.to_prepare do
-  Tabs.constants.each do |name|
-    next unless name.to_s.end_with?("Helper")
-
-    mod = Tabs.const_get(name)
-    Views::Base.include(mod) if mod.is_a?(Module)
-  end
-end

@@ -9,6 +9,22 @@ class ObservationsController
       build_index_with_query
     end
 
+    # Sort options for the index page. Consumed by `add_sorter` and
+    # `check_index_sorting`. Each key must resolve to
+    # `Observation.order_by_<key>`.
+    def index_sort_options
+      [
+        ["rss_log",           :sort_by_activity.l],
+        ["date",              :sort_by_date.l],
+        ["created_at",        :sort_by_posted.l],
+        ["name",              :sort_by_name.l],
+        ["user",              :sort_by_user.l],
+        ["confidence",        :sort_by_confidence.l],
+        ["thumbnail_quality", :sort_by_thumbnail_quality.l],
+        ["num_views",         :sort_by_num_views.l]
+      ].freeze
+    end
+
     private
 
     # Default on home is :rss_log (:log_updated_at), not :date.

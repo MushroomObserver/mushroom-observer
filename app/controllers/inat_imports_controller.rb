@@ -88,6 +88,8 @@ class InatImportsController < ApplicationController
   def create
     return reload_form if params[:go_back] == "1"
     return reload_form unless params_valid?
+
+    normalize_inat_ids_param!
     return confirm_import unless params[:confirmed] == "1"
 
     warn_about_listed_previous_imports
@@ -150,7 +152,7 @@ class InatImportsController < ApplicationController
   def reload_form
     render_new_form(
       username: params[:inat_username],
-      inat_ids: sanitize_inat_ids(params[:inat_ids]),
+      inat_ids: params[:inat_ids],
       all: params[:all],
       consent: params[:consent],
       import_others: params[:import_others]
@@ -190,11 +192,20 @@ class InatImportsController < ApplicationController
     params[:all] ||= new_form[:all]
   end
 
-  # Sanitize to only digits, commas, and whitespace, then trim
-  def sanitize_inat_ids(ids)
+  # For storage: extract only digit tokens and join with commas.
+  def normalize_inat_ids(ids)
     return nil if ids.nil?
 
-    ids.gsub(/[^\d,\s]/, "").strip.chomp(",").strip
+    ids.split(/[\s,]+/).grep(/\A\d+\z/).join(",")
+  end
+
+  # Normalize params[:inat_ids] in-place once after validation so all
+  # downstream readers (estimators, confirm form, init_ivars) see a
+  # clean comma-separated digit-only string.
+  def normalize_inat_ids_param!
+    return unless listing_ids?
+
+    params[:inat_ids] = normalize_inat_ids(params[:inat_ids])
   end
 
   # Were any listed iNat IDs previously imported?
@@ -246,7 +257,7 @@ class InatImportsController < ApplicationController
   def importables_count
     return nil if importing_all?
 
-    params[:inat_ids].split(",").length
+    inat_id_list.length
   end
 
   # Returns whether this import covers other users' observations.
@@ -258,7 +269,7 @@ class InatImportsController < ApplicationController
   end
 
   def clean_inat_ids
-    inat_ids = sanitize_inat_ids(params[:inat_ids])
+    inat_ids = normalize_inat_ids(params[:inat_ids])
     previous_imports = previously_imported_observations
     return inat_ids if previous_imports.none?
 
