@@ -154,7 +154,15 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("#observation_where_gps", text: gps_re)
     assert_select("#observation_where_gps i", text: hidden_re)
 
+    # roy admins current_project (which contains this obs). Per #4439, a
+    # project admin can reveal hidden GPS only when the owner is a
+    # trusting member — not when the owner (mary) is a non-member.
     login("roy")
+    get(:show, params: { id: obs.id })
+    assert_select("#observation_where_gps", text: gps_re, count: 0)
+
+    ProjectMember.create!(project: projects(:current_project),
+                          user: obs.user, trust_level: "hidden_gps")
     get(:show, params: { id: obs.id })
     assert_select("#observation_where_gps", text: gps_re)
     assert_select("#observation_where_gps i", text: hidden_re)
