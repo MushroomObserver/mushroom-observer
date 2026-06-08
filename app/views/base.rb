@@ -27,7 +27,15 @@ class Views::Base < Components::Base
   register_value_helper :add_sorter
   register_value_helper :container_class
   register_value_helper :column_classes
-  register_value_helper :content_for
+  # `Phlex::Rails::Helpers::ContentFor` exposes both `content_for(...)`
+  # (read/write the buffer) and `content_for?(...)` (presence check)
+  # in Phlex views. Page-chrome views (`Header`, `PageTitle`,
+  # `TopNav`) need `content_for?` for conditional rendering.
+  include Phlex::Rails::Helpers::ContentFor
+
+  # `content_padding` is the MO-specific layout-class setter
+  # (`:panels` / `:no_panels` / etc.) that the application layout
+  # reads. Not part of `Phlex::Rails::Helpers::ContentFor`.
   register_value_helper :content_padding
   register_value_helper :flash_error
   # `paginated_results` takes a block and emits the surrounding

@@ -56,7 +56,9 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
         <div id="right_side" class="col-xs-12 col-md-10">
           <%= render(partial: "application/top_nav") %>
           <%= render(partial: "application/app/page_flash") %>
-          <%= render(partial: "application/content/header") %>
+          <%= render(Views::Controllers::Application::Content::Header.new(
+            any_content_filters_applied: @any_content_filters_applied
+          )) %>
 
           <main id="content" class="<%= content_classes %>"
               data-controller="lightgallery">
