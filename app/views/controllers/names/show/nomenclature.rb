@@ -106,7 +106,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def render_citation_paragraph
     p do
       plain("#{:CITATION.l}: ")
-      raw(@name.citation.to_s.tl) # rubocop:disable Rails/OutputSafety
+      trusted_html(@name.citation.to_s.tl)
     end
   end
 
