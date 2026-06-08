@@ -324,7 +324,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     post(:create, params: params)
     assert_response(:success)
-    assert_select("body.comments__create")
+    assert_select("body.comments__new")
     assert_select("form#comment_form")
   end
 
