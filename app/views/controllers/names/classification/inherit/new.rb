@@ -7,10 +7,10 @@ class Views::Controllers::Names::Classification::Inherit::New <
   Views::Base
   prop :name, ::Name
   prop :parent_text_name, _Nilable(String), default: nil
-  # `@options` carries the ambiguous-parent disambiguation list —
+  # `@candidates` carries the ambiguous-parent disambiguation list —
   # an Array of `::Name` candidates when the user's
   # `parent_text_name` matched multiple Names.
-  prop :options, _Nilable(_Array(::Name)), default: nil
+  prop :candidates, _Nilable(_Array(::Name)), default: nil
   # The controller passes a translation key Symbol (e.g.
   # `:inherit_classification_alt_spellings`) and the form
   # localizes it for display.
@@ -25,7 +25,7 @@ class Views::Controllers::Names::Classification::Inherit::New <
 
     render(Views::Controllers::Names::Classification::Inherit::Form.new(
              name: @name, parent: @parent_text_name,
-             options: @options, message: @message
+             candidates: @candidates, message: @message
            ))
   end
 end

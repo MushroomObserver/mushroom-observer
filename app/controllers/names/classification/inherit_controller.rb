@@ -23,7 +23,7 @@ module Names::Classification
                           to_s.strip_html.strip_squeeze
       parent = resolve_name!(
         @parent_text_name,
-        params.dig(:inherit_classification, :options)
+        params.dig(:inherit_classification, :candidates)
       )
       unless parent && make_sure_parent_has_classification!(parent) &&
              make_sure_parent_higher_rank!(parent)
@@ -40,7 +40,7 @@ module Names::Classification
       render(Views::Controllers::Names::Classification::Inherit::New.new(
                name: @name,
                parent_text_name: @parent_text_name,
-               options: @options,
+               candidates: @candidates,
                message: @message
              ),
              location: form_to_inherit_classification_of_name_path)

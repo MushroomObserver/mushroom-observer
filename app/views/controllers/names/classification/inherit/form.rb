@@ -5,9 +5,9 @@
 # FormObject internally from the provided kwargs.
 module Views::Controllers::Names::Classification::Inherit
   class Form < ::Components::ApplicationForm
-    def initialize(name:, parent: nil, options: nil, message: nil, **)
+    def initialize(name:, parent: nil, candidates: nil, message: nil, **)
       @name = name
-      @options = options
+      @candidates = candidates
       @message = message
 
       form_object = FormObject::InheritClassification.new(parent: parent)
@@ -15,7 +15,7 @@ module Views::Controllers::Names::Classification::Inherit
     end
 
     def view_template
-      render_options_alert if @options
+      render_candidates_alert if @candidates
 
       text_field(:parent, label: "#{:inherit_classification_parent_name.l}:",
                           data: { autofocus: true }, inline: true)
@@ -25,11 +25,11 @@ module Views::Controllers::Names::Classification::Inherit
 
     private
 
-    def render_options_alert
+    def render_candidates_alert
       render(Components::Alert.new(level: :warning)) do
         trusted_html(@message.tp)
-        options = @options.map { |opt| [opt.id, opt.display_name.t] }
-        radio_field(:options, *options)
+        options = @candidates.map { |opt| [opt.id, opt.display_name.t] }
+        radio_field(:candidates, *options)
       end
     end
 

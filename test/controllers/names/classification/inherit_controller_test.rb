@@ -58,7 +58,7 @@ module Names::Classification
       assert_no_flash
       assert_response(:success)
       assert_not_blank(assigns(:message))
-      assert_not_empty(assigns(:options))
+      assert_not_empty(assigns(:candidates))
       assert_select("label", text: "Agaricales")
       assert_input_value("inherit_classification_parent", "Agariclaes")
 
@@ -78,7 +78,7 @@ module Names::Classification
       assert_no_flash
       assert_response(:success)
       assert_not_blank(assigns(:message))
-      assert_not_empty(assigns(:options))
+      assert_not_empty(assigns(:candidates))
       assert_select("input[type=radio][value='#{parent1.id}']", count: 1)
       assert_select("input[type=radio][value='#{parent2.id}']", count: 1)
       assert_select("input[type=radio][value='#{parent3.id}']", count: 1)
@@ -89,7 +89,7 @@ module Names::Classification
            params: { id: name.id,
                      inherit_classification: {
                        parent: "Agaricaceae",
-                       options: names(:coprinus_comatus).id
+                       candidates: names(:coprinus_comatus).id
                      } })
       assert_flash_error
       assert_response(:success)
@@ -102,7 +102,7 @@ module Names::Classification
            params: { id: name.id,
                      inherit_classification: { parent: "Agaricaceae" } })
       assert_no_flash
-      assert_name_arrays_equal([], assigns(:options))
+      assert_name_arrays_equal([], assigns(:candidates))
       assert_blank(assigns(:message))
       assert_redirected_to(name.show_link_args)
       new_str = "#{parent1.classification}\r\nFamily: _Agaricaceae_\r\n"
