@@ -517,7 +517,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within("#observation_form") { click_commit }
 
     # rejected, but images uploaded
-    assert_selector("body.observations__create", wait: 12)
+    assert_selector("body.observations__new", wait: 12)
     assert_flash_for_images_uploaded
     assert_has_location_warning(/Unknown country/)
 
