@@ -6,9 +6,9 @@
 module Views::Controllers::Observations::Images
   class Edit < Views::Base
     prop :image, ::Image
-    prop :licenses, _Array(_Array(_Any))
+    prop :licenses, _Array(Array)
     prop :projects, _Array(::Project), default: -> { [] }
-    prop :submitted_project_ids, _Nilable(_Array(_Any)), default: nil
+    prop :submitted_project_ids, _Nilable(_Array(String)), default: nil
     prop :user, _Nilable(::User), default: nil
 
     def view_template

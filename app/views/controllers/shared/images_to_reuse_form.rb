@@ -23,8 +23,8 @@ module Views::Controllers::Shared
 
     prop :form_action, Hash
     prop :user, _Nilable(::User), default: nil
-    prop :objects, _Any
-    prop :pagination_data, _Any
+    prop :objects, _Array(::Image)
+    prop :pagination_data, ::PaginationData
     prop :all_users, _Boolean, default: false
 
     def view_template

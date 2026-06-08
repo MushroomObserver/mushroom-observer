@@ -9,7 +9,7 @@ module Views::Controllers::Observations::Locations
   class Edit < Views::Base
     prop :where, String
     prop :matches, _Array(::Location)
-    prop :pagination_data, _Any
+    prop :pagination_data, ::PaginationData
     prop :user, _Nilable(::User), default: nil
 
     def view_template
