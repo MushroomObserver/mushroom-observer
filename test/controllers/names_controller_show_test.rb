@@ -200,6 +200,21 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_select("#nomenclature")
   end
 
+  def test_citation_url_renders_as_link
+    url = "http://example.com/protologue"
+    name = names(:peltigera)
+    name.update!(citation: url)
+
+    login
+    get(:show, params: { id: name.id })
+
+    assert_select(
+      "#nomenclature a[href='#{url}']",
+      { count: 1 },
+      "Citation URL should render as a clickable link"
+    )
+  end
+
   def test_name_external_links_exist
     login
     get(:show, params: { id: names(:coprinus_comatus).id })

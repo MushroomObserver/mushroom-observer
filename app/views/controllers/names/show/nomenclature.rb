@@ -104,7 +104,10 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_citation_paragraph
-    p { plain("#{:CITATION.l}: #{@name.citation.to_s.tl.strip_html}") }
+    p do
+      plain("#{:CITATION.l}: ")
+      raw(@name.citation.to_s.tl) # rubocop:disable Rails/OutputSafety
+    end
   end
 
   # --- Icon links (computed once, cached) ---------------------------
