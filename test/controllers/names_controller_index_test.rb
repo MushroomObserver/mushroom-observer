@@ -279,7 +279,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_template("index")
+    assert_select("body.names__index")
     assert_flash_text(:runtime_no_matches.l(type: :names.l))
   end
 

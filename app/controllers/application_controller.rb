@@ -53,7 +53,9 @@ class ApplicationController < ActionController::Base
   before_action :track_translations
   before_action :set_languages
 
-  # Make show_name_helper available to nested partials
+  # `names_index_sorts` is consumed by test infrastructure
+  # (`GeneralExtensions#index_sorts` → `check_index_sorting`).
+  # The runtime sort list is owned by the Phlex view.
   helper :names
 
   # Disable most filters to streamline some actions, e.g., API.

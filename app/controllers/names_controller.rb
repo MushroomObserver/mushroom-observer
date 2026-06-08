@@ -15,6 +15,20 @@ class NamesController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view`
+  # to render the Phlex Index view directly with the controller-
+  # populated ivars as explicit props. Replaces the implicit
+  # `render(action: :index)` lookup of `index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::Names::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user, error: @error,
+             help: @help, has_descriptions: @has_descriptions || false,
+             name_suggestions: @name_suggestions,
+             test_pagination_args: @test_pagination_args || {}
+           ))
+  end
+
   private
 
   def default_sort_order
