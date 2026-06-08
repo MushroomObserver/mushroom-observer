@@ -716,6 +716,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:OBSERVATIONS.l)
   end
 
+  # Covers the `return unless (project = find_or_goto_index(...))`
+  # bail-out in `ObservationsController::Index#project` (L169).
+  def test_index_project_with_unknown_id_redirects
+    login
+    get(:index, params: { project: 999_999_999 })
+
+    assert_redirected_to(projects_path)
+  end
+
   def test_index_project_banner_from_query_param
     project = projects(:eol_project)
 
@@ -749,6 +758,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:success)
     assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:species_lists.l}: #{spl.title}")
+  end
+
+  # Covers the `return unless (spl = find_or_goto_index(...))`
+  # bail-out in `ObservationsController::Index#species_list` (L181).
+  def test_index_species_list_with_unknown_id_redirects
+    login
+    get(:index, params: { species_list: 999_999_999 })
+
+    assert_redirected_to(species_lists_path)
   end
 
   def test_index_species_list_without_observations

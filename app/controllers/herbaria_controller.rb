@@ -221,13 +221,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     end
   end
 
-  def modal_form_action
-    case action_name
-    when "new", "create" then :create
-    when "edit", "update" then :update
-    end
-  end
-
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
   def create
