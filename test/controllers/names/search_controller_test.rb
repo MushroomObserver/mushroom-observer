@@ -10,11 +10,28 @@ module Names
     def test_show_help
       login
       get(:show)
+
+      assert_response(:success)
+      assert_select("body.search__show")
+      # Search-help block: the `Help` Phlex view emits a
+      # `<p>NAMES SEARCHES</p>` header followed by textilized help.
+      assert_select("body.search__show p",
+                    { text: /#{:NAMES.t}.*#{:SEARCHES.t}/i, minimum: 1 },
+                    "Search help block did not render")
     end
 
     def test_show_help_turbo
       login
       get(:show, format: :turbo_stream)
+
+      assert_response(:success)
+      # Controller emits `turbo_stream.update(:search_bar_help, …)` —
+      # assert the stream targets the right frame.
+      assert_select(
+        "turbo-stream[action='update'][target='search_bar_help']",
+        { minimum: 1 },
+        "Expected turbo-stream update for search_bar_help"
+      )
     end
 
     def test_new_names_search

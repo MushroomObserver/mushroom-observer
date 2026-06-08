@@ -15,18 +15,30 @@ module Names
     def test_map_names
       login
       get(:show, params: { id: names(:agaricus_campestris).id })
+
+      assert_response(:success)
+      assert_select("body.maps__show")
+      assert_select("#map_cap_banner")
     end
 
     # name with Observations that don't have Locations
     def test_map_names_no_loc
       login
       get(:show, params: { id: names(:coprinus_comatus).id })
+
+      assert_response(:success)
+      assert_select("body.maps__show")
+      assert_select("#map_cap_banner")
     end
 
     # name with no Observations
     def test_map_names_no_obs
       login
       get(:show, params: { id: names(:conocybe_filaris).id })
+
+      assert_response(:success)
+      assert_select("body.maps__show")
+      assert_select("#map_cap_banner")
     end
 
     # Regression: the Occurrence Map for a name must not inherit a

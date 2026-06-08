@@ -20,13 +20,16 @@ class NamesController < ApplicationController
   # populated ivars as explicit props. Replaces the implicit
   # `render(action: :index)` lookup of `index.html.erb` (deleted).
   def render_index_view
-    render(Views::Controllers::Names::Index.new(
-             query: @query, pagination_data: @pagination_data,
-             objects: @objects, user: @user, error: @error,
-             help: @help, has_descriptions: @has_descriptions || false,
-             name_suggestions: @name_suggestions,
-             test_pagination_args: @test_pagination_args || {}
-           ))
+    args = {
+      query: @query, pagination_data: @pagination_data,
+      objects: @objects, user: @user, error: @error,
+      help: @help, has_descriptions: @has_descriptions || false,
+      name_suggestions: @name_suggestions
+    }
+    # Only set when populated, so the view's `default: -> { {} }`
+    # fires for the common case (only `test_index` sets the ivar).
+    args[:test_pagination_args] = @test_pagination_args if @test_pagination_args
+    render(Views::Controllers::Names::Index.new(**args))
   end
 
   private

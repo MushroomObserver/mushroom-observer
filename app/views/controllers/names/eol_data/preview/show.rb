@@ -22,7 +22,11 @@ class Views::Controllers::Names::EolData::Preview::Show < Views::Base
     @names.select(&:ok_for_export).each do |name|
       odd_or_even = 1 - odd_or_even
       div(class: "ListLine#{odd_or_even} py-10px") do
-        plain(name.display_name.t.strip_html)
+        # Preserve textile-rendered italics/bold for scientific
+        # names — the legacy ERB used `.t` (which emits HTML). The
+        # initial conversion stripped the tags, dropping the
+        # italics; restored after Copilot review on #4474.
+        trusted_html(name.display_name.t)
       end
     end
   end

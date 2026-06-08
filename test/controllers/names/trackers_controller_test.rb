@@ -29,6 +29,35 @@ module Names
       assert_form_action(action: :update, id: name.id)
     end
 
+    # Hits the `above species` branch of the Phlex view's `help_blurb`
+    # (the `at_or_below_species?` else-arm). The default fixture
+    # (`coprinus_comatus`) is below species, so a Genus name is needed.
+    def test_email_tracking_new_above_species_help
+      name = names(:suillus_by_white)
+      assert_not(name.at_or_below_species?,
+                 "Test needs a name at or above genus")
+
+      login("rolf")
+      get(:new, params: { id: name.id })
+
+      assert_response(:success)
+      assert_select("body.trackers__new")
+    end
+
+    def test_email_tracking_edit_above_species_help
+      name = names(:suillus_by_white)
+      assert_not(name.at_or_below_species?,
+                 "Test needs a name at or above genus")
+      NameTracker.create!(name: name, user: rolf,
+                          approved: true, note_template: "")
+
+      login("rolf")
+      get(:edit, params: { id: name.id })
+
+      assert_response(:success)
+      assert_select("body.trackers__edit")
+    end
+
     def test_email_tracking_edit_without_existing_tracker_redirects_to_new
       name = names(:conocybe_filaris)
       name_tracker = NameTracker.find_by(name: name, user: rolf)
