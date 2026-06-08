@@ -3,7 +3,8 @@
 add_page_title(
   :species_list_manage_title.t(name: @observation.unique_format_name)
 )
-add_sorter(@all_lists, species_lists_index_sorts(query: @all_lists))
+add_sorter(@all_lists,
+           SpeciesListsController.sort_options(query: @all_lists))
 add_context_nav(Tab::Observation::ListActions.new(observation: @observation))
 container_class(:wide)
 content_padding(:panels)

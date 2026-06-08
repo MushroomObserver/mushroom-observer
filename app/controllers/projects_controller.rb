@@ -13,6 +13,18 @@ class ProjectsController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Consumed by `add_sorter` and
+  # `check_index_sorting`. Each key must resolve to
+  # `Project.order_by_<key>`.
+  def index_sort_options
+    [
+      ["name",       :sort_by_title.l],
+      ["created_at", :sort_by_created_at.l],
+      ["updated_at", :sort_by_updated_at.l],
+      ["summary",    :sort_by_summary.l]
+    ].freeze
+  end
+
   private
 
   def default_sort_order

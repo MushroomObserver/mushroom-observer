@@ -5,7 +5,7 @@ add_index_title(@query)
 add_context_nav(Tab::CollectionNumber::IndexActions.new(
   observation: @observation
 ))
-add_sorter(@query, collection_numbers_index_sorts)
+add_sorter(@query, controller.index_sort_options)
 add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?

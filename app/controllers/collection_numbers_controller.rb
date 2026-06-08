@@ -13,6 +13,18 @@ class CollectionNumbersController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Consumed by `add_sorter` and
+  # `check_index_sorting`. Each key must resolve to
+  # `CollectionNumber.order_by_<key>`.
+  def index_sort_options
+    [
+      ["name",       :sort_by_name.l],
+      ["number",     :sort_by_number.l],
+      ["created_at", :sort_by_created_at.l],
+      ["updated_at", :sort_by_updated_at.l]
+    ].freeze
+  end
+
   private
 
   def default_sort_order

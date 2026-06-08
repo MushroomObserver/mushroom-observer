@@ -22,6 +22,21 @@ module Locations
       "LocationDescription"
     end
 
+    # Sort options for the index page. Same shape as
+    # `Names::DescriptionsController#index_sort_options` — both
+    # description indexes share the legacy
+    # `DescriptionsHelper#descriptions_index_sorts` tuple. Each
+    # key must resolve to `LocationDescription.order_by_<key>`.
+    def index_sort_options
+      [
+        ["name",       :sort_by_name.l],
+        ["created_at", :sort_by_created_at.l],
+        ["updated_at", :sort_by_updated_at.l],
+        ["user",       :sort_by_user.l],
+        ["num_views",  :sort_by_num_views.l]
+      ].freeze
+    end
+
     private
 
     # Is :name

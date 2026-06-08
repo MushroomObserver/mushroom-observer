@@ -72,6 +72,21 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
+  # Covers the `[query, {}]` success-return tuple at the end of
+  # `ImagesController#advanced_search` — `test_index_advanced_search_error`
+  # only exercises the rescue path.
+  def test_index_advanced_search_success
+    query = Query.lookup_and_save(:Image, has_notes: true)
+    assert(query.params.any?, "Test needs a query with conditions")
+
+    login
+    get(:index, params: { q: @controller.q_param(query),
+                          advanced_search: true })
+
+    assert_response(:success)
+    assert_select("body.images__index")
+  end
+
   # The pattern param is maintained only for backwards compatibility.
   # Should redirect to SearchController#pattern
   def test_index_pattern_param_redirected_to_search
