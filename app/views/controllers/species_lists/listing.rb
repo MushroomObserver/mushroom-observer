@@ -108,6 +108,9 @@ module Views::Controllers::SpeciesLists
     end
 
     # Inlined from `SpeciesListsHelper#species_list_add_obs_button`.
+    # `btn: "btn btn-default"` gives the ADD button the Bootstrap
+    # button-shape it had under the legacy helper — without it,
+    # the row's ADD action renders as a bare link.
     def render_add_obs_button
       render(Components::CrudButton::Put.new(
                name: :ADD.t,
@@ -115,7 +118,8 @@ module Views::Controllers::SpeciesLists
                  id: @observation.id,
                  species_list_id: @species_list.id,
                  commit: "add"
-               )
+               ),
+               btn: "btn btn-default"
              ))
     end
   end
