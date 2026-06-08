@@ -262,10 +262,9 @@ module Views::Controllers::Application::Content
       lookups = truncate ? ids.first(CAPTION_TRUNCATE) : ids
       subclass = PARAM_LOOKUPS[param]
       lookup = "Lookup::#{subclass}".constantize
-      # Use Set in case there are doubles (e.g. many Genus names).
-      joined_vals = Set.new(
-        lookup.new(lookups, include_misspellings: false).titles
-      ).join(", ")
+      # Use `uniq` to de-dupe while keeping a joinable Array.
+      joined_vals =
+        lookup.new(lookups, include_misspellings: false).titles.uniq.join(", ")
       return joined_vals unless truncate
 
       truncate_joined_string(joined_vals, ids)
