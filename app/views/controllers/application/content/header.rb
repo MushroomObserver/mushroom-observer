@@ -7,7 +7,7 @@
 #   - on non-index actions, the page title strip
 #     (`Header::PageTitle` — replaces `_page_title.erb`);
 #   - on index actions (and `maps` show), the index filter / pager
-#     bar (still ERB: `_index_bar.erb`);
+#     bar (`Header::IndexBar` — replaces `_index_bar.erb`);
 #   - the rss-log type-filter row and project observation-buttons
 #     row, both fed from content_for slots.
 #
