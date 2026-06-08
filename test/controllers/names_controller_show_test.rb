@@ -203,15 +203,22 @@ class NamesControllerShowTest < FunctionalTestCase
   def test_citation_url_renders_as_link
     url = "http://example.com/protologue"
     name = names(:peltigera)
-    name.update!(citation: url)
 
+    name.update!(citation: url)
     login
     get(:show, params: { id: name.id })
-
     assert_select(
       "#nomenclature a[href='#{url}']",
       { count: 1 },
-      "Citation URL should render as a clickable link"
+      "Bare URL citation should render as a clickable link"
+    )
+
+    name.update!(citation: "\"Protologue\":#{url}")
+    get(:show, params: { id: name.id })
+    assert_select(
+      "#nomenclature a[href='#{url}']",
+      { text: "Protologue", count: 1 },
+      "Textile-style citation should render as a link with correct text"
     )
   end
 
