@@ -7,9 +7,13 @@ module Observations::Namings
 
     def show
       @observation = load_for_show_observation_or_goto_index(params[:id])
-      consensus    = Observation::NamingConsensus.new(@observation)
-      @owner_name  = consensus.owner_preference
+      return unless @observation
+
       @suggestions = Suggestion.analyze(JSON.parse(params[:names].to_s))
+      render(Views::Controllers::Observations::Namings::Suggestions::Show.new(
+               observation: @observation, user: @user,
+               suggestions: @suggestions
+             ))
     end
   end
 end

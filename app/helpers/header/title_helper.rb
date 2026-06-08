@@ -72,14 +72,11 @@ module Header
     # display); recomputing here is the cost of keeping the model
     # free of view code.
     def observation_page_title(obs, user)
-      observation_show_title(
-        obs: obs, user: user,
-        show_owner_naming: owner_naming_line(
-          name: obs.name,
-          owner_name: ::Observation::NamingConsensus.new(obs).owner_preference,
-          user: user
-        )
-      )
+      # Aliased to a local because the `LocalizationFilesTest`
+      # regex picks up `:ConsensusNameLink` after the `::`
+      # namespace separator and flags it as a translation tag.
+      klass = ::Views::Controllers::Observations::ConsensusNameLink
+      render(klass.new(observation: obs, user: user))
     end
 
     # Look up the model's `document_title` (plain-text string) or
@@ -95,37 +92,12 @@ module Header
       :"#{object.type_tag.to_s.upcase}".l
     end
 
+    # Kept for the one remaining ERB caller (`names/_name.erb`).
+    # Phlex callers should `render(Components::IdBadge.new(...))`
+    # directly instead.
     def show_title_id_badge(object, classes = "mr-4")
-      tag.button(
-        object.id || "?",
-        type: "button",
-        class: class_names("badge badge-id", classes), role: "button",
-        data: {
-          toggle: "tooltip", placement: "bottom", title: :COPY_THIS_ID.l,
-          controller: "clipboard", clipboard_target: "source",
-          action: "clipboard#copy", clipboard_copied_value: :COPIED.l
-        }
-      )
-    end
-
-    # Div shows even without content to maintain layout
-    def show_page_edit_icons
-      classes = %w[
-        nav d-flex align-items-center justify-content-end mt-0 h4 object_edit
-      ]
-
-      tag.ul(class: class_names(classes)) do
-        content_for(:edit_icons)
-      end
-    end
-
-    # Div shows even without content to maintain layout
-    def show_page_interest_icons
-      classes = %w[nav navbar-flex interest-eyes h4 my-0]
-
-      tag.ul(class: class_names(classes)) do
-        content_for(:interest_icons)
-      end
+      render(Components::IdBadge.new(object: object,
+                                     extra_class: classes))
     end
 
     # The record title as a string, preceded by the object type and id:
@@ -192,12 +164,23 @@ module Header
     end
 
     # Show obs: observer's preferred naming.
-    # HTML tag is here so no empty header printed in case there is no naming
-    def add_owner_naming(naming)
-      return unless naming
+    # HTML tag is here so no empty header printed when the line
+    # shouldn't be shown. Takes the observation and viewer
+    # directly — `Views::Controllers::Observations::OwnerNamingLine`
+    # decides whether to render anything via its `visible_for?`
+    # predicate — checked here BEFORE rendering so a blank h5
+    # isn't emitted when the view ends up empty.
+    def add_owner_naming(observation:, user:)
+      # Aliased to a local because the `LocalizationFilesTest`
+      # regex picks up `:OwnerNamingLine` after a `::` namespace
+      # separator and flags it as an undefined translation tag.
+      klass = ::Views::Controllers::Observations::OwnerNamingLine
+      return unless klass.visible_for?(observation: observation,
+                                       user: user)
 
+      line = render(klass.new(observation: observation, user: user))
       content_for(:owner_naming) do
-        tag.h5(naming, class: "pl-3 mt-0 mb-4", id: "owner_naming")
+        tag.h5(line, class: "pl-3 mt-0 mb-4", id: "owner_naming")
       end
     end
 

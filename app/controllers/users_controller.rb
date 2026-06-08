@@ -17,7 +17,35 @@ class UsersController < ApplicationController
   # since there is a view with this name, it crashes each time.
   alias list_users index
 
+  # Sort options for the index page. Admin variant exposes extra
+  # internal sort keys (id, updated_at, last_login). Consumed by
+  # `add_sorter` and `check_index_sorting`. Each key must resolve
+  # to `User.order_by_<key>`.
+  def index_sort_options
+    return admin_index_sort_options if in_admin_mode?
+
+    [
+      ["login",        :sort_by_login.t],
+      ["name",         :sort_by_name.t],
+      ["created_at",   :sort_by_created_at.t],
+      ["location",     :sort_by_location.t],
+      ["contribution", :sort_by_contribution.t]
+    ].freeze
+  end
+
   private
+
+  def admin_index_sort_options
+    [
+      ["id",           :sort_by_id.t],
+      ["login",        :sort_by_login.t],
+      ["name",         :sort_by_name.t],
+      ["created_at",   :sort_by_created_at.t],
+      ["updated_at",   :sort_by_updated_at.t],
+      ["last_login",   :sort_by_last_login.t],
+      ["contribution", :sort_by_contribution.t]
+    ].freeze
+  end
 
   # NOTE: Only admins can get the full user index.
   # Others get here via search, so they shouldn't hit unfiltered_index

@@ -12,8 +12,14 @@
 #   )) %>
 class Views::Layouts::ApplicationSidebar < Views::Base
   prop :user, _Nilable(::User), default: nil
-  prop :browser, _Any
-  prop :request, _Any
+  # Duck-typed: only `#bot?` is read (in `_logo_link_path` and
+  # `_user_sections`). Accepts a real `Browser::Base` or any stub
+  # that responds to `#bot?`.
+  prop :browser, _Interface(:bot?)
+  # Duck-typed: only `#url` is read via `reload_with_args` from
+  # `ApplicationHelper`. Accepts an `ActionDispatch::Request` or any
+  # stub with `#url`.
+  prop :request, _Interface(:url)
   prop :in_admin_mode, _Nilable(_Boolean), default: false
   prop :languages, _Array(Language)
 

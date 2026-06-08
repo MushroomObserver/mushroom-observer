@@ -16,7 +16,7 @@ class Tab::LocationDescription::IndexActions < Tab::Collection
     [
       Tab::Location::Map.new(q_param: @q_param),
       Tab::Location::Index.new,
-      Tab::Related::Query.for(
+      Tab::RelatedQuery.for(
         model: Location, filter: :LocationDescription,
         current_query: @query, controller: @controller
       )

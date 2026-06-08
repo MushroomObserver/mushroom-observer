@@ -12,7 +12,7 @@ all_links = if (params[:id].present? ||
             else
               true
             end
-add_sorter(@query, locations_index_sorts(query: @query), link_all: all_links)
+add_sorter(@query, controller.index_sort_options, link_all: all_links)
 @known_pages = @pagination_data
 @known_data  = @objects
 add_pagination(@pagination_data)
@@ -36,8 +36,10 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
         <div class="list-group">
           <% @known_data.each do |location| %>
             <div class="list-group-item">
-              <%= location_link(location.name.t, location,
-                                observation_counts[location.id].to_i) %>
+              <%= render(Components::LocationLink.new(
+                            where: location.name.t, location: location,
+                            count: observation_counts[location.id].to_i
+                          )) %>
             </div>
           <% end %>
         </div>
@@ -57,14 +59,16 @@ flash_error(@error) if @error && @known_pages.empty? && @undef_pages.empty?
           <% @undef_data.each do |obs, count|
             location_name = obs[:where] %>
           <div class="list-group-item">
-            <%= location_link(location_name, nil, count) %>
-            <%= icon_link_to(
+            <%= render(Components::LocationLink.new(
+                          where: location_name, count: count
+                        )) %>
+            <%= render(Components::IconLink.new(
                   :list_place_names_merge.t,
                   matching_locations_for_observations_path(
                     where: location_name
                   ),
                   icon: :merge, show_text: false
-                ) %>
+                )) %>
           </div>
         <% end %>
       </div>

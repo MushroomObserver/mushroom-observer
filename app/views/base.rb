@@ -16,6 +16,7 @@ class Views::Base < Components::Base
   register_value_helper :add_new_title
   register_value_helper :add_edit_title
   register_value_helper :add_show_title
+  register_value_helper :add_owner_naming
   register_value_helper :add_index_title
   register_value_helper :add_context_nav
   register_value_helper :add_project_banner
@@ -26,16 +27,25 @@ class Views::Base < Components::Base
   register_value_helper :add_sorter
   register_value_helper :container_class
   register_value_helper :column_classes
-  register_value_helper :content_for
+  # `Phlex::Rails::Helpers::ContentFor` exposes both `content_for(...)`
+  # (read/write the buffer) and `content_for?(...)` (presence check)
+  # in Phlex views. Page-chrome views (`Header`, `PageTitle`,
+  # `TopNav`) need `content_for?` for conditional rendering.
+  include Phlex::Rails::Helpers::ContentFor
+
+  # `content_padding` is the MO-specific layout-class setter
+  # (`:panels` / `:no_panels` / etc.) that the application layout
+  # reads. Not part of `Phlex::Rails::Helpers::ContentFor`.
+  register_value_helper :content_padding
   register_value_helper :flash_error
   # `paginated_results` takes a block and emits the surrounding
   # pagination HTML around it — output helper, mark_safe so Phlex
   # trusts the returned SafeBuffer.
   register_output_helper :paginated_results, mark_safe: true
   # `controller` (the ActionController instance) is referenced from
-  # Phlex views that build `InternalLink::RelatedQuery.new(...)` to
-  # compute cross-model "related index" URLs (e.g. species-list show
-  # → Locations / Images links). ERB views have it for free; Phlex
+  # Phlex views that build `Tab::RelatedQuery.new(...)` to compute
+  # cross-model "related index" URLs (e.g. species-list show →
+  # Locations / Images links). ERB views have it for free; Phlex
   # views need it registered.
   register_value_helper :controller
 

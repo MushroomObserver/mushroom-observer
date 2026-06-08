@@ -16,6 +16,11 @@ module Names::Descriptions
       @name = @description.name
       @description.revert_to(params[:version].to_i)
       @versions = @description.versions
+
+      render(Views::Controllers::Names::Descriptions::Versions::Show.new(
+               description: @description, name: @name, user: @user,
+               versions: @versions
+             ))
     end
   end
 end

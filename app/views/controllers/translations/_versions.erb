@@ -34,7 +34,7 @@
                   user_id = version.user_id
                   login = user_logins[user_id] ||=
                     User.find(user_id).login rescue ""
-                  login.blank? ? "--" : user_link(user_id, login)
+                  login.blank? ? "--" : render(Components::UserLink.new(user: user_id, name: login))
                 end,
                 tag.td(version.updated_at.web_date),
                 tag.td do

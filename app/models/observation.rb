@@ -850,9 +850,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # the denormalized binomial-only column — no author, no id, no
   # markup. The title helper prepends "OBSERVATION <id>:" so we
   # don't need those here. (The visible page heading is built by
-  # `header/title_helper#page_title_for` via `observation_show_title`
-  # — wraps the consensus name in a link, which is view-layer work
-  # that can't live cleanly on the model.)
+  # `header/title_helper#page_title_for` via
+  # `Observations::ConsensusNameLink` — wraps the consensus name
+  # in a link, which is view-layer work that can't live cleanly on
+  # the model.)
   def document_title
     text_name
   end

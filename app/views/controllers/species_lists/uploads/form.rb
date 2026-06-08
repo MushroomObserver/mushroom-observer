@@ -13,7 +13,7 @@ module Views::Controllers::SpeciesLists::Uploads
     def view_template
       super do
         file_field(:file, label: "#{:species_list_upload_label.t}:")
-        help_block(:div, :species_list_upload_help.tp)
+        render(Components::HelpBlock.new(:div, :species_list_upload_help.tp))
         submit(:UPLOAD.l, center: true)
       end
     end

@@ -18,7 +18,12 @@ module Components
   #
   class ObjectFooter < Base
     prop :user, _Nilable(User)
-    prop :obj, _Any # Any versioned or non-versioned object
+    # Polymorphic across many model classes (Article, Description,
+    # FieldSlip, GlossaryTerm, Image, Location, Name, Observation,
+    # Occurrence, Sequence) with branches gated by `@obj.respond_to?`.
+    # Duck-typed on `created_at` — the one accessor the component
+    # always reaches.
+    prop :obj, _Interface(:created_at)
     prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
          default: -> { [] }
 
@@ -38,10 +43,15 @@ module Components
 
     private
 
-    # NOTE: We use view_context.user_link() instead of the registered output
-    # helper user_link() because we need the return value for interpolation
-    # into translation strings. Registered output helpers write directly to the
-    # Phlex buffer rather than returning a value.
+    # The user-link string gets interpolated into a textile i18n
+    # template (`:footer_*_by.t(user: …, date: …)`), so we need the
+    # rendered HTML as a value — not as a side-effect on the Phlex
+    # buffer. `capture { render(Components::UserLink.new(...)) }`
+    # redirects the component's output into a temp buffer and returns
+    # the resulting SafeBuffer.
+    def user_link_html(user)
+      capture { render(Components::UserLink.new(user: user)) }
+    end
 
     # Renders metadata for old versions of versioned objects
     def render_old_version_metadata(num_versions)
@@ -53,7 +63,7 @@ module Components
       user = User.safe_find(@obj.user_id)
       br
       trusted_html(:footer_updated_by.t(
-                     user: view_context.user_link(user),
+                     user: user_link_html(user),
                      date: @obj.updated_at.web_time
                    ))
     end
@@ -88,7 +98,7 @@ module Components
       latest_user = User.safe_find(@versions.last.user_id)
       br
       trusted_html(:footer_last_updated_by.t(
-                     user: view_context.user_link(latest_user),
+                     user: user_link_html(latest_user),
                      date: @obj.updated_at.web_time
                    ))
     end
@@ -103,7 +113,7 @@ module Components
       return unless @obj.created_at
 
       trusted_html(:footer_created_by.t(
-                     user: view_context.user_link(@obj.user),
+                     user: user_link_html(@obj.user),
                      date: @obj.created_at.web_time
                    ))
     end

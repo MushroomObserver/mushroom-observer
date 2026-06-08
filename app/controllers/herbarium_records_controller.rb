@@ -13,6 +13,20 @@ class HerbariumRecordsController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Consumed by `add_sorter` and
+  # `check_index_sorting`. Each key must resolve to
+  # `HerbariumRecord.order_by_<key>`.
+  def index_sort_options
+    [
+      ["herbarium_name",   :sort_by_herbarium_name.t],
+      ["herbarium_label",  :sort_by_herbarium_label.t],
+      ["initial_det",      :sort_by_initial_det.t],
+      ["accession_number", :sort_by_accession_number.t],
+      ["created_at",       :sort_by_created_at.t],
+      ["updated_at",       :sort_by_updated_at.t]
+    ].freeze
+  end
+
   private
 
   def default_sort_order
@@ -477,10 +491,11 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_herbarium_records_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "herbarium_records",
-                obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "herbarium_records",
+      panel: Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 

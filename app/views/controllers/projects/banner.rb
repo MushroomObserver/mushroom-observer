@@ -79,9 +79,9 @@ module Views::Controllers::Projects
 
       h1(class: title_classes, id: "title") do
         div(class: "d-flex align-items-center") do
-          show_title_id_badge(@project)
+          render(Components::IdBadge.new(object: @project))
           plain(" ")
-          link_to_object(@project)
+          render(Components::ObjectLink.new(object: @project))
         end
       end
     end

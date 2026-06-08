@@ -843,7 +843,53 @@ class ProjectTest < UnitTestCase
                  "Adding a prefix should claim a member's matching orphan")
   end
 
+  # --- admin_power? requires the obs owner to be a trusting member (#4439) ---
+
+  def test_admin_power_over_trusting_member_obs
+    obs, = obs_in_eol_owned_by_member # mary is an editing member of eol
+
+    assert(Project.admin_power?(obs, rolf),
+           "Admin has power over a trusting member's observation")
+  end
+
+  def test_no_admin_power_over_no_trust_member_obs
+    obs, project = obs_in_eol_owned_by_member
+    ProjectMember.find_by(project: project, user: mary).
+      update!(trust_level: "no_trust")
+
+    assert_not(Project.admin_power?(obs, rolf))
+  end
+
+  def test_no_admin_power_over_non_member_obs
+    obs, project = obs_in_eol_owned_by_member
+    ProjectMember.find_by(project: project, user: mary).destroy!
+
+    assert_not(Project.admin_power?(obs, rolf),
+               "Admin must not have power over a non-member's observation")
+  end
+
+  def test_no_admin_power_when_user_not_project_admin
+    obs, = obs_in_eol_owned_by_member # dick is not an eol admin
+
+    assert_not(Project.admin_power?(obs, dick))
+  end
+
+  def test_no_admin_power_without_user
+    obs, = obs_in_eol_owned_by_member
+
+    assert_not(Project.admin_power?(obs, nil))
+  end
+
   private
+
+  # An observation owned by an eol member (mary), added to eol_project
+  # (where rolf is an admin). Returns [observation, project].
+  def obs_in_eol_owned_by_member
+    project = projects(:eol_project)
+    obs = observations(:minimal_unknown_obs) # owner mary, editing member
+    project.add_observation(obs)
+    [obs, project]
+  end
 
   # A field slip with no project, regardless of prefix matching.
   def orphan_field_slip(code, owner)

@@ -2,7 +2,19 @@
 @css_theme = css_theme(@user)
 
 html_class = (Rails.env == "test") ? "" : "scroll-behavior-smooth"
-ctrlr_action = "#{controller.controller_name}__#{controller.action_name}"
+# Map the action that's actually executing to the template it
+# tends to render — `create` failures fall through to `new`,
+# `update` failures to `edit`. The body class then reflects "the
+# page the user is looking at" (the form / index / show) rather
+# than "the verb that brought us here," so test assertions like
+# `assert_select("body.<thing>__new")` don't need a separate
+# variant for the re-rendered-after-validation-failure path.
+body_class_action = case controller.action_name
+                    when "create" then "new"
+                    when "update" then "edit"
+                    else controller.action_name
+                    end
+ctrlr_action = "#{controller.controller_name}__#{body_class_action}"
 theme = "theme-#{@css_theme.underscore.dasherize}"
 location_format = "location-format-#{@user&.location_format || "postal"}"
 logged_in = @user ? "logged-in-user" : "no-user"
@@ -44,7 +56,9 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
         <div id="right_side" class="col-xs-12 col-md-10">
           <%= render(partial: "application/top_nav") %>
           <%= render(partial: "application/app/page_flash") %>
-          <%= render(partial: "application/content/header") %>
+          <%= render(Views::Controllers::Application::Content::Header.new(
+            any_content_filters_applied: @any_content_filters_applied
+          )) %>
 
           <main id="content" class="<%= content_classes %>"
               data-controller="lightgallery">

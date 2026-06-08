@@ -69,13 +69,25 @@ class Components::LightboxCaption < Components::Base
 
   def render_identify_ui
     div(class: "obs-identify mb-3", id: "observation_identify_#{@obs.id}") do
-      propose_naming_link(
-        @obs.id,
-        context: "lightgallery",
-        btn_class: "btn btn-primary d-inline-block"
-      )
+      render_propose_naming_modal
       render_reviewed_toggle if @observation_view
     end
+  end
+
+  # Tab::Naming::New carries `icon: :add` by default; lightbox
+  # wants the text-only "Propose" button so the icon: gets nilled
+  # in the merge.
+  def render_propose_naming_modal
+    title, path, opts = Tab::Naming::New.new(
+      observation_id: @obs.id,
+      text: :create_naming.t,
+      context: "lightgallery",
+      btn_class: "btn btn-primary d-inline-block"
+    ).to_a
+    render(Components::ModalLink.new(
+             "obs_#{@obs.id}_naming", title, path,
+             **opts, icon: nil
+           ))
   end
 
   def render_reviewed_toggle
@@ -125,7 +137,9 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_location
     if @user
-      location_link(@obs.where, @obs.location, nil, true)
+      render(Components::LocationLink.new(
+               where: @obs.where, location: @obs.location, click: true
+             ))
     else
       plain(@obs.where)
     end
@@ -173,7 +187,7 @@ class Components::LightboxCaption < Components::Base
 
   def render_obs_user(obs_user)
     if @user
-      user_link(obs_user)
+      render(Components::UserLink.new(user: obs_user))
     else
       plain(obs_user.unique_text_name)
     end
@@ -186,10 +200,12 @@ class Components::LightboxCaption < Components::Base
 
   def render_contact_link(_obs_user)
     plain(" [")
-    modal_link_to(
-      "observation_email",
-      *Tab::Observation::SendQuestion.new(observation: @obs).to_a
-    )
+    name, path, opts = Tab::Observation::SendQuestion.new(
+      observation: @obs
+    ).to_a
+    render(Components::ModalLink.new(
+             "observation_email", name, path, **(opts || {})
+           ))
     plain("]")
   end
 

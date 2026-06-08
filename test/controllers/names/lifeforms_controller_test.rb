@@ -12,7 +12,6 @@ module Names
       name = names(:peltigera)
       assert_equal(" lichen ", name.lifeform)
       requires_login(:edit, id: name.id)
-      assert_template("names/lifeforms/edit")
       Name.all_lifeforms.each do |word|
         assert_input_value("lifeform_#{word}", word == "lichen" ? "1" : "")
       end

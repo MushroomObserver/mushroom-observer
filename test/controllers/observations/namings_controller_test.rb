@@ -72,7 +72,8 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; controller emits inline streams.
+      assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       post_propose_naming_assertions(args)
     end
@@ -84,7 +85,8 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; controller emits inline streams.
+      assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       # Check that turbo_stream replace action is in response
       assert_match(
@@ -737,13 +739,17 @@ module Observations
       # Phlex view renders outside the ActionView template lookup
       # chain, so `assert_template` doesn't fire for the Phlex
       # `Views::Controllers::Observations::Namings::Edit`. The
-      # body class is also not useful as a marker here — failed
-      # `update` requests re-render the Edit view but the body
-      # class stays `namings__update` (the request's action_name).
-      # Pin the Edit-specific page title instead.
+      # layout now maps `action_name = "update"` to `"edit"` for
+      # the body class, so `body.namings__edit` fires for both the
+      # GET edit form and the failed-update re-render — could be
+      # used as a marker here. Page-title check stays as the
+      # stronger Edit-specific pin.
       assert_head_title(:edit_naming_title.l(id: assigns(:observation).id))
-      assert_template("observations/show/_observation_details")
-      assert_template("observations/show/_images")
+      # _observation_details and _images are Phlex panels now;
+      # assert against their identifiers rather than the (gone)
+      # ActionView partial paths.
+      assert_select("#observation_details")
+      assert_select(".show_images")
     end
 
     # POST with no naming param at all triggers the `@given_name.blank?`

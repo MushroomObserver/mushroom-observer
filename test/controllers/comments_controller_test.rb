@@ -9,7 +9,8 @@ class CommentsControllerTest < FunctionalTestCase
   def test_index
     login
     get(:index)
-    assert_template("index")
+    assert_response(:success)
+    assert_select("body.comments__index")
   end
 
   def test_index_by_non_default_sort_order
@@ -135,7 +136,8 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: user.id })
 
-    assert_template("index")
+    assert_response(:success)
+    assert_select("body.comments__index")
     assert_page_title(:COMMENTS.l)
     assert_displayed_filters("#{:query_for_user.l}: #{user.name}")
     assert_session_query_record_is_correct
@@ -178,10 +180,20 @@ class CommentsControllerTest < FunctionalTestCase
   #########################################################
 
   def test_show_comment
+    comment = comments(:minimal_unknown_obs_comment_1)
     login
-    get(:show,
-        params: { id: comments(:minimal_unknown_obs_comment_1).id })
-    assert_template("show")
+    get(:show, params: { id: comment.id })
+    assert_response(:success)
+    assert_select("body.comments__show")
+  end
+
+  def test_show_comment_flow_next_and_prev_redirect
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login
+    get(:show, params: { id: comment.id, flow: "next" })
+    assert_response(:redirect)
+    get(:show, params: { id: comment.id, flow: "prev" })
+    assert_response(:redirect)
   end
 
   def test_new_comment
@@ -268,6 +280,52 @@ class CommentsControllerTest < FunctionalTestCase
     assert_equal(9, rolf.reload.contribution)
     obs.reload
     assert_not(obs.comments.member?(comment))
+  end
+
+  def test_update_comment_with_no_changes
+    # `comment_updated?` `!@comment.changed?` branch: notice + false.
+    comment = comments(:minimal_unknown_obs_comment_1)
+    params = { id: comment.id,
+               comment: { summary: comment.summary,
+                          comment: comment.comment } }
+    login("rolf")
+    put(:update, params: params)
+    assert_flash_text(:runtime_no_changes.t)
+  end
+
+  def test_update_comment_with_invalid_params_re_renders_form
+    # `comment_updated?` `!@comment.save` branch + reload_form
+    # HTML path.
+    comment = comments(:minimal_unknown_obs_comment_1)
+    params = { id: comment.id,
+               comment: { summary: "", comment: "Body" } }
+    login("rolf")
+    put(:update, params: params)
+    assert_response(:success)
+    assert_select("form#comment_form")
+  end
+
+  def test_create_comment_turbo_invalid_reloads_modal_form
+    # `reload_form` turbo_stream branch → `reload_modal_form`.
+    obs = observations(:minimal_unknown_obs)
+    params = { target: obs.id, type: "Observation",
+               comment: { summary: "", comment: "Body" } }
+    login
+    post(:create, params: params, format: :turbo_stream)
+    assert_response(:success)
+  end
+
+  def test_create_comment_with_invalid_params_re_renders_form
+    # `reload_form` HTML branch: missing summary fails save and
+    # falls through to `render_phlex_new`.
+    obs = observations(:minimal_unknown_obs)
+    params = { target: obs.id, type: "Observation",
+               comment: { summary: "", comment: "Body" } }
+    login
+    post(:create, params: params)
+    assert_response(:success)
+    assert_select("body.comments__new")
+    assert_select("form#comment_form")
   end
 
   def test_create_comment
@@ -359,5 +417,69 @@ class CommentsControllerTest < FunctionalTestCase
     end
     obs.reload
     assert_equal(comment_count + 1, obs.comments.size)
+  end
+
+  # The `after_create_commit` broadcast renders `_comment.erb`
+  # without a request context — `@user` is nil. The mod-links
+  # span (`[ edit | destroy ]`) still has to be in the broadcast
+  # markup so the comment's author can interact with their just-
+  # created comment; client-side CSS (`[data-user-specific]:not(…)`)
+  # hides it for everyone else.
+  def test_comment_broadcast_includes_mod_links_for_author
+    obs = observations(:minimal_unknown_obs)
+    login("rolf")
+    payloads = capture_turbo_stream_broadcasts([obs, :comments]) do
+      post(:create, params: {
+             target: obs.id, type: "Observation",
+             comment: { summary: "Mod-links test",
+                        comment: "Body" }
+           })
+    end
+    comment = ::Comment.find_by(summary: "Mod-links test")
+    assert_not_nil(comment, "Comment didn't save")
+
+    # `capture_turbo_stream_broadcasts` returns
+    # `Nokogiri::XML::Element` nodes (the `<turbo-stream>` wrappers).
+    html = payloads.last.to_html
+    # The mod-links span carries `data-user-specific` keyed to
+    # the comment's author id — that's the CSS's selector hook.
+    assert_match(/data-user-specific="#{comment.user.id}"/, html)
+    # `Components::InlineModLinks` emits a `<form>` with the
+    # delete-method input for destroy, and the edit modal anchor
+    # with `data-modal="modal_comment_<id>"`. Pin both as the
+    # contract.
+    assert_match(/data-modal="modal_comment_#{comment.id}"/, html)
+    assert_match(/<input[^>]*name="_method"[^>]*value="delete"/, html)
+  end
+
+  # Companion: in a regular page-render context (not a broadcast),
+  # `@user` is set. `InlineModLinks` gates server-side on
+  # owner-or-admin — the mod-links HTML doesn't appear at all
+  # for non-authors. The `data-user-specific` CSS would have
+  # hidden them anyway, but defense in depth is better when the
+  # logic is cheap (one `==` comparison) — and a non-author
+  # snooping the page source no longer sees affordances they
+  # can't actually use.
+  def test_comments_page_omits_mod_links_for_non_author
+    obs = observations(:detailed_unknown_obs)
+    comment = obs.comments.find { |c| c.user != users(:rolf) } ||
+              skip("Need a comment authored by a user other than rolf")
+    login("rolf")
+
+    get(:show, params: { id: comment.id })
+    assert_response(:success)
+
+    # The mod-links span has `data-user-specific` keyed to the
+    # COMMENT AUTHOR's id (not rolf). Rolf isn't the author, so
+    # the InlineModLinks render should produce no edit/destroy
+    # affordances at all — neither the modal-link edit anchor
+    # nor the destroy form.
+    assert_select(
+      "a[data-modal='modal_comment_#{comment.id}']", count: 0
+    )
+    assert_select(
+      "form[action='/comments/#{comment.id}'] " \
+      "input[name='_method'][value='delete']", count: 0
+    )
   end
 end

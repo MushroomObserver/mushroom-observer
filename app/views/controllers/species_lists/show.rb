@@ -91,19 +91,20 @@ module Views::Controllers::SpeciesLists
     def render_locations_button
       return unless related_to_locations?
 
-      url = InternalLink::RelatedQuery.new(
-        Location, :Observation, @query, controller
-      ).url
-      project_button(:LOCATIONS.l, url)
+      project_button(:LOCATIONS.l, related_query_path(Location))
     end
 
     def render_images_button
       return unless related_to_locations?
 
-      url = InternalLink::RelatedQuery.new(
-        Image, :Observation, @query, controller
-      ).url
-      project_button(:IMAGES.l, url)
+      project_button(:IMAGES.l, related_query_path(Image))
+    end
+
+    def related_query_path(model)
+      Tab::RelatedQuery.new(
+        model: model, filter: :Observation,
+        current_query: @query, controller: controller
+      ).path
     end
 
     def related_to_locations?
@@ -142,16 +143,11 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
-    # `comments/comments_for_object` is still ERB — same wrap-in-
-    # `trusted_html` pattern as `render_list_search` above.
     def render_comments
-      trusted_html(
-        view_context.render(
-          partial: "comments/comments_for_object",
-          locals: { object: @species_list, comments: @comments,
-                    controls: @user, limit: nil }
-        )
-      )
+      render(::Views::Controllers::Comments::CommentsForObject.new(
+               object: @species_list, comments: @comments, user: @user,
+               editable: @user.present?, limit: nil
+             ))
     end
   end
 end

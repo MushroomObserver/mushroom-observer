@@ -89,13 +89,30 @@ module Views::Controllers::Herbaria
       assert_html(html, "form[data-turbo='true']")
     end
 
+    # Admin-mode edit form for an existing herbarium with no top
+    # users yet — exercises the `:edit_herbarium_no_herbarium_records`
+    # branch of `admin_help_text`, which Coveralls flags as the
+    # one uncovered line on this PR's touched-file pass (the
+    # populated-top-users branch is hit by the integration tests).
+    def test_admin_personal_user_field_with_no_top_users
+      stub_admin_mode!
+      herbarium = herbaria(:nybg_herbarium)
+      html = render_form(model: herbarium, top_users: [])
+
+      # The admin autocompleter field renders; its help slot
+      # contains the "no herbarium records" notice.
+      assert_html(html, "input[name='herbarium[personal_user_name]']")
+      assert_includes(html, :edit_herbarium_no_herbarium_records.l)
+    end
+
     private
 
-    def render_form(model:, local: true, back: nil)
+    def render_form(model:, local: true, back: nil, top_users: nil)
       render(Form.new(model,
                       user: @user,
                       back: back,
-                      local: local))
+                      local: local,
+                      top_users: top_users))
     end
   end
 end

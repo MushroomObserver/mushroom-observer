@@ -488,11 +488,23 @@ class ComponentTestCase < UnitTestCase
     expected_attrs.each do |k, v|
       next if v == actual_attrs[k]
       next if HTML_BOOLEAN_ATTRS.include?(k)
+      # `class` is a space-separated token list; treat as a set.
+      # Phlex's `class_names` and Rails' `tag.div(class: …)` can
+      # emit the same tokens in different orders depending on
+      # which branch of the builder fires; CSS only cares about
+      # token presence, not order.
+      next if k == "class" && css_classes_match?(v, actual_attrs[k])
 
       return "#{here}: attribute #{k}=#{v.inspect} != " \
              "#{actual_attrs[k].inspect}"
     end
     nil
+  end
+
+  def css_classes_match?(expected, actual)
+    return false unless expected.is_a?(String) && actual.is_a?(String)
+
+    expected.split.sort == actual.split.sort
   end
 
   # Attributes whose blank-string presence is equivalent to absence.

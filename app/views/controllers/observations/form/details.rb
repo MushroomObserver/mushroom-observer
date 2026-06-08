@@ -12,9 +12,9 @@
 # @param default_place_name [String] default place name value
 # @param dubious_where_reasons [Array] location feedback reasons
 class Views::Controllers::Observations::Form::Details < Views::Base
-  prop :form, _Any
+  prop :form, ::Components::ApplicationForm
   prop :observation, Observation
-  prop :mode, _Nilable(Symbol), default: :create
+  prop :mode, _Nilable(_Union(:create, :update)), default: :create
   prop :button_name, String
   prop :location, _Nilable(Location), default: nil
   prop :default_place_name, _Nilable(String), default: nil
@@ -79,7 +79,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              controller_id: "observation_location_autocompleter",
              data: { map_target: "placeInput", action: exif_action }
            )) do |field|
-      field.with_help { observation_location_help }
+      field.with_help { render(Components::ObservationLocationHelp.new) }
     end
   end
 

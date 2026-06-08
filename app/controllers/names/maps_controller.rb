@@ -24,12 +24,23 @@ module Names
       find_locations_matching_observations
 
       respond_to do |format|
-        format.html
+        format.html { render_phlex_show }
         format.json { render(json: map_refetch_payload) }
       end
     end
 
     private
+
+    def render_phlex_show
+      render(Views::Controllers::Names::Maps::Show.new(
+               name: @name, query: @query,
+               observations: @observations,
+               observations_capped: @observations_capped,
+               observations_loaded_count: @observations_loaded_count,
+               observations_total_count: @observations_total_count,
+               cluster_query_string: @cluster_query_string
+             ))
+    end
 
     # Build a fresh query for this name's distribution. Bypasses the
     # session-stored query that `find_or_create_query` would otherwise

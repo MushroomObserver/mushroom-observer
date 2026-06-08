@@ -211,10 +211,11 @@ module Observations
       @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
-      render(
-        partial: "observations/show/section_update",
-        locals: { identifier: "external_links",
-                  obs: @observation, user: @user, sites: @other_sites }
+      klass = Views::Controllers::Observations::Show::ExternalLinksPanel
+      render_obs_section_update(
+        identifier: "external_links",
+        panel: klass.new(obs: @observation, user: @user,
+                         sites: @other_sites&.to_a, siblings: [])
       ) and return
     end
 

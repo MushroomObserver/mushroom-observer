@@ -7,9 +7,9 @@ if in_admin_mode?
     *Tab::Location::ReverseOrder.new(location: @location).to_a
   )
 end
-footer = icon_link_to(
-  *Tab::Location::ObservationsAt.new(location: @location).to_a
-)
+footer = render(Components::IconLink.new(
+  tab: Tab::Location::ObservationsAt.new(location: @location)
+))
 %>
 <%= render(Components::Panel.new(
       panel_id: "location_coordinates"

@@ -12,7 +12,9 @@ module Views::Controllers::Projects
     def view_template
       div(class: "list-group-item d-flex align-items-start") do
         div(class: "text-larger") do
-          show_title_id_badge(@project, "rss-id mr-4")
+          render(Components::IdBadge.new(
+                   object: @project, extra_class: "rss-id mr-4"
+                 ))
         end
         div do
           render_title_row
@@ -39,7 +41,7 @@ module Views::Controllers::Projects
       div do
         small { plain("#{@project.created_at.web_time}:") }
         whitespace
-        user_link(@project.user)
+        render(Components::UserLink.new(user: @project.user))
       end
     end
   end

@@ -33,6 +33,7 @@ class ApplicationController < ActionController::Base
   include NameValidation
   include Queries
   include Indexes
+  include SectionUpdater
 
   # Allow folder organization in the app/views folder
   append_view_path Rails.root.join("app/views/controllers")
@@ -51,9 +52,6 @@ class ApplicationController < ActionController::Base
   before_action :set_timezone
   before_action :track_translations
   before_action :set_languages
-
-  # Make show_name_helper available to nested partials
-  helper :names
 
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters

@@ -71,7 +71,9 @@ module Views::Controllers::Projects::FieldSlips
     def render_user_link
       return unless @tracker.user
 
-      user_link(@tracker.user_id, @tracker.user.login)
+      render(Components::UserLink.new(
+               user: @tracker.user_id, name: @tracker.user.login
+             ))
     end
 
     # Inlined from `ProjectsHelper#field_slip_link` — this was the

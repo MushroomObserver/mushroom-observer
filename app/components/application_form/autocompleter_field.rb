@@ -218,12 +218,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_has_id_indicator
-      link_icon(
-        :check,
-        title: :autocompleter_has_id.l,
-        class: "px-2 text-success has-id-indicator",
-        data: { target_attr_key => "hasIdIndicator" }
-      )
+      render(Components::LinkIcon.new(
+               type: :check,
+               title: :autocompleter_has_id.l,
+               html_class: "px-2 text-success has-id-indicator",
+               data: { target_attr_key => "hasIdIndicator" }
+             ))
     end
 
     def render_find_button
@@ -278,12 +278,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_modal_create_link
       return unless create_text && create.present? && create_path.present?
 
-      modal_link_to(
-        create, create_text, create_path,
-        icon: :plus, show_text: true, icon_class: "text-primary",
-        name: "create_#{autocompleter_type}", class: "ml-3 create-link",
-        data: { target_attr_key => "createBtn" }
-      )
+      render(Components::ModalLink.new(
+               create, create_text, create_path,
+               icon: :plus, show_text: true,
+               icon_class: "text-primary",
+               name: "create_#{autocompleter_type}",
+               class: "ml-3 create-link",
+               data: { target_attr_key => "createBtn" }
+             ))
     end
 
     def render_dropdown

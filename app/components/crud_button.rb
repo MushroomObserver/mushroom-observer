@@ -98,7 +98,7 @@ class Components::CrudButton < Components::Base
   # `@args` is merged into the underlying `link_to` / `button_to`
   # call, otherwise they'd leak through as HTML attributes.
   def ignored_arg_keys
-    [:class, :icon, :action, :back, :btn]
+    [:class, :icon, :icon_class, :action, :back, :btn]
   end
 
   def tooltip_data
@@ -130,7 +130,9 @@ class Components::CrudButton < Components::Base
     capture do
       if @args[:icon]
         span(class: "sr-only") { trusted_html(@name) }
-        link_icon(@args[:icon])
+        render(Components::LinkIcon.new(
+                 type: @args[:icon], html_class: @args[:icon_class]
+               ))
       else
         trusted_html(@name)
       end

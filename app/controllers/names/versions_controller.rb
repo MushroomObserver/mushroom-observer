@@ -13,12 +13,17 @@ module Names
       @name.revert_to(params[:version].to_i)
       @versions = @name.versions
       @correct_spelling = ""
-      return unless @name.is_misspelling?
+      if @name.is_misspelling?
+        # Old correct spellings could have gotten merged with something else
+        # and no longer exist. Note: this is a second db lookup
+        @correct_spelling = Name.where(id: @name.correct_spelling_id).
+                            pluck(:display_name)
+      end
 
-      # Old correct spellings could have gotten merged with something else
-      # and no longer exist. Note: this is a second db lookup
-      @correct_spelling = Name.where(id: @name.correct_spelling_id).
-                          pluck(:display_name)
+      render(Views::Controllers::Names::Versions::Show.new(
+               name: @name, user: @user, versions: @versions,
+               version: params[:version].to_i
+             ))
     end
 
     def show_includes

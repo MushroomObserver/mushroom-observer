@@ -8,7 +8,7 @@ module Views::Controllers::VisualGroups
   class ImageMatrix < Views::Base
     prop :user, _Nilable(User)
     prop :visual_group, VisualGroup
-    prop :subset, _Array(_Any)
+    prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean)))
     prop :status, String
     prop :pagination_data, _Nilable(PaginationData)
 

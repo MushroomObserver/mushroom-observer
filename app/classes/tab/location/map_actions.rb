@@ -14,12 +14,12 @@ class Tab::Location::MapActions < Tab::Collection
   def tabs
     [
       Tab::Location::Index.new,
-      Tab::Related::Query.for(
+      Tab::RelatedQuery.for(
         model: Observation, filter: :Location,
         current_query: @query, controller: @controller
       ),
       # related Locations bridge (cross-index for same model)
-      Tab::Related::Query.for(
+      Tab::RelatedQuery.for(
         model: Location, filter: :Location,
         current_query: @query, controller: @controller
       )

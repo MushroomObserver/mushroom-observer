@@ -473,6 +473,26 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_template("shared/_modal_form_reload")
   end
 
+  # Successful turbo_stream create hits
+  # `show_modal_flash_or_show_herbarium`'s turbo_stream branch
+  # (two flash_notices + render of `_update_observation`).
+  # Covers L503-509 in herbaria_controller.rb.
+  def test_create_success_turbo_stream_renders_update_observation
+    herbarium_count = Herbarium.count
+    login("rolf")
+
+    post(:create,
+         params: { herbarium: herbarium_params.merge(
+           name: "Brand New Test Herbarium",
+           code: "BNTH"
+         ) },
+         as: :turbo_stream)
+
+    assert_response(:success)
+    assert_equal(herbarium_count + 1, Herbarium.count)
+    assert_template("herbaria/_update_observation")
+  end
+
   def test_create_duplicate_name
     herbarium_count = Herbarium.count
     login("rolf")

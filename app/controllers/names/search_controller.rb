@@ -78,6 +78,39 @@ module Names
         dates: { shown: [[:created_at, :updated_at]], collapsed: [] } }
     ].freeze
 
+    # Overrides `Searchable#show` — the turbo_stream branch points
+    # at a now-Phlex help view, and the html branch needs an
+    # explicit Phlex render since the `show.erb` template is gone.
+    def show
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_bar_help,
+            Views::Controllers::Names::Search::Help.new
+          ))
+        end
+        format.html do
+          render(Views::Controllers::Names::Search::Show.new)
+        end
+      end
+    end
+
+    # Overrides `Searchable#new` so the html branch renders the
+    # Phlex view explicitly.
+    def new
+      @local = params[:local] != "false"
+      set_up_form_field_groupings
+      @search = build_search_query
+      respond_to do |format|
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
+        format.html do
+          render(Views::Controllers::Names::Search::New.new(
+                   search: @search, local: @local
+                 ))
+        end
+      end
+    end
+
     private
 
     def set_up_form_field_groupings

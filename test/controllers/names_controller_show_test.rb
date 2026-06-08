@@ -16,18 +16,18 @@ class NamesControllerShowTest < FunctionalTestCase
     # assert_equal(0, QueryRecord.count)
     login
     get(:show, params: { id: names(:coprinus_comatus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Creates three for children and all four observations sections,
     # but one never used. (? Now 4 - AN 20240107) (? Now 5 - AN 20241217)
     # assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:coprinus_comatus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Should re-use all the old queries.
     # assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:agaricus_campestris).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Needs new queries this time.
     # (? Up from 7 to 9 - AN 20240107)
     # Why are we making this assertion if we don't know what the
@@ -36,7 +36,7 @@ class NamesControllerShowTest < FunctionalTestCase
 
     # Agarcius: has children taxa.
     get(:show, params: { id: names(:agaricus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
   end
 
   def test_show_name_species_with_icn_id
@@ -197,7 +197,7 @@ class NamesControllerShowTest < FunctionalTestCase
   def test_show_name_with_eol_link
     login
     get(:show, params: { id: names(:abortiporus_biennis_for_eol).id })
-    assert_template("show")
+    assert_select("#nomenclature")
   end
 
   def test_name_external_links_exist

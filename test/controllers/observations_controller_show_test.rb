@@ -154,7 +154,15 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("#observation_where_gps", text: gps_re)
     assert_select("#observation_where_gps i", text: hidden_re)
 
+    # roy admins current_project (which contains this obs). Per #4439, a
+    # project admin can reveal hidden GPS only when the owner is a
+    # trusting member — not when the owner (mary) is a non-member.
     login("roy")
+    get(:show, params: { id: obs.id })
+    assert_select("#observation_where_gps", text: gps_re, count: 0)
+
+    ProjectMember.create!(project: projects(:current_project),
+                          user: obs.user, trust_level: "hidden_gps")
     get(:show, params: { id: obs.id })
     assert_select("#observation_where_gps", text: gps_re)
     assert_select("#observation_where_gps i", text: hidden_re)
@@ -273,7 +281,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
 
     assert_response(:success)
-    assert_template("observations/show")
+    # `observations/show` is a Phlex view now — pin the body class
+    # that Rails layouts emit from `controller_name__action_name`.
+    assert_select("body.observations__show")
   end
 
   ##############################################################################
@@ -295,12 +305,20 @@ class ObservationsControllerShowTest < FunctionalTestCase
   end
 
   def assert_show_observation
-    assert_template("observations/show")
-    assert_template("observations/show/_name_info")
-    assert_template("observations/show/_observation_details")
-    # assert_template("observations/show/_namings") now a helper
-    assert_template("comments/_comments_for_object")
-    assert_template("observations/show/_thumbnail_map")
+    # `observations/show` is a Phlex view now — pin the body class
+    # Rails layouts emit from `controller_name__action_name`
+    # instead of `assert_template`.
+    assert_select("body.observations__show")
+    assert_select("#comments_for_object")
+    # Phlex panels — assert against their stable IDs (no template
+    # lookup): _name_info / _observation_details / _namings /
+    # _thumbnail_map / _associated_observations / _species_lists.
+    assert_select("#observation_name_info")
+    assert_select("#observation_details")
+    assert_select("#observation_namings")
+    assert_select("#observation_thumbnail_map")
+    assert_select("#associated_observations")
+    assert_select("#observation_species_lists")
   end
 
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
@@ -914,7 +932,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: obs.id })
     assert_response(:success)
-    assert_template("show")
+    assert_select("body.observations__show")
     assert_select("form#naming_vote_form_#{naming1.id} " \
                   "select#vote_value_#{naming1.id}>" \
                   "option[selected=selected][value='#{vote1.value}']")

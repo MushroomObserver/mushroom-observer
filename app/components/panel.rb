@@ -55,7 +55,7 @@ class Components::Panel < Components::Base
 
   prop :panel_class, _Nilable(String), default: nil
   prop :panel_id, _Nilable(String), default: nil
-  prop :attributes, Hash, default: -> { {} }
+  prop :attributes, _Hash(Symbol, _Any), default: -> { {} }
   # Set collapsible: :true on component, plus panel.with_body(collapse: true)
   prop :collapsible, _Nilable(_Boolean), default: nil
   # Normally :collapse_target should be an id selector, like "#collapse_target".
@@ -145,8 +145,11 @@ class Components::Panel < Components::Base
     ) do
       render_collapse_message
 
-      link_icon(:chevron_down, title: :OPEN.l, class: "active-icon")
-      link_icon(:chevron_up, title: :CLOSE.l)
+      render(Components::LinkIcon.new(
+               type: :chevron_down, title: :OPEN.l,
+               html_class: "active-icon"
+             ))
+      render(Components::LinkIcon.new(type: :chevron_up, title: :CLOSE.l))
     end
   end
 

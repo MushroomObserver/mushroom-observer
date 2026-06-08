@@ -7,10 +7,10 @@ heading = [
 heading_links =
   if @show_user != @user && !@show_user.no_emails &&
      @show_user.email_general_question
-    modal_link_to(
-      "user_question_email",
-      *Tab::User::EmailQuestion.new(user: @show_user).to_a
-    )
+    render(Components::ModalLink.new(
+             "user_question_email",
+             tab: Tab::User::EmailQuestion.new(user: @show_user)
+           ))
   else
     nil
   end
@@ -55,7 +55,7 @@ footer =
     <% if @show_user.location %>
       <p>
         <strong><%= :show_user_primary_location.t %>:</strong>
-        <%= location_link(nil, @show_user.location) %>
+        <%= render(Components::LocationLink.new(location: @show_user.location)) %>
       </p>
     <% end %>
 

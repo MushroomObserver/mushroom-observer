@@ -123,7 +123,7 @@ module Names::Descriptions
       }
       put(:update, params: params)
       assert_flash(/not found/)
-      assert_template("edit")
+      assert_select("form")
     end
 
     # Cover no changes made

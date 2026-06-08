@@ -23,7 +23,7 @@ module Tab::Description
       assert_equal(:show_name_create_description.t, tab.title)
       assert_equal(routes.new_name_description_path(name_id: @name.id),
                    tab.path)
-      assert_equal({ icon: :add }, tab.html_options)
+      assert_equal(:add, tab.html_options[:icon])
       assert_equal(NameDescription, tab.model)
     end
 
@@ -41,7 +41,7 @@ module Tab::Description
 
       assert_equal(:show_description_edit.t, tab.title)
       assert_equal(routes.edit_name_description_path(@name_desc.id), tab.path)
-      assert_equal({ icon: :edit }, tab.html_options)
+      assert_equal(:edit, tab.html_options[:icon])
       assert_equal(@name_desc, tab.model)
     end
 
@@ -111,7 +111,7 @@ module Tab::Description
 
       assert_equal(:show_object.t(type: :project), tab.title)
       assert_equal(project_desc.source_object.show_link_args, tab.path)
-      assert_equal({ icon: :project }, tab.html_options)
+      assert_equal(:project, tab.html_options[:icon])
     end
 
     def test_publish_draft

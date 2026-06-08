@@ -52,4 +52,18 @@ class ModalLinkTest < ComponentTestCase
 
     assert_html(html, "a.extra-class[href='/x']")
   end
+
+  # `tab:` shortcut — derive name / path / opts from a Tab PORO so
+  # callers don't have to destructure `tab.to_a` themselves.
+  def test_tab_kwarg_derives_name_path_opts
+    project = projects(:eol_project)
+    tab = Tab::Project::Summary.new(project: project)
+
+    html = render(Components::ModalLink.new("project_summary", tab: tab))
+
+    assert_html(html, "a[href='#{tab.path}']" \
+                      "[data-modal='modal_project_summary']" \
+                      "[data-controller='modal-toggle']",
+                text: tab.title)
+  end
 end

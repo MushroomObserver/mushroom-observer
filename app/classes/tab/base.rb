@@ -20,9 +20,9 @@
 #                     Bootstrap nav-tab classes (`nav-link`, `active`,
 #                     `mt-3`) belong to `NavTabs`, NOT here.
 #
-# Consume via `#to_internal_link` (NavTabs and other PORO callers) or
-# `#to_a` (legacy `[title, url, opts]` consumers — the helper-method
-# splat pattern from the helpers/tabs/* era).
+# Consume via `#to_a` (the `[title, url, opts]` tuple — used by
+# `Components::NavTabs` and `add_context_nav`) or directly via
+# `#title` / `#path` / `#html_options`.
 #
 # @example
 #   class Tab::Project::Summary < Tab::Base
@@ -35,10 +35,36 @@
 #     def alt_title = "summary"
 #   end
 #
-#   Tab::Project::Summary.new(project: p).to_internal_link
-#   # => #<InternalLink title="Summary" url="/projects/123" …>
+#   Tab::Project::Summary.new(project: p).to_a
+#   # => ["Summary", "/projects/123",
+#   #     { class: "summary_link summary_link_123" }]
 class Tab::Base
   include Rails.application.routes.url_helpers
+
+  # Auto-prepend `HtmlOptionsComposer` onto every subclass so the
+  # subclass-supplied `#html_options` (or the Base default `{}`)
+  # is wrapped with the auto-derived `<alt_title>_link` selector
+  # class. Subclasses don't need to know about the composer — they
+  # define `html_options` returning whatever extra attrs they want
+  # (`{ icon: :edit }`, `{ button: :post }`, etc.) and the
+  # composition happens transparently.
+  def self.inherited(subclass)
+    super
+    subclass.prepend(HtmlOptionsComposer)
+  end
+
+  # Merges the auto-derived `<alt_title>_link` selector class
+  # (or `<title>_<model_name>_link <…_link_<id>>` when `#model`
+  # is set) into whatever `html_options` the subclass returned.
+  # See `Tab::Base#derived_html_class` for the derivation rules.
+  module HtmlOptionsComposer
+    def html_options
+      base = super.dup
+      base[:class] = [base[:class], derived_html_class].
+                     compact_blank.join(" ")
+      base
+    end
+  end
 
   def title
     raise(NotImplementedError.new("#{self.class}#title"))
@@ -56,30 +82,18 @@ class Tab::Base
     {}
   end
 
-  # Override to return a model (instance or class) when the Tab
-  # should use the `InternalLink::Model` variant — its `html_class`
-  # adds a `<model_name>` segment to the selector class (e.g.
-  # `edit_project_alias_link`) and, for instances, a per-id flavour
-  # (`edit_project_alias_link_123`). Plain Tab POROs leave this nil
-  # and get a plain `InternalLink`.
+  # Override to return a model (instance or class) when the Tab's
+  # selector class should include the model name + per-id flavour
+  # — e.g. `edit_project_alias_link edit_project_alias_link_123`.
+  # Plain Tab POROs leave this nil and get a single
+  # `<title|alt_title>_link` class. See `#derived_html_class` for
+  # the derivation rules.
   def model
     nil
   end
 
-  def to_internal_link
-    if model
-      InternalLink::Model.new(title, model, path,
-                              html_options: html_options,
-                              alt_title: alt_title)
-    else
-      InternalLink.new(title, path,
-                       html_options: html_options,
-                       alt_title: alt_title)
-    end
-  end
-
   def to_a
-    to_internal_link.tab
+    [title, path, html_options]
   end
 
   # Append a `q=<value>` query param to a path string. Pass the
@@ -130,5 +144,45 @@ class Tab::Base
   # project show page).
   def nav_key
     alt_title || self.class.name.demodulize.underscore
+  end
+
+  private
+
+  # Auto-derived selector class merged into `html_options[:class]` by
+  # `HtmlOptionsComposer`. Test selectors and JS hooks across the app
+  # depend on this naming pattern, so the derivation is kept stable.
+  def derived_html_class
+    model ? model_html_class : plain_html_class
+  end
+
+  def plain_html_class
+    "#{(alt_title || title).parameterize(separator: "_")}_link"
+  end
+
+  # Model-aware flavour: includes the model name in the slug (so the
+  # same `:EDIT.t` title on different models produces distinct
+  # classes) and, when the model has an `id`, a second
+  # `…_link_<id>` per-instance class for ID-pinned selectors.
+  def model_html_class
+    slug = model_class_slug
+    return slug unless model.respond_to?(:id) && model.id
+
+    "#{slug} #{slug}_#{model.id}"
+  end
+
+  def model_class_slug
+    raw = if alt_title
+            alt_title
+          elsif title.underscore.tr(" ", "_").include?(model_name_for_class)
+            title
+          else
+            "#{title}_#{model_name_for_class}"
+          end
+    "#{raw.parameterize(separator: "_")}_link"
+  end
+
+  def model_name_for_class
+    klass = model.is_a?(Class) ? model : model.class
+    klass.name.underscore
   end
 end

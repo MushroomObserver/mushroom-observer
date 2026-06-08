@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # "Edit" link for a single project alias — appears in the alias
-# row's action column. Uses `InternalLink::Model` so the rendered
-# selector class is `edit_project_alias_link` plus a per-id flavour
+# row's action column. Sets `model` so the auto-derived selector
+# class is `edit_project_alias_link` plus a per-id flavour
 # (`edit_project_alias_link_<id>`) for stable per-row test targeting.
 class Tab::Project::AliasEdit < Tab::Base
   def initialize(project_id:, name:, id:)
@@ -25,10 +25,10 @@ class Tab::Project::AliasEdit < Tab::Base
   end
 
   def model
-    # Pass the actual alias instance when available so InternalLink::Model
-    # appends the per-id selector flavour. The caller passed only id/name
-    # historically; we synthesize a stand-in carrying just `id` so the
-    # `_link_<id>` flavour is preserved.
+    # Pass the actual alias instance when available so the auto-derived
+    # selector includes the per-id flavour. The caller passed only
+    # id/name historically; we synthesize a stand-in carrying just `id`
+    # so the `_link_<id>` flavour is preserved.
     ProjectAlias.new(id: @id)
   end
 end

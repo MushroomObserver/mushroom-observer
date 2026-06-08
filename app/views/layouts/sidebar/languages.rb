@@ -9,8 +9,14 @@ module Views::Layouts::Sidebar
   #     request: request
   #   ))
   class Languages < ::Components::Base
-    prop :browser, _Any
-    prop :request, _Any
+    # `:browser` is unused inside this view but kept for API
+    # symmetry with `ApplicationSidebar`, which threads both
+    # `browser:` and `request:` through to here. Duck-typed for the
+    # same reason as the parent (tests pass a Struct stub).
+    prop :browser, _Interface(:bot?)
+    # Used via `attr_reader :request` so `reload_with_args` (a
+    # registered `ApplicationHelper`) can read `request.url`.
+    prop :request, _Interface(:url)
     prop :languages, _Array(Language)
 
     register_value_helper :reload_with_args

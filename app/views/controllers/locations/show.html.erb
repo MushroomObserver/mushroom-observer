@@ -17,9 +17,10 @@ column_classes(:seven_five)
   <%= tag.div(class: yield(:left_columns)) do %>
     <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>
     <%= render(partial: "locations/show/general_description_panel") %>
-    <%= render(partial: "comments/comments_for_object",
-                locals: { object: @location, comments: @comments,
-                          controls: @user, limit: 2 }) %>
+    <%= render(Views::Controllers::Comments::CommentsForObject.new(
+                 object: @location, comments: @comments, user: @user,
+                 editable: @user.present?, limit: 2
+               )) %>
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>

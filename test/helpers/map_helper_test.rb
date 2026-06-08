@@ -69,4 +69,50 @@ class MapHelperTest < ActionView::TestCase
     assert_match(/q(%5B|\[)model(%5D|\])=Observation/, url,
                  "query_param arg should thread into the URL's q[model]")
   end
+
+  # ------------------------------------------------------------------
+  # mapset_marker_title: multi-obs annotation (lines 187-191)
+  # ------------------------------------------------------------------
+
+  # Single unique location string with more observations than locations:
+  # appends " (N observations)" — line 191.
+  def test_mapset_marker_title_single_location_multi_obs
+    loc_klass = Struct.new(:display_name) do
+      define_method(:location?) { true }
+      define_method(:observation?) { false }
+    end
+    loc = loc_klass.new("Crater Lake")
+    set = Struct.new(:objects, :observations).new([loc], [1, 2])
+
+    result = mapset_marker_title(set)
+
+    assert_includes(result, "Crater Lake",
+                    "Expected location name in title")
+    assert_includes(result, "2 #{:observations.t}",
+                    "Expected obs count appended in parens")
+    assert_match(/\(2/, result,
+                 "Single-location case should use parentheses")
+  end
+
+  # Multiple distinct location strings with yet more observations:
+  # appends ", N observations" — line 189.
+  def test_mapset_marker_title_multi_location_multi_obs
+    loc_klass = Struct.new(:display_name) do
+      define_method(:location?) { true }
+      define_method(:observation?) { false }
+    end
+    set = Struct.new(:objects, :observations).new(
+      [loc_klass.new("Crater Lake"), loc_klass.new("Mount Hood")],
+      [1, 2, 3]
+    )
+
+    result = mapset_marker_title(set)
+
+    assert_includes(result, "2 #{:locations.t}",
+                    "Expected location count in title")
+    assert_includes(result, "3 #{:observations.t}",
+                    "Expected obs count appended with comma")
+    assert_match(/, 3/, result,
+                 "Multi-location case should use comma separator")
+  end
 end

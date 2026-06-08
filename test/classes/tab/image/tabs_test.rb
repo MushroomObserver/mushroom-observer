@@ -30,11 +30,16 @@ module Tab::Image
     end
 
     def test_eol
+      eol_url = "https://eol.org/pages/12345"
+      Triple.create!(subject: @image.show_url,
+                     predicate: @image.eol_predicate,
+                     object: eol_url)
       tab = Tab::Image::Eol.new(image: @image)
 
-      assert_equal("EOL", tab.title)
-      assert_equal(@image.eol_url, tab.path)
-      assert_equal("_blank", tab.html_options[:target])
+      assert_equal("EOL", tab.title, "EOL tab title")
+      assert_equal(eol_url, tab.path, "EOL tab path delegates to eol_url")
+      assert_equal("_blank", tab.html_options[:target],
+                   "EOL tab opens in new tab")
     end
 
     def test_commercial_inquiry
@@ -61,7 +66,7 @@ module Tab::Image
 
       assert_equal("Test Again", tab.title)
       assert_equal({ action: :test_add_image }, tab.path)
-      assert_equal({ class: "test_add_image_report_link" }, tab.html_options)
+      assert_includes(tab.html_options[:class], "test_add_image_report_link")
     end
   end
 end

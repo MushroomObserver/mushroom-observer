@@ -335,17 +335,21 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     false
   end
 
-  # Check if this user is an admin for a project that includes
-  # this observation.
+  # Check if this user is an admin for a project that includes this
+  # observation AND whose owner is a member trusting that project.
+  # A non-member owner is NOT trusted, so adding their observation to a
+  # project can't hand the project's admins power over it. Mirrors the
+  # #trusted_by? membership requirement (#4439). Like Project.can_edit?,
+  # keep scanning further projects when one doesn't grant.
   def self.admin_power?(observation, user)
     return false unless user
     return false if observation.projects.empty?
 
     observation.projects.each do |project|
-      if project.is_admin?(user)
-        member = project.project_members.find_by(user: observation.user)
-        return member&.trust_level != "no_trust"
-      end
+      next unless project.is_admin?(user)
+
+      member = project.project_members.find_by(user: observation.user)
+      return true if member.present? && member.trust_level != "no_trust"
     end
     false
   end

@@ -109,7 +109,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show, params: { id: location.id })
     assert_template("show")
     assert_template("locations/show/_notes")
-    assert_template("comments/_comments_for_object")
+    assert_select("#comments_for_object")
     assert_template("locations/show/_general_description_panel")
 
     location.reload
@@ -174,7 +174,7 @@ class LocationsControllerTest < FunctionalTestCase
   def assert_show_location
     assert_template("locations/show")
     assert_template("locations/show/_notes")
-    assert_template("comments/_comments_for_object")
+    assert_select("#comments_for_object")
     assert_template("locations/show/_general_description_panel")
   end
 
@@ -299,14 +299,35 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   # Render the index against a query whose `order_by` is already
-  # rss_log — exercises the `rss_log` branch of `LocationsHelper#
-  # locations_index_sorts` end-to-end through the controller.
+  # rss_log — exercises the `rss_log` branch of
+  # `LocationsController#index_sort_options` end-to-end through
+  # the controller.
   def test_index_with_rss_log_ordered_query_renders
     query = Query.lookup_and_save(Location, order_by: :rss_log)
     login
     get(:index, params: { q: query.id.alphabetize })
 
     assert_select("body.#{@controller.controller_name}__index")
+  end
+
+  # Pins the contextual flip in
+  # `LocationsController#index_sort_options`: when the active
+  # query orders by rss_log, the "Updated" slot maps to the
+  # rss_log timestamp instead of `updated_at`. (Was unit-tested
+  # against `LocationsHelper#locations_index_sorts` before that
+  # method moved to the controller.)
+  def test_index_sort_options_swaps_updated_at_for_rss_log
+    login
+    get(:index)
+    keys_without_query = @controller.index_sort_options.map(&:first)
+    assert_includes(keys_without_query, "updated_at")
+    assert_not_includes(keys_without_query, "rss_log")
+
+    query = Query.lookup_and_save(Location, order_by: :rss_log)
+    get(:index, params: { q: query.id.alphabetize })
+    keys_with_rss_log = @controller.index_sort_options.map(&:first)
+    assert_includes(keys_with_rss_log, "rss_log")
+    assert_not_includes(keys_with_rss_log, "updated_at")
   end
 
   def test_index_sorted_by_box_area

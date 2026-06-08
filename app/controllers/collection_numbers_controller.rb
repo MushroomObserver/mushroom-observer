@@ -13,6 +13,18 @@ class CollectionNumbersController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Consumed by `add_sorter` and
+  # `check_index_sorting`. Each key must resolve to
+  # `CollectionNumber.order_by_<key>`.
+  def index_sort_options
+    [
+      ["name",       :sort_by_name.l],
+      ["number",     :sort_by_number.l],
+      ["created_at", :sort_by_created_at.l],
+      ["updated_at", :sort_by_updated_at.l]
+    ].freeze
+  end
+
   private
 
   def default_sort_order
@@ -409,12 +421,12 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  # ivar @observation used in the partial
   def render_collection_numbers_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "collection_numbers",
-                obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "collection_numbers",
+      panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 

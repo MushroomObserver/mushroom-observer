@@ -23,7 +23,12 @@ class Components::Map < Components::Base
 
   MAX_GROUP_NAMES = 3
 
-  prop :objects, _Array(_Any), default: -> { [] }
+  # Mappable: real AR records (Location, Observation) or their
+  # `Mappable::Minimal*` analogs used by index/maps endpoints.
+  prop :objects, _Array(_Union(::Location, ::Observation,
+                               ::Mappable::MinimalLocation,
+                               ::Mappable::MinimalObservation)),
+       default: -> { [] }
   prop :user, _Nilable(User), default: nil
   prop :map_div, String, default: "map_div"
   prop :controller, _Nilable(String), default: "map"

@@ -101,6 +101,91 @@ This rule was added after a conversion shipped a
 `Views::Controllers::Descriptions::List` — the helper that PR was
 nominally trying to deprecate. Don't repeat that mistake.
 
+## ALWAYS use concrete prop types — never `_Any` when the type is known
+
+Phlex props validate at construction time when you give them a
+concrete type (`prop :user, ::User`, `prop :siblings,
+_Array(::Observation)`). A wrong-type arg fails loudly at the
+construction site instead of at the first method call that
+trips over `nil`. That's most of the value of having props at
+all — `_Any` throws the typecheck away.
+
+**Hard rule:** when you know the class an arg will hold, use it
+literally:
+
+```ruby
+# ✅ DO — concrete classes catch caller mistakes at construction
+prop :obs, ::Observation
+prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
+prop :siblings, _Array(::Observation), default: -> { [] }
+prop :sites, _Nilable(_Array(::ExternalSite)), default: nil
+
+# ❌ DON'T — `_Any` accepts anything, including nil, and fails
+# silently with a NoMethodError two methods later
+prop :consensus, _Nilable(_Any), default: nil
+prop :siblings, _Array(_Any), default: -> { [] }
+prop :sites, _Nilable(_Any), default: nil
+```
+
+Use `_Any` only when the arg genuinely can be any type and the
+view has explicit polymorphic handling for each shape
+(e.g. `Components::InlineModLinks#target` — different classes go
+through different `case`-branches). If you find yourself
+reaching for `_Any` to silence a typecheck error, the answer is
+almost always to figure out the right concrete type instead.
+
+## ALWAYS convert `assert_template` to a CSS-identifier assertion
+
+`assert_template("foo/show/_bar")` only works for ERB partials —
+Phlex components / views are rendered directly via `render(...)`,
+not through ActionView's template-lookup machinery, so the
+assertion will *always* fail after the conversion. **Do not
+delete or comment out** the assertion when this happens — that
+silently drops the coverage. Instead, replace it with an
+`assert_select` (controller tests) or `assert_html` (component
+tests) against a CSS selector that proves the same content
+rendered:
+
+```ruby
+# Before — partial-template assertion
+assert_template("observations/show/_thumbnail_map")
+
+# After — assert the panel's stable ID rendered
+assert_select("#observation_thumbnail_map")
+```
+
+Prefer a stable ID (`id="observation_thumbnail_map"`) when the
+panel has one; otherwise an identifier class
+(`.show_images`, `.observation_collection_numbers`); as a last
+resort, an unambiguous descendant selector. The goal is to pin
+the rendered DOM identity — the same thing the template
+assertion was implicitly checking when ActionView resolved the
+partial.
+
+This rule was added after the obs-show partials sweep dropped a
+batch of `assert_template` calls without replacing them — the
+tests passed but no longer verified the panel rendered at all.
+Re-deriving the coverage from the rendered HTML is the contract;
+the partial path was an implementation detail.
+
+**Do the assert_template swap BEFORE running the controller tests
+on the converted action.** When you Phlexify an action template,
+the moment the corresponding `.html.erb` leaves the disk every
+`assert_template("controller/action")` against that view starts
+returning a confusing "expecting <…> but rendering with
+<[layout partials]>" failure. Grep the test directory for matching
+`assert_template` calls in the same commit that deletes the ERB,
+swap each to its CSS-identifier equivalent, then run the suite.
+You'll save yourself a churn-y red CI pass.
+
+For full-action-template swaps, the layout's body class
+(`<body class="<controller_name>__<action_name>">`) gives a
+stable per-action identifier — `body.names__new`,
+`body.observations__index`, etc. Use that when the rendered
+view doesn't have a stronger page-specific id / class to pin
+against. Same shape as the integration-test `assert_selector(
+"body.observations__show")` calls already used elsewhere.
+
 ## Decide first: reusable or single-use?
 
 The first decision when converting an ERB helper / partial / template to
@@ -197,6 +282,67 @@ Example of the single-use pattern: see
 (`Views::Controllers::Account::APIKeys::Table`) — the api_keys index
 table chunk, rendered by both the index page and the post-CUD
 turbo_stream response, both within the api_keys controller.
+
+## Action-template + sub-partial organization
+
+An action template (`show.html.erb`, `new.html.erb`,
+`edit.html.erb`, …) usually has several sub-partials it composes
+(`_some_panel.erb`, `_some_row.erb`, …). When Phlexifying:
+
+- **Action template becomes a class** at `app/views/controllers/
+  <controller>/<action>.rb`, named `Views::Controllers::<C>::<A>`.
+  That's the class the controller renders.
+- **Sub-partials become sibling classes under the same action
+  namespace**, file-wise nested in `app/views/controllers/
+  <controller>/<action>/<name>.rb`, class-wise
+  `Views::Controllers::<C>::<A>::<Name>`.
+
+The action class and its sub-partial classes live in the **same
+constant** (the action is both a class AND a namespace — Ruby
+allows nested constants under a class just as under a module).
+File layout:
+
+```
+app/views/controllers/observations/
+  show.rb                          # class Views::Controllers::Observations::Show
+  show/
+    observation_details_panel.rb   # class Show::ObservationDetailsPanel
+    name_info_panel.rb             # class Show::NameInfoPanel
+    collection_numbers_panel.rb    # class Show::CollectionNumbersPanel
+    sibling_records.rb             # module Show::SiblingRecords (mixin)
+    …
+```
+
+Zeitwerk handles this fine: when the action class is referenced,
+it autoloads `show.rb`; when a sub-partial constant is
+referenced (`Show::FooPanel`), it autoloads the file under
+`show/`. The action class doesn't need to declare any of the
+sub-partials — they're discovered by the autoloader on demand.
+
+When the action class renders a sub-partial, qualify the
+constant from the namespace root the first time it's referenced
+inside another sub-partial:
+
+```ruby
+# In Show::ObservationDetailsPanel:
+render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(...))
+```
+
+The bare `CollectionNumbersPanel` form would resolve via Ruby's
+lexical scope from `Show::ObservationDetailsPanel`, but
+Zeitwerk's autoload-on-undefined-constant doesn't fire on
+unqualified references inside another constant's body —
+preferring the qualified form keeps things robust.
+
+Reference: `Views::Controllers::SpeciesLists::Show` and its
+siblings (`SpeciesLists::Details`, `SpeciesLists::Listing`,
+`SpeciesLists::Observation`) are the older pattern where
+sub-classes are flat siblings of the action class rather than
+nested under it; that's also valid, but for **action-specific**
+sub-partials (the obs-show case), nesting under the action
+class keeps the directory structure mirroring the ERB partial
+layout and makes the "which page does this belong to?" question
+trivial from the constant name alone.
 
 ## Collapse deep namespaces in `Views::Controllers::*`
 

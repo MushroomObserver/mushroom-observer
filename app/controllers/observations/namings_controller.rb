@@ -13,10 +13,15 @@ module Observations
     around_action :skip_bullet, if: -> { defined?(Bullet) },
                                 only: [:create, :update]
 
-    # The route for the namings table, an index of this obs' namings
+    # The route for the namings table, an index of this obs' namings.
+    # The view derives `consensus` from `observation` internally.
     def index
       @observation = find_or_goto_index(Observation, params[:observation_id])
-      @consensus = Observation::NamingConsensus.new(@observation)
+      return unless @observation
+
+      render(Views::Controllers::Observations::Namings::Index.new(
+               observation: @observation, user: @user
+             ))
     end
 
     # Note that every Naming form is also a nested Vote form.
@@ -174,9 +179,42 @@ module Observations
              ), layout: true)
     end
 
+    # Successful-create response when the form was opened from the
+    # lightbox / matrix-box context: swap the obs's title in both
+    # places (it now reflects the new naming), close out the
+    # naming modal + the AJAX-progress modal, and clear the
+    # identify-this-obs strip. Inlined from
+    # `_update_matrix_box.erb`.
+    def render_update_matrix_box_streams
+      obs_id = @observation.id
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "observation_what_#{obs_id}",
+                 Components::LightboxObservationTitle.new(
+                   obs: @observation, user: @user, identify: false
+                 )
+               ),
+               turbo_stream.replace(
+                 "box_title_#{obs_id}",
+                 Components::MatrixBoxTitle.new(
+                   id: obs_id,
+                   name: @observation.user_format_name(@user).
+                         t.break_name.small_author,
+                   type: :observation
+                 )
+               ),
+               turbo_stream.close_modal("modal_obs_#{obs_id}_naming"),
+               turbo_stream.remove("modal_obs_#{obs_id}_naming"),
+               turbo_stream.close_modal("mo_ajax_progress"),
+               turbo_stream.remove("mo_ajax_progress"),
+               turbo_stream.remove("observation_identify_#{obs_id}")
+             ])
+    end
+
     def naming_phlex_props
       {
         observation: @observation,
+        user: @user,
         naming: @naming,
         vote: @vote,
         given_name: @given_name,
@@ -260,8 +298,7 @@ module Observations
         format.turbo_stream do
           case params[:context]
           when "lightgallery", "matrix_box"
-            render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: @observation, user: @user })
+            render_update_matrix_box_streams
           else
             redirect_to_obs(@observation)
           end

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # "Edit this description" icon-link. Caller is responsible for the
-# `user_writer?(user, description)` permission check before
-# instantiating.
+# writer-permission check (`description.writer?(user)` or admin
+# mode) before instantiating — see `Components::DescriptionModLinks`.
 class Tab::Description::Edit < Tab::Base
   def initialize(description:)
     super()

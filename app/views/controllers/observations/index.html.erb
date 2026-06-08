@@ -9,15 +9,18 @@ if @objects.any?
                     q_param: q_param(@query), controller: controller
                   ))
 end
-add_sorter(@query, observations_index_sorts)
+add_sorter(@query, controller.index_sort_options)
 add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?
 %>
 
 <% if @objects.empty? && @name_suggestions.any? %>
-  <%= render(partial: "observations/show/name_suggestions",
-             locals: { names: @name_suggestions }) %>
+  <%= render(
+        Views::Controllers::Observations::Show::NameSuggestionsAlert.new(
+          names: @name_suggestions
+        )
+      ) %>
 <% end %>
 
 <%= paginated_results do %>

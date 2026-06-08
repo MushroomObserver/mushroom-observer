@@ -87,7 +87,6 @@ module Names::Synonyms
       }
       login("rolf")
       post(:create, params: params)
-      assert_template("names/synonyms/deprecate/new")
       assert_select("#name_messages")
       # Fail since name can't be disambiguated
 
@@ -157,7 +156,6 @@ module Names::Synonyms
       }
       login("rolf")
       post(:create, params: params)
-      assert_template("names/synonyms/deprecate/new")
       assert_select("#name_messages")
       # Fail since new name is not approved
 
@@ -215,7 +213,6 @@ module Names::Synonyms
       }
       login("rolf")
       post(:create, params: params)
-      assert_template("names/synonyms/deprecate/new")
       assert_flash_error(:runtime_name_deprecate_must_choose.t)
 
       # Name should remain unchanged

@@ -54,8 +54,8 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_accession_help
-      help_block_with_arrow("up") do
-        :create_herbarium_record_accession_number_help.t
+      render(Components::HelpBlock.new(arrow: :up)) do
+        trusted_html(:create_herbarium_record_accession_number_help.t)
       end
     end
 

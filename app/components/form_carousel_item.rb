@@ -25,7 +25,7 @@ class Components::FormCarouselItem < Components::BaseImage
   prop :index, Integer, default: 0
   prop :upload, _Boolean, default: false
   prop :obs_thumb_id, _Nilable(Integer), default: nil
-  prop :camera_info, Hash, default: -> { {} }
+  prop :camera_info, _Hash(Symbol, _Any?), default: -> { {} }
   prop :sibling, _Boolean, default: false
 
   def initialize(index: 0, upload: false, obs_thumb_id: nil, camera_info: {},
@@ -192,7 +192,9 @@ class Components::FormCarouselItem < Components::BaseImage
 
     button(type: "button", class: button_classes, data: data) do
       span { :image_remove_remove.l }
-      link_icon(:remove, class: "text-danger ml-3")
+      render(Components::LinkIcon.new(
+               type: :remove, html_class: "text-danger ml-3"
+             ))
     end
   end
 end

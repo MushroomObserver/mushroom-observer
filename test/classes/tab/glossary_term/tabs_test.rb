@@ -21,7 +21,7 @@ module Tab::GlossaryTerm
       assert_equal(:show_glossary_term.t(glossary_term: @term.name),
                    tab.title)
       assert_equal(routes.glossary_term_path(@term.id), tab.path)
-      assert_equal({ class: "glossary_term_link" }, tab.html_options)
+      assert_includes(tab.html_options[:class], "glossary_term_link")
     end
 
     def test_index
@@ -29,7 +29,7 @@ module Tab::GlossaryTerm
 
       assert_equal(:glossary_term_index.t, tab.title)
       assert_equal(routes.glossary_terms_path, tab.path)
-      assert_equal({ class: "glossary_terms_index_link" }, tab.html_options)
+      assert_includes(tab.html_options[:class], "glossary_terms_index_link")
     end
 
     def test_edit
@@ -37,7 +37,7 @@ module Tab::GlossaryTerm
 
       assert_equal(:edit_glossary_term.t, tab.title)
       assert_equal(routes.edit_glossary_term_path(@term.id), tab.path)
-      assert_equal({ class: "edit_glossary_term_link" }, tab.html_options)
+      assert_includes(tab.html_options[:class], "edit_glossary_term_link")
     end
   end
 end

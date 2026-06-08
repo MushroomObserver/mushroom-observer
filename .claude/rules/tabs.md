@@ -42,11 +42,12 @@ end
 
 `Tab::Base` provides:
 
-- `#to_internal_link` — returns the canonical `InternalLink` for
-  consumers that want pre-resolved attrs.
-- `#to_a` — returns the legacy `[title, url, html_options]` shape
-  for `tabs.tab(*tab.to_a)` splat consumers (and for parity with
-  the old helper-method API during migration).
+- `#to_a` — returns the `[title, url, html_options]` tuple. The
+  `html_options[:class]` is auto-composed with the derived
+  `<alt_title>_link` selector (or model-aware flavour when
+  `#model` is set) via `Tab::Base::HtmlOptionsComposer`.
+- `#html_options` — same composed hash as `to_a[2]`, callable
+  directly when you don't want the tuple form.
 - `#nav_key` — the identifier `Components::NavTabs` matches against
   `current:` to decide which tab is `.active`. Defaults to
   `alt_title` (a Tab's "short stable identifier" is the same
@@ -220,8 +221,7 @@ end
 ```
 
 `Collection#to_a` returns the Tab POROs themselves (via Enumerable's
-default). `Collection#to_internal_links` returns InternalLinks if
-you need pre-resolved attrs.
+default).
 
 ## Migration plan
 
@@ -232,12 +232,12 @@ ordered list.
 
 When converting a domain:
 
-1. For each helper method that returns
-   `InternalLink.new(...).tab`, create one Tab PORO class.
-2. For each helper method that returns an array of
-   `InternalLink#tab` arrays (e.g. `user_show_tabs`), create one
-   `Tab::Collection` subclass. Move conditional logic from the
-   view callers into the Collection's private methods.
+1. For each helper method that returns a `[title, url, opts]`
+   tuple, create one Tab PORO class.
+2. For each helper method that returns an array of such tuples
+   (e.g. `user_show_tabs`), create one `Tab::Collection` subclass.
+   Move conditional logic from the view callers into the
+   Collection's private methods.
 3. Update view callers to consume via NavTabs' `tabs:` kwarg or
    `add_all`.
 4. Delete the helper methods from `app/helpers/tabs/<domain>_helper.rb`.

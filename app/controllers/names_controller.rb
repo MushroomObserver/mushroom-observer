@@ -15,6 +15,36 @@ class NamesController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view`
+  # to render the Phlex Index view directly with the controller-
+  # populated ivars as explicit props. Replaces the implicit
+  # `render(action: :index)` lookup of `index.html.erb` (deleted).
+  def render_index_view
+    args = {
+      query: @query, pagination_data: @pagination_data,
+      objects: @objects, user: @user, error: @error,
+      help: @help, has_descriptions: @has_descriptions || false,
+      name_suggestions: @name_suggestions
+    }
+    # Only set when populated, so the view's `default: -> { {} }`
+    # fires for the common case (only `test_index` sets the ivar).
+    args[:test_pagination_args] = @test_pagination_args if @test_pagination_args
+    render(Views::Controllers::Names::Index.new(**args))
+  end
+
+  # Sort options for the index page. Swaps `updated_at` for
+  # `rss_log` when the active query orders by rss_log. Consumed by
+  # the Phlex Index view's `add_sorter` and by `check_index_sorting`.
+  def index_sort_options
+    rss_log = @query&.params&.dig(:order_by) == "rss_log"
+    [
+      ["name",                               :sort_by_name.t],
+      ["created_at",                         :sort_by_created_at.t],
+      [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
+      ["num_views",                          :sort_by_num_views.t]
+    ]
+  end
+
   private
 
   def default_sort_order
@@ -141,9 +171,9 @@ class NamesController < ApplicationController
   def show
     case params[:flow]
     when "next"
-      redirect_to_next_object(:next, Name, params[:id].to_s)
+      redirect_to_next_object(:next, Name, params[:id].to_s) and return
     when "prev"
-      redirect_to_next_object(:prev, Name, params[:id].to_s)
+      redirect_to_next_object(:prev, Name, params[:id].to_s) and return
     end
 
     # Load Name and NameDescription along with a bunch of associated objects.
@@ -156,6 +186,18 @@ class NamesController < ApplicationController
 
     init_projects_ivar
     init_related_query_ivars
+
+    render(Views::Controllers::Names::Show.new(
+             name: @name, user: @user,
+             best_images: @best_images,
+             description: @name.description,
+             comments: @comments, obss: @obss,
+             has_subtaxa: @has_subtaxa,
+             subtaxa_query: @subtaxa_query,
+             children_query: @children_query,
+             first_child: @first_child,
+             projects: @projects, versions: @versions
+           ))
   end
 
   # ----------------------------------------------------------------------------
@@ -172,7 +214,7 @@ class NamesController < ApplicationController
   # carousel:
   #   @best_images
   # best_description:
-  #   @best_description
+  #   @name.description (eager-loaded via Name.show_includes)
   # comments:
   #   comments_for_object
   # observations_menu:
@@ -190,8 +232,9 @@ class NamesController < ApplicationController
   #   @first_child
   # notes:
   # descriptions:
-  #   description_links = list_descriptions(user: @user, object: @name,
-  #                                         type: :name)
+  #   render(Views::Controllers::Descriptions::List.new(
+  #            user: @user, object: @name, type: :name
+  #          ))
   # projects:
   #   @projects
 
@@ -255,10 +298,6 @@ class NamesController < ApplicationController
     # This initiates a query for the images of only the most confident obs
     @best_images = @obss.best_images
 
-    # This seems like it queries the NameDescription table.
-    # Would be better to eager load descriptions and derive @best_description
-    # from them. Can also derive @projects from this.
-    @best_description = @name.best_brief_description
     # Save a lookup in comments_for_object
     @comments = @name.comments&.sort_by(&:created_at)&.reverse
   end
@@ -274,6 +313,7 @@ class NamesController < ApplicationController
 
   def new
     init_create_name_form
+    render_new_form
   end
 
   def create
@@ -291,6 +331,7 @@ class NamesController < ApplicationController
     return unless find_name!
 
     init_edit_name_form
+    render_edit_form
   end
 
   def update
@@ -327,7 +368,27 @@ class NamesController < ApplicationController
     @name.attributes = permitted_name_params[:name]
     @name.deprecated = params[:name][:deprecated] == "true"
     @name_string     = params[:name][:text_name]
-    render("new", location: new_name_path)
+    render(phlex_new_form, location: new_name_path)
+  end
+
+  def render_new_form
+    render(phlex_new_form)
+  end
+
+  def render_edit_form
+    render(Views::Controllers::Names::Edit.new(
+             name: @name, user: @user,
+             name_string: @name_string,
+             misspelling: @misspelling,
+             correct_spelling: @correct_spelling
+           ))
+  end
+
+  def phlex_new_form
+    Views::Controllers::Names::New.new(
+      name: @name, user: @user,
+      name_string: @name_string, approved_rank: @approved_rank
+    )
   end
 
   def init_edit_name_form

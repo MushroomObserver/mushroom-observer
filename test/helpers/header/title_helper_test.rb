@@ -45,6 +45,17 @@ module Header
       assert_equal(:PUBLICATION.l, document_title_for(pub))
     end
 
+    def test_document_title_for_handles_objects_without_document_title
+      # Defensive `unless object.respond_to?(:document_title)` gate —
+      # exercised by passing a stand-in that lacks the method. Real
+      # AR models all inherit `AbstractModel#document_title`, so
+      # this gate only ever fires for non-AR objects (a future
+      # edge case, but worth keeping covered).
+      fake = Struct.new(:type_tag).new(:observation)
+
+      assert_equal(:OBSERVATION.l, document_title_for(fake))
+    end
+
     def test_show_document_title_composes_type_id_and_plain_name
       obs = observations(:minimal_unknown_obs)
       title = show_document_title(document_title_for(obs), obs)

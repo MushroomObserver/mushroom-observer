@@ -34,10 +34,11 @@ class Components::ModalTurboForm < Components::Base
   prop :identifier, String
   prop :title, String
   prop :user, User
-  prop :model, _Nilable(_Any), default: nil
+  prop :model, _Nilable(_Union(::AbstractModel, ::FormObject::Base)),
+       default: nil
   prop :observation, _Nilable(Observation), default: nil
   prop :back, _Nilable(String), default: nil
-  prop :form_locals, Hash, default: -> { {} }
+  prop :form_locals, _Hash(Symbol, _Any?), default: -> { {} }
   prop :form_class, _Nilable(Class), default: nil
 
   # Returns the form view/component class for a given model. Prefers

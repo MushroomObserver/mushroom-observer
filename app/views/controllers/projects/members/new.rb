@@ -32,7 +32,9 @@ module Views::Controllers::Projects::Members
       render(Components::Table.new(@users.sort_by(&:login),
                                    class: "table-striped " \
                                           "table-project-members mt-3")) do |t|
-        t.column(:Login_name.t) { |u| user_link(u, u.login) }
+        t.column(:Login_name.t) do |u|
+          render(Components::UserLink.new(user: u, name: u.login))
+        end
         t.column(:Full_name.t) { |u| plain(u.name) }
         t.column(nil) { |u| render_add_button(u) }
       end
