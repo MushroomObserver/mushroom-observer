@@ -35,7 +35,7 @@ module Views::Controllers::Observations::SpeciesLists
 
       div(class: "navbar-flex mb-2") { content_for(:sorter) }
 
-      content_padded { render_sections }
+      render_sections
     end
 
     private
