@@ -45,7 +45,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
       <div class="row row-offcanvas row-offcanvas-left"
          data-nav-target="offcanvas">
 
-        <%= render(Views::Layouts::ApplicationSidebar.new(
+        <%= render(Views::Layouts::Sidebar.new(
           user: @user,
           browser: browser,
           request: request,
@@ -54,7 +54,9 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
         )) %>
 
         <div id="right_side" class="col-xs-12 col-md-10">
-          <%= render(partial: "application/top_nav") %>
+          <%= render(Views::Layouts::TopNav.new(
+                user: @user, query: @query
+              )) %>
           <%= render(partial: "application/app/page_flash") %>
           <%= render(partial: "application/content/header") %>
 

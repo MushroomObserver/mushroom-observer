@@ -2,12 +2,12 @@
 
 require("test_helper")
 
-module Components::ContextNav
-  # Tests for the right-side dropdown that renders into
+class Views::Layouts::TopNav
+  # Tests for the top-nav Actions dropdown that renders into
   # `content_for(:context_nav)`. Covers the basic structure, the
-  # per-link dispatch via `args[:button]`, and the `d-block`-stripping
-  # quirk inherited from the pre-Phlex helper.
-  class TopBarTest < ComponentTestCase
+  # per-link dispatch via `args[:button]`, and the
+  # `d-block`-stripping quirk inherited from the pre-Phlex helper.
+  class ContextNavTest < ComponentTestCase
     def setup
       super
       @article = articles(:premier_article)
@@ -16,7 +16,7 @@ module Components::ContextNav
     # No links → no markup at all (the entire dropdown is conditional
     # on having something to put inside it).
     def test_renders_nothing_when_links_empty
-      html = render(Components::ContextNav::TopBar.new(links: []))
+      html = render(Views::Layouts::TopNav::ContextNav.new(links: []))
 
       assert_equal("", html)
     end
@@ -25,7 +25,7 @@ module Components::ContextNav
     # that returns `[edit_tab, destroy_tab_if_admin]` shouldn't
     # collapse the dropdown when one entry is nil.
     def test_renders_nothing_when_all_links_are_nil
-      html = render(Components::ContextNav::TopBar.new(links: [nil, nil]))
+      html = render(Views::Layouts::TopNav::ContextNav.new(links: [nil, nil]))
 
       assert_equal("", html)
     end
@@ -40,15 +40,16 @@ module Components::ContextNav
       assert_html(html, "ul.dropdown-menu li", count: simple_links.length)
     end
 
-    # The dropdown's toggle shows the localized "Context Actions"
-    # label inside a span with the `dropdown_current_target` hook
-    # so the Stimulus controller can rewrite it on submenu changes.
+    # The dropdown's toggle shows the localized "Actions" label.
+    # (Previously the label span carried a
+    # `data-dropdown-current-target="title"` attr meant for a
+    # Stimulus controller that doesn't exist in the codebase —
+    # orphaned wiring; dropped with the Dropdown refactor.)
     def test_dropdown_toggle_shows_context_actions_label
       html = render_top_bar(simple_links)
 
-      title_sel =
-        "a.dropdown-toggle span[data-dropdown-current-target='title']"
-      assert_html(html, title_sel, text: :app_context_actions.l)
+      assert_html(html, "a.dropdown-toggle span",
+                  text: :app_context_actions.l)
     end
 
     # `args[:button] => :destroy` routes through `CrudButton::Delete`
@@ -114,7 +115,7 @@ module Components::ContextNav
     private
 
     def render_top_bar(links)
-      render(Components::ContextNav::TopBar.new(links: links))
+      render(Views::Layouts::TopNav::ContextNav.new(links: links))
     end
 
     def simple_links

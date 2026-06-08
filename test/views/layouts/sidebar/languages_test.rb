@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-module Views::Layouts::Sidebar
+class Views::Layouts::Sidebar
   class LanguagesTest < ComponentTestCase
     Browser = Struct.new(:bot?) do
       def bot?
