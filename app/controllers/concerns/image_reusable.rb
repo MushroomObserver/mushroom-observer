@@ -4,8 +4,9 @@
 # by `Observations::ImagesController#reuse`,
 # `Account::Profile::ImagesController#reuse`, and
 # `GlossaryTerms::ImagesController#reuse`. Each of those `reuse`
-# actions renders the same `Components::ImagesToReuseForm`, which
-# receives the loaded data as props.
+# actions renders the same
+# `Views::Controllers::Shared::ImagesToReuseForm`, which receives the
+# loaded data as props.
 module ImageReusable
   extend ActiveSupport::Concern
 

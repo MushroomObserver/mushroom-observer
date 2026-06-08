@@ -12,7 +12,8 @@ module GlossaryTerms
 
     # reuse_image_for_glossary_term
     def reuse
-      @object = GlossaryTerm.safe_find(params[:id])
+      return unless find_glossary_term!
+
       load_images_to_reuse
       render(Views::Controllers::GlossaryTerms::Images::Reuse.new(
                object: @object,
@@ -25,7 +26,7 @@ module GlossaryTerms
 
     # reuse image form buttons POST here
     def attach
-      @object = GlossaryTerm.safe_find(params[:id])
+      return unless find_glossary_term!
 
       image = Image.safe_find(params[:img_id])
       return render_reuse_with_invalid_id_error unless image
@@ -40,6 +41,10 @@ module GlossaryTerms
     # The actual grid of attachable images (partial) is a shared layout.
     # CRUD refactor makes each image link POST to create or edit.
 
+    def find_glossary_term!
+      @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
+    end
+
     def render_reuse_with_invalid_id_error
       flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
       render_reuse_page
@@ -52,7 +57,7 @@ module GlossaryTerms
           object: @object, user: @user, objects: @reuse_images,
           pagination_data: @reuse_pagination, all_users: @reuse_all_users
         ),
-        location: reuse_images_for_glossary_term_path(params[:img_id])
+        location: reuse_images_for_glossary_term_path(@object.id)
       )
     end
 
