@@ -9,6 +9,18 @@ class ObservationsController
       build_index_with_query
     end
 
+    def render_index_view
+      render(Views::Controllers::Observations::Index.new(
+               query: @query,
+               pagination_data: @pagination_data,
+               objects: @objects,
+               user: @user,
+               project: @project,
+               error: @error,
+               name_suggestions: @name_suggestions
+             ))
+    end
+
     # Sort options for the index page. Consumed by `add_sorter` and
     # `check_index_sorting`. Each key must resolve to
     # `Observation.order_by_<key>`.

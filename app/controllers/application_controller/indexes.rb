@@ -400,13 +400,17 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   # Check if a cached partial exists for this object.
-  # digest_path_from_template from ActionView::Helpers::CacheHelper :nodoc:
-  # https://stackoverflow.com/a/77862353/3357635
+  # Pre-check: does the `MatrixBox` fragment for this object+locale
+  # already exist in the cache? If yes, the row doesn't need eager-
+  # loaded associations (it'll be served from cache as-is); if no,
+  # the row needs eager-loading. Goes through `Rails.cache.exist?`
+  # with the shared key from `Components::MatrixTable.cache_key_for`
+  # so it matches the key the component writes under. (Previously
+  # used `fragment_exist?` with an ERB-template digest — its
+  # `views/` prefix and template-digest shape never matched what
+  # Phlex's `cache(...)` wrote, so the check always misfired.)
   def object_fragment_exist?(obj, locale)
-    template = lookup_context.find(action_name, lookup_context.prefixes)
-    digest_path = helpers.digest_path_from_template(template)
-
-    fragment_exist?([digest_path, obj, locale])
+    Rails.cache.exist?(::Components::MatrixTable.cache_key_for(obj, locale))
   end
 
   def users_content_filters

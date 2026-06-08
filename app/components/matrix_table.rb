@@ -29,6 +29,24 @@
 #     identify: true
 #   ))
 class Components::MatrixTable < Components::Base
+  # Bump when the rendered MatrixBox HTML changes (or any
+  # observable behavior the cached fragment captures). This is the
+  # invalidation lever for cached `MatrixBox` fragments — both the
+  # write site (`render_cached_boxes`) and the controller's
+  # pre-check (`ApplicationController::Indexes#object_fragment_exist?`)
+  # read this through `cache_key_for`. Phlex's automatic class +
+  # method + line digest doesn't survive into the controller's
+  # check, so we encode the version explicitly.
+  CACHE_VERSION = "v1"
+
+  # The cache key MatrixBox fragments are stored under, used by
+  # both the Phlex `low_level_cache` write inside this component and
+  # the controller's `fragment_exist?` pre-check. Keeping them as
+  # one method ensures the two ends agree on the key shape.
+  def self.cache_key_for(object, locale)
+    ["MatrixBox", CACHE_VERSION, locale, object]
+  end
+
   # Properties
   prop :objects, _Nilable(Array), default: nil
   prop :user, _Nilable(User), default: nil
@@ -66,9 +84,11 @@ class Components::MatrixTable < Components::Base
       # admin-only Exclude button. Non-admins see the same output as the
       # non-project case, so caching is still safe for them.
       if !@identify && !project_admin_view? && should_cache_object?(object)
-        cache([I18n.locale, object]) do
-          MatrixBox(user: @user, object: object)
-        end
+        # `low_level_cache` with the deterministic key from
+        # `cache_key_for` — same key the controller pre-check uses.
+        low_level_cache(
+          self.class.cache_key_for(object, I18n.locale)
+        ) { MatrixBox(user: @user, object: object) }
       else
         MatrixBox(user: @user, object: object,
                   identify: @identify, project: @project)
