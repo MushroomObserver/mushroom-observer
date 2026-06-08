@@ -33,5 +33,105 @@ class Inat
 
       assert_nothing_raised { PageParser.new(import) }
     end
+
+    def test_does_not_raise_if_not_own_import_has_url
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.inat_username = ""
+        i.inat_ids = ""
+        i.inat_url = "project_id=291058"
+      end
+
+      assert_nothing_raised { PageParser.new(import) }
+    end
+
+    def test_url_request_query_args_merges_url_params
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&place_id=5"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_equal("291058", args[:project_id],
+                   "URL param project_id should be in query args")
+      assert_equal("5", args[:place_id],
+                   "URL param place_id should be in query args")
+    end
+
+    def test_url_request_query_args_safety_params_override_url
+      import = inat_imports(:dick_inat_import).tap do |i|
+        # URL tries to override taxon_id and without_field — both should
+        # be replaced by MO's required values.
+        i.inat_url = "project_id=291058&taxon_id=1&without_field=something"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_equal(
+        Inat::Constants::IMPORTABLE_TAXON_IDS_ARG,
+        args[:taxon_id],
+        "MO taxon_id should override any taxon_id in user URL"
+      )
+      assert_equal(
+        "Mushroom Observer URL",
+        args[:without_field],
+        "MO without_field should override any without_field in user URL"
+      )
+    end
+
+    def test_url_request_query_args_strips_id_key
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&id=123,456"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_nil(args[:id],
+                 "URL mode should not pass id filter (uses id_above instead)")
+    end
+
+    def test_url_request_query_args_sets_pagination_params
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 42)
+
+      assert_equal(42, args[:id_above], "id_above should be set from argument")
+      assert_equal(200, args[:per_page], "per_page should be 200")
+      assert_equal("asc", args[:order], "order should be asc for pagination")
+      assert_equal("id", args[:order_by],
+                   "order_by should be id for pagination")
+    end
+
+    def test_url_id_above_used_for_first_page
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&id_above=500"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_equal(500, args[:id_above],
+                   "URL id_above should be used for the first page " \
+                   "(internal cursor still at 0)")
+    end
+
+    def test_internal_id_above_overrides_url_on_subsequent_pages
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&id_above=500"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 750)
+
+      assert_equal(750, args[:id_above],
+                   "Internal cursor should override URL id_above after " \
+                   "the first page")
+    end
   end
 end

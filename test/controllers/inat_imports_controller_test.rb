@@ -834,6 +834,171 @@ class InatImportsControllerTest < FunctionalTestCase
            "Clicking cancel button should make InatImport.canceled? == true")
   end
 
+  ########## URL-mode tests
+
+  INAT_SITE_OBS_URL = "https://www.inaturalist.org/observations"
+  INAT_API_OBS_URL  = "https://api.inaturalist.org/v1/observations"
+
+  def test_new_inat_import_has_inat_url_field
+    login
+    get(:new)
+
+    assert_select(
+      "input[name='inat_import[inat_url]']", true,
+      "Form should include an inat_url text field"
+    )
+  end
+
+  def test_create_with_valid_url_shows_confirmation
+    user = users(:rolf)
+    inat_username = "rolf_inat_user"
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: inat_username, consent: 1 })
+
+    assert_response(:success, "Valid URL should proceed to confirmation")
+    assert_template(:confirm)
+    assert_select("#estimated_count", "5",
+                  "Confirmation should show estimate from URL query")
+  end
+
+  def test_create_url_and_ids_both_present_rejected
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_ids: "123",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash_text(:inat_list_xor_all.l,
+                      "Supplying both URL and IDs should flash XOR error")
+    assert_form_action(action: :create)
+  end
+
+  def test_create_url_and_all_both_present_rejected
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, all: "1",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash_text(:inat_list_xor_all.l,
+                      "URL + Import All should flash XOR error")
+    assert_form_action(action: :create)
+  end
+
+  def test_create_invalid_url_rejected
+    login
+    post(:create,
+         params: { inat_url: "https://example.com/not-inat",
+                   inat_username: "someone", consent: 1 })
+
+    assert_flash_text(:inat_invalid_url.l,
+                      "Non-iNat URL should flash invalid URL error")
+    assert_form_action(action: :create)
+  end
+
+  def test_create_confirmed_with_url_saves_inat_url
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+    normalized = "project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1, confirmed: 1 })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Confirmed URL import should redirect to iNat auth")
+    assert_equal(normalized, inat_import.reload.inat_url,
+                 "Normalized URL query string should be saved on InatImport")
+  end
+
+  def test_url_mode_importables_is_nil
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1, confirmed: 1 })
+
+    assert_nil(inat_import.reload.importables,
+               "URL mode should save nil importables (unknown until job runs)")
+  end
+
+  def test_superimporter_not_own_can_import_via_url_without_username
+    user = users(:dick)
+    assert(InatImport.super_importer?(user),
+           "Test requires a super_importer fixture")
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, import_others: "1", consent: 1 })
+
+    assert_template(:confirm,
+                    "Superimporter URL import without username should confirm")
+  end
+
+  def test_url_mode_estimate_merges_url_params
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    # Sentinel: return a distinct count only when project_id is included
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("project_id" => "291058")).
+      to_return(status: 200, body: { total_results: 7 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "7",
+                  "Estimate should include project_id from user URL")
+  end
+
+  def test_url_params_preserved_through_confirm_round_trip
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    normalized = "project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf_inat_user",
+             inat_ids: "",
+             inat_url: normalized,
+             import_all: "",
+             consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Confirmed URL via superform params should auth")
+    assert_equal(normalized, inat_import.reload.inat_url,
+                 "inat_url should be saved from superform hidden field")
+  end
+
   ########## Utilities
 
   def authorization_denial_callback_params

@@ -3255,7 +3255,10 @@
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
-  inat_list_xor_all: "Either (a) list the iNat observation(s), or (b) check \"Import all ...\" (not both)"
+  inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
+  inat_url_label: "iNat observations URL"
+  inat_url_hint: "Paste an iNat observation search URL or API URL to filter which observations to import (e.g. by project or place). Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
+  inat_invalid_url: "URL must be an iNaturalist observations search URL or API URL"
   inat_previous_import: "[count] listed ids previously imported and will not be re-imported"
   inat_too_many_ids_listed: Too many ids listed
   inat_importing_all_anothers: You cannot import all observations of another person

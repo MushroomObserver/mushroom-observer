@@ -103,6 +103,7 @@ module Views::Controllers::InatImports
       hidden_field(:import_all)
       hidden_field(:consent)
       hidden_field(:import_others)
+      hidden_field(:inat_url)
     end
 
     def render_buttons
