@@ -1326,7 +1326,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # else nil (a field slip with no recorded collector renders blank).
   # The `collector` column is the single source of truth (#4211); the
   # legacy notes[:Collector] fallback was removed once the column was
-  # backfilled and notes stripped (script/migrate_collector_notes.rb).
+  # backfilled and notes stripped (the MigrateCollectorNotes migration).
   def collector_textile
     return collector_user.textile_name if collector_user
 
