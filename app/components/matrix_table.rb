@@ -48,6 +48,19 @@ class Components::MatrixTable < Components::Base
     ["MatrixBox", CACHE_VERSION, locale, object]
   end
 
+  # Per-object predicate the render path uses to decide whether to
+  # write the fragment cache (`render_cached_boxes`) AND the
+  # controller's pre-check uses to decide whether to consult it
+  # (`ApplicationController::Indexes#object_fragment_exist?`).
+  # Objects with an untransferred thumb_image are skipped — the
+  # rendered HTML embeds the image URL, which would be wrong (and
+  # the wrong-cached) until the transfer completes.
+  def self.should_cache_object?(object)
+    return true unless object.respond_to?(:thumb_image)
+
+    object.thumb_image&.transferred != false
+  end
+
   # Properties
   prop :objects, _Nilable(Array), default: nil
   prop :user, _Nilable(User), default: nil
@@ -81,10 +94,7 @@ class Components::MatrixTable < Components::Base
 
   def render_cached_boxes
     @objects.each do |object|
-      # Skip fragment cache only when the current user will see the
-      # admin-only Exclude button. Non-admins see the same output as the
-      # non-project case, so caching is still safe for them.
-      if !@identify && !project_admin_view? && should_cache_object?(object)
+      if cacheable_render?(object)
         # `low_level_cache` with the deterministic key from
         # `cache_key_for` — same key the controller pre-check uses.
         low_level_cache(
@@ -97,15 +107,18 @@ class Components::MatrixTable < Components::Base
     end
   end
 
-  def project_admin_view?
-    @project&.is_admin?(@user)
+  # Mirrors the controller's `matrix_caches_in_this_request?` AND
+  # `should_cache_object?` gates. Project admins see the admin-only
+  # Exclude button; identify mode renders the vote selector. Both
+  # diverge from the cached non-admin / non-identify markup, so the
+  # cache must be bypassed.
+  def cacheable_render?(object)
+    !@identify && !project_admin_view? &&
+      self.class.should_cache_object?(object)
   end
 
-  def should_cache_object?(object)
-    return true unless object.respond_to?(:thumb_image)
-
-    # Don't cache if thumb_image hasn't been transferred to image server
-    object.thumb_image&.transferred != false
+  def project_admin_view?
+    @project&.is_admin?(@user)
   end
 
   def render_matrix_boxes

@@ -403,14 +403,36 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # Pre-check: does the `MatrixBox` fragment for this object+locale
   # already exist in the cache? If yes, the row doesn't need eager-
   # loaded associations (it'll be served from cache as-is); if no,
-  # the row needs eager-loading. Goes through `Rails.cache.exist?`
-  # with the shared key from `Components::MatrixTable.cache_key_for`
-  # so it matches the key the component writes under. (Previously
-  # used `fragment_exist?` with an ERB-template digest — its
-  # `views/` prefix and template-digest shape never matched what
-  # Phlex's `cache(...)` wrote, so the check always misfired.)
+  # the row needs eager-loading.
+  #
+  # Two-stage gate. Both have to be true for the row to be served
+  # from cache:
+  #   1. `matrix_caches_in_this_request?` (per-request) — false
+  #      when `Components::MatrixTable#render_cached_boxes` would
+  #      bypass the cache for this whole render (identify mode,
+  #      project-admin view). Controllers override.
+  #   2. `MatrixTable.should_cache_object?` (per-object) — false
+  #      when the object itself isn't cacheable (e.g. an
+  #      Observation with an untransferred thumb image).
+  #
+  # Then `Rails.cache.exist?` confirms the fragment is actually in
+  # the store. Uses the shared key from `MatrixTable.cache_key_for`
+  # so the read matches what `MatrixTable#render_cached_boxes`
+  # writes.
   def object_fragment_exist?(obj, locale)
+    return false unless matrix_caches_in_this_request?
+    return false unless ::Components::MatrixTable.should_cache_object?(obj)
+
     Rails.cache.exist?(::Components::MatrixTable.cache_key_for(obj, locale))
+  end
+
+  # Overridable hook: does this request render the matrix in the
+  # cached path? Controllers that always (or sometimes) render
+  # `MatrixTable` in identify mode or project-admin view should
+  # override. The default is `true` because the basic obs index
+  # without an admin-viewable project uses caching.
+  def matrix_caches_in_this_request?
+    true
   end
 
   def users_content_filters
