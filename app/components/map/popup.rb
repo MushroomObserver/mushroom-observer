@@ -27,11 +27,12 @@ class Components::Map::Popup < Components::Base
   MAX_GROUP_NAMES = 3
 
   prop :set, ::Mappable::MapSet
-  # Carried through as `q:` on every link/href inside the popup so
-  # the user lands on the same filtered query they were already
-  # navigating. May arrive as a controller `Hash` (from the
-  # MapsController popup endpoint), a plain `Hash`, or `nil`.
-  prop :query_param, _Nilable(Hash), default: nil
+  # The Query the user is navigating — used to mint `?q=…` on every
+  # link inside the popup so a click lands inside the same filtered
+  # query context. Falls back to `current_query` (controller's
+  # session-current query, already validated) when omitted, so
+  # callers like `Components::Map` don't have to forward it.
+  prop :query, _Nilable(::Query), default: nil
 
   def view_template
     if single_obs_set?
@@ -47,8 +48,13 @@ class Components::Map::Popup < Components::Base
     @set.observations.length == 1 && @set.observations.first&.id
   end
 
+  def effective_query
+    @effective_query ||= @query || current_query
+  end
+
   def query_path_params
-    @query_param ? { q: @query_param } : {}
+    q = effective_query&.q_param
+    q ? { q: q } : {}
   end
 
   # ----------------------------------------------------------------

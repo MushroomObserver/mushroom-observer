@@ -59,11 +59,11 @@ module Observations
         thumb_image_id: observation.thumb_image_id
       )
       set = Mappable::MapSet.new([minimal])
-      # params[:q] arrives as ActionController::Parameters; URL helpers
-      # inside mapset_info_window reject unpermitted parameters, so
-      # convert to a plain Hash before passing through.
-      query_param = params[:q].presence&.to_unsafe_h
-      popup = Components::Map::Popup.new(set: set, query_param: query_param)
+      # `query` falls back to `current_query` (controller method) when
+      # nil, which itself reads `params[:q]` through
+      # `query_from_q_param`'s validated path — so the popup gets a
+      # typed `Query` regardless of how the URL arrived.
+      popup = Components::Map::Popup.new(set: set, query: current_query)
       render(json: { html: view_context.render(popup) })
     end
 

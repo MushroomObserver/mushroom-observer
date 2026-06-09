@@ -82,7 +82,12 @@ class Components::Map < Components::Base
   prop :controls, _Array(Symbol), default: -> { [:large_map, :map_type] }
   prop :location_format, _Nilable(String), default: nil
   prop :nothing_to_map, _Nilable(String), default: nil
-  prop :query_param, _Nilable(Hash), default: nil
+  # Typed `Query` (not raw Hash). Used for URL minting in popup
+  # links and by the `Mappable::ClusteredCollection` builder. Falls
+  # back to `current_query` (controller's session-current query,
+  # already validated by `query_from_q_param`) when omitted, so
+  # chrome-y callers don't have to thread it through.
+  prop :query, _Nilable(::Query), default: nil
   # Dynamic-clustering toggle. When true AND the input fits under
   # CLUSTER_MAX_OBJECTS, emit a Mappable::ClusteredCollection (one
   # MapSet per object) and `data-clustering="true"`, which tells the
@@ -271,19 +276,17 @@ class Components::Map < Components::Base
     effective_query_param ? { q: effective_query_param } : {}
   end
 
-  # Falls back to the registered `q_param` helper (which reads from
-  # the controller's session-current-query) when no explicit
-  # `query_param:` was passed. Lets chrome-y callers like
-  # `locations/show` skip threading `query_param: q_param(@query)`
-  # through the constructor — the session already knows the current
-  # query.
-  #
-  # NOTE: `q_param` (no receiver) — the `controller` prop on this
-  # class shadows the helper-registered `controller`, so reaching
-  # for `controller.q_param` would call `q_param` on the Stimulus
-  # controller string (e.g. "map") and crash.
+  # The query the user is navigating — explicit `@query` prop when
+  # given, otherwise the controller's `current_query` (session +
+  # `params[:q]`-derived). Memoized so popup builders don't re-ask
+  # per mapset.
+  def effective_query
+    @effective_query ||= @query || current_query
+  end
+
+  # The URL `q=` Hash, derived from `effective_query.q_param`.
   def effective_query_param
-    @effective_query_param ||= @query_param || q_param
+    @effective_query_param ||= effective_query&.q_param
   end
 
   # Plain-text coordinate formatters for marker titles. The popup

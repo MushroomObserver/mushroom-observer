@@ -56,7 +56,7 @@ module Components::Map::Clustering
     mapset.title = mapset_marker_title(mapset)
     mapset.caption = capture do
       render(::Components::Map::Popup.new(set: mapset,
-                                          query_param: effective_query_param))
+                                          query: effective_query))
     end
     mapset.objects = nil # can't delete, it's part of the MapSet object
   end
