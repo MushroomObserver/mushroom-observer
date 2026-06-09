@@ -15,6 +15,13 @@ class Components::Base < Phlex::HTML
   # Register custom value helpers (return values)
   register_value_helper :permission?
   register_value_helper :in_admin_mode?
+  # The logged-in User (or nil). Reads off the controller's
+  # before-filter-set `@user` ivar — request-scoped, no thread-
+  # local. Views that need "the viewer" can call `current_user`
+  # instead of taking a `prop :user, _Nilable(::User)`; views that
+  # need a non-viewer subject User keep the prop. See
+  # `ApplicationController::Authentication#current_user`.
+  register_value_helper :current_user
   register_value_helper :url_for
   register_value_helper :image_vote_as_short_string
   register_value_helper :image_vote_as_help_string
