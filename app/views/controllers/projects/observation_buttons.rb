@@ -9,7 +9,10 @@
 module Views::Controllers::Projects
   class ObservationButtons < Views::Base
     prop :project, ::Project
-    prop :query, _Nilable(::Query), default: nil
+    # Required — every render path passes a real `@query` (the obs
+    # index always builds one), and both `add_q_param` and
+    # `Tab::RelatedQuery.for` rely on the value to mint URLs.
+    prop :query, ::Query
 
     def view_template
       div do
