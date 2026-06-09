@@ -44,7 +44,7 @@ class MatrixTableTest < ComponentTestCase
 
       # Expect cache to be called
       cache_called = false
-      component.stub(:cache, lambda { |_obj, &block|
+      component.stub(:low_level_cache, lambda { |_key, &block|
         cache_called = true
         block.call
       }) do
@@ -67,7 +67,7 @@ class MatrixTableTest < ComponentTestCase
 
       # Expect cache NOT to be called
       cache_called = false
-      component.stub(:cache, lambda { |_obj, &block|
+      component.stub(:low_level_cache, lambda { |_key, &block|
         cache_called = true
         block.call
       }) do
@@ -93,7 +93,7 @@ class MatrixTableTest < ComponentTestCase
 
     # Expect cache to be called for user objects
     cache_called = false
-    component.stub(:cache, lambda { |_obj, &block|
+    component.stub(:low_level_cache, lambda { |_key, &block|
       cache_called = true
       block.call
     }) do
@@ -119,7 +119,7 @@ class MatrixTableTest < ComponentTestCase
 
     # Expect cache to be called when thumb_image is nil
     cache_called = false
-    component.stub(:cache, lambda { |_obj, &block|
+    component.stub(:low_level_cache, lambda { |_key, &block|
       cache_called = true
       block.call
     }) do
@@ -198,17 +198,20 @@ class MatrixTableTest < ComponentTestCase
         cached: true
       )
 
-      # Capture the cache key that gets passed to cache()
+      # Capture the cache key that gets passed to low_level_cache
       captured_key = nil
-      component.stub(:cache, lambda { |key, &block|
+      component.stub(:low_level_cache, lambda { |key, &block|
         captured_key = key
         block.call
       }) do
         render(component)
       end
 
-      assert_equal([I18n.locale, obs], captured_key,
-                   "Cache key should include locale and object")
+      assert_equal(
+        Components::MatrixTable.cache_key_for(obs, I18n.locale),
+        captured_key,
+        "Cache key should match `MatrixTable.cache_key_for(obj, locale)`"
+      )
     end
   end
 
@@ -223,7 +226,7 @@ class MatrixTableTest < ComponentTestCase
       )
 
       cache_called = false
-      component.stub(:cache, lambda { |_key, &block|
+      component.stub(:low_level_cache, lambda { |_key, &block|
         cache_called = true
         block.call
       }) do
@@ -247,7 +250,7 @@ class MatrixTableTest < ComponentTestCase
       component_en = Components::MatrixTable.new(
         objects: [obs], user: @user, cached: true
       )
-      component_en.stub(:cache, lambda { |key, &block|
+      component_en.stub(:low_level_cache, lambda { |key, &block|
         keys << key
         block.call
       }) do
@@ -258,15 +261,17 @@ class MatrixTableTest < ComponentTestCase
       component_es = Components::MatrixTable.new(
         objects: [obs], user: @user, cached: true
       )
-      component_es.stub(:cache, lambda { |key, &block|
+      component_es.stub(:low_level_cache, lambda { |key, &block|
         keys << key
         block.call
       }) do
         I18n.with_locale(:es) { render(component_es) }
       end
 
-      assert_equal([:en, obs], keys[0], "First key should use :en locale")
-      assert_equal([:es, obs], keys[1], "Second key should use :es locale")
+      assert_equal(Components::MatrixTable.cache_key_for(obs, :en),
+                   keys[0], "First key should use :en locale")
+      assert_equal(Components::MatrixTable.cache_key_for(obs, :es),
+                   keys[1], "Second key should use :es locale")
       assert_not_equal(keys[0], keys[1], "Different locales should have " \
                                          "different cache keys")
     end

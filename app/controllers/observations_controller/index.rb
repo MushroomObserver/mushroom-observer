@@ -9,6 +9,29 @@ class ObservationsController
       build_index_with_query
     end
 
+    def render_index_view
+      render(Views::Controllers::Observations::Index.new(
+               query: @query,
+               pagination_data: @pagination_data,
+               objects: @objects,
+               user: @user,
+               project: @project,
+               error: @error,
+               name_suggestions: @name_suggestions
+             ))
+    end
+
+    # `Components::MatrixTable` bypasses the fragment cache when
+    # rendering for a project admin (the admin-only Exclude button
+    # changes the markup). When the obs index is scoped to a project
+    # AND the current user is an admin of it, the controller's
+    # cache pre-check must agree — otherwise it would skip eager-
+    # loading rows it thinks are cache hits and then render uncached
+    # boxes → N+1.
+    def matrix_caches_in_this_request?
+      !@project&.is_admin?(@user)
+    end
+
     # Sort options for the index page. Consumed by `add_sorter` and
     # `check_index_sorting`. Each key must resolve to
     # `Observation.order_by_<key>`.
