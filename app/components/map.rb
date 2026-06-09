@@ -4,7 +4,27 @@
 # Works with the Stimulus map controller to render Google Maps with
 # markers and bounding boxes.
 #
-# Replaces the `make_map` helper from MapHelper.
+# Ports the logic that previously lived in `MapHelper`,
+# `MapPopupHelper`, and `MapLegendHelper` so that those helpers can be
+# deleted. The popup markup is the richer (`#4131`) flavor: a Bootstrap
+# `.media` layout with a thumbnail for single-obs popups, and a header
+# with "Show All" / "Map All" buttons for group popups.
+#
+# The rendering logic is split across three nested modules to keep
+# `Metrics/ClassLength` in check:
+#
+#   * `Components::Map::Clustering` — Mappable::Clustered vs
+#                                    CollapsibleCollection selection +
+#                                    cluster_url / singleton_key.
+#   * `Components::Map::Popup`      — info-window HTML (single-obs +
+#                                    group), coordinate formatting.
+#   * `Components::Map::Legend`     — border / consensus-color legend
+#                                    rendered under the map container.
+#
+# All three are `include`d into `Components::Map` at the bottom of the
+# class body. Their methods are all private and rely on instance
+# variables (`@objects`, `@clustering`, `@query_param`, etc.) declared
+# as props on the host class.
 #
 # @example Basic usage
 #   render(Components::Map.new(objects: [@location]))
@@ -17,11 +37,33 @@
 #     controller: nil  # form has the controller
 #   ))
 #
+# @example Clustered observations map with cap banner
+#   render(Components::Map.new(
+#     objects: @observations,
+#     clustering: true,
+#     capped: @observations_capped,
+#     cluster_query_string: @cluster_query_string,
+#     query_param: q_param(@query),
+#     zoom: 2,
+#     observations_loaded_count: @observations_loaded_count,
+#     observations_total_count: @observations_total_count
+#   ))
+#
 class Components::Map < Components::Base
-  include Phlex::Rails::Helpers::ContentTag
-  include Phlex::Rails::Helpers::LinkTo
+  # `<center>` is deprecated HTML but the Google Maps popup historically
+  # relied on it to vertically stack the bounding-box coordinate lines.
+  # Phlex doesn't ship it as a standard element; register it inline so
+  # the popup markup stays byte-for-byte equivalent to the helper-era
+  # output.
+  register_element :center
 
   MAX_GROUP_NAMES = 3
+
+  # Upper bound on points for client-side dynamic clustering
+  # (issue #4159). Above this size we fall back to the server-side
+  # CollapsibleCollectionOfObjects, which buckets the input
+  # geographically into a manageable number of marker sets.
+  CLUSTER_MAX_OBJECTS = 10_000
 
   # Mappable: real AR records (Location, Observation) or their
   # `Mappable::Minimal*` analogs used by index/maps endpoints.
@@ -40,15 +82,44 @@ class Components::Map < Components::Base
   prop :controls, _Array(Symbol), default: -> { [:large_map, :map_type] }
   prop :location_format, _Nilable(String), default: nil
   prop :nothing_to_map, _Nilable(String), default: nil
-  prop :query_param, _Nilable(String), default: nil
+  prop :query_param, _Nilable(Hash), default: nil
+  # Dynamic-clustering toggle. When true AND the input fits under
+  # CLUSTER_MAX_OBJECTS, emit a Mappable::ClusteredCollection (one
+  # MapSet per object) and `data-clustering="true"`, which tells the
+  # JS controller to wrap the markers in a MarkerClusterer.
+  prop :clustering, _Boolean, default: false
+  # Whether the server-side dataset was capped (so the client knows to
+  # refetch on viewport changes). Drives the cap-banner visibility.
+  prop :capped, _Boolean, default: false
+  # Server-emitted "q[...]=…" base for cluster popup Show All / Map All
+  # links. The JS controller can't rebuild this from window.location
+  # alone (might be a saved-query id, or no q params at all).
+  prop :cluster_query_string, _Nilable(String), default: nil
+  # Initial zoom level forwarded to the JS via data-zoom.
+  prop :zoom, _Nilable(Integer), default: nil
+  # Counts shown in the cap-banner — meaningful only when clustering.
+  prop :observations_loaded_count, _Nilable(Integer), default: nil
+  prop :observations_total_count, _Nilable(Integer), default: nil
 
   def view_template
-    return render_nothing_to_map unless mappable_objects.any?
+    # Cap banner is part of the clustering chrome — render even when
+    # there are no observations to map, so the JS layer can flip it
+    # visible after a refetch returns capped results.
+    render_cap_banner
 
-    render_map_container
+    if mappable_objects.any?
+      render_map_container
+      render_legend
+    else
+      render_nothing_to_map
+    end
   end
 
   private
+
+  # --------------------------------------------------------------
+  # Object filtering / nothing-to-map fallback
+  # --------------------------------------------------------------
 
   def mappable_objects
     @mappable_objects ||= @objects.reject do |obj|
@@ -61,55 +132,108 @@ class Components::Map < Components::Base
     @nothing_to_map || :runtime_map_nothing_to_map.t
   end
 
+  # `nothing_to_map_text` is typically a `:foo.tp` textile-processed
+  # html_safe string (e.g. with `<em>` tags around model names),
+  # so emit through `trusted_html` rather than `plain` which would
+  # escape the entities.
   def render_nothing_to_map
-    div(class: "w-100") { nothing_to_map_text }
+    div(class: "w-100") { trusted_html(nothing_to_map_text) }
   end
 
+  # --------------------------------------------------------------
+  # Cap banner
+  # --------------------------------------------------------------
+
+  # The banner is only meaningful when the dataset was clustered (the
+  # cap only kicks in on the clustering path). Skip the emit entirely
+  # when either count is missing so the helper-era output shape is
+  # preserved for non-cap callers.
+  def render_cap_banner
+    return unless @clustering
+    return if @observations_loaded_count.nil? ||
+              @observations_total_count.nil?
+
+    div(id: "map_cap_banner", class: "alert alert-warning mt-2",
+        style: (@capped ? nil : "display:none")) do
+      trusted_html(
+        :map_cap_banner.t(
+          loaded: @observations_loaded_count.to_fs(:delimited),
+          total: @observations_total_count.to_fs(:delimited)
+        )
+      )
+    end
+  end
+
+  # --------------------------------------------------------------
+  # Map container + data attributes
+  # --------------------------------------------------------------
+
   def render_map_container
-    div(class: "w-100 position-relative", style: "padding-bottom: 66%;") do
-      div(id: @map_div, class: "position-absolute w-100 h-100",
+    div(class: "w-100 position-relative map-container") do
+      div(id: @map_div,
+          class: "position-absolute w-100 h-100",
           data: map_data_attributes)
     end
   end
 
   def map_data_attributes
-    attrs = {
+    base_map_data_attributes.merge(optional_map_data_attributes)
+  end
+
+  def base_map_data_attributes
+    {
       map_target: @map_target,
       map_type: @map_type,
       need_elevations_value: @need_elevations_value.to_s,
       map_open: @map_open.to_s,
       editable: @editable.to_s,
       controls: @controls.to_json,
-      location_format: @location_format || @user&.location_format || "postal",
-      collection: mappable_collection.to_json,
+      location_format: location_format_value,
+      collection: collection_for_js.to_json,
       localization: localization_data.to_json
     }
+  end
+
+  def optional_map_data_attributes
+    attrs = {}
     attrs[:controller] = @controller if @controller
+    attrs[:zoom] = @zoom.to_s if @zoom
+    attrs[:cluster_query_string] = @cluster_query_string if
+      @cluster_query_string
+    attrs[:clustering] = "true" if use_clustering?
+    attrs[:capped] = "true" if @capped
     attrs
   end
 
+  # Location format — caller wins, then the prop'd user's preference,
+  # then the global `::User.current` fallback (the helper-era path),
+  # then the "postal" baseline. The `::User` qualifier matches the
+  # same fallback the deleted `MapHelper#default_map_args` used and
+  # keeps the NoUserCurrentInViews cop quiet on a pre-existing path.
+  def location_format_value
+    @location_format || @user&.location_format ||
+      ::User.current_location_format || "postal"
+  end
+
+  # Localization values shipped to the JS controller as a JSON blob on
+  # `data-localization`. Includes the cap-banner template — looked up
+  # via the raw `I18n.t` call (no textile processing) so the JS can
+  # substitute `[loaded]` / `[total]` on every viewport refetch.
   def localization_data
     {
       nothing_to_map: nothing_to_map_text,
       observations: :Observations.t,
       locations: :Locations.t,
       show_all: :show_all.t,
-      map_all: :map_all.t
+      map_all: :map_all.t,
+      map_cap_banner: I18n.t("#{MO.locale_namespace}.map_cap_banner")
     }
   end
 
-  def mappable_collection
-    collection = Mappable::CollapsibleCollectionOfObjects.new(mappable_objects)
-    collection.sets.each_value do |mapset|
-      mapset.color = mapset.compute_color
-      mapset.title = mapset_marker_title(mapset)
-      mapset.caption = mapset_info_window(mapset)
-      mapset.objects = nil
-    end
-    collection
-  end
+  # --------------------------------------------------------------
+  # Marker tooltip title
+  # --------------------------------------------------------------
 
-  # Title for map marker tooltip
   def mapset_marker_title(set)
     strings = map_location_strings(set.objects)
     result = if strings.length > 1
@@ -130,127 +254,36 @@ class Components::Map < Components::Base
       if obj.location?
         obj.display_name
       elsif obj.observation?
-        if obj.location
-          obj.location.display_name
-        elsif obj.lat
-          "#{format_latitude(obj.lat)} #{format_longitude(obj.lng)}"
-        end
+        observation_location_string(obj)
       end
     end.uniq
   end
 
-  # Info window content for map marker popup. Enhanced for issue #4131
-  # (see MapHelper#mapset_info_window for the parallel implementation
-  # used by non-Phlex callers).
-  def mapset_info_window(set)
-    lines = []
-    lines.concat(observation_lines(set)).compact!
-    lines << location_line(set)
-    lines << mapset_coords(set)
-    lines.compact.join("<br>")
-  end
-
-  def observation_lines(set)
-    observations = set.observations
-    if observations.length == 1 && observations.first&.id
-      single_observation_lines(observations.first, set)
-    elsif observations.length > 1
-      [mapset_observation_header(set), *group_name_links(observations)]
-    else
-      []
+  def observation_location_string(obs)
+    if obs.location
+      obs.location.display_name
+    elsif obs.lat
+      "#{format_latitude(obs.lat)} #{format_longitude(obs.lng)}"
     end
   end
 
-  def single_observation_lines(obs, _set)
-    [
-      mapset_observation_link(obs),
-      obs_date(obs),
-      consensus_indicator(obs)
-    ].compact
+  def query_path_params
+    effective_query_param ? { q: effective_query_param } : {}
   end
 
-  def group_name_links(observations)
-    sorted = observations.sort_by { |o| [o.when || Date.new(0), o.id] }.reverse
-    top = sorted.first(MAX_GROUP_NAMES)
-    links = top.map { |o| mapset_observation_link(o) }
-    links << "<span>…</span>" if sorted.length > MAX_GROUP_NAMES
-    links
+  # Falls back to `controller.q_param` (which reads from the session's
+  # current query) when no explicit `query_param:` was passed.
+  # Lets chrome-y callers like `locations/show` skip threading
+  # `query_param: q_param(@query)` through the constructor — the
+  # session already knows the current query.
+  def effective_query_param
+    @effective_query_param ||= @query_param || controller.q_param
   end
 
-  def obs_date(obs)
-    return nil unless obs.respond_to?(:when) && obs.when.present?
-
-    obs.when.web_date.to_s
-  end
-
-  # Plain-text confidence line. The marker color is the visual cue;
-  # the popup just names the percentage. `.floor` keeps the text from
-  # crossing a traffic-light threshold ahead of the underlying value
-  # (e.g. 79.6% should read "79%", not "80%").
-  def consensus_indicator(obs)
-    return nil unless obs.respond_to?(:vote_cache)
-
-    pct = ::Vote.percent(obs.vote_cache)
-    ERB::Util.html_escape("#{:Confidence.t}: #{pct.floor}%")
-  end
-
-  def location_line(set)
-    locations = set.underlying_locations
-    return mapset_location_header(set) if locations.length > 1
-    return mapset_location_link(locations.first) if single_loc?(set)
-
-    nil
-  end
-
-  def single_loc?(set)
-    set.underlying_locations.length == 1 && set.underlying_locations.first&.id
-  end
-
-  def mapset_observation_header(set)
-    "#{:Observations.t}: #{set.observations.length}"
-  end
-
-  def mapset_location_header(set)
-    "#{:Locations.t}: #{set.underlying_locations.length}"
-  end
-
-  # Observation link — opens in a new tab (issue #4131 request #2).
-  # Prefers the consensus text_name when available for clarity; falls
-  # back to "Observation #<id>" for callers that didn't load a name.
-  def mapset_observation_link(obs)
-    url = observation_path(id: obs.id)
-    label = observation_label(obs)
-    "<a href=\"#{url}\" target=\"_blank\" rel=\"noopener noreferrer\">" \
-      "#{label}</a>"
-  end
-
-  def observation_label(obs)
-    text = obs.respond_to?(:text_name) ? obs.text_name : nil
-    text = obs.name.text_name if text.blank? && obs.respond_to?(:name) &&
-                                 obs.name.respond_to?(:text_name)
-    # `.t` returns html_safe textile output; don't wrap in html_escape
-    # again (double-escape potential on any `&` the input contains, and
-    # redundant with Rails' safe-buffer handling).
-    return text.to_s.t if text.present?
-
-    "#{:Observation.t} ##{obs.id}"
-  end
-
-  def mapset_location_link(loc)
-    url = location_path(id: loc.id)
-    "<a href=\"#{url}\">#{ERB::Util.html_escape(loc.display_name.t)}</a>"
-  end
-
-  def mapset_coords(set)
-    if set.is_point
-      "#{format_latitude(set.lat)}&nbsp;#{format_longitude(set.lng)}"
-    else
-      "<center>#{format_latitude(set.north)}<br>" \
-        "#{format_longitude(set.west)}&nbsp;#{format_longitude(set.east)}<br>" \
-        "#{format_latitude(set.south)}</center>"
-    end
-  end
-
+  # Plain-text coordinate formatters for marker titles. The popup
+  # uses the same shape via `Components::Map::Popup`; kept here too
+  # so the marker title computed by `mapset_marker_title` doesn't
+  # need the popup class loaded.
   def format_latitude(val)
     format_coordinate(val, "N", "S")
   end
@@ -263,4 +296,11 @@ class Components::Map < Components::Base
     deg = val.abs.round(4)
     "#{deg}°#{val.negative? ? negative_dir : positive_dir}"
   end
+
+  # Rendering modules live in their own files (`app/components/map/`).
+  # Listed at the bottom of the class body so the constants they
+  # reference (`CLUSTER_MAX_OBJECTS`) are defined when their bodies
+  # first execute.
+  include Clustering
+  include Legend
 end

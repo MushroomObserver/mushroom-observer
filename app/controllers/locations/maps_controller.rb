@@ -20,6 +20,9 @@ module Locations
                    limit(MO.query_max_array).map do |loc|
         Mappable::MinimalLocation.new(loc.attributes.symbolize_keys)
       end
+      render(Views::Controllers::Locations::Maps::Show.new(
+               query: @query, locations: @locations
+             ))
     end
   end
 end

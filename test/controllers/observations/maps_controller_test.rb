@@ -7,7 +7,7 @@ module Observations
     def test_map_observations
       login
       get(:index)
-      assert_template(:index)
+      assert_select("body.maps__index")
     end
 
     # Tests validation of nested params passed into Query
@@ -121,7 +121,7 @@ module Observations
                "JSON refetch payload should include #{key}")
       end
       assert_kind_of(Hash, json["collection"])
-      assert_equal(MapHelper::CLUSTER_MAX_OBJECTS, json["cap"])
+      assert_equal(::Components::Map::CLUSTER_MAX_OBJECTS, json["cap"])
     end
 
     # When the result set exceeds the cap, the controller runs the
@@ -150,17 +150,17 @@ module Observations
 
     private
 
-    # Swap `MapHelper::CLUSTER_MAX_OBJECTS` for the duration of a
+    # Swap `::Components::Map::CLUSTER_MAX_OBJECTS` for the duration of a
     # block. `remove_const` before `const_set` avoids the
     # "already-initialized constant" warning.
     def with_cluster_max_objects(value)
-      original = MapHelper::CLUSTER_MAX_OBJECTS
-      MapHelper.send(:remove_const, :CLUSTER_MAX_OBJECTS)
-      MapHelper.const_set(:CLUSTER_MAX_OBJECTS, value)
+      original = ::Components::Map::CLUSTER_MAX_OBJECTS
+      ::Components::Map.send(:remove_const, :CLUSTER_MAX_OBJECTS)
+      ::Components::Map.const_set(:CLUSTER_MAX_OBJECTS, value)
       yield
     ensure
-      MapHelper.send(:remove_const, :CLUSTER_MAX_OBJECTS)
-      MapHelper.const_set(:CLUSTER_MAX_OBJECTS, original)
+      ::Components::Map.send(:remove_const, :CLUSTER_MAX_OBJECTS)
+      ::Components::Map.const_set(:CLUSTER_MAX_OBJECTS, original)
     end
   end
 end
