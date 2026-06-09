@@ -165,7 +165,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     users(:rolf).login
     post_requires_login(:create, params)
 
-    obs = Observation.find_by(collector: rolf.unique_text_name)
+    obs = Observation.find_by(collector: rolf.unique_text_name, user: rolf)
     assert_not_nil(obs, "Observation not created")
     assert_equal(rolf.id, obs.collector_user_id)
     assert_not(obs.collector_differs_from_creator?)

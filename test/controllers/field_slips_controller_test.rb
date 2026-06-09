@@ -147,10 +147,11 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   def test_should_not_change_collector_of_last_viewed_obs_if_not_owner
+    obs = @field_slip.observation
+    assert_not_equal(rolf, obs.user, "test needs rolf to be a non-owner")
+    obs.update!(collector: "Original Collector", collector_user: nil)
     login(rolf.login)
-    ObservationView.update_view_stats(@field_slip.observation&.id,
-                                      rolf.id)
-    collector = @field_slip.collector
+    ObservationView.update_view_stats(obs.id, rolf.id)
     code = "Y#{@field_slip.code}"
     assert_difference("FieldSlip.count") do
       post(:create,
@@ -165,7 +166,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     slip = FieldSlip.find_by(code: code)
-    assert_equal(collector, slip.collector)
+    # rolf is not the owner, so his supplied collector is ignored and the
+    # observation's existing collector is preserved.
+    assert_equal("Original Collector", slip.collector)
     assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(rolf.id))
   end
