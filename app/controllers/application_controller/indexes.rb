@@ -385,7 +385,14 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     # Not currently caching on user.
     # user = User.current ? "logged_in" : "no_user"
     locale = I18n.locale
-    objects_simple = query.paginate(@pagination_data)
+    # Preload the per-object association the cache pre-check reads
+    # (`MatrixTable.should_cache_object?` consults
+    # `obj.thumb_image.transferred`). Without this, the pre-check
+    # itself fires SELECT-per-row from `objects_simple`, which is
+    # explicitly NOT eager-loaded — defeating the optimization.
+    objects_simple = query.paginate(
+      @pagination_data, include: cache_precheck_includes(query.model)
+    )
 
     # If temporarily disabling cached matrix boxes: eager load everything
     # ids_to_eager_load = objects_simple
@@ -424,6 +431,18 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     return false unless ::Components::MatrixTable.should_cache_object?(obj)
 
     Rails.cache.exist?(::Components::MatrixTable.cache_key_for(obj, locale))
+  end
+
+  # Associations the per-object cache pre-check needs to consult
+  # without firing a query. Currently only `:thumb_image` (read by
+  # `MatrixTable.should_cache_object?`), and only when the model
+  # exposes it. Returns nil if there's nothing to preload so the
+  # underlying `query.paginate(...)` call receives no `include:` kw.
+  def cache_precheck_includes(model)
+    return nil unless model.respond_to?(:reflect_on_association) &&
+                      model.reflect_on_association(:thumb_image)
+
+    [:thumb_image]
   end
 
   # Overridable hook: does this request render the matrix in the
