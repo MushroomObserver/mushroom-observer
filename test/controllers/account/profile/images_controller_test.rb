@@ -21,8 +21,7 @@ module Account::Profile
     # This is what would happen when user first opens form.
     def test_reuse_image_for_user_page_access
       requires_login(:reuse)
-      assert_template("reuse")
-      assert_template(partial: "shared/_images_to_reuse")
+      assert_select("body.images__reuse")
       assert_form_action(action: :attach, id: rolf.id)
     end
 

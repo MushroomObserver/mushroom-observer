@@ -7,11 +7,19 @@
 # No need to remove_images from Account profile: reuse_image removes image
 module Account::Profile
   class ImagesController < ApplicationController
+    include ::ImageReusable
+
     before_action :login_required
 
     # was reuse_image params[:mode] = profile
     def reuse
-      nil unless User.safe_find(params[:id]) == @user
+      load_images_to_reuse
+      render(Views::Controllers::Account::Profile::Images::Reuse.new(
+               user: @user,
+               objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ))
     end
 
     # POST action
@@ -19,10 +27,7 @@ module Account::Profile
       return unless User.safe_find(params[:id]) == @user
 
       image = Image.safe_find(params[:img_id])
-      unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        render(:reuse, location: account_profile_select_image_path) and return
-      end
+      return render_reuse_with_invalid_id_error unless image
 
       attach_image_for_profile_and_flash_notice(image)
       redirect_to(user_path(@user.id))
@@ -43,6 +48,16 @@ module Account::Profile
 
     # The actual grid of images (partial) is a shared layout.
     # CRUD refactor could make each image link POST to create or delete.
+
+    def render_reuse_with_invalid_id_error
+      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+      load_images_to_reuse
+      render(Views::Controllers::Account::Profile::Images::Reuse.new(
+               user: @user, objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ), location: account_profile_select_image_path)
+    end
 
     def attach_image_for_profile_and_flash_notice(image)
       # Change user's profile image.

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Views::Layouts::Sidebar
+class Views::Layouts::Sidebar
   # Renders the "Account" section of the sidebar for non-logged-in
   # users.
   #

@@ -3,7 +3,7 @@
 require("test_helper")
 
 module Views::Layouts
-  class ApplicationSidebarTest < ComponentTestCase
+  class SidebarTest < ComponentTestCase
     Browser = Struct.new(:bot?) do
       def bot?
         self[:bot?]
@@ -103,7 +103,7 @@ module Views::Layouts
     end
 
     def test_cache_key_includes_locale_in_top_section
-      component = ApplicationSidebar.new(
+      component = Sidebar.new(
         user: nil,
         browser: human_browser,
         request: mock_request,
@@ -128,7 +128,7 @@ module Views::Layouts
       keys = []
 
       # Render with English locale
-      component_en = ApplicationSidebar.new(
+      component_en = Sidebar.new(
         user: @user,
         browser: human_browser,
         request: mock_request,
@@ -145,7 +145,7 @@ module Views::Layouts
       end
 
       # Render with French locale (new component instance)
-      component_fr = ApplicationSidebar.new(
+      component_fr = Sidebar.new(
         user: @user,
         browser: human_browser,
         request: mock_request,
@@ -173,7 +173,7 @@ module Views::Layouts
     def render_component(user: @user, browser: human_browser,
                          in_admin_mode: false)
       render(
-        ApplicationSidebar.new(
+        Sidebar.new(
           user: user,
           browser: browser,
           request: mock_request,

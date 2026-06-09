@@ -2,22 +2,23 @@
 
 require("test_helper")
 
-module Components::ContextNav
-  # Tests for the mobile (`xs`-only) sidebar that renders into
-  # `content_for(:context_nav_mobile)`. Sidebar dispatches each link
-  # tuple via `LinkRendering#render_crud_button_or_link` (same as
-  # `TopBar`) so destroy / post / put / patch tuples render as their
-  # actual forms — pre-Phlex `sidebar_nav_link` collapsed everything
-  # to plain links, which was a bug (mobile users couldn't trigger
-  # the action). Fixed in this PR.
-  class SidebarTest < ComponentTestCase
+class Views::Layouts::Sidebar
+  # Tests for the mobile (`xs`-only) sidebar Actions block that
+  # renders into `content_for(:context_nav_mobile)`. Dispatches
+  # each link tuple via
+  # `Views::Layouts::ContextNav::LinkRendering#render_crud_button_or_link`
+  # (same as the top-nav variant) so destroy / post / put / patch
+  # tuples render as their actual forms — pre-Phlex
+  # `sidebar_nav_link` collapsed everything to plain links, which
+  # was a bug (mobile users couldn't trigger the action).
+  class ContextNavTest < ComponentTestCase
     def setup
       super
       @article = articles(:premier_article)
     end
 
     def test_renders_nothing_when_links_empty
-      html = render(Components::ContextNav::Sidebar.new(links: []))
+      html = render(Views::Layouts::Sidebar::ContextNav.new(links: []))
 
       assert_equal("", html)
     end
@@ -85,7 +86,7 @@ module Components::ContextNav
     private
 
     def render_sidebar(links)
-      render(Components::ContextNav::Sidebar.new(links: links))
+      render(Views::Layouts::Sidebar::ContextNav.new(links: links))
     end
 
     def simple_links

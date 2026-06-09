@@ -7,6 +7,8 @@
 module Observations
   # Upload, attach, detach, edit Observation Images
   class ImagesController < ApplicationController
+    include ::ImageReusable
+
     before_action :login_required
 
     ###########################################################################
@@ -21,15 +23,17 @@ module Observations
       return unless (@image = find_image!)
 
       @licenses = current_license_names_and_ids
-      check_image_permission!
+      return unless check_image_permission?
+
       init_project_vars_for_add_or_edit(@image)
+      render_edit_html
     end
 
     def update
       return unless (@image = find_image!)
 
       @licenses = current_license_names_and_ids
-      check_image_permission!
+      return unless check_image_permission?
 
       @image.attributes = permitted_image_params
 
@@ -38,11 +42,24 @@ module Observations
         render("images/show", location: image_path(@image.id))
       else
         init_project_vars_for_reload(@image)
-        render(:edit, location: edit_image_path(@image.id))
+        render_edit_html(location: edit_image_path(@image.id))
       end
     end
 
     private
+
+    def render_edit_html(location: nil)
+      render(
+        Views::Controllers::Observations::Images::Edit.new(
+          image: @image,
+          licenses: @licenses,
+          projects: @projects,
+          submitted_project_ids: @submitted_project_ids,
+          user: @user
+        ),
+        location: location
+      )
+    end
 
     def find_image!
       find_or_goto_index(Image, params[:id].to_s)
@@ -63,10 +80,11 @@ module Observations
       end
     end
 
-    def check_image_permission!
-      return if permission!(@image)
+    def check_image_permission?
+      return true if permission!(@image)
 
       redirect_to(image_path(@image))
+      false
     end
 
     def permitted_image_params
@@ -189,8 +207,16 @@ module Observations
     # REUSE: Attach an Image to an Observation from existing uploads
     def reuse
       return unless (@observation = find_observation!)
+      return unless check_observation_permission!
 
-      nil unless check_observation_permission!
+      load_images_to_reuse
+      render(Views::Controllers::Observations::Images::Reuse.new(
+               observation: @observation,
+               user: @user,
+               objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ))
     end
 
     # reuse image form buttons POST here
@@ -202,9 +228,14 @@ module Observations
       image = Image.safe_find(params[:img_id])
       unless image
         flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        # redirect_to(:reuse) and return
-        render(:reuse,
-               location: reuse_images_for_observation_path(@observation.id))
+        load_images_to_reuse
+        render(Views::Controllers::Observations::Images::Reuse.new(
+                 observation: @observation,
+                 user: @user,
+                 objects: @reuse_images,
+                 pagination_data: @reuse_pagination,
+                 all_users: @reuse_all_users
+               ), location: reuse_images_for_observation_path(@observation.id))
         return
       end
 
