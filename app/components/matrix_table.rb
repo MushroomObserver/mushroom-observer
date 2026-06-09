@@ -41,8 +41,9 @@ class Components::MatrixTable < Components::Base
 
   # The cache key MatrixBox fragments are stored under, used by
   # both the Phlex `low_level_cache` write inside this component and
-  # the controller's `fragment_exist?` pre-check. Keeping them as
-  # one method ensures the two ends agree on the key shape.
+  # the controller's `Rails.cache.exist?` pre-check in
+  # `ApplicationController::Indexes#object_fragment_exist?`. Keeping
+  # both ends on one method ensures they agree on the key shape.
   def self.cache_key_for(object, locale)
     ["MatrixBox", CACHE_VERSION, locale, object]
   end

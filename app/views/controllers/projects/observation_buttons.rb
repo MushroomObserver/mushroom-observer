@@ -4,8 +4,8 @@
 # index — Map / Images / Download (and, when the project has a
 # field-slip prefix, Field Slips). Stashed into
 # `content_for(:observation_buttons)` by
-# `ProjectsHelper#project_observation_buttons`; the layout pulls it
-# out when rendering the project chrome.
+# `Views::Controllers::Observations::Index#add_project_observation_buttons`;
+# the layout pulls it out when rendering the project chrome.
 module Views::Controllers::Projects
   class ObservationButtons < Views::Base
     prop :project, ::Project
