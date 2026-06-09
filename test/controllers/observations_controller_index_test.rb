@@ -25,6 +25,25 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # Regression for #4492: the top-nav `search-type` Stimulus controller
+  # reads its help/form type lists as Array values, which Stimulus parses
+  # as JSON. Phlexifying top_nav emitted the arrays space-joined ("a b")
+  # instead of JSON-encoded, so JSON.parse threw and silently disabled the
+  # advanced-search and help forms. The attributes must be valid JSON.
+  def test_search_nav_stimulus_array_values_are_json
+    login
+    get(:index)
+
+    node = css_select("#search_nav").first
+    assert_not_nil(node, "search nav not rendered")
+    %w[data-search-type-form-types-value
+       data-search-type-help-types-value].each do |attr|
+      parsed = JSON.parse(node[attr])
+      assert_kind_of(Array, parsed, "#{attr} must be a JSON array")
+      assert_includes(parsed, "observations", "#{attr} must list observations")
+    end
+  end
+
   BUNCH_OF_NAMES = Name.take(10)
   BUNCH_OF_REGIONS = [
     "Connecticut, USA",
