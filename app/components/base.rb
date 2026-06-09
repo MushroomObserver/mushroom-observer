@@ -39,7 +39,7 @@ class Components::Base < Phlex::HTML
   # views accept a typed `prop :query, ::Query` for validated input
   # AND fall back to "whatever query the session knows about" when
   # the prop is omitted, without having to thread `@query` through
-  # every chrome-y caller.
+  # every view-layer caller.
   register_value_helper :current_query
   register_value_helper :add_args_to_url
   register_value_helper :controller

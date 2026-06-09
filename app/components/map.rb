@@ -86,7 +86,7 @@ class Components::Map < Components::Base
   # links and by the `Mappable::ClusteredCollection` builder. Falls
   # back to `current_query` (controller's session-current query,
   # already validated by `query_from_q_param`) when omitted, so
-  # chrome-y callers don't have to thread it through.
+  # view-layer callers don't have to thread it through.
   prop :query, _Nilable(::Query), default: nil
   # Dynamic-clustering toggle. When true AND the input fits under
   # CLUSTER_MAX_OBJECTS, emit a Mappable::ClusteredCollection (one
