@@ -8,6 +8,16 @@ module Observations
       build_index_with_query
     end
 
+    def render_index_view
+      render(Views::Controllers::Observations::Identify::Index.new(
+               query: @query,
+               pagination_data: @pagination_data,
+               objects: @objects,
+               user: @user,
+               error: @error
+             ))
+    end
+
     def controller_model_name
       "Observation"
     end
