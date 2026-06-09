@@ -271,13 +271,19 @@ class Components::Map < Components::Base
     effective_query_param ? { q: effective_query_param } : {}
   end
 
-  # Falls back to `controller.q_param` (which reads from the session's
-  # current query) when no explicit `query_param:` was passed.
-  # Lets chrome-y callers like `locations/show` skip threading
-  # `query_param: q_param(@query)` through the constructor — the
-  # session already knows the current query.
+  # Falls back to the registered `q_param` helper (which reads from
+  # the controller's session-current-query) when no explicit
+  # `query_param:` was passed. Lets chrome-y callers like
+  # `locations/show` skip threading `query_param: q_param(@query)`
+  # through the constructor — the session already knows the current
+  # query.
+  #
+  # NOTE: `q_param` (no receiver) — the `controller` prop on this
+  # class shadows the helper-registered `controller`, so reaching
+  # for `controller.q_param` would call `q_param` on the Stimulus
+  # controller string (e.g. "map") and crash.
   def effective_query_param
-    @effective_query_param ||= @query_param || controller.q_param
+    @effective_query_param ||= @query_param || q_param
   end
 
   # Plain-text coordinate formatters for marker titles. The popup

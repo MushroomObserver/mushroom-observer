@@ -91,15 +91,40 @@ module Mappable
       end
     end
 
+    # Marker tooltip text. Mirrors the per-object branch in
+    # `MapHelper#map_location_strings` — an obs with no location but
+    # known lat/lng falls back to formatted coordinates so the
+    # tooltip isn't blank (the GPS-only observation case).
     def mapset_title_for(set)
       first = set.objects.first
       if first.respond_to?(:observation?) && first.observation?
-        first.location&.display_name.to_s
+        observation_title_for(first)
       elsif first.respond_to?(:location?) && first.location?
         first.display_name.to_s
       else
         ""
       end
+    end
+
+    def observation_title_for(obs)
+      return obs.location.display_name.to_s if obs.location
+
+      return "" unless obs.lat
+
+      "#{format_latitude(obs.lat)} #{format_longitude(obs.lng)}"
+    end
+
+    def format_latitude(val)
+      format_coordinate(val, "N", "S")
+    end
+
+    def format_longitude(val)
+      format_coordinate(val, "E", "W")
+    end
+
+    def format_coordinate(val, positive_dir, negative_dir)
+      deg = val.abs.round(4)
+      "#{deg}°#{val.negative? ? negative_dir : positive_dir}"
     end
 
     def calc_extents
