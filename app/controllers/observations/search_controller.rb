@@ -11,6 +11,31 @@ module Observations
 
     before_action :login_required
 
+    # Both `show` and `new` override the `Searchable` mixin's defaults
+    # so the `format.html` / `format.turbo_stream` paths render the
+    # Phlex views directly instead of falling through to the
+    # now-deleted ERB templates.
+    def show
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_bar_help, help_phlex_view
+          ))
+        end
+        format.html { render(help_phlex_view) }
+      end
+    end
+
+    def new
+      @local = params[:local] != "false"
+      set_up_form_field_groupings
+      @search = build_search_query
+      respond_to do |format|
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
+        format.html { render(new_phlex_view) }
+      end
+    end
+
     def permitted_search_params
       [
         :date,
@@ -109,6 +134,16 @@ module Observations
     ].freeze
 
     private
+
+    def new_phlex_view
+      Views::Controllers::Observations::Search::New.new(
+        search: @search, local: @local
+      )
+    end
+
+    def help_phlex_view
+      Views::Controllers::Observations::Search::Help.new
+    end
 
     # This is the list of fields that are displayed in the search form. In the
     # template, each hash is interpreted as a column, and each key is a
