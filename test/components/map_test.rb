@@ -325,11 +325,21 @@ class MapTest < ComponentTestCase
 
   private
 
+  # Deterministic id counter so two `build_min_obs` calls in the same
+  # test produce distinct ids without `rand` (cluster collections key
+  # MapSets by `singleton_key_for(obj)` which embeds the id — a
+  # collision overwrites the prior entry and the failure is hard to
+  # reproduce).
+  def next_min_obs_id
+    @next_min_obs_id ||= 0
+    @next_min_obs_id += 1
+  end
+
   # `observed_on:` avoids `when` — a Ruby keyword that can't be used
   # as a method argument name — and maps to the model's `when:` attr.
   def build_min_obs(lat:, lng:, vote_cache:, **extras)
     Mappable::MinimalObservation.new(
-      id: rand(1_000_000),
+      id: next_min_obs_id,
       lat: lat, lng: lng,
       name_id: 1,
       text_name: extras[:text_name],

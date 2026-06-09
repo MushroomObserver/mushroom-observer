@@ -10,21 +10,32 @@
 # `.media` layout with a thumbnail for single-obs popups, and a header
 # with "Show All" / "Map All" buttons for group popups.
 #
-# The rendering logic is split across three nested modules to keep
-# `Metrics/ClassLength` in check:
+# The rendering logic is split across three siblings under
+# `app/components/map/`:
 #
-#   * `Components::Map::Clustering` — Mappable::Clustered vs
-#                                    CollapsibleCollection selection +
-#                                    cluster_url / singleton_key.
-#   * `Components::Map::Popup`      — info-window HTML (single-obs +
-#                                    group), coordinate formatting.
-#   * `Components::Map::Legend`     — border / consensus-color legend
-#                                    rendered under the map container.
+#   * `Components::Map::Clustering` (mixin) — Mappable::Clustered vs
+#                                    CollapsibleCollection selection,
+#                                    `decorate_mapset` writes the popup
+#                                    caption via `Components::Map::Popup`.
+#   * `Components::Map::Popup`      (Phlex view) — info-window HTML
+#                                    (single-obs + group), coordinate
+#                                    formatting. Rendered standalone by
+#                                    `Components::Map` AND by
+#                                    `Observations::MapsController#popup`
+#                                    (the lazy-load JSON endpoint
+#                                    clustered maps call on marker
+#                                    click), so the two entry points
+#                                    share the same popup HTML.
+#   * `Components::Map::Legend`     (mixin) — border / consensus-color
+#                                    legend rendered under the map
+#                                    container.
 #
-# All three are `include`d into `Components::Map` at the bottom of the
-# class body. Their methods are all private and rely on instance
-# variables (`@objects`, `@clustering`, `@query_param`, etc.) declared
-# as props on the host class.
+# `Clustering` and `Legend` are `include`d into `Components::Map` at
+# the bottom of the class body; `Popup` is rendered via
+# `render(::Components::Map::Popup.new(set:, query:))` from inside
+# `Clustering#decorate_mapset`. Their methods rely on instance
+# variables (`@objects`, `@clustering`, `@query`, etc.) declared as
+# props on the host class.
 #
 # @example Basic usage
 #   render(Components::Map.new(objects: [@location]))
@@ -43,22 +54,13 @@
 #     clustering: true,
 #     capped: @observations_capped,
 #     cluster_query_string: @cluster_query_string,
-#     query_param: q_param(@query),
+#     query: @query,
 #     zoom: 2,
 #     observations_loaded_count: @observations_loaded_count,
 #     observations_total_count: @observations_total_count
 #   ))
 #
 class Components::Map < Components::Base
-  # `<center>` is deprecated HTML but the Google Maps popup historically
-  # relied on it to vertically stack the bounding-box coordinate lines.
-  # Phlex doesn't ship it as a standard element; register it inline so
-  # the popup markup stays byte-for-byte equivalent to the helper-era
-  # output.
-  register_element :center
-
-  MAX_GROUP_NAMES = 3
-
   # Upper bound on points for client-side dynamic clustering
   # (issue #4159). Above this size we fall back to the server-side
   # CollapsibleCollectionOfObjects, which buckets the input
