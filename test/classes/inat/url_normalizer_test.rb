@@ -55,11 +55,12 @@ class Inat
 
     def test_strips_mo_controlled_filter_params
       url = "#{API_URL}?project_id=291058" \
-            "&taxon_id=47170&without_field=Mushroom+Observer+URL&only_id=true"
+            "&taxon_id=47170&without_field=Mushroom+Observer+URL" \
+            "&only_id=true&ttl=300"
       result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058", result,
-                   "Should strip taxon_id, without_field, only_id")
+                   "Should strip taxon_id, without_field, only_id, ttl")
     end
 
     def test_preserves_project_place_quality_and_license_params

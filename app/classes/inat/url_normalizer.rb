@@ -35,6 +35,8 @@ class Inat
       "subview",
       # We use taxon_id to restrict imports to fungi and myxos
       "taxon_id",
+      # Don't let users mess with cache control
+      "ttl",
       # UI-only param, would make API return 0 results
       "view",
       # We use without_field to avoid re-import of imported or mirrored obss
