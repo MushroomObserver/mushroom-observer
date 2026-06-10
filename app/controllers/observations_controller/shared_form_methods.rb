@@ -34,7 +34,7 @@ module ObservationsController::SharedFormMethods
   def permitted_observation_args
     [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,
      :is_collection_location, :when, "when(1i)", "when(2i)", "when(3i)",
-     :collector, :notes, :specimen, :thumb_image_id]
+     :collector, :collector_user_id, :notes, :specimen, :thumb_image_id]
   end
 
   def update_permitted_observation_attributes
