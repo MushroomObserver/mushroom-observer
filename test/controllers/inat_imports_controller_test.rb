@@ -906,6 +906,26 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  def test_create_warns_about_ignored_url_params
+    user = users(:rolf)
+    # taxon_id is always stripped (MO enforces its own fungi/myxo filter);
+    # using an API URL so it is not treated as silent UI noise.
+    url = "#{INAT_API_OBS_URL}?project_id=291058&taxon_id=47170"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      :inat_url_params_ignored.t(params: "taxon_id"),
+      "URL with stripped params should warn the user which were ignored"
+    )
+  end
+
   def test_create_confirmed_with_url_saves_inat_url
     user = users(:rolf)
     inat_import = inat_imports(:rolf_inat_import)
