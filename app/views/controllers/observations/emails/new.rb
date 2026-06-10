@@ -6,7 +6,6 @@
 module Views::Controllers::Observations::Emails
   class New < Views::Base
     prop :observation, ::Observation
-    prop :user, _Nilable(::User), default: nil
 
     def view_template
       add_page_title(

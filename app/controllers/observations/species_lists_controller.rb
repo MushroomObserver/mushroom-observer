@@ -56,8 +56,7 @@ module Observations
           observation: @observation,
           all_lists: @all_lists,
           obs_lists: @obs_lists,
-          other_lists: @other_lists,
-          user: @user
+          other_lists: @other_lists
         ),
         **render_opts
       )

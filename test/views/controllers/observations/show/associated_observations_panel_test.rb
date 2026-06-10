@@ -8,7 +8,6 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanelTest <
   ComponentTestCase
   def setup
     super
-    @user = users(:rolf)
     @obs = observations(:detailed_unknown_obs)
   end
 
@@ -48,7 +47,7 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanelTest <
 
   def panel_with(siblings:, occurrence:)
     Views::Controllers::Observations::Show::AssociatedObservationsPanel.new(
-      obs: @obs, occurrence: occurrence, siblings: siblings, user: @user
+      obs: @obs, occurrence: occurrence, siblings: siblings
     )
   end
 end

@@ -10,7 +10,6 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
   prop :obs, ::Observation
   prop :occurrence, _Nilable(::Occurrence), default: nil
   prop :siblings, _Array(::Observation), default: -> { [] }
-  prop :user, _Nilable(::User), default: nil
 
   def view_template
     render(Components::Panel.new(

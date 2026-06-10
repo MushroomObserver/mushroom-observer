@@ -6,7 +6,6 @@ class Views::Controllers::Observations::Show::ThumbnailMapPanelTest <
   ComponentTestCase
   def setup
     super
-    @user = users(:rolf)
     @obs = observations(:detailed_unknown_obs)
   end
 
@@ -22,8 +21,6 @@ class Views::Controllers::Observations::Show::ThumbnailMapPanelTest <
   private
 
   def panel_with(obs)
-    Views::Controllers::Observations::Show::ThumbnailMapPanel.new(
-      obs: obs, user: @user
-    )
+    Views::Controllers::Observations::Show::ThumbnailMapPanel.new(obs: obs)
   end
 end
