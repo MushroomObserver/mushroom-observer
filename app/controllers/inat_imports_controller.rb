@@ -216,8 +216,24 @@ class InatImportsController < ApplicationController
     return unless listing_url?
     return unless params[:inat_url].include?("://")
 
-    params[:inat_url] =
-      Inat::URLNormalizer.new(params[:inat_url]).normalize.to_s
+    normalizer = url_normalizer(params[:inat_url])
+    warn_about_ignored_url_params(normalizer)
+    params[:inat_url] = normalizer.normalize.to_s
+  end
+
+  def warn_about_ignored_url_params(normalizer)
+    ignored = normalizer.ignored_params
+    return if ignored.blank?
+
+    flash_warning(:inat_url_params_ignored.t(params: ignored.join(", ")))
+  end
+
+  def url_normalizer(url)
+    Inat::URLNormalizer.new(
+      url,
+      superimporter: InatImport.super_importer?(@user),
+      import_others: import_others?
+    )
   end
 
   # Were any listed iNat IDs previously imported?

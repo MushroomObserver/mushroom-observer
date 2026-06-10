@@ -55,23 +55,20 @@ class Inat
 
     def test_strips_mo_controlled_filter_params
       url = "#{API_URL}?project_id=291058" \
-            "&taxon_id=47170&iconic_taxa=Fungi&id=123,456" \
-            "&without_field=Mushroom+Observer+URL&only_id=true"
+            "&taxon_id=47170&without_field=Mushroom+Observer+URL&only_id=true"
       result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058", result,
-                   "Should strip taxon_id, iconic_taxa, id, without_field, " \
-                   "only_id")
+                   "Should strip taxon_id, without_field, only_id")
     end
 
     def test_preserves_project_place_quality_and_license_params
       url = "#{SITE_URL}?project_id=291058&place_id=5&quality_grade=research" \
-            "&license=cc-by&user_login=testuser"
+            "&license=cc-by"
       result = URLNormalizer.new(url).normalize
 
       assert_equal(
-        "license=cc-by&place_id=5&project_id=291058" \
-        "&quality_grade=research&user_login=testuser",
+        "license=cc-by&place_id=5&project_id=291058&quality_grade=research",
         result,
         "Should preserve filter params meaningful to the user"
       )
@@ -136,6 +133,135 @@ class Inat
 
       assert_nil(result,
                  "iNat API URL for a non-observations path should return nil")
+    end
+
+    # ---- context-dependent stripping ----------------------------------------
+
+    def test_strips_user_login_by_default
+      url = "#{API_URL}?project_id=291058&user_login=testuser"
+      result = URLNormalizer.new(url).normalize
+
+      assert_equal("project_id=291058", result,
+                   "user_login should be stripped for non-superimporters " \
+                   "(add_ownership_filter sets it from inat_username)")
+    end
+
+    def test_strips_user_id_by_default
+      url = "#{API_URL}?project_id=291058&user_id=12345"
+      result = URLNormalizer.new(url).normalize
+
+      assert_equal("project_id=291058", result,
+                   "user_id should be stripped for non-superimporters")
+    end
+
+    def test_superimporter_preserves_user_login
+      url = "#{API_URL}?project_id=291058&user_login=testuser"
+      result = URLNormalizer.new(url, superimporter: true).normalize
+
+      assert_equal("project_id=291058&user_login=testuser", result,
+                   "Superimporters may target another user's observations " \
+                   "via user_login")
+    end
+
+    def test_superimporter_preserves_user_id
+      url = "#{API_URL}?project_id=291058&user_id=12345"
+      result = URLNormalizer.new(url, superimporter: true).normalize
+
+      assert_equal("project_id=291058&user_id=12345", result,
+                   "Superimporters may target another user's observations " \
+                   "via user_id")
+    end
+
+    def test_superimporter_strips_licensed
+      url = "#{API_URL}?project_id=291058&licensed=false"
+      result = URLNormalizer.new(url, superimporter: true).normalize
+
+      assert_equal("project_id=291058", result,
+                   "licensed should be stripped for superimporters — " \
+                   "add_ownership_filter enforces the licensed constraint")
+    end
+
+    def test_import_others_strips_licensed
+      url = "#{API_URL}?project_id=291058&licensed=false"
+      result = URLNormalizer.new(url, import_others: true).normalize
+
+      assert_equal("project_id=291058", result,
+                   "licensed should be stripped when importing others' " \
+                   "observations — LICENSED_FILTER takes precedence")
+    end
+
+    def test_own_non_superimporter_preserves_licensed
+      url = "#{API_URL}?project_id=291058&licensed=false"
+      result = URLNormalizer.new(url,
+                                 superimporter: false,
+                                 import_others: false).normalize
+
+      assert_equal("licensed=false&project_id=291058", result,
+                   "licensed should be preserved for own non-superimporter " \
+                   "imports (user may want to include their unlicensed obs)")
+    end
+
+    # ---- #ignored_params ----------------------------------------------------
+
+    def test_ignored_params_silent_for_ui_noise_in_site_url
+      url = "#{SITE_URL}?project_id=291058&page=2&order=desc" \
+            "&order_by=created_at&per_page=50&subview=table&view=table"
+      ignored = URLNormalizer.new(url).ignored_params
+
+      assert_empty(ignored,
+                   "Pagination/display params from a www.inaturalist.org " \
+                   "URL are expected UI noise and should not warn the user")
+    end
+
+    def test_ignored_params_warns_for_ui_noise_in_api_url
+      url = "#{API_URL}?project_id=291058&page=2&order=desc"
+      ignored = URLNormalizer.new(url).ignored_params
+
+      assert_includes(ignored, "page",
+                      "page in an API URL is unexpected and should warn")
+      assert_includes(ignored, "order",
+                      "order in an API URL is unexpected and should warn")
+    end
+
+    def test_ignored_params_returns_always_stripped_params
+      url = "#{API_URL}?project_id=291058&taxon_id=47170&page=2"
+      ignored = URLNormalizer.new(url).ignored_params
+
+      assert_includes(ignored, "taxon_id",
+                      "taxon_id is always stripped and should appear in " \
+                      "ignored_params")
+      assert_includes(ignored, "page",
+                      "page is always stripped and should appear in " \
+                      "ignored_params")
+      assert_not_includes(ignored, "project_id",
+                          "project_id is kept and should not appear in " \
+                          "ignored_params")
+    end
+
+    def test_ignored_params_returns_context_stripped_params
+      url = "#{API_URL}?project_id=291058&user_login=testuser"
+      ignored = URLNormalizer.new(url).ignored_params
+
+      assert_includes(ignored, "user_login",
+                      "user_login stripped for non-superimporter should " \
+                      "appear in ignored_params")
+    end
+
+    def test_ignored_params_returns_empty_for_clean_url
+      url = "#{API_URL}?project_id=291058&place_id=5"
+      ignored = URLNormalizer.new(url).ignored_params
+
+      assert_empty(ignored,
+                   "No params should be ignored when URL has only " \
+                   "pass-through params")
+    end
+
+    def test_ignored_params_returns_nil_for_invalid_url
+      ignored = URLNormalizer.new("https://example.com/observations").
+                ignored_params
+
+      assert_nil(ignored,
+                 "ignored_params should return nil for a non-iNat URL")
     end
 
     # ---- whitespace handling ------------------------------------------------

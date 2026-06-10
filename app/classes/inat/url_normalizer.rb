@@ -16,17 +16,35 @@ class Inat
       "api.inaturalist.org" => "/v1/observations"
     }.freeze
 
+    # Pagination and display params that appear routinely in UI search URLs.
+    # Stripped silently — no warning shown — when the URL is from
+    # www.inaturalist.org, since they're expected cruft from the browser.
+    UI_NOISE_PARAMS = %w[order order_by page per_page subview view].freeze
+
     # Params MO always controls; strip them so the user's URL doesn't conflict.
-    STRIP_PARAMS = %w[
-      subview view
-      page per_page order order_by
-      only_id id
-      without_field
-      taxon_id iconic_taxa
+    STRIP_PARAMS = [
+      # We need the entire observation, not just a list of IDs
+      "only_id",
+      # ImportJob relies on order=asc, order_by=id
+      "order",
+      "order_by",
+      # ImportJob controls pagination; no reason for users to specify these
+      "page",
+      "per_page",
+      # UI-only param, would make API return 0 results
+      "subview",
+      # We use taxon_id to restrict imports to fungi and myxos
+      "taxon_id",
+      # UI-only param, would make API return 0 results
+      "view",
+      # We use without_field to avoid re-import of imported or mirrored obss
+      "without_field"
     ].freeze
 
-    def initialize(url)
-      @url = url.to_s.strip
+    def initialize(url, superimporter: false, import_others: false)
+      @url           = url.to_s.strip
+      @superimporter = superimporter
+      @import_others = import_others
     end
 
     # Returns the cleaned query string, or nil if the URL is invalid.
@@ -35,6 +53,19 @@ class Inat
       return nil unless valid_inat_observations_uri?(uri)
 
       clean_query(uri.query)
+    end
+
+    # Returns names of user-supplied params that will be stripped, or nil
+    # if the URL is not a valid iNat observations URL. Params that are routine
+    # UI noise (pagination/display) are excluded when the URL comes from the
+    # www.inaturalist.org site — they're expected and not worth warning about.
+    def ignored_params
+      uri = parse_uri
+      return nil unless valid_inat_observations_uri?(uri)
+
+      all_strips = STRIP_PARAMS + context_strip_params
+      silent = ui_url?(uri) ? UI_NOISE_PARAMS : []
+      Rack::Utils.parse_query(uri.query.to_s).keys & (all_strips - silent)
     end
 
     private
@@ -52,9 +83,20 @@ class Inat
       expected_path && uri.path == expected_path
     end
 
+    def ui_url?(uri)
+      uri.host == "www.inaturalist.org"
+    end
+
+    def context_strip_params
+      strips = []
+      strips += %w[user_id user_login] unless @superimporter
+      strips += ["licensed"]           if @superimporter || @import_others
+      strips
+    end
+
     def clean_query(raw_query)
       params = Rack::Utils.parse_query(raw_query.to_s)
-      params.except!(*STRIP_PARAMS)
+      params.except!(*STRIP_PARAMS, *context_strip_params)
       params.sort.to_h.to_query
     end
   end

@@ -72,7 +72,7 @@ module InatImportsController::Validators
     return true unless listing_url?
     # Already-normalized query strings (no "://") are always valid.
     return true unless params[:inat_url].include?("://")
-    return true if Inat::URLNormalizer.new(params[:inat_url]).normalize
+    return true if url_normalizer(params[:inat_url]).normalize
 
     flash_warning(:inat_invalid_url.l)
     false
