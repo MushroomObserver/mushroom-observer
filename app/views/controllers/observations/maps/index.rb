@@ -9,8 +9,7 @@
 module Views::Controllers::Observations::Maps
   class Index < Views::Base
     prop :query, ::Query::Observations
-    prop :observations, _Array(::Mappable::MinimalObservation),
-         default: -> { [] }
+    prop :observations, _Array(::Mappable::MinimalObservation)
     prop :observations_capped, _Boolean, default: false
     prop :observations_loaded_count, _Nilable(Integer), default: nil
     prop :observations_total_count, _Nilable(Integer), default: nil

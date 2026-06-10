@@ -134,6 +134,23 @@ class MapTest < ComponentTestCase
     assert_not_includes(caption, "nowrap")
   end
 
+  # When the obs has neither `display_name` nor `text_name`, the
+  # popup falls back to "Observation #<id>" in the link label. Pinned
+  # so the label-emission chain (`render_observation_label`) keeps
+  # the id-fallback branch alive (#4131 follow-up).
+  def test_single_observation_popup_label_falls_back_to_id
+    obs = build_min_obs(lat: 5, lng: 5, vote_cache: 3.0,
+                        text_name: "",
+                        observed_on: Date.new(2024, 1, 1))
+    obs.display_name = nil # both display_name and text_name blank
+
+    caption, = parse_first_set(render_map_json([obs]))
+
+    assert_includes(caption, "##{obs.id}",
+                    "Popup label falls back to 'Observation #<id>' " \
+                    "when both display_name and text_name are blank")
+  end
+
   def test_multi_observation_popup_lists_recent_names_and_no_date
     obs_a = build_min_obs(lat: 10, lng: 10, vote_cache: 3.0,
                           text_name: "Oldest sp.",

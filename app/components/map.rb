@@ -71,8 +71,7 @@ class Components::Map < Components::Base
   # `Mappable::Minimal*` analogs used by index/maps endpoints.
   prop :objects, _Array(_Union(::Location, ::Observation,
                                ::Mappable::MinimalLocation,
-                               ::Mappable::MinimalObservation)),
-       default: -> { [] }
+                               ::Mappable::MinimalObservation))
   prop :user, _Nilable(User), default: nil
   prop :map_div, String, default: "map_div"
   prop :controller, _Nilable(String), default: "map"
@@ -272,10 +271,6 @@ class Components::Map < Components::Base
     elsif obs.lat
       "#{format_latitude(obs.lat)} #{format_longitude(obs.lng)}"
     end
-  end
-
-  def query_path_params
-    effective_query_param ? { q: effective_query_param } : {}
   end
 
   # The query the user is navigating — explicit `@query` prop when
