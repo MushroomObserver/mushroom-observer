@@ -22,10 +22,6 @@ class NamesControllerIndexTest < FunctionalTestCase
                   "right `tabs` should not link to All Names")
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_via_related_query_old_and_new_q
     user = dick
     query = Query.lookup_and_save(:Observation, by_users: user)

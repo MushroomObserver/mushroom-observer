@@ -18,8 +18,7 @@ module Views::Controllers::SpeciesLists
     def view_template
       add_project_banner(@project) if @project
       add_index_title(@query)
-      # Sort table lives on the controller — single source of
-      # truth for both view rendering and `check_index_sorting`.
+      # Sort table lives on the controller — single source of truth.
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
       container_class(:wide)

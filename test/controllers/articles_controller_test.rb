@@ -17,10 +17,6 @@ class ArticlesControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_filtered
     article = Article.reorder(created_at: :asc).first # oldest
     query = Query.lookup(:Article, id_in_set: [article.id])

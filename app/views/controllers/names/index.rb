@@ -48,8 +48,7 @@ module Views::Controllers::Names
         )
       )
       # Sort table lives on the controller —
-      # `NamesController#index_sort_options` — single source of
-      # truth for view rendering and `check_index_sorting`.
+      # `NamesController#index_sort_options` — single source of truth.
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data, @test_pagination_args)
 

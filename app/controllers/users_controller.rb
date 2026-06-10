@@ -18,9 +18,9 @@ class UsersController < ApplicationController
   alias list_users index
 
   # Sort options for the index page. Admin variant exposes extra
-  # internal sort keys (id, updated_at, last_login). Consumed by
-  # `add_sorter` and `check_index_sorting`. Each key must resolve
-  # to `User.order_by_<key>`.
+  # internal sort keys (id, updated_at, last_login). Read by
+  # `add_sorter` in the view. Each key must resolve to
+  # `User.order_by_<key>`.
   def index_sort_options
     return admin_index_sort_options if in_admin_mode?
 

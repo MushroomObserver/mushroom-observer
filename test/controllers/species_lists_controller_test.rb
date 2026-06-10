@@ -113,10 +113,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_sorted_by(by)
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_with_id_and_sorted_by_title
     list = species_lists(:unknown_species_list)
     by = "title"

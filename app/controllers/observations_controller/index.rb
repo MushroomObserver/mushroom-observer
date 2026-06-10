@@ -32,9 +32,8 @@ class ObservationsController
       !@project&.is_admin?(@user)
     end
 
-    # Sort options for the index page. Consumed by `add_sorter` and
-    # `check_index_sorting`. Each key must resolve to
-    # `Observation.order_by_<key>`.
+    # Sort options for the index page. Read by `add_sorter` in the
+    # view. Each key must resolve to `Observation.order_by_<key>`.
     def index_sort_options
       [
         ["rss_log",           :sort_by_activity.l],
@@ -73,6 +72,10 @@ class ObservationsController
     # Displays matrix of advanced search results.
     def advanced_search
       query = advanced_search_query
+      # `handle_advanced_search_invalid_q_param?` already responded;
+      # bail before the raise-and-rescue dance double-redirects.
+      return [nil, {}] if performed?
+
       # Have to check this here because we're not running the query yet.
       raise(:runtime_no_conditions.l) unless query&.params&.any?
 

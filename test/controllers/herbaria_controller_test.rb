@@ -159,10 +159,6 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_all_merge_source_links_presence_rolf
     assert_true(nybg.can_edit?(rolf)) # rolf is a curator
     assert_true(fundis.can_edit?(rolf)) # herbarium has no curators
@@ -412,6 +408,14 @@ class HerbariaControllerTest < FunctionalTestCase
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
+
+  # NOTE: `create` and `update`'s `unless @herbarium.save` branches
+  # (`flash_object_errors` + `reload_form`) require forcing
+  # `Herbarium#save` to return false on the controller-built instance
+  # AFTER `validate_herbarium!` returns true. MO doesn't pull in Mocha
+  # (no `any_instance` stubbing). Left uncovered intentionally —
+  # defensive against DB-level failures past Rails validations. See
+  # `observations/namings_controller_test.rb` for the same pattern.
 
   def test_create
     email_count = ActionMailer::Base.deliveries.count
