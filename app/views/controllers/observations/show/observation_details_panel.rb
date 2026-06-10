@@ -179,16 +179,22 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     render_send_question_link if show_send_question?
   end
 
-  # Linked MO user when known, else the free-text collector string, else
-  # the entering user.
+  # Linked MO user when known, else the free-text collector string, else the
+  # legacy notes[:Collector] (expand-release fallback for rows the backfill
+  # has not reached — dropped in the contract release), else the entering
+  # user.
   def render_collector_identity
-    if @obs.collector_user
-      render_user_link(@obs.collector_user)
-    elsif @obs.collector.present?
-      plain(@obs.collector)
-    else
-      render_user_link(@obs.user)
-    end
+    return render_user_link(@obs.collector_user) if @obs.collector_user
+    return plain(@obs.collector) if @obs.collector.present?
+    return render_legacy_collector_note if @obs.notes[:Collector].present?
+
+    render_user_link(@obs.user)
+  end
+
+  # Expand-release fallback: render the legacy notes[:Collector] (which may
+  # carry "_user …_" markup) until the backfill has reached this row.
+  def render_legacy_collector_note
+    trusted_html(@obs.notes[:Collector].to_s.tl)
   end
 
   def render_user_link(target)
