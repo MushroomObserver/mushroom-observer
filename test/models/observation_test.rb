@@ -2495,4 +2495,84 @@ class ObservationTest < UnitTestCase
     assert_equal({}, Observation.collector_attrs(""))
     assert_equal({}, Observation.collector_attrs(nil))
   end
+
+  # --- resolve_collector (shared edit/import/migration resolver) ---
+
+  def test_resolve_collector_blank
+    assert_equal({ collector: nil, collector_user_id: nil },
+                 Observation.resolve_collector("  "))
+    assert_equal({ collector: nil, collector_user_id: nil },
+                 Observation.resolve_collector(nil))
+  end
+
+  def test_resolve_collector_user_markup
+    # "_user <ref>_" markup resolves to the MO user (Joe's edit-form case)
+    # and normalizes the display string to the user's unique_text_name.
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector("_user mary_"))
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector("_user Rolf Singer_"))
+  end
+
+  def test_resolve_collector_bare_login_and_name
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector("mary"))
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector("Rolf Singer"))
+  end
+
+  def test_resolve_collector_owner_match
+    # The owner's login / name / unique_text_name all link to the owner.
+    [mary.login, mary.name, mary.unique_text_name].each do |str|
+      assert_equal(Observation.collector_attrs(mary),
+                   Observation.resolve_collector(str, owner: mary), str)
+    end
+  end
+
+  def test_resolve_collector_inat_username_only_when_enabled
+    inat = users(:mary).inat_username
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector(inat, match_inat: true))
+    # Without the flag, an iNat username is just free text.
+    assert_equal({ collector: inat, collector_user_id: nil },
+                 Observation.resolve_collector(inat, match_inat: false))
+  end
+
+  def test_resolve_collector_free_text
+    assert_equal({ collector: "Jane Forager", collector_user_id: nil },
+                 Observation.resolve_collector("Jane Forager"))
+  end
+
+  def test_resolve_collector_preserves_existing_link
+    # A string that names neither owner nor a findable user, but matches the
+    # already-linked user's unique_text_name, preserves that link (an
+    # autocomplete selection or a backfilled-claimed identity).
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector(rolf.unique_text_name,
+                                               owner: mary, existing: rolf))
+  end
+
+  # --- edit-form save path (reconcile_collector_user) ---
+
+  def test_edit_collector_markup_links_user
+    obs = new_collector_obs
+    obs.update!(collector: "_user Rolf Singer_")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_edit_collector_bare_login_links_user
+    obs = new_collector_obs
+    obs.update!(collector: "rolf")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+  end
+
+  def test_edit_collector_unknown_stays_free_text
+    obs = new_collector_obs
+    obs.update!(collector: "Jane Forager")
+    assert_nil(obs.collector_user_id)
+    assert_equal("Jane Forager", obs.collector)
+  end
 end

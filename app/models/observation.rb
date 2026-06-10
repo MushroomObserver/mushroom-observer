@@ -319,6 +319,70 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # "_user <ref>_" textile markup, where <ref> is a login or full name. The
+  # closing "_" must be the delimiter (followed by a non-word char or
+  # end-of-string) so logins/names with internal underscores survive
+  # ("_user tyler_irvin_" -> "tyler_irvin"). Shared by the live edit path
+  # and the MigrateCollectorNotes data migration.
+  COLLECTOR_USER_MARKUP = /_user\s+(.+?)_(?=\W|\z)/
+
+  # Resolve a raw collector string to normalized column attributes:
+  # { collector: <display string or nil>, collector_user_id: <id or nil> }.
+  # Resolution order (first hit wins):
+  #   1. blank                                   -> { nil, nil }
+  #   2. "_user <ref>_" markup                   -> the referenced MO user
+  #   3. the already-linked `existing` user      -> preserved (autocomplete
+  #      selection / backfilled-claimed identity, matched by unique_text_name)
+  #   4. the `owner` (login / name / unique_text_name)
+  #   5. match_inat: a User#inat_username        -> that user
+  #   6. an exact, unique login or name          -> that user
+  #   7. otherwise                               -> free text, no FK
+  # When a user is resolved, the display string is normalized to that
+  # user's unique_text_name so the column stays consistent with the FK.
+  # This is the EXACT resolver used on every save; the migration layers a
+  # fuzzy owner-name match on top of a free-text result.
+  def self.resolve_collector(raw, owner: nil, existing: nil, match_inat: false)
+    string = raw.to_s.strip
+    return { collector: nil, collector_user_id: nil } if string.blank?
+
+    user = collector_user_for(string, owner:, existing:, match_inat:)
+    return collector_attrs(user) if user
+
+    { collector: string[0, 1024], collector_user_id: nil }
+  end
+
+  def self.collector_user_for(string, owner:, existing:, match_inat:)
+    if (ref = string[COLLECTOR_USER_MARKUP, 1])
+      return user_by_login_or_name(ref.strip)
+    end
+
+    preserved_collector_user(string, owner:, existing:) ||
+      (match_inat && User.find_by(inat_username: string)) ||
+      user_by_login_or_name(string)
+  end
+
+  # The already-linked user (autocomplete selection / backfilled-claimed
+  # identity) or the owner, when the string still names them.
+  def self.preserved_collector_user(string, owner:, existing:)
+    return existing if existing && string == existing.unique_text_name
+    return owner if owner && owner_strings(owner).include?(string)
+
+    nil
+  end
+
+  def self.owner_strings(owner)
+    [owner.login, owner.name, owner.unique_text_name].compact_blank
+  end
+
+  # A login (exact) or a name that is unique among users.
+  def self.user_by_login_or_name(ref)
+    ref = ref.to_s.strip
+    return if ref.blank?
+
+    User.find_by(login: ref) ||
+      (named = User.where(name: ref)).one? && named.first || nil
+  end
+
   def location?
     false
   end
@@ -1505,20 +1569,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     self.collector_user_id = user_id
   end
 
-  # When the collector string changes, re-resolve the FK: the creator
-  # when it matches, the existing collector_user when still consistent
-  # (preserving a backfilled/claimed identity), else cleared. An
-  # unchanged collector (e.g. a view-stats save) is left untouched.
+  # When the collector string changes, re-resolve it through the shared
+  # resolver: "_user <ref>_" markup, a bare login/name, the existing linked
+  # user (preserving an autocomplete selection or backfilled/claimed
+  # identity), or the creator all link the FK; anything else is kept as
+  # free text with the FK cleared. The resolver also normalizes the display
+  # string to the linked user's unique_text_name. An unchanged collector
+  # (e.g. a view-stats save) is left untouched.
   def reconcile_collector_user
     return unless will_save_change_to_attribute?(:collector)
 
-    self.collector_user_id = resolved_collector_user_id
-  end
-
-  def resolved_collector_user_id
-    return user_id if collector == user&.unique_text_name
-    return collector_user_id if collector_user&.unique_text_name == collector
-
-    nil
+    resolved = self.class.resolve_collector(collector, owner: user,
+                                                       existing: collector_user)
+    self.collector = resolved[:collector]
+    self.collector_user_id = resolved[:collector_user_id]
   end
 end
