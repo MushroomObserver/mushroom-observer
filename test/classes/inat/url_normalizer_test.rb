@@ -147,12 +147,12 @@ class Inat
                    "(add_ownership_filter sets it from inat_username)")
     end
 
-    def test_strips_user_id_by_default
+    def test_preserves_user_id_for_all_users
       url = "#{API_URL}?project_id=291058&user_id=12345"
       result = URLNormalizer.new(url).normalize
 
-      assert_equal("project_id=291058", result,
-                   "user_id should be stripped for non-superimporters")
+      assert_equal("project_id=291058&user_id=12345", result,
+                   "Should not strip user-supplied `user_id` iNat API param")
     end
 
     def test_superimporter_preserves_user_login
@@ -160,17 +160,15 @@ class Inat
       result = URLNormalizer.new(url, superimporter: true).normalize
 
       assert_equal("project_id=291058&user_login=testuser", result,
-                   "Superimporters may target another user's observations " \
-                   "via user_login")
+                   "Should accept superuser-supplied iNat `user_login` param")
     end
 
-    def test_superimporter_preserves_user_id
-      url = "#{API_URL}?project_id=291058&user_id=12345"
-      result = URLNormalizer.new(url, superimporter: true).normalize
+    def test_non_superimporter_strips_user_login_but_keeps_user_id
+      url = "#{API_URL}?project_id=291058&user_login=testuser&user_id=12345"
+      result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058&user_id=12345", result,
-                   "Superimporters may target another user's observations " \
-                   "via user_id")
+                   "user_login should be stripped but user_id preserved")
     end
 
     def test_superimporter_strips_licensed
@@ -178,17 +176,17 @@ class Inat
       result = URLNormalizer.new(url, superimporter: true).normalize
 
       assert_equal("project_id=291058", result,
-                   "licensed should be stripped for superimporters — " \
-                   "add_ownership_filter enforces the licensed constraint")
+                   "licensed should be stripped for superimporters")
     end
 
     def test_import_others_strips_licensed
       url = "#{API_URL}?project_id=291058&licensed=false"
       result = URLNormalizer.new(url, import_others: true).normalize
 
-      assert_equal("project_id=291058", result,
-                   "licensed should be stripped when importing others' " \
-                   "observations — LICENSED_FILTER takes precedence")
+      assert_equal(
+        "project_id=291058", result,
+        "`licensed` param should be stripped if importing others' observation"
+      )
     end
 
     def test_own_non_superimporter_preserves_licensed
@@ -198,8 +196,7 @@ class Inat
                                  import_others: false).normalize
 
       assert_equal("licensed=false&project_id=291058", result,
-                   "licensed should be preserved for own non-superimporter " \
-                   "imports (user may want to include their unlicensed obs)")
+                   "Should strip regular-user supplied iNat `licensed` param ")
     end
 
     # ---- #ignored_params ----------------------------------------------------

@@ -91,8 +91,9 @@ class Inat
 
     def context_strip_params
       strips = []
-      strips += %w[user_id user_login] unless @superimporter
-      strips += ["licensed"]           if @superimporter || @import_others
+      # We can allow user_id because we limit imports with user_login.
+      strips += ["user_login"] unless @superimporter
+      strips += ["licensed"] if @superimporter || @import_others
       strips
     end
 
