@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require(Rails.root.join("db/migrate/20260602000001_migrate_collector_notes.rb").to_s)
+require(Rails.root.join("db/migrate/20260611000000_migrate_collector_notes.rb").to_s)
 
 # Exercises the #4211 collector-seeding policy (PR #4452): which legacy
 # notes values become a linked collector, a free-text collector, or are
