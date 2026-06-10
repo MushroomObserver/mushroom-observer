@@ -107,6 +107,20 @@ module Views::Controllers::Descriptions
                   count: 2)
     end
 
+    # Regression for #4491: project/foreign descriptions show the source
+    # name read-only via `.t` (textile-safe HTML). It was emitted with
+    # `plain`, which re-escaped the entities, so a source name with "&"
+    # rendered the double-escaped code "&amp;" instead of "&".
+    def test_locked_source_name_renders_entities_not_codes
+      desc = name_descriptions(:draft_boletus_edulis) # source_type: project
+      desc.source_name = "Bolete & Friends"
+      html = render_form(description: desc)
+
+      # single-encoded "&amp;" is correct; "&amp;amp;" is the double-escape
+      assert_includes(html, "Bolete &amp; Friends")
+      assert_not_includes(html, "Bolete &amp;amp; Friends")
+    end
+
     def test_location_description_form
       html = render_form(description: @new_loc_desc)
 

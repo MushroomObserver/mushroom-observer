@@ -64,7 +64,12 @@ module Views::Controllers::Descriptions
     def render_source_name_field
       if !root? && locked_source_type?
         hidden_field(:source_name)
-        plain(" #{@description.source_name.t}")
+        # `.t` is textile-safe HTML; pass the SafeBuffer straight to
+        # trusted_html (NOT interpolated — that yields a plain String and
+        # trusted_html would escape it) so entities in the source name
+        # (e.g. "&" in a project title) aren't double-escaped (#4491).
+        plain(" ")
+        trusted_html(@description.source_name.t)
       else
         text_field(:source_name, class: "form-control")
       end
