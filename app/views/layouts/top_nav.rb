@@ -111,8 +111,12 @@ class Views::Layouts::TopNav < Views::Base
       div(class: "collapse w-100", id: "search_nav",
           data: {
             controller: "search-type",
-            search_type_help_types_value: SEARCH_HELP_TYPES,
-            search_type_form_types_value: SEARCH_FORM_TYPES
+            # Stimulus Array values must be JSON. Rails' tag helper
+            # JSON-encodes arrays automatically; Phlex space-joins them
+            # ("a b"), which breaks JSON.parse in the controller and
+            # silently disables the help/advanced-search forms (#4492).
+            search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
+            search_type_form_types_value: SEARCH_FORM_TYPES.to_json
           }) do
         # `_search_bar.html.erb` stays ERB for now — rendered via
         # Phlex's `partial(...)` wrapper. The identify-search variant

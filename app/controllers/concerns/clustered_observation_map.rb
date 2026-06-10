@@ -15,7 +15,7 @@ module ClusteredObservationMap
 
   private
 
-  # Capped at MapHelper::CLUSTER_MAX_OBJECTS so the client never has
+  # Capped at ::Components::Map::CLUSTER_MAX_OBJECTS so the client never has
   # to cluster more points than it can handle. Fetches `cap + 1` rows
   # so we can detect overflow cheaply (no separate COUNT query); the
   # extra row is trimmed before building the minimal observations. A
@@ -29,7 +29,7 @@ module ClusteredObservationMap
   end
 
   def capped_observation_rows
-    cap = MapHelper::CLUSTER_MAX_OBJECTS
+    cap = ::Components::Map::CLUSTER_MAX_OBJECTS
     rows = mapped_observations_scope.limit(cap + 1).
            select(*minimal_obs_columns).to_a
     @observations_capped = rows.size > cap
@@ -62,9 +62,10 @@ module ClusteredObservationMap
   # all overlays from the returned collection and updates the cap
   # banner visibility based on `capped`.
   def map_refetch_payload
-    args = { query_param: q_param(@query), map_type: "info" }
     {
-      collection: view_context.clustered_collection(@observations, args),
+      collection: ::Mappable::ClusteredCollection.new(
+        @observations, query_param: q_param(@query)
+      ),
       capped: @observations_capped,
       loaded: @observations_loaded_count,
       total: @observations_total_count,

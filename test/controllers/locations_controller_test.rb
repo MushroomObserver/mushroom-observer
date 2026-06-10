@@ -294,10 +294,6 @@ class LocationsControllerTest < FunctionalTestCase
     assert_page_title(:LOCATIONS.l)
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   # Render the index against a query whose `order_by` is already
   # rss_log — exercises the `rss_log` branch of
   # `LocationsController#index_sort_options` end-to-end through

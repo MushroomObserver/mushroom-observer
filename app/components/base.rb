@@ -11,6 +11,10 @@ class Components::Base < Phlex::HTML
   include Phlex::Rails::Helpers::ClassNames
   include Phlex::Rails::Helpers::TurboFrameTag
   include Components::TrustedHtml
+  # `content_for(...)` and `content_for?(...)` — available everywhere
+  # so chrome components, popup builders, etc. don't have to inherit
+  # from Views::Base just for the stash/read pair.
+  include Phlex::Rails::Helpers::ContentFor
 
   # Register custom value helpers (return values)
   register_value_helper :permission?
@@ -35,9 +39,10 @@ class Components::Base < Phlex::HTML
   # views accept a typed `prop :query, ::Query` for validated input
   # AND fall back to "whatever query the session knows about" when
   # the prop is omitted, without having to thread `@query` through
-  # every chrome-y caller.
+  # every view-layer caller.
   register_value_helper :current_query
   register_value_helper :add_args_to_url
+  register_value_helper :controller
   register_value_helper :controller_name
   register_value_helper :controller_path
   register_value_helper :action_name

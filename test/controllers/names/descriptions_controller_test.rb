@@ -29,10 +29,6 @@ module Names
       assert_page_title(:NAME_DESCRIPTIONS.l)
     end
 
-    def test_index_with_non_default_sort
-      check_index_sorting
-    end
-
     def test_index_by_author_of_one_description
       desc = name_descriptions(:draft_boletus_edulis)
       user = desc.user

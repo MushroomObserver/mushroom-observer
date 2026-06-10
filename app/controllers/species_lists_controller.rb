@@ -34,8 +34,8 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   # Sort options for the index page. Swaps `updated_at` for
   # `rss_log` when the active query orders by rss_log, so
-  # "Updated" picks the right backing column. Consumed by the
-  # Phlex Index view's `add_sorter` and by `check_index_sorting`.
+  # "Updated" picks the right backing column. Read by the Phlex
+  # Index view's `add_sorter`.
   def index_sort_options
     self.class.sort_options(query: @query)
   end

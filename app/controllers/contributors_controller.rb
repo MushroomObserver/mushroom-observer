@@ -17,8 +17,8 @@ class ContributorsController < ApplicationController
 
   # Sort options for the index page. Same shape as
   # `UsersController#index_sort_options` non-admin variant —
-  # contributors page never offers the admin-only keys. Consumed
-  # by `add_sorter` and `check_index_sorting`.
+  # contributors page never offers the admin-only keys. Read by
+  # `add_sorter` in the view.
   def index_sort_options
     [
       ["login",        :sort_by_login.t],

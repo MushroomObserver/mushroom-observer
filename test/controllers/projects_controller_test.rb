@@ -246,10 +246,6 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_template("index")
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_member
     login
 

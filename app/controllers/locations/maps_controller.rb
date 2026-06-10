@@ -5,10 +5,6 @@ module Locations
   class MapsController < ApplicationController
     before_action :login_required
 
-    def controller_model_name
-      "Location"
-    end
-
     # Map results of a search or index of Locations.
     def show
       @query = find_or_create_query(:Location)
@@ -20,6 +16,9 @@ module Locations
                    limit(MO.query_max_array).map do |loc|
         Mappable::MinimalLocation.new(loc.attributes.symbolize_keys)
       end
+      render(Views::Controllers::Locations::Maps::Show.new(
+               query: @query, locations: @locations
+             ))
     end
   end
 end

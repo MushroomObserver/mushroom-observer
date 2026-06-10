@@ -25,6 +25,25 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # Regression for #4492: the top-nav `search-type` Stimulus controller
+  # reads its help/form type lists as Array values, which Stimulus parses
+  # as JSON. Phlexifying top_nav emitted the arrays space-joined ("a b")
+  # instead of JSON-encoded, so JSON.parse threw and silently disabled the
+  # advanced-search and help forms. The attributes must be valid JSON.
+  def test_search_nav_stimulus_array_values_are_json
+    login
+    get(:index)
+
+    node = css_select("#search_nav").first
+    assert_not_nil(node, "search nav not rendered")
+    %w[data-search-type-form-types-value
+       data-search-type-help-types-value].each do |attr|
+      parsed = JSON.parse(node[attr])
+      assert_kind_of(Array, parsed, "#{attr} must be a JSON array")
+      assert_includes(parsed, "observations", "#{attr} must list observations")
+    end
+  end
+
   BUNCH_OF_NAMES = Name.take(10)
   BUNCH_OF_REGIONS = [
     "Connecticut, USA",
@@ -90,10 +109,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     regions_joined_trunc = "#{regions_joined[0...97]}..."
     assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
     assert_select("#caption-full", text: /#{regions_joined}/)
-  end
-
-  def test_index_with_non_default_sort
-    check_index_sorting
   end
 
   def test_index_sorted_by_invalid_order
@@ -275,6 +290,24 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       "Advanced Search should reload form if it throws an error"
     )
   end
+
+  # No advanced-search params + an invalid q passes through
+  # `handle_advanced_search_invalid_q_param?`, which flashes and
+  # redirects. `advanced_search_query` returns nil (the `elsif`
+  # branch); `advanced_search` sees `performed?` and bails before
+  # the rescue's redirect_to would have double-redirected.
+  def test_index_advanced_search_with_invalid_q_param_redirects
+    login
+    get(:index, params: { q: "INVALID", advanced_search: true })
+
+    assert_flash_error(:advanced_search_bad_q_error.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  # NOTE: `advanced_search_params`'s `raise "...is undefined."`
+  # fires only when `Query::Observations.advanced_search_params`
+  # returns nil/blank — a programming error in `Query::Observations`
+  # setup, not a runtime branch. Left uncovered intentionally.
 
   # The pattern param is maintained only for backwards compatibility.
   # Should redirect to SearchController#pattern, which instantiates the

@@ -15,7 +15,6 @@ class Views::Controllers::Observations::Show::ThumbnailMapPanel < Views::Base
   include Phlex::Rails::Helpers::ImageURL
 
   prop :obs, ::Observation
-  prop :user, _Nilable(::User), default: nil
 
   def view_template
     render(Components::Panel.new(

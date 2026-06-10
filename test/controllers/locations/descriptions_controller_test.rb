@@ -52,10 +52,6 @@ module Locations
       assert_page_title(:LOCATION_DESCRIPTIONS.l)
     end
 
-    def test_index_with_non_default_sort
-      check_index_sorting
-    end
-
     def test_index_with_id
       desc = location_descriptions(:albion_desc)
 

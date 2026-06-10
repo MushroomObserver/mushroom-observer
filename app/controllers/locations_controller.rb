@@ -29,9 +29,9 @@ class LocationsController < ApplicationController
   end
 
   # Sort options for the index page. Swaps `updated_at` for
-  # `rss_log` when the active query orders by rss_log. Consumed by
-  # `add_sorter` and `check_index_sorting`. Each key must resolve
-  # to `Location.order_by_<key>`.
+  # `rss_log` when the active query orders by rss_log. Read by
+  # `add_sorter` in the view. Each key must resolve to
+  # `Location.order_by_<key>`.
   def index_sort_options
     rss_log = @query&.params&.dig(:order_by) == "rss_log"
     [

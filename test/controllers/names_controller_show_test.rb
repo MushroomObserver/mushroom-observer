@@ -39,6 +39,25 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_select("#nomenclature")
   end
 
+  # Regression for #4491: name text (author, synonyms, classification
+  # rows) is textile-safe HTML. The Phlex conversion emitted it via
+  # `plain`, which re-escaped the entities, so panels showed literal
+  # codes like "&amp;" / "&#8212;" instead of "&" / "—". Same root cause
+  # / fix (`trusted_html`) in the nomenclature and classification panels.
+  def test_show_name_renders_html_entities_not_codes
+    login
+    # author is "(Bull.) Vilgalys, Hopple & Jacq. Johnson"
+    name = names(:coprinellus_micaceus)
+    get(:show, params: { id: name.id })
+    assert_response(:success)
+
+    nomenclature = css_select("#nomenclature").text
+    assert_includes(nomenclature, "Hopple & Jacq. Johnson",
+                    "ampersand should render as a character, not a code")
+    assert_not_includes(nomenclature, "&amp;",
+                        "HTML entity codes should not be visible as text")
+  end
+
   def test_show_name_species_with_icn_id
     # Name's icn_id is filled in
     name = names(:coprinus_comatus)

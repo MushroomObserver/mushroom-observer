@@ -80,7 +80,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
       plain("#{rank_as_string(node.rank)}: ")
       i do
         a(href: name_path(node.id)) do
-          plain(node.text_name.t.strip_html)
+          trusted_html(node.text_name.t)
         end
       end
       render_alias_suffix if node == approved && approved != @name
@@ -93,7 +93,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   def render_alias_suffix
     span(class: "ml-4") do
       plain("(= ")
-      i { plain(@name.text_name.t.strip_html) }
+      i { trusted_html(@name.text_name.t) }
       plain(")")
     end
   end

@@ -70,9 +70,8 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   # Sort options for the index page. `nonpersonal` queries get a
   # different subset (records / curator / code / name + create/update);
-  # full queries get every key. Consumed by `add_sorter` and
-  # `check_index_sorting`. Each key must resolve to
-  # `Herbarium.order_by_<key>`.
+  # full queries get every key. Read by `add_sorter` in the view.
+  # Each key must resolve to `Herbarium.order_by_<key>`.
   def index_sort_options
     if @query&.params&.dig(:nonpersonal)
       nonpersonal_index_sort_options

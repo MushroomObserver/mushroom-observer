@@ -992,7 +992,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_11_000000) do
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
     t.integer "label_format", default: 1
+    t.index ["inat_username"], name: "index_users_on_inat_username"
     t.index ["login"], name: "login_index"
+    t.index ["name"], name: "index_users_on_name"
   end
 
   create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
