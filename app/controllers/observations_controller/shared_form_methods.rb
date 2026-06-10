@@ -56,8 +56,6 @@ module ObservationsController::SharedFormMethods
     return Observation.no_notes unless notes_param_present?
 
     symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
-    # Collector has its own column; never let it live in notes (#4211).
-    symbolized.delete(:Collector)
     symbolized.compact_blank!
   end
 

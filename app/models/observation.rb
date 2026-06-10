@@ -323,7 +323,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # closing "_" must be the delimiter (followed by a non-word char or
   # end-of-string) so logins/names with internal underscores survive
   # ("_user tyler_irvin_" -> "tyler_irvin"). Shared by the live edit path
-  # and the MigrateCollectorNotes data migration.
+  # and the CollectorNotesSeeder backfill.
   COLLECTOR_USER_MARKUP = /_user\s+(.+?)_(?=\W|\z)/
 
   # Resolve a raw collector string to normalized column attributes:

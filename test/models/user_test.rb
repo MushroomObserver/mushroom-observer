@@ -340,13 +340,6 @@ class UserTest < UnitTestCase
     u.notes_template = "Blah, Blah"
     assert(u.invalid?,
            "Notes template with duplication headings should be invalid")
-
-    u.notes_template = "Cap, Collector"
-    assert(u.invalid?,
-           "Notes template with 'Collector' should be invalid (#4211)")
-
-    u.notes_template = "Cap, Collector's Name"
-    assert(u.valid?, "Collector variant headings stay valid")
   end
 
   def test_disable_account

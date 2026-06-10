@@ -1,26 +1,19 @@
 # frozen_string_literal: true
 
 require("test_helper")
-require(Rails.root.join("db/migrate/20260611000000_migrate_collector_notes.rb").to_s)
 
-# Exercises the #4211 collector-seeding policy (PR #4452): which legacy
-# notes values become a linked collector, a free-text collector, or are
-# skipped. The migrator delegates resolution to Observation.resolve_collector
-# (covered in observation_test.rb); these tests pin the per-key policy and
-# the fuzzy owner-name match.
-class MigrateCollectorNotesTest < UnitTestCase
-  # The migrator only needs an object that responds to #say for progress.
-  class SilentMigration
-    def say(*); end
-  end
-
-  def migrator
-    @migrator ||=
-      MigrateCollectorNotes::CollectorNotesMigrator.new(SilentMigration.new)
+# Exercises the #4211 collector-seeding policy (PR #4452): which legacy notes
+# values become a linked collector, a free-text collector, or are skipped.
+# The seeder delegates resolution to Observation.resolve_collector (covered in
+# observation_test.rb); these tests pin the per-key policy and the fuzzy
+# owner-name match. Used by the online backfill and the contract migration.
+class CollectorNotesSeederTest < UnitTestCase
+  def seeder
+    @seeder ||= CollectorNotesSeeder.new
   end
 
   # Create an obs with the given notes and a blank collector column, the
-  # state the migration's seed pass scans for.
+  # state the seeder scans for.
   def obs_with_notes(notes, user: mary)
     obs = Observation.create!(user: user, when: Time.zone.now,
                               where: "Anywhere", name: names(:fungi))
@@ -29,7 +22,7 @@ class MigrateCollectorNotesTest < UnitTestCase
   end
 
   def seed(obs)
-    migrator.send(:seed, obs.reload)
+    seeder.send(:seed, obs.reload)
     obs.reload
   end
 
@@ -53,10 +46,11 @@ class MigrateCollectorNotesTest < UnitTestCase
   # --- name-variant key: lists / junk / long sentences are skipped ---
 
   def test_seed_name_variant_skips_list_junk_and_sentence
+    sentence = "Likely new species of Clitocybe based on a DNA barcode " \
+               "of similar collections"
     [{ "Collector's_Name": "D. Newman & R. Vandegrift" },
      { "Collector's_Name": "N/A" },
-     { "Collector's_Name": "Likely new species of Clitocybe based on a " \
-                              "DNA barcode of similar collections" }].each do |n|
+     { "Collector's_Name": sentence }].each do |n|
       obs = seed(obs_with_notes(n))
       assert_nil(obs.collector, "should skip #{n.values.first.inspect}")
       assert_nil(obs.collector_user_id)
@@ -96,5 +90,13 @@ class MigrateCollectorNotesTest < UnitTestCase
   def test_seed_ignores_lowercase_collector_key
     obs = seed(obs_with_notes({ collector: "my collectors" }))
     assert_nil(obs.collector)
+  end
+
+  # --- run: full-scan entry point (the backfill / migration safety pass) ---
+
+  def test_run_seeds_blank_collector_columns
+    obs = obs_with_notes({ "Collector's_Name": "Bill Sheehan" })
+    seeder.run
+    assert_equal("Bill Sheehan", obs.reload.collector)
   end
 end
