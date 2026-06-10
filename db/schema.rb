@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_05_160002) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_10_215004) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -989,7 +989,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_05_160002) do
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
     t.integer "label_format", default: 1
+    t.index ["inat_username"], name: "index_users_on_inat_username"
     t.index ["login"], name: "login_index"
+    t.index ["name"], name: "index_users_on_name"
   end
 
   create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
