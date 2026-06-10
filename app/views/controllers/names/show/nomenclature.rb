@@ -100,7 +100,10 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_authority_paragraph
-    p { plain("#{:AUTHORITY.l}: #{@name.author.to_s.t.strip_html}") }
+    p do
+      plain("#{:AUTHORITY.l}: ")
+      trusted_html(@name.author.to_s.t)
+    end
   end
 
   def render_citation_paragraph
@@ -202,7 +205,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
       plain("#{:show_name_misspelling_correct.l}: ")
       if @name.correct_spelling
         a(href: name_path(@name.correct_spelling_id)) do
-          plain(@name.correct_spelling.user_display_name(@user).t.strip_html)
+          trusted_html(@name.correct_spelling.user_display_name(@user).t)
         end
       else
         plain(@name.correct_spelling_id.to_s)
@@ -237,7 +240,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
       plain("#{label}: ")
       names.each_with_index do |n, idx|
         a(href: name_path(n.id)) do
-          plain(n.user_display_name(@user).t.strip_html)
+          trusted_html(n.user_display_name(@user).t)
         end
         plain(", ") if idx < names.length - 1
       end
