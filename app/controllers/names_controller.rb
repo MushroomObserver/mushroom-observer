@@ -33,8 +33,8 @@ class NamesController < ApplicationController
   end
 
   # Sort options for the index page. Swaps `updated_at` for
-  # `rss_log` when the active query orders by rss_log. Consumed by
-  # the Phlex Index view's `add_sorter` and by `check_index_sorting`.
+  # `rss_log` when the active query orders by rss_log. Read by the
+  # Phlex Index view's `add_sorter`.
   def index_sort_options
     rss_log = @query&.params&.dig(:order_by) == "rss_log"
     [

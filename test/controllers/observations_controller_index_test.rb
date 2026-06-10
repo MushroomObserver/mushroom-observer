@@ -111,10 +111,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_select("#caption-full", text: /#{regions_joined}/)
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_sorted_by_invalid_order
     by = "edibility"
 

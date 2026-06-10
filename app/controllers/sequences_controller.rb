@@ -47,9 +47,8 @@ class SequencesController < ApplicationController
     build_index_with_query
   end
 
-  # Sort options for the index page. Consumed by `add_sorter` and
-  # `check_index_sorting`. Each key must resolve to
-  # `Sequence.order_by_<key>`.
+  # Sort options for the index page. Read by `add_sorter` in the
+  # view. Each key must resolve to `Sequence.order_by_<key>`.
   def index_sort_options
     [
       ["created_at",  :sort_by_created_at.t],

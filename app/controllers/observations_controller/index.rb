@@ -32,9 +32,8 @@ class ObservationsController
       !@project&.is_admin?(@user)
     end
 
-    # Sort options for the index page. Consumed by `add_sorter` and
-    # `check_index_sorting`. Each key must resolve to
-    # `Observation.order_by_<key>`.
+    # Sort options for the index page. Read by `add_sorter` in the
+    # view. Each key must resolve to `Observation.order_by_<key>`.
     def index_sort_options
       [
         ["rss_log",           :sort_by_activity.l],

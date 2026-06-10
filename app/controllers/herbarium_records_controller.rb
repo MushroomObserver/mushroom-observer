@@ -13,9 +13,8 @@ class HerbariumRecordsController < ApplicationController
     build_index_with_query
   end
 
-  # Sort options for the index page. Consumed by `add_sorter` and
-  # `check_index_sorting`. Each key must resolve to
-  # `HerbariumRecord.order_by_<key>`.
+  # Sort options for the index page. Read by `add_sorter` in the
+  # view. Each key must resolve to `HerbariumRecord.order_by_<key>`.
   def index_sort_options
     [
       ["herbarium_name",   :sort_by_herbarium_name.t],

@@ -29,8 +29,7 @@ class ArticlesController < ApplicationController
   end
 
   # Sort options for the index page. Read by `add_sorter` in the
-  # view AND by `check_index_sorting` in the controller test, which
-  # asserts each key resolves to `Article.order_by_<key>`.
+  # view. Each key must resolve to `Article.order_by_<key>`.
   def index_sort_options
     [
       ["created_at", :sort_by_created_at.t],

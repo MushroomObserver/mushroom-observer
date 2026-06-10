@@ -21,8 +21,7 @@ module Views::Controllers::Comments
     def view_template
       container_class(:text_image)
       add_index_title(@query)
-      # Sort table lives on the controller — single source of truth
-      # for view rendering and `check_index_sorting`.
+      # Sort table lives on the controller — single source of truth.
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
       flash_error(@error) if @error && @objects.empty?

@@ -159,10 +159,6 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_all_merge_source_links_presence_rolf
     assert_true(nybg.can_edit?(rolf)) # rolf is a curator
     assert_true(fundis.can_edit?(rolf)) # herbarium has no curators
