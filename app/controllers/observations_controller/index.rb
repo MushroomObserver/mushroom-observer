@@ -72,6 +72,10 @@ class ObservationsController
     # Displays matrix of advanced search results.
     def advanced_search
       query = advanced_search_query
+      # `handle_advanced_search_invalid_q_param?` already responded;
+      # bail before the raise-and-rescue dance double-redirects.
+      return [nil, {}] if performed?
+
       # Have to check this here because we're not running the query yet.
       raise(:runtime_no_conditions.l) unless query&.params&.any?
 

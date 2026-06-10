@@ -291,6 +291,24 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     )
   end
 
+  # No advanced-search params + an invalid q passes through
+  # `handle_advanced_search_invalid_q_param?`, which flashes and
+  # redirects. `advanced_search_query` returns nil (the `elsif`
+  # branch); `advanced_search` sees `performed?` and bails before
+  # the rescue's redirect_to would have double-redirected.
+  def test_index_advanced_search_with_invalid_q_param_redirects
+    login
+    get(:index, params: { q: "INVALID", advanced_search: true })
+
+    assert_flash_error(:advanced_search_bad_q_error.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  # NOTE: `advanced_search_params`'s `raise "...is undefined."`
+  # fires only when `Query::Observations.advanced_search_params`
+  # returns nil/blank — a programming error in `Query::Observations`
+  # setup, not a runtime branch. Left uncovered intentionally.
+
   # The pattern param is maintained only for backwards compatibility.
   # Should redirect to SearchController#pattern, which instantiates the
   # PatternSearch::Observation and then redirects here with :q param

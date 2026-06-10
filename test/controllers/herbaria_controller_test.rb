@@ -409,6 +409,14 @@ class HerbariaControllerTest < FunctionalTestCase
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
+  # NOTE: `create` and `update`'s `unless @herbarium.save` branches
+  # (`flash_object_errors` + `reload_form`) require forcing
+  # `Herbarium#save` to return false on the controller-built instance
+  # AFTER `validate_herbarium!` returns true. MO doesn't pull in Mocha
+  # (no `any_instance` stubbing). Left uncovered intentionally —
+  # defensive against DB-level failures past Rails validations. See
+  # `observations/namings_controller_test.rb` for the same pattern.
+
   def test_create
     email_count = ActionMailer::Base.deliveries.count
     herbarium_count = Herbarium.count

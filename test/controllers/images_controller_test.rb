@@ -12,6 +12,16 @@ class ImagesControllerTest < FunctionalTestCase
     assert_page_title(:IMAGES.l)
   end
 
+  # Sorting by `name` or `user` flips `opts[:letters] = true` in
+  # `ImagesController#index_display_opts`, switching the index to
+  # letter-based pagination.
+  def test_index_sort_by_name_enables_letter_pagination
+    login
+    get(:index, params: { by: "name" })
+
+    assert_response(:success)
+  end
+
   def test_index_by_user
     user = rolf
 
