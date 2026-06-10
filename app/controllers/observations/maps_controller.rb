@@ -24,17 +24,6 @@ module Observations
       end
     end
 
-    def maps_index_phlex_view
-      Views::Controllers::Observations::Maps::Index.new(
-        query: @query,
-        observations: @observations,
-        observations_capped: @observations_capped || false,
-        observations_loaded_count: @observations_loaded_count,
-        observations_total_count: @observations_total_count,
-        cluster_query_string: @cluster_query_string
-      )
-    end
-
     # Rendered caption HTML for a single observation — used by the
     # client to lazy-load popup content when the user clicks a marker
     # on a clustered map (#4159). Sending pre-rendered captions for
@@ -100,6 +89,19 @@ module Observations
                observations: @observations,
                query: @query
              ))
+    end
+
+    private
+
+    def maps_index_phlex_view
+      Views::Controllers::Observations::Maps::Index.new(
+        query: @query,
+        observations: @observations,
+        observations_capped: @observations_capped || false,
+        observations_loaded_count: @observations_loaded_count,
+        observations_total_count: @observations_total_count,
+        cluster_query_string: @cluster_query_string
+      )
     end
   end
 end
