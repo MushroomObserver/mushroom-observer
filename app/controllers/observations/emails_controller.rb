@@ -14,7 +14,7 @@ module Observations
       respond_to do |format|
         format.html do
           render(Views::Controllers::Observations::Emails::New.new(
-                   observation: @observation, user: @user
+                   observation: @observation
                  ))
         end
         format.turbo_stream do
@@ -54,7 +54,7 @@ module Observations
       flash_error(:runtime_missing.t(field: :message.l))
       @observation = observation
       render(Views::Controllers::Observations::Emails::New.new(
-               observation: observation, user: @user
+               observation: observation
              ))
       false
     end

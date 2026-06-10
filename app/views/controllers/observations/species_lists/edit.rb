@@ -12,7 +12,6 @@ module Views::Controllers::Observations::SpeciesLists
     prop :all_lists, ::Query::SpeciesLists
     prop :obs_lists, _Array(::SpeciesList)
     prop :other_lists, _Array(::SpeciesList)
-    prop :user, _Nilable(::User), default: nil
 
     def view_template
       add_page_title(

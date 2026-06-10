@@ -111,7 +111,7 @@ module Views::Controllers::Observations
       render(SpeciesListsPanel.new(obs: @observation, user: @user))
       render(AssociatedObservationsPanel.new(
                obs: @observation, occurrence: @occurrence,
-               siblings: @sibling_observations, user: @user
+               siblings: @sibling_observations
              ))
     end
 
@@ -122,9 +122,9 @@ module Views::Controllers::Observations
         div(class: content_for(:left_columns)) do
           render_namings_and_comments
         end
-        if @user
-          div(class: content_for(:right_columns)) do
-            render_thumbnail_map_if_shown
+        div(class: content_for(:right_columns)) do
+          if @user&.thumbnail_maps
+            render(ThumbnailMapPanel.new(obs: @observation))
           end
         end
       end
@@ -154,24 +154,6 @@ module Views::Controllers::Observations
 
     def render_source_credit
       trusted_html(@observation.source_credit.tpl)
-    end
-
-    def render_thumbnail_map_if_shown
-      return unless show_thumbnail_map?
-
-      render(ThumbnailMapPanel.new(
-               obs: @observation, user: @user
-             ))
-    end
-
-    # Only called from inside the `if @user` branch of
-    # `render_secondary_row`, so `@user` is always truthy here.
-    # The legacy ERB computed a `show_map` value with a
-    # `!@user`-then-session fallback, but the value was only used
-    # inside its own `if @user` block — the fallback branch was
-    # never reachable. Mirror reality.
-    def show_thumbnail_map?
-      @user.thumbnail_maps
     end
 
     def render_footer
