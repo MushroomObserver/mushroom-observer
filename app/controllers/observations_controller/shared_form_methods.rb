@@ -76,7 +76,12 @@ module ObservationsController::SharedFormMethods
   end
 
   def init_specimen_vars
-    @collectors_name   = params[:collector].presence || @user.legal_name
+    # The form submits the collector nested (params[:observation]
+    # [:collector]); the field-slip redirect to `new` carries it
+    # top-level. Check nested first so a failed create re-render keeps
+    # the user-entered collector instead of falling back to legal_name.
+    @collectors_name   = params.dig(:observation, :collector).presence ||
+                         params[:collector].presence || @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
     @herbarium_id      = @user.preferred_herbarium&.id

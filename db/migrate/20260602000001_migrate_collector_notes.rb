@@ -52,10 +52,13 @@ class MigrateCollectorNotes < ActiveRecord::Migration[7.2]
     VARIANT_KEYS = [:collector, :"Collector's_Name", :"Collector's_name",
                     :"Collector(s)"].freeze
     SEED_KEYS = [COLLECTOR_KEY, *VARIANT_KEYS].freeze
-    # Greedy capture up to the LAST underscore so logins containing
-    # underscores survive (e.g. "_user tyler_irvin_" -> "tyler_irvin",
-    # not "tyler"). See #4211 review.
-    USER_MARKUP = /_user\s+(.+)_/
+    # Capture the ref between "_user " and the closing "_" delimiter.
+    # Non-greedy, but the closing "_" must be followed by a non-word
+    # char or end-of-string, so logins/names containing underscores
+    # survive ("_user tyler_irvin_" -> "tyler_irvin", not "tyler")
+    # while trailing markup after the ref isn't over-captured
+    # ("_user joe_ and _user bob_" -> "joe"). See #4211 review.
+    USER_MARKUP = /_user\s+(.+?)_(?=\W|\z)/
     SEEDED_LOG = Rails.root.join("log/collector_notes_seeded.tsv")
     UNRESOLVED_LOG = Rails.root.join("log/collector_notes_unresolved.tsv")
 

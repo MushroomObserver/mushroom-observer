@@ -1510,7 +1510,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # (preserving a backfilled/claimed identity), else cleared. An
   # unchanged collector (e.g. a view-stats save) is left untouched.
   def reconcile_collector_user
-    return unless collector_changed?
+    return unless will_save_change_to_attribute?(:collector)
 
     self.collector_user_id = resolved_collector_user_id
   end
