@@ -6,10 +6,6 @@ module Observations
 
     before_action :login_required
 
-    def controller_model_name
-      "Observation"
-    end
-
     # Map results of a search or index.
     def index
       show and return if params[:id].present?
@@ -19,7 +15,7 @@ module Observations
       find_locations_matching_observations
 
       respond_to do |format|
-        format.html
+        format.html { render(maps_index_phlex_view) }
         format.json { render(json: map_refetch_payload) }
       end
     end
@@ -48,11 +44,12 @@ module Observations
         thumb_image_id: observation.thumb_image_id
       )
       set = Mappable::MapSet.new([minimal])
-      # params[:q] arrives as ActionController::Parameters; URL helpers
-      # inside mapset_info_window reject unpermitted parameters, so
-      # convert to a plain Hash before passing through.
-      args = { query_param: params[:q].presence&.to_unsafe_h }
-      render(json: { html: view_context.mapset_info_window(set, args) })
+      # `query` falls back to `current_query` (controller method) when
+      # nil, which itself reads `params[:q]` through
+      # `query_from_q_param`'s validated path — so the popup gets a
+      # typed `Query` regardless of how the URL arrived.
+      popup = Components::Map::Popup.new(set: set, query: current_query)
+      render(json: { html: view_context.render(popup) })
     end
 
     # Show map of one observation by id.
@@ -82,6 +79,25 @@ module Observations
           thumb_image_id: @observation.thumb_image_id
         )
       ]
+
+      render(Views::Controllers::Observations::Maps::Show.new(
+               observation: @observation,
+               observations: @observations,
+               query: @query
+             ))
+    end
+
+    private
+
+    def maps_index_phlex_view
+      Views::Controllers::Observations::Maps::Index.new(
+        query: @query,
+        observations: @observations,
+        observations_capped: @observations_capped || false,
+        observations_loaded_count: @observations_loaded_count,
+        observations_total_count: @observations_total_count,
+        cluster_query_string: @cluster_query_string
+      )
     end
   end
 end
