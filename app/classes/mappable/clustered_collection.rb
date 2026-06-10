@@ -71,38 +71,40 @@ module Mappable
 
     # Plain-text name grouping-key used by cluster popups — authors
     # are stripped by using the obs's `text_name` (fall back to the
-    # stringified display_name for locations / unexpected shapes).
+    # stringified display_name for locations — only ::Observation /
+    # ::Mappable::MinimalObservation expose `text_name`).
     def cluster_label_for(obj)
       return obj.text_name if obj.respond_to?(:text_name) &&
                               obj.text_name.present?
-      return obj.display_name.to_s if obj.respond_to?(:display_name)
 
-      ""
+      obj.display_name.to_s
     end
 
+    # Every object reaching `ClusteredCollection.new` is mappable
+    # (`Mappable::BoxMethods#location?` plus `Observation#observation?`
+    # / `MinimalObservation#observation?`), so the two branches are
+    # exhaustive. `MapSet#init_objects_and_derive_extents` raises on
+    # anything else, so this method never runs on an unmappable obj.
     def cluster_url_for(obj, query_param, routes)
       params = query_param ? { q: query_param } : {}
-      if obj.respond_to?(:observation?) && obj.observation?
+      if obj.observation?
         routes.observation_path(id: obj.id, params: params)
-      elsif obj.respond_to?(:location?) && obj.location?
-        routes.location_path(id: obj.id, params: params)
       else
-        ""
+        routes.location_path(id: obj.id, params: params)
       end
     end
 
-    # Marker tooltip text. Mirrors the per-object branch in
-    # `MapHelper#map_location_strings` — an obs with no location but
-    # known lat/lng falls back to formatted coordinates so the
-    # tooltip isn't blank (the GPS-only observation case).
+    # Marker tooltip text. Mirrors the per-object branch in the
+    # deleted `MapHelper#map_location_strings` — an obs with no
+    # location but known lat/lng falls back to formatted coordinates
+    # so the tooltip isn't blank (the GPS-only observation case).
+    # Two-branch exhaustive: see `cluster_url_for`'s note.
     def mapset_title_for(set)
       first = set.objects.first
-      if first.respond_to?(:observation?) && first.observation?
+      if first.observation?
         observation_title_for(first)
-      elsif first.respond_to?(:location?) && first.location?
-        first.display_name.to_s
       else
-        ""
+        first.display_name.to_s
       end
     end
 
