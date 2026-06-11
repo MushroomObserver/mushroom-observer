@@ -17,14 +17,14 @@ module Views::Controllers::HerbariumRecords
       column_classes(:six)
       container_class(:full)
 
-      # Keep the text details + Timestamps at `container-text` width;
-      # let the obs-matrix below run full-width inside the page's
-      # full-width `<main>`.
+      # Top text details + bottom Timestamps both kept at
+      # `container-text` width; the obs-matrix between them runs
+      # full-width inside the page's full-width `<main>`.
+      div(class: "container-text") { render_details }
+      render_observation_matrix
       div(class: "container-text") do
-        render_details
         render(Components::Timestamps.new(object: @herbarium_record))
       end
-      render_observation_matrix
     end
 
     private
