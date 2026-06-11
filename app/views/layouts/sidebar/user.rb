@@ -15,9 +15,6 @@ class Views::Layouts::Sidebar
 
     prop :user, ::User
     prop :classes, _Hash(Symbol, String)
-    prop :in_admin_mode, _Nilable(_Boolean), default: false
-
-    register_output_helper :active_link_to
 
     def view_template
       render_heading
@@ -66,7 +63,7 @@ class Views::Layouts::Sidebar
         html_options[:class]
       )
 
-      active_link_to(title, url, **html_options)
+      render(::Components::ActiveLink.new(title, url, **html_options))
     end
 
     def render_admin_button
@@ -85,7 +82,7 @@ class Views::Layouts::Sidebar
     end
 
     def show_admin_button?
-      @user.admin && !@in_admin_mode
+      @user.admin && !in_admin_mode?
     end
   end
 end

@@ -10,8 +10,7 @@
 #   <%= render(Views::Layouts::Sidebar.new(
 #     user: @user,
 #     browser: browser,
-#     request: request,
-#     in_admin_mode: in_admin_mode?
+#     request: request
 #   )) %>
 class Views::Layouts::Sidebar < Views::Base
   # The Bootstrap class set the nested partials (`Admin`,
@@ -37,7 +36,6 @@ class Views::Layouts::Sidebar < Views::Base
   # `ApplicationHelper`. Accepts an `ActionDispatch::Request` or any
   # stub with `#url`.
   prop :request, _Interface(:url)
-  prop :in_admin_mode, _Nilable(_Boolean), default: false
   prop :languages, _Array(Language)
 
   def view_template
@@ -81,7 +79,7 @@ class Views::Layouts::Sidebar < Views::Base
   def render_top_section
     # This cache depends on user status and locale
     cache([I18n.locale, user_status_string(@user), "login"]) do
-      if @in_admin_mode
+      if in_admin_mode?
         render(Views::Layouts::Sidebar::Admin.new(
                  heading_key: :app_admin,
                  tabs: Tab::Sidebar::AdminActions.new.map(&:to_a),
@@ -110,8 +108,7 @@ class Views::Layouts::Sidebar < Views::Base
     if @user
       render(Views::Layouts::Sidebar::User.new(
                user: @user,
-               classes: classes,
-               in_admin_mode: @in_admin_mode
+               classes: classes
              ))
     end
 
@@ -175,7 +172,7 @@ class Views::Layouts::Sidebar < Views::Base
   end
 
   def user_status_string(user = nil)
-    if @in_admin_mode
+    if in_admin_mode?
       "admin_mode"
     elsif @browser.bot?
       "robot"

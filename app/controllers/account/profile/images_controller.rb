@@ -26,7 +26,8 @@ module Account::Profile
     def attach
       return unless User.safe_find(params[:id]) == @user
 
-      image = Image.safe_find(params[:img_id])
+      @img_id = params.dig(:image_reuse, :img_id).presence || params[:img_id]
+      image = Image.safe_find(@img_id)
       return render_reuse_with_invalid_id_error unless image
 
       attach_image_for_profile_and_flash_notice(image)
@@ -50,7 +51,7 @@ module Account::Profile
     # CRUD refactor could make each image link POST to create or delete.
 
     def render_reuse_with_invalid_id_error
-      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+      flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
       load_images_to_reuse
       render(Views::Controllers::Account::Profile::Images::Reuse.new(
                user: @user, objects: @reuse_images,

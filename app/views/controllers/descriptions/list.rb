@@ -13,12 +13,6 @@
 # sibling `DetailsAndAltsPanel` own every chain they used to compose).
 module Views::Controllers::Descriptions
   class List < Views::Base
-    # `reviewer?` is description-domain only — it gates visibility
-    # of restricted descriptions for users in the "reviewers" group.
-    # Register here rather than on `Views::Base` so the helper stays
-    # scoped to its actual consumer.
-    register_value_helper :reviewer?
-
     prop :user, _Nilable(::User), default: nil
     prop :object, _Union(::Name, ::Location)
     prop :type, _Union(:name, :location)

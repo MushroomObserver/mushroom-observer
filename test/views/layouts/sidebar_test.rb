@@ -42,7 +42,8 @@ module Views::Layouts
     end
 
     def test_renders_admin_section_in_admin_mode
-      html = render_component(in_admin_mode: true)
+      stub_admin_mode!
+      html = render_component
 
       # Should have admin section
       assert_includes(html, :app_admin.t)
@@ -107,7 +108,6 @@ module Views::Layouts
         user: nil,
         browser: human_browser,
         request: mock_request,
-        in_admin_mode: false,
         languages: mock_languages
       )
 
@@ -132,7 +132,6 @@ module Views::Layouts
         user: @user,
         browser: human_browser,
         request: mock_request,
-        in_admin_mode: false,
         languages: mock_languages
       )
 
@@ -149,7 +148,6 @@ module Views::Layouts
         user: @user,
         browser: human_browser,
         request: mock_request,
-        in_admin_mode: false,
         languages: mock_languages
       )
 
@@ -170,14 +168,12 @@ module Views::Layouts
 
     private
 
-    def render_component(user: @user, browser: human_browser,
-                         in_admin_mode: false)
+    def render_component(user: @user, browser: human_browser)
       render(
         Sidebar.new(
           user: user,
           browser: browser,
           request: mock_request,
-          in_admin_mode: in_admin_mode,
           languages: mock_languages
         )
       )
