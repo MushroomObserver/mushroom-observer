@@ -182,6 +182,9 @@ class CollectorNotesSeeder
       f.puts(header.join("\t"))
       rows.each { |cols| f.puts(cols.join("\t")) }
     end
+  rescue SystemCallError => e
+    # A non-writable log dir must not abort an otherwise-successful seed.
+    say("Could not write #{path}: #{e.message}")
   end
 
   def print_summary

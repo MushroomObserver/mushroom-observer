@@ -2521,6 +2521,14 @@ class ObservationTest < UnitTestCase
                  Observation.resolve_collector("Rolf Singer"))
   end
 
+  # A "Name (login)" unique_text_name (no FK, e.g. field-slip redirect into
+  # the new-obs form) links to that user, not just owner/existing. See #4499.
+  def test_resolve_collector_unique_text_name_of_other_user
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector(rolf.unique_text_name,
+                                               owner: mary))
+  end
+
   def test_resolve_collector_owner_match
     # The owner's login / name / unique_text_name all link to the owner.
     [mary.login, mary.name, mary.unique_text_name].each do |str|
@@ -2574,5 +2582,16 @@ class ObservationTest < UnitTestCase
     obs.update!(collector: "Jane Forager")
     assert_nil(obs.collector_user_id)
     assert_equal("Jane Forager", obs.collector)
+  end
+
+  # Reconcile also fires when only collector_user_id changes, so a FK that
+  # is inconsistent with the (free-text) collector string is corrected
+  # rather than persisted. See #4499.
+  def test_edit_collector_user_id_change_reconciles_against_string
+    obs = new_collector_obs
+    obs.update_columns(collector: "Jane Forager", collector_user_id: nil)
+    obs.update!(collector_user_id: rolf.id)
+    assert_nil(obs.reload.collector_user_id,
+               "inconsistent FK reconciled away from the free-text string")
   end
 end

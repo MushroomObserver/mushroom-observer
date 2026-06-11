@@ -380,7 +380,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return if ref.blank?
 
     User.find_by(login: ref) ||
-      (named = User.where(name: ref)).one? && named.first || nil
+      unique_name_match(ref) ||
+      User.lookup_unique_text_name(ref)
+  end
+
+  # A name unique among users (so it identifies one person unambiguously).
+  def self.unique_name_match(ref)
+    named = User.where(name: ref)
+    named.one? ? named.first : nil
   end
 
   def location?
@@ -1577,7 +1584,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # string to the linked user's unique_text_name. An unchanged collector
   # (e.g. a view-stats save) is left untouched.
   def reconcile_collector_user
-    return unless will_save_change_to_attribute?(:collector)
+    return unless will_save_change_to_attribute?(:collector) ||
+                  will_save_change_to_attribute?(:collector_user_id)
 
     resolved = self.class.resolve_collector(collector, owner: user,
                                                        existing: collector_user)
