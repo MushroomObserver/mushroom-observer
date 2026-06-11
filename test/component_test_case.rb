@@ -517,8 +517,19 @@ class ComponentTestCase < UnitTestCase
 
   def html_text_diff(expected, actual, here)
     return nil if expected.content == actual.content
+    # Collapse runs of whitespace before comparing — ERB preserves
+    # template indentation as text between tags (e.g. `>\n    <`);
+    # Phlex emits no inter-tag whitespace. The two pages render
+    # visually identically in a browser as long as the non-WS text
+    # matches.
+    return nil if collapse_ws(expected.content) ==
+                  collapse_ws(actual.content)
 
     "#{here}: text #{expected.content.inspect} != #{actual.content.inspect}"
+  end
+
+  def collapse_ws(text)
+    text.to_s.gsub(/\s+/, " ").strip
   end
 
   def html_children_diff(expected, actual, here)
