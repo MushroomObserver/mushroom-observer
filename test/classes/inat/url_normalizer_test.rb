@@ -196,7 +196,7 @@ class Inat
                                  import_others: false).normalize
 
       assert_equal("licensed=false&project_id=291058", result,
-                   "Should strip regular-user supplied iNat `licensed` param ")
+                   "Should preserve regular user's iNat `licensed` param ")
     end
 
     # ---- #ignored_params ----------------------------------------------------
