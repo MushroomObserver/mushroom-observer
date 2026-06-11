@@ -401,6 +401,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def custom_hidden_field_name
+      # No model namespace = standalone usage via
+      # `FieldProxy.new(nil, …)` outside a Superform form. The
+      # hidden field gets the bare top-level `name="#{hidden_name}"`
+      # instead of `"[hidden_name]"`.
+      return hidden_name.to_s if model_namespace.empty?
+
       "#{model_namespace}[#{hidden_name}]"
     end
 
