@@ -42,11 +42,8 @@ class Components::InlineFilterForm < Components::ApplicationForm
     # `class: "form-inline"` + `method: :get` flow into Superform's
     # `@attributes` and become the rendered `<form>` tag's class /
     # method. `id:` is conditional so it never emits an empty
-    # `id=""` attribute. Manual string-concat instead of
-    # `class_names` because Rails view helpers aren't reachable
-    # until rendering starts.
-    extra = attributes[:class]
-    attributes[:class] = extra ? "form-inline #{extra}" : "form-inline"
+    # `id=""` attribute.
+    attributes[:class] = ["form-inline", attributes[:class]].compact.join(" ")
     attributes[:id] = form_id if form_id
     super(model, method: :get, **attributes)
   end
