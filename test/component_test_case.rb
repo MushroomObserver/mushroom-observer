@@ -433,7 +433,7 @@ class ComponentTestCase < UnitTestCase
   def extract_subtree(html, selector, strip_csrf)
     src = strip_csrf ? html.gsub(CSRF_INPUT_RE, '\1CSRF\2') : html
     subtree = Nokogiri::HTML5.fragment(src).at_css(selector)
-    strip_form_implementation_noise!(subtree) if subtree
+    strip_form_implementation_noise!(subtree) if subtree && strip_csrf
     subtree
   end
 
