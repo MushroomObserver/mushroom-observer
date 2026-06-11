@@ -42,13 +42,9 @@ module Views::Controllers::CollectionNumbers
     end
 
     def render_observation_matrix
-      ul(class: "row list-unstyled mt-3") do
-        @collection_number.observations.each do |obs|
-          render(Components::MatrixBox.new(
-                   user: @user, object: obs, columns: "col-xs-12"
-                 ))
-        end
-      end
+      render(Components::MatrixTable.new(
+               objects: @collection_number.observations.to_a, user: @user
+             ))
     end
   end
 end

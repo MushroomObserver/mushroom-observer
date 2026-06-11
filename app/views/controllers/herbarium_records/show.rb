@@ -86,13 +86,9 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_observation_matrix
-      ul(class: "row list-unstyled") do
-        @herbarium_record.observations.each do |obs|
-          render(Components::MatrixBox.new(
-                   user: @user, object: obs, columns: "col-xs-12"
-                 ))
-        end
-      end
+      render(Components::MatrixTable.new(
+               objects: @herbarium_record.observations.to_a, user: @user
+             ))
     end
 
     def herbarium
