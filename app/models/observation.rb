@@ -322,8 +322,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # "_user <ref>_" textile markup, where <ref> is a login or full name. The
   # closing "_" must be the delimiter (followed by a non-word char or
   # end-of-string) so logins/names with internal underscores survive
-  # ("_user tyler_irvin_" -> "tyler_irvin"). Shared by the live edit path
-  # and the CollectorNotesSeeder backfill.
+  # ("_user tyler_irvin_" -> "tyler_irvin"). Shared by the save-time collector
+  # reconcile and the CollectorNotesSeeder backfill.
   COLLECTOR_USER_MARKUP = /_user\s+(.+?)_(?=\W|\z)/
 
   # Resolve a raw collector string to normalized column attributes:
@@ -1385,24 +1385,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  # EXPAND-release dual read (#4211): the `collector` column is the new
-  # source of truth, but until the backfill has reached every legacy row the
-  # column may still be blank while the old identity lives in
-  # notes[:Collector]. Fall back to that legacy note so display stays correct
-  # during the window between this deploy and the backfill. The contract
-  # release drops this fallback once the backfill + note strip have run.
-  def collector_or_legacy
-    collector.presence || notes[:Collector].presence
-  end
-
   # Textile-marked-up collector for field-slip rendering: a `_user_`
-  # link when an MO user is known, else the plain `collector` string (or
-  # legacy note during expand), else nil (a field slip with no recorded
-  # collector renders blank).
+  # link when an MO user is known, else the plain `collector` string,
+  # else nil (a field slip with no recorded collector renders blank).
+  # The `collector` column is the single source of truth (#4211); the
+  # legacy notes[:Collector] fallback was removed once the column was
+  # backfilled and notes stripped (the MigrateCollectorNotes migration).
   def collector_textile
     return collector_user.textile_name if collector_user
 
-    collector_or_legacy
+    collector
   end
 
   # True when the collector identity differs from the user who entered
@@ -1412,8 +1404,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def collector_differs_from_creator?
     if collector_user_id
       collector_user_id != user_id
-    elsif collector_or_legacy.present?
-      collector_or_legacy != user&.unique_text_name
+    elsif collector.present?
+      collector != user&.unique_text_name
     else
       false
     end
@@ -1425,8 +1417,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # suppresses the "Collector:" line in this case rather than falsely
   # claiming the entering user, leaving only "Entered by:". See #4211.
   def collector_unrecorded?
-    collector_or_legacy.blank? && collector_user_id.nil? &&
-      field_slip_id.present?
+    collector.blank? && collector_user_id.nil? && field_slip_id.present?
   end
 
   def field_slip_name

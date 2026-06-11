@@ -34,7 +34,7 @@ module ObservationsController::SharedFormMethods
   def permitted_observation_args
     [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,
      :is_collection_location, :when, "when(1i)", "when(2i)", "when(3i)",
-     :collector, :collector_user_id, :notes, :specimen, :thumb_image_id]
+     :notes, :specimen, :thumb_image_id]
   end
 
   def update_permitted_observation_attributes
@@ -74,12 +74,7 @@ module ObservationsController::SharedFormMethods
   end
 
   def init_specimen_vars
-    # The form submits the collector nested (params[:observation]
-    # [:collector]); the field-slip redirect to `new` carries it
-    # top-level. Check nested first so a failed create re-render keeps
-    # the user-entered collector instead of falling back to legal_name.
-    @collectors_name   = params.dig(:observation, :collector).presence ||
-                         params[:collector].presence || @user.legal_name
+    @collectors_name   = params.dig(:notes, :Collector) || @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
     @herbarium_id      = @user.preferred_herbarium&.id
