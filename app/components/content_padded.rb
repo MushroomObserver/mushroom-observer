@@ -1,26 +1,31 @@
 # frozen_string_literal: true
 
 # Minimal padded-content wrapper: emits `<div class="p-3 ...">`
-# around the block. Replaces the legacy `ContentHelper#content_padded`
-# ERB helper for Phlex views.
+# around the block. Phlex-side drop-in for the legacy
+# `ContentHelper#content_padded(**args)` ERB helper — all keyword
+# args are forwarded to the underlying `<div>`, mirroring the
+# helper's API. `class:` is composed with the default `"p-3"`.
 #
 # @example
 #   render(Components::ContentPadded.new(id: "details")) do
 #     p { plain("Field 1: ...") }
 #   end
+#
+# @example with extra classes + data attrs
+#   render(Components::ContentPadded.new(
+#            class: "shadow-sm", data: { controller: "modal" }
+#          )) { ... }
 class Components::ContentPadded < Components::Base
-  # @param id [String] optional `id=` for the wrapper div
-  # @param class [String] CSS classes appended to the default "p-3"
-  # @param attributes [Hash] arbitrary HTML attrs forwarded to the div
-  def initialize(id: nil, class: nil, attributes: {})
+  # @param attrs [Hash] HTML attrs forwarded verbatim to the `<div>`.
+  #   `class:` is composed with the default `"p-3"`.
+  def initialize(**attrs)
     super()
-    @html_id = id
-    @html_class = binding.local_variable_get(:class)
-    @attributes = attributes
+    @attrs = attrs
   end
 
   def view_template(&block)
-    div(class: class_names("p-3", @html_class), id: @html_id, **@attributes,
-        &block)
+    attrs = @attrs.dup
+    attrs[:class] = class_names("p-3", attrs[:class])
+    div(**attrs, &block)
   end
 end

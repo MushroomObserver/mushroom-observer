@@ -145,6 +145,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:new, params: { observation_id: obs.id })
     assert_response(:success)
     assert_select("body.collection_numbers__new")
+    # Sidebar preview of the target Observation is rendered.
+    assert_select(".matrix-box", minimum: 1)
     assert(assigns(:collection_number))
 
     make_admin("mary")
@@ -183,6 +185,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:edit, params: { id: number.id })
     assert_response(:success)
     assert_select("body.collection_numbers__edit")
+    # Sidebar list of MatrixBox previews for each associated obs.
+    assert_select(".matrix-box", minimum: number.observations.size)
     assert_objs_equal(number, assigns(:collection_number))
 
     make_admin("mary")
