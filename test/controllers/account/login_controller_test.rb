@@ -111,12 +111,25 @@ module Account
       ctrl = @controller
       ctrl.instance_variable_set(:@new_user, user)
 
+      # Don't populate `user.errors` — adding errors trips MO's i18n
+      # tag tracker on teardown. Instead stub `flash_object_errors`
+      # to record that it was called.
+      flash_object_errors_called = false
+      ctrl.define_singleton_method(:flash_object_errors) do |obj|
+        flash_object_errors_called = true if obj == user
+      end
+
       ActionMailer::Base.deliveries.clear
       assert_no_enqueued_jobs do
         user.stub(:save, false) do
           ctrl.send(:set_random_password_for_new_user_and_email_them)
         end
       end
+
+      assert_empty(ActionMailer::Base.deliveries,
+                   "Save failure should not deliver the password email")
+      assert(flash_object_errors_called,
+             "Expected flash_object_errors(@new_user) on save failure")
     end
 
     # `switch_to_user` is private; the legacy code path covers the

@@ -87,7 +87,7 @@ module Account
 
     private
 
-    # Replaces the formerly-ERB `_update_table_and_flash.html.erb`
+    # Replaces the formerly-ERB `_update_table_and_flash.erb`
     # turbo_stream partial — emit two stream actions: refresh the
     # API-keys table with the Phlex view, and refresh the page-flash
     # zone with the current flash notices.
