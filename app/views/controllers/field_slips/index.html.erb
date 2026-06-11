@@ -34,8 +34,8 @@ project_title = @query&.params_cache&.dig(:project)&.title || ""
          nil, :project_name, project_title
        )
     %>
-    <%= render(Components::InlineFilterForm.new(
-                 url: field_slips_path,
+    <%= render(Components::IndexFilter.new(
+                 to: field_slips_path,
                  submit_text: "Filter")) do %>
       <%= render(Components::ApplicationForm::AutocompleterField.new(
                    project_field,

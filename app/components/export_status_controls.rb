@@ -35,12 +35,12 @@ class Components::ExportStatusControls < Components::Base
   }.freeze
 
   prop :object, _Union(::Name, ::NameDescription, ::Image)
-  prop :flag, Symbol, default: :ok_for_export
+  prop :flag, _Union(:ok_for_export, :diagnostic), default: :ok_for_export
 
   def view_template
     return unless reviewer?
 
-    status = @object.send(@flag)
+    status = @object.public_send(@flag)
     config = FLAGS.fetch(@flag)
     render_current_state(status: status, config: config)
     plain(" | ")
