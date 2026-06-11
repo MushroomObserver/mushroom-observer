@@ -100,6 +100,44 @@ module Account
       assert_head_title(:email_new_password_title.l)
     end
 
+    # When `@new_user.save` fails inside
+    # `set_random_password_for_new_user_and_email_them`,
+    # the controller flashes the validation errors instead of
+    # sending the email (line 130 of login_controller.rb). Invoke
+    # the private method directly with a stubbed-save User so we
+    # don't need a full Mocha-style any_instance stub.
+    def test_set_random_password_save_failure_flashes_errors
+      user = users(:roy)
+      ctrl = @controller
+      ctrl.instance_variable_set(:@new_user, user)
+
+      ActionMailer::Base.deliveries.clear
+      assert_no_enqueued_jobs do
+        user.stub(:save, false) do
+          ctrl.send(:set_random_password_for_new_user_and_email_them)
+        end
+      end
+    end
+
+    # `switch_to_user` is private; the legacy code path covers the
+    # `session[:real_user_id].blank?` branch (lines 136-137) when an
+    # admin switches into another user from themselves. The logout
+    # action is the only public caller and pre-guards
+    # `real_user_id.present?`, so call the private method directly
+    # to exercise the otherwise-dead branch.
+    def test_switch_to_user_with_blank_real_user_id_sets_session
+      ctrl = @controller
+      session.clear
+      User.current = users(:rolf)
+      target = users(:mary)
+
+      ctrl.send(:switch_to_user, target)
+
+      assert_equal(users(:rolf).id, session[:real_user_id])
+      assert_nil(session[:admin])
+      assert_equal(target, User.current)
+    end
+
     def test_email_new_password
       get(:email_new_password)
       assert_no_flash
