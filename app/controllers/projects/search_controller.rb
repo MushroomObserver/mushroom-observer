@@ -24,12 +24,6 @@ module Projects
       end
     end
 
-    def new_phlex_view
-      Views::Controllers::Projects::Search::New.new(
-        search: @search, local: @local
-      )
-    end
-
     def permitted_search_params
       [
         :members,
@@ -95,6 +89,12 @@ module Projects
     ].freeze
 
     private
+
+    def new_phlex_view
+      Views::Controllers::Projects::Search::New.new(
+        search: @search, local: @local
+      )
+    end
 
     def set_up_form_field_groupings
       @field_columns = FIELD_COLUMNS

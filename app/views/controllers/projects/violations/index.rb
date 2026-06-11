@@ -11,7 +11,10 @@ module Views::Controllers::Projects::Violations
   class Index < Views::Base
     prop :project, ::Project
     prop :violations, _Array(::Project::Violation)
-    prop :user, _Nilable(::User), default: nil
+    # Non-nilable: this view forwards `user` to `Violations::Form`,
+    # whose `prop :user` is non-nilable, and the controller's
+    # `login_required` guarantees `@user` is present.
+    prop :user, ::User
 
     def view_template
       add_project_banner(@project)
