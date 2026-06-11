@@ -23,6 +23,10 @@ class Inat
 
     # Params MO always controls; strip them so the user's URL doesn't conflict.
     STRIP_PARAMS = [
+      # Makes normalization/ignored-param warnings match actual import behavior
+      # The job strips `id` param in page_parser
+      # (User should use ID mode, not URL mode, to import specific obs)
+      "id",
       # We need the entire observation, not just a list of IDs
       "only_id",
       # ImportJob relies on order=asc, order_by=id
