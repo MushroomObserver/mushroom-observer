@@ -9,21 +9,26 @@ module Account
     # a form to create a new_key
     # a destroy button for each key
     # an activate button if the key is not verified (created by another app)
-    def index; end
+    def index
+      render(Views::Controllers::Account::APIKeys::Index.new(user: @user))
+    end
 
     # No-JS fallback for users whose browsers can't run the
     # inline-collapse "+ Add Key" panel on the index page. Renders
-    # the standalone create form (see `new.html.erb`); submit posts
-    # to `create` the same way as the inline form.
+    # the standalone create form; submit posts to `create` the same
+    # way as the inline form.
     def new
       @key = APIKey.new
+      render(Views::Controllers::Account::APIKeys::New.new(key: @key))
     end
 
     # No-JS fallback edit view. Loads the key for the standalone
-    # edit page (see `edit.html.erb`). The inline-on-index edit UI
-    # is JS-driven and doesn't need this action.
+    # edit page. The inline-on-index edit UI is JS-driven and
+    # doesn't need this action.
     def edit
-      verify_user_owns_key
+      return unless verify_user_owns_key
+
+      render(Views::Controllers::Account::APIKeys::Edit.new(key: @key))
     end
 
     def create
@@ -33,7 +38,7 @@ module Account
 
       respond_to do |format|
         format.turbo_stream do
-          render(partial: "account/api_keys/update_table_and_flash")
+          render_update_table_and_flash
         end
         format.html { redirect_to(account_api_keys_path) }
       end
@@ -45,7 +50,7 @@ module Account
       update_api_key
       respond_to do |format|
         format.turbo_stream do
-          render(partial: "account/api_keys/update_table_and_flash")
+          render_update_table_and_flash
         end
         format.html { redirect_to(account_api_keys_path) }
       end
@@ -59,7 +64,7 @@ module Account
 
       respond_to do |format|
         format.turbo_stream do
-          render(partial: "account/api_keys/update_table_and_flash")
+          render_update_table_and_flash
         end
         format.html { redirect_to(account_api_keys_path) }
       end
@@ -74,13 +79,31 @@ module Account
 
       respond_to do |format|
         format.turbo_stream do
-          render(partial: "account/api_keys/update_table_and_flash")
+          render_update_table_and_flash
         end
         format.html { redirect_to(account_api_keys_path) }
       end
     end
 
     private
+
+    # Replaces the formerly-ERB `_update_table_and_flash.html.erb`
+    # turbo_stream partial — emit two stream actions: refresh the
+    # API-keys table with the Phlex view, and refresh the page-flash
+    # zone with the current flash notices.
+    def render_update_table_and_flash
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "account_api_keys_table",
+                 view_context.render(
+                   Views::Controllers::Account::APIKeys::Table.new(user: @user)
+                 )
+               ),
+               turbo_stream.update(
+                 "page_flash", view_context.flash_notices_html
+               )
+             ])
+    end
 
     def create_api_key
       @key = APIKey.new(params.require(:api_key).permit(:user_id, :notes))

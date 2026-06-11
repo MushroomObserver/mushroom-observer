@@ -1,9 +1,0 @@
-<%
-add_page_title(:account_api_keys_title.t)
-add_context_nav(Tab::Account::APIActions.new)
-container_class(:full)
-%>
-
-<%= tag.div(:account_api_keys_help.tp, class: "container-text") %>
-
-<%= render(Views::Controllers::Account::APIKeys::Table.new(user: @user)) %>

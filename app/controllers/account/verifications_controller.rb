@@ -35,7 +35,7 @@ module Account
       # "verified", log user in, and display the "you're verified" page.
       else
         mark_user_verified_and_login(user)
-        render(:new)
+        render_new_phlex
       end
     end
 
@@ -55,7 +55,7 @@ module Account
         redirect_already_used_verification(user)
       else
         mark_user_verified_and_login(user)
-        render(action: :new)
+        render_new_phlex
       end
     end
 
@@ -91,9 +91,17 @@ module Account
 
     private
 
+    def render_new_phlex
+      render(Views::Controllers::Account::Verifications::New.new(
+               user: @user
+             ))
+    end
+
     def reverify_unverified_user(user)
       @unverified_user = user
-      render(action: :reverify)
+      render(Views::Controllers::Account::Verifications::Reverify.new(
+               unverified_user: @unverified_user
+             ))
     end
 
     def redirect_already_used_verification(_user)

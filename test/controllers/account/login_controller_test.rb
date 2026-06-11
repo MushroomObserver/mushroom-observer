@@ -37,7 +37,7 @@ module Account
       post(:create,
            params: { user: { login: "rolf", password: "not_correct" } })
       assert_nil(@request.session["user_id"])
-      assert_template("account/login/new")
+      assert_select("body.login__new")
 
       user = User.create!(
         login: "api",
@@ -45,12 +45,12 @@ module Account
       )
       post(:create, params: { user: { login: "api", password: "" } })
       assert_nil(@request.session["user_id"])
-      assert_template("account/login/new")
+      assert_select("body.login__new")
 
       user.update(verified: Time.zone.now)
       post(:create, params: { user: { login: "api", password: "" } })
       assert_nil(@request.session["user_id"])
-      assert_template("account/login/new")
+      assert_select("body.login__new")
 
       user.change_password("try_this_for_size")
       post(:create,

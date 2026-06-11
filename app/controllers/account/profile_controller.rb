@@ -16,6 +16,7 @@ module Account
         @copyright_year    = Time.zone.now.year
         @upload_license_id = @user&.license&.id
       end
+      render_edit_phlex
     end
 
     def update
@@ -32,6 +33,16 @@ module Account
     end
 
     private
+
+    def render_edit_phlex
+      render(Views::Controllers::Account::Profile::Edit.new(
+               user: @user,
+               copyright_holder: @copyright_holder,
+               copyright_year: @copyright_year,
+               licenses: @licenses,
+               upload_license_id: @upload_license_id
+             ))
+    end
 
     def check_and_maybe_update_user_place_name
       # Make sure the given location exists before accepting it.
@@ -68,7 +79,7 @@ module Account
         redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
-        render(:edit) and return
+        render_edit_phlex and return
       else
         maybe_update_location_and_finish
       end
