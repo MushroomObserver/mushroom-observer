@@ -109,6 +109,9 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                         new_inat_import_path)
     # Naming reasons fields should be present (collapsed until name entered)
     assert_select("input[id^='naming_reasons_'][id$='_check']")
+    # Collector field prefilled with the entering user (#4211)
+    assert_select("input[name='observation[collector]'][value=?]",
+                  users(:rolf).unique_text_name)
 
     users(:rolf).update(location_format: "scientific")
     get(:new)
@@ -134,6 +137,38 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     assert(Observation.last.log_updated_at.is_a?(Time),
            "Observation should have log_updated_at time")
+  end
+
+  def test_create_observation_with_explicit_collector
+    params = {
+      naming: { name: "", vote: { value: "" } },
+      user: rolf,
+      observation: { place_name: locations.first.name,
+                     collector: "Jane Forager" }
+    }
+    users(:rolf).login
+    post_requires_login(:create, params)
+
+    obs = Observation.find_by(collector: "Jane Forager")
+    assert_not_nil(obs, "Observation with explicit collector not created")
+    assert_nil(obs.collector_user_id, "Free-text collector should have no FK")
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_create_observation_collector_defaults_to_creator
+    params = {
+      naming: { name: "", vote: { value: "" } },
+      user: rolf,
+      observation: { place_name: locations.first.name,
+                     collector: rolf.unique_text_name }
+    }
+    users(:rolf).login
+    post_requires_login(:create, params)
+
+    obs = Observation.find_by(collector: rolf.unique_text_name, user: rolf)
+    assert_not_nil(obs, "Observation not created")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
   end
 
   def test_create_observation_without_scientific_name
@@ -1318,11 +1353,11 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
   def test_collector_to_observation
     login("katrina")
-    get(:new, params: { notes: { Collector: mary.textile_name } })
+    get(:new, params: { collector: mary.textile_name })
 
-    # Collector value should populate the notes textarea
-    assert_select("textarea[name='observation[notes][Collector]']",
-                  text: /#{Regexp.escape(mary.textile_name)}/)
+    # Collector value prefills the collector field (its own column, #4211)
+    assert_select("input[name='observation[collector]'][value=?]",
+                  mary.textile_name)
   end
 
   # Prove that notes are saved with template keys first, in the order listed in
