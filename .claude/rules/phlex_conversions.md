@@ -676,6 +676,155 @@ After writing the component:
    `ActionView::MissingTemplate` fires for paths under
    `app/views/controllers/`.
 
+### Parity-harness recipes
+
+The canonical parity test for an ERB → Phlex conversion is a
+one-off `ComponentTestCase` subclass that renders BOTH paths
+with identical inputs and calls `assert_html_element_equivalent`.
+Patterns that emerged across the field_slips, top_nav, account,
+and search-bar conversions:
+
+**1. Minimal skeleton (action template):**
+
+```ruby
+class Views::Controllers::Foo::BarParityTest < ComponentTestCase
+  def setup
+    super
+    controller.append_view_path(
+      Rails.root.join("app/views/controllers")
+    )
+    @user = users(:rolf)
+    controller.instance_variable_set(:@user, @user)
+    viewer = @user
+    controller.define_singleton_method(:current_user) { viewer }
+  end
+
+  def test_bar_parity
+    controller.instance_variable_set(:@thing, things(:one))
+    erb_html = view_context.render(template: "foo/bar")
+    phlex_html = render(Views::Controllers::Foo::Bar.new(thing: @thing))
+    assert_html_element_equivalent(
+      erb_html, phlex_html,
+      selector: "#some-stable-root",
+      label: "foo_bar"
+    )
+  end
+end
+```
+
+**2. ERB partial (not a full action template):**
+
+Use `view_context.render(partial: "foo/bar", locals: { … })`
+instead of `template:`. The view_path setup is the same.
+
+**3. The controller has no `session` store:**
+
+`ComponentTestCase` disables sessions, but some ERB helpers read
+`controller.session`. Stub it on the controller:
+
+```ruby
+session = { search_type: "observations", pattern: "Boletus" }
+controller.define_singleton_method(:session) { session }
+```
+
+**4. The ERB calls page-chrome helpers that crash in the test
+environment (`add_index_title`, `add_project_banner`, etc.):**
+
+Those helpers only side-effect `content_for` buffers — they
+contribute nothing to the body fragment the parity test is
+comparing. Prepend a no-op stub onto the helper modules at
+load time:
+
+```ruby
+module ChromeStubsForFooParity
+  STUBS = {
+    Header::TitleHelper => [:add_index_title],
+    Header::ContextNavHelper => [:add_context_nav],
+    Header::IndexPaginationHelper => [:add_pagination],
+    ProjectsHelper => [:add_project_banner],
+    ApplicationHelper => [:container_class]
+  }.freeze
+
+  STUBS.each do |host, methods|
+    mod = Module.new do
+      methods.each { |m| define_method(m) { |*, **| nil } }
+    end
+    host.prepend(mod)
+  end
+end
+```
+
+(Stub on the helper module — not on `view_context` or
+`ActionView::Base` — because Rails resolves helpers through the
+included-module chain and a singleton-method or
+`prepend(ActionView::Base)` doesn't reliably win.)
+
+**5. The whole page including a `<form>`:**
+
+Superform's `form-group` / `<label>` auto-wraps and its always-
+emitted `authenticity_token` / `_method` hidden inputs differ
+from `form_with`'s shape — comparing them strictly will fail.
+Two options:
+
+- **Skip the form**: strip the `<form>` element from both
+  sides before comparing, then pin the surrounding chrome:
+
+  ```ruby
+  def strip_form(html)
+    frag = Nokogiri::HTML5.fragment(html)
+    frag.css("form").remove
+    frag.to_html
+  end
+
+  erb_html = strip_form(view_context.render(template: "..."))
+  phlex_html = strip_form(render(...))
+  assert_html_element_equivalent(
+    "<div id='parity'>#{erb_html}</div>",
+    "<div id='parity'>#{phlex_html}</div>",
+    selector: "#parity",
+    label: "page_minus_form"
+  )
+  ```
+
+- **Compare the form too**: pass `label: false` on every Phlex
+  field helper (`text_field(:foo, label: false)`) to skip the
+  `form-group` wrap + auto-label, and lean on
+  `ComponentTestCase#strip_form_implementation_noise!` to drop
+  the `utf8` / `authenticity_token` / `_method` hidden inputs
+  (the helper does this automatically when `strip_csrf: true`,
+  the default).
+
+**6. Whitespace differences in body text:**
+
+ERB preserves template indentation between tags as text nodes;
+Phlex emits no inter-tag whitespace.
+`ComponentTestCase#html_text_diff` already collapses runs of
+whitespace before comparing — no change needed in the test.
+
+**7. Wrapping a body fragment for comparison:**
+
+When the parity surface is "the whole rendered output," wrap
+both sides in a `<div id="parity">` shell and pin that:
+
+```ruby
+assert_html_element_equivalent(
+  "<div id='parity'>#{erb_html}</div>",
+  "<div id='parity'>#{phlex_html}</div>",
+  selector: "#parity",
+  label: "whole_page"
+)
+```
+
+The helper anchors on the first `#parity` element in each
+fragment and walks the entire subtree.
+
+**8. Delete the parity test once the ERB is gone.**
+
+The test references the ERB path via `view_context.render(
+template: …)` / `(partial: …)` — once the ERB file is
+deleted, the test errors with `ActionView::MissingTemplate`.
+Remove it as part of the same commit that deletes the ERB.
+
 ## Tables in Phlex views: try `Components::Table` first
 
 Before reaching for `table { thead { tr { ... } }; tbody { @rows.each { ... } } }` in a Phlex view, check whether `Components::Table` fits. It keeps Bootstrap table markup consistent, supports per-column `class:` + arbitrary HTML attrs (`width:`, `data:`, etc.) via `t.column(header, **attrs) { |row| cell }`, and reads more clearly than hand-rolled rows.
