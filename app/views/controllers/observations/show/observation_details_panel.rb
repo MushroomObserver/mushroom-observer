@@ -145,19 +145,57 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     i { plain("(#{:show_observation_gps_hidden.t})") }
   end
 
+  # "Collector:" and (when they differ) "Entered by:" lines. A field-slip
+  # obs with no recorded collector shows only "Entered by:" — we don't
+  # claim the entering recorder as the collector. See #4211.
   def render_who
     p(class: "obs-who", id: "observation_who") do
-      plain("#{:WHO.t}: ")
-      render_who_name
-      render_send_question_link if show_send_question?
+      if @obs.collector_unrecorded?
+        render_entered_by
+      else
+        render_collector
+        if @obs.collector_differs_from_creator?
+          br
+          render_entered_by
+        end
+      end
     end
   end
 
-  def render_who_name
-    if @user
-      render(Components::UserLink.new(user: @obs.user))
+  # The send-question link rides the "Collector:" line only when the
+  # collector is the entering user; when they differ it moves to the
+  # "Entered by:" line (you email the MO account, not a free-text name).
+  def render_collector
+    plain("#{:COLLECTOR.t}: ")
+    render_collector_identity
+    return if @obs.collector_differs_from_creator?
+
+    render_send_question_link if show_send_question?
+  end
+
+  def render_entered_by
+    plain("#{:ENTERED_BY.t}: ")
+    render_user_link(@obs.user)
+    render_send_question_link if show_send_question?
+  end
+
+  # Linked MO user when known, else the free-text collector string, else
+  # the entering user.
+  def render_collector_identity
+    if @obs.collector_user
+      render_user_link(@obs.collector_user)
+    elsif @obs.collector.present?
+      plain(@obs.collector)
     else
-      plain(@obs.user.unique_text_name)
+      render_user_link(@obs.user)
+    end
+  end
+
+  def render_user_link(target)
+    if @user
+      render(Components::UserLink.new(user: target))
+    else
+      plain(target.unique_text_name)
     end
   end
 
