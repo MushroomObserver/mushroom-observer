@@ -18,7 +18,7 @@ module Views::Controllers::HerbariumRecords
 
       render_details
       render_observation_matrix
-      render_timestamps
+      render(Components::Timestamps.new(object: @herbarium_record))
     end
 
     private
@@ -91,19 +91,6 @@ module Views::Controllers::HerbariumRecords
           render(Components::MatrixBox.new(
                    user: @user, object: obs, columns: "col-xs-12"
                  ))
-        end
-      end
-    end
-
-    def render_timestamps
-      div(class: "text-center") do
-        p do
-          trusted_html(:CREATED_AT.t)
-          plain(": #{@herbarium_record.created_at.web_date}")
-          br
-          trusted_html(:UPDATED_AT.t)
-          plain(": #{@herbarium_record.updated_at.web_date}")
-          br
         end
       end
     end

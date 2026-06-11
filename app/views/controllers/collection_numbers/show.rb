@@ -15,7 +15,7 @@ module Views::Controllers::CollectionNumbers
 
       render_details
       render_observation_matrix
-      render_timestamps
+      render(Components::Timestamps.new(object: @collection_number))
     end
 
     private
@@ -51,17 +51,5 @@ module Views::Controllers::CollectionNumbers
       end
     end
 
-    def render_timestamps
-      div(class: "text-center") do
-        p do
-          trusted_html(:CREATED_AT.t)
-          plain(": #{@collection_number.created_at.web_date}")
-          br
-          trusted_html(:UPDATED_AT.t)
-          plain(": #{@collection_number.updated_at.web_date}")
-          br
-        end
-      end
-    end
   end
 end
