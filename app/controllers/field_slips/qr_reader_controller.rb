@@ -4,7 +4,9 @@ module FieldSlips
   class QRReaderController < ApplicationController
     before_action :login_required
 
-    def new; end
+    def new
+      render(Views::Controllers::FieldSlips::QRReader::New.new)
+    end
 
     def create
       field_slip_params = permitted_qr_params

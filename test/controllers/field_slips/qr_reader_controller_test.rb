@@ -7,7 +7,9 @@ module FieldSlips
     def test_new
       login
       get(:new)
-      assert_template("field_slips/qr_reader/new")
+      # The layout stamps `body.<controller>__<action>` so we can
+      # pin the rendered DOM identity post-Phlex conversion.
+      assert_select("body.qr_reader__new")
     end
 
     def test_create

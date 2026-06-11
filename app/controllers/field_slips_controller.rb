@@ -33,11 +33,13 @@ class FieldSlipsController < ApplicationController
     else
       flash_notice(:field_slip_cant_join_project.t)
     end
+    render_new_phlex
   end
 
   # GET /field_slips/1/edit
   def edit
     @recent_observations = recent_edit_observations
+    render_edit_phlex
   end
 
   # POST /field_slips or /field_slips.json
@@ -53,7 +55,7 @@ class FieldSlipsController < ApplicationController
         end
         format.json { render(:show, status: :created, location: @field_slip) }
       else
-        format.html { render(:new, status: :unprocessable_content) }
+        format.html { render_new_phlex(status: :unprocessable_content) }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_content)
         end
@@ -69,7 +71,7 @@ class FieldSlipsController < ApplicationController
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
         @field_slip.reload
-        format.html { render(:edit, status: :unprocessable_content) }
+        format.html { render_edit_phlex(status: :unprocessable_content) }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_content)
         end
@@ -91,6 +93,31 @@ class FieldSlipsController < ApplicationController
 
   private
 
+  def render_new_phlex(**render_opts)
+    render(
+      Views::Controllers::FieldSlips::New.new(
+        field_slip: @field_slip,
+        species_list: @species_list,
+        recent_observations: @recent_observations || [],
+        field_slip_project_gaps: @field_slip_project_gaps,
+        field_slip_occurrence: @field_slip_occurrence
+      ),
+      **render_opts
+    )
+  end
+
+  def render_edit_phlex(**render_opts)
+    render(
+      Views::Controllers::FieldSlips::Edit.new(
+        field_slip: @field_slip,
+        recent_observations: @recent_observations || [],
+        field_slip_project_gaps: @field_slip_project_gaps,
+        field_slip_occurrence: @field_slip_occurrence
+      ),
+      **render_opts
+    )
+  end
+
   def html_update
     if params[:commit] == :field_slip_create_obs.t
       redirect_to(new_observation_url(
@@ -109,7 +136,7 @@ class FieldSlipsController < ApplicationController
   def redirect_or_render_field_slip_update
     if @field_slip_project_gaps
       flash_notice(:field_slip_updated.t)
-      render(:edit, status: :ok)
+      render_edit_phlex(status: :ok)
     else
       redirect_to(field_slip_url(@field_slip),
                   notice: :field_slip_updated.t)
@@ -157,7 +184,7 @@ class FieldSlipsController < ApplicationController
       msg = :field_slip_created.t(code: @field_slip.code)
       if @field_slip_project_gaps
         flash_notice(msg)
-        render(:new, status: :ok)
+        render_new_phlex(status: :ok)
       elsif obs
         redirect_to(observation_url(obs), notice: msg)
       else
