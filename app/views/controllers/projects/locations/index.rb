@@ -11,9 +11,14 @@
 module Views::Controllers::Projects::Locations
   class Index < Views::Base
     prop :project, ::Project
-    prop :grouped_data, _Any
-    prop :ungrouped_locations, _Any
-    prop :obs_counts, _Any
+    # `[{ target: Location, sub_locations: [Location, ...] }, ...]`
+    # (or `[]` when the project has no target locations).
+    # Built by `Projects::LocationGrouping#build_grouped_locations`.
+    prop :grouped_data, _Array(_Hash(Symbol, _Any))
+    prop :ungrouped_locations, _Array(::Location)
+    # `location_id => observation_count` from
+    # `Projects::LocationGrouping#observation_counts`.
+    prop :obs_counts, _Hash(Integer, Integer)
     prop :user, _Nilable(::User), default: nil
 
     def view_template

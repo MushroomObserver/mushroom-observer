@@ -10,7 +10,7 @@
 module Views::Controllers::Projects::Violations
   class Index < Views::Base
     prop :project, ::Project
-    prop :violations, _Any
+    prop :violations, _Array(::Project::Violation)
     prop :user, _Nilable(::User), default: nil
 
     def view_template
