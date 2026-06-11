@@ -18,6 +18,14 @@
 class Components::SearchForm < Components::ApplicationForm
   include ApplicationForm::AutocompleterPrefill
 
+  # Bootstrap classes shared by the search-bar collapse-trigger
+  # buttons (`search_bar_toggle`, inlined below as
+  # `render_search_bar_toggle`). The same shape is duplicated on
+  # `Views::Layouts::TopNav::SearchBar::BAR_TOGGLE_CLASSES` —
+  # accept the small duplication so neither file has to reach
+  # outside its own namespace for a 4-token CSS class list.
+  BAR_TOGGLE_CLASSES = %w[btn btn-link navbar-link px-2].freeze
+
   # Boolean select option styles. Rails-shape `[label, value]` pairs.
   BOOL_OPTIONS = {
     nil_yes: [["", ""], ["yes", "true"]],
@@ -108,7 +116,7 @@ class Components::SearchForm < Components::ApplicationForm
   # collapse-trigger button that hides the search-bar elements row
   # in the top nav.
   def render_search_bar_toggle
-    button(class: class_names(SearchBarHelper::SEARCH_BAR_TOGGLE_CLASSES),
+    button(class: class_names(BAR_TOGGLE_CLASSES),
            type: :button,
            data: { toggle: "collapse", search_type_target: "barToggle",
                    target: "#search_bar_elements" },
