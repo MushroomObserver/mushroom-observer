@@ -14,8 +14,8 @@ module Views::Controllers::Projects
       project = projects(:eol_project)
       html = render(ListItem.new(project: project))
 
-      # Container
-      assert_html(html, "div.list-group-item")
+      # No `.list-group-item` wrapper — supplied by the caller.
+      assert_no_html(html, "div.list-group-item")
 
       # Title link
       assert_html(html, "a[href*='projects/#{project.id}']")

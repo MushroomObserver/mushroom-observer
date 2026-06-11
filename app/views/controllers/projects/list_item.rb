@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
-# Renders a single project in a list-group. Rendered by
-# `projects/index.html.erb` for each project in the result set.
+# Inner content of one row in the projects index list-group. The
+# `<div class="list-group-item …">` wrapper is supplied by the
+# caller (the ERB index template, soon `Components::ListGroup`);
+# this class only emits the two-column body (id badge + title /
+# meta column).
 module Views::Controllers::Projects
   class ListItem < Views::Base
     def initialize(project:)
@@ -10,16 +13,14 @@ module Views::Controllers::Projects
     end
 
     def view_template
-      div(class: "list-group-item d-flex align-items-start") do
-        div(class: "text-larger") do
-          render(Components::IdBadge.new(
-                   object: @project, extra_class: "rss-id mr-4"
-                 ))
-        end
-        div do
-          render_title_row
-          render_meta_row
-        end
+      div(class: "text-larger") do
+        render(Components::IdBadge.new(
+                 object: @project, extra_class: "rss-id mr-4"
+               ))
+      end
+      div do
+        render_title_row
+        render_meta_row
       end
     end
 

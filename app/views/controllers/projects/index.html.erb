@@ -11,7 +11,9 @@ flash_error(@error) if @error && @objects.empty?
 <%= paginated_results do %>
   <%= tag.div(class: "list-group") do %>
     <% @objects.each do |project| %>
-      <%= render(Views::Controllers::Projects::ListItem.new(project: project)) %>
+      <%= tag.div(class: "list-group-item d-flex align-items-start") do %>
+        <%= render(Views::Controllers::Projects::ListItem.new(project: project)) %>
+      <% end %>
     <% end %>
   <% end %>
 <% end %>
