@@ -151,11 +151,23 @@ class ObservationLabels::Fields
   end
 
   # The collector lives in the observation's column now (#4211): a linked
-  # MO user's name when known, else the free-text collector string.
+  # MO user's name (legal_name falls back to login when the name is blank)
+  # when known, else the free-text collector string, else — during the
+  # expand window — the legacy notes[:Collector] (inert once stripped).
   def column_collector
-    return observation.collector_user.name if observation.collector_user
+    return observation.collector_user.legal_name if observation.collector_user
+    return observation.collector if observation.collector.present?
 
-    observation.collector.presence
+    legacy_notes_collector
+  end
+
+  def legacy_notes_collector
+    raw = observation.notes[:Collector].presence
+    return unless raw
+
+    login = raw[Observation::COLLECTOR_USER_MARKUP, 1]
+    user = login && User.find_by(login: login)
+    user ? user.legal_name : raw
   end
 
   def collection_number_collector

@@ -2462,6 +2462,29 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.collector_textile)
   end
 
+  # Expand-window fallback: column blank, collector still in notes.
+  def test_collector_textile_falls_back_to_legacy_note
+    obs = Observation.new(user: mary, collector: nil,
+                          notes: { Collector: "_user rolf_" })
+    assert_equal("_user rolf_", obs.collector_textile)
+  end
+
+  def test_is_collector_uses_column_fk
+    obs = new_collector_obs(collector: rolf.unique_text_name)
+    assert(obs.is_collector?(rolf))
+    assert_not(obs.is_collector?(mary))
+  end
+
+  # Expand-window fallback: an un-backfilled obs keeps the legacy collector's
+  # edit permission via the notes markup.
+  def test_is_collector_falls_back_to_legacy_note
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil,
+                       notes: { Collector: "_user rolf_" })
+    assert(obs.is_collector?(rolf))
+    assert_not(obs.is_collector?(mary))
+  end
+
   def test_collector_unrecorded_field_slip_blank
     obs = observations(:minimal_unknown_obs)
     assert(obs.field_slip_id.present?, "fixture should have a field slip")

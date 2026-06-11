@@ -402,8 +402,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.can_edit?(self, user) || is_collector?(user)
   end
 
+  # A user is the collector when the linked FK is theirs. During the expand
+  # window — before the backfill links the column and the contract migration
+  # strips notes — fall back to the legacy notes[:Collector] markup so a
+  # legacy collector keeps edit permission. Inert once notes are stripped.
   def is_collector?(user)
-    user && collector_user_id == user.id
+    return false unless user
+    return collector_user_id == user.id if collector_user_id
+    return false if collector.present?
+
+    notes[:Collector].to_s.include?("_user #{user.login}_")
   end
 
   def project_admin?(user = User.current)
@@ -1393,15 +1401,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Textile-marked-up collector for field-slip rendering: a `_user_`
-  # link when an MO user is known, else the plain `collector` string,
-  # else nil (a field slip with no recorded collector renders blank).
-  # The `collector` column is the single source of truth (#4211); the
-  # legacy notes[:Collector] fallback was removed once the column was
-  # backfilled and notes stripped (the MigrateCollectorNotes migration).
+  # link when an MO user is known, else the plain `collector` string, else
+  # the legacy notes[:Collector] during the expand window (so an un-backfilled
+  # obs still renders its collector — inert once notes are stripped), else
+  # nil (a field slip with no recorded collector renders blank). See #4211.
   def collector_textile
     return collector_user.textile_name if collector_user
+    return collector if collector.present?
 
-    collector
+    notes[:Collector].presence
   end
 
   # True when the collector identity differs from the user who entered

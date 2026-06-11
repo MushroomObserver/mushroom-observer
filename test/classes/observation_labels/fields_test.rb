@@ -21,10 +21,11 @@ class FieldsTest < UnitTestCase
 
   def test_column_collector
     obs = observations(:minimal_unknown_obs)
+    obs.notes = {} # no legacy collector note
     fields = ObservationLabels::Fields.new(obs)
 
     obs.collector_user = users(:rolf)
-    assert_equal(users(:rolf).name, fields.send(:column_collector))
+    assert_equal(users(:rolf).legal_name, fields.send(:column_collector))
 
     obs.collector_user = nil
     obs.collector = "Jane Forager"
@@ -32,5 +33,25 @@ class FieldsTest < UnitTestCase
 
     obs.collector = nil
     assert_nil(fields.send(:column_collector))
+  end
+
+  # legal_name falls back to login when the linked user's name is blank.
+  def test_column_collector_blank_name_uses_login
+    obs = observations(:minimal_unknown_obs)
+    user = users(:rolf)
+    user.name = ""
+    obs.collector_user = user
+    fields = ObservationLabels::Fields.new(obs)
+    assert_equal(user.login, fields.send(:column_collector))
+  end
+
+  # Expand-window fallback: column blank, collector still in notes.
+  def test_column_collector_legacy_note_fallback
+    obs = observations(:minimal_unknown_obs)
+    obs.collector = nil
+    obs.collector_user = nil
+    obs.notes = { Collector: "_user rolf_" }
+    fields = ObservationLabels::Fields.new(obs)
+    assert_equal(users(:rolf).legal_name, fields.send(:column_collector))
   end
 end
