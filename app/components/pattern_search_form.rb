@@ -40,7 +40,7 @@ class Components::PatternSearchForm < Components::ApplicationForm
 
   def initialize(model, **options)
     options[:id] ||= "pattern_search_form"
-    options[:class] = [FORM_CLASS, options[:class]].compact.join(" ")
+    options[:class] = [FORM_CLASS, options[:class]].flatten.compact.join(" ")
     # Match Rails `form_with`'s default `<form accept-charset="UTF-8">`
     # so HTML parity holds against the legacy ERB partial.
     options[:"accept-charset"] ||= "UTF-8"
