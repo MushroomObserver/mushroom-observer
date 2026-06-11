@@ -13,5 +13,14 @@ class AddCollectorToObservations < ActiveRecord::Migration[7.2]
       :observations, :collector_user,
       type: :integer, null: true, foreign_key: { to_table: :users }
     )
+
+    # ALTER TABLE rebuilds the ~1.8M-row observations table, which leaves
+    # InnoDB's index statistics stale. Without a refresh the optimizer
+    # mis-plans common joins (e.g. the project list-search query full-scans
+    # observations instead of starting from project_observations), turning a
+    # ~20ms query into 100s+. Refresh stats so plans stay correct post-deploy.
+    reversible do |dir|
+      dir.up { execute("ANALYZE TABLE observations") }
+    end
   end
 end
