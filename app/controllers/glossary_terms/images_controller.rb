@@ -28,7 +28,8 @@ module GlossaryTerms
     def attach
       return unless find_glossary_term!
 
-      image = Image.safe_find(params[:img_id])
+      @img_id = params.dig(:image_reuse, :img_id).presence || params[:img_id]
+      image = Image.safe_find(@img_id)
       return render_reuse_with_invalid_id_error unless image
 
       attach_image_to_glossary_term(image)
@@ -46,7 +47,7 @@ module GlossaryTerms
     end
 
     def render_reuse_with_invalid_id_error
-      flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+      flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
       render_reuse_page
     end
 
