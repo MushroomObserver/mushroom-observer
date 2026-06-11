@@ -167,8 +167,12 @@ module Views::Controllers::Descriptions
     # -- footer: export + review status -----------------------------
 
     def render_export_and_review
+      # Same gate as `render_review_block` — name descriptions are
+      # the only kind exposed to the reviewer export/review flow.
       div do
-        render(Components::ExportStatusControls.new(object: @description))
+        if @description.is_a?(::NameDescription)
+          render(Components::ExportStatusControls.new(object: @description))
+        end
       end
       div { render_review_block }
     end
