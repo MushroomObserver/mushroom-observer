@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_10_215004) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_11_000001) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -224,7 +224,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_10_215004) do
     t.datetime "last_obs_start"
     t.boolean "cancel"
     t.boolean "import_others", default: false, null: false
-    t.string "inat_url"
+    t.text "inat_url"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
