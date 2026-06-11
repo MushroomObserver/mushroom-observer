@@ -10,6 +10,19 @@ require(Rails.root.join(
 # strips the canonical :Collector note + the "Collector" template heading while
 # leaving the column, variant keys, and other notes intact.
 class MigrateCollectorNotesTest < UnitTestCase
+  # Silence the migration's `say` progress output (and the seeder's, which
+  # reports through the migration) so the test run stays readable.
+  def setup
+    super
+    @prior_migration_verbose = ActiveRecord::Migration.verbose
+    ActiveRecord::Migration.verbose = false
+  end
+
+  def teardown
+    ActiveRecord::Migration.verbose = @prior_migration_verbose
+    super
+  end
+
   def migration
     @migration ||= MigrateCollectorNotes.new
   end
