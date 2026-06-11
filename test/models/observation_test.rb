@@ -2426,6 +2426,14 @@ class ObservationTest < UnitTestCase
     assert(obs.collector_differs_from_creator?)
   end
 
+  # No collector recorded at all (blank string, nil FK) — e.g. a legacy
+  # collector-less obs — does not "differ" from the creator.
+  def test_collector_differs_false_when_no_collector_recorded
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
   def test_collector_unchanged_save_preserves_resolved_fk
     # Simulates a backfilled foray row: collector resolves to a
     # different MO user than the one who entered the record.
