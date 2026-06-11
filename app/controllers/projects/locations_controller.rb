@@ -12,6 +12,13 @@ module Projects
       @grouped_data, @ungrouped_locations =
         build_grouped_locations(@project)
       @obs_counts = observation_counts(@project)
+      render(Views::Controllers::Projects::Locations::Index.new(
+               project: @project,
+               grouped_data: @grouped_data,
+               ungrouped_locations: @ungrouped_locations,
+               obs_counts: @obs_counts,
+               user: @user
+             ))
     end
 
     private
