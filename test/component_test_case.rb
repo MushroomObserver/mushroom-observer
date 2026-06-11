@@ -432,7 +432,33 @@ class ComponentTestCase < UnitTestCase
 
   def extract_subtree(html, selector, strip_csrf)
     src = strip_csrf ? html.gsub(CSRF_INPUT_RE, '\1CSRF\2') : html
-    Nokogiri::HTML5.fragment(src).at_css(selector)
+    subtree = Nokogiri::HTML5.fragment(src).at_css(selector)
+    strip_form_implementation_noise!(subtree) if subtree && strip_csrf
+    subtree
+  end
+
+  # Strip hidden `<input>`s that different form renderers emit as
+  # bookkeeping but that no real browser behavior depends on for
+  # **GET** forms. Rails' `form_with(method: :get)` emits `utf8`;
+  # Superform always emits `authenticity_token` and `_method`. For
+  # non-GET forms a missing `authenticity_token` is a real
+  # regression (CSRF protection bypass), so the strip is scoped to
+  # forms whose `method=` is `get` only — POST/PATCH/PUT/DELETE
+  # forms keep their hidden tokens and any missing one will surface
+  # in the parity diff. CSRF *values* are still normalized for
+  # non-GET forms via `CSRF_INPUT_RE`.
+  FORM_NOISE_HIDDEN_NAMES = %w[utf8 authenticity_token _method].freeze
+  private_constant :FORM_NOISE_HIDDEN_NAMES
+
+  def strip_form_implementation_noise!(subtree)
+    selector = FORM_NOISE_HIDDEN_NAMES.map do |n|
+      %(input[type="hidden"][name="#{n}"])
+    end.join(",")
+    subtree.css("form").each do |form|
+      next unless form["method"]&.downcase == "get"
+
+      form.css(selector).remove
+    end
   end
 
   # Returns a path-prefixed diff string on the first mismatch found
@@ -517,8 +543,19 @@ class ComponentTestCase < UnitTestCase
 
   def html_text_diff(expected, actual, here)
     return nil if expected.content == actual.content
+    # Collapse runs of whitespace before comparing — ERB preserves
+    # template indentation as text between tags (e.g. `>\n    <`);
+    # Phlex emits no inter-tag whitespace. The two pages render
+    # visually identically in a browser as long as the non-WS text
+    # matches.
+    return nil if collapse_ws(expected.content) ==
+                  collapse_ws(actual.content)
 
     "#{here}: text #{expected.content.inspect} != #{actual.content.inspect}"
+  end
+
+  def collapse_ws(text)
+    text.to_s.gsub(/\s+/, " ").strip
   end
 
   def html_children_diff(expected, actual, here)

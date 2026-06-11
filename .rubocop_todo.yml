@@ -255,7 +255,6 @@ Metrics/CyclomaticComplexity:
     - 'app/controllers/observations_controller/new.rb'
     - 'app/controllers/observations_controller/shared_form_methods.rb'
     - 'app/controllers/observations_controller/validators.rb'
-    - 'app/controllers/projects_controller.rb'
     - 'app/controllers/translations_controller.rb'
     - 'app/extensions/string.rb'
     - 'app/extensions/symbol.rb'
