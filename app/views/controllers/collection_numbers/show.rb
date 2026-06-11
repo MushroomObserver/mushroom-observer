@@ -50,6 +50,5 @@ module Views::Controllers::CollectionNumbers
         end
       end
     end
-
   end
 end
