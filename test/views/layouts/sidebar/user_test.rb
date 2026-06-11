@@ -42,7 +42,7 @@ class Views::Layouts::Sidebar
 
     def test_shows_admin_button_for_admin_not_in_admin_mode
       @user.admin = true
-      html = render_component(in_admin_mode: false)
+      html = render_component
 
       # Should have "Turn Admin On" button
       assert_includes(html, :app_turn_admin_on.t)
@@ -51,7 +51,7 @@ class Views::Layouts::Sidebar
 
     def test_hides_admin_button_for_non_admin
       @user.admin = false
-      html = render_component(in_admin_mode: false)
+      html = render_component
 
       # Should NOT have "Turn Admin On" button
       assert_not_includes(html, :app_turn_admin_on.t)
@@ -60,7 +60,8 @@ class Views::Layouts::Sidebar
 
     def test_hides_admin_button_when_in_admin_mode
       @user.admin = true
-      html = render_component(in_admin_mode: true)
+      stub_admin_mode!
+      html = render_component
 
       # Should NOT have "Turn Admin On" button (already in admin mode)
       assert_not_includes(html, :app_turn_admin_on.t)
@@ -69,19 +70,13 @@ class Views::Layouts::Sidebar
 
     private
 
-    def render_component(in_admin_mode: false)
+    def render_component
       classes = {
         heading: "list-group-item disabled font-weight-bold",
         indent: "list-group-item indent",
         mobile_only: "mobile-only"
       }
-      render(
-        User.new(
-          user: @user,
-          classes: classes,
-          in_admin_mode: in_admin_mode
-        )
-      )
+      render(User.new(user: @user, classes: classes))
     end
   end
 end

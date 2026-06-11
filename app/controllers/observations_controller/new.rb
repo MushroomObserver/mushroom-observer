@@ -75,8 +75,7 @@ module ObservationsController::New
     new_view_obs_attrs.merge(new_view_naming_attrs).
       merge(new_view_specimen_attrs).merge(new_view_project_attrs).
       merge(field_code: @field_code,
-            field_code_locked: @field_code_locked || false,
-            q_param: q_param)
+            field_code_locked: @field_code_locked || false)
   end
 
   def new_view_obs_attrs

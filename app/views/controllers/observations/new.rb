@@ -34,11 +34,10 @@ module Views::Controllers::Observations
     prop :suspect_checked_projects, _Array(::Project), default: -> { [] }
     prop :field_code, _Nilable(String), default: nil
     prop :field_code_locked, _Boolean, default: false
-    prop :q_param, _Nilable(Hash), default: nil
 
     def view_template
       add_new_title(:create_object, :OBSERVATION)
-      add_context_nav(Tab::Observation::FormNew.new(q_param: @q_param))
+      add_context_nav(Tab::Observation::FormNew.new(q_param: q_param))
       container_class(:wide)
 
       render(Form.new(@observation, **form_attrs))

@@ -29,14 +29,20 @@ project_title = @query&.params_cache&.dig(:project)&.title || ""
       </div>
     <% end %>
   <% else %>
-    <%= render(Components::InlineFilterForm.new(
-                 url: field_slips_path,
-                 submit_text: "Filter")) do |form| %>
-      <%= autocompleter_field(form:, field: :project_name, type: :project,
-                              hidden_name: :project, inline: true,
-                              value: project_title, size: 60,
-                              class: "mb-0",
-                              label: "#{:field_slip_filter_by.l}:") %>
+    <%
+       project_field = Components::ApplicationForm::FieldProxy.new(
+         nil, :project_name, project_title
+       )
+    %>
+    <%= render(Components::IndexFilter.new(
+                 to: field_slips_path,
+                 submit_text: "Filter")) do %>
+      <%= render(Components::ApplicationForm::AutocompleterField.new(
+                   project_field,
+                   type: :project, hidden_name: :project, inline: true,
+                   size: 60, class: "mb-0",
+                   label: "#{:field_slip_filter_by.l}:"
+                 )) %>
     <% end %>
   <% end %>
 <% end %>

@@ -225,9 +225,10 @@ module Observations
 
       return unless check_observation_permission!
 
-      image = Image.safe_find(params[:img_id])
+      img_id = params.dig(:image_reuse, :img_id).presence || params[:img_id]
+      image = Image.safe_find(img_id)
       unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
+        flash_error(:runtime_image_reuse_invalid_id.t(id: img_id))
         load_images_to_reuse
         render(Views::Controllers::Observations::Images::Reuse.new(
                  observation: @observation,
