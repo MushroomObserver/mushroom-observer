@@ -144,7 +144,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { observation_id: obs.id })
     assert_response(:success)
-    assert_template("new", partial: "_matrix_box")
+    assert_select("body.collection_numbers__new")
     assert(assigns(:collection_number))
 
     make_admin("mary")
@@ -182,7 +182,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: number.id })
     assert_response(:success)
-    assert_template(:edit, partial: "_rss_log")
+    assert_select("body.collection_numbers__edit")
     assert_objs_equal(number, assigns(:collection_number))
 
     make_admin("mary")
