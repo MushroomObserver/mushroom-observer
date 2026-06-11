@@ -2,7 +2,7 @@
 
 # Top-nav search bar. When the viewer is logged in, renders the
 # Bootstrap collapse-trigger help toggle, the `PatternSearchForm`,
-# and (off the `/search` action only) the form toggle that opens
+# and (off SearchController pages) the form toggle that opens
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
 #
