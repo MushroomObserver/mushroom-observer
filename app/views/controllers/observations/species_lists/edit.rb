@@ -34,10 +34,7 @@ module Views::Controllers::Observations::SpeciesLists
 
       div(class: "navbar-flex mb-2") { content_for(:sorter) }
 
-      # Inline `<div class="p-3">` instead of calling the
-      # `content_padded` helper — only used here, so the helper
-      # registration isn't worth carrying on `Views::Base`.
-      div(class: "p-3") { render_sections }
+      render(Components::ContentPadded.new) { render_sections }
     end
 
     private
