@@ -50,17 +50,17 @@ module InatImportsController::Estimators
   # Total obs count for import-others without a license filter,
   # used to derive how many will be skipped.
   def total_others_estimate_query_args
-    args = BASE_FILTER_PARAMS.merge(taxon_id: IMPORTABLE_TAXON_IDS_ARG,
+    args = listing_url? ? url_query_args : {}
+    args.merge!(BASE_FILTER_PARAMS, taxon_id: IMPORTABLE_TAXON_IDS_ARG,
                                     only_id: true)
-    args.merge!(url_query_args) if listing_url?
     args[:id] = params[:inat_ids] if listing_ids?
     args
   end
 
   def import_estimate_query_args
-    args = BASE_FILTER_PARAMS.merge(taxon_id: IMPORTABLE_TAXON_IDS_ARG,
+    args = listing_url? ? url_query_args : {}
+    args.merge!(BASE_FILTER_PARAMS, taxon_id: IMPORTABLE_TAXON_IDS_ARG,
                                     only_id: true)
-    args.merge!(url_query_args) if listing_url?
     if import_others?
       args.merge!(LICENSED_FILTER)
     else
@@ -74,7 +74,8 @@ module InatImportsController::Estimators
     import_estimate_query_args.merge(LICENSED_FILTER)
   end
 
+  # Strip :id — PageParser drops it in URL mode, so estimates must match.
   def url_query_args
-    Rack::Utils.parse_query(params[:inat_url].to_s).symbolize_keys
+    Rack::Utils.parse_query(params[:inat_url].to_s).symbolize_keys.except(:id)
   end
 end

@@ -1028,6 +1028,50 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Estimate should include project_id from user URL")
   end
 
+  def test_url_mode_estimate_mo_params_win_over_url_params
+    user = users(:rolf)
+    # URL supplies conflicting taxon_id and only_id; MO's values must win.
+    url = "#{INAT_API_OBS_URL}?project_id=291058&taxon_id=9999&only_id=false"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => "47170,47685",
+                                 "only_id" => "true")).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "5",
+                  "MO taxon_id and only_id must override user-supplied values")
+  end
+
+  def test_url_mode_estimate_excludes_id_param
+    user = users(:rolf)
+    # URL supplies id=12345; PageParser drops it in URL mode, estimate must too.
+    url = "#{INAT_API_OBS_URL}?project_id=291058&id=12345"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    # Returns 9 only when id is absent (i.e. not scoped to a specific obs).
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("project_id" => "291058")).
+      to_return(status: 200, body: { total_results: 9 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "9",
+                  "id param from URL must be excluded from the estimate")
+  end
+
   def test_url_params_preserved_through_confirm_round_trip
     user = users(:rolf)
     inat_import = inat_imports(:rolf_inat_import)
