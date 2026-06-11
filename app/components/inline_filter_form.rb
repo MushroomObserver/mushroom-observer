@@ -36,26 +36,23 @@
 #                                          label: "#{:field_slip_filter_by.l}:")
 #   end
 class Components::InlineFilterForm < Components::ApplicationForm
-  def initialize(model, url:, submit_text:, form_id: nil, **)
+  def initialize(model, url:, submit_text:, form_id: nil, **attributes)
     @url = url
     @submit_text = submit_text
-    @form_id = form_id
-    super(model, **)
+    # `class: "form-inline"` + `method: :get` flow into Superform's
+    # `@attributes` and become the rendered `<form>` tag's class /
+    # method. `id:` is conditional so it never emits an empty
+    # `id=""` attribute. Manual string-concat instead of
+    # `class_names` because Rails view helpers aren't reachable
+    # until rendering starts.
+    extra = attributes[:class]
+    attributes[:class] = extra ? "form-inline #{extra}" : "form-inline"
+    attributes[:id] = form_id if form_id
+    super(model, method: :get, **attributes)
   end
 
   def form_action
     @url
-  end
-
-  # GET keeps the filter state in the URL — bookmarkable, shareable,
-  # cache-friendly. The submitted form rewrites the index URL with
-  # the new params.
-  def form_method
-    :get
-  end
-
-  def form_attributes
-    super.merge(class: "form-inline", id: @form_id).compact
   end
 
   def view_template(&block)

@@ -30,13 +30,13 @@ project_title = @query&.params_cache&.dig(:project)&.title || ""
     <% end %>
   <% else %>
     <%= render(Components::InlineFilterForm.new(
+                 FormObject::FieldSlipFilter.new(project_name: project_title),
                  url: field_slips_path,
                  submit_text: "Filter")) do |form| %>
-      <%= autocompleter_field(form:, field: :project_name, type: :project,
-                              hidden_name: :project, inline: true,
-                              value: project_title, size: 60,
-                              class: "mb-0",
-                              label: "#{:field_slip_filter_by.l}:") %>
+      <% form.autocompleter_field(:project_name, type: :project,
+                                  hidden_name: :project, inline: true,
+                                  size: 60, class: "mb-0",
+                                  label: "#{:field_slip_filter_by.l}:") %>
     <% end %>
   <% end %>
 <% end %>
