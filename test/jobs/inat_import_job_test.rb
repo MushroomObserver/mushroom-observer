@@ -51,7 +51,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Calostoma lutescens", rank: "Species")
-    standard_assertions(obs: obs, name: name, loc: loc)
+    # casual grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name, loc: loc,
+                        expected_vote: Vote::MIN_POS_VOTE)
 
     # This iNat obs has only 1 suggested ID.
     # The suggester is the person who made the iNat observation.
@@ -165,7 +167,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Evernia", rank: "Genus")
-    standard_assertions(obs: obs, name: name, loc: loc)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name, loc: loc,
+                        expected_vote: Vote::MIN_POS_VOTE)
 
     inat_photo = @parsed_results.
                  first[:observation_photos].first
@@ -193,7 +197,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Tremellales", rank: "Order")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
     assert(obs.sequences.none?)
   end
 
@@ -267,7 +273,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Morchella sect. Distantes", rank: "Section")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
     assert_snapshot_suggested_ids(obs)
   end
 
@@ -288,7 +296,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Amanita sect. Validae", rank: "Section")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
   end
 
   def test_import_job_infra_specific_name
@@ -303,7 +313,9 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     name = Name.find_by(text_name: "Inonotus obliquus f. sterilis",
                         rank: "Form")
-    standard_assertions(obs: obs, name: name)
+    # research grade, no sequence, no provisional name -> Promising
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::NEXT_BEST_VOTE)
     assert(obs.sequences.none?)
   end
 
@@ -319,7 +331,9 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     name = Name.find_by(text_name: "Xeromphalina campanella complex",
                         rank: "Group")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
     assert(obs.sequences.none?)
   end
 
@@ -1129,7 +1143,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def standard_assertions(obs:, user: @user, name: nil, loc: nil)
+  def standard_assertions(obs:, user: @user, name: nil, loc: nil,
+                          expected_vote: Vote::MAXIMUM_VOTE)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_nil(obs.source, "Imported obs should have no entry-agent source")
     assert_equal(Source.inaturalist, obs.external_source,
@@ -1160,8 +1175,8 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     vote = Vote.find_by(naming: naming, user: naming.user)
     assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                 "Vote for MO consensus should be highest possible vote")
+    assert_equal(expected_vote, vote.value,
+                 "Vote for MO consensus has the wrong confidence weight")
 
     view = ObservationView.
            find_by(observation_id: obs.id, user_id: user.id)

@@ -6,7 +6,6 @@ class Inat
     attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
-    NAMING_VOTE = Vote::MAXIMUM_VOTE
 
     def initialize(inat_obs:, user:, import_others: false, inat_source: nil)
       @inat_obs = inat_obs
@@ -210,7 +209,7 @@ class Inat
       Observation::NamingConsensus.new(@observation).calc_consensus
     end
 
-    def add_naming_with_vote(name:, namer:, value: NAMING_VOTE)
+    def add_naming_with_vote(name:, namer:, value: naming_vote)
       used_references = 2
       explanation = used_references_explanation(name)
       naming = Naming.create(
@@ -272,7 +271,25 @@ class Inat
       naming = Naming.find_by(observation: @observation,
                               name: @observation.name)
       vote = Vote.find_by(naming: naming, observation: @observation)
-      vote.update(value: NAMING_VOTE)
+      vote.update(value: naming_vote)
+    end
+
+    # Confidence weight for the importer's single consensus naming, set
+    # from the iNat obs's signals (#4212). Sequence/DNA evidence is the
+    # strongest signal; a provisional name or Research Grade is Promising;
+    # everything else (needs_id / casual, no sequence) is Could Be.
+    def naming_vote
+      return Vote::MAXIMUM_VOTE if inat_obs.sequences.present?
+
+      if inat_obs.provisional_name.present? || research_grade?
+        Vote::NEXT_BEST_VOTE # Promising
+      else
+        Vote::MIN_POS_VOTE   # Could Be
+      end
+    end
+
+    def research_grade?
+      inat_obs[:quality_grade] == "research"
     end
 
     def add_inat_sequences
