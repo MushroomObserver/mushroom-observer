@@ -39,6 +39,11 @@ module ObservationsController::New
       @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
     end
     @observation.place_name = params[:place_name]
+    # Prefill the editable collector: the field-slip collector when one
+    # came through (the redirect carries it), else the entering user, who
+    # records someone else here when entering on a collector's behalf.
+    @observation.collector = params[:collector].presence ||
+                             @user.unique_text_name
     init_naming_and_vote
     @names       = nil
     @valid_names = nil
@@ -70,8 +75,7 @@ module ObservationsController::New
     new_view_obs_attrs.merge(new_view_naming_attrs).
       merge(new_view_specimen_attrs).merge(new_view_project_attrs).
       merge(field_code: @field_code,
-            field_code_locked: @field_code_locked || false,
-            q_param: q_param)
+            field_code_locked: @field_code_locked || false)
   end
 
   def new_view_obs_attrs

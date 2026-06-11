@@ -25,11 +25,15 @@ module Account
       assert(user.auth_code.length > 10)
 
       get(:new, params: { id: user.id, auth_code: "bogus_code" })
-      assert_template("reverify")
+      # The Reverify Phlex view emits the reverify button with this
+      # id — Phlex render is dispatched from the `:new` action, so
+      # the body class doesn't disambiguate between the New and
+      # Reverify views.
+      assert_select("#account_reverify_link")
       assert_not(@request.session[:user_id])
 
       get(:new, params: { id: user.id, auth_code: user.auth_code })
-      assert_template("new")
+      assert_select("#account_reverify_link", false)
       assert(@request.session[:user_id])
       assert_users_equal(user, assigns(:user))
       assert_not_nil(user.reload.verified)
@@ -58,7 +62,7 @@ module Account
       assert_not(user.verified)
 
       post(:create, params: { id: user.id, auth_code: user.auth_code })
-      assert_template(:new)
+      assert_select("#account_reverify_link", false)
       assert(@request.session[:user_id])
       assert(user.reload.verified)
     end
@@ -70,7 +74,7 @@ module Account
       )
 
       post(:create, params: { id: user.id, auth_code: "bogus" })
-      assert_template(:reverify)
+      assert_select("#account_reverify_link")
       assert_not(@request.session[:user_id])
     end
 

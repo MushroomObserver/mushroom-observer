@@ -15,6 +15,7 @@ module FieldSlipsController::ObservationHandling
     date = extract_date
     obs = Observation.build_observation(location, name, notes, date, @user)
     if obs
+      assign_field_slip_collector(obs)
       assign_project(obs)
       link_obs_to_field_slip(obs)
       @field_slip.adopt_user_from(obs)
@@ -40,15 +41,21 @@ module FieldSlipsController::ObservationHandling
     obs = @field_slip.observation
     return unless obs
 
-    # Don't update Collector
     notes = field_slip_notes
-    notes.delete(:Collector) unless @user == obs.user
-
     check_name
+    # Collector is owner-only: a non-owner editing a field slip must not
+    # change who collected it. It lives in the column, not in notes.
+    assign_field_slip_collector(obs) if @user == obs.user
     # Don't override obs.when or obs.place_name
     obs.notes.value_merge!(notes)
     obs.notes.compact_blank!
     obs.save!
+  end
+
+  def assign_field_slip_collector(obs)
+    attrs = Observation.collector_attrs(field_slip_collector)
+    obs.collector = attrs[:collector]
+    obs.collector_user_id = attrs[:collector_user_id]
   end
 
   def check_name

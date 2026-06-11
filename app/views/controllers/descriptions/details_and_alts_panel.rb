@@ -27,18 +27,8 @@
 # description helper files are deleted in the same commit.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
-    # `reviewer?` gates the export-status + review-status footer
-    # and the description-visibility filter inside `List`. Register
-    # here rather than on `Views::Base` so it stays scoped to the
-    # two description views that actually consume it.
-    register_value_helper :reviewer?
-
-    # `export_status_controls` is a description-agnostic export-row
-    # helper that lives in `app/helpers/exports_helper.rb` — also
-    # consumed from `names/show.html.erb` and `images/show.html.erb`,
-    # so out of scope to delete. Same for `review_as_string`
-    # (`localization_helper.rb`).
-    register_output_helper :export_status_controls, mark_safe: true
+    # `review_as_string` lives in `app/helpers/localization_helper.rb`
+    # and is also called from the description list view.
     register_value_helper :review_as_string
 
     prop :description, ::Description
@@ -177,7 +167,13 @@ module Views::Controllers::Descriptions
     # -- footer: export + review status -----------------------------
 
     def render_export_and_review
-      div { export_status_controls(@description) if reviewer? }
+      # Same gate as `render_review_block` — name descriptions are
+      # the only kind exposed to the reviewer export/review flow.
+      div do
+        if @description.is_a?(::NameDescription)
+          render(Components::ExportStatusControls.new(object: @description))
+        end
+      end
       div { render_review_block }
     end
 

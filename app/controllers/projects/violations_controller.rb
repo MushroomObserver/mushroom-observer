@@ -20,6 +20,15 @@ module Projects
       build_index_with_query
     end
 
+    # Overrides `ApplicationController::Indexes#render_index_view` so
+    # `show_index_of_objects` renders the Phlex `Violations::Index`
+    # class instead of `projects/violations/index.html.erb` (deleted).
+    def render_index_view
+      render(Views::Controllers::Projects::Violations::Index.new(
+               project: @project, violations: @violations, user: @user
+             ))
+    end
+
     # GET-only turbo-stream endpoint that renders the Add-Target-Location
     # modal for one obs (#4304). Called by the modal-toggle controller
     # in always-fresh mode so each open reflects current DB state —

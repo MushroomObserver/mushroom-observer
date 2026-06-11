@@ -157,7 +157,47 @@ module Views::Controllers::Observations
       )
     end
 
+    def test_collector_field_is_user_autocompleter
+      user = users(:rolf)
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create)
+
+      # Collector is a user autocompleter: selecting a suggestion links a
+      # User; the hidden field carries the chosen collector_user_id.
+      assert_html(
+        html,
+        ".autocompleter[data-controller~='autocompleter--user'] " \
+        "input[name='observation[collector]']"
+      )
+      assert_html(
+        html,
+        "input[type='hidden'][name='observation[collector_user_id]']"
+      )
+    end
+
+    def test_edit_form_prefills_linked_collector
+      user = users(:rolf)
+      obs = observations(:minimal_unknown_obs)
+      obs.update_columns(collector: rolf.unique_text_name,
+                         collector_user_id: rolf.id)
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(
+        html,
+        "input[name='observation[collector]'][value='#{rolf.unique_text_name}']"
+      )
+      assert_html(
+        html,
+        "input[type='hidden'][name='observation[collector_user_id]']" \
+        "[value='#{rolf.id}']"
+      )
+    end
+
     private
+
+    def rolf = users(:rolf)
 
     def render_form(observation:, user:, mode: :create, **extras)
       User.current = user

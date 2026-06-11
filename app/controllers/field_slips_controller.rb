@@ -33,11 +33,13 @@ class FieldSlipsController < ApplicationController
     else
       flash_notice(:field_slip_cant_join_project.t)
     end
+    render_new_phlex
   end
 
   # GET /field_slips/1/edit
   def edit
     @recent_observations = recent_edit_observations
+    render_edit_phlex
   end
 
   # POST /field_slips or /field_slips.json
@@ -53,7 +55,7 @@ class FieldSlipsController < ApplicationController
         end
         format.json { render(:show, status: :created, location: @field_slip) }
       else
-        format.html { render(:new, status: :unprocessable_content) }
+        format.html { render_new_phlex(status: :unprocessable_content) }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_content)
         end
@@ -69,7 +71,7 @@ class FieldSlipsController < ApplicationController
         format.json { render(:show, status: :ok, location: @field_slip) }
       else
         @field_slip.reload
-        format.html { render(:edit, status: :unprocessable_content) }
+        format.html { render_edit_phlex(status: :unprocessable_content) }
         format.json do
           render(json: @field_slip.errors, status: :unprocessable_content)
         end
@@ -91,13 +93,51 @@ class FieldSlipsController < ApplicationController
 
   private
 
+  def render_new_phlex(**render_opts)
+    # The `:new` action populates these; the `:create` validation-
+    # failure path and the project-gaps path enter through render_
+    # new_phlex without running `:new`, so backfill from params /
+    # the user's recent activity. Same shape as the ERB-era
+    # implicit `render(:new)`, which read the same ivars.
+    @species_list ||= params[:species_list]
+    @recent_observations ||= recent_observations_for_field_slip
+    render(
+      Views::Controllers::FieldSlips::New.new(
+        field_slip: @field_slip,
+        species_list: @species_list,
+        recent_observations: @recent_observations,
+        field_slip_project_gaps: @field_slip_project_gaps,
+        field_slip_occurrence: @field_slip_occurrence
+      ),
+      **render_opts
+    )
+  end
+
+  def render_edit_phlex(**render_opts)
+    # The `:edit` action populates `@recent_observations`; the
+    # `:update` validation-failure and project-gaps re-render
+    # paths skip it, so backfill via the same query the action
+    # uses. Matches ERB-era behavior.
+    @recent_observations ||= recent_edit_observations
+    render(
+      Views::Controllers::FieldSlips::Edit.new(
+        field_slip: @field_slip,
+        recent_observations: @recent_observations,
+        field_slip_project_gaps: @field_slip_project_gaps,
+        field_slip_occurrence: @field_slip_occurrence
+      ),
+      **render_opts
+    )
+  end
+
   def html_update
     if params[:commit] == :field_slip_create_obs.t
       redirect_to(new_observation_url(
                     field_code: @field_slip.code,
                     place_name: place_name,
                     date: extract_date,
-                    notes: field_slip_notes.compact_blank!
+                    notes: field_slip_notes.compact_blank!,
+                    collector: field_slip_collector_string
                   ))
     else
       sync_selected_observations
@@ -109,7 +149,7 @@ class FieldSlipsController < ApplicationController
   def redirect_or_render_field_slip_update
     if @field_slip_project_gaps
       flash_notice(:field_slip_updated.t)
-      render(:edit, status: :ok)
+      render_edit_phlex(status: :ok)
     else
       redirect_to(field_slip_url(@field_slip),
                   notice: :field_slip_updated.t)
@@ -147,7 +187,8 @@ class FieldSlipsController < ApplicationController
                     place_name: place_name,
                     date: extract_date,
                     notes: field_slip_notes.compact_blank!,
-                    species_list: params[:species_list]
+                    species_list: params[:species_list],
+                    collector: field_slip_collector_string
                   ))
     else
       attach_selected_observations
@@ -157,7 +198,7 @@ class FieldSlipsController < ApplicationController
       msg = :field_slip_created.t(code: @field_slip.code)
       if @field_slip_project_gaps
         flash_notice(msg)
-        render(:new, status: :ok)
+        render_new_phlex(status: :ok)
       elsif obs
         redirect_to(observation_url(obs), notice: msg)
       else
@@ -184,6 +225,18 @@ class FieldSlipsController < ApplicationController
 
   def field_slip_notes
     FieldSlipNotesBuilder.new(params, @field_slip).assemble
+  end
+
+  # Resolved field-slip collector: a User, a free-text String, or nil.
+  # Stored in the observation's collector column, not in notes (#4211).
+  def field_slip_collector
+    FieldSlipNotesBuilder.new(params, @field_slip).collector
+  end
+
+  # Display string for the resolved collector, for carrying through the
+  # new-observation form redirect.
+  def field_slip_collector_string
+    Observation.collector_attrs(field_slip_collector)[:collector]
   end
 
   def recent_edit_observations

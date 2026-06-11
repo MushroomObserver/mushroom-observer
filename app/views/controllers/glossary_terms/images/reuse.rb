@@ -19,20 +19,12 @@ module Views::Controllers::GlossaryTerms::Images
       container_class(:full)
 
       render(::Views::Controllers::Shared::ImagesToReuseForm.new(
-               form_action: form_action,
+               target: @object,
                user: @user,
                objects: @objects,
                pagination_data: @pagination_data,
                all_users: @all_users
              ))
-    end
-
-    private
-
-    def form_action
-      { controller: "/glossary_terms/images",
-        action: :attach,
-        id: @object.id }
     end
   end
 end

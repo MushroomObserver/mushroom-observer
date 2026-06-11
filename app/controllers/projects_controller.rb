@@ -2,6 +2,7 @@
 
 class ProjectsController < ApplicationController
   include Validators
+  include Creation
 
   before_action :login_required
   before_action :store_location, only: [:show]
@@ -11,6 +12,16 @@ class ProjectsController < ApplicationController
   #
   def index
     build_index_with_query
+  end
+
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `projects/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::Projects::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, error: @error
+           ))
   end
 
   # Sort options for the index page. Read by `add_sorter` in the
@@ -284,66 +295,6 @@ class ProjectsController < ApplicationController
   def find_project_and_where!
     find_project!
     @where = @project&.location&.display_name || ""
-  end
-
-  def create_members_group(title)
-    user_group = UserGroup.new
-    user_group.name = title
-    user_group.users << @user
-    return user_group if user_group.save
-
-    flash_object_errors(user_group)
-    nil
-  end
-
-  def create_admin_group(admin_name)
-    admin_group = UserGroup.new
-    admin_group.name = admin_name
-    admin_group.users << @user
-    return admin_group if admin_group.save
-
-    flash_object_errors(admin_group)
-    nil
-  end
-
-  def find_location(where)
-    location = Location.find_by_name_or_reverse_name(where)
-    return location if location || where == ""
-
-    flash_warning(:add_project_no_location.t(where: where))
-    nil
-  end
-
-  def create_project(title, admin_name, where)
-    user_group = create_members_group(title)
-    admin_group = create_admin_group(admin_name)
-    location = find_location(where)
-    if user_group && admin_group && (location || (where == ""))
-      @project = Project.new(project_create_params)
-      @project.user = @user
-      @project.user_group = user_group
-      @project.admin_group = admin_group
-      @project.location = location
-      if ProjectConstraints.new(params).allow_any_dates?
-        @project.start_date = @project.end_date = nil
-      end
-
-      upload_image_if_present
-      if @project.save
-        ProjectMember.create!(project: @project, user: @user,
-                              trust_level: "hidden_gps")
-        @project.log_create
-        flash_notice(:add_project_success.t)
-        return redirect_to(project_path(@project.id))
-      else
-        flash_object_errors(@project)
-      end
-    end
-    admin_group&.destroy
-    user_group&.destroy
-    @project = Project.new
-    image_ivars
-    render_new_form
   end
 
   def override_fixed_dates

@@ -31,6 +31,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_left_column
     render_date_field
+    render_collector_field
     div(id: "observation_where") do
       render_location_feedback
       render_location_autocompleter
@@ -43,6 +44,25 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_date_field
     @form.date_field(:when, label: "#{:WHEN.l}:", wrap_class: "mb-3")
+  end
+
+  # User autocompleter: selecting a suggestion fills the visible field
+  # with the user's unique_text_name and the hidden collector_user_id with
+  # their id (linking the collector). Free text is still accepted for a
+  # collector who is not an MO user; "_user <login>_" markup typed by hand
+  # is resolved on save. See #4211 / PR #4452.
+  def render_collector_field
+    render(@form.field(:collector).autocompleter(
+             type: :user,
+             wrapper_options: {
+               label: "#{:COLLECTOR.l}:",
+               wrap_class: "mb-3",
+               help: :form_observations_collector_help.t
+             },
+             value: @observation.collector,
+             hidden_name: :collector_user_id,
+             hidden_value: @observation.collector_user_id
+           ))
   end
 
   def render_location_feedback

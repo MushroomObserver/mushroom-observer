@@ -17,19 +17,20 @@ module Account
       else
         @login = ""
         @remember = true
+        render_new_phlex
       end
     end
 
     # login post action
     def create
-      render(:new) and return unless params[:user]
+      render_new_phlex and return unless params[:user]
 
       normalize_login_params
       user = User.authenticate(login: @login, password: @password)
 
       unless user
         flash_error(:runtime_login_failed.t)
-        render(:new) and return
+        render_new_phlex and return
       end
 
       user.verified ? login_success(user) : login_unverified(user)
@@ -48,11 +49,13 @@ module Account
         session_user_set(nil)
         session[:admin] = false
         clear_autologin_cookie
+        render(Views::Controllers::Account::Login::Logout.new)
       end
     end
 
     def email_new_password
       @new_user = User.new
+      render_email_new_password_phlex
     end
 
     def new_password_request
@@ -61,18 +64,32 @@ module Account
                              @login, @login, @login).first
       if @new_user.nil?
         flash_error(:runtime_email_new_password_failed.t(user: @login))
-        render("account/login/email_new_password") and return
+        render_email_new_password_phlex and return
       else
         set_random_password_for_new_user_and_email_them
       end
     end
 
     # This is used to test the autologin feature.
-    def test_autologin; end
+    def test_autologin
+      render(Views::Controllers::Account::Login::TestAutologin.new)
+    end
 
     ############################################################################
 
     private
+
+    def render_new_phlex
+      render(Views::Controllers::Account::Login::New.new(
+               login: @login, remember: @remember
+             ))
+    end
+
+    def render_email_new_password_phlex
+      render(Views::Controllers::Account::Login::EmailNewPassword.new(
+               new_user: @new_user
+             ))
+    end
 
     def normalize_login_params
       @login = params.dig(:user, :login).to_s.strip
@@ -94,7 +111,9 @@ module Account
 
     def login_unverified(user)
       @unverified_user = user
-      render("/account/verifications/reverify")
+      render(Views::Controllers::Account::Verifications::Reverify.new(
+               unverified_user: @unverified_user
+             ))
     end
 
     def set_random_password_for_new_user_and_email_them
@@ -106,7 +125,7 @@ module Account
         # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
         # See .claude/deliver_later_migration_plan.md for details.
         PasswordMailer.build(receiver: @new_user, password:).deliver_later
-        render("account/login/new")
+        render_new_phlex
       else
         flash_object_errors(@new_user)
       end

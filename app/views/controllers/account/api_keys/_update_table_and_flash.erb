@@ -1,7 +1,0 @@
-<%= turbo_stream.replace("account_api_keys_table") do
-  render(Views::Controllers::Account::APIKeys::Table.new(user: @user))
-end %>
-
-<%= turbo_stream.update("page_flash") do
-  flash_notices_html
-end %>

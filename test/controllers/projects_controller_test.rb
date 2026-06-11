@@ -243,7 +243,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_page_title(:PROJECTS.l)
-    assert_template("index")
+    assert_select("body.projects__index .list-group")
   end
 
   def test_index_member
@@ -251,7 +251,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     get(:index, params: { member: dick.id })
 
-    assert_template("index")
+    assert_select("body.projects__index .list-group")
     assert_page_title(:PROJECTS.l)
   end
 

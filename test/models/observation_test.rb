@@ -1146,7 +1146,7 @@ class ObservationTest < UnitTestCase
     # with order scrambled in the Observation
     obs   = observations(:template_and_orphaned_notes_scrambled_obs)
     parts = ["Cap", "Nearby trees", "odor", "orphaned caption 1",
-             "orphaned caption 2", "Collector", "Other"]
+             "orphaned caption 2", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
 
@@ -2397,5 +2397,232 @@ class ObservationTest < UnitTestCase
                "Removing location should clear cached coordinates")
     assert_nil(@cc_obs.location_lng,
                "Removing location should clear cached coordinates")
+  end
+
+  # --- Collector identity (#4211) ---
+
+  def new_collector_obs(**attrs)
+    Observation.create!({ user: mary, when: Time.zone.now,
+                          where: "Anywhere", name: names(:fungi) }.merge(attrs))
+  end
+
+  def test_collector_defaults_to_creator
+    obs = new_collector_obs
+    assert_equal(mary.unique_text_name, obs.collector)
+    assert_equal(mary.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_matching_creator_sets_fk
+    obs = new_collector_obs(collector: mary.unique_text_name)
+    assert_equal(mary.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_free_text_clears_fk_and_differs
+    obs = new_collector_obs(collector: "Jane Forager")
+    assert_equal("Jane Forager", obs.collector)
+    assert_nil(obs.collector_user_id)
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  # No collector recorded at all (blank string, nil FK) — e.g. a legacy
+  # collector-less obs — does not "differ" from the creator.
+  def test_collector_differs_false_when_no_collector_recorded
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_unchanged_save_preserves_resolved_fk
+    # Simulates a backfilled foray row: collector resolves to a
+    # different MO user than the one who entered the record.
+    obs = new_collector_obs
+    obs.update_columns(collector: rolf.unique_text_name,
+                       collector_user_id: rolf.id)
+    obs.reload.update!(where: "Somewhere else")
+    assert_equal(rolf.id, obs.collector_user_id,
+                 "Editing an unrelated field must not clear the collector FK")
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_textile_links_known_user
+    obs = Observation.new(user: mary, collector_user: rolf,
+                          collector: rolf.unique_text_name)
+    assert_equal(rolf.textile_name, obs.collector_textile)
+  end
+
+  def test_collector_textile_plain_string
+    obs = Observation.new(user: mary, collector: "Jane Forager")
+    assert_equal("Jane Forager", obs.collector_textile)
+  end
+
+  def test_collector_textile_blank_when_no_collector
+    obs = Observation.new(user: mary, collector: nil)
+    assert_nil(obs.collector_textile)
+  end
+
+  # Expand-window fallback: column blank, collector still in notes.
+  def test_collector_textile_falls_back_to_legacy_note
+    obs = Observation.new(user: mary, collector: nil,
+                          notes: { Collector: "_user rolf_" })
+    assert_equal("_user rolf_", obs.collector_textile)
+  end
+
+  def test_is_collector_uses_column_fk
+    obs = new_collector_obs(collector: rolf.unique_text_name)
+    assert(obs.is_collector?(rolf))
+    assert_not(obs.is_collector?(mary))
+  end
+
+  # Expand-window fallback: an un-backfilled obs keeps the legacy collector's
+  # edit permission via the notes markup.
+  def test_is_collector_falls_back_to_legacy_note
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil,
+                       notes: { Collector: "_user rolf_" })
+    assert(obs.is_collector?(rolf))
+    assert_not(obs.is_collector?(mary))
+  end
+
+  def test_collector_unrecorded_field_slip_blank
+    obs = observations(:minimal_unknown_obs)
+    assert(obs.field_slip_id.present?, "fixture should have a field slip")
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert(obs.collector_unrecorded?)
+  end
+
+  def test_collector_unrecorded_false_when_collector_present
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(collector: "Jane Forager", collector_user_id: nil)
+    assert_not(obs.collector_unrecorded?)
+  end
+
+  def test_collector_unrecorded_false_without_field_slip
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert_nil(obs.field_slip_id)
+    assert_not(obs.collector_unrecorded?)
+  end
+
+  def test_build_observation_skips_collector_default
+    obs = Observation.build_observation(
+      locations(:burbank), names(:fungi), {}, Time.zone.now, mary
+    )
+    assert_nil(obs.collector,
+               "field-slip-built obs must not auto-claim the recorder")
+    assert_nil(obs.collector_user_id)
+  end
+
+  def test_collector_attrs_user
+    attrs = Observation.collector_attrs(rolf)
+    assert_equal(rolf.unique_text_name, attrs[:collector])
+    assert_equal(rolf.id, attrs[:collector_user_id])
+  end
+
+  def test_collector_attrs_string_and_nil
+    assert_equal({ collector: "Jane Forager" },
+                 Observation.collector_attrs("Jane Forager"))
+    assert_equal({}, Observation.collector_attrs(""))
+    assert_equal({}, Observation.collector_attrs(nil))
+  end
+
+  # --- resolve_collector (shared edit/import/migration resolver) ---
+
+  def test_resolve_collector_blank
+    assert_equal({ collector: nil, collector_user_id: nil },
+                 Observation.resolve_collector("  "))
+    assert_equal({ collector: nil, collector_user_id: nil },
+                 Observation.resolve_collector(nil))
+  end
+
+  def test_resolve_collector_user_markup
+    # "_user <ref>_" markup resolves to the MO user (Joe's edit-form case)
+    # and normalizes the display string to the user's unique_text_name.
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector("_user mary_"))
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector("_user Rolf Singer_"))
+  end
+
+  def test_resolve_collector_bare_login_and_name
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector("mary"))
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector("Rolf Singer"))
+  end
+
+  # A "Name (login)" unique_text_name (no FK, e.g. field-slip redirect into
+  # the new-obs form) links to that user, not just owner/existing. See #4499.
+  def test_resolve_collector_unique_text_name_of_other_user
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector(rolf.unique_text_name,
+                                               owner: mary))
+  end
+
+  def test_resolve_collector_owner_match
+    # The owner's login / name / unique_text_name all link to the owner.
+    [mary.login, mary.name, mary.unique_text_name].each do |str|
+      assert_equal(Observation.collector_attrs(mary),
+                   Observation.resolve_collector(str, owner: mary), str)
+    end
+  end
+
+  def test_resolve_collector_inat_username_only_when_enabled
+    inat = users(:mary).inat_username
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector(inat, match_inat: true))
+    # Without the flag, an iNat username is just free text.
+    assert_equal({ collector: inat, collector_user_id: nil },
+                 Observation.resolve_collector(inat, match_inat: false))
+  end
+
+  def test_resolve_collector_free_text
+    assert_equal({ collector: "Jane Forager", collector_user_id: nil },
+                 Observation.resolve_collector("Jane Forager"))
+  end
+
+  def test_resolve_collector_preserves_existing_link
+    # A string that names neither owner nor a findable user, but matches the
+    # already-linked user's unique_text_name, preserves that link (an
+    # autocomplete selection or a backfilled-claimed identity).
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector(rolf.unique_text_name,
+                                               owner: mary, existing: rolf))
+  end
+
+  # --- edit-form save path (reconcile_collector_user) ---
+
+  def test_edit_collector_markup_links_user
+    obs = new_collector_obs
+    obs.update!(collector: "_user Rolf Singer_")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_edit_collector_bare_login_links_user
+    obs = new_collector_obs
+    obs.update!(collector: "rolf")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+  end
+
+  def test_edit_collector_unknown_stays_free_text
+    obs = new_collector_obs
+    obs.update!(collector: "Jane Forager")
+    assert_nil(obs.collector_user_id)
+    assert_equal("Jane Forager", obs.collector)
+  end
+
+  # Reconcile also fires when only collector_user_id changes, so a FK that
+  # is inconsistent with the (free-text) collector string is corrected
+  # rather than persisted. See #4499.
+  def test_edit_collector_user_id_change_reconciles_against_string
+    obs = new_collector_obs
+    obs.update_columns(collector: "Jane Forager", collector_user_id: nil)
+    obs.update!(collector_user_id: rolf.id)
+    assert_nil(obs.reload.collector_user_id,
+               "inconsistent FK reconciled away from the free-text string")
   end
 end

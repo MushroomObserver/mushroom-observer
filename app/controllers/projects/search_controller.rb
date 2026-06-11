@@ -11,6 +11,19 @@ module Projects
 
     before_action :login_required
 
+    # Override the `Searchable` default so the `new` action renders
+    # the Phlex `Views::Controllers::Projects::Search::New` instead
+    # of `projects/search/new.erb` (deleted).
+    def new
+      @local = params[:local] != "false"
+      set_up_form_field_groupings
+      @search = build_search_query
+      respond_to do |format|
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
+        format.html { render(new_phlex_view) }
+      end
+    end
+
     def permitted_search_params
       [
         :members,
@@ -76,6 +89,12 @@ module Projects
     ].freeze
 
     private
+
+    def new_phlex_view
+      Views::Controllers::Projects::Search::New.new(
+        search: @search, local: @local
+      )
+    end
 
     def set_up_form_field_groupings
       @field_columns = FIELD_COLUMNS

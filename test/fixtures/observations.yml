@@ -699,9 +699,10 @@ template_and_orphaned_notes_scrambled_obs:
     :orphaned_caption_1: orphaned notes 1
     :Other: other notes, +photo
     :orphaned_caption_2: orphaned notes 2
-    :Collector: _user rolf_
     :Cap: red
   user: notes_templater
+  collector: Rolf Singer (rolf)
+  collector_user: rolf
 
 california_obs:
   <<: *DEFAULTS
@@ -812,19 +813,18 @@ current_obs:
   where: Salt Point State Park, Sonoma Co., California, USA
   location: salt_point
   occurrence: occ_field_slip_previous
-  notes:
-    :Collector: _user katrina_
+  collector: Katrina (katrina)
+  collector_user: katrina
 
 newbie_obs:
   <<: *DEFAULTS
-  notes:
-    :Collector: _user foray_newbie_
+  collector: foray_newbie (foray_newbie)
+  collector_user: foray_newbie
 
 recorder_obs:
   <<: *DEFAULTS
   occurrence: occ_field_slip_by_recorder
-  notes:
-    :Collector: Foray Collector
+  collector: Foray Collector
 
 imported_inat_obs:
   <<: *DEFAULTS
