@@ -80,7 +80,10 @@ module Projects
              }, format: :turbo_stream)
       end
 
-      assert_template(:_target_update)
+      assert_select(
+        "turbo-stream[action='replace']" \
+        "[target='#{Views::Controllers::Projects::Aliases::Table::TABLE_ID}']"
+      )
     end
 
     def test_create_creates_new_project_alias_with_valid_user
@@ -179,7 +182,10 @@ module Projects
               project_alias: { name: "Updated Name", project_id: }
             }, format: :turbo_stream)
 
-      assert_template(:_target_update)
+      assert_select(
+        "turbo-stream[action='replace']" \
+        "[target='#{Views::Controllers::Projects::Aliases::Table::TABLE_ID}']"
+      )
       assert_equal("Updated Name", @project_alias.reload.name)
     end
 
@@ -210,7 +216,10 @@ module Projects
                          format: :turbo_stream })
       end
 
-      assert_template(:_target_update)
+      assert_select(
+        "turbo-stream[action='replace']" \
+        "[target='#{Views::Controllers::Projects::Aliases::Table::TABLE_ID}']"
+      )
     end
   end
 end

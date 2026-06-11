@@ -13,6 +13,16 @@ class ProjectsController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `projects/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::Projects::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, error: @error
+           ))
+  end
+
   # Sort options for the index page. Read by `add_sorter` in the
   # view. Each key must resolve to `Project.order_by_<key>`.
   def index_sort_options
