@@ -15,10 +15,16 @@ module Views::Controllers::HerbariumRecords
         Tab::HerbariumRecord::ShowActions.new(q_param: q_param)
       )
       column_classes(:six)
+      container_class(:full)
 
-      render_details
+      # Keep the text details + Timestamps at `container-text` width;
+      # let the obs-matrix below run full-width inside the page's
+      # full-width `<main>`.
+      div(class: "container-text") do
+        render_details
+        render(Components::Timestamps.new(object: @herbarium_record))
+      end
       render_observation_matrix
-      render(Components::Timestamps.new(object: @herbarium_record))
     end
 
     private
