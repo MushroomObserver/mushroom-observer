@@ -359,17 +359,17 @@ class Components::SearchForm < Components::ApplicationForm
     end
   end
 
-  def render_single_value_autocompleter(field_name:)
-    type = autocompleter_type(field_name)
-    ids = field_value(field_name)
-    autocompleter_field(field_name,
-                        type: type,
-                        label: field_label(field_name),
-                        value: prefilled_autocompleter_value(ids, type),
-                        hidden_value: ids) do |f|
-      f.with_help { field_help(field_name) }
-    end
-  end
+  # NOTE: `SearchFieldUI` returns `:single_value_autocompleter` for
+  # Class-typed `query_attr` definitions (e.g.
+  # `query_attr(:needs_naming, User)`). No current search-form
+  # `FIELD_COLUMNS` exposes such a field, and the few existing
+  # Class-typed attrs' names (`needs_naming`, `for_user`,
+  # `by_author`, `editable_by_user`) don't map to a supported
+  # autocompleter `type` via `AutocompleterPrefill#autocompleter_type`
+  # either. The dispatcher in `render_search_field` would raise
+  # `NoMethodError` if a future FIELD_COLUMNS added one — loud and
+  # actionable. Add `render_single_value_autocompleter` back here
+  # when that day comes.
 
   def render_multiple_value_autocompleter(field_name:)
     type = autocompleter_type(field_name)

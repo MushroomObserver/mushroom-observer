@@ -47,11 +47,9 @@ module Views::Controllers::Names
     prop :children_query, _Nilable(::Query::Names), default: nil
     prop :first_child, _Nilable(::Name), default: nil
     prop :projects, _Nilable(_Array(::Project)), default: nil
-    # `Name#versions` returns an AR-managed `CollectionProxy`; some
-    # tests pass an `Array` of stubs.
+    # `Name#versions` returns an AR-managed `CollectionProxy`.
     prop :versions,
-         _Union(Array, ::ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+         _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
 
     def view_template
       page_chrome_side_effects

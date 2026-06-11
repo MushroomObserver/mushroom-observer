@@ -87,25 +87,18 @@ module GlossaryTerms
     #   params[:selected][image_id]  (value of "yes" means delete)
     # Outputs: @object
     # Redirects to glossary_terms/show.
-    # remove_images
+    # remove_images. No permission check — `GlossaryTerm#can_edit?`
+    # returns true for any logged-in user, and `login_required`
+    # runs before this action.
     def remove
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
-      return unless @object
-
-      return if permission!(@object)
-
-      redirect_to(glossary_term_path(@object.id))
     end
 
-    # The remove form submits to this action
+    # The remove form submits to this action. Same permission note
+    # as `#remove` above.
     def detach
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
-
-      unless permission!(@object)
-        return redirect_to(glossary_term_path(@object.id))
-      end
-
       return unless (images_data = params[:selected])
 
       detach_images_from_glossary_term(images_data)

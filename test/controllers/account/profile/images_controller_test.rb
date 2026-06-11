@@ -44,5 +44,15 @@ module Account::Profile
       assert_equal(rolf.id, session[:user_id])
       assert_equal(image.id, rolf.reload.image_id)
     end
+
+    # Hitting `attach` with an `img_id` that doesn't resolve to an
+    # Image re-renders the reuse page with a flash error.
+    def test_attach_invalid_img_id_renders_reuse_with_flash
+      login("rolf")
+      post(:attach, params: { id: rolf.id, img_id: "99999999" })
+
+      assert_response(:success)
+      assert_flash_error(:runtime_image_reuse_invalid_id.t(id: "99999999"))
+    end
   end
 end
