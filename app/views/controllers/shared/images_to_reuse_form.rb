@@ -7,18 +7,20 @@
 #
 # Two parts:
 # - `Components::ImageReuseForm` — the small form that takes an Image
-#   id and POSTs to `form_action[:controller]#attach`.
+#   id and POSTs to `<target_domain>/images#attach`.
 # - A `paginated_results`-wrapped `Components::MatrixTable` of
 #   clickable thumbnails (each wrapping `Components::InteractiveImage`
 #   in a POST link to `attach` so a click attaches that image
 #   directly).
 #
-# Data (the paginated `objects:` and `pagination_data:`) is loaded by
-# the controller via `ImageReusable#load_images_to_reuse` — this
-# view does not query.
+# The `target` is the domain object (Observation / User /
+# GlossaryTerm) whose images are being selected for. Each caller
+# passes its subject; the Component derives both the form's submit
+# URL and the per-thumbnail POST URL from the target's class.
 module Views::Controllers::Shared
   class ImagesToReuseForm < Views::Base
-    prop :form_action, Hash
+    prop :target,
+         _Union(::Observation, ::User, ::GlossaryTerm)
     prop :user, _Nilable(::User), default: nil
     prop :objects, _Array(::Image)
     prop :pagination_data, ::PaginationData
@@ -26,7 +28,7 @@ module Views::Controllers::Shared
 
     def view_template
       render(::Components::ImageReuseForm.new(
-               form_action: @form_action, all_users: @all_users
+               target: @target, all_users: @all_users
              ))
       render_image_matrix
     end
@@ -52,13 +54,22 @@ module Views::Controllers::Shared
                      image: image,
                      votes: false,
                      original: true,
-                     image_link: @form_action.merge(img_id: image.id),
+                     image_link: attach_url_for(image),
                      link_method: :post,
                      extra_classes: "image-to-reuse"
                    ))
           end
         end
       end
+    end
+
+    def attach_url_for(image)
+      url_for(controller: target_controller,
+              action: :attach, id: @target.id, img_id: image.id)
+    end
+
+    def target_controller
+      ::Components::ImageReuseForm::CONTROLLERS.fetch(@target.class)
     end
   end
 end

@@ -21,20 +21,12 @@ module Views::Controllers::Observations::Images
       container_class(:full)
 
       render(::Views::Controllers::Shared::ImagesToReuseForm.new(
-               form_action: form_action,
+               target: @observation,
                user: @user,
                objects: @objects,
                pagination_data: @pagination_data,
                all_users: @all_users
              ))
-    end
-
-    private
-
-    def form_action
-      { controller: "/observations/images",
-        action: :attach,
-        id: @observation.id }
     end
   end
 end

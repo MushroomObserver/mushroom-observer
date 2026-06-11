@@ -1,10 +1,18 @@
 # frozen_string_literal: true
 
 # Bootstrap-3 inline filter form shell — `<form class="form-inline">`
-# wrapping a flex row that holds the caller's field(s) plus the
-# submit button. Used for narrow GET-method filters on index/edit
-# pages where the user picks a value (text, autocompleter, etc.)
-# and submits to refine the visible list.
+# wrapping a flex row that holds the caller's field(s) plus a submit
+# button. Used for narrow GET-method filters on index / edit pages
+# where the user picks a value (text, autocompleter, etc.) and
+# submits to refine the visible list.
+#
+# Inherits from `Components::ApplicationForm` (Superform-backed) and
+# is generic over the caller's FormObject — the caller defines the
+# attribute(s) being filtered on, instantiates a FormObject carrying
+# the current value(s), and passes both the FormObject and a block
+# rendering the field(s) bound to that FormObject. The shell owns
+# the `<form>` tag, the `.form-inline` chrome, the inner flex row,
+# and the submit button.
 #
 # Canonical Bootstrap-3 layout the shell owns:
 # - `.form-inline` on `<form>` (the right element per BS3 spec)
@@ -12,38 +20,49 @@
 #   to the input's baseline regardless of whether the field has a
 #   label-on-top stack (autocompleters do; plain inputs may)
 #
-# The caller's block receives the FormBuilder so it can render any
-# field type — `f.text_field`, `autocompleter_field(form: f, …)`,
-# `f.select`, etc.
+# Method: GET. The shell is for filter forms; mutate-state forms
+# should use a regular ApplicationForm subclass with method: POST.
 #
-# @example Plain text filter
+# @example Autocompleter filter (Phlex view)
+#   filter = FormObject::FieldSlipFilter.new(project_name: @title)
 #   render(Components::InlineFilterForm.new(
-#            url: edit_visual_group_path(@visual_group),
-#            submit_text: :edit_visual_group_update_filter.t)) do |f|
-#     # caller renders the field
-#   end
-#
-# @example Autocompleter filter
-#   render(Components::InlineFilterForm.new(
+#            filter,
 #            url: field_slips_path,
-#            submit_text: "Filter")) do |f|
-#     autocompleter_field(form: f, field: :project_name, …)
+#            submit_text: :FILTER.l
+#          )) do |f|
+#     f.autocompleter_field(:project_name, type: :project,
+#                                          hidden_name: :project,
+#                                          inline: true, size: 60,
+#                                          label: "#{:field_slip_filter_by.l}:")
 #   end
-class Components::InlineFilterForm < Components::Base
-  include Phlex::Rails::Helpers::FormWith
+class Components::InlineFilterForm < Components::ApplicationForm
+  def initialize(model, url:, submit_text:, form_id: nil, **)
+    @url = url
+    @submit_text = submit_text
+    @form_id = form_id
+    super(model, **)
+  end
 
-  prop :url, String
-  prop :submit_text, String
-  prop :form_id, _Nilable(String), default: nil
+  def form_action
+    @url
+  end
+
+  # GET keeps the filter state in the URL — bookmarkable, shareable,
+  # cache-friendly. The submitted form rewrites the index URL with
+  # the new params.
+  def form_method
+    :get
+  end
+
+  def form_attributes
+    super.merge(class: "form-inline", id: @form_id).compact
+  end
 
   def view_template(&block)
-    form_with(url: @url, method: :get, class: "form-inline",
-              id: @form_id) do |f|
-      div(class: "d-flex gap-2 align-items-end") do
-        yield(f) if block
-        input(type: "submit", name: "commit", value: @submit_text,
-              class: "btn btn-default")
-      end
+    div(class: "d-flex gap-2 align-items-end") do
+      yield(self) if block
+      input(type: "submit", name: "commit", value: @submit_text,
+            class: "btn btn-default")
     end
   end
 end

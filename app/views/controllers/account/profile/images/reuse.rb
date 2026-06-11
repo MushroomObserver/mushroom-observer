@@ -15,20 +15,12 @@ module Views::Controllers::Account::Profile::Images
       add_page_title(:image_reuse_title.t(name: @user.legal_name))
 
       render(::Views::Controllers::Shared::ImagesToReuseForm.new(
-               form_action: form_action,
+               target: @user,
                user: @user,
                objects: @objects,
                pagination_data: @pagination_data,
                all_users: @all_users
              ))
-    end
-
-    private
-
-    def form_action
-      { controller: "/account/profile/images",
-        action: :attach,
-        id: @user.id }
     end
   end
 end
