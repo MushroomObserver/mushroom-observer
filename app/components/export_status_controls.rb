@@ -34,7 +34,7 @@ class Components::ExportStatusControls < Components::Base
     }
   }.freeze
 
-  prop :object, _Any
+  prop :object, _Union(::Name, ::NameDescription, ::Image)
   prop :flag, Symbol, default: :ok_for_export
 
   def view_template
