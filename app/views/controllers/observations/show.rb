@@ -21,12 +21,6 @@
 # obs-title chain in `observations_helper.rb`.
 module Views::Controllers::Observations
   class Show < Views::Base
-    register_output_helper :flash_notices_html, mark_safe: true
-    # `tpl` on a SafeBuffer goes through MO's textile path; needed
-    # for `@observation.source_credit.tpl` below. Not a Phlex
-    # primitive — calling on the model's String return value
-    # already works.
-
     # rubocop:disable Metrics/ParameterLists
     # The show page consumes every obs-derived ivar the controller
     # builds; the param list mirrors the controller's `@ivar`s.

@@ -5,10 +5,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Wraps a text input with Stimulus autocompleter controller
   # rubocop:disable Metrics/ClassLength
   # Inherits from `Components::Input` (MO's thin subclass of
-  # Superform's `Components::Input`) to pick up the shared MO
-  # output-helper registrations — `link_icon` (used by
-  # `render_has_id_indicator`), `icon_link_to`, and `modal_link_to`
-  # (used by the create-link block).
+  # Superform's `Components::Input`).
   class AutocompleterField < ::Components::Input
     include Phlex::Slotable
 
@@ -229,50 +226,63 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_find_button
       return unless find_text
 
-      icon_link_to(
-        find_text, "#",
-        icon: :find_on_map, show_text: false, icon_class: "text-primary",
-        name: "find_#{autocompleter_type}", class: "ml-3 find-btn d-none",
-        data: { map_target: "showBoxBtn",
-                action: "map#showBox:prevent" }
-      )
+      render(::Components::IconLink.new(
+               find_text, "#",
+               icon: :find_on_map, show_text: false,
+               icon_class: "text-primary",
+               name: "find_#{autocompleter_type}",
+               class: "ml-3 find-btn d-none",
+               data: { map_target: "showBoxBtn",
+                       action: "map#showBox:prevent" }
+             ))
     end
 
     def render_keep_box_button
       return unless keep_text
 
-      icon_link_to(
-        keep_text, "#",
-        icon: :apply, show_text: false, icon_class: "text-primary",
-        name: "keep_#{autocompleter_type}", class: "ml-3 keep-btn d-none",
-        data: { target_attr_key => "keepBtn", map_target: "lockBoxBtn",
-                action: "map#toggleBoxLock:prevent form-exif#showFields" }
-      )
+      render(::Components::IconLink.new(
+               keep_text, "#",
+               icon: :apply, show_text: false,
+               icon_class: "text-primary",
+               name: "keep_#{autocompleter_type}",
+               class: "ml-3 keep-btn d-none",
+               data: { target_attr_key => "keepBtn",
+                       map_target: "lockBoxBtn",
+                       action: "map#toggleBoxLock:prevent " \
+                               "form-exif#showFields" }
+             ))
     end
 
     def render_edit_box_button
       return unless keep_text
 
-      icon_link_to(
-        edit_text, "#",
-        icon: :edit, show_text: false, icon_class: "text-primary",
-        name: "edit_#{autocompleter_type}", class: "ml-3 edit-btn d-none",
-        data: { target_attr_key => "editBtn", map_target: "editBoxBtn",
-                action: "map#toggleBoxLock:prevent form-exif#showFields" }
-      )
+      render(::Components::IconLink.new(
+               edit_text, "#",
+               icon: :edit, show_text: false,
+               icon_class: "text-primary",
+               name: "edit_#{autocompleter_type}",
+               class: "ml-3 edit-btn d-none",
+               data: { target_attr_key => "editBtn",
+                       map_target: "editBoxBtn",
+                       action: "map#toggleBoxLock:prevent " \
+                               "form-exif#showFields" }
+             ))
     end
 
     def render_create_button
       return if !create_text || create.present?
 
-      icon_link_to(
-        create_text, "#",
-        id: "create_#{autocompleter_type}_btn", class: "ml-3 create-button",
-        icon: :plus, show_text: true, icon_class: "text-primary",
-        name: "create_#{autocompleter_type}",
-        data: { target_attr_key => "createBtn",
-                action: "#{stimulus_controller_name}#swapCreate:prevent" }
-      )
+      render(::Components::IconLink.new(
+               create_text, "#",
+               id: "create_#{autocompleter_type}_btn",
+               class: "ml-3 create-button",
+               icon: :plus, show_text: true,
+               icon_class: "text-primary",
+               name: "create_#{autocompleter_type}",
+               data: { target_attr_key => "createBtn",
+                       action: "#{stimulus_controller_name}" \
+                               "#swapCreate:prevent" }
+             ))
     end
 
     def render_modal_create_link

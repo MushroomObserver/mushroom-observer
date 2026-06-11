@@ -19,8 +19,6 @@ class Views::Layouts::Sidebar
     prop :heading_key, _Nilable(Symbol), default: nil
     prop :tabs, _Nilable(_Array(_Nilable(Array))), default: nil
 
-    register_output_helper :active_link_to
-
     def view_template
       div(class: @classes[:heading]) do
         plain("#{@heading_key.t}:")
@@ -41,7 +39,7 @@ class Views::Layouts::Sidebar
         html_options[:class]
       )
 
-      active_link_to(title, url, **html_options)
+      render(::Components::ActiveLink.new(title, url, **html_options))
     end
   end
 end

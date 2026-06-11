@@ -17,12 +17,8 @@
 # `add_interest_icons` / `add_pager_for` (logged in only),
 # `container_class(:full)`, `column_classes(:seven_five)`.
 #
-# Helper `export_status_controls` (from ExportsHelper) is registered
-# here since the name footer block calls it.
 module Views::Controllers::Names
   class Show < Views::Base
-    register_value_helper :export_status_controls
-
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
     # `best_images` comes from `Name::Observations#best_images` —
@@ -174,7 +170,7 @@ module Views::Controllers::Names
         render(Components::PreviousVersion.new(
                  obj: @name, versions: @versions
                ))
-        trusted_html(export_status_controls(@name))
+        render(Components::ExportStatusControls.new(object: @name))
       end
     end
   end

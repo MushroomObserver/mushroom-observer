@@ -18,8 +18,6 @@
 class Components::SearchForm < Components::ApplicationForm
   include ApplicationForm::AutocompleterPrefill
 
-  register_output_helper :search_bar_toggle
-
   # Boolean select option styles. Rails-shape `[label, value]` pairs.
   BOOL_OPTIONS = {
     nil_yes: [["", ""], ["yes", "true"]],
@@ -106,8 +104,19 @@ class Components::SearchForm < Components::ApplicationForm
     end
   end
 
+  # Inlined from `SearchBarHelper#search_bar_toggle` — Bootstrap
+  # collapse-trigger button that hides the search-bar elements row
+  # in the top nav.
   def render_search_bar_toggle
-    search_bar_toggle
+    button(class: class_names(SearchBarHelper::SEARCH_BAR_TOGGLE_CLASSES),
+           type: :button,
+           data: { toggle: "collapse", search_type_target: "barToggle",
+                   target: "#search_bar_elements" },
+           aria: { expanded: "false", controls: "search_bar_elements" }) do
+      render(Components::LinkIcon.new(
+               type: :minus, title: :search_bar_fewer_options.l
+             ))
+    end
   end
 
   # Form layout
