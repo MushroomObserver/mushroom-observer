@@ -14,13 +14,22 @@ class AddCollectorToObservations < ActiveRecord::Migration[7.2]
       type: :integer, null: true, foreign_key: { to_table: :users }
     )
 
-    # ALTER TABLE rebuilds the ~1.8M-row observations table, which leaves
-    # InnoDB's index statistics stale. Without a refresh the optimizer
-    # mis-plans common joins (e.g. the project list-search query full-scans
-    # observations instead of starting from project_observations), turning a
-    # ~20ms query into 100s+. Refresh stats so plans stay correct post-deploy.
+    # ALTER TABLE rebuilds the ~1.8M-row observations table, which resets its
+    # InnoDB index statistics. Re-analyzing observations ALONE leaves it
+    # inconsistent with its hot join partners (project_observations, names):
+    # the optimizer then full-scans observations for the project list-search
+    # join (SELECT DISTINCT names ... JOIN project_observations) instead of
+    # driving from the handful of project_observations rows — turning a ~10ms
+    # query into 140s (measured on a prod copy). Refresh all three together so
+    # their stats stay mutually consistent and the join order stays correct.
+    # (The deploy runs migrations but no separate post-migrate step, so this
+    # belongs here; #4211.)
     reversible do |dir|
-      dir.up { execute("ANALYZE TABLE observations") }
+      dir.up do
+        execute("ANALYZE TABLE observations")
+        execute("ANALYZE TABLE project_observations")
+        execute("ANALYZE TABLE names")
+      end
     end
   end
 end
