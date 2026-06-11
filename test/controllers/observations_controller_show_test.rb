@@ -80,7 +80,6 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:template_and_orphaned_notes_scrambled_obs)
     get(:show, params: { id: obs.id })
     assert_select("#observation_notes", text: /\+photo/)
-    assert_select("#observation_notes a[href*='/lookups/lookup_user/rolf']")
     # Underscored key should NOT appear; humanized label SHOULD appear
     assert_select("#observation_notes", text: /orphaned_caption_1/,
                                         count: 0)

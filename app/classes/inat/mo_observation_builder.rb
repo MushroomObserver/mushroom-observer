@@ -64,7 +64,15 @@ class Inat
         text_name: text_name,
         notes: inat_obs.notes,
         external_source: @inat_source,
-        external_id: inat_obs[:id].to_s }
+        external_id: inat_obs[:id].to_s }.merge(collector_attrs)
+    end
+
+    # Link the collector to an MO user when the iNat collector (a custom
+    # collector field, else the iNat login) matches a User#inat_username;
+    # otherwise store the iNat name as free text. See PR #4452 / Joe.
+    def collector_attrs
+      Observation.resolve_collector(inat_obs.collector, owner: user,
+                                                        match_inat: true)
     end
 
     # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.

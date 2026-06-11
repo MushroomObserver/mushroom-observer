@@ -74,6 +74,15 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.notes.to_s.include?("Observation Fields: none"),
            "Notes should indicate if there were no iNat 'Observation Fields'")
 
+    assert(obs.collector.present?, "Import should populate the collector")
+    assert_not(obs.notes.key?(:Collector),
+               "Collector lives in the column, not notes (#4211)")
+    # The iNat collector (here the iNat login) matches the importing user's
+    # inat_username, so the collector links to that MO user rather than
+    # staying plaintext (#4452 / Joe).
+    assert_equal(@user.unique_text_name, obs.collector)
+    assert_equal(@user.id, obs.collector_user_id)
+
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")

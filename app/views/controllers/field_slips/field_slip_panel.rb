@@ -55,8 +55,17 @@ module Views::Controllers::FieldSlips
 
     def render_observation_top_lines(obs)
       labeled(:DATE) { plain(obs.when.to_s) }
-      labeled(:COLLECTOR) { trusted_html(obs.collector.tl) }
+      render_collector_line(obs)
       labeled(:LOCATION) { render_location_link(obs) }
+    end
+
+    # Omit the line entirely when no collector is recorded (#4211).
+    # collector_textile is the column's markup/link form (with the
+    # expand-window legacy-notes fallback).
+    def render_collector_line(obs)
+      return unless obs.collector_textile
+
+      labeled(:COLLECTOR) { trusted_html(obs.collector_textile.tl) }
     end
 
     def render_observation_id_lines(obs)

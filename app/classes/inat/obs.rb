@@ -97,9 +97,7 @@ class Inat
     def notes
       # Observation form requires a "normalized" key (no spaces) for Notes parts
       snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
-
-      { Collector: collector,
-        snapshot_key => snapshot,
+      { snapshot_key => snapshot,
         Other: cleaned_description }
     end
 
@@ -234,7 +232,7 @@ class Inat
       "Collectors Name",
       "Original Collector/ Observer"
     ].freeze
-    # This will get put into MO Observation's Notes Collector:
+
     def collector
       INAT_COLLECTOR_FIELDS.each do |field_name|
         if inat_obs_field(field_name).present?

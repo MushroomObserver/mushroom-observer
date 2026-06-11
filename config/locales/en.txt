@@ -717,6 +717,8 @@
   where: locality
   WHO: Who
   who: who
+  ENTERED_BY: Entered by
+  entered_by: entered by
 
   # Common verbs/actions used as button labels.
   ADD: Add
@@ -1825,6 +1827,7 @@
   form_observations_edit_image: "[:EDIT] [:image]"
   form_observations_remove_image: "[:REMOVE] [:image]"
   form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0; longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
+  form_observations_collector_help: Who collected this specimen. Defaults to you; change it when you are entering an observation on someone else's behalf (e.g. recording foray collections).
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing. Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_open_map: "[:SHOW] [:map]"
@@ -2169,6 +2172,7 @@
   notes_template: "[:prefs_notes_template]"
   prefs_notes_template_explanation: Comma-separated list of Notes sub-headings for the Create Observation page.
   prefs_notes_template_no_other: must not include a heading named “[part]”
+  prefs_notes_template_no_collector: must not include a heading named “[part]” — the collector has its own field
   prefs_notes_template_no_dups: contains duplicate heading “[part]”
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images

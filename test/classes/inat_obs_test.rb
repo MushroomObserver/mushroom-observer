@@ -78,13 +78,15 @@ class InatObsTest < UnitTestCase
     other = "on Quercus<!--- blank line(s) removed --->\n" \
             "&#8212;<!--- blank line(s) removed --->\n" \
             "Originally posted to Mushroom Observer on Mar. 7, 2024."
-    expected_notes = { Collector: "jdcohenesq",
-                       snapshot_key => expected_snapshot,
+    expected_notes = { snapshot_key => expected_snapshot,
                        Other: other }
     assert_equal(
       expected_notes, mock_inat_obs.notes,
-      "MO notes should include: (iNat Collector || login) && iNat Description"
+      "MO notes should be the iNat snapshot && Description (collector " \
+      "lives in the collector column, not notes)"
     )
+    assert_equal("jdcohenesq", mock_inat_obs.collector,
+                 "iNat collector should map to the collector column")
 
     expect = License.where(License[:url] =~ "/by-nc/").
              where(deprecated: false).order(id: :asc).first
@@ -311,8 +313,10 @@ class InatObsTest < UnitTestCase
   end
 
   def test_notes
-    assert_equal("tyler_irvin", mock_observation("coprinus").notes[:Collector],
-                 "MO Notes should always include Collector:")
+    assert_equal("tyler_irvin", mock_observation("coprinus").collector,
+                 "iNat collector should map to the collector column")
+    assert_not(mock_observation("coprinus").notes.key?(:Collector),
+               "collector should not live in notes")
     assert_equal(
       "Collection by Heidi Randall. \nSmells like T. suaveolens. ",
       strip_html_comments(mock_observation("trametes").notes[:Other]),

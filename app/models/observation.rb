@@ -57,6 +57,8 @@
 #  source_id::              FK to Source for external imports (iNat, etc.)
 #  external_id::            Source-system id (iNat obs number, etc.)
 #  last_synced_at::         When the sync job last refreshed this obs
+#  collector::              Display string for who collected the specimen.
+#  collector_user_id::      FK to the User who collected it, when known.
 #  inat_id::                iNaturalist id (deprecated; superseded by
 #                           external_id, will be dropped post-deploy)
 #
@@ -159,6 +161,13 @@
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   attr_accessor :current_user
 
+  # Transient flag: when set, the before_create default that copies the
+  # entering user into `collector` is skipped. Field-slip-originated
+  # observations set this so a foray recorder is never auto-claimed as
+  # the collector (the collector is written on the physical slip). See
+  # build_observation and default_collector_to_creator.
+  attr_accessor :skip_collector_default
+
   include Scopes
 
   belongs_to :thumb_image, class_name: "Image",
@@ -167,6 +176,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :location
   belongs_to :rss_log
   belongs_to :user
+  # The MO user who collected the specimen, when that identity is known.
+  # Distinct from `user` (who entered the record). Null for imports until
+  # the identity is claimed (#4217) and for legacy native obs. See #4211.
+  belongs_to :collector_user, class_name: "User", optional: true
   # Avoids colliding with the `source` enum below (entry agent vs.
   # external data source — see #4208 two-axis model).
   belongs_to :external_source, class_name: "Source",
@@ -244,6 +257,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   before_save :cache_content_filter_data
   before_save :prefer_minimum_bounding_box_to_earth
   before_save :set_gps_dubious
+  before_save :reconcile_collector_user
+  before_create :default_collector_to_creator
 
   # rubocop:enable Rails/ActiveRecordCallbacksOrder
   after_update :notify_users_after_change
@@ -261,6 +276,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
+  # Only the field-slip flow builds observations this way, so the
+  # collector default-to-creator is always skipped: a foray recorder is
+  # never auto-claimed as collector. The caller assigns the resolved
+  # field-slip collector to the column afterward; a blank one stays blank
+  # (suppressed on the show page). See #4211.
   def self.build_observation(location, name, notes, date, current_user = nil)
     return nil unless location
 
@@ -268,8 +288,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     now = Time.zone.now
     user = current_user || User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
-                when: date,
-                user:, location:, name:, notes: })
+                when: date, user:, location:, name:, notes:,
+                skip_collector_default: true })
     return nil unless obs
 
     obs.user_log(user, :log_observation_created)
@@ -285,6 +305,91 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     obs
   end
 
+  # Normalize a resolved collector (User, free-text String, or nil) into
+  # the column attributes. A User sets both the display string and the FK;
+  # a string sets the free-text column; nil leaves both blank.
+  def self.collector_attrs(collector)
+    case collector
+    when User
+      { collector: collector.unique_text_name, collector_user_id: collector.id }
+    when String
+      collector.blank? ? {} : { collector: collector }
+    else
+      {}
+    end
+  end
+
+  # "_user <ref>_" textile markup, where <ref> is a login or full name. The
+  # closing "_" must be the delimiter (followed by a non-word char or
+  # end-of-string) so logins/names with internal underscores survive
+  # ("_user tyler_irvin_" -> "tyler_irvin"). Shared by the save-time collector
+  # reconcile and the CollectorNotesSeeder backfill.
+  COLLECTOR_USER_MARKUP = /_user\s+(.+?)_(?=\W|\z)/
+
+  # Resolve a raw collector string to normalized column attributes:
+  # { collector: <display string or nil>, collector_user_id: <id or nil> }.
+  # Resolution order (first hit wins):
+  #   1. blank                                   -> { nil, nil }
+  #   2. "_user <ref>_" markup                   -> the referenced MO user
+  #   3. the already-linked `existing` user      -> preserved (autocomplete
+  #      selection / backfilled-claimed identity, matched by unique_text_name)
+  #   4. the `owner` (login / name / unique_text_name)
+  #   5. match_inat: a User#inat_username        -> that user
+  #   6. an exact, unique login or name          -> that user
+  #   7. otherwise                               -> free text, no FK
+  # When a user is resolved, the display string is normalized to that
+  # user's unique_text_name so the column stays consistent with the FK.
+  # This is the EXACT resolver used on every save; the migration layers a
+  # fuzzy owner-name match on top of a free-text result.
+  def self.resolve_collector(raw, owner: nil, existing: nil, match_inat: false)
+    string = raw.to_s.strip
+    return { collector: nil, collector_user_id: nil } if string.blank?
+
+    user = collector_user_for(string, owner:, existing:, match_inat:)
+    return collector_attrs(user) if user
+
+    { collector: string[0, 1024], collector_user_id: nil }
+  end
+
+  def self.collector_user_for(string, owner:, existing:, match_inat:)
+    if (ref = string[COLLECTOR_USER_MARKUP, 1])
+      return user_by_login_or_name(ref.strip)
+    end
+
+    preserved_collector_user(string, owner:, existing:) ||
+      (match_inat && User.find_by(inat_username: string)) ||
+      user_by_login_or_name(string)
+  end
+
+  # The already-linked user (autocomplete selection / backfilled-claimed
+  # identity) or the owner, when the string still names them.
+  def self.preserved_collector_user(string, owner:, existing:)
+    return existing if existing && string == existing.unique_text_name
+    return owner if owner && owner_strings(owner).include?(string)
+
+    nil
+  end
+
+  def self.owner_strings(owner)
+    [owner.login, owner.name, owner.unique_text_name].compact_blank
+  end
+
+  # A login (exact) or a name that is unique among users.
+  def self.user_by_login_or_name(ref)
+    ref = ref.to_s.strip
+    return if ref.blank?
+
+    User.find_by(login: ref) ||
+      unique_name_match(ref) ||
+      User.lookup_unique_text_name(ref)
+  end
+
+  # A name unique among users (so it identifies one person unambiguously).
+  def self.unique_name_match(ref)
+    named = User.where(name: ref)
+    named.one? ? named.first : nil
+  end
+
   def location?
     false
   end
@@ -297,8 +402,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.can_edit?(self, user) || is_collector?(user)
   end
 
+  # A user is the collector when the linked FK is theirs. During the expand
+  # window — before the backfill links the column and the contract migration
+  # strips notes — fall back to the legacy notes[:Collector] markup so a
+  # legacy collector keeps edit permission. Inert once notes are stripped.
   def is_collector?(user)
-    user && notes[:Collector]&.include?("_user #{user.login}_")
+    return false unless user
+    return collector_user_id == user.id if collector_user_id
+    return false if collector.present?
+
+    notes[:Collector].to_s.include?("_user #{user.login}_")
   end
 
   def project_admin?(user = User.current)
@@ -1287,14 +1400,39 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  def collector
-    return notes[:Collector] if notes.include?(:Collector)
-    return notes[:collector] if notes.include?(:collector)
-    return notes[:"Collector's_Name"] if notes.include?(:"Collector's_Name")
-    return notes[:"Collector's_name"] if notes.include?(:"Collector's_name")
-    return notes[:"Collector(s)"] if notes.include?(:"Collector(s)")
+  # Textile-marked-up collector for field-slip rendering: a `_user_`
+  # link when an MO user is known, else the plain `collector` string, else
+  # the legacy notes[:Collector] during the expand window (so an un-backfilled
+  # obs still renders its collector — inert once notes are stripped), else
+  # nil (a field slip with no recorded collector renders blank). See #4211.
+  def collector_textile
+    return collector_user.textile_name if collector_user
+    return collector if collector.present?
 
-    user.textile_name
+    notes[:Collector].presence
+  end
+
+  # True when the collector identity differs from the user who entered
+  # the record (foray recorder enters on a collector's behalf, or an
+  # import where the importer differs from the iNat collector). Drives
+  # the "Entered by:" secondary label on the show page.
+  def collector_differs_from_creator?
+    if collector_user_id
+      collector_user_id != user_id
+    elsif collector.present?
+      collector != user&.unique_text_name
+    else
+      false
+    end
+  end
+
+  # True when no collector identity is recorded and the observation came
+  # from a field slip — a foray recorder entered it but the collector was
+  # not captured here (it is written on the physical slip). The show page
+  # suppresses the "Collector:" line in this case rather than falsely
+  # claiming the entering user, leaving only "Entered by:". See #4211.
+  def collector_unrecorded?
+    collector.blank? && collector_user_id.nil? && field_slip_id.present?
   end
 
   def field_slip_name
@@ -1433,5 +1571,33 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return unless new_record? || gps_inputs_changed?
 
     self.gps_dubious = compute_gps_dubious?
+  end
+
+  # Native observations default the collector to the entering user, at
+  # creation only — so merely viewing/editing a legacy row (collector
+  # still null) never silently rewrites it. Imports and explicit form
+  # values arrive non-blank and skip this. See #4211.
+  def default_collector_to_creator
+    return if collector.present? || skip_collector_default
+
+    self.collector = user&.unique_text_name
+    self.collector_user_id = user_id
+  end
+
+  # When the collector string changes, re-resolve it through the shared
+  # resolver: "_user <ref>_" markup, a bare login/name, the existing linked
+  # user (preserving an autocomplete selection or backfilled/claimed
+  # identity), or the creator all link the FK; anything else is kept as
+  # free text with the FK cleared. The resolver also normalizes the display
+  # string to the linked user's unique_text_name. An unchanged collector
+  # (e.g. a view-stats save) is left untouched.
+  def reconcile_collector_user
+    return unless will_save_change_to_attribute?(:collector) ||
+                  will_save_change_to_attribute?(:collector_user_id)
+
+    resolved = self.class.resolve_collector(collector, owner: user,
+                                                       existing: collector_user)
+    self.collector = resolved[:collector]
+    self.collector_user_id = resolved[:collector_user_id]
   end
 end

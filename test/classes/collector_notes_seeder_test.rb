@@ -1,0 +1,128 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# Exercises the #4211 collector-seeding policy (PR #4452): which legacy notes
+# values become a linked collector, a free-text collector, or are skipped.
+# The seeder delegates resolution to Observation.resolve_collector (covered in
+# observation_test.rb); these tests pin the per-key policy and the fuzzy
+# owner-name match. Used by the online backfill and the contract migration.
+class CollectorNotesSeederTest < UnitTestCase
+  def seeder
+    @seeder ||= CollectorNotesSeeder.new
+  end
+
+  # Create an obs with the given notes and a blank collector column, the
+  # state the seeder scans for.
+  def obs_with_notes(notes, user: mary)
+    obs = Observation.create!(user: user, when: Time.zone.now,
+                              where: "Anywhere", name: names(:fungi))
+    obs.update_columns(collector: nil, collector_user_id: nil, notes: notes)
+    obs
+  end
+
+  def seed(obs)
+    seeder.send(:seed, obs.reload)
+    obs.reload
+  end
+
+  # --- name-variant key: single real person kept as free text ---
+
+  def test_seed_name_variant_keeps_single_person_free_text
+    obs = seed(obs_with_notes({ "Collector's_Name": "Bill Sheehan" }))
+    assert_equal("Bill Sheehan", obs.collector)
+    assert_nil(obs.collector_user_id)
+  end
+
+  # --- name-variant key: reformatted owner name links to the owner ---
+
+  def test_seed_name_variant_fuzzy_owner_match_links_owner
+    obs = seed(obs_with_notes({ "Collector's_Name": "Rolf C. Singer" },
+                              user: rolf))
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+  end
+
+  # --- name-variant key: lists / junk / long sentences are skipped ---
+
+  def test_seed_name_variant_skips_list_junk_and_sentence
+    sentence = "Likely new species of Clitocybe based on a DNA barcode " \
+               "of similar collections"
+    [{ "Collector's_Name": "D. Newman & R. Vandegrift" },
+     { "Collector's_Name": "N/A" },
+     { "Collector's_Name": sentence }].each do |n|
+      obs = seed(obs_with_notes(n))
+      assert_nil(obs.collector, "should skip #{n.values.first.inspect}")
+      assert_nil(obs.collector_user_id)
+    end
+  end
+
+  # --- "Collector(s)" is user-only: links when resolvable, else skipped ---
+
+  def test_seed_collectors_key_links_resolvable_user
+    obs = seed(obs_with_notes({ "Collector(s)": rolf.login }, user: mary))
+    assert_equal(rolf.id, obs.collector_user_id)
+  end
+
+  def test_seed_collectors_key_skips_unresolvable_free_text
+    obs = seed(obs_with_notes({ "Collector(s)": "Gerry Ansell" },
+                              user: mary))
+    assert_nil(obs.collector)
+    assert_nil(obs.collector_user_id)
+  end
+
+  # --- canonical :Collector seeds even non-person free text ---
+
+  def test_seed_canonical_collector_keeps_free_text
+    obs = seed(obs_with_notes({ Collector: "N/A" }))
+    assert_equal("N/A", obs.collector)
+    assert_nil(obs.collector_user_id)
+  end
+
+  def test_seed_canonical_collector_markup_links_user
+    obs = seed(obs_with_notes({ Collector: "_user rolf_" }, user: mary))
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+  end
+
+  # --- the lowercase :collector key is not a seed source ---
+
+  def test_seed_ignores_lowercase_collector_key
+    obs = seed(obs_with_notes({ collector: "my collectors" }))
+    assert_nil(obs.collector)
+  end
+
+  # --- run: full-scan entry point (the backfill / migration safety pass) ---
+
+  def test_run_seeds_blank_collector_columns
+    obs = obs_with_notes({ "Collector's_Name": "Bill Sheehan" })
+    seeder.run
+    assert_equal("Bill Sheehan", obs.reload.collector)
+  end
+
+  # run writes the unresolved-ref log when a "_user …_" markup names no MO
+  # user (exercises the unresolved-log write).
+  def test_run_records_and_logs_unresolved_user_markup
+    obs_with_notes({ Collector: "_user no_such_login_x_" })
+    seeder.run
+    assert(seeder.unresolved.any? { |r| r[:ref] == "no_such_login_x" })
+  end
+
+  # run writes the skipped-values log when a name-variant value is a list
+  # (exercises the skipped-log write).
+  def test_run_records_and_logs_skipped_variant
+    obs_with_notes({ "Collector's_Name": "A. One & B. Two" })
+    seeder.run
+    assert(seeder.skipped.any?)
+  end
+
+  # A non-writable log dir must not abort an otherwise-successful seed: the
+  # filesystem error is rescued and the seeding still stands.
+  def test_run_survives_unwritable_log_dir
+    obs = obs_with_notes({ Collector: "Jane Forager" })
+    File.stub(:open, ->(*) { raise(Errno::EACCES.new("denied")) }) do
+      seeder.run
+    end
+    assert_equal("Jane Forager", obs.reload.collector)
+  end
+end
