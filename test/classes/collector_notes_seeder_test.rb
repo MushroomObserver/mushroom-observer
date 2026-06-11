@@ -99,4 +99,30 @@ class CollectorNotesSeederTest < UnitTestCase
     seeder.run
     assert_equal("Bill Sheehan", obs.reload.collector)
   end
+
+  # run writes the unresolved-ref log when a "_user …_" markup names no MO
+  # user (exercises the unresolved-log write).
+  def test_run_records_and_logs_unresolved_user_markup
+    obs_with_notes({ Collector: "_user no_such_login_x_" })
+    seeder.run
+    assert(seeder.unresolved.any? { |r| r[:ref] == "no_such_login_x" })
+  end
+
+  # run writes the skipped-values log when a name-variant value is a list
+  # (exercises the skipped-log write).
+  def test_run_records_and_logs_skipped_variant
+    obs_with_notes({ "Collector's_Name": "A. One & B. Two" })
+    seeder.run
+    assert(seeder.skipped.any?)
+  end
+
+  # A non-writable log dir must not abort an otherwise-successful seed: the
+  # filesystem error is rescued and the seeding still stands.
+  def test_run_survives_unwritable_log_dir
+    obs = obs_with_notes({ Collector: "Jane Forager" })
+    File.stub(:open, ->(*) { raise(Errno::EACCES.new("denied")) }) do
+      seeder.run
+    end
+    assert_equal("Jane Forager", obs.reload.collector)
+  end
 end
