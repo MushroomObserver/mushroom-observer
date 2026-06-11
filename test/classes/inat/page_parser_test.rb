@@ -93,6 +93,18 @@ class Inat
                  "URL mode should not pass id filter (uses id_above instead)")
     end
 
+    def test_url_request_query_args_strips_only_id_key
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&only_id=true"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_nil(args[:only_id],
+                 "URL mode must not pass only_id — importer needs full JSON")
+    end
+
     def test_url_request_query_args_sets_pagination_params
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058"

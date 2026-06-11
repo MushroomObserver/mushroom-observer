@@ -96,6 +96,7 @@ class Inat
       args.merge!(id_above: effective_id_above, per_page: 200,
                   order: "asc", order_by: "id")
       args.delete(:id)
+      args.delete(:only_id)
       args
     end
 
