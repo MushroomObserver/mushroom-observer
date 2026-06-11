@@ -87,5 +87,82 @@ module Account
       assert_redirected_to(account_api_keys_path)
       assert_equal("new name", key.reload.notes)
     end
+
+    # The turbo_stream branches in create/update/destroy/activate go
+    # through `render_update_table_and_flash`, which emits two
+    # `turbo_stream` actions — the table replace and the page-flash
+    # update. The legacy ERB partial these replaced (`_update_table_and_flash`)
+    # is gone in #4503, so cover the Ruby paths explicitly.
+    def test_create_via_turbo_stream
+      login("mary")
+
+      post(:create,
+           params: { api_key: { notes: "via turbo" } },
+           format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select(
+        "turbo-stream[action='replace'][target='account_api_keys_table']"
+      )
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert(mary.reload.api_keys.any? { |k| k.notes == "via turbo" })
+    end
+
+    def test_update_via_turbo_stream
+      key = mary.api_keys.create(notes: "before")
+      login("mary")
+
+      patch(:update,
+            params: { id: key.id, api_key: { notes: "after" } },
+            format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select(
+        "turbo-stream[action='replace'][target='account_api_keys_table']"
+      )
+      assert_equal("after", key.reload.notes)
+    end
+
+    def test_destroy_via_turbo_stream
+      key = mary.api_keys.create(notes: "doomed")
+      login("mary")
+
+      delete(:destroy, params: { id: key.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select(
+        "turbo-stream[action='replace'][target='account_api_keys_table']"
+      )
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_nil(APIKey.find_by(id: key.id))
+    end
+
+    # `activate` flips an unverified key's `verified` timestamp and
+    # responds with the same two `turbo_stream` actions.
+    def test_activate_via_turbo_stream
+      key = APIKey.new(user_id: mary.id, notes: "unverified")
+      key.save!
+      assert_nil(key.verified)
+      login("mary")
+
+      put(:activate, params: { id: key.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select(
+        "turbo-stream[action='replace'][target='account_api_keys_table']"
+      )
+      assert_not_nil(key.reload.verified)
+    end
+
+    def test_activate_via_html_redirects
+      key = APIKey.new(user_id: mary.id, notes: "unverified")
+      key.save!
+      login("mary")
+
+      put(:activate, params: { id: key.id })
+
+      assert_redirected_to(account_api_keys_path)
+      assert_not_nil(key.reload.verified)
+    end
   end
 end

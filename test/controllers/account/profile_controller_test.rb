@@ -49,6 +49,64 @@ module Account
       assert_flash_text(:runtime_no_changes.t)
     end
 
+    # place_name doesn't match any Location → @need_location = true →
+    # post-save redirect goes to new_location_path so the user can
+    # define it (lines 53, 90-91 of profile_controller.rb). Also bumps
+    # `notes` so `@user.changed?` is true and the no-changes early
+    # return doesn't fire first.
+    def test_update_with_unknown_place_name_redirects_to_new_location
+      login("rolf", "testpassword")
+      unknown = "Atlantis, Wonderland"
+
+      patch(:update, params: {
+              user: {
+                name: rolf.name, notes: "fresh notes",
+                mailing_address: "", place_name: unknown
+              }
+            })
+
+      assert_flash_text(:runtime_profile_must_define.t)
+      assert_redirected_to(new_location_path(where: unknown,
+                                             set_user: rolf.id))
+    end
+
+    # Blank place_name when the user previously had a location →
+    # `@user.location = nil` (line 59 of profile_controller.rb).
+    def test_update_with_blank_place_name_clears_location
+      rolf.location = locations(:burbank)
+      rolf.save!
+      assert_not_nil(rolf.reload.location)
+      login("rolf", "testpassword")
+
+      patch(:update, params: {
+              user: {
+                name: rolf.name, notes: "", mailing_address: "",
+                place_name: ""
+              }
+            })
+
+      assert_nil(rolf.reload.location)
+    end
+
+    # User save failure → `flash_object_errors` + `render_edit_phlex`
+    # (lines 81-82 of profile_controller.rb).
+    def test_update_with_invalid_user_renders_edit_form
+      login("rolf", "testpassword")
+      # Set up a name long enough to trip the User#name length cap.
+      too_long = "x" * 1000
+
+      patch(:update, params: {
+              user: {
+                name: too_long, notes: "", mailing_address: "",
+                place_name: ""
+              }
+            })
+
+      assert_response(:success)
+      assert_select("form")
+      assert_flash_error
+    end
+
     # Test uploading mugshot for user profile.
     def test_add_mugshot
       # Create image directory and populate with test images.

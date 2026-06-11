@@ -37,7 +37,7 @@ module Account
       post(:create,
            params: { user: { login: "rolf", password: "not_correct" } })
       assert_nil(@request.session["user_id"])
-      assert_template("account/login/new")
+      assert_select("body.login__new")
 
       user = User.create!(
         login: "api",
@@ -45,12 +45,12 @@ module Account
       )
       post(:create, params: { user: { login: "api", password: "" } })
       assert_nil(@request.session["user_id"])
-      assert_template("account/login/new")
+      assert_select("body.login__new")
 
       user.update(verified: Time.zone.now)
       post(:create, params: { user: { login: "api", password: "" } })
       assert_nil(@request.session["user_id"])
-      assert_template("account/login/new")
+      assert_select("body.login__new")
 
       user.change_password("try_this_for_size")
       post(:create,
@@ -98,6 +98,57 @@ module Account
 
       assert_response(:success)
       assert_head_title(:email_new_password_title.l)
+    end
+
+    # When `@new_user.save` fails inside
+    # `set_random_password_for_new_user_and_email_them`,
+    # the controller flashes the validation errors instead of
+    # sending the email (line 130 of login_controller.rb). Invoke
+    # the private method directly with a stubbed-save User so we
+    # don't need a full Mocha-style any_instance stub.
+    def test_set_random_password_save_failure_flashes_errors
+      user = users(:roy)
+      ctrl = @controller
+      ctrl.instance_variable_set(:@new_user, user)
+
+      # Don't populate `user.errors` — adding errors trips MO's i18n
+      # tag tracker on teardown. Instead stub `flash_object_errors`
+      # to record that it was called.
+      flash_object_errors_called = false
+      ctrl.define_singleton_method(:flash_object_errors) do |obj|
+        flash_object_errors_called = true if obj == user
+      end
+
+      ActionMailer::Base.deliveries.clear
+      assert_no_enqueued_jobs do
+        user.stub(:save, false) do
+          ctrl.send(:set_random_password_for_new_user_and_email_them)
+        end
+      end
+
+      assert_empty(ActionMailer::Base.deliveries,
+                   "Save failure should not deliver the password email")
+      assert(flash_object_errors_called,
+             "Expected flash_object_errors(@new_user) on save failure")
+    end
+
+    # `switch_to_user` is private; the legacy code path covers the
+    # `session[:real_user_id].blank?` branch (lines 136-137) when an
+    # admin switches into another user from themselves. The logout
+    # action is the only public caller and pre-guards
+    # `real_user_id.present?`, so call the private method directly
+    # to exercise the otherwise-dead branch.
+    def test_switch_to_user_with_blank_real_user_id_sets_session
+      ctrl = @controller
+      session.clear
+      User.current = users(:rolf)
+      target = users(:mary)
+
+      ctrl.send(:switch_to_user, target)
+
+      assert_equal(users(:rolf).id, session[:real_user_id])
+      assert_nil(session[:admin])
+      assert_equal(target, User.current)
     end
 
     def test_email_new_password
