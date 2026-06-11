@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Views::Layouts::Sidebar
+class Views::Layouts::Sidebar
   # Base class for sidebar sections that render a heading and list of
   # links.
   #

@@ -14,7 +14,18 @@
 #
 module ApplicationController::Authentication
   def self.included(base)
-    base.helper_method(:permission?, :reviewer?, :in_admin_mode?)
+    base.helper_method(:permission?, :reviewer?, :in_admin_mode?,
+                       :current_user)
+  end
+
+  # Request-scoped accessor for the logged-in User. Lives on the
+  # controller so the request/session boundary is the only thing
+  # that can answer "who's looking at this page" — model-level
+  # `User.current` is thread-local global state that ought to die.
+  # `helper_method` exposes it to ERB; `Components::Base`
+  # registers it as a value helper for Phlex views.
+  def current_user
+    @user
   end
 
   ##############################################################################

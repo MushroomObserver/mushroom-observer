@@ -1,0 +1,127 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# Targeted coverage tests for the request-pipeline filter helpers
+# defined directly on `ApplicationController`. Hosted on
+# `InfoController` (a low-side-effect controller whose public
+# `intro` action runs the full filter stack).
+#
+# Excludes `kick_out_excessive_traffic` / `kick_out_robots` /
+# `is_cool?` — exercising those branches requires stubbing
+# `IpStats.blocked?` / `browser.bot?` (per-PR instruction to
+# skip those).
+class ApplicationControllerTest < FunctionalTestCase
+  tests InfoController
+
+  # `change_theme_to` is invoked by `choose_layout` when the
+  # request carries a `?user_theme=...` param. Three branches:
+  # (1) known theme + logged-in user persists it on the user,
+  # (2) known theme + no user persists it in the session,
+  # (3) unknown theme falls back to layout assignment.
+  def test_user_theme_param_assigns_to_logged_in_user
+    user = rolf
+    theme = MO.themes.first
+    original_theme = user.theme
+    login("rolf")
+
+    get(:intro, params: { user_theme: theme })
+
+    assert_response(:success)
+    assert_equal(theme, user.reload.theme,
+                 "Logged-in user's theme should persist to the model")
+  ensure
+    user&.update_column(:theme, original_theme)
+  end
+
+  def test_user_theme_param_logged_out_persists_in_session
+    theme = MO.themes.first
+
+    get(:intro, params: { user_theme: theme })
+
+    assert_response(:success)
+    assert_equal(theme, session[:theme],
+                 "Logged-out theme change should land in session")
+  end
+
+  def test_user_theme_param_unknown_value_sets_layout_session
+    # An unknown theme name falls through to `session[:layout] =
+    # change`, which `choose_layout` then returns. With a bogus
+    # layout name, Rails raises MissingTemplate after the session
+    # assignment — that's fine; we only care that the assignment
+    # happened (covers L139 in `application_controller.rb`).
+    assert_raises(ActionView::MissingTemplate) do
+      get(:intro, params: { user_theme: "BOGUS_LAYOUT" })
+    end
+
+    assert_equal("BOGUS_LAYOUT", session[:layout],
+                 "Unknown theme should be treated as a layout name")
+  end
+
+  # `fix_bad_domains` redirects GETs to `MO.http_domain` when the
+  # request host matches one of `MO.bad_domains` (configured in
+  # `test.rb` as `www.mushroomobserver.org`). Covers L206 in
+  # `application_controller.rb`.
+  def test_fix_bad_domains_redirects_when_host_matches
+    @request.host = "www.mushroomobserver.org"
+
+    get(:intro)
+
+    assert_redirected_to(/#{Regexp.escape(MO.http_domain)}/,
+                         "GET against a bad domain should redirect")
+  end
+
+  # `extra_gc` just calls `ObjectSpace.garbage_collect`. Wired in
+  # as an `around_action` on some debug-only endpoints; not
+  # routinely exercised. Cover by calling directly on a controller
+  # instance.
+  def test_extra_gc_invokes_garbage_collect
+    @controller.extra_gc # should not raise
+  end
+
+  # `default_thumbnail_size` returns the logged-in user's
+  # preference if set, else the session value, else "thumbnail".
+  def test_default_thumbnail_size_returns_user_preference
+    user = rolf
+    original = user.thumbnail_size
+    user.update!(thumbnail_size: "small")
+    login("rolf")
+    get(:intro)
+
+    assert_equal("small", @controller.default_thumbnail_size)
+  ensure
+    user&.update_column(:thumbnail_size, original)
+  end
+
+  def test_default_thumbnail_size_falls_back_to_session
+    get(:intro)
+    session[:thumbnail_size] = "small"
+
+    assert_equal("small", @controller.default_thumbnail_size)
+  end
+
+  # `default_thumbnail_size_set` persists to the user when one is
+  # logged in AND the new value differs from the current
+  # preference; otherwise it sets the session value.
+  def test_default_thumbnail_size_set_persists_to_logged_in_user
+    user = rolf
+    original = user.thumbnail_size
+    user.update!(thumbnail_size: "thumbnail")
+    login("rolf")
+    get(:intro)
+
+    @controller.default_thumbnail_size_set("small")
+
+    assert_equal("small", user.reload.thumbnail_size)
+  ensure
+    user&.update_column(:thumbnail_size, original)
+  end
+
+  def test_default_thumbnail_size_set_falls_back_to_session
+    get(:intro)
+
+    @controller.default_thumbnail_size_set("small")
+
+    assert_equal("small", session[:thumbnail_size])
+  end
+end

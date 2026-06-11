@@ -27,19 +27,17 @@ class Views::Base < Components::Base
   register_value_helper :add_sorter
   register_value_helper :container_class
   register_value_helper :column_classes
-  register_value_helper :content_for
+  # `content_padding` is the MO-specific layout-class setter
+  # (`:panels` / `:no_panels` / etc.) that the application layout
+  # reads. Not part of `Phlex::Rails::Helpers::ContentFor`.
+  # (`Phlex::Rails::Helpers::ContentFor` itself is on Components::Base
+  # — `content_for` and `content_for?` are available everywhere.)
+  register_value_helper :content_padding
   register_value_helper :flash_error
   # `paginated_results` takes a block and emits the surrounding
   # pagination HTML around it — output helper, mark_safe so Phlex
   # trusts the returned SafeBuffer.
   register_output_helper :paginated_results, mark_safe: true
-  # `controller` (the ActionController instance) is referenced from
-  # Phlex views that build `Tab::RelatedQuery.new(...)` to compute
-  # cross-model "related index" URLs (e.g. species-list show →
-  # Locations / Images links). ERB views have it for free; Phlex
-  # views need it registered.
-  register_value_helper :controller
-
   # Stable request-context predicate exposed to all Phlex views.
   # Reads `session[:admin]` via `ApplicationController::Authentication`
   # (`base.helper_method(:permission?, :reviewer?, :in_admin_mode?)`),

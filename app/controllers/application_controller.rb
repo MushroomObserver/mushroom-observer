@@ -53,9 +53,6 @@ class ApplicationController < ActionController::Base
   before_action :track_translations
   before_action :set_languages
 
-  # Make show_name_helper available to nested partials
-  helper :names
-
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
     skip_before_action(:verify_authenticity_token)

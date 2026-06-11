@@ -28,6 +28,21 @@ class LocationsController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Swaps `updated_at` for
+  # `rss_log` when the active query orders by rss_log. Read by
+  # `add_sorter` in the view. Each key must resolve to
+  # `Location.order_by_<key>`.
+  def index_sort_options
+    rss_log = @query&.params&.dig(:order_by) == "rss_log"
+    [
+      ["name",                               :sort_by_name.t],
+      ["created_at",                         :sort_by_created_at.t],
+      [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
+      ["num_views",                          :sort_by_num_views.t],
+      ["box_area",                           :sort_by_box_area.t]
+    ]
+  end
+
   private
 
   def default_sort_order

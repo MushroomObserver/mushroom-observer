@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-module Views::Layouts::Sidebar
+class Views::Layouts::Sidebar
   class LoginTest < ComponentTestCase
     include Rails.application.routes.url_helpers
 

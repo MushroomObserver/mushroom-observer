@@ -12,8 +12,14 @@ class ImagesControllerTest < FunctionalTestCase
     assert_page_title(:IMAGES.l)
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
+  # Sorting by `name` or `user` flips `opts[:letters] = true` in
+  # `ImagesController#index_display_opts`, switching the index to
+  # letter-based pagination.
+  def test_index_sort_by_name_enables_letter_pagination
+    login
+    get(:index, params: { by: "name" })
+
+    assert_response(:success)
   end
 
   def test_index_by_user
@@ -70,6 +76,21 @@ class ImagesControllerTest < FunctionalTestCase
 
     assert_flash_error(:runtime_no_conditions.l)
     assert_redirected_to(search_advanced_path)
+  end
+
+  # Covers the `[query, {}]` success-return tuple at the end of
+  # `ImagesController#advanced_search` — `test_index_advanced_search_error`
+  # only exercises the rescue path.
+  def test_index_advanced_search_success
+    query = Query.lookup_and_save(:Image, has_notes: true)
+    assert(query.params.any?, "Test needs a query with conditions")
+
+    login
+    get(:index, params: { q: @controller.q_param(query),
+                          advanced_search: true })
+
+    assert_response(:success)
+    assert_select("body.images__index")
   end
 
   # The pattern param is maintained only for backwards compatibility.

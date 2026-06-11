@@ -1,9 +1,15 @@
 # frozen_string_literal: true
 
-# One species_list "listing" row — used by `index.html.erb` and the
-# observation-attach edit page. Title row + place / user row on the
-# left, optional REMOVE / ADD button on the right (mutually exclusive,
-# driven by which page the listing renders on).
+# One species_list "listing" row, rendered inside a
+# `Components::ListGroup#item`. Used by:
+#   - `Views::Controllers::SpeciesLists::Index#render_list` (the
+#     species_lists index page)
+#   - `observations/species_lists/edit.html.erb` (the
+#     "manage species lists for this observation" page)
+# Title row + place / user row on the left, optional REMOVE / ADD
+# button on the right (mutually exclusive, driven by which page the
+# listing renders on). Emits contents only — no list-group-item
+# wrapper of its own; the surrounding ListGroup item provides it.
 module Views::Controllers::SpeciesLists
   class Listing < Views::Base
     def initialize(species_list:, observation: nil,
@@ -16,14 +22,12 @@ module Views::Controllers::SpeciesLists
       @project = project
     end
 
+    # Row contents only — the surrounding `<div class="list-group-item
+    # d-flex justify-content-between align-items-start">` is emitted by
+    # `Components::ListGroup#item` in the Index view.
     def view_template
-      div(
-        class: "list-group-item d-flex justify-content-between " \
-               "align-items-start"
-      ) do
-        render_info
-        render_manage_section if @remove || @add
-      end
+      render_info
+      render_manage_section if @remove || @add
     end
 
     private
@@ -104,6 +108,9 @@ module Views::Controllers::SpeciesLists
     end
 
     # Inlined from `SpeciesListsHelper#species_list_add_obs_button`.
+    # `btn: "btn btn-default"` gives the ADD button the Bootstrap
+    # button-shape it had under the legacy helper — without it,
+    # the row's ADD action renders as a bare link.
     def render_add_obs_button
       render(Components::CrudButton::Put.new(
                name: :ADD.t,
@@ -111,7 +118,8 @@ module Views::Controllers::SpeciesLists
                  id: @observation.id,
                  species_list_id: @species_list.id,
                  commit: "add"
-               )
+               ),
+               btn: "btn btn-default"
              ))
     end
   end

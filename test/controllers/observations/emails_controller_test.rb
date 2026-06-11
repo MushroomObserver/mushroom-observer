@@ -75,7 +75,7 @@ module Observations
              params: { id: obs.id, observer_question: { message: "" } })
       end
       assert_flash_error
-      assert_template(:new)
+      assert_select("body.emails__new")
     end
   end
 end

@@ -1,0 +1,90 @@
+# frozen_string_literal: true
+
+# A single row in the Names index list. Replaces the per-row
+# `app/views/controllers/names/_name.erb` partial.
+#
+# Each row carries:
+#   - `Components::IdBadge` with the Name's id
+#   - the localized display-name link (with a Stimulus
+#     `clipboard` controller wrapped around the name + a
+#     copy-button so users can clipboard the name string)
+#   - the observations count badge (per-name count derived in
+#     bulk by the Index view via `Name.count_observations`)
+#   - on the `has_descriptions` subaction only, three extra
+#     `<span>`s with the description's authors / note status /
+#     review status
+class Views::Controllers::Names::Index::Row < Views::Base
+  prop :name, ::Name
+  prop :user, _Nilable(::User), default: nil
+  prop :counts, _Hash(Integer, Integer), default: -> { {} }
+  prop :has_descriptions, _Boolean, default: false
+
+  # Row contents only — the surrounding `<div class="list-group-item">`
+  # is emitted by `Components::ListGroup` in the Index view.
+  def view_template
+    render_id_badge
+    render_clipboard_wrapper
+    render_count_badge
+    render_description_columns if @has_descriptions
+  end
+
+  private
+
+  def render_id_badge
+    span do
+      render(Components::IdBadge.new(
+               object: @name, extra_class: "rss-id mr-4"
+             ))
+    end
+  end
+
+  def render_clipboard_wrapper
+    span(
+      data: { controller: "clipboard",
+              clipboard_copied_value: :COPIED.l }
+    ) do
+      render_display_name_link
+      render_copy_button
+    end
+  end
+
+  def render_display_name_link
+    a(href: name_path(@name.id)) do
+      span(class: "display-name",
+           data: { clipboard_target: "source" }) do
+        trusted_html(@name.user_display_name(@user).t)
+      end
+    end
+  end
+
+  def render_copy_button
+    button(
+      type: "button", role: "button",
+      class: "btn btn-link py-0 link-normal opacity-75",
+      data: { toggle: "tooltip", placement: "bottom",
+              title: :COPY_THIS_NAME.l,
+              action: "clipboard#copy" }
+    ) do
+      render(Components::LinkIcon.new(type: :copy))
+    end
+  end
+
+  def render_count_badge
+    count = @counts[@name.id]
+    return unless count
+
+    span(class: "badge") { plain(count.to_s) }
+  end
+
+  # `has_descriptions` subaction columns: when a description
+  # exists, show authors / note status / review status; when it
+  # doesn't, show the placeholder text the legacy ERB used.
+  def render_description_columns
+    desc = @name.description
+    return span { plain("--- not the default ---") } unless desc
+
+    span { plain(desc.authors.map(&:login).join(", ")) }
+    span { plain(desc.note_status.join("/")) }
+    span { plain(:"review_#{desc.review_status}".l) }
+  end
+end

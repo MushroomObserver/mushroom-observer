@@ -7,7 +7,7 @@
 #  for the one exception).  In the end all these Name's cause rudimentary
 #  Observation's to spring into existence.
 #
-class SpeciesListsController < ApplicationController
+class SpeciesListsController < ApplicationController # rubocop:disable Metrics/ClassLength
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
   before_action :store_location, only: [:show]
@@ -30,6 +30,30 @@ class SpeciesListsController < ApplicationController
              query: @query, pagination_data: @pagination_data,
              objects: @objects, project: @project, error: @error
            ))
+  end
+
+  # Sort options for the index page. Swaps `updated_at` for
+  # `rss_log` when the active query orders by rss_log, so
+  # "Updated" picks the right backing column. Read by the Phlex
+  # Index view's `add_sorter`.
+  def index_sort_options
+    self.class.sort_options(query: @query)
+  end
+
+  # Class-level cousin of `#index_sort_options` so foreign callers
+  # can borrow the table without instantiating the controller.
+  # `Observations::SpeciesListsController#edit` uses it to sort
+  # the `@all_lists` query when listing species_lists for an
+  # observation. Pass the relevant query to flip rss_log labels.
+  def self.sort_options(query: nil)
+    rss_log = query&.params&.dig(:order_by) == "rss_log"
+    [
+      ["title",                              :sort_by_title.t],
+      ["date",                               :sort_by_date.t],
+      ["user",                               :sort_by_user.t],
+      ["created_at",                         :sort_by_created_at.t],
+      [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t]
+    ]
   end
 
   private

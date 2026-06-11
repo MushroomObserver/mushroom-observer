@@ -12,7 +12,11 @@ module Observations
       return unless @observation && can_email_user_question?(@observation)
 
       respond_to do |format|
-        format.html
+        format.html do
+          render(Views::Controllers::Observations::Emails::New.new(
+                   observation: @observation
+                 ))
+        end
         format.turbo_stream do
           render(Components::ModalTurboForm.new(
                    identifier: "observation_email",
@@ -49,7 +53,9 @@ module Observations
 
       flash_error(:runtime_missing.t(field: :message.l))
       @observation = observation
-      render(:new)
+      render(Views::Controllers::Observations::Emails::New.new(
+               observation: observation
+             ))
       false
     end
 

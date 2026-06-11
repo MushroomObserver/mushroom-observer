@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Views::Layouts::Sidebar
+class Views::Layouts::Sidebar
   # Renders the user section of the sidebar for logged-in users
   # (mobile only).
   #

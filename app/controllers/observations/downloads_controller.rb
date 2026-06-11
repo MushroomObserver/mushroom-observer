@@ -9,6 +9,9 @@ module Observations
       return too_many_results if too_many_results?
 
       update_stored_query(@query) # also stores query in session
+      render(Views::Controllers::Observations::Downloads::New.new(
+               query_param: q_param
+             ))
     end
 
     def create

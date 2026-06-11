@@ -16,18 +16,18 @@ class NamesControllerShowTest < FunctionalTestCase
     # assert_equal(0, QueryRecord.count)
     login
     get(:show, params: { id: names(:coprinus_comatus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Creates three for children and all four observations sections,
     # but one never used. (? Now 4 - AN 20240107) (? Now 5 - AN 20241217)
     # assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:coprinus_comatus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Should re-use all the old queries.
     # assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:agaricus_campestris).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Needs new queries this time.
     # (? Up from 7 to 9 - AN 20240107)
     # Why are we making this assertion if we don't know what the
@@ -36,7 +36,26 @@ class NamesControllerShowTest < FunctionalTestCase
 
     # Agarcius: has children taxa.
     get(:show, params: { id: names(:agaricus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
+  end
+
+  # Regression for #4491: name text (author, synonyms, classification
+  # rows) is textile-safe HTML. The Phlex conversion emitted it via
+  # `plain`, which re-escaped the entities, so panels showed literal
+  # codes like "&amp;" / "&#8212;" instead of "&" / "—". Same root cause
+  # / fix (`trusted_html`) in the nomenclature and classification panels.
+  def test_show_name_renders_html_entities_not_codes
+    login
+    # author is "(Bull.) Vilgalys, Hopple & Jacq. Johnson"
+    name = names(:coprinellus_micaceus)
+    get(:show, params: { id: name.id })
+    assert_response(:success)
+
+    nomenclature = css_select("#nomenclature").text
+    assert_includes(nomenclature, "Hopple & Jacq. Johnson",
+                    "ampersand should render as a character, not a code")
+    assert_not_includes(nomenclature, "&amp;",
+                        "HTML entity codes should not be visible as text")
   end
 
   def test_show_name_species_with_icn_id
@@ -197,7 +216,29 @@ class NamesControllerShowTest < FunctionalTestCase
   def test_show_name_with_eol_link
     login
     get(:show, params: { id: names(:abortiporus_biennis_for_eol).id })
-    assert_template("show")
+    assert_select("#nomenclature")
+  end
+
+  def test_citation_url_renders_as_link
+    url = "http://example.com/protologue"
+    name = names(:peltigera)
+
+    name.update!(citation: url)
+    login
+    get(:show, params: { id: name.id })
+    assert_select(
+      "#nomenclature a[href='#{url}']",
+      { count: 1 },
+      "Bare URL citation should render as a clickable link"
+    )
+
+    name.update!(citation: "\"Protologue\":#{url}")
+    get(:show, params: { id: name.id })
+    assert_select(
+      "#nomenclature a[href='#{url}']",
+      { text: "Protologue", count: 1 },
+      "Textile-style citation should render as a link with correct text"
+    )
   end
 
   def test_name_external_links_exist

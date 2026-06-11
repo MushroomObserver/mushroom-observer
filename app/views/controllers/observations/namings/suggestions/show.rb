@@ -18,7 +18,7 @@ module Views::Controllers::Observations::Namings::Suggestions
   class Show < Views::Base
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
-    prop :suggestions, _Array(_Any), default: -> { [] }
+    prop :suggestions, _Array(::Suggestion), default: -> { [] }
 
     def view_template
       add_chrome

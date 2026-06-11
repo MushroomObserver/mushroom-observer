@@ -21,6 +21,22 @@ class BaseTest < ComponentTestCase
     end
   end
 
+  # Reads the registered `current_user` value helper. Used by the
+  # `Components::Base.current_user` tests below.
+  class CurrentUserReader < Components::Base
+    def view_template
+      plain(current_user&.login || "nobody")
+    end
+  end
+
+  # Reads the registered `current_query` value helper. Used by the
+  # `Components::Base.current_query` tests below.
+  class CurrentQueryReader < Components::Base
+    def view_template
+      plain(current_query&.id&.to_s || "no-query")
+    end
+  end
+
   def test_trusted_html_with_plain_string
     html = render_component(TestComponent.new)
     doc = Nokogiri::HTML(html)
@@ -63,5 +79,38 @@ class BaseTest < ComponentTestCase
     html = render_component(TestComponent.new)
 
     assert_not_includes(html, "<!-- Before")
+  end
+
+  # `current_user` is a `register_value_helper`'d alias for the
+  # controller's `@user`; views call it instead of taking a
+  # `prop :user, _Nilable(::User)` when they only need "the viewer".
+  def test_current_user_reads_controllers_user_ivar
+    user = users(:rolf)
+    controller.instance_variable_set(:@user, user)
+
+    assert_equal(user.login, render(CurrentUserReader.new))
+  end
+
+  def test_current_user_is_nil_when_no_one_logged_in
+    controller.instance_variable_set(:@user, nil)
+
+    assert_equal("nobody", render(CurrentUserReader.new))
+  end
+
+  # `current_query` is a `register_value_helper`'d alias for
+  # `controller.current_query` — the typed `Query` view a Phlex view
+  # can fall back to when its `prop :query, _Nilable(::Query)` isn't
+  # passed, without round-tripping through the URL's q param.
+  def test_current_query_reads_controllers_current_query
+    query = ::Query.lookup_and_save(:Observation)
+    controller.instance_variable_set(:@query, query)
+
+    assert_equal(query.id.to_s, render(CurrentQueryReader.new))
+  end
+
+  def test_current_query_is_nil_when_no_query_on_controller
+    controller.instance_variable_set(:@query, nil)
+
+    assert_equal("no-query", render(CurrentQueryReader.new))
   end
 end

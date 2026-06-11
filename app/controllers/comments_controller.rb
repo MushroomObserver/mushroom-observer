@@ -34,6 +34,14 @@ class CommentsController < ApplicationController
            ))
   end
 
+  # Sort options for the index. Read by `add_sorter` in the view.
+  # Each key must resolve to `Comment.order_by_<key>`.
+  def index_sort_options
+    [["user", :sort_by_user.t],
+     ["created_at", :sort_by_posted.t],
+     ["updated_at", :sort_by_updated_at.t]].freeze
+  end
+
   private
 
   def default_sort_order

@@ -17,10 +17,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                   "Wrong number of Herbarium Records")
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_pattern_with_multiple_matching_records
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"

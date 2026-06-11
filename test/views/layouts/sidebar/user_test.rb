@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-module Views::Layouts::Sidebar
+class Views::Layouts::Sidebar
   class UserTest < ComponentTestCase
     def setup
       super

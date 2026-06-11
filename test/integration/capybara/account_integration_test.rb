@@ -25,7 +25,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       fill_in("user_login", with: "rolf")
       click_commit
     end
-    assert_selector("body.login__create")
+    assert_selector("body.login__new")
     assert_flash_text(/unsuccessful/)
 
     # Try again with incorrect password.
@@ -37,7 +37,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       uncheck("user_remember_me")
       click_commit
     end
-    assert_selector("body.login__create")
+    assert_selector("body.login__new")
     assert_flash_text(/unsuccessful/)
 
     # Try yet again with correct password.

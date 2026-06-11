@@ -13,6 +13,19 @@ class HerbariumRecordsController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Read by `add_sorter` in the
+  # view. Each key must resolve to `HerbariumRecord.order_by_<key>`.
+  def index_sort_options
+    [
+      ["herbarium_name",   :sort_by_herbarium_name.t],
+      ["herbarium_label",  :sort_by_herbarium_label.t],
+      ["initial_det",      :sort_by_initial_det.t],
+      ["accession_number", :sort_by_accession_number.t],
+      ["created_at",       :sort_by_created_at.t],
+      ["updated_at",       :sort_by_updated_at.t]
+    ].freeze
+  end
+
   private
 
   def default_sort_order

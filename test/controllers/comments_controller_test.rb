@@ -282,6 +282,14 @@ class CommentsControllerTest < FunctionalTestCase
     assert_not(obs.comments.member?(comment))
   end
 
+  # NOTE: `destroy`'s `!@comment.destroy` branch (the
+  # `flash_error(:runtime_form_comments_destroy_failed)` line) requires
+  # forcing `Comment#destroy` to return false on the controller-found
+  # instance. MO doesn't pull in Mocha (no `any_instance` stubbing).
+  # Left uncovered intentionally — defensive against AR callback
+  # abort. See `observations/namings_controller_test.rb` for the
+  # same pattern.
+
   def test_update_comment_with_no_changes
     # `comment_updated?` `!@comment.changed?` branch: notice + false.
     comment = comments(:minimal_unknown_obs_comment_1)
@@ -324,7 +332,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     post(:create, params: params)
     assert_response(:success)
-    assert_select("body.comments__create")
+    assert_select("body.comments__new")
     assert_select("form#comment_form")
   end
 

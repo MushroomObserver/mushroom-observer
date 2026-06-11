@@ -245,7 +245,8 @@ module ObservationsController::Create
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render(action: :new, location: new_observation_path)
+    render(Views::Controllers::Observations::New.new(**new_view_attrs),
+           location: new_observation_path)
   end
 
   def update_field_slip

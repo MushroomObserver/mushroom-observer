@@ -12,6 +12,9 @@ module Names::Synonyms
       return if abort_if_name_locked!(@name)
 
       @approved_names = @name.approved_synonyms
+      render(Views::Controllers::Names::Synonyms::Approve::New.new(
+               name: @name, approved_names: @approved_names
+             ))
     end
 
     def create

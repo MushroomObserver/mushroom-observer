@@ -10,6 +10,15 @@ module Names::EolData
       @timer_start = Time.current
       eol_data
       @timer_end = Time.current
+
+      respond_to do |format|
+        format.html do
+          render(Views::Controllers::Names::EolData::Preview::Show.new(
+                   names: @names
+                 ))
+        end
+        format.xml # show.xml.builder
+      end
     end
 
     private

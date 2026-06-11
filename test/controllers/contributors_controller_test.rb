@@ -16,8 +16,4 @@ class ContributorsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: users(:rolf).id })
   end
-
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
 end

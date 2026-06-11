@@ -4844,6 +4844,7 @@
   query_copyright_holder_has: copyright holder has
   query_deprecated: deprecated
   query_description_has: description has
+  query_editable_by_user: editable by
   query_field_slip_prefix_has: field slip prefix
   query_for_user: for
   query_has_author: has author

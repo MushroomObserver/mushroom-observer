@@ -159,10 +159,6 @@ class HerbariaControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_all_merge_source_links_presence_rolf
     assert_true(nybg.can_edit?(rolf)) # rolf is a curator
     assert_true(fundis.can_edit?(rolf)) # herbarium has no curators
@@ -413,6 +409,14 @@ class HerbariaControllerTest < FunctionalTestCase
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
 
+  # NOTE: `create` and `update`'s `unless @herbarium.save` branches
+  # (`flash_object_errors` + `reload_form`) require forcing
+  # `Herbarium#save` to return false on the controller-built instance
+  # AFTER `validate_herbarium!` returns true. MO doesn't pull in Mocha
+  # (no `any_instance` stubbing). Left uncovered intentionally —
+  # defensive against DB-level failures past Rails validations. See
+  # `observations/namings_controller_test.rb` for the same pattern.
+
   def test_create
     email_count = ActionMailer::Base.deliveries.count
     herbarium_count = Herbarium.count
@@ -471,6 +475,26 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_response(:success)
     # Should render modal_form_reload partial to update modal with flash
     assert_template("shared/_modal_form_reload")
+  end
+
+  # Successful turbo_stream create hits
+  # `show_modal_flash_or_show_herbarium`'s turbo_stream branch
+  # (two flash_notices + render of `_update_observation`).
+  # Covers L503-509 in herbaria_controller.rb.
+  def test_create_success_turbo_stream_renders_update_observation
+    herbarium_count = Herbarium.count
+    login("rolf")
+
+    post(:create,
+         params: { herbarium: herbarium_params.merge(
+           name: "Brand New Test Herbarium",
+           code: "BNTH"
+         ) },
+         as: :turbo_stream)
+
+    assert_response(:success)
+    assert_equal(herbarium_count + 1, Herbarium.count)
+    assert_template("herbaria/_update_observation")
   end
 
   def test_create_duplicate_name

@@ -9,6 +9,44 @@ class ObservationsController
       build_index_with_query
     end
 
+    def render_index_view
+      render(Views::Controllers::Observations::Index.new(
+               query: @query,
+               pagination_data: @pagination_data,
+               objects: @objects,
+               user: @user,
+               project: @project,
+               error: @error,
+               name_suggestions: @name_suggestions
+             ))
+    end
+
+    # `Components::MatrixTable` bypasses the fragment cache when
+    # rendering for a project admin (the admin-only Exclude button
+    # changes the markup). When the obs index is scoped to a project
+    # AND the current user is an admin of it, the controller's
+    # cache pre-check must agree — otherwise it would skip eager-
+    # loading rows it thinks are cache hits and then render uncached
+    # boxes → N+1.
+    def matrix_caches_in_this_request?
+      !@project&.is_admin?(@user)
+    end
+
+    # Sort options for the index page. Read by `add_sorter` in the
+    # view. Each key must resolve to `Observation.order_by_<key>`.
+    def index_sort_options
+      [
+        ["rss_log",           :sort_by_activity.l],
+        ["date",              :sort_by_date.l],
+        ["created_at",        :sort_by_posted.l],
+        ["name",              :sort_by_name.l],
+        ["user",              :sort_by_user.l],
+        ["confidence",        :sort_by_confidence.l],
+        ["thumbnail_quality", :sort_by_thumbnail_quality.l],
+        ["num_views",         :sort_by_num_views.l]
+      ].freeze
+    end
+
     private
 
     # Default on home is :rss_log (:log_updated_at), not :date.
@@ -34,6 +72,10 @@ class ObservationsController
     # Displays matrix of advanced search results.
     def advanced_search
       query = advanced_search_query
+      # `handle_advanced_search_invalid_q_param?` already responded;
+      # bail before the raise-and-rescue dance double-redirects.
+      return [nil, {}] if performed?
+
       # Have to check this here because we're not running the query yet.
       raise(:runtime_no_conditions.l) unless query&.params&.any?
 

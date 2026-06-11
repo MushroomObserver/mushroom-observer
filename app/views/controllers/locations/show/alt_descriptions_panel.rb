@@ -16,7 +16,11 @@ module Views::Controllers::Locations::Show
     prop :user, _Nilable(::User), default: nil
     prop :object, ::Location
     prop :projects, _Nilable(_Array(::Project)), default: nil
-    prop :current, _Nilable(_Any), default: nil
+    # Forwarded to `Descriptions::List#current` (typed there as
+    # `_Nilable(::Description)`). The currently-shown description
+    # of the parent Location, used to suppress its self-link in
+    # the alts list.
+    prop :current, _Nilable(::Description), default: nil
 
     def view_template
       render(Components::Panel.new(panel_id: "alt_descriptions")) do |panel|

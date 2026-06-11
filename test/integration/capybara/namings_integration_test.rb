@@ -50,7 +50,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.first("input[type='submit']").click
     end
 
-    namer_session.assert_selector("body.namings__create")
+    namer_session.assert_selector("body.namings__new")
     assert_flash_text(:form_naming_what_missing.l, session: namer_session)
     namer_session.
       # see https://github.com/MushroomObserver/mushroom-observer/issues/1796
@@ -60,7 +60,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.fill_in("naming_name", with: text_name)
       form.first("input[type='submit']").click
     end
-    namer_session.assert_selector("body.namings__create")
+    namer_session.assert_selector("body.namings__new")
     assert_true(namer_session.has_selector?(
                   ".alert-warning",
                   text: /MO does not recognize the name.*#{text_name}/

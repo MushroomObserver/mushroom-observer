@@ -8,7 +8,9 @@ column_classes(:seven_five)
 
 <%= tag.div(class: "row") do %>
   <%= tag.div(class: yield(:left_columns)) do %>
-    <%= tag.div(class: "mb-5") { make_map(objects: [@location]) } %>
+    <%= tag.div(class: "mb-5") do %>
+      <%= render(Components::Map.new(objects: [@location])) %>
+    <% end %>
   <% end %>
 
   <%= tag.div(class: yield(:right_columns)) do %>
