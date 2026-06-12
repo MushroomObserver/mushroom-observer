@@ -125,7 +125,8 @@ class InatImportsController < ApplicationController
       inat_url: params[:inat_url],
       import_all: params[:all],
       consent: params[:consent],
-      import_others: (import_others? ? "1" : nil)
+      import_others: (import_others? ? "1" : nil),
+      skip_inat_update: (skip_inat_update? ? "1" : nil)
     )
   end
 
@@ -145,6 +146,7 @@ class InatImportsController < ApplicationController
     merge_form_param(confirm, :inat_url)
     merge_form_param(confirm, :consent)
     merge_form_param(confirm, :import_others)
+    merge_form_param(confirm, :skip_inat_update)
     params[:all] ||= confirm[:import_all]
   end
 
@@ -161,7 +163,8 @@ class InatImportsController < ApplicationController
     render(
       Views::Controllers::InatImports::New.new(
         form: form,
-        super_importer: InatImport.super_importer?(@user)
+        super_importer: InatImport.super_importer?(@user),
+        admin_mode: in_admin_mode?
       ),
       layout: true
     )
@@ -174,7 +177,8 @@ class InatImportsController < ApplicationController
       inat_url: params[:inat_url],
       all: ("1" if params[:all] == "1"),
       consent: ("1" if params[:consent] == "1"),
-      import_others: ("1" if params[:import_others] == "1")
+      import_others: ("1" if params[:import_others] == "1"),
+      skip_inat_update: ("1" if params[:skip_inat_update] == "1")
     )
   end
 
@@ -190,6 +194,7 @@ class InatImportsController < ApplicationController
     merge_form_param(new_form, :inat_url)
     merge_form_param(new_form, :consent)
     merge_form_param(new_form, :import_others)
+    merge_form_param(new_form, :skip_inat_update)
     params[:all] ||= new_form[:all]
   end
 
@@ -275,6 +280,7 @@ class InatImportsController < ApplicationController
       inat_ids: clean_inat_ids,
       inat_url: params[:inat_url].presence,
       import_others: import_others?,
+      skip_inat_update: skip_inat_update?,
       response_errors: "",
       token: "",
       log: [],
@@ -295,6 +301,12 @@ class InatImportsController < ApplicationController
     return false unless InatImport.super_importer?(@user)
 
     params[:import_others] == "1"
+  end
+
+  def skip_inat_update?
+    return false unless in_admin_mode?
+
+    params[:skip_inat_update] == "1"
   end
 
   def clean_inat_ids
@@ -337,7 +349,7 @@ class InatImportsController < ApplicationController
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
     # InatImportJob.perform_now(inat_import) # uncomment to manually test job
-    InatImportJob.perform_later(inat_import) # uncomment for production
+    InatImportJob.perform_later(inat_import)
 
     redirect_to(inat_import_path(inat_import,
                                  params: { tracker_id: tracker.id }))

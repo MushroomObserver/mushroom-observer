@@ -143,32 +143,33 @@ class Inat
       result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058", result,
-                   "user_login should be stripped for non-superimporters " \
-                   "(add_ownership_filter sets it from inat_username)")
+                   "Should strip user_login for non-superimporters")
     end
 
-    def test_preserves_user_id_for_all_users
+    def test_always_strips_user_id
       url = "#{API_URL}?project_id=291058&user_id=12345"
       result = URLNormalizer.new(url).normalize
 
-      assert_equal("project_id=291058&user_id=12345", result,
-                   "Should not strip user-supplied `user_id` iNat API param")
+      assert_equal("project_id=291058", result,
+                   "Should strip user_id")
     end
 
-    def test_superimporter_preserves_user_login
-      url = "#{API_URL}?project_id=291058&user_login=testuser"
+    def test_superimporter_strips_user_id_preserves_user_login
+      url = "#{API_URL}?project_id=291058&user_login=testuser&user_id=12345"
       result = URLNormalizer.new(url, superimporter: true).normalize
 
       assert_equal("project_id=291058&user_login=testuser", result,
-                   "Should accept superuser-supplied iNat `user_login` param")
+                   "user_id stripped even for superimporters; " \
+                   "user_login preserved")
     end
 
-    def test_non_superimporter_strips_user_login_but_keeps_user_id
+    def test_non_superimporter_strips_user_login_and_user_id
       url = "#{API_URL}?project_id=291058&user_login=testuser&user_id=12345"
       result = URLNormalizer.new(url).normalize
 
-      assert_equal("project_id=291058&user_id=12345", result,
-                   "user_login should be stripped but user_id preserved")
+      assert_equal("project_id=291058", result,
+                   "Should strip Both user_login and user_id stripped for " \
+                   "non-superimporters")
     end
 
     def test_superimporter_strips_licensed

@@ -1085,6 +1085,31 @@ class InatImportsControllerTest < FunctionalTestCase
                   "id param from URL must be excluded from the estimate")
   end
 
+  def test_non_superuser_url_with_foreign_user_id_strips_user_id_from_estimate
+    user = users(:rolf)
+    # user_id is always stripped by URLNormalizer — iNat ORs user_id and
+    # user_login, so a user-supplied user_id alongside the injected user_login
+    # would return unexpected observations. The estimate must not include it.
+    url = "#{INAT_SITE_OBS_URL}?place_id=1&user_id=someone_else"
+
+    # Returns 5 for any request (user_id stripped; user_login only).
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    # Would return 99 if user_id leaked into the estimate request.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("user_id" => "someone_else")).
+      to_return(status: 200, body: { total_results: 99 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "5",
+                  "user_id must be stripped from the estimate request")
+  end
+
   def test_url_params_preserved_through_confirm_round_trip
     user = users(:rolf)
     inat_import = inat_imports(:rolf_inat_import)
@@ -1107,6 +1132,68 @@ class InatImportsControllerTest < FunctionalTestCase
                          "Confirmed URL via superform params should auth")
     assert_equal(normalized, inat_import.reload.inat_url,
                  "inat_url should be saved from superform hidden field")
+  end
+
+  def test_skip_inat_update_saved_when_admin_checks_it
+    inat_import = inat_imports(:rolf_inat_import)
+
+    make_admin(users(:rolf).login)
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf_inat_user", inat_ids: "123",
+             import_all: "", inat_url: "", consent: "1",
+             import_others: "", skip_inat_update: "1"
+           }
+         })
+
+    assert(inat_import.reload.skip_inat_update?,
+           "skip_inat_update should be saved when admin checks it")
+  end
+
+  def test_skip_inat_update_not_saved_without_admin_mode
+    inat_import = inat_imports(:rolf_inat_import)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf_inat_user", inat_ids: "123",
+             import_all: "", inat_url: "", consent: "1",
+             import_others: "", skip_inat_update: "1"
+           }
+         })
+
+    assert_not(inat_import.reload.skip_inat_update?,
+               "skip_inat_update should be ignored when not in admin mode")
+  end
+
+  def test_skip_inat_update_checkbox_visible_in_admin_mode
+    make_admin(users(:rolf).login)
+    get(:new)
+
+    assert_select(
+      "input[type=checkbox][name=?]",
+      "inat_import[skip_inat_update]",
+      true,
+      "skip_inat_update checkbox should appear in admin mode"
+    )
+  end
+
+  def test_skip_inat_update_checkbox_hidden_outside_admin_mode
+    user = users(:rolf)
+
+    login(user.login)
+    get(:new)
+
+    assert_select(
+      "input[type=checkbox][name=?]",
+      "inat_import[skip_inat_update]",
+      false,
+      "skip_inat_update checkbox should not appear outside admin mode"
+    )
   end
 
   ########## Utilities

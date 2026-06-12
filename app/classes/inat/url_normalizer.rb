@@ -41,6 +41,10 @@ class Inat
       "taxon_id",
       # Don't let users mess with cache control
       "ttl",
+      # iNat ORs user_id and user_login; add_ownership_filter sets user_login,
+      # so a user-supplied user_id would return unexpected observations
+      # Superimporters can use inat_login param as a work-around
+      "user_id",
       # UI-only param, would make API return 0 results
       "view",
       # We use without_field to avoid re-import of imported or mirrored obss
@@ -95,7 +99,6 @@ class Inat
 
     def context_strip_params
       strips = []
-      # We can allow user_id because we limit imports with user_login.
       strips += ["user_login"] unless @superimporter
       strips += ["licensed"] if @superimporter || @import_others
       strips
