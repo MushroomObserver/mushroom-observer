@@ -106,32 +106,31 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
 
-  acts_as_versioned(
-    if_changed: %w[
-      name
-      north
-      south
-      west
-      east
-      high
-      low
-      notes
-      box_area
-      center_lat
-      center_lng
-    ]
-  )
-  # The `acts_as_versioned` gem builds `Location::Version` but
-  # doesn't wire its `belongs_to :user` — the table has `user_id`
-  # but the gem only adds the reverse `belongs_to :location`. Add
-  # it here so `show_includes` can eager-load `{ versions: :user }`
-  # and views can read `version.user` without an N+1. Guarded by
-  # `reflect_on_association` so a future gem fix (or another
-  # initializer that defines it) is a safe no-op. Remove once the
-  # gem fork (mo_acts_as_versioned) handles this automatically.
-  unless const_get(:Version).reflect_on_association(:user)
-    const_get(:Version).belongs_to(:user, class_name: "::User",
-                                          optional: true)
+  # Columns whose change creates a new `Location::Version` row.
+  # Companion to the gem's `non_versioned_columns` setting below.
+  VERSIONED_COLUMNS = %w[
+    name
+    north
+    south
+    west
+    east
+    high
+    low
+    notes
+    box_area
+    center_lat
+    center_lng
+  ].freeze
+
+  # See `Name` for the rationale behind the `:extend` block — same
+  # pattern wires `belongs_to :user` onto `Location::Version` so
+  # `show_includes` can carry `{ versions: :user }`.
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS) do
+    def self.included(base)
+      return if base.reflect_on_association(:user)
+
+      base.belongs_to(:user, class_name: "::User", optional: true)
+    end
   end
   non_versioned_columns.push(
     "created_at",
