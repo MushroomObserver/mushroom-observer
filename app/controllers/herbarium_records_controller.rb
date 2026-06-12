@@ -13,6 +13,17 @@ class HerbariumRecordsController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `herbarium_records/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::HerbariumRecords::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user,
+             observation: @observation, error: @error
+           ))
+  end
+
   # Sort options for the index page. Read by `add_sorter` in the
   # view. Each key must resolve to `HerbariumRecord.order_by_<key>`.
   def index_sort_options
@@ -75,6 +86,11 @@ class HerbariumRecordsController < ApplicationController
     @layout = calc_layout_params
     @canonical_url = HerbariumRecord.show_url(params[:id])
     find_herbarium_record!
+    return unless @herbarium_record
+
+    render(Views::Controllers::HerbariumRecords::Show.new(
+             herbarium_record: @herbarium_record, user: @user
+           ))
   end
 
   def new
@@ -85,7 +101,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html
+      format.html { render_new_phlex }
     end
   end
 
@@ -106,7 +122,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html
+      format.html { render_edit_phlex }
     end
   end
 
@@ -143,6 +159,20 @@ class HerbariumRecordsController < ApplicationController
   def set_ivars_for_edit
     @layout = calc_layout_params
     find_herbarium_record!
+  end
+
+  def render_new_phlex
+    render(Views::Controllers::HerbariumRecords::New.new(
+             herbarium_record: @herbarium_record,
+             observation: @observation, user: @user
+           ))
+  end
+
+  def render_edit_phlex
+    render(Views::Controllers::HerbariumRecords::Edit.new(
+             herbarium_record: @herbarium_record, user: @user,
+             back: @back, back_object: @back_object
+           ))
   end
 
   def find_herbarium_record!
