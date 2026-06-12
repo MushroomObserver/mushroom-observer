@@ -158,7 +158,7 @@ class NoQueriesInPhlexViewsTest < ActiveSupport::TestCase
       if in_str
         in_str = nil if c == in_str
         out << c
-      elsif c == '"' || c == "'"
+      elsif ['"', "'"].include?(c)
         in_str = c
         out << c
       elsif c == "#"

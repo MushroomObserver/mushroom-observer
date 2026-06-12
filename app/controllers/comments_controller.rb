@@ -9,7 +9,7 @@
 #  update::
 #  destroy::
 #
-class CommentsController < ApplicationController
+class CommentsController < ApplicationController # rubocop:disable Metrics/ClassLength
   before_action :login_required
   before_action :store_location, only: [:show]
 

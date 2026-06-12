@@ -28,7 +28,7 @@ module Views::Controllers::FieldSlips
       end
 
       render(Components::VersionsFooter.new(user: current_user,
-                                          obj: @field_slip))
+                                            obj: @field_slip))
     end
   end
 end

@@ -79,7 +79,7 @@ module Components
       type = @obj.type_tag
       versions = @versions || []
 
-      editors_list = versions.map(&:user).compact.uniq - [@obj.user]
+      editors_list = versions.filter_map(&:user).uniq - [@obj.user]
 
       p do
         render_user_list(:"show_#{type}_creator", [@obj.user])

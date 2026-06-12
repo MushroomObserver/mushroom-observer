@@ -74,15 +74,7 @@ class CollectionNumbersController < ApplicationController
     end
 
     @canonical_url = CollectionNumber.show_url(params[:id])
-    # Eager-load `observations` (+ associations the MatrixTable
-    # render reaches into) so the show view doesn't re-query when
-    # iterating `@collection_number.observations`.
-    @collection_number = CollectionNumber.
-                         includes(observations: [:thumb_image, :user]).
-                         find_by(id: params[:id]) ||
-                         flash_error_and_goto_index(
-                           CollectionNumber, params[:id]
-                         )
+    @collection_number = find_collection_number_for_show
     return unless @collection_number
 
     render(Views::Controllers::CollectionNumbers::Show.new(
@@ -156,12 +148,17 @@ class CollectionNumbersController < ApplicationController
 
   def set_ivars_for_edit
     @layout = calc_layout_params
-    @collection_number = CollectionNumber.
-                         includes(observations: [:thumb_image, :user]).
-                         find_by(id: params[:id]) ||
-                         flash_error_and_goto_index(
-                           CollectionNumber, params[:id]
-                         )
+    @collection_number = find_collection_number_for_show
+  end
+
+  # Eager-loads `observations` (+ associations the MatrixTable
+  # render reaches into) so the show / edit views don't re-query
+  # when iterating `@collection_number.observations`.
+  def find_collection_number_for_show
+    CollectionNumber.
+      includes(observations: [:thumb_image, :user]).
+      find_by(id: params[:id]) ||
+      flash_error_and_goto_index(CollectionNumber, params[:id])
   end
 
   def render_new_phlex
