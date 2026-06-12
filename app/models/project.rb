@@ -78,7 +78,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :images, through: :project_images
 
   has_many :project_observations, dependent: :delete_all
-  has_many :observations, through: :project_observations
+  has_many :observations, through: :project_observations,
+                          after_add: :invalidate_visible_observations_cache!,
+                          after_remove: :invalidate_visible_observations_cache!
   has_many :locations, through: :observations
 
   has_many :project_excluded_observations, dependent: :delete_all
@@ -98,6 +100,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   before_destroy :orphan_drafts
+  # Adding/changing a prefix retroactively claims previously-orphaned
+  # field slips whose code matches — but only member-owned ones. See
+  # #adopt_matching_field_slips and #4436.
+  after_save :adopt_matching_field_slips,
+             if: :saved_change_to_field_slip_prefix?
   validates :field_slip_prefix, uniqueness: true, allow_blank: true
   validates :field_slip_prefix,
             allow_blank: true,
@@ -160,7 +167,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :show_includes, lambda {
     strict_loading.includes(
       { comments: :user },
-      :location
+      :admin_group,
+      :location,
+      :species_lists,
+      :target_locations,
+      :target_names,
+      :user,
+      :user_group
     )
   }
   scope :violations_includes, lambda {
@@ -189,12 +202,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Same as +text_name+ but with id tacked on to make unique.
   def unique_text_name
-    "#{text_name} (#{id || "?"})"
+    string_with_id(text_name)
   end
 
   # Need these to be compatible with Comment.
   alias format_name text_name
   alias unique_format_name unique_text_name
+
+  # Page heading + browser tab title — both plain `title`. (Can't
+  # `alias` to `title` — the AR column accessor isn't defined yet
+  # at class-load time.)
+  def page_title(_user = nil)
+    title
+  end
+
+  def document_title
+    title
+  end
 
   # Is +user+ a member of this Project? Reflects actual user_group
   # membership only — Site Admins (user.admin == true) get no implicit
@@ -211,9 +235,14 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
   alias admin? is_admin?
 
+  # A user trusts this project (allowing project admins to edit their
+  # content) only when they are an actual member whose trust_level is
+  # not "no_trust". A non-member is NOT trusted — otherwise merely
+  # associating their content with a project would hand its admins edit
+  # rights without consent. See #4436.
   def trusted_by?(user)
     member = project_members.find_by(user: user)
-    member&.trust_level != "no_trust"
+    member.present? && member.trust_level != "no_trust"
   end
 
   def can_edit?(user)
@@ -272,8 +301,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # plucks ids of OFFENDING observations and merges them into a Set
   # for dedup; total cost is O(violations) rather than the
   # O(visible_observations) cost of the full Ruby iteration in
-  # `#violations`. Called from the projects index
-  # (Tabs::ProjectsHelper#violations_button), so any per-project
+  # `#violations`. Called from the project show page's
+  # `render_violations_button` (inlined from the former
+  # `Tabs::ProjectsHelper#violations_button`), so any per-project
   # work multiplies by the number of projects rendered.
   def count_violations
     return 0 unless constraints?
@@ -305,17 +335,21 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     false
   end
 
-  # Check if this user is an admin for a project that includes
-  # this observation.
+  # Check if this user is an admin for a project that includes this
+  # observation AND whose owner is a member trusting that project.
+  # A non-member owner is NOT trusted, so adding their observation to a
+  # project can't hand the project's admins power over it. Mirrors the
+  # #trusted_by? membership requirement (#4439). Like Project.can_edit?,
+  # keep scanning further projects when one doesn't grant.
   def self.admin_power?(observation, user)
     return false unless user
     return false if observation.projects.empty?
 
     observation.projects.each do |project|
-      if project.is_admin?(user)
-        member = project.project_members.find_by(user: observation.user)
-        return member&.trust_level != "no_trust"
-      end
+      next unless project.is_admin?(user)
+
+      member = project.project_members.find_by(user: observation.user)
+      return true if member.present? && member.trust_level != "no_trust"
     end
     false
   end
@@ -388,6 +422,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     insert_project_observations(new_obs_ids)
     insert_project_images_for(new_obs_ids)
+    invalidate_visible_observations_cache!
     touch
     new_obs_ids.size
   end
@@ -857,8 +892,33 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Observations excluding non-primary members of multi-obs occurrences.
+  #
+  # The underlying `exclude_non_primary` scope adds a LEFT OUTER JOIN on
+  # `occurrences` with an `(occurrence_id IS NULL OR primary = id)` OR
+  # predicate, which the planner can't serve from the
+  # `(project_id, observation_id)` index. On big projects the dedup
+  # scan runs to 0.3-1.7s and is invoked separately by every show-page
+  # widget (tab counts, checklist, location count, constraint
+  # violations). Pluck the visible IDs once per Project instance and
+  # have every downstream query use a flat PK lookup. Mutators that
+  # add/remove/exclude observations call
+  # `invalidate_visible_observations_cache!` so the memo stays
+  # consistent within a single Project instance.
   def visible_observations
-    observations.exclude_non_primary
+    Observation.where(id: visible_observation_ids)
+  end
+
+  def visible_observation_ids
+    @visible_observation_ids ||=
+      observations.exclude_non_primary.pluck(:id)
+  end
+
+  # Wired as `after_add` / `after_remove` on the `observations`
+  # association, so the splat absorbs the record-arg that AR passes.
+  # Also called directly from `bulk_add_observations`, which uses
+  # `ProjectObservation.insert_all` and so bypasses the callbacks.
+  def invalidate_visible_observations_cache!(*)
+    @visible_observation_ids = nil
   end
 
   def out_of_range_observations
@@ -965,6 +1025,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def can_add_field_slip?(user)
     member?(user) || can_join?(user)
+  end
+
+  # Associate previously-orphaned field slips (no project) whose code
+  # matches this project's prefix, restricted to slips whose owner is
+  # already a member — so adding a prefix can't silently claim a
+  # non-member's field slips and hand admins edit rights over them.
+  # Returns the slips actually adopted. Idempotent. See #4436.
+  def adopt_matching_field_slips
+    prefix = field_slip_prefix
+    return [] if prefix.blank?
+
+    FieldSlip.orphaned_with_code_prefix(prefix).select do |slip|
+      next false unless FieldSlip.prefix_for_code(slip.code) == prefix
+      next false unless member?(slip.user)
+
+      slip.update_column(:project_id, id)
+    end
   end
 
   def alias_data(target)

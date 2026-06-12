@@ -43,6 +43,7 @@ module ObservationsController::EditAndUpdate
     @location = @observation.location
     init_project_vars_for_edit(@observation)
     init_list_vars_for_edit(@observation)
+    render_edit_view
   end
 
   private
@@ -52,11 +53,13 @@ module ObservationsController::EditAndUpdate
                    flash_error_and_goto_index(Observation, params[:id])
   end
 
+  # Edit-mode: just build the union of projects to display. The
+  # form reads checkedness off `obs.project_ids` directly (no
+  # separate `@project_checks` state needed post-array-shape).
   def init_project_vars_for_edit(obs)
     init_project_vars
     obs.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
-      @project_checks[proj.id] = true
     end
   end
 
@@ -64,7 +67,6 @@ module ObservationsController::EditAndUpdate
     init_list_vars
     obs.species_lists.each do |list|
       @lists << list unless @lists.include?(list)
-      @list_checks[list.id] = true
     end
   end
 
@@ -254,7 +256,42 @@ module ObservationsController::EditAndUpdate
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render(action: :edit)
+    render_edit_view
+  end
+
+  def render_edit_view
+    render(Views::Controllers::Observations::Edit.new(**edit_view_attrs))
+  end
+
+  def edit_view_attrs
+    edit_view_obs_attrs.merge(edit_view_image_attrs).
+      merge(edit_view_project_attrs).
+      merge(field_code: @field_code)
+  end
+
+  def edit_view_obs_attrs
+    {
+      observation: @observation, user: @user, location: @location,
+      dubious_where_reasons: @dubious_where_reasons
+    }
+  end
+
+  def edit_view_image_attrs
+    {
+      good_images: @good_images || [],
+      sibling_images: @sibling_images || [],
+      exif_data: @exif_data || {}
+    }
+  end
+
+  def edit_view_project_attrs
+    {
+      projects: @projects || [],
+      submitted_project_ids: @submitted_project_ids,
+      lists: @lists || [], submitted_list_ids: @submitted_list_ids,
+      error_checked_projects: @error_checked_projects || [],
+      suspect_checked_projects: @suspect_checked_projects || []
+    }
   end
 
   ##############################################################################

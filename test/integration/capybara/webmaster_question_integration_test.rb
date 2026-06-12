@@ -15,7 +15,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     visit(new_admin_emails_webmaster_questions_path)
 
     perform_enqueued_jobs do
-      within("#webmaster_question_form") do
+      within("#admin_email_webmaster_question_form") do
         # Email field should be pre-filled with user's email
         assert_field("email_reply_to", with: rolf.email)
 
@@ -45,7 +45,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     visit(new_admin_emails_webmaster_questions_path)
 
     perform_enqueued_jobs do
-      within("#webmaster_question_form") do
+      within("#admin_email_webmaster_question_form") do
         # Fill in both email and question
         fill_in("email_reply_to",
                 with: "concerned_user@example.com")
@@ -70,7 +70,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
   def test_validation_error_missing_email
     visit(new_admin_emails_webmaster_questions_path)
 
-    within("#webmaster_question_form") do
+    within("#admin_email_webmaster_question_form") do
       # Leave email blank
       fill_in("email_reply_to", with: "")
       fill_in("email_message",
@@ -86,7 +86,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
   def test_validation_error_missing_content
     visit(new_admin_emails_webmaster_questions_path)
 
-    within("#webmaster_question_form") do
+    within("#admin_email_webmaster_question_form") do
       fill_in("email_reply_to", with: "test@example.com")
       fill_in("email_message", with: "")
 
@@ -100,7 +100,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
   def test_spam_protection_for_anonymous_users
     visit(new_admin_emails_webmaster_questions_path)
 
-    within("#webmaster_question_form") do
+    within("#admin_email_webmaster_question_form") do
       fill_in("email_reply_to", with: "spammer@example.com")
       # Content with URL should trigger spam protection
       fill_in("email_message",
@@ -122,7 +122,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     visit(new_admin_emails_webmaster_questions_path)
 
     perform_enqueued_jobs do
-      within("#webmaster_question_form") do
+      within("#admin_email_webmaster_question_form") do
         # Logged in users can include URLs in their questions
         fill_in("email_message",
                 with: "Page https://mushroomobserver.org/123 has an error")

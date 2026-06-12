@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="refresh" content="60">
+<title>Updating website, back in a few minutes &middot; Mushroom Observer</title>
+<style>
+  /* Amanita theme palette, hard-coded since static pages can't @import SCSS. */
+  :root {
+    --bg: #383138;
+    --text: #cdcec9;
+    --heading: #ebcc79;
+    --link: #aa9a83;
+    --link-hover: #ebe4de;
+    --alert: #cc2616;
+    --muted: #aa9a83;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .container {
+    max-width: 720px;
+    width: 100%;
+    text-align: center;
+  }
+  .logo {
+    max-width: 320px;
+    width: 80%;
+    height: auto;
+    margin: 0 auto 2rem;
+    display: block;
+  }
+  h1 {
+    color: var(--alert);
+    font-size: 2rem;
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+  }
+  p {
+    font-size: 1.125rem;
+    margin: 0 0 1rem;
+  }
+  p.muted {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-top: 2rem;
+  }
+  a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  a:hover { color: var(--link-hover); }
+  @media (min-width: 720px) {
+    h1 { font-size: 2.5rem; }
+    .logo { max-width: 400px; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="/MO-Full-Logo-Dark-400.png" alt="Mushroom Observer">
+    <h1>Updating website, back in a few minutes</h1>
+    <p>
+      Mushroom Observer is temporarily unavailable while we deploy new code.
+      We should be back in a couple of minutes &mdash; this page will refresh
+      on its own.
+    </p>
+    <p>
+      If you have questions, or this is taking longer than expected, please
+      email <a href="mailto:webmaster@mushroomobserver.org">webmaster@mushroomobserver.org</a>.
+    </p>
+  </div>
+</body>
+</html>

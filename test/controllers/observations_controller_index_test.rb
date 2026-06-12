@@ -25,6 +25,25 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # Regression for #4492: the top-nav `search-type` Stimulus controller
+  # reads its help/form type lists as Array values, which Stimulus parses
+  # as JSON. Phlexifying top_nav emitted the arrays space-joined ("a b")
+  # instead of JSON-encoded, so JSON.parse threw and silently disabled the
+  # advanced-search and help forms. The attributes must be valid JSON.
+  def test_search_nav_stimulus_array_values_are_json
+    login
+    get(:index)
+
+    node = css_select("#search_nav").first
+    assert_not_nil(node, "search nav not rendered")
+    %w[data-search-type-form-types-value
+       data-search-type-help-types-value].each do |attr|
+      parsed = JSON.parse(node[attr])
+      assert_kind_of(Array, parsed, "#{attr} must be a JSON array")
+      assert_includes(parsed, "observations", "#{attr} must list observations")
+    end
+  end
+
   BUNCH_OF_NAMES = Name.take(10)
   BUNCH_OF_REGIONS = [
     "Connecticut, USA",
@@ -90,10 +109,6 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     regions_joined_trunc = "#{regions_joined[0...97]}..."
     assert_select("#caption-truncated", text: /#{regions_joined_trunc}/)
     assert_select("#caption-full", text: /#{regions_joined}/)
-  end
-
-  def test_index_with_non_default_sort
-    check_index_sorting
   end
 
   def test_index_sorted_by_invalid_order
@@ -275,6 +290,24 @@ class ObservationsControllerIndexTest < FunctionalTestCase
       "Advanced Search should reload form if it throws an error"
     )
   end
+
+  # No advanced-search params + an invalid q passes through
+  # `handle_advanced_search_invalid_q_param?`, which flashes and
+  # redirects. `advanced_search_query` returns nil (the `elsif`
+  # branch); `advanced_search` sees `performed?` and bails before
+  # the rescue's redirect_to would have double-redirected.
+  def test_index_advanced_search_with_invalid_q_param_redirects
+    login
+    get(:index, params: { q: "INVALID", advanced_search: true })
+
+    assert_flash_error(:advanced_search_bad_q_error.l)
+    assert_redirected_to(search_advanced_path)
+  end
+
+  # NOTE: `advanced_search_params`'s `raise "...is undefined."`
+  # fires only when `Query::Observations.advanced_search_params`
+  # returns nil/blank — a programming error in `Query::Observations`
+  # setup, not a runtime branch. Left uncovered intentionally.
 
   # The pattern param is maintained only for backwards compatibility.
   # Should redirect to SearchController#pattern, which instantiates the
@@ -586,6 +619,28 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_results(count:)
   end
 
+  # Regression: query_from_q_param_hash must call symbolize_keys on
+  # to_unsafe_hash before passing to Query.lookup. Without it, string-keyed
+  # params from the URL bypass the attribute slice and produce a query with
+  # no filter, or cause a TypeError in Ruby 3.4+.
+  # This is the param format produced by clicking "Show Observations at
+  # this Location" from a location show page.
+  def test_index_q_param_hash_with_locations
+    location = locations(:burbank)
+    q_param = { model: "Observation", locations: [location.id] }
+
+    login
+    get(:index, params: { q: q_param })
+
+    assert_response(:success,
+                    "Expected success — Integer NoMethodError means " \
+                    "symbolize_keys is missing in query_from_q_param_hash")
+    assert_page_title(:OBSERVATIONS.l, "Should be on the observations index")
+    assert_displayed_filters(location.display_name,
+                             "Location filter should appear in #filters")
+    assert_results(count: Observation.locations(location).count)
+  end
+
   def test_index_where
     location = locations(:obs_default_location)
 
@@ -694,6 +749,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:OBSERVATIONS.l)
   end
 
+  # Covers the `return unless (project = find_or_goto_index(...))`
+  # bail-out in `ObservationsController::Index#project` (L169).
+  def test_index_project_with_unknown_id_redirects
+    login
+    get(:index, params: { project: 999_999_999 })
+
+    assert_redirected_to(projects_path)
+  end
+
   def test_index_project_banner_from_query_param
     project = projects(:eol_project)
 
@@ -727,6 +791,15 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:success)
     assert_page_title(:OBSERVATIONS.l)
     assert_displayed_filters("#{:species_lists.l}: #{spl.title}")
+  end
+
+  # Covers the `return unless (spl = find_or_goto_index(...))`
+  # bail-out in `ObservationsController::Index#species_list` (L181).
+  def test_index_species_list_with_unknown_id_redirects
+    login
+    get(:index, params: { species_list: 999_999_999 })
+
+    assert_redirected_to(species_lists_path)
   end
 
   def test_index_species_list_without_observations

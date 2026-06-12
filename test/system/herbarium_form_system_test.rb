@@ -27,16 +27,16 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_selector("#observation_naming_specimen")
     scroll_to(find("#observation_naming_specimen"), align: :top)
     check("observation_specimen")
-    assert_selector("#herbarium_record_herbarium_name")
+    assert_selector("#observation_herbarium_record_herbarium_name")
     assert_selector(".create-link", text: :create_herbarium.l)
     click_link(:create_herbarium.l)
 
     assert_selector("#modal_herbarium")
     create_herbarium_with_new_location
 
-    assert_no_selector("#modal_herbarium")
-    assert_field("herbarium_record_herbarium_name",
-                 with: "Herbarium des Cévennes")
+    assert_no_selector("#modal_herbarium", wait: 15)
+    assert_field("observation_herbarium_record_herbarium_name",
+                 with: "Herbarium des Cévennes", wait: 15)
   end
 
   # Verify validation errors appear inside the modal, not on the page
@@ -92,12 +92,20 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # vs our database which has "Burbank, California, USA" (without county)
       fill_in("herbarium_place_name", with: "burbank")
 
-      # Wait for geocoding to complete - verify Google's format appears
+      # Stepwise diagnostic for a live Google Geocoding API roundtrip
+      # (test default ~2s + even 10s have flaked under full-suite
+      # load — see PR #4405 / #4406):
+      #
+      # 1. Hidden ID transitions blank → "-1" once JS has ANY Google
+      #    response. If THIS fails, Google API itself is slow/dead —
+      #    distinct from "JS race lost the field update."
+      # 2. Field text gets the full geocoded string.
+      #
+      # Same order as `create_herbarium_with_new_location` below.
+      assert_field("herbarium_location_id", with: "-1", type: :hidden,
+                                            wait: 15)
       assert_field("herbarium_place_name",
                    with: "Burbank, Los Angeles Co., California, USA", wait: 10)
-
-      # Hidden ID should be -1 (new location marker) since this is geocoded
-      assert_field("herbarium_location_id", with: "-1", type: :hidden)
     end
   end
 
@@ -141,6 +149,13 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
 
       # Verify autocompleter switched to location_google mode
       assert_selector("[data-type='location_google']", wait: 5)
+
+      # In a real browser the user's focus/click sequence fires
+      # `ourClick` on the place-name input after the mode swap,
+      # which triggers `scheduleGoogleRefresh` → geocoding. The
+      # JS-driven `execute_script("...click()")` above bypasses
+      # those events, so we have to fire one manually here.
+      find_field("herbarium_place_name").click
 
       # Wait for hidden ID to be set (proves geocoding worked)
       assert_field("herbarium_location_id", with: "-1", type: :hidden, wait: 10)

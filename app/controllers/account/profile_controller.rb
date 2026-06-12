@@ -5,21 +5,13 @@ module Account
     before_action :login_required
 
     def edit
-      @licenses = License.available_names_and_ids(@user.license)
       @user.place_name ||= @user.location&.display_name
-      if @user.image
-        @copyright_holder  = @user.image.copyright_holder
-        @copyright_year    = @user.image.when.year
-        @upload_license_id = @user.image.license.id
-      else
-        @copyright_holder  = @user.legal_name
-        @copyright_year    = Time.zone.now.year
-        @upload_license_id = @user&.license&.id
-      end
+      set_image_upload_ivars
+      render_edit_phlex
     end
 
     def update
-      @licenses = License.available_names_and_ids(@user.license)
+      set_image_upload_ivars
 
       [:name, :notes, :mailing_address].each do |arg|
         val = params[:user][arg].to_s
@@ -32,6 +24,33 @@ module Account
     end
 
     private
+
+    # Backfills `@licenses` plus the image-upload-field defaults
+    # (`@copyright_holder`, `@copyright_year`, `@upload_license_id`).
+    # Both `edit` and `update` need them so the Phlex Edit view
+    # renders on the failure path too.
+    def set_image_upload_ivars
+      @licenses = License.available_names_and_ids(@user.license)
+      if @user.image
+        @copyright_holder  = @user.image.copyright_holder
+        @copyright_year    = @user.image.when.year
+        @upload_license_id = @user.image.license.id
+      else
+        @copyright_holder  = @user.legal_name
+        @copyright_year    = Time.zone.now.year
+        @upload_license_id = @user&.license&.id
+      end
+    end
+
+    def render_edit_phlex
+      render(Views::Controllers::Account::Profile::Edit.new(
+               user: @user,
+               copyright_holder: @copyright_holder,
+               copyright_year: @copyright_year,
+               licenses: @licenses,
+               upload_license_id: @upload_license_id
+             ))
+    end
 
     def check_and_maybe_update_user_place_name
       # Make sure the given location exists before accepting it.
@@ -68,7 +87,7 @@ module Account
         redirect_to(user_path(@user.id))
       elsif !@user.save
         flash_object_errors(@user)
-        render(:edit) and return
+        render_edit_phlex and return
       else
         maybe_update_location_and_finish
       end

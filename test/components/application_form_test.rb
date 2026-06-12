@@ -72,12 +72,74 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "text-monospace")
   end
 
+  # Regression: TextareaField applies `text-monospace` when instantiated
+  # directly with `wrapper_options[:monospace]` — not just via the helper.
+  # Matches ERB `text_area_with_label`'s `:monospace` semantics so direct
+  # component callers (e.g. FieldProxy-backed textareas) get parity.
+  def test_textarea_field_monospace_at_component_level
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+    field = form.field(:notes)
+    component = Components::ApplicationForm::TextareaField.new(
+      field, wrapper_options: { label: "Notes", monospace: true }
+    )
+
+    html = render(component)
+    assert_html(html, "textarea.form-control.text-monospace")
+  end
+
   def test_textarea_field_with_rows
     form = render_form do
       textarea_field(:notes, label: "Notes", rows: 10)
     end
 
     assert_includes(form, 'rows="10"')
+  end
+
+  # Regression: `prefs: true` auto-resolves the label from the
+  # `prefs_<field>` i18n key, matching ERB
+  # `auto_label_if_form_is_account_prefs`. Six helpers honor this:
+  # text_field, textarea_field, select_field, checkbox_field,
+  # radio_field, number_field — same set as ERB.
+  def test_text_field_prefs_auto_resolves_label_from_i18n
+    form = render_form do
+      text_field(:login, prefs: true)
+    end
+
+    # `:prefs_login.t` → "Login" (config/locales/en.txt)
+    assert_html(form, "label", text: "Login")
+  end
+
+  def test_checkbox_field_prefs_auto_resolves_label_from_i18n
+    form = render_form do
+      checkbox_field(:no_emails, prefs: true)
+    end
+
+    # `:prefs_no_emails.t` → "Opt out of _all_ email from MO."
+    assert_includes(form, "Opt out of")
+  end
+
+  def test_auto_label_for_prefs_returns_options_unchanged_when_no_prefs
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+
+    result = form.send(:auto_label_for_prefs, :name, label: "Original")
+    assert_equal({ label: "Original" }, result,
+                 "Without :prefs, options should be untouched")
+  end
+
+  def test_auto_label_for_prefs_drops_prefs_key_when_resolving
+    form = Components::ApplicationForm.new(@collection_number,
+                                           action: "/test_form_path")
+
+    result = form.send(:auto_label_for_prefs, :login,
+                       prefs: true, class: "extra")
+    assert_equal("Login", result[:label])
+    assert_not(result.key?(:prefs),
+               ":prefs should be removed after resolution so it " \
+               "doesn't leak into wrapper_options downstream")
+    assert_equal("extra", result[:class],
+                 "Unrelated options should pass through")
   end
 
   # Checkbox field tests - CollectionNumber doesn't have boolean fields,
@@ -99,7 +161,7 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     # Should still have Bootstrap checkbox wrapper and label element
-    assert_match(/<div class="checkbox m-0">/, form)
+    assert_html(form, "div.checkbox.m-0")
     assert_html(form, "label.p-0")
     assert_includes(form, 'type="checkbox"')
     # But should NOT have label text
@@ -112,7 +174,38 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     # wrap_class should be on wrapper div, not the input
-    assert_match(/<div class="checkbox mt-3">/, form)
+    assert_html(form, "div.checkbox.mt-3")
+  end
+
+  # Collection mode: `checkbox_field(:field, [label, value], ...)`
+  # renders N checkboxes that post as `model[field][]=<value>` for
+  # each checked option. Pairs are `[label, value]` — matching
+  # `select_field` and `radio_field`. Previously this API path was
+  # unreachable: callers had to bypass `checkbox_field` and call
+  # `field(:foo).checkbox(...)` directly.
+  def test_checkbox_field_array_mode_renders_one_checkbox_per_choice
+    form = render_form do
+      checkbox_field(:placeholder,
+                     ["Foo", 1],
+                     ["Bar", 2],
+                     ["Baz", 3])
+    end
+
+    # Each option becomes a checkbox with the field name suffixed `[]`
+    # so the controller receives an array of selected values. Values
+    # are the SECOND element of each pair (Rails shape).
+    name_attr = "#{@collection_number.class.model_name.singular}" \
+                "[placeholder][]"
+    assert_html(form,
+                "input[type='checkbox'][name='#{name_attr}'][value='1']")
+    assert_html(form,
+                "input[type='checkbox'][name='#{name_attr}'][value='2']")
+    assert_html(form,
+                "input[type='checkbox'][name='#{name_attr}'][value='3']")
+    # Labels (first element of each pair) render alongside each input.
+    assert_includes(form, "Foo")
+    assert_includes(form, "Bar")
+    assert_includes(form, "Baz")
   end
 
   # Select field tests
@@ -129,6 +222,21 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "Option 1")
     assert_includes(form, "Option 2")
     assert_includes(form, "Option 3")
+  end
+
+  # Regression: a `[Label, nil]` pair (Rails-shape, value is nil) must
+  # render `<option value="">Label`, not `<option>Label` (which would
+  # submit "Label" as the value). Phlex's HTML DSL omits nil-valued
+  # attributes by default, so SelectField coerces nil values to "" to
+  # match Rails' select-helper behavior.
+  def test_select_field_nil_value_renders_empty_value_attribute
+    options = [["(No Project)", nil], ["EOL Project", "778455076"]]
+    form = render_form do
+      select_field(:number, options, label: "Project")
+    end
+
+    assert_html(form, "option[value='']", text: "(No Project)")
+    assert_html(form, "option[value='778455076']", text: "EOL Project")
   end
 
   # Slot tests
@@ -191,6 +299,26 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, 'type="password"')
   end
 
+  # Regression: Phlex password_field defaults `value: ""` to prevent
+  # Rails from re-populating the field with the stored password hash
+  # on form re-render. Matches ERB password_field_with_label.
+  def test_password_field_defaults_value_to_empty_string
+    form = render_form do
+      password_field(:password, label: "Password")
+    end
+
+    assert_html(form, "input[type='password'][value='']")
+  end
+
+  # Regression: explicit `value:` override is respected.
+  def test_password_field_explicit_value_overrides_default
+    form = render_form do
+      password_field(:password, label: "Password", value: "stored-hash")
+    end
+
+    assert_html(form, "input[type='password'][value='stored-hash']")
+  end
+
   # Hidden field tests
   def test_hidden_field_renders_without_wrapper
     form = render_form do
@@ -200,6 +328,82 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, 'type="hidden"')
     assert_includes(form, 'value="hidden_value"')
     assert_not_includes(form, "form-group")
+  end
+
+  # Regression: hidden inputs used to emit `class="form-control"` —
+  # harmless visually (hidden inputs don't render) but wrong markup,
+  # and inconsistent between Symbol and String paths (Symbol detoured
+  # through TextField; String through HiddenField). Both paths now
+  # route through `HiddenField`, the dedicated hidden-input component.
+  # The Symbol path passes Superform's `field(:x)` directly — same
+  # `.dom.id`/`.dom.name`/`.value` interface as `FieldProxy`.
+  def test_hidden_field_symbol_key_does_not_emit_form_control
+    form = render_form do
+      hidden_field(:secret, value: "x")
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name*='secret']")
+    assert(input, "Hidden input must render")
+    assert_not_includes(input["class"] || "", "form-control",
+                        "Symbol-keyed hidden_field must not emit form-control")
+  end
+
+  def test_hidden_field_string_key_does_not_emit_form_control
+    form = render_form do
+      hidden_field("approved_where", value: "x")
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name='approved_where']")
+    assert(input, "Hidden input must render")
+    assert_not_includes(input["class"] || "", "form-control",
+                        "String-keyed hidden_field must not emit form-control")
+  end
+
+  # Symbol-keyed `hidden_field` keeps Superform's namespaced name
+  # (e.g. `<model_name>[<field>]`) — the whole point of going through
+  # `field(...)` rather than the raw String path. Locks that in.
+  def test_hidden_field_symbol_key_uses_superform_namespace
+    form = render_form do
+      hidden_field(:secret, value: "x")
+    end
+    # The render_form helper builds an anonymous form whose model
+    # defaults to a Collection Number; the form's namespace is
+    # "collection_number". The hidden field should be namespaced
+    # under it.
+    assert_match(/name="collection_number\[secret\]"/, form,
+                 "Symbol-keyed hidden_field must namespace under the model")
+  end
+
+  # Most callers in the codebase rely on the Symbol path auto-reading
+  # the value from the form's model/FormObject (e.g.
+  # `descriptions/form.rb hidden_field(:project_id)` reads
+  # `form.model.project_id`). Passing Superform's `field(:x)` directly
+  # to HiddenField preserves that — `HiddenField` reads `.value` off
+  # the field, and Superform's field knows the model's value.
+  def test_hidden_field_symbol_key_auto_reads_value_from_model
+    # `@collection_number.name` == "Rolf Singer" per the fixture.
+    form = render_form do
+      hidden_field(:name) # no explicit value:
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name='collection_number[name]']")
+    assert(input, "Hidden input must render")
+    assert_equal("Rolf Singer", input["value"],
+                 "Symbol-keyed hidden_field with no value: must auto-read " \
+                 "from the form's model/FormObject")
+  end
+
+  # Caller's explicit `value:` always wins, even when the model has
+  # a value for the attribute. (HiddenField's `@attributes.fetch(:value)`
+  # uses the override before falling back to `@field.value`.)
+  def test_hidden_field_symbol_key_explicit_value_overrides_model
+    form = render_form do
+      hidden_field(:name, value: "OVERRIDE")
+    end
+    doc = Nokogiri::HTML(form)
+    input = doc.at_css("input[type='hidden'][name='collection_number[name]']")
+    assert_equal("OVERRIDE", input["value"],
+                 "Explicit value: must override the model's value")
   end
 
   # Number field tests
@@ -212,6 +416,25 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "Count")
     assert_includes(form, "form-control")
     assert_includes(form, 'type="number"')
+  end
+
+  # Regression: Phlex number_field defaults `min: 1`. Matches ERB
+  # number_field_with_label's `opts[:min] ||= 1`.
+  def test_number_field_defaults_min_to_1
+    form = render_form do
+      number_field(:count, label: "Count")
+    end
+
+    assert_html(form, "input[type='number'][min='1']")
+  end
+
+  # Regression: explicit `min:` override is respected.
+  def test_number_field_explicit_min_overrides_default
+    form = render_form do
+      number_field(:count, label: "Count", min: 0)
+    end
+
+    assert_html(form, "input[type='number'][min='0']")
   end
 
   # Test select with custom options block - renders component directly
@@ -322,7 +545,11 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "input[name='collection_number[when(1i)]'][size='4']")
 
     # Verify order: day, month, year (3i before 2i before 1i)
-    assert_match(/_3i.*_2i.*_1i/m, form)
+    day_pos = form.index("_3i")
+    month_pos = form.index("_2i")
+    year_pos = form.index("_1i")
+    assert(day_pos < month_pos && month_pos < year_pos,
+           "Expected order day(_3i), month(_2i), year(_1i)")
   end
 
   def test_date_field_with_append_slot
@@ -378,7 +605,7 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     # Should NOT have file-input controller on wrapper
-    assert_no_match(/data-controller=['"]file-input['"]/, form)
+    assert_no_html(form, "[data-controller='file-input']")
 
     # Should have custom action
     assert_includes(form, "change->form-images#addSelectedFiles")
@@ -436,6 +663,40 @@ class ApplicationFormTest < ComponentTestCase
     end
 
     assert_html(form, "input[data-turbo-submits-with='Saving...']")
+  end
+
+  # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
+  # button shows "Updating" in-flight, anything else shows "Submitting".
+  def test_submit_default_submits_with_for_update_button
+    form = render_form { submit(:UPDATE.l) }
+
+    assert_html(form, "input[data-turbo-submits-with='#{:UPDATING.l}']")
+  end
+
+  def test_submit_default_submits_with_for_create_button
+    form = render_form { submit(:CREATE.l) }
+
+    assert_html(form, "input[data-turbo-submits-with='#{:SUBMITTING.l}']")
+  end
+
+  # `between_class` (FieldWithHelp) mirrors ERB:
+  # inline rows pick "mr-3"; block rows pick "form-between".
+  def test_between_class_block_field_with_help
+    form = render_form do
+      text_field(:name, label: "Name:", help: "Help text")
+    end
+
+    assert_html(form, "span.form-between")
+    assert_no_html(form, "span.form-between.mr-3")
+  end
+
+  def test_between_class_inline_field_with_help
+    form = render_form do
+      text_field(:name, inline: true, label: "Name:", help: "Help text")
+    end
+
+    assert_html(form, "span.mr-3")
+    assert_no_html(form, "span.form-between")
   end
 
   def test_submit_with_custom_data_attributes
@@ -591,6 +852,64 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "div.radio.ml-4", count: 2)
   end
 
+  # Regression: each per-option label carries `for=` pointing at its
+  # input's id (matching ERB radio_with_label, which uses
+  # form.label("#{field}_#{value}")).
+  def test_radio_field_per_option_label_has_for_attribute
+    form = render_form do
+      radio_field(:number, [1, "A"], [2, "B"])
+    end
+
+    assert_html(form, "label[for='collection_number_number_1']")
+    assert_html(form, "label[for='collection_number_number_2']")
+    assert_html(form, "input[type='radio'][id='collection_number_number_1']")
+    assert_html(form, "input[type='radio'][id='collection_number_number_2']")
+  end
+
+  # Regression: RadioField `between` slot renders after each option's
+  # label text inside the `<label>`, wrapped in `<div class="d-inline-block
+  # ml-3">`. Matches ERB `radio_with_label`'s `between:` shape. Applied
+  # uniformly to every option (one slot per RadioField call).
+  def test_radio_field_with_between_slot
+    form = render_form do
+      component = Components::ApplicationForm::RadioField.new(
+        field(:number), [1, "A"], [2, "B"]
+      )
+      component.with_between do
+        span(class: "help-note") { "(see notes)" }
+      end
+      render(component)
+    end
+
+    assert_html(form, "div.radio div.d-inline-block.ml-3 span.help-note",
+                count: 2)
+    assert_includes(form, "(see notes)")
+  end
+
+  # Regression: array-mode checkbox per-option labels also carry `for=`,
+  # AND the inputs get value-suffixed ids (so multiple options don't
+  # collide). MO's CheckboxField bypasses upstream's Checkbox component
+  # for this case because upstream mis-detects array mode when the
+  # field's parent isn't another Superform::Field. Array mode is reached
+  # via `field(:foo).checkbox([v, label], …)` directly.
+  def test_checkbox_field_array_mode_per_option_label_has_for_attribute
+    form = render_form do
+      # Rails-shape pairs: `[label, value]` (matches `select_field`).
+      render(field(:number).checkbox(["A", 1], ["B", 2]))
+    end
+
+    assert_html(form, "label[for='collection_number_number_1']")
+    assert_html(form, "label[for='collection_number_number_2']")
+    assert_html(form, "input[type='checkbox'][id='collection_number_number_1']")
+    assert_html(form, "input[type='checkbox'][id='collection_number_number_2']")
+    # Each option submits its own value under `field[]`
+    array_name = "collection_number[number][]"
+    assert_html(form,
+                "input[type='checkbox'][name='#{array_name}'][value='1']")
+    assert_html(form,
+                "input[type='checkbox'][name='#{array_name}'][value='2']")
+  end
+
   # RadioField standalone tests (via FieldProxy)
   def test_radio_field_with_field_proxy
     proxy = Components::ApplicationForm::FieldProxy.new(
@@ -659,7 +978,118 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "textarea")
   end
 
+  # Regression: ReadOnlyField label should carry `for=` pointing at the
+  # hidden input's id, matching the ERB `form.label(field, ...)` output.
+  def test_read_only_field_label_has_for_attribute
+    form = render_form do
+      read_only_field(:number, label: "Number:", value: "42")
+    end
+
+    assert_html(form, "label[for='collection_number_number']")
+    assert_html(form, "input[type='hidden'][id='collection_number_number']")
+  end
+
+  # Regression: StaticTextField label should carry `for=` pointing at the
+  # field's dom id (even though there's no input — matches ERB output).
+  def test_static_field_label_has_for_attribute
+    form = render_form do
+      static_field(:number, label: "Number:", value: "42")
+    end
+
+    assert_html(form, "label[for='collection_number_number']")
+  end
+
+  # ----- derive_form_id -----
+  #
+  # The form id flows through `ApplicationForm#derive_form_id`, which
+  # picks the first non-nil of:
+  #   1. `views_controller_form_id` — if the class lives under
+  #      `Views::Controllers::*`, derive from the full controller
+  #      path so the id mirrors the directory structure.
+  #   2. The class's own demodulized name, if it's not the bare
+  #      "Form" (e.g. `Components::HerbariumForm` -> "herbarium_form").
+  #   3. `model_class_form_id` — for anonymous test classes / etc.,
+  #      derive from the model's class name.
+  #   4. Ultimate fallback: the literal string "application_form".
+
+  def test_derive_form_id_uses_all_controller_segments
+    klass = stub_views_controller_form("Names", "Synonyms", "Approve")
+    assert_equal("name_synonym_approve_form",
+                 instance_id_for(klass, Name.new))
+  end
+
+  def test_derive_form_id_appends_specific_class_name_to_segments
+    klass = stub_views_controller_form("Admin", "Donations",
+                                       class_name: "ReviewForm")
+    assert_equal("admin_donation_review_form",
+                 instance_id_for(klass, Donation.new))
+  end
+
+  def test_derive_form_id_singularizes_each_path_segment
+    klass = stub_views_controller_form("Account", "APIKeys")
+    assert_equal("account_api_key_form",
+                 instance_id_for(klass, APIKey.new))
+  end
+
+  def test_derive_form_id_for_components_uses_class_name
+    # Stand-in for `Components::HerbariumForm` (no Views::Controllers
+    # prefix) — derive from the class's own demodulized name.
+    klass = Class.new(Components::ApplicationForm)
+    Components.const_set(:HerbariumFormStub, klass)
+    begin
+      assert_equal("herbarium_form_stub",
+                   instance_id_for(klass, Herbarium.new))
+    ensure
+      Components.send(:remove_const, :HerbariumFormStub)
+    end
+  end
+
+  def test_derive_form_id_falls_back_to_model_class_when_class_has_no_name
+    # Anonymous form class (no name) + a real model → derive from the
+    # model class name.
+    klass = Class.new(Components::ApplicationForm)
+    assert_equal("herbarium_form",
+                 instance_id_for(klass, Herbarium.new))
+  end
+
+  def test_derive_form_id_ultimate_fallback_is_application_form
+    # Anonymous class with no model — falls all the way through to
+    # the literal "application_form" sentinel.
+    klass = Class.new(Components::ApplicationForm)
+    form = klass.allocate
+    assert_equal("application_form", form.derive_form_id(nil) ||
+                                     "application_form")
+  end
+
   private
+
+  # Build a stub class registered under
+  # `Views::Controllers::<seg1>::<seg2>::...::<class_name>` so the
+  # heuristic sees a realistic class name. Cleans up after itself via
+  # ObjectSpace constants when the test ends? No — caller is expected
+  # to use the returned class transiently in one assertion.
+  def stub_views_controller_form(*segments, class_name: "Form")
+    parent = Views::Controllers
+    segments.each do |seg|
+      parent = if parent.const_defined?(seg, false)
+                 parent.const_get(seg)
+               else
+                 parent.const_set(seg, Module.new)
+               end
+    end
+    if parent.const_defined?(class_name, false)
+      parent.const_get(class_name)
+    else
+      parent.const_set(class_name, Class.new(Components::ApplicationForm))
+    end
+  end
+
+  # Allocates a form of `klass` without calling `initialize` (avoids
+  # the Superform wiring we don't need) and asks it for its
+  # auto-derived form id given `model`.
+  def instance_id_for(klass, model)
+    klass.allocate.derive_form_id(model)
+  end
 
   def render_form(local: true, &block)
     form = TestFormClass.new(@collection_number,

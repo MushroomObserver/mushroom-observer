@@ -9,7 +9,7 @@ import { Controller } from "@hotwired/stimulus"
 // Custom titles: Add data-turbo-confirm-title to the element to override
 // the default "Are you sure?" title.
 export default class extends Controller {
-  static targets = ["title", "confirmButton"]
+  static targets = ["title", "message", "confirmButton"]
 
   connect() {
     // Store defaults for resetting
@@ -27,24 +27,38 @@ export default class extends Controller {
   }
 
   // Shows the modal with the given message and returns a Promise
-  // that resolves to true (confirm) or false (cancel)
+  // that resolves to true (confirm) or false (cancel).
+  //
+  // `element` is whatever Turbo's confirm callback hands us — usually
+  // a <form> (button_to flow) or a link (<a data-turbo-method=...>).
+  // For forms, look inside for a <button type=submit> to pick up
+  // per-button overrides (data-turbo-confirm-title etc.). For links,
+  // the link itself carries those data attrs.
   show(message, element) {
     return new Promise((resolve) => {
       this.resolvePromise = resolve
 
-      // Element is the form; find the button inside it for custom data
-      const button = element?.querySelector("button[type='submit']")
+      const source =
+        element?.querySelector?.("button[type='submit']") || element
+
+      // Body message — the actual `data-turbo-confirm` value that
+      // describes what's about to happen. Previously dropped on the
+      // floor, so the modal always read just "Are you sure?".
+      if (this.hasMessageTarget) {
+        this.messageTarget.textContent = message || ""
+      }
 
       // Use custom title if provided, otherwise default
-      const customTitle = button?.dataset?.turboConfirmTitle
+      const customTitle = source?.dataset?.turboConfirmTitle
       if (this.hasTitleTarget) {
         this.titleTarget.textContent = customTitle || this.defaultTitle
       }
 
       // Use button name if provided, otherwise default
-      const buttonName = button?.dataset?.turboConfirmButton
+      const buttonName = source?.dataset?.turboConfirmButton
       if (this.hasConfirmButtonTarget) {
-        this.confirmButtonTarget.textContent = buttonName || this.defaultButtonText
+        this.confirmButtonTarget.textContent =
+          buttonName || this.defaultButtonText
       }
 
       // Show the modal using Bootstrap

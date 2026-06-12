@@ -11,35 +11,42 @@ class Components::Base < Phlex::HTML
   include Phlex::Rails::Helpers::ClassNames
   include Phlex::Rails::Helpers::TurboFrameTag
   include Components::TrustedHtml
-
-  # Register custom output helpers (return HTML)
-  # mark_safe: true tells Phlex to trust the output without checking SafeBuffer
-  register_output_helper :show_title_id_badge, mark_safe: true
-  register_output_helper :link_to_object, mark_safe: true
-  register_output_helper :show_page_edit_icons, mark_safe: true
-  register_output_helper :naming_vote_form, mark_safe: true
-  register_output_helper :propose_naming_link, mark_safe: true
-  register_output_helper :location_link, mark_safe: true
-  register_output_helper :user_link, mark_safe: true
-  register_output_helper :modal_link_to, mark_safe: true
-  register_output_helper :put_button, mark_safe: true
-  register_output_helper :link_icon, mark_safe: true
-  register_output_helper :make_table, mark_safe: true
-  register_output_helper :help_block_with_arrow, mark_safe: true
-  register_output_helper :help_block, mark_safe: true
-  register_output_helper :observation_location_help, mark_safe: true
+  # `content_for(...)` and `content_for?(...)` — available everywhere
+  # so chrome components, popup builders, etc. don't have to inherit
+  # from Views::Base just for the stash/read pair.
+  include Phlex::Rails::Helpers::ContentFor
 
   # Register custom value helpers (return values)
   register_value_helper :permission?
+  register_value_helper :in_admin_mode?
+  register_value_helper :reviewer?
+  # The logged-in User (or nil). Reads off the controller's
+  # before-filter-set `@user` ivar — request-scoped, no thread-
+  # local. Views that need "the viewer" can call `current_user`
+  # instead of taking a `prop :user, _Nilable(::User)`; views that
+  # need a non-viewer subject User keep the prop. See
+  # `ApplicationController::Authentication#current_user`.
+  register_value_helper :current_user
   register_value_helper :url_for
   register_value_helper :image_vote_as_short_string
   register_value_helper :image_vote_as_help_string
-  register_value_helper :send_observer_question_tab
   register_value_helper :sequence_archive_options
   register_value_helper :add_q_param
   register_value_helper :q_param
+  # The Query for "what the user is currently looking at" — pulled
+  # from the controller's `@query` ivar, the URL's `q` param, or the
+  # session's stored query_record (in that order, via
+  # `ApplicationController::Queries#current_query`). Lets Phlex
+  # views accept a typed `prop :query, ::Query` for validated input
+  # AND fall back to "whatever query the session knows about" when
+  # the prop is omitted, without having to thread `@query` through
+  # every view-layer caller.
+  register_value_helper :current_query
   register_value_helper :add_args_to_url
+  register_value_helper :controller
   register_value_helper :controller_name
+  register_value_helper :controller_path
+  register_value_helper :action_name
   register_value_helper :params
 
   # Enable fragment caching
@@ -47,10 +54,8 @@ class Components::Base < Phlex::HTML
     Rails.cache
   end
 
-  if Rails.env.development?
-    def before_template
-      comment { "Before #{self.class.name}" }
-      super
-    end
+  def before_template
+    comment { "Before #{self.class.name}" } if Rails.env.development?
+    super
   end
 end

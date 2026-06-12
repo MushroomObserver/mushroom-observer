@@ -68,7 +68,43 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     build_index_with_query
   end
 
+  # Sort options for the index page. `nonpersonal` queries get a
+  # different subset (records / curator / code / name + create/update);
+  # full queries get every key. Read by `add_sorter` in the view.
+  # Each key must resolve to `Herbarium.order_by_<key>`.
+  def index_sort_options
+    if @query&.params&.dig(:nonpersonal)
+      nonpersonal_index_sort_options
+    else
+      full_index_sort_options
+    end
+  end
+
   private
+
+  def full_index_sort_options
+    [
+      ["records",    :sort_by_records.t],
+      ["curator",    :sort_by_curator.t],
+      ["code",       :sort_by_code.t],
+      ["name",       :sort_by_name.t],
+      ["user",       :sort_by_user.t],
+      ["created_at", :sort_by_created_at.t],
+      ["updated_at", :sort_by_updated_at.t]
+    ].freeze
+  end
+
+  # Nonpersonal variant is the full list minus `user` only (NOT
+  # `curator` — institutional herbaria can still have curators,
+  # so sorting by curator is meaningful in the nonpersonal view).
+  # Matches the legacy `nonpersonal_herbaria_index_sorts` exactly.
+  def nonpersonal_index_sort_options
+    # rubocop:disable Style/HashExcept
+    # `except` mistakenly suggested here — this is an Array of
+    # [key, label] tuples, not a Hash. `reject` is correct.
+    full_index_sort_options.reject { |key, _| key == "user" }.freeze
+    # rubocop:enable Style/HashExcept
+  end
 
   # If user clicks "merge" on an herbarium, it reloads the page and asks
   # them to click on the destination herbarium to merge it with.
@@ -122,7 +158,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     @herbarium = Herbarium.new
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_form }
-      format.html
+      format.html do
+        render(Views::Controllers::Herbaria::New.new(
+                 herbarium: @herbarium, user: @user
+               ))
+      end
     end
   end
 
@@ -133,7 +173,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     set_up_herbarium_for_edit
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_form }
-      format.html
+      format.html do
+        render(Views::Controllers::Herbaria::Edit.new(
+                 herbarium: @herbarium, user: @user, top_users: @top_users
+               ))
+      end
     end
   end
 
@@ -147,7 +191,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def render_modal_herbarium_form
-    render(Components::ModalForm.new(
+    render(Components::ModalTurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -173,13 +217,6 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
       helpers.new_page_title(:new_object, :HERBARIUM)
     when "edit", "update"
       helpers.edit_page_title(:HERBARIUM_RECORD.l, @herbarium)
-    end
-  end
-
-  def modal_form_action
-    case action_name
-    when "new", "create" then :create
-    when "edit", "update" then :update
     end
   end
 
@@ -385,6 +422,14 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def redirect_to_create_location_or_referrer_or_show_location
+    # Turbo-stream callers (the herbarium-create modal embedded in the
+    # obs form, project pages, etc.) should never get a redirect:
+    # we're in a modal that needs to close + update the parent page.
+    # `show_modal_flash_or_show_herbarium` dispatches on format and
+    # renders `_update_observation.erb` for turbo_stream, which closes
+    # the modal and populates the obs-form's herbarium fields.
+    return show_modal_flash_or_show_herbarium if request.format.turbo_stream?
+
     redirect_to_create_location || redirect_to_referrer ||
       show_modal_flash_or_show_herbarium
   end
@@ -406,7 +451,20 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
     respond_to do |format|
       format.turbo_stream { reload_herbarium_modal_form_and_flash }
-      format.html { render(action) }
+      format.html { render(phlex_form_view_for(action)) }
+    end
+  end
+
+  def phlex_form_view_for(action)
+    case action
+    when :new
+      Views::Controllers::Herbaria::New.new(
+        herbarium: @herbarium, user: @user
+      )
+    when :edit
+      Views::Controllers::Herbaria::Edit.new(
+        herbarium: @herbarium, user: @user, top_users: @top_users
+      )
     end
   end
 

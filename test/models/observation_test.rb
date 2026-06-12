@@ -123,6 +123,36 @@ class ObservationTest < UnitTestCase
     assert_not(consensus.owner_preference)
   end
 
+  # Pins the model-layer flow that drives the title's
+  # "Observer Preference" line (`OwnerNamingLine.visible_for?` →
+  # `NamingConsensus#owner_preference`): when the owner proposes
+  # a NEW naming and casts a higher vote on it than on their
+  # previous favorite, `owner_preference` should reflect the
+  # new naming's name on the very next call. (UI-side: the
+  # title isn't currently re-rendered after a vote
+  # turbo_stream, so the visible title stays stale until a full
+  # page reload — that's pre-existing behavior, not changed by
+  # the obs-title Phlex refactor.)
+  def test_owner_preference_updates_when_higher_vote_on_new_naming
+    obs = observations(:owner_only_favorite_ne_consensus)
+    consensus = ::Observation::NamingConsensus.new(obs)
+    assert_equal(names(:tremella_mesenterica), consensus.owner_preference)
+
+    # Drop the existing favorite to a lower-than-max vote so the
+    # new naming can outrank it without exceeding `Vote.maximum_vote`.
+    owner = obs.user
+    old_favorite = namings(:tremella_mesenterica_naming)
+    consensus.change_vote(old_favorite, Vote.next_best_vote, owner)
+    new_naming = ::Naming.create!(observation: obs, name: names(:fungi),
+                                  user: owner)
+    consensus.change_vote(new_naming, Vote.maximum_vote, owner)
+
+    refreshed = ::Observation::NamingConsensus.new(obs.reload)
+    assert_equal(names(:fungi), refreshed.owner_preference,
+                 "owner_preference should track the highest-voted " \
+                 "owner naming, not preserve the first favorite")
+  end
+
   def test_change_vote_weakened_favorite
     vote = votes(:owner_only_favorite_ne_consensus)
     change_vote(vote.observation, vote.naming, Vote.min_pos_vote, vote.user)
@@ -144,6 +174,38 @@ class ObservationTest < UnitTestCase
     old_2nd_choice.reload
 
     assert_equal(true, old_2nd_choice.favorite)
+  end
+
+  def test_clean_votes_destroys_other_users_votes_when_name_changes
+    # `NamingConsensus#clean_votes` is called by NamingsController#update
+    # when a user renames a naming — votes by anyone else become stale
+    # (they voted on a different identification) so we destroy them,
+    # but preserve the editor's own vote.
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    consensus = Observation::NamingConsensus.new(obs)
+    user_ids = naming.votes.map(&:user_id)
+    assert_includes(user_ids, rolf.id, "fixture: rolf voted")
+    assert_includes(user_ids, mary.id, "fixture: mary voted")
+
+    consensus.clean_votes(naming, names(:agaricus_campestris), rolf)
+
+    remaining = naming.votes.reload.map(&:user_id)
+    assert_includes(remaining, rolf.id, "editor's vote preserved")
+    assert_not_includes(remaining, mary.id, "other user's vote destroyed")
+  end
+
+  def test_clean_votes_noop_when_name_unchanged
+    # No-op early return when the new name matches the current one.
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    consensus = Observation::NamingConsensus.new(obs)
+    before = naming.votes.count
+
+    consensus.clean_votes(naming, naming.name, rolf)
+
+    assert_equal(before, naming.votes.reload.count,
+                 "no votes destroyed when name didn't change")
   end
 
   # Prove that when all an Observation's Namings are deprecated,
@@ -1084,7 +1146,7 @@ class ObservationTest < UnitTestCase
     # with order scrambled in the Observation
     obs   = observations(:template_and_orphaned_notes_scrambled_obs)
     parts = ["Cap", "Nearby trees", "odor", "orphaned caption 1",
-             "orphaned caption 2", "Collector", "Other"]
+             "orphaned caption 2", "Other"]
     assert_equal(parts, obs.form_notes_parts(obs.user))
   end
 
@@ -2069,8 +2131,201 @@ class ObservationTest < UnitTestCase
     assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
 
     obs = observations(:imported_inat_obs)
-    assert_equal("mo_inat_import", obs.source)
-    assert_equal(:source_credit_mo_inat_import, obs.source_credit)
+    assert_nil(obs.source)
+    assert_equal(sources(:inaturalist), obs.external_source)
+    assert_match(/"Imported from iNaturalist":/, obs.source_credit,
+                 "Whole phrase should be the link text")
+    assert_match(%r{www\.inaturalist\.org/observations/#{obs.external_id}},
+                 obs.source_credit,
+                 "Link should target the per-observation iNat URL")
+    assert(obs.source_noteworthy?)
+  end
+
+  def test_source_credit_external_source_without_observation_url
+    obs = observations(:imported_inat_obs)
+    # Replace the iNat source with one whose name doesn't match the
+    # known per-obs URL pattern AND whose homepage url is blank, so
+    # observation_url returns nil and we fall back to plain text.
+    blank_source = Source.create!(name: "BlankSource")
+    obs.update!(external_source: blank_source)
+    assert_equal("Imported from BlankSource", obs.source_credit,
+                 "Should fall back to non-linked text when no URL is known")
+    assert(obs.source_noteworthy?)
+  end
+
+  # ----- Coverage gap tests for app/models/observation.rb -----
+
+  # field_slip= is a no-op when the slip arg is nil — the early
+  # return at line 219 avoids touching the obs's occurrence.
+  def test_field_slip_setter_with_nil_is_no_op
+    obs = observations(:minimal_unknown_obs)
+    starting_occurrence = obs.occurrence
+    assert_not_nil(starting_occurrence,
+                   "fixture should still have an occurrence")
+    obs.field_slip = nil
+    assert_equal(starting_occurrence, obs.occurrence,
+                 "Setting field_slip to nil should not alter occurrence")
+  end
+
+  # destroy_orphaned_collection_numbers wipes any collection_number
+  # that was attached to only this obs (line 312). Called directly
+  # rather than via obs.destroy because the dependent: :destroy on
+  # observation_collection_numbers fires first in callback order
+  # and would empty col_num.observations before the predicate runs.
+  def test_destroy_orphaned_collection_numbers_destroys_only_orphans
+    obs = observations(:minimal_unknown_obs)
+    sole_coll_num = obs.collection_numbers.first
+    assert_equal([obs], sole_coll_num.observations,
+                 "Need a coll_num attached only to this obs")
+
+    obs.destroy_orphaned_collection_numbers
+    assert_nil(CollectionNumber.find_by(id: sole_coll_num.id),
+               "Orphaned collection_number should be destroyed")
+  end
+
+  # when_str returns the formatted self.when when the @when_str
+  # ivar hasn't been set (line 478).
+  def test_when_str_falls_back_to_formatted_when
+    obs = observations(:minimal_unknown_obs)
+    assert_equal(obs.when.strftime("%Y-%m-%d"), obs.when_str)
+  end
+
+  # display_alt formats altitude in meters when present (line 579)
+  # and returns "" when nil.
+  def test_display_alt
+    obs = observations(:minimal_unknown_obs)
+    obs.alt = nil
+    assert_equal("", obs.display_alt)
+    obs.alt = 1234
+    assert_equal("1234m", obs.display_alt)
+  end
+
+  # other_notes reads the canonical "Other" key (line 673) and
+  # other_notes= writes through it (lines 677-678).
+  #
+  # Note: the setter only round-trips reliably when notes is already
+  # a populated Hash (AR caches the deserialized hash and tracks
+  # mutations). On a fresh record the line `self.notes ||= {}` does
+  # run, but the subsequent `notes[key] = val` mutation doesn't
+  # persist because the serialize-coder returns a fresh hash on each
+  # read until something is written through `notes=`. This test
+  # exercises both code paths for coverage and asserts the
+  # round-trip on the populated path.
+  def test_other_notes_getter_and_setter
+    populated = observations(:detailed_unknown_obs)
+    assert_equal(populated.notes[Observation.other_notes_key],
+                 populated.other_notes,
+                 "Getter should return notes[other_notes_key]")
+    populated.other_notes = "Updated"
+    assert_equal("Updated", populated.other_notes,
+                 "Setter should round-trip on a populated hash")
+
+    fresh = Observation.new
+    assert_nil(fresh.other_notes,
+               "Getter on fresh obs returns nil (notes is empty hash)")
+    # Cover the setter's `self.notes ||= {}` branch on a fresh obs.
+    # The mutation won't persist (see method comment) but the line runs.
+    assert_nothing_raised { fresh.other_notes = "Hello" }
+  end
+
+  # user_unique_format_name swallows StandardError from the name
+  # call and returns "" (line 836).
+  def test_user_unique_format_name_swallows_errors
+    obs = observations(:minimal_unknown_obs)
+    obs.stub(:name, nil) do
+      assert_equal("", obs.user_unique_format_name(users(:rolf)),
+                   "Should swallow NoMethodError on nil name")
+    end
+  end
+
+  # turn_off_specimen_if_no_more_records clears specimen only when
+  # every record-bearing association is empty AND there is no
+  # field_slip (lines 942-945 are the cascading guards).
+  def test_turn_off_specimen_if_no_more_records
+    # The obs starts with collection_numbers, herbarium_records,
+    # and a field_slip → guard returns early, specimen unchanged.
+    obs = observations(:detailed_unknown_obs)
+    obs.update!(specimen: true)
+    obs.turn_off_specimen_if_no_more_records
+    assert(obs.reload.specimen, "Should not clear when records remain")
+
+    # Strip every record-like association so the early-return
+    # guards on lines 940-943 all pass.
+    obs.collection_numbers.clear
+    obs.herbarium_records.clear
+    obs.sequences.destroy_all
+    obs.update!(occurrence: nil)
+    obs.turn_off_specimen_if_no_more_records
+    assert_not(obs.reload.specimen,
+               "Should clear specimen once all record assocs gone")
+  end
+
+  # notify_species_lists logs :log_observation_destroyed2 on each
+  # SpeciesList the obs belonged to (line 1025). Called directly:
+  # via obs.destroy the species_list_observations cascade fires
+  # first (declared earlier in the class), emptying obs.species_lists
+  # before the notify_species_lists callback runs.
+  def test_notify_species_lists_logs_destruction
+    obs = observations(:minimal_unknown_obs)
+    spl = obs.species_lists.first
+    assert_not_nil(spl, "Need a fixture obs that's in a species_list")
+
+    obs.notify_species_lists
+    assert_match(/log_observation_destroyed2/, spl.reload.rss_log.notes,
+                 "SpeciesList rss_log should record the destruction")
+  end
+
+  # announce_consensus_change pushes interested users and removes
+  # explicitly-uninterested ones (lines 1186-1189).
+  def test_announce_consensus_change_uses_interest_state
+    obs = observations(:coprinus_comatus_obs)
+    NameTracker.all.map(&:destroy)
+    Interest.create!(target: obs, user: mary,    state: true)
+    Interest.create!(target: obs, user: dick,    state: false)
+    Interest.create!(target: obs, user: katrina, state: true)
+
+    User.current = rolf
+    old_name = obs.name
+    new_name = names(:agaricus_campestris)
+    assert_enqueued_jobs(2) do
+      obs.announce_consensus_change(old_name, new_name)
+    end
+    # Mary (state=true) and Katrina (state=true) get notified;
+    # Dick (state=false) does not. Sender (rolf) is excluded.
+  end
+
+  # log_consensus_change emits :log_consensus_created when there
+  # was no prior consensus name (line 1241).
+  def test_log_consensus_change_with_nil_old_name_logs_created
+    obs = observations(:minimal_unknown_obs)
+    new_name = names(:agaricus_campestris)
+    obs.log_consensus_change(nil, new_name)
+    assert_match(/log_consensus_created/, obs.rss_log.notes)
+  end
+
+  # user_log_consensus_change emits :log_consensus_created when
+  # there was no prior consensus name (line 1251).
+  def test_user_log_consensus_change_with_nil_old_name_logs_created
+    obs = observations(:minimal_unknown_obs)
+    new_name = names(:agaricus_campestris)
+    obs.user_log_consensus_change(nil, new_name, rolf)
+    assert_match(/log_consensus_created/, obs.rss_log.notes)
+  end
+
+  # check_altitude is unreachable through the normal alt= setter
+  # because the `t.integer "alt"` column coerces unparseable
+  # strings to 0 before parse_altitude ever sees them. Stub
+  # parse_altitude to nil during validation to exercise line 1375
+  # for coverage; if the column type ever changes, remove the stub
+  # and the test still passes (and a real test_setter case can be
+  # added).
+  def test_check_altitude_rejects_unparseable_alt
+    obs = observations(:minimal_unknown_obs)
+    obs.alt = 100
+    Location.stub(:parse_altitude, nil) do
+      assert_not(obs.valid?, "Should fail validation when parse returns nil")
+    end
+    assert_not_empty(obs.errors[:alt])
   end
 
   def test_hidden_location
@@ -2142,5 +2397,232 @@ class ObservationTest < UnitTestCase
                "Removing location should clear cached coordinates")
     assert_nil(@cc_obs.location_lng,
                "Removing location should clear cached coordinates")
+  end
+
+  # --- Collector identity (#4211) ---
+
+  def new_collector_obs(**attrs)
+    Observation.create!({ user: mary, when: Time.zone.now,
+                          where: "Anywhere", name: names(:fungi) }.merge(attrs))
+  end
+
+  def test_collector_defaults_to_creator
+    obs = new_collector_obs
+    assert_equal(mary.unique_text_name, obs.collector)
+    assert_equal(mary.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_matching_creator_sets_fk
+    obs = new_collector_obs(collector: mary.unique_text_name)
+    assert_equal(mary.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_free_text_clears_fk_and_differs
+    obs = new_collector_obs(collector: "Jane Forager")
+    assert_equal("Jane Forager", obs.collector)
+    assert_nil(obs.collector_user_id)
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  # No collector recorded at all (blank string, nil FK) — e.g. a legacy
+  # collector-less obs — does not "differ" from the creator.
+  def test_collector_differs_false_when_no_collector_recorded
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert_not(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_unchanged_save_preserves_resolved_fk
+    # Simulates a backfilled foray row: collector resolves to a
+    # different MO user than the one who entered the record.
+    obs = new_collector_obs
+    obs.update_columns(collector: rolf.unique_text_name,
+                       collector_user_id: rolf.id)
+    obs.reload.update!(where: "Somewhere else")
+    assert_equal(rolf.id, obs.collector_user_id,
+                 "Editing an unrelated field must not clear the collector FK")
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_collector_textile_links_known_user
+    obs = Observation.new(user: mary, collector_user: rolf,
+                          collector: rolf.unique_text_name)
+    assert_equal(rolf.textile_name, obs.collector_textile)
+  end
+
+  def test_collector_textile_plain_string
+    obs = Observation.new(user: mary, collector: "Jane Forager")
+    assert_equal("Jane Forager", obs.collector_textile)
+  end
+
+  def test_collector_textile_blank_when_no_collector
+    obs = Observation.new(user: mary, collector: nil)
+    assert_nil(obs.collector_textile)
+  end
+
+  # Expand-window fallback: column blank, collector still in notes.
+  def test_collector_textile_falls_back_to_legacy_note
+    obs = Observation.new(user: mary, collector: nil,
+                          notes: { Collector: "_user rolf_" })
+    assert_equal("_user rolf_", obs.collector_textile)
+  end
+
+  def test_is_collector_uses_column_fk
+    obs = new_collector_obs(collector: rolf.unique_text_name)
+    assert(obs.is_collector?(rolf))
+    assert_not(obs.is_collector?(mary))
+  end
+
+  # Expand-window fallback: an un-backfilled obs keeps the legacy collector's
+  # edit permission via the notes markup.
+  def test_is_collector_falls_back_to_legacy_note
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil,
+                       notes: { Collector: "_user rolf_" })
+    assert(obs.is_collector?(rolf))
+    assert_not(obs.is_collector?(mary))
+  end
+
+  def test_collector_unrecorded_field_slip_blank
+    obs = observations(:minimal_unknown_obs)
+    assert(obs.field_slip_id.present?, "fixture should have a field slip")
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert(obs.collector_unrecorded?)
+  end
+
+  def test_collector_unrecorded_false_when_collector_present
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(collector: "Jane Forager", collector_user_id: nil)
+    assert_not(obs.collector_unrecorded?)
+  end
+
+  def test_collector_unrecorded_false_without_field_slip
+    obs = new_collector_obs
+    obs.update_columns(collector: nil, collector_user_id: nil)
+    assert_nil(obs.field_slip_id)
+    assert_not(obs.collector_unrecorded?)
+  end
+
+  def test_build_observation_skips_collector_default
+    obs = Observation.build_observation(
+      locations(:burbank), names(:fungi), {}, Time.zone.now, mary
+    )
+    assert_nil(obs.collector,
+               "field-slip-built obs must not auto-claim the recorder")
+    assert_nil(obs.collector_user_id)
+  end
+
+  def test_collector_attrs_user
+    attrs = Observation.collector_attrs(rolf)
+    assert_equal(rolf.unique_text_name, attrs[:collector])
+    assert_equal(rolf.id, attrs[:collector_user_id])
+  end
+
+  def test_collector_attrs_string_and_nil
+    assert_equal({ collector: "Jane Forager" },
+                 Observation.collector_attrs("Jane Forager"))
+    assert_equal({}, Observation.collector_attrs(""))
+    assert_equal({}, Observation.collector_attrs(nil))
+  end
+
+  # --- resolve_collector (shared edit/import/migration resolver) ---
+
+  def test_resolve_collector_blank
+    assert_equal({ collector: nil, collector_user_id: nil },
+                 Observation.resolve_collector("  "))
+    assert_equal({ collector: nil, collector_user_id: nil },
+                 Observation.resolve_collector(nil))
+  end
+
+  def test_resolve_collector_user_markup
+    # "_user <ref>_" markup resolves to the MO user (Joe's edit-form case)
+    # and normalizes the display string to the user's unique_text_name.
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector("_user mary_"))
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector("_user Rolf Singer_"))
+  end
+
+  def test_resolve_collector_bare_login_and_name
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector("mary"))
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector("Rolf Singer"))
+  end
+
+  # A "Name (login)" unique_text_name (no FK, e.g. field-slip redirect into
+  # the new-obs form) links to that user, not just owner/existing. See #4499.
+  def test_resolve_collector_unique_text_name_of_other_user
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector(rolf.unique_text_name,
+                                               owner: mary))
+  end
+
+  def test_resolve_collector_owner_match
+    # The owner's login / name / unique_text_name all link to the owner.
+    [mary.login, mary.name, mary.unique_text_name].each do |str|
+      assert_equal(Observation.collector_attrs(mary),
+                   Observation.resolve_collector(str, owner: mary), str)
+    end
+  end
+
+  def test_resolve_collector_inat_username_only_when_enabled
+    inat = users(:mary).inat_username
+    assert_equal(Observation.collector_attrs(mary),
+                 Observation.resolve_collector(inat, match_inat: true))
+    # Without the flag, an iNat username is just free text.
+    assert_equal({ collector: inat, collector_user_id: nil },
+                 Observation.resolve_collector(inat, match_inat: false))
+  end
+
+  def test_resolve_collector_free_text
+    assert_equal({ collector: "Jane Forager", collector_user_id: nil },
+                 Observation.resolve_collector("Jane Forager"))
+  end
+
+  def test_resolve_collector_preserves_existing_link
+    # A string that names neither owner nor a findable user, but matches the
+    # already-linked user's unique_text_name, preserves that link (an
+    # autocomplete selection or a backfilled-claimed identity).
+    assert_equal(Observation.collector_attrs(rolf),
+                 Observation.resolve_collector(rolf.unique_text_name,
+                                               owner: mary, existing: rolf))
+  end
+
+  # --- edit-form save path (reconcile_collector_user) ---
+
+  def test_edit_collector_markup_links_user
+    obs = new_collector_obs
+    obs.update!(collector: "_user Rolf Singer_")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_edit_collector_bare_login_links_user
+    obs = new_collector_obs
+    obs.update!(collector: "rolf")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_equal(rolf.unique_text_name, obs.collector)
+  end
+
+  def test_edit_collector_unknown_stays_free_text
+    obs = new_collector_obs
+    obs.update!(collector: "Jane Forager")
+    assert_nil(obs.collector_user_id)
+    assert_equal("Jane Forager", obs.collector)
+  end
+
+  # Reconcile also fires when only collector_user_id changes, so a FK that
+  # is inconsistent with the (free-text) collector string is corrected
+  # rather than persisted. See #4499.
+  def test_edit_collector_user_id_change_reconciles_against_string
+    obs = new_collector_obs
+    obs.update_columns(collector: "Jane Forager", collector_user_id: nil)
+    obs.update!(collector_user_id: rolf.id)
+    assert_nil(obs.reload.collector_user_id,
+               "inconsistent FK reconciled away from the free-text string")
   end
 end

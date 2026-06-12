@@ -20,7 +20,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options, :field, :attributes
 
-    def initialize(field, attributes:, wrapper_options: {})
+    def initialize(field, wrapper_options: {}, **attributes)
       super()
       @field = field
       @attributes = attributes
@@ -52,7 +52,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_label(text, _inline)
-      label(class: "mr-3") { text } if text
+      label(for: field.dom.id, class: "mr-3") { text } if text
     end
   end
 end

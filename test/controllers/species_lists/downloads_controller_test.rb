@@ -37,18 +37,22 @@ module SpeciesLists
 
       path = Rails.root.join("test/reports")
 
-      post(:create, params: { id: list.id, type: "csv" })
+      post(:create,
+           params: { id: list.id, species_list_report: { format: "csv" } })
       assert_response_equal_file(["#{path}/test.csv", "ISO-8859-1"])
 
-      post(:create, params: { id: list.id, type: "txt" })
+      post(:create,
+           params: { id: list.id, species_list_report: { format: "txt" } })
       assert_response_equal_file("#{path}/test.txt")
 
-      post(:create, params: { id: list.id, type: "rtf" })
+      post(:create,
+           params: { id: list.id, species_list_report: { format: "rtf" } })
       assert_response_equal_file("#{path}/test.rtf") do |x|
         x.sub(/\{\\createim\\yr.*\}/, "")
       end
 
-      post(:create, params: { id: list.id, type: "bogus" })
+      post(:create,
+           params: { id: list.id, species_list_report: { format: "bogus" } })
       assert_response(:redirect)
       assert_flash_error
     end

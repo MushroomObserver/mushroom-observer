@@ -22,6 +22,21 @@ module Locations
       "LocationDescription"
     end
 
+    # Sort options for the index page. Same shape as
+    # `Names::DescriptionsController#index_sort_options` — both
+    # description indexes share the legacy
+    # `DescriptionsHelper#descriptions_index_sorts` tuple. Each
+    # key must resolve to `LocationDescription.order_by_<key>`.
+    def index_sort_options
+      [
+        ["name",       :sort_by_name.l],
+        ["created_at", :sort_by_created_at.l],
+        ["updated_at", :sort_by_updated_at.l],
+        ["user",       :sort_by_user.l],
+        ["num_views",  :sort_by_num_views.l]
+      ].freeze
+    end
+
     private
 
     # Is :name
@@ -74,24 +89,43 @@ module Locations
 
     def show
       return unless find_description!
-
-      case params[:flow]
-      when "next"
-        redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
-      when "prev"
-        redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
-      end
+      return if handle_show_flow_redirect
 
       @location = @description.location
       return unless description_parent_exists?(@location)
       return unless user_has_permission_to_see_description?
 
+      gather_show_ivars
+      return if performed?
+
+      render(Views::Controllers::Locations::Descriptions::Show.new(
+               description: @description, user: @user,
+               versions: @versions, projects: @projects
+             ))
+    end
+
+    private
+
+    def handle_show_flow_redirect
+      case params[:flow]
+      when "next"
+        redirect_to_next_object(:next, LocationDescription, params[:id].to_s)
+        true
+      when "prev"
+        redirect_to_next_object(:prev, LocationDescription, params[:id].to_s)
+        true
+      end
+    end
+
+    def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this(@location)
       @versions = @description.versions
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
+
+    public
 
     def new
       find_location
@@ -101,6 +135,12 @@ module Locations
 
       # Render a blank form.
       initialize_description_source
+      return if performed?
+
+      render(Views::Controllers::Locations::Descriptions::New.new(
+               location: @location, description: @description,
+               user: @user, licenses: @licenses
+             ))
     end
 
     def create
@@ -127,6 +167,10 @@ module Locations
 
       find_description_parent
       find_licenses
+
+      render(Views::Controllers::Locations::Descriptions::Edit.new(
+               description: @description, user: @user, licenses: @licenses
+             ))
     end
 
     def update
@@ -136,7 +180,14 @@ module Locations
 
       find_description_parent
       find_licenses
-      @description.attributes = permitted_location_description_params
+      # `.compact` drops permitted params whose value is `nil` — which
+      # only happens when the corresponding form input wasn't rendered
+      # (conditional fields). Form inputs always submit at least an
+      # empty string, so intentional user-blanking flows through and
+      # marks the model as changed.
+      @description.assign_attributes(
+        permitted_location_description_params.compact
+      )
 
       modify_description_permissions
       save_if_changes_made_or_flash
@@ -161,11 +212,16 @@ module Locations
     end
 
     def render_new
-      render("new", location: new_location_description_path(@location.id))
+      render(Views::Controllers::Locations::Descriptions::New.new(
+               location: @location, description: @description,
+               user: @user, licenses: @licenses
+             ), location: new_location_description_path(@location.id))
     end
 
     def render_edit
-      render("edit", location: edit_location_description_path(@location.id))
+      render(Views::Controllers::Locations::Descriptions::Edit.new(
+               description: @description, user: @user, licenses: @licenses
+             ), location: edit_location_description_path(@location.id))
     end
 
     # called by :create

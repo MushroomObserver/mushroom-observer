@@ -8,10 +8,11 @@ class Inat
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
     NAMING_VOTE = Vote::MAXIMUM_VOTE
 
-    def initialize(inat_obs:, user:, import_others: false)
+    def initialize(inat_obs:, user:, import_others: false, inat_source: nil)
       @inat_obs = inat_obs
       @user = user
       @import_others = import_others
+      @inat_source = inat_source || Source.inaturalist
       @skipped_images = 0
       @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
     end
@@ -62,8 +63,16 @@ class Inat
         specimen: inat_obs.specimen?,
         text_name: text_name,
         notes: inat_obs.notes,
-        source: inat_obs.source,
-        inat_id: inat_obs[:id] }
+        external_source: @inat_source,
+        external_id: inat_obs[:id].to_s }.merge(collector_attrs)
+    end
+
+    # Link the collector to an MO user when the iNat collector (a custom
+    # collector field, else the iNat login) matches a User#inat_username;
+    # otherwise store the iNat name as free text. See PR #4452 / Joe.
+    def collector_attrs
+      Observation.resolve_collector(inat_obs.collector, owner: user,
+                                                        match_inat: true)
     end
 
     # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.

@@ -17,9 +17,12 @@
 class Components::NamesLookupFieldGroup < Components::Base
   include Components::ApplicationForm::AutocompleterPrefill
 
-  prop :names_namespace, _Any
+  # Duck-typed: only `#field` is called. Accepts a
+  # `Superform::Namespace`, a `Superform::Rails::Form`, or any
+  # stub that responds to `#field` (test mocks).
+  prop :names_namespace, _Interface(:field)
   prop :query, Query
-  prop :modifier_fields, _Array(Object)
+  prop :modifier_fields, _Array(_Union(Symbol, _Array(Symbol)))
 
   def view_template
     render_lookup_autocompleter
@@ -124,9 +127,9 @@ class Components::NamesLookupFieldGroup < Components::Base
   end
 
   def render_select_field(field_name)
-    # Superform uses [value, label] order (opposite of Rails)
-    # Use string "false"/"true" instead of booleans for HTML rendering
-    options = [%w[false no], %w[true yes]]
+    # Rails-shape `[label, value]`. Use string "false"/"true" instead
+    # of booleans for HTML rendering (Phlex omits `value="false"`).
+    options = [%w[no false], %w[yes true]]
     field_component = @names_namespace.field(field_name).select(
       options,
       wrapper_options: {

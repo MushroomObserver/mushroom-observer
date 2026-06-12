@@ -1,9 +1,9 @@
 <%
 add_new_title(:create_object, :GLOSSARY_TERM)
-add_context_nav(glossary_term_form_new_tabs)
+add_context_nav(Tab::GlossaryTerm::FormNew.new)
 %>
 
-<%= render(Components::GlossaryTermForm.new(
+<%= render(Views::Controllers::GlossaryTerms::Form.new(
   @glossary_term,
   enctype: "multipart/form-data",
   upload_params: {

@@ -1,11 +1,15 @@
 <% heading_links = []
 if @location.destroyable? && (in_admin_mode? || @location.user == @user)
-  heading_links << destroy_button(target: @location, icon: :delete)
+  heading_links << destroy_button(target: @location, btn: nil)
 end
 if in_admin_mode?
-  heading_links << icon_link_with_query(*location_reverse_order_tab(@location))
+  heading_links << icon_link_with_query(
+    *Tab::Location::ReverseOrder.new(location: @location).to_a
+  )
 end
-footer = icon_link_to(*observations_at_location_tab(@location))
+footer = render(Components::IconLink.new(
+  tab: Tab::Location::ObservationsAt.new(location: @location)
+))
 %>
 <%= render(Components::Panel.new(
       panel_id: "location_coordinates"

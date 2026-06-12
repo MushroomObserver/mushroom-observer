@@ -717,6 +717,8 @@
   where: locality
   WHO: Who
   who: who
+  ENTERED_BY: Entered by
+  entered_by: entered by
 
   # Common verbs/actions used as button labels.
   ADD: Add
@@ -790,6 +792,7 @@
   save_changes: save changes
   SAVE_EDITS: Save Edits
   save_edits: save edits
+  SAVING: Saving
   SEARCH: Search
   search: search
   SEARCHES: Searches
@@ -814,6 +817,8 @@
   RECORD: Record
   IDENTIFY: Identify
   ADD_TO: Add to
+  ADD_ALL: Add All
+  SKIP: Skip
 
   # Common adjectives.
   ANONYMOUS: Anonymous
@@ -924,6 +929,7 @@
   attached_to_project: Attached [object] to "[project]".
   and_num_more: And [num] more...
   are_you_sure: Are you sure?
+  opens_in_new_tab: Opens in a new tab
   click_for_map: Click for map
   CREATED_BY: Created by
   EDITING: Editing
@@ -1014,6 +1020,9 @@
   # descriptions in the show_name page.
   description_part_title_public: Public [:DESCRIPTION]
   description_part_title_user: "[USER]'s [:DESCRIPTION]"
+  description_part_title_project: "[USER]'s Draft"
+  description_part_title_source: "[:DESCRIPTION]"
+  description_part_title_foreign: "[:DESCRIPTION]"
 
   # Name/location description types. These are used when listing the available
   # descriptions in the show_name page, but this time the optional text field was
@@ -1446,7 +1455,10 @@
   source_credit_mo_android_app: Created via the "Mushroom Observer Android app":https://mushroomobserver.org/articles/34
   source_credit_mo_iphone_app: Created via the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34
   source_credit_mo_api: Created via the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
-  source_credit_mo_inat_import: '"Imported from iNaturalist":https://mushroomobserver.org/articles/39'
+  source_credit_external: '"Imported from [name]":[url]'
+  source_credit_external_no_url: Imported from [name]
+  source_credit_external_text: Imported from [name]
+  source_credit_help_link: About imported observations
 
   ##############################################################################
 
@@ -1815,6 +1827,7 @@
   form_observations_edit_image: "[:EDIT] [:image]"
   form_observations_remove_image: "[:REMOVE] [:image]"
   form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0; longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
+  form_observations_collector_help: Who collected this specimen. Defaults to you; change it when you are entering an observation on someone else's behalf (e.g. recording foray collections).
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing. Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
   form_observations_open_map: "[:SHOW] [:map]"
@@ -2159,6 +2172,7 @@
   notes_template: "[:prefs_notes_template]"
   prefs_notes_template_explanation: Comma-separated list of Notes sub-headings for the Create Observation page.
   prefs_notes_template_no_other: must not include a heading named “[part]”
+  prefs_notes_template_no_collector: must not include a heading named “[part]” — the collector has its own field
   prefs_notes_template_no_dups: contains duplicate heading “[part]”
   prefs_privacy: Privacy Settings
   prefs_votes_anonymous: Votes on proposed names and images
@@ -2173,6 +2187,9 @@
   prefs_bulk_filename_purge_confirm: Are you sure you want to purge all image filenames from our database? This action cannot be undone. Please note that no one but you is able to see these filenames, anyway.
   prefs_bulk_filename_purge_success: Successfully purged all image filenames from our database.
   prefs_change_image_vote_anonymity: Change Image Vote Anonymity
+  prefs_apply_to_votes: Apply to votes
+  prefs_purge_filenames: Purge filenames
+  prefs_apply_to_images: Apply to images
   prefs_license_note: Default "license":/info/how_to_use#license you want for new images.
 
   prefs_email_please_notify: Please notify me when...
@@ -2399,7 +2416,6 @@
   show_namings_consensus_help: For each name listed above select your opinion of how well that name applies to this observation. Select '[:show_namings_propose_new_name]' if you want to suggest another option. See the "How to Use":/info/how_to_use#voting page for more details on how the votes are tallied.
   show_namings_lose_changes: You must click '[:show_namings_update_votes]' to save any changes you've made to your votes.
   show_namings_please_login: Please login to propose your own names and vote on existing names.
-  show_namings_saving: Saving
 
   # observations/show_observation
   show_observation_site_id: Site ID
@@ -3026,10 +3042,6 @@
   occurrence_not_found: Occurrence not found.
   occurrence_resolve_projects_title: "Add Observations to Projects"
   occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
-  occurrence_resolve_projects_projects: "Projects:"
-  occurrence_resolve_projects_species_lists: "Species Lists:"
-  occurrence_resolve_projects_cancel: Cancel
-  occurrence_resolve_projects_add_all: Add All
   occurrence_resolve_projects_done: "Primary observation added to [count] projects/lists."
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
   field_slips_created_job: Created job for [filename]
@@ -3238,13 +3250,13 @@
   # observation/inat_imports
   inat_import_create_title: Import from iNat
   inat_choose_observations: "Inat Observations to Import:"
-  inat_import_list: "Comma separated list of up to about 384 observation #s"
+  inat_import_list: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
   inat_import_all: Import all my iNat observations instead of a list
   inat_import_others: Import other users' observations
   inat_import_consent: "(Required) I consent to importing my iNaturalist observations into Mushroom Observer, including any unlicensed observations and images, with my default MO license applied to any unlicensed images."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
-  runtime_illegal_inat_id: iNat observation number can contain only numbers, commas, and spaces
+  runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_list_xor_all: "Either (a) list the iNat observation(s), or (b) check \"Import all ...\" (not both)"
@@ -3655,7 +3667,9 @@
   show_project_drafts: Drafts
   show_project_edit: Edit Project
   show_project_field_slip_create: Create Field Slip PDF
+  show_project_field_slip_no_prefix: This project has no field slip prefix yet, which is required before field slips can be created.
   show_project_field_slip_prefix: Field Slip Prefix
+  show_project_field_slip_set_prefix: Set a field slip prefix
   show_project_join: Join Project
   show_project_location: Location
   show_project_leave: Leave Project
@@ -4830,6 +4844,7 @@
   query_copyright_holder_has: copyright holder has
   query_deprecated: deprecated
   query_description_has: description has
+  query_editable_by_user: editable by
   query_field_slip_prefix_has: field slip prefix
   query_for_user: for
   query_has_author: has author

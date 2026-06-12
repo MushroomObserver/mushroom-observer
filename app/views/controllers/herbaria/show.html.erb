@@ -1,8 +1,8 @@
 <%
-add_show_title(@herbarium.format_name.t, @herbarium)
+add_show_title(@herbarium)
 add_edit_icons(@herbarium, @user)
 add_pager_for(@herbarium)
-add_context_nav(herbarium_show_tabs)
+add_context_nav(Tab::Herbarium::Show.new(q_param: q_param))
 container_class(:wide)
 
 map = @herbarium.location
@@ -74,7 +74,9 @@ map = @herbarium.location
 
   <% if map %>
     <div class="col-xs-12 col-sm-4 mt-3" style="max-width:320px">
-      <%= tag.div(class: "mb-3") { make_map(objects: [@herbarium.location]) } %>
+      <%= tag.div(class: "mb-3") do %>
+        <%= render(Components::Map.new(objects: [@herbarium.location])) %>
+      <% end %>
       <%= tag.p(id: "herbarium_location") do
           "#{:LOCATION.l}: #{@herbarium.location.text_name}"
         end %>

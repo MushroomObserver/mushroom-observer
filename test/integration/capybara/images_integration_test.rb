@@ -45,7 +45,13 @@ class ImagesIntegrationTest < CapybaraIntegrationTestCase
     visit(edit_image_path(img.id))
     assert_selector("body.images__edit")
     visit(image_path(img.id))
-    click_button(class: "destroy_image_link_#{img.id}")
+    # `#context_nav` is the top-bar dropdown menu's `<ul>`. The destroy
+    # button now also lives in the mobile sidebar (#4392 sidebar bug
+    # fix) so an unscoped `click_button` is ambiguous — scope to the
+    # top-bar to disambiguate.
+    within("#context_nav") do
+      click_button(class: "destroy_image_link_#{img.id}")
+    end
     assert_flash_success
   end
 end

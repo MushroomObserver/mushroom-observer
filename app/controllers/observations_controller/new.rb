@@ -39,6 +39,11 @@ module ObservationsController::New
       @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
     end
     @observation.place_name = params[:place_name]
+    # Prefill the editable collector: the field-slip collector when one
+    # came through (the redirect carries it), else the entering user, who
+    # records someone else here when entering on a collector's behalf.
+    @observation.collector = params[:collector].presence ||
+                             @user.unique_text_name
     init_naming_and_vote
     @names       = nil
     @valid_names = nil
@@ -55,11 +60,61 @@ module ObservationsController::New
     @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
     check_location
+    render_new_view
   end
 
   ##############################################################################
 
   private
+
+  def render_new_view
+    render(Views::Controllers::Observations::New.new(**new_view_attrs))
+  end
+
+  def new_view_attrs
+    new_view_obs_attrs.merge(new_view_naming_attrs).
+      merge(new_view_specimen_attrs).merge(new_view_project_attrs).
+      merge(field_code: @field_code,
+            field_code_locked: @field_code_locked || false)
+  end
+
+  def new_view_obs_attrs
+    {
+      observation: @observation, user: @user, location: @location,
+      good_images: @good_images || [], exif_data: @exif_data || {},
+      given_name: @given_name, place_name: @place_name,
+      default_place_name: @default_place_name,
+      dubious_where_reasons: @dubious_where_reasons
+    }
+  end
+
+  def new_view_naming_attrs
+    {
+      vote: @vote, names: @names, valid_names: @valid_names,
+      reasons: @reasons,
+      suggest_corrections: @suggest_corrections || false,
+      parent_deprecated: @parent_deprecated || false
+    }
+  end
+
+  def new_view_specimen_attrs
+    {
+      collectors_name: @collectors_name,
+      collectors_number: @collectors_number,
+      herbarium_name: @herbarium_name, herbarium_id: @herbarium_id,
+      accession_number: @accession_number
+    }
+  end
+
+  def new_view_project_attrs
+    {
+      projects: @projects || [],
+      submitted_project_ids: @submitted_project_ids,
+      lists: @lists || [], submitted_list_ids: @submitted_list_ids,
+      error_checked_projects: @error_checked_projects || [],
+      suspect_checked_projects: @suspect_checked_projects || []
+    }
+  end
 
   def init_naming_and_vote
     @naming      = Naming.new
@@ -71,11 +126,12 @@ module ObservationsController::New
     @vote.value = 3.0
   end
 
+  # `@observation` is a fresh `Observation.new` here, so assigning
+  # `project_ids =` stays in-memory until save (Rails' has_many-
+  # through `*_ids=` only commits on a persisted parent).
   def init_project_vars_for_new
     init_project_vars
-    @projects.each do |proj|
-      @project_checks[proj.id] = proj.current?
-    end
+    @observation.project_ids = @projects.select(&:current?).map(&:id)
   end
 
   def defaults_from_last_observation_created
@@ -93,12 +149,8 @@ module ObservationsController::New
       @observation.when = last_observation.when
     end
 
-    @project_checks = {}
-    last_observation.projects.find_each do |project|
-      next unless project.current?
-
-      @project_checks[project.id] = true
-    end
+    @observation.project_ids =
+      last_observation.projects.find_each.select(&:current?).map(&:id)
 
     last_observation.species_lists.each do |list|
       add_list(list)
@@ -109,20 +161,25 @@ module ObservationsController::New
     return unless list && permission?(list)
 
     @lists << list unless @lists.include?(list)
-    @list_checks[list.id] = true
+    ids = @observation.species_list_ids
+    @observation.species_list_ids = ids | [list.id]
   end
 
+  # Adding a field-slip project: always check it; for other already-
+  # checked projects, keep them checked UNLESS they have their own
+  # field_slip_prefix (in which case adding a new field-slip project
+  # supersedes them — original ERB had this exclusive behavior).
   def add_field_slip_project(code)
     project = FieldSlip.find_by(code: code)&.project
     return unless project&.current? || project&.admin?(@user)
     return unless project&.member?(@user)
 
     @projects.append(project) unless @projects.include?(project)
-    @projects.each do |proj|
-      @project_checks[proj.id] = (proj == project) ||
-                                 (@project_checks[proj.id] &&
-                                  proj.field_slip_prefix.nil?)
-    end
+    current_ids = @observation.project_ids
+    @observation.project_ids = @projects.select do |proj|
+      proj == project ||
+        (current_ids.include?(proj.id) && proj.field_slip_prefix.nil?)
+    end.map(&:id)
   end
 
   def check_location

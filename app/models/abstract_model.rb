@@ -86,6 +86,23 @@ class AbstractModel < ApplicationRecord
     self.class.name.underscore.to_sym
   end
 
+  # Default title strings for the `header/title_helper` helpers
+  # (`add_show_title` / `add_edit_title`). Subclasses override when
+  # there's a more meaningful per-instance string — e.g. an
+  # Observation's binomial, a SpeciesList's title.
+  #
+  # `page_title(user)` — rendered HTML/textile for the visible page
+  # heading. Defaults to the localized type-tag label.
+  # `document_title` — plain text for the browser tab `<title>`.
+  # Defaults to the same label (it's already plain).
+  def page_title(_user = nil)
+    :"#{type_tag.to_s.upcase}".l
+  end
+
+  def document_title
+    :"#{type_tag.to_s.upcase}".l
+  end
+
   ##############################################################################
   #
   #  :section: "Find" Extensions
@@ -731,7 +748,7 @@ class AbstractModel < ApplicationRecord
   def can_edit?(user)
     return false unless user
 
-    !respond_to?(:user) || self.user_id == user.id
+    !respond_to?(:user) || user_id == user.id
   end
 
   def string_with_id(str)

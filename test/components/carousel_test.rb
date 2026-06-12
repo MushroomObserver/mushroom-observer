@@ -61,6 +61,24 @@ class CarouselTest < ComponentTestCase
     end
   end
 
+  # Carousel items embed `Components::CarouselItem`, which inherits from
+  # `BaseImage` and dispatches to `Components::ImageVoteInterface` via
+  # `render_image_vote_section`. Asserts the dispatch actually emits
+  # the vote section markers — a previous version of the dispatch
+  # `ImageVoteInterface(...)` was malformed Phlex and silently no-op'd
+  # so the lightbox / carousel never showed votes.
+  def test_carousel_item_renders_vote_section
+    image = @images.first
+    component = Components::Carousel.new(
+      user: @user, images: [image], object: @obs
+    )
+    html = render(component)
+
+    assert_html(html, ".carousel-item .vote-section#image_vote_#{image.id}")
+    assert_html(html, ".carousel-item .vote-meter.progress")
+    assert_html(html, ".carousel-item .image-vote-links")
+  end
+
   def test_renders_single_image_without_controls
     image = @images.first
     component = Components::Carousel.new(

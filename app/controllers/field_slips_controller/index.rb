@@ -6,6 +6,17 @@ module FieldSlipsController::Index
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `field_slips/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::FieldSlips::Index.new(
+             objects: @objects, query: @query, project: @project,
+             pagination_data: @pagination_data,
+             notice: flash[:notice]
+           ))
+  end
+
   private
 
   def default_sort_order

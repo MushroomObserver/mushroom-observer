@@ -15,14 +15,14 @@ module Images
       respond_to do |format|
         format.html
         format.turbo_stream do
-          render(Components::ModalForm.new(
+          render(Components::ModalTurboForm.new(
                    identifier: "commercial_inquiry_email",
                    title: :commercial_inquiry_title.t(
                      name: @image.unique_format_name
                    ),
                    user: @user,
                    model: FormObject::EmailRequest.new,
-                   form_class: Components::CommercialInquiryForm,
+                   form_class: Views::Controllers::Images::Emails::Form,
                    form_locals: { image: @image, user: @user }
                  ), layout: false)
         end

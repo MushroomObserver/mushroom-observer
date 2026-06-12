@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+# Phlex view for the species-list project-management page. Replaces
+# edit.html.erb — page chrome plus the inline `Form`.
+module Views::Controllers::SpeciesLists::Projects
+  class Edit < Views::Base
+    def initialize(list:, projects:, object_states:, project_states:)
+      super()
+      @list = list
+      @projects = projects
+      @object_states = object_states
+      @project_states = project_states
+    end
+
+    def view_template
+      add_page_title(:species_list_projects_title.t(list: @list.title))
+      add_context_nav(::Tab::SpeciesList::FormEditProject.new(list: @list))
+
+      div(class: "help-block mt-3") do
+        trusted_html(:species_list_projects_help.tp)
+      end
+
+      # Sibling reference within the namespace.
+      render(Form.new(
+               list: @list,
+               projects: @projects,
+               object_states: @object_states,
+               project_states: @project_states
+             ))
+    end
+  end
+end

@@ -23,6 +23,7 @@
 #   render MatrixBox.new(id: 123, extra_class: "text-center") do
 #     tag.div(class: "panel panel-default") { "Custom content" }
 #   end
+# rubocop:disable Metrics/ClassLength
 class Components::MatrixBox < Components::Base
   include Components::MatrixBox::RenderData
 
@@ -146,7 +147,7 @@ class Components::MatrixBox < Components::Base
 
   def render_id_badge(obj)
     whitespace
-    show_title_id_badge(obj, "rss-id")
+    render(Components::IdBadge.new(object: obj, extra_class: "rss-id"))
   end
 
   def render_occurrence_link
@@ -179,22 +180,40 @@ class Components::MatrixBox < Components::Base
         class: "vote-select-container mb-3",
         data: { vote_cache: obs.vote_cache }
       ) do
-        naming_vote_form(naming, nil, context: "matrix_box")
+        render(Views::Controllers::Observations::Namings::Votes::Form.new(
+                 naming: naming, user: @user, vote: nil,
+                 context: "matrix_box"
+               ))
       end
     else
-      propose_naming_link(
-        obs.id,
-        btn_class: "btn btn-default d-inline-block mb-3",
-        context: "matrix_box"
+      render_propose_naming_modal(
+        obs, btn_class: "btn btn-default d-inline-block mb-3"
       )
     end
+  end
+
+  # Tab::Naming::New carries `icon: :add` by default; matrix-box
+  # wants a text-only button, so the `icon: nil` override nils it
+  # out in the kwargs splat to ModalLink.
+  def render_propose_naming_modal(obs, btn_class:)
+    title, path, opts = Tab::Naming::New.new(
+      observation_id: obs.id, text: :create_naming.t,
+      context: "matrix_box", btn_class: btn_class
+    ).to_a
+    render(Components::ModalLink.new(
+             "obs_#{obs.id}_naming", title, path, **opts, icon: nil
+           ))
   end
 
   def render_where_section
     return unless @data[:where]
 
     div(class: "rss-where") do
-      small { location_link(@data[:where], @data[:location]) }
+      small do
+        render(Components::LocationLink.new(
+                 where: @data[:where], location: @data[:location]
+               ))
+      end
     end
   end
 
@@ -205,7 +224,10 @@ class Components::MatrixBox < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        user_link(@data[:who], nil, class: "rss-who")
+        render(Components::UserLink.new(
+                 user: @data[:who],
+                 attributes: { class: "rss-who" }
+               ))
       end
     end
   end
@@ -217,8 +239,29 @@ class Components::MatrixBox < Components::Base
 
     div(class: "small mt-3") do
       div(class: "source-credit") do
-        small { target.source_credit.tpl }
+        small { render_source_credit_inner(target) }
       end
+    end
+  end
+
+  # External imports get a Phlex-rendered link so we can set
+  # target="_blank" / rel="noopener" — textile has no syntax for
+  # those attributes. Enum credits keep going through .tpl.
+  def render_source_credit_inner(target)
+    if target.respond_to?(:external_credit_link) &&
+       (link = target.external_credit_link)
+      render_external_credit_link(link)
+    else
+      target.source_credit.tpl
+    end
+  end
+
+  def render_external_credit_link(link)
+    if link[:url].present?
+      a(href: link[:url], target: "_blank",
+        rel: "noopener noreferrer") { link[:text] }
+    else
+      plain(link[:text])
     end
   end
 
@@ -303,3 +346,4 @@ class Components::MatrixBox < Components::Base
       @project.is_admin?(@user)
   end
 end
+# rubocop:enable Metrics/ClassLength

@@ -1,118 +1,88 @@
 # frozen_string_literal: true
 
-module Views
-  module Controllers
-    module Projects
-      module Members
-        # Phlex view for the project members index page.
-        # Replaces members/index.html.erb.
-        class Index < Views::Base
-          register_output_helper :add_project_banner
-          register_value_helper :container_class
+module Views::Controllers::Projects::Members
+  # Phlex view for the project members index page.
+  # Replaces members/index.html.erb.
+  class Index < Views::Base
+    def initialize(project:, users:, project_member:,
+                   user:)
+      super()
+      @project = project
+      @users = users
+      @project_member = project_member
+      @user = user
+    end
 
-          def initialize(project:, users:, project_member:,
-                         user:)
-            super()
-            @project = project
-            @users = users
-            @project_member = project_member
-            @user = user
-          end
+    def view_template
+      add_project_banner(@project)
+      container_class(:wide)
 
-          def view_template
-            add_project_banner(@project)
-            container_class(:wide)
+      render(Views::Controllers::Projects::AdminSubtabs.new(
+               project: @project, current_subtab: "members"
+             ))
+      render(Views::Controllers::Projects::Members::Form.new(
+               @project_member, project: @project
+             ))
+      render_table
+    end
 
-            render(Components::Projects::AdminSubtabs.new(
-                     project: @project, current_subtab: "members"
-                   ))
-            render(Components::ProjectMemberForm.new(
-                     @project_member, project: @project
-                   ))
-            render_table
-          end
+    private
 
-          private
+    def render_table
+      render(Components::Table.new(
+               @users.sort_by(&:login),
+               class: "table-striped table-project-members mt-3"
+             )) do |table|
+        define_columns(table)
+      end
+    end
 
-          def render_table
-            table(class: "table table-striped " \
-                         "table-project-members mt-3") do
-              render_header
-              tbody do
-                @users.sort_by(&:login).each do |u|
-                  render_row(u)
-                end
-              end
-            end
-          end
+    # Column class lands on BOTH `<th>` and `<td>` (current
+    # Table#column behavior). The pre-conversion ERB had distinct
+    # th-only / td-only classes; consolidated here to a single
+    # per-column class (the redundant `.align-middle` on single-line
+    # thead rows is invisible in standard Bootstrap).
+    def define_columns(table)
+      table.column(:Login_name.t,
+                   class: "text-center") { |u| render_avatar(u) }
+      table.column(:Full_name.t, class: "align-middle") { |u| plain(u.name) }
+      table.column(:PROJECT_ALIASES.t, class: "align-middle") do |u|
+        render_aliases(u)
+      end
+      table.column(:Status.t, class: "align-middle") do |u|
+        plain(@project.member_status(u))
+      end
+      table.column(nil, class: "align-middle") { |u| render_edit_link(u) }
+    end
 
-          def render_header
-            thead do
-              tr do
-                th(class: "text-center") do
-                  plain(:Login_name.t)
-                end
-                th { plain(:Full_name.t) }
-                th { plain(:PROJECT_ALIASES.t) }
-                th { plain(:Status.t) }
-                th
-              end
-            end
-          end
+    def render_avatar(user)
+      render_user_image(user) if user.image
+      render(Components::UserLink.new(user: user, name: user.login))
+    end
 
-          def render_row(user)
-            tr do
-              render_avatar_cell(user)
-              td(class: "align-middle") { plain(user.name) }
-              render_aliases_cell(user)
-              render_status_cell(user)
-              render_edit_cell(user)
-            end
-          end
+    def render_user_image(user)
+      render(Components::InteractiveImage.new(
+               user: user,
+               image: user.image,
+               votes: false,
+               size: :thumbnail
+             ))
+    end
 
-          def render_avatar_cell(user)
-            td(class: "text-center") do
-              render_user_image(user) if user.image
-              user_link(user, user.login)
-            end
-          end
+    def render_aliases(user)
+      render(Views::Controllers::Projects::Aliases::Widget.new(
+               project: @project, target: user
+             ))
+    end
 
-          def render_user_image(user)
-            render(Components::InteractiveImage.new(
-                     user: user,
-                     image: user.image,
-                     votes: false,
-                     size: :thumbnail
-                   ))
-          end
+    def render_edit_link(user)
+      return unless @project.is_admin?(@user)
 
-          def render_aliases_cell(user)
-            td(class: "align-middle") do
-              render(Components::ProjectAliases.new(
-                       project: @project, target: user
-                     ))
-            end
-          end
-
-          def render_status_cell(user)
-            td(class: "align-middle") do
-              plain(@project.member_status(user))
-            end
-          end
-
-          def render_edit_cell(user)
-            td(class: "align-middle") do
-              next unless @project.is_admin?(@user)
-
-              a(href: edit_project_member_path(
-                project_id: @project.id,
-                candidate: user.id
-              )) do
-                plain(:change_member_status_change_status.t)
-              end
-            end
-          end
-        end
+      a(href: edit_project_member_path(
+        project_id: @project.id,
+        candidate: user.id
+      )) do
+        plain(:change_member_status_change_status.t)
       end
     end
   end

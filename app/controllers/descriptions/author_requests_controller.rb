@@ -10,6 +10,9 @@ module Descriptions
     # Linked from show_<object>.
     def new
       @object = AbstractModel.find_object(params[:type], params[:id].to_s)
+      render(Views::Controllers::Descriptions::AuthorRequests::New.new(
+               object: @object
+             ))
     end
 
     def create

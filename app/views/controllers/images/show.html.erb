@@ -1,7 +1,9 @@
 <%
-add_show_title(@image.format_name.t.small_author, @image)
+add_show_title(@image)
 add_pager_for(@image)
-add_context_nav(show_image_tabs(image: @image))
+add_context_nav(Tab::Image::ShowActions.new(
+  image: @image, permission: permission?(@image)
+))
 container_class(:full)
 column_classes(:six)
 %>
@@ -46,8 +48,7 @@ column_classes(:six)
             ) %>
       </div>
       <div class="py-5px mb-3">
-        <%= render(partial: "shared/form_license_badge",
-                   locals: { license: @image.license }) %>
+        <%= render(Components::LicenseBadge.new(license: @image.license)) %>
       </div>
     </div>
   <% end %>

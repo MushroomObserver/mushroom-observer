@@ -372,18 +372,24 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name
   end
 
+  # Page heading + browser tab title. `display_name` is plain text
+  # for the visible heading (place name; no textile); `text_name` is
+  # the ASCII form for the doc title.
+  alias page_title display_name
+  alias document_title text_name
+
   def textile_name
     display_name
   end
 
   # Same as +text_name+ but with id tacked on.
   def unique_text_name
-    text_name + " (#{id || "?"})"
+    string_with_id(text_name)
   end
 
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
-    format_name + " (#{id || "?"})"
+    string_with_id(format_name)
   end
 
   # Info to include about each location in merge requests.
@@ -565,6 +571,26 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       reasons += check_for_bad_chars(name)
     end
     provide_reasons ? reasons : reasons.any?
+  end
+
+  # Reasons the given `place_name` looks "dubious" for the given user
+  # (typos, mismatched country, etc.) -- returns an array of reasons.
+  # Empty array means the name is clean; non-empty means the form
+  # should re-render and ask the user to confirm.
+  #
+  # `approved:` is the value of the `approved_where` form field the
+  # user submitted to skip this check after confirming. When non-nil
+  # and equal to `place_name`, returns `[]` immediately.
+  #
+  # Centralizes a pattern that lived as 2-3 lines in 4 controllers:
+  #   db_name = Location.user_format(user, place_name)
+  #   Location.dubious_name?(db_name, true)
+  # with an optional "skip if approved" gate around it.
+  def self.dubious_reasons_for(user:, place_name:, approved: nil)
+    return [] if !approved.nil? && place_name == approved
+
+    db_name = user_format(user, place_name)
+    dubious_name?(db_name, true) || []
   end
 
   def self.check_for_empty_name(name)

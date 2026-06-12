@@ -786,7 +786,117 @@ class ProjectTest < UnitTestCase
                         "Excluded obs should not surface as a violation")
   end
 
+  # --- trusted_by? requires membership (#4436) ---
+
+  def test_trusted_by_trusting_member
+    assert(projects(:eol_project).trusted_by?(mary)) # editing member
+  end
+
+  def test_trusted_by_no_trust_member_is_false
+    assert_not(projects(:eol_project).trusted_by?(katrina)) # no_trust member
+  end
+
+  def test_trusted_by_non_member_is_false
+    project = projects(:eol_project)
+    assert_not(project.member?(dick))
+    assert_not(project.trusted_by?(dick),
+               "A non-member must not be trusted (escalation guard)")
+  end
+
+  # --- adopt_matching_field_slips (#4436) ---
+
+  def test_adopt_matching_field_slips_member_owned
+    project = projects(:eol_project) # prefix EOL, mary is editing member
+    slip = orphan_field_slip("EOL-9001", mary)
+
+    adopted = project.adopt_matching_field_slips
+
+    assert_equal([slip], adopted)
+    assert_equal(project.id, slip.reload.project_id)
+  end
+
+  def test_adopt_skips_non_member_owned
+    project = projects(:eol_project)
+    assert_not(project.member?(dick))
+    slip = orphan_field_slip("EOL-9002", dick)
+
+    assert_empty(project.adopt_matching_field_slips)
+    assert_nil(slip.reload.project_id)
+  end
+
+  def test_adopt_skips_non_matching_prefix
+    project = projects(:eol_project)
+    slip = orphan_field_slip("XYZ-9003", mary)
+
+    project.adopt_matching_field_slips
+
+    assert_nil(slip.reload.project_id)
+  end
+
+  def test_setting_prefix_adopts_member_orphans
+    project = projects(:bolete_project) # mary is editing member
+    slip = orphan_field_slip("BOLNEW-1", mary)
+
+    project.update!(field_slip_prefix: "BOLNEW")
+
+    assert_equal(project.id, slip.reload.project_id,
+                 "Adding a prefix should claim a member's matching orphan")
+  end
+
+  # --- admin_power? requires the obs owner to be a trusting member (#4439) ---
+
+  def test_admin_power_over_trusting_member_obs
+    obs, = obs_in_eol_owned_by_member # mary is an editing member of eol
+
+    assert(Project.admin_power?(obs, rolf),
+           "Admin has power over a trusting member's observation")
+  end
+
+  def test_no_admin_power_over_no_trust_member_obs
+    obs, project = obs_in_eol_owned_by_member
+    ProjectMember.find_by(project: project, user: mary).
+      update!(trust_level: "no_trust")
+
+    assert_not(Project.admin_power?(obs, rolf))
+  end
+
+  def test_no_admin_power_over_non_member_obs
+    obs, project = obs_in_eol_owned_by_member
+    ProjectMember.find_by(project: project, user: mary).destroy!
+
+    assert_not(Project.admin_power?(obs, rolf),
+               "Admin must not have power over a non-member's observation")
+  end
+
+  def test_no_admin_power_when_user_not_project_admin
+    obs, = obs_in_eol_owned_by_member # dick is not an eol admin
+
+    assert_not(Project.admin_power?(obs, dick))
+  end
+
+  def test_no_admin_power_without_user
+    obs, = obs_in_eol_owned_by_member
+
+    assert_not(Project.admin_power?(obs, nil))
+  end
+
   private
+
+  # An observation owned by an eol member (mary), added to eol_project
+  # (where rolf is an admin). Returns [observation, project].
+  def obs_in_eol_owned_by_member
+    project = projects(:eol_project)
+    obs = observations(:minimal_unknown_obs) # owner mary, editing member
+    project.add_observation(obs)
+    [obs, project]
+  end
+
+  # A field slip with no project, regardless of prefix matching.
+  def orphan_field_slip(code, owner)
+    slip = FieldSlip.create!(code: code, user: owner)
+    slip.update_column(:project_id, nil)
+    slip
+  end
 
   def build_target_location_project
     Project.create!(

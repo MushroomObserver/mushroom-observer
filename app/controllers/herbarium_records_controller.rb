@@ -13,6 +13,30 @@ class HerbariumRecordsController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `herbarium_records/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::HerbariumRecords::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user,
+             observation: @observation, error: @error
+           ))
+  end
+
+  # Sort options for the index page. Read by `add_sorter` in the
+  # view. Each key must resolve to `HerbariumRecord.order_by_<key>`.
+  def index_sort_options
+    [
+      ["herbarium_name",   :sort_by_herbarium_name.t],
+      ["herbarium_label",  :sort_by_herbarium_label.t],
+      ["initial_det",      :sort_by_initial_det.t],
+      ["accession_number", :sort_by_accession_number.t],
+      ["created_at",       :sort_by_created_at.t],
+      ["updated_at",       :sort_by_updated_at.t]
+    ].freeze
+  end
+
   private
 
   def default_sort_order
@@ -62,6 +86,11 @@ class HerbariumRecordsController < ApplicationController
     @layout = calc_layout_params
     @canonical_url = HerbariumRecord.show_url(params[:id])
     find_herbarium_record!
+    return unless @herbarium_record
+
+    render(Views::Controllers::HerbariumRecords::Show.new(
+             herbarium_record: @herbarium_record, user: @user
+           ))
   end
 
   def new
@@ -72,7 +101,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html
+      format.html { render_new_phlex }
     end
   end
 
@@ -93,7 +122,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html
+      format.html { render_edit_phlex }
     end
   end
 
@@ -132,6 +161,20 @@ class HerbariumRecordsController < ApplicationController
     find_herbarium_record!
   end
 
+  def render_new_phlex
+    render(Views::Controllers::HerbariumRecords::New.new(
+             herbarium_record: @herbarium_record,
+             observation: @observation, user: @user
+           ))
+  end
+
+  def render_edit_phlex
+    render(Views::Controllers::HerbariumRecords::Edit.new(
+             herbarium_record: @herbarium_record, user: @user,
+             back: @back, back_object: @back_object
+           ))
+  end
+
   def find_herbarium_record!
     @herbarium_record = HerbariumRecord.includes(herbarium_record_includes).
                         find_by(id: params[:id]) ||
@@ -142,7 +185,8 @@ class HerbariumRecordsController < ApplicationController
 
   def herbarium_record_includes
     [:user,
-     { observations: [:user, observation_matrix_box_image_includes] }]
+     { observations: [:external_source, :user,
+                      observation_matrix_box_image_includes] }]
   end
 
   def default_herbarium_record
@@ -443,7 +487,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_modal_herbarium_record_form
-    render(Components::ModalForm.new(
+    render(Components::ModalTurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -476,10 +520,11 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_herbarium_records_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "herbarium_records",
-                obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "herbarium_records",
+      panel: Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 

@@ -146,6 +146,28 @@ class SearchControllerTest < FunctionalTestCase
     assert_redirected_to(herbaria_path)
   end
 
+  # Regression for the production 500 incident on 2026-05-31. A bot
+  # GET'd `/search/pattern` with no `pattern_search` params while
+  # `session["return-to"]` was set to a previous `/observations?q=...`
+  # URL. The invalid-type guard called
+  # `flash_and_redirect_invalid_search(:"") and return` — but
+  # `redirect_back_or_default` returned nil in the "return-to was
+  # set" branch (its last statement was `session["return-to"] =
+  # nil`), so `and return` short-circuited and control fell through
+  # to `forward_pattern_search(:"", "")`, which crashed inside
+  # `send(:"#{type}_path")` with `NoMethodError: undefined method
+  # '_path' for an instance of SearchController`.
+  def test_pattern_search_no_params_with_return_to_in_session
+    @request.session["return-to"] = observations_path(q: "abc")
+
+    assert_nothing_raised do
+      get(:pattern)
+    end
+    # Honors the return-to (the production behavior); doesn't 500
+    # by falling through to a `send(:"_path")` call.
+    assert_redirected_to(observations_path(q: "abc"))
+  end
+
   def test_pattern_search_matching_an_id_redirects_to_show
     login
 

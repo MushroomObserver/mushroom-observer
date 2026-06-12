@@ -9,7 +9,7 @@ gem("sorted_set")
 source("https://rubygems.org")
 
 # To bundle edge Rails instead: gem "rails", github: "rails/rails"
-# gem("rails", "~> 7.2.2.1")
+# gem("rails", "~> 7.0")
 
 # To skip loading parts of Rails, bundle the constituent gems separately.
 # NOTE: Remember to require the classes also, in config/application.rb
@@ -19,19 +19,19 @@ source("https://rubygems.org")
 # Convenience group for updating rails constituents with one command
 # Usage: bundle update --group==rails
 group :rails do
-  gem("actioncable", "~> 7.2.2.1")
-  # gem("actionmailbox", "~> 7.2.2.1")
-  gem("actionmailer", "~> 7.2.2.1")
-  gem("actionpack", "~> 7.2.2.1")
-  # gem("actiontext", "~> 7.2.2.1")
-  gem("actionview", "~> 7.2.2.1")
-  gem("activejob", "~> 7.2.2.1")
-  gem("activemodel", "~> 7.2.2.1")
-  gem("activerecord", "~> 7.2.2.2")
-  # gem("activestorage", "~> 7.2.2.1")
-  gem("activesupport", "~> 7.2.2.1")
+  gem("actioncable", "~> 7.0")
+  # gem("actionmailbox", "~> 7.0")
+  gem("actionmailer", "~> 7.0")
+  gem("actionpack", "~> 7.0")
+  # gem("actiontext", "~> 7.0")
+  gem("actionview", "~> 7.0")
+  gem("activejob", "~> 7.0")
+  gem("activemodel", "~> 7.0")
+  gem("activerecord", "~> 7.0")
+  # gem("activestorage", "~> 7.0")
+  gem("activesupport", "~> 7.0")
   gem("bundler")
-  gem("railties", "~> 7.2.2.1")
+  gem("railties", "~> 7.0")
 end
 
 # Use trilogy as db connector
@@ -70,7 +70,7 @@ gem("literal")
 # Enable Slot API for Phlex
 gem("phlex-slotable")
 # Superform for type-safe forms with Phlex
-gem("superform", github: "nimmolo/superform", branch: "nimmo-add-radio-fields")
+gem("superform", "~> 0.7.0")
 # Strict ivars: raises a NameError if an ivar is nil (undefined). Must be
 # required in config/boot.rb to work: https://github.com/yippee-fun/strict_ivars
 # gem("strict_ivars", require: false)
@@ -84,8 +84,7 @@ gem("requestjs-rails")
 # turbo for partial page updates
 gem("turbo-rails")
 # minimal two way bridge between the V8 JavaScript engine and Ruby
-# Locked here at "0.18.1" because "0.19.0" will not compile for nimmolo
-gem("mini_racer", "~> 0.18.1")
+gem("mini_racer")
 
 # Add Arel helpers for more concise query syntax in Arel
 # https://github.com/camertron/arel-helpers

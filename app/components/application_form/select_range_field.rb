@@ -18,11 +18,23 @@ class Components::ApplicationForm < Superform::Rails::Form
   class SelectRangeField < Components::Base
     include Phlex::Slotable
 
-    prop :form, _Any
+    prop :form, ::Components::ApplicationForm
     prop :field_name, Symbol
-    prop :options, _Array(Object)
-    prop :value, _Nilable(_Any), default: nil
-    prop :range_value, _Nilable(_Any), default: nil
+    # Rails options-for-select shape: a flat array of values, OR
+    # an array of `[label, value]` tuples. Callers mix both — rank
+    # passes flat strings ("Form", "Variety", ...), confidence
+    # passes `[label, numeric]` tuples — so the element type is a
+    # union of those two shapes. The tuple value type mirrors the
+    # `value` prop above (String / Integer / Float).
+    prop :options,
+         _Array(
+           _Union(
+             _Nilable(String),
+             _Tuple(String, _Nilable(_Union(String, Integer, Float)))
+           )
+         )
+    prop :value, _Nilable(_Union(String, Integer, Float)), default: nil
+    prop :range_value, _Nilable(_Union(String, Integer, Float)), default: nil
     prop :label, String
 
     slot :help

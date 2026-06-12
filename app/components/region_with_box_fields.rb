@@ -7,10 +7,8 @@
 # @example Usage in SearchForm
 #   RegionWithBoxFields(query: model, form_namespace: self)
 class Components::RegionWithBoxFields < Components::Base
-  register_output_helper :make_map
-
   prop :query, Query
-  prop :form_namespace, _Any
+  prop :form_namespace, ::Components::ApplicationForm
 
   def view_template
     div(id: map_element_id, data: map_controller_data) do
@@ -115,14 +113,13 @@ class Components::RegionWithBoxFields < Components::Base
     (@query.in_box[direction] || 0).to_f
   end
 
-  # rubocop:disable Rails/OutputSafety
   def render_editable_map
-    minimal_loc = build_minimal_location
-    # make_map is a trusted helper that returns safe HTML
-    raw(make_map(objects: [minimal_loc], editable: true, map_type: "location",
-                 map_open: true, controller: nil))
+    render(::Components::Map.new(
+             objects: [build_minimal_location],
+             editable: true, map_type: "location",
+             map_open: true, controller: nil
+           ))
   end
-  # rubocop:enable Rails/OutputSafety
 
   def build_minimal_location
     args = if @query&.in_box.blank?

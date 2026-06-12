@@ -448,7 +448,8 @@ class Observation
     def load_occurrence_namings
       obs_ids = occurrence_observations.map(&:id)
       @namings = Naming.where(observation_id: obs_ids).
-                 includes(:name, :user, votes: [:observation, :user])
+                 includes(:name, :user, :observation,
+                          votes: [:observation, :user])
       @votes = @namings.flat_map(&:votes)
     end
 

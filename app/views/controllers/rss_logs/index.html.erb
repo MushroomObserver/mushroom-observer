@@ -1,6 +1,10 @@
 <%
 add_index_title(@query)
-add_context_nav(rss_logs_index_tabs(user: @user, types: @types))
+add_context_nav(Tab::RssLog::IndexActions.new(
+  user: @user, types: @types,
+  make_default_param: params[:make_default],
+  make_default_path: add_q_param(action: :index, make_default: 1)
+))
 add_type_filters(@query, @types)
 add_pagination(@pagination_data)
 

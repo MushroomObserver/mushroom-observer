@@ -234,7 +234,7 @@ class AutocompleterFieldTest < ComponentTestCase
   private
 
   def render_with_component
-    form = Components::HerbariumRecordForm.new(
+    form = Views::Controllers::HerbariumRecords::Form.new(
       @herbarium_record,
       observation: observations(:coprinus_comatus_obs),
       herbarium_names: ["Test Herbarium"],

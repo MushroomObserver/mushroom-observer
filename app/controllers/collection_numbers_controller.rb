@@ -13,6 +13,28 @@ class CollectionNumbersController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `collection_numbers/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::CollectionNumbers::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user,
+             observation: @observation, error: @error
+           ))
+  end
+
+  # Sort options for the index page. Read by `add_sorter` in the
+  # view. Each key must resolve to `CollectionNumber.order_by_<key>`.
+  def index_sort_options
+    [
+      ["name",       :sort_by_name.l],
+      ["number",     :sort_by_number.l],
+      ["created_at", :sort_by_created_at.l],
+      ["updated_at", :sort_by_updated_at.l]
+    ].freeze
+  end
+
   private
 
   def default_sort_order
@@ -53,6 +75,11 @@ class CollectionNumbersController < ApplicationController
 
     @canonical_url = CollectionNumber.show_url(params[:id])
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    return unless @collection_number
+
+    render(Views::Controllers::CollectionNumbers::Show.new(
+             collection_number: @collection_number, user: @user
+           ))
   end
 
   def new
@@ -64,7 +91,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html
+      format.html { render_new_phlex }
     end
   end
 
@@ -85,7 +112,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html
+      format.html { render_edit_phlex }
     end
   end
 
@@ -122,6 +149,20 @@ class CollectionNumbersController < ApplicationController
   def set_ivars_for_edit
     @layout = calc_layout_params
     @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+  end
+
+  def render_new_phlex
+    render(Views::Controllers::CollectionNumbers::New.new(
+             collection_number: @collection_number,
+             observation: @observation, user: @user
+           ))
+  end
+
+  def render_edit_phlex
+    render(Views::Controllers::CollectionNumbers::Edit.new(
+             collection_number: @collection_number, user: @user,
+             back: @back, back_object: @back_object
+           ))
   end
 
   # create
@@ -379,7 +420,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_modal_collection_number_form
-    render(Components::ModalForm.new(
+    render(Components::ModalTurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -409,12 +450,12 @@ class CollectionNumbersController < ApplicationController
     end
   end
 
-  # ivar @observation used in the partial
   def render_collection_numbers_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "collection_numbers",
-                obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "collection_numbers",
+      panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 

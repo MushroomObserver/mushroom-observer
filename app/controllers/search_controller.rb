@@ -20,7 +20,8 @@ class SearchController < ApplicationController
     type = type.to_s.pluralize.to_sym unless type == :google
 
     unless (PATTERN_SEARCHABLE_MODELS + [:google]).include?(type)
-      flash_and_redirect_invalid_search(type) and return
+      flash_and_redirect_invalid_search(type)
+      return
     end
 
     return if pattern_too_long?(pattern)

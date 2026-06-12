@@ -2,4 +2,4 @@
 add_page_title(:change_user_bonuses_title.t(user: @user2.legal_name))
 %>
 
-<%= render(Components::UserBonusesForm.new(@user_stats)) %>
+<%= render(Views::Controllers::Admin::Users::BonusesForm.new(@user_stats)) %>

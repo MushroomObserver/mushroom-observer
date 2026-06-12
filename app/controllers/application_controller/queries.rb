@@ -24,7 +24,7 @@ module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :query_params, :add_q_param, :q_param,
-      :find_or_create_query
+      :find_or_create_query, :current_query
     )
   end
 
@@ -111,11 +111,28 @@ module ApplicationController::Queries
       query.params.any? { |arg, val| new_args[arg] != val }
   end
 
-  # Turn old query into a new query for given model,
-  # (re-using the old query if it's still correct),
-  # and returning nil if no new query can be found.
+  # Turn old query into a new query for given model — re-use the
+  # old query as-is when its model matches; otherwise try to bridge
+  # via a subquery (e.g. an Observation query landing on the Images
+  # index becomes an Image query with `observation_query: {...}`).
+  # Returns nil only when no bridge is defined for the
+  # filter→target pair (see `RELATED_QUERIES` in
+  # `Query::Modules::Subqueries`).
+  #
+  # Bug fix for #4360: previously this method returned nil for any
+  # model mismatch, causing the caller to fall back to the
+  # unfiltered index. So a URL like
+  # `/images?q[model]=Observation&q[pattern]=Foo` (which is a
+  # legitimate cross-model search produced by MO's search links)
+  # silently rendered the full Image index — a >60s response that
+  # could trigger downtime alerts. The bridge below resolves to a
+  # proper Image query that returns 0 hits when no Observations
+  # match.
   def find_new_query_for_model(model, old_query)
-    old_query_correct_for_model(model, old_query) || nil
+    return nil unless old_query
+    return old_query if old_query_correct_for_model(model, old_query)
+
+    old_query.subquery_of(model.to_sym)
   end
 
   def old_query_correct_for_model(model, old_query)
@@ -248,7 +265,7 @@ module ApplicationController::Queries
     return nil if q_param[:model].blank?
 
     Query.lookup(q_param[:model].to_sym,
-                 **q_param.except(:model).to_unsafe_hash)
+                 **q_param.except(:model).to_unsafe_hash.symbolize_keys)
   end
 
   # Add a :q param to a path helper like `names_path`,
@@ -358,8 +375,15 @@ module ApplicationController::Queries
   #     redirect_to_next_object(:next, Image, params[:id].to_s)
   #   end
   #
+  # Returns truthy on both branches so callers chaining `... and return`
+  # don't silently fall through when the object isn't found (the
+  # not-found path internally redirects to the index via
+  # `find_or_goto_index`; before this change it then returned nil
+  # because of the implicit-return guard, which combined with the
+  # caller's `and return` walked control into `show`'s body without
+  # `@object` set).
   def redirect_to_next_object(method, model, id)
-    return unless (object = find_or_goto_index(model, id))
+    return true unless (object = find_or_goto_index(model, id))
 
     next_params = find_query_and_next_object(object, method, id)
     object = next_params[:object]

@@ -13,6 +13,63 @@
       font-size: 90% !important
     }
   }
+
+  // When the row has a sibling button-link next to the label (e.g.
+  // a "Create" link on placeholder rows in the project-violations
+  // target-location modal), flex-layout the row so the label and
+  // the button stay on the same line regardless of label wrap.
+  // Default inline-block flow puts the button on a new line at
+  // x=0 when the label wraps — confusing visually.
+  &:has(> a.btn) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+// Theme- AND variant-aware "pressed" styles for button-styled
+// radios/checkboxes that drive their active state via
+// `:has(input:checked)` rather than the BS3 `.active` class.
+//
+// Each `.btn-{variant}` exposes its active-state colors as CSS
+// custom properties (computed via BS3's `darken()` logic, matching
+// what `button-variant` generates internally for `.active`). The
+// `button-active-state` mixin then references those custom
+// properties — variant-agnostic. Whichever `.btn-{variant}` class
+// the element has, the right colors apply automatically. Dark
+// themes get dark pressed colors for free, since the source vars
+// are theme-mapped (`$BUTTON_*` → `$btn-default-*` etc. in
+// `_map_theme_vars_to_bootstrap_vars.scss`).
+//
+// Sass `@extend .btn-default.active` won't work — compound
+// selectors are no longer extendable.
+$btn-active-variants: (
+  default: ($btn-default-color, $btn-default-bg, $btn-default-border),
+  primary: ($btn-primary-color, $btn-primary-bg, $btn-primary-border),
+  success: ($btn-success-color, $btn-success-bg, $btn-success-border),
+  info: ($btn-info-color, $btn-info-bg, $btn-info-border),
+  warning: ($btn-warning-color, $btn-warning-bg, $btn-warning-border),
+  danger: ($btn-danger-color, $btn-danger-bg, $btn-danger-border),
+  // MO's `.btn-outline-default` (see `_links_buttons_alerts.scss`)
+  // — uses input vars rather than the BS3 button vars.
+  outline-default: ($input-color, $input-bg, $input-border)
+);
+
+@each $variant, $colors in $btn-active-variants {
+  .btn-#{$variant} {
+    --btn-active-color: #{nth($colors, 1)};
+    --btn-active-bg: #{darken(nth($colors, 2), 10%)};
+    --btn-active-border: #{darken(nth($colors, 3), 12%)};
+  }
+}
+
+@mixin button-active-state {
+  color: var(--btn-active-color);
+  background-color: var(--btn-active-bg);
+  border-color: var(--btn-active-border);
+  background-image: none;
+  outline: 0;
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
 }
 
 // rss-log filter buttons with checkboxes
@@ -20,6 +77,14 @@
   input[type=checkbox] {
     vertical-align: text-top;
   }
+}
+
+// Button-styled filter checkboxes (rss-log type filters etc.):
+// CSS-only "pressed" state via `:has()` matching the inner checked
+// input — no JS to toggle `.active`. Same pattern as
+// `.thumb_img_btn` in `_carousel.scss`.
+.filter-checkbox:has(input[type="checkbox"]:checked) {
+  @include button-active-state;
 }
 
 // Remove browser default gradients on select elements

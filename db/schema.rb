@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_11_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -558,10 +558,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.decimal "location_lng", precision: 15, scale: 10
     t.integer "occurrence_id"
     t.boolean "gps_dubious", default: false, null: false
+    t.bigint "source_id"
+    t.string "external_id", limit: 64
+    t.datetime "last_synced_at"
+    t.string "collector", limit: 1024
+    t.integer "collector_user_id"
+    t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
     t.index ["location_id"], name: "index_observations_on_location_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
     t.index ["occurrence_id"], name: "index_observations_on_occurrence_id"
+    t.index ["source_id", "external_id"], name: "index_observations_on_source_id_and_external_id", unique: true
   end
 
   create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -839,6 +846,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "sources", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "name", limit: 100, null: false
+    t.string "url", limit: 1024
+    t.text "description"
+    t.datetime "last_successful_sync_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["name"], name: "index_sources_on_name", unique: true
+  end
+
   create_table "species_list_observations", charset: "utf8mb3", force: :cascade do |t|
     t.integer "observation_id", default: 0, null: false
     t.integer "species_list_id", default: 0, null: false
@@ -975,7 +992,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.string "inat_username"
     t.integer "original_image_quota", default: 0
     t.integer "label_format", default: 1
+    t.index ["inat_username"], name: "index_users_on_inat_username"
     t.index ["login"], name: "login_index"
+    t.index ["name"], name: "index_users_on_name"
   end
 
   create_table "visual_group_images", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1011,6 +1030,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_27_180000) do
     t.index ["observation_id"], name: "observation_index"
   end
 
+  add_foreign_key "observations", "sources"
+  add_foreign_key "observations", "users", column: "collector_user_id"
   add_foreign_key "project_aliases", "projects"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

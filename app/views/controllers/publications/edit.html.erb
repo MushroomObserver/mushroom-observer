@@ -1,7 +1,7 @@
 <%
-add_edit_title(:PUBLICATION, @publication)
+add_edit_title(@publication)
 
-add_context_nav(publication_form_edit_tabs(pub: @publication))
+add_context_nav(Tab::Publication::FormEdit.new(publication: @publication))
 %>
 
-<%= render(Components::PublicationForm.new(@publication)) %>
+<%= render(Views::Controllers::Publications::Form.new(@publication)) %>

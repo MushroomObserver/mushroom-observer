@@ -1,14 +1,16 @@
 <%
 container_class(:full)
 add_new_title(:add_object, :SEQUENCE)
-add_context_nav(sequence_form_tabs(obj: @observation))
+add_context_nav(Tab::Sequence::Form.new(back_object: @observation))
 %>
 
 <div class="row">
   <div class="col-xs-12 col-sm-7">
     <%= render(partial: "sequences/observation_title",
                locals: { observation: @observation }) %>
-    <%= render(Components::SequenceForm.new(@sequence, observation: @observation)) %>
+    <%= render(Views::Controllers::Sequences::Form.new(
+                 @sequence, observation: @observation
+               )) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

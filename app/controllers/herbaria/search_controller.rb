@@ -11,6 +11,23 @@ module Herbaria
 
     before_action :login_required
 
+    # Override Searchable#new to render the Phlex view explicitly.
+    # (Same pattern as `SpeciesLists::SearchController#new` — see
+    # there for the why.)
+    def new
+      @local = params[:local] != "false"
+      set_up_form_field_groupings
+      @search = build_search_query
+      respond_to do |format|
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
+        format.html do
+          render(Views::Controllers::Herbaria::Search::New.new(
+                   search: @search, controller: self, local: @local
+                 ))
+        end
+      end
+    end
+
     def permitted_search_params
       [
         :by_users,

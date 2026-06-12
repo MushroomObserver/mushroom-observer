@@ -5,13 +5,23 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     include Components::TrustedHtml
 
+    # Three layouts depending on what extras the label row needs:
+    #
+    # - No between/help/label_end: bare `<label>` (no wrap div noise).
+    # - Has between or help but no label_end: plain `<div>` wrap holding
+    #   label + help + between inline — `justify-content-between` is
+    #   meaningless without a right-side counterpart, so skip d-flex.
+    # - Has label_end: d-flex with left (label+help+between) and right
+    #   (label_end) children.
     def render_label_row(label_text, inline)
-      if simple_label?
-        label(for: field.dom.id, class: "mr-3") do
+      if label_end_present?
+        render_label_flex_row(label_text, inline)
+      elsif label_extras_present?
+        render_label_with_help(label_text)
+      else
+        label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
         end
-      else
-        render_label_flex_row(label_text, inline)
       end
     end
 
@@ -20,11 +30,23 @@ class Components::ApplicationForm < Superform::Rails::Form
       text.html_safe? ? trusted_html(text) : plain(text)
     end
 
-    def simple_label?
-      has_label_end = respond_to?(:label_end_slot) && label_end_slot
+    def label_end_present?
+      respond_to?(:label_end_slot) && label_end_slot
+    end
+
+    def label_extras_present?
       has_between = between_slot || wrapper_options[:between]
       has_help = respond_to?(:help_slot) && help_slot
-      !has_between && !has_label_end && !has_help
+      has_between || has_help
+    end
+
+    # `wrapper_options[:label_sr_only] == true` hides the label
+    # visually (Bootstrap's `sr-only`) but keeps the `<label for="…">`
+    # association for screen readers. Use when the field's visible
+    # label would be redundant — e.g. when a panel heading already
+    # names the only field in the panel.
+    def label_class
+      wrapper_options[:label_sr_only] ? "sr-only" : "mr-3"
     end
 
     def render_label_flex_row(label_text, inline)
@@ -37,7 +59,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_label_with_help(label_text)
       div do
-        label(for: field.dom.id, class: "mr-3") do
+        label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
         end
         render_help_in_label_row

@@ -4,10 +4,12 @@
 
 <%= turbo_stream.update("page_flash") { flash_notices_html } %>
 
-<%= turbo_stream.update_input("herbarium_record_herbarium_name",
+<%# Obs form's herbarium-name field is namespaced under the
+    observation Superform: id is `observation_herbarium_record_*`. %>
+<%= turbo_stream.update_input("observation_herbarium_record_herbarium_name",
                               @herbarium.name) %>
 
-<%= turbo_stream.update_input("herbarium_record_herbarium_id",
+<%= turbo_stream.update_input("observation_herbarium_record_herbarium_id",
                               @herbarium.id) %>
 
 <%= turbo_stream.remove("create_herbarium_btn") %>

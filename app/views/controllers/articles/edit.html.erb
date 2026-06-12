@@ -1,6 +1,6 @@
 <%
-add_edit_title(@article.display_title.t, @article)
-add_context_nav(article_form_edit_tabs(article: @article))
+add_edit_title(@article)
+add_context_nav(Tab::Article::FormEdit.new(article: @article))
 %>
 
-<%= render(partial: "articles/form") %>
+<%= render(Views::Controllers::Articles::Form.new(@article)) %>

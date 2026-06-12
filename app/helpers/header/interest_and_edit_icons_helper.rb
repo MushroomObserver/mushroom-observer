@@ -16,9 +16,9 @@ module Header
     # Only shows buttons the user has permission to use.
     def add_edit_icons(object, user)
       icons = []
-      icons << tag.li { edit_button(target: object, icon: :edit) } if
+      icons << tag.li { edit_button(target: object, btn: nil) } if
         can_edit_object?(object, user)
-      icons << tag.li { destroy_button(target: object, icon: :delete) } if
+      icons << tag.li { destroy_button(target: object, btn: nil) } if
         can_destroy_object?(object, user)
 
       return if icons.empty?

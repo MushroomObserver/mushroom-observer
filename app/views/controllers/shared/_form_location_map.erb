@@ -17,7 +17,7 @@ on an ancestor element that also contains the inputs
             data: { map_target: "controlWrap" }) do %>
   <%= js_button(
     button: [
-      link_icon(:globe),
+      render(Components::LinkIcon.new(type: :globe)),
       tag.span(:form_observations_open_map.l, class: "map-show mx-2"),
       tag.span(:form_observations_hide_map.l, class: "map-hide mx-2")
     ].safe_join,

@@ -48,6 +48,12 @@ module Observations
       @where = params[:where].to_s
       @matches = locations_matching_where
       @pagination_data = paginate_locations!
+      render(Views::Controllers::Observations::Locations::Edit.new(
+               where: @where,
+               matches: @matches,
+               pagination_data: @pagination_data,
+               user: @user
+             ))
     end
 
     # Adds the Observation's associated with obs.where == params[:where]

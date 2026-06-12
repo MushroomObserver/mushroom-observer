@@ -79,8 +79,12 @@ class LicensesControllerTest < FunctionalTestCase
       "a[href = '#{edit_license_path(license.id)}']", true,
       "License page missing link to edit License"
     )
+    # Two destroy buttons: one in the top-bar dropdown, one in the
+    # mobile-sidebar context-nav (the sidebar collapsed every tuple
+    # to a plain link before #4392; now it correctly emits the
+    # destroy form so mobile users can actually trigger the delete).
     assert_select(
-      "button", { text: "Destroy", count: 1 },
+      "button", { text: "Destroy", count: 2 },
       "Show page for unused License in use should have Destroy button"
     )
   end

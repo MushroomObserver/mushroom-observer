@@ -97,20 +97,42 @@ class Inat
     def notes
       # Observation form requires a "normalized" key (no spaces) for Notes parts
       snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
+      { snapshot_key => snapshot,
+        Other: cleaned_description }
+    end
 
-      { Collector: collector,
-        snapshot_key => snapshot,
-        Other: self[:description]&.
-               # strip p tags to avoid messing up textile and keep
-               # notes source clean
-               gsub(%r{</?p>}, "")&.
-               # compress newlines/returns to single newline, leaving
-               # an html comment because our textiling won't render
-               # text after consecutive newlines:
-               #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
-               #   Pulk's mirror script inserts `\n\n` in iNat notes
-               gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n").
-               to_s }
+    # Pattern matches the legacy back-link annotations MO/Pulk's mirror
+    # script wrote into iNat observation descriptions. Re-importing one
+    # of those obs after the dedup gap (#4221) round-trips the line back
+    # into MO as part of the Other notes — leaving self-referential
+    # entries like "Imported by Mushroom Observer 2024-12-17". Strip
+    # them here so the user-visible notes stay clean.
+    MO_BACK_LINK_LINE_PATTERN = %r{
+      ^[ \t]*
+      (?:Imported\s+by\s+Mushroom\s+Observer\s+\d{4}-\d{2}-\d{2}
+       | https?://(?:www\.)?mushroomobserver\.org/(?:obs|observations)/\d+/?)
+      [ \t]*\n?
+    }x
+
+    def cleaned_description
+      description = self[:description]
+      return "" if description.nil?
+
+      description.
+        # strip p tags to avoid messing up textile and keep
+        # notes source clean
+        gsub(%r{</?p>}, "").
+        # normalize CRLF so the back-link pattern matches whether the
+        # iNat description was line-broken with \n or \r\n
+        gsub("\r\n", "\n").
+        # strip MO back-link annotations from prior imports (#4221)
+        gsub(MO_BACK_LINK_LINE_PATTERN, "").
+        # compress newlines/returns to single newline, leaving
+        # an html comment because our textiling won't render
+        # text after consecutive newlines:
+        #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
+        #   Pulk's mirror script inserts `\n\n` in iNat notes
+        gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n")
     end
 
     # MO Location with min bounding rectangle
@@ -183,8 +205,6 @@ class Inat
       # field.present? && field[:value] == "Yes"
     end
 
-    def source = "mo_inat_import"
-
     def when
       observed_on = @obs[:observed_on_details]
       return nil if observed_on.nil?
@@ -212,7 +232,7 @@ class Inat
       "Collectors Name",
       "Original Collector/ Observer"
     ].freeze
-    # This will get put into MO Observation's Notes Collector:
+
     def collector
       INAT_COLLECTOR_FIELDS.each do |field_name|
         if inat_obs_field(field_name).present?

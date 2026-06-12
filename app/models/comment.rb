@@ -126,27 +126,50 @@ class Comment < AbstractModel
     }, foreign_key: "target_id", inverse_of: :comments
   end
 
-  # Default broadcasting "later" (with solid_queue and ActiveJob)
-  # NOTE: create/update doesn't work locally after first job, but
-  # turbo-rails gem v >= 2.0.14 should fix this.
-  # https://github.com/hotwired/turbo-rails/pull/710 -
-  # broadcasts_to(->(comment) { [comment.target, :comments] },
-  #               inserts_by: :prepend, partial: "comments/comment",
-  #               locals: { controls: true },
-  #               target: "comments")
-
-  # Broadcast "now" (without solid_queue and ActiveJob)
-  # (broadcasts_to calls broadcast_prepend_later_to and _replace_later)
+  # Action Cable broadcasts that keep the comments list group on
+  # show pages live across browser windows / users.
+  #
+  # - `after_create_commit` (prepend): a brand-new row, wrapper +
+  #   inner. Renders `Views::Controllers::Comments::CommentRow`
+  #   (full `<div class="list-group-item comment"
+  #   id="comment_<id>">…CommentItem…</div>`) so the wrapper id is
+  #   set up for later update/replace broadcasts to target.
+  # - `after_update_commit` (update, not replace): the wrapper
+  #   already exists in the DOM with id `"comment_<id>"`; only the
+  #   inner content needs to change. `broadcast_update_to`
+  #   targets the wrapper id and replaces its INSIDE, so the
+  #   wrapper element (and its position in the list) is preserved
+  #   even when re-broadcast across browser windows.
+  # - `after_destroy_commit`: unchanged — remove the wrapper by id.
+  #
+  # Rendering happens through `ApplicationController.renderer` —
+  # the model isn't in a request context, but the renderer
+  # supplies a usable view context for the Phlex views.
+  # `layout: false` keeps the renderer from wrapping the broadcast
+  # payload in the application layout — we want the Phlex component's
+  # HTML and nothing else.
   after_create_commit lambda { |comment|
-    broadcast_prepend_to(
+    comment.broadcast_prepend_to(
       [comment.target, :comments],
-      partial: "comments/comment", locals: { controls: true }
+      target: "comments",
+      html: ::ApplicationController.renderer.render(
+        ::Views::Controllers::Comments::CommentRow.new(
+          comment: comment, editable: true
+        ),
+        layout: false
+      )
     )
   }
   after_update_commit lambda { |comment|
-    broadcast_replace_to(
+    comment.broadcast_update_to(
       [comment.target, :comments],
-      partial: "comments/comment", locals: { controls: true }
+      target: ::ActionView::RecordIdentifier.dom_id(comment),
+      html: ::ApplicationController.renderer.render(
+        ::Views::Controllers::Comments::CommentItem.new(
+          comment: comment, editable: true
+        ),
+        layout: false
+      )
     )
   }
   after_destroy_commit lambda { |comment|

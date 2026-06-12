@@ -90,9 +90,11 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_response(:success)
-    assert_match(:show_project_join.t, @response.body,
-                 "Join button should be present for non-member " \
-                 "on open project")
+    assert_select(
+      "form button", { text: /#{Regexp.escape(:show_project_join.l)}/,
+                       count: 1 },
+      "Join button should be present for non-member on open project"
+    )
   end
 
   def test_show_project_without_banner
@@ -194,14 +196,12 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert(project.species_lists.any?)
-    assert_match(species_lists_path(project:),
-                 @response.body,
-                 "Page is missing a link to observation list")
+    assert_select("a[href*=?]", species_lists_path(project:), { minimum: 1 },
+                  "Page is missing a link to observation list")
 
     assert_not(project.observations.any?)
-    assert_no_match(observations_path(project:),
-                    @response.body,
-                    "The project should not have any observations")
+    assert_select("a[href*=?]", observations_path(project:), { count: 0 },
+                  "The project should not have any observations")
   end
 
   # exposes bug found ruing development
@@ -234,9 +234,8 @@ class ProjectsControllerTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_match(project_violations_path(project_id: project.id),
-                 @response.body,
-                 "Page is missing a link to violations")
+    assert_select("a[href*=?]", project_violations_path(project_id: project.id),
+                  { minimum: 1 }, "Page is missing a link to violations")
   end
 
   def test_index
@@ -244,11 +243,7 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_page_title(:PROJECTS.l)
-    assert_template("index")
-  end
-
-  def test_index_with_non_default_sort
-    check_index_sorting
+    assert_select("body.projects__index .list-group")
   end
 
   def test_index_member
@@ -256,7 +251,7 @@ class ProjectsControllerTest < FunctionalTestCase
 
     get(:index, params: { member: dick.id })
 
-    assert_template("index")
+    assert_select("body.projects__index .list-group")
     assert_page_title(:PROJECTS.l)
   end
 

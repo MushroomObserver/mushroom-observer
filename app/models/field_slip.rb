@@ -19,6 +19,14 @@ class FieldSlip < AbstractModel
     end
   end
 
+  # The project-prefix portion of a code: everything before the trailing
+  # " 123" / "-123" sequence number. Returns nil when the code has no
+  # such suffix (so it can't belong to a prefixed project).
+  def self.prefix_for_code(code)
+    match = code.to_s.match(/(^.+)[ -]\d+$/)
+    match && match[1]
+  end
+
   # Find an existing field slip by code, or create a new one.
   # Returns nil if the code is invalid (fails validation).
   def self.find_or_create_by_code(code, user)
@@ -65,6 +73,14 @@ class FieldSlip < AbstractModel
   scope :projects, lambda { |projects|
     project_ids = Lookup::Projects.new(projects).ids
     where(project: project_ids).distinct
+  }
+
+  # Orphaned (no project) slips whose code begins with the given prefix.
+  # A SQL pre-filter — callers must still confirm an exact prefix match
+  # via prefix_for_code (LIKE "FOO%" also matches "FOOBAR-1").
+  scope :orphaned_with_code_prefix, lambda { |prefix|
+    where(project_id: nil).
+      where("code LIKE ?", "#{sanitize_sql_like(prefix.to_s.upcase)}%")
   }
 
   def current_user=(a_user)
@@ -123,11 +139,11 @@ class FieldSlip < AbstractModel
   end
 
   def update_project
-    prefix_match = code.match(/(^.+)[ -]\d+$/)
-    return unless prefix_match
+    prefix = self.class.prefix_for_code(code)
+    return unless prefix
 
     # Needs to get updated when Projects can share a field_slip_prefix
-    candidate = Project.find_by(field_slip_prefix: prefix_match[1])
+    candidate = Project.find_by(field_slip_prefix: prefix)
     self.project = candidate if candidate&.can_add_field_slip?(@current_user)
   end
 
@@ -203,6 +219,9 @@ class FieldSlip < AbstractModel
     obs&.location
   end
 
+  # Plain collector string for the form's autocompleter input (the
+  # observation's `collector` column, in "Name (login)" form). Display
+  # views use Observation#collector_textile for markup/links. See #4211.
   def collector
     observation&.collector
   end

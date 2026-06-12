@@ -7,20 +7,10 @@
 #  for the one exception).  In the end all these Name's cause rudimentary
 #  Observation's to spring into existence.
 #
-class SpeciesListsController < ApplicationController
+class SpeciesListsController < ApplicationController # rubocop:disable Metrics/ClassLength
   before_action :login_required
   before_action :require_successful_user, only: [:new, :create]
   before_action :store_location, only: [:show]
-  # Bullet wants us to eager load synonyms for @deprecated_names in
-  # edit_species_list, and I thought it would be possible, but I can't
-  # get it to work.  Seems toooo minor to waste any more time on.
-  # Also, as of 20231212, it wants a cached column for Observation.name,
-  # but this is not as simple as an AR default column_cache because count
-  # needs to be recalculated whenever an observation's consensus name
-  # changes, not just on create or destroy of the Observation.name.
-  around_action :skip_bullet, if: -> { defined?(Bullet) }, only: [
-    :create, :update
-  ]
 
   ##############################################################################
   # INDEX
@@ -28,6 +18,42 @@ class SpeciesListsController < ApplicationController
   def index
     set_project_ivar
     build_index_with_query
+  end
+
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class. Other
+  # actions in this controller render Phlex explicitly from the
+  # action method; index needs the hook because it routes through
+  # `show_index_of_objects` which calls render itself.
+  def render_index_view
+    render(Views::Controllers::SpeciesLists::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, project: @project, error: @error
+           ))
+  end
+
+  # Sort options for the index page. Swaps `updated_at` for
+  # `rss_log` when the active query orders by rss_log, so
+  # "Updated" picks the right backing column. Read by the Phlex
+  # Index view's `add_sorter`.
+  def index_sort_options
+    self.class.sort_options(query: @query)
+  end
+
+  # Class-level cousin of `#index_sort_options` so foreign callers
+  # can borrow the table without instantiating the controller.
+  # `Observations::SpeciesListsController#edit` uses it to sort
+  # the `@all_lists` query when listing species_lists for an
+  # observation. Pass the relevant query to flip rss_log labels.
+  def self.sort_options(query: nil)
+    rss_log = query&.params&.dig(:order_by) == "rss_log"
+    [
+      ["title",                              :sort_by_title.t],
+      ["date",                               :sort_by_date.t],
+      ["user",                               :sort_by_user.t],
+      ["created_at",                         :sort_by_created_at.t],
+      [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t]
+    ]
   end
 
   private
@@ -92,20 +118,20 @@ class SpeciesListsController < ApplicationController
     return unless (@species_list = find_species_list!)
 
     set_project_ivar
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, SpeciesList, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, SpeciesList, params[:id]) and return
+    if %w[next prev].include?(params[:flow])
+      return redirect_to_next_object(params[:flow].to_sym,
+                                     SpeciesList, params[:id])
     end
 
     init_ivars_for_show
+    render_phlex_show
   end
 
   def new
     @species_list = SpeciesList.new
     init_project_vars_for_create
     init_list_for_clone(params[:clone]) if params[:clone].present?
+    render_phlex_new
   end
 
   def edit
@@ -114,6 +140,7 @@ class SpeciesListsController < ApplicationController
     if permission!(@species_list)
       @place_name = @species_list.place_name
       init_project_vars_for_edit(@species_list)
+      render_phlex_edit
     else
       redirect_to(species_list_path(@species_list))
     end
@@ -218,7 +245,44 @@ class SpeciesListsController < ApplicationController
     return if redirected
 
     init_project_vars_for_reload(@species_list)
-    render(create_or_update == :create ? :new : :edit)
+    if create_or_update == :create
+      render_phlex_new
+    else
+      render_phlex_edit
+    end
+  end
+
+  # MO doesn't wire a Phlex view resolver, so the controller renders
+  # each action's Phlex view explicitly. `process_species_list` also
+  # uses these on the failure-reload path. `species_list_form_view`
+  # returns the 5 form props shared between new + edit + reload —
+  # spread into each call via `**`.
+  def species_list_form_view
+    { species_list: @species_list, projects: @projects,
+      dubious_where_reasons: @dubious_where_reasons,
+      submitted_project_ids: @submitted_project_ids,
+      user: @user }
+  end
+
+  def render_phlex_show
+    render(Views::Controllers::SpeciesLists::Show.new(
+             species_list: @species_list, user: @user, query: @query,
+             pagination_data: @pagination_data, objects: @objects,
+             comments: @comments, object_names: @object_names,
+             project: @project
+           ))
+  end
+
+  def render_phlex_new
+    render(Views::Controllers::SpeciesLists::New.new(
+             **species_list_form_view, clone_id: @clone_id
+           ))
+  end
+
+  def render_phlex_edit
+    render(Views::Controllers::SpeciesLists::Edit.new(
+             **species_list_form_view
+           ))
   end
 
   def validate_place_name
@@ -230,13 +294,12 @@ class SpeciesListsController < ApplicationController
 
     @place_name = @species_list.place_name
     @dubious_where_reasons = []
-    unless (@place_name != params[:approved_where]) &&
-           @species_list.location_id.nil?
-      return
-    end
+    return if @species_list.location_id
 
-    db_name = Location.user_format(@user, @place_name)
-    @dubious_where_reasons = Location.dubious_name?(db_name, true)
+    @dubious_where_reasons = Location.dubious_reasons_for(
+      user: @user, place_name: @place_name,
+      approved: params.dig(:species_list, :approved_where)
+    )
   end
 
   def check_for_clone
@@ -264,10 +327,9 @@ class SpeciesListsController < ApplicationController
     @species_list.title = @species_list.title.to_s.strip_squeeze
   end
 
-  def update_redirect_and_flash_notices(create_or_update, sorter = nil)
+  def update_redirect_and_flash_notices(create_or_update)
     log_and_flash_notices(create_or_update)
-    update_projects(@species_list, params[:project])
-    construct_observations(@species_list, sorter) if sorter
+    update_projects(@species_list, params.dig(:species_list, :project_ids))
 
     if @species_list.location_id.nil?
       redirect_to(new_location_path(where: @place_name,
@@ -289,47 +351,21 @@ class SpeciesListsController < ApplicationController
     end
   end
 
-  # Creates observations for names written in
-  # Uses the member instance vars, as well as:
-  #   params[:chosen_approved_names]    Names from radio boxes.
-  def construct_observations(spl, sorter)
-    # Put together a list of arguments to use when creating new observations.
-    spl_args = init_spl_args(spl)
+  # `submitted_ids` is the `species_list[project_ids][]` array from
+  # the form. Delegate the actual sync to `SpeciesList#sync_projects`
+  # and flash the per-change notification + the trailing "and the
+  # observations too" hint.
+  def update_projects(spl, submitted_ids)
+    changes = spl.sync_projects(submitted_ids, user: @user)
+    changes.each { |project, change| flash_project_change(project, change) }
+    return if changes.empty?
 
-    # This updates certain observation namings already in the list.  It looks
-    # for namings that are deprecated, then replaces them with approved
-    # synonyms which the user has chosen via radio boxes in
-    # params[:chosen_approved_names].
-    update_namings(spl)
-
-    # Add all names from text box into species_list. Creates a new observation
-    # for each name.  ("single names" are names that matched a single name
-    # uniquely.)
-    sorter.single_names.each do |name, timestamp|
-      spl_args[:when] = timestamp || spl.when
-      spl.construct_observation(name, spl_args)
-    end
-
-    spl_args[:when] = spl.when
+    flash_notice(:species_list_show_manage_observations_too.t)
   end
 
-  def update_projects(spl, checks)
-    return unless checks
-
-    any_changes = false
-    Project.where(id: @user.projects_member.map(&:id)).
-      includes(:species_lists).find_each do |project|
-      before = spl.projects.include?(project)
-      after = checks["id_#{project.id}"] == "1"
-      next if before == after
-
-      change_project_species_lists(
-        project: project, spl: spl, change: (after ? :add : :remove)
-      )
-      any_changes = true
-    end
-
-    flash_notice(:species_list_show_manage_observations_too.t) if any_changes
+  def flash_project_change(project, change)
+    key = change == :added ? :attached_to_project : :removed_from_project
+    flash_notice(key.t(object: :species_list, project: project.title))
   end
 
   def init_list_for_clone(clone_id)
@@ -340,18 +376,6 @@ class SpeciesListsController < ApplicationController
     @species_list.place_name = clone.place_name
     @species_list.location = clone.location
     @species_list.title = clone.title
-  end
-
-  def change_project_species_lists(project:, spl:, change: :add)
-    if change == :add
-      project.add_species_list(spl)
-      flash_notice(:attached_to_project.t(object: :species_list,
-                                          project: project.title))
-    else
-      project.remove_species_list(spl)
-      flash_notice(:removed_from_project.t(object: :species_list,
-                                           project: project.title))
-    end
   end
 
   def permitted_species_list_args

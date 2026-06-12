@@ -143,6 +143,18 @@ class Herbarium < AbstractModel
     code.blank? ? name : "#{name} (#{code})"
   end
 
+  # Page heading: textilize so apostrophes etc. become smart-quoted
+  # (and bold/italic markers, if any user typed them into the name,
+  # render correctly). Doc title is plain `format_name` — the
+  # browser tab doesn't render HTML or smart-quote.
+  def page_title(_user = nil)
+    format_name.t
+  end
+
+  def document_title
+    format_name
+  end
+
   def unique_format_name
     "#{format_name} (#{id})"
   end
@@ -255,6 +267,23 @@ class Herbarium < AbstractModel
         includeothercatnum: 1 }
 
     "#{base_url}?#{search_params.to_query}"
+  end
+
+  # AbstractModel's `order_by_user` joins on `:user`; Herbarium has
+  # `:personal_user` (only set for personal herbaria; nil for
+  # institutional ones). Override so the "user" sort on the herbaria
+  # index works for the full (mixed) listing. Private class method
+  # because Query's `order_by(:user)` dispatcher checks
+  # `private_methods(false)` on the model.
+  class << self
+    private
+
+    def order_by_user
+      joins(:personal_user).distinct.order(
+        User[:name].when(nil).then(User[:login]).when("").then(User[:login]).
+          else(User[:name]).asc
+      )
+    end
   end
 
   private

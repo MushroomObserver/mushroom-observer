@@ -6,6 +6,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Slotable
     include FieldWithHelp
     include FieldLabelRow
+    include InputGroupAddon
 
     slot :between
     slot :label_end
@@ -17,8 +18,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options
 
-    def initialize(field, attributes:, wrapper_options: {})
-      super(field, attributes: attributes)
+    def initialize(field, wrapper_options: {}, **attributes)
+      super(field, **attributes)
       @wrapper_options = wrapper_options
     end
 
@@ -65,30 +66,11 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_field_input(&block)
       if wrapper_options[:button]
-        render_input_with_button(&block)
+        render_input_group_button(&block)
       elsif wrapper_options[:addon]
-        render_input_with_addon(&block)
+        render_input_group_addon(&block)
       else
         yield
-      end
-    end
-
-    def render_input_with_button
-      div(class: "input-group") do
-        yield
-        span(class: "input-group-btn") do
-          button(type: "button", class: "btn btn-default",
-                 data: wrapper_options[:button_data] || {}) do
-            wrapper_options[:button]
-          end
-        end
-      end
-    end
-
-    def render_input_with_addon
-      div(class: "input-group") do
-        yield
-        span(class: "input-group-addon") { wrapper_options[:addon] }
       end
     end
 

@@ -18,6 +18,7 @@ module Observations
       return unless (@observation = find_observation!)
 
       set_list_ivars
+      render_phlex_edit
     end
 
     # new endpoint for :add_observation_to_species_list and
@@ -39,14 +40,27 @@ module Observations
         remove_observation_from_species_list(@species_list, @observation)
       else
         flash_error("Invalid mode: #{params[:commit].inspect}")
-        render("edit",
-               location: edit_observation_species_lists_path(
-                 id: @observation.id
-               ))
+        render_phlex_edit(
+          location: edit_observation_species_lists_path(
+            id: @observation.id
+          )
+        )
       end
     end
 
     private
+
+    def render_phlex_edit(**render_opts)
+      render(
+        Views::Controllers::Observations::SpeciesLists::Edit.new(
+          observation: @observation,
+          all_lists: @all_lists,
+          obs_lists: @obs_lists,
+          other_lists: @other_lists
+        ),
+        **render_opts
+      )
+    end
 
     def set_list_ivars
       order_by = params[:by] || :date

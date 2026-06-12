@@ -460,11 +460,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#added_images", visible: :visible, wait: 3)
     assert_selector(".carousel-item[data-image-status='upload']",
                     text: /Coprinus_comatus/, wait: 3)
-    # Set the first (last) one as the thumb_image
+    # Set the first (last) one as the thumb_image. The visual
+    # "pressed" swap is CSS-only (`:has(input:checked)`), driven by
+    # the radio's checked state — so click the radio directly via
+    # `choose`. The radio's hidden inside a `.btn`-styled label;
+    # `visible: :all` because the radio itself isn't styled visible.
     within(first_image_wrapper) do
       thumb_button = find(".thumb_img_btn")
       scroll_to(thumb_button, align: :center)
-      thumb_button.trigger("click")
+      radio = thumb_button.find("input[type='radio']", visible: :all)
+      choose(radio[:id], visible: :all)
       assert_text(:image_add_default.l)
       assert_no_text(:image_set_default.l)
     end
@@ -502,8 +507,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(projects, align: :top)
 
     # Inherited project constraints maybe messing with this observation - clear
-    all('[id^="project_id_"]', visible: :all).each do |project_checkbox|
-      project_checkbox.trigger("click") if project_checkbox.checked?
+    all('[id^="observation_project_ids_"]', visible: :all).each do |cb|
+      cb.trigger("click") if cb.checked?
     end
     naming = find("#observation_naming_specimen")
     scroll_to(naming, align: :top)
@@ -512,7 +517,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within("#observation_form") { click_commit }
 
     # rejected, but images uploaded
-    assert_selector("body.observations__create", wait: 12)
+    assert_selector("body.observations__new", wait: 12)
     assert_flash_for_images_uploaded
     assert_has_location_warning(/Unknown country/)
 
@@ -735,16 +740,36 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # This attribute controls whether makeMapClickable() is called
     assert_selector("#observation_form_map[data-editable='true']")
 
+    # Wait for the map controller to actually finish drawing. The
+    # `data-map='connected'` attribute is set in `connect()` BEFORE
+    # the google.maps loader resolves, so it doesn't gate `this.map`.
+    # Wait for `controller.map` to be defined (drawMap to have run)
+    # so the click trigger has a real map to fire on.
+    Timeout.timeout(10) do
+      loop do
+        ready = evaluate_script(<<~JS)
+          (() => {
+            const f = document.getElementById('observation_form');
+            const c = window.Stimulus.getControllerForElementAndIdentifier(
+              f, 'map'
+            );
+            return !!(c && c.map);
+          })()
+        JS
+        break if ready
+
+        sleep(0.1)
+      end
+    end
+
     # Trigger a Google Maps click event
     execute_script(<<~JS)
       const form = document.getElementById('observation_form');
       const controller = window.Stimulus.getControllerForElementAndIdentifier(
         form, 'map'
       );
-      if (controller && controller.map) {
-        const location = new google.maps.LatLng(45.5231, -122.6765);
-        google.maps.event.trigger(controller.map, 'click', { latLng: location });
-      }
+      const location = new google.maps.LatLng(45.5231, -122.6765);
+      google.maps.event.trigger(controller.map, 'click', { latLng: location });
     JS
 
     # Verify lat/lng fields are now populated

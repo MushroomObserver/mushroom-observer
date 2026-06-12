@@ -106,6 +106,10 @@ module Descriptions::Permissions
         redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
+        klass = "Views::Controllers::#{controller_path.camelize}::Edit".
+                constantize
+        render(klass.new(description: @description, groups: @groups,
+                         data: @data))
       end
     end
 
@@ -134,7 +138,10 @@ module Descriptions::Permissions
         redirect_to(@description.show_link_args)
       else
         gather_list_of_groups
-        render("edit")
+        klass = "Views::Controllers::#{controller_path.camelize}::Edit".
+                constantize
+        render(klass.new(description: @description, groups: @groups,
+                         data: @data))
       end
     end
 

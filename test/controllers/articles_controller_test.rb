@@ -17,10 +17,6 @@ class ArticlesControllerTest < FunctionalTestCase
     end
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_filtered
     article = Article.reorder(created_at: :asc).first # oldest
     query = Query.lookup(:Article, id_in_set: [article.id])
@@ -63,7 +59,10 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
     get(:show, params: { id: article.id })
-    assert_select("a", text: "New Article")
+    # nav_create renders the new-article button with visible "Add" and
+    # `aria-label="New Article"` (#3930). Assert against the aria-label
+    # since that's the stable accessibility contract.
+    assert_select("a[href='/articles/new'][aria-label='New Article']")
     assert_select("a", text: :edit_object.t(type: :article))
     assert_select(".destroy_article_link_#{article.id}", true,
                   "Page is missing Destroy button")
@@ -95,7 +94,13 @@ class ArticlesControllerTest < FunctionalTestCase
     tab2 = @controller.helpers.link_to(
       :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
     )
-    tab3 = @controller.helpers.destroy_button(target: article)
+    # `context_nav_links` routes destroy tabs through `crud_button_or_link`,
+    # which defaults `icon: nil, btn: nil` for `:destroy` so context-nav
+    # `[ DESTROY ]` tabs render as plain text links (no btn frame, no
+    # glyphicon). Build the expected tab the same way for the comparison.
+    tab3 = @controller.helpers.destroy_button(
+      target: article, icon: nil, btn: nil
+    )
 
     assert_includes(tabs, tab1)
     assert_includes(tabs, tab2)

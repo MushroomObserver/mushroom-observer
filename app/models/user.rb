@@ -440,6 +440,17 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # Both the page heading and the browser tab title use the
+  # "About <Full Name (login)>" i18n template — the "About" prefix
+  # is the show-page's identity (vs. e.g. an edit page).
+  def page_title(_user = nil)
+    :show_user_about.t(user: unique_text_name)
+  end
+
+  def document_title
+    :show_user_about.t(user: unique_text_name)
+  end
+
   def format_name
     unique_text_name
   end
@@ -1145,6 +1156,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     c.new_record? || c.email_changed?
   }
   validate :notes_template_forbid_other
+  validate :notes_template_forbid_collector
   validate :notes_template_forbid_duplicates
   validate :check_content_filter_region, if: proc { |c|
     c.new_record? || c.content_filter_changed?
@@ -1203,6 +1215,20 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes_template_forbid_other
     notes_template_bad_parts.each do |part|
       errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
+    end
+  end
+
+  # "Collector" has its own observation column now (#4211), so it may
+  # not be a notes heading. Only the exact "Collector" key is forbidden;
+  # variants like "Collector's Name" remain valid independent fields.
+  def notes_template_forbid_collector
+    return if notes_template.blank?
+
+    notes_template.split(",").each do |part|
+      next unless part.squish == "Collector"
+
+      errors.add(:notes_template,
+                 :prefs_notes_template_no_collector.t(part: part.squish))
     end
   end
 

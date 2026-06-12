@@ -13,10 +13,15 @@ module Observations
     around_action :skip_bullet, if: -> { defined?(Bullet) },
                                 only: [:create, :update]
 
-    # The route for the namings table, an index of this obs' namings
+    # The route for the namings table, an index of this obs' namings.
+    # The view derives `consensus` from `observation` internally.
     def index
       @observation = find_or_goto_index(Observation, params[:observation_id])
-      @consensus = Observation::NamingConsensus.new(@observation)
+      return unless @observation
+
+      render(Views::Controllers::Observations::Namings::Index.new(
+               observation: @observation, user: @user
+             ))
     end
 
     # Note that every Naming form is also a nested Vote form.
@@ -26,7 +31,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html
+        format.html { render_phlex_new }
       end
     end
 
@@ -62,7 +67,7 @@ module Observations
 
       respond_to do |format|
         format.turbo_stream { render_modal_naming_form }
-        format.html
+        format.html { render_phlex_edit }
       end
     end
 
@@ -111,14 +116,12 @@ module Observations
       @observation = Observation.show_includes.find(params[:observation_id])
     end
 
-    # There seems to be a chance the id will be blank, although i believe not.
+    # `params[:id]` is guaranteed by the `:edit`/`:update`/`:destroy`
+    # routes (`resources :namings`) — let `find` raise on the
+    # impossible blank-id case rather than dead-code a consensus
+    # fallback for it.
     def naming_from_params
-      if params[:id].blank?
-        @consensus = Observation::NamingConsensus.new(@observation)
-        @consensus.consensus_naming
-      else
-        @observation.namings.find(params[:id])
-      end
+      @observation.namings.find(params[:id])
     end
 
     def init_edit_ivars
@@ -129,7 +132,7 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(Components::ModalForm.new(
+      render(Components::ModalTurboForm.new(
                identifier: modal_identifier,
                title: modal_title,
                user: @user,
@@ -164,6 +167,62 @@ module Observations
       }
     end
 
+    def render_phlex_new
+      render(Views::Controllers::Observations::Namings::New.new(
+               **naming_phlex_props
+             ), layout: true)
+    end
+
+    def render_phlex_edit
+      render(Views::Controllers::Observations::Namings::Edit.new(
+               **naming_phlex_props
+             ), layout: true)
+    end
+
+    # Successful-create response when the form was opened from the
+    # lightbox / matrix-box context: swap the obs's title in both
+    # places (it now reflects the new naming), close out the
+    # naming modal + the AJAX-progress modal, and clear the
+    # identify-this-obs strip. Inlined from
+    # `_update_matrix_box.erb`.
+    def render_update_matrix_box_streams
+      obs_id = @observation.id
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "observation_what_#{obs_id}",
+                 Components::LightboxObservationTitle.new(
+                   obs: @observation, user: @user, identify: false
+                 )
+               ),
+               turbo_stream.replace(
+                 "box_title_#{obs_id}",
+                 Components::MatrixBoxTitle.new(
+                   id: obs_id,
+                   name: @observation.user_format_name(@user).
+                         t.break_name.small_author,
+                   type: :observation
+                 )
+               ),
+               turbo_stream.close_modal("modal_obs_#{obs_id}_naming"),
+               turbo_stream.remove("modal_obs_#{obs_id}_naming"),
+               turbo_stream.close_modal("mo_ajax_progress"),
+               turbo_stream.remove("mo_ajax_progress"),
+               turbo_stream.remove("observation_identify_#{obs_id}")
+             ])
+    end
+
+    def naming_phlex_props
+      {
+        observation: @observation,
+        user: @user,
+        naming: @naming,
+        vote: @vote,
+        given_name: @given_name,
+        reasons: @reasons,
+        feedback: naming_feedback
+      }
+    end
+
     def modal_identifier
       case action_name
       when "new", "create"
@@ -176,9 +235,9 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        helpers.naming_form_new_title(obs: @observation)
+        :create_naming_title.t(id: @observation.id)
       when "edit", "update"
-        helpers.naming_form_edit_title(obs: @observation)
+        :edit_naming_title.t(id: @observation.id)
       end
     end
 
@@ -239,8 +298,7 @@ module Observations
         format.turbo_stream do
           case params[:context]
           when "lightgallery", "matrix_box"
-            render(partial: "observations/namings/update_matrix_box",
-                   locals: { obs: @observation, user: @user })
+            render_update_matrix_box_streams
           else
             redirect_to_obs(@observation)
           end
@@ -267,14 +325,13 @@ module Observations
     end
 
     def respond_to_form_errors
-      redo_action = case action_name
-                    when "create"
-                      :new
-                    when "update"
-                      :edit
-                    end
       respond_to do |format|
-        format.html { render(action: redo_action) and return }
+        format.html do
+          case action_name
+          when "create" then render_phlex_new
+          when "update" then render_phlex_edit
+          end and return
+        end
         format.turbo_stream do
           render(
             partial: "shared/modal_form_reload",

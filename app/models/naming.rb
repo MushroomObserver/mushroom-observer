@@ -133,7 +133,7 @@ class Naming < AbstractModel
 
   # Return name in plain text (with id tacked on to make unique).
   def unique_text_name
-    text_name + " (#{id || "?"})"
+    string_with_id(text_name)
   end
 
   # Return name in Textile format.
@@ -151,7 +151,7 @@ class Naming < AbstractModel
 
   # Return name in Textile format (with id tacked on to make unique).
   def unique_format_name
-    format_name + " (#{id || "?"})"
+    string_with_id(format_name)
   end
 
   ##############################################################################

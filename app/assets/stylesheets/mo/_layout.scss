@@ -43,7 +43,18 @@ $sidebar-max-width: 18rem;
     -webkit-transition: all .25s ease-out;
     -o-transition: all .25s ease-out;
     transition: all .25s ease-out;
-    -webkit-transform: translate3d(0,0,0);
+    // NOTE: Do not add `transform:` (or `filter:` / `perspective:`)
+    // to .row-offcanvas. Any of those creates a CSS containing block
+    // for descendants, which breaks `position: fixed` on BS3 modals
+    // — the modal becomes positioned relative to .row-offcanvas
+    // instead of the viewport, ending up inline in document flow
+    // while the backdrop (which is appended to <body>, outside
+    // .row-offcanvas) still fills the viewport on top. Result: modal
+    // is visible but unclickable at narrow widths. Previously we had
+    // `-webkit-transform: translate3d(0,0,0)` here as a hardware-
+    // acceleration hack for the offcanvas slide; modern browsers
+    // composite without that, and the side-effect was breaking the
+    // project-violations target-location modal on mobile.
   }
 
   .row-offcanvas-right {

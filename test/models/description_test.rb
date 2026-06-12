@@ -204,9 +204,114 @@ class DescriptionTest < UnitTestCase
     desc = name_descriptions(:peltigera_user_desc)
     desc.update(user_id: nil)
 
-    assert(desc.text_name.start_with?("Public"),
-           "text_name of user sourced Description with unknown user should " \
-           "start_with Public ")
+    # User-source description with unknown user: the user-source
+    # title format still applies (the description's
+    # `source_type` is "user" regardless of whether the user
+    # record exists), but the `[USER]` placeholder falls back to
+    # the "?" sentinel from `put_together_name`'s rescue branch.
+    # Prior to the source_type-shadow bug fix this asserted
+    # "Public" because the buggy local-variable shadow made every
+    # description render with the public-source title format.
+    assert(desc.text_name.start_with?("?'s"),
+           "text_name of user-sourced description with unknown user " \
+           "should start with the user-source format and an `?` " \
+           "placeholder — got #{desc.text_name.inspect}")
+  end
+
+  # ---- source_type-specific title formats ------------------------
+  #
+  # Each `Description` source_type maps to its own i18n key — see
+  # `description_{full,part}_title_<type>` in `en.txt`. The
+  # `put_together_name` shadow bug masked these differences for
+  # years (every description rendered with the `_public` format
+  # regardless of its actual `source_type`); pin each format
+  # explicitly so regressions don't silently re-flatten everything
+  # back to "Public" again.
+
+  # `description_part_title_public_with_text: "[TEXT]"`. A public
+  # description with a `source_name` just renders the source_name
+  # verbatim.
+  def test_partial_text_name_public_source_with_text
+    desc = name_descriptions(:peltigera_alt_desc) # source_type :public
+    desc.update(source_name: "Wikipedia")
+    assert_equal("public", desc.source_type)
+
+    assert_equal("Wikipedia", desc.partial_text_name)
+  end
+
+  # `description_part_title_user_with_text: "[TEXT] by [USER]"`.
+  def test_partial_text_name_user_source_with_text
+    desc = name_descriptions(:peltigera_user_desc) # user mary
+    desc.update(source_name: "Mary's Take")
+
+    assert_equal("user", desc.source_type)
+    assert_equal("Mary's Take by Mary Newbie", desc.partial_text_name)
+  end
+
+  # `description_part_title_user: "[USER]'s [:DESCRIPTION]"` (no
+  # text variant).
+  def test_partial_text_name_user_source_without_text
+    desc = name_descriptions(:peltigera_user_desc)
+    desc.update(source_name: nil)
+
+    assert_equal("Mary Newbie's Description", desc.partial_text_name)
+  end
+
+  # `description_part_title_project_with_text: Draft for [TEXT] by [USER]`.
+  def test_partial_text_name_project_source_with_text
+    desc = name_descriptions(:draft_coprinus_comatus) # project draft
+    assert_equal("project", desc.source_type)
+    assert(desc.source_name.present?)
+
+    assert_equal("Draft for #{desc.source_name} by #{desc.user.legal_name}",
+                 desc.partial_text_name)
+  end
+
+  # `description_part_title_source_with_text: "[:DESCRIPTION] From [TEXT]"`.
+  def test_partial_text_name_source_source_with_text
+    desc = name_descriptions(:peltigera_source_desc)
+    assert_equal("source", desc.source_type)
+    assert(desc.source_name.present?)
+
+    assert_equal("Description From #{desc.source_name}",
+                 desc.partial_text_name)
+  end
+
+  # `description_full_title_public: Public [:DESCRIPTION] of [object]`
+  # — the no-text public format, used in `text_name`.
+  def test_text_name_public_source_no_text
+    desc = name_descriptions(:suillus_desc)
+    desc.update(source_name: nil)
+
+    assert(desc.text_name.start_with?("Public Description of "),
+           "Expected public-no-text format, got #{desc.text_name.inspect}")
+  end
+
+  # `description_full_title_project: Draft of [object] for [text] by [user]`.
+  def test_text_name_project_source
+    desc = name_descriptions(:draft_coprinus_comatus)
+    expected_prefix = "Draft of "
+
+    assert(desc.text_name.start_with?(expected_prefix),
+           "Expected project full title prefix, got " \
+           "#{desc.text_name.inspect}")
+    assert_includes(desc.text_name, desc.source_name)
+    assert_includes(desc.text_name, desc.user.legal_name)
+  end
+
+  # When `source_type` is nil (legacy / direct-attribute write),
+  # `put_together_name` falls back to `:public`. Re-pins the
+  # explicit fallback path so a future refactor doesn't drop it.
+  def test_nil_source_type_falls_back_to_public_format
+    desc = name_descriptions(:suillus_desc)
+    # Bypass the AR enum validation so we can set the raw nil.
+    desc.update_columns(source_type: nil)
+    desc.reload
+
+    assert_nil(desc.source_type)
+    assert(desc.text_name.start_with?("Public Description of "),
+           "Nil source_type should default to public format — got " \
+           "#{desc.text_name.inspect}")
   end
 
   def test_source_object

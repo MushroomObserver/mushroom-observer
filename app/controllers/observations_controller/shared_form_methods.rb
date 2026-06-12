@@ -34,7 +34,7 @@ module ObservationsController::SharedFormMethods
   def permitted_observation_args
     [:lat, :lng, :alt, :gps_hidden, :place_name, :where, :location_id,
      :is_collection_location, :when, "when(1i)", "when(2i)", "when(3i)",
-     :notes, :specimen, :thumb_image_id]
+     :collector, :collector_user_id, :notes, :specimen, :thumb_image_id]
   end
 
   def update_permitted_observation_attributes
@@ -56,6 +56,8 @@ module ObservationsController::SharedFormMethods
     return Observation.no_notes unless notes_param_present?
 
     symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
+    # Collector has its own column; never let it live in notes (#4211).
+    symbolized.delete(:Collector)
     symbolized.compact_blank!
   end
 
@@ -74,7 +76,12 @@ module ObservationsController::SharedFormMethods
   end
 
   def init_specimen_vars
-    @collectors_name   = params.dig(:notes, :Collector) || @user.legal_name
+    # The form submits the collector nested (params[:observation]
+    # [:collector]); the field-slip redirect to `new` carries it
+    # top-level. Check nested first so a failed create re-render keeps
+    # the user-entered collector instead of falling back to legal_name.
+    @collectors_name   = params.dig(:observation, :collector).presence ||
+                         params[:collector].presence || @user.legal_name
     @collectors_number = ""
     @herbarium_name    = @user.preferred_herbarium_name
     @herbarium_id      = @user.preferred_herbarium&.id
@@ -99,32 +106,29 @@ module ObservationsController::SharedFormMethods
   def init_project_vars
     @projects = @user.projects_member(order: :title,
                                       include: :user_group)
-    @project_checks = {}
   end
 
+  # Failure-reload path: capture the user's just-submitted project_ids
+  # for the form to render checked. We CAN'T set
+  # `@observation.project_ids = submitted` — that would instantly
+  # commit join-table changes on a persisted record (Rails
+  # `*_ids=` setter is INSERT/DELETE on the join table immediately),
+  # even though the save itself failed.
   def init_project_vars_for_reload
     @observation.projects.each do |proj|
       @projects << proj unless @projects.include?(proj)
     end
-    proj_params = project_params
-    @projects.each do |proj|
-      @project_checks[proj.id] =
-        proj_params.nil? ? false : proj_params["id_#{proj.id}"] == "1"
-    end
+    @submitted_project_ids = params.dig(:observation, :project_ids)
   end
 
   def init_list_vars
     @lists = @user.all_editable_species_lists.sort_by(&:title)
-    @list_checks = {}
   end
 
   def init_list_vars_for_reload
     init_list_vars
     @lists = @lists.union(@observation.species_lists)
-    lst_params = list_params
-    @lists.each do |list|
-      @list_checks[list.id] = lst_params&.dig("id_#{list.id}") == "1"
-    end
+    @submitted_list_ids = params.dig(:observation, :species_list_ids)
   end
 
   # Save observation now that everything is created successfully.
@@ -275,12 +279,19 @@ module ObservationsController::SharedFormMethods
 
   ##############################################################################
 
+  # `submitted_ids` is `observation[project_ids][]` — the projects
+  # the user wants the obs attached to. Only `@user.projects_member`
+  # projects are toggled — non-member projects the obs belongs to are
+  # preserved by omission (disabled checkboxes don't submit, and the
+  # iteration excludes them anyway).
   def update_projects
-    return unless (checks = project_params)
+    submitted_ids = params.dig(:observation, :project_ids)
+    return unless submitted_ids
 
+    desired = submitted_ids.compact_blank.map(&:to_i)
     @user.projects_member(include: :observations).each do |project|
       before = @observation.projects.include?(project)
-      after = checks["id_#{project.id}"] == "1"
+      after = desired.include?(project.id)
       next unless before != after
 
       if after
@@ -295,12 +306,14 @@ module ObservationsController::SharedFormMethods
   end
 
   def update_species_lists
-    return unless (checks = list_params)
+    submitted_ids = params.dig(:observation, :species_list_ids)
+    return unless submitted_ids
 
+    desired = submitted_ids.compact_blank.map(&:to_i)
     @user.all_editable_species_lists.includes(:observations).
       find_each do |list|
       before = @observation.species_lists.include?(list)
-      after = checks["id_#{list.id}"] == "1"
+      after = desired.include?(list.id)
       next unless before != after
 
       if after

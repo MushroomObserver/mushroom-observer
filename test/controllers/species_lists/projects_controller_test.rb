@@ -8,6 +8,14 @@ module SpeciesLists
     #  Project Manager.
     # ----------------------------
 
+    # Helper: CSS selector for the array-mode checkbox input of a
+    # specific project under the `species_list_projects[project_ids][]`
+    # name.
+    def project_checkbox_selector(proj)
+      "input[name='species_list_projects[project_ids][]']" \
+        "[value='#{proj.id}']"
+    end
+
     def test_manage_projects_permission
       list = species_lists(:unknown_species_list)
 
@@ -41,10 +49,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "1",
-          objects_img: "0",
-          "projects_#{proj.id}" => "1",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "1",
+            objects_img: "0",
+            project_ids: [proj.id.to_s]
+          },
           commit: :REMOVE.l
         }
       )
@@ -61,10 +71,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj.id}" => "1",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -80,10 +92,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj.id}" => "1",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -97,29 +111,34 @@ module SpeciesLists
 
       login("dick")
       get(:edit, params: { id: list.id })
-      assert_checkbox_state("objects_list", :unchecked)
-      assert_checkbox_state("objects_obs", :unchecked)
-      assert_checkbox_state("objects_img", :unchecked)
-      assert_checkbox_state("projects_#{proj1.id}", :no_field)
-      assert_checkbox_state("projects_#{proj2.id}", :unchecked)
+      assert_checkbox_state("species_list_projects_objects_list", :unchecked)
+      assert_checkbox_state("species_list_projects_objects_obs", :unchecked)
+      assert_checkbox_state("species_list_projects_objects_img", :unchecked)
+      # Project checkboxes are array-mode; select by name+value.
+      assert_select(project_checkbox_selector(proj1), count: 0)
+      assert_select(project_checkbox_selector(proj2), count: 1)
+      assert_select("#{project_checkbox_selector(proj2)}[checked]", count: 0)
 
       login("mary")
       get(:edit, params: { id: list.id })
-      assert_checkbox_state("objects_list", :unchecked)
-      assert_checkbox_state("objects_obs", :unchecked)
-      assert_checkbox_state("objects_img", :unchecked)
-      assert_checkbox_state("projects_#{proj1.id}", :unchecked)
-      assert_checkbox_state("projects_#{proj2.id}", :unchecked)
+      assert_checkbox_state("species_list_projects_objects_list", :unchecked)
+      assert_checkbox_state("species_list_projects_objects_obs", :unchecked)
+      assert_checkbox_state("species_list_projects_objects_img", :unchecked)
+      assert_select(project_checkbox_selector(proj1), count: 1)
+      assert_select("#{project_checkbox_selector(proj1)}[checked]", count: 0)
+      assert_select(project_checkbox_selector(proj2), count: 1)
+      assert_select("#{project_checkbox_selector(proj2)}[checked]", count: 0)
 
       put(
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: []
+          },
           commit: "bogus"
         }
       )
@@ -130,11 +149,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: []
+          },
           commit: :ATTACH.l
         }
       )
@@ -145,11 +165,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "1",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj2.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -160,11 +181,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "1",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj1.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -175,11 +197,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "1",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj1.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -190,11 +213,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: []
+          },
           commit: :REMOVE.l
         }
       )
@@ -205,11 +229,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "1",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj2.id.to_s]
+          },
           commit: :REMOVE.l
         }
       )
@@ -220,11 +245,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "1",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj2.id.to_s]
+          },
           commit: :REMOVE.l
         }
       )
@@ -235,11 +261,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "1",
-          objects_obs: "0",
-          objects_img: "0",
-          "projects_#{proj1.id}" => "1",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "1",
+            objects_obs: "0",
+            objects_img: "0",
+            project_ids: [proj1.id.to_s]
+          },
           commit: :REMOVE.l
         }
       )
@@ -259,11 +286,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "0",
-          objects_obs: "1",
-          objects_img: "1",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "0",
+            objects_obs: "1",
+            objects_img: "1",
+            project_ids: []
+          },
           commit: :ATTACH.l
         }
       )
@@ -273,11 +301,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "0",
-          objects_obs: "1",
-          objects_img: "1",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "0",
+          species_list_projects: {
+            objects_list: "0",
+            objects_obs: "1",
+            objects_img: "1",
+            project_ids: []
+          },
           commit: :REMOVE.l
         }
       )
@@ -287,11 +316,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "0",
-          objects_obs: "1",
-          objects_img: "1",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "1",
+          species_list_projects: {
+            objects_list: "0",
+            objects_obs: "1",
+            objects_img: "1",
+            project_ids: [proj2.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -302,11 +332,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "0",
-          objects_obs: "1",
-          objects_img: "1",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "1",
+          species_list_projects: {
+            objects_list: "0",
+            objects_obs: "1",
+            objects_img: "1",
+            project_ids: [proj2.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -317,11 +348,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "0",
-          objects_obs: "1",
-          objects_img: "1",
-          "projects_#{proj1.id}" => "1",
-          "projects_#{proj2.id}" => "",
+          species_list_projects: {
+            objects_list: "0",
+            objects_obs: "1",
+            objects_img: "1",
+            project_ids: [proj1.id.to_s]
+          },
           commit: :ATTACH.l
         }
       )
@@ -334,11 +366,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "0",
-          objects_obs: "1",
-          objects_img: "1",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "1",
+          species_list_projects: {
+            objects_list: "0",
+            objects_obs: "1",
+            objects_img: "1",
+            project_ids: [proj2.id.to_s]
+          },
           commit: :REMOVE.l
         }
       )
@@ -352,11 +385,12 @@ module SpeciesLists
         :update,
         params: {
           id: list.id,
-          objects_list: "0",
-          objects_obs: "1",
-          objects_img: "1",
-          "projects_#{proj1.id}" => "0",
-          "projects_#{proj2.id}" => "1",
+          species_list_projects: {
+            objects_list: "0",
+            objects_obs: "1",
+            objects_img: "1",
+            project_ids: [proj2.id.to_s]
+          },
           commit: :REMOVE.l
         }
       )

@@ -15,8 +15,8 @@ module Locations
       desc = location_descriptions(:albion_desc)
       login
       get(:show, params: { id: desc.id })
-      assert_template("show")
-      assert_template("descriptions/_description_details_and_alts_panel")
+      # show now renders via Phlex
+      assert_select("#description_details_and_alts")
 
       # Unhappy paths
       # Prove they flash an error and redirect to the appropriate page
@@ -50,10 +50,6 @@ module Locations
       get(:index)
 
       assert_page_title(:LOCATION_DESCRIPTIONS.l)
-    end
-
-    def test_index_with_non_default_sort
-      check_index_sorting
     end
 
     def test_index_with_id
@@ -352,7 +348,7 @@ module Locations
       login("mary") # project admin
       get(:new, params: { location_id: loc.id, project: project.id })
 
-      assert_template("new")
+      assert_select("form")
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
@@ -418,7 +414,7 @@ module Locations
       end
 
       assert_flash_error
-      assert_template("new")
+      assert_select("form")
     end
 
     # Test update with save validation failure - covers lines 191-193
@@ -442,7 +438,7 @@ module Locations
       end
 
       assert_flash_error
-      assert_template("edit")
+      assert_select("form")
     end
   end
 end

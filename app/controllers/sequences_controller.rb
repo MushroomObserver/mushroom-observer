@@ -47,6 +47,17 @@ class SequencesController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Read by `add_sorter` in the
+  # view. Each key must resolve to `Sequence.order_by_<key>`.
+  def index_sort_options
+    [
+      ["created_at",  :sort_by_created_at.t],
+      ["updated_at",  :sort_by_updated_at.t],
+      ["user",        :USER.t],
+      ["observation", :OBSERVATION.t]
+    ].freeze
+  end
+
   private
 
   def default_sort_order
@@ -169,7 +180,8 @@ class SequencesController < ApplicationController
   end
 
   def sequence_includes
-    [{ observation: observation_matrix_box_image_includes }]
+    [{ observation: [:external_source,
+                     observation_matrix_box_image_includes] }]
   end
 
   def figure_out_where_to_go_back_to
@@ -274,7 +286,7 @@ class SequencesController < ApplicationController
   end
 
   def render_modal_sequence_form
-    render(Components::ModalForm.new(
+    render(Components::ModalTurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -303,9 +315,11 @@ class SequencesController < ApplicationController
   end
 
   def render_sequences_section_update
-    render(
-      partial: "observations/show/section_update",
-      locals: { identifier: "sequences", obs: @observation, user: @user }
+    render_obs_section_update(
+      identifier: "sequences",
+      panel: Views::Controllers::Observations::Show::SequencesPanel.new(
+        obs: @observation, user: @user, has_sibling_records: false
+      )
     ) and return
   end
 

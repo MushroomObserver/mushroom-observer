@@ -153,7 +153,8 @@ class RssLogsController < ApplicationController
       location: :user,
       name: :user,
       observation: [
-        :location, :name, :user, observation_matrix_box_image_includes
+        :external_source, :location, :name, :user,
+        observation_matrix_box_image_includes
       ],
       project: [:location, :user],
       species_list: [:location, :user]

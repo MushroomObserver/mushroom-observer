@@ -28,6 +28,45 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # eol_project: admins rolf + mary; katrina is a member but not admin.
+  def test_index_nudges_admin_to_set_missing_prefix
+    project = projects(:eol_project)
+    project.update!(field_slip_prefix: nil)
+    login(users(:rolf).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select(
+      "#field_slip_no_prefix_nudge a[href=?]",
+      project_admin_path(project_id: project.id), true,
+      "Admin should be nudged to the Admin Details page to set a prefix"
+    )
+  end
+
+  def test_index_prefix_nudge_hidden_from_non_admin
+    project = projects(:eol_project)
+    project.update!(field_slip_prefix: nil)
+    login(users(:katrina).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select("#field_slip_no_prefix_nudge", false,
+                  "Non-admin should not see the set-prefix nudge")
+  end
+
+  def test_index_no_nudge_when_prefix_present
+    project = projects(:eol_project) # has prefix EOL
+    login(users(:rolf).login)
+
+    get(:index, params: { project: project.id })
+
+    assert_response(:success)
+    assert_select("#field_slip_no_prefix_nudge", false,
+                  "No nudge when the project already has a prefix")
+  end
+
   def test_should_get_new
     requires_login(:new)
     assert_response(:success)
@@ -58,7 +97,13 @@ class FieldSlipsControllerTest < FunctionalTestCase
     get(:new, params: { code: code })
     assert_response(:success)
     assert(response.body.include?(project.title))
-    assert_select('input[name="field_slip[collector]"]:not([value])')
+    # Collector input is present and empty. Phlex/Superform emits
+    # `value=""` for nil-valued fields where Rails' form_with would
+    # omit the attribute; both are functionally equivalent.
+    assert_select('input[name="field_slip[collector]"]') do |inputs|
+      assert_empty(inputs.first["value"].to_s,
+                   "collector input should be empty")
+    end
   end
 
   def test_should_create_field_slip_with_last_viewed_obs
@@ -96,16 +141,17 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     slip = FieldSlip.find_by(code: code)
-    assert_equal(rolf.textile_name, slip.collector)
+    assert_equal(rolf.unique_text_name, slip.collector)
     assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(@field_slip.user))
   end
 
   def test_should_not_change_collector_of_last_viewed_obs_if_not_owner
+    obs = @field_slip.observation
+    assert_not_equal(rolf, obs.user, "test needs rolf to be a non-owner")
+    obs.update!(collector: "Original Collector", collector_user: nil)
     login(rolf.login)
-    ObservationView.update_view_stats(@field_slip.observation&.id,
-                                      rolf.id)
-    collector = @field_slip.collector
+    ObservationView.update_view_stats(obs.id, rolf.id)
     code = "Y#{@field_slip.code}"
     assert_difference("FieldSlip.count") do
       post(:create,
@@ -120,7 +166,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     slip = FieldSlip.find_by(code: code)
-    assert_equal(collector, slip.collector)
+    # rolf is not the owner, so his supplied collector is ignored and the
+    # observation's existing collector is preserved.
+    assert_equal("Original Collector", slip.collector)
     assert_redirected_to(observation_url(slip.observation))
     assert_equal(slip.observation, ObservationView.last(rolf.id))
   end
@@ -404,6 +452,61 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # assert_redirected_to edit_field_slip_url(id: @field_slip.id)
   end
 
+  # Site admin (admin mode) can edit a slip they couldn't otherwise edit,
+  # matching the edit-icon visibility rule. See #4436.
+  def test_admin_mode_allows_edit
+    slip = field_slips(:field_slip_no_trust) # owner katrina (no_trust)
+    make_admin("rolf")
+
+    get(:edit, params: { id: slip.id })
+
+    assert_response(:success)
+  end
+
+  def test_edit_redirects_when_not_permitted
+    slip = field_slips(:field_slip_no_trust)
+    login("dick") # not owner, not project admin, not site admin
+
+    get(:edit, params: { id: slip.id })
+
+    assert_redirected_to(field_slip_url(id: slip.id))
+  end
+
+  # The Project dropdown must list the editing user's member-projects,
+  # not just the slip's own project. Regression: edit omitted setting
+  # current_user, so find_projects ran against a nil user. See #4436.
+  def test_edit_project_dropdown_lists_editor_member_projects
+    slip = field_slips(:field_slip_one) # owner mary, project eol_project
+    bolete = projects(:bolete_project)  # mary is a member, not the slip's proj
+    login(slip.user.login)
+
+    get(:edit, params: { id: slip.id })
+
+    assert_response(:success)
+    assert_select(
+      "select[name=?] option[value=?]",
+      "field_slip[project_id]", bolete.id.to_s
+    )
+  end
+
+  # update re-renders :edit on validation failure without running edit,
+  # so current_user must be set in the before_action, not the edit action,
+  # for the Project dropdown to still list member-projects. See #4436.
+  def test_update_validation_failure_rerenders_with_member_projects
+    slip = field_slips(:field_slip_one) # owner mary
+    bolete = projects(:bolete_project)  # mary is a member
+    login(slip.user.login)
+
+    # code with only digits/dots/dashes fails the format validation
+    patch(:update, params: { id: slip.id, field_slip: { code: "123" } })
+
+    assert_response(:unprocessable_content)
+    assert_select(
+      "select[name=?] option[value=?]",
+      "field_slip[project_id]", bolete.id.to_s
+    )
+  end
+
   def test_should_show_field_slip_and_allow_owner_to_change
     field_slip = field_slips(:field_slip_no_trust)
     login(field_slip.user.login)
@@ -430,7 +533,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
     fs = field_slips(:field_slip_project_orphan)
     get(:show, params: { id: fs.id })
     assert_response(:success)
-    assert_match(/#{:field_slip_edit.t}/, @response.body)
+    assert_select("a[href='#{edit_field_slip_path(fs)}']",
+                  text: /#{:field_slip_edit.t}/)
   end
 
   def test_should_get_edit
@@ -450,8 +554,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     field_slip = field_slips(:field_slip_by_recorder)
     login(field_slip.user.login)
     get(:edit, params: { id: field_slip.id })
-    assert_match(field_slip.observation.collector,
-                 @response.body)
+    assert_input_value(:field_slip_collector, field_slip.collector)
   end
 
   def test_should_show_previous_field_slip_location
@@ -591,7 +694,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
   end
 
   def test_check_name_handles_textile_formats
-    login
+    # Admin mode: this test edits slips across projects/owners (incl. a
+    # non-member's), exercising name formatting, not the permission gate.
+    make_admin
 
     # Test "_name Xxx yyy_" format - should create naming with correct name
     fs1 = field_slips(:field_slip_one)
@@ -997,6 +1102,50 @@ class FieldSlipsControllerTest < FunctionalTestCase
     gaps = occ.project_membership_gaps
     assert(gaps.any?, "Should detect project gaps")
     assert(gaps[:projects]&.include?(project))
+  end
+
+  # Coverage gap: the existing detect-gaps test verifies the gap data
+  # but not the view-render branch. This test PUTs through the
+  # controller flow that sets `@field_slip_project_gaps`, then asserts
+  # the response renders `Components::Modal` wrapping the
+  # `Views::Controllers::Occurrences::Projects::Form` — the view-level
+  # contract in `field_slips/edit.html.erb` that no other test
+  # exercises.
+  def test_update_with_project_gaps_renders_modal
+    login("rolf")
+    fs = field_slips(:field_slip_no_obs)
+    obs2 = observations(:coprinus_comatus_obs)
+    obs3 = observations(:detailed_unknown_obs) # in bolete_project
+    [obs2, obs3].each { |obs| obs.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(
+      user: rolf, primary_observation: obs2, field_slip: fs
+    )
+    obs2.update!(occurrence: occ)
+    obs3.update!(occurrence: occ)
+
+    # PUT update — must include `observation_ids` to trigger the
+    # sync_selected_observations path → check_field_slip_project_gaps
+    # → @field_slip_project_gaps set → render(:edit) instead of redirect.
+    put(:update,
+        params: {
+          id: fs.id,
+          observation_ids: [obs2.id.to_s, obs3.id.to_s],
+          field_slip: { code: fs.code }
+        })
+
+    assert_response(:success)
+    # Components::Modal markup proves the new modal composition
+    # rendered, not just that we got a 200.
+    assert_select(
+      "#modal_resolve_projects.modal.fade.in",
+      { count: 1 },
+      "Expected Components::Modal for project-gaps overlay"
+    )
+    assert_select(".modal-dialog.modal-lg")
+    assert_select(".modal-backdrop.fade.in")
+    # Resolve modal's submit buttons (Skip + Add All) are posted under
+    # the FormObject's namespace.
+    assert_select("[name='occurrence_projects[resolution]']", count: 2)
   end
 
   def test_check_field_slip_project_gaps_no_gaps

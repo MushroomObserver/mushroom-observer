@@ -16,18 +16,18 @@ class NamesControllerShowTest < FunctionalTestCase
     # assert_equal(0, QueryRecord.count)
     login
     get(:show, params: { id: names(:coprinus_comatus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Creates three for children and all four observations sections,
     # but one never used. (? Now 4 - AN 20240107) (? Now 5 - AN 20241217)
     # assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:coprinus_comatus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Should re-use all the old queries.
     # assert_equal(5, QueryRecord.count)
 
     get(:show, params: { id: names(:agaricus_campestris).id })
-    assert_template("show")
+    assert_select("#nomenclature")
     # Needs new queries this time.
     # (? Up from 7 to 9 - AN 20240107)
     # Why are we making this assertion if we don't know what the
@@ -36,7 +36,26 @@ class NamesControllerShowTest < FunctionalTestCase
 
     # Agarcius: has children taxa.
     get(:show, params: { id: names(:agaricus).id })
-    assert_template("show")
+    assert_select("#nomenclature")
+  end
+
+  # Regression for #4491: name text (author, synonyms, classification
+  # rows) is textile-safe HTML. The Phlex conversion emitted it via
+  # `plain`, which re-escaped the entities, so panels showed literal
+  # codes like "&amp;" / "&#8212;" instead of "&" / "—". Same root cause
+  # / fix (`trusted_html`) in the nomenclature and classification panels.
+  def test_show_name_renders_html_entities_not_codes
+    login
+    # author is "(Bull.) Vilgalys, Hopple & Jacq. Johnson"
+    name = names(:coprinellus_micaceus)
+    get(:show, params: { id: name.id })
+    assert_response(:success)
+
+    nomenclature = css_select("#nomenclature").text
+    assert_includes(nomenclature, "Hopple & Jacq. Johnson",
+                    "ampersand should render as a character, not a code")
+    assert_not_includes(nomenclature, "&amp;",
+                        "HTML entity codes should not be visible as text")
   end
 
   def test_show_name_species_with_icn_id
@@ -53,27 +72,28 @@ class NamesControllerShowTest < FunctionalTestCase
 
     ##### External research links
     [
-      ["GBIF", gbif_name_search_url(name)],
-      ["Google Search", google_name_search_url(name)],
-      ["iNat", inat_name_search_url(name)],
-      ["MushroomExpert", mushroomexpert_name_web_search_url(name)],
-      ["MyCoPortal", mycoportal_url(name)],
-      ["NCBI", ncbi_nucleotide_term_search_url(name)],
-      ["Wikipedia", wikipedia_term_search_url(name)]
+      ["GBIF", Tab::Name::Gbif.new(name: name).path],
+      ["Google Search", Tab::Name::GoogleSearch.new(name: name).path],
+      ["iNat", Tab::Name::Inat.new(name: name).path],
+      ["MushroomExpert", Tab::Name::MushroomExpert.new(name: name).path],
+      ["MyCoPortal", Tab::Name::Mycoportal.new(name: name).path],
+      ["NCBI", Tab::Name::NcbiNucleotide.new(name: name).path],
+      ["Wikipedia", Tab::Name::Wikipedia.new(name: name).path]
     ].each do |site, link|
       assert_external_link(site, link)
     end
 
     assert_select(
-      "body a[href='#{ascomycete_org_name_url(name)}']", false,
+      "body a[href='#{Tab::Name::AscomyceteOrg.new(name: name).path}']", false,
       "Page should not have a link to Ascomycete.org"
     )
 
     ##### External nomenclature links
     [
-      ["IF record", index_fungorum_record_url(name.icn_id)],
-      ["MB record", mycobank_record_url(name.icn_id)],
-      ["GSD Synonymy record", species_fungorum_gsd_synonymy(name.icn_id)]
+      ["IF record", Tab::Name::IndexFungorumRecord.new(name: name).path],
+      ["MB record", Tab::Name::MycobankRecord.new(name: name).path],
+      ["GSD Synonymy record",
+       Tab::Name::FungorumGsdSynonymy.new(name: name).path]
     ].each do |site, link|
       assert_external_link(site, link)
     end
@@ -94,7 +114,8 @@ class NamesControllerShowTest < FunctionalTestCase
     login
     get(:show, params: { id: name.id })
 
-    assert_external_link("Ascomycete.org", ascomycete_org_name_url(name))
+    assert_external_link("Ascomycete.org",
+                         Tab::Name::AscomyceteOrg.new(name: name).path)
   end
 
   def test_show_name_genus_with_icn_id
@@ -103,7 +124,8 @@ class NamesControllerShowTest < FunctionalTestCase
     login
     get(:show, params: { id: name.id })
     assert_select(
-      "body a[href='#{species_fungorum_sf_synonymy(name.icn_id)}']", true,
+      "body a[href='#{Tab::Name::FungorumSfSynonymy.new(name: name).path}']",
+      true,
       "Page is missing a link to SF Synonymy record"
     )
   end
@@ -123,23 +145,26 @@ class NamesControllerShowTest < FunctionalTestCase
     )
     assert_select(
       "#nomenclature a:match('href',?)",
-      /#{index_fungorum_search_page_url}/,
+      /#{Tab::Name::IndexFungorumSearchPage.new.path}/,
       { count: 1 },
       "Nomenclature section is missing a link to IF search page"
     )
     assert_select(
-      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      "#nomenclature " \
+      "a[href='#{Tab::Name::IndexFungorumNameSearch.new(name: name).path}']",
       true,
       "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
-      "#nomenclature a:match('href',?)", /#{mycobank_name_search_url(name)}/,
+      "#nomenclature a:match('href',?)",
+      /#{Tab::Name::MycobankSearch.new(name: name).path}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )
 
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", false,
+      "body a[href='#{Tab::Name::IndexFungorumRecord.new(name: name).path}']",
+      false,
       "Page should not have link to IF record"
     )
   end
@@ -153,24 +178,27 @@ class NamesControllerShowTest < FunctionalTestCase
     assert(/#{:ICN_ID.l}/ !~ @response.body,
            "Page should not have ICN identifier label")
     assert_select(
-      "body a[href='#{index_fungorum_record_url(name.icn_id)}']", false,
+      "body a[href='#{Tab::Name::IndexFungorumRecord.new(name: name).path}']",
+      false,
       "Page should not have link to IF record"
     )
 
     # but it makes sense to link to search pages in fungal registries
     assert_select(
       "#nomenclature a:match('href',?)",
-      /#{index_fungorum_search_page_url}/,
+      /#{Tab::Name::IndexFungorumSearchPage.new.path}/,
       { count: 1 },
       "Nomenclature section should have link to IF search page"
     )
     assert_select(
-      "#nomenclature a[href='#{index_fungorum_name_web_search_url(name)}']",
+      "#nomenclature " \
+      "a[href='#{Tab::Name::IndexFungorumNameSearch.new(name: name).path}']",
       true,
       "Nomenclature section is missing a link to Index Fungorum web search"
     )
     assert_select(
-      "#nomenclature a:match('href',?)", /#{mycobank_basic_search_url}/,
+      "#nomenclature a:match('href',?)",
+      /#{Tab::Name::MycobankBasicSearch.new.path}/,
       { count: 1 },
       "Nomenclature section should have link to MB search"
     )
@@ -188,7 +216,29 @@ class NamesControllerShowTest < FunctionalTestCase
   def test_show_name_with_eol_link
     login
     get(:show, params: { id: names(:abortiporus_biennis_for_eol).id })
-    assert_template("show")
+    assert_select("#nomenclature")
+  end
+
+  def test_citation_url_renders_as_link
+    url = "http://example.com/protologue"
+    name = names(:peltigera)
+
+    name.update!(citation: url)
+    login
+    get(:show, params: { id: name.id })
+    assert_select(
+      "#nomenclature a[href='#{url}']",
+      { count: 1 },
+      "Bare URL citation should render as a clickable link"
+    )
+
+    name.update!(citation: "\"Protologue\":#{url}")
+    get(:show, params: { id: name.id })
+    assert_select(
+      "#nomenclature a[href='#{url}']",
+      { text: "Protologue", count: 1 },
+      "Textile-style citation should render as a link with correct text"
+    )
   end
 
   def test_name_external_links_exist

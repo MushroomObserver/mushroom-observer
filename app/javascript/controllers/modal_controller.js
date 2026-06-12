@@ -36,6 +36,7 @@ export default class extends Controller {
 
   // Reset the text within the progress modal, if it exists.
   resetProgress() {
-    document.getElementById('modal_progress_spinner_caption').innerHTML = ""
+    const elem = document.getElementById('modal_progress_spinner_caption')
+    if (elem) { elem.innerHTML = "" }
   }
 }

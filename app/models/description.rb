@@ -151,6 +151,12 @@ class Description < AbstractModel
     put_together_name(:full)
   end
 
+  # Page heading: textilized parent-inclusive name. Doc title: plain.
+  def page_title(_user = nil)
+    format_name.t
+  end
+  alias document_title text_name
+
   # Same as +format_name+ but with id tacked on.
   def unique_format_name
     string_with_id(format_name)
@@ -240,7 +246,8 @@ class Description < AbstractModel
   # Return an Array of source type Strings, e.g. "public", "project", etc.
   # as would `NameDescription.source_types.keys`. However, the below order is
   # different. It is a preferred order, and is how these will be listed in
-  # the show_name descriptions panel, list_descriptions.
+  # the show-name descriptions panel
+  # (`Views::Controllers::Descriptions::List#sort_descriptions`).
   ALL_SOURCE_TYPES = [
     "public",    # Public ones created by any user.
     "foreign",   # Foreign "public" description(s) written on another server.
@@ -529,8 +536,11 @@ class Description < AbstractModel
   # include the title of the parent object), in plain text.  [I'm not sure
   # I like this here.  It might violate MVC a bit too flagrantly... -JPH]
   def put_together_name(full_or_part)
-    source_type ||= :public
-    tag = :"description_#{full_or_part}_title_#{source_type}"
+    # NOT `source_type ||= :public` — Ruby would treat the LHS as a
+    # new local that shadows the AR reader for the rest of the
+    # method, flattening every description to the public title format.
+    type = source_type.presence || :public
+    tag = :"description_#{full_or_part}_title_#{type}"
     user_name = begin
                   user.legal_name
                 rescue StandardError

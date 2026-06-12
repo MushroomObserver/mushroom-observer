@@ -56,14 +56,25 @@ class Article < AbstractModel
     title.to_s.t.html_to_ascii
   end
 
+  # Page heading: bold-textile + `.t` (HTML). Doc title: plain title.
+  # (Can't `alias document_title title` — the `title` AR accessor
+  # isn't defined yet at class-load time.)
+  def page_title(_user = nil)
+    display_title.t
+  end
+
+  def document_title
+    title
+  end
+
   # used by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
-    title + " (#{id || "?"})"
+    string_with_id(title)
   end
 
   # used by RSS feed
   def unique_text_name
-    text_name + " (#{id || "?"})"
+    string_with_id(text_name)
   end
 
   # wrapper around class method of same name

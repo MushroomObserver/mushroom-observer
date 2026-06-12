@@ -16,11 +16,11 @@ module SpeciesLists
 
       get(:edit, params: params)
       assert_response(:success)
-      assert_input_value(:species_list, "")
+      assert_input_value(:species_list_title, "")
 
-      get(:edit, params: params.merge(species_list: "blah"))
+      get(:edit, params: params.merge(species_list: { title: "blah" }))
       assert_response(:success)
-      assert_input_value(:species_list, "blah")
+      assert_input_value(:species_list_title, "blah")
     end
 
     def test_post_add_remove_observations
@@ -43,7 +43,7 @@ module SpeciesLists
       put_requires_login(:update)
       assert_response(:redirect)
       assert_redirected_to(
-        species_lists_edit_observations_path(species_list: "")
+        species_lists_edit_observations_path(species_list: { title: "" })
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
@@ -51,26 +51,26 @@ module SpeciesLists
       put(:update, params: params)
       assert_response(:redirect)
       assert_redirected_to(
-        species_lists_edit_observations_path(species_list: "")
+        species_lists_edit_observations_path(species_list: { title: "" })
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
 
-      put(:update, params: params.merge(species_list: "blah"))
+      put(:update, params: params.merge(species_list: { title: "blah" }))
       assert_response(:redirect)
       assert_redirected_to(
-        species_lists_edit_observations_path(species_list: "blah")
+        species_lists_edit_observations_path(species_list: { title: "blah" })
       )
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
 
-      put(:update, params: { species_list: spl.title })
+      put(:update, params: { species_list: { title: spl.title } })
       assert_response(:redirect)
       assert_redirected_to(species_list_path(spl.id))
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
 
-      put(:update, params: params.merge(species_list: spl.title))
+      put(:update, params: params.merge(species_list: { title: spl.title }))
       assert_response(:redirect)
       assert_redirected_to(species_list_path(spl.id))
       assert_flash_error
@@ -78,14 +78,16 @@ module SpeciesLists
 
       # Test a bogus commit param, in case of hacks
       put(:update,
-          params: params.merge(commit: "bogus", species_list: spl.title))
+          params: params.merge(commit: "bogus",
+                               species_list: { title: spl.title }))
       assert_response(:redirect)
       assert_redirected_to(%r{/species_lists})
       assert_flash_error
       assert_equal(old_count, spl.reload.observations.size)
 
       put(:update,
-          params: params.merge(commit: :ADD.l, species_list: spl.title))
+          params: params.merge(commit: :ADD.l,
+                               species_list: { title: spl.title }))
       assert_response(:redirect)
       assert_redirected_to(%r{/species_lists})
       assert_flash_error
@@ -93,14 +95,16 @@ module SpeciesLists
 
       login("mary")
       put(:update,
-          params: params.merge(commit: :ADD.l, species_list: spl.title))
+          params: params.merge(commit: :ADD.l,
+                               species_list: { title: spl.title }))
       assert_response(:redirect)
       assert_redirected_to(%r{/species_lists})
       assert_flash_success
       assert_equal(new_count, spl.reload.observations.size)
 
       put(:update,
-          params: params.merge(commit: :REMOVE.l, species_list: spl.id.to_s))
+          params: params.merge(commit: :REMOVE.l,
+                               species_list: { title: spl.id.to_s }))
       assert_response(:redirect)
       assert_redirected_to(%r{/species_lists})
       assert_flash_success
@@ -121,7 +125,7 @@ module SpeciesLists
       params = {
         q: @controller.q_param(query),
         commit: :ADD.l,
-        species_list: spl.title
+        species_list: { title: spl.title }
       }
       login(spl.user.login)
       put(:update, params:)

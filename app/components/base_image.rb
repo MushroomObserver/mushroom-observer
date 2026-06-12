@@ -50,8 +50,8 @@ class Components::BaseImage < Components::Base
 
   # Image fitting and data
   prop :fit, Fit, default: :cover
-  prop :data, Hash, default: -> { {} }
-  prop :data_sizes, Hash, default: -> { {} }
+  prop :data, _Hash(Symbol, _Any), default: -> { {} }
+  prop :data_sizes, _Hash(String, Integer), default: -> { {} }
 
   # Lightbox and observation context
   prop :obs, _Union(Observation, Hash), default: -> { {} }
@@ -195,7 +195,8 @@ class Components::BaseImage < Components::Base
         image_id: lightbox_data[:image_id],
         obs: lightbox_data[:obs],
         identify: lightbox_data[:identify],
-        observation_view: lightbox_data[:observation_view]
+        observation_view: lightbox_data[:observation_view],
+        votes: @votes
       )
     end
   end

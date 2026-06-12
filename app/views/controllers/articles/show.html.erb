@@ -1,11 +1,11 @@
 <%
 container_class(:wide)
-add_show_title(@article.display_title.t, @article)
+add_show_title(@article)
 add_edit_icons(@article, @user)
 %>
 
 <%= content_padded do %>
-  <%= :BY.t %> <%= user_link(@article.user) %>,
+  <%= :BY.t %> <%= render(Components::UserLink.new(user: @article.user)) %>,
   <%= tag.small(@article.created_at.display_time) %>
 <% end %>
 

@@ -11,6 +11,27 @@ module SpeciesLists
 
     before_action :login_required
 
+    # Override Searchable#new to render the Phlex view explicitly.
+    # `Searchable` is a shared concern used by 6 search controllers;
+    # the other 5 still ship `search/new.erb` and rely on
+    # ActionView's implicit template lookup. species_lists is the
+    # first to migrate, so this duplicates Searchable#new's
+    # 3-line setup rather than threading a `render_search_new_view`
+    # hook through the concern just for one caller.
+    def new
+      @local = params[:local] != "false"
+      set_up_form_field_groupings
+      @search = build_search_query
+      respond_to do |format|
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
+        format.html do
+          render(Views::Controllers::SpeciesLists::Search::New.new(
+                   search: @search, controller: self, local: @local
+                 ))
+        end
+      end
+    end
+
     def permitted_search_params
       [
         :by_users,

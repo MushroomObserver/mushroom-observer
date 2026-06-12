@@ -109,6 +109,9 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                         new_inat_import_path)
     # Naming reasons fields should be present (collapsed until name entered)
     assert_select("input[id^='naming_reasons_'][id$='_check']")
+    # Collector field prefilled with the entering user (#4211)
+    assert_select("input[name='observation[collector]'][value=?]",
+                  users(:rolf).unique_text_name)
 
     users(:rolf).update(location_format: "scientific")
     get(:new)
@@ -134,6 +137,38 @@ class ObservationsControllerCreateTest < FunctionalTestCase
 
     assert(Observation.last.log_updated_at.is_a?(Time),
            "Observation should have log_updated_at time")
+  end
+
+  def test_create_observation_with_explicit_collector
+    params = {
+      naming: { name: "", vote: { value: "" } },
+      user: rolf,
+      observation: { place_name: locations.first.name,
+                     collector: "Jane Forager" }
+    }
+    users(:rolf).login
+    post_requires_login(:create, params)
+
+    obs = Observation.find_by(collector: "Jane Forager")
+    assert_not_nil(obs, "Observation with explicit collector not created")
+    assert_nil(obs.collector_user_id, "Free-text collector should have no FK")
+    assert(obs.collector_differs_from_creator?)
+  end
+
+  def test_create_observation_collector_defaults_to_creator
+    params = {
+      naming: { name: "", vote: { value: "" } },
+      user: rolf,
+      observation: { place_name: locations.first.name,
+                     collector: rolf.unique_text_name }
+    }
+    users(:rolf).login
+    post_requires_login(:create, params)
+
+    obs = Observation.find_by(collector: rolf.unique_text_name, user: rolf)
+    assert_not_nil(obs, "Observation not created")
+    assert_equal(rolf.id, obs.collector_user_id)
+    assert_not(obs.collector_differs_from_creator?)
   end
 
   def test_create_observation_without_scientific_name
@@ -1310,14 +1345,19 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     name = names(:coprinus_comatus)
     get(:new, params: { notes: { Field_Slip_ID: name.text_name } })
 
-    assert_match(name.text_name, @response.body)
+    # Name should be pre-filled in the naming autocompleter
+    assert_select(
+      "input[name='observation[naming][name]'][value=?]", name.text_name
+    )
   end
 
   def test_collector_to_observation
     login("katrina")
-    get(:new, params: { notes: { Collector: mary.textile_name } })
+    get(:new, params: { collector: mary.textile_name })
 
-    assert_match(mary.textile_name, @response.body)
+    # Collector value prefills the collector field (its own column, #4211)
+    assert_select("input[name='observation[collector]'][value=?]",
+                  mary.textile_name)
   end
 
   # Prove that notes are saved with template keys first, in the order listed in
@@ -1359,14 +1399,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
           notes: { Field_Slip_ID: "_#{name.text_name}_" }
         })
     assert_response(:success)
-    body = @response.body
 
-    # Name should be pre-filled
-    assert_match(/#{name.text_name}/, body)
+    # Name should be pre-filled into the naming name input
+    assert_select("input[value=?]", name.text_name, { minimum: 1 },
+                  "Name should be pre-filled into the form")
 
-    # Should NOT show "not recognized" or "deprecated" warnings
-    assert_no_match(/does not recognize/, body)
-    assert_no_match(/is deprecated/, body)
+    # Should NOT show any name_messages warning/error alert
+    assert_select("#name_messages", count: 0)
   end
 
   def test_new_from_field_slip_no_warning_without_name
@@ -1374,6 +1413,99 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     get(:new, params: { field_code: "TEST-001" })
     assert_response(:success)
 
-    assert_no_match(/name_messages/, @response.body)
+    assert_select("#name_messages", count: 0)
+  end
+
+  # Stub-based regression coverage for the
+  # `validate_observation` / `validate_naming` / `validate_vote`
+  # failure branches (`@any_errors = true; false`). Observation,
+  # Naming, and Vote have no `validates` clauses, so the only way
+  # to reach those branches is by forcing `valid?` to return false
+  # on the in-controller instance. We intercept `.new` to swap in
+  # a pre-stubbed instance.
+  def test_create_observation_fails_validation
+    login("rolf")
+    stub_valid_false_on(Observation) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  def test_create_observation_fails_naming_validation
+    login("rolf")
+    stub_valid_false_on(Naming) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  def test_create_observation_fails_vote_validation
+    login("rolf")
+    stub_valid_false_on(Vote) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  # `update_good_images` flash-object-errors branch — when editing
+  # an already-uploaded image's attributes (via `good_image[<id>]`)
+  # and the save fails. Stub the loaded image's `save` to false.
+  def test_create_with_good_image_save_fails
+    login("rolf")
+    img = images(:in_situ_image)
+    img.define_singleton_method(:save) { |*| false }
+
+    params = create_params_with_name.merge(
+      observation: create_params_with_name[:observation].merge(
+        good_image_ids: img.id.to_s,
+        good_image: { img.id.to_s => { notes: "Forced change" } }
+      )
+    )
+    Image.stub(:safe_find, img) do
+      post(:create, params: params)
+    end
+    # Goal here is purely to exercise the `flash_object_errors`
+    # branch — the create may or may not redirect, depending on
+    # other state. Just confirm the image didn't actually persist
+    # its forced change.
+    assert_not_equal("Forced change", img.reload.notes)
+  end
+
+  private
+
+  def create_params_with_name
+    {
+      observation: {
+        when: Time.zone.now,
+        place_name: "Somewhere, Massachusetts, USA",
+        specimen: "0",
+        thumb_image_id: "0"
+      },
+      naming: { name: "Agaricus campestris", vote: { value: "3" } }
+    }
+  end
+
+  # Stub `klass.new(*args)` so every instance built inside the
+  # controller has `valid?` returning false. MiniTest's `stub` can't
+  # do "any_instance" — we intercept the constructor and stub the
+  # one instance after it's built.
+  def stub_valid_false_on(klass, &block)
+    stub_new_with(klass, :valid?, false, &block)
+  end
+
+  def stub_save_false_on(klass, &block)
+    stub_new_with(klass, :save, false, &block)
+  end
+
+  def stub_new_with(klass, method_name, return_value)
+    original_new = klass.method(:new)
+    klass.define_singleton_method(:new) do |*args, **kwargs|
+      obj = original_new.call(*args, **kwargs)
+      obj.define_singleton_method(method_name) { |*| return_value }
+      obj
+    end
+    yield
+  ensure
+    klass.singleton_class.remove_method(:new)
   end
 end

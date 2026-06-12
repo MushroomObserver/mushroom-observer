@@ -12,8 +12,14 @@ class ImagesControllerTest < FunctionalTestCase
     assert_page_title(:IMAGES.l)
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
+  # Sorting by `name` or `user` flips `opts[:letters] = true` in
+  # `ImagesController#index_display_opts`, switching the index to
+  # letter-based pagination.
+  def test_index_sort_by_name_enables_letter_pagination
+    login
+    get(:index, params: { by: "name" })
+
+    assert_response(:success)
   end
 
   def test_index_by_user
@@ -72,6 +78,21 @@ class ImagesControllerTest < FunctionalTestCase
     assert_redirected_to(search_advanced_path)
   end
 
+  # Covers the `[query, {}]` success-return tuple at the end of
+  # `ImagesController#advanced_search` — `test_index_advanced_search_error`
+  # only exercises the rescue path.
+  def test_index_advanced_search_success
+    query = Query.lookup_and_save(:Image, has_notes: true)
+    assert(query.params.any?, "Test needs a query with conditions")
+
+    login
+    get(:index, params: { q: @controller.q_param(query),
+                          advanced_search: true })
+
+    assert_response(:success)
+    assert_select("body.images__index")
+  end
+
   # The pattern param is maintained only for backwards compatibility.
   # Should redirect to SearchController#pattern
   def test_index_pattern_param_redirected_to_search
@@ -107,6 +128,37 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
+    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_template("index")
+  end
+
+  # Regression for #4360: a cross-model q param (Observation query
+  # landing on the Images index) used to silently fall back to the
+  # full unfiltered Image index — a >60s response that could trigger
+  # downtime alerts. The query-coercion bridge in
+  # `find_new_query_for_model` should map the Observation query to an
+  # Image query via the `observation_query` subquery instead.
+  def test_index_cross_model_q_param_with_hits
+    pattern = "USA"
+    params = { q: { model: :Observation, pattern: } }
+
+    login
+    get(:index, params:)
+
+    assert_template("index", partial: "_image")
+    # Should NOT have flashed "no matches" — the bridge produces hits.
+    assert_no_flash
+  end
+
+  def test_index_cross_model_q_param_no_hits_flashes_error
+    pattern = "nothingMatchesAxotl"
+    params = { q: { model: :Observation, pattern: } }
+
+    login
+    get(:index, params:)
+
+    # Zero matching Observations → zero matching Images → "no matches"
+    # flash, not a silent fall-back to the unfiltered Image index.
     assert_flash_text(:runtime_no_matches.l(type: :images.l))
     assert_template("index")
   end

@@ -68,7 +68,7 @@ module Names::Classification
     end
 
     def resolve_name!(in_str, chosen_id)
-      @options = @message = nil
+      @candidates = @message = nil
       return Name.find(chosen_id) if chosen_id.present?
 
       name = Name.find_by(search_name: in_str)
@@ -96,7 +96,7 @@ module Names::Classification
     def no_names_match(in_str)
       matches = Name.suggest_alternate_spellings(in_str)
       if matches.any?
-        @options = matches
+        @candidates = matches
         @message = :inherit_classification_alt_spellings
       else
         flash_error(:inherit_classification_no_matches.t)
@@ -111,7 +111,7 @@ module Names::Classification
     end
 
     def multiple_names_match(matches)
-      @options = matches
+      @candidates = matches
       @message = :inherit_classification_multiple_matches
       nil
     end

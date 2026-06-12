@@ -21,6 +21,22 @@ class BaseTest < ComponentTestCase
     end
   end
 
+  # Reads the registered `current_user` value helper. Used by the
+  # `Components::Base.current_user` tests below.
+  class CurrentUserReader < Components::Base
+    def view_template
+      plain(current_user&.login || "nobody")
+    end
+  end
+
+  # Reads the registered `current_query` value helper. Used by the
+  # `Components::Base.current_query` tests below.
+  class CurrentQueryReader < Components::Base
+    def view_template
+      plain(current_query&.id&.to_s || "no-query")
+    end
+  end
+
   def test_trusted_html_with_plain_string
     html = render_component(TestComponent.new)
     doc = Nokogiri::HTML(html)
@@ -47,29 +63,54 @@ class BaseTest < ComponentTestCase
     assert_equal(Rails.cache, component.cache_store)
   end
 
+  # The before_template hook emits a "<!-- Before ClassName -->"
+  # comment in development so reviewers can see which component
+  # rendered which DOM region; in test/prod it's a no-op.
   def test_before_template_adds_comment_in_development
-    # Stub Rails.env.development? to return true
     Rails.env.stub(:development?, true) do
-      # Create a component class that will have before_template defined
-      component_class = Class.new(Components::Base) do
-        # Re-define before_template since it's only defined when
-        # Rails.env.development? is true at class load time
-        def before_template
-          comment { "Before #{self.class.name}" }
-          super
-        end
+      html = render_component(TestComponent.new)
 
-        def view_template
-          div { "content" }
-        end
-      end
-
-      html = render_component(component_class.new)
-
-      # Should include HTML comment with class name
       assert_includes(html, "<!--")
-      assert_includes(html, "Before")
-      assert_includes(html, "content")
+      assert_includes(html, "Before #{TestComponent.name}")
     end
+  end
+
+  def test_before_template_no_comment_outside_development
+    html = render_component(TestComponent.new)
+
+    assert_not_includes(html, "<!-- Before")
+  end
+
+  # `current_user` is a `register_value_helper`'d alias for the
+  # controller's `@user`; views call it instead of taking a
+  # `prop :user, _Nilable(::User)` when they only need "the viewer".
+  def test_current_user_reads_controllers_user_ivar
+    user = users(:rolf)
+    controller.instance_variable_set(:@user, user)
+
+    assert_equal(user.login, render(CurrentUserReader.new))
+  end
+
+  def test_current_user_is_nil_when_no_one_logged_in
+    controller.instance_variable_set(:@user, nil)
+
+    assert_equal("nobody", render(CurrentUserReader.new))
+  end
+
+  # `current_query` is a `register_value_helper`'d alias for
+  # `controller.current_query` — the typed `Query` view a Phlex view
+  # can fall back to when its `prop :query, _Nilable(::Query)` isn't
+  # passed, without round-tripping through the URL's q param.
+  def test_current_query_reads_controllers_current_query
+    query = ::Query.lookup_and_save(:Observation)
+    controller.instance_variable_set(:@query, query)
+
+    assert_equal(query.id.to_s, render(CurrentQueryReader.new))
+  end
+
+  def test_current_query_is_nil_when_no_query_on_controller
+    controller.instance_variable_set(:@query, nil)
+
+    assert_equal("no-query", render(CurrentQueryReader.new))
   end
 end

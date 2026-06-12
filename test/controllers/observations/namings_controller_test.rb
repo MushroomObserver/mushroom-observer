@@ -72,7 +72,8 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; controller emits inline streams.
+      assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       post_propose_naming_assertions(args)
     end
@@ -84,7 +85,8 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      assert_template("observations/namings/_update_matrix_box")
+      # _update_matrix_box.erb deleted; controller emits inline streams.
+      assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       # Check that turbo_stream replace action is in response
       assert_match(
@@ -734,9 +736,135 @@ module Observations
     end
 
     def assert_edit
-      assert_template("observations/namings/edit")
-      assert_template("observations/show/_observation_details")
-      assert_template("observations/show/_images")
+      # Phlex view renders outside the ActionView template lookup
+      # chain, so `assert_template` doesn't fire for the Phlex
+      # `Views::Controllers::Observations::Namings::Edit`. The
+      # layout now maps `action_name = "update"` to `"edit"` for
+      # the body class, so `body.namings__edit` fires for both the
+      # GET edit form and the failed-update re-render — could be
+      # used as a marker here. Page-title check stays as the
+      # stronger Edit-specific pin.
+      assert_head_title(:edit_naming_title.l(id: assigns(:observation).id))
+      # _observation_details and _images are Phlex panels now;
+      # assert against their identifiers rather than the (gone)
+      # ActionView partial paths.
+      assert_select("#observation_details")
+      assert_select(".show_images")
+    end
+
+    # POST with no naming param at all triggers the `@given_name.blank?`
+    # branch of `flash_naming_errors`. The controller flashes the
+    # "what's missing" error and re-renders the new form.
+    def test_create_with_no_naming_param_flashes_what_missing
+      login("rolf")
+      obs = observations(:detailed_unknown_obs)
+      assert_no_difference("Naming.count") do
+        post(:create, params: { observation_id: obs.id })
+      end
+      assert_flash_error
+      assert_head_title(:create_naming_title.l(id: obs.id))
+    end
+
+    # POST with a naming hash that omits `:name` exercises
+    # `rough_draft`'s `else true` branch (no name → `success = true`
+    # without calling `resolve_name`). The flow then fails name
+    # validation and re-renders the form via `flash_naming_errors`'s
+    # `name_missing?` branch.
+    def test_create_with_naming_hash_but_no_name_param
+      login("rolf")
+      obs = observations(:detailed_unknown_obs)
+      assert_no_difference("Naming.count") do
+        post(:create, params: {
+               observation_id: obs.id, naming: { vote: { value: "3" } }
+             })
+      end
+      assert_flash_error
+    end
+
+    # Turbo-stream-format submission with form errors → renders the
+    # `shared/modal_form_reload` partial via the turbo_stream branch
+    # of `respond_to_form_errors`. The partial emits two
+    # `<turbo-stream>` tags: one `update`-ing the modal's flash slot
+    # and one `replace`-ing the form by id.
+    def test_create_turbo_stream_form_errors_render_modal_reload
+      login("rolf")
+      obs = observations(:detailed_unknown_obs)
+      post(:create, params: { observation_id: obs.id, naming: {} },
+                    as: :turbo_stream)
+
+      assert_match("turbo-stream", @response.media_type)
+      assert_match(/<turbo-stream[^>]*action="update"/, @response.body)
+      assert_match(/<turbo-stream[^>]*action="replace"/, @response.body)
+    end
+
+    # PUT update without changing the vote value drops into
+    # `change_vote`'s else branch (`new_val == @vote.value` keeps
+    # the predicate false), which calls
+    # `consensus.reload_namings_and_votes!` + `calc_consensus`
+    # instead of `change_vote`.
+    def test_update_naming_without_changing_vote_recalculates_consensus
+      login("rolf")
+      nmg = namings(:coprinus_comatus_naming)
+      consensus = ::Observation::NamingConsensus.new(nmg.observation)
+      vote_value = consensus.users_vote(nmg, rolf).value
+
+      put(:update, params: {
+            observation_id: nmg.observation_id, id: nmg.id,
+            naming: { name: nmg.text_name,
+                      vote: { value: vote_value.to_s } }
+          })
+
+      assert_redirected_to(nmg.observation.show_link_args)
+    end
+
+    # destroy fired by a user without permission lands on the
+    # `!permission!(naming)` branch — flashes
+    # `:runtime_destroy_naming_denied` and skips the destroy.
+    def test_destroy_naming_without_permission_flashes_denied
+      login("mary") # mary doesn't own rolf's naming
+      nmg = namings(:coprinus_comatus_naming) # owned by rolf
+      assert_no_difference("Naming.count") do
+        get(:destroy,
+            params: { observation_id: nmg.observation_id, id: nmg.id })
+      end
+      assert_flash_error
+    end
+
+    # NOTE: `destroy_if_we_can`'s `!naming.destroy` branch (the
+    # "Unable to destroy" flash) requires forcing `naming.destroy`
+    # to return false on a specific AR instance fetched by the
+    # controller. MO doesn't pull in Mocha (no `any_instance`
+    # stubbing), and Minitest's `stub` can't reach the
+    # `Naming.includes(:votes).find(id)` chain cleanly — the
+    # branch is defensive against the impossible-in-practice case
+    # of a callback abort. Left uncovered intentionally.
+
+    # `destroy_sibling_namings` is gated on
+    # `@observation.occurrence_id`. Hitting any destroy on an
+    # occurrence-linked obs exercises the `Naming.where(...).
+    # destroy_all` line (the WHERE may match zero rows; the line
+    # still executes).
+    def test_destroy_naming_runs_sibling_query_for_occurrence_obs
+      mary = users(:mary)
+      login("mary")
+      consensus = ::Observation::NamingConsensus.new(
+        observations(:coprinus_comatus_obs)
+      )
+      consensus.change_vote(namings(:coprinus_comatus_naming),
+                            Vote.delete_vote, mary)
+      nmg = namings(:coprinus_comatus_naming) # owned by rolf
+      obs = nmg.observation
+
+      # Linking obs → occurrence via `update_columns` skips
+      # validations and any callback that might reset state.
+      occ = Occurrence.create!(primary_observation: obs, user: nmg.user,
+                               observations: [obs])
+      obs.update_columns(occurrence_id: occ.id)
+
+      login("rolf")
+      assert_difference("Naming.count", -1) do
+        get(:destroy, params: { observation_id: obs.id, id: nmg.id })
+      end
     end
 
     # Rolf can destroy his naming if Mary deletes her vote on it.

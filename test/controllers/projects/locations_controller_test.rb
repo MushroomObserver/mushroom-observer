@@ -10,7 +10,8 @@ module Projects
       get(:index, params: { project_id: eol_project.id })
 
       loc = eol_project.locations.first
-      assert_match(loc.display_name, @response.body)
+      assert_select("#locations_table",
+                    text: /#{Regexp.escape(loc.display_name)}/)
       assert_response(:success)
     end
 
@@ -20,7 +21,8 @@ module Projects
       get(:index, params: { project_id: eol_project.id })
 
       loc = eol_project.locations.first
-      assert_match(loc.display_name, @response.body)
+      assert_select("#locations_table",
+                    text: /#{Regexp.escape(loc.display_name)}/)
       assert_response(:success)
     end
 
@@ -32,7 +34,8 @@ module Projects
       assert_response(:success)
       target = locations(:burbank)
       # Target location name should appear even with no obs
-      assert_match(target.display_name, @response.body)
+      assert_select("#locations_table",
+                    text: /#{Regexp.escape(target.display_name)}/)
     end
 
     def test_index_without_target_locations
@@ -42,7 +45,7 @@ module Projects
 
       assert_response(:success)
       # No collapse elements when there are no targets
-      assert_no_match(/panel-collapse-trigger/, @response.body)
+      assert_select(".panel-collapse-trigger", count: 0)
     end
 
     # Exercises grouping logic: assign_to_targets,
@@ -69,13 +72,15 @@ module Projects
       get(:index, params: { project_id: project.id })
       assert_response(:success)
 
-      body = @response.body
       # California target should appear
-      assert_match(california.display_name, body)
+      assert_select("a", { text: california.display_name, minimum: 1 },
+                    "California target should appear as a link")
       # Albion grouped under California as a sub-location
-      assert_match(albion.display_name, body)
+      assert_select("a", { text: albion.display_name, minimum: 1 },
+                    "Albion should appear under California")
       # NYBG appears ungrouped (not a sub of any target)
-      assert_match(nybg.display_name, body)
+      assert_select("a", { text: nybg.display_name, minimum: 1 },
+                    "NYBG should appear ungrouped")
     end
   end
 end

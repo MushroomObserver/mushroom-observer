@@ -1,8 +1,0 @@
-<%
-add_page_title(:merge_descriptions_title.t(object: @description.format_name))
-add_context_nav(
-  location_description_form_permissions_tabs(description: @description)
-)
-%>
-
-<%= render(Components::Descriptions::MoveForm.new(@description, user: @user)) %>

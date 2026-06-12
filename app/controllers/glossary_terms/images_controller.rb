@@ -6,24 +6,31 @@
 
 module GlossaryTerms
   class ImagesController < ApplicationController
+    include ::ImageReusable
+
     before_action :login_required
 
     # reuse_image_for_glossary_term
     def reuse
-      @object = GlossaryTerm.safe_find(params[:id])
+      return unless find_glossary_term!
+
+      load_images_to_reuse
+      render(Views::Controllers::GlossaryTerms::Images::Reuse.new(
+               object: @object,
+               user: @user,
+               objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ))
     end
 
     # reuse image form buttons POST here
     def attach
-      @object = GlossaryTerm.safe_find(params[:id])
+      return unless find_glossary_term!
 
-      image = Image.safe_find(params[:img_id])
-      unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: params[:img_id]))
-        render(:reuse,
-               location: reuse_images_for_glossary_term_path(params[:img_id]))
-        return
-      end
+      @img_id = params.dig(:image_reuse, :img_id).presence || params[:img_id]
+      image = Image.safe_find(@img_id)
+      return render_reuse_with_invalid_id_error unless image
 
       attach_image_to_glossary_term(image)
     end
@@ -35,6 +42,26 @@ module GlossaryTerms
     # The actual grid of attachable images (partial) is a shared layout.
     # CRUD refactor makes each image link POST to create or edit.
 
+    def find_glossary_term!
+      @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
+    end
+
+    def render_reuse_with_invalid_id_error
+      flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
+      render_reuse_page
+    end
+
+    def render_reuse_page
+      load_images_to_reuse
+      render(
+        Views::Controllers::GlossaryTerms::Images::Reuse.new(
+          object: @object, user: @user, objects: @reuse_images,
+          pagination_data: @reuse_pagination, all_users: @reuse_all_users
+        ),
+        location: reuse_images_for_glossary_term_path(@object.id)
+      )
+    end
+
     def attach_image_to_glossary_term(image = nil)
       if image &&
          @object.add_image(image) &&
@@ -43,8 +70,7 @@ module GlossaryTerms
         redirect_to(glossary_term_path(@object.id))
       else
         flash_error(:runtime_no_save.t(:glossary_term)) if image
-        render(:reuse,
-               location: reuse_images_for_glossary_term_path(params[:img_id]))
+        render_reuse_page
       end
     end
 
@@ -61,25 +87,18 @@ module GlossaryTerms
     #   params[:selected][image_id]  (value of "yes" means delete)
     # Outputs: @object
     # Redirects to glossary_terms/show.
-    # remove_images
+    # remove_images. No permission check — `GlossaryTerm#can_edit?`
+    # returns true for any logged-in user, and `login_required`
+    # runs before this action.
     def remove
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
-      return unless @object
-
-      return if permission!(@object)
-
-      redirect_to(glossary_term_path(@object.id))
     end
 
-    # The remove form submits to this action
+    # The remove form submits to this action. Same permission note
+    # as `#remove` above.
     def detach
       @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
       return unless @object
-
-      unless permission!(@object)
-        return redirect_to(glossary_term_path(@object.id))
-      end
-
       return unless (images_data = params[:selected])
 
       detach_images_from_glossary_term(images_data)

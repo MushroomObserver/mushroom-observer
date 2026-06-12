@@ -18,7 +18,9 @@ module Projects
       assert_not_nil(assigns(:project_aliases))
       url = "/projects/#{@project.id}/aliases/#{@project_alias.id}/edit"
       assert_select("table.table-project-members") do
-        assert_select("a[href='#{url}']", text: "Edit")
+        # sr-only label inside the icon-only edit link — more
+        # descriptive than the prior `:EDIT.l` for accessibility.
+        assert_select("a[href='#{url}']", text: /Edit Project Alias/)
       end
     end
 
@@ -30,7 +32,8 @@ module Projects
       get(:index, params: { project_id: @project.id })
       assert_response(:success)
       assert_not_nil(assigns(:project_aliases))
-      assert_match(location.display_name, @response.body)
+      assert_select("#index_project_alias_table",
+                    text: /#{Regexp.escape(location.display_name)}/)
     end
 
     def test_show_displays_the_requested_project_alias
@@ -77,7 +80,10 @@ module Projects
              }, format: :turbo_stream)
       end
 
-      assert_template(:_target_update)
+      assert_select(
+        "turbo-stream[action='replace']" \
+        "[target='#{Views::Controllers::Projects::Aliases::Table::TABLE_ID}']"
+      )
     end
 
     def test_create_creates_new_project_alias_with_valid_user
@@ -176,7 +182,10 @@ module Projects
               project_alias: { name: "Updated Name", project_id: }
             }, format: :turbo_stream)
 
-      assert_template(:_target_update)
+      assert_select(
+        "turbo-stream[action='replace']" \
+        "[target='#{Views::Controllers::Projects::Aliases::Table::TABLE_ID}']"
+      )
       assert_equal("Updated Name", @project_alias.reload.name)
     end
 
@@ -207,7 +216,10 @@ module Projects
                          format: :turbo_stream })
       end
 
-      assert_template(:_target_update)
+      assert_select(
+        "turbo-stream[action='replace']" \
+        "[target='#{Views::Controllers::Projects::Aliases::Table::TABLE_ID}']"
+      )
     end
   end
 end

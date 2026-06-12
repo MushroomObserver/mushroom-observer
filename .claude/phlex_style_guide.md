@@ -29,6 +29,7 @@ fields. **Always use these helpers** instead of the verbose
 text_field(:name, label: "Name:", size: 40)
 textarea_field(:notes, label: "Notes:", rows: 6)
 checkbox_field(:approved, label: "Approved")
+radio_field(:status, ["active", "Active"], ["inactive", "Inactive"])
 select_field(:rank, rank_options, label: "Rank:")
 static_field(:display_name, label: "Name:", value: @model.name, inline: true)
 read_only_field(:locked_field, label: "Value:", value: @value)
@@ -37,6 +38,61 @@ read_only_field(:locked_field, label: "Value:", value: @value)
 render(field(:name).text(wrapper_options: { label: "Name:" }, size: 40))
 render(field(:notes).textarea(wrapper_options: { label: "Notes:" }, rows: 6))
 ```
+
+### NEVER hand-roll form-control HTML inside a form component
+
+**HARD RULE**: Inside any class that extends `Components::ApplicationForm`, do
+NOT emit raw `input`, `select`, `textarea`, or `option` Phlex tags for form
+controls. Every form control goes through an `ApplicationForm` field helper
+(`text_field`, `textarea_field`, `radio_field`, `checkbox_field`,
+`select_field`, `date_field`, `number_field`, `password_field`, `file_field`,
+`hidden_field`, `autocompleter_field`, `static_field`, `read_only_field`,
+`submit`, `upload_fields`).
+
+The helpers accept the field name as either a Symbol or a String, with three
+distinct paths covering every case you'll hit (PRs #4382, #4384):
+
+| First arg | When to use | Example |
+|---|---|---|
+| **Symbol** | The field IS an attribute of the form's model / FormObject. Value reads from the model. | `text_field(:title)` |
+| **Symbol + explicit `value:`** | The field's `name=` belongs in the form's namespace, but the value comes from somewhere other than the model (controller-supplied state, derived value, etc.). Explicit value wins over `model.foo`. | `radio_field(:dates_any, *choices, value: @dates_any)` |
+| **String** | The field's `name=` is under a different namespace from the form's model, or a top-level param. Raw `name=` attribute, value from `value:`. | `text_field("member[lat]", value: @member_lat)` `hidden_field("approved_rank", value: x)` |
+
+**Why this rule exists**: The field helpers generate the exact Bootstrap
+markup, ARIA attributes, ID/name conventions, and Stimulus hooks the rest of
+the app expects. Hand-rolled `input`s skip all of that (rule added after PR
+#4224 had to undo hand-rolled radios for a non-model field).
+
+**Decision tree** when adding a field to an `ApplicationForm` subclass:
+
+```
+Is the field an attribute of the form's model / FormObject?
+├── Yes → `text_field(:foo)` (Symbol, model-bound).
+└── No  → does the field's `name=` belong in the form's namespace?
+         ├── Yes → `text_field(:foo, value: …)`
+         │         (Symbol + value:, name stays namespaced, explicit value).
+         └── No  → `text_field("namespace[foo]", value: …)`
+                    (String, raw `name=`, explicit value).
+                    NEVER hand-roll the HTML.
+```
+
+**Reference example** for the non-model-field case (`ProjectForm` —
+`dates_any` is UI state, not a `Project` column; the `name=` still belongs
+under `project[...]` so the Symbol-with-value form is the right shape):
+
+```ruby
+def render_dates_any_radios
+  radio_field(:dates_any,
+              ["false", range_label],
+              ["true", any_label],
+              value: @dates_any)
+end
+```
+
+If you need to construct a `FieldProxy` by hand — outside a Superform form,
+or for a fine-grained case the helpers don't cover — see
+[FieldProxy: Fields Without a Superform Field Backing](#fieldproxy-fields-without-a-superform-field-backing)
+below.
 
 ### Pattern B Forms: Internal FormObject Creation
 
@@ -69,6 +125,112 @@ with model as the first positional argument. Pattern B forms ignore this model
 - Views are clean - just pass domain objects as kwargs
 - Form owns its FormObject creation logic
 - Works with both direct rendering and ModalForm turbo_stream responses
+
+### Form Inside a Modal
+
+When a Superform is rendered inside a Bootstrap modal, the `<form>` tag's
+relationship to `.modal-body` / `.modal-footer` matters. The two options:
+
+| Form shape | What the form owns | Modal slot |
+|---|---|---|
+| Form has a distinct footer-button row (submit + cancel separated from fields) | Both `.modal-body` AND `.modal-footer` | `:form_content` slot |
+| Form is all body content (e.g. one inline submit button below the fields) | Just `.modal-body` (or nothing — Modal renders it) | `:body` slot |
+
+#### Pattern A: form spans `.modal-body` + `.modal-footer` (BS3 footer chrome)
+
+Forms with submit/cancel buttons that should sit in `.modal-footer` (top
+border, right alignment, button spacing) must have the `<form>` tag wrap
+**both** modal sections, so the submit button in `.modal-footer` is
+naturally inside the form. Anything else either drops `.modal-footer`
+entirely (and synthesizes ad-hoc `text-right mt-3` chrome — anti-pattern)
+or requires HTML5 `form="<id>"` attributes on out-of-form buttons.
+
+To use this pattern:
+
+1. **Declare** the form opts in via a class method:
+
+    ```ruby
+    class Components::TrustSettingsForm < Components::ApplicationForm
+      # Tells ModalTurboForm (and any Modal caller) to render this form
+      # via Modal's :form_content slot, not :body.
+      def self.owns_modal_sections?
+        true
+      end
+      # ...
+    end
+    ```
+
+2. **Emit both divs inside `view_template`**, using Superform's yield so
+   the `<form>` opens before `.modal-body` and closes after `.modal-footer`:
+
+    ```ruby
+    def view_template
+      super do
+        hidden_field(:do, value: "add_target_location")
+        div(class: "modal-body", id: @body_id) do
+          div(id: @flash_id) if @flash_id
+          render_fields
+        end
+        div(class: "modal-footer") { render_footer_buttons }
+      end
+    end
+    ```
+
+3. **Accept `modal_ids: { body:, flash: }`** in the initializer. ModalTurboForm
+   passes this automatically when it detects `owns_modal_sections?`. The two ids
+   serve different purposes — drop either and you silently break a feature:
+
+    | id | What targets it |
+    |---|---|
+    | `body_id` | Turbo-stream re-renders that replace `.modal-body` after a server action — without the id, the stream can't find its target. |
+    | `flash_id` | `_modal_form_reload.erb` injects in-modal validation flash messages into this slot on submit failure — without the id, validation errors disappear. |
+
+    ```ruby
+    def initialize(model, modal_ids: {}, **)
+      @body_id  = modal_ids[:body]
+      @flash_id = modal_ids[:flash]
+      super(model, **)
+    end
+    ```
+
+4. **Render via Modal's `:form_content` slot** (ModalTurboForm does this
+   automatically when `owns_modal_sections?` is true; for direct
+   `Components::Modal.new` callers, do it yourself):
+
+    ```ruby
+    render(Components::Modal.new(id: "modal_x", title: "Edit", user: @user)) do |m|
+      m.with_form_content { render(Components::ThingForm.new(@thing)) }
+    end
+    ```
+
+#### Pattern B: form lives inside `.modal-body`
+
+When the form has no distinct footer-button row — e.g. a one-button
+confirmation form, or fields with an inline submit at the bottom — render
+the form via Modal's regular `:body` slot. Don't declare
+`owns_modal_sections?`. The form is just content; Modal handles all
+chrome around it.
+
+```ruby
+render(Components::Modal.new(id: "modal_y", title: "Pick")) do |m|
+  m.with_body { render(Components::SimpleForm.new(@thing)) }
+end
+```
+
+#### Modal Form Anti-Patterns
+
+- **Synthesizing footer chrome inside `.modal-body`.** Don't add a
+  `<div class="text-right mt-3">` button row at the bottom of `.modal-body`
+  as a stand-in for `.modal-footer`. That drops the BS3 footer styling
+  (top border, padding, alignment) and produces visible drift from the
+  pre-Phlex chrome. If you need a button row, use Pattern A.
+- **Splitting the form across two slots.** Don't put fields in
+  `with_body` and buttons in `with_footer` — the submit button ends up
+  outside the `<form>` and clicking it submits nothing. Either span both
+  via `:form_content` (Pattern A) or keep everything in `:body` (Pattern B).
+- **Dropping `body_id` or `flash_id`.** Both kwargs are load-bearing
+  (turbo-stream targets, in-modal flash). If your form doesn't need them
+  for any reason, document why — don't silently omit.
 
 ### Form Objects
 
@@ -521,18 +683,57 @@ def normalize_link(link)
 end
 ```
 
-### FieldProxy: Form Fields Outside a Form Context
+### FieldProxy: Fields Without a Superform Field Backing
 
-When you need to render Superform field components (e.g., `TextField`,
-`RadioField`) **outside** of a `Superform::Rails::Form`, use `FieldProxy`.
-This is common in feedback components and image field editors that render
-form inputs without owning the `<form>` tag.
+`FieldProxy` is the underlying mechanism for any form field that can't be
+reached via `field(:attr)` on the form's model / FormObject. It provides
+the same interface as `Superform::Field` (`key`, `value`, `dom.id`,
+`dom.name`, `dom.value`) so the field classes (`TextField`, `RadioField`,
+`CheckboxField`, `SelectField`, …) render identical Bootstrap markup
+whether or not the field is model-backed.
 
-`FieldProxy` provides the same interface as `Superform::Field` (`key`, `value`,
-`dom.id`, `dom.name`, `dom.value`) so field components work identically.
+Most of the time you don't construct one by hand. Inside an
+`ApplicationForm` subclass, the **field helpers accept either a Symbol or
+a String** and dispatch through `FieldProxy` for you (PRs #4382, #4384):
 
 ```ruby
-# Create a proxy for a namespaced field
+# Symbol — model-bound (Symbol path, today's default).
+text_field(:title)
+
+# Symbol + explicit `value:` — overrides the model's value.
+# `name=` is the Superform-namespaced `model_name[foo]`; value comes
+# from the caller, not from `model.foo`. Use this when the field's
+# name belongs in the form's namespace but the value comes from
+# somewhere else (controller-supplied state, etc.).
+radio_field(:dates_any, ["false", range_label], ["true", any_label],
+            value: @dates_any)
+
+# String — raw HTML `name=`, no model namespacing, value from caller.
+# Use this for fields under a different namespace from the form's
+# model, or top-level params:
+text_field("member[lat]", value: @member_lat, size: 8)
+hidden_field("approved_rank", value: @approved_rank)
+checkbox_field("reviewed[#{donation.id}]", checked: donation.reviewed)
+```
+
+The helpers in scope today: `text_field`, `textarea_field`,
+`checkbox_field`, `radio_field`, `select_field`, `date_field`,
+`number_field`, `password_field`, `file_field`, `hidden_field`,
+`autocompleter_field`, `static_field`, `read_only_field`.
+
+**When you DO construct `FieldProxy` directly**: when you're rendering
+form inputs *outside* an `ApplicationForm` subclass (no surrounding
+`<form>` tag, no field helpers available) — e.g., feedback / editor
+components like `FormImageFields`, `FormNameFeedback`, `FormListFeedback`.
+
+```ruby
+# Outside-form usage (FormNameFeedback).
+#
+# `wrapper_options: { wrap_class: ... }` adds CSS classes to each
+# choice's `<div class="radio">` (or `<div class="checkbox">`) wrapper.
+# Use this to preserve pre-refactor row spacing — pre-Phlex ERB modals
+# and forms often put `.mb-2` on per-row `.radio` / `.checkbox` wrappers
+# for vertical spacing, and Superform's default omits it.
 proxy = Components::ApplicationForm::FieldProxy.new(
   "chosen_multiple_names", name.id
 )
@@ -541,7 +742,7 @@ render(Components::ApplicationForm::RadioField.new(
   wrapper_options: { wrap_class: "my-1 mr-4 d-inline-block" }
 ))
 
-# For image fields, use the factory method
+# Image fields have a factory method
 proxy = ApplicationForm.image_field_proxy(:good_image, 123, :notes, "text")
 render(Components::ApplicationForm::TextField.new(
   proxy,
@@ -550,13 +751,8 @@ render(Components::ApplicationForm::TextField.new(
 ))
 ```
 
-**When to use FieldProxy:**
-- Components that render form inputs but don't own the `<form>` tag
-  (e.g., `FormImageFields`, `FormListFeedback`, `FormNameFeedback`)
-- Standalone radio groups or other inputs outside a Superform form
-
-**Never use `fields_for`** — use `FieldProxy` or Superform's `namespace`
-method instead.
+**Never use `fields_for`** — use the String / Symbol+value forms of the
+field helpers, or Superform's `namespace` method.
 
 ### Phlex Built-in Helpers
 

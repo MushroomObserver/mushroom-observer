@@ -25,7 +25,7 @@ class Components::FormCarouselItem < Components::BaseImage
   prop :index, Integer, default: 0
   prop :upload, _Boolean, default: false
   prop :obs_thumb_id, _Nilable(Integer), default: nil
-  prop :camera_info, Hash, default: -> { {} }
+  prop :camera_info, _Hash(Symbol, _Any?), default: -> { {} }
   prop :sibling, _Boolean, default: false
 
   def initialize(index: 0, upload: false, obs_thumb_id: nil, camera_info: {},
@@ -138,24 +138,38 @@ class Components::FormCarouselItem < Components::BaseImage
     end
   end
 
-  # Note that this is not `observation[thumb_image_id]`, a hidden field that
-  # is set by the Stimulus controller on the basis of these radios' value.
+  # Real `observation[thumb_image_id]` radio — browser-native radio
+  # group across carousel items submits the checked value directly,
+  # no Stimulus round-trip via a separate hidden field. A static
+  # hidden default with the same name (see
+  # `ObservationFormUpload#render_thumb_image_id_field`) ensures the
+  # param is always submitted (so removing the current thumb image
+  # without picking another one clears the model field).
+  #
+  # The visual "pressed" state on the selected button is CSS-only
+  # (`.thumb_img_btn:has(input[type="radio"]:checked)` in
+  # `_carousel.scss`) — no JS to toggle `.active`.
   def button_to_set_thumb_img
     value = @img_instance&.id || "true"
     checked = @obs_thumb_id&.== @img_instance&.id
-    label_classes = class_names("btn btn-default btn-sm thumb_img_btn",
-                                active: checked)
 
-    label(
-      for: "thumb_image_id",
-      class: label_classes,
-      data: { form_images_target: "thumbImgBtn",
-              action: "click->form-images#setObsThumbnail" }
-    ) do
-      input(type: :radio, name: "thumb_image_id",
-            id: "thumb_image_id_#{value}", value: value,
-            class: "mr-3", checked: checked,
-            data: { form_images_target: "thumbImgRadio" })
+    # `id:` uses `@img_id` (unique per carousel item: image id for
+    # server-rendered, UUID for upload placeholders) rather than
+    # `value` (which is the literal string "true" for all
+    # placeholders). Unique ids matter for the label `for=`
+    # association (clicking the second placeholder's label otherwise
+    # activates the first's radio) and for Capybara test selectors.
+    # `value:` stays as "true" / image id; the JS post-upload hook
+    # (`form-images#updateObsImages`) updates both the radio's value
+    # AND its id to the real image id once assigned.
+    render(Components::ApplicationForm::ButtonStyleRadio.new(
+             name: "observation[thumb_image_id]",
+             value: value,
+             id: "thumb_image_id_#{@img_id}",
+             checked: checked,
+             label: { class: "btn btn-default btn-sm thumb_img_btn" },
+             class: "mr-3"
+           )) do
       span(class: "set_thumb_img_text") { :image_set_default.l }
       span(class: "is_thumb_img_text") { :image_add_default.l }
     end
@@ -178,7 +192,9 @@ class Components::FormCarouselItem < Components::BaseImage
 
     button(type: "button", class: button_classes, data: data) do
       span { :image_remove_remove.l }
-      link_icon(:remove, class: "text-danger ml-3")
+      render(Components::LinkIcon.new(
+               type: :remove, html_class: "text-danger ml-3"
+             ))
     end
   end
 end

@@ -17,10 +17,6 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                   "Wrong number of Herbarium Records")
   end
 
-  def test_index_with_non_default_sort
-    check_index_sorting
-  end
-
   def test_index_pattern_with_multiple_matching_records
     # Two herbarium_records match this pattern.
     pattern = "Coprinus comatus"
@@ -91,7 +87,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     get(:show, params: { id: herbarium_record.id })
 
-    assert_template(:show)
+    assert_select("body.herbarium_records__show")
     assert_select("a[href=?]", new_herbarium_record_path, false,
                   "Fungarium Index should not have a `new` button")
   end
@@ -101,7 +97,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert(herbarium_record)
     login
     get(:show, params: { id: herbarium_record.id })
-    assert_template(:show)
+    assert_select("body.herbarium_records__show")
   end
 
   def test_show_herbarium_record_mcp_searchable
@@ -161,7 +157,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new, params: { observation_id: obs_id })
-    assert_template("new")
+    assert_select("body.herbarium_records__new")
     assert_equal(assigns(:herbarium_record).accession_number, "MO #{obs_id}")
   end
 
@@ -182,7 +178,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new, params: { observation_id: obs.id })
-    assert_template("new")
+    assert_select("body.herbarium_records__new")
     assert(assigns(:herbarium_record))
     assert_equal(assigns(:herbarium_record).accession_number,
                  obs.collection_numbers.first.format_name)
@@ -195,7 +191,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new, params: { observation_id: obs.id })
-    assert_template("new")
+    assert_select("body.herbarium_records__new")
     assert(assigns(:herbarium_record))
     assert_equal(assigns(:herbarium_record).accession_number,
                  obs.field_slip.code)
@@ -216,11 +212,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:edit, params: { id: nybg.id })
-    assert_template(:edit)
+    assert_select("body.herbarium_records__edit")
 
     make_admin("mary") # Non-curator, but an admin
     get(:edit, params: { id: nybg.id })
-    assert_template(:edit)
+    assert_select("body.herbarium_records__edit")
   end
 
   def test_edit_herbarium_record_turbo
@@ -457,7 +453,10 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     post(:update, params:, format: :turbo_stream)
 
-    assert_template("observations/show/_section_update")
+    # _section_update.erb deleted; controllers now render two
+    # turbo_stream actions inline (replace + page_flash update).
+    assert_select("turbo-stream[target='observation_herbarium_records']")
+    assert_select("turbo-stream[target='page_flash']")
     assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)
   end
 

@@ -2,6 +2,8 @@
 
 module Projects
   class TargetNamesController < ApplicationController
+    include Projects::TabCountsRefreshable
+
     before_action :login_required
     before_action :set_project
     before_action :require_admin
@@ -55,7 +57,7 @@ module Projects
     # Parse name input: supports comma-separated, newline-separated,
     # and pasted checklist format with counts like "Name (3) * +".
     # Submitted under the `project_target_names_add` namespace by
-    # Components::ProjectTargetNamesWidget (Pattern B form).
+    # Views::Controllers::Projects::TargetNames::Form (Pattern B form).
     def parse_names_from_params
       raw = params.dig(:project_target_names_add, :names).to_s
       raw.split(/[,\n]/).filter_map { |entry| lookup_name(entry) }
@@ -100,10 +102,25 @@ module Projects
 
     def render_checklist_update
       data = Checklist::ForProject.new(@project)
-      render(
-        partial: "projects/target_names/checklist_update",
-        locals: { project: @project, data: data, user: @user }
-      )
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "target_names_widget",
+                 Views::Controllers::Projects::TargetNames::Form.new(
+                   project: @project
+                 )
+               ),
+               turbo_stream.replace(
+                 "checklist_contents",
+                 Views::Controllers::Checklists::Contents.new(
+                   data: data,
+                   context: Views::Controllers::Checklists::Context.new(
+                     user: @user, project: @project
+                   )
+                 )
+               ),
+               turbo_stream_project_tabs("checklists"),
+               helpers.render_turbo_stream_flash_messages
+             ])
     end
   end
 end

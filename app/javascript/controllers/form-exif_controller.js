@@ -345,9 +345,8 @@ export default class extends Controller {
 
   // gets or sets current obs date, simpledate object updates date
   observationDate(simpleDate) {
-    // These aren't targets because they are created on the fly by Rails
-    // date_select, and because our year-input_controller may fire after
-    // this connects, making obs_year (the select) an obsolete element.
+    // Cache element refs on first lookup so callbacks fired before the form
+    // section renders don't crash on missing elements.
     if (!this.obs_day || !this.obs_month || !this.obs_year) {
       this.obs_day = document.getElementById('observation_when_3i');
       this.obs_month = document.getElementById('observation_when_2i');

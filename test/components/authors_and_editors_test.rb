@@ -60,8 +60,9 @@ class AuthorsAndEditorsTest < ComponentTestCase
     assert_includes(html, "Rolf")
     assert_includes(html, "Mary")
     assert_includes(html, "Dick")
-    assert_match(/author/, html)
-    assert_match(/[Ee]ditor/, html)
+    text = Nokogiri::HTML(html).text
+    assert_match(/author/, text)
+    assert_match(/[Ee]ditor/, text)
   end
 
   def test_description_with_admin_user
@@ -175,7 +176,7 @@ class AuthorsAndEditorsTest < ComponentTestCase
     assert_includes(html, "Dick")
     assert_includes(html, "Katrina")
     # Should show creator and editors
-    assert_match(/[Ee]ditor/, html)
+    assert_match(/[Ee]ditor/, Nokogiri::HTML(html).text)
   end
 
   def test_non_description_object_without_versions

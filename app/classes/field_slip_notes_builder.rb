@@ -8,7 +8,6 @@ class FieldSlipNotesBuilder
 
   def assemble
     notes = {}
-    notes[:Collector] = collector
     notes[:Field_Slip_ID] = field_slip_id
     notes[:Field_Slip_ID_By] = field_slip_id_by
     notes[:Other_Codes] = other_codes
@@ -16,10 +15,20 @@ class FieldSlipNotesBuilder
     notes
   end
 
+  # The collector lives in the observation's `collector` column, not in
+  # notes. Returns the matched MO User (resolving project aliases and
+  # logins), else the free-text string, else nil. See #4211.
+  def collector
+    resolve_user(@params[:field_slip][:collector])
+  end
+
   private
 
-  def collector
-    user_str(@params[:field_slip][:collector])
+  def resolve_user(str)
+    return nil if str.blank?
+
+    updated_str = @field_slip.project&.check_for_alias(str, User) || str
+    User.lookup_unique_text_name(updated_str) || str
   end
 
   def field_slip_id

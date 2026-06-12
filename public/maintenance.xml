@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<error>
+  <code>service_unavailable</code>
+  <message>Mushroom Observer is temporarily unavailable while we deploy new code. We should be back in a couple of minutes. If you have questions, email webmaster@mushroomobserver.org.</message>
+  <retry_after_seconds>120</retry_after_seconds>
+</error>

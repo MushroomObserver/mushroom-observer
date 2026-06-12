@@ -4,12 +4,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap autocompleter input field component with dropdown suggestions
   # Wraps a text input with Stimulus autocompleter controller
   # rubocop:disable Metrics/ClassLength
-  class AutocompleterField < Superform::Rails::Components::Input
+  # Inherits from `Components::Input` (MO's thin subclass of
+  # Superform's `Components::Input`).
+  class AutocompleterField < ::Components::Input
     include Phlex::Slotable
-
-    register_output_helper :link_icon
-    register_output_helper :icon_link_to
-    register_output_helper :modal_link_to
 
     # Types with dedicated Stimulus controllers
     SUPPORTED_TYPE_CONTROLLERS = [
@@ -31,7 +29,7 @@ class Components::ApplicationForm < Superform::Rails::Form
                 :custom_controller_id, :map_outlet
 
     def initialize(field, type:, textarea: false, **options)
-      super(field, attributes: {})
+      super(field)
       @autocompleter_type = type
       @textarea = textarea
       extract_options(options)
@@ -89,8 +87,12 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
+    # Only emit an outer-wrap id when the caller explicitly passes one
+    # (matches ERB `autocompleter_field`). Forms that need a stable
+    # CSS-selector handle (e.g. map outlets) pass `controller_id:`;
+    # forms that don't shouldn't get noise.
     def controller_id
-      custom_controller_id || "#{field.dom.id}_autocompleter"
+      custom_controller_id
     end
 
     def controller_data
@@ -159,7 +161,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def input_data_attributes
-      { target_attr_key => "input", autocompleter: true }.merge(extra_data)
+      # Use string "true" (not boolean true) so Phlex emits
+      # `data-autocompleter="true"` instead of the boolean shorthand
+      # `data-autocompleter`. Matches ERB `autocompleter_field` helper output.
+      # Functionally equivalent — autocompleter base_controller overwrites this
+      # to `"connected"` on connect — but normalizes the rendered HTML between
+      # the two emission paths.
+      { target_attr_key => "input", autocompleter: "true" }.merge(extra_data)
     end
 
     def autocompleter_wrapper_options
@@ -177,8 +185,12 @@ class Components::ApplicationForm < Superform::Rails::Form
         render_label_after
       end
 
-      # Add label_end buttons to label_end slot
-      field_component.with_label_end { render_label_end }
+      # Add label_end buttons to label_end slot — only when content is
+      # actually present. Registering an empty slot makes
+      # `label_end_present?` return true and forces the label row into
+      # the d-flex path with an empty right side (see
+      # FieldLabelRow#render_label_row).
+      field_component.with_label_end { render_label_end } if create_text
 
       # Pass through help slot to inner field
       field_component.with_help { render(help_slot) } if help_slot
@@ -203,72 +215,87 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_has_id_indicator
-      link_icon(
-        :check,
-        title: :autocompleter_has_id.l,
-        class: "px-2 text-success has-id-indicator",
-        data: { target_attr_key => "hasIdIndicator" }
-      )
+      render(Components::LinkIcon.new(
+               type: :check,
+               title: :autocompleter_has_id.l,
+               html_class: "px-2 text-success has-id-indicator",
+               data: { target_attr_key => "hasIdIndicator" }
+             ))
     end
 
     def render_find_button
       return unless find_text
 
-      icon_link_to(
-        find_text, "#",
-        icon: :find_on_map, show_text: false, icon_class: "text-primary",
-        name: "find_#{autocompleter_type}", class: "ml-3 find-btn d-none",
-        data: { map_target: "showBoxBtn",
-                action: "map#showBox:prevent" }
-      )
+      render(::Components::IconLink.new(
+               find_text, "#",
+               icon: :find_on_map, show_text: false,
+               icon_class: "text-primary",
+               name: "find_#{autocompleter_type}",
+               class: "ml-3 find-btn d-none",
+               data: { map_target: "showBoxBtn",
+                       action: "map#showBox:prevent" }
+             ))
     end
 
     def render_keep_box_button
       return unless keep_text
 
-      icon_link_to(
-        keep_text, "#",
-        icon: :apply, show_text: false, icon_class: "text-primary",
-        name: "keep_#{autocompleter_type}", class: "ml-3 keep-btn d-none",
-        data: { target_attr_key => "keepBtn", map_target: "lockBoxBtn",
-                action: "map#toggleBoxLock:prevent form-exif#showFields" }
-      )
+      render(::Components::IconLink.new(
+               keep_text, "#",
+               icon: :apply, show_text: false,
+               icon_class: "text-primary",
+               name: "keep_#{autocompleter_type}",
+               class: "ml-3 keep-btn d-none",
+               data: { target_attr_key => "keepBtn",
+                       map_target: "lockBoxBtn",
+                       action: "map#toggleBoxLock:prevent " \
+                               "form-exif#showFields" }
+             ))
     end
 
     def render_edit_box_button
       return unless keep_text
 
-      icon_link_to(
-        edit_text, "#",
-        icon: :edit, show_text: false, icon_class: "text-primary",
-        name: "edit_#{autocompleter_type}", class: "ml-3 edit-btn d-none",
-        data: { target_attr_key => "editBtn", map_target: "editBoxBtn",
-                action: "map#toggleBoxLock:prevent form-exif#showFields" }
-      )
+      render(::Components::IconLink.new(
+               edit_text, "#",
+               icon: :edit, show_text: false,
+               icon_class: "text-primary",
+               name: "edit_#{autocompleter_type}",
+               class: "ml-3 edit-btn d-none",
+               data: { target_attr_key => "editBtn",
+                       map_target: "editBoxBtn",
+                       action: "map#toggleBoxLock:prevent " \
+                               "form-exif#showFields" }
+             ))
     end
 
     def render_create_button
       return if !create_text || create.present?
 
-      icon_link_to(
-        create_text, "#",
-        id: "create_#{autocompleter_type}_btn", class: "ml-3 create-button",
-        icon: :plus, show_text: true, icon_class: "text-primary",
-        name: "create_#{autocompleter_type}",
-        data: { target_attr_key => "createBtn",
-                action: "#{stimulus_controller_name}#swapCreate:prevent" }
-      )
+      render(::Components::IconLink.new(
+               create_text, "#",
+               id: "create_#{autocompleter_type}_btn",
+               class: "ml-3 create-button",
+               icon: :plus, show_text: true,
+               icon_class: "text-primary",
+               name: "create_#{autocompleter_type}",
+               data: { target_attr_key => "createBtn",
+                       action: "#{stimulus_controller_name}" \
+                               "#swapCreate:prevent" }
+             ))
     end
 
     def render_modal_create_link
       return unless create_text && create.present? && create_path.present?
 
-      modal_link_to(
-        create, create_text, create_path,
-        icon: :plus, show_text: true, icon_class: "text-primary",
-        name: "create_#{autocompleter_type}", class: "ml-3 create-link",
-        data: { target_attr_key => "createBtn" }
-      )
+      render(Components::ModalLink.new(
+               create, create_text, create_path,
+               icon: :plus, show_text: true,
+               icon_class: "text-primary",
+               name: "create_#{autocompleter_type}",
+               class: "ml-3 create-link",
+               data: { target_attr_key => "createBtn" }
+             ))
     end
 
     def render_dropdown
@@ -332,13 +359,41 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_prefix}_#{hidden_name}"
     end
 
-    # Strips field key suffix from dom.id to get model prefix
-    # e.g., "herbarium_place_name" -> "herbarium"
-    def model_prefix
-      field.dom.id.to_s.sub(/_#{field.key}$/, "")
+    # Returns the model prefix and leaf-key segments of the field's
+    # `dom.name`. Splits on the LAST `[…]` group so the result is
+    # correct whether `field.key` is a Symbol (model-bound, leaf
+    # only) or a String that already contains the full namespaced
+    # name (e.g. `"list[members]"` from the String-form field
+    # helpers). Examples:
+    #
+    # | dom.name                  | namespace      | leaf      |
+    # | `species_list[place_name]`| `species_list` | `place_name` |
+    # | `list[members]`           | `list`         | `members` |
+    # | `member[notes][Cap]`      | `member[notes]`| `Cap`     |
+    # | `approved_rank` (no `[]`) | `""`           | `approved_rank` |
+    def name_parts
+      @name_parts ||= begin
+                        name = field.dom.name.to_s
+                        match = name.match(/\A(.*)\[([^\[\]]+)\]\z/)
+                        match ? [match[1], match[2]] : ["", name]
+                      end
     end
 
-    # Converts brackets in field key to underscores for param parsing.
+    def model_namespace
+      name_parts[0]
+    end
+
+    def leaf_key
+      name_parts[1]
+    end
+
+    # Strips bracket characters and collapses runs to single underscores
+    # so the prefix is a valid HTML id segment. `model_namespace` of
+    # `"member[notes]"` becomes `"member_notes"`.
+    def model_prefix
+      model_namespace.tr("[]", "_").gsub(/__+/, "_").chomp("_")
+    end
+
     def hidden_field_name
       return custom_hidden_field_name if hidden_name
 
@@ -346,18 +401,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def custom_hidden_field_name
+      # No model namespace = standalone usage via
+      # `FieldProxy.new(nil, …)` outside a Superform form. The
+      # hidden field gets the bare top-level `name="#{hidden_name}"`
+      # instead of `"[hidden_name]"`.
+      return hidden_name.to_s if model_namespace.empty?
+
       "#{model_namespace}[#{hidden_name}]"
     end
 
-    # Strips field key suffix from dom.name to get model namespace
-    # e.g., "herbarium[place_name]" -> "herbarium"
-    def model_namespace
-      field.dom.name.to_s.sub(/\[#{field.key}\]$/, "")
-    end
-
     def default_hidden_field_name
-      key = field.key.to_s.tr("[]", "_").chomp("_")
-      field.dom.name.sub(/\[#{field.key}\]$/, "[#{key}_id]")
+      return "#{leaf_key}_id" if model_namespace.empty?
+
+      "#{model_namespace}[#{leaf_key}_id]"
     end
     # rubocop:enable Metrics/ClassLength
   end

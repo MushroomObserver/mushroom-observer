@@ -1,8 +1,8 @@
 <%
-add_show_title(@sequence.format_name, @sequence)
+add_show_title(@sequence)
 add_edit_icons(@sequence, @user)
 add_pager_for(@sequence)
-add_context_nav(sequence_show_tabs(seq: @sequence))
+add_context_nav(Tab::Sequence::ShowActions.new(sequence: @sequence))
 container_class(:wide)
 %>
 
@@ -60,7 +60,7 @@ container_class(:wide)
 <br>
 <div class="small">
   <span class="font-weight-bold"><%= :CREATED_BY.t %>:</span>
-  <%= user_link(@sequence.user) %>
+  <%= render(Components::UserLink.new(user: @sequence.user)) %>
 </div>
 
 <%= render(Components::ObjectFooter.new(user: @user, obj: @sequence)) %>

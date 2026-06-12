@@ -1,8 +1,10 @@
 <%
 container_class(:full)
 add_index_title(@query)
-add_context_nav(images_index_tabs(query: @query))
-add_sorter(@query, images_index_sorts)
+add_context_nav(Tab::Image::IndexActions.new(
+  query: @query, controller: controller
+))
+add_sorter(@query, controller.index_sort_options)
 add_pagination(@pagination_data)
 
 flash_error(@error) if @error && @objects.empty?

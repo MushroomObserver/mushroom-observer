@@ -17,11 +17,12 @@
              <%= destroy_button(
                    name: "X",
                    target: herbaria_curator_path(herbarium, user: user.id),
-                   id: "delete_herbarium_curator_link_#{user.id}"
+                   id: "delete_herbarium_curator_link_#{user.id}",
+                   btn: nil
                  ) %>
           </td>
         <% end %>
-        <td><%= user_link(user, user.legal_name) %></td>
+        <td><%= render(Components::UserLink.new(user: user, name: user.legal_name)) %></td>
       </tr>
     <% end %>
   </tbody>

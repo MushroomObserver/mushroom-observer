@@ -70,7 +70,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # Edit the Observation, unchecking the Project.
     visit(edit_observation_path(id: observation.id).to_s)
-    uncheck("project_id_#{project.id}")
+    uncheck("observation_project_ids_#{project.id}")
     click_on("Save Edits", match: :first)
 
     assert_not_includes(project.observations, observation)
@@ -89,7 +89,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # Edit the Observation, unchecking the Species List.
     visit(edit_observation_path(id: observation.id).to_s)
-    uncheck("list_id_#{species_list.id}")
+    uncheck("observation_species_list_ids_#{species_list.id}")
     click_on("Save Edits", match: :first)
 
     assert_not_includes(species_list.observations, observation)
@@ -208,7 +208,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # Ensure fixtures not broken
     assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
-    proj_checkbox = "project_id_#{proj.id}"
+    proj_checkbox = "observation_project_ids_#{proj.id}"
     login(user)
 
     # create an Observation with Project selected
@@ -247,7 +247,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     # Ensure fixtures not broken
     assert(proj.member?(user),
            "Need fixtures such that `user` is a member of `proj`")
-    proj_checkbox = "project_id_#{proj.id}"
+    proj_checkbox = "observation_project_ids_#{proj.id}"
     last_obs = Observation.recent_by_user(user).last
     last_location = last_obs.location # nybg_location
     obs_location = locations(:burbank)

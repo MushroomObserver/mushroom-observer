@@ -110,7 +110,6 @@ module Names
       }
       login("rolf")
       put(:update, params: params)
-      assert_template("names/synonyms/edit")
       assert_nil(selected_name.reload.synonym_id)
       assert_not(selected_name.deprecated)
     end
@@ -355,7 +354,6 @@ module Names
       }
       login("rolf")
       put(:update, params: params)
-      assert_template("names/synonyms/edit")
 
       assert_not(add_name.reload.deprecated)
       assert_equal(add_version, add_name.version)
@@ -483,7 +481,6 @@ module Names
       }
       login("rolf")
       put(:update, params: params)
-      assert_template("names/synonyms/edit")
 
       assert_not(add_name.reload.deprecated)
       assert_not_nil(add_synonym = add_name.synonym)
@@ -751,7 +748,6 @@ module Names
       login("rolf")
       put(:update, params: params)
       # Should re-render with ambiguous name message
-      assert_template("names/synonyms/edit")
 
       # Name should remain unchanged
       assert_not(selected_name.reload.deprecated)
@@ -777,7 +773,6 @@ module Names
       login("rolf")
       put(:update, params: params)
       # Should show confirmation for unapproved synonyms
-      assert_template("names/synonyms/edit")
 
       # Name should remain unchanged until synonyms are approved
       assert_not(selected_name.reload.deprecated)

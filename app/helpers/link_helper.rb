@@ -11,7 +11,7 @@
 #  heads up about button_to input vs button
 #  https://blog.saeloun.com/2021/08/24/rails-7-button-to-rendering
 
-module LinkHelper # rubocop:disable Metrics/ModuleLength
+module LinkHelper
   # Call `link_to` with query params added.
   # Should now take exactly the same args as `link_to`.
   # You can pass a hash to `path`, but not separate args. Can take a block.
@@ -27,14 +27,13 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Make a link that is a target for the stimulus "nav-active_controller"
   # (The controller adds .active class if it's a link to the current page,
   # and updates the active link when navigating. Allows nav to be cached!)
-  def active_link_to(text = nil, path = nil, **opts, &block)
-    link = block ? text : path # because positional
+  # Delegates to `Components::ActiveLink` — render the component
+  # directly in Phlex views.
+  def active_link_to(text = nil, path = nil, **, &block)
+    link_path = block ? text : path # positional: block ⇒ first arg is path
     content = block ? capture(&block) : text
-    opts[:data] = (opts[:data] || {}).merge(
-      { nav_active_target: "link", action: "nav-active#navigate" }
-    )
 
-    link_to(link, opts) { content }
+    render(Components::ActiveLink.new(content, link_path, **))
   end
 
   # mixes in "active" class
@@ -46,7 +45,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   end
 
   # Link should be to a controller action that renders the form in the modal.
-  # Stimulus modal-toggle controller fetches the form from the link as a .
+  # Stimulus modal-toggle controller fetches the form from the link as a
   # turbo-stream response. It also checks if it needs to generate a modal, or
   # just show the one in progress.
   # NOTE: Needs a modal `identifier`, in case of multiple form modals
@@ -54,62 +53,25 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   # Links with data-turbo-frame do a direct page update, and if turbo doesn't
   # find the frame already on the page it's appended after body! That may be
   # why it's appended to the page and not returned to the stimulus caller
+  # Delegates to `Components::ModalLink` — render the component
+  # directly in Phlex views.
   def modal_link_to(identifier, name, path, args)
-    args = args.deep_merge({ data: {
-                             modal: "modal_#{identifier}",
-                             controller: "modal-toggle",
-                             action: "modal-toggle#showModal:prevent"
-                           } })
-
-    if args[:icon].present?
-      icon_link_to(name, path, **args)
-    else
-      link_to(name, path, **args)
-    end
+    render(Components::ModalLink.new(identifier, name, path, **args))
   end
 
-  # Icon link with optional active state. (Tooltip title must be swapped in JS.)
-  # Now also accepts active state options: active_icon, active_content
-  # NOTE: Takes same args as link_to, e.g.
-  # icon_link_to(text, path, **args). Can also print a button_to.
+  # Icon link with optional active state. (Tooltip title must be
+  # swapped in JS.) Takes same args as `link_to`, e.g.
+  # `icon_link_to(text, path, **args)`. Can also print a `button_to`
+  # via `button_to: true`. Delegates to `Components::IconLink` —
+  # render the component directly in Phlex views.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
 
-    link_path = block ? text : path # because positional
+    link_path = block ? text : path # positional: block ⇒ first arg is path
     content = block ? capture(&block) : text
-    opts = block ? path : options # because positional
-    icon_type = opts[:icon]
-    return link_to(link, opts) { content } if icon_type.blank?
+    opts = block ? path : options
 
-    opts[:role] = "button" if opts[:button_to]
-    active_icon = opts[:active_icon]
-    active_content = opts[:active_content]
-    stateful = active_icon && active_content
-    icon_class = class_names(opts[:icon_class], "px-2")
-    icon_active_class = class_names(icon_class, "active-icon")
-    label_show_classes = "pl-2 d-none d-sm-inline font-weight-bold"
-    label_class = opts[:show_text] ? label_show_classes : "sr-only"
-    label_active_class = class_names(label_class, "active-label")
-
-    link_opts = {
-      title: content, # title is what shows up in tooltip
-      class: class_names("icon-link", opts[:class]),
-      data: { toggle: "tooltip", title: content, # needed for swapping only
-              active_title: opts[:active_content] }
-    }.deep_merge(opts.except(:class, :icon, :icon_class, :show_text,
-                             :active_icon, :active_content, :button_to))
-
-    inner_html = capture do
-      concat(link_icon(icon_type, class: icon_class))
-      concat(link_icon(active_icon, class: icon_active_class)) if stateful
-      concat(tag.span(content, class: label_class))
-      concat(tag.span(active_content, class: label_active_class)) if stateful
-    end
-    if opts[:button_to]
-      button_to(inner_html, link_path, **link_opts)
-    else
-      link_to(inner_html, link_path, **link_opts)
-    end
+    render(Components::IconLink.new(content, link_path, **opts))
   end
 
   # NOTE: above re: MO tabs
@@ -123,35 +85,36 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     icon_link_to(add_q_param(link), opts) { content }
   end
 
-  # pass title if it's a plain button (say for collapse) but you want a tooltip
+  # Glyphicon `<span>` with the MO `link-icon` class. Pass `title:`
+  # for a tooltip + screen-reader label. Delegates to
+  # `Components::LinkIcon` — render the component directly in Phlex
+  # views.
   def link_icon(type, **args)
-    return "" unless (glyph = LINK_ICON_INDEX[type])
+    return "" unless LINK_ICON_INDEX[type]
 
-    text = ""
-    args[:class] = class_names("glyphicon glyphicon-#{glyph} link-icon",
-                               args[:class])
-
-    if args[:title].present?
-      title = args[:title]
-      args[:data] = { toggle: "tooltip" }.merge(args[:data] || {})
-      text = tag.span(title, class: "sr-only")
-    end
-
-    tag.span(text, **args)
+    render(Components::LinkIcon.new(
+             type: type,
+             title: args[:title],
+             html_class: args[:class],
+             data: args[:data] || {},
+             attributes: args.except(:title, :class, :data)
+           ))
   end
 
+  # Renders an `<a>` for an `ExternalLink` AR record. Delegates to
+  # `Components::ExternalSiteLink` — render the component directly
+  # in Phlex views. (Component is named for the destination — an
+  # external site — to avoid collision with the AR model.)
+  #
+  # `concat` preserves the long-standing side-effect emission
+  # contract of this helper, so ERB callers can write a bare
+  # `external_link(link)` line inside a `tag.li(...) do ... end`
+  # block (no `<%= %>` / `concat` wrapping needed at the call
+  # site). The previous ERB-only helper used `concat` for this
+  # reason; the Phlex-component refactor (PR #4401) accidentally
+  # dropped the `concat` and the lone caller fell silent.
   def external_link(link)
-    case link.external_site.name
-    when "iNaturalist"
-      concat(
-        link_to(
-          "iNat #{link.url.sub(link.external_site.base_url, "")}", link.url
-        )
-      )
-    else
-      concat(link_to(:on_site.t(site: link.external_site.name), link.url))
-      concat(tag.small(" #{link.created_at.web_date}"))
-    end
+    concat(render(Components::ExternalSiteLink.new(link: link)))
   end
 
   # NOTE: Specific to glyphicons
@@ -207,6 +170,7 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
     mobile: "phone",
     project: "th-list",
     download: "download-alt",
+    new_window: "new-window",
     search: "search",
     prev: "triangle-left",
     next: "triangle-right",
@@ -229,163 +193,55 @@ module LinkHelper # rubocop:disable Metrics/ModuleLength
   #   )
   #
   def destroy_button(target:, name: nil, **args)
-    name ||= if target.is_a?(String)
-               :DESTROY.l
-             else
-               :destroy_object.t(type: target.type_tag)
-             end
-    args[:class] = class_names(args[:class], "text-danger")
-
-    # Add back param for SHOW_OBS_EDITABLES (like edit_button does)
-    unless target.is_a?(String) || target.is_a?(Hash)
-      back_args = add_back_param_to_button_atts(:destroy)
-      args[:back] = back_args[:back] if back_args[:back]
-    end
-
-    crud_action_button(method: :delete, name:, target:, action: :destroy,
-                       confirm: :are_you_sure.l, **args)
+    render(Components::CrudButton::Delete.new(
+             target: target, name: name, **args
+           ))
   end
 
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
+  # GET-style edit link — emits `<a>` (link_to), not a form-wrapped
+  # button. Delegates to `Components::CrudButton::Edit`, which carries
+  # the `action: :edit`/`icon: :edit` defaults and (for model targets
+  # rendered from SHOW_OBS_EDITABLES controllers) the `?back=show|index`
+  # query param. Callers wanting a text-only edit link pass `icon: nil`.
   def edit_button(target:, name: nil, **args)
-    # target could just be a path
-    name ||= if target.is_a?(String)
-               :EDIT.l
-             else
-               :edit_object.t(type: target.type_tag)
-             end
-    path, identifier, icon, content = button_atts(:edit, target, args, name)
-
-    html_options = {
-      class: class_names(identifier, args[:class]), # usually also btn
-      title: name, data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args.except(:class, :back))
-
-    link_to(path, html_options) do
-      [content, icon].safe_join
-    end
+    render(Components::CrudButton::Edit.new(
+             target: target, name: name, **args
+           ))
   end
 
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def download_button(target:, name: :DOWNLOAD.t, **args)
-    # necessary if nil/empty string passed
-    name = :DOWNLOAD.t if name.blank?
-    path, identifier, icon, content = button_atts(
-      :download,
-      new_download_species_list_path(id: target.id), args, name
-    )
-
-    html_options = {
-      class: class_names(identifier, args[:class]), # usually also btn
-      title: name, data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args.except(:class, :back))
-
-    link_to(path, html_options) do
-      [content, icon].safe_join
-    end
-  end
-
-  # Attempts to put together some common button attributes. Overrides available.
-  def button_atts(action, target, args, name)
-    if target.is_a?(String) || target.is_a?(Hash) # eg { controller:, action: }
-      path = target # ignores `action`
-      identifier = "" # can send one via args[:class]
-    else
-      prefix = action == :destroy ? "" : "#{action}_"
-      path_args = add_back_param_to_button_atts(action)
-      path = send(:"#{prefix}#{target.type_tag}_path", target.id, **path_args)
-      identifier = "#{action}_#{target.type_tag}_link_#{target.id}"
-    end
-    if args[:icon]
-      icon = link_icon(args[:icon])
-      content = tag.span(name, class: "sr-only")
-    else
-      icon = ""
-      content = name
-    end
-    [path, identifier, icon, content]
-  end
-
-  SHOW_OBS_EDITABLES = %w[
-    collection_numbers herbarium_records sequences external_links
-  ].freeze
-
-  # This allows expected and tested behavior of either
-  # - returning to :show or :index of these types of records
-  # - returning to the :show page of the observation they're associated with
-  # depending on what page the form request originated.
-  def add_back_param_to_button_atts(action)
-    return {} unless [:edit, :destroy].include?(action) &&
-                     SHOW_OBS_EDITABLES.include?(controller.controller_name)
-
-    case action_name
-    when "show"
-      { back: :show }
-    when "index"
-      { back: :index }
-    end
-  end
-
-  # Refactor to accept a tab array
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def add_button(path:, name: :ADD.t, **args, &block)
-    content = block ? capture(&block) : ""
-    html_options = {
-      class: "", # usually also btn
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args)
-
-    link_to(path, html_options) do
-      [content, link_icon(:add)].safe_join
-    end
-  end
-
-  # Refactor to accept a tab array
-  # TODO: Change translations BACK to PREV, or make a BACK TO translation
-  # Note `link_to` - not a <button> element, but an <a> because it's a GET
-  def back_button(path:, name: :BACK.t, **args, &block)
-    content = block ? capture(&block) : ""
-    html_options = {
-      class: "", # usually also btn
-      data: { toggle: "tooltip", placement: "top", title: name }
-    }.deep_merge(args)
-
-    link_to(path, html_options) do
-      [content, link_icon(:back)].safe_join
-    end
+  # GET-style download link for a species_list — emits `<a>` via
+  # `Components::CrudButton::Download`. The path is built explicitly
+  # as a String because the route shape doesn't match
+  # `download_<resource>_path` — there's a `new_download_species_list`
+  # named route, but `download_species_list` is the index path.
+  def download_button(target:, name: nil, **args)
+    render(Components::CrudButton::Download.new(
+             target: new_download_species_list_path(id: target.id),
+             name: name,
+             **args
+           ))
   end
 
   # Refactor to accept a tab array
 
   # POST to a path; used instead of a link because POST link requires js
-  def post_button(name:, path:, **, &block)
-    crud_action_button(method: :post, name:, target: path, **, &block)
+  def post_button(name:, path:, **args, &block)
+    render(Components::CrudButton::Post.new(
+             name: name, target: path, **args, &block
+           ))
   end
 
   # PUT to a path; used instead of a link because PUT link requires js
-  def put_button(name:, path:, **, &block)
-    crud_action_button(method: :put, name:, target: path, **, &block)
+  def put_button(name:, path:, **args, &block)
+    render(Components::CrudButton::Put.new(
+             name: name, target: path, **args, &block
+           ))
   end
 
   # PATCH to a path; used instead of a link because PATCH link requires js
-  def patch_button(name:, path:, **, &block)
-    crud_action_button(method: :patch, name:, target: path, **, &block)
-  end
-
-  # crud_action_button(method: :patch,
-  #                    name: herbarium.name.t,
-  #                    target: @herbarium,  # or a path string
-  #                    confirm: :are_you_sure.t,
-  #                    action: :remove)  # optional, defaults to method
-  # Pass a block and a name if you want an icon with tooltip
-  def crud_action_button(**, &block)
-    render(Components::CrudActionButton.new(**, &block))
-  end
-
-  def button_link(title, path, **args)
-    classes = %w[btn btn-default]
-    args[:class] = class_names(classes, args[:class])
-
-    link_to(title, path, **args)
+  def patch_button(name:, path:, **args, &block)
+    render(Components::CrudButton::Patch.new(
+             name: name, target: path, **args, &block
+           ))
   end
 end

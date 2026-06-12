@@ -14,9 +14,20 @@
 #
 module Header
   module TitleHelper
-    def add_show_title(string, object)
+    # Per-model `page_title(user)` returns the rich/textile string
+    # shown in the visible page heading; `document_title` returns the
+    # plain string for the browser tab `<title>`. The doc title
+    # renders as plain text, so we keep textile/HTML out of it. Models
+    # without those methods fall back to a localized type-tag label.
+    #
+    # `user:` lets the page heading apply user-specific naming prefs
+    # (e.g. hide_authors, deprecated-with-preferred-synonym link
+    # wrapping). Document title ignores user — the tab text shouldn't
+    # vary by viewer.
+    def add_show_title(object, user: nil)
       add_page_title(
-        show_page_title(string, object), show_document_title(string, object)
+        show_page_title(page_title_for(object, user), object),
+        show_document_title(document_title_for(object), object)
       )
     end
 
@@ -28,37 +39,65 @@ module Header
       end
     end
 
+    # Look up the model's `page_title` (HTML/textile string) or fall
+    # back to its localized type-tag label.
+    #
+    # Observation is special-cased: the obs show heading wraps the
+    # consensus name in a link to the name page (with a "(Site ID)"
+    # flag when the owner's preferred naming differs). That logic
+    # lives in `observations_helper#observation_show_title` — view-
+    # layer work we don't want to push onto the model. The title
+    # helper has access to it via the helper chain.
+    #
+    # The arity check lets models alias `page_title` to a zero-arg
+    # accessor (e.g. `alias page_title title`) instead of writing a
+    # one-line wrapper that ignores the user — calling `title(user)`
+    # would raise ArgumentError. `arity.zero?` is true when the
+    # method takes no required args; we then call it with none.
+    def page_title_for(object, user = nil)
+      return observation_page_title(object, user) if object.is_a?(Observation)
+      return fallback_title(object) unless object.respond_to?(:page_title)
+
+      if object.method(:page_title).arity.zero?
+        object.page_title
+      else
+        object.page_title(user)
+      end
+    end
+
+    # Observation's page heading: link-wrapped consensus name plus
+    # the optional "(Site ID)" flag computed from the owner's
+    # preferred naming. The obs show view also independently uses
+    # the owner-preferred-naming via `add_owner_naming` (separate
+    # display); recomputing here is the cost of keeping the model
+    # free of view code.
+    def observation_page_title(obs, user)
+      # Aliased to a local because the `LocalizationFilesTest`
+      # regex picks up `:ConsensusNameLink` after the `::`
+      # namespace separator and flags it as a translation tag.
+      klass = ::Views::Controllers::Observations::ConsensusNameLink
+      render(klass.new(observation: obs, user: user))
+    end
+
+    # Look up the model's `document_title` (plain-text string) or
+    # fall back to its localized type-tag label. The `<title>` element
+    # renders as plain text — textile / HTML must NOT leak through.
+    def document_title_for(object)
+      return fallback_title(object) unless object.respond_to?(:document_title)
+
+      object.document_title
+    end
+
+    def fallback_title(object)
+      :"#{object.type_tag.to_s.upcase}".l
+    end
+
+    # Kept for the one remaining ERB caller (`names/_name.erb`).
+    # Phlex callers should `render(Components::IdBadge.new(...))`
+    # directly instead.
     def show_title_id_badge(object, classes = "mr-4")
-      tag.button(
-        object.id || "?",
-        type: "button",
-        class: class_names("badge badge-id", classes), role: "button",
-        data: {
-          toggle: "tooltip", placement: "bottom", title: :COPY_THIS_ID.l,
-          controller: "clipboard", clipboard_target: "source",
-          action: "clipboard#copy", clipboard_copied_value: :COPIED.l
-        }
-      )
-    end
-
-    # Div shows even without content to maintain layout
-    def show_page_edit_icons
-      classes = %w[
-        nav d-flex align-items-center justify-content-end mt-0 h4 object_edit
-      ]
-
-      tag.ul(class: class_names(classes)) do
-        content_for(:edit_icons)
-      end
-    end
-
-    # Div shows even without content to maintain layout
-    def show_page_interest_icons
-      classes = %w[nav navbar-flex interest-eyes h4 my-0]
-
-      tag.ul(class: class_names(classes)) do
-        content_for(:interest_icons)
-      end
+      render(Components::IdBadge.new(object: object,
+                                     extra_class: classes))
     end
 
     # The record title as a string, preceded by the object type and id:
@@ -71,21 +110,24 @@ module Header
       ].safe_join(" ")
     end
 
-    def add_edit_title(string, object)
+    def add_edit_title(object, user: nil)
       add_page_title(
-        edit_page_title(string, object),
-        edit_document_title(string, object)
+        edit_page_title(page_title_for(object, user), object),
+        edit_document_title(document_title_for(object), object)
       )
     end
 
-    # Needs to be separate. Called in modal forms
-    def edit_page_title(string, object)
+    # Needs to be separate. Called in modal forms.
+    # `html_str` is already the rendered HTML (textile applied by the
+    # model's `page_title`) — we just compose it next to the
+    # `:edit_object.t(type: …)` label.
+    def edit_page_title(html_str, object)
       tag.div(class: "d-flex align-items-center") do
         [
           show_title_id_badge(object),
           tag.span do
             [:edit_object.t(type: object.type_tag),
-             string.t.small_author].safe_join(": ")
+             html_str].safe_join(": ")
           end
         ].safe_join(" ")
       end
@@ -122,12 +164,23 @@ module Header
     end
 
     # Show obs: observer's preferred naming.
-    # HTML tag is here so no empty header printed in case there is no naming
-    def add_owner_naming(naming)
-      return unless naming
+    # HTML tag is here so no empty header printed when the line
+    # shouldn't be shown. Takes the observation and viewer
+    # directly — `Views::Controllers::Observations::OwnerNamingLine`
+    # decides whether to render anything via its `visible_for?`
+    # predicate — checked here BEFORE rendering so a blank h5
+    # isn't emitted when the view ends up empty.
+    def add_owner_naming(observation:, user:)
+      # Aliased to a local because the `LocalizationFilesTest`
+      # regex picks up `:OwnerNamingLine` after a `::` namespace
+      # separator and flags it as an undefined translation tag.
+      klass = ::Views::Controllers::Observations::OwnerNamingLine
+      return unless klass.visible_for?(observation: observation,
+                                       user: user)
 
+      line = render(klass.new(observation: observation, user: user))
       content_for(:owner_naming) do
-        tag.h5(naming, class: "pl-3 mt-0 mb-4", id: "owner_naming")
+        tag.h5(line, class: "pl-3 mt-0 mb-4", id: "owner_naming")
       end
     end
 

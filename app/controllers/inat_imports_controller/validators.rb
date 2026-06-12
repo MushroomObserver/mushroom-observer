@@ -54,14 +54,24 @@ module InatImportsController::Validators
   end
 
   def valid_inat_ids_param?
-    return true unless contains_illegal_characters?
+    return true unless contains_illegal_characters? ||
+                       contains_malformed_id_tokens? ||
+                       (listing_ids? && inat_id_list.none?)
 
     flash_warning(:runtime_illegal_inat_id.l)
     false
   end
 
   def contains_illegal_characters?
-    /[^\d ,]/.match?(params[:inat_ids])
+    /[^\w\s,]/.match?(params[:inat_ids])
+  end
+
+  def contains_malformed_id_tokens?
+    return false unless params[:inat_ids]
+
+    params[:inat_ids].split(/[\s,]+/).any? do |token|
+      token.match?(/\d/) && token.match?(/[a-zA-Z]/)
+    end
   end
 
   def list_within_size_limits?
@@ -75,7 +85,9 @@ module InatImportsController::Validators
   def inat_id_list
     return [] unless listing_ids?
 
-    params[:inat_ids].delete(" ").split(",").map(&:to_i)
+    params[:inat_ids].split(/[\s,]+/).
+      grep(/\A\d+\z/).
+      map(&:to_i)
   end
 
   # Block superimporter from importing **all** another user's iNat observations

@@ -1,9 +1,0 @@
-<%
-add_page_title(
-  :create_location_description_title.t(name: @location.display_name)
-)
-add_context_nav(location_description_form_new_tabs(description: @description))
-%>
-
-<%= render(Components::DescriptionForm.new(@description, licenses: @licenses,
-                                            user: @user)) %>

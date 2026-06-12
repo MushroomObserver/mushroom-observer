@@ -49,17 +49,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     current_params.each do |subaction|
       next if params[subaction].blank?
 
-      # May go through #sorted_index to create the query, before #filtered_index
-      query, display_opts = send(index_param_method_or_default(subaction))
-
-      # Some actions may redirect instead of returning a query, such as pattern
-      # searches when they resolve to a single object or get no results.
-      # So if we had the param, but got a blank query, we should bail to allow
-      # the redirect without rendering a blank index.
-      return nil if query.blank?
-
-      # If we have a query, display it.
-      return filtered_index(query, display_opts)
+      return filtered_subaction_index(subaction)
     end
 
     # Otherwise, display the unfiltered index.
@@ -260,11 +250,34 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
       show_action_redirect(query)
     else
       calc_pages_and_objects(query, display_opts)
-      render(action: :index) # must be explicit for names' `test_index` action
+      render_index_view
     end
   end
 
+  # Render the index view. Default renders the ERB action template
+  # (was `render(action: :index)` — must be explicit for names'
+  # `test_index` action). Controllers that have converted their
+  # index template to Phlex override this to render the class
+  # directly with explicit props. Transitional hook so the rest of
+  # the index machinery doesn't need to know about Phlex.
+  def render_index_view
+    render(action: :index)
+  end
+
   private ##########
+
+  def filtered_subaction_index(subaction)
+    # May go through #sorted_index to create the query, before #filtered_index
+    query, display_opts = send(index_param_method_or_default(subaction))
+
+    # Some actions may redirect instead of returning a query, such as pattern
+    # searches when they resolve to a single object or get no results.
+    # In Rails 7.2.3+, redirect_to returns the status code (Integer), so
+    # performed? guards against treating that as a query.
+    return nil if performed? || query.blank?
+
+    filtered_index(query, display_opts)
+  end
 
   def show_index_setup(query, display_opts)
     store_location
@@ -371,8 +384,25 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def objects_with_only_needed_eager_loads(query, include)
     # Not currently caching on user.
     # user = User.current ? "logged_in" : "no_user"
+    #
+    # When MatrixTable will bypass the cache for the whole request
+    # (identify mode, project-admin view), every row is going to need
+    # the full eager loads anyway — the two-query pre-check shape
+    # (paginate simple, re-fetch with includes) is strictly more
+    # work than just paginating with the includes the first time.
+    unless matrix_caches_in_this_request?
+      return query.paginate(@pagination_data, include: include)
+    end
+
     locale = I18n.locale
-    objects_simple = query.paginate(@pagination_data)
+    # Preload the per-object association the cache pre-check reads
+    # (`MatrixTable.should_cache_object?` consults
+    # `obj.thumb_image.transferred`). Without this, the pre-check
+    # itself fires SELECT-per-row from `objects_simple`, which is
+    # explicitly NOT eager-loaded — defeating the optimization.
+    objects_simple = query.paginate(
+      @pagination_data, include: cache_precheck_includes(query.model)
+    )
 
     # If temporarily disabling cached matrix boxes: eager load everything
     # ids_to_eager_load = objects_simple
@@ -387,13 +417,51 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   end
 
   # Check if a cached partial exists for this object.
-  # digest_path_from_template from ActionView::Helpers::CacheHelper :nodoc:
-  # https://stackoverflow.com/a/77862353/3357635
+  # Pre-check: does the `MatrixBox` fragment for this object+locale
+  # already exist in the cache? If yes, the row doesn't need eager-
+  # loaded associations (it'll be served from cache as-is); if no,
+  # the row needs eager-loading.
+  #
+  # Two-stage gate. Both have to be true for the row to be served
+  # from cache:
+  #   1. `matrix_caches_in_this_request?` (per-request) — false
+  #      when `Components::MatrixTable#render_cached_boxes` would
+  #      bypass the cache for this whole render (identify mode,
+  #      project-admin view). Controllers override.
+  #   2. `MatrixTable.should_cache_object?` (per-object) — false
+  #      when the object itself isn't cacheable (e.g. an
+  #      Observation with an untransferred thumb image).
+  #
+  # Then `Rails.cache.exist?` confirms the fragment is actually in
+  # the store. Uses the shared key from `MatrixTable.cache_key_for`
+  # so the read matches what `MatrixTable#render_cached_boxes`
+  # writes.
   def object_fragment_exist?(obj, locale)
-    template = lookup_context.find(action_name, lookup_context.prefixes)
-    digest_path = helpers.digest_path_from_template(template)
+    return false unless matrix_caches_in_this_request?
+    return false unless ::Components::MatrixTable.should_cache_object?(obj)
 
-    fragment_exist?([digest_path, obj, locale])
+    Rails.cache.exist?(::Components::MatrixTable.cache_key_for(obj, locale))
+  end
+
+  # Associations the per-object cache pre-check needs to consult
+  # without firing a query. Currently only `:thumb_image` (read by
+  # `MatrixTable.should_cache_object?`), and only when the model
+  # exposes it. Returns nil if there's nothing to preload so the
+  # underlying `query.paginate(...)` call receives no `include:` kw.
+  def cache_precheck_includes(model)
+    return nil unless model.respond_to?(:reflect_on_association) &&
+                      model.reflect_on_association(:thumb_image)
+
+    [:thumb_image]
+  end
+
+  # Overridable hook: does this request render the matrix in the
+  # cached path? Controllers that always (or sometimes) render
+  # `MatrixTable` in identify mode or project-admin view should
+  # override. The default is `true` because the basic obs index
+  # without an admin-viewable project uses caching.
+  def matrix_caches_in_this_request?
+    true
   end
 
   def users_content_filters

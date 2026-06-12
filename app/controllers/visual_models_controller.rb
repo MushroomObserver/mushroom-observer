@@ -5,14 +5,21 @@ class VisualModelsController < ApplicationController
 
   # GET /visual_models
   def index
-    @visual_models = VisualModel.order(:name)
+    @visual_models = VisualModel.order(:name).to_a
+    render(Views::Controllers::VisualModels::Index.new(
+             visual_models: @visual_models
+           ))
   end
 
   # GET /visual_models/1
   def show
     @visual_model = VisualModel.find(params[:id])
     respond_to do |format|
-      format.html
+      format.html do
+        render(Views::Controllers::VisualModels::Show.new(
+                 visual_model: @visual_model
+               ))
+      end
       format.json { render(json: @visual_model) }
     end
   end
@@ -20,11 +27,17 @@ class VisualModelsController < ApplicationController
   # GET /visual_models/new
   def new
     @visual_model = VisualModel.new
+    render(Views::Controllers::VisualModels::New.new(
+             visual_model: @visual_model
+           ))
   end
 
   # GET /visual_models/1/edit
   def edit
     @visual_model = VisualModel.find(params[:id])
+    render(Views::Controllers::VisualModels::Edit.new(
+             visual_model: @visual_model
+           ))
   end
 
   # POST /visual_models

@@ -17,8 +17,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     attr_reader :wrapper_options
 
-    def initialize(field, attributes:, wrapper_options: {})
-      super(field, attributes: attributes)
+    def initialize(field, wrapper_options: {}, **attributes)
+      super(field, **attributes)
       @wrapper_options = wrapper_options
     end
 
@@ -27,12 +27,20 @@ class Components::ApplicationForm < Superform::Rails::Form
         # Use value attribute, then field value, as default content
         default_value = attributes.delete(:value) || field.dom.value
         content ||= proc { default_value }
-        textarea(**attributes, class: class_names(attributes[:class],
-                                                  "form-control"), &content)
+        textarea(**attributes, class: textarea_class, &content)
       end
     end
 
     private
+
+    # `wrapper_options[:monospace] == true` appends `text-monospace` to
+    # the textarea's class chain. Matches the ERB `text_area_with_label`
+    # helper's `:monospace` option so callers (and direct component
+    # instantiators) get the same emission either way.
+    def textarea_class
+      mono = "text-monospace" if wrapper_options[:monospace]
+      class_names(attributes[:class], "form-control", mono)
+    end
 
     def render_with_wrapper
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do

@@ -28,6 +28,17 @@ class ArticlesController < ApplicationController
     build_index_with_query
   end
 
+  # Sort options for the index page. Read by `add_sorter` in the
+  # view. Each key must resolve to `Article.order_by_<key>`.
+  def index_sort_options
+    [
+      ["created_at", :sort_by_created_at.t],
+      ["updated_at", :sort_by_updated_at.t],
+      ["user",       :sort_by_user.t],
+      ["title",      :sort_by_title.t]
+    ].freeze
+  end
+
   private
 
   def default_sort_order

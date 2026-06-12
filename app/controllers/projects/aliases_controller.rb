@@ -132,16 +132,52 @@ module Projects
                   notice: :project_alias_updated.t)
     end
 
+    # Replaces the target widget and the aliases table, then closes
+    # and removes the modal. Inlined from the deleted
+    # `projects/aliases/_target_update.erb` partial. Emits four
+    # turbo_stream actions.
     def render_project_alias_target_change(project)
       project_aliases = project.aliases.order(name: :asc)
-      render(
-        partial: "projects/aliases/target_update",
-        locals: { identifier: "project_alias", project_aliases: }
-      ) and return
+      render(turbo_stream: [
+               replace_target_alias_widget,
+               replace_aliases_table(project_aliases),
+               turbo_stream.close_modal(target_change_modal_id),
+               turbo_stream.remove(target_change_modal_id)
+             ])
+    end
+
+    def replace_target_alias_widget
+      turbo_stream.replace(
+        "target_project_alias_#{@project_alias.target_id}",
+        view_context.render(Views::Controllers::Projects::Aliases::Widget.new(
+                              project: @project_alias.project,
+                              target: @project_alias.target
+                            ))
+      )
+    end
+
+    def replace_aliases_table(project_aliases)
+      turbo_stream.replace(
+        Views::Controllers::Projects::Aliases::Table::TABLE_ID,
+        view_context.render(Views::Controllers::Projects::Aliases::Table.new(
+                              project_aliases: project_aliases
+                            ))
+      )
+    end
+
+    # The update action replaces the per-alias modal
+    # (`modal_project_alias_<id>`); create / destroy use the shared
+    # `modal_project_alias` id.
+    def target_change_modal_id
+      if action_name == "update"
+        "modal_project_alias_#{@project_alias.id}"
+      else
+        "modal_project_alias"
+      end
     end
 
     def render_modal_project_alias_form
-      render(Components::ModalForm.new(
+      render(Components::ModalTurboForm.new(
                identifier: modal_identifier,
                title: modal_title,
                user: @user,

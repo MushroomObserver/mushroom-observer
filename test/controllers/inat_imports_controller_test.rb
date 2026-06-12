@@ -166,6 +166,39 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_text(:runtime_illegal_inat_id.l)
   end
 
+  def test_no_numeric_ids_in_list_rejected
+    login
+    post(:create,
+         params: { inat_ids: "id\nobservation", inat_username: "anything",
+                   consent: 1 })
+
+    assert_flash_text(:runtime_illegal_inat_id.l,
+                      "Input with no numeric IDs should be rejected")
+    assert_form_action(action: :create)
+    assert_select(
+      "textarea#inat_import_inat_ids",
+      { text: "id\nobservation", count: 1 },
+      "Reloaded form should show the original input"
+    )
+  end
+
+  def test_alphanumeric_token_rejected_as_malformed_id
+    login
+    post(:create,
+         params: { inat_ids: "id\n123456a", inat_username: "anything",
+                   consent: 1 })
+
+    assert_flash_text(:runtime_illegal_inat_id.l,
+                      "Alphanumeric token (e.g. 123456a) should be " \
+                      "rejected as a malformed ID")
+    assert_form_action(action: :create)
+    assert_select(
+      "textarea#inat_import_inat_ids",
+      { text: "id\n123456a", count: 1 },
+      "Reloaded form should show the original input"
+    )
+  end
+
   def test_create_no_consent
     params = { inat_username: "anything", inat_ids: 123,
                consent: 0 }
@@ -207,27 +240,65 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Failed to save inat_ids at maximum length")
   end
 
-  def test_strips_trailing_commas_and_space_chars_from_id_list
+  def test_illegal_chars_preserved_in_reloaded_form
+    login
+    post(:create,
+         params: { inat_ids: "123*", inat_username: "anything", consent: 1 })
+
+    assert_flash_text(:runtime_illegal_inat_id.l,
+                      "Should warn about illegal characters")
+    assert_select(
+      "textarea#inat_import_inat_ids",
+      { text: "123*", count: 1 },
+      "Reloaded form should show raw input so user can identify " \
+      "the illegal character"
+    )
+  end
+
+  def test_newline_delimited_ids_accepted_and_normalized
+    user = users(:rolf)
     inat_import = inat_imports(:rolf_inat_import)
-    user = inat_import.user
     assert_equal("Unstarted", inat_import.state,
-                 "Need a Unstarted inat_import fixture")
-    id_list = "123,456,789, \n"
-    expected_saved_id_list = "123,456,789"
+                 "Need an Unstarted inat_import fixture")
+    inat_ids = "368966299\n368983890\n368951839"
+    expected_ids = "368966299,368983890,368951839"
 
     login(user.login)
 
     post(:create,
-         params: { inat_ids: id_list,
-                   inat_username: "", # omit this to force form reload
-                   consent: 1 })
+         params: { inat_ids: inat_ids, inat_username: "rolf",
+                   consent: 1, confirmed: 1 })
 
-    assert_form_action(action: :create)
-    assert_select(
-      "textarea#inat_import_inat_ids",
-      { text: expected_saved_id_list, count: 1 },
-      "inat_ids textarea should have trailing commas and whitespace stripped"
-    )
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Newline-delimited IDs should pass validation")
+    assert_equal(expected_ids, inat_import.reload.inat_ids,
+                 "Newline-delimited IDs should be normalized to " \
+                 "comma-separated")
+    assert_equal(3, inat_import.reload.importables,
+                 "importables_count should reflect the number of IDs")
+  end
+
+  def test_header_row_ignored_in_id_list
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    assert_equal("Unstarted", inat_import.state,
+                 "Need an Unstarted inat_import fixture")
+    inat_ids = "id\n368966299\n368983890\n368951839"
+    expected_ids = "368966299,368983890,368951839"
+
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: inat_ids, inat_username: "rolf",
+                   consent: 1, confirmed: 1 })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Input with a header row should pass validation")
+    assert_equal(expected_ids, inat_import.reload.inat_ids,
+                 "Non-digit header token should be stripped from " \
+                 "stored inat_ids")
+    assert_equal(3, inat_import.reload.importables,
+                 "importables_count should not include the header row token")
   end
 
   def test_create_too_many_ids_listed
@@ -254,8 +325,8 @@ class InatImportsControllerTest < FunctionalTestCase
       where: "North Falmouth, Massachusetts, USA",
       user: user,
       when: "2024-09-08",
-      source: Observation.sources[:mo_inat_import],
-      inat_id: inat_id
+      external_source: Source.inaturalist,
+      external_id: inat_id
     )
     estimate_response = { total_results: 1 }.to_json
 
@@ -284,8 +355,8 @@ class InatImportsControllerTest < FunctionalTestCase
       where: "North Falmouth, Massachusetts, USA",
       user: user,
       when: "2024-09-08",
-      source: Observation.sources[:mo_inat_import],
-      inat_id: inat_id
+      external_source: Source.inaturalist,
+      external_id: inat_id
     )
 
     params = { inat_username: "anything", inat_ids: inat_id,

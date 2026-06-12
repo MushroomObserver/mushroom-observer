@@ -18,7 +18,7 @@ module OccurrencesController::Edit
 
   def process_update
     primary_obs = @occurrence.primary_observation
-    sync_observations if params.key?(:observation_ids)
+    sync_observations if params.dig(:occurrence, :observation_ids)
     update_primary
     update_primary_obs_attributes
     recalculate_occurrence_consensus
@@ -64,7 +64,7 @@ module OccurrencesController::Edit
   end
 
   def parse_selected_ids
-    Array(params[:observation_ids]).
+    Array(params.dig(:occurrence, :observation_ids)).
       map(&:to_i).reject(&:zero?).to_set
   end
 
@@ -133,7 +133,7 @@ module OccurrencesController::Edit
     obs = @occurrence.primary_observation
     return unless obs
 
-    obs_params = params[:primary_obs]
+    obs_params = params.dig(:occurrence, :primary_observation)
     return unless obs_params
 
     update_obs_location(obs, obs_params)

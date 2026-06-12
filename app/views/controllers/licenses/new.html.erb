@@ -1,6 +1,6 @@
 <%
   add_page_title(:create_license_title.l)
-  add_context_nav(license_form_new_tabs)
+  add_context_nav(Tab::License::FormNew.new)
 %>
 
-<%= render(Components::LicenseForm.new(@license)) %>
+<%= render(Views::Controllers::Licenses::Form.new(@license)) %>

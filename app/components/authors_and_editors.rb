@@ -21,7 +21,13 @@ module Components
   #   ))
   #
   class AuthorsAndEditors < Base
-    prop :obj, _Any # Any object with type_tag
+    # Concrete callers are `Description` (`NameDescription` and
+    # `LocationDescription` subclasses), `Name`, `Location`, and
+    # `GlossaryTerm`. Duck-typed via `_Interface(:type_tag)` so
+    # tests can substitute lightweight stubs that don't carry the
+    # full AR object graph the description / non-description
+    # branches each consume.
+    prop :obj, _Interface(:type_tag)
     prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
          default: -> { [] }
     prop :user, _Nilable(User)
@@ -114,19 +120,7 @@ module Components
 
     # Wrap user name in link to show_user.
     def render_user_link(user, name = nil)
-      return plain(:unknown_user_name.t) unless user
-
-      if user.is_a?(Integer)
-        name ||= "#{:USER.t} ##{user}"
-        user_id = user
-      else
-        name ||= user.unique_text_name
-        user_id = user.id
-      end
-
-      a(href: user_path(user_id), class: "user_link_#{user_id}") do
-        plain(name)
-      end
+      render(Components::UserLink.new(user: user, name: name))
     end
   end
 end

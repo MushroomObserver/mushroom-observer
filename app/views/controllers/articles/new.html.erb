@@ -1,6 +1,6 @@
 <%
 add_new_title(:create_object, :ARTICLE)
-add_context_nav(article_form_new_tabs)
+add_context_nav(Tab::Article::FormNew.new)
 %>
 
-<%= render(partial: "articles/form") %>
+<%= render(Views::Controllers::Articles::Form.new(@article)) %>

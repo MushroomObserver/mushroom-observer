@@ -15,11 +15,14 @@ module Report
       end
     end
 
+    # Mutates the row hash in place: overrides obs_lat / obs_lng with
+    # project-trusted coordinates when the current user is allowed to
+    # see the unblurred GPS for this obs.
     def tweak(row)
-      lat_lng = @vals[row[0]]
+      lat_lng = @vals[row["obs_id"]]
       if lat_lng
-        row[2] = lat_lng[0]
-        row[3] = lat_lng[1]
+        row["obs_lat"] = lat_lng[0]
+        row["obs_lng"] = lat_lng[1]
       end
       row
     end
