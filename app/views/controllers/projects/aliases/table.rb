@@ -11,9 +11,13 @@ module Views::Controllers::Projects::Aliases
   class Table < Views::Base
     TABLE_ID = "index_project_alias_table"
 
+    # Callers must eager-load `:target` so the per-row
+    # `link_to(alias_.target.try(:format_name), alias_.target)` cell
+    # doesn't trigger N+1 queries. The `Projects::AliasesController`
+    # paths supply that.
     def initialize(project_aliases:)
       super()
-      @project_aliases = project_aliases.includes(:target)
+      @project_aliases = project_aliases
     end
 
     def view_template

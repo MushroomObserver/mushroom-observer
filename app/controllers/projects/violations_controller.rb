@@ -48,16 +48,27 @@ module Projects
       obs = Observation.safe_find(params[:obs_id])
       return head(:not_found) unless project && obs && project.is_admin?(@user)
 
+      existing_locations = lookup_existing_target_suffixes(obs)
       respond_to do |format|
         format.turbo_stream do
           render(
             Views::Controllers::Projects::Violations::TargetLocationModal.new(
-              project: project, obs: obs, user: @user
+              project: project, obs: obs, user: @user,
+              existing_locations: existing_locations
             ),
             layout: false
           )
         end
       end
+    end
+
+    # Pre-loads `name => Location` for every suffix of `obs.where`
+    # that has a corresponding Location row. `TargetLocationForm`
+    # would otherwise run this query itself when rendering.
+    def lookup_existing_target_suffixes(obs)
+      suffixes = Views::Controllers::Projects::Violations::
+                 TargetLocationForm.suffixes_for(obs)
+      Location.where(name: suffixes).index_by(&:name)
     end
 
     def controller_model_name

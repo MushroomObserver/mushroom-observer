@@ -12,6 +12,10 @@
 module Views::Controllers::VisualModels
   class VisualGroupTable < Views::Base
     prop :visual_model, VisualModel
+    # Pre-loaded by the host controllers (`VisualGroupsController#index`
+    # / `VisualModelsController#show`); the view no longer runs the
+    # `.order(:name)` query itself.
+    prop :visual_groups, _Array(VisualGroup)
 
     def view_template
       add_show_title(@visual_model)
@@ -76,7 +80,7 @@ module Views::Controllers::VisualModels
     end
 
     def groups
-      @groups ||= @visual_model.visual_groups.order(:name)
+      @visual_groups
     end
 
     def included_counts

@@ -9,7 +9,7 @@ module Components
   #
   class TranslatorsCredit < Base
     def view_template
-      lang = Language.find_by(locale: I18n.locale)
+      lang = Language.for_locale(I18n.locale)
       return unless lang && (!lang.official || Language.tracking_usage?)
 
       div(id: "translators_credit", class: "hidden-print") do

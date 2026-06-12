@@ -68,7 +68,8 @@ module Account
 
     def render_edit
       render(Views::Controllers::Account::Preferences::Edit.new(
-               user: @user, licenses: @licenses
+               user: @user, licenses: @licenses,
+               languages: Language.all.to_a
              ))
     end
 

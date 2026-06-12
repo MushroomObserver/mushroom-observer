@@ -104,6 +104,10 @@
 class Comment < AbstractModel
   include Callbacks
 
+  # Surface N+1 queries on `comment.user` / `comment.target` from
+  # view loops — every caller must eager-load these associations.
+  self.strict_loading_by_default = true
+
   belongs_to :user
   belongs_to :target, polymorphic: true
 

@@ -22,8 +22,22 @@ module Names
 
       render(Views::Controllers::Names::Versions::Show.new(
                name: @name, user: @user, versions: @versions,
-               version: params[:version].to_i
+               version: params[:version].to_i,
+               inherited_classification_user: inherited_classification_user
              ))
+    end
+
+    # Looks up the user the version's classification was inherited
+    # from, if any — keeps the look-up out of
+    # `Views::Controllers::Names::Versions::Show`.
+    def inherited_classification_user
+      version = params[:version].to_i
+      row = @versions.find { |v| v.version == version }
+      data = row && @name.classification_at_version(row)
+      return unless data && data[:source] == :inherited
+
+      user_id = data.dig(:inherited_from, :user_id)
+      user_id && User.find_by(id: user_id)
     end
 
     def show_includes

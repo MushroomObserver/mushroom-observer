@@ -20,7 +20,10 @@ module Views::Controllers::FieldSlips
         render(Components::Alert.new(message: @notice, level: :success))
       end
 
-      render(Components::ContentPadded.new) do
+      # Match the wrapper that the ERB-era `content_padded` helper
+      # emitted (`<div class="p-3">`). Registering the helper on
+      # `Views::Base` isn't worth it for one caller in the codebase.
+      div(class: "p-3") do
         render(FieldSlipPanel.new(field_slip: @field_slip))
       end
 

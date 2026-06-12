@@ -55,7 +55,7 @@ module FieldSlipsController::Index
   def field_slip_includes
     [{ occurrence: [:primary_observation,
                     { observations: [:location, :name, :namings,
-                                     :rss_log, :user] }] },
+                                     :rss_log, :thumb_image, :user] }] },
      :project, :user]
   end
 end

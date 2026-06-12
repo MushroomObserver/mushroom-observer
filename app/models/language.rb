@@ -48,6 +48,15 @@ class Language < AbstractModel
     where(official: false)
   end
 
+  # Lookup a Language record by its locale string, memoized per
+  # process. Languages don't change at runtime, so callers (e.g.
+  # `Components::TranslatorsCredit` on every page render) avoid a
+  # per-request `find_by(locale: …)` query.
+  def self.for_locale(locale)
+    @for_locale_cache ||= {}
+    @for_locale_cache[locale.to_s] ||= find_by(locale: locale)
+  end
+
   # Returns an Array of pairs containing language name and locale.
   # Useful for building pulldown menus using <tt>select_tag</tt> helper.
   def self.menu_options

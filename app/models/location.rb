@@ -121,6 +121,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       center_lng
     ]
   )
+  # The `acts_as_versioned` gem builds `Location::Version` but
+  # doesn't wire its `belongs_to :user` — the table has `user_id`
+  # but the gem only adds the reverse `belongs_to :location`. Add
+  # it here so `show_includes` can eager-load `{ versions: :user }`
+  # and views can read `version.user` without an N+1. Remove once
+  # the gem fork (mo_acts_as_versioned) handles this automatically.
+  const_get(:Version).belongs_to(:user, class_name: "::User",
+                                        optional: true)
   non_versioned_columns.push(
     "created_at",
     "updated_at",

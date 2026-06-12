@@ -6,9 +6,11 @@
 module Views::Controllers::VisualModels
   class Show < Views::Base
     prop :visual_model, VisualModel
+    prop :visual_groups, _Array(VisualGroup)
 
     def view_template
-      render(VisualGroupTable.new(visual_model: @visual_model))
+      render(VisualGroupTable.new(visual_model: @visual_model,
+                                  visual_groups: @visual_groups))
     end
   end
 end
