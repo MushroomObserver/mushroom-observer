@@ -49,7 +49,10 @@ class NoQueriesInPhlexViewsTest < ActiveSupport::TestCase
     /\.distinct\b/,
     /\.order\(/,
     /\.group\(/,
-    /\.exists\?\(/
+    # `.exists?` is the no-arg form (`scope.exists?`) — match the
+    # `?` boundary, not the parenthesized form, so both shapes get
+    # flagged.
+    /\.exists\?/
   ].freeze
 
   # `Query::Filter.all` is the documented exception — it returns
@@ -75,6 +78,8 @@ class NoQueriesInPhlexViewsTest < ActiveSupport::TestCase
     assert_bad("@visual_model.visual_groups.order(:name)")
     assert_bad("Foo.find_or_create_by(slug: 'x')")
     assert_bad("Foo.preload(:bar)")
+    assert_bad("NameTracker.where(name_id: 1).exists?")
+    assert_bad("@scope.exists?(id: 1)")
   end
 
   def test_scanner_does_not_flag_bare_all

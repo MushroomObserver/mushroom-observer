@@ -38,10 +38,14 @@ class GlossaryTerm < AbstractModel
   # doesn't wire its `belongs_to :user` — the table has `user_id`
   # but the gem only adds the reverse `belongs_to :glossary_term`.
   # Add it here so `show_includes` can eager-load `{ versions: :user }`
-  # and views can read `version.user` without an N+1. Remove once
-  # the gem fork (mo_acts_as_versioned) handles this automatically.
-  const_get(:Version).belongs_to(:user, class_name: "::User",
-                                        optional: true)
+  # and views can read `version.user` without an N+1. Guarded by
+  # `reflect_on_association` so a future gem fix (or another
+  # initializer that defines it) is a safe no-op. Remove once the
+  # gem fork (mo_acts_as_versioned) handles this automatically.
+  unless const_get(:Version).reflect_on_association(:user)
+    const_get(:Version).belongs_to(:user, class_name: "::User",
+                                          optional: true)
+  end
   non_versioned_columns.push(
     "thumb_image_id",
     "created_at",
