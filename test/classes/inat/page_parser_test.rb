@@ -4,6 +4,8 @@ require("test_helper")
 
 class Inat
   class PageParserTest < UnitTestCase
+    include Inat::Constants
+
     def test_raises_if_not_own_import_has_no_username_or_ids
       import = inat_imports(:dick_inat_import).tap do |i|
         i.import_others = true
@@ -119,11 +121,20 @@ class Inat
 
       assert_equal("291058", args[:project_id],
                    "project_id should be preserved")
-      [:taxon_id, :page, :per_page, :order, :order_by, :without_field,
-       :only_id, :ttl, :id].each do |key|
+      # Stripped and not re-set — must be nil
+      [:page, :only_id, :ttl, :id].each do |key|
         assert_nil(args[key],
-                   "#{key} should be stripped from stored query string")
+                   "#{key} should be stripped and not re-set")
       end
+      # Stripped but overridden with MO's values — user value must not win
+      assert_equal(IMPORTABLE_TAXON_IDS_ARG, args[:taxon_id],
+                   "taxon_id must be MO's value, not user-supplied 9999")
+      assert_equal(200, args[:per_page],
+                   "per_page must be MO's value, not user-supplied 50")
+      assert_equal("asc", args[:order],
+                   "order must be MO's value, not user-supplied desc")
+      assert_equal("id", args[:order_by],
+                   "order_by must be MO's value, not user-supplied created_at")
     end
 
     def test_url_request_query_args_sets_pagination_params
