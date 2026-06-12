@@ -1,4 +1,4 @@
--- Docker MariaDB init: create additional databases and grant permissions.
+-- Docker MySQL init: create additional databases and grant permissions.
 -- MYSQL_DATABASE/MYSQL_USER/MYSQL_PASSWORD in compose.yaml create mo_development
 -- and the mo user automatically; this script handles the rest.
 
