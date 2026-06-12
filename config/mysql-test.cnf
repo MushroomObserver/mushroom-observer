@@ -1,6 +1,8 @@
 [client]
+host=db
+port=3306
 user=mo
-password=mo
+password=mo_password
 
 [mysql]
 database=mo_test

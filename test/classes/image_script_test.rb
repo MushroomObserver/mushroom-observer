@@ -112,18 +112,18 @@ class ImageScriptTest < UnitTestCase
     # Create worker-specific mysql config for parallel testing
     if (worker_num = database_worker_number)
       config_file = Rails.root.join("config", "mysql-test-#{worker_num}.cnf")
-      unless File.exist?(config_file)
-        # Create worker-specific config file
-        db_name = "mo_test-#{worker_num}"
-        File.write(config_file, <<~CONFIG)
-          [client]
-          user=mo
-          password=mo
+      db_name = "mo_test-#{worker_num}"
+      host_line = ENV["DATABASE_HOST"] ? "host=#{ENV["DATABASE_HOST"]}\nport=3306\n" : ""
+      db_user = ENV.fetch("DATABASE_USERNAME", "mo")
+      db_pass = ENV.fetch("DATABASE_PASSWORD", "mo")
+      File.write(config_file, <<~CONFIG)
+        [client]
+        #{host_line}user=#{db_user}
+        password=#{db_pass}
 
-          [mysql]
-          database=#{db_name}
-        CONFIG
-      end
+        [mysql]
+        database=#{db_name}
+      CONFIG
       config_file
     else
       Rails.root.join("config", "mysql-#{Rails.env}.cnf")

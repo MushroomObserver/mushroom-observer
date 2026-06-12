@@ -1,0 +1,55 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    volumes:
+      - .:/app
+      - bundle_cache:/bundle
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      RAILS_ENV: development
+      DOCKER: "true"
+      PARALLEL_WORKERS: "4"
+
+      # Trilogy/MySQL
+      DATABASE_HOST: db
+      DATABASE_NAME: mo_development
+      DATABASE_USERNAME: mo
+      DATABASE_PASSWORD: mo_password
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: mo_development
+      MYSQL_USER: mo
+      MYSQL_PASSWORD: mo_password
+
+    command:
+      - --character-set-server=utf8
+      - --collation-server=utf8_general_ci
+      - --default-authentication-plugin=mysql_native_password
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db/docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mysql_data:
+  bundle_cache:
