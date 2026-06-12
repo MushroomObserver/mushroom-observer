@@ -7,10 +7,15 @@ class TranslatorsCreditTest < ComponentTestCase
   def setup
     super
     Language.ignore_usage
+    # `Language.for_locale` memoizes per-process; tests that stub it
+    # need a clean cache so the stub actually fires (and a stubbed
+    # Language doesn't leak into the next test).
+    Language.instance_variable_set(:@for_locale_cache, nil)
   end
 
   def teardown
     Language.ignore_usage
+    Language.instance_variable_set(:@for_locale_cache, nil)
     super
   end
 
@@ -86,7 +91,7 @@ class TranslatorsCreditTest < ComponentTestCase
         [users(:roy).id, users(:roy).login]
       ]
       lang.define_singleton_method(:top_contributors) { |_num| contributors }
-      Language.stub(:find_by, lang) do
+      Language.stub(:for_locale, lang) do
         html = render_component
         # Should render all 5 user links
         doc = Nokogiri::HTML(html)

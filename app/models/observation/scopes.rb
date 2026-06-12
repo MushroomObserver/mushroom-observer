@@ -586,6 +586,9 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:sequences).subquery(:Sequence, hash)
     }
 
+    # `Descriptions::List#visible?` reads each description's `.user`
+    # to decide visibility — without `name: { descriptions: :user }`
+    # this is N+1 per description on the show page.
     scope :show_includes, lambda {
       strict_loading.includes(
         :collection_numbers,
@@ -595,7 +598,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         { images: [:image_votes, :license, :projects, :user] },
         { interests: :user },
         :location,
-        { name: { synonym: :names } },
+        { name: [{ synonym: :names }, { descriptions: :user }] },
         { namings: [:name, :user, { votes: [:observation, :user] }] },
         { occurrence: :field_slip },
         { projects: :admin_group },
@@ -611,7 +614,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         { comments: :user },
         { images: [:image_votes, :license, :user] },
         :location,
-        { name: { synonym: :names } },
+        { name: [{ synonym: :names }, { descriptions: :user }] },
         { namings: [:name, :user, { votes: [:observation, :user] }] },
         :projects,
         :thumb_image,
