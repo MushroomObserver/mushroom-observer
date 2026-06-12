@@ -183,10 +183,10 @@ class HerbariumRecordsController < ApplicationController
                         )
   end
 
+  # Reuses `Observation.matrix_box_includes` so the obs subtree
+  # matches every other MatrixBox-rendering controller.
   def herbarium_record_includes
-    [:user,
-     { observations: [:external_source, :user,
-                      observation_matrix_box_image_includes] }]
+    [:user, { observations: Observation.matrix_box_includes }]
   end
 
   def default_herbarium_record

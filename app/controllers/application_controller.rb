@@ -15,7 +15,6 @@
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
 #
 #  ==== Other stuff
-#  observation_matrix_box_image_includes:: Hash of includes for eager-loading
 #  name_flash_for_project::      Flash message for adding obs to projects
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
@@ -224,12 +223,6 @@ class ApplicationController < ActionController::Base
   #  :section: Other stuff
   #
   ##############################################################################
-
-  def observation_matrix_box_image_includes
-    { thumb_image: [:image_votes, :license, :projects, :user] }.freeze
-    # for matrix_box_carousels:
-    # { images: [:image_votes, :license, :projects, :user] }.freeze
-  end
 
   def name_flash_for_project(name, project)
     return unless name && project

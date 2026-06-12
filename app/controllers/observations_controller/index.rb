@@ -238,14 +238,11 @@ class ObservationsController
       opts
     end
 
-    # An { images: } hash is necessary if we're adding the index carousels.
-    # :projects required by Bullet because it's needed to compute
-    # `can_edit?` for an image.
+    # Reuses `Observation.matrix_box_includes` — the canonical tree
+    # shared by every matrix-box render (field_slips show/index,
+    # collection_numbers show).
     def observation_index_includes
-      [observation_matrix_box_image_includes,
-       :external_source, :location, :name,
-       { namings: :votes },
-       { occurrence: :observations }, :projects, :rss_log, :user]
+      Observation.matrix_box_includes
     end
   end
 end

@@ -82,11 +82,10 @@ class CollectionNumber < AbstractModel
   }
 
   # Eager-loads the observations + everything `Components::MatrixBox`
-  # reaches into while rendering them (`Observation::NamingConsensus`
-  # walks `namings.flat_map(&:votes)` and `naming.name`).
+  # reaches into. Reuses `Observation.matrix_box_includes` so this
+  # matches observations#index / field_slips show + index.
   scope :show_includes, lambda {
-    includes(observations: [:location, :name, :rss_log, :thumb_image,
-                            :user, { namings: [:votes, :name, :user] }])
+    includes(observations: Observation.matrix_box_includes)
   }
 
   def format_name

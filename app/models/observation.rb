@@ -276,6 +276,28 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
+  # Eager-load tree every `Components::MatrixBox` render of an
+  # observation reaches into — image with vote/license/project/user
+  # for `can_edit?`, location, name, namings (+ votes for
+  # `Observation::NamingConsensus`), occurrence (+ observations for
+  # the multi-obs occurrence link), projects, rss_log, user.
+  # Shared by observations#index, field_slips show/index,
+  # collection_numbers#show, herbarium_records#show, rss_logs#index,
+  # sequences#new/edit, projects/updates#index, and the identify
+  # queue (extends with `:observation_views`, `{ name: :synonym }`,
+  # `{ namings: :name }`).
+  #
+  # Swap the `thumb_image:` hash for the matrix_box_carousels
+  # alternative below when the carousel feature lands.
+  def self.matrix_box_includes
+    [{ thumb_image: [:image_votes, :license, :projects, :user] },
+     # for matrix_box_carousels:
+     # { images: [:image_votes, :license, :projects, :user] },
+     :external_source, :location, :name,
+     { namings: :votes },
+     { occurrence: :observations }, :projects, :rss_log, :user]
+  end
+
   # Only the field-slip flow builds observations this way, so the
   # collector default-to-creator is always skipped: a foray recorder is
   # never auto-claimed as collector. The caller assigns the resolved
