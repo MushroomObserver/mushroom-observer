@@ -26,7 +26,7 @@ module Views::Controllers::Locations::Descriptions
       render(Views::Controllers::Descriptions::AuthorsAndEditorsPanel.new(
                description: @description, user: @user, versions: @versions
              ))
-      render(Components::ObjectFooter.new(
+      render(Components::VersionsFooter.new(
                user: @user, obj: @description, versions: @versions
              ))
     end

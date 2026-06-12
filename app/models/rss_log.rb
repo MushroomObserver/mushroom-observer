@@ -57,7 +57,7 @@
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
-#       <%= render(Components::ObjectFooter.new(user: @user, obj: @object)) %>
+#       <%= render(Components::VersionsFooter.new(user: @user, obj: @object)) %>
 #
 #
 #  == Usage

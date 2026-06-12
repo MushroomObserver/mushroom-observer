@@ -62,7 +62,7 @@ module Views::Controllers::SpeciesLists
       render_list_search
       paginated_results { render_observations }
       render_comments
-      render(Components::ObjectFooter.new(
+      render(Components::VersionsFooter.new(
                user: @user, obj: @species_list
              ))
     end

@@ -8,7 +8,7 @@
 # (as captured at this version; if `cls[:source] == :inherited`,
 # annotates with the source-Name / date / editor). Right column:
 # the versions table. Notes panel appears when the historic name
-# has notes; ObjectFooter at the bottom.
+# has notes; VersionsFooter at the bottom.
 module Views::Controllers::Names::Versions
   class Show < Views::Base
     prop :name, ::Name
@@ -29,7 +29,7 @@ module Views::Controllers::Names::Versions
         render_right_column
       end
 
-      render(Components::ObjectFooter.new(
+      render(Components::VersionsFooter.new(
                user: @user, obj: @name, versions: @versions
              ))
     end

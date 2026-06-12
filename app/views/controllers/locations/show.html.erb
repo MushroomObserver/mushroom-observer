@@ -37,5 +37,5 @@ column_classes(:seven_five)
 <!--.row-->
 
 <%= tag.div(class: "mt-3") do %>
-  <%= render(Components::ObjectFooter.new(user: @user, obj: @location, versions: @versions)) %>
+  <%= render(Components::VersionsFooter.new(user: @user, obj: @location, versions: @versions)) %>
 <% end %>
