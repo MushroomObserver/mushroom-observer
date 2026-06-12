@@ -124,15 +124,9 @@ module Views::Controllers::FieldSlips
     end
 
     def render_observations_matrix(all_obs)
-      ul(class: "row list-unstyled mt-3",
-         data: { controller: "matrix-table",
-                 action: "resize@window->matrix-table#rearrange" }) do
-        all_obs.each do |obs_item|
-          render(Components::MatrixBox.new(
-                   user: current_user, object: obs_item
-                 ))
-        end
-      end
+      render(Components::MatrixTable.new(
+               objects: all_obs, user: current_user
+             ))
     end
   end
 end
