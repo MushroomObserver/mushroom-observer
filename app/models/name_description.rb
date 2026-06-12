@@ -148,7 +148,12 @@ class NameDescription < Description
   }
 
   scope :show_includes, lambda {
-    strict_loading
+    strict_loading.includes(
+      :authors,
+      :editors,
+      :user,
+      { name: { descriptions: [:authors, :editors, :user] } }
+    )
   }
 
   EOL_NOTE_FIELDS = [
