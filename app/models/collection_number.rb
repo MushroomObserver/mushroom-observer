@@ -81,6 +81,14 @@ class CollectionNumber < AbstractModel
     search_columns(cols, phrase)
   }
 
+  # Eager-loads the observations + everything `Components::MatrixBox`
+  # reaches into while rendering them (`Observation::NamingConsensus`
+  # walks `namings.flat_map(&:votes)` and `naming.name`).
+  scope :show_includes, lambda {
+    includes(observations: [:location, :name, :rss_log, :thumb_image,
+                            :user, { namings: [:votes, :name, :user] }])
+  }
+
   def format_name
     "#{name} #{number}"
   end

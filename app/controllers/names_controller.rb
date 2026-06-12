@@ -186,8 +186,12 @@ class NamesController < ApplicationController
 
     init_projects_ivar
     init_related_query_ivars
-    @has_name_tracker = NameTracker.where(name_id: @name.id,
-                                          user_id: @user&.id).exists?
+    @has_name_tracker = if @user
+                          NameTracker.where(name_id: @name.id,
+                                            user_id: @user.id).exists?
+                        else
+                          false
+                        end
 
     render(Views::Controllers::Names::Show.new(
              name: @name, user: @user,

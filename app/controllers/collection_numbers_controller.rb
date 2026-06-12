@@ -151,13 +151,12 @@ class CollectionNumbersController < ApplicationController
     @collection_number = find_collection_number_for_show
   end
 
-  # Eager-loads `observations` (+ associations the MatrixTable
-  # render reaches into) so the show / edit views don't re-query
-  # when iterating `@collection_number.observations`.
+  # Uses `CollectionNumber.show_includes` so the show / edit views
+  # don't re-query when iterating `@collection_number.observations`
+  # (the MatrixTable / MatrixBox render walks down through
+  # `Observation::NamingConsensus` into votes + naming.name).
   def find_collection_number_for_show
-    CollectionNumber.
-      includes(observations: [:thumb_image, :user]).
-      find_by(id: params[:id]) ||
+    CollectionNumber.show_includes.find_by(id: params[:id]) ||
       flash_error_and_goto_index(CollectionNumber, params[:id])
   end
 

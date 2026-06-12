@@ -83,6 +83,32 @@ class FieldSlip < AbstractModel
       where("code LIKE ?", "#{sanitize_sql_like(prefix.to_s.upcase)}%")
   }
 
+  # Eager-load trees for `FieldSlipPanel` / `Components::MatrixBox`
+  # (`Observation::NamingConsensus` walks `namings.flat_map(&:votes)`
+  # and `naming.name`). Exposed as class methods so the index path —
+  # which feeds the array directly into `show_index_of_objects` via
+  # `:include` — can reuse the same shape the show scope applies.
+  def self.show_includes_tree
+    [{ occurrence: { observations: observation_show_associations } }]
+  end
+
+  # Index variant: the page renders one panel per slip and also
+  # walks `occurrence.primary_observation`; the panel's `:project`
+  # and `:user` lines need those preloaded too.
+  def self.index_includes_tree
+    [{ occurrence: [:primary_observation,
+                    { observations: observation_show_associations }] },
+     :project, :user]
+  end
+
+  def self.observation_show_associations
+    [:location, :name, :rss_log, :thumb_image, :user,
+     { namings: [:votes, :name, :user] }]
+  end
+
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
+
   def current_user=(a_user)
     @current_user = a_user
     return if user

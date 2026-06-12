@@ -17,21 +17,10 @@ module FieldSlipsController::Show
 
   def resolve_field_slip_from_params
     if params[:id].match?(/^\d+$/)
-      @field_slip = field_slip_with_observations.find_by(id: params[:id])
+      @field_slip = FieldSlip.show_includes.find_by(id: params[:id])
     else
       handle_by_code
     end
-  end
-
-  # Eager-loads everything `FieldSlipPanel` reads — observations
-  # plus the associations `Components::MatrixBox` reaches into
-  # (`:name`, `:user`, `:thumb_image`, `:location`, `:namings`,
-  # `:rss_log`). Without this, the panel triggers an N+1.
-  def field_slip_with_observations
-    FieldSlip.includes(occurrence: {
-                         observations: [:location, :name, :namings,
-                                        :rss_log, :thumb_image, :user]
-                       })
   end
 
   # `handle_by_code` may have already redirected to an observation
@@ -52,8 +41,7 @@ module FieldSlipsController::Show
   end
 
   def handle_by_code
-    @field_slip = field_slip_with_observations.
-                  find_by(code: params[:id].upcase)
+    @field_slip = FieldSlip.show_includes.find_by(code: params[:id].upcase)
     return unless @field_slip&.observations&.any?
 
     obs = @field_slip.observation

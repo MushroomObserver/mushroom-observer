@@ -216,7 +216,7 @@ class Views::Controllers::Account::Preferences::FormTest <
     fake = Struct.new(:type, :sym).new(:not_a_real_type, :bogus)
     form = Views::Controllers::Account::Preferences::Form.new(
       @user, licenses: License.available_names_and_ids(@user&.license),
-      languages: Language.all.to_a
+             languages: Language.all.to_a
     )
     assert_raises(RuntimeError) do
       form.send(:render_filter_field, fake)
