@@ -51,8 +51,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Calostoma lutescens", rank: "Species")
+    assert_equal(loc, obs.location)
     # casual grade, no sequence, no provisional name -> Could Be
-    standard_assertions(obs: obs, name: name, loc: loc,
+    standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
 
     # This iNat obs has only 1 suggested ID.
@@ -167,8 +168,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Evernia", rank: "Genus")
+    assert_equal(loc, obs.location)
     # needs_id grade, no sequence, no provisional name -> Could Be
-    standard_assertions(obs: obs, name: name, loc: loc,
+    standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
 
     inat_photo = @parsed_results.
@@ -364,7 +366,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")
 
-    standard_assertions(obs: obs, name: name)
+    # iNat Community ID + the provisional name (lead) -> two namings.
+    standard_assertions(obs: obs, name: name, naming_count: 2)
 
     proposed_name = obs.namings.first
     assert_equal(@user,
@@ -466,7 +469,8 @@ class InatImportJobTest < ActiveJob::TestCase
       "It should create only 3 names: provisional, its genus, suggested ID"
     )
 
-    standard_assertions(obs: obs, name: expected_consensus)
+    # iNat Community ID + the provisional name (lead) -> two namings.
+    standard_assertions(obs: obs, name: expected_consensus, naming_count: 2)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
@@ -1143,20 +1147,19 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def standard_assertions(obs:, user: @user, name: nil, loc: nil,
-                          expected_vote: Vote::MAXIMUM_VOTE)
+  def standard_assertions(obs:, user: @user, name: nil,
+                          expected_vote: Vote::MAXIMUM_VOTE, naming_count: 1)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_nil(obs.source, "Imported obs should have no entry-agent source")
     assert_equal(Source.inaturalist, obs.external_source,
                  "Imported obs should link to iNaturalist Source")
-    assert_equal(loc, obs.location) if loc
 
     expected_photo_count = expected_imported_photo_count
     assert_equal(expected_photo_count, obs.images.length,
                  "Observation should have #{expected_photo_count} image(s)")
 
-    assert_equal(1, obs.namings.length,
-                 "iNatImport should create exactly one Naming")
+    assert_equal(naming_count, obs.namings.length,
+                 "iNatImport created the wrong number of Namings")
     obs.namings.each do |naming|
       assert_not(
         naming.vote_cache.zero?,
