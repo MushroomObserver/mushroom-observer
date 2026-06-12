@@ -104,7 +104,7 @@ class NoQueriesInPhlexViewsTest < ActiveSupport::TestCase
     assert_clean("Query::Filter.all.each { |f| render(f) }")
   end
 
-  def test_scanner_flags_query_inside_comment_excluded
+  def test_scanner_ignores_queries_inside_comments
     assert_clean("# @object.descriptions.includes(:user)")
     assert_clean("    # Use Foo.where(bar: 1) instead.")
   end

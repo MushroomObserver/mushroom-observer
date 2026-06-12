@@ -29,10 +29,11 @@ module Names
 
     # Looks up the user the version's classification was inherited
     # from, if any — keeps the look-up out of
-    # `Views::Controllers::Names::Versions::Show`.
+    # `Views::Controllers::Names::Versions::Show`. `find_by(version:)`
+    # hits the `(name_id, version)` index instead of loading every
+    # version into memory like `.find { ... }` would.
     def inherited_classification_user
-      version = params[:version].to_i
-      row = @versions.find { |v| v.version == version }
+      row = @versions.find_by(version: params[:version].to_i)
       data = row && @name.classification_at_version(row)
       return unless data && data[:source] == :inherited
 

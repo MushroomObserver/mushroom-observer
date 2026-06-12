@@ -62,15 +62,6 @@ module Projects
       end
     end
 
-    # Pre-loads `name => Location` for every suffix of `obs.where`
-    # that has a corresponding Location row. `TargetLocationForm`
-    # would otherwise run this query itself when rendering.
-    def lookup_existing_target_suffixes(obs)
-      suffixes = Views::Controllers::Projects::Violations::
-                 TargetLocationForm.suffixes_for(obs)
-      Location.where(name: suffixes).index_by(&:name)
-    end
-
     def controller_model_name
       "Project"
     end
@@ -85,6 +76,15 @@ module Projects
     end
 
     private
+
+    # Pre-loads `name => Location` for every suffix of `obs.where`
+    # that has a corresponding Location row. `TargetLocationForm`
+    # would otherwise run this query itself when rendering.
+    def lookup_existing_target_suffixes(obs)
+      suffixes = Views::Controllers::Projects::Violations::
+                 TargetLocationForm.suffixes_for(obs)
+      Location.where(name: suffixes).index_by(&:name)
+    end
 
     # Eager-loaded variant of `find_or_goto_index` for the index
     # action, which renders the full violations list. `find_by`

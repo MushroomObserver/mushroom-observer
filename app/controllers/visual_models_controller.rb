@@ -14,9 +14,9 @@ class VisualModelsController < ApplicationController
   # GET /visual_models/1
   def show
     @visual_model = VisualModel.find(params[:id])
-    @visual_groups = @visual_model.visual_groups.order(:name).to_a
     respond_to do |format|
       format.html do
+        @visual_groups = @visual_model.visual_groups.order(:name).to_a
         render(Views::Controllers::VisualModels::Show.new(
                  visual_model: @visual_model,
                  visual_groups: @visual_groups
