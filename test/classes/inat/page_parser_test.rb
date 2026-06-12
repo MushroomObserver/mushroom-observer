@@ -105,6 +105,27 @@ class Inat
                  "URL mode must not pass only_id — importer needs full JSON")
     end
 
+    def test_url_request_query_args_strips_mo_controlled_keys_from_stored_query
+      # Simulate a stored query string that somehow contains MO-controlled keys
+      # (e.g. from a confirm round-trip of an older normalized value).
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&taxon_id=9999&page=2&per_page=50" \
+                     "&order=desc&order_by=created_at&without_field=foo" \
+                     "&only_id=true&ttl=300&id=123"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_equal("291058", args[:project_id],
+                   "project_id should be preserved")
+      [:taxon_id, :page, :per_page, :order, :order_by, :without_field,
+       :only_id, :ttl, :id].each do |key|
+        assert_nil(args[key],
+                   "#{key} should be stripped from stored query string")
+      end
+    end
+
     def test_url_request_query_args_sets_pagination_params
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058"

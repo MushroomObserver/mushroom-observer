@@ -91,12 +91,14 @@ class Inat
       # Honor the URL's id_above only for the first page (internal cursor
       # still at 0). After the first page the internal cursor takes over.
       effective_id_above = id_above.zero? ? args[:id_above].to_i : id_above
+      # The confirm round-trip stores the normalized query string as a hidden
+      # field, bypassing URLNormalizer. Strip MO-controlled keys defensively.
+      strip_keys = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym) + [:id]
+      args.except!(*strip_keys)
       args.merge!(BASE_FILTER_PARAMS)
       args[:taxon_id] = IMPORTABLE_TAXON_IDS_ARG
       args.merge!(id_above: effective_id_above, per_page: 200,
                   order: "asc", order_by: "id")
-      args.delete(:id)
-      args.delete(:only_id)
       args
     end
 
