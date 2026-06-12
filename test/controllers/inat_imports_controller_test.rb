@@ -939,6 +939,19 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  def test_create_url_with_no_surviving_params_rejected
+    login
+    # All params in this URL are stripped by URLNormalizer (taxon_id is
+    # MO-controlled), leaving an empty query string.
+    url = "#{INAT_API_OBS_URL}?taxon_id=47170"
+    post(:create,
+         params: { inat_url: url, inat_username: "someone", consent: 1 })
+
+    assert_flash_text(:inat_url_no_valid_filter_params.l,
+                      "URL without valid filter params should flash a warning")
+    assert_form_action(action: :create)
+  end
+
   def test_create_warns_about_ignored_url_params
     user = users(:rolf)
     # taxon_id is always stripped (MO enforces its own fungi/myxo filter);
