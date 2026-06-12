@@ -15,6 +15,7 @@ services:
       RAILS_ENV: development
       DOCKER: "true"
       PARALLEL_WORKERS: "4"
+      MO_MYSQL_CONFIG_DIR: /etc/mo-mysql
 
       # Trilogy/MySQL
       DATABASE_HOST: db
