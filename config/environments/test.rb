@@ -94,8 +94,12 @@ MushroomObserver::Application.configure do
   # ensure that test database is shared between threads
   # config.active_record.shared_connection = true
 
-  # Debugging strict loading - either :log, or :error out the page
-  # config.active_record.action_on_strict_loading_violation = :error
+  # Raise on every strict_loading violation in tests so any lazy-load
+  # against a model with `strict_loading_by_default = true` fails the
+  # offending test. (Production / dev still log per
+  # `config/application.rb`.) Reveals view paths that need to be
+  # added to a controller's `show_includes` tree.
+  config.active_record.action_on_strict_loading_violation = :raise
 
   # Print deprecation notices to the stderr.
   config.active_support.deprecation = :stderr

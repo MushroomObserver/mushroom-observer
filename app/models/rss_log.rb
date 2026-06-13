@@ -164,13 +164,23 @@ class RssLog < AbstractModel
   # Returns Array of type_tags (Symbols) of ALL_TYPES.
   ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
 
-  # Returns the associated object, or nil if it's an orphan.
+  # Returns the associated object, or nil if it's an orphan. Checks
+  # FK columns first — only loads the target's actual type, and
+  # falls back to an explicit `find_by` when the association isn't
+  # preloaded (avoids strict-loading violations on fresh records).
   def target
     ALL_TYPE_TAGS.each do |type|
-      obj = send(type)
+      fk = send(:"#{type}_id")
+      next unless fk
+
+      obj = association(type).loaded? ? send(type) : load_target_by_fk(type, fk)
       return obj if obj
     end
     nil
+  end
+
+  def load_target_by_fk(type, foreign_key)
+    type.to_s.classify.constantize.find_by(id: foreign_key)
   end
 
   # Returns the associated object's id, or nil if it's an orphan.

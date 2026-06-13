@@ -25,15 +25,23 @@
 #  None.
 #
 class NameTracker < AbstractModel
-  # Surface N+1s on `name_tracker.user` / `.name` / `.interests`
-  # from view loops; every caller must eager-load these.
-  self.strict_loading_by_default = true
-
   belongs_to :user
   belongs_to :name
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
 
   scope :for_user, ->(user) { where(user: user) }
+
+  # Eager-loads everything every NameTracker iteration reaches into.
+  def self.show_includes_tree
+    [:name, :user, :interests]
+  end
+
+  def self.index_includes_tree
+    show_includes_tree
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   # Used as an "opt-in" check-box in the UI form.
   attr_accessor :note_template_enabled

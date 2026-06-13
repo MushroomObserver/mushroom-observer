@@ -562,6 +562,22 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # Exercises the turbo_stream branch of `destroy` so
+  # `render_herbarium_records_section_update` (panel re-render) is
+  # covered at the controller layer.
+  def test_destroy_herbarium_record_turbo
+    login("rolf")
+    herbarium_record = herbarium_records(:interesting_unknown)
+    obs = herbarium_record.observations.first
+    params = { id: herbarium_record.id, back: obs.id.to_s }
+
+    assert_difference("HerbariumRecord.count", -1) do
+      delete(:destroy, params: params, format: :turbo_stream)
+    end
+    assert_response(:success)
+    assert_select("turbo-stream[target='observation_herbarium_records']")
+  end
+
   def test_destroy_herbarium_record_not_curator
     login("mary")
     herbarium_record = herbarium_records(:interesting_unknown)

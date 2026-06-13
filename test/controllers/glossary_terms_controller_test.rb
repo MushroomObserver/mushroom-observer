@@ -473,9 +473,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     login
     make_admin
+    # `find_or_goto_index` uses `GlossaryTerm.show_includes.find_by`,
+    # and the destroy refetches via `GlossaryTerm.find` — stub both
+    # paths so the controller sees our destroy-mocked instance.
     term.stub(:destroy, false) do
-      GlossaryTerm.stub(:safe_find, term) do
-        delete(:destroy, params: { id: term.id })
+      GlossaryTerm.stub(:show_includes, GlossaryTerm) do
+        GlossaryTerm.stub(:find_by, term) do
+          GlossaryTerm.stub(:find, term) do
+            delete(:destroy, params: { id: term.id })
+          end
+        end
       end
     end
 

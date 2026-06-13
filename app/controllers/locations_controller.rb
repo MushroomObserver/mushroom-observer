@@ -302,7 +302,10 @@ class LocationsController < ApplicationController
     return unless find_location!
     return unless can_destroy_location?
 
-    if @location.destroy
+    # Refetch as a fresh (non-strict_loading) record so the destroy
+    # cascade can reach `:project_aliases` (not in `show_includes`)
+    # without lazy-load violations.
+    if Location.find(@location.id).destroy
       flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
     end
     redirect_to(locations_path)

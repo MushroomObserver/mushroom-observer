@@ -151,9 +151,11 @@ module Observations
       }
 
       login(image.user.login)
-      # simulate image save failure
+      # Simulate image save failure. `find_or_goto_index` uses
+      # `Image.find_by` (Image has no `show_includes` scope), so stub
+      # find_by to surface our save-mocked instance.
       image.stub(:save, false) do
-        Image.stub(:safe_find, image) do
+        Image.stub(:find_by, image) do
           put(:update, params: params)
         end
       end

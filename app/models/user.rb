@@ -321,6 +321,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # NOTE: the obs images are a separate optimized query
   scope :show_includes, lambda {
     strict_loading.includes(
+      { image: :license },
       :location,
       :user_stats
     )

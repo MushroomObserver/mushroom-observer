@@ -13,7 +13,7 @@ module Projects
 
     def index
       @project = Project.find(params[:project_id])
-      @project_aliases = ProjectAlias.includes(:target).
+      @project_aliases = ProjectAlias.index_includes.
                          where(project: @project).order(name: :asc)
       respond_to do |format|
         format.html do
@@ -98,7 +98,8 @@ module Projects
 
     def destroy
       project = @project_alias.project
-      @project_alias.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      ProjectAlias.find(@project_alias.id).destroy
       respond_to do |format|
         format.html do
           redirect_to(project_aliases_path(project_id: project&.id),
@@ -220,7 +221,7 @@ module Projects
     end
 
     def set_project_alias
-      @project_alias = ProjectAlias.find(params[:id])
+      @project_alias = ProjectAlias.show_includes.find(params[:id])
     end
 
     def project_alias_params

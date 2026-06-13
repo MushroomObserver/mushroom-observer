@@ -91,7 +91,7 @@ module Observations
     end
 
     def destroy
-      naming = Naming.includes([:votes]).find(params[:id].to_s)
+      naming = Naming.show_includes.find(params[:id].to_s)
       @observation = Observation.naming_includes.find(params[:observation_id])
       @consensus = Observation::NamingConsensus.new(@observation)
       if destroy_if_we_can(naming) # needs to know consensus before deleting

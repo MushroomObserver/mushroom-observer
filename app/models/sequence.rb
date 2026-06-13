@@ -34,10 +34,6 @@
 #  unique_format_name  name for unorphaned objects
 #
 class Sequence < AbstractModel
-  # Surface N+1s on `sequence.observation` / `.user` from view
-  # loops; every caller must eager-load these.
-  self.strict_loading_by_default = true
-
   belongs_to :observation
   belongs_to :user
 
@@ -72,6 +68,22 @@ class Sequence < AbstractModel
   scope :observation_query, lambda { |hash|
     joins(:observation).subquery(:Observation, hash)
   }
+
+  # Eager-loads the show/edit page (sequence + its user + the obs
+  # the sequence belongs to, rendered as a MatrixBox).
+  def self.show_includes_tree
+    [:user, { observation: Observation.matrix_box_includes }]
+  end
+
+  # Index row links to the underlying observation; preload :user and
+  # the obs name. Picked up by
+  # `ApplicationController::Indexes#default_index_includes_for_model`.
+  def self.index_includes_tree
+    [:user, { observation: :name }]
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   ##############################################################################
   #
@@ -272,7 +284,9 @@ class Sequence < AbstractModel
 
   # array of other Sequences in same Observation
   def other_sequences_same_obs
-    observation.try(:sequences) ? observation.sequences - [self] : []
+    return [] unless observation_id
+
+    Sequence.where(observation_id:).where.not(id:).to_a
   end
 
   # Validate proper formatting of bases

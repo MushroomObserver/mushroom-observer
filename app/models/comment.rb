@@ -104,10 +104,6 @@
 class Comment < AbstractModel
   include Callbacks
 
-  # Surface N+1 queries on `comment.user` / `comment.target` from
-  # view loops — every caller must eager-load these associations.
-  self.strict_loading_by_default = true
-
   belongs_to :user
   belongs_to :target, polymorphic: true
 
@@ -244,6 +240,16 @@ class Comment < AbstractModel
     search_columns(Comment[:comment], phrase).
       or(Comment.search_columns(Comment[:summary], phrase)).distinct
   }
+
+  # Comment iteration always reaches `.user` (author byline) and
+  # `.target` (polymorphic — Observation, Name, etc., used to build
+  # the "comment on X" link). Also reused as a subtree by every
+  # commentable's `show_includes` — `{ comments: Comment.index_includes_tree }`.
+  def self.index_includes_tree
+    [:user, :target]
+  end
+
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   # Returns +summary+ for debugging.
   def text_name

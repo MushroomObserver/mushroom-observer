@@ -39,11 +39,14 @@ module SpeciesLists
     private
 
     def projects_to_manage
-      if @list.user == @user
-        @user.projects_member.union(@list.projects)
-      else
-        @user.projects_member
-      end
+      # Refetch as a single non-strict_loading query so iteration in
+      # `attach_*` / `remove_*` can reach `.observations` / `.images`
+      # without lazy-load violations. `@user.projects_member` is an
+      # Array (memoized), so `map(&:id)`; `@list.project_ids` uses
+      # the rails-generated id reader (loaded-collection-aware).
+      ids = @user.projects_member.map(&:id)
+      ids += @list.project_ids if @list.user == @user
+      Project.where(id: ids.uniq).order(:created_at).to_a
     end
 
     def manage_object_states

@@ -8,12 +8,28 @@ class ProjectAlias < AbstractModel
   # aliases only work in the context of the project (specifically when
   # filling in field slip forms).
 
-  # Surface N+1s on `project_alias.target` / `.project` from view
-  # loops; every caller must eager-load these.
-  self.strict_loading_by_default = true
-
   belongs_to :target, polymorphic: true
   belongs_to :project
+
+  # The single-alias show page renders the project banner plus the
+  # alias target. Reuse `Project.banner_includes_tree` so the banner
+  # eager-loads stay in one place.
+  def self.show_includes_tree
+    [{ project: Project.banner_includes_tree }, :target]
+  end
+
+  # The aliases index table only reads `alias.target` (+ column
+  # reads). The controller fetches `@project` separately for the
+  # page banner, so the project-banner subtree isn't needed per row.
+  def self.index_includes_tree
+    [:target]
+  end
+
+  # `.strict_loading` on the read scopes (not on the model itself)
+  # surfaces N+1s on every show/index path that fetches via these
+  # scopes, while leaving plain fixture lookups in tests untouched.
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   validates :name, presence: true
   validates :name, uniqueness: { scope: :project_id }

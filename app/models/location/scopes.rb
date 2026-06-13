@@ -199,12 +199,13 @@ module Location::Scopes
 
     scope :show_includes, lambda {
       strict_loading.includes(
-        { comments: :user },
-        { description: { comments: :user } },
+        { comments: Comment.index_includes_tree },
+        { description: { comments: Comment.index_includes_tree } },
         { descriptions: [:authors, :editors, :user] },
-        :interests,
+        { interests: :user },
         :observations,
         :rss_log,
+        :user,
         { versions: :user }
       )
     }

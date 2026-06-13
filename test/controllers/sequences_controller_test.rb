@@ -481,6 +481,32 @@ class SequencesControllerTest < FunctionalTestCase
            "Failed to include Sequence change in RssLog for Observation")
   end
 
+  # Exercises the turbo_stream branch of `update` so
+  # `render_sequences_section_update` (panel re-render) is covered
+  # at the controller layer, not just the system test.
+  def test_update_sequence_turbo
+    sequence = sequences(:local_sequence)
+    obs = sequence.observation
+    login(obs.user.login)
+    params = {
+      id: sequence.id,
+      back: obs.id.to_s,
+      sequence: {
+        locus: sequence.locus,
+        bases: sequence.bases,
+        archive: sequence.archive,
+        accession: sequence.accession,
+        notes: "Updated notes via turbo"
+      }
+    }
+
+    patch(:update, params: params, format: :turbo_stream)
+
+    assert_response(:success)
+    assert_equal("Updated notes via turbo", sequence.reload.notes)
+    assert_select("turbo-stream[target='observation_sequences']")
+  end
+
   def test_update_by_admin
     sequence = sequences(:local_sequence)
     obs = sequence.observation

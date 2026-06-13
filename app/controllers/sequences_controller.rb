@@ -148,7 +148,8 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
-    @sequence.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    Sequence.find(@sequence.id).destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
 
     redirect_to(@observation.show_link_args)
@@ -173,14 +174,10 @@ class SequencesController < ApplicationController
   end
 
   def find_sequence!
-    @sequence = Sequence.includes(sequence_includes).find_by(id: params[:id]) ||
+    @sequence = Sequence.show_includes.find_by(id: params[:id]) ||
                 flash_error_and_goto_index(
                   Sequence, params[:id]
                 )
-  end
-
-  def sequence_includes
-    [{ observation: Observation.matrix_box_includes }]
   end
 
   def figure_out_where_to_go_back_to
@@ -314,10 +311,12 @@ class SequencesController < ApplicationController
   end
 
   def render_sequences_section_update
+    # Refetch with just the sequences subtree the panel reads.
+    fresh_obs = Observation.includes(sequences: :user).find(@observation.id)
     render_obs_section_update(
       identifier: "sequences",
       panel: Views::Controllers::Observations::Show::SequencesPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
   end

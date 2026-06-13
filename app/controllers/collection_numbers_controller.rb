@@ -55,10 +55,8 @@ class CollectionNumbersController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      letters: true,
-      num_per_page: 100
-    }.merge(opts)
+    # `:include` falls back to `CollectionNumber.index_includes_tree`.
+    { letters: true, num_per_page: 100 }.merge(opts)
   end
 
   public
@@ -297,7 +295,8 @@ class CollectionNumbersController < ApplicationController
     @collection_number.change_corresponding_herbarium_records(old_format_name)
     @other_number.observations += @collection_number.observations -
                                   @other_number.observations
-    @collection_number.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    CollectionNumber.find(@collection_number.id).destroy
     @collection_number = @other_number
 
     show_flash_and_send_back
@@ -336,7 +335,8 @@ class CollectionNumbersController < ApplicationController
     else
       # Figure out where to redirect BEFORE destroying the record
       figure_out_destroy_redirect
-      @collection_number.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      CollectionNumber.find(@collection_number.id).destroy
     end
     true
   end
@@ -460,10 +460,15 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_collection_numbers_section_update
+    # Refetch with just the collection-numbers subtree the panel reads
+    # (`obs.collection_numbers` + `obs.can_edit?`-related projects).
+    fresh_obs = Observation.includes(
+      :projects, collection_numbers: :user
+    ).find(@observation.id)
     render_obs_section_update(
       identifier: "collection_numbers",
       panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
   end

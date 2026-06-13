@@ -96,12 +96,11 @@ class CommentsController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def index_display_opts(opts, query)
-    opts = {
-      num_per_page: 25,
-      # (Eager-loading of names might fail when comments start to apply to
-      # objects other than observations.)
-      include: [:target, :user]
-    }.merge(opts)
+    # `:include` falls back to `Comment.index_includes_tree` via
+    # `default_index_includes_for_model`. (Re: the historical
+    # eager-loading note — :target is polymorphic and Rails handles
+    # the multi-type case correctly.)
+    opts = { num_per_page: 25 }.merge(opts)
 
     # Paginate by letter if sorting by user.
     if %w[user reverse_user].include?(query.params[:order_by])

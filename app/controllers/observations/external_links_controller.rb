@@ -74,9 +74,9 @@ module Observations
     end
 
     def set_ivars_for_edit
-      @external_link = ExternalLink.find(params[:id].to_s)
-      @observation = Observation.find(@external_link.observation_id)
-      @site = ExternalSite.find(@external_link.external_site_id)
+      @external_link = ExternalLink.show_includes.find(params[:id].to_s)
+      @observation = @external_link.observation
+      @site = @external_link.external_site
       @sites = [@site]
       @base_urls = { @site.name => @site.base_url }
       @back_object = @observation
@@ -155,7 +155,8 @@ module Observations
 
     def remove_external_link
       @id = @external_link.id
-      @external_link.destroy!
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      ExternalLink.find(@external_link.id).destroy!
 
       flash_success_and_return
     end
@@ -226,8 +227,12 @@ module Observations
     end
 
     def render_external_links_section_update
-      # need to reset this in case they can now add sites
-      @observation = @observation.reload
+      # Refetch with just the external-links subtree the panel +
+      # `sites_user_can_add_links_to_for_obs` access — much cheaper
+      # than the full `show_includes` tree for a panel re-render.
+      @observation = Observation.includes(
+        external_links: { external_site: { project: :user_group } }
+      ).find(@observation.id)
       @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )

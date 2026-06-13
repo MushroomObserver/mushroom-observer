@@ -21,7 +21,8 @@ module ObservationsController::Destroy
     if !permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
       redirect_to({ action: :show, id: obs_id })
-    elsif !@observation.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    elsif !Observation.find(@observation.id).destroy
       flash_error(:runtime_destroy_observation_failed.t(id: obs_id))
       redirect_to({ action: :show, id: obs_id })
     else
