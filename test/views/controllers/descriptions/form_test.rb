@@ -116,9 +116,14 @@ module Views::Controllers::Descriptions
       desc.source_name = "Bolete & Friends"
       html = render_form(description: desc)
 
-      # single-encoded "&amp;" is correct; "&amp;amp;" is the double-escape
-      assert_includes(html, "Bolete &amp; Friends")
-      assert_not_includes(html, "Bolete &amp;amp; Friends")
+      # Assert the *visible* read-only source name, not the hidden input's
+      # value= attribute (which carries the same string). Nokogiri's .text
+      # excludes attributes and decodes entities: a correct single-encode
+      # renders the literal "&", a double-escape bug renders the code "&amp;".
+      source_fields = Nokogiri::HTML(html).
+                      at_css("label[for='description_source']").parent
+      assert_includes(source_fields.text, "Bolete & Friends")
+      assert_not_includes(source_fields.text, "Bolete &amp; Friends")
     end
 
     def test_location_description_form
