@@ -116,8 +116,7 @@ class LocationDescription < Description
       { comments: Comment.index_includes_tree },
       { interests: :user },
       :license,
-      { location: [:descriptions, { interests: :user }, :rss_log,
-                   :project_aliases, :user] },
+      { location: [:descriptions, { interests: :user }, :rss_log, :user] },
       :project,
       :user,
       :versions

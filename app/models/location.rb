@@ -807,7 +807,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
                             this: old_loc.name, that: name)
     old_loc.rss_log = nil
     remove_old_location_versions(old_loc)
-    old_loc.destroy
+    # Refetch as a fresh (non-strict_loading) record so the destroy
+    # cascade reads stable associations rather than the stale loaded
+    # collections (e.g. project_aliases were reassigned in
+    # `move_interests_and_aliases` but the preloaded collection on
+    # `old_loc` still references them).
+    Location.find(old_loc.id).destroy
   end
 
   def remove_old_location_versions(old_loc)

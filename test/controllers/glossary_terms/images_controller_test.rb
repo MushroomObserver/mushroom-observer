@@ -65,10 +65,14 @@ module GlossaryTerms
       get(:reuse, params: { id: glossary_term.id.to_s })
       assert_form_action(action: :attach, id: glossary_term.id)
 
-      # force glossary_term.add_image to fail
+      # force glossary_term.add_image to fail. `find_or_goto_index`
+      # uses `GlossaryTerm.show_includes.find_by` — stub the class +
+      # find_by so the controller sees our save-mocked instance.
       glossary_term.stub(:save, false) do
-        GlossaryTerm.stub(:safe_find, glossary_term) do
-          post(:attach, params: params)
+        GlossaryTerm.stub(:show_includes, GlossaryTerm) do
+          GlossaryTerm.stub(:find_by, glossary_term) do
+            post(:attach, params: params)
+          end
         end
       end
       assert_flash_error

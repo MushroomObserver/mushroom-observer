@@ -204,7 +204,6 @@ module Location::Scopes
         { descriptions: [:authors, :editors, :user] },
         { interests: :user },
         :observations,
-        :project_aliases,
         :rss_log,
         :user,
         { versions: :user }
