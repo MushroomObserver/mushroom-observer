@@ -190,7 +190,11 @@ class Inat
       # https://github.com/MushroomObserver/mushroom-observer/issues/2232
       # NTOE: 2024-06-19 jdc. Can we figure out the following?
       # archive, accession fields
-      Inat::SequenceFieldDetector.extract_sequences(inat_obs_fields)
+      # Memoized: scanning the obs fields is pure and the fields don't
+      # change during an import, so both callers (naming_vote and
+      # add_inat_sequences) reuse one extraction.
+      @sequences ||=
+        Inat::SequenceFieldDetector.extract_sequences(inat_obs_fields)
     end
 
     def specimen?
