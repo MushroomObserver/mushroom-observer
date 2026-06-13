@@ -58,7 +58,9 @@ class GlossaryTerm < AbstractModel
 
   scope :show_includes, lambda {
     strict_loading.includes(
-      :glossary_term_images,
+      # `glossary_term_images: :image` preloads the polymorphic image
+      # so `glossary_term.remove_image(image)` cascade doesn't lazy-load.
+      { glossary_term_images: :image },
       { images: [:copyright_changes,
                  :glossary_terms,
                  :image_votes,

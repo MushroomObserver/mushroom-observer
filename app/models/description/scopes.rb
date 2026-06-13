@@ -27,5 +27,35 @@ module Description::Scopes
     def parent_class
       parent_type.camelize.constantize
     end
+
+    # Preload subtree used by `show_includes` in NameDescription /
+    # LocationDescription. Covers both the join tables
+    # (`<prefix>_admins`, `_authors`, `_editors`, `_readers`,
+    # `_writers`) and their through associations
+    # (`admin_groups`, `authors`, `editors`, `reader_groups`,
+    # `writer_groups`).
+    #
+    # The admin/reader/writer join records belong_to `:user_group`
+    # (preloaded for `update_groups` in the permissions concern); the
+    # author/editor join records belong_to `:user`. The
+    # admin/reader/writer through groups preload `users: :user_groups`
+    # so the permissions form can render personal-group user rows
+    # (`group.users.first`) and check `user.in_group?("reviewers")`
+    # without lazy-loading.
+    def permissions_subtree
+      prefix = name.underscore # "name_description" / "location_description"
+      [
+        { admin_groups: { users: :user_groups } },
+        :authors,
+        :editors,
+        { reader_groups: { users: :user_groups } },
+        { writer_groups: { users: :user_groups } },
+        { :"#{prefix}_admins" => :user_group },
+        { :"#{prefix}_authors" => :user },
+        { :"#{prefix}_editors" => :user },
+        { :"#{prefix}_readers" => :user_group },
+        { :"#{prefix}_writers" => :user_group }
+      ]
+    end
   end
 end

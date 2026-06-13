@@ -582,8 +582,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # name as a string, preferring +location+ over +where+ wherever both exist.
   # Also applies the location_format of the current user (defaults to "postal").
   def place_name
-    if location
-      location.display_name
+    # Use FK lookup directly: callers can reach `place_name` after a
+    # `location_id =` assignment that invalidates the cached
+    # `:location` association, so trusting `obs.location` would
+    # lazy-load on a strict_loading record.
+    loc = location_id && Location.find_by(id: location_id)
+    if loc
+      loc.display_name
     elsif User.current_location_format == "scientific"
       Location.reverse_name(where)
     else

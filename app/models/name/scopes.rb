@@ -328,7 +328,7 @@ module Name::Scopes
 
     scope :show_includes, lambda {
       strict_loading.includes(
-        { comments: [:user, :target] },
+        { comments: Comment.index_includes_tree },
         :correct_spelling,
         { description: [:authors, :reviewer, :interests] },
         { descriptions: [:authors, :editors, :reviewer, :user,
@@ -336,7 +336,9 @@ module Name::Scopes
         { interests: :user },
         :misspellings,
         { name_trackers: [:user, :name] },
-        { namings: [:user, :name, :observation] },
+        # Reuse Naming's subtree so each naming's `observation`
+        # carries user/interests/rss_log for callbacks in merge flows.
+        { namings: Naming.index_includes_tree },
         { observations: [:location, :thumb_image, :user] },
         :rss_log,
         { synonym: :names },

@@ -593,7 +593,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       strict_loading.includes(
         :collector_user,
         { collection_numbers: :user },
-        { comments: [:user, :target] },
+        { comments: Comment.index_includes_tree },
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
         { images: [:image_votes, :license, :projects, :user] },
@@ -602,10 +602,11 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         { name: [{ synonym: :names }, { descriptions: :user },
                  :interests, :description] },
         { namings: Naming.index_includes_tree },
-        # `observation_images` is the dependent: :destroy join table
-        # that Rails reads on `obs.destroy`. Preloading skips the
-        # cascade query under strict_loading.
-        :observation_images,
+        # `observation_images: :image` is the dependent: :destroy join
+        # table that Rails reads on `obs.destroy` and `images.delete`.
+        # Preloading the polymorphic image skips the cascade query
+        # under strict_loading.
+        { observation_images: :image },
         :observation_collection_numbers,
         :observation_herbarium_records,
         :observation_views,
@@ -622,7 +623,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     }
     scope :not_logged_in_show_includes, lambda {
       strict_loading.includes(
-        { comments: [:user, :target] },
+        { comments: Comment.index_includes_tree },
         { images: [:image_votes, :license, :user] },
         :location,
         { name: [{ synonym: :names }, { descriptions: :user },
@@ -653,7 +654,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         { interests: :user },
         :location,
         { name: { synonym: :names } },
-        { projects: :admin_group },
+        { occurrence: [:field_slip, :observations] },
+        # Join tables for cascade preload. `observation_images: :image`
+        # so `obs.images.delete(img)` doesn't lazy-load the image on
+        # each loaded ObservationImage row.
+        { observation_images: :image },
+        :observation_collection_numbers,
+        :observation_herbarium_records,
+        { projects: [:admin_group, { user_group: :users }] },
         :rss_log,
         :sequences,
         { species_lists: [:projects, :user] },

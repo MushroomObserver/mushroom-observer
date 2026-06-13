@@ -149,23 +149,16 @@ class NameDescription < Description
 
   scope :show_includes, lambda {
     strict_loading.includes(
-      :admin_groups,
-      :authors,
-      { comments: [:user, :target] },
-      :editors,
+      *permissions_subtree,
+      { comments: Comment.index_includes_tree },
       { interests: :user },
       :license,
-      :name_description_admins,
-      :name_description_authors,
-      :name_description_editors,
-      :name_description_readers,
-      :name_description_writers,
       :project,
-      :reader_groups,
       :reviewer,
       :user,
-      :writer_groups,
-      { name: { descriptions: [:authors, :editors, :user] } },
+      { name: [:description, { interests: :user },
+               :rss_log, { synonym: :names },
+               { descriptions: [:authors, :editors, :user] }] },
       :versions
     )
   }

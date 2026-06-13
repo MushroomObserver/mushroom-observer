@@ -243,7 +243,8 @@ class Comment < AbstractModel
 
   # Comment iteration always reaches `.user` (author byline) and
   # `.target` (polymorphic — Observation, Name, etc., used to build
-  # the "comment on X" link).
+  # the "comment on X" link). Also reused as a subtree by every
+  # commentable's `show_includes` — `{ comments: Comment.index_includes_tree }`.
   def self.index_includes_tree
     [:user, :target]
   end

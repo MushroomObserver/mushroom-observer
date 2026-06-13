@@ -166,9 +166,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Subtree needed to render `Tab::Project::Banner` (image,
   # admin/user group membership, species-lists/names/locations
-  # counts via the `Tab::Project::*` POROs).
+  # counts via the `Tab::Project::*` POROs). `image: :license` is
+  # included for the project edit form's `image_ivars` which reads
+  # the image's license id.
   def self.banner_includes_tree
-    [:image,
+    [{ image: :license },
      { admin_group: :users },
      { user_group: :users },
      :species_lists,
@@ -177,18 +179,28 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def self.show_includes_tree
-    [{ comments: [:user, :target] },
+    [:aliases,
+     { comments: Comment.index_includes_tree },
+     { interests: :user },
      :location,
+     :observations,
+     :project_members,
+     :rss_log,
      { species_lists: [:location, :projects, :user] },
      :user] +
       banner_includes_tree
   end
 
   scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  # `Project#violations` walks the constraints (incl. `location`); the
+  # violations index page also renders the project banner via
+  # `add_project_banner`, so the banner subtree is reused here.
   scope :violations_includes, lambda {
     strict_loading.includes(
-      { observations: [:location, :name, :user] },
-      :target_names, :target_locations
+      *banner_includes_tree,
+      :location,
+      :rss_log,
+      { observations: [:location, :name, :user] }
     )
   }
 
@@ -333,11 +345,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Check if user has permission to edit a given object.
   def self.can_edit?(obj, user)
     return false unless user
-    return true  if obj.user_id == user.id
-    return false if obj.projects.empty?
+    return true if obj.user_id == user.id
+
+    project_ids = obj.association(:projects).loaded? ? obj.projects.map(&:id) : obj.project_ids
+    return false if project_ids.empty?
 
     group_ids = user.user_group_ids
-    obj.projects.each do |project|
+    Project.where(id: project_ids).each do |project|
       next unless project.can_edit_content?(obj.user)
       return true if group_ids.member?(project.admin_group_id)
     end
@@ -408,7 +422,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     unexclude_observation(obs)
     return if observations.include?(obs)
 
-    imgs = obs.images.select { |img| img.user_id == obs.user_id }
+    imgs = if obs.association(:images).loaded?
+             obs.images.select { |img| img.user_id == obs.user_id }
+           else
+             Image.where(id: obs.image_ids, user_id: obs.user_id).to_a
+           end
     observations.push(obs)
     imgs.each { |img| images.push(img) }
     touch
@@ -812,8 +830,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       source_type: LocationDescription.source_types[:project], project_id: id
     )
     orphan_each_draft(drafts)
-    user_group&.destroy
-    admin_group&.destroy
+    # Refetch as fresh (non-strict_loading) records so destroy can
+    # cascade through the user_group_users / description joins
+    # without lazy-load violations.
+    UserGroup.find_by(id: user_group_id)&.destroy
+    UserGroup.find_by(id: admin_group_id)&.destroy
   end
 
   def orphan_each_draft(drafts)
