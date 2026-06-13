@@ -7,8 +7,9 @@ docker compose build
 docker compose up -d
 ```
 
-The container will install gems, wait for the database, and run
-`db:prepare` automatically on first start. To load fixtures afterward:
+The container will install gems, wait for the database, and run `db:prepare`
+automatically on every start. To load fixtures and regenerate the language
+file (required before running tests):
 
 ```bash
 docker compose exec web bin/rails db:fixtures:load
