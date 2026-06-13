@@ -149,10 +149,18 @@ class NameDescription < Description
 
   scope :show_includes, lambda {
     strict_loading.includes(
+      :admin_groups,
       :authors,
+      { comments: :user },
       :editors,
+      :license,
+      :project,
+      :reader_groups,
+      :reviewer,
       :user,
-      { name: { descriptions: [:authors, :editors, :user] } }
+      :writer_groups,
+      { name: { descriptions: [:authors, :editors, :user] } },
+      :versions
     )
   }
 

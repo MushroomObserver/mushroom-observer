@@ -260,12 +260,12 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     )
     assert_not_nil(herbarium_record, "Cannot find HerbariumRecord")
     assert_equal("The New York Botanical Garden",
-                 herbarium_record.herbarium.name)
+                 Herbarium.find(herbarium_record.herbarium_id).name)
     assert_equal(params[:herbarium_record][:initial_det],
                  herbarium_record.initial_det)
     assert_equal(params[:herbarium_record][:accession_number],
                  herbarium_record.accession_number)
-    assert_equal(rolf, herbarium_record.user)
+    assert_equal(rolf.id, herbarium_record.user_id)
     obs = Observation.find(params[:observation_id])
     assert(obs.specimen)
     assert_response(:redirect)
@@ -515,7 +515,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params = {
       id: rec.id,
       herbarium_record: {
-        herbarium_name: rec.herbarium.autocomplete_name,
+        herbarium_name: Herbarium.find(rec.herbarium_id).autocomplete_name,
         initial_det: rec.initial_det,
         accession_number: rec.accession_number,
         notes: rec.notes

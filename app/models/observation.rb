@@ -444,7 +444,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # observations are destroyed or removed from it.
   def destroy_orphaned_collection_numbers
     collection_numbers.each do |col_num|
-      col_num.destroy_without_callbacks if col_num.observations == [self]
+      # SQL count so we don't lazy-load `col_num.observations`
+      # under strict_loading.
+      next if col_num.observations.where.not(id: id).exists?
+
+      col_num.destroy_without_callbacks
     end
   end
 
@@ -1466,10 +1470,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def field_slip_id_by
     return notes[:Field_Slip_ID_By] if notes.include?(:Field_Slip_ID_By)
 
-    naming = namings.find_by(name:)
-    return naming.user.textile_name if naming
+    # `pick(:user_id)` reads the column directly, avoiding the
+    # `namings.find_by(...).user` chain that would trip strict
+    # loading on the form autocompleter render path.
+    user_id = namings.where(name:).pick(:user_id)
+    return "" unless user_id
 
-    ""
+    User.find_by(id: user_id)&.textile_name || ""
   end
 
   def other_codes

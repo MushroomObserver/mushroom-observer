@@ -591,45 +591,56 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # this is N+1 per description on the show page.
     scope :show_includes, lambda {
       strict_loading.includes(
-        :collection_numbers,
-        { comments: :user },
+        :collector_user,
+        { collection_numbers: :user },
+        { comments: [:user, :target] },
         { external_links: { external_site: { project: :user_group } } },
         { herbarium_records: [{ herbarium: :curators }, :user] },
         { images: [:image_votes, :license, :projects, :user] },
         { interests: :user },
         :location,
         { name: [{ synonym: :names }, { descriptions: :user }] },
-        { namings: [:name, :user, { votes: [:observation, :user] }] },
-        { occurrence: :field_slip },
-        { projects: :admin_group },
+        { namings: [:name, :user, :observation,
+                    { votes: [:observation, :user] }] },
+        # `observation_images` is the dependent: :destroy join table
+        # that Rails reads on `obs.destroy`. Preloading skips the
+        # cascade query under strict_loading.
+        :observation_images,
+        :observation_collection_numbers,
+        :observation_herbarium_records,
+        :observation_views,
+        :project_observations,
+        :species_list_observations,
+        { occurrence: [:field_slip, :observations] },
+        { projects: [{ admin_group: :users }, :image] },
         :rss_log,
-        :sequences,
-        { species_lists: [:projects, :user] },
+        { sequences: :user },
+        { species_lists: [:location, :projects, :user] },
         :thumb_image,
         :user
       )
     }
     scope :not_logged_in_show_includes, lambda {
       strict_loading.includes(
-        { comments: :user },
+        { comments: [:user, :target] },
         { images: [:image_votes, :license, :user] },
         :location,
         { name: [{ synonym: :names }, { descriptions: :user }] },
-        { namings: [:name, :user, { votes: [:observation, :user] }] },
-        :projects,
+        { namings: [:name, :user, :observation,
+                    { votes: [:observation, :user] }] },
+        { projects: :image },
         :thumb_image,
         :user
       )
     }
     scope :naming_includes, lambda {
       includes(
-        { herbarium_records: [:herbarium] }, # in case naming is "Imageless"
-        :location, # ugh. worth it because of cache_content_filter_data
+        { herbarium_records: [{ herbarium: :curators }, :user] },
+        :location,
         :name,
-        # Observation#find_matches complains synonym is not eager-loaded. TBD
-        { namings: [{ name: { synonym: :names } }, :user,
+        { namings: [{ name: { synonym: :names } }, :user, :observation,
                     { votes: [:observation, :user] }] },
-        :species_lists, # in case naming is "Imageless"
+        { species_lists: [:location, :projects, :user] },
         :user
       )
     }

@@ -166,14 +166,15 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :show_includes, lambda {
     strict_loading.includes(
-      { comments: :user },
-      :admin_group,
+      { admin_group: :users },
+      { comments: [:user, :target] },
+      :image,
       :location,
-      :species_lists,
+      { species_lists: [:location, :projects, :user] },
       :target_locations,
       :target_names,
       :user,
-      :user_group
+      { user_group: :users }
     )
   }
   scope :violations_includes, lambda {

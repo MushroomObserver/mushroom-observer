@@ -134,7 +134,15 @@ class HerbariumRecord < AbstractModel
   alias document_title herbarium_label
 
   def accession_at_herbarium
-    "#{accession_number} @ #{herbarium.try(&:format_name)}"
+    # Use the loaded association when available (no extra query
+    # on the edit path); fall back to an FK `pick` on freshly-built
+    # records that haven't been through `show_includes`.
+    name = if association(:herbarium).loaded?
+             herbarium&.format_name
+           elsif herbarium_id
+             Herbarium.where(id: herbarium_id).pick(:name)
+           end
+    "#{accession_number} @ #{name}"
   end
 
   def mcp_url
@@ -145,15 +153,22 @@ class HerbariumRecord < AbstractModel
   def can_edit?(user)
     return false unless user
 
-    self.user == user || herbarium&.curator?(user)
+    # FK comparison + scoped curator lookup so the check works
+    # under strict_loading without eager-loading `:user` or
+    # `:herbarium`.
+    user_id == user.id ||
+      (herbarium_id.present? &&
+       HerbariumCurator.where(herbarium_id:, user:).exists?)
   end
 
   # Send email notifications when herbarium_record created by non-curator.
   # Migrated from QueuedEmail::AddRecordToHerbarium to ActionMailer + ActiveJob.
   def notify_curators
-    sender = user
-    recipients = herbarium.try(&:curators) || []
-    return if recipients.member?(sender)
+    sender = sender_user
+    recipients =
+      User.joins(:herbarium_curators).
+      where(herbarium_curators: { herbarium_id: herbarium_id })
+    return if recipients.exists?(id: user_id)
 
     recipients.each do |receiver|
       next if receiver.no_emails
@@ -171,9 +186,18 @@ class HerbariumRecord < AbstractModel
 
     observations.push(obs)
     obs.update(specimen: true) unless obs.specimen
-    obs.user_log(user, :log_herbarium_record_added,
+    obs.user_log(sender_user, :log_herbarium_record_added,
                  name: accession_at_herbarium,
                  touch: true)
+  end
+
+  # Use the loaded `:user` if it's available (edit / show paths
+  # via `HerbariumRecord.show_includes`); fall back to a FK lookup
+  # for freshly-built records on the create path.
+  def sender_user
+    return user if association(:user).loaded?
+
+    User.find_by(id: user_id)
   end
 
   # Remove this HerbariumRecord from an Observation and log the action.
