@@ -44,6 +44,12 @@
 #                     Herbarium.  Called after create.
 #
 class HerbariumRecord < AbstractModel
+  # Surface N+1s on `herbarium_record.observations` / `.user` /
+  # `.herbarium` from view loops; every caller must eager-load
+  # these via the controller's `herbarium_record_includes` or
+  # equivalent.
+  self.strict_loading_by_default = true
+
   belongs_to :herbarium
   belongs_to :user
 
