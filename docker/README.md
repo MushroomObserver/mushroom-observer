@@ -70,6 +70,9 @@ docker compose exec web bin/rails db:migrate
 
 # Open a MySQL shell
 docker compose exec db mysql -u mo -pmo_password mo_development
+
+# Load a gzipped DB image into the containerized DB
+gunzip -c <file> | docker compose exec -T db mysql -u mo -pmo_password mo_development
 ```
 
 ---
