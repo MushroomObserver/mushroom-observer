@@ -1518,8 +1518,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # `pick(:user_id)` reads the column directly, avoiding the
     # `namings.find_by(...).user` chain that would trip strict
-    # loading on the form autocompleter render path.
-    user_id = namings.where(name:).pick(:user_id)
+    # loading on the form autocompleter render path. Filter by
+    # `name_id` so we don't touch the `:name` association either.
+    user_id = namings.where(name_id:).pick(:user_id)
     return "" unless user_id
 
     User.find_by(id: user_id)&.textile_name || ""

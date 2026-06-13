@@ -11,15 +11,18 @@ class ProjectAlias < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :project
 
-  # Show / index pages render the project banner plus the alias
-  # target. Reuse `Project.banner_includes_tree` so the banner
+  # The single-alias show page renders the project banner plus the
+  # alias target. Reuse `Project.banner_includes_tree` so the banner
   # eager-loads stay in one place.
   def self.show_includes_tree
     [{ project: Project.banner_includes_tree }, :target]
   end
 
+  # The aliases index table only reads `alias.target` (+ column
+  # reads). The controller fetches `@project` separately for the
+  # page banner, so the project-banner subtree isn't needed per row.
   def self.index_includes_tree
-    show_includes_tree
+    [:target]
   end
 
   # `.strict_loading` on the read scopes (not on the model itself)

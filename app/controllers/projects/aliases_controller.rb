@@ -13,7 +13,7 @@ module Projects
 
     def index
       @project = Project.find(params[:project_id])
-      @project_aliases = ProjectAlias.show_includes.
+      @project_aliases = ProjectAlias.index_includes.
                          where(project: @project).order(name: :asc)
       respond_to do |format|
         format.html do
