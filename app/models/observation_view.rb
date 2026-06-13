@@ -35,14 +35,17 @@ class ObservationView < AbstractModel
     end
   end
 
+  # Pick the FK directly so strict_loading on `view.observation`
+  # isn't a problem — one extra `find_by` is cheaper than an extra
+  # `includes` per call.
   def self.last(user)
-    view = ObservationView.where(user:).order(last_view: :desc).first
-    view&.observation
+    obs_id = where(user:).order(last_view: :desc).pick(:observation_id)
+    obs_id && Observation.find_by(id: obs_id)
   end
 
   def self.previous(user, observation)
-    view = ObservationView.where(user:).
-           where.not(observation:).order(last_view: :desc).first
-    view&.observation
+    obs_id = where(user:).where.not(observation:).
+             order(last_view: :desc).pick(:observation_id)
+    obs_id && Observation.find_by(id: obs_id)
   end
 end

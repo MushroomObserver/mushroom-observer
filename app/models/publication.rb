@@ -40,7 +40,9 @@ class Publication < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    unless user
+    # Check the FK directly so strict_loading doesn't force an
+    # extra `users` lookup during validation.
+    unless user_id
       errors.add(:user, "missing user") # sign of internal error,
       # should never happen
     end
