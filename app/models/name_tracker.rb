@@ -35,6 +35,18 @@ class NameTracker < AbstractModel
 
   scope :for_user, ->(user) { where(user: user) }
 
+  # Eager-loads everything every NameTracker iteration reaches into.
+  def self.show_includes_tree
+    [:name, :user, :interests]
+  end
+
+  def self.index_includes_tree
+    show_includes_tree
+  end
+
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
+
   # Used as an "opt-in" check-box in the UI form.
   attr_accessor :note_template_enabled
 

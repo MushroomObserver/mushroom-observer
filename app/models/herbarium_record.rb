@@ -97,6 +97,23 @@ class HerbariumRecord < AbstractModel
     search_columns(cols, phrase).distinct
   }
 
+  # Eager-loads the show / edit page (HR record + its herbarium,
+  # user, and the obs panel's matrix-box tree).
+  def self.show_includes_tree
+    [:user, { herbarium: :curators },
+     { observations: Observation.matrix_box_includes }]
+  end
+
+  # Index variant — herbarium + observations.name suffice for the
+  # row label; full matrix-box tree isn't needed. Picked up by
+  # `ApplicationController::Indexes#default_index_includes_for_model`.
+  def self.index_includes_tree
+    [:user, { herbarium: :curators }, { observations: :name }]
+  end
+
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
+
   def herbarium_label
     if initial_det.blank?
       accession_number

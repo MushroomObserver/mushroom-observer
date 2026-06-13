@@ -73,6 +73,22 @@ class Sequence < AbstractModel
     joins(:observation).subquery(:Observation, hash)
   }
 
+  # Eager-loads the show/edit page (sequence + its user + the obs
+  # the sequence belongs to, rendered as a MatrixBox).
+  def self.show_includes_tree
+    [:user, { observation: Observation.matrix_box_includes }]
+  end
+
+  # Index row links to the underlying observation; preload :user and
+  # the obs name. Picked up by
+  # `ApplicationController::Indexes#default_index_includes_for_model`.
+  def self.index_includes_tree
+    [:user, { observation: :name }]
+  end
+
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
+
   ##############################################################################
   #
   #  :section: Matchers

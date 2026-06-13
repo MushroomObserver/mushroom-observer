@@ -74,9 +74,9 @@ module Observations
     end
 
     def set_ivars_for_edit
-      @external_link = ExternalLink.find(params[:id].to_s)
-      @observation = Observation.find(@external_link.observation_id)
-      @site = ExternalSite.find(@external_link.external_site_id)
+      @external_link = ExternalLink.show_includes.find(params[:id].to_s)
+      @observation = @external_link.observation
+      @site = @external_link.external_site
       @sites = [@site]
       @base_urls = { @site.name => @site.base_url }
       @back_object = @observation

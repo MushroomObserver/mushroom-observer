@@ -64,11 +64,10 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      letters: true,
-      num_per_page: 100,
-      include: [{ herbarium: :curators }, { observations: :name }, :user]
-    }.merge(opts)
+    # `:include` falls back to `HerbariumRecord.index_includes_tree`
+    # via the base `instantiated_object_subset`, so we only set the
+    # display-specific opts here.
+    { letters: true, num_per_page: 100 }.merge(opts)
   end
 
   public
@@ -176,17 +175,9 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def find_herbarium_record!
-    @herbarium_record = HerbariumRecord.includes(herbarium_record_includes).
-                        find_by(id: params[:id]) ||
-                        flash_error_and_goto_index(
-                          HerbariumRecord, params[:id]
-                        )
-  end
-
-  # Reuses `Observation.matrix_box_includes` so the obs subtree
-  # matches every other MatrixBox-rendering controller.
-  def herbarium_record_includes
-    [:user, { observations: Observation.matrix_box_includes }]
+    @herbarium_record =
+      HerbariumRecord.show_includes.find_by(id: params[:id]) ||
+      flash_error_and_goto_index(HerbariumRecord, params[:id])
   end
 
   def default_herbarium_record

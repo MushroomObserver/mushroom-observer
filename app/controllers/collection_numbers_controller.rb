@@ -55,10 +55,8 @@ class CollectionNumbersController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      letters: true,
-      num_per_page: 100
-    }.merge(opts)
+    # `:include` falls back to `CollectionNumber.index_includes_tree`.
+    { letters: true, num_per_page: 100 }.merge(opts)
   end
 
   public

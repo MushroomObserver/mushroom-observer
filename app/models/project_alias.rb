@@ -15,6 +15,19 @@ class ProjectAlias < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :project
 
+  # Eager-load both polymorphic ends — show / index pages render
+  # the project breadcrumb plus the alias target.
+  def self.show_includes_tree
+    [:project, :target]
+  end
+
+  def self.index_includes_tree
+    show_includes_tree
+  end
+
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
+
   validates :name, presence: true
   validates :name, uniqueness: { scope: :project_id }
   validates :target, presence: true

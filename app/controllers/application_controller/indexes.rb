@@ -371,13 +371,27 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def instantiated_object_subset(query, display_opts)
     caching = display_opts[:cache] || false
-    include = display_opts[:include] || nil
+    include = display_opts[:include] || default_index_includes_for_model
 
     if caching
       objects_with_only_needed_eager_loads(query, include)
     else
       query.paginate(@pagination_data, include: include)
     end
+  end
+
+  # Falls back to the model's `index_includes_tree` class method
+  # when a controller's `index_display_opts` doesn't specify
+  # `:include` explicitly. Lets a controller override `letters:` /
+  # `num_per_page:` without re-stating its includes tree — the
+  # model is the single source of truth.
+  def default_index_includes_for_model
+    return nil unless controller_model_name
+
+    model = controller_model_name.safe_constantize
+    return nil unless model.respond_to?(:index_includes_tree)
+
+    model.index_includes_tree
   end
 
   # If caching, only uncached objects need to eager_load the includes
@@ -473,7 +487,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id)
-    model.safe_find(id) || flash_error_and_goto_index(model, id)
+    finder = model.respond_to?(:show_includes) ? model.show_includes : model
+    finder.find_by(id: id) || flash_error_and_goto_index(model, id)
   end
 
   def flash_error_and_goto_index(model, id)

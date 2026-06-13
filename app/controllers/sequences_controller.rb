@@ -173,14 +173,10 @@ class SequencesController < ApplicationController
   end
 
   def find_sequence!
-    @sequence = Sequence.includes(sequence_includes).find_by(id: params[:id]) ||
+    @sequence = Sequence.show_includes.find_by(id: params[:id]) ||
                 flash_error_and_goto_index(
                   Sequence, params[:id]
                 )
-  end
-
-  def sequence_includes
-    [{ observation: Observation.matrix_box_includes }]
   end
 
   def figure_out_where_to_go_back_to

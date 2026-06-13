@@ -50,6 +50,20 @@ class ExternalLink < AbstractModel
   scope :observations,
         ->(ids) { where(observation_id: ids) }
 
+  # Eager-loads the show/edit page: user, owning observation, and
+  # the external site (rendered as a link).
+  def self.show_includes_tree
+    [:user, :observation,
+     { external_site: { project: :user_group } }]
+  end
+
+  def self.index_includes_tree
+    show_includes_tree
+  end
+
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
+
   def check_url_syntax
     return if format_url_for_external_site
 

@@ -245,6 +245,15 @@ class Comment < AbstractModel
       or(Comment.search_columns(Comment[:summary], phrase)).distinct
   }
 
+  # Comment iteration always reaches `.user` (author byline) and
+  # `.target` (polymorphic — Observation, Name, etc., used to build
+  # the "comment on X" link).
+  def self.index_includes_tree
+    [:user, :target]
+  end
+
+  scope :index_includes, -> { includes(index_includes_tree) }
+
   # Returns +summary+ for debugging.
   def text_name
     summary.to_s

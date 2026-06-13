@@ -89,9 +89,19 @@ class CollectionNumber < AbstractModel
   # Eager-loads the observations + everything `Components::MatrixBox`
   # reaches into. Reuses `Observation.matrix_box_includes` so this
   # matches observations#index / field_slips show + index.
-  scope :show_includes, lambda {
-    includes(observations: Observation.matrix_box_includes)
-  }
+  def self.show_includes_tree
+    [:user, { observations: Observation.matrix_box_includes }]
+  end
+
+  # Index row only renders the collection number + a brief obs count
+  # link; cheap to preload :user + obs.name. Picked up by
+  # `ApplicationController::Indexes#default_index_includes_for_model`.
+  def self.index_includes_tree
+    [:user, { observations: :name }]
+  end
+
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
 
   def format_name
     "#{name} #{number}"
