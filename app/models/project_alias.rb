@@ -8,10 +8,6 @@ class ProjectAlias < AbstractModel
   # aliases only work in the context of the project (specifically when
   # filling in field slip forms).
 
-  # Surface N+1s on `project_alias.target` / `.project` from view
-  # loops; every caller must eager-load these.
-  self.strict_loading_by_default = true
-
   belongs_to :target, polymorphic: true
   belongs_to :project
 
@@ -25,8 +21,11 @@ class ProjectAlias < AbstractModel
     show_includes_tree
   end
 
-  scope :show_includes, -> { includes(show_includes_tree) }
-  scope :index_includes, -> { includes(index_includes_tree) }
+  # `.strict_loading` on the read scopes (not on the model itself)
+  # surfaces N+1s on every show/index path that fetches via these
+  # scopes, while leaving plain fixture lookups in tests untouched.
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   validates :name, presence: true
   validates :name, uniqueness: { scope: :project_id }

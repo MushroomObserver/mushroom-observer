@@ -44,12 +44,6 @@
 #                     Herbarium.  Called after create.
 #
 class HerbariumRecord < AbstractModel
-  # Surface N+1s on `herbarium_record.observations` / `.user` /
-  # `.herbarium` from view loops; every caller must eager-load
-  # these via the controller's `herbarium_record_includes` or
-  # equivalent.
-  self.strict_loading_by_default = true
-
   belongs_to :herbarium
   belongs_to :user
 
@@ -98,9 +92,12 @@ class HerbariumRecord < AbstractModel
   }
 
   # Eager-loads the show / edit page (HR record + its herbarium,
-  # user, and the obs panel's matrix-box tree).
+  # user, the obs panel's matrix-box tree, and the
+  # `observation_herbarium_records` join needed by `destroy` /
+  # `remove_observation`).
   def self.show_includes_tree
-    [:user, { herbarium: :curators },
+    [:observation_herbarium_records,
+     :user, { herbarium: :curators },
      { observations: Observation.matrix_box_includes }]
   end
 
@@ -111,8 +108,8 @@ class HerbariumRecord < AbstractModel
     [:user, { herbarium: :curators }, { observations: :name }]
   end
 
-  scope :show_includes, -> { includes(show_includes_tree) }
-  scope :index_includes, -> { includes(index_includes_tree) }
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   def herbarium_label
     if initial_det.blank?
@@ -202,14 +199,16 @@ class HerbariumRecord < AbstractModel
 
   # Remove this HerbariumRecord from an Observation and log the action.
   def remove_observation(obs)
-    return unless observations.include?(obs)
+    return unless observation_herbarium_records.exists?(observation_id: obs.id)
 
-    observations.delete(obs)
-    obs.reload.turn_off_specimen_if_no_more_records
+    # Delete the join row directly so strict_loading doesn't fault on
+    # the cascade's `OHR#observation` lookup.
+    observation_herbarium_records.where(observation_id: obs.id).delete_all
+    obs.turn_off_specimen_if_no_more_records
     obs.log(:log_herbarium_record_removed,
             name: accession_at_herbarium,
             touch: true)
-    destroy if observations.empty?
+    destroy unless observation_herbarium_records.exists?
   end
 
   def log_update

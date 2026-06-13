@@ -24,10 +24,6 @@
 #  url::           Actual URL, complete with transport ("http://"), etc.
 #
 class ExternalLink < AbstractModel
-  # Surface N+1s on `external_link.observation` / `.external_site` /
-  # `.user` from view loops; every caller must eager-load these.
-  self.strict_loading_by_default = true
-
   belongs_to :observation
   belongs_to :external_site
   belongs_to :user
@@ -61,8 +57,8 @@ class ExternalLink < AbstractModel
     show_includes_tree
   end
 
-  scope :show_includes, -> { includes(show_includes_tree) }
-  scope :index_includes, -> { includes(index_includes_tree) }
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   def check_url_syntax
     return if format_url_for_external_site

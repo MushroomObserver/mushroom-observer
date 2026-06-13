@@ -511,10 +511,14 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_herbarium_records_section_update
+    # Re-fetch through `show_includes` so the HR panel can read
+    # `obs.herbarium_records` without lazy-loading under the
+    # strict-loading scope.
+    fresh_obs = Observation.show_includes.find(@observation.id)
     render_obs_section_update(
       identifier: "herbarium_records",
       panel: Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
   end

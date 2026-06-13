@@ -1077,10 +1077,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def turn_off_specimen_if_no_more_records
     return unless specimen
-    return unless collection_numbers.empty?
-    return unless herbarium_records.empty?
-    return unless sequences.empty?
-    return if field_slip
+    # SQL `exists?` instead of loading the associations — keeps
+    # the caller from needing to `.reload` (which would drop the
+    # `show_includes` eager-loads from the strict-loading scope).
+    return if observation_collection_numbers.exists?
+    return if observation_herbarium_records.exists?
+    return if sequences.exists?
+    return if field_slip_id
 
     update(specimen: false)
   end

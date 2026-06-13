@@ -44,10 +44,6 @@
 #
 ################################################################################
 class Naming < AbstractModel
-  # Surface N+1s on `naming.observation` / `.name` / `.user` /
-  # `.votes` from view loops; every caller must eager-load these.
-  self.strict_loading_by_default = true
-
   attr_accessor :current_user
 
   belongs_to :observation
@@ -74,8 +70,8 @@ class Naming < AbstractModel
     show_includes_tree
   end
 
-  scope :show_includes, -> { includes(show_includes_tree) }
-  scope :index_includes, -> { includes(index_includes_tree) }
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   # Override the default show_controller
   def self.show_controller

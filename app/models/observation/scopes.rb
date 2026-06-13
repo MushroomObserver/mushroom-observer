@@ -600,8 +600,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         { interests: :user },
         :location,
         { name: [{ synonym: :names }, { descriptions: :user }] },
-        { namings: [:name, :user, :observation,
-                    { votes: [:observation, :user] }] },
+        { namings: Naming.index_includes_tree },
         # `observation_images` is the dependent: :destroy join table
         # that Rails reads on `obs.destroy`. Preloading skips the
         # cascade query under strict_loading.
@@ -626,8 +625,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         { images: [:image_votes, :license, :user] },
         :location,
         { name: [{ synonym: :names }, { descriptions: :user }] },
-        { namings: [:name, :user, :observation,
-                    { votes: [:observation, :user] }] },
+        { namings: Naming.index_includes_tree },
         { projects: :image },
         :thumb_image,
         :user
