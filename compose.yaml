@@ -12,7 +12,6 @@ services:
       - "3000:3000"
 
     environment:
-      RAILS_ENV: development
       DOCKER: "true"
       PARALLEL_WORKERS: "4"
       MO_MYSQL_CONFIG_DIR: /etc/mo-mysql

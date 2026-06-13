@@ -3,7 +3,9 @@ set -e
 
 # Always use the Docker database.yml (TCP) when DATABASE_HOST is set,
 # overwriting any socket-based config from a local dev environment.
-cp db/docker/database.yml config/database.yml
+if [ -n "${DATABASE_HOST:-}" ]; then
+  cp db/docker/database.yml config/database.yml
+fi
 
 # Create config/master.key if absent (dev key matching vagrant default)
 if [ ! -f config/master.key ]; then
@@ -17,7 +19,7 @@ mkdir -p log public/images/thumb public/images/320 public/images/640 \
 touch log/development.log log/test.log log/production.log
 
 # Populate bundle volume on first run
-bundle install
+bundle check || bundle install
 
 # Wait for the database to be reachable
 DB_HOST="${DATABASE_HOST:-db}"
@@ -36,10 +38,11 @@ bin/rails db:prepare
 DB_USER="${DATABASE_USERNAME:-mo}"
 DB_PASS="${DATABASE_PASSWORD:-mo}"
 CNF_DIR="${MO_MYSQL_CONFIG_DIR:-/etc/mo-mysql}"
+DB_NAME_DEV="${DATABASE_NAME:-mo_development}"
+DB_NAME_TEST="${MO_TEST_DATABASE:-mo_test}"
 mkdir -p "$CNF_DIR"
 
-for env in development test; do
-  cat > "$CNF_DIR/mysql-${env}.cnf" <<EOF
+cat > "$CNF_DIR/mysql-development.cnf" <<EOF
 [client]
 host=${DB_HOST}
 port=3306
@@ -47,9 +50,19 @@ user=${DB_USER}
 password=${DB_PASS}
 
 [mysql]
-database=mo_${env}
+database=${DB_NAME_DEV}
 EOF
-done
+
+cat > "$CNF_DIR/mysql-test.cnf" <<EOF
+[client]
+host=${DB_HOST}
+port=3306
+user=${DB_USER}
+password=${DB_PASS}
+
+[mysql]
+database=${DB_NAME_TEST}
+EOF
 
 # Pre-create parallel worker cnf files in config/ (gitignored).
 # ImageScriptTest writes these itself when absent, but only with default
