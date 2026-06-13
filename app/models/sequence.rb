@@ -34,6 +34,10 @@
 #  unique_format_name  name for unorphaned objects
 #
 class Sequence < AbstractModel
+  # Surface N+1s on `sequence.observation` / `.user` from view
+  # loops; every caller must eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :observation
   belongs_to :user
 

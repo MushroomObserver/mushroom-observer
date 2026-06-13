@@ -44,6 +44,10 @@
 #
 ################################################################################
 class Naming < AbstractModel
+  # Surface N+1s on `naming.observation` / `.name` / `.user` /
+  # `.votes` from view loops; every caller must eager-load these.
+  self.strict_loading_by_default = true
+
   attr_accessor :current_user
 
   belongs_to :observation

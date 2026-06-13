@@ -48,6 +48,11 @@
 ################################################################################
 
 class Vote < AbstractModel
+  # Surface N+1s on `vote.user` / `.naming` / `.observation` from
+  # `Observation::NamingConsensus` iteration; every caller must
+  # eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :user
   belongs_to :naming
   belongs_to :observation

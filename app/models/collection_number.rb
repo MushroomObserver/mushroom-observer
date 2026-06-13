@@ -51,6 +51,11 @@
 #  None.
 #
 class CollectionNumber < AbstractModel
+  # Surface N+1s on `collection_number.observations` / `.user` from
+  # view loops; every caller must eager-load these via
+  # `CollectionNumber.show_includes` or equivalent.
+  self.strict_loading_by_default = true
+
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :observations, through: :observation_collection_numbers
   belongs_to :user

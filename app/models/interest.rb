@@ -50,6 +50,10 @@
 ################################################################################
 #
 class Interest < AbstractModel
+  # Surface N+1s on `interest.user` / `.target` from view loops;
+  # every caller must eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :user
   belongs_to :target, polymorphic: true
 
