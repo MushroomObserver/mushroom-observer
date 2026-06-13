@@ -628,6 +628,39 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_confirm_renders_gracefully_when_unlicensed_others_estimate_fails
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+
+    # Total-others request (no license filter) returns 200 with invalid JSON,
+    # triggering JSON::ParserError and the rescue in fetch_unlicensed_others_count.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: "not json")
+    # Licensed estimate returns valid JSON — registered last, matched first.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including(
+        "license" => Inat::Constants::LICENSED_FILTER[:license]
+      )).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "anyone",
+                   consent: 1, import_others: "1" })
+
+    assert_response(:success)
+    assert_template(:confirm)
+    assert_select(
+      "#estimated_count", "3",
+      "Estimate should still show when only unlicensed-others request fails"
+    )
+    assert_select(
+      "#unlicensed_obs_count", "",
+      "Unlicensed count should be blank when total-others estimate fails"
+    )
+  end
+
   def test_create_go_back_with_superform_params
     login(users(:rolf).login)
 
