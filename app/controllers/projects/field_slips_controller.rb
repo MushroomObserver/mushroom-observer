@@ -12,9 +12,11 @@ module Projects
       return unless find_project!
 
       @field_slip_max = field_slip_max
+      @trackers = @project.trackers.order(id: :desc).to_a
       render(Views::Controllers::Projects::FieldSlips::New.new(
                project: @project, user: @user,
-               field_slip_max: @field_slip_max
+               field_slip_max: @field_slip_max,
+               trackers: @trackers
              ), layout: true)
     end
 

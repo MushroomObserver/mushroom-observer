@@ -71,7 +71,7 @@ class GlossaryTerm < AbstractModel
       { thumb_image: :image_votes },
       :rss_log,
       :user,
-      :versions
+      { versions: :user }
     )
   }
 

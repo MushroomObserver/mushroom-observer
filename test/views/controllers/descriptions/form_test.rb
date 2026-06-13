@@ -107,6 +107,25 @@ module Views::Controllers::Descriptions
                   count: 2)
     end
 
+    # Regression for #4491: project/foreign descriptions show the source
+    # name read-only via `.t` (textile-safe HTML). It was emitted with
+    # `plain`, which re-escaped the entities, so a source name with "&"
+    # rendered the double-escaped code "&amp;" instead of "&".
+    def test_locked_source_name_renders_entities_not_codes
+      desc = name_descriptions(:draft_boletus_edulis) # source_type: project
+      desc.source_name = "Bolete & Friends"
+      html = render_form(description: desc)
+
+      # Assert the *visible* read-only source name, not the hidden input's
+      # value= attribute (which carries the same string). Nokogiri's .text
+      # excludes attributes and decodes entities: a correct single-encode
+      # renders the literal "&", a double-escape bug renders the code "&amp;".
+      source_fields = Nokogiri::HTML(html).
+                      at_css("label[for='description_source']").parent
+      assert_includes(source_fields.text, "Bolete & Friends")
+      assert_not_includes(source_fields.text, "Bolete &amp; Friends")
+    end
+
     def test_location_description_form
       html = render_form(description: @new_loc_desc)
 

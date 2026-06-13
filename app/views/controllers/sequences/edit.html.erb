@@ -18,7 +18,7 @@ obs = @sequence.observation
       <%= render(Components::UserLink.new(user: @sequence.user)) %>
     </div>
 
-    <%= render(Components::ObjectFooter.new(user: @user, obj: @sequence)) %>
+    <%= render(Components::VersionsFooter.new(user: @user, obj: @sequence)) %>
   </div>
 
   <div class="col-xs-12 col-sm-5">

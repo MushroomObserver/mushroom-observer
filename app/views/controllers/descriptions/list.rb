@@ -34,10 +34,15 @@ module Views::Controllers::Descriptions
 
     private
 
+    # `@object.descriptions` is expected to be pre-loaded with
+    # `:user` (and friends) by the host page's `show_includes`
+    # scope. The `Name.show_includes` and `Location.show_includes`
+    # scopes carry that — new callers must keep it that way to
+    # avoid an N+1 here.
     def visible_descriptions
       @visible_descriptions ||=
         sort_descriptions(
-          @object.descriptions.includes(:user).select { |d| visible?(d) }
+          @object.descriptions.select { |d| visible?(d) }
         )
     end
 

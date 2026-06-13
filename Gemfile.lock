@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/MushroomObserver/acts_as_versioned
-  revision: 56891f7f915610e9f884e3a932bfb6934303b3b8
+  revision: 6c49beb3e205cbe0a597792eaa9587c931d7d923
   specs:
-    mo_acts_as_versioned (0.6.6)
+    mo_acts_as_versioned (0.8.0)
       activerecord (>= 3.0.9)
 
 GEM
@@ -635,7 +635,7 @@ DEPENDENCIES
   minitest (< 6)
   minitest-reporters
   mission_control-jobs
-  mo_acts_as_versioned (>= 0.6.6)!
+  mo_acts_as_versioned (>= 0.8.0)!
   oauth2
   phlex-rails
   phlex-slotable

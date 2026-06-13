@@ -13,6 +13,17 @@ class CollectionNumbersController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `collection_numbers/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::CollectionNumbers::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user,
+             observation: @observation, error: @error
+           ))
+  end
+
   # Sort options for the index page. Read by `add_sorter` in the
   # view. Each key must resolve to `CollectionNumber.order_by_<key>`.
   def index_sort_options
@@ -63,7 +74,12 @@ class CollectionNumbersController < ApplicationController
     end
 
     @canonical_url = CollectionNumber.show_url(params[:id])
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    @collection_number = find_collection_number_for_show
+    return unless @collection_number
+
+    render(Views::Controllers::CollectionNumbers::Show.new(
+             collection_number: @collection_number, user: @user
+           ))
   end
 
   def new
@@ -75,7 +91,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html
+      format.html { render_new_phlex }
     end
   end
 
@@ -96,7 +112,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html
+      format.html { render_edit_phlex }
     end
   end
 
@@ -132,7 +148,30 @@ class CollectionNumbersController < ApplicationController
 
   def set_ivars_for_edit
     @layout = calc_layout_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    @collection_number = find_collection_number_for_show
+  end
+
+  # Uses `CollectionNumber.show_includes` so the show / edit views
+  # don't re-query when iterating `@collection_number.observations`
+  # (the MatrixTable / MatrixBox render walks down through
+  # `Observation::NamingConsensus` into votes + naming.name).
+  def find_collection_number_for_show
+    CollectionNumber.show_includes.find_by(id: params[:id]) ||
+      flash_error_and_goto_index(CollectionNumber, params[:id])
+  end
+
+  def render_new_phlex
+    render(Views::Controllers::CollectionNumbers::New.new(
+             collection_number: @collection_number,
+             observation: @observation, user: @user
+           ))
+  end
+
+  def render_edit_phlex
+    render(Views::Controllers::CollectionNumbers::Edit.new(
+             collection_number: @collection_number, user: @user,
+             back: @back, back_object: @back_object
+           ))
   end
 
   # create

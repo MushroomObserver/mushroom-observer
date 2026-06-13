@@ -331,7 +331,8 @@ module Name::Scopes
         { comments: :user },
         :correct_spelling,
         { description: [:authors, :reviewer] },
-        { descriptions: [:authors, :editors, :reviewer, :writer_groups] },
+        { descriptions: [:authors, :editors, :reviewer, :user,
+                         :writer_groups] },
         { interests: :user },
         :misspellings,
         # { namings: [:user] },
@@ -339,7 +340,7 @@ module Name::Scopes
         :rss_log,
         { synonym: :names },
         :user,
-        :versions
+        { versions: :user }
       )
     }
   end

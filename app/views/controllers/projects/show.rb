@@ -22,7 +22,7 @@ module Views::Controllers::Projects
       render_summary_panel
       render_actions
       render_comments
-      render(Components::ObjectFooter.new(
+      render(Components::VersionsFooter.new(
                user: @user, obj: @project
              ))
     end

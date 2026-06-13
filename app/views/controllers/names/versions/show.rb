@@ -8,7 +8,7 @@
 # (as captured at this version; if `cls[:source] == :inherited`,
 # annotates with the source-Name / date / editor). Right column:
 # the versions table. Notes panel appears when the historic name
-# has notes; ObjectFooter at the bottom.
+# has notes; VersionsFooter at the bottom.
 module Views::Controllers::Names::Versions
   class Show < Views::Base
     prop :name, ::Name
@@ -16,6 +16,10 @@ module Views::Controllers::Names::Versions
     prop :versions, _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
     # `version` is the requested historic version number.
     prop :version, Integer
+    # User the version's classification was inherited from, if any.
+    # The controller pre-computes it so this view doesn't do a
+    # per-render `User.find_by(...)`.
+    prop :inherited_classification_user, _Nilable(::User)
 
     def view_template
       page_chrome_side_effects
@@ -25,7 +29,7 @@ module Views::Controllers::Names::Versions
         render_right_column
       end
 
-      render(Components::ObjectFooter.new(
+      render(Components::VersionsFooter.new(
                user: @user, obj: @name, versions: @versions
              ))
     end
@@ -101,11 +105,10 @@ module Views::Controllers::Names::Versions
 
     def inherited_classification_text
       src = classification_data[:inherited_from]
-      editor = src[:user_id] && ::User.find_by(id: src[:user_id])
       :show_past_name_classification_inherited.t(
         name: name_link_for_source(src),
         date: src[:edited_at].to_date.to_s,
-        user: editor ? editor.unique_text_name : "—"
+        user: @inherited_classification_user&.unique_text_name || "—"
       )
     end
 

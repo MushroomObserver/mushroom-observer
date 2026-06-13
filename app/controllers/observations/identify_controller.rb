@@ -93,13 +93,14 @@ module Observations
         include: observation_identify_index_includes }.merge(opts)
     end
 
+    # `matrix_box_includes` + identify-specific preloads: name
+    # synonyms (for name comparison), per-user observation_views,
+    # and `naming.name` (the identify queue's naming column).
+    # `:name`, `:namings`, and `:projects` from the shared tree
+    # are merged by Rails' includes hash-merge.
     def observation_identify_index_includes
-      [observation_matrix_box_image_includes,
-       :external_source, :location, { occurrence: :observations },
-       :observation_views,
-       { name: :synonym },
-       { namings: [:name, :votes] },
-       :rss_log, :user]
+      Observation.matrix_box_includes +
+        [:observation_views, { name: :synonym }, { namings: :name }]
     end
   end
 end

@@ -7,16 +7,16 @@ module Components
   # and links to activity logs.
   #
   # @example Basic usage (non-versioned object)
-  #   render(Components::ObjectFooter.new(user: @user, obj: @sequence))
+  #   render(Components::VersionsFooter.new(user: @user, obj: @sequence))
   #
   # @example Versioned object with versions
-  #   render(Components::ObjectFooter.new(
+  #   render(Components::VersionsFooter.new(
   #     user: @user,
   #     obj: @name,
   #     versions: @versions
   #   ))
   #
-  class ObjectFooter < Base
+  class VersionsFooter < Base
     prop :user, _Nilable(User)
     # Polymorphic across many model classes (Article, Description,
     # FieldSlip, GlossaryTerm, Image, Location, Name, Observation,

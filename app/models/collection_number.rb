@@ -51,6 +51,11 @@
 #  None.
 #
 class CollectionNumber < AbstractModel
+  # Surface N+1s on `collection_number.observations` / `.user` from
+  # view loops; every caller must eager-load these via
+  # `CollectionNumber.show_includes` or equivalent.
+  self.strict_loading_by_default = true
+
   has_many :observation_collection_numbers, dependent: :destroy
   has_many :observations, through: :observation_collection_numbers
   belongs_to :user
@@ -79,6 +84,13 @@ class CollectionNumber < AbstractModel
   scope :pattern, lambda { |phrase|
     cols = (CollectionNumber[:name] + CollectionNumber[:number])
     search_columns(cols, phrase)
+  }
+
+  # Eager-loads the observations + everything `Components::MatrixBox`
+  # reaches into. Reuses `Observation.matrix_box_includes` so this
+  # matches observations#index / field_slips show + index.
+  scope :show_includes, lambda {
+    includes(observations: Observation.matrix_box_includes)
   }
 
   def format_name

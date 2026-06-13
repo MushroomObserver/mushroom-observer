@@ -338,23 +338,25 @@ class Name < AbstractModel
   has_many :namings
   has_many :observations
 
-  acts_as_versioned(
-    if_changed: %w[
-      rank
-      text_name
-      search_name
-      sort_name
-      display_name
-      author
-      citation
-      classification
-      deprecated
-      correct_spelling
-      notes
-      lifeform
-      icn_id
-    ]
-  )
+  # Columns whose change creates a new `Name::Version` row.
+  # Companion to the gem's `non_versioned_columns` setting below.
+  VERSIONED_COLUMNS = %w[
+    rank
+    text_name
+    search_name
+    sort_name
+    display_name
+    author
+    citation
+    classification
+    deprecated
+    correct_spelling
+    notes
+    lifeform
+    icn_id
+  ].freeze
+
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS)
   non_versioned_columns.push(
     "created_at",
     "updated_at",

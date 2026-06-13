@@ -10,7 +10,7 @@
 #            lifeform side-by-side, optional notes, alt-descriptions,
 #            optional projects, name footer (authors/editors +
 #            previous-version + export-status), and finally the
-#            ObjectFooter.
+#            VersionsFooter.
 #
 # Side-effects (page chrome) are issued from `view_template` before
 # emission: `Textile.user_register_name`, `add_show_title`,
@@ -43,6 +43,11 @@ module Views::Controllers::Names
     # `0` as “no subtaxa” and only renders the subtaxa-observations link
     # when this value is positive.
     prop :has_subtaxa, Integer, default: 0
+    # Whether the current user already has a NameTracker on this
+    # name (the menu's "edit tracker" vs "new tracker" link picker
+    # toggles on this). Pre-computed by the controller so the view
+    # doesn't run an `exists?` query.
+    prop :has_name_tracker, _Boolean
     prop :subtaxa_query, _Nilable(::Query::Observations), default: nil
     prop :children_query, _Nilable(::Query::Names), default: nil
     prop :first_child, _Nilable(::Name), default: nil
@@ -59,7 +64,7 @@ module Views::Controllers::Names
         render_right_column
       end
 
-      render(Components::ObjectFooter.new(
+      render(Components::VersionsFooter.new(
                user: @user, obj: @name, versions: @versions
              ))
     end
@@ -114,7 +119,8 @@ module Views::Controllers::Names
       render(Show::ObservationsMenu.new(
                name: @name, obss: @obss,
                subtaxa_query: @subtaxa_query,
-               has_subtaxa: @has_subtaxa, user: @user
+               has_subtaxa: @has_subtaxa,
+               has_name_tracker: @has_name_tracker, user: @user
              ))
       render(Show::Nomenclature.new(name: @name, user: @user))
       render_classification_and_lifeform_row

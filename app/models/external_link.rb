@@ -24,6 +24,10 @@
 #  url::           Actual URL, complete with transport ("http://"), etc.
 #
 class ExternalLink < AbstractModel
+  # Surface N+1s on `external_link.observation` / `.external_site` /
+  # `.user` from view loops; every caller must eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :observation
   belongs_to :external_site
   belongs_to :user

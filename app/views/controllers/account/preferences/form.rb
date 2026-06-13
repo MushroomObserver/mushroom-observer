@@ -23,8 +23,9 @@ class Views::Controllers::Account::Preferences::Form <
   # `Metrics/ClassLength` limit.
   include EmailSection
 
-  def initialize(user, licenses:, **)
+  def initialize(user, licenses:, languages:, **)
     @licenses = licenses
+    @languages = languages
     super(user, id: "account_preferences_form", **)
   end
 
@@ -219,7 +220,7 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def locale_values
-    Language.all.map do |lang|
+    @languages.map do |lang|
       name = lang.name
       name += " (beta)" if lang.beta
       [name, lang.locale]

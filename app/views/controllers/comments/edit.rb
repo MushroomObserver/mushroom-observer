@@ -11,6 +11,9 @@ module Views::Controllers::Comments
     prop :comment, ::Comment
     prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
+    # Comments on `target` pre-loaded by the controller, fed into
+    # `CommentsForObject` below.
+    prop :comments, _Array(::Comment)
 
     def view_template
       add_page_title(:comment_edit_title.t(
@@ -32,12 +35,11 @@ module Views::Controllers::Comments
     private
 
     # Mirrors `_object.html.erb`: render the comments-for-object
-    # panel for the target. `@comments` isn't set on the edit
-    # action, so fall back to a fresh fetch.
+    # panel for the target.
     def render_object_panel
       render(CommentsForObject.new(
                object: @target,
-               comments: ::Comment.where(target: @target).to_a,
+               comments: @comments,
                user: @user, editable: false, limit: 10
              ))
     end
