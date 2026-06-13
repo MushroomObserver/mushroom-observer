@@ -678,6 +678,33 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_go_back_from_confirm_restores_original_url
+    user = users(:rolf)
+    original_url = "#{INAT_SITE_OBS_URL}?project_id=291058&place_id=5"
+    normalized = "place_id=5&project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: {
+           go_back: 1,
+           inat_import_confirm: {
+             inat_username: "rolf_inat_user",
+             inat_ids: "",
+             inat_url: normalized,
+             original_inat_url: original_url,
+             import_all: "",
+             consent: "1"
+           }
+         })
+
+    assert_response(:success)
+    url_field = css_select("input#inat_import_inat_url").first
+    assert_not_nil(url_field, "inat_url input field not found in response")
+    assert_equal(original_url, url_field["value"],
+                 "Go Back must restore the original URL, not the " \
+                 "normalized query string")
+  end
+
   def test_create_confirmation_estimate_unavailable
     user = users(:rolf)
     inat_username = "rolf"

@@ -104,6 +104,7 @@ module Views::Controllers::InatImports
       hidden_field(:consent)
       hidden_field(:import_others)
       hidden_field(:inat_url)
+      hidden_field(:original_inat_url)
       hidden_field(:skip_inat_update)
     end
 

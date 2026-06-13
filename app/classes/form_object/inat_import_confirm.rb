@@ -9,5 +9,6 @@ class FormObject::InatImportConfirm < FormObject::Base
   attribute :consent, :string
   attribute :import_others, :string
   attribute :inat_url, :string
+  attribute :original_inat_url, :string
   attribute :skip_inat_update, :string
 end

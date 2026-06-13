@@ -99,8 +99,6 @@ class InatImportsController < ApplicationController
     request_inat_user_authorization
   end
 
-  # ---------------------------------
-
   private
 
   def confirm_import
@@ -123,6 +121,7 @@ class InatImportsController < ApplicationController
       inat_username: params[:inat_username],
       inat_ids: params[:inat_ids],
       inat_url: params[:inat_url],
+      original_inat_url: params[:original_inat_url],
       import_all: params[:all],
       consent: params[:consent],
       import_others: (import_others? ? "1" : nil),
@@ -144,6 +143,7 @@ class InatImportsController < ApplicationController
     merge_form_param(confirm, :inat_username)
     merge_form_param(confirm, :inat_ids)
     merge_form_param(confirm, :inat_url)
+    merge_form_param(confirm, :original_inat_url)
     merge_form_param(confirm, :consent)
     merge_form_param(confirm, :import_others)
     merge_form_param(confirm, :skip_inat_update)
@@ -174,12 +174,16 @@ class InatImportsController < ApplicationController
     FormObject::InatImport.new(
       inat_username: params[:inat_username],
       inat_ids: params[:inat_ids],
-      inat_url: params[:inat_url],
-      all: ("1" if params[:all] == "1"),
-      consent: ("1" if params[:consent] == "1"),
-      import_others: ("1" if params[:import_others] == "1"),
-      skip_inat_update: ("1" if params[:skip_inat_update] == "1")
+      inat_url: params[:original_inat_url].presence || params[:inat_url],
+      all: flag_param(:all),
+      consent: flag_param(:consent),
+      import_others: flag_param(:import_others),
+      skip_inat_update: flag_param(:skip_inat_update)
     )
+  end
+
+  def flag_param(key)
+    "1" if params[key] == "1"
   end
 
   # Superform namespaces fields under the model key.
@@ -215,14 +219,14 @@ class InatImportsController < ApplicationController
   end
 
   # Normalize params[:inat_url] in-place: convert any observation search URL
-  # to a cleaned API query string. Skips if the value is already a query
-  # string (no "://" — happens when the confirm form re-submits it).
+  # to a cleaned query string. Saves the original so Go Back can restore it.
   def normalize_inat_url_param!
     return unless listing_url?
     return unless params[:inat_url].include?("://")
 
     normalizer = url_normalizer(params[:inat_url])
     warn_about_ignored_url_params(normalizer)
+    params[:original_inat_url] = params[:inat_url]
     params[:inat_url] = normalizer.normalize.to_s
   end
 
