@@ -73,8 +73,8 @@ class Inat
     # observations that are licensed, and subtract from total to get the
     # unlicensed count.
     LICENSED_FILTER =
-      { license: "license=cc0,cc-by,cc-by-nc,cc-by-nd,cc-by-nc-nd," \
-                 "cc-by-sa,cc-by-nc-sa,cc-by-nc-nd-sa" }.freeze
+      { license: "cc0,cc-by,cc-by-nc,cc-by-nd,cc-by-nc-nd" \
+                 "cc-by-sa,cc-by-nc-sa" }.freeze
 
     # Kept for backwards compatibility; some callers may still reference this.
     IMPORT_FILTER_PARAMS = BASE_FILTER_PARAMS.merge(LICENSED_FILTER).freeze
