@@ -164,19 +164,27 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     joins(:admin_group_users).where(user: user_id)
   }
 
-  scope :show_includes, lambda {
-    strict_loading.includes(
-      { admin_group: :users },
-      { comments: [:user, :target] },
-      :image,
-      :location,
-      { species_lists: [:location, :projects, :user] },
-      :target_locations,
-      :target_names,
-      :user,
-      { user_group: :users }
-    )
-  }
+  # Subtree needed to render `Tab::Project::Banner` (image,
+  # admin/user group membership, species-lists/names/locations
+  # counts via the `Tab::Project::*` POROs).
+  def self.banner_includes_tree
+    [:image,
+     { admin_group: :users },
+     { user_group: :users },
+     :species_lists,
+     :target_locations,
+     :target_names]
+  end
+
+  def self.show_includes_tree
+    [{ comments: [:user, :target] },
+     :location,
+     { species_lists: [:location, :projects, :user] },
+     :user] +
+      banner_includes_tree
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
   scope :violations_includes, lambda {
     strict_loading.includes(
       { observations: [:location, :name, :user] },

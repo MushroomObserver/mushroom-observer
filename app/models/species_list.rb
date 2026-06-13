@@ -162,8 +162,14 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :show_includes, lambda {
     strict_loading.includes(
-      { comments: :user },
-      { observations: :namings }
+      { comments: [:user, :target] },
+      :interests,
+      :location,
+      { observations: :namings },
+      :project_species_lists,
+      { projects: Project.banner_includes_tree },
+      :rss_log,
+      :user
     )
   }
 

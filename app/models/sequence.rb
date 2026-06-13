@@ -284,7 +284,9 @@ class Sequence < AbstractModel
 
   # array of other Sequences in same Observation
   def other_sequences_same_obs
-    observation.try(:sequences) ? observation.sequences - [self] : []
+    return [] unless observation_id
+
+    Sequence.where(observation_id:).where.not(id:).to_a
   end
 
   # Validate proper formatting of bases

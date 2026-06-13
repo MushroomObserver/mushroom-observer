@@ -458,10 +458,11 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_collection_numbers_section_update
+    fresh_obs = Observation.show_includes.find(@observation.id)
     render_obs_section_update(
       identifier: "collection_numbers",
       panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
   end

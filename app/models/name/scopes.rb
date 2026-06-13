@@ -328,14 +328,14 @@ module Name::Scopes
 
     scope :show_includes, lambda {
       strict_loading.includes(
-        { comments: :user },
+        { comments: [:user, :target] },
         :correct_spelling,
-        { description: [:authors, :reviewer] },
+        { description: [:authors, :reviewer, :interests] },
         { descriptions: [:authors, :editors, :reviewer, :user,
-                         :writer_groups] },
-        :interests,
+                         :writer_groups, :interests] },
+        { interests: :user },
         :misspellings,
-        :name_trackers,
+        { name_trackers: [:user, :name] },
         { namings: [:user, :name, :observation] },
         { observations: [:location, :thumb_image, :user] },
         :rss_log,

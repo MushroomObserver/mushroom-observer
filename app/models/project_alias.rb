@@ -11,10 +11,11 @@ class ProjectAlias < AbstractModel
   belongs_to :target, polymorphic: true
   belongs_to :project
 
-  # Eager-load both polymorphic ends — show / index pages render
-  # the project breadcrumb plus the alias target.
+  # Show / index pages render the project banner plus the alias
+  # target. Reuse `Project.banner_includes_tree` so the banner
+  # eager-loads stay in one place.
   def self.show_includes_tree
-    [:project, :target]
+    [{ project: Project.banner_includes_tree }, :target]
   end
 
   def self.index_includes_tree

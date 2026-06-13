@@ -83,9 +83,13 @@ class CollectionNumber < AbstractModel
 
   # Eager-loads the observations + everything `Components::MatrixBox`
   # reaches into. Reuses `Observation.matrix_box_includes` so this
-  # matches observations#index / field_slips show + index.
+  # matches observations#index / field_slips show + index. Includes
+  # the `observation_collection_numbers` join (with `:observation`
+  # preloaded) so destroy / `remove_observation` paths don't
+  # lazy-load it.
   def self.show_includes_tree
-    [:user, { observations: Observation.matrix_box_includes }]
+    [{ observation_collection_numbers: :observation },
+     :user, { observations: Observation.matrix_box_includes }]
   end
 
   # Index row only renders the collection number + a brief obs count
@@ -135,7 +139,7 @@ class CollectionNumber < AbstractModel
     return unless observations.include?(obs)
 
     observations.delete(obs)
-    obs.reload.turn_off_specimen_if_no_more_records
+    obs.turn_off_specimen_if_no_more_records
     obs.log(:log_collection_number_removed, name: format_name, touch: true)
     destroy if observations.empty?
   end

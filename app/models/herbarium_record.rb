@@ -93,10 +93,11 @@ class HerbariumRecord < AbstractModel
 
   # Eager-loads the show / edit page (HR record + its herbarium,
   # user, the obs panel's matrix-box tree, and the
-  # `observation_herbarium_records` join needed by `destroy` /
-  # `remove_observation`).
+  # `observation_herbarium_records` join — with `:observation`
+  # preloaded on the join so `observations.delete(obs)` doesn't
+  # lazy-load the row's `:observation` during cascade).
   def self.show_includes_tree
-    [:observation_herbarium_records,
+    [{ observation_herbarium_records: :observation },
      :user, { herbarium: :curators },
      { observations: Observation.matrix_box_includes }]
   end
@@ -199,16 +200,14 @@ class HerbariumRecord < AbstractModel
 
   # Remove this HerbariumRecord from an Observation and log the action.
   def remove_observation(obs)
-    return unless observation_herbarium_records.exists?(observation_id: obs.id)
+    return unless observations.include?(obs)
 
-    # Delete the join row directly so strict_loading doesn't fault on
-    # the cascade's `OHR#observation` lookup.
-    observation_herbarium_records.where(observation_id: obs.id).delete_all
+    observations.delete(obs)
     obs.turn_off_specimen_if_no_more_records
     obs.log(:log_herbarium_record_removed,
             name: accession_at_herbarium,
             touch: true)
-    destroy unless observation_herbarium_records.exists?
+    destroy if observations.empty?
   end
 
   def log_update

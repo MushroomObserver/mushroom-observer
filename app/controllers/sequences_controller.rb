@@ -310,10 +310,11 @@ class SequencesController < ApplicationController
   end
 
   def render_sequences_section_update
+    fresh_obs = Observation.show_includes.find(@observation.id)
     render_obs_section_update(
       identifier: "sequences",
       panel: Views::Controllers::Observations::Show::SequencesPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
   end
