@@ -191,6 +191,14 @@
 #                       before object is created.
 #
 class User < AbstractModel # rubocop:disable Metrics/ClassLength
+  # Surface N+1s on `user.*` from view loops (image, location,
+  # license, projects, user_stats, etc.); every caller must
+  # eager-load these via the controller's `show_includes` or
+  # equivalent. User is the high-traffic risky-tier model from
+  # #4510 — expect this PR to surface paths that need eager-load
+  # additions before it can land.
+  self.strict_loading_by_default = true
+
   # Enums: Do not change the integer associated with a value
   # First value is the default
   enum :thumbnail_size, { thumbnail: 1, small: 2 },

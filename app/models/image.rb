@@ -226,6 +226,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   require("mimemagic")
   require("fastimage")
 
+  # Surface N+1s on `image.user` / `.license` / `.projects` /
+  # `.image_votes` / `.observations` from view loops; every caller
+  # must eager-load these via the controller's `show_includes` or
+  # `Observation.matrix_box_includes` (already covers the obs-show
+  # path through `{ thumb_image: [:image_votes, :license, :projects,
+  # :user] }`).
+  self.strict_loading_by_default = true
+
   include Scopes
 
   has_many :glossary_term_images, dependent: :destroy
