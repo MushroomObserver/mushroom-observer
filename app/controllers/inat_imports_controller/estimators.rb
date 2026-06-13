@@ -74,8 +74,11 @@ module InatImportsController::Estimators
     import_estimate_query_args.merge(LICENSED_FILTER)
   end
 
-  # Strip :id — PageParser drops it in URL mode, so estimates must match.
+  # Strip MO-controlled params so estimates match actual import behavior.
+  # Normal URL submissions are cleaned by normalize_inat_url_param! first;
+  # this guards against raw query strings (no "://") that bypass it.
   def url_query_args
-    Rack::Utils.parse_query(params[:inat_url].to_s).symbolize_keys.except(:id)
+    strip = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym)
+    Rack::Utils.parse_query(params[:inat_url].to_s).symbolize_keys.except(*strip)
   end
 end
