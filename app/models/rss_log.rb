@@ -173,13 +173,14 @@ class RssLog < AbstractModel
       fk = send(:"#{type}_id")
       next unless fk
 
-      return association(type).loaded? ? send(type) : load_target_by_fk(type, fk)
+      return association(type).loaded? ? send(type) : load_target_by_fk(type,
+                                                                        fk)
     end
     nil
   end
 
-  def load_target_by_fk(type, fk)
-    type.to_s.classify.constantize.find_by(id: fk)
+  def load_target_by_fk(type, foreign_key)
+    type.to_s.classify.constantize.find_by(id: foreign_key)
   end
 
   # Returns the associated object's id, or nil if it's an orphan.

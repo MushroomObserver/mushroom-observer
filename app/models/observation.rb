@@ -298,6 +298,38 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
      { occurrence: :observations }, :projects, :rss_log, :user]
   end
 
+  # Subtree consumed by `Observation.show_includes`. The
+  # `Descriptions::List#visible?` path reads each description's
+  # `.user`, so `name: { descriptions: :user }` avoids N+1 per
+  # description on the show page. The `observation_images: :image`
+  # polymorphic preload skips the `images.delete` cascade query.
+  def self.show_includes_tree
+    [:collector_user,
+     { collection_numbers: :user },
+     { comments: Comment.index_includes_tree },
+     { external_links: { external_site: { project: :user_group } } },
+     { herbarium_records: [{ herbarium: :curators }, :user] },
+     { images: [:image_votes, :license, :projects, :user] },
+     { interests: :user },
+     :location,
+     { name: [{ synonym: :names }, { descriptions: :user },
+              :interests, :description] },
+     { namings: Naming.index_includes_tree },
+     { observation_images: :image },
+     :observation_collection_numbers,
+     :observation_herbarium_records,
+     :observation_views,
+     :project_observations,
+     :species_list_observations,
+     { occurrence: [:field_slip, :observations] },
+     { projects: [{ admin_group: :users }, :image] },
+     :rss_log,
+     { sequences: :user },
+     { species_lists: [:location, :projects, :user] },
+     :thumb_image,
+     :user]
+  end
+
   # Only the field-slip flow builds observations this way, so the
   # collector default-to-creator is always skipped: a foray recorder is
   # never auto-claimed as collector. The caller assigns the resolved

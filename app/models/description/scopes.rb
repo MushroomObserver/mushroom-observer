@@ -50,11 +50,11 @@ module Description::Scopes
         :editors,
         { reader_groups: { users: :user_groups } },
         { writer_groups: { users: :user_groups } },
-        { :"#{prefix}_admins" => :user_group },
-        { :"#{prefix}_authors" => :user },
-        { :"#{prefix}_editors" => :user },
-        { :"#{prefix}_readers" => :user_group },
-        { :"#{prefix}_writers" => :user_group }
+        { "#{prefix}_admins": :user_group },
+        { "#{prefix}_authors": :user },
+        { "#{prefix}_editors": :user },
+        { "#{prefix}_readers": :user_group },
+        { "#{prefix}_writers": :user_group }
       ]
     end
   end

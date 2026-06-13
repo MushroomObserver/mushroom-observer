@@ -39,7 +39,7 @@ module Names::Synonyms
       # + rss_log + interests subtrees that `save_with_log`'s
       # `notify_users` chain reaches into.
       ids = @name.approved_synonyms.map(&:id)
-      Name.show_includes.where(id: ids).each do |n|
+      Name.show_includes.where(id: ids).find_each do |n|
         n.change_deprecated(true)
         n.save_with_log(@user, :log_name_deprecated,
                         other: @name.real_search_name)

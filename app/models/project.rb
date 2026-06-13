@@ -347,12 +347,24 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     return false unless user
     return true if obj.user_id == user.id
 
-    project_ids = obj.association(:projects).loaded? ? obj.projects.map(&:id) : obj.project_ids
+    project_ids = obj_project_ids(obj)
     return false if project_ids.empty?
 
+    user_admin_via_project?(project_ids, user, obj.user)
+  end
+
+  def self.obj_project_ids(obj)
+    if obj.association(:projects).loaded?
+      obj.projects.map(&:id)
+    else
+      obj.project_ids
+    end
+  end
+
+  def self.user_admin_via_project?(project_ids, user, owner)
     group_ids = user.user_group_ids
-    Project.where(id: project_ids).each do |project|
-      next unless project.can_edit_content?(obj.user)
+    Project.where(id: project_ids).find_each do |project|
+      next unless project.can_edit_content?(owner)
       return true if group_ids.member?(project.admin_group_id)
     end
     false
