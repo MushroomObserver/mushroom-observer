@@ -201,11 +201,11 @@ module Location::Scopes
       strict_loading.includes(
         { comments: :user },
         { description: { comments: :user } },
-        { descriptions: [:authors, :editors] },
+        { descriptions: [:authors, :editors, :user] },
         :interests,
         :observations,
         :rss_log,
-        :versions
+        { versions: :user }
       )
     }
   end

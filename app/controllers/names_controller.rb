@@ -186,6 +186,12 @@ class NamesController < ApplicationController
 
     init_projects_ivar
     init_related_query_ivars
+    @has_name_tracker = if @user
+                          NameTracker.where(name_id: @name.id,
+                                            user_id: @user.id).exists?
+                        else
+                          false
+                        end
 
     render(Views::Controllers::Names::Show.new(
              name: @name, user: @user,
@@ -193,6 +199,7 @@ class NamesController < ApplicationController
              description: @name.description,
              comments: @comments, obss: @obss,
              has_subtaxa: @has_subtaxa,
+             has_name_tracker: @has_name_tracker,
              subtaxa_query: @subtaxa_query,
              children_query: @children_query,
              first_child: @first_child,

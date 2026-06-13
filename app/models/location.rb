@@ -106,21 +106,32 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
 
-  acts_as_versioned(
-    if_changed: %w[
-      name
-      north
-      south
-      west
-      east
-      high
-      low
-      notes
-      box_area
-      center_lat
-      center_lng
-    ]
-  )
+  # Columns whose change creates a new `Location::Version` row.
+  # Companion to the gem's `non_versioned_columns` setting below.
+  VERSIONED_COLUMNS = %w[
+    name
+    north
+    south
+    west
+    east
+    high
+    low
+    notes
+    box_area
+    center_lat
+    center_lng
+  ].freeze
+
+  # See `Name` for the rationale behind the `:extend` block — same
+  # pattern wires `belongs_to :user` onto `Location::Version` so
+  # `show_includes` can carry `{ versions: :user }`.
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS) do
+    def self.included(base)
+      return if base.reflect_on_association(:user)
+
+      base.belongs_to(:user, class_name: "::User", optional: true)
+    end
+  end
   non_versioned_columns.push(
     "created_at",
     "updated_at",

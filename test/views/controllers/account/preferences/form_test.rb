@@ -215,7 +215,8 @@ class Views::Controllers::Account::Preferences::FormTest <
     # produce no field. The form raises to surface the bug instead.
     fake = Struct.new(:type, :sym).new(:not_a_real_type, :bogus)
     form = Views::Controllers::Account::Preferences::Form.new(
-      @user, licenses: License.available_names_and_ids(@user&.license)
+      @user, licenses: License.available_names_and_ids(@user&.license),
+             languages: Language.all.to_a
     )
     assert_raises(RuntimeError) do
       form.send(:render_filter_field, fake)
@@ -333,7 +334,7 @@ class Views::Controllers::Account::Preferences::FormTest <
   def render_form
     licenses = License.available_names_and_ids(@user&.license)
     render(Views::Controllers::Account::Preferences::Form.new(
-             @user, licenses: licenses
+             @user, licenses: licenses, languages: Language.all.to_a
            ))
   end
 

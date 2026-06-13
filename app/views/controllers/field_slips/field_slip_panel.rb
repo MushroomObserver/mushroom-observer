@@ -111,9 +111,12 @@ module Views::Controllers::FieldSlips
       br
     end
 
+    # Reads `@field_slip.observations` without running a query —
+    # the controller eager-loads `occurrence: { observations: [...]}`
+    # at lookup time, so this hits the cached collection. New
+    # callers of `FieldSlipPanel` must preserve that contract.
     def render_observations_section
-      all_obs = @field_slip.observations.
-                includes(:name, :user, :thumb_image).to_a
+      all_obs = @field_slip.observations.to_a
       strong { plain("#{:OBSERVATIONS.t}:") }
       if all_obs.any?
         render_observations_matrix(all_obs)

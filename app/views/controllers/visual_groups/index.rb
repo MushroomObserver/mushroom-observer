@@ -6,10 +6,12 @@
 module Views::Controllers::VisualGroups
   class Index < Views::Base
     prop :visual_model, VisualModel
+    prop :visual_groups, _Array(VisualGroup)
 
     def view_template
       render(Views::Controllers::VisualModels::VisualGroupTable.new(
-               visual_model: @visual_model
+               visual_model: @visual_model,
+               visual_groups: @visual_groups
              ))
     end
   end

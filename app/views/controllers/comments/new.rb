@@ -12,6 +12,9 @@ module Views::Controllers::Comments
     prop :comment, ::Comment
     prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
+    # Comments on `target` pre-loaded by the controller, fed into
+    # `CommentsForObject` below.
+    prop :comments, _Array(::Comment)
 
     def view_template
       container_class(:full)
@@ -40,7 +43,7 @@ module Views::Controllers::Comments
     def render_object_panel
       render(CommentsForObject.new(
                object: @target,
-               comments: ::Comment.where(target: @target).to_a,
+               comments: @comments,
                user: @user, editable: false, limit: 10
              ))
     end

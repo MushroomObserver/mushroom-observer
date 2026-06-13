@@ -36,7 +36,7 @@ class ObjectFooterTest < ComponentTestCase
       updated_at: Time.zone.parse("2024-01-20 15:30:00")
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: nil,
                               obj: obj
                             ))
@@ -53,7 +53,7 @@ class ObjectFooterTest < ComponentTestCase
       user: creator
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: users(:mary),
                               obj: obj
                             ))
@@ -65,7 +65,7 @@ class ObjectFooterTest < ComponentTestCase
   def test_non_versioned_object_without_timestamps
     obj = TestObject.new(created_at: nil, updated_at: nil)
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: nil,
                               obj: obj
                             ))
@@ -89,7 +89,7 @@ class ObjectFooterTest < ComponentTestCase
     version3 = TestVersion.new(user_id: users(:katrina).id)
     versions = [version1, version2, version3]
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj,
                               versions: versions
@@ -116,7 +116,7 @@ class ObjectFooterTest < ComponentTestCase
     version2 = TestVersion.new(user_id: nil) # No user_id
     versions = [version1, version2]
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj,
                               versions: versions
@@ -146,7 +146,7 @@ class ObjectFooterTest < ComponentTestCase
     version3 = TestVersion.new(user_id: katrina.id)
     versions = [version1, version2, version3]
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: rolf,
                               obj: obj,
                               versions: versions
@@ -174,7 +174,7 @@ class ObjectFooterTest < ComponentTestCase
       TestVersion.new(user_id: users(:dick).id)
     ]
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj,
                               versions: versions
@@ -197,7 +197,7 @@ class ObjectFooterTest < ComponentTestCase
       num_views: 1
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj
                             ))
@@ -218,7 +218,7 @@ class ObjectFooterTest < ComponentTestCase
       num_views: 42
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj
                             ))
@@ -236,7 +236,7 @@ class ObjectFooterTest < ComponentTestCase
       last_viewed_by_time: Time.zone.parse("2024-01-18 12:00:00")
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj
                             ))
@@ -254,7 +254,7 @@ class ObjectFooterTest < ComponentTestCase
       last_viewed_by_time: nil
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj
                             ))
@@ -270,7 +270,7 @@ class ObjectFooterTest < ComponentTestCase
       rss_log_id: 123
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: nil,
                               obj: obj
                             ))
@@ -287,7 +287,7 @@ class ObjectFooterTest < ComponentTestCase
       rss_log_id: nil
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: nil,
                               obj: obj
                             ))
@@ -301,7 +301,7 @@ class ObjectFooterTest < ComponentTestCase
     name = names(:fungi)
     versions = name.versions.to_a
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: users(:rolf),
                               obj: name,
                               versions: versions
@@ -316,7 +316,7 @@ class ObjectFooterTest < ComponentTestCase
     location = locations(:albion)
     versions = location.versions.to_a
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: users(:rolf),
                               obj: location,
                               versions: versions
@@ -331,7 +331,7 @@ class ObjectFooterTest < ComponentTestCase
     # Pass the collection proxy directly, not converted to array
     versions = name.versions
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: users(:rolf),
                               obj: name,
                               versions: versions
@@ -348,7 +348,7 @@ class ObjectFooterTest < ComponentTestCase
       user: users(:rolf)
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: users(:rolf),
                               obj: obj,
                               versions: []
@@ -364,7 +364,7 @@ class ObjectFooterTest < ComponentTestCase
       created_at: Time.zone.parse("2024-01-15 10:00:00")
     )
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: nil,
                               obj: obj
                             ))
@@ -384,7 +384,7 @@ class ObjectFooterTest < ComponentTestCase
     version1 = TestVersion.new(user_id: user.id)
     versions = [version1]
 
-    html = render_component(Components::ObjectFooter.new(
+    html = render_component(Components::VersionsFooter.new(
                               user: user,
                               obj: obj,
                               versions: versions

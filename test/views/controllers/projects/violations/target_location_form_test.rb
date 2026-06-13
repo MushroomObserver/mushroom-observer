@@ -190,7 +190,8 @@ module Views::Controllers::Projects::Violations
       )
 
       html = render(TargetLocationForm.new(
-                      obs: obs, project: @project
+                      obs: obs, project: @project,
+                      existing_locations: existing_for(obs)
                     ))
 
       assert_html(html, "input[type='radio'][disabled]")
@@ -225,7 +226,8 @@ module Views::Controllers::Projects::Violations
       )
 
       html = render(TargetLocationForm.new(
-                      obs: obs, project: @project
+                      obs: obs, project: @project,
+                      existing_locations: existing_for(obs)
                     ))
 
       encoded = "Unique+County+X42%2C+California%2C+USA"
@@ -249,7 +251,8 @@ module Views::Controllers::Projects::Violations
       $stderr = stderr_io
       begin
         render(TargetLocationForm.new(
-                 obs: obs, project: @project
+                 obs: obs, project: @project,
+                 existing_locations: existing_for(obs)
                ))
       ensure
         $stderr = original_stderr
@@ -261,8 +264,17 @@ module Views::Controllers::Projects::Violations
 
     def render_form
       render(TargetLocationForm.new(
-               obs: @obs, project: @project
+               obs: @obs, project: @project,
+               existing_locations: existing_for(@obs)
              ))
+    end
+
+    # Mirrors `Projects::ViolationsController#lookup_existing_target_suffixes` —
+    # `TargetLocationForm` requires `existing_locations:` so the form
+    # doesn't run a query in `view_template`.
+    def existing_for(obs)
+      suffixes = TargetLocationForm.suffixes_for(obs)
+      Location.where(name: suffixes).index_by(&:name)
     end
 
     # Lightweight stand-in: TargetLocationForm.suffixes_for only reads

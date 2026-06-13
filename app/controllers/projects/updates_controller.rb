@@ -93,12 +93,7 @@ module Projects
       scope.
         offset(pagination.from).
         limit(pagination.num_per_page).
-        includes(
-          observation_matrix_box_image_includes,
-          :external_source, :location, :name, :rss_log, :user,
-          { namings: :votes },
-          { occurrence: :observations }, :projects
-        )
+        includes(Observation.matrix_box_includes)
     end
 
     def require_admin

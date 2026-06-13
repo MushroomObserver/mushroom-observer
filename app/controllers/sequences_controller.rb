@@ -180,8 +180,7 @@ class SequencesController < ApplicationController
   end
 
   def sequence_includes
-    [{ observation: [:external_source,
-                     observation_matrix_box_image_includes] }]
+    [{ observation: Observation.matrix_box_includes }]
   end
 
   def figure_out_where_to_go_back_to

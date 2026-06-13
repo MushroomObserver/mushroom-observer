@@ -71,13 +71,15 @@ module Components
       end
     end
 
-    # Renders authors and editors for non-description objects
+    # Renders authors and editors for non-description objects.
+    # Reads editors from `versions.map(&:user)` — the host page's
+    # `show_includes` scope eager-loads `{ versions: :user }`, so
+    # no DB queries here.
     def non_description_authors_and_editors
       type = @obj.type_tag
       versions = @versions || []
 
-      editor_ids = versions.map(&:user_id).uniq - [@obj.user_id]
-      editors_list = User.where(id: editor_ids).to_a
+      editors_list = versions.filter_map(&:user).uniq - [@obj.user]
 
       p do
         render_user_list(:"show_#{type}_creator", [@obj.user])

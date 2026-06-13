@@ -32,12 +32,18 @@ class AuthorsAndEditorsTest < ComponentTestCase
     end
   end
 
-  # Test double for version objects
+  # Test double for version objects. Matches the
+  # `mo_acts_as_versioned`-wired `belongs_to :user` API the component
+  # now reads via `versions.map(&:user)`.
   class TestVersion
     attr_reader :user_id
 
     def initialize(user_id:)
       @user_id = user_id
+    end
+
+    def user
+      User.find_by(id: @user_id)
     end
   end
 

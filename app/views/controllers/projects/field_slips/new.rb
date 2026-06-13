@@ -4,11 +4,12 @@ module Views::Controllers::Projects::FieldSlips
   # Phlex view for the field slips form page.
   # Replaces field_slips/new.html.erb.
   class New < Views::Base
-    def initialize(project:, user:, field_slip_max:)
+    def initialize(project:, user:, field_slip_max:, trackers:)
       super()
       @project = project
       @user = user
       @field_slip_max = field_slip_max
+      @trackers = trackers
     end
 
     def view_template
@@ -72,7 +73,7 @@ module Views::Controllers::Projects::FieldSlips
     # the entire `<tr>` per tracker via `TrackerRow`.
     def render_tracker_table
       render(Components::Table.new(
-               @project.trackers.order(id: :desc),
+               @trackers,
                class: "mt-3", tbody_id: "field_slip_job_trackers"
              )) do |table|
         define_tracker_columns(table)

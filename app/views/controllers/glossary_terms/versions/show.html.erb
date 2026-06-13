@@ -24,4 +24,4 @@ column_classes(:six)
 <% end %>
 <!--.row-->
 
-<%= render(Components::ObjectFooter.new(user: @user, obj: @glossary_term, versions: @versions)) %>
+<%= render(Components::VersionsFooter.new(user: @user, obj: @glossary_term, versions: @versions)) %>

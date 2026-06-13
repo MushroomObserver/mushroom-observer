@@ -81,6 +81,13 @@ class CollectionNumber < AbstractModel
     search_columns(cols, phrase)
   }
 
+  # Eager-loads the observations + everything `Components::MatrixBox`
+  # reaches into. Reuses `Observation.matrix_box_includes` so this
+  # matches observations#index / field_slips show + index.
+  scope :show_includes, lambda {
+    includes(observations: Observation.matrix_box_includes)
+  }
+
   def format_name
     "#{name} #{number}"
   end

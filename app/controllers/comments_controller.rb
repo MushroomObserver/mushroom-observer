@@ -9,7 +9,7 @@
 #  update::
 #  destroy::
 #
-class CommentsController < ApplicationController
+class CommentsController < ApplicationController # rubocop:disable Metrics/ClassLength
   before_action :login_required
   before_action :store_location, only: [:show]
 
@@ -273,14 +273,29 @@ class CommentsController < ApplicationController
 
   def render_phlex_new
     render(Views::Controllers::Comments::New.new(
-             comment: @comment, target: @target, user: @user
+             comment: @comment, target: @target, user: @user,
+             comments: load_target_comments
            ))
   end
 
   def render_phlex_edit
     render(Views::Controllers::Comments::Edit.new(
-             comment: @comment, target: @target, user: @user
+             comment: @comment, target: @target, user: @user,
+             comments: load_target_comments
            ))
+  end
+
+  # Comments-for-target list used by the read-only `CommentsForObject`
+  # block on both the `new` and `edit` Phlex pages. Pulled into the
+  # controller so the views don't run a query.
+  #
+  # Eager-loads `:user` (each `CommentItem` reads `comment.user`
+  # multiple times — UserLink, avatar image, display name) and
+  # `:target` (the polymorphic target — `CommentItem` calls
+  # `comment.target.show_link_args` / `target.class.name`, which
+  # would otherwise issue one query per comment).
+  def load_target_comments
+    Comment.includes(:user, :target).where(target: @target).to_a
   end
 
   # The identifier needs to be more specific for an edit form, because
