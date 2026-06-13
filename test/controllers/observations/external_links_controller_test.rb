@@ -193,6 +193,36 @@ module Observations
       assert_flash_error
     end
 
+    # Exercises the turbo_stream branch of `update` so
+    # `render_external_links_section_update` (panel re-render) is
+    # covered at the controller layer, not just the system test.
+    def test_update_external_link_turbo
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      new_url = "#{link.external_site.base_url}999999"
+      params = { id: link.id, external_link: { url: new_url } }
+
+      login("mary")
+      put(:update, params: params, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_equal(new_url, link.reload.url)
+      assert_select("turbo-stream[target='observation_external_links']")
+    end
+
+    # Exercises the turbo_stream branch of `destroy` so
+    # `render_external_links_section_update` (panel re-render) is
+    # covered at the controller layer.
+    def test_remove_external_link_turbo
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      params = { id: link.id }
+      login("mary")
+      delete(:destroy, params: params, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_nil(ExternalLink.safe_find(link.id))
+      assert_select("turbo-stream[target='observation_external_links']")
+    end
+
     def test_remove_external_link_not_logged_in
       # obs owned by rolf, mary created link and is member of site's project
       link = external_links(:coprinus_comatus_obs_inaturalist_link)

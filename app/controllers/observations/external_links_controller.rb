@@ -227,8 +227,12 @@ module Observations
     end
 
     def render_external_links_section_update
-      # need to reset this in case they can now add sites
-      @observation = @observation.reload
+      # Refetch with just the external-links subtree the panel +
+      # `sites_user_can_add_links_to_for_obs` access — much cheaper
+      # than the full `show_includes` tree for a panel re-render.
+      @observation = Observation.includes(
+        external_links: { external_site: { project: :user_group } }
+      ).find(@observation.id)
       @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )

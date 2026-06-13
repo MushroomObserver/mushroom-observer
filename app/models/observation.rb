@@ -614,11 +614,17 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # name as a string, preferring +location+ over +where+ wherever both exist.
   # Also applies the location_format of the current user (defaults to "postal").
   def place_name
-    # Use FK lookup directly: callers can reach `place_name` after a
-    # `location_id =` assignment that invalidates the cached
-    # `:location` association, so trusting `obs.location` would
-    # lazy-load on a strict_loading record.
-    loc = location_id && Location.find_by(id: location_id)
+    # Use the eager-loaded `:location` when its id still matches
+    # `location_id` (the show/index render path). Fall back to an FK
+    # fetch when callers reach `place_name` after a `location_id =`
+    # assignment invalidated the cached target, so we don't lazy-load
+    # against strict_loading.
+    cached = association(:location).target if association(:location).loaded?
+    loc = if cached && cached.id == location_id
+            cached
+          elsif location_id
+            Location.find_by(id: location_id)
+          end
     if loc
       loc.display_name
     elsif User.current_location_format == "scientific"

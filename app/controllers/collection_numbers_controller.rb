@@ -460,7 +460,11 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_collection_numbers_section_update
-    fresh_obs = Observation.show_includes.find(@observation.id)
+    # Refetch with just the collection-numbers subtree the panel reads
+    # (`obs.collection_numbers` + `obs.can_edit?`-related projects).
+    fresh_obs = Observation.includes(
+      :projects, collection_numbers: :user
+    ).find(@observation.id)
     render_obs_section_update(
       identifier: "collection_numbers",
       panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(

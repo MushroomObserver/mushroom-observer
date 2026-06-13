@@ -132,13 +132,15 @@ class HerbariumRecord < AbstractModel
   alias document_title herbarium_label
 
   def accession_at_herbarium
-    # Use the loaded association when available (no extra query
-    # on the edit path); fall back to an FK `pick` on freshly-built
-    # records that haven't been through `show_includes`.
+    # Use the loaded association when available (no extra query on
+    # the edit path); fall back to an FK fetch on freshly-built
+    # records. The bare Herbarium load is enough — `format_name`
+    # needs both `name` and `code` to include the parenthesized code,
+    # so `pick(:name)` alone would lose it.
     name = if association(:herbarium).loaded?
              herbarium&.format_name
            elsif herbarium_id
-             Herbarium.where(id: herbarium_id).pick(:name)
+             Herbarium.find_by(id: herbarium_id)&.format_name
            end
     "#{accession_number} @ #{name}"
   end

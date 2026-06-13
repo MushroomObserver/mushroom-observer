@@ -173,8 +173,8 @@ class RssLog < AbstractModel
       fk = send(:"#{type}_id")
       next unless fk
 
-      return association(type).loaded? ? send(type) : load_target_by_fk(type,
-                                                                        fk)
+      obj = association(type).loaded? ? send(type) : load_target_by_fk(type, fk)
+      return obj if obj
     end
     nil
   end
