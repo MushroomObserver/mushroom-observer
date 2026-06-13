@@ -109,8 +109,7 @@ module ActiveSupport
     # Threshold can be set via PARALLEL_TEST_THRESHOLD environment variable
     # Default is 50 (Rails default) if not set
     threshold = ENV["PARALLEL_TEST_THRESHOLD"]&.to_i || 50
-    workers = ENV["PARALLEL_WORKERS"]&.to_i || :number_of_processors
-    parallelize(workers: workers, threshold: threshold)
+    parallelize(workers: :number_of_processors, threshold: threshold)
 
     # Set up worker-specific database for parallel testing
     parallelize_setup do |worker|
