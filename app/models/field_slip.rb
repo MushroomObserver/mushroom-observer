@@ -4,6 +4,11 @@
 # code:    string, unique code for field slip, starts with project prefix
 
 class FieldSlip < AbstractModel
+  # Surface N+1s on `field_slip.occurrence` / `.project` / `.user`
+  # / `.observation` / `.observations`; every caller must eager-load
+  # these via `FieldSlip.show_includes` / `.index_includes_tree`.
+  self.strict_loading_by_default = true
+
   attr_reader :current_user
 
   has_one :occurrence, dependent: :nullify

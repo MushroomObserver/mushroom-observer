@@ -25,6 +25,10 @@
 ################################################################################
 
 class CopyrightChange < AbstractModel
+  # Surface N+1s on `copyright_change.user` / `.license` / `.target`;
+  # every caller must eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :user
   belongs_to :license
   belongs_to :target, polymorphic: true

@@ -17,6 +17,10 @@
 #  updated_at::               timestamp
 #
 class Occurrence < AbstractModel
+  # Surface N+1s on `occurrence.observations` / `.primary_observation`
+  # / `.field_slip`; every caller must eager-load these.
+  self.strict_loading_by_default = true
+
   include Occurrence::ProjectGaps
   include Occurrence::Logging
 

@@ -11,6 +11,10 @@
 #                  may edit external_links to this site for any observation.
 #
 class ExternalSite < AbstractModel
+  # Surface N+1s on `external_site.project` / `.external_links` /
+  # `.observations`; every caller must eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :project
   has_many   :external_links
   has_many   :observations, through: :external_links

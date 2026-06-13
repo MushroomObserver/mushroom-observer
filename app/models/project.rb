@@ -55,6 +55,12 @@
 class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   include Date
 
+  # Surface N+1s on `project.user` / `.location` / `.image` /
+  # `.admin_group` / `.user_group` / `.members` / `.observations`
+  # / `.species_lists` from view loops; every caller must
+  # eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :admin_group, class_name: "UserGroup"
   belongs_to :location
   belongs_to :image

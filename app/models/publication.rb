@@ -32,6 +32,10 @@
 ################################################################################
 
 class Publication < AbstractModel
+  # Surface N+1s on `publication.user`; every caller must
+  # eager-load this.
+  self.strict_loading_by_default = true
+
   belongs_to :user
 
   validate :check_requirements
