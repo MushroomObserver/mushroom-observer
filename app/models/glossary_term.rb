@@ -30,19 +30,10 @@ class GlossaryTerm < AbstractModel
   validate :must_have_description_or_image
 
   ALL_TERM_FIELDS = [:name, :description].freeze
-  # See `Name` for the rationale behind the `:extend` block — same
-  # pattern wires `belongs_to :user` onto `GlossaryTerm::Version`
-  # so `show_includes` can carry `{ versions: :user }`.
   acts_as_versioned(
     if_changed: ALL_TERM_FIELDS,
     association_options: { dependent: :nullify }
-  ) do
-    def self.included(base)
-      return if base.reflect_on_association(:user)
-
-      base.belongs_to(:user, class_name: "::User", optional: true)
-    end
-  end
+  )
   non_versioned_columns.push(
     "thumb_image_id",
     "created_at",

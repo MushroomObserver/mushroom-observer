@@ -122,16 +122,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     center_lng
   ].freeze
 
-  # See `Name` for the rationale behind the `:extend` block — same
-  # pattern wires `belongs_to :user` onto `Location::Version` so
-  # `show_includes` can carry `{ versions: :user }`.
-  acts_as_versioned(if_changed: VERSIONED_COLUMNS) do
-    def self.included(base)
-      return if base.reflect_on_association(:user)
-
-      base.belongs_to(:user, class_name: "::User", optional: true)
-    end
-  end
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS)
   non_versioned_columns.push(
     "created_at",
     "updated_at",

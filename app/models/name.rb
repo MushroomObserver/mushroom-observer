@@ -356,22 +356,7 @@ class Name < AbstractModel
     icn_id
   ].freeze
 
-  # The `:extend` block (see `acts_as_versioned` docs) wires
-  # `belongs_to :user` onto `Name::Version` — the table has a
-  # `user_id` column but the gem only defines the reverse
-  # `belongs_to :name` by default. With this in place
-  # `show_includes` can eager-load `{ versions: :user }` and views
-  # can read `version.user` without an N+1. The `return if
-  # reflect_on_association(:user)` guard skips `Name` itself (which
-  # already declares its own `belongs_to :user`) — the gem includes
-  # the block on both the host and the version class.
-  acts_as_versioned(if_changed: VERSIONED_COLUMNS) do
-    def self.included(base)
-      return if base.reflect_on_association(:user)
-
-      base.belongs_to(:user, class_name: "::User", optional: true)
-    end
-  end
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS)
   non_versioned_columns.push(
     "created_at",
     "updated_at",
