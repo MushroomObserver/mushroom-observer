@@ -69,13 +69,12 @@ class Inat
     # default MO license to any unlicensed images.
     #
     # The iNat API `licensed` param returns true if the observation
-    # license_code is null, which seems to happen only if **both** the
-    # observation. So we have to use this filter to get the count of
+    # license_code is null. So we have to use this filter to get the count of
     # observations that are licensed, and subtract from total to get the
     # unlicensed count.
     LICENSED_FILTER =
-      { license: "license=cc0,cc-by,cc-by-nc,cc-by-nd," \
-                 "cc-by-sa,cc-by-nc-nd,cc-by-nc-nd-sa" }.freeze
+      { license: "license=cc0,cc-by,cc-by-nc,cc-by-nd,cc-by-nc-nd," \
+                 "cc-by-sa,cc-by-nc-sa,cc-by-nc-nd-sa" }.freeze
 
     # Kept for backwards compatibility; some callers may still reference this.
     IMPORT_FILTER_PARAMS = BASE_FILTER_PARAMS.merge(LICENSED_FILTER).freeze
