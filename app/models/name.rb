@@ -274,6 +274,12 @@
 class Name < AbstractModel
   require("acts_as_versioned")
 
+  # Surface N+1s on `name.user` / `.description` / `.descriptions`
+  # / `.versions` / `.synonym` / `.rss_log` from view loops; every
+  # caller must eager-load these via `Name.show_includes` or
+  # equivalent. See `Location` for the gem-bump context.
+  self.strict_loading_by_default = true
+
   # modules with instance methods and maybe class methods
   include Scopes
   include Validation

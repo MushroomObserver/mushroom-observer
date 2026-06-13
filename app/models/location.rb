@@ -90,6 +90,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   include Scopes
 
+  # Surface N+1s on `location.user` / `.description` / `.descriptions`
+  # / `.versions` / `.rss_log` / `.observations` from view loops;
+  # every caller must eager-load these via `Location.show_includes`
+  # or equivalent. Bundled with the `mo_acts_as_versioned` 0.8.0
+  # bump (#4515) which fixed the versions-cache sync that previously
+  # tripped `LocationTest#test_versioning` under strict loading.
+  self.strict_loading_by_default = true
+
   belongs_to :description, class_name: "LocationDescription" # (main one)
   belongs_to :rss_log
   belongs_to :user

@@ -50,6 +50,13 @@
 class LocationDescription < Description
   require("acts_as_versioned")
 
+  # Surface N+1s on `location_description.user` / `.authors` /
+  # `.editors` / `.versions` / `.location` / `.license` from view
+  # loops; every caller must eager-load these via
+  # `LocationDescription.show_includes` or equivalent. See
+  # `Location` for the gem-bump context.
+  self.strict_loading_by_default = true
+
   include Description::Scopes
 
   # Do not change the integer associated with a value

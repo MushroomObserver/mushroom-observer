@@ -64,6 +64,13 @@
 class NameDescription < Description
   require("acts_as_versioned")
 
+  # Surface N+1s on `name_description.user` / `.authors` /
+  # `.editors` / `.versions` / `.name` / `.license` / `.reviewer`
+  # from view loops; every caller must eager-load these via
+  # `NameDescription.show_includes` or equivalent. See
+  # `Location` for the gem-bump context.
+  self.strict_loading_by_default = true
+
   include Description::Scopes
 
   # Do not change the integer associated with a value

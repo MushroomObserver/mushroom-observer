@@ -7,6 +7,12 @@
 class GlossaryTerm < AbstractModel
   require("acts_as_versioned")
 
+  # Surface N+1s on `glossary_term.user` / `.thumb_image` /
+  # `.rss_log` / `.images` / `.versions` from view loops; every
+  # caller must eager-load these. See `Location` for the gem-bump
+  # context.
+  self.strict_loading_by_default = true
+
   belongs_to(:thumb_image,
              class_name: "Image",
              inverse_of: :thumb_glossary_terms)
