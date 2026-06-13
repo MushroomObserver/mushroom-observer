@@ -3264,7 +3264,7 @@
   inat_url_hint: "Paste an iNat observation search URL or API URL to filter which observations to import (e.g. by project or place). Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
   inat_invalid_url: "URL must be a filtered iNat observations URL or iNat API observation search URL"
   inat_url_no_valid_filter_params: "URL has no valid filter parameters — please add at least one (e.g. project_id, place_id, quality_grade)"
-  inat_url_params_ignored: "These URL parameters were ignored: %{params}"
+  inat_url_params_ignored: "MO ignores these URL parameters: [params]"
   inat_previous_import: "[count] listed ids previously imported and will not be re-imported"
   inat_too_many_ids_listed: Too many ids listed
   inat_importing_all_anothers: You cannot import all observations of another person
