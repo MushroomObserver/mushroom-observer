@@ -32,11 +32,17 @@
 ################################################################################
 
 class Publication < AbstractModel
+  # Surface N+1s on `publication.user`; every caller must
+  # eager-load this.
+  self.strict_loading_by_default = true
+
   belongs_to :user
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    unless user
+    # Check the FK directly so strict_loading doesn't force an
+    # extra `users` lookup during validation.
+    unless user_id
       errors.add(:user, "missing user") # sign of internal error,
       # should never happen
     end

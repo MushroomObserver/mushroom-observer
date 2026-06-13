@@ -26,6 +26,10 @@
 ################################################################################
 
 class ImageVote < AbstractModel
+  # Surface N+1s on `image_vote.user` / `.image`; every caller must
+  # eager-load these.
+  self.strict_loading_by_default = true
+
   belongs_to :user
   belongs_to :image
 end
