@@ -98,7 +98,8 @@ module Projects
 
     def destroy
       project = @project_alias.project
-      @project_alias.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      ProjectAlias.find(@project_alias.id).destroy
       respond_to do |format|
         format.html do
           redirect_to(project_aliases_path(project_id: project&.id),

@@ -295,7 +295,8 @@ class CollectionNumbersController < ApplicationController
     @collection_number.change_corresponding_herbarium_records(old_format_name)
     @other_number.observations += @collection_number.observations -
                                   @other_number.observations
-    @collection_number.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    CollectionNumber.find(@collection_number.id).destroy
     @collection_number = @other_number
 
     show_flash_and_send_back
@@ -334,7 +335,8 @@ class CollectionNumbersController < ApplicationController
     else
       # Figure out where to redirect BEFORE destroying the record
       figure_out_destroy_redirect
-      @collection_number.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      CollectionNumber.find(@collection_number.id).destroy
     end
     true
   end

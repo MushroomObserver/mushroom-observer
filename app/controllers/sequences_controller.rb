@@ -148,7 +148,8 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
-    @sequence.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    Sequence.find(@sequence.id).destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
 
     redirect_to(@observation.show_link_args)

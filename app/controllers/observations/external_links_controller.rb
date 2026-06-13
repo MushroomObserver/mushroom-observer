@@ -155,7 +155,8 @@ module Observations
 
     def remove_external_link
       @id = @external_link.id
-      @external_link.destroy!
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      ExternalLink.find(@external_link.id).destroy!
 
       flash_success_and_return
     end

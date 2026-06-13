@@ -181,7 +181,8 @@ class ProjectsController < ApplicationController
 
     if !permission!(@project)
       redirect_to(project_path(@project.id))
-    elsif !@project.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    elsif !Project.find(@project.id).destroy
       flash_error(:destroy_project_failed.t)
       redirect_to(project_path(@project.id))
     else

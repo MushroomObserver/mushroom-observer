@@ -87,7 +87,8 @@ class GlossaryTermsController < ApplicationController
     return if redirect_non_admins!
 
     old_images = @glossary_term.images.to_a
-    if @glossary_term.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    if GlossaryTerm.find(@glossary_term.id).destroy
       destroy_unused_images(old_images)
       flash_notice(
         :runtime_destroyed_id.t(type: :glossary_term, value: params[:id])

@@ -352,7 +352,8 @@ class HerbariumRecordsController < ApplicationController
     else
       # Figure out where to redirect BEFORE destroying the record
       figure_out_destroy_redirect
-      @herbarium_record.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      HerbariumRecord.find(@herbarium_record.id).destroy
     end
     true
   end

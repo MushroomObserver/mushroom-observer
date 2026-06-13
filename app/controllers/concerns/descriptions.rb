@@ -335,7 +335,8 @@ module Descriptions
       if in_admin_mode? || @description.is_admin?(@user)
         flash_notice(:runtime_destroy_description_success.t)
         log_description_destroyed
-        @description.destroy
+        # Refetch fresh (non-strict_loading) for the destroy cascade.
+        @description.class.find(@description.id).destroy
         redirect_to(@description.parent.show_link_args)
       else
         flash_error(:runtime_destroy_description_not_admin.t)
