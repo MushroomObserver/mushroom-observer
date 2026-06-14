@@ -1,6 +1,0 @@
-<%
-add_edit_title(@article)
-add_context_nav(Tab::Article::FormEdit.new(article: @article))
-%>
-
-<%= render(Views::Controllers::Articles::Form.new(@article)) %>
