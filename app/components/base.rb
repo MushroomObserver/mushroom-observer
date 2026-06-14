@@ -15,7 +15,7 @@ class Components::Base < Phlex::HTML
   # as `LinkTo` / `ButtonTo` above.
   include Phlex::Rails::Helpers::StripTags
   include Phlex::Rails::Helpers::Truncate
-  include Components::TrustedHtml
+  include Phlex::TrustedHtml
   # `content_for(...)` and `content_for?(...)` — available everywhere
   # so chrome components, popup builders, etc. don't have to inherit
   # from Views::Base just for the stash/read pair.

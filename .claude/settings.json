@@ -8,6 +8,21 @@
             "type": "command",
             "command": "test -x .claude/hooks/check_rubocop_staged.sh && exec .claude/hooks/check_rubocop_staged.sh || exit 0",
             "timeout": 600
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_python.sh && exec .claude/hooks/block_python.sh || exit 0",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_any_phlex_props_on_save.sh && exec .claude/hooks/check_any_phlex_props_on_save.sh || exit 0",
+            "timeout": 10
           }
         ]
       }

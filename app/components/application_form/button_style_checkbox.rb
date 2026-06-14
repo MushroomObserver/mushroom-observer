@@ -26,7 +26,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     plain "Observations"
   #   end
   class ButtonStyleCheckbox < Phlex::HTML
-    include Components::TrustedHtml
+    include Phlex::TrustedHtml
 
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, value:, id:, checked: false,
