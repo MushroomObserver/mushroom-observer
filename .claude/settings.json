@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_rubocop_staged.sh && exec .claude/hooks/check_rubocop_staged.sh || exit 0",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_coveralls_pr.sh && exec .claude/hooks/check_coveralls_pr.sh || exit 0",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
