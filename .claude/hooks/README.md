@@ -6,8 +6,13 @@ rules the team kept needing to remind the assistant about:
 
 | Hook | Trigger | Behavior |
 | --- | --- | --- |
-| `check_rubocop_staged.sh` | `PreToolUse` on `Bash` containing `git commit` | Runs `bundle exec rubocop` on staged `.rb` files. Blocks the commit (exit 2) if any offenses remain. |
+| `check_rubocop_staged.sh` | `PreToolUse` on `Bash` containing `git commit` | (1) Runs `bundle exec rubocop` on staged `.rb` files. (2) If rubocop is clean, runs `bin/rails test test/style/` — codebase-wide style rules like `no_queries_in_phlex_views_test` and `no_any_phlex_props_test` that catch patterns rubocop can't see. Blocks the commit (exit 2) if either step fails. |
 | `check_coveralls_pr.sh` | `PostToolUse` on `Bash` containing `git push` | If the current branch has an open PR and coveralls has reported on at least one build, prints per-file coverage for every Ruby file in the diff and flags any below 100%. Non-blocking — surfaces the gaps so they can't be silently ignored. |
+
+The wiring in `.claude/settings.json` uses a defensive
+`test -x … && exec … || exit 0` shape so branches without these
+script files (e.g. older branches forked before this hook landed)
+silently no-op instead of erroring on every commit/push.
 
 Wired in `.claude/settings.json` (committed). A developer who doesn't
 want them can disable per-hook in their `.claude/settings.local.json`

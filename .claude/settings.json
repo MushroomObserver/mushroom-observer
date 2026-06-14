@@ -6,8 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/check_rubocop_staged.sh",
-            "timeout": 60
+            "command": "test -x .claude/hooks/check_rubocop_staged.sh && exec .claude/hooks/check_rubocop_staged.sh || exit 0",
+            "timeout": 600
           }
         ]
       }
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": ".claude/hooks/check_coveralls_pr.sh",
+            "command": "test -x .claude/hooks/check_coveralls_pr.sh && exec .claude/hooks/check_coveralls_pr.sh || exit 0",
             "timeout": 30
           }
         ]
