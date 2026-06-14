@@ -10,6 +10,17 @@ require("test_helpers/system/cuprite_setup")
 require("test_helpers/system/cuprite_helpers")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  # System tests use the Maps JavaScript API
+  # (`@googlemaps/js-api-loader`); the key's HTTP-Referer whitelist
+  # in Google Cloud Console gates which ports can call it. Start at
+  # 3001 (not 3000) so a running `bin/rails server` on 3000 doesn't
+  # collide with a worker. Count is the number of whitelisted ports
+  # — bump (and ask Joe to widen the Cloud Console whitelist) when
+  # we want more parallel system-test workers.
+  MAPS_API_PORT_FIRST = 3001
+  MAPS_API_PORT_COUNT = 3
+  parallelize(workers: MAPS_API_PORT_COUNT)
+
   driven_by :mo_cuprite, using: :chromium
   # Include MO's helpers
   include GeneralExtensions
@@ -28,17 +39,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.server = :puma
     # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
-    # Bind to 3000 (not the OS-assigned ephemeral port that would
-    # otherwise be Capybara's default) because the Google Maps API
-    # key the front-end uses is HTTP-Referer-restricted in Google
-    # Cloud Console to `http://localhost:3000/*`. Tests that
-    # exercise the Maps geocoder / autocompleter would otherwise
-    # be rejected by Google's API. **Stop your `bin/rails server`
-    # before running system tests** to avoid `Errno::EADDRINUSE`.
-    # If the Maps key's referer restriction is ever broadened to
-    # `http://localhost:*/*`, this can become `nil` (ephemeral) and
-    # tests will run alongside a running dev server.
-    Capybara.server_port = 3000
+    # Bind to a Maps-API-whitelisted port starting at
+    # `MAPS_API_PORT_FIRST` (3001). One port per worker so they
+    # don't fight — worker 0 → 3001, worker 1 → 3002, etc. Skipping
+    # 3000 leaves a running `bin/rails server` on 3000 alone so
+    # devs don't need to stop it before `bin/rails test test/system`.
+    # Serial runs leave `TEST_ENV_NUMBER` unset → port 3001.
+    Capybara.server_port = MAPS_API_PORT_FIRST + ENV["TEST_ENV_NUMBER"].to_i
     # Normalize whitespaces when using `has_text?` and similar matchers,
     # i.e., ignore newlines, trailing spaces, etc.
     # That makes tests less dependent on slight UI changes.
