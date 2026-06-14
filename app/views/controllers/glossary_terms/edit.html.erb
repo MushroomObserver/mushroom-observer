@@ -1,6 +1,0 @@
-<%
-add_edit_title(@glossary_term)
-add_context_nav(Tab::GlossaryTerm::FormEdit.new(term: @glossary_term))
-%>
-
-<%= render(Views::Controllers::GlossaryTerms::Form.new(@glossary_term)) %>

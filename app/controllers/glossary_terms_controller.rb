@@ -14,6 +14,14 @@ class GlossaryTermsController < ApplicationController
 
   private
 
+  # Phlex action template — explicit render per the conversion rule.
+  def render_index_view
+    render(Views::Controllers::GlossaryTerms::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects
+           ))
+  end
+
   def default_sort_order
     ::Query::GlossaryTerms.default_order # :name
   end
@@ -40,6 +48,11 @@ class GlossaryTermsController < ApplicationController
     @layout = calc_layout_params
     @other_images = @glossary_term.other_images.order(vote_cache: :desc)
     @versions = @glossary_term.versions
+    render(Views::Controllers::GlossaryTerms::Show.new(
+             glossary_term: @glossary_term,
+             other_images: @other_images.to_a,
+             versions: @versions.to_a
+           ))
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -47,14 +60,19 @@ class GlossaryTermsController < ApplicationController
   def new
     @glossary_term = GlossaryTerm.new
     assign_image_form_ivars
+    render(new_form_view)
   end
 
   def edit
     return unless find_glossary_term!
-    return unless @glossary_term.locked? && !in_admin_mode? # happy path
 
-    flash_error(:edit_glossary_term_not_allowed.t)
-    redirect_to(glossary_term_path(@glossary_term))
+    if @glossary_term.locked? && !in_admin_mode?
+      flash_error(:edit_glossary_term_not_allowed.t)
+      redirect_to(glossary_term_path(@glossary_term))
+      return
+    end
+
+    render(edit_form_view)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -139,7 +157,26 @@ class GlossaryTermsController < ApplicationController
   def reload_form(form)
     add_glossary_term_error_messages_to_flash
     assign_image_form_ivars
-    render(form)
+    case form
+    when "new"  then render(new_form_view)
+    when "edit" then render(edit_form_view)
+    end
+  end
+
+  def new_form_view
+    Views::Controllers::GlossaryTerms::New.new(
+      glossary_term: @glossary_term,
+      copyright_holder: @copyright_holder,
+      copyright_year: @copyright_year,
+      licenses: @licenses,
+      upload_license_id: @upload_license_id
+    )
+  end
+
+  def edit_form_view
+    Views::Controllers::GlossaryTerms::Edit.new(
+      glossary_term: @glossary_term
+    )
   end
 
   def add_glossary_term_error_messages_to_flash
