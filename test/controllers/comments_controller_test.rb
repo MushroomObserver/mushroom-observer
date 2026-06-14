@@ -243,7 +243,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     # Test turbo shows flash error
     get(:new, params:, format: :turbo_stream)
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
     assert_flash_error
   end
 

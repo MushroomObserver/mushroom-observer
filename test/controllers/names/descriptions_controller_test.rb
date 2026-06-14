@@ -56,7 +56,7 @@ module Names
       login
       get(:index, params: { by_author: user })
 
-      assert_template("index")
+      assert_select("body.descriptions__index")
       assert_page_title(:NAME_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
@@ -71,7 +71,7 @@ module Names
       get(:index, params: { by_author: user })
 
       assert_flash_text("No matching name descriptions found.")
-      assert_template("index")
+      assert_select("body.descriptions__index")
     end
 
     def test_index_by_author_bad_user_id
@@ -117,7 +117,7 @@ module Names
       login
       get(:index, params: { by_editor: user.id })
 
-      assert_template("index")
+      assert_select("body.descriptions__index")
       assert_page_title(:NAME_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
@@ -132,7 +132,7 @@ module Names
       get(:index, params: { by_editor: user.id })
 
       assert_flash_text("No matching name descriptions found.")
-      assert_template("index")
+      assert_select("body.descriptions__index")
     end
 
     def test_index_by_editor_bad_user_id

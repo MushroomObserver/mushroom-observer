@@ -7,19 +7,19 @@ class InfoControllerTest < FunctionalTestCase
   def test_page_loads
     login
     get(:how_to_help)
-    assert_template(:how_to_help)
+    assert_select("body.info__how_to_help")
 
     get(:how_to_use)
-    assert_template(:how_to_use)
+    assert_select("body.info__how_to_use")
 
     get(:intro)
-    assert_template(:intro)
+    assert_select("body.info__intro")
 
     get(:search_bar_help)
     assert_response(:success)
 
     get(:news)
-    assert_template(:news)
+    assert_select("body.info__news")
 
     get(:textile_sandbox)
     assert_response(:success)
