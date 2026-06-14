@@ -90,6 +90,7 @@ class InatImportsController < ApplicationController
     return reload_form unless params_valid?
 
     normalize_inat_ids_param!
+    normalize_inat_url_param!
     return confirm_import unless params[:confirmed] == "1"
 
     warn_about_listed_previous_imports
@@ -97,8 +98,6 @@ class InatImportsController < ApplicationController
     init_ivars
     request_inat_user_authorization
   end
-
-  # ---------------------------------
 
   private
 
@@ -121,9 +120,12 @@ class InatImportsController < ApplicationController
     FormObject::InatImportConfirm.new(
       inat_username: params[:inat_username],
       inat_ids: params[:inat_ids],
+      inat_url: params[:inat_url],
+      original_inat_url: params[:original_inat_url],
       import_all: params[:all],
       consent: params[:consent],
-      import_others: (import_others? ? "1" : nil)
+      import_others: (import_others? ? "1" : nil),
+      skip_inat_update: (skip_inat_update? ? "1" : nil)
     )
   end
 
@@ -140,8 +142,11 @@ class InatImportsController < ApplicationController
 
     merge_form_param(confirm, :inat_username)
     merge_form_param(confirm, :inat_ids)
+    merge_form_param(confirm, :inat_url)
+    merge_form_param(confirm, :original_inat_url)
     merge_form_param(confirm, :consent)
     merge_form_param(confirm, :import_others)
+    merge_form_param(confirm, :skip_inat_update)
     params[:all] ||= confirm[:import_all]
   end
 
@@ -150,32 +155,35 @@ class InatImportsController < ApplicationController
   end
 
   def reload_form
-    render_new_form(
-      username: params[:inat_username],
-      inat_ids: params[:inat_ids],
-      all: params[:all],
-      consent: params[:consent],
-      import_others: params[:import_others]
-    )
+    render_new_form(form: reload_form_object)
   end
 
-  def render_new_form(username: @user.inat_username,
-                      inat_ids: nil, all: nil,
-                      consent: nil, import_others: nil)
-    form = FormObject::InatImport.new(
-      inat_username: username,
-      inat_ids: inat_ids,
-      all: ("1" if all == "1"),
-      consent: ("1" if consent == "1"),
-      import_others: ("1" if import_others == "1")
-    )
+  def render_new_form(form: nil)
+    form ||= FormObject::InatImport.new(inat_username: @user.inat_username)
     render(
       Views::Controllers::InatImports::New.new(
         form: form,
-        super_importer: InatImport.super_importer?(@user)
+        super_importer: InatImport.super_importer?(@user),
+        admin_mode: in_admin_mode?
       ),
       layout: true
     )
+  end
+
+  def reload_form_object
+    FormObject::InatImport.new(
+      inat_username: params[:inat_username],
+      inat_ids: params[:inat_ids],
+      inat_url: params[:original_inat_url].presence || params[:inat_url],
+      all: flag_param(:all),
+      consent: flag_param(:consent),
+      import_others: flag_param(:import_others),
+      skip_inat_update: flag_param(:skip_inat_update)
+    )
+  end
+
+  def flag_param(key)
+    "1" if params[key] == "1"
   end
 
   # Superform namespaces fields under the model key.
@@ -187,8 +195,10 @@ class InatImportsController < ApplicationController
 
     merge_form_param(new_form, :inat_username)
     merge_form_param(new_form, :inat_ids)
+    merge_form_param(new_form, :inat_url)
     merge_form_param(new_form, :consent)
     merge_form_param(new_form, :import_others)
+    merge_form_param(new_form, :skip_inat_update)
     params[:all] ||= new_form[:all]
   end
 
@@ -206,6 +216,33 @@ class InatImportsController < ApplicationController
     return unless listing_ids?
 
     params[:inat_ids] = normalize_inat_ids(params[:inat_ids])
+  end
+
+  # Normalize params[:inat_url] in-place: convert any observation search URL
+  # to a cleaned query string. Saves the original so Go Back can restore it.
+  def normalize_inat_url_param!
+    return unless listing_url?
+    return unless params[:inat_url].include?("://")
+
+    normalizer = url_normalizer(params[:inat_url])
+    warn_about_ignored_url_params(normalizer)
+    params[:original_inat_url] = params[:inat_url]
+    params[:inat_url] = normalizer.normalize.to_s
+  end
+
+  def warn_about_ignored_url_params(normalizer)
+    ignored = normalizer.ignored_params
+    return if ignored.blank?
+
+    flash_warning(:inat_url_params_ignored.t(params: ignored.join(", ")))
+  end
+
+  def url_normalizer(url)
+    Inat::URLNormalizer.new(
+      url,
+      superimporter: InatImport.super_importer?(@user),
+      import_others: import_others?
+    )
   end
 
   # Were any listed iNat IDs previously imported?
@@ -245,7 +282,9 @@ class InatImportsController < ApplicationController
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
+      inat_url: params[:inat_url].presence,
       import_others: import_others?,
+      skip_inat_update: skip_inat_update?,
       response_errors: "",
       token: "",
       log: [],
@@ -255,7 +294,7 @@ class InatImportsController < ApplicationController
   end
 
   def importables_count
-    return nil if importing_all?
+    return nil if importing_all? || listing_url?
 
     inat_id_list.length
   end
@@ -266,6 +305,12 @@ class InatImportsController < ApplicationController
     return false unless InatImport.super_importer?(@user)
 
     params[:import_others] == "1"
+  end
+
+  def skip_inat_update?
+    return false unless in_admin_mode?
+
+    params[:skip_inat_update] == "1"
   end
 
   def clean_inat_ids
@@ -308,7 +353,7 @@ class InatImportsController < ApplicationController
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
     # InatImportJob.perform_now(inat_import) # uncomment to manually test job
-    InatImportJob.perform_later(inat_import) # uncomment for production
+    InatImportJob.perform_later(inat_import)
 
     redirect_to(inat_import_path(inat_import,
                                  params: { tracker_id: tracker.id }))

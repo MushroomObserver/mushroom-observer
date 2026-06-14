@@ -94,7 +94,8 @@ class InatImportJob < ApplicationJob
     inat_import.update(state: "Importing")
     inat_ids = inat_id_list
     return log("No observations requested") if inat_import[:import_all].
-                                               blank? && inat_ids.blank?
+                                               blank? && inat_ids.blank? &&
+                                               inat_import.inat_url.blank?
 
     # Request a page of iNat observations at a time, until done with all pages
     # (or canceled).

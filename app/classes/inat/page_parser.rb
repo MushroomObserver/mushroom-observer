@@ -33,7 +33,11 @@ class Inat
     # multiple times.
     # https://stackoverflow.com/a/11251654/3357635
     def next_page
-      result = next_request(id: inat_ids, id_above: @last_import_id)
+      result = if url_mode?
+                 next_url_request(id_above: @last_import_id)
+               else
+                 next_request(id: inat_ids, id_above: @last_import_id)
+               end
       return nil if response_bad?(result)
       return nil if result.body.blank?
 
@@ -41,6 +45,10 @@ class Inat
     end
 
     private
+
+    def url_mode?
+      @import.inat_url.present?
+    end
 
     def response_bad?(response)
       response.is_a?(::RestClient::RequestFailed) ||
@@ -60,6 +68,38 @@ class Inat
       error = { error: e.http_code, query: query_args.to_json }.to_json
       @import.add_response_error(error)
       e.response
+    end
+
+    # Build a request from the user-supplied URL query string, merged with
+    # MO's required safety params. Safety params (taxon_id, without_field)
+    # and pagination params always win over the user URL.
+    def next_url_request(id_above:)
+      query_args = url_request_query_args(id_above: id_above)
+      add_ownership_filter(query_args)
+      headers = { authorization: "Bearer #{@import.token}", accept: :json }
+
+      Inat::APIRequest.new(@import.token).
+        request(path: "observations?#{query_args.to_query}", headers: headers)
+    rescue ::RestClient::ExceptionWithResponse => e
+      error = { error: e.http_code, query: query_args.to_json }.to_json
+      @import.add_response_error(error)
+      e.response
+    end
+
+    def url_request_query_args(id_above:)
+      args = Rack::Utils.parse_query(@import.inat_url).symbolize_keys
+      # Honor the URL's id_above only for the first page (internal cursor
+      # still at 0). After the first page the internal cursor takes over.
+      effective_id_above = id_above.zero? ? args[:id_above].to_i : id_above
+      # The confirm round-trip stores the normalized query string as a hidden
+      # field, bypassing URLNormalizer. Strip MO-controlled keys defensively.
+      strip_keys = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym) + [:id]
+      args.except!(*strip_keys)
+      args.merge!(BASE_FILTER_PARAMS)
+      args[:taxon_id] = IMPORTABLE_TAXON_IDS_ARG
+      args.merge!(id_above: effective_id_above, per_page: 200,
+                  order: "asc", order_by: "id")
+      args
     end
 
     def base_query_args

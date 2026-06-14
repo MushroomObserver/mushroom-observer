@@ -5,17 +5,19 @@ module Views::Controllers::InatImports
   # Sets page title and context nav, then renders the
   # form component.
   class New < Views::Base
-    def initialize(form:, super_importer: false)
+    def initialize(form:, super_importer: false, admin_mode: false)
       super()
       @form = form
       @super_importer = super_importer
+      @admin_mode = admin_mode
     end
 
     def view_template
       add_page_title(:inat_import_create_title.l)
       add_context_nav(Tab::InatImport::FormNew.new)
       render(Views::Controllers::InatImports::Form.new(
-               @form, super_importer: @super_importer
+               @form, super_importer: @super_importer,
+                      admin_mode: @admin_mode
              ))
     end
   end

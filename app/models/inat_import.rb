@@ -78,10 +78,10 @@ class InatImport < ApplicationRecord
   def adequate_constraints?
     return inat_username.present? unless import_others
 
-    # Not-own superimporter: safe only if scoped to a username or a
-    # specific ID list. Without either, import_all would fetch all
-    # fungal/slime-mold observations across all iNat users.
-    inat_username.present? || inat_ids.present?
+    # Not-own superimporter: safe only if scoped to a username, a
+    # specific ID list, or a URL query. Without any of these, import_all
+    # would fetch all fungal/slime-mold observations across all iNat users.
+    inat_username.present? || inat_ids.present? || inat_url.present?
   end
 
   def job_pending?
