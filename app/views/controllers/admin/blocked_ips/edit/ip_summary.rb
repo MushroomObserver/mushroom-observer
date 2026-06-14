@@ -25,13 +25,23 @@ module Views::Controllers::Admin::BlockedIps
       def render_table
         render(::Components::Table.new(
                  sorted_ips, class: "ips ips-lined align-middle"
-               )) do |t|
-          t.column("ip") { |ip| render_ip_link(ip) }
-          t.column("block") { |ip| render_block_button(ip) }
-          t.column("user") { |ip| render_user_cell(ip) }
-          t.column("rate / min") { |ip| plain((@stats[ip][:rate] * 60).round(2)) }
-          t.column("load %") { |ip| plain((@stats[ip][:load] * 100).round(2)) }
-        end
+               )) { |t| render_table_columns(t) }
+      end
+
+      def render_table_columns(table)
+        table.column("ip") { |ip| render_ip_link(ip) }
+        table.column("block") { |ip| render_block_button(ip) }
+        table.column("user") { |ip| render_user_cell(ip) }
+        table.column("rate / min") { |ip| render_rate_cell(ip) }
+        table.column("load %") { |ip| render_load_cell(ip) }
+      end
+
+      def render_rate_cell(ip)
+        plain((@stats[ip][:rate] * 60).round(2))
+      end
+
+      def render_load_cell(ip)
+        plain((@stats[ip][:load] * 100).round(2))
       end
 
       def render_ip_link(ip)
@@ -78,7 +88,7 @@ module Views::Controllers::Admin::BlockedIps
       def render_api_key_line(ip)
         return unless (api_key_str = @stats[ip][:api_key])
 
-        api_key = ::APIKey.find_by_key(api_key_str)
+        api_key = ::APIKey.find_by(key: api_key_str)
         plain("API key: #{api_key_str} (")
         if api_key
           render(::Components::UserLink.new(user: api_key.user))

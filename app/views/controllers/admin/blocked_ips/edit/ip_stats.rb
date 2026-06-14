@@ -49,7 +49,7 @@ module Views::Controllers::Admin::BlockedIps
       def render_api_key_line
         return unless (api_key_str = ip_stats[:api_key])
 
-        api_key = ::APIKey.find_by_key(api_key_str)
+        api_key = ::APIKey.find_by(key: api_key_str)
         plain("API key: #{api_key_str} (")
         if api_key
           render(::Components::UserLink.new(user: api_key.user))
@@ -94,11 +94,13 @@ module Views::Controllers::Admin::BlockedIps
         render(::Components::Table.new(
                  ip_stats[:activity].reverse[0..50],
                  class: "ips ips-lined"
-               )) do |t|
-          t.column("time") { |row| plain(row[0]) }
-          t.column("seconds") { |row| plain(row[1].to_f.round(2)) }
-          t.column("action") { |row| plain("#{row[2]}/#{row[3]}") }
-        end
+               )) { |t| render_activity_columns(t) }
+      end
+
+      def render_activity_columns(table)
+        table.column("time") { |row| plain(row[0]) }
+        table.column("seconds") { |row| plain(row[1].to_f.round(2)) }
+        table.column("action") { |row| plain("#{row[2]}/#{row[3]}") }
       end
     end
   end
