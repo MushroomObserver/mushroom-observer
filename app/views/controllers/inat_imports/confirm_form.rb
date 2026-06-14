@@ -53,6 +53,8 @@ module Views::Controllers::InatImports
       b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
       plain(": ")
       span(id: "unlicensed_obs_count") { plain(@unlicensed_obs.to_s) }
+      return unless @unlicensed_obs.to_i.positive?
+
       plain(" ")
       plain(unlicensed_obs_note)
     end
