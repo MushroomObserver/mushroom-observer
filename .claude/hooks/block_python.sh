@@ -23,21 +23,17 @@ COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')"
 # All of those start with `python` / `python3` as a whole word
 # somewhere in the command.
 if printf '%s' "$COMMAND" | grep -qE '(^|[^A-Za-z0-9_])python3?($|[^A-Za-z0-9_])'; then
-  cat >&2 <<EOF
-🚫 \`python3\` invocation blocked.
+  cat >&2 <<'EOF'
+🚫 Write Ruby, not Python.
 
-The project's permission settings don't allowlist Python, so every
-\`python3 -c …\` requires an explicit user permission prompt. The
-\`ruby -rjson -e …\` shape is already allowlisted and does the
-same work for JSON parsing / data munging.
+The project's permission settings don't allowlist Python, because
+every `python3 -c …` requires an explicit user permission prompt.
+That prompt is intentional — the team works in Ruby; ad-hoc data
+munging should too.
 
-Rewrite the command in Ruby. Common translation:
-
-  # Python:
-  python3 -c "import json; …"
-
-  # Ruby (equivalent, no permission prompt):
-  ruby -rjson -e '…'
+`ruby -rjson -e '…'` is allowlisted in `.claude/settings.local.json`
+and does the same work for JSON parsing / data munging without
+any prompt. Rewrite the one-liner in Ruby and retry.
 
 If you genuinely need Python (NumPy / scientific libs, etc.), ask
 the user to allowlist the specific command before retrying.
