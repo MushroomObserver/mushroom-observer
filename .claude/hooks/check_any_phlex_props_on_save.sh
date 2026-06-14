@@ -41,18 +41,22 @@ NEW="$(printf '%s' "$INPUT" | jq -r '
 
 # Strip comment-only lines before pattern matching — discussion /
 # removal-notes that mention these antipatterns shouldn't trip the
-# guard. (`grep -v '^\s*#'` after `grep -n` keeps line numbers.)
+# guard. POSIX ERE doesn't reliably support `\b` / `\s` / `\w`
+# (macOS / BSD greps may treat them as literals, not metacharacters);
+# use `[[:space:]]` / `[^[:alnum:]_]` instead so the regexes work on
+# any conformant grep.
+COMMENT_LINE_RE='^[0-9]*:[[:space:]]*#'
 
-# 1. Bare `_Any` — word boundary on both sides, with a non-word /
-#    start-of-line boundary before it. The leading boundary covers
-#    `, _Any` AND `,_Any` (no space) AND `(_Any` etc., without
-#    matching identifiers like `_AnyThing` or `Foo_Any`.
-ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^A-Za-z0-9_])_Any\b' | grep -v '^[0-9]*:\s*#' || true)"
+# 1. Bare `_Any` — non-word boundary (or start-of-line) before AND
+#    non-word boundary (or end-of-line) after. Covers `, _Any` AND
+#    `,_Any` (no space) AND `(_Any` etc., without matching
+#    identifiers like `_AnyThing` or `Foo_Any`.
+ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])_Any([^[:alnum:]_]|$)' | grep -v "$COMMENT_LINE_RE" || true)"
 
 # 2. `.html_safe` (chained on any expression) or `raw(...)`. Phlex
 #    views should use `trusted_html(...)`, which writes safely-
 #    marked content to the buffer.
-RAW_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '\.html_safe\b|(\s|^|\()raw\(' | grep -v '^[0-9]*:\s*#' || true)"
+RAW_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '\.html_safe([^[:alnum:]_]|$)|(^|[[:space:]]|\()raw\(' | grep -v "$COMMENT_LINE_RE" || true)"
 
 if [ -n "$ANY_OFFENDERS" ]; then
   cat >&2 <<EOF
