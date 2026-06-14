@@ -39,7 +39,12 @@ coverage stops being something the human has to chase.
 
 Both hook scripts assume:
 - `gh` CLI authenticated against the repo
-- `jq` and `python3` on PATH
+- `jq` and `ruby` on PATH
 - `curl` for the coveralls fetch
 - The repo root is the working directory when hooks fire (Claude
   Code's default)
+
+(JSON parsing is in Ruby, not Python, so the inline `ruby -rjson -e`
+calls match the project's existing
+`Bash(ruby -rjson -e:*)` permission wildcard — no extra permission
+prompt on every coveralls run.)

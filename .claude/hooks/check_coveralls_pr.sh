@@ -46,12 +46,12 @@ page=1
 while : ; do
   curl -sf "https://coveralls.io/builds/${BUILD_ID}/source_files.json?per_page=2000&page=${page}" \
     > "${TMPDIR}/page_${page}.json" || break
-  count=$(python3 -c "
-import json, sys
-with open('${TMPDIR}/page_${page}.json') as f: d = json.load(f)
-src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
-print(len(src))
-" 2>/dev/null || echo 0)
+  count=$(ruby -rjson -e "
+    d = JSON.parse(File.read('${TMPDIR}/page_${page}.json'))
+    src = d['source_files']
+    src = JSON.parse(src) if src.is_a?(String)
+    print src.length
+  " 2>/dev/null || echo 0)
   [ "$count" = "0" ] && break
   page=$((page + 1))
   [ "$page" -gt 10 ] && break
@@ -65,30 +65,26 @@ if [ ! -s "${TMPDIR}/touched.txt" ]; then
   exit 0
 fi
 
-REPORT="$(TMPDIR="$TMPDIR" python3 <<'PY'
-import json, glob, os
-tmp = os.environ['TMPDIR']
-files = []
-for path in sorted(glob.glob(os.path.join(tmp, 'page_*.json'))):
-    with open(path) as f: d = json.load(f)
-    src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
-    files.extend(src)
-by_name = {x['name']: x for x in files}
-with open(os.path.join(tmp, 'touched.txt')) as f:
-    paths = [p.strip() for p in f if p.strip()]
-gaps = []
-for p in paths:
-    f = by_name.get(p)
-    if not f:
-        continue
-    cov, rel, miss = f['covered_line_count'], f['relevant_line_count'], f['missed_line_count']
-    if miss > 0:
-        pct = 100.0 * cov / rel if rel else 0
-        gaps.append(f"{p}: {cov}/{rel} ({pct:.1f}%)  MISSED {miss}")
-if gaps:
-    print('\n'.join(gaps))
-PY
-)"
+REPORT="$(TMPDIR="$TMPDIR" ruby -rjson -e '
+  tmp = ENV.fetch("TMPDIR")
+  files = Dir[File.join(tmp, "page_*.json")].sort.flat_map do |path|
+    d = JSON.parse(File.read(path))
+    src = d["source_files"]
+    src = JSON.parse(src) if src.is_a?(String)
+    src
+  end
+  by_name = files.each_with_object({}) { |x, h| h[x["name"]] = x }
+  paths = File.readlines(File.join(tmp, "touched.txt"))
+                .map(&:strip).reject(&:empty?)
+  gaps = paths.filter_map do |p|
+    f = by_name[p]
+    next unless f && f["missed_line_count"] > 0
+    cov, rel, miss = f["covered_line_count"], f["relevant_line_count"], f["missed_line_count"]
+    pct = rel > 0 ? (100.0 * cov / rel) : 0
+    format("%s: %d/%d (%.1f%%)  MISSED %d", p, cov, rel, pct, miss)
+  end
+  print gaps.join("\n")
+')"
 
 if [ -n "$REPORT" ]; then
   cat >&2 <<EOF
