@@ -47,7 +47,7 @@ module Images
       }
       put_requires_login(:update, params)
       # assert_redirected_to(images_edit_licenses_path)
-      assert_template("images/licenses/edit")
+      assert_select("body.licenses__edit")
       assert_equal(10, rolf.reload.contribution)
 
       target_count_after = Image.
@@ -86,7 +86,7 @@ module Images
         }
       }
       put_requires_login(:update, params)
-      assert_template("images/licenses/edit")
+      assert_select("body.licenses__edit")
       example_image.reload
       assert_equal("A. H. Smith", example_image.copyright_holder,
                    "Name of new copyright holder is incorrect")

@@ -10,13 +10,13 @@ module Locations
     def test_show_help
       login
       get(:show)
-      assert_template("locations/search/_help")
+      assert_select("#locations_search_help")
     end
 
     def test_show_help_turbo
       login
       get(:show, format: :turbo_stream)
-      assert_template("locations/search/_help")
+      assert_select("#locations_search_help")
     end
 
     def test_new_locations_search

@@ -331,7 +331,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params:, format: :turbo_stream)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_flash_text(/already exists/i)
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 
   # I keep thinking only curators should be able to add herbarium_records.
@@ -469,7 +469,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
     assert_flash_text(/missing/i)
-    assert_template("shared/_modal_form_reload")
+    assert_select("turbo-stream[action='replace'][target$='_form']")
   end
 
   def test_update_herbarium_record_wrong_user
@@ -482,7 +482,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
     assert_flash_text(/permission denied/i)
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 
   def test_update_herbarium_record_label_already_used

@@ -58,7 +58,7 @@ module Observations
       login("dick")
       post(:create, params:, format: :turbo_stream)
       assert_flash_warning
-      assert_template("shared/_modal_flash_update")
+      assert_select("turbo-stream[action='update'][target$='_flash']")
     end
 
     # rolf can because he owns it

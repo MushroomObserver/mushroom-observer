@@ -27,7 +27,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
   end
 
   def assert_create_species_list
-    assert_template("new")
+    assert_select("body.species_lists__new")
     # See `assert_edit_species_list` below: `species_lists/_form` was
     # folded into `Components::SpeciesListForm`. Phlex components don't
     # show in `assert_template`; assert the form's root element.

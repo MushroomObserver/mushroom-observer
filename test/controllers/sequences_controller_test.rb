@@ -413,7 +413,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Test turbo shows flash warning
     get(:edit, params: { id: sequence.id }, format: :turbo_stream)
     assert_flash_warning
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 
   def test_edit_redirect

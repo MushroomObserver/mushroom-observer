@@ -34,7 +34,10 @@ module Observations
         }
       }
       put_requires_login(:update, params)
-      assert_template("images/show")
+      # Action is `:update` (body class would be `images__edit`); the
+      # update success branch does `render("images/show", ...)`. Pin a
+      # stable element from the show page instead.
+      assert_select("#image_votes_container")
       assert_equal(10, rolf.reload.contribution)
 
       assert(obs.reload.rss_log)

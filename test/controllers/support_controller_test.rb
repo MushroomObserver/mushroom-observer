@@ -18,14 +18,14 @@ class SupportControllerTest < FunctionalTestCase
       :wrapup_2012
     ].each do |template|
       get(template)
-      assert_template(template)
+      assert_select("body.support__#{template}")
     end
   end
 
   def test_donate
     login("rolf")
     get(:donate)
-    assert_template(:donate)
+    assert_select("body.support__donate")
     assert_select("form input[value=\"#{users(:rolf).name}\"]")
   end
 
@@ -41,7 +41,7 @@ class SupportControllerTest < FunctionalTestCase
     params = donation_params(amount, rolf, anon, recurring)
     params[:donation][:other_amount] = other_amount
     post(:confirm, params: params)
-    assert_template(:confirm)
+    assert_select("body.support__confirm")
     assert_donations(donations + 1, final_amount, false, params[:donation])
   end
 
