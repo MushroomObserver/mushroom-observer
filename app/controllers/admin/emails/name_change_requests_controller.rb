@@ -19,7 +19,13 @@ module Admin
         end
 
         respond_to do |format|
-          format.html
+          format.html do
+            render(
+              Views::Controllers::Admin::Emails::NameChangeRequests::New.new(
+                name: @name, new_name_with_icn_id: @new_name_with_icn_id
+              )
+            )
+          end
           format.turbo_stream do
             render(Components::ModalTurboForm.new(
                      identifier: "name_change_request_email",

@@ -8,6 +8,9 @@ module Admin
 
       @user_stats = UserStats.find_by(user_id: @user2.id) ||
                     UserStats.create(user_id: @user2.id)
+      render(Views::Controllers::Admin::Users::Edit.new(
+               user2: @user2, user_stats: @user_stats
+             ))
     end
 
     def update
