@@ -634,7 +634,7 @@ class InatImportsControllerTest < FunctionalTestCase
            "Test requires user to be a super_importer")
 
     # Total-others request (no license filter) returns 200 with invalid JSON,
-    # triggering JSON::ParserError and the rescue in fetch_unlicensed_others_count.
+    # triggers JSON::ParserError and the rescue in fetch_unlicensed_others_count
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: "not json")
     # Licensed estimate returns valid JSON — registered last, matched first.
