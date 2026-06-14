@@ -26,17 +26,16 @@ if printf '%s' "$COMMAND" | grep -qE '(^|[^A-Za-z0-9_])python3?($|[^A-Za-z0-9_])
   cat >&2 <<'EOF'
 🚫 Write Ruby, not Python.
 
-The project's permission settings don't allowlist Python, because
-every `python3 -c …` requires an explicit user permission prompt.
-That prompt is intentional — the team works in Ruby; ad-hoc data
-munging should too.
+The project's permission settings allowlist `ruby -rjson -e …`
+(via the `.claude/settings.local.json` wildcard) but not Python.
+Each Python `-c` invocation therefore requires an explicit
+permission prompt, while the equivalent Ruby one-liner runs
+through without one. For JSON parsing / data munging the two are
+interchangeable — Ruby is just the friction-free path.
 
-`ruby -rjson -e '…'` is allowlisted in `.claude/settings.local.json`
-and does the same work for JSON parsing / data munging without
-any prompt. Rewrite the one-liner in Ruby and retry.
-
-If you genuinely need Python (NumPy / scientific libs, etc.), ask
-the user to allowlist the specific command before retrying.
+Rewrite the one-liner in Ruby and retry. If you genuinely need
+Python (NumPy / scientific libs, etc.), ask the user to allowlist
+the specific command before retrying.
 EOF
   exit 2
 fi
