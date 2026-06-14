@@ -103,7 +103,11 @@ module Views::Controllers::Contributors
             end
             plain(" #{example[:number]} * #{weight}")
           end
-          td { trusted_html("(#{example[:text_key].t})") }
+td do
+  plain("(")
+  trusted_html(example[:text_key].t)
+  plain(")")
+end
           td
         end
       end
