@@ -13,6 +13,9 @@ module GlossaryTerms
 
       @glossary_term.revert_to(params[:version].to_i)
       @versions = @glossary_term.versions
+      render(Views::Controllers::GlossaryTerms::Versions::Show.new(
+               glossary_term: @glossary_term, versions: @versions.to_a
+             ))
     end
 
     private
