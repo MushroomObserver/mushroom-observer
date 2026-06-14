@@ -82,6 +82,14 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   private
 
+  # Phlex action template — explicit render per the conversion rule.
+  def render_index_view
+    render(Views::Controllers::Herbaria::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, merge: @merge
+           ))
+  end
+
   def full_index_sort_options
     [
       ["records",    :sort_by_records.t],
@@ -141,15 +149,18 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   # Display a single herbarium, based on :flow params
   # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
   def show
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Herbarium, params[:id].to_s)
-    when "prev"
-      redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
-    else
-      @canonical_url = herbarium_url(params[:id])
-      @herbarium = find_or_goto_index(Herbarium, params[:id])
-    end
+    flow = params[:flow]
+    return redirect_to_next_object(flow.to_sym, Herbarium, params[:id].to_s) \
+      if %w[next prev].include?(flow)
+
+    render_herbarium_show
+  end
+
+  def render_herbarium_show
+    @canonical_url = herbarium_url(params[:id])
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
+
+    render(Views::Controllers::Herbaria::Show.new(herbarium: @herbarium))
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
