@@ -40,7 +40,7 @@ module Views::Controllers::Contributors
       private
 
       def render_heading
-        strong { trusted_html(:users_by_contribution_legend.l) }
+        strong { plain(:users_by_contribution_legend.l) }
       end
 
       def render_toggle_button
@@ -54,9 +54,13 @@ module Views::Controllers::Contributors
       end
 
       def render_body
+        # `.tp` runs textile + paragraph-wrap and returns an
+        # html-safe `<p>…</p>` string — trusted_html is the right
+        # marker. The intermediate `_2` value is plain prose with
+        # no markup or cross-refs, so `.l` + plain suffices.
         div(class: "mb-3") { trusted_html(:users_by_contribution_1.tp) }
         render_weights_table
-        p(class: "pt-3") { trusted_html(:users_by_contribution_2.t) }
+        p(class: "pt-3") { plain(:users_by_contribution_2.l) }
         render_example_math_table
         trusted_html(:users_by_contribution_3.tp)
       end
@@ -67,7 +71,11 @@ module Views::Controllers::Contributors
                  show_headers: false,
                  class: "text-center bg-none mx-lg-5"
                )) do |t|
-          t.column("field") { |f| trusted_html(:"user_stats_#{f}".t) }
+          # `user_stats_*` values are `[:IMAGES]`-style cross-refs to
+          # plain-text root keys ("Images", "Votes", …); needs `.t`
+          # for the cross-ref expansion, but the resolved text has
+          # no HTML markup so `plain` is sufficient.
+          t.column("field") { |f| plain(:"user_stats_#{f}".t) }
           t.column("weight") { |f| plain(::UserStats::ALL_FIELDS[f][:weight]) }
           # Original ERB rendered an empty third `<td></td>`; mirror it.
           t.column("spacer") { plain("") }
@@ -103,11 +111,10 @@ module Views::Controllers::Contributors
             end
             plain(" #{example[:number]} * #{weight}")
           end
-td do
-  plain("(")
-  trusted_html(example[:text_key].t)
-  plain(")")
-end
+          # `users_by_contribution_2[a-e]` cross-refs to the same
+          # plain-text root keys as `user_stats_*` above; same logic
+          # — `.t` for the cross-ref, `plain` for the resolved text.
+          td { plain("(#{example[:text_key].t})") }
           td
         end
       end
@@ -115,7 +122,8 @@ end
       def render_example_math_total_row(total)
         tr do
           td { span(class: "ml-4") { plain(total.to_s) } }
-          td { trusted_html(:users_by_contribution_2f.t) }
+          # Plain text "points" — no markup, no cross-ref.
+          td { plain(:users_by_contribution_2f.l) }
           td
         end
       end
