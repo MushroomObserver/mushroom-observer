@@ -113,10 +113,18 @@ module Views::Controllers::Names::Versions
     end
 
     def name_link_for_source(src)
-      ApplicationController.helpers.link_to(
-        src[:name].user_display_name(@user).t,
-        name_path(src[:name].id)
-      )
+      # Returned (not buffered) — interpolated into a `.t(name: …)`
+      # translation in `inherited_classification_text`. `capture`
+      # returns the rendered Phlex tag as an
+      # `ActiveSupport::SafeBuffer`, so the `<a>` markup survives
+      # the i18n interpolation without any explicit html-safe
+      # annotation. `trusted_html` inside the block is the right
+      # marker for the translated link text.
+      capture do
+        a(href: name_path(src[:name].id)) do
+          trusted_html(src[:name].user_display_name(@user).t)
+        end
+      end
     end
 
     # --- Right column --------------------------------------------

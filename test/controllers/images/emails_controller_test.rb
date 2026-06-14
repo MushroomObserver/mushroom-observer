@@ -41,7 +41,7 @@ module Images
              params: { id: image.id, email: { message: "" } })
       end
       assert_flash_error
-      assert_template(:new)
+      assert_select("body.emails__new")
     end
 
     def test_new_turbo_stream

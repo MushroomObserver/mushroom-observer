@@ -455,7 +455,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     body = @response.body
     assert_match(:inat_import_confirm_estimate_caption.l, body)
     assert_select("#estimated_count", "2")
@@ -487,7 +487,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "1",
       "Estimate should not filter by user_login if a super_importer " \
@@ -542,7 +542,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "1",
       "Estimate for a super_importer's own import-all should filter " \
@@ -568,7 +568,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "1",
       "Estimate should include unlicensed own observations"
@@ -598,7 +598,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "3",
       "Estimate for import-others should be licensed obs count"
@@ -621,7 +621,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#unlicensed_obs_count", "",
       "Unlicensed count should be blank when licensed estimate fails"
@@ -756,7 +756,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, all: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
   end
 
   def test_superimporter_not_own_import_all_without_username_blocked
@@ -862,7 +862,7 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:cancel, params: { id: import.id })
 
     assert_response(:success)
-    assert_template(:show)
+    assert_select("[data-controller='inat-import-job']")
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
   end

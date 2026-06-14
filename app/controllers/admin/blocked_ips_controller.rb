@@ -8,10 +8,11 @@ module Admin
     # params[:add_okay] and params[:add_bad]
     # Using params[:report] will show info about a chosen IP
     def edit
-      @ip = params[:report] if validate_ip!(params[:report])
       @stats = IpStats.read_stats(do_activity: true)
-      load_paginated_okay_ips
-      load_paginated_blocked_ips
+      @ip = report_ip_if_present
+      @okay = load_paginated_ip_list(:okay)
+      @blocked = load_paginated_ip_list(:blocked)
+      render_edit_view
     end
 
     # Render the page after an update
@@ -19,40 +20,104 @@ module Admin
       strip_params!
       process_blocked_ips_commands
       @stats = IpStats.read_stats(do_activity: true)
-      load_paginated_okay_ips
-      load_paginated_blocked_ips
-      render(action: :edit)
+      @ip = report_ip_if_present
+      @okay = load_paginated_ip_list(:okay)
+      @blocked = load_paginated_ip_list(:blocked)
+      render_edit_view
     end
 
     private
 
-    def load_paginated_okay_ips
-      all_okay = sort_by_ip(IpStats.read_okay_ips)
-      @okay_ips_starts_with = params.dig(:okay_filter, :starts_with).presence
-      if @okay_ips_starts_with
-        all_okay = all_okay.select do |ip|
-          ip.start_with?(@okay_ips_starts_with)
-        end
-      end
-      @okay_ips_total = all_okay.size
-      @okay_ips_page = (params[:okay_page].presence || 1).to_i
-      @okay_ips_pages = [(@okay_ips_total.to_f / IPS_PER_PAGE).ceil, 1].max
-      offset = (@okay_ips_page - 1) * IPS_PER_PAGE
-      @okay_ips = all_okay[offset, IPS_PER_PAGE] || []
+    # Returns the reported IP only if it's a valid IPv4 AND we have
+    # stats for it — the per-IP stats panel does `@stats[@ip][...]`
+    # and would `NoMethodError` on a missing key.
+    def report_ip_if_present
+      ip = params[:report]
+      return nil unless validate_ip!(ip)
+      return nil unless @stats.key?(ip)
+
+      ip
     end
 
-    def load_paginated_blocked_ips
-      all_blocked = sort_by_ip(IpStats.read_blocked_ips)
-      @starts_with = params.dig(:text_filter, :starts_with).presence
-      if @starts_with
-        all_blocked = all_blocked.select { |ip| ip.start_with?(@starts_with) }
+    def render_edit_view
+      preload_stats = stats_for_preload
+      render(Views::Controllers::Admin::BlockedIps::Edit.new(
+               ip: @ip, stats: @stats,
+               okay: @okay, blocked: @blocked,
+               users_by_id: preloaded_users_for(preload_stats),
+               api_keys_by_str: preloaded_api_keys_for(preload_stats)
+             ))
+    end
+
+    # The right-column views render at most 51 entries from `@stats`:
+    # `IpSummary`'s top-50 by load plus, when set, the reported IP's
+    # stats panel. Preload only those — otherwise a busy `@stats`
+    # produces an IN-clause covering every active user/key, most of
+    # which we'd discard. Mirrors `IpSummary#sorted_ips`' `last(50)`.
+    def stats_for_preload
+      top_keys = @stats.keys.sort_by { |k| @stats[k][:load] }.last(50)
+      displayed_keys = (top_keys + [@ip].compact).uniq
+      @stats.slice(*displayed_keys)
+    end
+
+    # Preloads of the Users / APIKeys the right-column subviews will
+    # display. Computed once in the controller so the views don't run
+    # per-row `User.safe_find` / `APIKey.find_by(...)` queries (the
+    # `find_by(` shape is also blocked by `no_queries_in_phlex_views_test`).
+    def preloaded_users_for(stats)
+      ids = stats.values.filter_map { |s| s[:user] }.uniq
+      User.where(id: ids).index_by(&:id)
+    end
+
+    def preloaded_api_keys_for(stats)
+      strs = stats.values.filter_map { |s| s[:api_key] }.uniq
+      APIKey.where(key: strs).includes(:user).index_by(&:key)
+    end
+
+    # Builds an `Admin::BlockedIps::IpListState` for either the
+    # okay or blocked list — both use the same shape (sort, filter
+    # by starts_with, paginate). The only difference is the source
+    # data and which params they read.
+    def load_paginated_ip_list(type)
+      all_ips = sort_by_ip(read_all_ips(type))
+      starts_with = filter_param_for(type)
+      if starts_with
+        all_ips = all_ips.select do |ip|
+          ip.start_with?(starts_with)
+        end
       end
-      @blocked_ips_total = all_blocked.size
-      @blocked_ips_page = (params[:page].presence || 1).to_i
-      total_pages = (@blocked_ips_total.to_f / IPS_PER_PAGE).ceil
-      @blocked_ips_pages = [total_pages, 1].max
-      offset = (@blocked_ips_page - 1) * IPS_PER_PAGE
-      @blocked_ips = all_blocked[offset, IPS_PER_PAGE] || []
+
+      total = all_ips.size
+      total_pages = [(total.to_f / IPS_PER_PAGE).ceil, 1].max
+      page = clamp_page(params[page_param_for(type)], total_pages)
+      offset = (page - 1) * IPS_PER_PAGE
+
+      ::Admin::BlockedIps::IpListState[
+        ips: all_ips[offset, IPS_PER_PAGE] || [],
+        page: page, total_pages: total_pages,
+        total_count: total, starts_with: starts_with
+      ]
+    end
+
+    # Clamp `page` to `[1, total_pages]` so a malformed param
+    # (`page=0`, `page=999999`, non-numeric) can't make `offset`
+    # negative or push us off the end of the list.
+    def clamp_page(raw, total_pages)
+      n = (raw.presence || 1).to_i
+      n.clamp(1, total_pages)
+    end
+
+    def read_all_ips(type)
+      type == :okay ? IpStats.read_okay_ips : IpStats.read_blocked_ips
+    end
+
+    def filter_param_for(type)
+      key = type == :okay ? :okay_filter : :text_filter
+      params.dig(key, :starts_with).presence
+    end
+
+    def page_param_for(type)
+      type == :okay ? :okay_page : :page
     end
 
     def strip_params!

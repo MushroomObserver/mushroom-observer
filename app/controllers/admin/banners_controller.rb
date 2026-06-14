@@ -3,6 +3,7 @@
 class Admin::BannersController < AdminController
   def index
     @banner = Banner.current || Banner.new
+    render(Views::Controllers::Admin::Banners::Index.new(banner: @banner))
   end
 
   def create
@@ -14,7 +15,7 @@ class Admin::BannersController < AdminController
     else
       flash_error(:banner_update_failure.t)
       @banner = Banner.current || @banner
-      render(:index)
+      render(Views::Controllers::Admin::Banners::Index.new(banner: @banner))
     end
   end
 

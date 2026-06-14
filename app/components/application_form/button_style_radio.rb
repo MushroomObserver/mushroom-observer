@@ -31,7 +31,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     span(class: "set_thumb_img_text") { :image_set_default.l }
   #   end
   class ButtonStyleRadio < Phlex::HTML
-    include Components::TrustedHtml
+    include Phlex::TrustedHtml
 
     # @param name [String] HTML name (shared across radios in the group)
     # @param value [String] value submitted when this radio is checked

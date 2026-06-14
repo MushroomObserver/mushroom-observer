@@ -474,7 +474,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success)
     # Should render modal_form_reload partial to update modal with flash
-    assert_template("shared/_modal_form_reload")
+    assert_select("turbo-stream[action='replace'][target$='_form']")
   end
 
   # Successful turbo_stream create hits
@@ -494,7 +494,7 @@ class HerbariaControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_equal(herbarium_count + 1, Herbarium.count)
-    assert_template("herbaria/_update_observation")
+    assert_select("turbo-stream[action='remove'][target='modal_herbarium']")
   end
 
   def test_create_duplicate_name
@@ -711,7 +711,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_equal(last_update, nybg.reload.updated_at)
     assert_response(:success)
     # Should render modal_form_reload partial to update modal with flash
-    assert_template("shared/_modal_form_reload")
+    assert_select("turbo-stream[action='replace'][target$='_form']")
   end
 
   def test_update_by_non_curator

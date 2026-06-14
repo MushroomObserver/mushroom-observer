@@ -15,7 +15,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_page_loads
     login
     get(:show, params: { id: rolf.id })
-    assert_template(:show)
+    assert_select("body.users__show")
   end
 
   #   -------------
@@ -61,7 +61,7 @@ class UsersControllerTest < FunctionalTestCase
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:index,
                                params: { pattern: unmatched_pattern })
-    assert_template("users/index")
+    assert_select("body.users__index")
 
     assert_page_title(:USERS.l)
     assert_empty(css_select(".sorts"), "There should be no sort links")
@@ -109,7 +109,7 @@ class UsersControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: user.id })
 
-    assert_template(:show)
+    assert_select("body.users__show")
     assert_select(
       "a[href = '#{location_descriptions_index_path}?by_author=#{user.id}']"
     )

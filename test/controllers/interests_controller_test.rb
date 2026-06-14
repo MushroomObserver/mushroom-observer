@@ -12,7 +12,7 @@ class InterestsControllerTest < FunctionalTestCase
     Interest.create(target: names(:agaricus_campestris), user: rolf,
                     state: true)
     get(:index)
-    assert_template("index")
+    assert_select("body.interests__index")
   end
 
   def test_set_interest_another_user

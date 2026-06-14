@@ -101,7 +101,7 @@ module Locations
       login
       get(:index, params: { by_author: user.id })
 
-      assert_template("index")
+      assert_select("body.descriptions__index")
       assert_page_title(:LOCATION_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_equal(
@@ -120,7 +120,7 @@ module Locations
       get(:index, params: { by_author: user.id })
 
       assert_flash_text("No matching location descriptions found.")
-      assert_template("index")
+      assert_select("body.descriptions__index")
     end
 
     def test_index_by_author_bad_user_id
@@ -167,7 +167,7 @@ module Locations
       login
       get(:index, params: { by_editor: user.id })
 
-      assert_template("index")
+      assert_select("body.descriptions__index")
       assert_page_title(:LOCATION_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
@@ -182,7 +182,7 @@ module Locations
       get(:index, params: { by_editor: user.id })
 
       assert_flash_text("No matching location descriptions found.")
-      assert_template("index")
+      assert_select("body.descriptions__index")
     end
 
     def test_index_by_editor_bad_user_id

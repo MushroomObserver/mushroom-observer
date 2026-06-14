@@ -414,7 +414,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Test turbo shows flash warning
     patch(:update, params:, format: :turbo_stream)
     assert_flash_text(/permission denied/i)
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
 
     login("rolf")
     patch(:update, params: params.deep_merge(collection_number: { name: "" }))

@@ -3,7 +3,7 @@
 class Components::ApplicationForm < Superform::Rails::Form
   # Shared label row rendering for form field components
   module FieldLabelRow
-    include Components::TrustedHtml
+    include Phlex::TrustedHtml
 
     # Three layouts depending on what extras the label row needs:
     #

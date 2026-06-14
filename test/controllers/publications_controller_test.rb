@@ -104,7 +104,7 @@ class PublicationsControllerTest < FunctionalTestCase
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "" } })
     assert_response(:success)
-    assert_template(:edit)
+    assert_select("body.publications__edit")
   end
 
   def test_should_not_destroy_publication_without_permission

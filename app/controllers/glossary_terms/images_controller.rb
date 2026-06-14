@@ -91,7 +91,12 @@ module GlossaryTerms
     # returns true for any logged-in user, and `login_required`
     # runs before this action.
     def remove
-      @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
+      return unless (@object = find_or_goto_index(GlossaryTerm,
+                                                  params[:id].to_s))
+
+      render(Views::Controllers::GlossaryTerms::Images::Remove.new(
+               object: @object
+             ))
     end
 
     # The remove form submits to this action. Same permission note
@@ -109,13 +114,7 @@ module GlossaryTerms
     private
 
     def detach_images_from_glossary_term(images_data)
-      if images_data == ""
-        flash_error(:runtime_no_save.t(:glossary_term))
-        return render(:remove,
-                      location: remove_images_from_glossary_term_path(
-                        params[:id]
-                      ))
-      end
+      return rerender_remove_form_with_no_save_error if images_data == ""
 
       images_data.each do |image_id, do_it|
         next unless do_it == "yes"
@@ -127,8 +126,14 @@ module GlossaryTerms
         flash_notice(:runtime_image_remove_success.t(id: image_id))
       end
       redirect_to(glossary_term_path(@object.id))
-      # render("glossary_terms/show",
-      #        location: glossary_term_path(@object.id))
+    end
+
+    def rerender_remove_form_with_no_save_error
+      flash_error(:runtime_no_save.t(:glossary_term))
+      render(
+        Views::Controllers::GlossaryTerms::Images::Remove.new(object: @object),
+        location: remove_images_from_glossary_term_path(params[:id])
+      )
     end
   end
 end

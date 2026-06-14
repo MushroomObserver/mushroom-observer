@@ -179,6 +179,89 @@ module Admin
       end
     end
 
+    # Exercises the per-IP stats panel (`IpStats` Phlex view) and the
+    # bot / missing-user branches in `IpSummary`. Without this test
+    # the entire `app/views/controllers/admin/blocked_ips/edit/
+    # ip_stats.rb` file is dead code from coverage's perspective.
+    def test_report_ip_renders_stats_panels
+      login(:rolf)
+      make_admin
+
+      api_key = api_keys(:rolfs_api_key)
+      # IP 1: user + api_key — exercises `render_user_line` (user found)
+      # + `render_api_key_line` (api_key found) in both IpStats and
+      # IpSummary.
+      IpStats.log_stats({ ip: "1.1.1.1", time: Time.zone.now,
+                          controller: "api", action: "observations",
+                          api_key: api_key.key },
+                        rolf.id)
+      # IP 2: no user, no api_key — exercises IpSummary's "bot" branch.
+      IpStats.log_stats({ ip: "2.2.2.2", time: Time.zone.now,
+                          controller: "rss_logs", action: "index" },
+                        nil)
+      # IP 3: user_id set but the User doesn't exist — exercises
+      # IpSummary's `plain(user_id.to_s)` fallback when
+      # `@users_by_id[user_id]` is nil.
+      IpStats.log_stats({ ip: "3.3.3.3", time: Time.zone.now,
+                          controller: "observations", action: "show" },
+                        9_999_999)
+      # IP 4: api_key string set but no APIKey record matches —
+      # exercises the `plain("bogus!")` branch in both IpStats and
+      # IpSummary.
+      IpStats.log_stats({ ip: "4.4.4.4", time: Time.zone.now,
+                          controller: "api", action: "observations",
+                          api_key: "key-not-in-db-bogus" },
+                        nil)
+      # IP 5: >50 activity entries — exercises IpStats'
+      # "most recent 50 of N" branch in `render_activity_count`.
+      51.times do |i|
+        IpStats.log_stats({ ip: "5.5.5.5", time: i.seconds.ago,
+                            controller: "observations", action: "show" },
+                          nil)
+      end
+
+      # Valid IP that IS in stats — `report_ip_if_present` returns the
+      # IP; `Edit#render_right_column` renders the IpStats panel.
+      get(:edit, params: { report: "1.1.1.1" })
+      assert_response(:success)
+      assert_select("#ip_stats")
+
+      # Bot IP — IpStats panel renders, IpSummary writes "bot" label.
+      get(:edit, params: { report: "2.2.2.2" })
+      assert_response(:success)
+      assert_select("#ip_stats")
+
+      # User_id without backing User — fallback to user_id text.
+      get(:edit, params: { report: "3.3.3.3" })
+      assert_response(:success)
+      assert_select("#ip_stats")
+
+      # Valid IP shape but not in stats — `report_ip_if_present`
+      # returns nil at the `@stats.key?(ip)` guard; IpStats panel
+      # does NOT render.
+      get(:edit, params: { report: "9.9.9.9" })
+      assert_response(:success)
+      assert_select("#ip_stats", count: 0)
+
+      # Invalid IP — `validate_ip!` flashes and returns nil before
+      # the stats lookup; IpStats panel does NOT render.
+      get(:edit, params: { report: "not.an.ip" })
+      assert_response(:success)
+      assert_select("#ip_stats", count: 0)
+
+      # Bogus api_key — IpStats and IpSummary both render the
+      # `"bogus!"` fallback when the key string has no matching APIKey.
+      get(:edit, params: { report: "4.4.4.4" })
+      assert_response(:success)
+      assert_select("#ip_stats")
+
+      # >50 activity — IpStats renders the "most recent 50 of N"
+      # heading from `render_activity_count`.
+      get(:edit, params: { report: "5.5.5.5" })
+      assert_response(:success)
+      assert_select("#ip_stats")
+    end
+
     # Test that the Superform-generated nested params work
     # (form submits blocked_ips[add_bad] instead of add_bad)
     def test_blocked_ips_nested_params
