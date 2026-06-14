@@ -10,6 +10,16 @@
             "timeout": 600
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_any_phlex_props_on_save.sh && exec .claude/hooks/check_any_phlex_props_on_save.sh || exit 0",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "PostToolUse": [

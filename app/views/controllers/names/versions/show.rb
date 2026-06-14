@@ -113,10 +113,22 @@ module Views::Controllers::Names::Versions
     end
 
     def name_link_for_source(src)
-      ApplicationController.helpers.link_to(
-        src[:name].user_display_name(@user).t,
-        name_path(src[:name].id)
-      )
+      # Returned (not buffered) — interpolated into a `.t(name: …)`
+      # translation in `inherited_classification_text`. `capture`
+      # gives back Phlex's `a` tag as a string; mark it html_safe so
+      # Rails' i18n interpolation doesn't escape the `<a>` markup.
+      # rubocop:disable Rails/OutputSafety
+      # The captured Phlex `a` tag is generated entirely from
+      # internal route + `.t`-translated content; html_safe is the
+      # correct annotation. The `.t(name: …)` interpolation in
+      # `inherited_classification_text` will otherwise escape the
+      # `<a>` markup back into literal text.
+      capture do
+        a(href: name_path(src[:name].id)) do
+          trusted_html(src[:name].user_display_name(@user).t)
+        end
+      end.html_safe
+      # rubocop:enable Rails/OutputSafety
     end
 
     # --- Right column --------------------------------------------
