@@ -13,42 +13,24 @@ require("test_helper")
 # > `foo` needs to be reachable from the view, either inline it or
 # > go through the proper registration channels.
 #
-# This test scans every `app/components/**/*.rb` and
-# `app/views/**/*.rb` file and fails if any line has a bare
-# `helpers.<method>` call (i.e. `helpers.` preceded by a non-word
-# character or start-of-line, NOT preceded by a `.` — which would
-# make it a longer chain like `ApplicationController.helpers.foo`).
-#
-# What we leave alone:
-#   - Comments. Discussion / removal-notes that mention "helpers."
-#     in prose shouldn't trigger this.
-#   - ERB files (`*.erb`). Same as the no-queries scanner.
-#   - `register_value_helper` / `register_output_helper`. They use
-#     the `helper` (singular) keyword for the macro, but might
-#     mention `helpers` in surrounding doc — the receiver pattern
-#     `.helpers.foo` is a different thing.
-#   - `ApplicationController.helpers.foo`. The class-level
-#     `helpers` proxy is technically distinct from the
-#     instance-level antipattern, and the regex (no preceding `.`)
-#     wouldn't flag it anyway. Phlex's `capture { a(...) { ... } }`
-#     should be reached for first when a Phlex tag needs to return
-#     a string for interpolation — see
-#     `Names::Versions::Show#name_link_for_source` for the worked
-#     example.
+# Both `helpers.foo` and `ApplicationController.helpers.foo` (or any
+# `<Class>.helpers.foo`) hit the same ActionView dispatch, so both
+# are flagged. Comments are ignored.
 class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
   PHLEX_GLOBS = %w[
     app/components/**/*.rb
     app/views/**/*.rb
   ].freeze
 
-  # `(?<![\w.])` — no word character and no `.` immediately before
-  # `helpers` (so `ApplicationController.helpers.foo` and
-  # `nested_helpers.foo` don't match, but `helpers.foo` at the
-  # start of an expression does).
+  # `\bhelpers\.` — `helpers` as a whole word followed by `.`.
+  # Matches `helpers.foo`, `ApplicationController.helpers.foo`,
+  # `MyClass.helpers.foo`, etc. Does NOT match `module_helpers.foo`
+  # because the `_` before `helpers` is a word character and breaks
+  # the `\b` boundary.
   #
   # `\w+[!?=]?` after the dot — Ruby method names can end in
   # `!` / `?` / `=`, so e.g. `helpers.content_for?` is also flagged.
-  HELPERS_PATTERN = /(?<![\w.])helpers\.\w+[!?=]?/
+  HELPERS_PATTERN = /\bhelpers\.\w+[!?=]?/
 
   def test_no_helpers_in_phlex_views
     offenders = scan_for_helpers
@@ -57,7 +39,7 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
 
   # --- Unit tests for the scanner itself ------------------------
 
-  def test_scanner_flags_bare_helpers_call
+  def test_scanner_flags_helpers_calls
     assert_bad("helpers.link_to('foo', '#')")
     assert_bad("  helpers.url_for(action: :show)")
     assert_bad("  x = helpers.t('foo.bar')")
@@ -65,30 +47,21 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
     # Methods ending in `?` / `!` / `=`.
     assert_bad("helpers.content_for?(:left)")
     assert_bad("helpers.flash_clear!")
+    # Class-level helpers proxy — same ActionView dispatch.
+    assert_bad("ApplicationController.helpers.link_to(name, path)")
+    assert_bad("MyController.helpers.tag.a(name)")
   end
 
-  def test_scanner_allows_application_controller_proxy
-    assert_clean("ApplicationController.helpers.link_to(name, path)")
-    assert_clean("MyController.helpers.tag.a(name)")
-  end
-
-  def test_scanner_allows_chained_helpers_on_unrelated_receiver
-    # `Module#helpers` on something other than `self`, chained from
-    # an identifier ending in alphanumeric, isn't the antipattern.
-    assert_clean("File.helpers.foo") # pretend module method
-    assert_clean("MyClass.helpers.bar")
-  end
-
-  def test_scanner_ignores_word_helpers_in_comments
-    assert_clean("# `helpers.foo` is forbidden; inline instead")
-    assert_clean("  # see helpers.rb deletes after both inlinings")
+  def test_scanner_ignores_identifiers_ending_in_helpers
+    # `module_helpers.foo` is one word followed by `.foo`; the `_`
+    # breaks the `\bhelpers\b` boundary.
+    assert_clean("module_helpers.foo")
+    assert_clean("my_helpers.bar")
   end
 
   def test_scanner_ignores_helpers_in_comments
-    # NOTE: the scanner only strips comments, not strings. Strings
-    # that literally include `helpers.foo` text are extremely rare
-    # in views/components and would be flagged — fix the string if
-    # it ever shows up rather than complicating the scanner.
+    assert_clean("# `helpers.foo` is forbidden; inline instead")
+    assert_clean("  # see helpers.rb deletes after both inlinings")
     assert_clean("# explains helpers.foo behavior")
   end
 
@@ -158,21 +131,17 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
     <<~MSG
       `helpers.foo(...)` calls found in Phlex view/component files.
 
-      Per `.claude/rules/phlex_conversions.md`: never call
-      `helpers.foo` from inside a Phlex view. It's a silent runtime
-      dispatch into ActionView, brittle across Phlex versions. If
-      `foo` needs to be reachable from the view, either inline it
-      or go through the proper registration channels
-      (`register_value_helper` / `register_output_helper` on a
-      shared base — but ask first; see the rule for when
-      registration is OK vs when to inline).
+      Both `helpers.foo` and `<Class>.helpers.foo` (e.g.
+      `ApplicationController.helpers.foo`) dispatch silently into
+      ActionView and are brittle across Phlex versions. Inline the
+      logic, or register the helper via
+      `register_value_helper` / `register_output_helper` on a
+      shared base.
 
-      When you need a Phlex tag to return an HTML-safe string
-      (instead of writing to the output buffer) — for example to
-      interpolate a link into a `.t(name: …)` translation —
-      reach for `capture { a(href: …) { … } }` first.
-      `ApplicationController.helpers.foo` is allowed by the regex
-      (no preceding `.`), but the `capture` path is preferred.
+      When you need a Phlex tag to return a string for
+      interpolation (e.g. into a `.t(name: …)` translation), use
+      `capture { a(href: …) { … } }` — capture returns an
+      `ActiveSupport::SafeBuffer`.
 
       Offenders:
       #{rendered.join("\n")}
