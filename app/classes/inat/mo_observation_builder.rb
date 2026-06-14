@@ -6,7 +6,6 @@ class Inat
     attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
-    NAMING_VOTE = Vote::MAXIMUM_VOTE
 
     def initialize(inat_obs:, user:, import_others: false, inat_source: nil)
       @inat_obs = inat_obs
@@ -35,19 +34,11 @@ class Inat
 
     def create_observation
       @observation = Observation.create(new_obs_params)
-      # Ensure this Name wins consensus_calc ties
-      # by creating this naming and vote first
-      name = @observation.name
-      namer =
-        if suggested?(name) &&
-           (suggester = User.find_by(
-             inat_username: suggester(suggestion(name))
-           ))
-          suggester
-        else
-          user
+      # Lead naming first so it wins calc_consensus ties (see consensus_naming).
+      proposed_namings(community_name, prov_name, naming_vote).
+        each do |name, value|
+          add_naming_with_vote(name: name, namer: namer_for(name), value: value)
         end
-      add_naming_with_vote(name: @observation.name, namer: namer)
       @observation.log(:log_observation_created)
     end
 
@@ -59,9 +50,9 @@ class Inat
         lat: inat_obs.lat,
         lng: inat_obs.lng,
         gps_hidden: inat_obs.gps_hidden,
-        name_id: id_or_provisional_or_species_name,
+        name_id: lead_name.id,
         specimen: inat_obs.specimen?,
-        text_name: text_name,
+        text_name: lead_name.text_name,
         notes: inat_obs.notes,
         external_source: @inat_source,
         external_id: inat_obs[:id].to_s }.merge(collector_attrs)
@@ -75,30 +66,66 @@ class Inat
                                                         match_inat: true)
     end
 
-    # NOTE: 1. iNat users seem to add a prov name only if there's a sequence.
-    #  2. iNat cannot use a prov name as the iNat identication.
-    # So if iNat has a provisional name observation field, then
-    #   add an MO provisional name if none exists, and
-    #   treat the provisional name as the MO consensus.
-    def id_or_provisional_or_species_name
-      return resolved_obs_name.id if inat_obs.provisional_name.blank?
+    # The MO name for the iNat Community ID, creating it if needed.
+    def community_name
+      resolved_obs_name
+    end
 
-      parsed_prov_name = Name.parse_name(inat_obs.provisional_name)
+    # The MO name for the iNat provisional-name observation field, or nil.
+    # iNat can't use a provisional name as its own identification, so it is a
+    # separate proposal from the Community ID. Creates the MO name if absent.
+    # NOTE: iNat users seem to add a prov name only when there's a sequence.
+    def prov_name
+      return nil if inat_obs.provisional_name.blank?
 
-      if need_new_prov_name?(parsed_prov_name)
-        name = add_provisional_name(parsed_prov_name)
-        name.id
+      @prov_name ||= find_or_create_prov_name
+    end
+
+    def find_or_create_prov_name
+      parsed = Name.parse_name(inat_obs.provisional_name)
+      if Name.where(text_name: parsed.text_name).none?
+        add_provisional_name(parsed)
       else
-        best_mo_homonym(parsed_prov_name.text_name).id
+        best_mo_homonym(parsed.text_name)
       end
     end
 
-    def need_new_prov_name?(parsed_prov_name)
-      Name.where(text_name: parsed_prov_name.text_name).none?
+    # The name proposed as the obs's consensus: the provisional name when
+    # present, else the Community ID, corrected to its preferred synonym when
+    # deprecated in MO. calc_consensus confirms it from the votes, where it
+    # carries the highest weight. (#4212)
+    def lead_name
+      @lead_name ||= preferred(prov_name || community_name)
     end
 
-    def text_name
-      Name.find(id_or_provisional_or_species_name).text_name
+    # A deprecated name's best preferred synonym, else the name itself
+    # (falling back to itself when a deprecated name has no approved synonym).
+    def preferred(name)
+      return name unless name.deprecated?
+
+      name.best_preferred_synonym.presence || name
+    end
+
+    # Pure: the namings to create as [name, vote] for the given Community ID
+    # name, provisional name (or nil), and the lead's confidence vote. The
+    # lead leads at lead_vote; the other iNat name and the preferred synonym
+    # of any deprecated name follow at Could Be. Lead is first so it wins
+    # calc_consensus ties. (#4212)
+    def proposed_namings(community, provisional, lead_vote)
+      lead = preferred(provisional || community)
+      named = [community, provisional].compact
+      synonyms = named.select(&:deprecated?).
+                 filter_map { |name| name.best_preferred_synonym.presence }
+      others = (named + synonyms).uniq(&:id).reject { |n| n.id == lead.id }
+      [[lead, lead_vote]] + others.map { |n| [n, Vote::MIN_POS_VOTE] }
+    end
+
+    # The proposer of a naming: the iNat user who suggested it when they're
+    # an MO user, else the importer.
+    def namer_for(name)
+      return user unless suggested?(name)
+
+      User.find_by(inat_username: suggester(suggestion(name))) || user
     end
 
     def add_external_link
@@ -205,12 +232,10 @@ class Inat
     end
 
     def update_names_and_proposals
-      adjust_consensus_name_naming # also adds naming for provisionals
-
       Observation::NamingConsensus.new(@observation).calc_consensus
     end
 
-    def add_naming_with_vote(name:, namer:, value: NAMING_VOTE)
+    def add_naming_with_vote(name:, namer:, value:)
       used_references = 2
       explanation = used_references_explanation(name)
       naming = Naming.create(
@@ -227,8 +252,8 @@ class Inat
     end
 
     def used_references_explanation(name)
-      # If iNat has a provisional name, it's the id of the MO observation.
-      if inat_obs.provisional_name.present?
+      # The provisional explanation applies only to the provisional naming.
+      if prov_name && name.id == prov_name.id
         nom_prov_adder = inat_obs.inat_prov_name_field[:user][:login]
         # force it to be a String instead of an ActiveSupport::SafeBuffer
         # SafeBuffer causes an errors later on. Idk why. jdc 20241126
@@ -268,11 +293,22 @@ class Inat
         first
     end
 
-    def adjust_consensus_name_naming
-      naming = Naming.find_by(observation: @observation,
-                              name: @observation.name)
-      vote = Vote.find_by(naming: naming, observation: @observation)
-      vote.update(value: NAMING_VOTE)
+    # Confidence weight for the importer's lead (consensus) naming, set
+    # from the iNat obs's signals (#4212). Sequence/DNA evidence is the
+    # strongest signal; a provisional name or Research Grade is Promising;
+    # everything else (needs_id / casual, no sequence) is Could Be.
+    def naming_vote
+      return Vote::MAXIMUM_VOTE if inat_obs.sequences.present?
+
+      if inat_obs.provisional_name.present? || research_grade?
+        Vote::NEXT_BEST_VOTE # Promising
+      else
+        Vote::MIN_POS_VOTE   # Could Be
+      end
+    end
+
+    def research_grade?
+      inat_obs[:quality_grade] == "research"
     end
 
     def add_inat_sequences
