@@ -495,6 +495,31 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     ) and return true
   end
 
+  # Turbo-stream chain emitted from `show_modal_flash_or_show_herbarium`
+  # success branch — closes the herbarium-create modal, flashes the
+  # success notice into the obs form's `page_flash`, updates the obs
+  # form's herbarium-name + herbarium-id inputs to the newly-saved
+  # herbarium, and removes the "Create herbarium" button. Inlined
+  # from the deleted `herbaria/_update_observation.erb` partial.
+  def update_observation_after_herbarium_save_streams
+    [
+      turbo_stream.close_modal("modal_herbarium"),
+      turbo_stream.remove("modal_herbarium"),
+      turbo_stream.update("page_flash") do
+        helpers.flash_notices_html
+      end,
+      # Obs form's herbarium-name field is namespaced under the
+      # observation Superform: id is `observation_herbarium_record_*`.
+      turbo_stream.update_input(
+        "observation_herbarium_record_herbarium_name", @herbarium.name
+      ),
+      turbo_stream.update_input(
+        "observation_herbarium_record_herbarium_id", @herbarium.id
+      ),
+      turbo_stream.remove("create_herbarium_btn")
+    ]
+  end
+
   # What to do if the save succeeds
   def show_modal_flash_or_show_herbarium
     respond_to do |format|
@@ -509,7 +534,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
         flash_notice(
           :runtime_added_to.t(type: :herbarium, name: :observation)
         )
-        render(partial: "herbaria/update_observation") and return
+        render(turbo_stream: update_observation_after_herbarium_save_streams)
       end
     end
   end
