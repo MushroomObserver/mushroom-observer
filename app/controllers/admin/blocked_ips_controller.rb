@@ -29,8 +29,25 @@ module Admin
 
     def render_edit_view
       render(Views::Controllers::Admin::BlockedIps::Edit.new(
-               ip: @ip, stats: @stats, okay: @okay, blocked: @blocked
+               ip: @ip, stats: @stats,
+               okay: @okay, blocked: @blocked,
+               users_by_id: preloaded_users_for(@stats),
+               api_keys_by_str: preloaded_api_keys_for(@stats)
              ))
+    end
+
+    # Preloads of the Users / APIKeys the right-column subviews will
+    # display. Computed once in the controller so the views don't run
+    # per-row `User.safe_find` / `APIKey.find_by(...)` queries (the
+    # `find_by(` shape is also blocked by `no_queries_in_phlex_views_test`).
+    def preloaded_users_for(stats)
+      ids = stats.values.filter_map { |s| s[:user] }.uniq
+      User.where(id: ids).index_by(&:id)
+    end
+
+    def preloaded_api_keys_for(stats)
+      strs = stats.values.filter_map { |s| s[:api_key] }.uniq
+      APIKey.where(key: strs).includes(:user).index_by(&:key)
     end
 
     # Builds an `Admin::BlockedIps::IpListState` for either the

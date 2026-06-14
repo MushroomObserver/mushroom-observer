@@ -10,6 +10,10 @@ module Views::Controllers::Admin::BlockedIps
     prop :stats, ::Hash
     prop :okay, ::Admin::BlockedIps::IpListState
     prop :blocked, ::Admin::BlockedIps::IpListState
+    # `{ user_id (Integer) => User }` preloaded by the controller.
+    prop :users_by_id, ::Hash, default: -> { {} }
+    # `{ api_key_str (String) => APIKey-with-:user-preloaded }`.
+    prop :api_keys_by_str, ::Hash, default: -> { {} }
 
     def view_template
       add_page_title("IP Access Manager")
@@ -36,17 +40,22 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_manager(form:, type:, list:)
-      render(Manager.new(
-               form,
-               type: type, list: list,
-               filter_path: edit_admin_blocked_ips_path,
-               action_path: admin_blocked_ips_path
-             ))
+      # `Manager` hardcodes its `action_path` / `filter_path` (both
+      # point at this same admin/blocked_ips resource) so they're not
+      # passed through here. See the comment on those methods inside
+      # `Manager` for the reasoning.
+      render(Manager.new(form, type: type, list: list))
     end
 
     def render_right_column
-      render(IpStats.new(stats: @stats, ip: @ip)) if @ip.present?
-      render(IpSummary.new(stats: @stats))
+      if @ip.present?
+        render(IpStats.new(stats: @stats, ip: @ip,
+                           users_by_id: @users_by_id,
+                           api_keys_by_str: @api_keys_by_str))
+      end
+      render(IpSummary.new(stats: @stats,
+                           users_by_id: @users_by_id,
+                           api_keys_by_str: @api_keys_by_str))
     end
   end
 end

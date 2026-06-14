@@ -8,6 +8,10 @@ module Views::Controllers::Admin::BlockedIps
     class IpStats < Views::Base
       prop :stats, ::Hash
       prop :ip, ::String
+      # `{ user_id => User }` + `{ api_key_str => APIKey }` preloaded
+      # by the controller — see `BlockedIpsController#render_edit_view`.
+      prop :users_by_id, ::Hash, default: -> { {} }
+      prop :api_keys_by_str, ::Hash, default: -> { {} }
 
       def view_template
         render(::Components::Panel.new(panel_class: "my-3",
@@ -41,7 +45,7 @@ module Views::Controllers::Admin::BlockedIps
 
         plain("User: ")
         render(::Components::UserLink.new(
-                 user: ::User.safe_find(user_id) || user_id
+                 user: @users_by_id[user_id] || user_id
                ))
         br
       end
@@ -49,7 +53,7 @@ module Views::Controllers::Admin::BlockedIps
       def render_api_key_line
         return unless (api_key_str = ip_stats[:api_key])
 
-        api_key = ::APIKey.find_by(key: api_key_str)
+        api_key = @api_keys_by_str[api_key_str]
         plain("API key: #{api_key_str} (")
         if api_key
           render(::Components::UserLink.new(user: api_key.user))
@@ -63,8 +67,11 @@ module Views::Controllers::Admin::BlockedIps
       def render_rate_line
         rate = ip_stats[:rate].to_f
         per_min = (rate * 60).round(2)
-        per_req = (1.0 / rate).round(2)
-        plain("Rate: #{per_min} / minute = 1 every #{per_req} seconds")
+        # Guard against `1.0 / 0.0` → `Infinity`, which raises
+        # `FloatDomainError` on `.round`. Only show the "1 every …
+        # seconds" suffix when `rate` is positive.
+        suffix = " = 1 every #{(1.0 / rate).round(2)} seconds" if rate.positive?
+        plain("Rate: #{per_min} / minute#{suffix}")
         br
       end
 
@@ -92,7 +99,7 @@ module Views::Controllers::Admin::BlockedIps
 
       def render_activity_table
         render(::Components::Table.new(
-                 ip_stats[:activity].reverse[0..50],
+                 ip_stats[:activity].last(50).reverse,
                  class: "ips ips-lined"
                )) { |t| render_activity_columns(t) }
       end

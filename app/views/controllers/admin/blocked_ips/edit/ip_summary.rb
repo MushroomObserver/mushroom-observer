@@ -7,6 +7,10 @@ module Views::Controllers::Admin::BlockedIps
     # Converted from `admin/blocked_ips/_ip_summary.html.erb`.
     class IpSummary < Views::Base
       prop :stats, ::Hash
+      # `{ user_id => User }` + `{ api_key_str => APIKey }` preloaded
+      # by the controller — see `BlockedIpsController#render_edit_view`.
+      prop :users_by_id, ::Hash, default: -> { {} }
+      prop :api_keys_by_str, ::Hash, default: -> { {} }
 
       def view_template
         render(::Components::Panel.new(panel_class: "my-3",
@@ -19,7 +23,7 @@ module Views::Controllers::Admin::BlockedIps
       private
 
       def sorted_ips
-        @stats.keys.sort_by { |ip| @stats[ip][:load] }.reverse[0..50]
+        @stats.keys.sort_by { |ip| @stats[ip][:load] }.last(50).reverse
       end
 
       def render_table
@@ -75,7 +79,7 @@ module Views::Controllers::Admin::BlockedIps
       end
 
       def render_user_line(user_id)
-        user = ::User.safe_find(user_id)
+        user = @users_by_id[user_id]
         plain("User: ")
         if user
           render(::Components::UserLink.new(user: user))
@@ -88,7 +92,7 @@ module Views::Controllers::Admin::BlockedIps
       def render_api_key_line(ip)
         return unless (api_key_str = @stats[ip][:api_key])
 
-        api_key = ::APIKey.find_by(key: api_key_str)
+        api_key = @api_keys_by_str[api_key_str]
         plain("API key: #{api_key_str} (")
         if api_key
           render(::Components::UserLink.new(user: api_key.user))
