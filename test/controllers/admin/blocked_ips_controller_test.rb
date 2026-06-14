@@ -205,6 +205,20 @@ module Admin
       IpStats.log_stats({ ip: "3.3.3.3", time: Time.zone.now,
                           controller: "observations", action: "show" },
                         9_999_999)
+      # IP 4: api_key string set but no APIKey record matches —
+      # exercises the `plain("bogus!")` branch in both IpStats and
+      # IpSummary.
+      IpStats.log_stats({ ip: "4.4.4.4", time: Time.zone.now,
+                          controller: "api", action: "observations",
+                          api_key: "key-not-in-db-bogus" },
+                        nil)
+      # IP 5: >50 activity entries — exercises IpStats'
+      # "most recent 50 of N" branch in `render_activity_count`.
+      51.times do |i|
+        IpStats.log_stats({ ip: "5.5.5.5", time: i.seconds.ago,
+                            controller: "observations", action: "show" },
+                          nil)
+      end
 
       # Valid IP that IS in stats — `report_ip_if_present` returns the
       # IP; `Edit#render_right_column` renders the IpStats panel.
@@ -234,6 +248,18 @@ module Admin
       get(:edit, params: { report: "not.an.ip" })
       assert_response(:success)
       assert_select("#ip_stats", count: 0)
+
+      # Bogus api_key — IpStats and IpSummary both render the
+      # `"bogus!"` fallback when the key string has no matching APIKey.
+      get(:edit, params: { report: "4.4.4.4" })
+      assert_response(:success)
+      assert_select("#ip_stats")
+
+      # >50 activity — IpStats renders the "most recent 50 of N"
+      # heading from `render_activity_count`.
+      get(:edit, params: { report: "5.5.5.5" })
+      assert_response(:success)
+      assert_select("#ip_stats")
     end
 
     # Test that the Superform-generated nested params work

@@ -38,6 +38,25 @@ module Admin
       assert_response(:success)
     end
 
+    # `update_user_contribution` subtracts previously-stored bonuses
+    # before adding the new ones. The default fixture has no prior
+    # bonuses, so pre-populate a Hash to exercise the `&.each_key`
+    # subtraction branch.
+    def test_update_subtracts_existing_bonuses
+      user = users(:mary)
+      user_stats = user_stats(:mary)
+      user_stats.update(bonuses: { 5 => "old_reason" })
+      old_contribution = user.reload.contribution
+
+      login(:rolf)
+      make_admin
+      post(:update, params: { id: user.id, val: "10 new_reason" })
+
+      user.reload
+      # Old 5 subtracted, new 10 added → net +5.
+      assert_equal(old_contribution + 5, user.contribution)
+    end
+
     def test_destroy_user
       # disposable fixture user; `User.erase_user` does the heavy work.
       user = users(:spammer)
