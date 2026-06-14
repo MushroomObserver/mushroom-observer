@@ -157,9 +157,9 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
       dispatch into ActionView, brittle across Phlex versions. If
       `foo` needs to be reachable from the view, either inline it
       or go through the proper registration channels
-      (`register_value_helper` / `register_output_helper` on a base
-      class — but ask first; see the rule for when registration is
-      OK vs when to inline).
+      (`register_value_helper` / `register_output_helper` on a
+      shared base — but ask first; see the rule for when
+      registration is OK vs when to inline).
 
       When you need a Phlex tag to return an HTML-safe string
       (instead of writing to the output buffer) — for example to
