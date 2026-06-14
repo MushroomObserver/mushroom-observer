@@ -80,8 +80,9 @@ module InatImportsController::Validators
 
   def valid_inat_url_param?
     return true unless listing_url?
-    # Already-normalized query strings (no "://") are always valid.
-    return true unless params[:inat_url].include?("://")
+    # On the confirm round-trip the URL is already a normalized query string;
+    # it was validated on the first submit so accept it as-is.
+    return true if confirmed_url_mode?
 
     normalized = url_normalizer(params[:inat_url]).normalize
     return true if normalized.present?
@@ -94,6 +95,10 @@ module InatImportsController::Validators
       end
     flash_warning(msg)
     false
+  end
+
+  def confirmed_url_mode?
+    params[:confirmed] == "1" && params[:inat_url].exclude?("://")
   end
 
   def list_within_size_limits?
