@@ -55,9 +55,9 @@ class ArticlesControllerTest < FunctionalTestCase
     # Phlex `Articles::Show` pins the article body in
     # `#article_body .panel-body` (was `assert_template(:show)` + a
     # `/#{article.body}/ =~ @response.body` regex on the rendered HTML).
-assert_select("#article_body .panel-body",
-              text: /#{Regexp.escape(article.body)}/,
-              count: 1)
+    assert_select("#article_body .panel-body",
+                  text: /#{Regexp.escape(article.body)}/,
+                  count: 1)
 
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
