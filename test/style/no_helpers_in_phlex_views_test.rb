@@ -45,7 +45,10 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
   # `helpers` (so `ApplicationController.helpers.foo` and
   # `nested_helpers.foo` don't match, but `helpers.foo` at the
   # start of an expression does).
-  HELPERS_PATTERN = /(?<![\w.])helpers\.\w+/
+  #
+  # `\w+[!?=]?` after the dot — Ruby method names can end in
+  # `!` / `?` / `=`, so e.g. `helpers.content_for?` is also flagged.
+  HELPERS_PATTERN = /(?<![\w.])helpers\.\w+[!?=]?/
 
   def test_no_helpers_in_phlex_views
     offenders = scan_for_helpers
@@ -59,6 +62,9 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
     assert_bad("  helpers.url_for(action: :show)")
     assert_bad("  x = helpers.t('foo.bar')")
     assert_bad("plain(helpers.content_for(:left))")
+    # Methods ending in `?` / `!` / `=`.
+    assert_bad("helpers.content_for?(:left)")
+    assert_bad("helpers.flash_clear!")
   end
 
   def test_scanner_allows_application_controller_proxy
@@ -78,7 +84,7 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
     assert_clean("  # see helpers.rb deletes after both inlinings")
   end
 
-  def test_scanner_ignores_helpers_in_doc_or_string
+  def test_scanner_ignores_helpers_in_comments
     # NOTE: the scanner only strips comments, not strings. Strings
     # that literally include `helpers.foo` text are extremely rare
     # in views/components and would be flagged — fix the string if

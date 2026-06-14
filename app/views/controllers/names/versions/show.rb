@@ -115,13 +115,11 @@ module Views::Controllers::Names::Versions
     def name_link_for_source(src)
       # Returned (not buffered) — interpolated into a `.t(name: …)`
       # translation in `inherited_classification_text`. `capture`
-      # gives back Phlex's `a` tag as a string; mark it html_safe so
-      # Rails' i18n interpolation doesn't escape the `<a>` markup.
-      # `capture` returns the rendered Phlex tag as an HTML-safe
-      # string; `trusted_html` inside marks the translated text as
-      # safe so the resulting capture preserves the `<a>` markup
-      # through the `.t(name: …)` interpolation in
-      # `inherited_classification_text`.
+      # returns the rendered Phlex tag as an
+      # `ActiveSupport::SafeBuffer`, so the `<a>` markup survives
+      # the i18n interpolation without any explicit html-safe
+      # annotation. `trusted_html` inside the block is the right
+      # marker for the translated link text.
       capture do
         a(href: name_path(src[:name].id)) do
           trusted_html(src[:name].user_display_name(@user).t)

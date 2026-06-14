@@ -5,14 +5,14 @@
 #
 # Lives under `Phlex::` (in `app/helpers/phlex/`) rather than inside
 # `app/components/` or `app/views/` because the implementation uses
-# `raw(...)` and `.html_safe`. The on-save guard hook
-# (`.claude/hooks/check_any_phlex_props_on_save.sh`) blocks those
-# patterns inside the `app/components/` and `app/views/` trees;
-# moving the mixin out lets the implementation use the escape hatch
-# while still keeping callers in actual Phlex views away from `raw`
-# / `.html_safe`. The two helpers used in the body (`raw` and
-# `plain`) are both Phlex helpers, which is why the `Phlex::`
-# namespace fits.
+# `raw(...)`. The on-save guard hook
+# (`.claude/hooks/check_any_phlex_props_on_save.sh`) blocks `raw`
+# (and `.html_safe`) inside the `app/components/` and `app/views/`
+# trees; moving the mixin out lets the implementation use the
+# escape hatch while still keeping callers in actual Phlex views
+# away from those patterns. The two helpers used in the body
+# (`raw` and `plain`) are both Phlex helpers, which is why the
+# `Phlex::` namespace fits.
 #
 # @example
 #   class MyComponent < Phlex::HTML

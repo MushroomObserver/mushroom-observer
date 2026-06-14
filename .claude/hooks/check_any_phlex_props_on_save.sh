@@ -43,9 +43,11 @@ NEW="$(printf '%s' "$INPUT" | jq -r '
 # removal-notes that mention these antipatterns shouldn't trip the
 # guard. (`grep -v '^\s*#'` after `grep -n` keeps line numbers.)
 
-# 1. Bare `_Any` (word boundary on both sides), not a substring of
-#    something larger like `_AnyThing`.
-ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(\s|^)_Any\b' | grep -v '^[0-9]*:\s*#' || true)"
+# 1. Bare `_Any` — word boundary on both sides, with a non-word /
+#    start-of-line boundary before it. The leading boundary covers
+#    `, _Any` AND `,_Any` (no space) AND `(_Any` etc., without
+#    matching identifiers like `_AnyThing` or `Foo_Any`.
+ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^A-Za-z0-9_])_Any\b' | grep -v '^[0-9]*:\s*#' || true)"
 
 # 2. `.html_safe` (chained on any expression) or `raw(...)`. Phlex
 #    views should use `trusted_html(...)`, which writes safely-
