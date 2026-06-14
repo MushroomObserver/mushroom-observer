@@ -10,8 +10,9 @@ module Admin
     def edit
       @ip = params[:report] if validate_ip!(params[:report])
       @stats = IpStats.read_stats(do_activity: true)
-      load_paginated_okay_ips
-      load_paginated_blocked_ips
+      @okay = load_paginated_ip_list(:okay)
+      @blocked = load_paginated_ip_list(:blocked)
+      render_edit_view
     end
 
     # Render the page after an update
@@ -19,40 +20,55 @@ module Admin
       strip_params!
       process_blocked_ips_commands
       @stats = IpStats.read_stats(do_activity: true)
-      load_paginated_okay_ips
-      load_paginated_blocked_ips
-      render(action: :edit)
+      @okay = load_paginated_ip_list(:okay)
+      @blocked = load_paginated_ip_list(:blocked)
+      render_edit_view
     end
 
     private
 
-    def load_paginated_okay_ips
-      all_okay = sort_by_ip(IpStats.read_okay_ips)
-      @okay_ips_starts_with = params.dig(:okay_filter, :starts_with).presence
-      if @okay_ips_starts_with
-        all_okay = all_okay.select do |ip|
-          ip.start_with?(@okay_ips_starts_with)
-        end
-      end
-      @okay_ips_total = all_okay.size
-      @okay_ips_page = (params[:okay_page].presence || 1).to_i
-      @okay_ips_pages = [(@okay_ips_total.to_f / IPS_PER_PAGE).ceil, 1].max
-      offset = (@okay_ips_page - 1) * IPS_PER_PAGE
-      @okay_ips = all_okay[offset, IPS_PER_PAGE] || []
+    def render_edit_view
+      render(Views::Controllers::Admin::BlockedIps::Edit.new(
+               ip: @ip, stats: @stats, okay: @okay, blocked: @blocked
+             ))
     end
 
-    def load_paginated_blocked_ips
-      all_blocked = sort_by_ip(IpStats.read_blocked_ips)
-      @starts_with = params.dig(:text_filter, :starts_with).presence
-      if @starts_with
-        all_blocked = all_blocked.select { |ip| ip.start_with?(@starts_with) }
+    # Builds an `Admin::BlockedIps::IpListState` for either the
+    # okay or blocked list — both use the same shape (sort, filter
+    # by starts_with, paginate). The only difference is the source
+    # data and which params they read.
+    def load_paginated_ip_list(type)
+      all_ips = sort_by_ip(read_all_ips(type))
+      starts_with = filter_param_for(type)
+      if starts_with
+        all_ips = all_ips.select do |ip|
+          ip.start_with?(starts_with)
+        end
       end
-      @blocked_ips_total = all_blocked.size
-      @blocked_ips_page = (params[:page].presence || 1).to_i
-      total_pages = (@blocked_ips_total.to_f / IPS_PER_PAGE).ceil
-      @blocked_ips_pages = [total_pages, 1].max
-      offset = (@blocked_ips_page - 1) * IPS_PER_PAGE
-      @blocked_ips = all_blocked[offset, IPS_PER_PAGE] || []
+
+      total = all_ips.size
+      page = (params[page_param_for(type)].presence || 1).to_i
+      total_pages = [(total.to_f / IPS_PER_PAGE).ceil, 1].max
+      offset = (page - 1) * IPS_PER_PAGE
+
+      ::Admin::BlockedIps::IpListState[
+        ips: all_ips[offset, IPS_PER_PAGE] || [],
+        page: page, total_pages: total_pages,
+        total_count: total, starts_with: starts_with
+      ]
+    end
+
+    def read_all_ips(type)
+      type == :okay ? IpStats.read_okay_ips : IpStats.read_blocked_ips
+    end
+
+    def filter_param_for(type)
+      key = type == :okay ? :okay_filter : :text_filter
+      params.dig(key, :starts_with).presence
+    end
+
+    def page_param_for(type)
+      type == :okay ? :okay_page : :page
     end
 
     def strip_params!

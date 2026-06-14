@@ -5,6 +5,7 @@ module Admin
   class DonationsController < AdminController
     def new
       @donation = Donation.new
+      render(Views::Controllers::Admin::Donations::New.new(donation: @donation))
     end
 
     def create
@@ -18,6 +19,9 @@ module Admin
       @donations.each do |d|
         @reviewed[d.id] = d.reviewed
       end
+      render(Views::Controllers::Admin::Donations::Edit.new(
+               donations: @donations.to_a
+             ))
     end
 
     def update
@@ -27,7 +31,9 @@ module Admin
       @donations.each do |d|
         @reviewed[d.id] = d.reviewed
       end
-      render(action: :edit)
+      render(Views::Controllers::Admin::Donations::Edit.new(
+               donations: @donations.to_a
+             ))
     end
 
     private

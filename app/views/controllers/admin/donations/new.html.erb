@@ -1,6 +1,0 @@
-<%
-add_page_title(:create_donation_title.l)
-add_context_nav(Tab::Admin::DonationsFormNew.new)
-%>
-
-<%= render(Views::Controllers::Admin::Donations::Form.new(@donation)) %>

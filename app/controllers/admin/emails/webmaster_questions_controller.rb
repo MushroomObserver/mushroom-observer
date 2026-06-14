@@ -10,7 +10,7 @@ module Admin
         @email = @user.email if @user
 
         respond_to do |format|
-          format.html
+          format.html { render_new_page }
           format.turbo_stream do
             render(Components::ModalTurboForm.new(
                      identifier: "webmaster_question_email",
@@ -54,17 +54,23 @@ module Admin
       def handle_invalid_email
         flash_error(:runtime_ask_webmaster_need_address.t)
         @email_error = true
-        render(:new)
+        render_new_page
       end
 
       def handle_missing_content
         flash_error(:runtime_ask_webmaster_need_content.t)
-        render(:new)
+        render_new_page
       end
 
       def handle_spam
         flash_error(:runtime_ask_webmaster_antispam.t)
-        render(:new)
+        render_new_page
+      end
+
+      def render_new_page
+        render(Views::Controllers::Admin::Emails::WebmasterQuestions::New.new(
+                 email: @email, message: @message, email_error: @email_error
+               ))
       end
 
       def send_email_and_redirect

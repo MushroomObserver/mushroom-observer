@@ -57,8 +57,7 @@ module Views::Controllers::Admin::BlockedIps
         ips: ["1.2.3.4"],
         page: 2,
         total_pages: 5,
-        total_count: 100,
-        filter_path: "/admin/blocked_ips/edit"
+        total_count: 100
       )
 
       # Shows pagination info in the panel heading, e.g.
@@ -107,17 +106,14 @@ module Views::Controllers::Admin::BlockedIps
              else
                FormObject::OkayIps.new
              end
-      render(Manager.new(
-               form,
-               type: type,
-               ips: ips,
-               action_path: "/admin/blocked_ips",
-               page: opts[:page],
-               total_pages: opts[:total_pages],
-               total_count: opts[:total_count],
-               starts_with: opts[:starts_with],
-               filter_path: opts[:filter_path]
-             ))
+      list = ::Admin::BlockedIps::IpListState[
+        ips: ips,
+        page: opts[:page],
+        total_pages: opts[:total_pages],
+        total_count: opts[:total_count],
+        starts_with: opts[:starts_with]
+      ]
+      render(Manager.new(form, type: type, list: list))
     end
   end
 end

@@ -10,7 +10,10 @@ module Admin
       def test_page_loads
         login
         get(:new)
-        assert_template("admin/emails/webmaster_questions/new")
+        # Phlex `Admin::Emails::WebmasterQuestions::New` renders the
+        # webmaster-question form (id derived by ApplicationForm from
+        # the Views::Controllers::* namespace).
+        assert_select("form#admin_email_webmaster_question_form")
         assert_form_action(action: :create)
       end
 

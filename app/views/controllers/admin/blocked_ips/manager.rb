@@ -9,43 +9,28 @@ module Views::Controllers::Admin::BlockedIps
   # - Optional filter form with pagination (for blocked IPs)
   # - Table of IPs with REMOVE buttons
   #
-  # @example Usage for okay IPs
-  #   render(Views::Controllers::Admin::BlockedIps::Manager.new(
-  #     FormObject::OkayIps.new,
-  #     type: :okay,
-  #     ips: @okay_ips,
-  #     action_path: admin_blocked_ips_path
-  #   ))
-  #
-  # @example Usage for blocked IPs (with filtering)
+  # @example Usage
   #   render(Views::Controllers::Admin::BlockedIps::Manager.new(
   #     FormObject::BlockedIps.new,
   #     type: :blocked,
-  #     ips: @blocked_ips,
-  #     action_path: admin_blocked_ips_path,
-  #     page: @blocked_ips_page,
-  #     total_pages: @blocked_ips_pages,
-  #     total_count: @blocked_ips_total,
-  #     starts_with: @starts_with,
-  #     filter_path: edit_admin_blocked_ips_path
+  #     list: blocked_ip_list_state
   #   ))
   class Manager < ::Components::ApplicationForm
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(form, type:, ips:,
-                   action_path:, page: nil, total_pages: nil,
-                   total_count: nil,
-                   starts_with: nil, filter_path: nil, **)
+    def initialize(form, type:, list:, **)
       @type = type
-      @ips = ips
-      @action_path = action_path
-      @page = page
-      @total_pages = total_pages
-      @total_count = total_count
-      @starts_with = starts_with
-      @filter_path = filter_path
+      @list = list # ::Admin::BlockedIps::IpListState
       super(form, **)
     end
-    # rubocop:enable Metrics/ParameterLists
+
+    private
+
+    # Manager only ever lives on the admin/blocked_ips edit page;
+    # both paths are fixed (POST target for the main form, GET target
+    # for the filter sub-form). No reason to make callers pass them.
+    def action_path = admin_blocked_ips_path
+    def filter_path = edit_admin_blocked_ips_path
+
+    public
 
     def around_template(&block)
       turbo_frame_tag("#{@type}_ips_list") do
@@ -77,11 +62,11 @@ module Views::Controllers::Admin::BlockedIps
     private
 
     def filterable?
-      @page.present? && @total_pages.present?
+      @list.page.present? && @list.total_pages.present?
     end
 
     def form_tag(&block)
-      form(action: @action_path, method: :post, **form_attributes, &block)
+      form(action: action_path, method: :post, **form_attributes, &block)
     end
 
     def form_attributes
@@ -95,11 +80,11 @@ module Views::Controllers::Admin::BlockedIps
 
     def render_filter_form
       render(Components::LiveDataFilterForm.new(
-               FormObject::TextFilter.new(starts_with: @starts_with),
+               FormObject::TextFilter.new(starts_with: @list.starts_with),
                turbo_frame: "#{@type}_ips_list",
-               page: @page,
-               total_pages: @total_pages,
-               filter_path: @filter_path,
+               page: @list.page,
+               total_pages: @list.total_pages,
+               filter_path: filter_path,
                placeholder: "Filter by IP prefix...",
                page_param: @type == :blocked ? "page" : "okay_page",
                filter_param:
@@ -112,11 +97,13 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_showing_message
-      plain("Showing #{@ips.size}")
+      plain("Showing #{@list.ips.size}")
       return unless filterable?
 
-      plain(" of #{@total_count}")
-      plain(" (page #{@page} of #{@total_pages})") if @total_pages > 1
+      plain(" of #{@list.total_count}")
+      return unless @list.total_pages > 1
+
+      plain(" (page #{@list.page} of #{@list.total_pages})")
     end
 
     def render_controls_row
@@ -163,7 +150,7 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_ips_table
-      render(Components::Table.new(@ips,
+      render(Components::Table.new(@list.ips,
                                    id: "#{@type}_ips",
                                    show_headers: false,
                                    class: "ips align-middle border-top",
