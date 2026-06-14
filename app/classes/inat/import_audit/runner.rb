@@ -29,7 +29,6 @@ module Inat::ImportAudit
       scope = select_observations
       @io.puts("Auditing #{count(scope)} observation(s) " \
                "(seed=#{@seed}) -> #{@out}")
-      @fetcher = Fetcher.new
       @builder = RowBuilder.new(source: @source)
       @tally = Hash.new(0)
       @total = 0
@@ -44,7 +43,8 @@ module Inat::ImportAudit
 
     def select_observations
       scope = Observation.where(source_id: @source.id).
-              where.not(external_id: nil).includes(:collector_user, :images)
+              where.not(external_id: nil).
+              includes(:collector_user, :images, :rss_log)
       return scope.where(id: @explicit_ids.map(&:to_i)).to_a if @explicit_ids
       return scope.order(:id) if @sample.zero? # full run: stream a relation
 
@@ -68,19 +68,25 @@ module Inat::ImportAudit
     end
 
     def each_batch(scope)
+      batches = (count(scope) / PAGE.to_f).ceil
       if scope.is_a?(Array)
-        slices = scope.each_slice(PAGE).to_a
-        slices.each_with_index { |batch, i| yield(batch, i, slices.size) }
+        scope.each_slice(PAGE).with_index do |batch, i|
+          yield(batch, i, batches)
+        end
       else
-        batches = (scope.count / PAGE.to_f).ceil
         scope.in_batches(of: PAGE).each_with_index do |rel, i|
           yield(rel.to_a, i, batches)
         end
       end
     end
 
+    # Memoized so tests can inject a stub via a singleton override.
+    def fetcher
+      @fetcher ||= Fetcher.new
+    end
+
     def write_batch(csv, batch)
-      by_id, failed = @fetcher.fetch_batch(batch.map(&:external_id))
+      by_id, failed = fetcher.fetch_batch(batch.map(&:external_id))
       batch.each do |obs|
         row = @builder.call(obs, by_id[obs.external_id.to_s],
                             fetch_failed: failed)

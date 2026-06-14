@@ -4,7 +4,7 @@ module Inat::ImportAudit
   # Builds one audit row per imported observation, oriented around the
   # migration question: what MO-side data would a reimport-overwrite drop,
   # and is that delta clean (recoverable to a sibling) or ambiguous?
-  # See doc/inat_import_migration_strategy.md.
+  # See the migration model write-up on #4208.
   class RowBuilder
     include Compare
 

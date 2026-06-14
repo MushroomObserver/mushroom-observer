@@ -47,7 +47,7 @@ args = ARGV.dup
 until args.empty?
   case (flag = args.shift)
   when "--sample" then options[:sample] = args.shift.to_i
-  when "--ids"    then options[:ids] = args.shift.to_s.split(",")
+  when "--ids"    then options[:ids] = args.shift.to_s.split(",").map(&:strip)
   when "--seed"   then options[:seed] = args.shift.to_i
   when "--out"    then options[:out] = args.shift
   else warn("Unknown argument: #{flag}")

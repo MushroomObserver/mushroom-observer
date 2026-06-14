@@ -2,10 +2,10 @@
 
 module Inat::ImportAudit
   # Batched, public, rate-limited fetch of current iNat observations by id,
-  # with retry/backoff and a descriptive User-Agent. `call` returns
-  # [results_by_id, failed_id_set]; a batch that exhausts its retries records
-  # its ids in failed_id_set so callers can distinguish a transient fetch
-  # failure from an observation genuinely absent/deleted on iNat.
+  # with retry/backoff and a descriptive User-Agent. `fetch_batch` returns
+  # [results_by_id, failed?]; failed? is true when the batch exhausted its
+  # retries, so callers can distinguish a transient fetch failure from an
+  # observation genuinely absent/deleted on iNat.
   class Fetcher
     PAGE_SIZE = 200          # iNat's maximum per_page
     INTER_PAGE_SLEEP = 1     # ~1 req/sec; within iNat's ~60/min guidance

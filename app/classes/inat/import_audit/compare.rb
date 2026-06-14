@@ -10,7 +10,7 @@ module Inat::ImportAudit
 
     # MO-auto-generated note fragments a reimport regenerates from
     # associations (field slips, occurrences, back-links) - not user-authored,
-    # so they're stripped from the residual. See the migration design note.
+    # so they're stripped from the residual. See #4208 for the model.
     REGENERABLE = Regexp.union(
       /Field slip:\s*\S+/i,
       %r{https?://(?:www\.)?mushroomobserver\.org/\S*}i,
