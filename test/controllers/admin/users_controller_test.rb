@@ -37,5 +37,29 @@ module Admin
       get(:edit, params: { id: user.id })
       assert_response(:success)
     end
+
+    def test_destroy_user
+      # disposable fixture user; `User.erase_user` does the heavy work.
+      user = users(:spammer)
+      user_id = user.id
+
+      login(:rolf)
+      make_admin
+      delete(:destroy, params: { id: user_id })
+
+      assert_response(:redirect)
+      assert_nil(User.find_by(id: user_id),
+                 "User.erase_user should have removed the user")
+    end
+
+    def test_destroy_blank_id
+      # `if id.present?` guard branch — blank `id` skips the
+      # `User.erase_user` call and still redirects.
+      login(:rolf)
+      make_admin
+      delete(:destroy, params: { id: "" })
+
+      assert_response(:redirect)
+    end
   end
 end

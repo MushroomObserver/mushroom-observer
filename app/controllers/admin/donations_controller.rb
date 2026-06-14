@@ -30,13 +30,6 @@ module Admin
 
     private
 
-    def check_donate_admin(error)
-      return true if in_admin_mode?
-
-      flash_error(error)
-      redirect_to(support_donate_path)
-    end
-
     def create_donation(params)
       email = params["donation"]["email"]
       Donation.create(amount: params["donation"]["amount"],
