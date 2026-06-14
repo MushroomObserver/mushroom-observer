@@ -52,9 +52,12 @@ class ArticlesControllerTest < FunctionalTestCase
     article = articles(:premier_article)
     get(:show, params: { id: article.id })
     assert_response(:success)
-    assert_template(:show)
-    assert(/#{article.body}/ =~ @response.body,
-           "Page is missing article body")
+    # Phlex `Articles::Show` pins the article body in
+    # `#article_body .panel-body` (was `assert_template(:show)` + a
+    # `/#{article.body}/ =~ @response.body` regex on the rendered HTML).
+    assert_select("#article_body .panel-body",
+                  text: /#{Regexp.escape(article.body)}/,
+                  count: 1)
 
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
@@ -119,6 +122,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove authorized user can go to create_article form
     login(users(:article_writer).login)
     get(:new)
+    assert_select("form#article_form")
     assert_form_action(action: :create) # "new" form posts to :create action
 
     # Prove that if News Articles project doesn't exist, there's no error.
@@ -141,6 +145,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove authorized user can create article
     login(users(:article_writer).login)
     get(:edit, params: params)
+    assert_select("form#article_form")
     assert_form_action(action: :update) # "edit" form posts to :update action
   end
 
@@ -171,7 +176,9 @@ class ArticlesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash_text(:article_title_required.l)
-    assert_template(:new)
+    # Phlex `Articles::New` renders the form (id derived by
+    # ApplicationForm from the Views::Controllers::* namespace).
+    assert_select("form#article_form")
     assert_form_action(action: :create) # "new" form
 
     # Prove authorized user can create Article
@@ -225,7 +232,9 @@ class ArticlesControllerTest < FunctionalTestCase
     params[:article][:title] = ""
     post(:update, params: params)
     assert_flash_text(:article_title_required.l)
-    assert_template(:edit)
+    # Phlex `Articles::Edit` renders the form (id derived by
+    # ApplicationForm from the Views::Controllers::* namespace).
+    assert_select("form#article_form")
     assert_form_action(action: :update) # "edit" form
   end
 
