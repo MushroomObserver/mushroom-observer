@@ -57,10 +57,40 @@ module Inat::ImportAudit
       assert(row[:ambiguous])
     end
 
+    def test_collector_user_matching_uploader_is_not_a_diff
+      users(:rolf).update!(inat_username: "rolf_inat")
+      obs = collector_obs(user_login: "rolf_inat",
+                          collector_user_id: users(:rolf).id)
+      assert_not(@builder.call(obs, inat_raw("x"))[:collector_differs])
+    end
+
+    def test_collector_user_differing_from_uploader_is_a_diff
+      users(:rolf).update!(inat_username: "rolf_inat")
+      obs = collector_obs(user_login: "rolf_inat",
+                          collector_user_id: users(:mary).id)
+      assert(@builder.call(obs, inat_raw("x"))[:collector_differs])
+    end
+
+    def test_free_text_collector_matching_uploader_is_not_a_diff
+      obs = collector_obs(user_login: "joe", collector: "joe")
+      assert_not(@builder.call(obs, inat_raw("x"))[:collector_differs])
+    end
+
+    def test_free_text_collector_naming_another_person_is_a_diff
+      obs = collector_obs(user_login: "bdthomas", collector: "Daniel Oshiro")
+      assert(@builder.call(obs, inat_raw("x"))[:collector_differs])
+    end
+
     private
 
     def build(notes:, raw:)
       @builder.call(observation(notes), raw)
+    end
+
+    def collector_obs(user_login:, **attrs)
+      Observation.new({ external_id: "999",
+                        notes: { iNat_imported_data: "User: #{user_login}",
+                                 Other: "x" } }.merge(attrs))
     end
 
     def observation(notes)
