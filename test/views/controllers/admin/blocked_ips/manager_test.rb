@@ -69,8 +69,13 @@ module Views::Controllers::Admin::BlockedIps
       assert_html(html, "#blocked-ips-list-filter-form")
     end
 
+    # Defensive `filterable?` check in `Manager`: when an IpListState
+    # is constructed with nil pagination fields (currently never the
+    # case in production, but the view tolerates it), no filter form
+    # or "of TOTAL" / "page X of Y" pagination message renders.
     def test_renders_without_pagination
-      html = render_manager(type: :okay, ips: ["1.2.3.4"])
+      html = render_manager(type: :okay, ips: ["1.2.3.4"],
+                            page: nil, total_pages: nil, total_count: nil)
 
       heading = Nokogiri::HTML(html).at_css(".panel-heading-links")
       assert(heading, "Expected .panel-heading-links element")
@@ -100,6 +105,10 @@ module Views::Controllers::Admin::BlockedIps
 
     private
 
+    # Defaults page/total_pages/total_count to the values production
+    # always supplies (page 1, single page covering all `ips`) so the
+    # default render path mirrors the controller. Tests that exercise
+    # the nil/defensive path pass them explicitly.
     def render_manager(type:, ips:, **opts)
       form = if type == :blocked
                FormObject::BlockedIps.new
@@ -108,9 +117,9 @@ module Views::Controllers::Admin::BlockedIps
              end
       list = ::Admin::BlockedIps::IpListState[
         ips: ips,
-        page: opts[:page],
-        total_pages: opts[:total_pages],
-        total_count: opts[:total_count],
+        page: opts.fetch(:page, 1),
+        total_pages: opts.fetch(:total_pages, 1),
+        total_count: opts.fetch(:total_count, ips.size),
         starts_with: opts[:starts_with]
       ]
       render(Manager.new(form, type: type, list: list))

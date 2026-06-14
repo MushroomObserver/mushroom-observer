@@ -40,12 +40,24 @@ module Admin
     end
 
     def render_edit_view
+      preload_stats = stats_for_preload
       render(Views::Controllers::Admin::BlockedIps::Edit.new(
                ip: @ip, stats: @stats,
                okay: @okay, blocked: @blocked,
-               users_by_id: preloaded_users_for(@stats),
-               api_keys_by_str: preloaded_api_keys_for(@stats)
+               users_by_id: preloaded_users_for(preload_stats),
+               api_keys_by_str: preloaded_api_keys_for(preload_stats)
              ))
+    end
+
+    # The right-column views render at most 51 entries from `@stats`:
+    # `IpSummary`'s top-50 by load plus, when set, the reported IP's
+    # stats panel. Preload only those — otherwise a busy `@stats`
+    # produces an IN-clause covering every active user/key, most of
+    # which we'd discard. Mirrors `IpSummary#sorted_ips`' `last(50)`.
+    def stats_for_preload
+      top_keys = @stats.keys.sort_by { |k| @stats[k][:load] }.last(50)
+      displayed_keys = (top_keys + [@ip].compact).uniq
+      @stats.slice(*displayed_keys)
     end
 
     # Preloads of the Users / APIKeys the right-column subviews will

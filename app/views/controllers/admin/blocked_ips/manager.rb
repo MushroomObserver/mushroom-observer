@@ -2,11 +2,12 @@
 
 module Views::Controllers::Admin::BlockedIps
   # Superform component for managing IP lists (blocked or okay).
-  # Rendered by the admin/blocked_ips controller's `edit.html.erb`.
+  # Rendered by `Views::Controllers::Admin::BlockedIps::Edit`.
   # Renders a Panel containing a management form (PATCH) with:
   # - Panel heading with title and count
   # - Add IP input + ADD button + Clear List button
-  # - Optional filter form with pagination (for blocked IPs)
+  # - Optional filter form with pagination (rendered for either type
+  #   whenever `list.page` and `list.total_pages` are present)
   # - Table of IPs with REMOVE buttons
   #
   # @example Usage
