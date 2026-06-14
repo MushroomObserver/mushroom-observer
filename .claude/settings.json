@@ -8,6 +8,11 @@
             "type": "command",
             "command": "test -x .claude/hooks/check_rubocop_staged.sh && exec .claude/hooks/check_rubocop_staged.sh || exit 0",
             "timeout": 600
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_python.sh && exec .claude/hooks/block_python.sh || exit 0",
+            "timeout": 10
           }
         ]
       },
