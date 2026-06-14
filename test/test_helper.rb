@@ -105,11 +105,16 @@ end
 
 module ActiveSupport
   class TestCase
-    # Run tests in parallel with specified workers
+    # Run tests in parallel with specified workers.
+    # `PARALLEL_WORKERS` env var overrides the CPU-count default
+    # (used by system tests to cap at the Maps API port whitelist
+    # of 3000–3003 — see `ApplicationSystemTestCase`).
     # Threshold can be set via PARALLEL_TEST_THRESHOLD environment variable
     # Default is 50 (Rails default) if not set
     threshold = ENV["PARALLEL_TEST_THRESHOLD"]&.to_i || 50
-    parallelize(workers: :number_of_processors, threshold: threshold)
+    parallel_workers =
+      ENV["PARALLEL_WORKERS"].presence&.to_i || :number_of_processors
+    parallelize(workers: parallel_workers, threshold: threshold)
 
     # Set up worker-specific database for parallel testing
     parallelize_setup do |worker|
