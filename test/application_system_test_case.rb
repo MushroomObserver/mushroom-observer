@@ -10,14 +10,15 @@ require("test_helpers/system/cuprite_setup")
 require("test_helpers/system/cuprite_helpers")
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
-  # System tests bind Capybara to a port in the Google Maps API
-  # key's referer-whitelist range (`http://localhost:3000-3003/*`).
-  # Override the global `parallelize(workers: :number_of_processors)`
-  # from `test_helper.rb` to cap at the same count so each worker
-  # gets a whitelisted port to itself (worker N → port 3000 + N,
-  # see the `setup` method below). If the whitelist is widened in
-  # Cloud Console later, bump this constant.
-  MAPS_API_PORT_COUNT = 4
+  # System tests use the Maps JavaScript API
+  # (`@googlemaps/js-api-loader`); the key's HTTP-Referer whitelist
+  # in Google Cloud Console gates which ports can call it. Start at
+  # 3001 (not 3000) so a running `bin/rails server` on 3000 doesn't
+  # collide with a worker. Count is the number of whitelisted ports
+  # — bump (and ask Joe to widen the Cloud Console whitelist) when
+  # we want more parallel system-test workers.
+  MAPS_API_PORT_FIRST = 3001
+  MAPS_API_PORT_COUNT = 3
   parallelize(workers: MAPS_API_PORT_COUNT)
 
   driven_by :mo_cuprite, using: :chromium
@@ -38,13 +39,13 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     Capybara.server = :puma
     # Capybara.current_driver = :mo_cuprite
     Capybara.server_host = "localhost"
-    # Bind to a Maps-API-whitelisted port (3000–3003). The exact
-    # port is chosen per parallel worker so workers don't fight over
-    # one port — worker 0 → 3000, worker 1 → 3001, etc. Serial runs
-    # (`PARALLEL_WORKERS=1`) leave `TEST_ENV_NUMBER` unset → port 3000.
-    # **Stop your `bin/rails server` before running system tests** to
-    # avoid `Errno::EADDRINUSE` on whichever port is in play.
-    Capybara.server_port = 3000 + ENV["TEST_ENV_NUMBER"].to_i
+    # Bind to a Maps-API-whitelisted port starting at
+    # `MAPS_API_PORT_FIRST` (3001). One port per worker so they
+    # don't fight — worker 0 → 3001, worker 1 → 3002, etc. Skipping
+    # 3000 leaves a running `bin/rails server` on 3000 alone so
+    # devs don't need to stop it before `bin/rails test test/system`.
+    # Serial runs leave `TEST_ENV_NUMBER` unset → port 3001.
+    Capybara.server_port = MAPS_API_PORT_FIRST + ENV["TEST_ENV_NUMBER"].to_i
     # Normalize whitespaces when using `has_text?` and similar matchers,
     # i.e., ignore newlines, trailing spaces, etc.
     # That makes tests less dependent on slight UI changes.
