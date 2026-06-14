@@ -1147,12 +1147,12 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_non_superuser_url_with_foreign_user_id_strips_user_id_from_estimate
     user = users(:rolf)
-    # user_id is always stripped by URLNormalizer — iNat ORs user_id and
+    # user_id is stripped for non-superimporters — iNat ORs user_id and
     # user_login, so a user-supplied user_id alongside the injected user_login
     # would return unexpected observations. The estimate must not include it.
     url = "#{INAT_SITE_OBS_URL}?place_id=1&user_id=someone_else"
 
-    # Returns 5 for any request (user_id stripped; user_login only).
+    # Returns 5 for any request (user_id stripped; user_login injected by MO).
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 5 }.to_json)
 

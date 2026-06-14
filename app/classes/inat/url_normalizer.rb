@@ -41,10 +41,6 @@ class Inat
       "taxon_id",
       # Don't let users mess with cache control
       "ttl",
-      # iNat ORs user_id and user_login; add_ownership_filter sets user_login,
-      # so a user-supplied user_id would return unexpected observations
-      # Superimporters can use inat_login param as a work-around
-      "user_id",
       # UI-only param, would make API return 0 results
       "view",
       # We use without_field to avoid re-import of imported or mirrored obss
@@ -73,9 +69,11 @@ class Inat
       uri = parse_uri
       return nil unless valid_inat_observations_uri?(uri)
 
-      all_strips = STRIP_PARAMS + context_strip_params
+      parsed = Rack::Utils.parse_query(uri.query.to_s)
+      all_strips = STRIP_PARAMS + context_strip_params +
+                   content_strip_params(parsed)
       silent = ui_url?(uri) ? UI_NOISE_PARAMS : []
-      Rack::Utils.parse_query(uri.query.to_s).keys & (all_strips - silent)
+      parsed.keys & (all_strips - silent)
     end
 
     private
@@ -106,8 +104,20 @@ class Inat
 
     def clean_query(raw_query)
       params = Rack::Utils.parse_query(raw_query.to_s)
-      params.except!(*STRIP_PARAMS, *context_strip_params)
+      params.except!(*STRIP_PARAMS, *context_strip_params,
+                     *content_strip_params(params))
       params.sort.to_h.to_query
+    end
+
+    # user_id is safe for superimporters importing others' obs because the
+    # ownership filter uses LICENSED_FILTER (no user_login) — no iNat OR risk.
+    # Exception: if user_login is also present, iNat ORs them; strip user_id.
+    def content_strip_params(params)
+      if @superimporter && @import_others && !params.key?("user_login")
+        return []
+      end
+
+      ["user_id"]
     end
   end
 end

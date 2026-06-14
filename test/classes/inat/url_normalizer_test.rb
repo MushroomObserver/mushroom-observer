@@ -146,21 +146,43 @@ class Inat
                    "Should strip user_login for non-superimporters")
     end
 
-    def test_always_strips_user_id
+    def test_strips_user_id_by_default
       url = "#{API_URL}?project_id=291058&user_id=12345"
       result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058", result,
-                   "Should strip user_id")
+                   "Should strip user_id for non-superimporter")
     end
 
-    def test_superimporter_strips_user_id_preserves_user_login
+    def test_superimporter_own_import_strips_user_id
       url = "#{API_URL}?project_id=291058&user_login=testuser&user_id=12345"
       result = URLNormalizer.new(url, superimporter: true).normalize
 
       assert_equal("project_id=291058&user_login=testuser", result,
-                   "user_id stripped even for superimporters; " \
+                   "user_id stripped for own-import superimporter; " \
                    "user_login preserved")
+    end
+
+    def test_superimporter_import_others_preserves_user_id
+      url = "#{API_URL}?project_id=291058&user_id=12345"
+      result = URLNormalizer.new(url, superimporter: true,
+                                      import_others: true).normalize
+
+      assert_equal(
+        "project_id=291058&user_id=12345", result,
+        "user_id should be kept for superimporter in import-others " \
+        "mode so the import can be scoped to a specific user"
+      )
+    end
+
+    def test_superimporter_import_others_strips_user_id_when_user_login_present
+      url = "#{API_URL}?project_id=291058&user_id=12345&user_login=testuser"
+      result = URLNormalizer.new(url, superimporter: true,
+                                      import_others: true).normalize
+
+      assert_equal("project_id=291058&user_login=testuser", result,
+                   "user_id stripped when user_login also present to prevent " \
+                   "iNat from ORing them and returning cross-user results")
     end
 
     def test_non_superimporter_strips_user_login_and_user_id
