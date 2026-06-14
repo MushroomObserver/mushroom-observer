@@ -198,6 +198,59 @@ class TableTest < ComponentTestCase
     assert_no_match(/<thead>/, html)
     assert_no_match(/<th>/, html)
   end
+
+  # --- Section heading row (t.heading) -----------------------------
+
+  def test_heading_renders_single_th_with_colspan_equal_column_count
+    rows = [TestRow.new(name: "Alice")]
+
+    # Block return values become the cell content — production
+    # callers use Phlex `plain` / `trusted_html` etc. inside the
+    # block because the block runs in Phlex view context there.
+    html = render(Components::Table.new(rows)) do |t|
+      t.heading { "Section label:" }
+      t.column("Name", &:name)
+      t.column("Age", &:age)
+    end
+
+    # Single th with colspan = number of columns.
+    assert_html(html, "thead tr th[colspan='2']", text: "Section label:")
+    # Per-column header row is suppressed when heading is set.
+    assert_html(html, "thead tr", count: 1)
+    assert_no_match(/<th>Name<\/th>/, html)
+    assert_no_match(/<th>Age<\/th>/, html)
+    # Body still renders normally.
+    assert_includes(html, "<td>Alice</td>")
+  end
+
+  def test_heading_forwards_attributes_to_th
+    rows = []
+
+    html = render(Components::Table.new(rows)) do |t|
+      t.heading(class: "text-center", data: { foo: "bar" }) { "Curators:" }
+      t.column("a", &:name)
+      t.column("b", &:name)
+    end
+
+    assert_html(html,
+                "thead th[colspan='2'][class='text-center'][data-foo='bar']",
+                text: "Curators:")
+  end
+
+  def test_heading_with_show_headers_false_renders_no_thead
+    rows = [TestRow.new(name: "Alice")]
+
+    html = render(Components::Table.new(rows, show_headers: false)) do |t|
+      t.heading { "Suppressed:" }
+      t.column("Name", &:name)
+    end
+
+    # `show_headers: false` overrides the heading — no thead at all.
+    assert_no_match(/<thead>/, html)
+    assert_no_match(/Suppressed:/, html)
+    # Body still renders.
+    assert_includes(html, "<td>Alice</td>")
+  end
 end
 
 # Test host for body mode: renders Table inside a real Phlex view so
