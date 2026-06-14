@@ -18,7 +18,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   class CheckboxField < Superform::Rails::Components::Checkbox
     include Phlex::Slotable
     include FieldWithHelp
-    include Components::TrustedHtml
+    include Phlex::TrustedHtml
 
     slot :between
     slot :append
