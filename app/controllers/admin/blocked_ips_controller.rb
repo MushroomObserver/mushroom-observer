@@ -8,8 +8,8 @@ module Admin
     # params[:add_okay] and params[:add_bad]
     # Using params[:report] will show info about a chosen IP
     def edit
-      @ip = params[:report] if validate_ip!(params[:report])
       @stats = IpStats.read_stats(do_activity: true)
+      @ip = report_ip_if_present
       @okay = load_paginated_ip_list(:okay)
       @blocked = load_paginated_ip_list(:blocked)
       render_edit_view
@@ -20,12 +20,24 @@ module Admin
       strip_params!
       process_blocked_ips_commands
       @stats = IpStats.read_stats(do_activity: true)
+      @ip = report_ip_if_present
       @okay = load_paginated_ip_list(:okay)
       @blocked = load_paginated_ip_list(:blocked)
       render_edit_view
     end
 
     private
+
+    # Returns the reported IP only if it's a valid IPv4 AND we have
+    # stats for it — the per-IP stats panel does `@stats[@ip][...]`
+    # and would `NoMethodError` on a missing key.
+    def report_ip_if_present
+      ip = params[:report]
+      return nil unless validate_ip!(ip)
+      return nil unless @stats.key?(ip)
+
+      ip
+    end
 
     def render_edit_view
       render(Views::Controllers::Admin::BlockedIps::Edit.new(
@@ -64,8 +76,8 @@ module Admin
       end
 
       total = all_ips.size
-      page = (params[page_param_for(type)].presence || 1).to_i
       total_pages = [(total.to_f / IPS_PER_PAGE).ceil, 1].max
+      page = clamp_page(params[page_param_for(type)], total_pages)
       offset = (page - 1) * IPS_PER_PAGE
 
       ::Admin::BlockedIps::IpListState[
@@ -73,6 +85,14 @@ module Admin
         page: page, total_pages: total_pages,
         total_count: total, starts_with: starts_with
       ]
+    end
+
+    # Clamp `page` to `[1, total_pages]` so a malformed param
+    # (`page=0`, `page=999999`, non-numeric) can't make `offset`
+    # negative or push us off the end of the list.
+    def clamp_page(raw, total_pages)
+      n = (raw.presence || 1).to_i
+      n.clamp(1, total_pages)
     end
 
     def read_all_ips(type)

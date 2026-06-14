@@ -15,10 +15,6 @@ module Admin
     # Review donations
     def edit
       @donations = Donation.order(created_at: :desc)
-      @reviewed = {}
-      @donations.each do |d|
-        @reviewed[d.id] = d.reviewed
-      end
       render(Views::Controllers::Admin::Donations::Edit.new(
                donations: @donations.to_a
              ))
@@ -27,10 +23,6 @@ module Admin
     def update
       update_donations(params[:reviewed])
       @donations = Donation.order(created_at: :desc)
-      @reviewed = {}
-      @donations.each do |d|
-        @reviewed[d.id] = d.reviewed
-      end
       render(Views::Controllers::Admin::Donations::Edit.new(
                donations: @donations.to_a
              ))
