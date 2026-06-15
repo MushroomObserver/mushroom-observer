@@ -217,8 +217,8 @@ class TableTest < ComponentTestCase
     assert_html(html, "thead tr th[colspan='2']", text: "Section label:")
     # Per-column header row is suppressed when heading is set.
     assert_html(html, "thead tr", count: 1)
-    assert_no_match(/<th>Name<\/th>/, html)
-    assert_no_match(/<th>Age<\/th>/, html)
+    assert_no_match(%r{<th>Name</th>}, html)
+    assert_no_match(%r{<th>Age</th>}, html)
     # Body still renders normally.
     assert_includes(html, "<td>Alice</td>")
   end
