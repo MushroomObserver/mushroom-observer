@@ -11,13 +11,15 @@ require("test_helper")
 class InatMoObservationBuilderTest < UnitTestCase
   # Minimal stand-in for an ::Inat::Obs, exposing only what naming_vote reads.
   class FakeInatObs
-    def initialize(sequences:, provisional_name:, quality_grade:)
+    def initialize(sequences:, provisional_name:, quality_grade:,
+                   name_override: nil)
       @sequences = sequences
       @provisional_name = provisional_name
       @quality_grade = quality_grade
+      @name_override = name_override
     end
 
-    attr_reader :sequences, :provisional_name
+    attr_reader :sequences, :provisional_name, :name_override
 
     def [](key)
       { quality_grade: @quality_grade, license_code: "cc-by" }[key]
@@ -108,27 +110,101 @@ class InatMoObservationBuilderTest < UnitTestCase
                           provisional: names(:lactarius_alpinus)))
   end
 
+  # --- Species Name Override (#4533) ---
+
+  # The override leads ahead of the Community ID.
+  def test_proposed_namings_override_leads_over_community
+    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
+                  ["Peltigera", Vote::MIN_POS_VOTE]],
+                 proposed(community: names(:peltigera),
+                          override: names(:lactarius_alpinus)))
+  end
+
+  # The override outranks BOTH the provisional name and the Community ID;
+  # the other two follow at Could Be.
+  def test_proposed_namings_override_outranks_provisional_and_community
+    assert_equal([["Coprinus comatus", Vote::MAXIMUM_VOTE],
+                  ["Boletus edulis", Vote::MIN_POS_VOTE],
+                  ["Peltigera", Vote::MIN_POS_VOTE]],
+                 proposed(community: names(:peltigera),
+                          provisional: names(:boletus_edulis),
+                          override: names(:coprinus_comatus)))
+  end
+
+  # Override equal to the provisional collapses to one naming for it.
+  def test_proposed_namings_override_equals_provisional
+    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
+                  ["Peltigera", Vote::MIN_POS_VOTE]],
+                 proposed(community: names(:peltigera),
+                          provisional: names(:lactarius_alpinus),
+                          override: names(:lactarius_alpinus)))
+  end
+
+  # A deprecated override is corrected to its preferred synonym, which leads.
+  def test_proposed_namings_deprecated_override_prefers_synonym
+    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
+                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE],
+                  ["Peltigera", Vote::MIN_POS_VOTE]],
+                 proposed(community: names(:peltigera),
+                          override: names(:lactarius_alpigenes)))
+  end
+
   # When the iNat provisional name already exists in MO, reuse it rather than
   # posting a new one.
   def test_prov_name_reuses_existing_mo_name
     existing = names(:lactarius_alpinus)
-    fake = FakeInatObs.new(sequences: [], quality_grade: "needs_id",
-                           provisional_name: existing.text_name)
-    builder = Inat::MoObservationBuilder.new(
-      inat_obs: fake, user: users(:rolf), inat_source: :stub
-    )
+    builder = builder_for(provisional_name: existing.text_name)
     assert_equal(existing, builder.send(:prov_name))
+  end
+
+  # An override matching an existing MO name reuses it (no API post).
+  def test_override_name_reuses_existing_mo_name
+    existing = names(:coprinus_comatus)
+    builder = builder_for(name_override: existing.text_name)
+    assert_equal(existing, builder.send(:override_name))
+  end
+
+  # An unparseable override falls back to nil so the import proceeds with the
+  # provisional/Community lead.
+  def test_override_name_unparseable_falls_back_to_nil
+    assert_nil(builder_for(name_override: "see comments").send(:override_name))
+  end
+
+  # A failure while resolving the override (e.g. an API error) is logged and
+  # falls back to nil rather than aborting the import.
+  def test_override_name_falls_back_when_resolution_raises
+    builder = builder_for(name_override: "Boletus edulis")
+    builder.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
+    assert_nil(builder.send(:override_name))
+  end
+
+  # No override field => no override name.
+  def test_override_name_absent_is_nil
+    assert_nil(builder_for.send(:override_name))
+  end
+
+  # The override naming carries the override reason text.
+  def test_override_naming_reason
+    existing = names(:coprinus_comatus)
+    builder = builder_for(name_override: existing.text_name)
+    assert_equal("Following Species Name Override from iNat",
+                 builder.send(:used_references_explanation, existing))
   end
 
   private
 
-  def proposed(community:, provisional: nil, lead_vote: Vote::MAXIMUM_VOTE)
-    fake = FakeInatObs.new(sequences: [], provisional_name: nil,
-                           quality_grade: "needs_id")
-    builder = Inat::MoObservationBuilder.new(
-      inat_obs: fake, user: users(:rolf), inat_source: :stub
-    )
-    builder.send(:proposed_namings, community, provisional, lead_vote).
+  def builder_for(provisional_name: nil, name_override: nil)
+    fake = FakeInatObs.new(sequences: [], quality_grade: "needs_id",
+                           provisional_name: provisional_name,
+                           name_override: name_override)
+    Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
+                                   inat_source: :stub)
+  end
+
+  def proposed(community:, provisional: nil, override: nil,
+               lead_vote: Vote::MAXIMUM_VOTE)
+    builder_for.send(:proposed_namings, community, provisional, override,
+                     lead_vote).
       map { |name, vote| [name.text_name, vote] }
   end
 
