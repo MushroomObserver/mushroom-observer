@@ -78,6 +78,10 @@ module API2Extensions
           "Got: <#{show_val(actual)}>\n"
     if expect.is_a?(Class) && expect <= API2::Error
       assert_kind_of(expect, actual, msg)
+    elsif expect.nil?
+      # `expect == nil` triggers Minitest's `assert_equal nil, …`
+      # deprecation; use the explicit nil-aware form instead.
+      assert_nil(actual, msg)
     else
       assert_equal(expect, actual, msg)
     end
