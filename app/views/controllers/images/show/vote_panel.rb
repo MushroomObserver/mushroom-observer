@@ -27,11 +27,7 @@ module Views::Controllers::Images
       private
 
       def current_vote_value
-        @current_vote_value ||= begin
-                                  (@image.vote_cache.to_f + 0.5).to_i
-                                rescue StandardError
-                                  0
-                                end
+        @current_vote_value ||= (@image.vote_cache.to_f + 0.5).to_i
       end
 
       def render_current_vote_heading
