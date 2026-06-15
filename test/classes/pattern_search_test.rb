@@ -586,12 +586,12 @@ class PatternSearchTest < UnitTestCase
 
   def test_location_pattern_search_terms_help
     help_text = PatternSearch::Location.terms_help
-    assert_includes(help_text, "region")
-    assert_includes(help_text, "user")
-    assert_includes(help_text, "editor")
-    assert_includes(help_text, "created")
-    assert_includes(help_text, "modified")
-    assert_includes(help_text, "has_notes")
+    assert(help_text.include?("region"))
+    assert(help_text.include?("user"))
+    assert(help_text.include?("editor"))
+    assert(help_text.include?("created"))
+    assert(help_text.include?("modified"))
+    assert(help_text.include?("has_notes"))
   end
 
   def test_location_pattern_search_combined_params

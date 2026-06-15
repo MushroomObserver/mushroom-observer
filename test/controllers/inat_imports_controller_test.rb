@@ -63,8 +63,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_new_inat_import_inat_username_prefilled
     user = users(:mary)
-    assert_predicate(user.inat_username, :present?,
-                     "Test needs a user fixture with an inat_username")
+    assert(user.inat_username.present?,
+           "Test needs a user fixture with an inat_username")
 
     login(mary.login)
     get(:new)
@@ -81,8 +81,7 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_create_cancel_reset
     user = users(:ollie)
     import = inat_imports(:ollie_inat_import)
-    assert_predicate(import, :canceled?,
-                     "Test needs a canceled InatImport fixture")
+    assert(import.canceled?, "Test needs a canceled InatImport fixture")
     id = "123"
     params = { inat_ids: id, inat_username: user.inat_username,
                consent: 1, confirmed: 1 }
@@ -377,9 +376,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_strip_inat_username
     user = users(:mary)
-    assert_predicate(APIKey.where(user: user, notes: MO_API_KEY_NOTES), :none?,
-                     "Test needs user fixture without an MO API key for iNat " \
-                     "imports")
+    assert(APIKey.where(user: user, notes: MO_API_KEY_NOTES).none?,
+           "Test needs user fixture without an MO API key for iNat imports")
     inat_username = " #{user.name} " # simulate typing extra spaces
     inat_import = inat_imports(:mary_inat_import)
     assert_equal("Unstarted", inat_import.state,
@@ -396,9 +394,9 @@ class InatImportsControllerTest < FunctionalTestCase
                      consent: 1, confirmed: 1 })
     end
 
-    assert_predicate(
+    assert(
       APIKey.where(user: user, notes: MO_API_KEY_NOTES).
-             where.not(verified: nil), :one?,
+             where.not(verified: nil).one?,
       "MO should assure user has personal verified API key for iNat imports"
     )
     assert_response(:redirect)
@@ -865,9 +863,8 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("[data-controller='inat-import-job']")
-    assert_predicate(import.reload, :canceled?,
-                     "Clicking cancel button should make " \
-                     "InatImport.canceled? == true")
+    assert(import.reload.canceled?,
+           "Clicking cancel button should make InatImport.canceled? == true")
   end
 
   ########## Utilities

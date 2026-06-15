@@ -18,7 +18,7 @@ class ImagesIntegrationTest < CapybaraIntegrationTestCase
     img = images(:in_situ_image)
     proj = projects(:bolete_project)
     assert_equal(mary.id, img.user_id) # owned by mary
-    assert_includes(img.projects, proj) # owned by bolete project
+    assert(img.projects.include?(proj)) # owned by bolete project
     # dick is only member of project
     assert_equal([mary.id, dick.id], proj.user_group.users.map(&:id))
 

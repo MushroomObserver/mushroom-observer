@@ -214,7 +214,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     # This does not generate a new_admin_emails_name_change_requests_path email,
     # both because this name has no dependents,
     # and because the email form requires a POST.
-    assert_predicate(@@emails, :one?)
+    assert(@@emails.one?)
     assert_flash_success
     assert_redirected_to(name_path(name.id))
     assert_equal(desired_text_name, name.reload.search_name)
@@ -384,7 +384,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     }
     put(:update, params: params)
     assert_flash_error
-    assert_predicate(name.reload, :is_misspelling?)
+    assert(name.reload.is_misspelling?)
 
     # Prove we cannot correct misspelling with same Name
     name = names(:suilus)
@@ -401,7 +401,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     }
     put(:update, params: params)
     assert_flash_error
-    assert_predicate(name.reload, :is_misspelling?)
+    assert(name.reload.is_misspelling?)
 
     # Prove we can swap misspelling and correct_spelling
     # Change "Suillus E.B. White" to "Suilus E.B. White"
@@ -420,7 +420,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     }
     put(:update, params: params)
     # old_correct_spelling's spelling status and deprecation should change
-    assert_predicate(old_correct_spelling.reload, :is_misspelling?)
+    assert(old_correct_spelling.reload.is_misspelling?)
     assert_equal(old_misspelling, old_correct_spelling.correct_spelling)
     assert(old_correct_spelling.deprecated)
     # old_misspelling's spelling status should change but deprecation should not
@@ -894,7 +894,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
   def test_update_change_icn_id_name_with_dependents
     name = names(:lactarius)
     assert(name.icn_id, "Test needs a fixture with an icn_id")
-    assert_predicate(name, :dependents?, "Test needs a fixture with dependents")
+    assert(name.dependents?, "Test needs a fixture with dependents")
     params = {
       id: name.id,
       name: {

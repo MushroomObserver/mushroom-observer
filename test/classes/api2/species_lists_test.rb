@@ -72,7 +72,7 @@ class API2::SpeciesListsTest < UnitTestCase
     obs2.species_lists << species_lists(:another_species_list)
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
     ssp_lists = obses.map(&:species_lists).flatten.uniq.sort_by(&:id)
-    assert_operator(ssp_lists.length, :>, 1)
+    assert(ssp_lists.length > 1)
     assert_api_pass(params_get(synonyms_of: "Lactarius alpinus"))
     assert_api_results(ssp_lists)
     assert_api_pass(
@@ -121,8 +121,8 @@ class API2::SpeciesListsTest < UnitTestCase
   def test_getting_species_lists_has_notes
     with    = SpeciesList.where(SpeciesList[:notes].not_blank)
     without = SpeciesList.where(SpeciesList[:notes].blank)
-    assert_operator(with.length, :>, 1)
-    assert_operator(without.length, :>, 1)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_notes: "yes"))
     assert_api_results(with)
     assert_api_pass(params_get(has_notes: "no"))

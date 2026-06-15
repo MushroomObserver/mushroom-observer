@@ -33,7 +33,7 @@ module GlossaryTerms
       login("mary")
       post(:attach, params: params)
       assert_redirected_to(glossary_term_path(glossary_term.id))
-      assert_includes(glossary_term.reload.images, image)
+      assert(glossary_term.reload.images.member?(image))
     end
 
     def test_reuse_image_for_glossary_term_post_without_thumbnail
@@ -48,7 +48,7 @@ module GlossaryTerms
       login("mary")
       post(:attach, params: params)
       assert_redirected_to(glossary_term_path(glossary_term.id))
-      assert_includes(glossary_term.reload.images, image)
+      assert(glossary_term.reload.images.member?(image))
       assert_objs_equal(image, glossary_term.thumb_image)
     end
 

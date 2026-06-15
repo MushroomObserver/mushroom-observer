@@ -195,7 +195,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: project.id })
 
-    assert_predicate(project.species_lists, :any?)
+    assert(project.species_lists.any?)
     assert_select("a[href*=?]", species_lists_path(project:), { minimum: 1 },
                   "Page is missing a link to observation list")
 
@@ -227,8 +227,8 @@ class ProjectsControllerTest < FunctionalTestCase
   def test_show_project_with_constraint_violations
     project = projects(:falmouth_2023_09_project)
     violations_count = project.count_violations
-    assert_predicate(violations_count, :positive?,
-                     "Test needs Project fixture with constraint violations")
+    assert(violations_count.positive?,
+           "Test needs Project fixture with constraint violations")
     user = project.user
 
     login(user.login)
@@ -471,7 +471,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert(admin_group)
     drafts = NameDescription.where(source_name: project.title)
     project_draft_count = drafts.length
-    assert_predicate(project_draft_count, :positive?)
+    assert(project_draft_count.positive?)
     params = { id: project.id.to_s }
     requires_user(:destroy, { action: :show }, params, "dick")
     assert_redirected_to(projects_path)

@@ -13,18 +13,13 @@ class AbstractModelTest < UnitTestCase
         assert_equal((old_val || 0) + 1, new_val, "#{msg}num_views wrong")
       elsif key == "last_view"
         if new_val
-          assert_operator(new_val, :>, 1.hour.ago,
-                          "#{msg}#{key} more than one hour old")
-          if old_val
-            assert_operator(new_val, :>, old_val,
-                            "#{msg}#{key} wasn't updated")
-          end
+          assert(new_val > 1.hour.ago, "#{msg}#{key} more than one hour old")
+          assert(new_val > old_val, "#{msg}#{key} wasn't updated") if old_val
         end
       elsif rss_log_id_or_reason.member?(key) && (new_val != old_val)
         assert(new_val)
       elsif key == "updated_at"
-        assert_operator(new_val, :>=, old_val,
-                        "#{msg}#{key} is older than it was")
+        assert(new_val >= old_val, "#{msg}#{key} is older than it was")
       else
         assert_equal(old_val, new_val, "#{msg}#{key} shouldn't have changed!")
       end
@@ -80,10 +75,8 @@ class AbstractModelTest < UnitTestCase
     now1 = now.in_time_zone
     now2 = Time.now.in_time_zone
     assert_equal(now1.to_s, obs.created_at.to_s, '"created_at" got mangled.')
-    assert_operator(now1, :<=, obs.updated_at + 1.second,
-                    '"updated_at" is too old.')
-    assert_operator(now2, :>=, obs.updated_at - 1.second,
-                    '"updated_at" is too new.')
+    assert(now1 <= obs.updated_at + 1.second, '"updated_at" is too old.')
+    assert(now2 >= obs.updated_at - 1.second, '"updated_at" is too new.')
 
     # Now check the internal representation.  Should be UTC.
     obs = observations(:detailed_unknown_obs)
@@ -195,7 +188,7 @@ class AbstractModelTest < UnitTestCase
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
     assert_rss_log_has_tag(:test_message, rss_log)
-    assert_operator(rss_log.updated_at, :>, time)
+    assert(rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
@@ -203,7 +196,7 @@ class AbstractModelTest < UnitTestCase
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
     assert_rss_log_has_tag(:log_location_updated, rss_log)
-    assert_operator(rss_log.updated_at, :>, time)
+    assert(rss_log.updated_at > time)
 
     location_with_notes = locations(:albion)
     RssLog.update(rss_log.id, updated_at: time)
@@ -213,7 +206,7 @@ class AbstractModelTest < UnitTestCase
     # (extra line for orphan title)
     assert_rss_log_lines(5, rss_log)
     assert_rss_log_has_tag(:log_location_merged, rss_log)
-    assert_operator(rss_log.updated_at, :>, time)
+    assert(rss_log.updated_at > time)
     assert_nil(Location.safe_find(loc_id))
     assert_nil(rss_log.target_type)
   end
@@ -252,7 +245,7 @@ class AbstractModelTest < UnitTestCase
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
     assert_rss_log_has_tag(:log_name_updated, rss_log)
-    assert_operator(rss_log.updated_at, :>, time)
+    assert(rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
@@ -261,7 +254,7 @@ class AbstractModelTest < UnitTestCase
     # (extra line for orphan title)
     assert_rss_log_lines(4, rss_log)
     assert_rss_log_has_tag(:log_name_merged, rss_log)
-    assert_operator(rss_log.updated_at, :>, time)
+    assert(rss_log.updated_at > time)
     assert_nil(Name.safe_find(name_id))
     assert_nil(rss_log.target_type)
   end
@@ -338,7 +331,7 @@ class AbstractModelTest < UnitTestCase
     rss_log.reload
     assert_rss_log_lines(2, rss_log)
     assert_rss_log_has_tag(:test_message, proj)
-    assert_operator(proj.rss_log.updated_at, :>, time)
+    assert(proj.rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
@@ -348,7 +341,7 @@ class AbstractModelTest < UnitTestCase
     rss_log.reload
     assert_rss_log_lines(3, rss_log)
     assert_rss_log_has_tag(:log_project_updated, rss_log)
-    assert_operator(proj.rss_log.updated_at, :>, time)
+    assert(proj.rss_log.updated_at > time)
 
     RssLog.update(rss_log.id, updated_at: time)
     rss_log.reload
@@ -359,7 +352,7 @@ class AbstractModelTest < UnitTestCase
     # (extra line for orphan title)
     assert_rss_log_lines(5, rss_log)
     assert_rss_log_has_tag(:log_project_destroyed, rss_log)
-    assert_operator(proj.rss_log.updated_at, :>, time)
+    assert(proj.rss_log.updated_at > time)
     assert_nil(Project.safe_find(proj_id))
     assert_nil(rss_log.target_type)
   end

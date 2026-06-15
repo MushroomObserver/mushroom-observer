@@ -50,7 +50,7 @@ module Inat::ImportAudit
     def test_sample_path_uses_seeded_random
       io = StringIO.new
       audit(sample: 5, seed: 1, io: io, fetcher: stub_fetcher({})) do |path|
-        assert(File.exist?(path))
+        assert_path_exists(path)
       end
       assert_match(/seed=1/, io.string)
     end

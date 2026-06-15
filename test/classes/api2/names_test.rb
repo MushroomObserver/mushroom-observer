@@ -493,8 +493,8 @@ class API2::NamesTest < UnitTestCase
       api_key: @api_key.key
     }
     syns = name1.synonyms
-    assert_operator(syns.count, :>, 2)
-    assert_includes(syns, name2)
+    assert(syns.count > 2)
+    assert(syns.include?(name2))
     assert_api_pass(params.merge(id: name1.id, clear_synonyms: "yes"))
     assert_obj_arrays_equal([name1], Name.find(name1.id).synonyms)
     assert_obj_arrays_equal((syns - [name1]).sort_by(&:id),

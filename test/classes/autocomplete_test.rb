@@ -43,12 +43,12 @@ class AutocompleteTest < UnitTestCase
     auto = Autocomplete::ForName.new(string: "Agaricus")
     results = auto.matching_records
     assert_equal("A", results.first[:name])
-    assert_includes(results.pluck(:name), "Agaricus")
-    assert_includes(results.pluck(:name), "Agaricus campestris")
+    assert(results.pluck(:name).include?("Agaricus"))
+    assert(results.pluck(:name).include?("Agaricus campestris"))
 
     auto = Autocomplete::ForUser.new(string: "Rolf Singer")
     results = auto.matching_records
-    assert_includes(results.pluck(:name), "Rolf Singer (rolf)")
+    assert(results.pluck(:name).include?("Rolf Singer (rolf)"))
   end
 
   # ForName uses word matching after WORD_MATCH_THRESHOLD characters.
@@ -68,8 +68,8 @@ class AutocompleteTest < UnitTestCase
     auto = Autocomplete::ForName.new(string: "camp")
     results = auto.matching_records
     names = results.pluck(:name)
-    assert_includes(names, "Agaricus campestris",
-                    "Long query should match epithet via word matching")
+    assert(names.include?("Agaricus campestris"),
+           "Long query should match epithet via word matching")
   end
 
   def test_typical_use_with_exact_match

@@ -386,7 +386,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     end
 
     def should_be_reviewer
-      assert_includes(UserGroup.reviewers.users, user)
+      assert(UserGroup.reviewers.users.include?(user))
     end
 
     def should_not_be_reviewer

@@ -30,8 +30,8 @@ module Projects
       assert_equal(email_count + 1, ActionMailer::Base.deliveries.count)
 
       @project.reload
-      assert_includes(@project.admin_group.users, @site_admin)
-      assert_includes(@project.user_group.users, @site_admin)
+      assert(@project.admin_group.users.include?(@site_admin))
+      assert(@project.user_group.users.include?(@site_admin))
       assert_not_nil(
         ProjectMember.find_by(project: @project, user: @site_admin)
       )

@@ -14,7 +14,7 @@ class QueryTest < UnitTestCase
     # assert_raises(NameError) { Query.lookup(:Name, :bogus) }
 
     query = Query.lookup(:Observation)
-    assert_predicate(query.record, :new_record?)
+    assert(query.record.new_record?)
     assert_equal("Observation", query.model.to_s)
     assert_equal(:observation, query.type_tag)
     # Test QueryRecord.model? method:
@@ -343,7 +343,7 @@ class QueryTest < UnitTestCase
                                           letter: "L")
     # Make sure we have a bunch of Lactarii, Leptiotas, etc.
     @ells = @names.select { |n| n.text_name[0, 1] == "L" }
-    assert_operator(@ells.length, :>=, 9)
+    assert(@ells.length >= 9)
     assert_equal(@ells[3..5].map(&:id), @query.paginate_ids(@pagination_data))
     assert_equal(@letters, @pagination_data.used_letters.sort)
     assert_name_arrays_equal(@ells[3..5], @query.paginate(@pagination_data))
@@ -361,12 +361,12 @@ class QueryTest < UnitTestCase
 
     # Have to test it on a different one, because first is now cached.
     second = query.instantiate_results([ids[1]], include: :images).first
-    assert_predicate(second.images, :loaded?)
+    assert(second.images.loaded?)
 
     # Or we can clear out the cache and it will work...
     query.clear_cache
     first = query.instantiate_results([ids[0]], include: :images).first
-    assert_predicate(first.images, :loaded?)
+    assert(first.images.loaded?)
   end
 
   ##############################################################################
@@ -553,9 +553,7 @@ class QueryTest < UnitTestCase
 
     [*0..len].each do |i|
       # Try relating them all.
-      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
       assert(query_b[i] = query_a[i].subquery_of(model))
-      # rubocop:enable Minitest/AssertOperator
 
       # They should all be new records
       # assert(query_b[i].record.new_record?)
@@ -576,9 +574,7 @@ class QueryTest < UnitTestCase
 
     [*0..len].each do |i|
       # Now try to relate them back to Observation.
-      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
       assert(query_c[i] = query_b[i].subquery_of(:Observation))
-      # rubocop:enable Minitest/AssertOperator
       # They should not be new records
       # assert_not(query_c[i].record.new_record?)
       assert_equal(query_a[i].params,
@@ -614,9 +610,7 @@ class QueryTest < UnitTestCase
 
     # Try coercing them into parent_type queries.
     [*0..4].each do |i|
-      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
       assert(qb[i] = qa[i].subquery_of(model))
-      # rubocop:enable Minitest/AssertOperator
       # They should all be new records
       # assert(qb[i].record.new_record?)
       assert_save(qb[i])
@@ -634,9 +628,7 @@ class QueryTest < UnitTestCase
     # Try coercing them back.
     # None should be new records
     [*0..4].each do |i|
-      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
       assert(qc[i] = qb[i].subquery_of(desc_model))
-      # rubocop:enable Minitest/AssertOperator
       assert_equal(qa[i], qc[i])
     end
   end

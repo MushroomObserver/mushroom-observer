@@ -47,11 +47,8 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     project = projects(:falmouth_2023_09_project)
     wrong_location = locations(:albion)
     user = users(:roy)
-    # Project#member? is a User-membership predicate, not Enumerable.
-    # rubocop:disable Minitest/AssertIncludes
     assert(project.member?(user),
            "Test needs user who is member of #{project.title} Project")
-    # rubocop:enable Minitest/AssertIncludes
 
     login(user)
     visit("/qr/NFAL-0001")

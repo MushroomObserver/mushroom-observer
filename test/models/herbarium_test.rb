@@ -4,7 +4,7 @@ require("test_helper")
 
 class HerbariumTest < UnitTestCase
   def test_herbarium_records
-    assert_operator(herbaria(:nybg_herbarium).herbarium_records.length, :>, 1)
+    assert(herbaria(:nybg_herbarium).herbarium_records.length > 1)
   end
 
   def test_mailing_address
@@ -23,7 +23,7 @@ class HerbariumTest < UnitTestCase
   end
 
   def test_curators
-    assert_operator(herbaria(:nybg_herbarium).curators.length, :>, 1)
+    assert(herbaria(:nybg_herbarium).curators.length > 1)
     assert_equal(1, herbaria(:rolf_herbarium).curators.length)
   end
 
@@ -83,7 +83,7 @@ class HerbariumTest < UnitTestCase
 
   def test_web_searchable
     nybg = herbaria(:nybg_herbarium)
-    assert_predicate(nybg, :web_searchable?)
+    assert(nybg.web_searchable?)
 
     nybg.update(code: "notInMCP")
     assert_not(nybg.web_searchable?)
@@ -92,7 +92,7 @@ class HerbariumTest < UnitTestCase
   end
 
   def test_mcp_searchable
-    assert_predicate(herbaria(:nybg_herbarium), :mcp_searchable?)
+    assert(herbaria(:nybg_herbarium).mcp_searchable?)
     assert_not(herbaria(:rolf_herbarium).mcp_searchable?)
   end
 end

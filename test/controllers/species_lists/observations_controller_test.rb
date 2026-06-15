@@ -6,7 +6,7 @@ module SpeciesLists
   class ObservationsControllerTest < FunctionalTestCase
     def test_add_remove_observations
       query = Query.lookup(:Observation, by_users: users(:mary))
-      assert_operator(query.num_results, :>, 1)
+      assert(query.num_results > 1)
       params = { q: @controller.q_param(query) }
 
       requires_login(:edit)
@@ -25,7 +25,7 @@ module SpeciesLists
 
     def test_post_add_remove_observations
       query = Query.lookup(:Observation, by_users: users(:mary))
-      assert_operator(query.num_results, :>, 1)
+      assert(query.num_results > 1)
       params = { q: @controller.q_param(query) }
 
       spl = species_lists(:unknown_species_list)
@@ -33,11 +33,11 @@ module SpeciesLists
       new_count = (spl.observations + query.results).uniq.count
 
       # make sure there are already some observations in list
-      assert_operator(old_count, :>, 1)
+      assert(old_count > 1)
       # make sure we are actually trying to add some observations!
-      assert_operator(new_count, :>, old_count)
+      assert(new_count > old_count)
       # make sure some of the query results are already in there
-      assert_operator(query.results & spl.observations, :!=, [])
+      assert(query.results & spl.observations != [])
 
       # The form does not require any starting species_list or obs
       put_requires_login(:update)

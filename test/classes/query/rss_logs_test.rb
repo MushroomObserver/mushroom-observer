@@ -51,12 +51,12 @@ class Query::RssLogsTest < UnitTestCase
     # Check that the results got everything
     expect = RssLog.joins(:location).
              where(Location[:name].matches("%#{region}")).count
-    assert_predicate(expect, :positive?)
+    assert(expect.positive?)
     assert_equal(expect,
                  scope.where(Location[:name].matches("%#{region}")).count)
     expect = RssLog.joins(:observation).
              where(Observation[:where].matches("%#{region}")).count
-    assert_predicate(expect, :positive?)
+    assert(expect.positive?)
     assert_equal(expect,
                  scope.where(Observation[:where].matches("%#{region}")).count)
   end
@@ -72,7 +72,7 @@ class Query::RssLogsTest < UnitTestCase
     #              scope.where(Name[:lifeform].matches("%lichen%")).count)
     expect = RssLog.joins(:observation).
              where(Observation[:lifeform].matches("%lichen%")).count
-    assert_predicate(expect, :positive?)
+    assert(expect.positive?)
     assert_equal(expect,
                  scope.where(Observation[:lifeform].matches("%lichen%")).count)
   end

@@ -15,11 +15,11 @@ module Observations
 
       # Should match against albion.
       requires_login(:edit, where: "Albion, CA")
-      assert_includes(assigns(:matches), albion)
+      assert(assigns(:matches).include?(albion))
 
       # Should match against albion.
       requires_login(:edit, where: "Albion Field Station, CA")
-      assert_includes(assigns(:matches), albion)
+      assert(assigns(:matches).include?(albion))
 
       # Shouldn't match anything.
       requires_login(:edit, where: "Somewhere out there")
@@ -27,11 +27,11 @@ module Observations
 
       # Case seen in the wild that causes error
       requires_login(:edit, where: "")
-      assert_includes(assigns(:matches), albion)
+      assert(assigns(:matches).include?(albion))
 
       # Another case that caused an error
       requires_login(:edit, where: "CA")
-      assert_includes(assigns(:matches), albion)
+      assert(assigns(:matches).include?(albion))
     end
 
     def test_add_to_location

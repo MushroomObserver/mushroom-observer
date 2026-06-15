@@ -13,7 +13,7 @@ module Names::Descriptions
       desc.update(gen_desc: "something new which refers to _P. aphthosa_")
       desc.reload
       new_versions = desc.versions.length
-      assert_operator(new_versions, :>, old_versions)
+      assert(new_versions > old_versions)
       get(:show, params: { id: desc.id })
       assert_select("#description_details_and_alts")
       assert_select("#description_details_and_alts")

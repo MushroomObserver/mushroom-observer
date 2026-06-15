@@ -239,7 +239,7 @@ class ObservationTest < UnitTestCase
     assert_objs_equal(locations(:burbank), min_map.location)
     assert_equal(locations(:burbank).id, min_map.location_id)
 
-    assert_predicate(min_map, :observation?)
+    assert(min_map.observation?)
     assert_not(min_map.location?)
     assert_not(min_map.lat_lng_dubious?)
 
@@ -804,8 +804,8 @@ class ObservationTest < UnitTestCase
     namg.reload
     cache_with_boost = namg.vote_cache
 
-    assert_operator(cache_with_boost, :>, cache_with_one_vote,
-                    "Promising vote should increase consensus, not " \
+    assert(cache_with_boost > cache_with_one_vote,
+           "Promising vote should increase consensus, not " \
            "decrease it. Before: #{cache_with_one_vote}, " \
            "After: #{cache_with_boost}")
   end
@@ -844,8 +844,8 @@ class ObservationTest < UnitTestCase
     namg1.reload
     cache_after = namg1.vote_cache
 
-    assert_operator(cache_after, :<, cache_before,
-                    "Promising vote should penalize when user has " \
+    assert(cache_after < cache_before,
+           "Promising vote should penalize when user has " \
            "'I'd Call It That' elsewhere. Before: " \
            "#{cache_before}, After: #{cache_after}")
   end
@@ -875,8 +875,8 @@ class ObservationTest < UnitTestCase
     obs.reload
     namg.reload
 
-    assert_operator(namg.vote_cache, :>, cache_before,
-                    "Could Be vote should increase consensus when " \
+    assert(namg.vote_cache > cache_before,
+           "Could Be vote should increase consensus when " \
            "it's user's max. Before: #{cache_before}, " \
            "After: #{namg.vote_cache}")
   end
@@ -918,8 +918,8 @@ class ObservationTest < UnitTestCase
     # namg2 should be penalized because Mary's max vote
     # is "Promising" (on namg1), and her "Could Be" on
     # namg2 is not her max.
-    assert_operator(namg2.vote_cache, :<, cache_namg2_before,
-                    "Could Be should penalize when user's max is " \
+    assert(namg2.vote_cache < cache_namg2_before,
+           "Could Be should penalize when user's max is " \
            "Promising elsewhere. Before: " \
            "#{cache_namg2_before}, After: #{namg2.vote_cache}")
   end
@@ -945,10 +945,10 @@ class ObservationTest < UnitTestCase
     obs.reload
     namg.reload
 
-    assert_predicate(namg.vote_cache, :positive?,
-                     "Single Promising vote should produce positive cache")
-    assert_operator(namg.vote_cache, :<, 2.0,
-                    "Single Promising vote should stay below 2.0 " \
+    assert(namg.vote_cache.positive?,
+           "Single Promising vote should produce positive cache")
+    assert(namg.vote_cache < 2.0,
+           "Single Promising vote should stay below 2.0 " \
            "(regular algorithm). Got: #{namg.vote_cache}")
   end
 
@@ -977,8 +977,8 @@ class ObservationTest < UnitTestCase
     obs.reload
     namg.reload
 
-    assert_operator(namg.vote_cache, :<, cache_before,
-                    "Negative vote should always decrease consensus")
+    assert(namg.vote_cache < cache_before,
+           "Negative vote should always decrease consensus")
   end
 
   def test_refresh_needs_naming_column
@@ -2031,20 +2031,20 @@ class ObservationTest < UnitTestCase
     # "Promising" (2.0) should match vote_cache > 1.0 AND <= 2.0
     promising_results = Observation.confidence(2.0)
     promising_results.each do |obs|
-      assert_operator(obs.vote_cache, :>, 1.0,
-                      "vote_cache should be > 1.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<=, 2.0,
-                      "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache > 1.0,
+             "vote_cache should be > 1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
     end
 
     # Single negative values should search for range [value, next_higher)
     # "Doubtful" (-1.0) should match vote_cache >= -1.0 AND < 0.0
     doubtful_results = Observation.confidence(-1.0)
     doubtful_results.each do |obs|
-      assert_operator(obs.vote_cache, :>=, -1.0,
-                      "vote_cache should be >= -1.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<, 0.0,
-                      "vote_cache should be < 0.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache >= -1.0,
+             "vote_cache should be >= -1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < 0.0,
+             "vote_cache should be < 0.0, got #{obs.vote_cache}")
     end
 
     # "No Opinion" (0.0) should match exactly 0.0
@@ -2057,19 +2057,19 @@ class ObservationTest < UnitTestCase
     # "I'd Call It That" (3.0) should match vote_cache > 2.0 AND <= 3.0
     max_results = Observation.confidence(3.0)
     max_results.each do |obs|
-      assert_operator(obs.vote_cache, :>, 2.0,
-                      "vote_cache should be > 2.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<=, 3.0,
-                      "vote_cache should be <= 3.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache > 2.0,
+             "vote_cache should be > 2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 3.0,
+             "vote_cache should be <= 3.0, got #{obs.vote_cache}")
     end
 
     # "As If!" (-3.0) should match vote_cache >= -3.0 AND < -2.0
     min_results = Observation.confidence(-3.0)
     min_results.each do |obs|
-      assert_operator(obs.vote_cache, :>=, -3.0,
-                      "vote_cache should be >= -3.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<, -2.0,
-                      "vote_cache should be < -2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache >= -3.0,
+             "vote_cache should be >= -3.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < -2.0,
+             "vote_cache should be < -2.0, got #{obs.vote_cache}")
     end
   end
 
@@ -2081,40 +2081,40 @@ class ObservationTest < UnitTestCase
     # Should search for vote_cache > 1.0 AND <= 3.0
     promising_to_max = Observation.confidence(2.0, 3.0)
     promising_to_max.each do |obs|
-      assert_operator(obs.vote_cache, :>, 1.0,
-                      "vote_cache should be > 1.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<=, 3.0,
-                      "vote_cache should be <= 3.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache > 1.0,
+             "vote_cache should be > 1.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 3.0,
+             "vote_cache should be <= 3.0, got #{obs.vote_cache}")
     end
 
     # "Could Be" (1.0) to "Promising" (2.0)
     # Should search for vote_cache > 0.0 AND <= 2.0
     could_be_to_promising = Observation.confidence(1.0, 2.0)
     could_be_to_promising.each do |obs|
-      assert_operator(obs.vote_cache, :>, 0.0,
-                      "vote_cache should be > 0.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<=, 2.0,
-                      "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache > 0.0,
+             "vote_cache should be > 0.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
     end
 
     # "Not Likely" (-2.0) to "Promising" (2.0)
     # Should search for vote_cache >= -2.0 AND <= 2.0
     not_likely_to_promising = Observation.confidence(-2.0, 2.0)
     not_likely_to_promising.each do |obs|
-      assert_operator(obs.vote_cache, :>=, -2.0,
-                      "vote_cache should be >= -2.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<=, 2.0,
-                      "vote_cache should be <= 2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache >= -2.0,
+             "vote_cache should be >= -2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache <= 2.0,
+             "vote_cache should be <= 2.0, got #{obs.vote_cache}")
     end
 
     # "Not Likely" (-2.0) to "Doubtful" (-1.0)
     # Should search for vote_cache >= -2.0 AND < 0.0
     not_likely_to_doubtful = Observation.confidence(-2.0, -1.0)
     not_likely_to_doubtful.each do |obs|
-      assert_operator(obs.vote_cache, :>=, -2.0,
-                      "vote_cache should be >= -2.0, got #{obs.vote_cache}")
-      assert_operator(obs.vote_cache, :<, 0.0,
-                      "vote_cache should be < 0.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache >= -2.0,
+             "vote_cache should be >= -2.0, got #{obs.vote_cache}")
+      assert(obs.vote_cache < 0.0,
+             "vote_cache should be < 0.0, got #{obs.vote_cache}")
     end
   end
 
@@ -2139,7 +2139,7 @@ class ObservationTest < UnitTestCase
     assert_match(%r{www\.inaturalist\.org/observations/#{obs.external_id}},
                  obs.source_credit,
                  "Link should target the per-observation iNat URL")
-    assert_predicate(obs, :source_noteworthy?)
+    assert(obs.source_noteworthy?)
   end
 
   def test_source_credit_external_source_without_observation_url
@@ -2151,7 +2151,7 @@ class ObservationTest < UnitTestCase
     obs.update!(external_source: blank_source)
     assert_equal("Imported from BlankSource", obs.source_credit,
                  "Should fall back to non-linked text when no URL is known")
-    assert_predicate(obs, :source_noteworthy?)
+    assert(obs.source_noteworthy?)
   end
 
   # ----- Coverage gap tests for app/models/observation.rb -----
@@ -2344,8 +2344,8 @@ class ObservationTest < UnitTestCase
 
     # Test small location (box_area <= threshold): coordinates should be cached
     small_loc = locations(:albion)
-    assert_operator(small_loc.box_area, :<=, MO.obs_location_max_area,
-                    "Test location should be small (box_area <= threshold)")
+    assert(small_loc.box_area <= MO.obs_location_max_area,
+           "Test location should be small (box_area <= threshold)")
     assert_not_nil(small_loc.center_lat)
     assert_not_nil(small_loc.center_lng)
 
@@ -2364,8 +2364,8 @@ class ObservationTest < UnitTestCase
 
     # Test large location (box_area > threshold): coordinates should be nil
     large_loc = locations(:unknown_location)
-    assert_operator(large_loc.box_area, :>, MO.obs_location_max_area,
-                    "Test location should be large (box_area > threshold)")
+    assert(large_loc.box_area > MO.obs_location_max_area,
+           "Test location should be large (box_area > threshold)")
 
     @cc_obs.location = large_loc
     @cc_obs.save!
@@ -2424,7 +2424,7 @@ class ObservationTest < UnitTestCase
     obs = new_collector_obs(collector: "Jane Forager")
     assert_equal("Jane Forager", obs.collector)
     assert_nil(obs.collector_user_id)
-    assert_predicate(obs, :collector_differs_from_creator?)
+    assert(obs.collector_differs_from_creator?)
   end
 
   # No collector recorded at all (blank string, nil FK) — e.g. a legacy
@@ -2444,7 +2444,7 @@ class ObservationTest < UnitTestCase
     obs.reload.update!(where: "Somewhere else")
     assert_equal(rolf.id, obs.collector_user_id,
                  "Editing an unrelated field must not clear the collector FK")
-    assert_predicate(obs, :collector_differs_from_creator?)
+    assert(obs.collector_differs_from_creator?)
   end
 
   def test_collector_textile_links_known_user
@@ -2488,10 +2488,9 @@ class ObservationTest < UnitTestCase
 
   def test_collector_unrecorded_field_slip_blank
     obs = observations(:minimal_unknown_obs)
-    assert_predicate(obs.field_slip_id, :present?,
-                     "fixture should have a field slip")
+    assert(obs.field_slip_id.present?, "fixture should have a field slip")
     obs.update_columns(collector: nil, collector_user_id: nil)
-    assert_predicate(obs, :collector_unrecorded?)
+    assert(obs.collector_unrecorded?)
   end
 
   def test_collector_unrecorded_false_when_collector_present
@@ -2600,7 +2599,7 @@ class ObservationTest < UnitTestCase
     obs.update!(collector: "_user Rolf Singer_")
     assert_equal(rolf.id, obs.collector_user_id)
     assert_equal(rolf.unique_text_name, obs.collector)
-    assert_predicate(obs, :collector_differs_from_creator?)
+    assert(obs.collector_differs_from_creator?)
   end
 
   def test_edit_collector_bare_login_links_user

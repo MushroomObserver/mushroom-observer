@@ -118,8 +118,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
 
   def test_who_collector_unrecorded_suppresses_collector_line
     obs = observations(:minimal_unknown_obs)
-    assert_predicate(obs.field_slip_id, :present?,
-                     "fixture should have a field slip")
+    assert(obs.field_slip_id.present?, "fixture should have a field slip")
     obs.collector = nil
     obs.collector_user_id = nil
 

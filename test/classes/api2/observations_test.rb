@@ -83,7 +83,7 @@ class API2::ObservationsTest < UnitTestCase
                         where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses)
     assert_api_pass(params_get(name: "Lactarius alpinus",
@@ -97,7 +97,7 @@ class API2::ObservationsTest < UnitTestCase
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
     ssp_obs = Observation.names_like("Agaricus")
-    assert_operator(ssp_obs.length, :>, 1)
+    assert(ssp_obs.length > 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)s
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
     assert_api_pass(params_get(children_of: "Agaricus"))
@@ -108,7 +108,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_getting_observations_locations
     obses = Observation.within_locations(locations(:burbank))
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(location: 'Burbank\, California\, USA'))
     assert_api_results(obses)
   end
@@ -116,7 +116,7 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_herbaria
     obses = HerbariumRecord.where(herbarium: herbaria(:nybg_herbarium)).
             map(&:observations).flatten.sort_by(&:id)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(
       params_get(herbarium: "The New York Botanical Garden")
     )
@@ -126,7 +126,7 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_herbarium_records
     rec = herbarium_records(:interesting_unknown)
     obses = rec.observations.sort_by(&:id)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(herbarium_record: rec.id))
     assert_api_results(obses)
   end
@@ -134,7 +134,7 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_projects
     proj = projects(:one_genus_two_species_project)
     obses = proj.observations.sort_by(&:id)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(project: proj.id))
     assert_api_results(obses)
   end
@@ -142,21 +142,21 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_species_lists
     spl = species_lists(:one_genus_three_species_list)
     obses = spl.observations.sort_by(&:id)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(species_list: spl.id))
     assert_api_results(obses)
   end
 
   def test_getting_observations_confidence
     obses = Observation.where(vote_cache: 3)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(confidence: "3.0"))
     assert_api_results(obses)
   end
 
   def test_getting_observations_collection_location
     obses = Observation.is_collection_location(false)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(is_collection_location: "no"))
     assert_api_results(obses)
   end
@@ -164,8 +164,8 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_has_images
     with    = Observation.has_images
     without = Observation.has_images(false)
-    assert_operator(with.length, :>, 1)
-    assert_operator(without.length, :>, 1)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_images: "yes"))
     assert_api_results(with)
     assert_api_pass(params_get(has_images: "no"))
@@ -178,8 +178,8 @@ class API2::ObservationsTest < UnitTestCase
     names = Name.where((Name[:rank] <= genus).or(Name[:rank].eq(group)))
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
-    assert_operator(with.length, :>, 1)
-    assert_operator(without.length, :>, 1)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_name: "yes"))
     assert_api_results(with)
     assert_api_pass(params_get(has_name: "no"))
@@ -189,8 +189,8 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_has_comments
     with = Observation.has_comments
     without = Observation.has_comments(false)
-    assert_operator(with.length, :>, 1)
-    assert_operator(without.length, :>, 1)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_comments: "yes"))
     assert_api_results(with)
     assert_api_pass(params_get(has_comments: "no"))
@@ -200,8 +200,8 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_has_specimen
     with    = Observation.has_specimen
     without = Observation.has_specimen(false)
-    assert_operator(with.length, :>, 1)
-    assert_operator(without.length, :>, 1)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_specimen: "yes"))
     assert_api_results(with)
     assert_api_pass(params_get(has_specimen: "no"))
@@ -216,8 +216,8 @@ class API2::ObservationsTest < UnitTestCase
     # Observation.no_notes, not the above, works for comparison in Arel here.
     with = Observation.has_notes
     without = Observation.has_notes(false)
-    assert_operator(with.length, :>, 1)
-    assert_operator(without.length, :>, 1)
+    assert(with.length > 1)
+    assert(without.length > 1)
     assert_api_pass(params_get(has_notes: "yes"))
     assert_api_results(with)
     assert_api_pass(params_get(has_notes: "no"))
@@ -227,12 +227,12 @@ class API2::ObservationsTest < UnitTestCase
   def test_getting_observations_notes_has
     obses = Observation.notes_has(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(has_notes_field: "substrate"))
     assert_api_results(obses)
 
     obses = Observation.notes_has("orphan")
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(notes_has: "orphan"))
     assert_api_results(obses)
   end
@@ -241,7 +241,7 @@ class API2::ObservationsTest < UnitTestCase
     obses = Comment.where(
       Comment[:summary].concat(Comment[:comment]).matches("%let's%")
     ).map(&:target).uniq.sort_by(&:id)
-    assert_operator(obses.length, :>, 1)
+    assert(obses.length > 1)
     assert_api_pass(params_get(comments_has: "let's"))
     assert_api_results(obses)
   end
@@ -428,8 +428,7 @@ class API2::ObservationsTest < UnitTestCase
 
   def test_post_observation_with_used_field_slip
     fs = field_slips(:field_slip_one)
-    assert_predicate(fs.observations, :any?,
-                     "Test needs field_slip with observation")
+    assert(fs.observations.any?, "Test needs field_slip with observation")
     params = {
       method: :post,
       action: :observation,
@@ -600,7 +599,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_api_pass(params.merge(set_thumbnail: rolfs_img.id))
     rolfs_obs.reload
     assert_objs_equal(rolfs_img, rolfs_obs.thumb_image)
-    assert_includes(rolfs_obs.images, rolfs_img)
+    assert(rolfs_obs.images.include?(rolfs_img))
     imgs = rolf.images.map { |img| img.id.to_s }.join(",")
     assert_api_fail(params.merge(add_images: marys_img.id))
     assert_api_pass(params.merge(add_images: imgs))
@@ -609,7 +608,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_obj_arrays_equal(rolf.images, rolfs_obs.images, :sort)
     assert_api_pass(params.merge(remove_images: rolfs_img.id))
     rolfs_obs.reload
-    assert_operator(rolfs_obs.thumb_image, :!=, rolfs_img)
+    assert(rolfs_obs.thumb_image != rolfs_img)
     assert_objs_equal(rolfs_obs.images.first, rolfs_obs.thumb_image)
     imgs = rolf.images[2..6].map { |img| img.id.to_s }.join(",")
     imgs += ",#{marys_img.id}"
@@ -623,7 +622,7 @@ class API2::ObservationsTest < UnitTestCase
     proj.user_group.users << rolf
     rolf.reload
     assert_not(proj.observations.include?(rolfs_obs))
-    assert_includes(proj.observations, marys_obs)
+    assert(proj.observations.include?(marys_obs))
     assert(rolfs_obs.can_edit?(rolf))
     assert(marys_obs.can_edit?(rolf))
     assert_equal(rolfs_obs.user, rolf)
@@ -634,14 +633,14 @@ class API2::ObservationsTest < UnitTestCase
     assert_equal(Date.parse("2013-01-01"), marys_obs.reload.when)
     assert_api_pass(params.merge(id: rolfs_obs.id, add_to_project: proj.id))
     assert_api_fail(params.merge(id: marys_obs.id, add_to_project: proj.id))
-    assert_includes(Project.find(proj.id).observations, rolfs_obs)
-    assert_includes(Project.find(proj.id).observations, marys_obs)
+    assert(Project.find(proj.id).observations.include?(rolfs_obs))
+    assert(Project.find(proj.id).observations.include?(marys_obs))
     assert_api_pass(params.merge(id: rolfs_obs.id,
                                  remove_from_project: proj.id))
     assert_api_fail(params.merge(id: marys_obs.id,
                                  remove_from_project: proj.id))
     assert_not(Project.find(proj.id).observations.include?(rolfs_obs))
-    assert_includes(Project.find(proj.id).observations, marys_obs)
+    assert(Project.find(proj.id).observations.include?(marys_obs))
 
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:query_first_list)
@@ -649,7 +648,7 @@ class API2::ObservationsTest < UnitTestCase
     assert_not(spl2.can_edit?(rolf))
     assert_api_pass(params.merge(add_to_species_list: spl1.id))
     assert_api_fail(params.merge(add_to_species_list: spl2.id))
-    assert_includes(spl1.reload.observations, rolfs_obs)
+    assert(spl1.reload.observations.include?(rolfs_obs))
     assert_not(spl2.reload.observations.include?(rolfs_obs))
     assert_api_pass(params.merge(remove_from_species_list: spl1.id))
     assert_api_fail(params.merge(remove_from_species_list: spl2.id))

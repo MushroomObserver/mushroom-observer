@@ -72,8 +72,8 @@ class Observation::MergedNamingTest < UnitTestCase
     )
 
     merged = build_merged_naming(occ, @obs1)
-    assert_predicate(merged, :multiple_proposers?,
-                     "Should be true with different sibling proposers")
+    assert(merged.multiple_proposers?,
+           "Should be true with different sibling proposers")
   end
 
   def test_multiple_proposers_false_when_local_naming_exists

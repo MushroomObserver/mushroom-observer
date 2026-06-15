@@ -167,12 +167,9 @@ class MapTest < ComponentTestCase
     # inherits the confirmed band's color (#4159).
     assert_equal(Mappable::MapSet::CONFIRMED_COLOR, color)
     # Most recent first.
-    assert_operator(caption.index("Newest sp."), :<,
-                    caption.index("Middle sp."),
-                    "Group popup should list most recent name " \
-                    "first")
-    assert_operator(caption.index("Middle sp."), :<,
-                    caption.index("Oldest sp."))
+    assert(caption.index("Newest sp.") < caption.index("Middle sp."),
+           "Group popup should list most recent name first")
+    assert(caption.index("Middle sp.") < caption.index("Oldest sp."))
     # No consensus dot / percentage line for groups.
     assert_no_match(/\d+%/, Nokogiri::HTML(caption).text,
                     "Group popup should omit consensus %")

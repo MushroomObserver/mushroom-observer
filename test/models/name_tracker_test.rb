@@ -18,6 +18,6 @@ class NameTrackerTest < UnitTestCase
     name_tracker.user = nil
 
     assert_not(name_tracker.save)
-    assert_predicate(name_tracker.errors[:user], :any?)
+    assert(name_tracker.errors[:user].any?)
   end
 end

@@ -12,8 +12,8 @@ module Projects
     def test_index_renders_for_owner
       project = projects(:falmouth_2023_09_project)
       violations = project.violations
-      assert_predicate(violations, :any?,
-                       "Test needs Project fixture with violations")
+      assert(violations.any?,
+             "Test needs Project fixture with violations")
 
       user = project.user
       login(user.login)

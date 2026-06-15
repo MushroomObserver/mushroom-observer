@@ -19,7 +19,7 @@ class OccurrenceTest < UnitTestCase
 
   def test_create_occurrence
     occ = create_occurrence(@obs1, @obs2)
-    assert_predicate(occ, :persisted?)
+    assert(occ.persisted?)
     assert_equal(2, occ.observations.count)
     assert_equal(@obs1, occ.primary_observation)
     assert_users_equal(rolf, occ.user)
@@ -56,7 +56,7 @@ class OccurrenceTest < UnitTestCase
     occ = create_occurrence(@obs1, @obs2)
     @obs2.update!(occurrence: nil)
     occ.destroy_if_incomplete!
-    assert_predicate(occ, :destroyed?)
+    assert(occ.destroyed?)
   end
 
   def test_destroy_if_incomplete_with_enough_observations
@@ -70,9 +70,8 @@ class OccurrenceTest < UnitTestCase
     obs_list = Observation.where.not(id: nil).limit(
       Occurrence::MAX_OBSERVATIONS + 1
     ).to_a
-    assert_operator(obs_list.length, :>, Occurrence::MAX_OBSERVATIONS,
-                    "Need more than #{Occurrence::MAX_OBSERVATIONS} " \
-                    "observations")
+    assert(obs_list.length > Occurrence::MAX_OBSERVATIONS,
+           "Need more than #{Occurrence::MAX_OBSERVATIONS} observations")
 
     occ = Occurrence.create!(
       user: rolf,
@@ -80,7 +79,7 @@ class OccurrenceTest < UnitTestCase
     )
     obs_list.each { |obs| obs.update!(occurrence: occ) }
     assert_not(occ.valid?)
-    assert_predicate(occ.errors[:observations], :any?)
+    assert(occ.errors[:observations].any?)
   end
 
   def test_primary_observation_must_belong
@@ -88,7 +87,7 @@ class OccurrenceTest < UnitTestCase
     occ.observations.load # preload so loaded? branch is covered
     occ.primary_observation = @obs3
     assert_not(occ.valid?(:update))
-    assert_predicate(occ.errors[:primary_observation], :any?)
+    assert(occ.errors[:primary_observation].any?)
   end
 
   def test_nullifies_observations_on_destroy
@@ -168,8 +167,8 @@ class OccurrenceTest < UnitTestCase
 
     obs4.reload
     assert_equal(occ_a.id, obs4.occurrence_id)
-    assert_predicate(Occurrence.where(id: occ_b.id), :none?,
-                     "Absorbed occurrence should be destroyed")
+    assert(Occurrence.where(id: occ_b.id).none?,
+           "Absorbed occurrence should be destroyed")
   end
 
   # -- create_manual tests --
@@ -177,7 +176,7 @@ class OccurrenceTest < UnitTestCase
   def test_create_manual
     selected = [@obs1, @obs2]
     occ = Occurrence.create_manual(@obs1, selected, rolf)
-    assert_predicate(occ, :persisted?)
+    assert(occ.persisted?)
     assert_equal(@obs1, occ.primary_observation)
     assert_equal(2, occ.observations.count)
   end
@@ -211,7 +210,7 @@ class OccurrenceTest < UnitTestCase
     result = Occurrence.merge!(occ_a, occ_b)
     assert_equal(occ_a, result)
     assert_equal(4, result.observations.count)
-    assert_predicate(Occurrence.where(id: occ_b.id), :none?)
+    assert(Occurrence.where(id: occ_b.id).none?)
   end
 
   # -- check_field_slip_conflicts! tests --
@@ -252,7 +251,7 @@ class OccurrenceTest < UnitTestCase
     occ = create_occurrence(@obs1, @obs2, @obs3)
     @obs1.destroy!
     occ.reload
-    assert_predicate(occ, :persisted?)
+    assert(occ.persisted?)
     assert_equal(2, occ.observations.count)
     assert_not_equal(@obs1.id, occ.primary_observation_id)
     # Should pick oldest remaining by created_at
@@ -531,8 +530,8 @@ class OccurrenceTest < UnitTestCase
     occ.dissolve!
     occ.reload
 
-    assert_predicate(occ, :persisted?,
-                     "Occurrence with field_slip should survive dissolve")
+    assert(occ.persisted?,
+           "Occurrence with field_slip should survive dissolve")
     assert_equal(1, occ.observations.count,
                  "Only primary should remain")
     assert_equal(@obs1, occ.primary_observation)
@@ -546,8 +545,8 @@ class OccurrenceTest < UnitTestCase
 
     occ.dissolve!
 
-    assert_predicate(occ, :destroyed?,
-                     "Occurrence without field_slip should be destroyed")
+    assert(occ.destroyed?,
+           "Occurrence without field_slip should be destroyed")
     assert_nil(@obs1.reload.occurrence_id)
     assert_nil(@obs2.reload.occurrence_id)
     assert_nil(@obs3.reload.occurrence_id)
@@ -611,7 +610,7 @@ class OccurrenceTest < UnitTestCase
 
     msgs = Occurrence.refresh_has_specimen_cache(dry_run: false)
 
-    assert_predicate(msgs, :any?, "Should report corrections")
+    assert(msgs.any?, "Should report corrections")
     occ.reload
     assert(occ.has_specimen, "Should fix cached value")
   end
@@ -921,8 +920,8 @@ class OccurrenceTest < UnitTestCase
   def test_detects_primary_missing_from_project
     occ = create_occurrence(@obs1, @obs3)
     gaps = occ.project_membership_gaps
-    assert_predicate(gaps[:projects], :any?)
-    assert_predicate(gaps[:primary_missing], :any?)
+    assert(gaps[:projects]&.any?)
+    assert(gaps[:primary_missing]&.any?)
   end
 
   def test_detects_non_primary_gaps
@@ -981,8 +980,8 @@ class OccurrenceTest < UnitTestCase
     project = projects(:bolete_project)
     occ = create_occurrence(@obs1, @obs3)
     gaps = occ.project_membership_gaps
-    assert_includes(gaps[:projects], project)
-    assert_includes(gaps[:primary_missing], project)
+    assert(gaps[:projects]&.include?(project))
+    assert(gaps[:primary_missing]&.include?(project))
   end
 
   def test_any_obs_missing_detects_gap
@@ -1019,10 +1018,10 @@ class OccurrenceTest < UnitTestCase
     ).limit(Occurrence::MAX_OBSERVATIONS).to_a
     extras.each { |obs| obs.update_columns(occurrence_id: occ.id) }
     occ.reload
-    assert_operator(occ.observations.count, :>, Occurrence::MAX_OBSERVATIONS)
+    assert(occ.observations.count > Occurrence::MAX_OBSERVATIONS)
     assert_not(occ.valid?(:update),
                "Should be invalid with too many observations")
-    assert_predicate(occ.errors[:observations], :any?)
+    assert(occ.errors[:observations].any?)
   end
 
   # == Coverage: dissolve_transaction field_slip branch ==
@@ -1037,7 +1036,7 @@ class OccurrenceTest < UnitTestCase
     occ.reload
 
     # With field slip: occurrence survives, only primary
-    assert_predicate(occ, :persisted?)
+    assert(occ.persisted?)
     assert_equal(1, occ.observations.count)
     assert_equal(@obs1.id, occ.primary_observation_id)
   end
@@ -1139,7 +1138,7 @@ class OccurrenceTest < UnitTestCase
 
   def assert_activity_updated(obs)
     obs.reload
-    assert_operator(obs.log_updated_at, :>, 1.minute.ago,
-                    "Obs #{obs.id} log_updated_at should be recent")
+    assert(obs.log_updated_at > 1.minute.ago,
+           "Obs #{obs.id} log_updated_at should be recent")
   end
 end

@@ -11,8 +11,8 @@ class Query::NameDescriptionsTest < UnitTestCase
     all_descs = NameDescription.order_by_default
     all_pelt_descs = NameDescription.names(lookup: "Peltigera").order_by_default
     public_pelt_descs = all_pelt_descs.is_public.order_by_default
-    assert_operator(all_pelt_descs.length, :<, all_descs.length)
-    assert_operator(public_pelt_descs.length, :<, all_pelt_descs.length)
+    assert(all_pelt_descs.length < all_descs.length)
+    assert(public_pelt_descs.length < all_pelt_descs.length)
 
     assert_query(all_descs, :NameDescription)
     assert_query(

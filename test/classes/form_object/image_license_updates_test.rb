@@ -34,7 +34,7 @@ class FormObject::ImageLicenseUpdatesTest < ActiveSupport::TestCase
   # `persisted?` is `true` so Superform uses PATCH (matching the
   # license-updater PUT/PATCH route).
   def test_form_is_persisted_for_patch_method
-    assert_predicate(FormObject::ImageLicenseUpdates.new, :persisted?)
+    assert(FormObject::ImageLicenseUpdates.new.persisted?)
   end
 
   # `method_missing` resolves numeric-string keys to rows so

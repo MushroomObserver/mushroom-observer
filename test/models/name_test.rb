@@ -1812,28 +1812,28 @@ class NameTest < UnitTestCase
     assert_not(name.at_or_below_species?)
 
     name = names(:agaricus)
-    assert_predicate(name, :at_or_below_genus?)
+    assert(name.at_or_below_genus?)
     assert_not(name.below_genus?)
     assert_not(name.between_genus_and_species?)
     assert_not(name.at_or_below_species?)
 
     name = names(:amanita_subgenus_lepidella)
-    assert_predicate(name, :at_or_below_genus?)
-    assert_predicate(name, :below_genus?)
-    assert_predicate(name, :between_genus_and_species?)
+    assert(name.at_or_below_genus?)
+    assert(name.below_genus?)
+    assert(name.between_genus_and_species?)
     assert_not(name.at_or_below_species?)
 
     name = names(:coprinus_comatus)
-    assert_predicate(name, :at_or_below_genus?)
-    assert_predicate(name, :below_genus?)
+    assert(name.at_or_below_genus?)
+    assert(name.below_genus?)
     assert_not(name.between_genus_and_species?)
-    assert_predicate(name, :at_or_below_species?)
+    assert(name.at_or_below_species?)
 
     name = names(:amanita_boudieri_var_beillei)
-    assert_predicate(name, :at_or_below_genus?)
-    assert_predicate(name, :below_genus?)
+    assert(name.at_or_below_genus?)
+    assert(name.below_genus?)
     assert_not(name.between_genus_and_species?)
-    assert_predicate(name, :at_or_below_species?)
+    assert(name.at_or_below_species?)
   end
 
   def test_genus_display_ranks
@@ -2036,7 +2036,7 @@ class NameTest < UnitTestCase
     assert_name_arrays_equal([ssp], var.parents)
     assert_name_arrays_equal([var], frm.parents)
 
-    assert_includes(kng.children, phy)
+    assert(kng.children.include?(phy))
     assert_name_arrays_equal([cls], phy.children)
     assert_name_arrays_equal([ord], cls.children)
     assert_name_arrays_equal([fam], ord.children)
@@ -2376,7 +2376,7 @@ class NameTest < UnitTestCase
 
     # Make sure deprecating a name doesn't clear misspelling stuff.
     names(:petigera).change_deprecated(true)
-    assert_predicate(names(:petigera), :is_misspelling?)
+    assert(names(:petigera).is_misspelling?)
     assert_equal(names(:peltigera), names(:petigera).correct_spelling)
 
     # Make sure approving a name clears misspelling stuff.
@@ -2386,16 +2386,15 @@ class NameTest < UnitTestCase
   end
 
   def test_lichen
-    assert_predicate(names(:tremella_mesenterica), :is_lichen?)
-    assert_predicate(names(:tremella), :is_lichen?)
-    assert_predicate(names(:tremella_justpublished), :is_lichen?)
+    assert(names(:tremella_mesenterica).is_lichen?)
+    assert(names(:tremella).is_lichen?)
+    assert(names(:tremella_justpublished).is_lichen?)
     assert_not(names(:agaricus_campestris).is_lichen?)
   end
 
   def test_has_eol_data
-    assert_predicate(names(:peltigera), :has_eol_data?,
-                     "peltigera should have EoL data via qualifying " \
-                     "observation image")
+    assert(names(:peltigera).has_eol_data?,
+           "peltigera should have EoL data via qualifying observation image")
     assert_not(names(:lactarius_alpigenes).has_eol_data?,
                "lactarius_alpigenes is deprecated so has no EoL data")
   end
@@ -2405,8 +2404,8 @@ class NameTest < UnitTestCase
     # peltigera returns true via observations normally; disqualify them
     # so the descriptions loop is exercised instead
     name.observations.update_all(vote_cache: 0)
-    assert_predicate(
-      name, :has_eol_data?,
+    assert(
+      name.has_eol_data?,
       "`eol_data?` should be true via vetted description " \
       "when no observation qualifies"
     )
@@ -3262,8 +3261,8 @@ class NameTest < UnitTestCase
 
   def assert_name_suggestions(str)
     results = Name.suggest_alternate_spellings(str)
-    assert_predicate(results, :any?,
-                     "Couldn't suggest alternate spellings for #{str.inspect}.")
+    assert(results.any?,
+           "Couldn't suggest alternate spellings for #{str.inspect}.")
   end
 
   # --------------------------------------
@@ -3281,8 +3280,8 @@ class NameTest < UnitTestCase
                   name: deprecated_name,
                   observation: observations(:minimal_unknown_obs))
 
-    assert_predicate(
-      approved_synonym, :dependents?,
+    assert(
+      approved_synonym.dependents?,
       "`dependents?` should be true for an approved synonym " \
       "(#{approved_synonym.text_name}) of " \
       "a correctly spelt Proposed Name (#{deprecated_name.text_name})"
@@ -3320,16 +3319,16 @@ class NameTest < UnitTestCase
       "Test needs different fixture: A correctly spelled Name " \
       "at a rank that has Namings classified with that rank."
     )
-    assert_predicate(
-      ancestor, :dependents?,
+    assert(
+      ancestor.dependents?,
       "`dependents?` should be true for a Name above genus " \
       "(#{ancestor.text_name}) that is a correctly spelled ancestor " \
       "of a Proposed Name"
     )
 
     ancestor = names(:boletus)
-    assert_predicate(
-      ancestor, :dependents?,
+    assert(
+      ancestor.dependents?,
       "`dependents?` should be true for a Genus (#{ancestor.text_name}) " \
       "that is an ancestor of a Proposed Name."
     )
@@ -3338,8 +3337,8 @@ class NameTest < UnitTestCase
     Naming.create(user: mary,
                   name: names(:amanita_boudieri_var_beillei),
                   observation: observations(:minimal_unknown_obs))
-    assert_predicate(
-      ancestor, :dependents?,
+    assert(
+      ancestor.dependents?,
       "`dependents?` should be true for Species (#{ancestor.text_name}) " \
       "that is an ancestor of a Proposed Name."
     )
@@ -3383,10 +3382,9 @@ class NameTest < UnitTestCase
       classification: "Family: _#{ancestor.text_name}_",
       user: dick
     )
-    assert_predicate(ancestor, :dependents?,
-                     "`dependents?` should be true because " \
-                     "#{ancestor.text_name} is an ancestor of " \
-                     "#{descendant.text_name}")
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
 
     ancestor = names(:tubaria)
     descendant = names(:tubaria_furfuracea)
@@ -3394,10 +3392,9 @@ class NameTest < UnitTestCase
       Naming.where(name: descendant).none? && !descendant.is_misspelling?,
       "Test needs different fixture: correctly spelled, without Namings"
     )
-    assert_predicate(ancestor, :dependents?,
-                     "`dependents?` should be true because " \
-                     "#{ancestor.text_name} is an ancestor of " \
-                     "#{descendant.text_name}")
+    assert(ancestor.dependents?,
+           "`dependents?` should be true because " \
+           "#{ancestor.text_name} is an ancestor of #{descendant.text_name}")
   end
 
   # --------------------------------------
@@ -3498,85 +3495,76 @@ class NameTest < UnitTestCase
 
   def test_registability
     name = names(:boletus_edulis_group)
-    assert_predicate(name, :unregistrable?, "Groups should be unregistrable")
+    assert(name.unregistrable?, "Groups should be unregistrable")
 
     name = Name.new(text_name: 'Cortinarus "quoted"', rank: "Species")
-    assert_predicate(name, :unregistrable?,
-                     "Names below genus with quotes should be unregistrable")
+    assert(name.unregistrable?,
+           "Names below genus with quotes should be unregistrable")
 
     name = Name.new(text_name: "Agaricus pinyonensis",
                     author: "Isaacs nom. prov.")
-    assert_predicate(name, :unregistrable?,
-                     "Provisional names should be unregistrable")
+    assert(name.unregistrable?, "Provisional names should be unregistrable")
 
     name = Name.new(text_name: "Fulvifomes porrectus",
                     author: "comb. prov.")
-    assert_predicate(name, :unregistrable?,
-                     "Provisional names should be unregistrable")
+    assert(name.unregistrable?, "Provisional names should be unregistrable")
 
     name = Name.new(text_name: "Cortinarius calaisopus", author: "ined.")
-    assert_predicate(name, :unregistrable?,
-                     "Unpublished names should be unregistrable")
+    assert(name.unregistrable?, "Unpublished names should be unregistrable")
 
     name = Name.new(text_name: "Agricales", author: "sensu lato")
-    assert_predicate(name, :unregistrable?,
-                     "Names s.l. should be unregistrable")
+    assert(name.unregistrable?, "Names s.l. should be unregistrable")
 
     name = Name.new(text_name: "Eukaryota", rank: "Domain")
-    assert_predicate(name, :unregistrable?, "Domains should be unregistrable")
+    assert(name.unregistrable?, "Domains should be unregistrable")
 
     name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
-    assert_predicate(name, :unregistrable?,
-                     "Taxa outside of Fungi and slime molds should be " \
-                     "unregistrable")
+    assert(name.unregistrable?,
+           "Taxa outside of Fungi and slime molds should be unregistrable")
 
     name = names(:coprinus)
-    assert_predicate(name, :registrable?,
-                     "Non-group fungal names should be registrable")
+    assert(name.registrable?, "Non-group fungal names should be registrable")
 
     # Use Protozoa as a rough proxy for slime molds, which are included
     # fungal nomenclature registries, even though they are not fungi.
     name = Name.new(text_name: "Myxomycetes", rank: "Class",
                     classification: "Kingdom: Protozoa")
-    assert_predicate(name, :registrable?, "Protozoa should be registrable")
+    assert(name.registrable?, "Protozoa should be registrable")
 
     name = Name.new(text_name: "New species", rank: "Species")
-    assert_predicate(name, :registrable?,
-                     "Non-group,
-                       non-domain kingdom-less names should be registrable")
+    assert(name.registrable?,
+           "Non-group, non-domain kingdom-less names should be registrable")
   end
 
   def test_searchability_in_registry
     name = Name.new(text_name: "Eukaryota", rank: "Domain")
-    assert_predicate(name, :unsearchable_in_registry?,
-                     "Domains should be unsearchable")
+    assert(name.unsearchable_in_registry?, "Domains should be unsearchable")
 
     name = Name.new(text_name: "Ericales", classification: "Kingdom: _Plantae_")
-    assert_predicate(name, :unsearchable_in_registry?,
-                     "Taxa outside of Fungi and slime molds should be " \
-                     "unsearchable")
+    assert(name.unsearchable_in_registry?,
+           "Taxa outside of Fungi and slime molds should be unsearchable")
 
     name = Name.new(text_name: 'Amanita "sp-01"', author: "crypt. temp.")
-    assert_predicate(name, :unsearchable_in_registry?,
-                     "Cryptonyms should be unsearchable")
+    assert(name.unsearchable_in_registry?,
+           "Cryptonyms should be unsearchable")
 
     name = names(:boletus_edulis_group)
-    assert_predicate(name, :searchable_in_registry?,
-                     "Fungal `groups` can be searchable in registy")
+    assert(name.searchable_in_registry?,
+           "Fungal `groups` can be searchable in registy")
 
     name = Name.new(text_name: 'Cortinarus "quoted"', rank: "Species")
-    assert_predicate(name, :searchable_in_registry?,
-                     "Names with quote marks can be searchable")
+    assert(name.searchable_in_registry?,
+           "Names with quote marks can be searchable")
 
     name = Name.new(text_name: "Agaricus pinyonensis",
                     author: "Isaacs nom. prov.")
-    assert_predicate(name, :searchable_in_registry?,
-                     "Provisional names can be searchable in registry")
+    assert(name.searchable_in_registry?,
+           "Provisional names can be searchable in registry")
 
     name = Name.new(text_name: "Myxomycetes", rank: "Class",
                     classification: "Kingdom: Protozoa")
-    assert_predicate(name, :searchable_in_registry?,
-                     "Protozoa should be searchable in registry")
+    assert(name.searchable_in_registry?,
+           "Protozoa should be searchable in registry")
   end
 
   # The ":Fr" in this used to raise an ActiveRecord error because it was
@@ -3592,8 +3580,8 @@ class NameTest < UnitTestCase
     editors = old_name.versions.each_with_object([]) do |version, e|
       e << version.user_id
     end.uniq
-    assert_predicate(editors, :many?,
-                     "Test needs Name fixture edited by multiple users")
+    assert(editors.many?,
+           "Test needs Name fixture edited by multiple users")
     user = User.find(old_name.versions.second.user_id)
     old_contribution = user.contribution
 
@@ -3610,10 +3598,9 @@ class NameTest < UnitTestCase
   def test_merge_interests
     old_name = names(:agaricus_campestros)
     interests = old_name.interests
-    assert_predicate(interests, :any?, "Test needs a fixture with an interest")
+    assert(interests.any?, "Test needs a fixture with an interest")
     target = names(:agaricus_campestras)
-    assert_predicate(target.interests, :none?,
-                     "Test needs a fixture without interests")
+    assert(target.interests.none?, "Test needs a fixture without interests")
 
     target.merge(nil, old_name)
     assert_equal(
@@ -3722,8 +3709,8 @@ class NameTest < UnitTestCase
   end
 
   def test_can_propagate
-    assert_predicate(names(:coprinus), :can_propagate?,
-                     "Genus s.s. Classifications should be propagable")
+    assert(names(:coprinus).can_propagate?,
+           "Genus s.s. Classifications should be propagable")
 
     assert_false(names(:coprinus_sensu_lato).can_propagate?,
                  "Names sensu lato Classifications should not be propagable")
@@ -4172,61 +4159,48 @@ class NameTest < UnitTestCase
       display_name: "**__Paradiscina__** Benedix",
       sort_name: "Paradiscina  Benedix"
     }
-    assert_predicate(Name.new(valid_params), :valid?,
-                     "Letters should be allowable in Author")
+    assert(Name.new(valid_params).valid?,
+           "Letters should be allowable in Author")
     # ----- modify Author to prove validity of other characters
     # A period can be part of an abbreviated Author
-    assert_predicate(Name.new(valid_params.merge({ author: "Benedix." })),
-                     :valid?,
-                     "Period should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period should be allowable in Author")
     # Contrived example to test spaces
-    assert_predicate(
-      Name.new(valid_params.merge({ author: "Benedix Benedix" })),
-      :valid?, "Space should be allowable in Author"
-    )
+    assert(Name.new(valid_params.merge({ author: "Benedix Benedix" })).valid?,
+           "Space should be allowable in Author")
     # Parens can enclose author(s) of basionym
-    assert_predicate(
-      Name.new(valid_params.merge({ author: "(Benedix) Benedix" })),
-      :valid?, "Parens should be allowable in Author"
-    )
+    assert(Name.new(valid_params.merge({ author: "(Benedix) Benedix" })).valid?,
+           "Parens should be allowable in Author")
     # Ampersand can appear when there are multiple authors
-    assert_predicate(Name.new(valid_params.merge({ author: "Benedix & Woo" })),
-                     :valid?,
-                     "Ampersand should be allowable in Author")
-    assert_predicate(Name.new(valid_params.merge({ author: "Ben-edix" })),
-                     :valid?,
-                     "Hyphen should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Benedix & Woo" })).valid?,
+           "Ampersand should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Ben-edix" })).valid?,
+           "Hyphen should be allowable in Author")
     # Commas can separate multiple authors
-    assert_predicate(
-      Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })), :valid?,
-      "Commas should be allowable in Author"
-    )
-    assert_predicate(Name.new(valid_params.merge({ author: "B'enedix" })),
-                     :valid?, "Single quote should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Benedix, Woo & Zhu" })).
+      valid?, "Commas should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "B'enedix" })).
+      valid?, "Single quote should be allowable in Author")
     # MycoBank allows square brackets in author to show correction. Ex:
     # Xylaria symploci Pande, Waingankar, Punekar & Ran[a]dive
     # https://www.mycobank.org/page/Name%20details%20page/field/Mycobank%20%23/585173
-    assert_predicate(Name.new(valid_params.merge({ author: "Ben[e]dix" })),
-                     :valid?,
-                     "Square brackets should be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Ben[e]dix" })).valid?,
+           "Square brackets should be allowable in Author")
     author = "V. Kučera".unicode_normalize
-    assert_predicate(Name.new(valid_params.merge({ author: author })), :valid?,
-                     "Composed Unicode chars should be allowable in author")
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Composed Unicode chars should be allowable in author")
     author = "V. Kučera".unicode_normalize(:nfd)
-    assert_predicate(Name.new(valid_params.merge({ author: author })), :valid?,
-                     "author with uncomposed Unicode chars should pass " \
-                     "validation")
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "author with uncomposed Unicode chars should pass validation")
     # ----- Prove that including bad character prevents validation of Name
     # Users have added numbers manually
     # or pasted an IF or MB line into the Name form
-    assert_predicate(
-      Name.new(valid_params.merge({ author: "Benedix (1969)" })), :invalid?,
-      "Numerals should not be allowable in Author"
-    )
+    assert(Name.new(valid_params.merge({ author: "Benedix (1969)" })).
+      invalid?, "Numerals should not be allowable in Author")
     # Users have added brackets by pasting IF or MB line into the Name form
     # Hasn't happened yet; but waiting for ExcitedDelirium to drop the shoe
-    assert_predicate(Name.new(valid_params.merge({ author: "Benedix 🤮" })),
-                     :invalid?, "Emoji should not be allowable in Author")
+    assert(Name.new(valid_params.merge({ author: "Benedix 🤮" })).
+      invalid?, "Emoji should not be allowable in Author")
   end
 
   # Prove which characters that are allowed in author
@@ -4241,31 +4215,27 @@ class NameTest < UnitTestCase
       display_name: "**__Paradiscina__** Benedix",
       sort_name: "Paradiscina  Benedix"
     }
-    assert_predicate(Name.new(valid_params), :valid?,
-                     "Author ending in letter should be validated")
+    assert(Name.new(valid_params).valid?,
+           "Author ending in letter should be validated")
     author = "Lizoň".unicode_normalize
-    assert_predicate(Name.new(valid_params.merge({ author: author })), :valid?,
-                     "Author ending in composed unicode char should pass " \
-                     "validation")
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Author ending in composed unicode char should pass validation")
     author = "Lizoň".unicode_normalize(:nfd)
-    assert_predicate(Name.new(valid_params.merge({ author: author })), :valid?,
-                     "Author ending in uncomposed unicode char should pass " \
-                     "validation")
+    assert(Name.new(valid_params.merge({ author: author })).valid?,
+           "Author ending in uncomposed unicode char should pass validation")
 
-    assert_predicate(Name.new(valid_params.merge({ author: "Benedix." })),
-                     :valid?,
-                     "Period at end of author should be allowable")
+    assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
+           "Period at end of author should be allowable")
 
     # Some actually occuring cases of bad endings
     # Emulate user pasting certain IF lines into the Name form
-    assert_predicate(
-      Name.new(valid_params.merge({ author: "Benedix," })), :invalid?,
-      "Comma at end of author should not be allowable"
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix," })).
+      invalid?, "Comma at end of author should not be allowable"
     )
-    assert_predicate(
-      Name.new(valid_params.merge({ author: "Benedix [as 'Paradiscena']" })),
-      :invalid?,
-      "Square bracket at end of author should not be allowable"
+    assert(
+      Name.new(valid_params.merge({ author: "Benedix [as 'Paradiscena']" })).
+      invalid?, "Square bracket at end of author should not be allowable"
     )
   end
 
@@ -4286,10 +4256,10 @@ class NameTest < UnitTestCase
                         search_name: I18n.transliterate(name.search_name))
     )
 
-    assert_predicate(new_name, :invalid?,
-                     "Name differing only in diacriticals should be invalid")
-    assert_predicate(
-      new_name.errors[:search_name], :any?,
+    assert(new_name.invalid?,
+           "Name differing only in diacriticals should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
       "Name differing only in diacriticals should create error on :search_name"
     )
 
@@ -4298,10 +4268,10 @@ class NameTest < UnitTestCase
                         search_name: "#{name.search_name},")
     )
 
-    assert_predicate(new_name, :invalid?,
-                     "Name differing only in punctuation should be invalid")
-    assert_predicate(
-      new_name.errors[:search_name], :any?,
+    assert(new_name.invalid?,
+           "Name differing only in punctuation should be invalid")
+    assert(
+      new_name.errors[:search_name].any?,
       "Name differing only in punctuation should create error on :search_name"
     )
   end

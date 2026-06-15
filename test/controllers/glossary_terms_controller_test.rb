@@ -79,8 +79,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
   def test_show_with_multiple_images
     term = glossary_terms(:plane_glossary_term)
-    assert_operator(term.images.size, :>, 1,
-                    "Test needs term with multiple images")
+    assert(term.images.size > 1, "Test needs term with multiple images")
 
     get(:show, params: { id: term.id })
 
