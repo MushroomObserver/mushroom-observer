@@ -265,6 +265,16 @@ class Inat
       inat_prov_name
     end
 
+    # The value of the iNat "Species Name Override" observation field, or nil.
+    # When present it outranks the provisional name and the Community ID as the
+    # lead naming. (#4533)
+    def name_override
+      return nil if inat_obs_fields.blank?
+
+      field = inat_obs_field("Species Name Override")
+      field.present? ? field[:value].presence : nil
+    end
+
     # derive a provisional name from some specific Observation Fields
     # NOTE: iNat does not allow provisional names as identifications.
     # Also, iNat allows only 1 obs field with a given :name per obs,

@@ -3,6 +3,8 @@
 class Inat
   # builds an MO Observation from an ::Inat::Obs
   class MoObservationBuilder
+    include NamingReasons
+
     attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
@@ -35,7 +37,7 @@ class Inat
     def create_observation
       @observation = Observation.create(new_obs_params)
       # Lead naming first so it wins calc_consensus ties (see consensus_naming).
-      proposed_namings(community_name, prov_name, naming_vote).
+      proposed_namings(community_name, prov_name, override_name, naming_vote).
         each do |name, value|
           add_naming_with_vote(name: name, namer: namer_for(name), value: value)
         end
@@ -82,7 +84,31 @@ class Inat
     end
 
     def find_or_create_prov_name
-      parsed = Name.parse_name(inat_obs.provisional_name)
+      find_or_create_name(Name.parse_name(inat_obs.provisional_name))
+    end
+
+    # The MO name for the iNat "Species Name Override" obs field, or nil. The
+    # override outranks the provisional name and the Community ID as the lead
+    # (#4533). Returns nil - falling back to the provisional/Community lead -
+    # when the override value can't be parsed or created as an MO Name.
+    def override_name
+      return @override_name if defined?(@override_name)
+
+      @override_name =
+        inat_obs.name_override.blank? ? nil : find_or_create_override_name
+    end
+
+    def find_or_create_override_name
+      find_or_create_name(Name.parse_name(inat_obs.name_override))
+    rescue StandardError
+      nil
+    end
+
+    # Existing MO Name for the parsed name, else create it via the API (iNat
+    # taxa/provisional names lack ICN ids). nil when the name won't parse.
+    def find_or_create_name(parsed)
+      return nil if parsed.nil? || parsed.text_name.blank?
+
       if Name.where(text_name: parsed.text_name).none?
         add_provisional_name(parsed)
       else
@@ -90,12 +116,12 @@ class Inat
       end
     end
 
-    # The name proposed as the obs's consensus: the provisional name when
-    # present, else the Community ID, corrected to its preferred synonym when
-    # deprecated in MO. calc_consensus confirms it from the votes, where it
-    # carries the highest weight. (#4212)
+    # The name proposed as the obs's consensus: the override name when present,
+    # else the provisional name, else the Community ID, corrected to its
+    # preferred synonym when deprecated in MO. calc_consensus confirms it from
+    # the votes, where it carries the highest weight. (#4212, #4533)
     def lead_name
-      @lead_name ||= preferred(prov_name || community_name)
+      @lead_name ||= preferred(override_name || prov_name || community_name)
     end
 
     # A deprecated name's best preferred synonym, else the name itself
@@ -107,13 +133,14 @@ class Inat
     end
 
     # Pure: the namings to create as [name, vote] for the given Community ID
-    # name, provisional name (or nil), and the lead's confidence vote. The
-    # lead leads at lead_vote; the other iNat name and the preferred synonym
-    # of any deprecated name follow at Could Be. Lead is first so it wins
-    # calc_consensus ties. (#4212)
-    def proposed_namings(community, provisional, lead_vote)
-      lead = preferred(provisional || community)
-      named = [community, provisional].compact
+    # name, provisional name (or nil), override name (or nil), and the lead's
+    # confidence vote. The lead (override, else provisional, else Community ID)
+    # leads at lead_vote; every other name and the preferred synonym of any
+    # deprecated name follow at Could Be. Lead is first so it wins
+    # calc_consensus ties. (#4212, #4533)
+    def proposed_namings(community, provisional, override, lead_vote)
+      named = [override, provisional, community].compact
+      lead = preferred(named.first)
       synonyms = named.select(&:deprecated?).
                  filter_map { |name| name.best_preferred_synonym.presence }
       others = (named + synonyms).uniq(&:id).reject { |n| n.id == lead.id }
@@ -249,20 +276,6 @@ class Inat
       # We need an ObservationView, but noone has actually viewed this Obs.
       ObservationView.create!(observation: @observation, user: user,
                               last_view: vote.updated_at, reviewed: 1)
-    end
-
-    def used_references_explanation(name)
-      # The provisional explanation applies only to the provisional naming.
-      if prov_name && name.id == prov_name.id
-        nom_prov_adder = inat_obs.inat_prov_name_field[:user][:login]
-        # force it to be a String instead of an ActiveSupport::SafeBuffer
-        # SafeBuffer causes an errors later on. Idk why. jdc 20241126
-        :naming_inat_provisional.l(user: nom_prov_adder).to_str
-      elsif suggested?(name)
-        suggester_with_date(name)
-      else
-        "iNat `Community ID` #{Time.zone.today.strftime("%Y-%m-%d")}"
-      end
     end
 
     def suggested?(name)
