@@ -44,7 +44,7 @@ The test is specific: **a leading `cd` is redundant only when its target
 resolves to the current working directory** — what the `pwd` command (or
 the `$PWD` variable) prints. Check the target against `$PWD` before
 writing it. A `cd` into a *different* directory is legitimate and not the
-anti-pattern; just prefer absolute paths
+anti-pattern. Prefer absolute paths
 (`bin/rails test test/...`, `sed -n '1,5p' "$PWD/path/file"`) over
 `cd`-then-relative when practical.
 
