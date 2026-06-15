@@ -39,7 +39,10 @@ module Observations
 
       if image_or_projects_updated
         # redirect_to(image_path(@image.id))
-        render("images/show", location: image_path(@image.id))
+        render(
+          Views::Controllers::Images::Show.new(image: @image),
+          location: image_path(@image.id)
+        )
       else
         init_project_vars_for_reload(@image)
         render_edit_html(location: edit_image_path(@image.id))

@@ -64,16 +64,20 @@ curl = Class.new do
   end
 end.new
 
-count = 0
 NUMBER.times do
   curl.run("/")
   curl.run("images", id: IMAGES.sample)
   curl.run("names", id: NAMES.sample)
   curl.run("observations", id: OBSERVATIONS.sample)
-  if count % 100 == 0
-    curl.run("image/test_upload_speed", image_file: IMAGE_FILE)
-  end
-  count += 1
+  # The `image/test_upload_speed` hit (every 100th iteration) was
+  # removed when its controller action + supporting views were
+  # deleted as orphans — the action had been gone since 2011
+  # (commit 744df89970), so curl was logging silent 404s on every
+  # 100th iteration of every perf-monitor run since then. `IMAGE_FILE`
+  # (`ARGV[1]`) is still parsed at the top of the script but no
+  # longer used by any `curl.run` call; callers can pass an empty
+  # string in its slot until someone gets around to dropping the
+  # positional arg.
 end
 
 exit 0

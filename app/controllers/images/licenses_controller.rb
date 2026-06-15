@@ -14,6 +14,7 @@ module Images
     # was #license_updater.
     def edit
       @form = build_form_object
+      render_edit_view
     end
 
     # process_license_changes
@@ -21,10 +22,16 @@ module Images
       Image.process_license_changes_for_user(@user, params[:updates])
 
       @form = build_form_object
-      render(:edit, location: images_edit_licenses_path)
+      render_edit_view(location: images_edit_licenses_path)
     end
 
     private
+
+    def render_edit_view(**)
+      render(Views::Controllers::Images::Licenses::Edit.new(
+               form: @form, user: @user
+             ), **)
+    end
 
     def build_form_object
       FormObject::ImageLicenseUpdates.new(

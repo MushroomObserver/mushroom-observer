@@ -1,8 +1,0 @@
-<% add_page_title(:commercial_inquiry_title.t(name: @image.unique_format_name)) %>
-
-<%= render(Views::Controllers::Images::Emails::Form.new(
-      image: @image,
-      user: @user,
-      message: @message,
-      local: true
-    )) %>
