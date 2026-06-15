@@ -38,8 +38,7 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
     readable, unreadable = name.descriptions.partition do |desc|
       desc.is_reader?(@user)
     end
-    assert_predicate(readable, :any?,
-                     "Need at least one description rolf can read")
+    assert(readable.any?, "Need at least one description rolf can read")
 
     readable.each do |desc|
       assert_html(html, "a.description_link_#{desc.id}")

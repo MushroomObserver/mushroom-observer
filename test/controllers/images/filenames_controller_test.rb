@@ -7,7 +7,7 @@ module Images
   class FilenamesControllerTest < FunctionalTestCase
     def test_bulk_original_filename_purge
       imgs = Image.where.not(original_name: "").where(user_id: rolf.id)
-      assert_predicate(imgs, :any?)
+      assert(imgs.any?)
 
       login("rolf")
       put(:update)

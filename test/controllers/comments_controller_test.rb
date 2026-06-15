@@ -94,7 +94,7 @@ class CommentsControllerTest < FunctionalTestCase
     another_comment_by_user = comments(:detailed_unknown_obs_comment)
     another_comment_by_user.user = user
     another_comment_by_user.save
-    assert_predicate(Comment.where(user: user), :many?)
+    assert(Comment.where(user: user).many?)
 
     login
     get(:index, params: { by_user: user.id })
@@ -271,7 +271,7 @@ class CommentsControllerTest < FunctionalTestCase
   def test_destroy_comment
     comment = comments(:minimal_unknown_obs_comment_1)
     obs = comment.target
-    assert_includes(obs.comments, comment)
+    assert(obs.comments.member?(comment))
     assert_equal("rolf", comment.user.login)
     params = { id: comment.id.to_s }
     requires_user(:destroy,

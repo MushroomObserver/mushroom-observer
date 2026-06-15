@@ -266,8 +266,8 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
 
   def test_add_curator
     # Make sure nobody broke the fixtures
-    assert_includes(nybg.curators, roy,
-                    "Need different fixture: herbarium where roy is a curator")
+    assert(nybg.curators.include?(roy),
+           "Need different fixture: herbarium where roy is a curator")
     assert(nybg.curators.exclude?(mary),
            "Need different fixture: herbarium where mary is not a curator")
 

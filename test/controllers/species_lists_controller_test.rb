@@ -226,8 +226,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_show_species_list_non_owner_logged_in
     list = species_lists(:unknown_species_list)
     observations = list.observations
-    assert_predicate(observations, :any?,
-                     "Need SpeciesList fixture that has >= 1 Observation")
+    assert(observations.any?,
+           "Need SpeciesList fixture that has >= 1 Observation")
     assert_not_equal(rolf, list.user)
 
     login(rolf.login)
@@ -246,8 +246,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_show_species_list_owner_logged_in
     list = species_lists(:unknown_species_list)
     observations = list.observations
-    assert_predicate(observations, :any?,
-                     "Need SpeciesList fixture that has >= 1 Observation")
+    assert(observations.any?,
+           "Need SpeciesList fixture that has >= 1 Observation")
 
     login(list.user.login)
     get(:show, params: { id: list.id })
@@ -325,7 +325,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:unknown_species_list)
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
-    assert_includes(spl.projects, proj)           # owned by bolete project
+    assert(spl.projects.include?(proj))           # owned by bolete project
     assert_equal([mary.id, dick.id],
                  proj.user_group.users.map(&:id)) # dick is only project member
 
@@ -415,8 +415,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
   # species list. (Pre-Phlex this was uncovered.)
   def test_create_with_clone_id_copies_observations
     source = species_lists(:unknown_species_list)
-    assert_predicate(source.observations, :any?,
-                     "Test needs a source species_list with observations")
+    assert(source.observations.any?,
+           "Test needs a source species_list with observations")
     login("rolf")
     post(:create, params: {
            clone_id: source.id,
@@ -563,7 +563,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     post(:create, params: params)
     spl = SpeciesList.last
-    assert_predicate(spl.projects, :any?)
+    assert(spl.projects.any?)
   end
 
   # -----------------------------------------------
@@ -601,7 +601,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
                species_list: { title: spl.title, project_ids: [""] } }
     put(:update, params:)
     spl.reload
-    assert_operator(spl.projects.count, :<, count)
+    assert(spl.projects.count < count)
   end
 
   def test_update_species_list_nochange
@@ -689,9 +689,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
   def test_clear
     spl = species_lists(:unknown_species_list)
     login(spl.user.login)
-    assert_predicate(spl.observations, :any?)
+    assert(spl.observations.any?)
     put(:clear, params: { id: spl.id })
-    assert_predicate(spl.observations, :none?)
+    assert(spl.observations.none?)
   end
 
   def test_clear_not_owner

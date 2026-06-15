@@ -21,8 +21,7 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
     carousel_item_img = find(".carousel-item img.set-src", match: :first)
     src = carousel_item_img["src"]
 
-    assert_predicate(src, :present?,
-                     "Carousel item img should have src attribute")
+    assert(src.present?, "Carousel item img should have src attribute")
     assert(
       src.start_with?("data:image"),
       "Carousel item img src should be base64 data URL, got: #{src[0..50]}"
@@ -33,8 +32,7 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
                          match: :first, visible: false)
     thumb_src = thumbnail_img["src"]
 
-    assert_predicate(thumb_src, :present?,
-                     "Thumbnail img should have src attribute")
+    assert(thumb_src.present?, "Thumbnail img should have src attribute")
     assert(
       thumb_src.start_with?("data:image"),
       "Thumbnail img src should be base64 data URL, got: #{thumb_src[0..50]}"
@@ -73,7 +71,7 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
     # Both should have base64 src
     carousel_imgs.each_with_index do |img, i|
       src = img["src"]
-      assert_predicate(src, :present?, "Image #{i + 1} should have src")
+      assert(src.present?, "Image #{i + 1} should have src")
       assert(src.start_with?("data:image"),
              "Image #{i + 1} src should be base64, got: #{src[0..50]}")
     end
@@ -85,7 +83,7 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
     # Both should have base64 src
     thumbnail_imgs.each_with_index do |img, i|
       src = img["src"]
-      assert_predicate(src, :present?, "Thumbnail #{i + 1} should have src")
+      assert(src.present?, "Thumbnail #{i + 1} should have src")
       assert(src.start_with?("data:image"),
              "Thumbnail #{i + 1} src should be base64, got: #{src[0..50]}")
     end

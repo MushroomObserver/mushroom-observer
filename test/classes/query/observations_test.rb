@@ -344,8 +344,8 @@ class Query::ObservationsTest < UnitTestCase
     in_box_expects = Query.lookup(:Observation, in_box: box)
     # be sure we have more than one user's obs in this box
     box_users = in_box_expects.results.pluck(:user_id).uniq
-    assert_operator(box_users.size, :>, 1)
-    assert_includes(box_users, mary.id)
+    assert(box_users.size > 1)
+    assert(box_users.include?(mary.id))
 
     chained_expects = Query.lookup(:Observation, in_box: box, by_users: mary.id)
     assert_not_equal(in_box_expects.result_ids, chained_expects.result_ids)
@@ -354,7 +354,7 @@ class Query::ObservationsTest < UnitTestCase
     in_box_expects = Query.lookup(:Observation, in_box: box)
     # be sure we have more than one value in this box
     box_names = in_box_expects.results.pluck(:name_id).uniq
-    assert_operator(box_names.size, :>, 1)
+    assert(box_names.size > 1)
 
     chained_expects = Query.lookup(
       :Observation, in_box: box,

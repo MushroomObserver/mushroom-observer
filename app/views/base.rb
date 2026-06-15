@@ -34,6 +34,10 @@ class Views::Base < Components::Base
   # — `content_for` and `content_for?` are available everywhere.)
   register_value_helper :content_padding
   register_value_helper :flash_error
+  # Rebuilds the current request URL with the given args merged /
+  # cleared (e.g. `reload_with_args(merge: nil)` strips the `?merge=`
+  # param). Used by the herbaria index merge-mode Alert.
+  register_value_helper :reload_with_args
   # `paginated_results` takes a block and emits the surrounding
   # pagination HTML around it — output helper, mark_safe so Phlex
   # trusts the returned SafeBuffer.

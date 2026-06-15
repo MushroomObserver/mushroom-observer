@@ -517,8 +517,32 @@ Capybara/SpecificActions:
   Exclude:
     - 'test/system/observation_show_system_test.rb'
 
+# Offense count: 152
+# This cop supports safe autocorrection (--autocorrect).
+# Permanently disabled. `assert(arr.include?(x))` is more readable
+# than `assert_includes(arr, x)`. Also catches and rewrites
+# `assert(obj.member?(other))` where `obj` is a custom
+# `member?`-predicate object (e.g. `Project#member?` checks user
+# membership, not collection inclusion) — those break.
+Minitest/AssertIncludes:
+  Enabled: false
 
+# Offense count: 188
+# This cop supports safe autocorrection (--autocorrect).
+# Permanently disabled. `assert(x > y)` is more readable than
+# `assert_operator(x, :>, y)`. Also confuses assignment-expression
+# inside `assert(…)` with comparison (e.g.
+# `assert(qb[i] = qa[i].subquery_of(model))` got rewritten as
+# `assert_operator(qb, :[]=, i)`).
+Minitest/AssertOperator:
+  Enabled: false
 
+# Offense count: 399
+# This cop supports safe autocorrection (--autocorrect).
+# Permanently disabled. `assert(x.present?)` is more readable than
+# `assert_predicate(x, :present?)`.
+Minitest/AssertPredicate:
+  Enabled: false
 
 # Offense count: 75
 # This cop supports unsafe autocorrection (--autocorrect-all).

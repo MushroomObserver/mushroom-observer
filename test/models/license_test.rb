@@ -18,8 +18,7 @@ class LicenseTest < UnitTestCase
 
   def test_available_names_and_ids_deprecated_chosen
     chosen = licenses(:ccnc25)
-    assert_predicate(chosen, :deprecated?,
-                     "Test needs deprecated License fixture")
+    assert(chosen.deprecated?, "Test needs deprecated License fixture")
 
     names_and_ids = License.available_names_and_ids(chosen)
 
@@ -36,7 +35,7 @@ class LicenseTest < UnitTestCase
   end
 
   def test_in_use
-    assert_predicate(licenses(:ccnc30), :in_use?)
+    assert(licenses(:ccnc30).in_use?)
     assert_not(licenses(:unused).in_use?)
   end
 
@@ -44,10 +43,10 @@ class LicenseTest < UnitTestCase
     ccnc25 = licenses(:ccnc25)
 
     license = License.new(display_name: ccnc25.display_name, url: "anything")
-    assert_predicate(license, :attribute_duplicated?)
+    assert(license.attribute_duplicated?)
 
     license = License.new(display_name: "anything", url: ccnc25.url)
-    assert_predicate(license, :attribute_duplicated?)
+    assert(license.attribute_duplicated?)
 
     assert_not(ccnc25.attribute_duplicated?)
   end
@@ -59,7 +58,7 @@ class LicenseTest < UnitTestCase
 
   def test_preferred
     preferred_license = License.preferred
-    assert_predicate(preferred_license, :preferred?)
+    assert(preferred_license.preferred?)
 
     License.where.not(id: preferred_license.id).find_each do |lic|
       assert_not(lic.preferred?, "There should be only one preferred license.")

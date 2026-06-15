@@ -185,19 +185,19 @@ class DescriptionTest < UnitTestCase
                  desc.text_name,
                  "Description text_name should not have HTML")
 
-    assert_includes(desc.unique_text_name, desc.id.to_s,
-                    "Description unique_text_name should include id")
+    assert(desc.unique_text_name.include?(desc.id.to_s),
+           "Description unique_text_name should include id")
 
-    assert_includes(desc.unique_format_name, desc.id.to_s,
-                    "Description unique_format_name should include id")
+    assert(desc.unique_format_name.include?(desc.id.to_s),
+           "Description unique_format_name should include id")
 
     assert(desc.partial_text_name.exclude?(desc.parent.text_name),
            "Description partial_text_name should omit parent")
 
     assert(desc.unique_partial_text_name.exclude?(desc.parent.text_name),
            "Description unique_partial_text_name should omit parent")
-    assert_includes(desc.unique_partial_text_name, desc.id.to_s,
-                    "Description unique_partial_text_name should include id")
+    assert(desc.unique_partial_text_name.include?(desc.id.to_s),
+           "Description unique_partial_text_name should include id")
   end
 
   def test_user_sourced_description_with_unknown_user
@@ -261,7 +261,7 @@ class DescriptionTest < UnitTestCase
   def test_partial_text_name_project_source_with_text
     desc = name_descriptions(:draft_coprinus_comatus) # project draft
     assert_equal("project", desc.source_type)
-    assert_predicate(desc.source_name, :present?)
+    assert(desc.source_name.present?)
 
     assert_equal("Draft for #{desc.source_name} by #{desc.user.legal_name}",
                  desc.partial_text_name)
@@ -271,7 +271,7 @@ class DescriptionTest < UnitTestCase
   def test_partial_text_name_source_source_with_text
     desc = name_descriptions(:peltigera_source_desc)
     assert_equal("source", desc.source_type)
-    assert_predicate(desc.source_name, :present?)
+    assert(desc.source_name.present?)
 
     assert_equal("Description From #{desc.source_name}",
                  desc.partial_text_name)
@@ -352,9 +352,9 @@ class DescriptionTest < UnitTestCase
     desc.add_writer(user_group)
     desc.add_reader(user_group)
 
-    assert_includes(desc.admins, user_group)
-    assert_includes(desc.writers, user_group)
-    assert_includes(desc.readers, user_group)
+    assert(desc.admins.include?(user_group))
+    assert(desc.writers.include?(user_group))
+    assert(desc.readers.include?(user_group))
 
     desc.remove_admin(user_group)
     desc.remove_writer(user_group)

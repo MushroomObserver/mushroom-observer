@@ -398,7 +398,7 @@ class ObjectFooterTest < ComponentTestCase
 
     assert_not_nil(created_index, "Should contain 'Created'")
     assert_not_nil(user_index, "Should contain username")
-    assert_operator(created_index, :<, user_index,
-                    "Created should appear before username, but got:\n#{html}")
+    assert(created_index < user_index,
+           "Created should appear before username, but got:\n#{html}")
   end
 end

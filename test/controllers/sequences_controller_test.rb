@@ -172,9 +172,8 @@ class SequencesControllerTest < FunctionalTestCase
     assert_empty(sequence.accession)
     assert_redirected_to(obs.show_link_args)
     assert_flash_success
-    assert_includes(obs.rss_log.notes, "log_sequence_added",
-                    "Failed to include Sequence added in RssLog for " \
-                    "Observation")
+    assert(obs.rss_log.notes.include?("log_sequence_added"),
+           "Failed to include Sequence added in RssLog for Observation")
   end
 
   def test_turbo_create
@@ -213,9 +212,8 @@ class SequencesControllerTest < FunctionalTestCase
     assert_empty(sequence.accession)
     assert_redirected_to(obs.show_link_args)
     assert_flash_success
-    assert_includes(obs.rss_log.notes, "log_sequence_added",
-                    "Failed to include Sequence added in RssLog for " \
-                    "Observation")
+    assert(obs.rss_log.notes.include?("log_sequence_added"),
+           "Failed to include Sequence added in RssLog for Observation")
   end
 
   def test_create_repo_sequence
@@ -479,9 +477,8 @@ class SequencesControllerTest < FunctionalTestCase
     assert_equal(new_notes, sequence.notes)
 
     obs.rss_log.reload
-    assert_includes(obs.rss_log.notes, "log_sequence",
-                    "Failed to include Sequence change in RssLog for " \
-                    "Observation")
+    assert(obs.rss_log.notes.include?("log_sequence"),
+           "Failed to include Sequence change in RssLog for Observation")
   end
 
   # Exercises the turbo_stream branch of `update` so
@@ -531,9 +528,8 @@ class SequencesControllerTest < FunctionalTestCase
     assert_equal(new_archive, sequence.archive)
     assert_equal(new_accession, sequence.accession)
     obs.rss_log.reload
-    assert_includes(obs.rss_log.notes, "log_sequence_accessioned",
-                    "Failed to include Sequence accessioned in RssLog for " \
-                    "Observation")
+    assert(obs.rss_log.notes.include?("log_sequence_accessioned"),
+           "Failed to include Sequence accessioned in RssLog for Observation")
   end
 
   def test_update_locus_by_observation_creator
@@ -706,9 +702,8 @@ class SequencesControllerTest < FunctionalTestCase
     end
     assert_redirected_to(obs.show_link_args)
     assert_flash_success
-    assert_includes(obs.rss_log.notes, "log_sequence_destroy",
-                    "Failed to include Sequence destroyed in RssLog for " \
-                    "Observation")
+    assert(obs.rss_log.notes.include?("log_sequence_destroy"),
+           "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
   def test_destroy_no_login
@@ -744,9 +739,8 @@ class SequencesControllerTest < FunctionalTestCase
     end
     assert_redirected_to(obs.show_link_args)
     assert_flash_success
-    assert_includes(obs.rss_log.notes, "log_sequence_destroy",
-                    "Failed to include Sequence destroyed in RssLog for " \
-                    "Observation")
+    assert(obs.rss_log.notes.include?("log_sequence_destroy"),
+           "Failed to include Sequence destroyed in RssLog for Observation")
   end
 
   def test_destroy_redirect

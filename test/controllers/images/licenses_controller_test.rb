@@ -32,8 +32,8 @@ module Images
       new_count = Image.where(user_id: user_id,
                               license_id: new_license.id,
                               copyright_holder: copyright_holder).length
-      assert_predicate(target_count, :positive?)
-      assert_predicate(new_count, :zero?)
+      assert(target_count.positive?)
+      assert(new_count.zero?)
 
       params = {
         updates: {
@@ -58,8 +58,8 @@ module Images
       new_count_after = Image.where(user_id: user_id,
                                     license_id: new_license.id,
                                     copyright_holder: copyright_holder).length
-      assert_operator(target_count_after, :<, target_count)
-      assert_operator(new_count_after, :>, new_count)
+      assert(target_count_after < target_count)
+      assert(new_count_after > new_count)
       assert_equal(target_count_after + new_count_after,
                    target_count + new_count)
       example_image.reload

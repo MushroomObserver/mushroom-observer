@@ -27,8 +27,8 @@ class ImageOriginalLinkTest < ComponentTestCase
     a = doc.at_css("a[data-controller='image-loader']")
     assert(a, "Expected image-loader anchor")
     %w[loading maxed-out error].each do |kind|
-      assert_predicate(a["data-#{kind}-text"].to_s, :present?,
-                       "Expected data-#{kind}-text attribute on link")
+      assert(a["data-#{kind}-text"].to_s.present?,
+             "Expected data-#{kind}-text attribute on link")
     end
   end
 

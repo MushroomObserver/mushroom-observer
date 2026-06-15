@@ -18,7 +18,7 @@ class LanguageTest < UnitTestCase
     french_contributors = Set.new(french.top_contributors)
     assert_equal(Set.new([[mary.id, "mary"], [rolf.id, "rolf"]]),
                  french_contributors)
-    assert_includes(french_contributors, [mary.id, "mary"])
+    assert(french_contributors.member?([mary.id, "mary"]))
     assert_equal([[dick.id, "dick"]], greek.top_contributors)
   end
 
@@ -63,11 +63,11 @@ class LanguageTest < UnitTestCase
   def test_versioning_twice
     str = translation_strings(:version_wizard)
     yesterday = Time.zone.now.yesterday
-    assert_operator(str.updated_at, :<, yesterday)
+    assert(str.updated_at < yesterday)
     expected_version = str.version + 1
     User.current = str.user
     set_text(str, "Gandalf the Gray")
-    assert_operator(str.updated_at, :>, yesterday)
+    assert(str.updated_at > yesterday)
     assert_equal(expected_version, str.version)
     set_text(str, "Gandalf the White")
     assert_equal(expected_version, str.version)

@@ -70,8 +70,8 @@ class Query::FiltersTest < UnitTestCase
     assert_query(expects, :Observation, region: "California, USA")
 
     expects = Location.region("North America").order_by_default
-    assert_includes(expects, locations(:albion)) # usa
-    assert_includes(expects, locations(:elgin_co)) # canada
+    assert(expects.include?(locations(:albion))) # usa
+    assert(expects.include?(locations(:elgin_co))) # canada
     assert_query(expects, :Location, region: "North America")
   end
 

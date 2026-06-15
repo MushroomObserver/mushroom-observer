@@ -102,8 +102,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
   def test_show_herbarium_record_mcp_searchable
     herbarium_record = herbarium_records(:agaricus_campestris_spec)
-    assert_predicate(
-      herbarium_record&.herbarium, :mcp_searchable?,
+    assert(
+      herbarium_record&.herbarium&.mcp_searchable?,
       "Test needs HerbariumRecord fixture that's searchable via MyCoPortal"
     )
 
@@ -117,8 +117,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   def test_show_herbarium_record_mcp_unsearchable
     herbarium_record = herbarium_records(:agaricus_campestris_spec)
     herbarium = herbarium_record.herbarium
-    assert_predicate(
-      herbarium, :mcp_searchable?,
+    assert(
+      herbarium&.mcp_searchable?,
       "Test needs HerbariumRecord in a Herbarium with a MyCoPortal db"
     )
     # Make the Herbarium code something that's not in the MyCoPortal network
@@ -233,7 +233,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs2 = observations(:agaricus_campestris_obs)
     hr1 = herbarium_records(:coprinus_comatus_nybg_spec)
     hr1.add_observation(obs2)
-    assert_operator(hr1.observations.size, :>, 1)
+    assert(hr1.observations.size > 1)
 
     login
     get(:edit, params: { id: hr1.id })
@@ -311,7 +311,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     herbarium = Herbarium.find_by(name: mary.personal_herbarium_name)
     assert_not_nil(herbarium,
                    "Mary's personal herbarium should have been created")
-    assert_includes(herbarium.curators, mary)
+    assert(herbarium.curators.member?(mary))
   end
 
   def test_create_herbarium_record_duplicate

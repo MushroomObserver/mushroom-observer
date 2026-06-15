@@ -146,8 +146,8 @@ class ComponentTestCase < UnitTestCase
     )
 
     children = parent.css(child_selector)
-    assert_predicate(
-      children, :any?,
+    assert(
+      children.any?,
       "Expected to find child element '#{child_selector}' " \
       "within parent '#{parent_selector}'"
     )

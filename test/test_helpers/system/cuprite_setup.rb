@@ -10,12 +10,17 @@ require("capybara/cuprite")
 # :cuprite is registered by Rails already in version 7
 # https://github.com/rubycdp/cuprite/issues/180
 Capybara.register_driver(:mo_cuprite) do |app|
+  # --no-sandbox and --disable-dev-shm-usage are required in Docker containers
+  docker_options = if ENV["DOCKER"]
+                     { "no-sandbox" => nil, "disable-dev-shm-usage" => nil }
+                   else
+                     {}
+                   end
+
   Capybara::Cuprite::Driver.new(
     app,
     window_size: [1200, 800],
-    # See additional options for Dockerized environment in the respective
-    # section of this article
-    browser_options: {},
+    browser_options: docker_options,
     # Increase Chrome startup wait time (required for stable CI builds)
     process_timeout: 15,
     # Enable debugging capabilities

@@ -238,8 +238,8 @@ class InatTaxonTest < UnitTestCase
   def test_importable
     fungi_obs = mock_observation("somion_unicolor")
     fungi_ident_taxon = Inat::Taxon.new(fungi_obs[:identifications].last[:taxon])
-    assert_predicate(fungi_ident_taxon, :importable?,
-                     "Fungi identification taxon should be importable")
+    assert(fungi_ident_taxon.importable?,
+           "Fungi identification taxon should be importable")
 
     plant_obs = mock_observation("ceanothus_cordulatus")
     plant_ident_taxon = Inat::Taxon.new(plant_obs[:identifications].last[:taxon])

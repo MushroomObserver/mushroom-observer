@@ -11,8 +11,7 @@ class ProjectAdminRequestsIntegrationTest < CapybaraIntegrationTestCase
     login(users(:katrina))
     project = projects(:eol_project)
     admin_count = project.admin_group.users.count
-    assert_predicate(admin_count, :positive?,
-                     "Project should have at least one admin")
+    assert(admin_count.positive?, "Project should have at least one admin")
 
     # Visit the new project admin request page
     visit(new_project_admin_request_path(project))

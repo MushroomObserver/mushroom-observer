@@ -21,8 +21,7 @@ module Admin
       def test_email_name_change_request_get
         name = names(:lactarius)
         assert(name.icn_id, "Test needs a fixture with an icn_id")
-        assert_predicate(name, :dependents?,
-                         "Test needs a fixture with dependents")
+        assert(name.dependents?, "Test needs a fixture with dependents")
         params = {
           name_id: name.id,
           new_name_with_icn_id: "#{name.search_name} [#777]"
@@ -75,8 +74,7 @@ module Admin
       def test_email_name_change_request_post
         name = names(:lactarius)
         assert(name.icn_id, "Test needs a fixture with an icn_id")
-        assert_predicate(name, :dependents?,
-                         "Test needs a fixture with dependents")
+        assert(name.dependents?, "Test needs a fixture with dependents")
         params = {
           name_id: name.id,
           new_name_with_icn_id: "#{name.search_name} [#777]"

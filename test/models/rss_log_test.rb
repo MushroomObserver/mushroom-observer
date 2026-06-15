@@ -12,8 +12,8 @@ class RssLogTest < UnitTestCase
       rss_log = create_rss_log(type)
       id = rss_log.target_id
 
-      assert_includes(rss_log.url, "#{model(type).show_controller}/#{id}",
-                      "rss_log.url incorrect for #{model(type)}")
+      assert(rss_log.url.include?("#{model(type).show_controller}/#{id}"),
+             "rss_log.url incorrect for #{model(type)}")
     end
   end
 

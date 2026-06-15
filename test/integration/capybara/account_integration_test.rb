@@ -151,9 +151,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       assert_operator(ActionMailer::Base.deliveries.size, :>, mail_count_before,
                       "Verification email should have been sent")
       verify_email = ActionMailer::Base.deliveries.last
-      assert_includes(verify_email.subject.downcase, "verif",
-                      "Email should be verification,
-                        got: #{verify_email.subject}")
+      assert(verify_email.subject.downcase.include?("verif"),
+             "Email should be verification, got: #{verify_email.subject}")
       assert_includes(verify_email.to, "random_theme@test.org",
                       "Email should be sent to the user's address")
     end
@@ -238,9 +237,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       assert_operator(ActionMailer::Base.deliveries.size, :>, mail_count_before,
                       "Verification email should have been sent")
       verify_email = ActionMailer::Base.deliveries.last
-      assert_includes(verify_email.subject.downcase, "verif",
-                      "Last email should be verification,
-                        got: #{verify_email.subject}")
+      assert(verify_email.subject.downcase.include?("verif"),
+             "Last email should be verification, got: #{verify_email.subject}")
       assert_includes(verify_email.to, "webmaster@hogwarts.org",
                       "Email should be sent to the user's address")
 
@@ -268,8 +266,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       # Rails should send another email with this link.
       verify_mail_content = delivered_mail_html
-      assert_includes(verify_mail_content, wizard.login)
-      assert_includes(verify_mail_content, "verify")
+      assert(verify_mail_content.include?(wizard.login))
+      assert(verify_mail_content.include?("verify"))
       # Store the link in that mail, so we can test the reverify link.
       verify_link = first_link_in_mail
 
@@ -279,8 +277,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       # GOTCHA: last email sent is the webmaster notification for reverify.
       # So check the second to last delivery: delivered_mail_html(2)
       reverify_mail_content = delivered_mail_html(2)
-      assert_includes(reverify_mail_content, wizard.login)
-      assert_includes(reverify_mail_content, "verify")
+      assert(reverify_mail_content.include?(wizard.login))
+      assert(reverify_mail_content.include?("verify"))
       reverify_link = first_link_in_mail(2)
 
       assert_equal(verify_link, reverify_link)

@@ -12,7 +12,7 @@ module SpeciesLists
       # This will have to be very rudimentary, since the vast majority of the
       # complexity is in Javascript.  Sigh.
       user = login("rolf")
-      assert_predicate(user, :successful_contributor?)
+      assert(user.successful_contributor?)
       get(:new)
 
       params = {

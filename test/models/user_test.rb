@@ -28,16 +28,16 @@ class UserTest < UnitTestCase
 
     u.password = u.password_confirmation = "tiny"
     assert_not(u.save)
-    assert_predicate(u.errors[:password], :any?)
+    assert(u.errors[:password].any?)
 
     u.password = u.password_confirmation = "huge" * 43 # size = 4 * 43 == 172
     assert_not(u.save)
-    assert_predicate(u.errors[:password], :any?)
+    assert(u.errors[:password].any?)
 
     u.password = "unconfirmed_password"
     u.password_confirmation = ""
     assert_not(u.save)
-    assert_predicate(u.errors[:password], :any?)
+    assert(u.errors[:password].any?)
 
     # This is allowed now to let API create users without a password chosen yet.
     u.password = u.password_confirmation = "bobs_secure_password"
@@ -55,15 +55,15 @@ class UserTest < UnitTestCase
 
     u.login = "x"
     assert_not(u.save)
-    assert_predicate(u.errors[:login], :any?)
+    assert(u.errors[:login].any?)
 
     u.login = "hugebob" * 26 # size = 7 * 26 == 182
     assert_not(u.save)
-    assert_predicate(u.errors[:login], :any?)
+    assert(u.errors[:login].any?)
 
     u.login = ""
     assert_not(u.save)
-    assert_predicate(u.errors[:login], :any?)
+    assert(u.errors[:login].any?)
 
     u.login = "okbob"
     assert(u.save)
@@ -233,7 +233,7 @@ class UserTest < UnitTestCase
     assert_equal(1, user.comments.length)
     comment_id = user.comments.first.id
     num_name_descriptions = NameDescription.count
-    assert_operator(user.name_descriptions.length, :>, 1)
+    assert(user.name_descriptions.length > 1)
     sample_name_description_id = user.name_descriptions.first.id
     herbarium = user.personal_herbarium
     assert_not_nil(herbarium.personal_user)
@@ -309,7 +309,7 @@ class UserTest < UnitTestCase
   end
 
   def test_successful_contributor?
-    assert_predicate(rolf, :successful_contributor?)
+    assert(rolf.successful_contributor?)
   end
 
   def test_is_unsuccessful_contributor?
@@ -326,30 +326,27 @@ class UserTest < UnitTestCase
       password: "bobs_secure_password",
       password_confirmation: "bobs_secure_password"
     )
-    assert_predicate(u, :valid?, "Nil notes template should be valid")
+    assert(u.valid?, "Nil notes template should be valid")
 
     u.notes_template = ""
-    assert_predicate(u, :valid?, "Empty notes template should be valid")
+    assert(u.valid?, "Empty notes template should be valid")
 
     u.notes_template = "Cap, Stem"
-    assert_predicate(u, :valid?, "Notes template present should be valid")
+    assert(u.valid?, "Notes template present should be valid")
 
     u.notes_template = "Cap, Stem, Other"
-    assert_predicate(u, :invalid?,
-                     "Notes template with 'Other' should be invalid")
+    assert(u.invalid?, "Notes template with 'Other' should be invalid")
 
     u.notes_template = "Blah, Blah"
-    assert_predicate(u, :invalid?,
-                     "Notes template with duplication headings should be " \
-                     "invalid")
+    assert(u.invalid?,
+           "Notes template with duplication headings should be invalid")
 
     u.notes_template = "Cap, Collector"
-    assert_predicate(u, :invalid?,
-                     "Notes template with 'Collector' should be invalid " \
-                     "(#4211)")
+    assert(u.invalid?,
+           "Notes template with 'Collector' should be invalid (#4211)")
 
     u.notes_template = "Cap, Collector's Name"
-    assert_predicate(u, :valid?, "Collector variant headings stay valid")
+    assert(u.valid?, "Collector variant headings stay valid")
   end
 
   def test_disable_account
@@ -530,8 +527,8 @@ class UserTest < UnitTestCase
     obs1 = observations(:minimal_unknown_obs)
     obs2 = observations(:detailed_unknown_obs)
     assert_users_equal(mary, obs1.user)
-    assert_includes(obs1.herbarium_records, rec)
-    assert_includes(obs2.herbarium_records, rec)
+    assert(obs1.herbarium_records.include?(rec))
+    assert(obs2.herbarium_records.include?(rec))
 
     # Used by two observations at first.
     rolf.delete_unattached_herbarium_records
@@ -601,7 +598,7 @@ class UserTest < UnitTestCase
 
   def test_nihilist
     user = users(:nihilist_user)
-    assert_includes(user.textile_name, user.login)
+    assert(user.textile_name.include?(user.login))
   end
 
   def test_user_with_underscore

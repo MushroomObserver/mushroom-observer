@@ -88,15 +88,15 @@ class ScriptTest < UnitTestCase
     script_succeeded = system(script_env, cmd)
 
     assert(script_succeeded, "Script failed.")
-    assert_predicate(File.size(dest_file), :positive?,
-                     "#{dest_file} should have content but is empty.")
+    assert(File.size(dest_file).positive?,
+           "#{dest_file} should have content but is empty.")
     assert_equal("", File.read(stdout_file),
                  "#{stdout_file} should be empty, but has content")
     # In test mode, the script just grabs first observation from api
     # (or mocks grabbing the first observation from api).
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
-    assert_includes(File.read(dest_file), '<results number="1">')
+    assert(File.read(dest_file).include?('<results number="1">'))
     # system("cp #{dest_file} x.xml")
   end
 

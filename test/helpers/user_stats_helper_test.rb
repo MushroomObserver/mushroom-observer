@@ -13,8 +13,8 @@ class UserStatsHelperTest < ActionView::TestCase
     rows = user_stats_rows(stats)
     lang_row = rows.last
 
-    assert_includes(lang_row[:label].to_s, "English",
-                    "Expected language label to include the locale name")
+    assert(lang_row[:label].to_s.include?("English"),
+           "Expected language label to include the locale name")
   end
 
   # Line 35: bonuses array triggers the bonus row block

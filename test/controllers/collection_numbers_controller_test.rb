@@ -82,8 +82,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_index_pattern_str_matching_multiple_collection_numbers
     pattern = "Singer"
     numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
-    assert_predicate(numbers, :many?,
-                     "Test needs a pattern matching many collection numbers")
+    assert(numbers.many?,
+           "Test needs a pattern matching many collection numbers")
 
     login
     get(:index, params: { q: { model: :CollectionNumber, pattern: pattern } })
@@ -210,7 +210,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs2 = observations(:coprinus_comatus_obs)
     num1 = collection_numbers(:agaricus_campestris_coll_num)
     num1.add_observation(obs2)
-    assert_operator(num1.observations.size, :>, 1)
+    assert(num1.observations.size > 1)
 
     login
     get(:edit, params: { id: num1.id })

@@ -25,14 +25,14 @@ class OccurrenceEditFormSystemTest < ApplicationSystemTestCase
     assert_selector("#occurrence_form")
 
     # Both observations show as checked Include checkboxes.
-    assert_predicate(checkbox_for(primary_obs), :checked?,
-                     "Primary obs should start checked")
-    assert_predicate(checkbox_for(secondary_obs), :checked?,
-                     "Secondary obs should start checked")
+    assert(checkbox_for(primary_obs).checked?,
+           "Primary obs should start checked")
+    assert(checkbox_for(secondary_obs).checked?,
+           "Secondary obs should start checked")
 
     # Primary observation's primary radio is selected.
-    assert_predicate(radio_for(primary_obs), :checked?,
-                     "Primary obs's primary radio should be selected")
+    assert(radio_for(primary_obs).checked?,
+           "Primary obs's primary radio should be selected")
 
     # Inline primary-obs detail section is present (date picker is
     # always shown; location select only when >1 distinct location).

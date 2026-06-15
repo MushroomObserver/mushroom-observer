@@ -80,8 +80,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Hidden ID should be set - wait for it to have a non-empty value
     hidden_field = find_by_id("query_observations_by_users_id", visible: false)
-    assert_predicate(hidden_field.value, :present?,
-                     "Hidden ID should be set after selection")
+    assert(hidden_field.value.present?,
+           "Hidden ID should be set after selection")
 
     # Clear the field - use Capybara's cross-platform method
     fill_in("query_observations_by_users", with: "")

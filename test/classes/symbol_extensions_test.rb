@@ -103,11 +103,11 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_hello_has_translation
-    assert_predicate(:hello, :has_translation?)
+    assert(:hello.has_translation?)
   end
 
   def test_Hello_has_translation # rubocop:disable Naming/MethodName
-    assert_predicate(:Hello, :has_translation?)
+    assert(:Hello.has_translation?)
   end
 
   def test_no_translation

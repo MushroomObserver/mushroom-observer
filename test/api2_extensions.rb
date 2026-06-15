@@ -35,7 +35,7 @@ module API2Extensions
   def assert_api_fail(params)
     @api = API2.execute(params)
     msg = "API2 request should have failed, params: #{params.inspect}"
-    assert_predicate(@api.errors, :any?, msg)
+    assert(@api.errors.any?, msg)
   end
 
   def assert_api_pass(params)
@@ -266,9 +266,9 @@ module API2Extensions
     assert_equal(0, obs.num_views)
     assert_nil(obs.last_view)
     assert_not_nil(obs.rss_log)
-    assert_equal(@lat, obs.lat)
-    assert_equal(@long, obs.lng)
-    assert_equal(@alt, obs.alt)
+    assert_equal_even_if_nil(@lat, obs.lat)
+    assert_equal_even_if_nil(@long, obs.lng)
+    assert_equal_even_if_nil(@alt, obs.alt)
     assert_obj_arrays_equal([@proj].compact,
                             obs.projects.reorder(id: :asc))
     assert_obj_arrays_equal([@spl].compact,

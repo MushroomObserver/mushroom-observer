@@ -6,7 +6,7 @@ class LocationTest < UnitTestCase
   include ActiveJob::TestHelper
 
   def bad_location(str)
-    assert_operator(Location.dubious_name?(str, true), :!=, [])
+    assert(Location.dubious_name?(str, true) != [])
   end
 
   def good_location(str)
@@ -117,7 +117,7 @@ class LocationTest < UnitTestCase
   def test_understood_continent
     assert(Location.understood_continent?("Central America"))
     assert_not(Location.understood_continent?("Atlantis"))
-    assert_includes(Location.countries_in_continent("Europe"), "France")
+    assert(Location.countries_in_continent("Europe").include?("France"))
     assert_not(Location.countries_in_continent("Europe").include?("Canada"))
   end
 
@@ -463,8 +463,8 @@ class LocationTest < UnitTestCase
   def test_unknown
     loc = locations(:unknown_location)
     assert_objs_equal(loc, Location.unknown)
-    assert_includes(Location.names_for_unknown, "Unknown")
-    assert_includes(Location.names_for_unknown, "Earth")
+    assert(Location.names_for_unknown.include?("Unknown"))
+    assert(Location.names_for_unknown.include?("Earth"))
     assert_true(Location.is_unknown?("Unknown"))
     assert_true(Location.is_unknown?("Earth"))
     assert_true(Location.is_unknown?("World"))
@@ -673,10 +673,10 @@ class LocationTest < UnitTestCase
   end
 
   def contains_corners(loc)
-    assert_includes(Location.contains_point(lat: loc.north, lng: loc.east),
-                    loc, "#{loc.name} should contain its NE corner")
-    assert_includes(Location.contains_point(lat: loc.south, lng: loc.west),
-                    loc, "#{loc.name} should contain its SW corner")
+    assert(Location.contains_point(lat: loc.north, lng: loc.east).
+      include?(loc), "#{loc.name} should contain its NE corner")
+    assert(Location.contains_point(lat: loc.south, lng: loc.west).
+      include?(loc), "#{loc.name} should contain its SW corner")
   end
 
   def cal

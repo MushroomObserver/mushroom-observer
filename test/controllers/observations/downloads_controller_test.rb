@@ -6,8 +6,7 @@ module Observations
   class DownloadsControllerTest < FunctionalTestCase
     def test_new
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
-      assert_operator(query.num_results, :>, 1,
-                      "Test needs query with multiple results")
+      assert(query.num_results > 1, "Test needs query with multiple results")
 
       login(:rolf)
       get(:new, params: { q: @controller.q_param(query) })
@@ -27,8 +26,7 @@ module Observations
 
     def test_new_admin
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
-      assert_operator(query.num_results, :>, 1,
-                      "Test needs query with multiple results")
+      assert(query.num_results > 1, "Test needs query with multiple results")
 
       login(:rolf)
       make_admin("rolf")
@@ -49,7 +47,7 @@ module Observations
 
     def test_download_observation_index
       obs = Observation.reorder(id: :asc).where(user: mary)
-      assert_operator(obs.length, :>=, 4)
+      assert(obs.length >= 4)
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
 
       # Add herbarium_record to fourth obs for testing purposes.
@@ -122,7 +120,7 @@ module Observations
         "#{o.notes[Observation.other_notes_key]}," \
         "#{MO.http_domain}/obs/#{o.id}"
 
-      assert_includes(response.body, expected)
+      assert(response.body.include?(expected))
 
       post(
         :create,
@@ -298,7 +296,7 @@ module Observations
       assert_equal("application/pdf", response.content_type)
       pdf_content = response.body.force_encoding("ASCII-8BIT")
       assert(pdf_content.start_with?("%PDF-"), "Should generate valid PDF")
-      assert_includes(pdf_content, "%%EOF", "Should have valid PDF ending")
+      assert(pdf_content.include?("%%EOF"), "Should have valid PDF ending")
     end
 
     def test_project_labels
@@ -361,9 +359,8 @@ module Observations
       obss_with_images =
         Observation.joins(:images).where(id: query.results(&:id)).
         order(id: :asc, image_id: :asc)
-      assert_predicate(obss_with_images, :many?,
-                       "Test needs query which results in many Observations " \
-                       "with Images")
+      assert(obss_with_images.many?,
+             "Test needs query which results in many Observations with Images")
       assert(
         obss_with_images.any? { |obs| obs.images.many? },
         "Test needs query which results in >=1 Observations with many Images"

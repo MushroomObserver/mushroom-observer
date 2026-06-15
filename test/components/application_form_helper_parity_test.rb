@@ -129,8 +129,8 @@ class ApplicationFormHelperParityTest < ComponentTestCase
     selects_pos = html.index("date-selects")
     assert(between_pos && selects_pos,
            "both between content and date-selects should be present")
-    assert_operator(between_pos, :<, selects_pos,
-                    "between content must render in the label row " \
+    assert(between_pos < selects_pos,
+           "between content must render in the label row " \
            "(before the date-selects)")
   end
 

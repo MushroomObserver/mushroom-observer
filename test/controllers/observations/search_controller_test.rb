@@ -191,8 +191,7 @@ module Observations
         has_specimen: true
       )
       original_query_id = query.id
-      assert_predicate(query.params, :present?,
-                       "Original query should have params")
+      assert(query.params.present?, "Original query should have params")
 
       # Now load the form with clear=1, which triggers reset_search_query
       get(:new, params: { clear: "1" })
@@ -222,8 +221,7 @@ module Observations
         has_specimen: true
       )
       query.id
-      assert_predicate(query.params, :present?,
-                       "Original query should have params")
+      assert(query.params.present?, "Original query should have params")
 
       # Post to create with commit="Clear" (the localized CLEAR button value)
       # This triggers clear_form? which calls clear_relevant_query and redirects
@@ -630,8 +628,8 @@ module Observations
         assert_select("option[selected]") do |options|
           assert_equal(1, options.length)
           # The blank option has an empty or nil value attribute
-          assert_predicate(
-            options.first["value"], :blank?,
+          assert(
+            options.first["value"].blank?,
             "Second confidence dropdown should have blank value for No Opinion"
           )
         end

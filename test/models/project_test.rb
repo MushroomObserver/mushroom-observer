@@ -10,7 +10,7 @@ class ProjectTest < UnitTestCase
     imgs = detailed_unknown_obs.images.sort_by(&:id)
     assert_obj_arrays_equal([], proj.images)
     assert_obj_arrays_equal([], minimal_unknown_obs.images)
-    assert_predicate(imgs, :any?)
+    assert(imgs.any?)
 
     proj.add_observation(minimal_unknown_obs)
     assert_true(proj.observations.include?(minimal_unknown_obs))
@@ -108,7 +108,7 @@ class ProjectTest < UnitTestCase
   end
 
   def test_dates_current
-    assert_predicate(projects(:current_project), :current?)
+    assert(projects(:current_project).current?)
     assert_not(projects(:past_project).current?)
     assert_not(projects(:future_project).current?)
   end
@@ -144,8 +144,8 @@ class ProjectTest < UnitTestCase
 
   def assert_out_of_range_observations(project,
                                        expect: project.observations.count)
-    assert_predicate(
-      project.observations, :any?,
+    assert(
+      project.observations.any?,
       "Test needs fixture with some Observations; #{project.title} has none"
     )
     assert_equal(expect, project.out_of_range_observations.count)
@@ -153,8 +153,8 @@ class ProjectTest < UnitTestCase
 
   def assert_in_range_observations(project,
                                    expect: project.observations.count)
-    assert_predicate(
-      project.observations, :any?,
+    assert(
+      project.observations.any?,
       "Test needs fixture with some Observations; #{project.title} has none"
     )
     assert_equal(expect, project.in_range_observations.count)
@@ -277,7 +277,7 @@ class ProjectTest < UnitTestCase
 
   def test_has_targets
     proj = projects(:rare_fungi_project)
-    assert_predicate(proj, :has_targets?)
+    assert(proj.has_targets?)
 
     empty = projects(:empty_project)
     assert_not(empty.has_targets?)
@@ -311,7 +311,7 @@ class ProjectTest < UnitTestCase
     proj = projects(:rare_fungi_project)
     # Remove all target locations so only names remain
     proj.project_target_locations.destroy_all
-    assert_predicate(proj.target_names, :any?)
+    assert(proj.target_names.any?)
     assert_not(proj.target_locations.any?)
 
     candidates = proj.candidate_observations
@@ -324,10 +324,10 @@ class ProjectTest < UnitTestCase
     # Remove all target names so only locations remain
     proj.project_target_names.destroy_all
     assert_not(proj.target_names.any?)
-    assert_predicate(proj.target_locations, :any?)
+    assert(proj.target_locations.any?)
 
     candidates = proj.candidate_observations
-    assert_operator(candidates.count, :>=, 0, "Should query without error")
+    assert(candidates.count >= 0, "Should query without error")
   end
 
   # Genus-level target should pick up observations of species in that
@@ -401,8 +401,8 @@ class ProjectTest < UnitTestCase
   def test_field_slip_prefix_validation
     proj = Project.new(title: "Test", field_slip_prefix: "bad prefix!")
     proj.valid?
-    assert_predicate(proj.errors[:field_slip_prefix], :any?,
-                     "Should reject invalid field_slip_prefix")
+    assert(proj.errors[:field_slip_prefix].any?,
+           "Should reject invalid field_slip_prefix")
   end
 
   def test_exclude_and_unexclude_observation
@@ -460,8 +460,8 @@ class ProjectTest < UnitTestCase
     minimal = observations(:minimal_unknown_obs)
     detailed = observations(:detailed_unknown_obs)
     owner_imgs = detailed.images.select { |i| i.user_id == detailed.user_id }
-    assert_predicate(owner_imgs, :any?,
-                     "fixture must have at least one owner-attributed image")
+    assert(owner_imgs.any?,
+           "fixture must have at least one owner-attributed image")
 
     count = proj.bulk_add_observations([minimal.id, detailed.id])
 

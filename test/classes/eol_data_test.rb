@@ -7,9 +7,9 @@ class EolDataTest < UnitTestCase
     name_id = name.id
     assert(obj.has_images?(name_id))
     assert_instance_of(Array, obj.images(name_id))
-    assert_predicate(obj.image_count(name_id), :positive?,
-                     "Expected #{name.text_name} image count > 0; " \
-                     "got #{obj.image_count(name_id)}")
+    assert(obj.image_count(name_id).positive?,
+           "Expected #{name.text_name} image count > 0; " \
+           "got #{obj.image_count(name_id)}")
     assert_equal(name.user.legal_name, obj.legal_name(name.user.id))
     assert_equal(name.real_search_name,
                  obj.image_to_names(obj.images(name_id)[0].id))
@@ -19,9 +19,9 @@ class EolDataTest < UnitTestCase
     obj = EolData.new
 
     assert_instance_of(SortedSet, obj.names)
-    assert_operator(obj.name_count, :>=, 2)
-    assert_operator(obj.total_image_count, :>=, 2)
-    assert_operator(obj.total_description_count, :>=, 1)
+    assert(obj.name_count >= 2)
+    assert(obj.total_image_count >= 2)
+    assert(obj.total_description_count >= 1)
     assert_instance_of(Array, obj.all_images)
     assert_instance_of(Array, obj.all_descriptions)
 
@@ -31,7 +31,7 @@ class EolDataTest < UnitTestCase
     name_id = names(:peltigera).id
     assert(obj.has_descriptions?(name_id))
     assert_instance_of(Array, obj.descriptions(name_id))
-    assert_operator(obj.description_count(name_id), :>=, 1)
+    assert(obj.description_count(name_id) >= 1)
     description = obj.descriptions(name_id)[0]
     assert_equal(description.user.legal_name, obj.authors(description.id))
 
@@ -51,6 +51,6 @@ class EolDataTest < UnitTestCase
     initial_count = Triple.count
     obj = EolData.new
     obj.refresh_links_to_eol
-    assert_operator(initial_count, :<, Triple.count)
+    assert(initial_count < Triple.count)
   end
 end

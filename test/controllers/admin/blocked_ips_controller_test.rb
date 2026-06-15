@@ -47,7 +47,7 @@ module Admin
       File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
       patch(:update, params: { add_bad: new_ip })
       assert_no_flash
-      assert_operator(time, :<, File.mtime(MO.blocked_ips_file))
+      assert(time < File.mtime(MO.blocked_ips_file))
       IpStats.reset!
       assert_true(IpStats.blocked?(new_ip))
 
@@ -55,7 +55,7 @@ module Admin
       File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
       patch(:update, params: { remove_bad: new_ip })
       assert_no_flash
-      assert_operator(time, :<, File.mtime(MO.blocked_ips_file))
+      assert(time < File.mtime(MO.blocked_ips_file))
       IpStats.reset!
       assert_false(IpStats.blocked?(new_ip))
 
@@ -63,7 +63,7 @@ module Admin
       File.utime(time.to_time, time.to_time, MO.blocked_ips_file)
       patch(:update, params: { add_bad: " #{new_ip} " })
       assert_no_flash
-      assert_operator(time, :<, File.mtime(MO.blocked_ips_file))
+      assert(time < File.mtime(MO.blocked_ips_file))
       IpStats.reset!
       assert_true(IpStats.blocked?(new_ip),
                   "It should ignore leading & trailing spaces in ip addr")
