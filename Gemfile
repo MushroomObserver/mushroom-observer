@@ -184,10 +184,10 @@ group :test, :development do
   # Use rubocop and extensions for code quality control
   # https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
   gem("rubocop", require: false)
-  gem("rubocop-capybara")
-  gem("rubocop-minitest")
-  gem("rubocop-performance")
-  gem("rubocop-rails")
+  gem("rubocop-capybara", require: false)
+  gem("rubocop-minitest", require: false)
+  gem("rubocop-performance", require: false)
+  gem("rubocop-rails", require: false)
   gem("rubocop-thread_safety", require: false)
 end
 

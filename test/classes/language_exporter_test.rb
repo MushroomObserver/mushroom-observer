@@ -115,11 +115,11 @@ class LanguageExporterTest < UnitTestCase
     @official.send_private(:check_export_line, str)
     pass, in_tag = @official.get_check_export_line_status
     msg = assert_message("Expected #{str.inspect} to #{expected_str}.")
-    assert_equal(pass, expected_val, msg)
+    assert_equal(expected_val, pass, msg)
     msg = assert_message(
       "Expected #{str.inspect} to leave in_tag = #{in_tag_end.inspect}"
     )
-    assert_equal(!!in_tag, in_tag_end == 1, msg)
+    assert_equal(in_tag_end == 1, !!in_tag, msg)
     Language.clear_verbose_messages
   end
 
