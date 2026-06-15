@@ -188,6 +188,19 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  def test_name_override
+    with_field = inat_obs_with_fields(
+      [{ name: "Provisional Species Name", value: "ignore me" },
+       { name: "Species Name Override", value: "Boletus edulis" }]
+    )
+    assert_equal("Boletus edulis", with_field.name_override)
+
+    other_field = inat_obs_with_fields([{ name: "Other", value: "x" }])
+    assert_nil(other_field.name_override)
+
+    assert_nil(inat_obs_with_fields(nil).name_override)
+  end
+
   def test_specimen
     assert_not(mock_observation("somion_unicolor").specimen?)
     # See comment in Inat::Obs#specimen? about disabling specimen detection
@@ -461,5 +474,14 @@ class InatObsTest < UnitTestCase
     Inat::Obs.new(
       JSON.generate(JSON.parse(mock_search)["results"].first)
     )
+  end
+
+  # A minimal Inat::Obs with the given observation fields (ofvs), or none.
+  def inat_obs_with_fields(ofvs)
+    Inat::Obs.new(JSON.generate(
+                    taxon: { name: "Boletus", rank: "species",
+                             ancestor_ids: [] },
+                    ofvs: ofvs
+                  ))
   end
 end
