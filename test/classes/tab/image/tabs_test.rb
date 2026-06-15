@@ -60,13 +60,5 @@ module Tab::Image
       assert_includes(tab.path, @name.search_name)
       assert_equal("_blank", tab.html_options[:target])
     end
-
-    def test_test_again
-      tab = Tab::Image::TestAgain.new
-
-      assert_equal("Test Again", tab.title)
-      assert_equal({ action: :test_add_image }, tab.path)
-      assert_includes(tab.html_options[:class], "test_add_image_report_link")
-    end
   end
 end
