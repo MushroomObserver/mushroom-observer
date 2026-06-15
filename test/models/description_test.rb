@@ -154,9 +154,9 @@ class DescriptionTest < UnitTestCase
                                   license_id: licenses(:ccnc25).id)
     burbank = locations(:burbank)
     obj.parent = burbank
-    assert_equal(obj.parent_id, burbank.id)
+    assert_equal(burbank.id, obj.parent_id)
     obj.parent_id = albion.id
-    assert_equal(obj.parent, albion)
+    assert_equal(albion, obj.parent)
   end
 
   def test_permitted?

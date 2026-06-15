@@ -76,7 +76,7 @@ class LanguageExporterTest < UnitTestCase
   def assert_valid_or_invalid(method, str, expected_val, expected_str)
     msg = assert_message("#{method}: Expected #{str.inspect} to be" \
                          "#{expected_str}.")
-    assert_equal(!!@official.send_private(method, str), !!expected_val, msg)
+    assert_equal(!!expected_val, !!@official.send_private(method, str), msg)
     Language.clear_verbose_messages
   end
 

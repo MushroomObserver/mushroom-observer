@@ -79,7 +79,7 @@ module API2Extensions
     if expect.is_a?(Class) && expect <= API2::Error
       assert_kind_of(expect, actual, msg)
     else
-      assert_equal(actual, expect, msg)
+      assert_equal(expect, actual, msg)
     end
   end
 
