@@ -129,18 +129,13 @@ class ParallelTestConfigServiceTest < UnitTestCase
   def test_setup_config_files_write_error
     create_database_yml
 
-    # Make config directory read-only to cause write failure
-    config_path = @rails_root.join("config")
-    FileUtils.chmod(0o444, config_path)
-
-    begin
+    error = Errno::EACCES.new("Permission denied")
+    File.stub(:write, ->(*_args) { raise(error) }) do
       result = @service.setup_config_files
 
       assert_not(result,
                  "setup_config_files should return false on write error")
       assert_match(/ERROR:/, output_messages)
-    ensure
-      FileUtils.chmod(0o755, config_path)
     end
   end
 

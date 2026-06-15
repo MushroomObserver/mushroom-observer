@@ -1,0 +1,26 @@
+shared:
+  adapter: trilogy
+  variables:
+    sql_mode: TRADITIONAL
+
+development:
+  primary:
+    database: <%= ENV.fetch("DATABASE_NAME", "mo_development") %>
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+  cache:
+    database: cache_development
+    host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+    username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+    password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+    port: 3306
+    migrations_paths: "db/cache/migrate"
+
+test:
+  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? && 'mo_test') || 'mo_test-' + ENV['TEST_ENV_NUMBER'] %>"
+  host: <%= ENV.fetch("DATABASE_HOST", "db") %>
+  username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
+  password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
+  port: 3306
