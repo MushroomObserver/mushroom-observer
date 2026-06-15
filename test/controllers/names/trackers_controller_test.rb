@@ -135,7 +135,7 @@ module Names
       assert(name_tracker.note_template)
       assert(name_tracker.calc_note(user: mary,
                                     naming: namings(:coprinus_comatus_naming)))
-      assert_equal(false, name_tracker.approved)
+      assert_not(name_tracker.approved)
       interest = Interest.find_by(target: name_tracker)
       assert(interest)
     end

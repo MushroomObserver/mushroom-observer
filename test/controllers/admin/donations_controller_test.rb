@@ -47,7 +47,7 @@ module Admin
     def test_update_reviewed_donations
       make_admin
       unreviewed = donations(:unreviewed)
-      assert_equal(false, unreviewed.reviewed)
+      assert_not(unreviewed.reviewed)
       params = { reviewed: { unreviewed.id => true } }
       put(:update, params: params)
       reloaded = Donation.find(unreviewed.id)

@@ -433,8 +433,8 @@ module Names
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
-      assert_equal(false, desc.public)
-      assert_equal(false, desc.public_write)
+      assert_not(desc.public)
+      assert_not(desc.public_write)
 
       # Test draft creation by project non-member.
       login("dick")
@@ -465,8 +465,8 @@ module Names
       desc = assigns(:description)
       assert_equal("project", desc.source_type)
       assert_equal(project.title, desc.source_name)
-      assert_equal(false, desc.public)
-      assert_equal(false, desc.public_write)
+      assert_not(desc.public)
+      assert_not(desc.public_write)
 
       # Test draft creation by project non-member.
       login("dick")
@@ -489,8 +489,8 @@ module Names
       desc = assigns(:description)
       assert_equal("user", desc.source_type)
       assert_equal("", desc.source_name.to_s)
-      assert_equal(false, desc.public)
-      assert_equal(false, desc.public_write)
+      assert_not(desc.public)
+      assert_not(desc.public_write)
     end
 
     def test_create_name_description_public

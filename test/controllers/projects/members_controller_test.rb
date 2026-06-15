@@ -561,8 +561,8 @@ module Projects
     def test_add_member_admin
       eol_project = projects(:eol_project)
       target_user = dick
-      assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
-      assert_equal(false, target_user.in_group?(eol_project.user_group.name))
+      assert_not(target_user.in_group?(eol_project.admin_group.name))
+      assert_not(target_user.in_group?(eol_project.user_group.name))
       params = {
         project_id: eol_project.id,
         candidate: target_user.id
@@ -570,7 +570,7 @@ module Projects
       post_requires_login(:create, params, mary.login)
       assert_redirected_to(project_members_path(eol_project.id))
       target_user = User.find(target_user.id)
-      assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
+      assert_not(target_user.in_group?(eol_project.admin_group.name))
       assert_equal(true, target_user.in_group?(eol_project.user_group.name))
     end
 
@@ -578,8 +578,8 @@ module Projects
     def test_add_member_member
       eol_project = projects(:eol_project)
       target_user = dick
-      assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
-      assert_equal(false, target_user.in_group?(eol_project.user_group.name))
+      assert_not(target_user.in_group?(eol_project.admin_group.name))
+      assert_not(target_user.in_group?(eol_project.user_group.name))
       params = {
         project_id: eol_project.id,
         candidate: target_user.id
@@ -587,15 +587,15 @@ module Projects
       post_requires_login(:create, params, katrina.login)
       assert_redirected_to(project_members_path(eol_project.id))
       target_user = User.find(target_user.id)
-      assert_equal(false, target_user.in_group?(eol_project.admin_group.name))
-      assert_equal(false, target_user.in_group?(eol_project.user_group.name))
+      assert_not(target_user.in_group?(eol_project.admin_group.name))
+      assert_not(target_user.in_group?(eol_project.user_group.name))
     end
 
     def test_add_self_to_open_membership_project
       project = projects(:open_membership_project)
       target_user = dick
-      assert_equal(false, target_user.in_group?(project.admin_group.name))
-      assert_equal(false, target_user.in_group?(project.user_group.name))
+      assert_not(target_user.in_group?(project.admin_group.name))
+      assert_not(target_user.in_group?(project.user_group.name))
       params = {
         project_id: project.id,
         candidate: target_user.id,
@@ -604,15 +604,15 @@ module Projects
       post_requires_login(:create, params, target_user.login)
       assert_redirected_to(project_path(project.id))
       target_user = User.find(target_user.id)
-      assert_equal(false, target_user.in_group?(project.admin_group.name))
+      assert_not(target_user.in_group?(project.admin_group.name))
       assert_equal(true, target_user.in_group?(project.user_group.name))
     end
 
     def test_add_someone_else_to_open_membership_project
       project = projects(:open_membership_project)
       target_user = dick
-      assert_equal(false, target_user.in_group?(project.admin_group.name))
-      assert_equal(false, target_user.in_group?(project.user_group.name))
+      assert_not(target_user.in_group?(project.admin_group.name))
+      assert_not(target_user.in_group?(project.user_group.name))
       params = {
         project_id: project.id,
         candidate: target_user.id
@@ -620,8 +620,8 @@ module Projects
       post_requires_login(:create, params, katrina.login)
       assert_redirected_to(project_members_path(project.id))
       target_user = User.find(target_user.id)
-      assert_equal(false, target_user.in_group?(project.admin_group.name))
-      assert_equal(false, target_user.in_group?(project.user_group.name))
+      assert_not(target_user.in_group?(project.admin_group.name))
+      assert_not(target_user.in_group?(project.user_group.name))
     end
 
     def test_add_member_writein

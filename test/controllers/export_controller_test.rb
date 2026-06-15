@@ -36,7 +36,7 @@ class ExportControllerTest < FunctionalTestCase
     assert_equal(true, name.reload.ok_for_export)
     get(:set_export_status, params: params.merge(value: "0"))
     assert_redirected_to(name_path(name.id))
-    assert_equal(false, name.reload.ok_for_export)
+    assert_not(name.reload.ok_for_export)
 
     get(:set_export_status, params: params.merge(value: "1"))
     assert_redirected_to(name_path(name.id))
@@ -87,7 +87,7 @@ class ExportControllerTest < FunctionalTestCase
     image.update(diagnostic: true)
     get(:set_ml_status, params: ml_params.merge(value: "0"))
     assert_redirected_to(image_path(image.id))
-    assert_equal(false, image.reload.diagnostic)
+    assert_not(image.reload.diagnostic)
   end
 
   def test_set_ml_status_turn_on

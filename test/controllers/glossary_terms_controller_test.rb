@@ -376,7 +376,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
          params: { id: glossary_terms(:conic_glossary_term).id,
                    glossary_term: { locked: true } })
 
-    assert_equal(false, term.reload.locked)
+    assert_not(term.reload.locked)
   end
 
   def test_update_glossary_term_unlock_by_admin
@@ -388,7 +388,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
          params: { id: glossary_terms(:locked_glossary_term).id,
                    glossary_term: { locked: false } })
 
-    assert_equal(false, term.reload.locked)
+    assert_not(term.reload.locked)
   end
 
   def test_update_glossary_term_no_name

@@ -40,7 +40,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_equal("needs a name!", user.name)
     assert_equal("webmaster@mushroomobserver.org", user.email)
     assert_nil(user.verified)
-    assert_equal(false, user.admin)
+    assert_not(user.admin)
     # RANDOM theme stores nil so css_theme picks random theme on each page load
     assert_nil(user.theme, "RANDOM should store nil for random theme per page")
 

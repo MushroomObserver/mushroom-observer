@@ -21,9 +21,9 @@ class StringExtensionsTest < UnitTestCase
   def test_to_boolean
     assert_equal(true, "true".to_boolean)
     assert_equal(true, "tabbouleh".to_boolean)
-    assert_equal(false, "false".to_boolean)
+    assert_not("false".to_boolean)
     assert_equal(true, "1".to_boolean)
-    assert_equal(false, "0".to_boolean)
+    assert_not("0".to_boolean)
   end
 
   def test_random_no_seed_string

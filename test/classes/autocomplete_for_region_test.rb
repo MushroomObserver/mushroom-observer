@@ -17,8 +17,8 @@ class AutocompleteForRegionTest < UnitTestCase
 
   def test_initialize_sets_reverse_flag
     auto_standard = Autocomplete::ForRegion.new(string: "Cal")
-    assert_equal(
-      false, auto_standard.reverse,
+    assert_not(
+      auto_standard.reverse,
       "reverse should be false without scientific format"
     )
 

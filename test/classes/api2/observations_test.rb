@@ -557,8 +557,8 @@ class API2::ObservationsTest < UnitTestCase
     assert_equal(Date.parse("2012-12-12"), rolfs_obs.when)
     assert_objs_equal(locations(:burbank), rolfs_obs.location)
     assert_equal("Burbank, California, USA", rolfs_obs.where)
-    assert_equal(false, rolfs_obs.specimen)
-    assert_equal(false, rolfs_obs.is_collection_location)
+    assert_not(rolfs_obs.specimen)
+    assert_not(rolfs_obs.is_collection_location)
 
     params = {
       method: :patch,

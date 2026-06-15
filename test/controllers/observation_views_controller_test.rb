@@ -70,7 +70,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
     assert_equal("text/vnd.turbo-stream.html", response.media_type)
 
     # Verify instance variables are set correctly
-    assert_equal(false, assigns(:reviewed))
+    assert_not(assigns(:reviewed))
     assert_equal(obs.id, assigns(:obs_id))
     assert_equal(obs, assigns(:obs))
     assert_equal(user, assigns(:user))
@@ -78,7 +78,7 @@ class ObservationViewsControllerTest < FunctionalTestCase
     # Verify observation_view was updated with reviewed=false
     ov = ObservationView.find_by(observation_id: obs.id, user_id: user.id)
     assert_not_nil(ov)
-    assert_equal(false, ov.reviewed)
+    assert_not(ov.reviewed)
   end
 
   def test_update_turbo_stream_renders_caption_components

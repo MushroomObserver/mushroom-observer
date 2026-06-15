@@ -70,7 +70,7 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(false, rolfs_interests.second.state)
+    assert_not(rolfs_interests.second.state)
 
     # Succeed: Turn a name interest off from no interest.
     login("rolf")
@@ -81,9 +81,9 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(3, rolfs_interests.length)
     assert_equal(minimal_unknown, rolfs_interests.second.target)
-    assert_equal(false, rolfs_interests.second.state)
+    assert_not(rolfs_interests.second.state)
     assert_equal(peltigera, rolfs_interests.last.target)
-    assert_equal(false, rolfs_interests.last.state)
+    assert_not(rolfs_interests.last.state)
 
     # Succeed: Delete interest in existing object that rolf hasn't expressed
     # interest in yet.
@@ -103,7 +103,7 @@ class InterestsControllerTest < FunctionalTestCase
     rolfs_interests = Interest.where(user_id: rolf.id)
     assert_equal(2, rolfs_interests.length)
     assert_equal(peltigera, rolfs_interests.last.target)
-    assert_equal(false, rolfs_interests.last.state)
+    assert_not(rolfs_interests.last.state)
 
     # Succeed: Delete last non-name-tracker interest.
     login("rolf")

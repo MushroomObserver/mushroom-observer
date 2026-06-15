@@ -561,10 +561,6 @@ Minitest/RefuteEqual:
     - 'test/controllers/species_lists/observations_controller_test.rb'
     - 'test/models/location_test.rb'
 
-# Offense count: 59
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Minitest/RefuteFalse:
-  Enabled: false
 
 # Offense count: 23
 # This cop supports safe autocorrection (--autocorrect), but the
