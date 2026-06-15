@@ -546,12 +546,23 @@ Minitest/AssertWithExpectedArgument:
 
 # Offense count: 5902
 # This cop supports safe autocorrection (--autocorrect).
+# Permanently disabled. The autocorrect inserts a blank line before
+# every assertion that follows non-whitespace — pure cosmetic churn
+# across nearly every test file (5900+ lines), with no readability
+# win for MO's style.
 Minitest/EmptyLineBeforeAssertionMethods:
   Enabled: false
 
 # Offense count: 1564
+# Permanently disabled. The cop counts assertions per test method;
+# MO's test suite has many long property/integration-style tests
+# (highest single test: 94 assertions) where consolidating
+# assertions per render is actively encouraged by the project's
+# component-test conventions (see `.claude/rules/testing.md`).
+# Threshold-policing the assertion count doesn't fit how MO writes
+# tests.
 Minitest/MultipleAssertions:
-  Max: 94
+  Enabled: false
 
 # Offense count: 5
 Minitest/NonPublicTestMethod:
