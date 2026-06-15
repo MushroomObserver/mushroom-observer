@@ -14,13 +14,14 @@ module Views::Controllers::Images
     register_output_helper :export_status_ml_controls, mark_safe: true
 
     prop :image, ::Image
-    # `ImagesController#set_default_size` normalizes `@size` to a
-    # Symbol (`params[:size].to_sym` or `@user.image_size`), but
+    # In the normal `Images#show` path, `set_default_size` stores
+    # `@size` / `@default_size` as Symbols (via `params[:size].to_sym`
+    # or `@user.image_size`). Two callers bypass that normalization:
     # `Observations::ImagesController#update` re-renders this view
-    # without setting size (defaulting to nil) and some test paths
-    # pass a String straight through. `_Union(Symbol, String)`
-    # accepts both shapes — comparisons in `VotePanel#vote_link_args`
-    # don't care.
+    # without setting size at all (defaults to `nil`), and some test
+    # paths construct the view directly with a raw `params[:size]`
+    # String. `_Union(Symbol, String)` accepts both shapes since
+    # `VotePanel#vote_link_args` only compares them for inequality.
     prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil
     prop :default_size, _Nilable(_Union(::Symbol, ::String)), default: nil
 

@@ -15,7 +15,7 @@ module Views::Controllers::Images
       prop :image, ::Image
       prop :data, _Nilable(_Array(_Array(::String))), default: nil
       prop :success, _Boolean, default: true
-      prop :error_html, _Nilable(::String), default: nil
+      prop :error_text, _Nilable(::String), default: nil
 
       def view_template
         render(::Components::Modal.new(
@@ -27,7 +27,10 @@ module Views::Controllers::Images
             if @success
               render(DataTable.new(data: @data))
             else
-              trusted_html(@error_html)
+              # `@error_text` is raw exiftool output (stderr on failure);
+              # render as escaped plain text in a <pre> to preserve
+              # formatting without an HTML-injection vector.
+              pre { plain(@error_text.to_s) }
             end
           end
         end

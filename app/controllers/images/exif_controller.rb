@@ -33,10 +33,11 @@ module Images
     # `view_template(&block)`, so the modal is wrapped in a Phlex view
     # that does the `with_body` slot wiring.
     def render_exif_modal
+      status = @status.success? ? :ok : :internal_server_error
       render(Views::Controllers::Images::EXIF::Modal.new(
                image: @image, data: @data,
-               success: @status.success?, error_html: @result
-             ), layout: false)
+               success: @status.success?, error_text: @result
+             ), layout: false, status: status)
     end
   end
 end
