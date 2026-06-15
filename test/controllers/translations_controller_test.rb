@@ -86,7 +86,7 @@ class TranslationsControllerTest < FunctionalTestCase
   def test_primary_tag
     lang = languages(:english)
     strings = lang.localization_strings
-    assert(strings.length >= 8)
+    assert_operator(strings.length, :>=, 8)
     assert_equal("one", @controller.primary_tag("one", strings))
     assert_equal("two", @controller.primary_tag("two", strings))
     assert_equal("two", @controller.primary_tag("Two", strings))
@@ -193,7 +193,7 @@ class TranslationsControllerTest < FunctionalTestCase
     # result is it will display all tags, not just the two used above.
     get(:index, params: { locale: "en", for_page: "xxx" })
     assert_flash_error
-    assert(assigns(:show_tags).length > 2)
+    assert_operator(assigns(:show_tags).length, :>, 2)
   end
 
   # ----------------------------
@@ -223,7 +223,7 @@ class TranslationsControllerTest < FunctionalTestCase
       id: "one", locale: "en"
     )
     @controller.send(:edit)
-    assert(assigns(:msg).present?)
+    assert_predicate(assigns(:msg), :present?)
   end
 
   def test_edit_sets_error_on_bad_locale
@@ -232,7 +232,7 @@ class TranslationsControllerTest < FunctionalTestCase
       id: "one", locale: "bad"
     )
     @controller.send(:edit)
-    assert(assigns(:msg).present?)
+    assert_predicate(assigns(:msg), :present?)
   end
 
   def test_edit_with_plural_tag
@@ -288,7 +288,7 @@ class TranslationsControllerTest < FunctionalTestCase
     )
     assert_response(:success)
     str.reload
-    assert(str.updated_at >= old_updated_at)
+    assert_operator(str.updated_at, :>=, old_updated_at)
   end
 
   def test_update_creates_new_translation
@@ -380,7 +380,7 @@ class TranslationsControllerTest < FunctionalTestCase
     @controller.instance_variable_set(:@lang, lang)
     long_str = "a" * 300
     result = @controller.send(:preview_string, long_str, 250)
-    assert(result.length < 300)
+    assert_operator(result.length, :<, 300)
     assert(result.end_with?("..."))
   end
 

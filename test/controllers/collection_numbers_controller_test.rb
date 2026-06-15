@@ -82,8 +82,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
   def test_index_pattern_str_matching_multiple_collection_numbers
     pattern = "Singer"
     numbers = CollectionNumber.where(CollectionNumber[:name] =~ pattern)
-    assert(numbers.many?,
-           "Test needs a pattern matching many collection numbers")
+    assert_predicate(numbers, :many?,
+                     "Test needs a pattern matching many collection numbers")
 
     login
     get(:index, params: { q: { model: :CollectionNumber, pattern: pattern } })
@@ -210,7 +210,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     obs2 = observations(:coprinus_comatus_obs)
     num1 = collection_numbers(:agaricus_campestris_coll_num)
     num1.add_observation(obs2)
-    assert(num1.observations.size > 1)
+    assert_operator(num1.observations.size, :>, 1)
 
     login
     get(:edit, params: { id: num1.id })
@@ -483,7 +483,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     patch(:update,
           params: { id: num2.id, collection_number: params })
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
-    assert(collection_number_count - 1, CollectionNumber.count)
+    assert_operator(collection_number_count, :-, 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
     assert_obj_arrays_equal([new_num], obs1.collection_numbers)
     assert_obj_arrays_equal([new_num], obs2.reload.collection_numbers)

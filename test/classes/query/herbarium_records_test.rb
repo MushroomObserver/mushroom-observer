@@ -58,10 +58,10 @@ class Query::HerbariumRecordsTest < UnitTestCase
 
   def test_herbarium_record_has_notes
     expects = HerbariumRecord.has_notes.order_by_default
-    assert(expects.include?(herbarium_records(:interesting_unknown)))
+    assert_includes(expects, herbarium_records(:interesting_unknown))
     assert_query(expects, :HerbariumRecord, has_notes: true)
     expects = HerbariumRecord.has_notes(false).order_by_default
-    assert(expects.include?(herbarium_records(:coprinus_comatus_nybg_spec)))
+    assert_includes(expects, herbarium_records(:coprinus_comatus_nybg_spec))
     assert_query(expects, :HerbariumRecord, has_notes: false)
   end
 

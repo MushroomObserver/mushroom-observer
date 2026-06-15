@@ -47,8 +47,8 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     project = projects(:falmouth_2023_09_project)
     wrong_location = locations(:albion)
     user = users(:roy)
-    assert(project.member?(user),
-           "Test needs user who is member of #{project.title} Project")
+    assert_includes(project, user,
+                    "Test needs user who is member of #{project.title} Project")
 
     login(user)
     visit("/qr/NFAL-0001")

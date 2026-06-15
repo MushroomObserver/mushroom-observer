@@ -25,7 +25,7 @@ module Tab::Sequence
         sequence: @sequence, observation: @observation
       )
 
-      assert(tab.path[:q].present?)
+      assert_predicate(tab.path[:q], :present?)
     end
 
     def test_new

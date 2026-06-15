@@ -41,10 +41,10 @@ module Observations
       assert_equal(10, rolf.reload.contribution)
 
       assert(obs.reload.rss_log)
-      assert(obs.rss_log.notes.include?("log_image_updated"))
-      assert(obs.rss_log.notes.include?("user #{obs.user.login}"))
-      assert(
-        obs.rss_log.notes.include?("name ##{image.id}")
+      assert_includes(obs.rss_log.notes, "log_image_updated")
+      assert_includes(obs.rss_log.notes, "user #{obs.user.login}")
+      assert_includes(
+        obs.rss_log.notes, "name ##{image.id}"
       )
       assert_equal(new_name, image.reload.original_name)
     end
@@ -75,8 +75,8 @@ module Observations
     # by updating image without changes
     def test_update_image_unchanged_remove_from_project
       project = projects(:bolete_project)
-      assert(project.images.present?,
-             "Test needs Project fixture that has an Image")
+      assert_predicate(project.images, :present?,
+                       "Test needs Project fixture that has an Image")
       image = project.images.first
       user = image.user
       # `project_ids: [""]` is the sentinel-only submission — the
@@ -113,7 +113,7 @@ module Observations
       project = projects(:eol_project)
       user = users(:rolf) # member of eol_project
       image = images(:commercial_inquiry_image) # rolf's, no projects
-      assert(user.projects_member.include?(project))
+      assert_includes(user.projects_member, project)
       assert_empty(image.projects, "Test wants image with no projects yet")
 
       params = {
@@ -133,8 +133,8 @@ module Observations
 
       put(:update, params: params)
 
-      assert(project.reload.images.include?(image),
-             "Failed to add image to project")
+      assert_includes(project.reload.images, image,
+                      "Failed to add image to project")
     end
 
     def test_update_image_save_fail
@@ -264,8 +264,8 @@ module Observations
       assert_not(obs.images.member?(image))
       post_requires_login(:attach, id: obs.id, img_id: image.id)
       assert_redirected_to(permanent_observation_path(obs.id))
-      assert(obs.reload.images.member?(image))
-      assert(updated_at != obs.updated_at)
+      assert_includes(obs.reload.images, image)
+      assert_operator(updated_at, :!=, obs.updated_at)
     end
 
     def test_reuse_image_by_id
@@ -288,8 +288,8 @@ module Observations
       post(:attach, params: params)
       # assert_template(controller: "/observations", action: :show)
       assert_redirected_to(permanent_observation_path(obs.id))
-      assert(obs.reload.images.member?(image))
-      assert(updated_at != obs.updated_at)
+      assert_includes(obs.reload.images, image)
+      assert_operator(updated_at, :!=, obs.updated_at)
     end
 
     def test_reuse_image_for_observation_bad_image_id

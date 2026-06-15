@@ -162,7 +162,7 @@ class FormCarouselTest < ComponentTestCase
     # Create an occurrence with two observations that have images
     obs2 = observations(:two_img_obs)
     sibling_imgs = obs2.images.to_a
-    assert(sibling_imgs.any?, "Sibling should have images")
+    assert_predicate(sibling_imgs, :any?, "Sibling should have images")
 
     html = render_carousel(sibling_images: sibling_imgs)
 
@@ -174,8 +174,8 @@ class FormCarouselTest < ComponentTestCase
 
     # Sibling thumbnails should also appear
     thumbnails = html.scan("carousel-indicators").size
-    assert(thumbnails.positive?,
-           "Should have thumbnail navigation")
+    assert_predicate(thumbnails, :positive?,
+                     "Should have thumbnail navigation")
   end
 
   private

@@ -136,14 +136,14 @@ class InatObsTest < UnitTestCase
   end
 
   def test_inat_observation_fields
-    assert(mock_observation("trametes").inat_obs_fields.any?)
-    assert(mock_observation("evernia").inat_obs_fields.none?)
+    assert_predicate(mock_observation("trametes").inat_obs_fields, :any?)
+    assert_predicate(mock_observation("evernia").inat_obs_fields, :none?)
   end
 
   def test_inat_observation_field
-    assert(
+    assert_predicate(
       mock_observation("arrhenia_sp_NY02").
-      inat_obs_field("Voucher Specimen Taken").present?,
+      inat_obs_field("Voucher Specimen Taken"), :present?,
       "Failed to find iNat observation field"
     )
     assert_nil(
@@ -158,21 +158,21 @@ class InatObsTest < UnitTestCase
   def test_provisional_name
     mock_inat_obs = mock_observation("arrhenia_sp_NY02")
     prov_name = mock_inat_obs.inat_prov_name
-    assert(prov_name.present?)
+    assert_predicate(prov_name, :present?)
     assert_equal('Arrhenia "sp-NY02"', prov_name)
     assert_equal('Arrhenia "sp-NY02"', mock_inat_obs.provisional_name,
                  "Provisional name should be unprocessed iNat provisional name")
 
     mock_inat_obs = mock_observation("donadinia_PNW01")
     prov_name = mock_inat_obs.inat_prov_name
-    assert(prov_name.present?)
+    assert_predicate(prov_name, :present?)
     assert_equal("Donadinia PNW01", prov_name)
     assert_equal("Donadinia PNW01", mock_inat_obs.provisional_name,
                  "Provisional name should be unprocessed iNat provisional name")
 
     mock_inat_obs = mock_observation("hygrocybe_sp_conica-CA06_ncbi_style")
     prov_name = mock_inat_obs.inat_prov_name
-    assert(prov_name.present?)
+    assert_predicate(prov_name, :present?)
     assert_equal("Hygrocybe sp. 'conica-CA06'", prov_name)
     assert_equal("Hygrocybe sp. 'conica-CA06'", mock_inat_obs.provisional_name,
                  "Provisional name should be unprocessed iNat provisional name")
@@ -245,8 +245,9 @@ class InatObsTest < UnitTestCase
                  where.not(name: "Earth")
     bounding_boxes =
       all_bounding_boxes.where.not(id: phony_locs.select(:id))
-    assert(bounding_boxes.many?,
-           "Test needs a Location fixture with multiple true bounding boxes")
+    assert_predicate(bounding_boxes, :many?,
+                     "Test needs a Location fixture with multiple true " \
+                     "bounding boxes")
 
     # modify a mock_inat_obs instead of trying to create one from scratch
     mock_inat_obs = mock_observation("somion_unicolor")
@@ -402,18 +403,19 @@ class InatObsTest < UnitTestCase
 
   def test_sequences
     mock_inat_obs = mock_observation("lycoperdon")
-    assert(mock_inat_obs.sequences.one?)
+    assert_predicate(mock_inat_obs.sequences, :one?)
     sequence = mock_inat_obs.sequences.first
-    assert(sequence.present?)
+    assert_predicate(sequence, :present?)
 
     assert_empty(mock_observation("evernia").sequences)
   end
 
   def test_taxon_importable
-    assert(mock_observation("somion_unicolor").taxon_importable?,
-           "iNat Fungi observations should be importable")
-    assert(mock_observation("fuligo_septica").taxon_importable?,
-           "iNat Slime mold (Protozoa) observations should be importable")
+    assert_predicate(mock_observation("somion_unicolor"), :taxon_importable?,
+                     "iNat Fungi observations should be importable")
+    assert_predicate(mock_observation("fuligo_septica"), :taxon_importable?,
+                     "iNat Slime mold (Protozoa) observations should be " \
+                     "importable")
     assert_not(mock_observation("ceanothus_cordulatus").taxon_importable?,
                "iNat Plant observations should not be importable")
     assert_not(
@@ -423,8 +425,10 @@ class InatObsTest < UnitTestCase
   end
 
   def test_inat_obs_photos
-    assert(mock_observation("amanita_flavorubens")[:observation_photos].none?)
-    assert(mock_observation("coprinus")[:observation_photos].one?)
+    assert_predicate(
+      mock_observation("amanita_flavorubens")[:observation_photos], :none?
+    )
+    assert_predicate(mock_observation("coprinus")[:observation_photos], :one?)
   end
 
   def test_copyright

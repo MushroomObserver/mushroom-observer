@@ -183,9 +183,9 @@ module Observations
       assert_equal("", nr2.notes)
       assert_equal("Spore texture.", nr3.notes)
       assert_nil(nr4.notes)
-      assert(nr1.used?)
-      assert(nr2.used?)
-      assert(nr3.used?)
+      assert_predicate(nr1, :used?)
+      assert_predicate(nr2, :used?)
+      assert_predicate(nr3, :used?)
       assert_not(nr4.used?)
 
       # Make sure a few random methods work right, too. Must re-calc_consensus

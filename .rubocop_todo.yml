@@ -517,20 +517,8 @@ Capybara/SpecificActions:
   Exclude:
     - 'test/system/observation_show_system_test.rb'
 
-# Offense count: 152
-# This cop supports safe autocorrection (--autocorrect).
-Minitest/AssertIncludes:
-  Enabled: false
 
-# Offense count: 188
-# This cop supports safe autocorrection (--autocorrect).
-Minitest/AssertOperator:
-  Enabled: false
 
-# Offense count: 399
-# This cop supports safe autocorrection (--autocorrect).
-Minitest/AssertPredicate:
-  Enabled: false
 
 # Offense count: 75
 # This cop supports unsafe autocorrection (--autocorrect-all).

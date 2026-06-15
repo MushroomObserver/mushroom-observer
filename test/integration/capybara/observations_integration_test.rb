@@ -206,8 +206,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj = projects(:current_closed_project)
     user = users(:katrina)
     # Ensure fixtures not broken
-    assert(proj.member?(user),
-           "Need fixtures such that `user` is a member of `proj`")
+    assert_includes(proj, user,
+                    "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "observation_project_ids_#{proj.id}"
     login(user)
 
@@ -245,8 +245,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     proj = projects(:past_project)
     user = users(:roy)
     # Ensure fixtures not broken
-    assert(proj.member?(user),
-           "Need fixtures such that `user` is a member of `proj`")
+    assert_includes(proj, user,
+                    "Need fixtures such that `user` is a member of `proj`")
     proj_checkbox = "observation_project_ids_#{proj.id}"
     last_obs = Observation.recent_by_user(user).last
     last_location = last_obs.location # nybg_location
@@ -341,8 +341,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     ) do
       first(:button, "Create").click
     end
-    assert(
-      proj.observations.include?(Observation.last),
+    assert_includes(
+      proj.observations, Observation.last,
       "Failed to include Obs in Project when user fixes Observation When"
     )
 
@@ -373,8 +373,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     ) do
       first(:button, "Create").click # override warning by clicking button
     end
-    assert(
-      proj.observations.include?(Observation.last),
+    assert_includes(
+      proj.observations, Observation.last,
       "Failed to include Obs in Project when user overrides warning"
     )
   end

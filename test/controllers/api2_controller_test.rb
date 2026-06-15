@@ -185,7 +185,7 @@ class API2ControllerTest < FunctionalTestCase
     post(:observations, params: params)
     assert_no_api_errors
     obs = Observation.last
-    assert(obs.field_slip.project.observations.include?(obs))
+    assert_includes(obs.field_slip.project.observations, obs)
   end
 
   def test_post_observation_joins_project
@@ -195,7 +195,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_no_api_errors
     obs = Observation.last
     project = Project.find_by(field_slip_prefix: "OPEN")
-    assert(project.member?(obs.user))
+    assert_includes(project, obs.user)
   end
 
   def test_post_maximal_observation
@@ -454,7 +454,8 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_get_field_slip_observation_ids
     fs = field_slips(:field_slip_one)
-    assert(fs.observations.any?, "Test needs field_slip with observations")
+    assert_predicate(fs.observations, :any?,
+                     "Test needs field_slip with observations")
     expected_ids = fs.observation_ids.sort
 
     # JSON
@@ -514,7 +515,8 @@ class API2ControllerTest < FunctionalTestCase
     # field_slip_one already has an observation; creating another obs
     # with the same code should succeed (not raise FieldSlipInUse)
     fs = field_slips(:field_slip_one)
-    assert(fs.observations.any?, "Test needs field_slip with observation")
+    assert_predicate(fs.observations, :any?,
+                     "Test needs field_slip with observation")
     params = { api_key: api_keys(:rolfs_api_key).key, location: "Earth",
                code: fs.code }
     post(:observations, params: params)
@@ -525,7 +527,8 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_get_observation_with_field_slip
     obs = observations(:minimal_unknown_obs)
-    assert(obs.field_slip.present?, "Test needs obs with field_slip")
+    assert_predicate(obs.field_slip, :present?,
+                     "Test needs obs with field_slip")
 
     # JSON detail=high should include field_slip
     get(:observations,

@@ -421,10 +421,10 @@ class API2::OccurrencesTest < UnitTestCase
     result = @api.results.first
     assert_equal(@occ.id, result.id)
     # high_detail_includes loads observations, field_slip, user
-    assert(result.association(:observations).loaded?,
-           "Observations should be eager-loaded")
-    assert(result.association(:user).loaded?,
-           "User should be eager-loaded")
+    assert_predicate(result.association(:observations), :loaded?,
+                     "Observations should be eager-loaded")
+    assert_predicate(result.association(:user), :loaded?,
+                     "User should be eager-loaded")
   end
 
   # == Coverage: GET filtering by created_at range ==
@@ -449,8 +449,8 @@ class API2::OccurrencesTest < UnitTestCase
       observation: obs1.id.to_s
     }
     api = API2.execute(params)
-    assert(api.errors.any?,
-           "Should fail with only one observation")
+    assert_predicate(api.errors, :any?,
+                     "Should fail with only one observation")
     err = api.errors.first
     assert_kind_of(API2::BadParameterValue, err)
   end

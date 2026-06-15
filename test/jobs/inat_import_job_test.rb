@@ -74,10 +74,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert(obs.notes.to_s.include?("Observation Fields: none"),
-           "Notes should indicate if there were no iNat 'Observation Fields'")
+    assert_includes(obs.notes.to_s, "Observation Fields: none",
+                    "Notes should indicate if there were no iNat " \
+                    "'Observation Fields'")
 
-    assert(obs.collector.present?, "Import should populate the collector")
+    assert_predicate(obs.collector, :present?,
+                     "Import should populate the collector")
     assert_not(obs.notes.key?(:Collector),
                "Collector lives in the column, not notes (#4211)")
     # The iNat collector (here the iNat login) matches the importing user's
@@ -89,8 +91,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")
-    assert(@inat_import.total_seconds.to_i.positive?,
-           "Failed to update user's inat_import total_seconds")
+    assert_predicate(@inat_import.total_seconds.to_i, :positive?,
+                     "Failed to update user's inat_import total_seconds")
     assert_equal(
       0, @tracker.reload.estimated_remaining_time,
       "Estimated remaining time should be 0 when InatImportJob is Done"
@@ -103,8 +105,8 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("calostoma_lutescens")
 
     user = users(:mary)
-    assert(user.inat_username.present?,
-           "Test needs user fixture with an inat_username")
+    assert_predicate(user.inat_username, :present?,
+                     "Test needs user fixture with an inat_username")
 
     # re-do the ivars to make mary the iNat user who made the 1st iNat id
     parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
@@ -184,7 +186,7 @@ class InatImportJobTest < ActiveJob::TestCase
       "Image original_name should be iNat photo_id and uuid"
     )
 
-    assert(obs.sequences.none?)
+    assert_predicate(obs.sequences, :none?)
   end
 
   # Had 1 photo; 2 identifications, 1 not by user.
@@ -202,7 +204,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # needs_id grade, no sequence, no provisional name -> Could Be
     standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
-    assert(obs.sequences.none?)
+    assert_predicate(obs.sequences, :none?)
   end
 
   def test_import_job_blank_line_in_description
@@ -245,7 +247,7 @@ class InatImportJobTest < ActiveJob::TestCase
     name = Name.find_by(text_name: "Lycoperdon", rank: "Genus")
     standard_assertions(obs: obs, name: name)
     assert_snapshot_suggested_ids(obs)
-    assert(obs.sequences.one?, "Obs should have a sequence")
+    assert_predicate(obs.sequences, :one?, "Obs should have a sequence")
     assert_equal(@user, obs.sequences.first.user,
                  "Sequences should belong to the user who imported the obs")
   end
@@ -318,7 +320,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # research grade, no sequence, no provisional name -> Promising
     standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::NEXT_BEST_VOTE)
-    assert(obs.sequences.none?)
+    assert_predicate(obs.sequences, :none?)
   end
 
   def test_import_job_complex
@@ -336,7 +338,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # needs_id grade, no sequence, no provisional name -> Could Be
     standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
-    assert(obs.sequences.none?)
+    assert_predicate(obs.sequences, :none?)
   end
 
   # Prove that Namings, Votes, Identification are correct
@@ -362,9 +364,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Arrhenia sp. 'NY02'")
-    assert(name.present?, "Failed to create provisional name")
-    assert(name.rss_log_id.present?,
-           "Failed to log creation of provisional name")
+    assert_predicate(name, :present?, "Failed to create provisional name")
+    assert_predicate(name.rss_log_id, :present?,
+                     "Failed to log creation of provisional name")
 
     # iNat Community ID + the provisional name (lead) -> two namings.
     standard_assertions(obs: obs, name: name, naming_count: 2)
@@ -386,7 +388,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(:naming_inat_provisional.l(user: adding_inat_user),
                  proposed_name_notes)
 
-    assert(obs.sequences.one?, "Obs should have one sequence")
+    assert_predicate(obs.sequences, :one?, "Obs should have one sequence")
 
     expected_subject =
       "#{@user.login} created #{name.user_real_text_name(@user)}"
@@ -453,17 +455,19 @@ class InatImportJobTest < ActiveJob::TestCase
                                       rank: "Species",
                                       user: @user)
     new_names = Name.where(Name[:text_name] =~ /Donadinia/)
-    assert(new_names.include?(expected_consensus),
-           "Failed to create MO provisional name corresponding to " \
-           "iNat `Provisional Species Name` Observation Field")
-    assert(new_names.include?(Name.find_by(text_name: "Donadinia",
-                                           rank: "Genus",
-                                           user: @user)),
-           "Failed to create MO genus for new provisional species name")
-    assert(new_names.include?(Name.find_by(text_name: "Donadinia nigrella",
-                                           rank: "Species",
-                                           user: @user)),
-           "Failed to create MO species corresponding to iNat suggested ID")
+    assert_includes(new_names, expected_consensus,
+                    "Failed to create MO provisional name corresponding to " \
+                    "iNat `Provisional Species Name` Observation Field")
+    assert_includes(new_names, Name.find_by(text_name: "Donadinia",
+                                            rank: "Genus",
+                                            user: @user),
+                    "Failed to create MO genus for new provisional species " \
+                    "name")
+    assert_includes(new_names, Name.find_by(text_name: "Donadinia nigrella",
+                                            rank: "Species",
+                                            user: @user),
+                    "Failed to create MO species corresponding to iNat " \
+                    "suggested ID")
     assert_equal(
       3, new_names.count,
       "It should create only 3 names: provisional, its genus, suggested ID"
@@ -472,7 +476,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # iNat Community ID + the provisional name (lead) -> two namings.
     standard_assertions(obs: obs, name: expected_consensus, naming_count: 2)
 
-    assert(obs.sequences.one?, "Obs should have one sequence")
+    assert_predicate(obs.sequences, :one?, "Obs should have one sequence")
   end
 
   # Own-obs import: unlicensed obs (no iNat license) are still imported, and
@@ -594,8 +598,8 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("calostoma_lutescens")
 
     user = users(:mary)
-    assert(user.inat_username.present?,
-           "Test needs user fixture with an inat_username")
+    assert_predicate(user.inat_username, :present?,
+                     "Test needs user fixture with an inat_username")
 
     # re-do the ivars to make mary the iNat user who made the 1st iNat id
     parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
@@ -863,8 +867,8 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_super_importer_anothers_observation
     @user = users(:dick)
     inat_username = @user.inat_username
-    assert(InatImport.super_importers.include?(@user),
-           "Test needs User fixture that's SuperImporter")
+    assert_includes(InatImport.super_importers, @user,
+                    "Test needs User fixture that's SuperImporter")
 
     create_ivars_from_filename("calostoma_lutescens")
     stub_inat_interactions
@@ -931,8 +935,8 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal("Done", @inat_import.state,
                  "Import should be Done")
-    assert(@inat_import.canceled?,
-           "Import should remain canceled")
+    assert_predicate(@inat_import, :canceled?,
+                     "Import should remain canceled")
   end
 
   def test_oauth_failure
@@ -1098,8 +1102,9 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.find_by(external_source: Source.inaturalist,
                               external_id: inat_id.to_s)
     assert_not_nil(obs, "Cannot find imported Observation")
-    assert(obs.external_links.none?,
-           "Observation should have no ExternalLink when creation fails")
+    assert_predicate(obs.external_links, :none?,
+                     "Observation should have no ExternalLink when creation " \
+                     "fails")
     assert(
       warnings.any? do |w|
         w.include?("InatImport: failed to create ExternalLink") &&
@@ -1171,19 +1176,19 @@ class InatImportJobTest < ActiveJob::TestCase
 
     namings = obs.namings
     naming = namings.find_by(name: name)
-    assert(naming.present?, "Missing Naming for MO consensus ID")
+    assert_predicate(naming, :present?, "Missing Naming for MO consensus ID")
     assert_equal(
       user, naming.user,
       "Consensus Naming for this MO obs should be by #{user.login}"
     )
     vote = Vote.find_by(naming: naming, user: naming.user)
-    assert(vote.present?, "Naming is missing a Vote")
+    assert_predicate(vote, :present?, "Naming is missing a Vote")
     assert_equal(expected_vote, vote.value,
                  "Vote for MO consensus has the wrong confidence weight")
 
     view = ObservationView.
            find_by(observation_id: obs.id, user_id: user.id)
-    assert(view.present?, "Failed to create ObservationView")
+    assert_predicate(view, :present?, "Failed to create ObservationView")
 
     external_link = obs.external_links.first
     assert_equal(
@@ -1192,7 +1197,8 @@ class InatImportJobTest < ActiveJob::TestCase
       "MO Observation should have ExternalLink to iNat observation"
     )
 
-    assert(obs.external_id.present?, "Failed to set Observation external_id")
+    assert_predicate(obs.external_id, :present?,
+                     "Failed to set Observation external_id")
     assert_equal(Source.inaturalist, obs.external_source,
                  "Imported obs should link to iNaturalist Source")
 
@@ -1230,7 +1236,7 @@ class InatImportJobTest < ActiveJob::TestCase
   def assert_naming(obs:, name:, user:)
     namings = obs.namings
     naming = namings.find_by(name: name)
-    assert(naming.present?, "Naming for MO consensus ID")
+    assert_predicate(naming, :present?, "Naming for MO consensus ID")
     assert_equal(user, naming.user,
                  "Naming should belong to #{user.login}")
   end

@@ -39,7 +39,7 @@ class GlossaryTermTest < UnitTestCase
     glossary_term.reload
     assert_equal(image, glossary_term.thumb_image)
     assert_equal(1, glossary_term.images.length - images_length)
-    assert(glossary_term.images.member?(additional_image))
+    assert_includes(glossary_term.images, additional_image)
   end
 
   def test_add_image_first
@@ -62,13 +62,13 @@ class GlossaryTermTest < UnitTestCase
     glossary_term.reload
     assert_equal(thumb, glossary_term.thumb_image)
     assert_equal(2, glossary_term.images.length)
-    assert(glossary_term.images.member?(second_image))
+    assert_includes(glossary_term.images, second_image)
   end
 
   def test_rss_log
-    assert(GlossaryTerm.has_rss_log?)
+    assert_predicate(GlossaryTerm, :has_rss_log?)
     glossary_term = glossary_terms(:convex_glossary_term)
-    assert(glossary_term.has_rss_log?)
+    assert_predicate(glossary_term, :has_rss_log?)
   end
 
   def test_remove_image_thumb
@@ -76,7 +76,7 @@ class GlossaryTermTest < UnitTestCase
     thumb = glossary_term.thumb_image
     assert(thumb)
     images_length = glossary_term.images.length
-    assert(images_length >= 2)
+    assert_operator(images_length, :>=, 2)
     next_thumb = (glossary_term.images - [thumb]).first
     assert(next_thumb)
     glossary_term.remove_image(thumb)
@@ -91,7 +91,7 @@ class GlossaryTermTest < UnitTestCase
     thumb = glossary_term.thumb_image
     assert(thumb)
     images_length = glossary_term.images.length
-    assert(images_length >= 2)
+    assert_operator(images_length, :>=, 2)
     first_non_thumb = (glossary_term.images - [thumb]).first
     assert(first_non_thumb)
     glossary_term.remove_image(first_non_thumb)
@@ -135,16 +135,17 @@ class GlossaryTermTest < UnitTestCase
 
   def test_validations
     term = GlossaryTerm.new(name: nil, description: "xxx")
-    assert(term.invalid?, "GlossaryTerm must have a name")
+    assert_predicate(term, :invalid?, "GlossaryTerm must have a name")
 
     term = GlossaryTerm.new(
       name: GlossaryTerm.reorder(created_at: :asc).first.name,
       description: "xxx"
     )
-    assert(term.invalid?, "GlossaryTerm name must be unique")
+    assert_predicate(term, :invalid?, "GlossaryTerm name must be unique")
 
     term = GlossaryTerm.new(name: "xxx", description: nil, thumb_image: nil)
-    assert(term.invalid?, "GlossaryTerm must have description or image")
+    assert_predicate(term, :invalid?,
+                     "GlossaryTerm must have description or image")
   end
 
   def test_destroy_orphans_log

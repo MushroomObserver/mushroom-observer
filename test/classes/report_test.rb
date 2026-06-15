@@ -98,7 +98,7 @@ class ReportTest < UnitTestCase
     table = CSV.parse(report_content, col_sep: taxa_report.separator)
     assert_equal(Observation.select(:name_id).distinct.count + 1, table.count)
     obs = Observation.first
-    assert(table.include?([obs.name_id.to_s, obs.text_name]))
+    assert_includes(table, [obs.name_id.to_s, obs.text_name])
   end
 
   def test_fundis_no_exact_lat_lng
@@ -1117,7 +1117,7 @@ class ReportTest < UnitTestCase
       query = Query.lookup_and_save(:Observation)
       report = klass.new(query: query)
       raw_rows = report.send(:all_rows)
-      assert(raw_rows.any?, "#{klass} all_rows returned no data; " \
+      assert_predicate(raw_rows, :any?, "#{klass} all_rows returned no data; " \
                             "test would not exercise key check")
       raw_rows.each do |raw|
         keys = raw.keys.map(&:to_s)

@@ -296,7 +296,7 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(@official, str.language)
     assert_equal("number", str.tag)
     assert_equal("uno", str.text)
-    assert(str.updated_at > 1.minute.ago)
+    assert_operator(str.updated_at, :>, 1.minute.ago)
     assert_users_equal(dick, str.user)
     assert_equal(1, str.versions.length)
 
@@ -304,7 +304,7 @@ class LanguageExporterTest < UnitTestCase
     assert_equal(1, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal("uno", ver.text)
-    assert(ver.updated_at > 1.minute.ago)
+    assert_operator(ver.updated_at, :>, 1.minute.ago)
     assert_equal(dick.id, ver.user_id)
   end
 
@@ -320,7 +320,7 @@ class LanguageExporterTest < UnitTestCase
     assert_objs_equal(greek, str.language)
     assert_equal("one", str.tag)
     assert_equal("eins", str.text)
-    assert(str.updated_at > 1.minute.ago)
+    assert_operator(str.updated_at, :>, 1.minute.ago)
     assert_users_equal(katrina, str.user)
     assert_equal(3, str.versions.length)
 
@@ -328,14 +328,14 @@ class LanguageExporterTest < UnitTestCase
     assert_equal(3, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal("eins", ver.text)
-    assert(ver.updated_at > 1.minute.ago)
+    assert_operator(ver.updated_at, :>, 1.minute.ago)
     assert_equal(katrina.id, str.user_id)
 
     ver = str.versions[1]
     assert_equal(2, ver.version)
     assert_objs_equal(str, ver.translation_string)
     assert_equal("ένα", ver.text)
-    assert(ver.updated_at < 1.minute.ago)
+    assert_operator(ver.updated_at, :<, 1.minute.ago)
     assert_equal(dick.id, ver.user_id)
   end
 
@@ -366,7 +366,7 @@ class LanguageExporterTest < UnitTestCase
     User.current = dick
     use_test_locales do
       hash = @official.localization_strings
-      assert(hash.length >= 9) # Make sure we got something
+      assert_operator(hash.length, :>=, 9) # Make sure we got something
       @official.write_hash(hash)
       assert_false(@official.import_from_file,
                    "Shouldn't have been any import changes.")

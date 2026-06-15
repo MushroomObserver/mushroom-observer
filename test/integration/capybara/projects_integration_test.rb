@@ -72,9 +72,9 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
   def test_project_maintain_dates
     project = projects(:pinned_date_range_project)
     start_date = project.start_date
-    assert(start_date < Time.zone.today)
+    assert_operator(start_date, :<, Time.zone.today)
     end_date = project.end_date
-    assert(end_date < Time.zone.today)
+    assert_operator(end_date, :<, Time.zone.today)
     login(project.user.login)
 
     visit(project_path(project))

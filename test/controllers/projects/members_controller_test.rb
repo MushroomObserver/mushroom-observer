@@ -484,7 +484,7 @@ module Projects
         commit: :change_member_add_obs.l
       }
       put_requires_login(:update, params, target_user.login)
-      assert(obs_count < project.observations.count)
+      assert_operator(obs_count, :<, project.observations.count)
     end
 
     # untrusting member trusting

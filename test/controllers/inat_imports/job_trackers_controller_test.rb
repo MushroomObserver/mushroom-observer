@@ -15,25 +15,25 @@ module InatImports
                  format: :turbo_stream)
 
       assert_response(:success)
-      assert(@response.body.include?("status_#{tracker.id}"))
+      assert_includes(@response.body, "status_#{tracker.id}")
 
       # remove HTML tags for easier testing of displayed text
       body = strip_tags(@response.body)
 
-      assert(body.include?("#{:STATUS.l}: Unstarted"))
+      assert_includes(body, "#{:STATUS.l}: Unstarted")
       importables_line =
         "#{:inat_import_imported.l}: 0 of#{tracker.importables}"
-      assert(body.include?(importables_line))
-      assert(body.include?("#{:inat_import_tracker_elapsed_time.l}: 00:00:00"))
-      assert(body.include?(:inat_import_tracker_estimated_remaining_time.l))
-      assert(body.include?(:inat_import_tracker_ended.l))
+      assert_includes(body, importables_line)
+      assert_includes(body, "#{:inat_import_tracker_elapsed_time.l}: 00:00:00")
+      assert_includes(body, :inat_import_tracker_estimated_remaining_time.l)
+      assert_includes(body, :inat_import_tracker_ended.l)
     end
 
     def test_show_done
       import = inat_imports(:lone_wolf_import)
       tracker = InatImportJobTracker.create(inat_import: import.id)
-      assert(tracker.response_errors.present?,
-             "Test needs tracker fixture with response_errors")
+      assert_predicate(tracker.response_errors, :present?,
+                       "Test needs tracker fixture with response_errors")
 
       login
       get(:show, params: { inat_import_id: import.id, id: tracker.id },
@@ -42,11 +42,11 @@ module InatImports
       assert_response(:success)
       body = strip_tags(@response.body)
 
-      assert(body.include?("#{:STATUS.l}: Done"))
-      assert(body.include?(
-               "#{:inat_import_tracker_estimated_remaining_time.l}: 00:00:00"
-             ))
-      assert(body.include?(tracker.response_errors))
+      assert_includes(body, "#{:STATUS.l}: Done")
+      assert_includes(body,
+                      "#{:inat_import_tracker_estimated_remaining_time.l}: " \
+                      "00:00:00")
+      assert_includes(body, tracker.response_errors)
     end
   end
 end

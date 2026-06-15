@@ -1122,8 +1122,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   def assert_edit_observation_has_correct_data(expected_values)
     new_obs = Observation.last
     assert_users_equal(expected_values[:user], new_obs.user)
-    assert(new_obs.created_at > 1.minute.ago)
-    assert(new_obs.updated_at > 1.minute.ago)
+    assert_operator(new_obs.created_at, :>, 1.minute.ago)
+    assert_operator(new_obs.updated_at, :>, 1.minute.ago)
     assert_dates_equal(expected_values[:when], new_obs.when)
     assert_equal(expected_values[:is_collection_location],
                  new_obs.is_collection_location)
@@ -1141,8 +1141,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     new_obs = Observation.last
     assert_users_equal(expected_values[:user], new_obs.user)
 
-    assert(new_obs.created_at > 1.minute.ago)
-    assert(new_obs.updated_at > 1.minute.ago)
+    assert_operator(new_obs.created_at, :>, 1.minute.ago)
+    assert_operator(new_obs.updated_at, :>, 1.minute.ago)
     # assert_dates_equal(expected_values[:when], new_obs.when)
     assert_equal(expected_values[:is_collection_location],
                  new_obs.is_collection_location)

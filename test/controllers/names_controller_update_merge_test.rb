@@ -496,9 +496,11 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
   # direction, but always keeping the name with observations.
   def test_update_name_merge_one_has_observations
     old_name = names(:mergeable_no_notes) # mergeable, ergo no observation
-    assert(old_name.observations.none?, "Test needs a different fixture.")
+    assert_predicate(old_name.observations, :none?,
+                     "Test needs a different fixture.")
     new_name = names(:coprinus_comatus) # has observations
-    assert(new_name.observations.any?, "Test needs a different fixture.")
+    assert_predicate(new_name.observations, :any?,
+                     "Test needs a different fixture.")
 
     params = {
       id: old_name.id,
@@ -522,9 +524,11 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
   def test_update_name_merge_one_has_observations_other_direction
     old_name = names(:coprinus_comatus) # has observations
-    assert(old_name.observations.any?, "Test needs a different fixture.")
+    assert_predicate(old_name.observations, :any?,
+                     "Test needs a different fixture.")
     new_name = names(:mergeable_no_notes) # mergeable, ergo no observations
-    assert(new_name.observations.none?, "Test needs a different fixture.")
+    assert_predicate(new_name.observations, :none?,
+                     "Test needs a different fixture.")
 
     params = {
       id: old_name.id,
@@ -723,7 +727,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     name4.skip_notify = true
     name4.save
     assert(name1.correct_spelling)
-    assert(name1.correct_spelling != name4)
+    assert_operator(name1.correct_spelling, :!=, name4)
     assert(name1.deprecated)
     assert_not(name4.correct_spelling)
     assert_not(name4.deprecated)

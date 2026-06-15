@@ -40,8 +40,8 @@ class InatImportTest < ActiveSupport::TestCase
   end
 
   def test_adequate_constraints
-    assert(
-      inat_imports(:rolf_inat_import).adequate_constraints?,
+    assert_predicate(
+      inat_imports(:rolf_inat_import), :adequate_constraints?,
       "iNat username adequately constrains imports"
     )
 
@@ -58,16 +58,18 @@ class InatImportTest < ActiveSupport::TestCase
       i.inat_username = "some_user"
       i.inat_ids = ""
     end
-    assert(not_own_with_username_import.adequate_constraints?,
-           "Not-own import with username should be adequately constrained")
+    assert_predicate(not_own_with_username_import, :adequate_constraints?,
+                     "Not-own import with username should be adequately " \
+                     "constrained")
 
     not_own_with_ids_import = superimporter_import.dup.tap do |i|
       i.import_others = true
       i.inat_username = ""
       i.inat_ids = "123,456"
     end
-    assert(not_own_with_ids_import.adequate_constraints?,
-           "Not-own import with specific IDs should be adequately constrained")
+    assert_predicate(not_own_with_ids_import, :adequate_constraints?,
+                     "Not-own import with specific IDs should be adequately " \
+                     "constrained")
 
     not_own_no_constraints_import = superimporter_import.dup.tap do |i|
       i.import_others = true
@@ -127,8 +129,9 @@ class InatImportTest < ActiveSupport::TestCase
     import.update_column(:updated_at,
                          InatImport::STUCK_THRESHOLD.ago - 1.second)
 
-    assert(import.stuck?,
-           "Import in Importing state with stale updated_at should be stuck")
+    assert_predicate(import, :stuck?,
+                     "Import in Importing state with stale updated_at should " \
+                     "be stuck")
   end
 
   def test_not_stuck_when_importing_but_recent

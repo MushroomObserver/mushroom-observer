@@ -199,7 +199,7 @@ class CommentTest < UnitTestCase
 
     dup = Comment.new(attrs)
     assert_not(dup.valid?, "Identical comment should be invalid")
-    assert(dup.errors[:base].any?, "Should have base error")
+    assert_predicate(dup.errors[:base], :any?, "Should have base error")
   ensure
     User.current = old_user
   end
@@ -214,7 +214,7 @@ class CommentTest < UnitTestCase
 
     dup = Comment.new(attrs)
     assert_not(dup.valid?, "Identical summary-only comment should be invalid")
-    assert(dup.errors[:base].any?, "Should have base error")
+    assert_predicate(dup.errors[:base], :any?, "Should have base error")
   ensure
     User.current = old_user
   end
@@ -227,7 +227,7 @@ class CommentTest < UnitTestCase
 
   def test_scope_target
     obss = Observation.has_comments
-    assert(obss.size > 1)
+    assert_operator(obss.size, :>, 1)
     obs1 = obss.first
     obs2 = obss.last
     assert_not_equal(obs1.id, obs2.id)

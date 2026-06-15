@@ -5,7 +5,7 @@ require("test_helper")
 class NameObservationTest < UnitTestCase
   def test_where_proposed
     name = names(:lactarius_alpigenes)
-    assert(name.deprecated?, "Test needs deprecated Name")
+    assert_predicate(name, :deprecated?, "Test needs deprecated Name")
     assert_blank(Naming.where(name: name),
                  "Test needs name without Namings")
     assert_blank(Observation.where(name: name),

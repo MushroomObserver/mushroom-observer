@@ -83,7 +83,7 @@ class ImagesControllerTest < FunctionalTestCase
   # only exercises the rescue path.
   def test_index_advanced_search_success
     query = Query.lookup_and_save(:Image, has_notes: true)
-    assert(query.params.any?, "Test needs a query with conditions")
+    assert_predicate(query.params, :any?, "Test needs a query with conditions")
 
     login
     get(:index, params: { q: @controller.q_param(query),
@@ -165,8 +165,9 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_show_image
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).many?,
-           "Use Image fixture with multiple votes for better coverage")
+    assert_predicate(ImageVote.where(image: image), :many?,
+                     "Use Image fixture with multiple votes for better " \
+                     "coverage")
     num_views = image.num_views
     login
     get(:show, params: { id: image.id })
@@ -227,8 +228,9 @@ class ImagesControllerTest < FunctionalTestCase
 
   def test_show_image_with_bad_vote
     image = images(:peltigera_image)
-    assert(ImageVote.where(image: image).many?,
-           "Use Image fixture with multiple votes for better coverage")
+    assert_predicate(ImageVote.where(image: image), :many?,
+                     "Use Image fixture with multiple votes for better " \
+                     "coverage")
     # create invalid vote in order to cover line that rescues an error
     bad_vote = ImageVote.new(image: image, user: nil, value: Image.minimum_vote)
     bad_vote.save!(validate: false)
@@ -286,7 +288,7 @@ class ImagesControllerTest < FunctionalTestCase
   def test_destroy_image
     image = images(:turned_over_image)
     obs = image.observations.first
-    assert(obs.images.member?(image))
+    assert_includes(obs.images, image)
     params = { id: image.id }
     assert_equal("mary", image.user.login)
     delete_requires_user(:destroy, { action: :show, id: image.id }, params,
@@ -299,11 +301,11 @@ class ImagesControllerTest < FunctionalTestCase
   # Prove that destroying image with query redirects to next image
   def test_destroy_image_with_query
     user = users(:mary)
-    assert(user.images.size > 1, "Need different fixture for test")
+    assert_operator(user.images.size, :>, 1, "Need different fixture for test")
     image = user.images.reorder(created_at: :asc).second
     next_image = user.images.reorder(created_at: :asc).first
     obs = image.observations.reorder(created_at: :asc).first
-    assert(obs.images.member?(image))
+    assert_includes(obs.images, image)
     query = @controller.find_or_create_query(:Image, by_users: user)
     q = @controller.q_param(query)
     params = { id: image.id, q: }

@@ -45,7 +45,7 @@ class AccountControllerTest < FunctionalTestCase
     assert_nil(user.theme, "RANDOM should store nil for random theme per page")
 
     # Make sure user groups are updated correctly.
-    assert(UserGroup.all_users.users.include?(user))
+    assert_includes(UserGroup.all_users.users, user)
     assert(group = UserGroup.one_user(user))
     assert_user_arrays_equal([user], group.users)
 
@@ -71,41 +71,41 @@ class AccountControllerTest < FunctionalTestCase
     post(:create, params: { new_user: params.except(:password) })
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:password].any?)
+    assert_predicate(assigns("new_user").errors[:password], :any?)
 
     # Password doesn't match
     post(:create,
          params: { new_user: params.merge(password_confirmation: "wrong") })
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:password].any?)
+    assert_predicate(assigns("new_user").errors[:password], :any?)
 
     # No email
     post(:create, params: { new_user: params.except(:email) })
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:email].any?,
-           assigns("new_user").dump_errors)
+    assert_predicate(assigns("new_user").errors[:email], :any?,
+                     assigns("new_user").dump_errors)
 
     # Invalid email
     post(:create, params: { new_user: params.merge(email: "wrong") })
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:email].any?,
-           assigns("new_user").dump_errors)
+    assert_predicate(assigns("new_user").errors[:email], :any?,
+                     assigns("new_user").dump_errors)
 
     # Email confirmation blank.
     post(:create, params: { new_user: params.except(:email_confirmation) })
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:email].any?)
+    assert_predicate(assigns("new_user").errors[:email], :any?)
 
     # Email doesn't match.
     post(:create,
          params: { new_user: params.merge(email_confirmation: "wrong") })
     assert_flash_error
     assert_response(:success)
-    assert(assigns("new_user").errors[:email].any?)
+    assert_predicate(assigns("new_user").errors[:email], :any?)
 
     # Make sure correct request would have succeeded!
     post(:create, params: { new_user: params })
@@ -201,18 +201,18 @@ class AccountControllerTest < FunctionalTestCase
     html_client_error = 400..499
 
     post(:create, params: { new_user: params.merge(login: "xUplilla") })
-    assert(html_client_error.include?(response.status),
-           "Signup response should be 4xx")
+    assert_includes(html_client_error, response.status,
+                    "Signup response should be 4xx")
 
     post(:create, params: { new_user: params.merge(email: "x@namnerbca.com") })
-    assert(html_client_error.include?(response.status),
-           "Signup response should be 4xx")
+    assert_includes(html_client_error, response.status,
+                    "Signup response should be 4xx")
 
     post(:create,
          params: {
            new_user: params.merge(email: "b.l.izk.o.ya.n201.7@gmail.com\r\n")
          })
-    assert(html_client_error.include?(response.status),
-           "Signup response should be 4xx")
+    assert_includes(html_client_error, response.status,
+                    "Signup response should be 4xx")
   end
 end

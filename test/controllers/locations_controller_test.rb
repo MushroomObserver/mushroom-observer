@@ -123,7 +123,8 @@ class LocationsControllerTest < FunctionalTestCase
     login("mary")
     make_admin("mary")
     location = locations(:unused_location)
-    assert(location.destroyable?, "Test requires a destroyable location")
+    assert_predicate(location, :destroyable?,
+                     "Test requires a destroyable location")
     get(:show, params: { id: location.id })
 
     assert_edit_button(location)
@@ -133,7 +134,8 @@ class LocationsControllerTest < FunctionalTestCase
   def test_show_location_destroy_button_for_owner_destroyable
     location = locations(:howarth_park) # created by rolf (default)
     login("rolf")
-    assert(location.destroyable?, "Test requires a destroyable location")
+    assert_predicate(location, :destroyable?,
+                     "Test requires a destroyable location")
     get(:show, params: { id: location.id })
 
     assert_edit_button(location)
@@ -143,7 +145,8 @@ class LocationsControllerTest < FunctionalTestCase
   def test_show_location_no_destroy_button_for_non_owner
     location = locations(:howarth_park) # created by rolf
     login("mary") # not the owner
-    assert(location.destroyable?, "Test requires a destroyable location")
+    assert_predicate(location, :destroyable?,
+                     "Test requires a destroyable location")
     get(:show, params: { id: location.id })
 
     assert_edit_button(location)
@@ -491,7 +494,7 @@ class LocationsControllerTest < FunctionalTestCase
 
   def test_index_by_user_who_created_one_location
     user = roy
-    assert(Location.where(user: user).one?)
+    assert_predicate(Location.where(user: user), :one?)
 
     login
     get(:index, params: { by_user: user.id })
@@ -528,7 +531,7 @@ class LocationsControllerTest < FunctionalTestCase
     locs_edited_by_user = Location.joins(:versions).
                           where.not(user: user).
                           where(versions: { user_id: user.id })
-    assert(locs_edited_by_user.many?)
+    assert_predicate(locs_edited_by_user, :many?)
 
     login
     get(:index, params: { by_editor: user.id })
@@ -545,7 +548,7 @@ class LocationsControllerTest < FunctionalTestCase
     locs_edited_by_user = Location.joins(:versions).
                           where.not(user_id: user.id).
                           where(versions: { user_id: user.id })
-    assert(locs_edited_by_user.one?)
+    assert_predicate(locs_edited_by_user, :one?)
 
     login
     get(:index, params: { by_editor: user.id })
@@ -597,7 +600,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index)
     assert_select("body.locations__index")
     # Check that @undef_data is set (the letter filter applies to this)
-    assert(assigns(:undef_data).present?, "Should have undefined locations")
+    assert_predicate(assigns(:undef_data), :present?,
+                     "Should have undefined locations")
 
     # Now request with letter2=a should filter to only "A" locations
     get(:index, params: { letter2: "a" })
@@ -934,7 +938,7 @@ class LocationsControllerTest < FunctionalTestCase
         assert_equal(new_params[k], bfp[k])
       end
     end
-    assert(key_count.positive?) # Make sure something was compared.
+    assert_predicate(key_count, :positive?) # Make sure something was compared.
 
     # Rolf was already author, Mary doesn't become editor because
     # there was no change.
@@ -1185,8 +1189,8 @@ class LocationsControllerTest < FunctionalTestCase
     to_stay = locations(:burbank)
 
     # Ensure both have observations so neither is mergeable
-    assert(to_go.observations.any?, "falmouth needs observations")
-    assert(to_stay.observations.any?, "burbank needs observations")
+    assert_predicate(to_go.observations, :any?, "falmouth needs observations")
+    assert_predicate(to_stay.observations, :any?, "burbank needs observations")
     assert_false(to_go.mergable?, "falmouth should not be mergeable")
     assert_false(to_stay.mergable?, "burbank should not be mergeable")
 
@@ -1214,7 +1218,8 @@ class LocationsControllerTest < FunctionalTestCase
       north: 45.0, south: 44.0, east: -122.0, west: -123.0,
       user: rolf
     )
-    assert(location.destroyable?, "Fresh location should be destroyable")
+    assert_predicate(location, :destroyable?,
+                     "Fresh location should be destroyable")
 
     # Non-owner cannot destroy
     login("mary")
@@ -1236,7 +1241,8 @@ class LocationsControllerTest < FunctionalTestCase
       north: 45.0, south: 44.0, east: -122.0, west: -123.0,
       user: users(:rolf)
     )
-    assert(location.destroyable?, "Fresh location should be destroyable")
+    assert_predicate(location, :destroyable?,
+                     "Fresh location should be destroyable")
 
     login("mary")
     make_admin

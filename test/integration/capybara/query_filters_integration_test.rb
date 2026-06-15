@@ -66,8 +66,9 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     assert(page.has_content?(:prefs_content_filters.t),
            "Preference page lacks Content Filters section")
     obs_imged_checkbox = find_field("user[has_images]")
-    assert(obs_imged_checkbox.checked?,
-           "'#{:prefs_filters_has_images.t}' checkbox should be checked.")
+    assert_predicate(obs_imged_checkbox, :checked?,
+                     "'#{:prefs_filters_has_images.t}' checkbox should be " \
+                     "checked.")
     page.uncheck("user[has_images]")
     click_button(:SAVE_EDITS.t.to_s, match: :first)
 
@@ -156,8 +157,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
       assert_text(:advanced_search_filters.t)
       assert_text(:advanced_search_filter_has_images.t)
       # Verify radio box defaults
-      assert(find_by_id("content_filter_has_images_yes").checked?)
-      assert(find_by_id("content_filter_has_specimen_").checked?)
+      assert_predicate(find_by_id("content_filter_has_images_yes"), :checked?)
+      assert_predicate(find_by_id("content_filter_has_specimen_"), :checked?)
     end
 
     # Fill out and submit the form
@@ -184,8 +185,8 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     visit("/search/advanced")
     filters = page.find_by_id("advanced_search_filters")
     within(filters) do
-      assert(find_by_id("content_filter_has_images_yes").checked?)
-      assert(find_by_id("content_filter_has_specimen_").checked?)
+      assert_predicate(find_by_id("content_filter_has_images_yes"), :checked?)
+      assert_predicate(find_by_id("content_filter_has_specimen_"), :checked?)
     end
 
     # Fill out and submit the form

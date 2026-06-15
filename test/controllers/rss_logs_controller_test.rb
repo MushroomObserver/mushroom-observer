@@ -97,7 +97,7 @@ class RssLogsControllerTest < FunctionalTestCase
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
-    assert(results.include?(rss_logs(:detailed_unknown_obs_rss_log)))
+    assert_includes(results, rss_logs(:detailed_unknown_obs_rss_log))
   end
 
   def test_rss_log_lichen_content_filter
@@ -106,14 +106,14 @@ class RssLogsControllerTest < FunctionalTestCase
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:imged_unvouchered_obs_rss_log)))
-    assert(results.include?(rss_logs(:peltigera_obs_rss_log)))
+    assert_includes(results, rss_logs(:peltigera_obs_rss_log))
 
     login(users(:antilichenologist).name)
     get(:index, params: { q: { type: "observation" } })
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:peltigera_obs_rss_log)))
-    assert(results.include?(rss_logs(:stereum_hirsutum_2_rss_log)))
+    assert_includes(results, rss_logs(:stereum_hirsutum_2_rss_log))
   end
 
   def test_rss_log_region_content_filter
@@ -122,7 +122,7 @@ class RssLogsControllerTest < FunctionalTestCase
     results = @controller.instance_variable_get(:@objects)
 
     assert(results.exclude?(rss_logs(:unknown_with_no_naming_rss_log)))
-    assert(results.include?(rss_logs(:minimal_unknown_obs_rss_log)))
+    assert_includes(results, rss_logs(:minimal_unknown_obs_rss_log))
   end
 
   def test_next_and_prev_rss_log

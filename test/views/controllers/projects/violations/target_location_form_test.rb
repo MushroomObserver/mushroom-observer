@@ -73,7 +73,7 @@ module Views::Controllers::Projects::Violations
     def test_owns_modal_sections_class_method_returns_true
       # Modal's :form_content slot pattern — callers (Project's modal
       # wrapper) auto-detect this to switch slots.
-      assert(TargetLocationForm.owns_modal_sections?)
+      assert_predicate(TargetLocationForm, :owns_modal_sections?)
     end
 
     # ---------- view_template structure ----------

@@ -29,7 +29,7 @@ class Tab::Name::ObsLinkTest < UnitTestCase
   def test_linked_when_count_positive
     tab = build_tab(Tab::Name::ObsLink::ThisName, count: 1)
 
-    assert(tab.linked?)
+    assert_predicate(tab, :linked?)
   end
 
   def test_not_linked_when_count_zero
@@ -64,9 +64,9 @@ class Tab::Name::ObsLinkTest < UnitTestCase
 
     data = tab.html_options[:data]
     assert_not_nil(data)
-    assert(data[:query_params].present?)
-    assert(data[:query_record].positive?)
-    assert(data[:query_alph].present?)
+    assert_predicate(data[:query_params], :present?)
+    assert_predicate(data[:query_record], :positive?)
+    assert_predicate(data[:query_alph], :present?)
   end
 
   # --- Query shape per subclass --------------------------------

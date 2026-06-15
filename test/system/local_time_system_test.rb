@@ -15,7 +15,7 @@ class LocalTimeSystemTest < ApplicationSystemTestCase
 
     # Verify the Stimulus controller data attribute is present
     utc_value = time_element["data-local-time-utc-value"]
-    assert(utc_value.present?, "Expected UTC value data attribute")
+    assert_predicate(utc_value, :present?, "Expected UTC value data attribute")
     assert_match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
                  utc_value,
                  "Expected ISO8601 UTC format")

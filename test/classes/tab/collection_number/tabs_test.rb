@@ -28,7 +28,7 @@ module Tab::CollectionNumber
         collection_number: @collection_number, observation: @observation
       )
 
-      assert(tab.path[:q].present?)
+      assert_predicate(tab.path[:q], :present?)
     end
 
     def test_new

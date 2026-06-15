@@ -164,8 +164,8 @@ class NamingTest < UnitTestCase
     naming = namings(:coprinus_comatus_other_naming)
     nrs = naming.reasons_hash
 
-    assert(nrs[1].used?)
-    assert(nrs[2].used?)
+    assert_predicate(nrs[1], :used?)
+    assert_predicate(nrs[2], :used?)
     assert_not(nrs[3].used?)
     assert_not(nrs[4].used?)
 

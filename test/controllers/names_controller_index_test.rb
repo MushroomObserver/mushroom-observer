@@ -83,8 +83,8 @@ class NamesControllerIndexTest < FunctionalTestCase
   def test_index_advanced_search_one_hit
     search_string = "Stereum hirsutum"
     query = Query.lookup_and_save(:Name, search_name: search_string)
-    assert(query.results.one?,
-           "Test needs a string that has exactly one hit")
+    assert_predicate(query.results, :one?,
+                     "Test needs a string that has exactly one hit")
 
     login
     params = { q: @controller.q_param(query), advanced_search: true }
@@ -191,7 +191,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     names = Name.joins(:observations).
             with_correct_spelling. # website seems to behave this way
             where(Observation[:text_name].matches("#{letter}%"))
-    assert(names.many?, "Test needs different letter")
+    assert_predicate(names, :many?, "Test needs different letter")
 
     login
     get(:index, params: { has_observations: true, letter: letter })
@@ -255,7 +255,7 @@ class NamesControllerIndexTest < FunctionalTestCase
 
   def test_index_by_user_who_created_one_name
     user = roy
-    assert(Name.where(user: user).none?)
+    assert_predicate(Name.where(user: user), :none?)
     name = names(:boletus_edulis)
     name.user = user
     name.skip_notify = true
@@ -297,7 +297,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     names_edited_by_user = Name.joins(:versions).
                            where.not(user: user).
                            where(versions: { user_id: user.id })
-    assert(names_edited_by_user.many?)
+    assert_predicate(names_edited_by_user, :many?)
 
     login
     get(:index, params: { by_editor: user })
@@ -324,7 +324,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     names_edited_by_user = Name.joins(:versions).
                            where.not(user: user).
                            where(versions: { user_id: user.id })
-    assert(names_edited_by_user.one?)
+    assert_predicate(names_edited_by_user, :one?)
 
     login
     get(:index, params: { by_editor: user.id })

@@ -18,7 +18,7 @@ class FormLocationFeedbackTest < ComponentTestCase
     assert_html(html, ".help-note")
     # Help note should include the button name
     help_note = Nokogiri::HTML(html).at_css(".help-note")
-    assert(help_note.text.include?("Save"), "Help note should include button")
+    assert_includes(help_note.text, "Save", "Help note should include button")
   end
 
   def test_renders_multiple_reasons_with_br_tags

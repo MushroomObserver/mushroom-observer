@@ -176,7 +176,7 @@ module GeneralExtensions
   # Assert that something is blank.
   def assert_blank(value, msg = nil)
     msg ||= "Expected #{value.inspect} to be blank."
-    assert(value.blank?, msg)
+    assert_predicate(value, :blank?, msg)
   end
 
   # Assert that something is not blank.
@@ -262,7 +262,7 @@ module GeneralExtensions
   #   assert_gps_equal(-123.4567, location.west)
   #
   def assert_gps_equal(expected, value)
-    assert((expected.to_f - value.to_f).abs < GPS_CLOSE_ENOUGH)
+    assert_operator((expected.to_f - value.to_f).abs, :<, GPS_CLOSE_ENOUGH)
   end
 
   # Assert that an ActiveRecord +save+ succeeds, dumping errors if not.

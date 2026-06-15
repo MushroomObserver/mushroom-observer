@@ -67,7 +67,7 @@ class StringExtensionsTest < UnitTestCase
   end
 
   def test_character_asciiness
-    assert("a".is_ascii_character?)
+    assert_predicate("a", :is_ascii_character?)
     assert_not("á".is_ascii_character?)
   end
 

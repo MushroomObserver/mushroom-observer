@@ -33,8 +33,8 @@ class LicensesControllerTest < FunctionalTestCase
 
   def test_show
     license = licenses(:publicdomain)
-    assert(Image.where(license: license).any?,
-           "Need License fixture that's used")
+    assert_predicate(Image.where(license: license), :any?,
+                     "Need License fixture that's used")
     login("rolf")
     make_admin
 

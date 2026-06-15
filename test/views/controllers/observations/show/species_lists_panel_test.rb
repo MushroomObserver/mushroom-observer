@@ -12,8 +12,8 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
 
   def test_no_species_lists_renders_panel_chrome_only
     obs = observations(:imageless_unvouchered_obs)
-    assert(obs.species_lists.none?,
-           "Need obs fixture obs without species lists")
+    assert_predicate(obs.species_lists, :none?,
+                     "Need obs fixture obs without species lists")
     html = render(panel_with(obs))
 
     assert_html(html, "#observation_species_lists")

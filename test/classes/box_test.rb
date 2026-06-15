@@ -8,11 +8,11 @@ class BoxTest < UnitTestCase
   end
 
   def test_valid
-    assert(Mappable::Box.new(**valid_args).valid?)
-    assert(Mappable::Box.new(**valid_args,  east: -10, west: 10).
-           valid?)
+    assert_predicate(Mappable::Box.new(**valid_args), :valid?)
+    assert_predicate(Mappable::Box.new(**valid_args,  east: -10, west: 10),
+                     :valid?)
     # Box 370 degrees wide & wraps around date line
-    assert(Mappable::Box.new(**valid_args,  west: 20).valid?)
+    assert_predicate(Mappable::Box.new(**valid_args,  west: 20), :valid?)
 
     assert_not(Mappable::Box.new(**valid_args,  north: nil).valid?,
                "Box missing north should be invalid")
@@ -37,10 +37,10 @@ class BoxTest < UnitTestCase
   end
 
   def test_straddle_dateline
-    assert(Mappable::Box.new(**valid_args,  east: -10, west: 10).
-           straddles_180_deg?)
-    assert(Mappable::Box.new(**valid_args,  west: 20).
-           straddles_180_deg?)
+    assert_predicate(Mappable::Box.new(**valid_args,  east: -10, west: 10),
+                     :straddles_180_deg?)
+    assert_predicate(Mappable::Box.new(**valid_args,  west: 20),
+                     :straddles_180_deg?)
     assert_not(Mappable::Box.new(**valid_args).straddles_180_deg?)
   end
 

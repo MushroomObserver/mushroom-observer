@@ -16,8 +16,8 @@ class Query::LocationDescriptionsTest < UnitTestCase
     all_descs = LocationDescription.all
     all_gualala_descs = LocationDescription.locations(gualala).order_by_default
     public_gualala_descs = all_gualala_descs.is_public
-    assert(all_gualala_descs.length < all_descs.length)
-    assert(public_gualala_descs.length < all_gualala_descs.length)
+    assert_operator(all_gualala_descs.length, :<, all_descs.length)
+    assert_operator(public_gualala_descs.length, :<, all_gualala_descs.length)
 
     assert_query(all_gualala_descs,
                  :LocationDescription, locations: gualala)

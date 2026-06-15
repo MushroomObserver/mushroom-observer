@@ -230,7 +230,7 @@ module Views::Controllers::Occurrences::Projects
     def test_owns_modal_sections_class_method_returns_true
       # ModalTurboForm and similar wrappers auto-detect this to choose
       # Modal's :form_content slot. Locks the contract in.
-      assert(Form.owns_modal_sections?)
+      assert_predicate(Form, :owns_modal_sections?)
     end
 
     def test_multiple_projects_listed

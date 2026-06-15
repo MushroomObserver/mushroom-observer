@@ -113,7 +113,7 @@ class CollectorNotesSeederTest < UnitTestCase
   def test_run_records_and_logs_skipped_variant
     obs_with_notes({ "Collector's_Name": "A. One & B. Two" })
     seeder.run
-    assert(seeder.skipped.any?)
+    assert_predicate(seeder.skipped, :any?)
   end
 
   # A non-writable log dir must not abort an otherwise-successful seed: the

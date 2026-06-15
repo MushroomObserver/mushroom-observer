@@ -27,8 +27,8 @@ module Names::Lifeforms
           params: { id: name.id, propagate_lifeform: { add_lichen: "1" } })
       assert_redirected_to(name.show_link_args)
       children.each do |child|
-        assert(child.reload.lifeform.include?(" lichen "),
-               "Child, #{child.search_name}, is missing 'lichen'.")
+        assert_includes(child.reload.lifeform, " lichen ",
+                        "Child, #{child.search_name}, is missing 'lichen'.")
       end
 
       # Make sure we can remove "lichen" from all children, too.

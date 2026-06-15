@@ -202,13 +202,16 @@ module SessionExtensions
       end
 
       if strict
-        context.assert(results.any?,
-                       "Couldn't find input field with ID ending in " \
-                       "#{id.inspect}.\n" \
-                       "Have these: #{inputs.map(&:id).inspect}")
-        context.assert(results.length == 1,
-                       "Multiple input fields field with ID ending in " \
-                       "#{id.inspect}: #{results.map(&:id).inspect}")
+        context.assert_predicate(
+          results, :any?,
+          "Couldn't find input field with ID ending in #{id.inspect}.\n" \
+          "Have these: #{inputs.map(&:id).inspect}"
+        )
+        context.assert_operator(
+          results.length, :==, 1,
+          "Multiple input fields field with ID ending in " \
+          "#{id.inspect}: #{results.map(&:id).inspect}"
+        )
       end
 
       results.first
@@ -232,13 +235,16 @@ module SessionExtensions
       end
 
       if strict
-        context.assert(results.any?,
-                       "Couldn't find input field with name ending in " \
-                       "#{name.inspect}.\n" \
-                       "Have these: #{inputs.map(&:name).inspect}")
-        context.assert(results.length == 1,
-                       "Multiple input fields field with name ending in " \
-                       "#{name.inspect}: #{results.map(&:name).inspect}")
+        context.assert_predicate(
+          results, :any?,
+          "Couldn't find input field with name ending in #{name.inspect}.\n" \
+          "Have these: #{inputs.map(&:name).inspect}"
+        )
+        context.assert_operator(
+          results.length, :==, 1,
+          "Multiple input fields field with name ending in " \
+          "#{name.inspect}: #{results.map(&:name).inspect}"
+        )
       end
 
       results.first
@@ -262,12 +268,12 @@ module SessionExtensions
       end
 
       if strict
-        context.assert(results.any?,
-                       "Couldn't find checkbox with name ending in " \
-                       "#{name.inspect}.\n" \
-                       "Have these: #{inputs.map(&:name).inspect}")
-        context.assert(results.length == 1,
-                       "Multiple checkboxes with name ending in " \
+        context.assert_predicate(results, :any?,
+                                 "Couldn't find checkbox with name ending in " \
+                                 "#{name.inspect}.\n" \
+                                 "Have these: #{inputs.map(&:name).inspect}")
+        context.assert_operator(results.length, :==, 1,
+                                "Multiple checkboxes with name ending in " \
                        "#{name.inspect}: #{results.map(&:name).inspect}")
       end
       results.first
@@ -388,7 +394,7 @@ module SessionExtensions
     def assert_hidden(id, msg = nil)
       field = get_field!(id)
       msg ||= "Expected field #{id.inspect} to be hidden."
-      context.assert(field.type == :hidden, msg)
+      context.assert_operator(field.type, :==, :hidden, msg)
       field
     end
 
@@ -421,8 +427,8 @@ module SessionExtensions
               end
       msg ||= "Expected field #{identifier.inspect} to be enabled."
       context.refute(field.disabled, msg)
-      context.assert([:checkbox, :radio].include?(field.type),
-                     "Must be a check-box or radio-box.")
+      context.assert_includes([:checkbox, :radio], field.type,
+                              "Must be a check-box or radio-box.")
 
       # Just change "checked" property for checkboxes.
       field.node["checked"] = "checked" if field.type == :checkbox
@@ -447,7 +453,7 @@ module SessionExtensions
               end
       msg ||= "Expected field #{identifier.inspect} to be enabled."
       context.refute(field.disabled, msg)
-      context.assert([:checkbox].include?(field.type), "Must be a check-box.")
+      context.assert_includes([:checkbox], field.type, "Must be a check-box.")
       field.node.remove_attribute("checked")
     end
 
@@ -461,8 +467,9 @@ module SessionExtensions
     # Change selection of pulldown menu.
     def select(id, label)
       field = assert_enabled(id)
-      context.assert(field.type == :select,
-                     "Expected field #{id.inspect} to be a select field!")
+      context.assert_operator(field.type, :==, :select,
+                              "Expected field #{id.inspect} to be a select " \
+                              "field!")
       matches = []
       field.options.each do |opt|
         if label.is_a?(Regexp)
@@ -478,9 +485,11 @@ module SessionExtensions
                      "Couldn't find any options in the pulldown " \
                      "#{field.id.inspect} that match #{label.inspect}.\n" \
                      "Have these: #{field.options.map(&:label).inspect}")
-      context.assert(matches.length == 1,
-                     "Multiple options in the pulldown #{field.id.inspect} " \
-                     "match #{label.inspect}: #{matches.inspect}")
+      context.assert_operator(
+        matches.length, :==, 1,
+        "Multiple options in the pulldown #{field.id.inspect} " \
+        "match #{label.inspect}: #{matches.inspect}"
+      )
     end
 
     # Submit the form using the given button.  Button can be specified by a

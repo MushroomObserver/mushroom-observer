@@ -51,13 +51,13 @@ class ChecklistTest < UnitTestCase
 
   def test_checklist_for_users
     data = Checklist::ForUser.new(mary)
-    assert(data.num_genera >= 1)
+    assert_operator(data.num_genera, :>=, 1)
     assert_equal(0, data.num_species)
     assert_equal([], data.species)
 
     data = Checklist::ForUser.new(katrina)
-    assert(data.num_genera >= 1)
-    assert(data.num_species >= 1)
+    assert_operator(data.num_genera, :>=, 1)
+    assert_operator(data.num_species, :>=, 1)
     assert_equal([], genera(katrinas_species) - data.genera)
     assert_equal([], katrinas_species - just_names(data.species))
 

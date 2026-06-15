@@ -202,8 +202,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     obs = observations(:strobilurus_diminutivus_obs)
     search_string = obs.text_name
     query = Query.lookup_and_save(:Observation, search_name: search_string)
-    assert(query.results.one?,
-           "Test needs a string that has exactly one hit")
+    assert_predicate(query.results, :one?,
+                     "Test needs a string that has exactly one hit")
 
     login
     params = { q: @controller.q_param(query), advanced_search: true }
@@ -262,7 +262,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     loc.notes = "blah blah blahString in notesblah blah blah"
     loc.save
     loc.reload
-    assert(loc.notes.to_s.include?("String in notes"))
+    assert_includes(loc.notes.to_s, "String in notes")
 
     login
     get(:index, params: advanced_search_params)
@@ -444,7 +444,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     look_alikes = Observation.joins(:namings).
                   where(namings: { name: name }).
                   where.not(name: name).count
-    assert(look_alikes > 1, "Test needs different fixture")
+    assert_operator(look_alikes, :>, 1, "Test needs different fixture")
 
     setup_rolfs_index
     get(:index, params: { look_alikes: "1", name: name.id })
@@ -460,7 +460,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     look_alikes = Observation.joins(:namings).
                   where(namings: { name: name }).
                   where.not(name: name).count
-    assert(look_alikes.zero?, "Test needs different fixture")
+    assert_predicate(look_alikes, :zero?, "Test needs different fixture")
 
     setup_rolfs_index
     get(:index, params: { look_alikes: "1", name: name.id })
@@ -490,7 +490,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   def test_index_name
     name = names(:fungi)
     ids = Observation.where(name: name).map(&:id)
-    assert(ids.length.positive?, "Test needs different fixture for 'name'")
+    assert_predicate(ids.length, :positive?,
+                     "Test needs different fixture for 'name'")
     params = { name: name }
 
     login("zero") # Has no observations
@@ -513,8 +514,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_not_nil(obs.rss_log_id)
     assert_not_nil(obs.thumb_image_id)
     user = rolf
-    assert(
-      user.layout_count >= user.observations.size,
+    assert_operator(
+      user.layout_count, :>=, user.observations.size,
       "User must be able to display all rolf's Observations in a single page"
     )
 
@@ -822,7 +823,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     results = @controller.instance_variable_get(:@objects)
 
-    assert(results.many?)
+    assert_predicate(results, :many?)
     assert(results.all? { |result| result.lifeform.include?("lichen") },
            "All results should be lichen-ish")
   end
@@ -835,7 +836,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     results = @controller.instance_variable_get(:@objects)
 
-    assert(results.many?)
+    assert_predicate(results, :many?)
     assert(results.none? { |result| result.lifeform.include?(" lichen ") },
            "No results should be lichens")
   end
@@ -847,8 +848,9 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     user = users(:californian)
     # Make sure the fixture is still okay
     assert_equal({ region: "California, USA" }, user.content_filter)
-    assert(user.layout_count >= observations_in_region.size,
-           "User must be able to display search results in a single page.")
+    assert_operator(user.layout_count, :>=, observations_in_region.size,
+                    "User must be able to display search results in a single " \
+                    "page.")
 
     login(user.name)
     get(:index)

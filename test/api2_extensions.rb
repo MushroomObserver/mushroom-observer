@@ -35,7 +35,7 @@ module API2Extensions
   def assert_api_fail(params)
     @api = API2.execute(params)
     msg = "API2 request should have failed, params: #{params.inspect}"
-    assert(@api.errors.any?, msg)
+    assert_predicate(@api.errors, :any?, msg)
   end
 
   def assert_api_pass(params)

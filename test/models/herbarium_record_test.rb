@@ -49,7 +49,8 @@ class HerbariumRecordTest < UnitTestCase
   def test_notify_curators_emails_curators
     nybg = herbaria(:nybg_herbarium)
     curators = nybg.curators
-    assert(curators.count >= 2, "Need herbarium with multiple curators")
+    assert_operator(curators.count, :>=, 2,
+                    "Need herbarium with multiple curators")
     non_curator = mary
     assert_not(curators.include?(non_curator))
 

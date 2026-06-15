@@ -196,8 +196,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     name = names(:tremella_celata)
 
     # make sure fixtures will work for this test
-    assert(name.lifeform.blank?,
-           "Test needs fixture without a lifeform")
+    assert_predicate(name.lifeform, :blank?,
+                     "Test needs fixture without a lifeform")
 
     login
     visit(edit_lifeform_of_name_path(name))
@@ -244,8 +244,8 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     # Verify the name was correctly marked as misspelt
     assert(bad_name.deprecated,
            "Name should be deprecated after marking as misspelt")
-    assert(bad_name.is_misspelling?,
-           "Name should be marked as misspelling")
+    assert_predicate(bad_name, :is_misspelling?,
+                     "Name should be marked as misspelling")
     assert_equal(good_name.id, bad_name.correct_spelling_id,
                  "Correct spelling should be set to good_name")
 
@@ -263,7 +263,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     species = names(:tremella_celata)
 
     # make sure fixtures will work for this test
-    assert(genus.children.include?(species))
+    assert_includes(genus.children, species)
     assert(genus.lifeform.present? && species.lifeform.blank?,
            "Test needs fixtures where genus has lifeform but species does not")
     assert_match(/#{:lifeform_lichenicolous.l}/i, genus.lifeform)

@@ -13,16 +13,16 @@ class APIKeyTest < UnitTestCase
     APIKey.create(notes: "app name")
     key = APIKey.find_by(notes: "app name", user: dick)
     assert_not_nil(key, "Cannot find APIKey")
-    assert(key.created_at > 1.minute.ago)
+    assert_operator(key.created_at, :>, 1.minute.ago)
     assert_nil(key.last_used)
     assert_equal(0, key.num_uses)
     assert_users_equal(dick, key.user)
-    assert(key.key.length > 30)
+    assert_operator(key.key.length, :>, 30)
     assert_equal("app name", key.notes)
 
     key.touch!
     key.reload
-    assert(key.last_used > 1.minute.ago)
+    assert_operator(key.last_used, :>, 1.minute.ago)
     assert_equal(1, key.num_uses)
   end
 end

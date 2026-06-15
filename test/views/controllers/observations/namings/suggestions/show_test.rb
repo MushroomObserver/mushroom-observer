@@ -68,7 +68,7 @@ module Views::Controllers::Observations::Namings::Suggestions
       # Force multiple images on the obs so `render_confidence_lines`
       # takes the avg branch (max + avg) rather than the
       # single-image one.
-      assert(@observation.images.length > 1, "fixture sanity")
+      assert_operator(@observation.images.length, :>, 1, "fixture sanity")
       sugg = ::Suggestion.new("Coprinus comatus", 80)
 
       html = render(Show.new(observation: @observation, user: @user,

@@ -21,8 +21,8 @@ module Account
         password_confirmation: "mouse",
         email: "mm@disney.com"
       )
-      assert(user.auth_code.present?)
-      assert(user.auth_code.length > 10)
+      assert_predicate(user.auth_code, :present?)
+      assert_operator(user.auth_code.length, :>, 10)
 
       get(:new, params: { id: user.id, auth_code: "bogus_code" })
       # The Reverify Phlex view emits the reverify button with this

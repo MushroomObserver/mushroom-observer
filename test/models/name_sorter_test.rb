@@ -99,11 +99,11 @@ class NameSorterTest < UnitTestCase
     sorter.add_name(rolf, names(:namings_deprecated_2).text_name)
 
     sorter.append_approved_synonyms([names(:namings_deprecated).id])
-    assert(sorter.approved_synonyms.include?(names(:namings_deprecated)))
+    assert_includes(sorter.approved_synonyms, names(:namings_deprecated))
 
     sorter.append_approved_synonyms("#{names(:fungi).id}/#{names(:lichen).id}")
-    assert(sorter.approved_synonyms.include?(names(:fungi)))
-    assert(sorter.approved_synonyms.include?(names(:lichen)))
+    assert_includes(sorter.approved_synonyms, names(:fungi))
+    assert_includes(sorter.approved_synonyms, names(:lichen))
 
     assert_raises(TypeError) do
       sorter.append_approved_synonyms(names(:suillus))
@@ -116,10 +116,10 @@ class NameSorterTest < UnitTestCase
     sorter.add_name(rolf, names(:namings_deprecated_2).text_name)
 
     sorter.push_synonym(names(:namings_deprecated).id)
-    assert(sorter.approved_synonyms.include?(names(:namings_deprecated)))
+    assert_includes(sorter.approved_synonyms, names(:namings_deprecated))
 
     sorter.push_synonym(names(:fungi))
-    assert(sorter.approved_synonyms.include?(names(:fungi)))
+    assert_includes(sorter.approved_synonyms, names(:fungi))
 
     assert_raises(TypeError) do
       sorter.push_synonym("A string")

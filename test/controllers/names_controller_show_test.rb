@@ -175,8 +175,8 @@ class NamesControllerShowTest < FunctionalTestCase
     get(:show, params: { id: name.id })
 
     # Name isn't registrable; it shouldn't have an icn_id label or record link
-    assert(/#{:ICN_ID.l}/ !~ @response.body,
-           "Page should not have ICN identifier label")
+    assert_no_match(/#{:ICN_ID.l}/, @response.body,
+                    "Page should not have ICN identifier label")
     assert_select(
       "body a[href='#{Tab::Name::IndexFungorumRecord.new(name: name).path}']",
       false,
@@ -209,8 +209,8 @@ class NamesControllerShowTest < FunctionalTestCase
     name = names(:eukarya)
     login
     get(:show, params: { id: name.id })
-    assert(/#{:ICN_ID.l}/ !~ @response.body,
-           "Page should not have ICN identifier label")
+    assert_no_match(/#{:ICN_ID.l}/, @response.body,
+                    "Page should not have ICN identifier label")
   end
 
   def test_show_name_with_eol_link

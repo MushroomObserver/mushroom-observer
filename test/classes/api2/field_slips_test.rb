@@ -169,8 +169,8 @@ class API2::FieldSlipsTest < UnitTestCase
     helper.xml_field_slip(xml, slip)
 
     # Verify the XML contains the code
-    assert(xml.target!.include?(slip.code),
-           "XML output should contain field slip code")
+    assert_includes(xml.target!, slip.code,
+                    "XML output should contain field slip code")
   end
 
   def test_page_length_methods

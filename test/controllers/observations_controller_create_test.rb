@@ -122,7 +122,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     login
     name = names(:coprinus_comatus)
     get(:new, params: { name: name.text_name })
-    assert(@response.body.include?(name.text_name))
+    assert_includes(@response.body, name.text_name)
   end
 
   def test_create_log_updated_at
@@ -152,7 +152,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     obs = Observation.find_by(collector: "Jane Forager")
     assert_not_nil(obs, "Observation with explicit collector not created")
     assert_nil(obs.collector_user_id, "Free-text collector should have no FK")
-    assert(obs.collector_differs_from_creator?)
+    assert_predicate(obs, :collector_differs_from_creator?)
   end
 
   def test_create_observation_collector_defaults_to_creator
@@ -220,7 +220,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.field_slip.present?)
+    assert_predicate(obs.field_slip, :present?)
   end
 
   def test_create_observation_with_collection_number
@@ -232,7 +232,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.collection_numbers.one?)
+    assert_predicate(obs.collection_numbers, :one?)
   end
 
   def test_create_observation_with_used_collection_number
@@ -244,7 +244,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.collection_numbers.one?)
+    assert_predicate(obs.collection_numbers, :one?)
     assert_flash_warning
   end
 
@@ -280,7 +280,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.collection_numbers.one?)
+    assert_predicate(obs.collection_numbers, :one?)
     col_num = obs.collection_numbers.first
     assert_equal(rolf.legal_name, col_num.name)
     assert_equal("27-18A.2", col_num.number)
@@ -298,7 +298,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert(obs.specimen)
-    assert(obs.herbarium_records.one?)
+    assert_predicate(obs.herbarium_records, :one?)
   end
 
   def test_create_observation_with_herbarium_duplicate_label
@@ -343,7 +343,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     )
     obs = assigns(:observation)
     assert_not(obs.specimen)
-    assert(obs.herbarium_records.none?)
+    assert_predicate(obs.herbarium_records, :none?)
   end
 
   def test_create_observation_with_new_nonpersonal_herbarium
@@ -374,7 +374,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     herbarium_record = obs.herbarium_records.first
     herbarium = herbarium_record.herbarium
     assert(herbarium.curator?(katrina))
-    assert(herbarium.name.include?("Katrina"))
+    assert_includes(herbarium.name, "Katrina")
   end
 
   def test_create_simple_observation_with_approved_unique_name
@@ -519,7 +519,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     name_trackers = NameTracker.where(name: name)
     assert_equal(2, name_trackers.length,
                  "Should be 2 name name_trackers for name ##{name.id}")
-    assert(name_trackers.map(&:user).include?(mary))
+    assert_includes(name_trackers.map(&:user), mary)
     mary.update(no_emails: true)
 
     where = "Simple, Massachusetts, USA"

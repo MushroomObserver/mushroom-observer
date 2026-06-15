@@ -18,7 +18,7 @@ class FormObject::TranslationTest < UnitTestCase
   def test_is_persisted
     form = FormObject::Translation.new(tag: "app_title")
 
-    assert(form.persisted?)
+    assert_predicate(form, :persisted?)
   end
 
   def test_model_name

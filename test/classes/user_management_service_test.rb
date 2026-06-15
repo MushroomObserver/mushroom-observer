@@ -12,7 +12,7 @@ class UserManagementServiceTest < UnitTestCase
 
       log_contents = with_captured_logger do
         service = UserManagementService.new
-        assert(service.verify_user?)
+        assert_predicate(service, :verify_user?)
       end
       assert_match(/is already verified/, log_contents)
       user.reload
@@ -49,7 +49,7 @@ class UserManagementServiceTest < UnitTestCase
 
       log_contents = with_captured_logger do
         service = UserManagementService.new
-        assert(service.verify_user?)
+        assert_predicate(service, :verify_user?)
       end
       assert_match(/is already verified/, log_contents)
       user.reload
@@ -87,7 +87,7 @@ class UserManagementServiceTest < UnitTestCase
 
       log_contents = with_captured_logger do
         service = UserManagementService.new
-        assert(service.verify_user?)
+        assert_predicate(service, :verify_user?)
       end
       msg = :user_verify_verified.t(login: user.login, timestamp: "").
             unescape_html
@@ -129,7 +129,7 @@ class UserManagementServiceTest < UnitTestCase
 
       log_contents = with_captured_logger do
         service = UserManagementService.new
-        assert(service.verify_user?)
+        assert_predicate(service, :verify_user?)
       end
       assert_match(/Verified/, log_contents)
       assert_match(/Not verified/, log_contents)
@@ -149,7 +149,7 @@ class UserManagementServiceTest < UnitTestCase
 
       log_contents = with_captured_logger do
         service = UserManagementService.new
-        assert(service.verify_user?)
+        assert_predicate(service, :verify_user?)
       end
       assert_match(/Verified/, log_contents)
       assert_match(/Not verified/, log_contents)
@@ -171,7 +171,7 @@ class UserManagementServiceTest < UnitTestCase
 
       log_contents = with_captured_logger do
         service = UserManagementService.new
-        assert(service.verify_user?)
+        assert_predicate(service, :verify_user?)
       end
       assert_match(/Verified/, log_contents)
       assert_match(/Not verified/, log_contents)
@@ -214,7 +214,7 @@ class UserManagementServiceTest < UnitTestCase
 
       log_contents = with_captured_logger do
         service = UserManagementService.new
-        assert(service.create_user?)
+        assert_predicate(service, :create_user?)
       end
       assert_match(/#{:user_add_success.t(login: "foobar").unescape_html}/,
                    log_contents)

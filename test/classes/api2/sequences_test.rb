@@ -140,7 +140,7 @@ class API2::SequencesTest < UnitTestCase
                         where: locations(:burbank),
                         name: names(:lactarius_alpigenes))
     obses = Observation.where(name: names(:lactarius_alpinus).synonyms)
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(synonyms_of: "Lactarius alpinus"))
     assert_api_results(obses.map(&:sequences).flatten)
     assert_api_pass(
@@ -156,7 +156,7 @@ class API2::SequencesTest < UnitTestCase
       "Tests won't work if there's already an Observation for genus Agaricus"
     )
     ssp_obs = Observation.names_like("Agaricus")
-    assert(ssp_obs.length > 1)
+    assert_operator(ssp_obs.length, :>, 1)
     agaricus = Name.where(text_name: "Agaricus").first # (an existing autonym)
     agaricus_obs = Observation.create(name: agaricus, user: rolf)
     agaricus_sequence = Sequence.create(
@@ -172,7 +172,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_location
     ensure_all_obs_have_at_least_one_sequence
     obses = Observation.locations(locations(:burbank))
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(location: 'Burbank\, California\, USA'))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -181,7 +181,7 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     obses = HerbariumRecord.where(herbarium: herbaria(:nybg_herbarium)).
             map(&:observations).flatten.sort_by(&:id)
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(herbarium: "The New York Botanical Garden"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -190,7 +190,7 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     rec = herbarium_records(:interesting_unknown)
     obses = rec.observations.sort_by(&:id)
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(herbarium_record: rec.id))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -199,7 +199,7 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     proj = projects(:one_genus_two_species_project)
     obses = proj.observations.sort_by(&:id)
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(project: proj.id))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -208,7 +208,7 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     spl = species_lists(:one_genus_three_species_list)
     obses = spl.observations.sort_by(&:id)
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(species_list: spl.id))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -216,7 +216,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_confidence
     ensure_all_obs_have_at_least_one_sequence
     obses = Observation.where(vote_cache: 3)
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(confidence: "3.0"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -236,7 +236,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_is_collection_location
     ensure_all_obs_have_at_least_one_sequence
     obses = Observation.is_collection_location(false)
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(is_collection_location: "no"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -245,8 +245,8 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     with    = Observation.has_images
     without = Observation.has_images(false)
-    assert(with.length > 1)
-    assert(without.length > 1)
+    assert_operator(with.length, :>, 1)
+    assert_operator(without.length, :>, 1)
     assert_api_pass(params_get(has_images: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
     assert_api_pass(params_get(has_images: "no"))
@@ -258,8 +258,8 @@ class API2::SequencesTest < UnitTestCase
     names = Name.with_rank_at_or_below_genus
     with = Observation.where(name: names)
     without = Observation.where.not(name: names)
-    assert(with.length > 1)
-    assert(without.length > 1)
+    assert_operator(with.length, :>, 1)
+    assert_operator(without.length, :>, 1)
     assert_api_pass(params_get(has_name: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
     assert_api_pass(params_get(has_name: "no"))
@@ -270,8 +270,8 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     with    = Observation.has_specimen
     without = Observation.has_specimen(false)
-    assert(with.length > 1)
-    assert(without.length > 1)
+    assert_operator(with.length, :>, 1)
+    assert_operator(without.length, :>, 1)
     assert_api_pass(params_get(has_specimen: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
     assert_api_pass(params_get(has_specimen: "no"))
@@ -282,8 +282,8 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     with = Observation.has_notes
     without = Observation.has_notes(false)
-    assert(with.length > 1)
-    assert(without.length > 1)
+    assert_operator(with.length, :>, 1)
+    assert_operator(without.length, :>, 1)
     assert_api_pass(params_get(has_obs_notes: "yes"))
     assert_api_results(with.map(&:sequences).flatten.sort_by(&:id))
     assert_api_pass(params_get(has_obs_notes: "no"))
@@ -294,7 +294,7 @@ class API2::SequencesTest < UnitTestCase
     ensure_all_obs_have_at_least_one_sequence
     obses = Observation.notes_has(":substrate:").
             reject { |o| o.notes[:substrate].blank? }
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(has_notes_field: "substrate"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end
@@ -302,7 +302,7 @@ class API2::SequencesTest < UnitTestCase
   def test_getting_sequences_obs_notes_has
     ensure_all_obs_have_at_least_one_sequence
     obses = Observation.notes_has("orphan")
-    assert(obses.length > 1)
+    assert_operator(obses.length, :>, 1)
     assert_api_pass(params_get(obs_notes_has: "orphan"))
     assert_api_results(obses.map(&:sequences).flatten.sort_by(&:id))
   end

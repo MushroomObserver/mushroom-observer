@@ -91,8 +91,8 @@ class FormNotesTest < ComponentTestCase
     assert_includes(html, "ABOVE_HELP_MARKER")
     above_help_pos = html.index("ABOVE_HELP_MARKER")
     textarea_pos = html.index("<textarea")
-    assert(above_help_pos < textarea_pos,
-           "above_help must render before the textarea")
+    assert_operator(above_help_pos, :<, textarea_pos,
+                    "above_help must render before the textarea")
   end
 
   def test_single_part_mode_textile_help_renders_below_textarea

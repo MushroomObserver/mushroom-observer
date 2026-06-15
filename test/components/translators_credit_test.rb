@@ -75,7 +75,8 @@ class TranslatorsCreditTest < ComponentTestCase
       # Verify we have multiple contributor links
       doc = Nokogiri::HTML(html)
       user_links = doc.css("a[class^='user_link_']")
-      assert(user_links.length > 1, "Should render multiple contributor links")
+      assert_operator(user_links.length, :>, 1,
+                      "Should render multiple contributor links")
     end
   end
 

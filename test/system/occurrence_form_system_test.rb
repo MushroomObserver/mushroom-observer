@@ -26,7 +26,8 @@ class OccurrenceFormSystemTest < ApplicationSystemTestCase
     checkboxes = all(
       "input[name='occurrence[observation_ids][]'][type='checkbox']"
     )
-    assert(checkboxes.any?, "Expected recent observation checkboxes")
+    assert_predicate(checkboxes, :any?,
+                     "Expected recent observation checkboxes")
     checkboxes.first.check
 
     click_button(:create_occurrence_submit.l)

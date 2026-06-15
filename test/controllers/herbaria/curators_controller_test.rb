@@ -13,7 +13,7 @@ module Herbaria
     # ---------- Actions to Modify data: (create, update, destroy, etc.) -------
 
     def test_create
-      assert(nybg.curators.include?(rolf))
+      assert_includes(nybg.curators, rolf)
       curator_count = nybg.curators.count
 
       login("rolf")
@@ -25,7 +25,7 @@ module Herbaria
     end
 
     def test_create_with_type_ahead
-      assert(nybg.curators.include?(rolf))
+      assert_includes(nybg.curators, rolf)
       curator_count = nybg.curators.count
 
       login("rolf")

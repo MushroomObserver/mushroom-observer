@@ -65,8 +65,8 @@ class HerbariaControllerTest < FunctionalTestCase
 
   def test_show_mcp_db
     herbarium = nybg
-    assert(herbarium.mcp_searchable?,
-           "Test needs a herbarium serachble via MyCoPortal")
+    assert_predicate(herbarium, :mcp_searchable?,
+                     "Test needs a herbarium serachble via MyCoPortal")
 
     login("mary")
     get(:show, params: { id: herbarium.id })

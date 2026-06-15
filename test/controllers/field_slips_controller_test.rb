@@ -78,7 +78,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     code = "#{project.field_slip_prefix}-1234"
     get(:new, params: { code: code })
     assert_response(:success)
-    assert(response.body.include?(project.title))
+    assert_includes(response.body, project.title)
   end
 
   def test_should_get_new_with_no_project_if_not_member
@@ -96,7 +96,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     code = "#{project.field_slip_prefix}-1234"
     get(:new, params: { code: code })
     assert_response(:success)
-    assert(response.body.include?(project.title))
+    assert_includes(response.body, project.title)
     # Collector input is present and empty. Phlex/Superform emits
     # `value=""` for nil-valued fields where Rails' form_with would
     # omit the attribute; both are functionally equivalent.
@@ -242,9 +242,9 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert(fs.user)
     obs = fs.observation
     assert_redirected_to(observation_url(obs))
-    assert(project.member?(user))
-    assert(project.observations.member?(obs))
-    assert(species_list.observations.member?(obs))
+    assert_includes(project, user)
+    assert_includes(project.observations, obs)
+    assert_includes(species_list.observations, obs)
   end
 
   def test_should_create_field_slip_and_redirect_to_create_obs
@@ -512,7 +512,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     login(field_slip.user.login)
     get(:show, params: { id: field_slip.id })
     assert_response(:success)
-    assert(response.body.include?(:field_slip_edit.t))
+    assert_includes(response.body, :field_slip_edit.t)
   end
 
   def test_should_show_field_slip_by_code
@@ -631,7 +631,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(field_slip_url(@field_slip))
     assert_equal(@field_slip.observation&.id, initial)
     obs.reload
-    assert(obs.notes[:Other].include?(notes))
+    assert_includes(obs.notes[:Other], notes)
     assert_equal(obs_date, obs.when) # Observation wins
   end
 
@@ -771,8 +771,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
                                   notes: { Other: new_note } } })
     assert_redirected_to(field_slip_url(field_slip))
     notes = field_slip.observation.reload.notes[:Other]
-    assert(notes.include?(old_note))
-    assert(notes.include?(new_note))
+    assert_includes(notes, old_note)
+    assert_includes(notes, new_note)
   end
 
   def test_should_update_field_slip_and_same_note
@@ -822,7 +822,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(field_slip_url(@field_slip))
     assert_equal(@field_slip.reload.observation,
                  ObservationView.last(user))
-    assert(@field_slip.project.observations.include?(obs))
+    assert_includes(@field_slip.project.observations, obs)
   end
 
   # Removed: test_should_not_remove_obs_from_project_when_multiple_reasons
@@ -1100,8 +1100,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs3.update!(occurrence: occ)
 
     gaps = occ.project_membership_gaps
-    assert(gaps.any?, "Should detect project gaps")
-    assert(gaps[:projects]&.include?(project))
+    assert_predicate(gaps, :any?, "Should detect project gaps")
+    assert_includes(gaps[:projects], project)
   end
 
   # Coverage gap: the existing detect-gaps test verifies the gap data
