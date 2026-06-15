@@ -504,14 +504,6 @@ Style/SafeNavigationChainLength:
 # follow-up sweep so new code has to pass them.
 
 
-# Offense count: 4
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Capybara/FindAllFirst:
-  Exclude:
-    - 'test/system/help_identify_system_test.rb'
-    - 'test/system/local_time_system_test.rb'
-    - 'test/system/observation_form_carousel_system_test.rb'
-
 # Offense count: 152
 # This cop supports safe autocorrection (--autocorrect).
 # Temporarily disabled. `assert(arr.include?(x))` is more readable
