@@ -67,7 +67,9 @@ RAW_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '\.html_safe([^[:alnum:]_]|$)|(
 #    helper at the base-class level. When a Phlex tag needs to
 #    return a SafeBuffer string for interpolation, use
 #    `capture { a(href: …) { … } }` instead of `view_context.tag.a`.
-VIEW_CONTEXT_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '\bview_context\.[A-Za-z_][A-Za-z0-9_]*[!?=]?' | grep -v "$COMMENT_LINE_RE" || true)"
+#    Uses the same `(^|[^[:alnum:]_])` POSIX boundary as `_Any` —
+#    `\b` isn't portable on BSD grep.
+VIEW_CONTEXT_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])view_context\.[A-Za-z_][A-Za-z0-9_]*[!?=]?' | grep -v "$COMMENT_LINE_RE" || true)"
 
 if [ -n "$ANY_OFFENDERS" ]; then
   cat >&2 <<EOF
