@@ -1,0 +1,138 @@
+# frozen_string_literal: true
+
+module Views::Controllers::Herbaria
+  # Paginated herbaria index. Page chrome + optional merge-mode
+  # Alert + `Components::Table` of one row per herbarium. Converted
+  # from `herbaria/index.html.erb`.
+  class Index < Views::Base
+    prop :query, ::Query
+    prop :pagination_data, ::PaginationData
+    prop :objects, _Array(::Herbarium)
+    prop :merge, _Nilable(::Herbarium), default: nil
+    prop :error, _Nilable(::String), default: nil
+
+    def view_template
+      container_class(:full)
+      add_index_title(@query)
+      add_context_nav(::Tab::Herbarium::Index.new(query: @query))
+      add_sorter(@query, controller.index_sort_options)
+      add_pagination(@pagination_data)
+
+      flash_error(@error) if @error && @objects.empty?
+      render_merge_alert if @merge
+
+      paginated_results { render_table if @objects.any? }
+    end
+
+    private
+
+    def nonpersonal?
+      @query&.params&.dig(:nonpersonal)
+    end
+
+    def render_merge_alert
+      render(::Components::Alert.new(
+               level: :warning, class: "container-text mt-3"
+             )) do
+        trusted_html(
+          :herbarium_index_merge_help.tp(
+            name: @merge.format_name,
+            url: reload_with_args(merge: nil)
+          )
+        )
+      end
+    end
+
+    def render_table
+      render(::Components::Table.new(
+               @objects, class: "table-striped table-herbarium w-100 mt-3"
+             )) { |t| build_table_columns(t) }
+    end
+
+    def build_table_columns(table)
+      table.column(:herbarium_code.t) { |h| plain(h.code.to_s) }
+      table.column(:herbarium_index_records.t) do |h|
+        plain(h.herbarium_records.length)
+      end
+      table.column(:HERBARIUM.t) { |h| render_name_cell(h) }
+      table.column(user_header) { |h| render_user_cell(h) }
+    end
+
+    def user_header
+      nonpersonal? ? "" : :USER.t
+    end
+
+    # --- 3rd column: name link / merge POST + edit / merge actions --
+
+    def render_name_cell(herbarium)
+      render_name_link(herbarium)
+      render_admin_actions(herbarium) if admin_actions?(herbarium)
+    end
+
+    def render_name_link(herbarium)
+      if !@merge || !current_user
+        render_plain_name_link(herbarium)
+      elsif @merge != herbarium
+        render_merge_target_button(herbarium)
+      else
+        render_self_merge_marker(herbarium)
+      end
+    end
+
+    def render_plain_name_link(herbarium)
+      link_to(herbarium.name.t, herbarium_path(herbarium),
+              class: "herbarium_link_#{herbarium.id}")
+    end
+
+    # Cannot POST from a link without js; use a button instead.
+    def render_merge_target_button(herbarium)
+      render(::Components::CrudButton::Post.new(
+               name: herbarium.name.t,
+               target: herbaria_merges_path(src: @merge.id,
+                                            dest: herbarium.id),
+               class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
+               confirm: :are_you_sure.t
+             ))
+    end
+
+    def render_self_merge_marker(herbarium)
+      plain("[")
+      i(style: "color:red") { plain(herbarium.name.t) }
+      plain("]")
+    end
+
+    def admin_actions?(herbarium)
+      return false if !current_user || @merge
+
+      herbarium.can_edit?(current_user) || in_admin_mode?
+    end
+
+    def render_admin_actions(herbarium)
+      plain(" [")
+      render(::Components::CrudButton::Edit.new(
+               target: herbarium,
+               name: :EDIT.l,
+               icon: nil, btn: nil,
+               class: "edit_herbarium_link_#{herbarium.id}"
+             ))
+      plain(" | ")
+      render(::Components::CrudButton::Get.new(
+               name: :MERGE.l,
+               target: herbaria_path(merge: herbarium.id),
+               icon: nil, btn: nil,
+               class: "merge_herbarium_link_#{herbarium.id}"
+             ))
+      plain("]")
+    end
+
+    # --- 4th column: personal-user cell ----------------------------
+
+    def render_user_cell(herbarium)
+      return if nonpersonal? || herbarium.personal_user.blank?
+
+      span(title: herbarium.personal_user.unique_text_name) do
+        render(::Components::UserLink.new(user: herbarium.personal_user))
+      end
+    end
+  end
+end

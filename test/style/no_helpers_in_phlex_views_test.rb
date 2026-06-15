@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# Guards against the `helpers.foo(...)` antipattern inside Phlex
-# views / components.
+# Guards against the `helpers.foo(...)` / `view_context.foo(...)`
+# antipatterns inside Phlex views / components.
 #
 # Per `.claude/rules/phlex_conversions.md`:
 #
@@ -13,6 +13,8 @@ require("test_helper")
 # > `foo` needs to be reachable from the view, either inline it or
 # > go through the proper registration channels.
 #
+# `view_context.foo` is the same family of escape hatch into the
+# ActionView dispatch chain — flagged here for the same reason.
 # Both `helpers.foo` and `ApplicationController.helpers.foo` (or any
 # `<Class>.helpers.foo`) hit the same ActionView dispatch, so both
 # are flagged. Comments are ignored.
@@ -32,8 +34,14 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
   # `!` / `?` / `=`, so e.g. `helpers.content_for?` is also flagged.
   HELPERS_PATTERN = /\bhelpers\.\w+[!?=]?/
 
-  def test_no_helpers_in_phlex_views
-    offenders = scan_for_helpers
+  # `\bview_context\.` — same boundary rules as HELPERS_PATTERN.
+  # Catches `view_context.tag.a`, `view_context.render`,
+  # `view_context.try(:controller_path)`, etc. Does NOT match an
+  # identifier ending in `_view_context` (boundary breaks).
+  VIEW_CONTEXT_PATTERN = /\bview_context\.\w+[!?=]?/
+
+  def test_no_helpers_or_view_context_in_phlex_views
+    offenders = scan_for_offenders
     assert_empty(offenders, build_failure_message(offenders))
   end
 
@@ -52,17 +60,29 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
     assert_bad("MyController.helpers.tag.a(name)")
   end
 
-  def test_scanner_ignores_identifiers_ending_in_helpers
-    # `module_helpers.foo` is one word followed by `.foo`; the `_`
-    # breaks the `\bhelpers\b` boundary.
-    assert_clean("module_helpers.foo")
-    assert_clean("my_helpers.bar")
+  def test_scanner_flags_view_context_calls
+    assert_bad("view_context.tag.a(text, href: path)")
+    assert_bad("  x = view_context.render(component)")
+    assert_bad("view_context.try(:controller_path)")
+    # Methods ending in `?` / `!` / `=`.
+    assert_bad("view_context.something?")
+    assert_bad("view_context.something!")
   end
 
-  def test_scanner_ignores_helpers_in_comments
+  def test_scanner_ignores_identifiers_ending_in_helpers_or_view_context
+    # `module_helpers.foo` / `caller_view_context.foo` are one word
+    # followed by `.foo`; the `_` breaks the `\b` boundary.
+    assert_clean("module_helpers.foo")
+    assert_clean("my_helpers.bar")
+    assert_clean("caller_view_context.foo")
+    assert_clean("erb_view_context.render(component)")
+  end
+
+  def test_scanner_ignores_in_comments
     assert_clean("# `helpers.foo` is forbidden; inline instead")
     assert_clean("  # see helpers.rb deletes after both inlinings")
     assert_clean("# explains helpers.foo behavior")
+    assert_clean("# view_context.tag.a is banned; use capture")
   end
 
   private
@@ -77,7 +97,7 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
     assert_empty(offenders, "expected scanner to allow:\n#{snippet}")
   end
 
-  def scan_for_helpers
+  def scan_for_offenders
     files = PHLEX_GLOBS.flat_map { |g| Rails.root.glob(g) }
     files.flat_map do |path|
       rel = Pathname.new(path).relative_path_from(Rails.root).to_s
@@ -92,7 +112,8 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
       next if comment_line?(raw)
 
       stripped = strip_inline_comment(raw)
-      next unless stripped.match?(HELPERS_PATTERN)
+      next unless stripped.match?(HELPERS_PATTERN) ||
+                  stripped.match?(VIEW_CONTEXT_PATTERN)
 
       offenders << { path: rel, line: idx + 1, snippet: raw.strip }
     end
@@ -129,14 +150,15 @@ class NoHelpersInPhlexViewsTest < ActiveSupport::TestCase
       "  #{o[:path]}:#{o[:line]}: #{o[:snippet]}"
     end
     <<~MSG
-      `helpers.foo(...)` calls found in Phlex view/component files.
+      `helpers.foo(...)` / `view_context.foo(...)` calls found in
+      Phlex view/component files.
 
-      Both `helpers.foo` and `<Class>.helpers.foo` (e.g.
-      `ApplicationController.helpers.foo`) dispatch silently into
-      ActionView and are brittle across Phlex versions. Inline the
-      logic, or register the helper via
-      `register_value_helper` / `register_output_helper` on a
-      shared base.
+      All three shapes — `helpers.foo`, `<Class>.helpers.foo`
+      (e.g. `ApplicationController.helpers.foo`), and
+      `view_context.foo` — dispatch silently into ActionView and
+      are brittle across Phlex versions. Inline the logic, or
+      register the helper via `register_value_helper` /
+      `register_output_helper` on a shared base.
 
       When you need a Phlex tag to return a string for
       interpolation (e.g. into a `.t(name: …)` translation), use
