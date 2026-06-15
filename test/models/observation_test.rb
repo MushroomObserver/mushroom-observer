@@ -656,7 +656,7 @@ class ObservationTest < UnitTestCase
     assert_names_equal(@name1, obs.name)
     assert_equal(namg1, consensus.consensus_naming)
     # Check that the obs no longer `needs_naming`
-    assert_not(obs.needs_naming)
+    assert_equal(false, obs.needs_naming)
 
     consensus.change_vote(namg1, 0.01, rolf)
     namg1.reload
@@ -687,7 +687,7 @@ class ObservationTest < UnitTestCase
     assert_names_equal(@name2, obs.name)
     assert_equal(namg2, consensus.consensus_naming)
     # Check that the obs again does not `needs_naming`
-    assert_not(obs.needs_naming)
+    assert_equal(false, obs.needs_naming)
 
     # Make votes namg1: -0.01, namg2: 1, namg3: 2
     consensus.change_vote(namg3, 2, rolf)
@@ -763,7 +763,7 @@ class ObservationTest < UnitTestCase
     assert_equal(namg3, consensus.consensus_naming)
 
     # Check that the obs no longer `needs_naming`
-    assert_not(obs.needs_naming)
+    assert_equal(false, obs.needs_naming)
 
     # Check that this whole thing marked the obs as reviewed in the ov table
     # for both Rolf and Mary
@@ -986,7 +986,7 @@ class ObservationTest < UnitTestCase
     Observation.refresh_needs_naming_column
     assert_equal(true, observations(:minimal_unknown_obs).needs_naming)
     assert_equal(true, observations(:detailed_unknown_obs).needs_naming)
-    assert_not(observations(:coprinus_comatus_obs).needs_naming)
+    assert_equal(false, observations(:coprinus_comatus_obs).needs_naming)
     assert_equal(true, observations(:agaricus_campestris_obs).needs_naming)
   end
 

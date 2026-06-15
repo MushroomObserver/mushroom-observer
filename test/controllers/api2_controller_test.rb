@@ -168,7 +168,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_nil(obs.lat)
     assert_nil(obs.lng)
     assert_nil(obs.alt)
-    assert_not(obs.specimen)
+    assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal(Observation.no_notes, obs.notes)
     assert_kind_of(Time, obs.log_updated_at,

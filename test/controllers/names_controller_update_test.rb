@@ -110,7 +110,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     name = names(:conocybe_filaris)
     assert_equal("Conocybe filaris", name.text_name)
     assert_blank(name.author)
-    assert_not(name.deprecated)
+    assert_equal(false, name.deprecated)
 
     params = {
       id: name.id,
@@ -132,7 +132,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     # Verify the author was saved
     assert_equal("New Author", name.reload.author)
     # Verify deprecated status unchanged
-    assert_not(name.deprecated)
+    assert_equal(false, name.deprecated)
   end
 
   def test_edit_name_no_changes

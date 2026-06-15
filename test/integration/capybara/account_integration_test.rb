@@ -507,10 +507,10 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.preferences__edit")
 
     mary.reload
-    assert_not(mary.email_html)
-    assert_not(mary.email_comments_owner)
-    assert_not(mary.email_general_question)
-    assert_not(mary.email_general_feature)
+    assert_equal(false, mary.email_html)
+    assert_equal(false, mary.email_comments_owner)
+    assert_equal(false, mary.email_general_question)
+    assert_equal(false, mary.email_general_feature)
   end
 
   def test_profile

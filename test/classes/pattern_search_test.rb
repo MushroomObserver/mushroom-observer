@@ -81,19 +81,19 @@ class PatternSearchTest < UnitTestCase
     x.vals = [1, 2]
     assert_raises(PatternSearch::TooManyValuesError) { x.parse_boolean }
     x.vals = ["0"]
-    assert_not(x.parse_boolean)
+    assert_equal(false, x.parse_boolean)
     x.vals = ["1"]
     assert_equal(true, x.parse_boolean)
     x.vals = ["no"]
-    assert_not(x.parse_boolean)
+    assert_equal(false, x.parse_boolean)
     x.vals = ["yes"]
     assert_equal(true, x.parse_boolean)
     x.vals = ["false"]
-    assert_not(x.parse_boolean)
+    assert_equal(false, x.parse_boolean)
     x.vals = ["true"]
     assert_equal(true, x.parse_boolean)
     x.vals = ["FALSE"]
-    assert_not(x.parse_boolean)
+    assert_equal(false, x.parse_boolean)
     x.vals = ["TRUE"]
     assert_equal(true, x.parse_boolean)
     x.vals = ["xxx"]

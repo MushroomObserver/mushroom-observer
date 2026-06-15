@@ -522,6 +522,13 @@ Capybara/SpecificActions:
 
 # Offense count: 75
 # This cop supports unsafe autocorrection (--autocorrect-all).
+# Permanently disabled. The cop rewrites `assert_equal(true, x)` to
+# `assert(x)`, which relaxes a literal-`true` assertion to a truthy
+# check. Test code that says `assert_equal(true, foo?)` documents
+# the author's expectation that the method returns the boolean
+# `true` itself, not just any truthy value; the autocorrect erases
+# that intent. Leave as `Enabled: false` rather than per-file
+# excludes.
 Minitest/AssertTruthy:
   Enabled: false
 
@@ -561,6 +568,17 @@ Minitest/RefuteEqual:
     - 'test/controllers/species_lists/observations_controller_test.rb'
     - 'test/models/location_test.rb'
 
+# Offense count: 59
+# This cop supports unsafe autocorrection (--autocorrect-all).
+# Permanently disabled — same reasoning as `Minitest/AssertTruthy`
+# above. The cop's autocorrect rewrites `assert_equal(false, x)`
+# to (via the `Rails/RefuteMethods` chain) `assert_not(x)`, which
+# accepts `nil` in addition to literal `false`. `assert_equal(false,
+# x)` documents that the method returns the boolean `false` itself,
+# not any falsy value; the relaxation erases that intent and would
+# silently hide a regression that started returning `nil`.
+Minitest/RefuteFalse:
+  Enabled: false
 
 # Offense count: 23
 # This cop supports safe autocorrection (--autocorrect), but the
