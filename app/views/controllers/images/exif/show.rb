@@ -15,13 +15,7 @@ module Views::Controllers::Images
         add_context_nav(::Tab::Image::EXIFShow.new(image: @image))
         container_class(:text)
 
-        div(id: "exif_data_table") do
-          render(::Components::Table.new(@data, class: "table-striped mb-0",
-                                                show_headers: false)) do |t|
-            t.column("key") { |row| row.first.to_s }
-            t.column("value") { |row| row.last.to_s }
-          end
-        end
+        render(DataTable.new(data: @data))
       end
     end
   end
