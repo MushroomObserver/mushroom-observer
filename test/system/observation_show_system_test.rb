@@ -102,7 +102,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
     assert_no_link(text: /#{updated_number}/)
@@ -155,12 +155,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#observation_herbarium_records") do
       # Verify remove button has text-danger class
       assert_selector("button.text-danger", text: :REMOVE.l)
-      find("button", text: :REMOVE.l).click
+      click_button(:REMOVE.l)
     end
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
 
@@ -237,7 +237,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
     assert_no_link(text: /LSU/)
@@ -307,7 +307,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
     assert_no_link(text: /MycoPortal/)

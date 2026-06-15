@@ -91,7 +91,7 @@ class StringExtensionsTest < UnitTestCase
 
   ### Test extensions used with Textile ###
   def test_tp_nodiv
-    assert("<p>a</p>", "a".tp_nodiv)
+    assert_equal("<p>a</p>", "a".tp_nodiv)
   end
 
   def test_fix_utf8

@@ -15,7 +15,7 @@ class VoteTest < UnitTestCase
       user: mary,
       value: 1
     )
-    assert(vote.save, vote.errors.full_messages.join("; "))
+    assert(vote.save, "Save failed: #{vote.errors.full_messages.join('; ')}")
   end
 
   # Change an existing one.

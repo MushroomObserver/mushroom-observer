@@ -355,7 +355,7 @@ module GeneralExtensions
     assert(@doc, "XML response is nil!")
     key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
       elem = elem.elements[/^\d+$/.match?(key) ? k.to_i : k]
-      assert(nil, msg || "XML response should have \"#{k}\".") unless elem
+      flunk(msg || "XML response should have \"#{k}\".") unless elem
       elem
     end
   end

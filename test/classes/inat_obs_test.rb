@@ -226,7 +226,7 @@ class InatObsTest < UnitTestCase
   end
 
   def test_tags
-    assert(2, mock_observation("inocybe")[:tags].length)
+    assert_equal(3, mock_observation("inocybe")[:tags].length)
     assert_empty(mock_observation("evernia")[:tags])
   end
 

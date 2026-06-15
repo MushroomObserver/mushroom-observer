@@ -26,7 +26,7 @@ class TranslationStringTest < UnitTestCase
       { tag: "interesting_things", text: "Stuff that we may want to know.",
         user: users(:rolf), language: languages(:english) }
     )
-    assert_raises("Tags must be symbols or strings with no spaces.") do
+    assert_raises(RuntimeError) do
       TranslationString.rename_tags("interesting_things" => "other things")
     end
     assert_not_nil(TranslationString.find_by(tag: "interesting_things"))
