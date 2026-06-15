@@ -7,6 +7,7 @@ rules the team kept needing to remind the assistant about:
 | Hook | Trigger | Behavior |
 | --- | --- | --- |
 | `check_rubocop_staged.sh` | `PreToolUse` on `Bash` containing `git commit` | (1) Runs `bundle exec rubocop` on staged `.rb` files. (2) If rubocop is clean, runs `bin/rails test test/style/` — codebase-wide style rules like `no_queries_in_phlex_views_test` and `no_any_phlex_props_test` that catch patterns rubocop can't see. Blocks the commit (exit 2) if either step fails. |
+| `check_orphaned_erb_renders.sh` | `PreToolUse` on `Bash` containing `git commit` | If the staged change deletes one or more ERB action templates / partials, scans `app/` for any surviving `render("<path>")` / `render(:<action>)` / `render(action: …)` / `render(template: …)` / `render(partial: …)` call that targeted the deleted view. Blocks the commit when ERB → Phlex conversion forgets to update one of these references (the classic `ActionView::MissingTemplate` CI failure that bit every conversion PR). |
 | `check_coveralls_pr.sh` | `PostToolUse` on `Bash` containing `git push` | If the current branch has an open PR and coveralls has reported on at least one build, prints per-file coverage for every Ruby file in the diff and flags any below 100%. Non-blocking — surfaces the gaps so they can't be silently ignored. |
 
 The wiring in `.claude/settings.json` uses a defensive
