@@ -3,19 +3,22 @@
 # Fires before `Edit` / `Write` / `MultiEdit` Bash calls. If the
 # tool is writing to a Ruby file under `app/components/` or
 # `app/views/`, block the write when the new content contains
-# either:
+# any of:
 #
 #   - a bare `_Any` prop declaration (antipattern documented in
 #     `.claude/rules/phlex_conversions.md` and enforced post-hoc by
 #     `test/style/no_any_phlex_props_test.rb`), or
 #   - `.html_safe` / `raw(...)` (Phlex views should use the
 #     buffer-writing `trusted_html(...)` helper instead — see the
-#     phlex-conversions rule + matching style guidance).
+#     phlex-conversions rule + matching style guidance), or
+#   - `view_context.foo` (silent ActionView dispatch — same family
+#     as `helpers.foo`, banned by
+#     `test/style/no_helpers_in_phlex_views_test.rb`).
 #
-# Catches both antipatterns before the file lands on disk.
+# Catches each antipattern before the file lands on disk.
 #
-# Allows `_Any` / `raw` / `html_safe` outside `app/components/` and
-# `app/views/` — controllers, models, helpers, tests are unaffected.
+# Allows the patterns outside `app/components/` and `app/views/` —
+# controllers, models, helpers, tests are unaffected.
 set -euo pipefail
 
 INPUT="$(cat)"
@@ -58,6 +61,16 @@ ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])_Any([^[:alnu
 #    marked content to the buffer.
 RAW_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '\.html_safe([^[:alnum:]_]|$)|(^|[[:space:]]|\()raw\(' | grep -v "$COMMENT_LINE_RE" || true)"
 
+# 3. `view_context.foo` — same family as `helpers.foo` (silent
+#    dispatch into the ActionView helper chain). Inline the logic
+#    onto the Phlex view as a private method or register the
+#    helper at the base-class level. When a Phlex tag needs to
+#    return a SafeBuffer string for interpolation, use
+#    `capture { a(href: …) { … } }` instead of `view_context.tag.a`.
+#    Uses the same `(^|[^[:alnum:]_])` POSIX boundary as `_Any` —
+#    `\b` isn't portable on BSD grep.
+VIEW_CONTEXT_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])view_context\.[A-Za-z_][A-Za-z0-9_]*[!?=]?' | grep -v "$COMMENT_LINE_RE" || true)"
+
 if [ -n "$ANY_OFFENDERS" ]; then
   cat >&2 <<EOF
 🚫 \`_Any\` prop declaration in a Phlex view/component file —
@@ -93,6 +106,26 @@ buffer-writing \`trusted_html(...)\` helper instead. When you need
 a captured value to remain html_safe for interpolation, use
 \`capture { ... }\` — its return value is already an
 \`ActiveSupport::SafeBuffer\`.
+EOF
+  exit 2
+fi
+
+if [ -n "$VIEW_CONTEXT_OFFENDERS" ]; then
+  cat >&2 <<EOF
+🚫 \`view_context.<method>\` in a Phlex view/component file —
+blocking write.
+
+File: $FILE
+Offending lines:
+$VIEW_CONTEXT_OFFENDERS
+
+Same family as \`helpers.<method>\` — silent runtime dispatch into
+ActionView, brittle across Phlex versions. Inline the logic onto
+the Phlex view as a private method, register the helper at the
+base-class level (\`register_value_helper\` / \`register_output_helper\`),
+or call the underlying Phlex tag directly (\`a(href: …)\` instead of
+\`view_context.tag.a(…)\`). When you need a returned SafeBuffer
+string for interpolation, use \`capture { ... }\`.
 EOF
   exit 2
 fi

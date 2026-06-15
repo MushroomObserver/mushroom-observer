@@ -13,6 +13,11 @@
             "type": "command",
             "command": "test -x .claude/hooks/block_python.sh && exec .claude/hooks/block_python.sh || exit 0",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_orphaned_erb_renders.sh && exec .claude/hooks/check_orphaned_erb_renders.sh || exit 0",
+            "timeout": 30
           }
         ]
       },
