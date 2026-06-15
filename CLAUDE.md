@@ -30,6 +30,24 @@ bin/rails console
 bin/rails routes
 ```
 
+## Shell Commands
+
+**Never prepend a `cd` back to the directory each Bash call already
+starts in.** Bash calls begin in the session's working directory (shown
+as "Primary working directory" at session start) and that directory
+persists across every call, so `cd` to it is a pure no-op. Worse, a `cd`
+combined with `&&`/`;`/newlines and output redirection trips a built-in
+approval prompt ("path resolution bypass"), interrupting the user — a
+hook cannot suppress it, so the only fix is not to emit it.
+
+The test is specific: **a leading `cd` is redundant only when its target
+resolves to the current working directory** — what the `pwd` command (or
+the `$PWD` variable) prints. Check the target against `$PWD` before
+writing it. A `cd` into a *different* directory is legitimate and not the
+anti-pattern; just prefer absolute paths
+(`bin/rails test test/...`, `sed -n '1,5p' "$PWD/path/file"`) over
+`cd`-then-relative when practical.
+
 ## Test
 
 Framework: **MiniTest** (not RSpec). System tests use **Capybara + Cuprite**.
