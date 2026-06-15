@@ -368,7 +368,8 @@ module Names
     end
 
     def test_edit_draft_member
-      assert_includes(projects(:eol_project), katrina)
+      # Project#member? is a User-membership predicate, not Enumerable.
+      assert(projects(:eol_project).member?(katrina)) # rubocop:disable Minitest/AssertIncludes
       assert_equal("EOL Project",
                    name_descriptions(:draft_agaricus_campestris).source_name)
       edit_draft_tester(name_descriptions(:draft_agaricus_campestris),

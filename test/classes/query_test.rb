@@ -553,7 +553,9 @@ class QueryTest < UnitTestCase
 
     [*0..len].each do |i|
       # Try relating them all.
-      assert_operator(query_b, :[]=, i)
+      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
+      assert(query_b[i] = query_a[i].subquery_of(model))
+      # rubocop:enable Minitest/AssertOperator
 
       # They should all be new records
       # assert(query_b[i].record.new_record?)
@@ -574,7 +576,9 @@ class QueryTest < UnitTestCase
 
     [*0..len].each do |i|
       # Now try to relate them back to Observation.
-      assert_operator(query_c, :[]=, i)
+      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
+      assert(query_c[i] = query_b[i].subquery_of(:Observation))
+      # rubocop:enable Minitest/AssertOperator
       # They should not be new records
       # assert_not(query_c[i].record.new_record?)
       assert_equal(query_a[i].params,
@@ -610,7 +614,9 @@ class QueryTest < UnitTestCase
 
     # Try coercing them into parent_type queries.
     [*0..4].each do |i|
-      assert_operator(qb, :[]=, i)
+      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
+      assert(qb[i] = qa[i].subquery_of(model))
+      # rubocop:enable Minitest/AssertOperator
       # They should all be new records
       # assert(qb[i].record.new_record?)
       assert_save(qb[i])
@@ -628,7 +634,9 @@ class QueryTest < UnitTestCase
     # Try coercing them back.
     # None should be new records
     [*0..4].each do |i|
-      assert_operator(qc, :[]=, i)
+      # rubocop:disable Minitest/AssertOperator -- assignment, not operator
+      assert(qc[i] = qb[i].subquery_of(desc_model))
+      # rubocop:enable Minitest/AssertOperator
       assert_equal(qa[i], qc[i])
     end
   end

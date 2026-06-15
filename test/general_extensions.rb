@@ -415,7 +415,7 @@ module GeneralExtensions
   #
   def _assert_xml(val, str, msg = nil)
     if val.is_a?(Regexp)
-      assert_match(str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), val, msg)
+      assert_match(val, str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), msg)
     else
       assert_equal(val.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "),
                    str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), msg)

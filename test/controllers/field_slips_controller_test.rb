@@ -242,7 +242,8 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert(fs.user)
     obs = fs.observation
     assert_redirected_to(observation_url(obs))
-    assert_includes(project, user)
+    # Project#member? is a User-membership predicate, not Enumerable.
+    assert(project.member?(user)) # rubocop:disable Minitest/AssertIncludes
     assert_includes(project.observations, obs)
     assert_includes(species_list.observations, obs)
   end

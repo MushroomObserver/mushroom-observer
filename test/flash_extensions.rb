@@ -64,7 +64,7 @@ module FlashExtensions
                    "#{msg} Wrong flash error level. " \
                    "Message: level #{lvl}, #{got.inspect}.")
     elsif expect.is_a?(Regexp)
-      assert_match(got, expect,
+      assert_match(expect, got,
                    "#{msg} Got the wrong flash error(s). " \
                    "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     else

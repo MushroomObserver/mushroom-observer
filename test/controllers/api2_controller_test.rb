@@ -195,7 +195,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_no_api_errors
     obs = Observation.last
     project = Project.find_by(field_slip_prefix: "OPEN")
-    assert_includes(project, obs.user)
+    # Project#member? is a User-membership predicate, not Enumerable.
+    assert(project.member?(obs.user)) # rubocop:disable Minitest/AssertIncludes
   end
 
   def test_post_maximal_observation
