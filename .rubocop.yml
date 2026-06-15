@@ -10,6 +10,8 @@ inherit_mode:
     - Exclude
 
 plugins:
+  - rubocop-capybara
+  - rubocop-minitest
   - rubocop-performance
   - rubocop-rails
 
