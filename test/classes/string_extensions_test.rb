@@ -82,10 +82,10 @@ class StringExtensionsTest < UnitTestCase
       levenshtein_distance_to("Agaricus campestras"))
     assert_equal(2, "Physcia".levenshtein_distance_to("Phycsia"))
 
-    assert_equal(1.0000, "Physcia".percent_match("Physcia").round(4))
-    assert_equal(0.0000, "freedom".percent_match("Physcia").round(4))
-    assert_equal(0.7143, "Physcia".percent_match("Phycsia").round(4))
-    assert_equal(0.8421, "Agaricis Campestras".
+    assert_in_delta(1.0000, "Physcia".percent_match("Physcia").round(4))
+    assert_in_delta(0.0000, "freedom".percent_match("Physcia").round(4))
+    assert_in_delta(0.7143, "Physcia".percent_match("Phycsia").round(4))
+    assert_in_delta(0.8421, "Agaricis Campestras".
       percent_match("Agaricus campestris").round(4))
   end
 

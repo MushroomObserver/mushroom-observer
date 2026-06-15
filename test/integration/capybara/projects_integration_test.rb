@@ -82,10 +82,10 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     click_on(:SAVE_EDITS.l)
 
     project.reload
-    assert(project.start_date == start_date,
-           "Project Start Date should not be today")
-    assert(project.end_date == end_date,
-           "Project Start Date should not be today")
+    assert_equal(project.start_date, start_date,
+                 "Project Start Date should not be today")
+    assert_equal(project.end_date, end_date,
+                 "Project Start Date should not be today")
   end
 
   def test_project_violations

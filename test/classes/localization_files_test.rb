@@ -13,7 +13,7 @@ class LocalizationFilesTest < UnitTestCase
   ##############################################################################
 
   def test_localization_files_exist
-    Language.find_each { |lang| assert(File.exist?(lang.localization_file)) }
+    Language.find_each { |lang| assert_path_exists(lang.localization_file) }
   end
 
   def test_syntax_of_official_export_file

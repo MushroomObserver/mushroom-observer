@@ -51,8 +51,8 @@ module Tab::Sidebar
       tabs = Tab::Sidebar::InfoActions.new.to_a
 
       assert_equal(12, tabs.length)
-      assert_equal(Tab::Sidebar::Info::MobileApp, tabs.first.class)
-      assert_equal(Tab::Sidebar::Info::PrivacyPolicy, tabs.last.class)
+      assert_instance_of(Tab::Sidebar::Info::MobileApp, tabs.first)
+      assert_instance_of(Tab::Sidebar::Info::PrivacyPolicy, tabs.last)
     end
 
     def test_latest_actions_no_user

@@ -190,7 +190,7 @@ module GeneralExtensions
     expect = expect.strftime("%Y%m%d")
     actual = actual.strftime("%Y%m%d")
     msg = build_message(msg, "Expected <#{expect}> to be <#{actual}>.")
-    assert(expect == actual, msg)
+    assert_equal(expect, actual, msg)
   end
 
   # Assert that two instances are equal.
@@ -415,7 +415,7 @@ module GeneralExtensions
   #
   def _assert_xml(val, str, msg = nil)
     if val.is_a?(Regexp)
-      assert(str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ").match(val), msg)
+      assert_match(str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), val, msg)
     else
       assert_equal(val.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "),
                    str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), msg)

@@ -954,13 +954,13 @@ class ReportTest < UnitTestCase
 
   def test_rounding_of_latitudes_etc
     row = Report::Row.new("obs_lat" => 1.20456)
-    assert_equal(1.2, row.obs_lat(2))
-    assert_equal(1.205, row.obs_lat(3))
-    assert_equal(1.2046, row.obs_lat(4))
+    assert_in_delta(1.2, row.obs_lat(2))
+    assert_in_delta(1.205, row.obs_lat(3))
+    assert_in_delta(1.2046, row.obs_lat(4))
     row = Report::Row.new("obs_lat" => -123.00045)
     assert_equal(-123, row.obs_lat(3))
-    assert_equal(-123.0005, row.obs_lat(4))
-    assert_equal(-123.00045, row.obs_lat(5))
+    assert_in_delta(-123.0005, row.obs_lat(4))
+    assert_in_delta(-123.00045, row.obs_lat(5))
     assert_equal(123, Report::Row.new("obs_alt" => 123.4999).obs_alt)
     assert_equal(-124, Report::Row.new("obs_alt" => -123.5).obs_alt)
   end

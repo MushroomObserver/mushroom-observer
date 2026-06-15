@@ -135,8 +135,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     users(:rolf).login
     post_requires_login(:create, params)
 
-    assert(Observation.last.log_updated_at.is_a?(Time),
-           "Observation should have log_updated_at time")
+    assert_kind_of(Time, Observation.last.log_updated_at,
+                   "Observation should have log_updated_at time")
   end
 
   def test_create_observation_with_explicit_collector

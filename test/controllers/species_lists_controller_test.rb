@@ -699,6 +699,6 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     initial_count = spl.observations.count
     put(:clear, params: { id: spl.id })
-    assert(spl.observations.count == initial_count)
+    assert_equal(spl.observations.count, initial_count)
   end
 end

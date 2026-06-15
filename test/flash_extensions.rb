@@ -53,22 +53,24 @@ module FlashExtensions
     end
     msg&.sub(/\n*$/, "\n")
     if !expect && got
-      assert(got.nil?,
-             "#{msg} Shouldn't have been any flash errors. Got #{got.inspect}.")
+      assert_nil(
+        got,
+        "#{msg} Shouldn't have been any flash errors. Got #{got.inspect}."
+      )
     elsif expect && !got
-      assert(expect.nil?, "#{msg} Expected a flash error.  Got nothing.")
+      assert_nil(expect, "#{msg} Expected a flash error.  Got nothing.")
     elsif expect.is_a?(Integer)
-      assert(expect == lvl,
-             "#{msg} Wrong flash error level. " \
-             "Message: level #{lvl}, #{got.inspect}.")
+      assert_equal(expect, lvl,
+                   "#{msg} Wrong flash error level. " \
+                   "Message: level #{lvl}, #{got.inspect}.")
     elsif expect.is_a?(Regexp)
-      assert(got.match(expect),
-             "#{msg} Got the wrong flash error(s). " \
-             "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
+      assert_match(got, expect,
+                   "#{msg} Got the wrong flash error(s). " \
+                   "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     else
-      assert(got == expect,
-             "#{msg} Got the wrong flash error(s). " \
-             "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
+      assert_equal(got, expect,
+                   "#{msg} Got the wrong flash error(s). " \
+                   "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     end
 
     clear_flash

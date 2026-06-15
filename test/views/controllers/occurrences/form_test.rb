@@ -181,7 +181,7 @@ module Views::Controllers::Occurrences
       assert_includes(label.text, "Include")
 
       # Regression: #4286 — label `for=` must match nested input id
-      return unless label["for"]
+      skip unless label["for"]
 
       assert_equal(cb["id"], label["for"],
                    "Label `for` must match the nested checkbox id, " \

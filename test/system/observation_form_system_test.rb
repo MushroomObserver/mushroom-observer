@@ -27,7 +27,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: locations.first.name)
 
     # Move to the next step, Identification
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
     fill_in("observation_naming_name", with: "Elfin saddle")
@@ -49,7 +49,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: locations.first.name)
 
     # Move to the next step, Identification
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
     assert_selector("#name_messages", text: "MO does not recognize the name")
@@ -150,7 +150,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_location_id", with: "", type: :hidden)
 
     # Move to the next step, Identification
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
     within("#observation_form") { click_commit }
@@ -367,7 +367,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_place_name", with: last_obs.where)
 
     # Move to the next step, Identification
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
     assert_field("observation_naming_name", with: "")
@@ -377,7 +377,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field(other_notes_id, with: "", visible: :all)
 
     # Move to the previous step, Images/Details
-    images_details = find("#observation_images_details")
+    images_details = find_by_id("observation_images_details")
     scroll_to(images_details, align: :top)
 
     # Add the images separately, so we can be sure of the order. Otherwise,
@@ -442,7 +442,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                                 text: SO_PASA_EXIF[:lat].to_s)
     image_wrappers = all(".carousel-item[data-image-status='upload']",
                          visible: :all)
-    assert_equal(image_wrappers.length, 2)
+    assert_equal(2, image_wrappers.length)
 
     within(second_image_wrapper) do
       assert_image_exif_available(SO_PASA_EXIF)
@@ -475,7 +475,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Override the dates from the geotagged image for this obs
-    obs_when = find("#observation_when_1i")
+    obs_when = find_by_id("observation_when_1i")
     scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2010")
     select("August", from: "observation_when_2i")
@@ -483,18 +483,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # intentional error: nonexistant place name. Also, katrina's preference is
     # for postal format locations. Should not validate the country "Pasadena".
-    location = find("#observation_place_name")
+    location = find_by_id("observation_place_name")
     scroll_to(location, align: :center)
     fill_in("observation_place_name", with: "USA, California, Pasadena")
     assert_field("observation_place_name", with: "USA, California, Pasadena")
     uncheck("observation_is_collection_location", visible: :all)
 
     # Move to the next step, Identification
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
     sleep(1)
 
-    specimen_section = find("#observation_specimen_section", visible: :all)
+    specimen_section = find_by_id("observation_specimen_section", visible: :all)
     scroll_to(specimen_section, align: :center)
     assert_field("observation_specimen")
     check("observation_specimen")
@@ -503,14 +503,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in(other_notes_id, with: "Notes for observation", visible: :all)
 
     # Move to the next step, Projects/Lists
-    projects = find("#observation_projects")
+    projects = find_by_id("observation_projects")
     scroll_to(projects, align: :top)
 
     # Inherited project constraints maybe messing with this observation - clear
     all('[id^="observation_project_ids_"]', visible: :all).each do |cb|
       cb.trigger("click") if cb.checked?
     end
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
     # submit_observation_form_with_errors
@@ -555,7 +555,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     second_item = find(".carousel-item", text: SO_PASA_EXIF[:lat].to_s,
                                          visible: :all)
     items = all(".carousel-item", visible: :all)
-    assert_equal(items.length, 2)
+    assert_equal(2, items.length)
 
     within(second_item) do
       assert_image_exif_available(SO_PASA_EXIF)
@@ -570,7 +570,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
     # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
-    find("#observation_place_name").trigger("focus")
+    find_by_id("observation_place_name").trigger("focus")
     # assert_selector(".auto_complete", wait: 6)
     # assert_selector(".dropdown-item a[data-id='-1']",
     #                 text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
@@ -584,7 +584,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_hidden_location_fields_filled(SOUTH_PASADENA)
 
     # Move to the next step, Identification
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
     assert_selector("[data-type='name'][data-autocompleter='connected']")
@@ -664,7 +664,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Submit observation form with changes
-    obs_when = find("#observation_when_1i")
+    obs_when = find_by_id("observation_when_1i")
     scroll_to(obs_when, align: :center)
     fill_in("observation_when_1i", with: "2011")
     select("April", from: "observation_when_2i")
@@ -680,17 +680,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       fill_in("#{img_field}_notes", with: "New notes for image")
     end
 
-    obs_images = find("#observation_images")
+    obs_images = find_by_id("observation_images")
     scroll_to(obs_images, align: :top)
     choose("thumb_image_id_#{geo.id}", visible: :all)
     sleep(1)
 
     # Move to the next step, Identification
-    naming = find("#observation_naming_specimen")
+    naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
     sleep(1)
 
-    obs_notes = find("#observation_notes")
+    obs_notes = find_by_id("observation_notes")
     scroll_to(obs_notes, align: :top)
     fill_in(other_notes_id, with: "New notes for observation")
 
@@ -808,7 +808,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(2)
 
     # Verify the place name was auto-filled with University Park
-    place_field = find("#observation_place_name")
+    place_field = find_by_id("observation_place_name")
     assert_match(/University Park/, place_field.value,
                  "Place name should be auto-filled with matching location")
 
@@ -828,11 +828,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("[data-type='location_containing']", wait: 10)
 
     # Verify the new coordinates are set
-    assert_equal("34.15", find("#observation_lat").value)
-    assert_equal("-118.14", find("#observation_lng").value)
+    assert_equal("34.15", find_by_id("observation_lat").value)
+    assert_equal("-118.14", find_by_id("observation_lng").value)
 
     # The place name should update to Pasadena (auto-filled from server)
-    place_field = find("#observation_place_name")
+    place_field = find_by_id("observation_place_name")
     assert_match(/Pasadena/, place_field.value, wait: 5)
 
     university_park.destroy
@@ -862,7 +862,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(2)
 
     # Verify place name was auto-filled
-    place_field = find("#observation_place_name")
+    place_field = find_by_id("observation_place_name")
     assert_match(/University Park/, place_field.value,
                  "Place name should be auto-filled with matching location")
 
@@ -908,7 +908,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     sleep(2)
 
     # Verify place name was auto-filled
-    place_field = find("#observation_place_name")
+    place_field = find_by_id("observation_place_name")
     assert_match(/University Park/, place_field.value,
                  "Place name should be auto-filled with matching location")
 
@@ -928,13 +928,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("[data-type='location']", wait: 10)
 
     # Verify the autocompleter is no longer constrained
-    autocompleter = find("#observation_location_autocompleter")
+    autocompleter = find_by_id("observation_location_autocompleter")
     assert_equal("location", autocompleter["data-type"],
                  "Autocompleter should be in 'location' mode")
 
     # Verify lat/lng are actually cleared
-    assert_equal("", find("#observation_lat").value)
-    assert_equal("", find("#observation_lng").value)
+    assert_equal("", find_by_id("observation_lat").value)
+    assert_equal("", find_by_id("observation_lng").value)
 
     university_park.destroy
   end

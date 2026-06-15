@@ -1053,7 +1053,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # The payload should contain the observation_field_value details
     payload = errors[:payload]
-    assert(payload.is_a?(Hash), "Error payload should be a hash")
+    assert_kind_of(Hash, payload, "Error payload should be a hash")
     assert_equal(@inat_import.inat_ids.to_i,
                  payload[:observation_field_value][:observation_id],
                  "Incorrect observation_id in error payload")

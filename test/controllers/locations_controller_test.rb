@@ -27,8 +27,8 @@ class LocationsControllerTest < FunctionalTestCase
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert(@@emails.empty?,
-           "Wasn't expecting any email notifications; got:\n#{msg}")
+    assert_empty(@@emails,
+                 "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
     @@emails = []
   end
@@ -604,7 +604,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select("body.locations__index")
     # The letter filter is applied, verify the data is filtered
     undef_data = assigns(:undef_data)
-    return if undef_data.blank?
+    skip if undef_data.blank?
 
     undef_data.each do |obs|
       assert_match(/^A/i, obs[:where], "Filtered results should start with A")

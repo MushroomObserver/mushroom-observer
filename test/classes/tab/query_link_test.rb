@@ -48,8 +48,8 @@ class Tab::QueryLinkTest < UnitTestCase
 
     result = tab.path
 
-    assert_equal(controller.last_target,
-                 { controller: "/observations", action: :index })
+    assert_equal({ controller: "/observations", action: :index },
+                 controller.last_target)
     assert_equal(controller.last_query, tab.query)
     assert_equal({ controller: "/observations", action: :index,
                    q: "STUB" }, result)

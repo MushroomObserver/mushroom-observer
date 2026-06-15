@@ -154,9 +154,9 @@ class DescriptionTest < UnitTestCase
                                   license_id: licenses(:ccnc25).id)
     burbank = locations(:burbank)
     obj.parent = burbank
-    assert(obj.parent_id == burbank.id)
+    assert_equal(obj.parent_id, burbank.id)
     obj.parent_id = albion.id
-    assert(obj.parent == albion)
+    assert_equal(obj.parent, albion)
   end
 
   def test_permitted?
@@ -172,7 +172,7 @@ class DescriptionTest < UnitTestCase
     assert(desc.permitted?(table, users(:dick).id.to_s),
            "`permitted?` should accept user.id")
     error = assert_raises(Exception) { desc.permitted?(table, "bad argument") }
-    assert_equal(ArgumentError, error.class)
+    assert_instance_of(ArgumentError, error)
   end
 
   def test_formats

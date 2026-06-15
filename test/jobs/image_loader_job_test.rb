@@ -57,7 +57,7 @@ class ImageLoaderJobTest < ActiveJob::TestCase
     admin_count = User.admin.original_image_quota
     with_stubs do
       ImageLoaderJob.perform_now(@test_image.id, users(:rolf).id)
-      assert(File.exist?(@test_file))
+      assert_path_exists(@test_file)
       assert_equal(rolf_count + 1, users(:rolf).reload.original_image_quota)
       assert_equal(admin_count + 1, User.admin.reload.original_image_quota)
     end

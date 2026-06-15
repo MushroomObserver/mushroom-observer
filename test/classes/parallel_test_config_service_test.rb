@@ -51,7 +51,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
     # Verify config files were created
     worker_count.times do |i|
       config_file = @rails_root.join("config/mysql-test-#{i}.cnf")
-      assert(File.exist?(config_file), "Config file #{i} should exist")
+      assert_path_exists(config_file, "Config file #{i} should exist")
 
       content = File.read(config_file)
       assert_match(/user=test_user/, content)
@@ -76,7 +76,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
       # Verify only 3 config files were created
       worker_count.times do |i|
         config_file = @rails_root.join("config/mysql-test-#{i}.cnf")
-        assert(File.exist?(config_file), "Config file #{i} should exist")
+        assert_path_exists(config_file, "Config file #{i} should exist")
       end
 
       # Verify no extra files
@@ -267,10 +267,10 @@ class ParallelTestConfigServiceTest < UnitTestCase
 
     # Verify only parallel test configs were deleted
     assert_not(File.exist?(config_path.join("mysql-test-0.cnf")))
-    assert(File.exist?(config_path.join("mysql-production.cnf")),
-           "Should not delete non-test config files")
-    assert(File.exist?(config_path.join("other.txt")),
-           "Should not delete other files")
+    assert_path_exists(config_path.join("mysql-production.cnf"),
+                       "Should not delete non-test config files")
+    assert_path_exists(config_path.join("other.txt"),
+                       "Should not delete other files")
   end
 end
 

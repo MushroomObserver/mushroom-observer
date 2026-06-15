@@ -136,7 +136,7 @@ class NameTest < UnitTestCase
 
   def do_validate_classification_test(rank, text, expected)
     result = Name.validate_classification(rank, text)
-    assert(expected == result)
+    assert_equal(expected, result)
   rescue RuntimeError => e
     raise(e) if expected
   end
@@ -2873,8 +2873,8 @@ class NameTest < UnitTestCase
 
   def test_sensu_stricto
     %w[group gr gr. gp gp. clade complex].each do |str|
-      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto,
-                   "Boletus",
+      assert_equal("Boletus",
+                   Name.new(text_name: "Boletus #{str}").sensu_stricto,
                    "Name s.s. should not include `#{str}`")
       assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
                    "Boletus#{str}",
@@ -2891,7 +2891,7 @@ class NameTest < UnitTestCase
 
   # Just make sure mysql is collating accents and case correctly.
   def test_mysql_sort_order
-    return unless sql_collates_accents?
+    skip unless sql_collates_accents?
 
     names = [
       create_test_name("Agaricus Aehou"),

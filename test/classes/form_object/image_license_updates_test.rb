@@ -49,8 +49,8 @@ class FormObject::ImageLicenseUpdatesTest < ActiveSupport::TestCase
 
     assert_equal(form.rows[0], form.send(:"0"))
     assert_equal(form.rows[1], form.send(:"1"))
-    assert(form.respond_to?(:"0"))
-    assert(form.respond_to?(:"1"))
+    assert_respond_to(form, :"0")
+    assert_respond_to(form, :"1")
   end
 
   # Non-numeric missing methods still raise NoMethodError —
