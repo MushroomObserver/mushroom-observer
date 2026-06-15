@@ -14,9 +14,13 @@ module Views::Controllers::Images
     register_output_helper :export_status_ml_controls, mark_safe: true
 
     prop :image, ::Image
-    # `@size` flows in from `params[:size]` / `set_default_size` —
-    # arrives as a String from the URL ("medium"), and the
-    # `Image::ALL_SIZES`-based default is also a String in practice.
+    # `ImagesController#set_default_size` normalizes `@size` to a
+    # Symbol (`params[:size].to_sym` or `@user.image_size`), but
+    # `Observations::ImagesController#update` re-renders this view
+    # without setting size (defaulting to nil) and some test paths
+    # pass a String straight through. `_Union(Symbol, String)`
+    # accepts both shapes — comparisons in `VotePanel#vote_link_args`
+    # don't care.
     prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil
     prop :default_size, _Nilable(_Union(::Symbol, ::String)), default: nil
 
