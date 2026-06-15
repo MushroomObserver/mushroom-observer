@@ -23,6 +23,9 @@ class Inat
 
     # Params MO always controls; strip them so the user's URL doesn't conflict.
     STRIP_PARAMS = [
+      # This param yields unexpectedly broad results for Collection Projects
+      # https://github.com/MushroomObserver/mushroom-observer/pull/4478#issuecomment-4702380313
+      "apply_project_rules_for",
       # Makes normalization/ignored-param warnings match actual import behavior
       # The job strips `id` param in page_parser
       # (User should use ID mode, not URL mode, to import specific obs)
