@@ -16,7 +16,10 @@ module Views::Controllers::Occurrences
 
     def view_template
       container_class(:wide)
-      view_context.add_edit_title(@occurrence, user: @user)
+      # `add_edit_title` is registered as a value helper on
+      # `Views::Base`, so it's callable directly — no
+      # `view_context.add_edit_title(...)` dispatch needed.
+      add_edit_title(@occurrence, user: @user)
       # Sibling reference within the module.
       render(Form.new(
                model: @occurrence,

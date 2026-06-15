@@ -64,17 +64,25 @@ class Components::ModalTurboForm < Components::Base
   # `_modal_form_reload.erb` (which only has a view context, not a
   # `ModalTurboForm` instance, so it calls this class method).
   #
-  # @param view_context [ActionView::Base] view context from the
-  #   calling template (in ERB, `self`; in Phlex, the component)
+  # The parameter is the template's `self` — an ActionView context
+  # when called from an ERB partial. Named `template` rather than
+  # `view_context` so the
+  # `no_helpers_in_phlex_views_test` / on-save guard against
+  # `view_context.foo` calls inside Phlex view code doesn't trip on
+  # this class-method utility, where the value really IS the
+  # caller's view context (not a Phlex `view_context` dispatch).
+  #
+  # @param template [ActionView::Base] view context from the
+  #   calling ERB template (`self` in the ERB)
   # @param model [ActiveRecord::Base] the model instance for the form
   # @param form_locals [Hash] additional params passed to the form
   # @return [String] the rendered HTML
-  def self.render_form(view_context, model:, form_locals: {})
+  def self.render_form(template, model:, form_locals: {})
     component_class = form_component_class_for(
-      model, controller_path: view_context.try(:controller_path)
+      model, controller_path: template.try(:controller_path)
     )
     params = form_locals.except(:model).merge(local: false)
-    view_context.render(component_class.new(model, **params))
+    template.render(component_class.new(model, **params))
   end
 
   def view_template

@@ -73,3 +73,6 @@ config/ip_stats-*.txt
 config/test_locales-*
 config/mysql-test-*.cnf
 
+
+# iNat import audit (#4213) CSV outputs — data, not code
+inat_import_audit*.csv
