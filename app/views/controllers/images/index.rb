@@ -1,0 +1,30 @@
+# frozen_string_literal: true
+
+module Views::Controllers::Images
+  # Paginated images index — chrome + `Components::MatrixTable` of
+  # one image per row. Converted from `images/index.html.erb`.
+  class Index < Views::Base
+    prop :query, ::Query
+    prop :pagination_data, ::PaginationData
+    prop :objects, _Array(::Image)
+    prop :error, _Nilable(::String), default: nil
+
+    def view_template
+      container_class(:full)
+      add_index_title(@query)
+      add_context_nav(::Tab::Image::IndexActions.new(
+                        query: @query, controller: controller
+                      ))
+      add_sorter(@query, controller.index_sort_options)
+      add_pagination(@pagination_data)
+
+      flash_error(@error) if @error && @objects.empty?
+
+      paginated_results do
+        render(::Components::MatrixTable.new(
+                 objects: @objects, user: current_user
+               ))
+      end
+    end
+  end
+end

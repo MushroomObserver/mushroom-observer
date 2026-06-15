@@ -37,5 +37,34 @@ module Images
                      key.match(/latitude|longitude|gps/i)
                    end)
     end
+
+    # turbo_stream format wraps the EXIF table in the lightbox modal.
+    # HTML format is covered by `test_exif_gps_hidden`.
+    def test_exif_show_turbo_stream
+      image = images(:in_situ_image)
+      fixture = "#{MO.root}/test/images/geotagged.jpg"
+      file = image.full_filepath("orig")
+      FileUtils.mkdir_p(File.dirname(file))
+      FileUtils.cp(fixture, file)
+
+      login
+      get(:show, params: { id: image.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("#modal_image_exif_#{image.id} #exif_data_table")
+    end
+
+    # When exiftool exits non-zero (file missing / unreadable) the
+    # controller renders the captured output with a 500 status.
+    def test_exif_show_unreadable
+      image = images(:in_situ_image)
+      FileUtils.rm_f(image.full_filepath("orig"))
+
+      login
+      get(:show, params: { id: image.id })
+
+      assert_response(:internal_server_error)
+      assert_not_empty(response.body)
+    end
   end
 end
