@@ -170,6 +170,14 @@ class InatMoObservationBuilderTest < UnitTestCase
     assert_nil(builder_for(name_override: "see comments").send(:override_name))
   end
 
+  # A failure while resolving the override (e.g. an API error) is logged and
+  # falls back to nil rather than aborting the import.
+  def test_override_name_falls_back_when_resolution_raises
+    builder = builder_for(name_override: "Boletus edulis")
+    builder.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
+    assert_nil(builder.send(:override_name))
+  end
+
   # No override field => no override name.
   def test_override_name_absent_is_nil
     assert_nil(builder_for.send(:override_name))

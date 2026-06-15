@@ -99,8 +99,17 @@ class Inat
     end
 
     def find_or_create_override_name
-      find_or_create_name(Name.parse_name(inat_obs.name_override))
-    rescue StandardError
+      find_or_create_name(Name.parse_name(inat_obs.name_override)) ||
+        log_ignored_override("unparseable or uncreatable name")
+    rescue StandardError => e
+      log_ignored_override(e.message)
+    end
+
+    # Logs why an override was dropped (so a fall-back isn't silent) and
+    # returns nil for the override lead. (#4533)
+    def log_ignored_override(reason)
+      Rails.logger.warn("InatImport: ignoring Species Name Override " \
+                        "#{inat_obs.name_override.inspect}: #{reason}")
       nil
     end
 
