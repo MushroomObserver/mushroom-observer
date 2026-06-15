@@ -633,14 +633,16 @@ class API2::ObservationsTest < UnitTestCase
     assert_equal(Date.parse("2013-01-01"), marys_obs.reload.when)
     assert_api_pass(params.merge(id: rolfs_obs.id, add_to_project: proj.id))
     assert_api_fail(params.merge(id: marys_obs.id, add_to_project: proj.id))
-    assert(Project.find(proj.id).observations.include?(rolfs_obs))
-    assert(Project.find(proj.id).observations.include?(marys_obs))
+    proj_obs = proj.observations.reload
+    assert_includes(proj_obs, rolfs_obs)
+    assert_includes(proj_obs, marys_obs)
     assert_api_pass(params.merge(id: rolfs_obs.id,
                                  remove_from_project: proj.id))
     assert_api_fail(params.merge(id: marys_obs.id,
                                  remove_from_project: proj.id))
-    assert_not(Project.find(proj.id).observations.include?(rolfs_obs))
-    assert(Project.find(proj.id).observations.include?(marys_obs))
+    proj_obs = proj.observations.reload
+    assert_not_includes(proj_obs, rolfs_obs)
+    assert_includes(proj_obs, marys_obs)
 
     spl1 = species_lists(:unknown_species_list)
     spl2 = species_lists(:query_first_list)
@@ -648,12 +650,12 @@ class API2::ObservationsTest < UnitTestCase
     assert_not(spl2.can_edit?(rolf))
     assert_api_pass(params.merge(add_to_species_list: spl1.id))
     assert_api_fail(params.merge(add_to_species_list: spl2.id))
-    assert(spl1.reload.observations.include?(rolfs_obs))
-    assert_not(spl2.reload.observations.include?(rolfs_obs))
+    assert_includes(spl1.observations.reload, rolfs_obs)
+    assert_not_includes(spl2.observations.reload, rolfs_obs)
     assert_api_pass(params.merge(remove_from_species_list: spl1.id))
     assert_api_fail(params.merge(remove_from_species_list: spl2.id))
-    assert_not(spl1.reload.observations.include?(rolfs_obs))
-    assert_not(spl2.reload.observations.include?(rolfs_obs))
+    assert_not_includes(spl1.observations.reload, rolfs_obs)
+    assert_not_includes(spl2.observations.reload, rolfs_obs)
   end
 
   def test_deleting_observations
