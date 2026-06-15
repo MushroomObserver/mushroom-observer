@@ -13,7 +13,11 @@ module Images
         can_email_user_question?(@image, method: :email_general_commercial)
 
       respond_to do |format|
-        format.html
+        format.html do
+          render(Views::Controllers::Images::Emails::New.new(
+                   image: @image, message: @message
+                 ))
+        end
         format.turbo_stream do
           render(Components::ModalTurboForm.new(
                    identifier: "commercial_inquiry_email",
@@ -53,7 +57,10 @@ module Images
 
       flash_error(:runtime_missing.t(field: :message.l))
       @image = image
-      render(:new)
+      @message = params.dig(:email, :message)
+      render(Views::Controllers::Images::Emails::New.new(
+               image: @image, message: @message
+             ))
       false
     end
 

@@ -22,6 +22,10 @@ module Images::Votes
       @num_public = ImageVote.where(user_id: @user.id).
                     where(anonymous: false).
                     pick(ImageVote[:id].count.as("total"))
+      render(Views::Controllers::Images::Votes::Anonymity::Edit.new(
+               num_anonymous: @num_anonymous || 0,
+               num_public: @num_public || 0
+             ))
     end
 
     def update

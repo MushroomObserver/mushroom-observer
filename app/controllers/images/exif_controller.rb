@@ -12,7 +12,7 @@ module Images
       @data, @status, @result = @image.read_exif_data
 
       respond_to do |format|
-        format.html
+        format.html { render_exif_html }
         format.turbo_stream do
           identifier = "image_exif_#{@image.id}"
           title = :exif_data_for_image.t(image: @image.id)
@@ -21,6 +21,18 @@ module Images
                  locals: { identifier: identifier, title: title,
                            body: "images/exif/data", fallback: fallback })
         end
+      end
+    end
+
+    private
+
+    def render_exif_html
+      if @status
+        render(Views::Controllers::Images::EXIF::Show.new(
+                 image: @image, data: @data
+               ))
+      else
+        render(plain: @result, status: :internal_server_error)
       end
     end
   end

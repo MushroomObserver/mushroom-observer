@@ -174,6 +174,18 @@ class ImagesController < ApplicationController
 
     # Update view stats on image we're actually showing.
     update_view_stats(@image)
+
+    render(Views::Controllers::Images::Show.new(
+             image: @image, size: @size, default_size: @default_size
+           ))
+  end
+
+  # Phlex action template — explicit render per the conversion rule.
+  def render_index_view
+    render(Views::Controllers::Images::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, error: @error
+           ))
   end
 
   private
