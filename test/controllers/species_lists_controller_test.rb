@@ -34,6 +34,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_select("form#species_list_form", { count: 1 },
                   "Expected SpeciesListForm to render")
   end
+  private :assert_create_species_list
 
   def assert_edit_species_list
     # `edit.html.erb` and its child form partial are both Phlex now
@@ -45,6 +46,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_select("form#species_list_form", { count: 1 },
                   "Expected SpeciesListForm to render")
   end
+  private :assert_edit_species_list
 
   def assert_project_checks(project_states)
     project_states.each do |id, state|
@@ -69,6 +71,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users)
     assert_obj_arrays_equal([mary, dick], @proj2.user_group.users)
   end
+  private :init_for_project_checkbox_tests
 
   def obs_params(obs, vote)
     {

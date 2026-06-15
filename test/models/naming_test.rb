@@ -15,7 +15,8 @@ class NamingTest < UnitTestCase
       name_id: names(:agaricus_campestris).id,
       user_id: mary.id
     )
-    assert(naming.save, "Save failed: #{naming.errors.full_messages.join('; ')}")
+    assert(naming.save,
+           "Save failed: #{naming.errors.full_messages.join("; ")}")
   end
 
   # Change an existing one.

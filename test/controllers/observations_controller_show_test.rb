@@ -319,6 +319,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("#associated_observations")
     assert_select("#observation_species_lists")
   end
+  private :assert_show_observation
 
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
   def assert_show_obs(types, _id, items, can_add)

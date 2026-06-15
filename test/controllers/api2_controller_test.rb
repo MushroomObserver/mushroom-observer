@@ -10,6 +10,7 @@ class API2ControllerTest < FunctionalTestCase
     @api = assigns(:api)
     assert_not(@api.errors.empty?, "Expected API to fail with errors.")
   end
+  private :assert_api_failed
 
   def assert_no_api_errors(msg = nil)
     @api = assigns(:api)
@@ -586,6 +587,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("34.1622", result["latitude"].to_s)
     assert_equal("-118.3521", result["longitude"].to_s)
   end
+  private :assert_observation_lat_lng_visible_json
 
   def assert_observation_lat_lng_visible_xml
     doc = REXML::Document.new(response.body)
@@ -593,12 +595,14 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("34.1622", result.elements["latitude"]&.get_text.to_s)
     assert_equal("-118.3521", result.elements["longitude"]&.get_text.to_s)
   end
+  private :assert_observation_lat_lng_visible_xml
 
   def assert_observation_lat_lng_hidden_json
     result = response.parsed_body["results"][0]
     assert_nil(result["latitude"])
     assert_nil(result["longitude"])
   end
+  private :assert_observation_lat_lng_hidden_json
 
   def assert_observation_lat_lng_hidden_xml
     doc = REXML::Document.new(response.body)
@@ -606,6 +610,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_nil(result.elements["latitude"])
     assert_nil(result.elements["longitude"])
   end
+  private :assert_observation_lat_lng_hidden_xml
 
   def test_get_empty_results
     params = { date: "2100-01-01" }

@@ -27,6 +27,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
   ensure
     @@emails = []
   end
+  private :assert_email_generated
 
   def assert_no_emails
     msg = @@emails.join("\n")

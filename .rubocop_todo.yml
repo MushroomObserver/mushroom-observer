@@ -512,11 +512,6 @@ Capybara/FindAllFirst:
     - 'test/system/local_time_system_test.rb'
     - 'test/system/observation_form_carousel_system_test.rb'
 
-# Offense count: 5
-Capybara/SpecificActions:
-  Exclude:
-    - 'test/system/observation_show_system_test.rb'
-
 # Offense count: 152
 # This cop supports safe autocorrection (--autocorrect).
 # Temporarily disabled. `assert(arr.include?(x))` is more readable
@@ -556,18 +551,6 @@ Minitest/AssertPredicate:
 Minitest/AssertTruthy:
   Enabled: false
 
-# Offense count: 23
-Minitest/AssertWithExpectedArgument:
-  Exclude:
-    - 'test/classes/inat_obs_test.rb'
-    - 'test/classes/string_extensions_test.rb'
-    - 'test/controllers/account_controller_test.rb'
-    - 'test/controllers/collection_numbers_controller_test.rb'
-    - 'test/general_extensions.rb'
-    - 'test/models/naming_test.rb'
-    - 'test/models/sequence_test.rb'
-    - 'test/models/vote_test.rb'
-
 # Offense count: 5902
 # This cop supports safe autocorrection (--autocorrect).
 # Permanently disabled. The autocorrect inserts a blank line before
@@ -587,11 +570,6 @@ Minitest/EmptyLineBeforeAssertionMethods:
 # tests.
 Minitest/MultipleAssertions:
   Enabled: false
-
-# Offense count: 5
-Minitest/NonPublicTestMethod:
-  Exclude:
-    - 'test/components/search_form_test.rb'
 
 # Offense count: 6
 # This cop supports safe autocorrection (--autocorrect).
@@ -615,34 +593,3 @@ Minitest/RefuteEqual:
 Minitest/RefuteFalse:
   Enabled: false
 
-# Offense count: 23
-# This cop supports safe autocorrection (--autocorrect), but the
-# autocorrect renames public helper methods (e.g. `assert_api_failed`)
-# to `test_*`, which breaks every call site. Follow-up plan: move the
-# helpers under `private` so the cop skips them.
-Minitest/TestMethodName:
-  Exclude:
-    - 'test/controllers/api2_controller_test.rb'
-    - 'test/controllers/locations_controller_test.rb'
-    - 'test/controllers/names_controller_update_merge_test.rb'
-    - 'test/controllers/names_controller_update_test.rb'
-    - 'test/controllers/observations/namings_controller_test.rb'
-    - 'test/controllers/observations_controller_project_list_test.rb'
-    - 'test/controllers/observations_controller_show_test.rb'
-    - 'test/controllers/species_lists/name_lists_controller_test.rb'
-    - 'test/controllers/species_lists/uploads_controller_test.rb'
-    - 'test/controllers/species_lists_controller_test.rb'
-    - 'test/controllers/users_controller_test.rb'
-    - 'test/system/observation_form_system_test.rb'
-
-# Offense count: 2
-Minitest/UnspecifiedException:
-  Exclude:
-    - 'test/models/external_site_test.rb'
-    - 'test/models/translation_string_test.rb'
-
-# Offense count: 2
-Minitest/UselessAssertion:
-  Exclude:
-    - 'test/models/donation_test.rb'
-    - 'test/models/publication_test.rb'

@@ -1015,12 +1015,14 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_2i", text: local_now.strftime("%B"))
     assert_select("observation_when_3i", text: local_now.day.to_s)
   end
+  private :assert_date_is_now
 
   def assert_geolocation_is_empty
     assert_field("observation_lat", with: "", visible: :all)
     assert_field("observation_lng", with: "", visible: :all)
     assert_field("observation_alt", with: "", visible: :all)
   end
+  private :assert_geolocation_is_empty
 
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)
@@ -1217,6 +1219,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     #   href: /#{Rails.application.routes.url_helpers.image_path(new_img.id)}/
     # )
   end
+  private :assert_show_observation_page_has_important_info
 
   def review_flash(patterns)
     patterns.each { |pat| assert_flash_success(pat) }

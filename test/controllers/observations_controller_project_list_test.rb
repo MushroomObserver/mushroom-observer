@@ -335,6 +335,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     assert_obj_arrays_equal([], @obs1.species_lists)
     assert_obj_arrays_equal([@spl2], @obs2.species_lists)
   end
+  private :init_for_list_checkbox_tests
 
   def assert_list_checks(list_states)
     list_states.each do |id, state|

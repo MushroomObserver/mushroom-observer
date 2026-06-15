@@ -24,6 +24,7 @@ class LocationsControllerTest < FunctionalTestCase
   ensure
     @@emails = []
   end
+  private :assert_email_generated
 
   def assert_no_emails
     msg = @@emails.join("\n")
@@ -177,6 +178,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select("#comments_for_object")
     assert_select("#location_general_description")
   end
+  private :assert_show_location
 
   def test_show_location_next_flow
     loc = locations(:albion)
