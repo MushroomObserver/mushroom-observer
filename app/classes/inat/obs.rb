@@ -127,12 +127,13 @@ class Inat
         gsub("\r\n", "\n").
         # strip MO back-link annotations from prior imports (#4221)
         gsub(MO_BACK_LINK_LINE_PATTERN, "").
-        # compress newlines/returns to single newline, leaving
-        # an html comment because our textiling won't render
-        # text after consecutive newlines:
+        # Compress blank lines to a single newline (textile renders \n as a
+        # <br/>). A former "<!--- blank line(s) removed --->" marker rendered
+        # as visible junk and its hyphens opened textile strikethrough spans
+        # when paired with hyphens in the description (#4536).
         #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
         #   Pulk's mirror script inserts `\n\n` in iNat notes
-        gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n")
+        gsub(/(\r?\n){2,}/, "\n")
     end
 
     # MO Location with min bounding rectangle
