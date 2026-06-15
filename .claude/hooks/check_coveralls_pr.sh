@@ -65,7 +65,11 @@ fetch_source_files() {
   done
 }
 
-fetch_source_files "$BUILD_ID" pr
+if ! fetch_source_files "$BUILD_ID" pr; then
+  echo "" >&2
+  echo "📊 PR #${PR_NUM}: couldn't fetch coveralls source_files.json for build ${BUILD_ID} (transient network/API error)." >&2
+  exit 0
+fi
 
 gh pr view "$PR_NUM" --json files \
   --jq '.files[] | select(.changeType!="DELETED") | .path' |
@@ -89,7 +93,12 @@ if MAIN_SHA="$(git rev-parse --verify origin/main 2>/dev/null)"; then
 fi
 
 if [ -n "$MAIN_BUILD_ID" ]; then
-  fetch_source_files "$MAIN_BUILD_ID" main
+  # Pagination failure on the main fetch isn't fatal — the touched-files
+  # report doesn't need it. Drop the partial data and skip ripple instead.
+  fetch_source_files "$MAIN_BUILD_ID" main || {
+    rm -f "${TMPDIR}"/main_*.json
+    MAIN_BUILD_ID=""
+  }
 fi
 
 TMPDIR="$TMPDIR" ruby -rjson -rset -e '
