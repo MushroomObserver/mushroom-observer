@@ -129,18 +129,18 @@ class ParallelTestConfigServiceTest < UnitTestCase
   def test_setup_config_files_write_error
     create_database_yml
 
-    # Make config directory read-only to cause write failure
-    config_path = @rails_root.join("config")
-    FileUtils.chmod(0o444, config_path)
-
-    begin
+    # Stub File.write to raise. Provoking the failure via
+    # `FileUtils.chmod(0o444, config_path)` is flaky on CI runners
+    # whose process UID can write through a read-only directory bit
+    # (Docker root, some tmpfs mounts), leaving the rescue branch in
+    # `setup_config_files` uncovered.
+    error = StandardError.new("Write failed")
+    File.stub(:write, ->(_path, _content) { raise(error) }) do
       result = @service.setup_config_files
 
       assert_not(result,
                  "setup_config_files should return false on write error")
-      assert_match(/ERROR:/, output_messages)
-    ensure
-      FileUtils.chmod(0o755, config_path)
+      assert_match(/ERROR: Write failed/, output_messages)
     end
   end
 
