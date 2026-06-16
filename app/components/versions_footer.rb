@@ -30,7 +30,9 @@ module Components
     def view_template
       num_versions = @versions.length
 
-      div(class: "p-3 small footer-view-stats") do
+      render(::Components::ContentPadded.new(
+               class: "small footer-view-stats"
+             )) do
         if num_versions.positive? && @obj.version < num_versions
           render_old_version_metadata(num_versions)
         else

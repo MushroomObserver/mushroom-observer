@@ -74,6 +74,16 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Cover the deposit branch — `local_sequence` has no archive /
+  # accession set so `render_deposit` doesn't run on test_show.
+  def test_show_deposited_sequence
+    login
+    sequence = sequences(:deposited_sequence)
+    get(:show, params: { id: sequence.id })
+    assert_response(:success)
+    assert_select("a[href*='ncbi.nlm.nih.gov']")
+  end
+
   def test_show_nonexistent_sequence
     # Prove index displayed if called with id of sequence not in db
     login
