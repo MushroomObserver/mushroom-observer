@@ -32,6 +32,11 @@ class InterestsController < ApplicationController
     @interests = filter_interests_by_type(@interests, @selected_type) \
       if @selected_type.present?
     @pagination_data = paginate_interests!
+    render(Views::Controllers::Interests::Index.new(
+             interests: @interests.to_a, types: @types.map(&:to_s),
+             selected_type: @selected_type.presence,
+             pagination_data: @pagination_data
+           ))
   end
 
   private
@@ -204,8 +209,10 @@ class InterestsController < ApplicationController
       check_params_or_flash_errors!(target_type, target_id)
 
     @interest = find_interest
-    return interest unless !interest && @state != 0
+    return redirect_to_target_or_list_interests if !@interest &&
+                                                   @state.zero?
 
+    @interest ||= create_interest
     update_interest_and_flash_notice
     redirect_to_target_or_list_interests
   end

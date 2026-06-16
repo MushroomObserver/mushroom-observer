@@ -5,6 +5,8 @@ module Locations
   class HelpController < ApplicationController
     before_action :login_required
     # Help for locations
-    def show; end
+    def show
+      render(Views::Controllers::Locations::Help::Show.new)
+    end
   end
 end

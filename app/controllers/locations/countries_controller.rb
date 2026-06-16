@@ -8,6 +8,7 @@ module Locations
     # Displays a list of all countries with counts.
     def index
       @cc = ::CountryCounter.new
+      render(Views::Controllers::Locations::Countries::Index.new(cc: @cc))
     end
   end
 end

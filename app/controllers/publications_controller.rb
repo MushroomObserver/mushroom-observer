@@ -9,12 +9,9 @@ class PublicationsController < ApplicationController
   # GET /publications
   # GET /publications.xml
   def index
-    @publications = Publication.order(:full)
-    @full_count = @publications.length
-    @peer_count = @publications.count(&:peer_reviewed)
-    @mo_count   = @publications.count(&:mo_mentioned)
+    @publications = Publication.order(:full).to_a
     respond_to do |format|
-      format.html # index.html.erb
+      format.html { render_index_view }
       format.xml  { render(xml: @publications) }
     end
   end
@@ -24,8 +21,12 @@ class PublicationsController < ApplicationController
   def show
     @publication = Publication.find(params[:id])
     respond_to do |format|
-      format.html # show.html.erb
-      format.xml  { render(xml: @publication) }
+      format.html do
+        render(Views::Controllers::Publications::Show.new(
+                 publication: @publication
+               ))
+      end
+      format.xml { render(xml: @publication) }
     end
   end
 
@@ -34,7 +35,7 @@ class PublicationsController < ApplicationController
   def new
     @publication = Publication.new
     respond_to do |format|
-      format.html # new.html.erb
+      format.html { render_new_view }
       format.xml  { render(xml: @publication) }
     end
   end
@@ -42,7 +43,11 @@ class PublicationsController < ApplicationController
   # GET /publications/1/edit
   def edit
     @publication = Publication.find(params[:id])
-    redirect_to(publications_url) unless can_edit?(@publication)
+    if can_edit?(@publication)
+      render_edit_view
+    else
+      redirect_to(publications_url)
+    end
   end
 
   # POST /publications
@@ -60,7 +65,7 @@ class PublicationsController < ApplicationController
         end
       else
         flash_object_errors(@publication)
-        format.html { render(action: :new) }
+        format.html { render_new_view }
         format.xml  do
           render(xml: @publication.errors,
                  status: :unprocessable_content)
@@ -85,7 +90,7 @@ class PublicationsController < ApplicationController
         format.xml  { head(:ok) }
       else
         flash_object_errors(@publication)
-        format.html { render(action: :edit) }
+        format.html { render_edit_view }
         format.xml  do
           render(xml: @publication.errors,
                  status: :unprocessable_content)
@@ -124,5 +129,23 @@ class PublicationsController < ApplicationController
     else
       {}
     end
+  end
+
+  def render_index_view
+    render(Views::Controllers::Publications::Index.new(
+             publications: @publications
+           ))
+  end
+
+  def render_new_view
+    render(Views::Controllers::Publications::New.new(
+             publication: @publication
+           ))
+  end
+
+  def render_edit_view
+    render(Views::Controllers::Publications::Edit.new(
+             publication: @publication
+           ))
   end
 end
