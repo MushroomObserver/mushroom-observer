@@ -60,9 +60,9 @@ class ObservationViewsController < ApplicationController
 
   # `<turbo-stream action="update_lightbox_caption" obs-id="…">` is a
   # custom Turbo Stream action (handled by the lightbox Stimulus
-  # controller). Build it explicitly — the standard
-  # `turbo_stream.update(target)` action wraps in `<template>` and
-  # targets `#id`; this one targets the lightbox by `obs-id` attr.
+  # controller). Build it via Rails' `tag` builder so `@obs_id` is
+  # attribute-escaped — passing strings straight into a heredoc is
+  # an XSS shape even when `@obs_id` happens to be an integer today.
   def lightbox_caption_stream
     caption = view_context.capture do
       view_context.render(
@@ -72,9 +72,10 @@ class ObservationViewsController < ApplicationController
         )
       )
     end
-    html = "<turbo-stream action=\"update_lightbox_caption\" " \
-           "obs-id=\"#{@obs_id}\"><template>#{caption}</template>" \
-           "</turbo-stream>"
-    ::ActiveSupport::SafeBuffer.new(html)
+    view_context.tag.turbo_stream(
+      view_context.tag.template { caption },
+      action: "update_lightbox_caption",
+      "obs-id": @obs_id
+    )
   end
 end

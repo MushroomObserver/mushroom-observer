@@ -74,10 +74,10 @@ while IFS= read -r erb; do
     # Symbol-form action renders (`render(:foo)`, `render(action: :foo)`)
     # are scoped to the calling controller — they always resolve to
     # `<controller>/<action>` in the controller's own view dir. So
-    # only scan the controller file (and a couple of co-located
-    # concern files) that maps to the deleted ERB's namespace.
-    # E.g. deleted `app/views/controllers/users/emails/new.html.erb`
-    # → check `app/controllers/users/emails_controller.rb` only.
+    # only scan the controller file that maps to the deleted ERB's
+    # namespace. E.g. deleted
+    # `app/views/controllers/users/emails/new.html.erb` →
+    # `app/controllers/users/emails_controller.rb`.
     if [ "$dir" = "." ]; then
       ctrl_targets=""
     else
