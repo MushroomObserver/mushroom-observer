@@ -19,12 +19,17 @@ class Views::Base < Components::Base
   register_value_helper :add_owner_naming
   register_value_helper :add_index_title
   register_value_helper :add_context_nav
+  # `context_nav_links([tuples])` — array-version of `context_nav_link`,
+  # used where a view wraps each link manually. Composes the underlying
+  # link-building chain in Header::ContextNavHelper.
+  register_value_helper :context_nav_links
   register_value_helper :add_project_banner
   register_value_helper :add_edit_icons
   register_value_helper :add_interest_icons
   register_value_helper :add_pager_for
   register_value_helper :add_pagination
   register_value_helper :add_sorter
+  register_value_helper :add_type_filters
   register_value_helper :container_class
   register_value_helper :column_classes
   # `content_padding` is the MO-specific layout-class setter

@@ -11,6 +11,14 @@ class RssLogsController < ApplicationController
     build_index_with_query
   end
 
+  def render_index_view
+    render(Views::Controllers::RssLogs::Index.new(
+             query: @query, rss_logs: @objects.to_a,
+             pagination_data: @pagination_data,
+             types: @types || [], error: @error
+           ))
+  end
+
   private
 
   def default_sort_order
@@ -125,14 +133,19 @@ class RssLogsController < ApplicationController
 
   # Show a single RssLog.
   def show
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, RssLog, params[:id].to_s)
-    when "prev"
-      redirect_to_next_object(:prev, RssLog, params[:id].to_s)
+    return if redirect_or_find_show_target?
+
+    render(Views::Controllers::RssLogs::Show.new(rss_log: @rss_log))
+  end
+
+  def redirect_or_find_show_target?
+    flow = params[:flow]
+    if %w[next prev].include?(flow)
+      redirect_to_next_object(flow.to_sym, RssLog, params[:id].to_s)
     else
       @rss_log = find_or_goto_index(RssLog, params["id"])
     end
+    performed? || @rss_log.nil?
   end
 
   # This is the site's rss feed.

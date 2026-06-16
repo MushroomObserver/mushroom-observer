@@ -12,6 +12,12 @@ class TranslationsController < ApplicationController
     @show_tags = tags_to_show(@for_page, @strings)
     build_record_maps(@lang)
     @index = build_index(@lang, @show_tags)
+    render(Views::Controllers::Translations::Index.new(
+             lang: @lang, tag: @tag, for_page: @for_page,
+             index: @index, strings: @strings, edit_tags: @edit_tags,
+             official_records: @official_records,
+             translated_records: @translated_records
+           ))
   rescue StandardError => e
     raise(e) if Rails.env.test? && @lang
 
@@ -31,6 +37,7 @@ class TranslationsController < ApplicationController
     @strings = @lang.localization_strings
     @edit_tags = tags_to_edit(@tag, @strings)
     build_record_maps(@lang)
+    render_edit_turbo_stream
   rescue StandardError => e
     @msg = error_message(e).join("\n")
   end
@@ -46,10 +53,54 @@ class TranslationsController < ApplicationController
 
     @locale = @lang.locale
     @new_str = preview_string(@translated_records[@tag].text)
-    render(partial: "translations/update")
+    render_update_turbo_stream
   rescue StandardError => e
     @msg = error_message(e).join("\n")
-    render(:edit)
+    render_edit_turbo_stream
+  end
+
+  def render_edit_turbo_stream
+    form_view = Views::Controllers::Translations::Form.new(
+      lang: @lang, tag: @tag, edit_tags: @edit_tags,
+      strings: @strings, for_page: @for_page,
+      official_records: @official_records
+    )
+    versions_view = build_versions_view
+    render(turbo_stream: turbo_stream.update(
+      "translation_ui",
+      view_context.safe_join([
+                               view_context.render(form_view),
+                               view_context.render(versions_view)
+                             ])
+    ))
+  end
+
+  # Pre-resolve the version authors' logins so the view doesn't
+  # have to (the no_queries_in_phlex_views rule blocks AR calls
+  # from views).
+  def build_versions_view
+    user_ids = @edit_tags.filter_map { |t| @translated_records[t] }.
+               flat_map { |r| r.versions.map(&:user_id) }.uniq
+    user_logins = User.where(id: user_ids).pluck(:id, :login).to_h
+    Views::Controllers::Translations::Versions.new(
+      edit_tags: @edit_tags,
+      translated_records: @translated_records,
+      user: @user, user_logins: user_logins
+    )
+  end
+
+  def render_update_turbo_stream
+    versions_view = build_versions_view
+    render(turbo_stream: [
+             turbo_stream.replace(
+               "str_#{@tag}",
+               view_context.tag.span(@new_str,
+                                     class: "translated text-muted " \
+                                            "translation-updated",
+                                     id: "str_#{@tag}")
+             ),
+             turbo_stream.replace("translation_versions", versions_view)
+           ])
   end
 
   # -------------------------------

@@ -20,10 +20,61 @@ class ObservationViewsController < ApplicationController
                                                           @reviewed)
 
     respond_to do |format|
-      format.turbo_stream
+      format.turbo_stream { render_update_streams }
       format.html do
         return redirect_to(identify_observations_path)
       end
     end
+  end
+
+  private
+
+  def render_update_streams
+    render(turbo_stream: [
+             caption_toggle_stream,
+             box_toggle_stream,
+             lightbox_caption_stream
+           ])
+  end
+
+  def caption_toggle_stream
+    turbo_stream.replace(
+      "caption_reviewed_toggle_#{@obs_id}",
+      Components::MarkAsReviewedToggle.new(
+        observation_view: @observation_view,
+        selector: "caption_reviewed"
+      )
+    )
+  end
+
+  def box_toggle_stream
+    turbo_stream.replace(
+      "box_reviewed_toggle_#{@obs_id}",
+      Components::MarkAsReviewedToggle.new(
+        observation_view: @observation_view,
+        selector: "box_reviewed",
+        label_class: "stretched-link"
+      )
+    )
+  end
+
+  # `<turbo-stream action="update_lightbox_caption" obs-id="…">` is a
+  # custom Turbo Stream action (handled by the lightbox Stimulus
+  # controller). Build it explicitly — the standard
+  # `turbo_stream.update(target)` action wraps in `<template>` and
+  # targets `#id`; this one targets the lightbox by `obs-id` attr.
+  def lightbox_caption_stream
+    caption = view_context.capture do
+      view_context.render(
+        Components::LightboxCaption.new(
+          user: @user, obs: @obs, identify: true,
+          observation_view: @observation_view
+        )
+      )
+    end
+    html = "<turbo-stream action=\"update_lightbox_caption\" " \
+           "obs-id=\"#{@obs_id}\"><template>#{caption}</template>" \
+           "</turbo-stream>"
+    ::ActiveSupport::SafeBuffer.new(html)
   end
 end
