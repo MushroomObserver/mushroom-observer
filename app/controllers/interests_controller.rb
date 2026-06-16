@@ -209,9 +209,8 @@ class InterestsController < ApplicationController
       check_params_or_flash_errors!(target_type, target_id)
 
     @interest = find_interest
-    if !@interest && @state.zero?
-      return redirect_to_target_or_list_interests
-    end
+    return redirect_to_target_or_list_interests if !@interest &&
+                                                   @state.zero?
 
     @interest ||= create_interest
     update_interest_and_flash_notice

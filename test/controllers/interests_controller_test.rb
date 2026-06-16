@@ -126,6 +126,21 @@ class InterestsControllerTest < FunctionalTestCase
 
   # Hits `filter_interests_by_type` (only invoked when `type` param
   # present).
+  # Covers `Views::Controllers::Interests::Index#render_pending_notice`
+  # — the unapproved name-tracker branch (target_type=NameTracker,
+  # note_template present, approved=false). No fixture matches all
+  # three; build a tracker inline.
+  def test_index_with_pending_name_tracker
+    login("rolf")
+    tracker = NameTracker.create!(
+      user: rolf, name: names(:peltigera),
+      note_template: "note", approved: false
+    )
+    Interest.create!(target: tracker, user: rolf, state: true)
+    get(:index)
+    assert_response(:success)
+  end
+
   def test_index_filtered_by_type
     login("rolf")
     Interest.create(target: observations(:minimal_unknown_obs),

@@ -67,7 +67,9 @@ module Views::Controllers::Publications
       return if @publication.created_at.web_date ==
                 @publication.updated_at.web_date
 
-      plain(:footer_last_updated_at.t(date: @publication.updated_at.web_date))
+      trusted_html(
+        :footer_last_updated_at.t(date: @publication.updated_at.web_date)
+      )
     end
   end
 end
