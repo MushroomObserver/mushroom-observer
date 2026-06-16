@@ -257,30 +257,27 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_requested(:post, "#{API_BASE}/observation_field_values", times: 1)
   end
 
-  # INAT_SKIP_WRITEBACK=true forces the write-back off everywhere.
-  def test_import_writeback_forced_off_by_env
-    create_ivars_from_filename("tremella_mesenterica")
+  # An admin's per-import writeback: :skip forces the write-back off
+  # everywhere, overriding the environment default.
+  def test_import_writeback_forced_off_by_import_setting
+    create_ivars_from_filename("tremella_mesenterica", writeback: :skip)
     stub_inat_interactions
 
     reset_inat_request_log
-    with_env("INAT_SKIP_WRITEBACK", "true") do
-      InatImportJob.perform_now(@inat_import)
-    end
+    InatImportJob.perform_now(@inat_import)
 
     assert_not_requested(:post, "#{API_BASE}/observation_field_values")
   end
 
-  # INAT_SKIP_WRITEBACK=false forces the write-back on, overriding the
-  # development default (e.g. to exercise the write-back locally).
+  # An admin's per-import writeback: :force turns the write-back on,
+  # overriding the development default (e.g. to exercise it locally).
   def test_import_writeback_forced_on_overrides_development_default
-    create_ivars_from_filename("tremella_mesenterica")
+    create_ivars_from_filename("tremella_mesenterica", writeback: :force)
     stub_inat_interactions
 
     reset_inat_request_log
     Rails.env.stub(:development?, true) do
-      with_env("INAT_SKIP_WRITEBACK", "false") do
-        InatImportJob.perform_now(@inat_import)
-      end
+      InatImportJob.perform_now(@inat_import)
     end
 
     assert_requested(:post, "#{API_BASE}/observation_field_values", times: 1)
@@ -292,16 +289,6 @@ class InatImportJobTest < ActiveJob::TestCase
   # counts only its own import's requests.
   def reset_inat_request_log
     WebMock::RequestRegistry.instance.reset!
-  end
-
-  # Set an ENV var for the block, restoring its prior value (or absence).
-  def with_env(key, value)
-    had = ENV.key?(key)
-    old = ENV.fetch(key, nil)
-    ENV[key] = value
-    yield
-  ensure
-    had ? ENV[key] = old : ENV.delete(key)
   end
 
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,

@@ -123,7 +123,8 @@ class InatImportsController < ApplicationController
       inat_ids: params[:inat_ids],
       import_all: params[:all],
       consent: params[:consent],
-      import_others: (import_others? ? "1" : nil)
+      import_others: (import_others? ? "1" : nil),
+      skip_inat_writeback: params[:skip_inat_writeback]
     )
   end
 
@@ -142,6 +143,7 @@ class InatImportsController < ApplicationController
     merge_form_param(confirm, :inat_ids)
     merge_form_param(confirm, :consent)
     merge_form_param(confirm, :import_others)
+    merge_form_param(confirm, :skip_inat_writeback)
     params[:all] ||= confirm[:import_all]
   end
 
@@ -150,32 +152,47 @@ class InatImportsController < ApplicationController
   end
 
   def reload_form
-    render_new_form(
-      username: params[:inat_username],
-      inat_ids: params[:inat_ids],
-      all: params[:all],
-      consent: params[:consent],
-      import_others: params[:import_others]
-    )
+    render_new_form(submitted: {
+                      username: params[:inat_username],
+                      inat_ids: params[:inat_ids],
+                      all: params[:all],
+                      consent: params[:consent],
+                      import_others: params[:import_others],
+                      skip_writeback: params[:skip_inat_writeback]
+                    })
   end
 
-  def render_new_form(username: @user.inat_username,
-                      inat_ids: nil, all: nil,
-                      consent: nil, import_others: nil)
-    form = FormObject::InatImport.new(
-      inat_username: username,
-      inat_ids: inat_ids,
-      all: ("1" if all == "1"),
-      consent: ("1" if consent == "1"),
-      import_others: ("1" if import_others == "1")
-    )
+  def render_new_form(submitted: {})
     render(
       Views::Controllers::InatImports::New.new(
-        form: form,
-        super_importer: InatImport.super_importer?(@user)
+        form: build_new_form(submitted),
+        super_importer: InatImport.super_importer?(@user),
+        admin: in_admin_mode?
       ),
       layout: true
     )
+  end
+
+  def build_new_form(submitted)
+    FormObject::InatImport.new(
+      inat_username: submitted.fetch(:username, @user.inat_username),
+      inat_ids: submitted[:inat_ids],
+      all: ("1" if submitted[:all] == "1"),
+      consent: ("1" if submitted[:consent] == "1"),
+      import_others: ("1" if submitted[:import_others] == "1"),
+      skip_inat_writeback: initial_skip_writeback(submitted)
+    )
+  end
+
+  # The fresh form (no :skip_writeback key) pre-checks the box to mirror the
+  # default that will apply if the admin doesn't touch it: skip in
+  # development, write back in production. On reload, honor the submitted
+  # state.
+  def initial_skip_writeback(submitted)
+    return ("1" if Rails.env.development?) unless
+      submitted.key?(:skip_writeback)
+
+    ("1" if submitted[:skip_writeback] == "1")
   end
 
   # Superform namespaces fields under the model key.
@@ -189,6 +206,7 @@ class InatImportsController < ApplicationController
     merge_form_param(new_form, :inat_ids)
     merge_form_param(new_form, :consent)
     merge_form_param(new_form, :import_others)
+    merge_form_param(new_form, :skip_inat_writeback)
     params[:all] ||= new_form[:all]
   end
 
@@ -246,6 +264,7 @@ class InatImportsController < ApplicationController
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
       import_others: import_others?,
+      writeback: writeback_policy,
       response_errors: "",
       token: "",
       log: [],
@@ -266,6 +285,16 @@ class InatImportsController < ApplicationController
     return false unless InatImport.super_importer?(@user)
 
     params[:import_others] == "1"
+  end
+
+  # Admins can toggle the iNat write-back per import via a form checkbox
+  # (checked = skip, unchecked = force it on). Everyone else gets `default`
+  # so the importer applies its environment default (skip in development,
+  # write back in production).
+  def writeback_policy
+    return :default unless in_admin_mode?
+
+    params[:skip_inat_writeback] == "1" ? :skip : :force
   end
 
   def clean_inat_ids
