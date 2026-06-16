@@ -76,8 +76,7 @@ export default class extends Controller {
         this.respondToGeocode(results)
       })
       .catch((e) => {
-        console.log("Geocode was not successful: " + e)
-        // alert("Geocode was not successful for the following reason: " + e)
+        this.showGeocodeError(e)
       });
   }
 
@@ -108,9 +107,32 @@ export default class extends Controller {
         this.respondToGeocode(results)
       })
       .catch((e) => {
-        console.log("Geocode was not successful: " + e)
-        // alert("Geocode was not successful for the following reason: " + e)
+        this.showGeocodeError(e)
       });
+  }
+
+  // Surface a Google Maps geocode failure to the user. Without this the
+  // catch handler was a silent `console.log` — issue #4535: clicking
+  // "Find on Map" appeared to do nothing because the Geocoding API on
+  // MO's Google Cloud key was disabled and every request returned
+  // `REQUEST_DENIED`. The injected `.alert-danger` lives in
+  // `#geocode_flash`, a div the location form renders above the
+  // place input.
+  showGeocodeError(error) {
+    console.log("Geocode was not successful: " + error)
+    const flash = document.getElementById("geocode_flash")
+    if (!flash) return
+
+    const message = `Geocoding failed: ${error?.message || error}.
+      The map service may be misconfigured — please report this to
+      a site administrator.`
+    flash.innerHTML = `
+      <div class="alert alert-danger" role="alert">
+        <button type="button" class="close" data-dismiss="alert"
+                aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        ${message}
+      </div>
+    `
   }
 
   // Remove certain types of results from the geocoder response:
