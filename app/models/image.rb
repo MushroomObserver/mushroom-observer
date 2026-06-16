@@ -253,6 +253,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :user
   belongs_to :license
 
+  # External data source for imported images (#4208/#4529). `source_id` +
+  # `external_id` record where the image came from (e.g. the iNat photo id),
+  # mirroring the Observation source/external_id pair.
+  belongs_to :external_source, class_name: "Source",
+                               foreign_key: :source_id, optional: true,
+                               inverse_of: :images
+
   has_many :copyright_changes, as: :target,
                                dependent: :destroy,
                                inverse_of: :target

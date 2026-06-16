@@ -33,6 +33,7 @@ class Source < AbstractModel
 
   has_many :observations, dependent: :restrict_with_exception,
                           inverse_of: :external_source
+  has_many :images, dependent: :nullify, inverse_of: :external_source
 
   validates :name, presence: true, length: { maximum: 100 },
                    uniqueness: { case_sensitive: false }
