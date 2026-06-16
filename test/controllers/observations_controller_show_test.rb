@@ -90,8 +90,11 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
-    # Simple-notes path renders <div class="textile"><p>Notes:<br/>…</p></div>
-    assert_select("div.textile p", text: /Notes:/)
+    # Other-only notes render the "Notes:" caption with the value as an
+    # indented textile paragraph beneath it.
+    assert_select("#observation_notes", text: /Notes:/)
+    assert_select("#observation_notes .indent .textile p",
+                  text: "Second fruiting in bark chips")
   end
 
   def test_show_project_observation
