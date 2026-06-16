@@ -7,7 +7,7 @@
 #
 #  DESCRIPTION::
 #
-#    Phase 2 of the classification roadmap (#4163 follow-up). Walks
+#    Phase 2 of the classification roadmap (discussion #4167). Walks
 #    every Name and buckets it by what its classification source
 #    likely is. Helps size Phase 4 (genus imports) and Phase 5
 #    (external-source validation) by showing the shape of what's
@@ -138,7 +138,15 @@ log("  #{genera_by_text.size} unique genus text_names")
 log("Scanning non-genus names…")
 counts = Hash.new(0)
 processed = 0
-Name.where.not(rank: Name.ranks[:Genus]).find_each(batch_size: 5000) do |name|
+# `where.not(rank: genus)` drops NULL-rank rows (SQL `!=` never matches
+# NULL), and `names.rank` is nullable — so any legacy/invalid rows with
+# NULL rank would be silently skipped. Include them explicitly so the
+# census stays complete. Select only the columns bucket_for reads to
+# keep this ~70K-row scan light.
+genus_rank = Name.ranks[:Genus]
+Name.where.not(rank: genus_rank).or(Name.where(rank: nil)).
+  select(:id, :rank, :text_name, :classification).
+  find_each(batch_size: 5000) do |name|
   bucket = bucket_for(name, lookup_genus(name, genera_by_text))
   counts[bucket] += 1
   processed += 1
