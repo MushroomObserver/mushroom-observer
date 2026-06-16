@@ -227,7 +227,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_16_120000) do
     t.datetime "last_obs_start"
     t.boolean "cancel"
     t.boolean "import_others", default: false, null: false
-    t.text "inat_url"
     t.integer "writeback", default: 0, null: false
   end
 
