@@ -61,7 +61,9 @@ class InfoController < ApplicationController
 
   # Allow translator to enter a special note linked to from the lower left.
   def translators_note
-    render(Views::Controllers::Info::TranslatorsNote.new)
+    render(Views::Controllers::Info::TranslatorsNote.new(
+             languages: Language.all.sort_by(&:order)
+           ))
   end
 
   def site_stats

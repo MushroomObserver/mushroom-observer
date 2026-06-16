@@ -65,6 +65,12 @@ class InfoControllerTest < FunctionalTestCase
     assert_head_title(:intro_title.l)
   end
 
+  def test_translators_note
+    login
+    get(:translators_note)
+    assert_select("body.info__translators_note")
+  end
+
   def test_site_stats
     login
     get(:site_stats)

@@ -28,7 +28,9 @@ class SupportController < ApplicationController
 
   def donors
     @donor_list = Donation.donor_list
-    render(Views::Controllers::Support::Donors.new(donor_list: @donor_list))
+    render(Views::Controllers::Support::Donors.new(
+             donor_names: @donor_list.pluck("who")
+           ))
   end
 
   def wrapup_2011

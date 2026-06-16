@@ -3,7 +3,7 @@
 module Views::Controllers::Support
   # Donor wall — striped table of donor names.
   class Donors < Views::Base
-    prop :donor_list, _Array(_Hash(::String, ::String))
+    prop :donor_names, _Array(::String)
 
     def view_template
       add_page_title(:donors_title.l)
@@ -13,7 +13,7 @@ module Views::Controllers::Support
 
       div(class: "text-center") do
         table(class: "table-striped table-donors mt-3 mb-3") do
-          @donor_list.each { |donor| tr { td { plain(donor["who"]) } } }
+          @donor_names.each { |name| tr { td { plain(name) } } }
         end
       end
       trusted_html(:donors_order.tp)

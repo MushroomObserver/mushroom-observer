@@ -3,6 +3,8 @@
 module Views::Controllers::Info
   # Translators' note + language picker.
   class TranslatorsNote < Views::Base
+    prop :languages, _Array(::Language)
+
     def view_template
       add_page_title(:translators_note_title.l)
 
@@ -11,9 +13,7 @@ module Views::Controllers::Info
                            "blob/main/config/locales/en.txt"
                    ))
 
-      ul do
-        ::Language.all.sort_by(&:order).each { |lang| render_lang(lang) }
-      end
+      ul { @languages.each { |lang| render_lang(lang) } }
     end
 
     private

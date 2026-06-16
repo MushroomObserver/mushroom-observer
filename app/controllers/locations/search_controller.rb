@@ -59,9 +59,7 @@ module Locations
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
             :search_bar_help,
-            html: render_to_string(
-              Views::Controllers::Locations::Search::Help.new
-            )
+            Views::Controllers::Locations::Search::Help.new
           ))
         end
         format.html do
