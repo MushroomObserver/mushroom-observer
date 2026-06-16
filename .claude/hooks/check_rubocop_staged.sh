@@ -26,7 +26,10 @@ if [ -z "$STAGED" ]; then
 fi
 
 # Step 1: Rubocop on the staged files only.
-RUBOCOP_OUT="$(bundle exec rubocop --format simple $STAGED 2>&1 || true)"
+# --force-exclusion so explicitly-passed paths still honor .rubocop.yml's
+# AllCops/Exclude (e.g. generated db/schema.rb, db/migrate/*); without it,
+# naming a file on the command line overrides the project's own excludes.
+RUBOCOP_OUT="$(bundle exec rubocop --force-exclusion --format simple $STAGED 2>&1 || true)"
 if ! printf '%s' "$RUBOCOP_OUT" | grep -qE "no offenses detected"; then
   cat >&2 <<EOF
 🚫 Rubocop offenses on staged Ruby files — blocking commit.

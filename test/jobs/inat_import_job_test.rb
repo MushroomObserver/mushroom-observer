@@ -229,6 +229,67 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  # In development the importer skips the iNat write-back by default, so a
+  # local import never annotates a real iNat observation.
+  def test_import_skips_inat_writeback_by_default_in_development
+    create_ivars_from_filename("tremella_mesenterica")
+    stub_inat_interactions
+
+    # Count only this import's requests (see reset_inat_request_log).
+    reset_inat_request_log
+    Rails.env.stub(:development?, true) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_not_requested(:post, "#{API_BASE}/observation_field_values")
+  end
+
+  # Outside development (production, and the WebMock-isolated test env) the
+  # importer stamps the MO URL back onto the iNat observation by default.
+  def test_import_writes_mo_url_back_to_inat_by_default
+    create_ivars_from_filename("tremella_mesenterica")
+    stub_inat_interactions
+
+    reset_inat_request_log
+    InatImportJob.perform_now(@inat_import)
+
+    assert_requested(:post, "#{API_BASE}/observation_field_values", times: 1)
+  end
+
+  # An admin's per-import writeback: :skip forces the write-back off
+  # everywhere, overriding the environment default.
+  def test_import_writeback_forced_off_by_import_setting
+    create_ivars_from_filename("tremella_mesenterica", writeback: :skip)
+    stub_inat_interactions
+
+    reset_inat_request_log
+    InatImportJob.perform_now(@inat_import)
+
+    assert_not_requested(:post, "#{API_BASE}/observation_field_values")
+  end
+
+  # An admin's per-import writeback: :force turns the write-back on,
+  # overriding the development default (e.g. to exercise it locally).
+  def test_import_writeback_forced_on_overrides_development_default
+    create_ivars_from_filename("tremella_mesenterica", writeback: :force)
+    stub_inat_interactions
+
+    reset_inat_request_log
+    Rails.env.stub(:development?, true) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_requested(:post, "#{API_BASE}/observation_field_values", times: 1)
+  end
+
+  # webmock/minitest's per-test reset does not clear the request log between
+  # these write-back tests, and assert_(not_)requested reads the cumulative
+  # log; clear just the request counter (not the stubs) so each assertion
+  # counts only its own import's requests.
+  def reset_inat_request_log
+    WebMock::RequestRegistry.instance.reset!
+  end
+
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
   # 9 obs fields, including "DNA Barcode ITS", "Collection number", "Collector"
   def test_import_job_obs_with_sequence_and_multiple_ids

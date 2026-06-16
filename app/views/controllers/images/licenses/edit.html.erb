@@ -1,8 +1,0 @@
-<%
-add_page_title(:image_updater_title.t(user: @user.login))
-container_class(:wide)
-%>
-
-<%= render(Views::Controllers::Images::Licenses::Form.new(
-             @form,
-             action: images_license_updater_path)) %>

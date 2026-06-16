@@ -12,16 +12,32 @@ module Images
       @data, @status, @result = @image.read_exif_data
 
       respond_to do |format|
-        format.html
-        format.turbo_stream do
-          identifier = "image_exif_#{@image.id}"
-          title = :exif_data_for_image.t(image: @image.id)
-          fallback = @status ? nil : @result
-          render(partial: "shared/modal",
-                 locals: { identifier: identifier, title: title,
-                           body: "images/exif/data", fallback: fallback })
-        end
+        format.html { render_exif_html }
+        format.turbo_stream { render_exif_modal }
       end
+    end
+
+    private
+
+    def render_exif_html
+      if @status.success?
+        render(Views::Controllers::Images::EXIF::Show.new(
+                 image: @image, data: @data
+               ))
+      else
+        render(plain: @result, status: :internal_server_error)
+      end
+    end
+
+    # Controller `render` can't thread a block to `Components::Modal`'s
+    # `view_template(&block)`, so the modal is wrapped in a Phlex view
+    # that does the `with_body` slot wiring.
+    def render_exif_modal
+      status = @status.success? ? :ok : :internal_server_error
+      render(Views::Controllers::Images::EXIF::Modal.new(
+               image: @image, data: @data,
+               success: @status.success?, error_text: @result
+             ), layout: false, status: status)
     end
   end
 end
