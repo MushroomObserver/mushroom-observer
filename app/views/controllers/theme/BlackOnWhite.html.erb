@@ -1,9 +1,0 @@
-<%
-add_page_title(:theme_black_on_white.tl)
-
-add_context_nav(Tab::Theme::ShowActions.new)
-%>
-
-<%= :theme_black_on_white_description.tp(link: "XXX").sub("XXX", link_to("**__Amanita__**".t, action: :Amanita)).html_safe %>
-
-<%= :theme_switch.tp(theme: :BlackOnWhite.t) %>

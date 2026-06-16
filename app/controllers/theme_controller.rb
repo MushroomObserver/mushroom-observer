@@ -10,13 +10,31 @@
 class ThemeController < ApplicationController
   # callbacks
   before_action :login_required
-  # except: MO.themes + [:color_themes]
 
   # Show general information on color themes
-  def color_themes; end
+  def color_themes
+    render(Views::Controllers::Theme::ColorThemes.new)
+  end
 
   # Individual theme actions. Each shows a sample page in that theme,
   # explaining the colors for that theme.
-  # These actions are not defined here, but rather are automagically created
-  # if there's a view template corresponding to the theme.
+  def Agaricus # rubocop:disable Naming/MethodName
+    render(Views::Controllers::Theme::Agaricus.new)
+  end
+
+  def Amanita # rubocop:disable Naming/MethodName
+    render(Views::Controllers::Theme::Amanita.new)
+  end
+
+  def BlackOnWhite # rubocop:disable Naming/MethodName
+    render(Views::Controllers::Theme::BlackOnWhite.new)
+  end
+
+  def Cantharellaceae # rubocop:disable Naming/MethodName
+    render(Views::Controllers::Theme::Cantharellaceae.new)
+  end
+
+  def Hygrocybe # rubocop:disable Naming/MethodName
+    render(Views::Controllers::Theme::Hygrocybe.new)
+  end
 end

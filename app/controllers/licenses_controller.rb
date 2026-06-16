@@ -7,17 +7,20 @@ class LicensesController < AdminController
   before_action :store_location, except: :destroy
 
   def index
-    @objects = License.all
+    @objects = License.all.to_a
+    render(Views::Controllers::Licenses::Index.new(objects: @objects))
   end
 
   def show
     return false unless (@license = find_or_goto_index(License, params[:id]))
 
     @canonical_url = license_url(@license.id)
+    render(Views::Controllers::Licenses::Show.new(license: @license))
   end
 
   def new
     @license = License.new
+    render_new_view
   end
 
   def create
@@ -28,7 +31,7 @@ class LicensesController < AdminController
     # and blanks all the attributes
     if @license.attribute_duplicated?
       flash_warning("Duplicate display_name, code, or url")
-      return render(:new)
+      return render_new_view
     end
 
     if @license.save
@@ -38,13 +41,13 @@ class LicensesController < AdminController
       redirect_to(license_path(@license.id))
     else
       @license.errors.full_messages.each { |msg| flash_warning(msg) }
-      render(:new)
+      render_new_view
     end
   end
 
   def edit
     @license = find_or_goto_index(License, params[:id])
-    @deprecated = @license.deprecated
+    render_edit_view
   end
 
   def update
@@ -95,12 +98,12 @@ class LicensesController < AdminController
 
   def no_changes
     flash_warning(:runtime_edit_name_no_change.l)
-    render(:edit)
+    render_edit_view
   end
 
   def duplicate_attribute
     flash_warning(:runtime_license_duplicate_attributed.l)
-    render(:edit)
+    render_edit_view
   end
 
   def update_succeded
@@ -112,6 +115,14 @@ class LicensesController < AdminController
 
   def update_failed
     @license.errors.full_messages.each { |msg| flash_warning(msg) }
-    render(:edit)
+    render_edit_view
+  end
+
+  def render_new_view
+    render(Views::Controllers::Licenses::New.new(license: @license))
+  end
+
+  def render_edit_view
+    render(Views::Controllers::Licenses::Edit.new(license: @license))
   end
 end

@@ -32,6 +32,11 @@ class InterestsController < ApplicationController
     @interests = filter_interests_by_type(@interests, @selected_type) \
       if @selected_type.present?
     @pagination_data = paginate_interests!
+    render(Views::Controllers::Interests::Index.new(
+             interests: @interests.to_a, types: @types.map(&:to_s),
+             selected_type: @selected_type.presence,
+             pagination_data: @pagination_data
+           ))
   end
 
   private

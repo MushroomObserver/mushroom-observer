@@ -22,6 +22,13 @@ module Locations
       "LocationDescription"
     end
 
+    def render_index_view
+      render(Views::Controllers::Locations::Descriptions::Index.new(
+               query: @query, descriptions: @objects.to_a,
+               pagination_data: @pagination_data, error: @error
+             ))
+    end
+
     # Sort options for the index page. Same shape as
     # `Names::DescriptionsController#index_sort_options` — both
     # description indexes share the legacy

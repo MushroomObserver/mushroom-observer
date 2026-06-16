@@ -54,6 +54,38 @@ module Locations
       }
     ].freeze
 
+    def show
+      respond_to do |format|
+        format.turbo_stream do
+          render(turbo_stream: turbo_stream.update(
+            :search_bar_help,
+            html: render_to_string(
+              Views::Controllers::Locations::Search::Help.new
+            )
+          ))
+        end
+        format.html do
+          render(Views::Controllers::Locations::Search::Show.new)
+        end
+      end
+    end
+
+    # Override the Searchable concern's HTML branches so the form +
+    # help page render the Phlex views instead of the deleted ERBs.
+    def new
+      @local = params[:local] != "false"
+      set_up_form_field_groupings
+      @search = build_search_query
+      respond_to do |format|
+        format.turbo_stream { render(turbo_stream: turbo_stream_update) }
+        format.html do
+          render(Views::Controllers::Locations::Search::New.new(
+                   search: @search, local: @local
+                 ))
+        end
+      end
+    end
+
     private
 
     def set_up_form_field_groupings

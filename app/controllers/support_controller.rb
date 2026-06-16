@@ -8,10 +8,11 @@ class SupportController < ApplicationController
     @donation = Donation.new
     @donation.user = @user
     @donation.amount = 100
-    return unless @user
-
-    @donation.who = @user.name
-    @donation.email = @user.email
+    if @user
+      @donation.who = @user.name
+      @donation.email = @user.email
+    end
+    render(Views::Controllers::Support::Donate.new(donation: @donation))
   end
 
   def confirm
@@ -20,7 +21,37 @@ class SupportController < ApplicationController
                 else
                   Donation.new
                 end
+    return if performed?
+
+    render(Views::Controllers::Support::Confirm.new(donation: @donation))
   end
+
+  def donors
+    @donor_list = Donation.donor_list
+    render(Views::Controllers::Support::Donors.new(donor_list: @donor_list))
+  end
+
+  def wrapup_2011
+    render(Views::Controllers::Support::Wrapup2011.new)
+  end
+
+  def wrapup_2012
+    render(Views::Controllers::Support::Wrapup2012.new)
+  end
+
+  def letter
+    render(Views::Controllers::Support::Letter.new)
+  end
+
+  def thanks
+    render(Views::Controllers::Support::Thanks.new)
+  end
+
+  def governance
+    render(Views::Controllers::Support::Governance.new)
+  end
+
+  private
 
   def find_user(email)
     users = User.where(email: email)
@@ -50,18 +81,4 @@ class SupportController < ApplicationController
     end
     true
   end
-
-  def donors
-    @donor_list = Donation.donor_list
-  end
-
-  def wrapup_2011; end
-
-  def wrapup_2012; end
-
-  def letter; end
-
-  def thanks; end
-
-  def governance; end
 end
