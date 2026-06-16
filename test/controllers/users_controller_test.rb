@@ -148,6 +148,19 @@ class UsersControllerTest < FunctionalTestCase
     assert_redirected_to({ action: :index })
   end
 
+  # An unverified user has verified: nil; the profile heading must not
+  # crash on nil.strftime when rendering the "Joined" date (#4551).
+  def test_show_unverified_user
+    user = users(:unverified)
+    assert_nil(user.verified)
+
+    login
+    get(:show, params: { id: user.id })
+
+    assert_response(:success)
+    assert_select("body.users__show")
+  end
+
   #   ---------------------
   #    show_selected users
   #   ---------------------

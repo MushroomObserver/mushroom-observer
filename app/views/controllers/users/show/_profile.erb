@@ -1,8 +1,8 @@
 <%
 heading = [
   tag.strong(:show_user_joined.t), ": ",
-  tag.span(@show_user.verified.strftime("%Y-%m-%d"),
-           data: { time: @show_user.verified.strftime("%Y-%m-%dT%H:%M:%S") })
+  tag.span(@show_user.verified&.strftime("%Y-%m-%d"),
+           data: { time: @show_user.verified&.strftime("%Y-%m-%dT%H:%M:%S") })
 ].safe_join
 heading_links =
   if @show_user != @user && !@show_user.no_emails &&
