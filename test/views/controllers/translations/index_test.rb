@@ -44,7 +44,8 @@ module Views::Controllers::Translations
     private
 
     def build_records(lang, tag, text)
-      record = lang.translation_strings.first || (return {})
+      return {} unless lang.translation_strings.first
+
       record_double = TranslationString.new(language: lang, tag: tag,
                                             text: text,
                                             updated_at: Time.zone.now)
