@@ -75,8 +75,8 @@ class InatObsTest < UnitTestCase
 
     # Observation form needs the Notes "parts" keys to be normalized
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
-    other = "on Quercus\n" \
-            "&#8212;\n" \
+    other = "on Quercus\n\n" \
+            "&#8212;\n\n" \
             "Originally posted to Mushroom Observer on Mar. 7, 2024."
     expected_notes = { snapshot_key => expected_snapshot,
                        Other: other }
@@ -343,16 +343,17 @@ class InatObsTest < UnitTestCase
     )
 
     mock_obs = mock_observation("tremella_mesenterica")
-    mock_obs[:description] = "before blank line\r\n\r\nafter blank line"
+    mock_obs[:description] = "before\r\n\r\n\r\n\r\nafter blank lines"
     assert_not(
-      mock_obs.notes[:Other].match?(/\n{2,}/),
-      "Failed to compress consecutive newlines/returns from iNat Notes"
+      mock_obs.notes[:Other].match?(/\n{3,}/),
+      "Failed to collapse multiple blank lines to a single blank line"
     )
-    # Blank lines compress to a single newline (no marker since #4536).
+    # Multiple blank lines collapse to a single blank line (no marker
+    # since #4536).
     assert_equal(
-      "before blank line\nafter blank line",
+      "before\n\nafter blank lines",
       mock_obs.notes[:Other],
-      "Failed to compress consecutive newlines/returns from iNat Notes"
+      "Failed to collapse multiple blank lines to a single blank line"
     )
   end
 
