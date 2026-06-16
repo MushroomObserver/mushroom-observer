@@ -234,23 +234,30 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     notes = @obs.notes
     return if notes == ::Observation.no_notes
 
-    if notes.keys == [:Other]
-      trusted_html("#{:NOTES.t}:\n#{notes[:Other]}".tpl)
-    else
-      render_structured_notes(notes)
-    end
-  end
-
-  def render_structured_notes(notes)
     div(class: "obs-notes textile", id: "observation_notes") do
       ::Textile.clear_textile_cache
       ::Textile.register_name(@obs.name)
-      trusted_html("<p>#{:NOTES.t}:<br>".t)
-      notes.each do |key, value|
-        trusted_html("+#{key.to_s.tr("_", " ")}+: #{value}<br>".tl)
-      end
-      trusted_html("</p>".t)
+      trusted_html("#{:NOTES.t}:".t)
+      div(class: "indent") { render_note_values(notes) }
     end
+  end
+
+  # "Other"-only notes show just the value (MO omits the lone "Other"
+  # caption); multi-part notes show each caption with its value indented
+  # beneath it. Values render via `.tpl` (full textile) so blank lines
+  # survive as paragraph breaks — `.tl` keeps only the first paragraph
+  # and would truncate the note at its first blank line (#4536).
+  def render_note_values(notes)
+    if notes.keys == [:Other]
+      trusted_html(notes[:Other].to_s.tpl)
+    else
+      notes.each { |key, value| render_note_part(key, value) }
+    end
+  end
+
+  def render_note_part(key, value)
+    trusted_html("+#{key.to_s.tr("_", " ")}+:".tl)
+    div(class: "indent") { trusted_html(value.to_s.tpl) }
   end
 
   def render_projects
