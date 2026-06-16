@@ -25,9 +25,10 @@ module Views::Controllers::Users
       def render_heading
         strong { :show_user_joined.l }
         plain(": ")
+        # `verified` is nil for unverified users (#4551 fix from main).
         span(
-          data: { time: @show_user.verified.strftime("%Y-%m-%dT%H:%M:%S") }
-        ) { @show_user.verified.strftime("%Y-%m-%d") }
+          data: { time: @show_user.verified&.strftime("%Y-%m-%dT%H:%M:%S") }
+        ) { @show_user.verified&.strftime("%Y-%m-%d") }
       end
 
       def render_heading_links

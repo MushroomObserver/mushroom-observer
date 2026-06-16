@@ -519,6 +519,90 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Should flatten inat_username from namespaced params")
   end
 
+  def test_skip_writeback_checkbox_admin_only
+    login(users(:rolf).login)
+    get(:new)
+    assert_select(
+      "input[type=checkbox][id=inat_import_skip_inat_writeback]", false,
+      "Non-admin should not see the skip-writeback checkbox"
+    )
+
+    make_admin
+    get(:new)
+    assert_select(
+      "input[type=checkbox][id=inat_import_skip_inat_writeback]", true,
+      "Admin should see the skip-writeback checkbox"
+    )
+  end
+
+  def test_skip_writeback_checkbox_checked_by_default_in_development
+    make_admin
+    Rails.env.stub(:development?, true) do
+      get(:new)
+    end
+
+    assert_select(
+      "input[type=checkbox]" \
+      "[id=inat_import_skip_inat_writeback][checked]", true,
+      "In development the skip-writeback box should default to checked"
+    )
+  end
+
+  def test_admin_checked_skip_writeback_persists_as_skip
+    inat_import = inat_imports(:rolf_inat_import)
+    make_admin
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           skip_inat_writeback: "1",
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123", consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_equal("skip", inat_import.reload.writeback,
+                 "Admin's checked skip-writeback box should persist as :skip")
+  end
+
+  def test_admin_unchecked_skip_writeback_persists_as_force
+    inat_import = inat_imports(:rolf_inat_import)
+    make_admin
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123", consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_equal("force", inat_import.reload.writeback,
+                 "Admin's unchecked skip box should persist as :force")
+  end
+
+  def test_non_admin_leaves_writeback_default
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           skip_inat_writeback: "1", # ignored: only admins may set it
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123", consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_equal("default", inat_import.reload.writeback,
+                 "Non-admin import should leave writeback :default so the " \
+                 "importer applies its environment default")
+  end
+
   def test_superimporter_own_import_all_estimate_filters_by_user
     user = users(:dick) # Dick is a super_importer with inat_username "dick"
     assert(InatImport.super_importer?(user),
