@@ -49,10 +49,11 @@ module Views::Controllers::Locations
 
     def render_editable_form
       render_location_feedback
-      # Slot for `geocode_controller.js#showGeocodeError` to inject a
-      # Bootstrap alert when the Google Maps Geocoding API call fails
-      # (issue #4535).
-      div(id: "geocode_flash")
+      # Slot for `geocode_controller.js#showGoogleMapsError` to inject
+      # a Bootstrap alert when any Google Maps API call fails — loader,
+      # geocoder, elevation, or the global `gm_authFailure` Google
+      # fires on a bad API key (issue #4535).
+      div(id: "gmaps_flash")
       div(class: "row") do
         div(class: "col-md-8 col-lg-6") { render_fields }
         div(class: "col-md-4 col-lg-6 mb-3 mt-3") { render_map }

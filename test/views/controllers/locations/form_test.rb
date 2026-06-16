@@ -52,8 +52,8 @@ module Views::Controllers::Locations
         "input[name='location[display_name]'][data-map-target='placeInput']"
       )
 
-      # Flash slot for geocode failures (issue #4535).
-      assert_html(html, "#geocode_flash")
+      # Flash slot for Google Maps API failures (issue #4535).
+      assert_html(html, "#gmaps_flash")
 
       # Display name input group
       assert_html(html, ".input-group")
