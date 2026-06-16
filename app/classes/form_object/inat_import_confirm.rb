@@ -8,4 +8,5 @@ class FormObject::InatImportConfirm < FormObject::Base
   attribute :import_all, :string
   attribute :consent, :string
   attribute :import_others, :string
+  attribute :skip_inat_writeback, :string
 end
