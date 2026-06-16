@@ -82,6 +82,12 @@
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
   include Phlex::Rails::Helpers::TurboFrameTag
+  # `Components::Base` includes this; ApplicationForm subclasses
+  # don't inherit from Base (they go through `Superform::Rails::Form`),
+  # so we include it here too. Lets subclasses call
+  # `trusted_html(:foo.t)` instead of `raw(:foo.t) # rubocop:disable
+  # Rails/OutputSafety`.
+  include Phlex::TrustedHtml
   include FieldHelpers
   include UploadHelpers
 

@@ -57,7 +57,7 @@ module Views::Controllers::GlossaryTerms
             whitespace
             glossary_doc_link
             plain(". ")
-            raw(:field_textile_link.t) # rubocop:disable Rails/OutputSafety
+            trusted_html(:field_textile_link.t)
           end
         end
       end

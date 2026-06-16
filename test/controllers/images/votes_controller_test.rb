@@ -57,6 +57,18 @@ module Images
       end
     end
 
+    def test_cast_vote_turbo_stream
+      image = images(:in_situ_image)
+      login(users(:mary).login)
+
+      put(:update, params: { image_id: image.id, value: Image.maximum_vote },
+                   format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update']" \
+                    "[target='image_vote_#{image.id}']")
+    end
+
     # These try to test the results of ajax calls.
     # AJAX now renders image_vote_links helper inline to avoid nested partial
     # def test_image_vote_renders_partial

@@ -19,10 +19,19 @@ module Images
       raise("Bad value.") if @value != "0" && @value != "1"
 
       mark_image_exportable(@image, @value)
-      render(partial: "images/exports/update")
+      render(turbo_stream: image_export_toggle_stream)
     end
 
     private
+
+    # Was `render(partial: "images/exports/update")`, the partial just
+    # emitted a single `turbo_stream.update("image_export_#{id}")`
+    # with the helper-rendered export button — inlined here.
+    def image_export_toggle_stream
+      turbo_stream.update("image_export_#{@image.id}") do
+        helpers.image_exporter(@image.id, @image.ok_for_export)
+      end
+    end
 
     def mark_image_exportable(image, value)
       @image = image
