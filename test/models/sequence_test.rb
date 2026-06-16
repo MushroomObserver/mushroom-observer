@@ -3,6 +3,17 @@
 require("test_helper")
 
 class SequenceTest < UnitTestCase
+  # `page_title` is used by `Header::TitleHelper#add_show_title` as
+  # the H1 + browser-tab title. Sequence's locus is shown in the
+  # body, so the title identifies the sequence by its observation.
+  def test_page_title_aliases
+    seq = sequences(:local_sequence)
+    assert_equal(:show_sequence_title.l(id: seq.observation_id),
+                 seq.page_title)
+    # `document_title` is aliased to `page_title`.
+    assert_equal(seq.page_title, seq.document_title)
+  end
+
   def test_validators
     # Prove that Sequence with all proper fields is valid.
     sequence = Sequence.new(
