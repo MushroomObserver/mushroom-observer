@@ -208,9 +208,9 @@ class InatImportJobTest < ActiveJob::TestCase
   def test_import_job_blank_line_in_description
     create_ivars_from_filename("tremella_mesenterica")
 
-    # modify iNat observation description to include blank line
+    # modify iNat observation description to include multiple blank lines
     parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
-    description = "before blank line\r\n\r\nafter blank line"
+    description = "before blank lines\r\n\r\n\r\n\r\nafter blank lines"
     parsed_response[:results].first[:description] = description
     @mock_inat_response = parsed_response.to_json
 
@@ -223,10 +223,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     assert_equal(
-      "before blank line<!--- blank line(s) removed --->\n" \
-      "after blank line",
+      "before blank lines\n\nafter blank lines",
       obs.notes[:Other],
-      "Failed to compress consecutive newlines/returns in Notes[:Other]"
+      "Failed to collapse multiple blank lines to a single blank line"
     )
   end
 

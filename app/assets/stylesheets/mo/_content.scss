@@ -51,10 +51,18 @@
 }
 
 .obs-notes {
+  // Notes values are indented via `.indent` wrappers, so cancel the
+  // inherited `.name-section p` hanging indent (padding-left + negative
+  // text-indent) that would otherwise push every line after the first.
+  // Keep a blank-line gap between paragraphs, trimming the trailing one.
   .textile p {
-    margin: 0;
-    padding-left: 1em;
-    text-indent: -1em;
+    margin: 0 0 1em;
+    padding-left: 0;
+    text-indent: 0;
+  }
+
+  .textile p:last-child {
+    margin-bottom: 0;
   }
 }
 
