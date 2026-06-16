@@ -46,7 +46,8 @@ class LicensesController < AdminController
   end
 
   def edit
-    @license = find_or_goto_index(License, params[:id])
+    return unless (@license = find_or_goto_index(License, params[:id]))
+
     render_edit_view
   end
 
