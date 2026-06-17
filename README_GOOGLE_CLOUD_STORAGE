@@ -53,27 +53,50 @@ On the image server, configuration is done interactively:
 
 FREEING SPACE ON THE IMAGE SERVER::
 
-First, update the webserver configuration.
+First, update the nginx configuration.
 
-root> vi /etc/nginx/nginx.conf
-  # serve old originals from google object store
-  rewrite "^/images/orig/((\d{1,6}|1[0123]\d\d\d\d\d)\.\w+)$" https://storage.googleapis.com/mo-image-archive-bucket/orig/$1?;
-                                   ^^^^^^^
-root> service nginx reload
-mo> vi config/consts-site.rb
-  config.next_image_id_to_go_to_cloud = 1400000
-                                        ^^^^^^^
-mo> sudo service puma restart
-mo> sudo service solidqueue restart
+This change should go into a quick PR that modifies
+config/etc/nginx.conf.  However, if you've run out of space and want
+to accelerate the process you can also do the edit directly on the
+webserver as root:
 
-In the example above, you want to change the nginx regexp to "1[01234]",
-and the next_image_id_to_go_to_cloud constant to 1500000.
+The examples below describe switching from having a max id of 150000
+to 160000 on the images server.
 
-Then login to the image server and delete the images.
+Update the regular expression in the /images/orig rewrite:
 
-mo> cd /data/images/mo/orig
-mo> ls | egrep '^14[0-9]{5}\.' | head
-mo> ls | egrep '^14[0-9]{5}\.' | tail
+      # serve old originals from google object store
+      if ($uri ~ "^/images/orig/((\d{1,6}|1[012345]\d\d\d\d\d)\.\w+)$") {
+                                                 ^
+
+If you are going the PR route, copy (as root) config/etc/nginx.conf to
+/etc/nginx/nginx.conf.
+
+After changing nginx.conf as root on the webserver run:
+
+  service nginx reload
+
+Now as the mo user edit /var/web/mo/config/consts-site.rb to update
+the value of next_image_id_to_go_to_cloud:
+
+  config.next_image_id_to_go_to_cloud = 1600000
+                                         ^
+
+Then as the mo user start puma and solid queue:
+
+  sudo service puma restart
+  sudo service solidqueue restart
+
+Then login to the image server, switch to the mo user, and delete the
+images.
+
+  cd /data/images/mo/orig
+
   # MAKE SURE IT'S THE RIGHT FILES!!!
-mo> ls | egrep '^14[0-9]{5}\.' | xargs rm
+  ls | egrep '^15[0-9]{5}\.' | head
+                ^
+  ls | egrep '^15[0-9]{5}\.' | tail
+                ^
 
+  ls | egrep '^15[0-9]{5}\.' | xargs rm
+                ^
