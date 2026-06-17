@@ -58,8 +58,8 @@ class ChecklistTest < UnitTestCase
     data = Checklist::ForUser.new(katrina)
     assert(data.num_genera >= 1)
     assert(data.num_species >= 1)
-    assert(genera(katrinas_species) - data.genera == [])
-    assert(katrinas_species - just_names(data.species) == [])
+    assert_equal([], genera(katrinas_species) - data.genera)
+    assert_equal([], katrinas_species - just_names(data.species))
 
     data = Checklist::ForUser.new(rolf)
     assert_equal(7, data.num_genera)
@@ -70,7 +70,7 @@ class ChecklistTest < UnitTestCase
              distinct.size
     assert_equal(expect, data.num_species)
 
-    assert(genera(rolfs_species) - data.genera == [])
+    assert_equal([], genera(rolfs_species) - data.genera)
     assert_equal(rolfs_species, just_names(data.species))
 
     User.current = dick

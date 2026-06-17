@@ -264,7 +264,7 @@ class QueryTest < UnitTestCase
       Set.new([rolf.id, mary.id, junk.id, dick.id, katrina.id, roy.id]) -
         query.result_ids
     )
-    assert_equal(roy.location_format, "scientific")
+    assert_equal("scientific", roy.location_format)
     assert_equal(
       Set.new,
       Set.new([rolf, mary, junk, dick, katrina, roy]) - query.results

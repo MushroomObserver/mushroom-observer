@@ -7,8 +7,6 @@
 # reference this view by its full namespace.
 module Views::Controllers::Projects::FieldSlips
   class TrackerRow < Views::Base
-    include Phlex::Rails::Helpers::NumberWithPrecision
-
     def initialize(tracker:, user:)
       super()
       @tracker = tracker

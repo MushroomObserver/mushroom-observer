@@ -71,22 +71,41 @@ while IFS= read -r erb; do
     # Action template.
     action="$base"
 
-    # `render("<X>/<Y>")` / `render('<X>/<Y>')`
+    # Symbol-form action renders (`render(:foo)`, `render(action: :foo)`)
+    # are scoped to the calling controller — they always resolve to
+    # `<controller>/<action>` in the controller's own view dir. So
+    # only scan the controller file that maps to the deleted ERB's
+    # namespace. E.g. deleted
+    # `app/views/controllers/users/emails/new.html.erb` →
+    # `app/controllers/users/emails_controller.rb`.
+    if [ "$dir" = "." ]; then
+      ctrl_targets=""
+    else
+      ctrl_file="app/controllers/${dir}_controller.rb"
+      ctrl_targets="$ctrl_file"
+    fi
+
+    # `render("<X>/<Y>")` / `render('<X>/<Y>')` — fully-qualified,
+    # can appear anywhere.
     matches+="$(grep -rEn \
       "render[[:space:]]*\\([[:space:]]*['\"]${rel}['\"]" \
       app/ 2>/dev/null || true)"$'\n'
 
-    # `render(:<Y>)` — symbol form, action-scoped.
-    matches+="$(grep -rEn \
-      "render[[:space:]]*\\([[:space:]]*:${action}([[:space:],)]|$)" \
-      app/ 2>/dev/null || true)"$'\n'
+    if [ -n "$ctrl_targets" ] && [ -f "$ctrl_targets" ]; then
+      # `render(:<Y>)` — symbol form, action-scoped, controller-local.
+      # `-H` forces filename prefix so the offender message includes
+      # the path even on single-file grep.
+      matches+="$(grep -HEn \
+        "render[[:space:]]*\\([[:space:]]*:${action}([[:space:],)]|$)" \
+        "$ctrl_targets" 2>/dev/null || true)"$'\n'
 
-    # `render(action: :<Y>)` / `render(action: "<Y>")` / `action: '<Y>'`
-    matches+="$(grep -rEn \
-      "render[[:space:]]*\\([^)]*action:[[:space:]]*(:?${action}([[:space:],)]|$)|['\"]${action}['\"])" \
-      app/ 2>/dev/null || true)"$'\n'
+      # `render(action: :<Y>)` / `render(action: "<Y>")` — same scope.
+      matches+="$(grep -HEn \
+        "render[[:space:]]*\\([^)]*action:[[:space:]]*(:?${action}([[:space:],)]|$)|['\"]${action}['\"])" \
+        "$ctrl_targets" 2>/dev/null || true)"$'\n'
+    fi
 
-    # `render(template: "<X>/<Y>")`
+    # `render(template: "<X>/<Y>")` — fully-qualified, can appear anywhere.
     matches+="$(grep -rEn \
       "render[[:space:]]*\\([^)]*template:[[:space:]]*['\"]${rel}['\"]" \
       app/ 2>/dev/null || true)"

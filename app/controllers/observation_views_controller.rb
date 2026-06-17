@@ -20,10 +20,62 @@ class ObservationViewsController < ApplicationController
                                                           @reviewed)
 
     respond_to do |format|
-      format.turbo_stream
+      format.turbo_stream { render_update_streams }
       format.html do
         return redirect_to(identify_observations_path)
       end
     end
+  end
+
+  private
+
+  def render_update_streams
+    render(turbo_stream: [
+             caption_toggle_stream,
+             box_toggle_stream,
+             lightbox_caption_stream
+           ])
+  end
+
+  def caption_toggle_stream
+    turbo_stream.replace(
+      "caption_reviewed_toggle_#{@obs_id}",
+      Components::MarkAsReviewedToggle.new(
+        observation_view: @observation_view,
+        selector: "caption_reviewed"
+      )
+    )
+  end
+
+  def box_toggle_stream
+    turbo_stream.replace(
+      "box_reviewed_toggle_#{@obs_id}",
+      Components::MarkAsReviewedToggle.new(
+        observation_view: @observation_view,
+        selector: "box_reviewed",
+        label_class: "stretched-link"
+      )
+    )
+  end
+
+  # `<turbo-stream action="update_lightbox_caption" obs-id="…">` is a
+  # custom Turbo Stream action (handled by the lightbox Stimulus
+  # controller). Build it via Rails' `tag` builder so `@obs_id` is
+  # attribute-escaped — passing strings straight into a heredoc is
+  # an XSS shape even when `@obs_id` happens to be an integer today.
+  def lightbox_caption_stream
+    caption = view_context.capture do
+      view_context.render(
+        Components::LightboxCaption.new(
+          user: @user, obs: @obs, identify: true,
+          observation_view: @observation_view
+        )
+      )
+    end
+    view_context.tag.turbo_stream(
+      view_context.tag.template { caption },
+      action: "update_lightbox_caption",
+      "obs-id": @obs_id
+    )
   end
 end

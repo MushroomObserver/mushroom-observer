@@ -65,6 +65,12 @@ class InfoControllerTest < FunctionalTestCase
     assert_head_title(:intro_title.l)
   end
 
+  def test_translators_note
+    login
+    get(:translators_note)
+    assert_select("body.info__translators_note")
+  end
+
   def test_site_stats
     login
     get(:site_stats)
@@ -72,7 +78,7 @@ class InfoControllerTest < FunctionalTestCase
     assert_select("title").text.include?(:show_site_stats_title.l)
     assert_select("#title", { text: :show_site_stats_title.l },
                   "Displayed title should be #{:show_site_stats_title.l}")
-    assert(/#{:site_stats_contributing_users.l}/ =~ @response.body,
-           "Page is missing #{:site_stats_contributing_users.l}")
+    assert_match(/#{:site_stats_contributing_users.l}/, @response.body,
+                 "Page is missing #{:site_stats_contributing_users.l}")
   end
 end

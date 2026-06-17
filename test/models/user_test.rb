@@ -42,7 +42,7 @@ class UserTest < UnitTestCase
     # This is allowed now to let API create users without a password chosen yet.
     u.password = u.password_confirmation = "bobs_secure_password"
     assert(u.save)
-    assert(u.errors.empty?)
+    assert_empty(u.errors)
   end
 
   def test_bad_logins
@@ -67,7 +67,7 @@ class UserTest < UnitTestCase
 
     u.login = "okbob"
     assert(u.save)
-    assert(u.errors.empty?)
+    assert_empty(u.errors)
   end
 
   def test_collision

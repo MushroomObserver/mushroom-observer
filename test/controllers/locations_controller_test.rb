@@ -24,11 +24,12 @@ class LocationsControllerTest < FunctionalTestCase
   ensure
     @@emails = []
   end
+  private :assert_email_generated
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert(@@emails.empty?,
-           "Wasn't expecting any email notifications; got:\n#{msg}")
+    assert_empty(@@emails,
+                 "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
     @@emails = []
   end
@@ -177,6 +178,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select("#comments_for_object")
     assert_select("#location_general_description")
   end
+  private :assert_show_location
 
   def test_show_location_next_flow
     loc = locations(:albion)
@@ -604,11 +606,42 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select("body.locations__index")
     # The letter filter is applied, verify the data is filtered
     undef_data = assigns(:undef_data)
-    return if undef_data.blank?
+    skip if undef_data.blank?
 
-    undef_data.each do |obs|
+    # `undef_data` is an Array of `[obs, count]` tuples, not a Hash —
+    # `each_key` isn't available; cop false-positives on the
+    # destructured block.
+    undef_data.each do |obs, _count| # rubocop:disable Style/HashEachMethods
       assert_match(/^A/i, obs[:where], "Filtered results should start with A")
     end
+  end
+
+  # `@undef_data` is grouped by `where` and reported as
+  # `[representative_observation, count]` tuples — duplicate `where`
+  # strings on a page collapse into one row carrying the group size.
+  def test_index_undef_data_groups_duplicates_with_count
+    # Two observations sharing the same unmatched `where` should
+    # appear as a single row whose count is 2.
+    where_str = "Duplicate Place, Imaginary, Country"
+    2.times do
+      Observation.create!(
+        user: rolf, when: Time.zone.today,
+        where: where_str, name: names(:agaricus_campestris)
+      )
+    end
+
+    login
+    get(:index)
+    assert_response(:success)
+
+    undef_data = assigns(:undef_data)
+    pair = undef_data.find { |obs, _count| obs[:where] == where_str }
+    assert(pair, "Duplicate `where` row should be present in @undef_data")
+    obs, count = pair
+    assert_equal(2, count,
+                 "Both observations sharing #{where_str.inspect} " \
+                 "should be folded into one row with count 2")
+    assert_equal(where_str, obs[:where])
   end
 
   ##############################################################################

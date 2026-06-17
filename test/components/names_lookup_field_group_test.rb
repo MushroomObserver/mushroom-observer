@@ -65,7 +65,7 @@ class NamesLookupFieldGroupTest < ComponentTestCase
 
     # Verify it processes arrays
     modifier_fields = component.instance_variable_get(:@modifier_fields)
-    assert(modifier_fields.first.is_a?(Array))
+    assert_kind_of(Array, modifier_fields.first)
   end
 
   # Test line 115: render_select_field(field_pair) when not an array

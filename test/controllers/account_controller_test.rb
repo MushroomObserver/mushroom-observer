@@ -85,14 +85,14 @@ class AccountControllerTest < FunctionalTestCase
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:email].any?,
-           assigns("new_user").dump_errors)
+           "Errors: #{assigns("new_user").dump_errors}")
 
     # Invalid email
     post(:create, params: { new_user: params.merge(email: "wrong") })
     assert_flash_error
     assert_response(:success)
     assert(assigns("new_user").errors[:email].any?,
-           assigns("new_user").dump_errors)
+           "Errors: #{assigns("new_user").dump_errors}")
 
     # Email confirmation blank.
     post(:create, params: { new_user: params.except(:email_confirmation) })

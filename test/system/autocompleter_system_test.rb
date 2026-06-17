@@ -79,7 +79,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_field("query_observations_by_users", with: "Rolf Singer (rolf)")
 
     # Hidden ID should be set - wait for it to have a non-empty value
-    hidden_field = find("#query_observations_by_users_id", visible: false)
+    hidden_field = find_by_id("query_observations_by_users_id", visible: false)
     assert(hidden_field.value.present?,
            "Hidden ID should be set after selection")
 
@@ -258,7 +258,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     obs = Observation.last
     visit(observation_path(obs.id))
 
-    scroll_to(find("#observation_namings"), align: :center)
+    scroll_to(find_by_id("observation_namings"), align: :center)
     assert_link(text: /Propose/)
     click_link(text: /Propose/)
     assert_selector("#modal_obs_#{obs.id}_naming", wait: 9)
@@ -319,7 +319,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_match(/Tricky Dick/, final_value, "Third user should be present")
 
     # Hidden IDs should have all three
-    hidden_field = find("#query_observations_by_users_id", visible: false)
+    hidden_field = find_by_id("query_observations_by_users_id", visible: false)
     ids = hidden_field.value.split(",")
     assert_equal(3, ids.length, "Should have 3 IDs in hidden field")
 
@@ -363,7 +363,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     field.send_keys(:tab)
 
     # Wait for staggered fetch requests: 0ms, 450ms, 900ms for 3 users
-    hidden_field = find("#query_observations_by_users_id", visible: false)
+    hidden_field = find_by_id("query_observations_by_users_id", visible: false)
 
     # Poll for IDs to appear (up to 5 seconds)
     ids = []
@@ -414,7 +414,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_match(/Bolete/, field.value)
 
     # Hidden field should have all 3 IDs
-    hidden_field = find("#query_observations_projects_id", visible: false)
+    hidden_field = find_by_id("query_observations_projects_id", visible: false)
     ids = hidden_field.value.split(",")
     assert_equal(3, ids.length, "Should have 3 IDs prefilled")
 

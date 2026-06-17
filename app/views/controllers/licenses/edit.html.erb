@@ -1,6 +1,0 @@
-<%
-  add_page_title(license_edit_title(@license))
-  add_context_nav(Tab::License::FormEdit.new(license: @license))
-%>
-
-<%= render(Views::Controllers::Licenses::Form.new(@license)) %>

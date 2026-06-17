@@ -31,7 +31,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     login(rolf)
 
     visit("/names/#{names(:boletus_edulis).id}/trackers/new")
-    template = find("#name_tracker_note_template")
+    template = find_by_id("name_tracker_note_template")
     template.assert_no_text(":mailing_address")
   end
 

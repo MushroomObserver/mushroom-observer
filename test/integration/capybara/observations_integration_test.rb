@@ -137,7 +137,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
       fill_in("fr:mo.ask_user_question_subject", with: "Bonjour!")
       fill_in("fr:mo.ask_user_question_message:", with: "Ça va?")
       click_button("fr:mo.SEND")
-      notices = page.find("#flash_notices")
+      notices = page.find_by_id("flash_notices")
       notices.assert_text("fr:mo.runtime_ask_user_question_success")
     end
   end

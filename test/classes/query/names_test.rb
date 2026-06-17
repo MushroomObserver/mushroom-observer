@@ -690,7 +690,7 @@ class Query::NamesTest < UnitTestCase
                 projects(:bolete_project)]
     projects.each do |pj|
       expects = pj.observations.map(&:name).uniq
-      assert_equal(expects, []) if pj == projects(:empty_project)
+      assert_equal([], expects) if pj == projects(:empty_project)
       scope = Name.with_correct_spelling.joins(:observations).distinct.
               merge(Observation.projects(pj)).order_by_default
       assert_query_scope(

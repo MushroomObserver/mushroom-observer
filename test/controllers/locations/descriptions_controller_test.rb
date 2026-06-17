@@ -282,7 +282,7 @@ module Locations
       login
       get(:show, params: { flow: :next, id: })
       next_data = @controller.find_query_and_next_object(object, :next, id)
-      return unless next_data
+      skip unless next_data
 
       params = { id: next_data[:id],
                  q: @controller.q_param(next_data[:query]) }
@@ -296,7 +296,7 @@ module Locations
       login
       get(:show, params: { flow: :prev, id: })
       prev_data = @controller.find_query_and_next_object(object, :prev, id)
-      return unless prev_data
+      skip unless prev_data
 
       params = { id: prev_data[:id],
                  q: @controller.q_param(prev_data[:query]) }

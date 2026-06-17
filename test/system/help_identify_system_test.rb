@@ -94,7 +94,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     assert_selector("body.identify__index")
 
     # Find an observation box that has an image (theater button)
-    box_with_image = find(".matrix-box:has(.theater-btn)", match: :first)
+    box_with_image = first(".matrix-box:has(.theater-btn)")
     obs_id = box_with_image[:id].sub("box_", "")
 
     # Verify both checkboxes start unchecked

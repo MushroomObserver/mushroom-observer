@@ -496,3 +496,13 @@ Style/SafeNavigationChainLength:
     - 'app/classes/report/darwin/observations.rb'
     - 'app/controllers/locations_controller.rb'
     - 'app/models/location.rb'
+
+# Offense count: 6
+# This cop supports safe autocorrection (--autocorrect).
+Minitest/RefuteEqual:
+  Exclude:
+    - 'test/classes/api2/observations_test.rb'
+    - 'test/controllers/names_controller_update_merge_test.rb'
+    - 'test/controllers/observations/images_controller_test.rb'
+    - 'test/controllers/species_lists/observations_controller_test.rb'
+    - 'test/models/location_test.rb'

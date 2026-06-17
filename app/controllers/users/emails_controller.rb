@@ -12,7 +12,9 @@ module Users
       return unless @target && can_email_user_question?(@target)
 
       respond_to do |format|
-        format.html
+        format.html do
+          render(Views::Controllers::Users::Emails::New.new(target: @target))
+        end
         format.turbo_stream do
           render(Components::ModalTurboForm.new(
                    identifier: "user_question_email",

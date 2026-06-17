@@ -119,8 +119,8 @@ class ScriptTest < UnitTestCase
     errors = File.read(tempfile)
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
-    assert(File.exist?(output_file),
-           "#{script} failed to write #{output_file}")
+    assert_path_exists(output_file,
+                       "#{script} failed to write #{output_file}")
 
     output = File.read(output_file)
     fixture = Rails.root.join("test/reports/name_list_data.js")

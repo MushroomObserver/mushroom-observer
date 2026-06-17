@@ -23,7 +23,7 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
     # falls back to /account/api_keys/new without JS); with JS,
     # Bootstrap collapse.js intercepts the click to expand the
     # inline form.
-    find("#new_key_button").click
+    find_by_id("new_key_button").click
     assert_selector("#new_api_key_form")
     within("#new_api_key_form") do
       fill_in("api_key_notes", with: "New key idea")

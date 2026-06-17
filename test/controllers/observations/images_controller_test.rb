@@ -8,7 +8,7 @@ module Observations
     def test_edit_image
       image = images(:connected_coprinus_comatus_image)
       params = { "id" => image.id.to_s }
-      assert(image.user.login == "rolf")
+      assert_equal("rolf", image.user.login)
       requires_user(:edit,
                     { controller: "/images", action: :show, id: image.id },
                     params)

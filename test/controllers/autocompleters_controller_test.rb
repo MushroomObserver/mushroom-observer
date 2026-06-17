@@ -39,7 +39,7 @@ class AutocompletersControllerTest < FunctionalTestCase
     array1 = array1.map(&:symbolize_keys)
     array2 = array2.map(&:symbolize_keys)
     diff = (array1 - array2) + (array2 - array1)
-    assert(diff.empty?, diff.inspect)
+    assert_empty(diff, diff.inspect)
     # assert_equal(array1.sort_by { |r| r[:name] },
     #              array2.sort_by { |r| r[:name] })
   end

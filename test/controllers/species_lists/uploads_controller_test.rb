@@ -84,5 +84,6 @@ module SpeciesLists
       assert_select("form#species_list_form", { count: 1 },
                     "Expected SpeciesListForm to render")
     end
+    private :assert_edit_species_list
   end
 end

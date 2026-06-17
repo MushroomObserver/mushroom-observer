@@ -5,7 +5,7 @@ require("test_helper")
 class ImageTest < UnitTestCase
   def test_votes
     img = images(:in_situ_image)
-    assert(img.image_votes.empty?)
+    assert_empty(img.image_votes)
     assert_equal(0, img.num_votes)
     assert_equal(0, img.vote_cache.to_i)
     assert_nil(img.users_vote(mary))

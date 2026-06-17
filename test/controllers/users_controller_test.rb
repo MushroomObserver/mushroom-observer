@@ -172,6 +172,7 @@ class UsersControllerTest < FunctionalTestCase
     sorting_links = css_select(".sorts")
     assert_match(/Contribution/, sorting_links.text)
   end
+  private :prove_sorting_links_include_contribution
 
   def test_show_next
     query = Query.lookup_and_save(:User)

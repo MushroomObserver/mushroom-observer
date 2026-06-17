@@ -25,8 +25,8 @@ module Observations::Namings
       data = data.sort_by(&:max).reverse
       assert_names_equal(name1, data[0].name)
       assert_names_equal(name2b, data[1].name)
-      assert_equal(0.7654, data[0].max)
-      assert_equal(0.321, data[1].max)
+      assert_in_delta(0.7654, data[0].max)
+      assert_in_delta(0.321, data[1].max)
       assert_objs_equal(obs, data[1].image_obs)
     end
   end

@@ -1,4 +1,0 @@
-<%= render(Components::Panel.new(panel_id: "location_notes")) do |panel|
-      panel.with_heading { :NOTES.l }
-      panel.with_body { @location.notes.to_s.html_safe.tpl }
-    end unless @location.notes.blank? %>
