@@ -68,6 +68,9 @@ class InatImportsController < ApplicationController
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
     @inat_import = InatImport.find(params[:id])
+    render(Views::Controllers::InatImports::Show.new(
+             tracker: @tracker, inat_import: @inat_import, user: @user
+           ))
   end
 
   def new
@@ -114,7 +117,10 @@ class InatImportsController < ApplicationController
     warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = build_confirm_form
-    render(:confirm)
+    render(Views::Controllers::InatImports::Confirm.new(
+             confirm_form: @confirm_form, estimate: @estimate,
+             unlicensed_obs: @unlicensed_obs, inat_import: @inat_import
+           ))
   end
 
   def build_confirm_form
@@ -371,6 +377,8 @@ class InatImportsController < ApplicationController
     @inat_import.update(cancel: true)
     @tracker = InatImportJobTracker.where(inat_import: @inat_import).
                order(:created_at).last
-    render(:show)
+    render(Views::Controllers::InatImports::Show.new(
+             tracker: @tracker, inat_import: @inat_import, user: @user
+           ))
   end
 end

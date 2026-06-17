@@ -12,9 +12,10 @@ module InatImports
       respond_to do |format|
         format.turbo_stream do
           render(turbo_stream: turbo_stream.update(
-            :"status_#{@tracker.id}", # id of element to update contents of
-            partial: "inat_imports/job_trackers/current", # current content
-            locals: { tracker: @tracker }
+            :"status_#{@tracker.id}",
+            Views::Controllers::InatImports::JobTrackers::Current.new(
+              tracker: @tracker
+            )
           ))
         end
       end
