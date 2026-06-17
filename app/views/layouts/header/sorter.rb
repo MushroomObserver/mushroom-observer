@@ -15,7 +15,7 @@
 # the page's current query state.
 module Views::Layouts
   class Header::Sorter < Views::Base
-    prop :query, _Nilable(::Query::Base), default: nil
+    prop :query, _Nilable(::Query), default: nil
     prop :sorts,
          _Nilable(_Array(_Array(_Union(::String, ::Symbol)))),
          default: nil
