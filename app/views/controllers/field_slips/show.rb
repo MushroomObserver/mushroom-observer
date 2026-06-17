@@ -27,8 +27,9 @@ module Views::Controllers::FieldSlips
         render(FieldSlipPanel.new(field_slip: @field_slip))
       end
 
-      render(Views::Layouts::VersionsFooter.new(user: current_user,
-                                                obj: @field_slip))
+      render(Views::Layouts::VersionsFooter.new(
+               user: current_user, obj: @field_slip
+             ))
     end
   end
 end

@@ -87,8 +87,9 @@ module Views::Controllers::Images
     end
 
     def render_right_footer
-      render(::Views::Layouts::VersionsFooter.new(user: current_user,
-                                                  obj: @image))
+      render(::Views::Layouts::VersionsFooter.new(
+               user: current_user, obj: @image
+             ))
     end
   end
 end

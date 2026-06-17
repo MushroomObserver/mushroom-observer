@@ -12,11 +12,14 @@ module Views::Layouts
     # Duck-typed on `created_at` — the one accessor the component
     # always reaches.
     prop :obj, _Interface(:created_at)
-    # Version log entries — callers pass `@versions.to_a` (or `[]`
-    # for non-versioned objects). The view reads `length` and
-    # `last.user_id` off each entry; duck-typed via
-    # `_Interface(:user_id)` so test doubles work too.
-    prop :versions, _Array(_Interface(:user_id))
+    # Version log entries (`@versions.to_a` from the controller).
+    # Non-versioned objects (Article, FieldSlip, Image, Observation,
+    # Occurrence, Project, Sequence, SpeciesList) literally have no
+    # version history, so the prop defaults to an empty Array rather
+    # than forcing every non-versioned caller to spell out the same
+    # `versions: []` shape. Duck-typed via `_Interface(:user_id)`
+    # so test doubles work too.
+    prop :versions, _Array(_Interface(:user_id)), default: -> { [] }
 
     def view_template
       num_versions = @versions.length
