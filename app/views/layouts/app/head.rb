@@ -35,12 +35,6 @@ module Views::Layouts::App
     JS
 
     def view_template
-      comment { "APPLICATION LAYOUT HEAD" }
-      render_head_contents
-      comment { "/APPLICATION LAYOUT HEAD" }
-    end
-
-    def render_head_contents
       render_gtm_bootstrap if Rails.env.production?
       render_meta_tags
       render_title
@@ -56,9 +50,7 @@ module Views::Layouts::App
     private
 
     def render_gtm_bootstrap
-      comment { " Google Tag Manager " }
       script { trusted_html(::ActiveSupport::SafeBuffer.new(GTM_SCRIPT)) }
-      comment { " End Google Tag Manager " }
     end
 
     def render_meta_tags

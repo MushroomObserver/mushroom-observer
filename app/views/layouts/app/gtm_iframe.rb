@@ -6,7 +6,6 @@ module Views::Layouts::App
   # markup; the production-only gate is on `Views::Layouts::App::GtmFooter`.
   class GtmIframe < Views::Base
     def view_template
-      comment { " Google Tag Manager (noscript) " }
       noscript do
         iframe(
           src: "https://www.googletagmanager.com/ns.html?id=GTM-PJKJR59" \
@@ -15,7 +14,6 @@ module Views::Layouts::App
           style: "display:none;visibility:hidden"
         )
       end
-      comment { " End Google Tag Manager (noscript) " }
     end
   end
 end

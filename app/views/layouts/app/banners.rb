@@ -16,12 +16,10 @@ module Views::Layouts::App
     ADMIN_BANNER_CLASSES = "h3 text-center font-weight-bold p-2"
 
     def view_template
-      comment { "CALLOUT_BANNERS" }
       div(id: "banners", class: "hidden-print") do
         render_admin_banner
         render_site_banner if ::Banner.current
       end
-      comment { "/CALLOUT_BANNERS" }
     end
 
     private

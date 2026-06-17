@@ -21,11 +21,9 @@ module Views::Layouts::App
     JS
 
     def view_template
-      comment { " Google Tag Manager (footer) " }
-      if Rails.env.production?
-        script { trusted_html(::ActiveSupport::SafeBuffer.new(SCRIPT)) }
-      end
-      comment { " End Google Tag Manager (footer) " }
+      return unless Rails.env.production?
+
+      script { trusted_html(::ActiveSupport::SafeBuffer.new(SCRIPT)) }
     end
   end
 end
