@@ -60,8 +60,8 @@ config/etc/nginx.conf.  However, if you've run out of space and want
 to accelerate the process you can also do the edit directly on the
 webserver as root:
 
-The examples below describe switching from having a max id of 150000
-to 160000 on the images server.
+The examples below describe switching from having a max id of 1500000
+to 1600000 on the image server.
 
 Update the regular expression in the /images/orig rewrite:
 
