@@ -30,6 +30,13 @@ module Names
       build_index_with_query
     end
 
+    def render_index_view
+      render(Views::Controllers::Names::Descriptions::Index.new(
+               query: @query, descriptions: @objects.to_a,
+               pagination_data: @pagination_data, error: @error
+             ))
+    end
+
     def controller_model_name
       "NameDescription"
     end

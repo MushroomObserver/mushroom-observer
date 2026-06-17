@@ -54,10 +54,13 @@ module Views::Controllers::InatImports
     # ordered by created_at desc. For now, use the today/tomorrow
     # pattern the ERB used. (jdc 2025-02-08)
     def results_observations_path
+      # `Date#strftime` with no format string raises `ArgumentError`;
+      # the legacy ERB had the same bug. Use `Date#to_s` (default
+      # `:iso8601` → `YYYY-MM-DD`), which is what the observations
+      # `pattern:` parser expects anyway.
       observations_path(
         pattern: "user:#{@user.id} created:" \
-                 "#{Time.zone.today.strftime}-" \
-                 "#{Time.zone.tomorrow.strftime}"
+                 "#{Time.zone.today}-#{Time.zone.tomorrow}"
       )
     end
   end
