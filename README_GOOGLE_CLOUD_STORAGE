@@ -82,7 +82,7 @@ the value of next_image_id_to_go_to_cloud:
   config.next_image_id_to_go_to_cloud = 1600000
                                          ^
 
-Then as the mo user start puma and solid queue:
+Then as the mo user restart puma and solid queue:
 
   sudo service puma restart
   sudo service solidqueue restart
