@@ -205,14 +205,14 @@ module Views::Controllers::Observations
     end
 
     def render_name_feedback
-      FormNameFeedback(
-        button_name: button_name,
-        given_name: @given_name,
-        names: @names,
-        valid_names: @valid_names,
-        suggest_corrections: @suggest_corrections,
-        parent_deprecated: @parent_deprecated.presence
-      )
+      render(Components::Form::NameFeedback.new(
+               button_name: button_name,
+               given_name: @given_name,
+               names: @names,
+               valid_names: @valid_names,
+               suggest_corrections: @suggest_corrections,
+               parent_deprecated: @parent_deprecated.presence
+             ))
     end
 
     def render_naming_specimen_row

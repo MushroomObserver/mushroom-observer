@@ -68,10 +68,10 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_location_feedback
     return unless @dubious_where_reasons&.any?
 
-    FormLocationFeedback(
-      dubious_where_reasons: @dubious_where_reasons,
-      button: @button_name
-    )
+    render(Components::Form::LocationFeedback.new(
+             dubious_where_reasons: @dubious_where_reasons,
+             button: @button_name
+           ))
   end
 
   def render_location_autocompleter
@@ -225,7 +225,9 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_map
-    FormLocationMap(id: "observation_form_map", map_type: "observation")
+    render(Components::Form::LocationMap.new(
+             id: "observation_form_map", map_type: "observation"
+           ))
   end
 
   # --- Helpers ---
