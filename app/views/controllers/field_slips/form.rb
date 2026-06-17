@@ -181,7 +181,7 @@ module Views::Controllers::FieldSlips
     # consumes.
     def field_slip_note_parts
       model.notes_fields.map do |part|
-        Components::FormNotes::Part.new(
+        Components::Form::Notes::Part.new(
           key: part.name,
           value: part.value,
           label: "#{part.label}:"

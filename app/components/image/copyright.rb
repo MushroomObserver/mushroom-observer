@@ -25,7 +25,7 @@ class Components::Image::Copyright < Components::Base
     return "" unless @image && show_copyright?
 
     holder = if @image.copyright_holder == @image.user.legal_name
-               capture { render(Components::UserLink.new(user: @image.user)) }
+               capture { render(Components::Link::Object::User.new(user: @image.user)) }
              else
                @image.copyright_holder.to_s.t
              end

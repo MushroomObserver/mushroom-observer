@@ -36,7 +36,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   def heading_links
     return unless permission?(@obs)
 
-    render(Components::IconLink.new(
+    render(Components::Link::Icon.new(
              tab: ::Tab::Observation::ReuseImages.new(observation: @obs)
            ))
   end

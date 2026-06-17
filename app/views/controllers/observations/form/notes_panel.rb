@@ -5,7 +5,7 @@ module Views::Controllers::Observations
     # Private mixin: notes-section adapter for the observation form.
     # Converts the observation's raw notes parts (strings like
     # "Habitat" or `Observation.other_notes_part`) into the uniform
-    # `Components::FormNotes::Part` shape, and renders the shared
+    # `Components::Form::Notes::Part` shape, and renders the shared
     # `FormNotes` component with the right panel/expanded/single-part
     # configuration.
     #
@@ -29,7 +29,7 @@ module Views::Controllers::Observations
 
       def observation_form_note_parts
         observation_notes_form_parts.map do |part|
-          Components::FormNotes::Part.new(
+          Components::Form::Notes::Part.new(
             key: model.notes_normalized_key(part),
             value: model.notes_part_value(part),
             label: single_notes_part? ? "#{:NOTES.l}:" : "#{part}:"

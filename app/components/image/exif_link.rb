@@ -17,7 +17,7 @@ class Components::Image::EXIFLink < Components::Base
   prop :link_class, String, default: ""
 
   def view_template
-    render(Components::ModalLink.new(
+    render(Components::Link::Modal.new(
              "image_exif_#{@image_id}",
              :image_show_exif.t,
              exif_image_path(id: @image_id),

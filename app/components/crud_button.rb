@@ -130,7 +130,7 @@ class Components::CrudButton < Components::Base
     capture do
       if @args[:icon]
         span(class: "sr-only") { trusted_html(@name) }
-        render(Components::LinkIcon.new(
+        render(Components::Icon.new(
                  type: @args[:icon], html_class: @args[:icon_class]
                ))
       else

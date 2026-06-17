@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Backs `Components::PatternSearchForm` — the top-nav search bar's
+# Backs `Components::Form::PatternSearch` — the top-nav search bar's
 # GET form that lets a user type a pattern and pick a target type
 # (observations / names / locations / etc.). `SearchController#pattern`
 # reads `params.dig(:pattern_search, :pattern)` and

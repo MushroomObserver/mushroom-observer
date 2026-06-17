@@ -200,7 +200,7 @@ class Components::MatrixBox < Components::Base
       observation_id: obs.id, text: :create_naming.t,
       context: "matrix_box", btn_class: btn_class
     ).to_a
-    render(Components::ModalLink.new(
+    render(Components::Link::Modal.new(
              "obs_#{obs.id}_naming", title, path, **opts, icon: nil
            ))
   end
@@ -210,7 +210,7 @@ class Components::MatrixBox < Components::Base
 
     div(class: "rss-where") do
       small do
-        render(Components::LocationLink.new(
+        render(Components::Link::Object::Location.new(
                  where: @data[:where], location: @data[:location]
                ))
       end
@@ -224,7 +224,7 @@ class Components::MatrixBox < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        render(Components::UserLink.new(
+        render(Components::Link::Object::User.new(
                  user: @data[:who],
                  attributes: { class: "rss-who" }
                ))

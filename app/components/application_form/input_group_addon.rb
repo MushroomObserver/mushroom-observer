@@ -58,13 +58,13 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Renders the addon's visible label: the `:button` text + an
     # optional `:button_icon` (rendered after a space via the
-    # `Components::LinkIcon` component).
+    # `Components::Icon` component).
     def render_addon_label
       plain(wrapper_options[:button])
       return unless wrapper_options[:button_icon]
 
       whitespace
-      render(Components::LinkIcon.new(type: wrapper_options[:button_icon]))
+      render(Components::Icon.new(type: wrapper_options[:button_icon]))
     end
   end
 end

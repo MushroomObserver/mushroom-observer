@@ -119,10 +119,10 @@ class Components::FormCarousel::Item < Components::Image::Base
                  upload: @upload
                ))
 
-        FormCameraInfo(
-          img_id: @img_id,
-          **@camera_info
-        )
+        render(Components::Form::CameraInfo.new(
+                 img_id: @img_id,
+                 **@camera_info
+               ))
       end
     end
   end
@@ -192,7 +192,7 @@ class Components::FormCarousel::Item < Components::Image::Base
 
     button(type: "button", class: button_classes, data: data) do
       span { :image_remove_remove.l }
-      render(Components::LinkIcon.new(
+      render(Components::Icon.new(
                type: :remove, html_class: "text-danger ml-3"
              ))
     end

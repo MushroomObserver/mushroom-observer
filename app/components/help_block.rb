@@ -15,7 +15,7 @@
 # - **Collapsible well** (`collapse_id: "…"`): the well shape
 #   wrapped in `<div class="collapse" id="<collapse_id>">` so a
 #   sibling `data-toggle="collapse"` trigger (typically built via
-#   `Components::IconLink` with `type: :question`) can show / hide
+#   `Components::Link::Icon` with `type: :question`) can show / hide
 #   it. The well shape is forced; `arrow:` is ignored.
 #
 # Content comes from either the `string:` prop or a block. When

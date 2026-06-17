@@ -452,7 +452,7 @@ class CommentsControllerTest < FunctionalTestCase
     # The mod-links span carries `data-user-specific` keyed to
     # the comment's author id — that's the CSS's selector hook.
     assert_match(/data-user-specific="#{comment.user.id}"/, html)
-    # `Components::InlineModLinks` emits a `<form>` with the
+    # `Components::Link::InlineMod` emits a `<form>` with the
     # delete-method input for destroy, and the edit modal anchor
     # with `data-modal="modal_comment_<id>"`. Pin both as the
     # contract.

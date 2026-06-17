@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Action template for `Names::SearchController#new`. Renders the
-# `Components::SearchForm` inside a wide container.
+# `Components::Form::Search` inside a wide container.
 class Views::Controllers::Names::Search::New < Views::Base
   # `@search = Query.create_query(query_model, @query_params)` per
   # the `Searchable` concern — a `Query::Names` in this context.
@@ -13,7 +13,7 @@ class Views::Controllers::Names::Search::New < Views::Base
     container_class(:wide)
 
     div(id: "names_search_container") do
-      render(Components::SearchForm.new(
+      render(Components::Form::Search.new(
                @search, search_controller: controller, local: @local
              ))
     end

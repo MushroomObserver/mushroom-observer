@@ -80,7 +80,7 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_filter_form
-      render(Components::LiveDataFilterForm.new(
+      render(Components::Form::LiveDataFilter.new(
                FormObject::TextFilter.new(starts_with: @list.starts_with),
                turbo_frame: "#{@type}_ips_list",
                page: @list.page,

@@ -18,7 +18,7 @@
 #
 # The heading-links icon strip is extracted to
 # `Components::DescriptionModLinks` (sibling-in-spirit to
-# `Components::InlineModLinks`), which replaces all of
+# `Components::Link::InlineMod`), which replaces all of
 # `DescriptionIconsHelper`. The "Version: N / Previous Version" line
 # is `Components::PreviousVersion`, replacing
 # `VersionsHelper#show_previous_version`. The license-badge block
@@ -138,7 +138,7 @@ module Views::Controllers::Descriptions
       content, path, opts = ::Tab::Description::Create.new(
         parent: object
       ).to_a
-      Components::IconLink.new(content, path, **(opts || {}))
+      Components::Link::Icon.new(content, path, **(opts || {}))
     end
 
     def alts_empty_text(type)
@@ -227,7 +227,7 @@ module Views::Controllers::Descriptions
     def reviewer_link
       reviewer = @description.reviewer
       capture do
-        render(Components::UserLink.new(user: reviewer, name: reviewer.login))
+        render(Components::Link::Object::User.new(user: reviewer, name: reviewer.login))
       end
     end
 

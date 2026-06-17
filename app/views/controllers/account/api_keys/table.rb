@@ -100,7 +100,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_notes_accordion(key)
-      render(Components::TableFormAccordion.new(
+      render(Components::Form::TableAccordion.new(
                id: "notes_#{key.id}",
                view_id: "view_notes_#{key.id}_container",
                edit_id: "edit_notes_#{key.id}_container"
@@ -120,7 +120,7 @@ module Views::Controllers::Account::APIKeys
                      role: "edit_api_key",
                      target: "#edit_notes_#{key.id}_container",
                      parent: "#notes_#{key.id}" }) do
-        render(Components::LinkIcon.new(type: :edit, title: :EDIT.l))
+        render(Components::Icon.new(type: :edit, title: :EDIT.l))
       end
     end
 
@@ -148,7 +148,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_new_form_panel
-      render(Components::TableFormAccordion.new(
+      render(Components::Form::TableAccordion.new(
                id: "new_key_row",
                view_id: "new_key_button_container",
                edit_id: "new_key_form_container"
@@ -172,7 +172,7 @@ module Views::Controllers::Account::APIKeys
               data: { toggle: "collapse",
                       target: "#new_key_form_container",
                       parent: "#new_key_row" }) do
-        render(Components::LinkIcon.new(type: :add))
+        render(Components::Icon.new(type: :add))
         whitespace
         plain(:account_api_keys_create_button.l)
       end

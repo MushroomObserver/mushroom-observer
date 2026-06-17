@@ -2,7 +2,7 @@
 
 # Action template for `Observations::SearchController#new` — the
 # faceted observations-search form page. Replaces `new.erb`. Renders
-# `Components::SearchForm` against the controller's `@search`
+# `Components::Form::Search` against the controller's `@search`
 # (a `Query::Observations` instance).
 #
 # The `new` action in `Searchable` always sets `@local` (the
@@ -19,7 +19,7 @@ module Views::Controllers::Observations::Search
       container_class(:wide)
 
       div(id: "observations_search_container") do
-        render(::Components::SearchForm.new(
+        render(::Components::Form::Search.new(
                  @search,
                  search_controller: controller,
                  local: @local

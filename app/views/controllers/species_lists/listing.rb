@@ -77,7 +77,7 @@ module Views::Controllers::SpeciesLists
         whitespace
         plain("|")
         whitespace
-        render(Components::UserLink.new(user: @species_list.user))
+        render(Components::Link::Object::User.new(user: @species_list.user))
       end
     end
 

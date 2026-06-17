@@ -10,16 +10,16 @@ module LinkHelper
   # Links with data-turbo-frame do a direct page update, and if turbo doesn't
   # find the frame already on the page it's appended after body! That may be
   # why it's appended to the page and not returned to the stimulus caller
-  # Delegates to `Components::ModalLink` — render the component
+  # Delegates to `Components::Link::Modal` — render the component
   # directly in Phlex views.
   def modal_link_to(identifier, name, path, args)
-    render(Components::ModalLink.new(identifier, name, path, **args))
+    render(Components::Link::Modal.new(identifier, name, path, **args))
   end
 
   # Icon link with optional active state. (Tooltip title must be
   # swapped in JS.) Takes same args as `link_to`, e.g.
   # `icon_link_to(text, path, **args)`. Can also print a `button_to`
-  # via `button_to: true`. Delegates to `Components::IconLink` —
+  # via `button_to: true`. Delegates to `Components::Link::Icon` —
   # render the component directly in Phlex views.
   def icon_link_to(text = nil, path = nil, options = {}, &block)
     return unless text
@@ -28,17 +28,17 @@ module LinkHelper
     content = block ? capture(&block) : text
     opts = block ? path : options
 
-    render(Components::IconLink.new(content, link_path, **opts))
+    render(Components::Link::Icon.new(content, link_path, **opts))
   end
 
   # Glyphicon `<span>` with the MO `link-icon` class. Pass `title:`
   # for a tooltip + screen-reader label. Delegates to
-  # `Components::LinkIcon` — render the component directly in Phlex
+  # `Components::Icon` — render the component directly in Phlex
   # views.
   def link_icon(type, **args)
     return "" unless LINK_ICON_INDEX[type]
 
-    render(Components::LinkIcon.new(
+    render(Components::Icon.new(
              type: type,
              title: args[:title],
              html_class: args[:class],

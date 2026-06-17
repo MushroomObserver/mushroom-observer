@@ -12,7 +12,7 @@ module Views::Controllers::Locations
         container_class(:wide)
 
         div(id: "locations_search_container") do
-          render(::Components::SearchForm.new(
+          render(::Components::Form::Search.new(
                    @search,
                    search_controller: controller,
                    local: @local

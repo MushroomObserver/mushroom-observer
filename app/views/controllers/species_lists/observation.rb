@@ -66,7 +66,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_location_link
       div(class: "font-weight-bold") do
-        render(Components::LocationLink.new(
+        render(Components::Link::Object::Location.new(
                  where: @observation.where, location: @observation.location
                ))
       end
@@ -74,7 +74,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_who_and_when
       div do
-        render(Components::UserLink.new(user: @observation.user))
+        render(Components::Link::Object::User.new(user: @observation.user))
         plain(": ")
         plain(@observation.when.web_date)
       end

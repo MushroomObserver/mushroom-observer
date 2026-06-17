@@ -39,7 +39,7 @@ module Views::Controllers::FieldSlips
       strong { plain("#{:PROJECT.t}:") }
       plain(" ")
       if @field_slip.project
-        render(Components::ObjectLink.new(object: @field_slip.project))
+        render(Components::Link::Object::Base.new(object: @field_slip.project))
       else
         plain(:field_slip_no_project.t)
       end
@@ -86,7 +86,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_location_link(obs)
-      render(Components::LocationLink.new(
+      render(Components::Link::Object::Location.new(
                where: obs.where, location: obs.location, click: true
              ))
     end
@@ -107,7 +107,7 @@ module Views::Controllers::FieldSlips
       usr = @field_slip.user
       strong { plain("#{:field_slip_creator.t}:") }
       plain(" ")
-      render(Components::UserLink.new(user: usr, name: usr.legal_name))
+      render(Components::Link::Object::User.new(user: usr, name: usr.legal_name))
       br
     end
 

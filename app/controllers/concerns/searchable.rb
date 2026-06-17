@@ -97,7 +97,7 @@ module Searchable
     def turbo_stream_update
       turbo_stream.update(
         :search_nav_form,
-        Components::SearchForm.new(
+        Components::Form::Search.new(
           @search,
           search_controller: self,
           local: false

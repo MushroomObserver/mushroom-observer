@@ -84,7 +84,7 @@ class Components::Image::Lightbox::Caption < Components::Base
       context: "lightgallery",
       btn_class: "btn btn-primary d-inline-block"
     ).to_a
-    render(Components::ModalLink.new(
+    render(Components::Link::Modal.new(
              "obs_#{@obs.id}_naming", title, path,
              **opts, icon: nil
            ))
@@ -138,7 +138,7 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_obs_location
     if @user
-      render(Components::LocationLink.new(
+      render(Components::Link::Object::Location.new(
                where: @obs.where, location: @obs.location, click: true
              ))
     else
@@ -188,7 +188,7 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_obs_user(obs_user)
     if @user
-      render(Components::UserLink.new(user: obs_user))
+      render(Components::Link::Object::User.new(user: obs_user))
     else
       plain(obs_user.unique_text_name)
     end
@@ -204,7 +204,7 @@ class Components::Image::Lightbox::Caption < Components::Base
     name, path, opts = Tab::Observation::SendQuestion.new(
       observation: @obs
     ).to_a
-    render(Components::ModalLink.new(
+    render(Components::Link::Modal.new(
              "observation_email", name, path, **(opts || {})
            ))
     plain("]")

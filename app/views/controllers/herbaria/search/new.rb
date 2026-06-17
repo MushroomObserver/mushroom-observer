@@ -15,7 +15,7 @@ module Views::Controllers::Herbaria::Search
       container_class(:wide)
 
       div(id: "herbaria_search_container") do
-        render(Components::SearchForm.new(
+        render(Components::Form::Search.new(
                  @search,
                  search_controller: @controller,
                  local: @local != false

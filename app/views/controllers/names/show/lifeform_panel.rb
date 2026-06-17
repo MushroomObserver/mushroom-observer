@@ -23,7 +23,7 @@ class Views::Controllers::Names::Show::LifeformPanel < Views::Base
   private
 
   def render_edit_link
-    render(Components::IconLink.new(
+    render(Components::Link::Icon.new(
              tab: Tab::Name::EditLifeform.new(name: @name)
            ))
   end

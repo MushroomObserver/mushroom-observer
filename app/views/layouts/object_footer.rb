@@ -71,11 +71,11 @@ module Views::Layouts
     # `:foo_by.t(user: <link>, date: <time>)` shape — the legacy
     # `_by` translation strings interpolate the rendered `<a>` user
     # link into the textile template. `capture` redirects
-    # `Components::UserLink`'s buffer write into a returnable
+    # `Components::Link::Object::User`'s buffer write into a returnable
     # SafeBuffer so the rendered HTML can be threaded through `.t`.
     def render_user_dated_line(key, user:, date:)
       trusted_html(key.t(
-                     user: capture { render(Components::UserLink.new(user:)) },
+                     user: capture { render(Components::Link::Object::User.new(user:)) },
                      date: date.web_time
                    ))
     end

@@ -22,7 +22,7 @@ module Views::Controllers::Articles
       def render_byline
         small { plain("#{@article.created_at.web_time}:") }
         plain(" ")
-        render(::Components::UserLink.new(user: @article.user))
+        render(::Components::Link::Object::User.new(user: @article.user))
       end
     end
   end

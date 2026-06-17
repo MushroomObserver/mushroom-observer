@@ -163,7 +163,7 @@ class Views::Layouts::TopNav < Views::Base
         data: { toggle: "collapse", target: "#search_nav" },
         aria: { expanded: "false", controls: "search_nav" }
       ) do
-        render(Components::LinkIcon.new(type: :search, title: :SEARCH.l))
+        render(Components::Icon.new(type: :search, title: :SEARCH.l))
       end
     end
   end
@@ -231,7 +231,7 @@ class Views::Layouts::TopNav < Views::Base
 
     link_to({ controller: "/#{controller.controller_path}", action: :new },
             nav_create_link_options) do
-      render(Components::LinkIcon.new(type: :add))
+      render(Components::Icon.new(type: :add))
       span(class: "d-none d-sm-inline ml-1") { plain(:ADD.l) }
     end
   end
@@ -264,7 +264,7 @@ class Views::Layouts::TopNav < Views::Base
       field_slips_qr_reader_new_path,
       class: "btn btn-sm btn-outline-default mx-0 mx-sm-2 top_nav_button"
     ) do
-      render(Components::LinkIcon.new(type: :qrcode, title: :app_qrcode.l))
+      render(Components::Icon.new(type: :qrcode, title: :app_qrcode.l))
     end
   end
 end
