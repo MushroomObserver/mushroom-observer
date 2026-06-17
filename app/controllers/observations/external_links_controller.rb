@@ -169,7 +169,7 @@ module Observations
       respond_to do |format|
         # renders the flash in the modal, but not sure it's necessary
         # to have a response here. are they getting sent back?
-        format.turbo_stream { render_modal_flash_update }
+        format.turbo_stream { render_modal_flash_update(modal_identifier) }
         format.html do
           redirect_to(permanent_observation_path(@observation)) and return
         end
@@ -220,9 +220,12 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        helpers.new_page_title(:add_object, :EXTERNAL_LINK)
+        :add_object.t(type: :EXTERNAL_LINK)
       when "edit", "update"
-        helpers.edit_page_title(:EXTERNAL_LINK.l, @external_link)
+        render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                           object: @external_link, mode: :edit,
+                           title: :EXTERNAL_LINK.l
+                         ))
       end
     end
 
@@ -244,27 +247,16 @@ module Observations
       ) and return
     end
 
-    def render_modal_flash_update
-      render(partial: "shared/modal_flash_update",
-             locals: { identifier: modal_identifier }) and return
-    end
-
     # this updates both the form and the flash
     def reload_external_link_modal_form_and_flash
-      render(
-        partial: "shared/modal_form_reload",
-        locals: {
-          identifier: modal_identifier,
-          form_locals: {
-            user: @user,
-            model: @external_link,
-            observation: @observation,
-            back: @back,
-            sites: @sites,
-            site: @site
-          }
-        }
-      ) and return true
+      render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                                 user: @user,
+                                 model: @external_link,
+                                 observation: @observation,
+                                 back: @back,
+                                 sites: @sites,
+                                 site: @site
+                               }) and return true
     end
   end
 end

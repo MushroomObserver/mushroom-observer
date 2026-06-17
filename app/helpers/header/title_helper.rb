@@ -24,80 +24,27 @@ module Header
     # (e.g. hide_authors, deprecated-with-preferred-synonym link
     # wrapping). Document title ignores user — the tab text shouldn't
     # vary by viewer.
+    #
+    # The visible HTML side is built by
+    # `Views::Layouts::Header::ObjectTitle` (`:show` mode here, `:edit`
+    # in `add_edit_title`).
     def add_show_title(object, user: nil)
       add_page_title(
-        show_page_title(page_title_for(object, user), object),
+        render(::Views::Layouts::Header::ObjectTitle.new(
+                 object: object, user: user
+               )),
         show_document_title(document_title_for(object), object)
       )
-    end
-
-    # The record title preceded by the id as a badge, as HTML
-    # "[23435] Amanita novinupta"
-    def show_page_title(string, object)
-      tag.div(class: "d-flex align-items-center") do
-        [show_title_id_badge(object), tag.span(string)].safe_join(" ")
-      end
-    end
-
-    # Look up the model's `page_title` (HTML/textile string) or fall
-    # back to its localized type-tag label.
-    #
-    # Observation is special-cased: the obs show heading wraps the
-    # consensus name in a link to the name page (with a "(Site ID)"
-    # flag when the owner's preferred naming differs). That logic
-    # lives in `observations_helper#observation_show_title` — view-
-    # layer work we don't want to push onto the model. The title
-    # helper has access to it via the helper chain.
-    #
-    # The arity check lets models alias `page_title` to a zero-arg
-    # accessor (e.g. `alias page_title title`) instead of writing a
-    # one-line wrapper that ignores the user — calling `title(user)`
-    # would raise ArgumentError. `arity.zero?` is true when the
-    # method takes no required args; we then call it with none.
-    def page_title_for(object, user = nil)
-      return observation_page_title(object, user) if object.is_a?(Observation)
-      return fallback_title(object) unless object.respond_to?(:page_title)
-
-      if object.method(:page_title).arity.zero?
-        object.page_title
-      else
-        object.page_title(user)
-      end
-    end
-
-    # Observation's page heading: link-wrapped consensus name plus
-    # the optional "(Site ID)" flag computed from the owner's
-    # preferred naming. The obs show view also independently uses
-    # the owner-preferred-naming via `add_owner_naming` (separate
-    # display); recomputing here is the cost of keeping the model
-    # free of view code.
-    def observation_page_title(obs, user)
-      # Aliased to a local because the `LocalizationFilesTest`
-      # regex picks up `:ConsensusNameLink` after the `::`
-      # namespace separator and flags it as a translation tag.
-      klass = ::Views::Controllers::Observations::ConsensusNameLink
-      render(klass.new(observation: obs, user: user))
     end
 
     # Look up the model's `document_title` (plain-text string) or
     # fall back to its localized type-tag label. The `<title>` element
     # renders as plain text — textile / HTML must NOT leak through.
     def document_title_for(object)
-      return fallback_title(object) unless object.respond_to?(:document_title)
+      return :"#{object.type_tag.to_s.upcase}".l \
+        unless object.respond_to?(:document_title)
 
       object.document_title
-    end
-
-    def fallback_title(object)
-      :"#{object.type_tag.to_s.upcase}".l
-    end
-
-    # Kept for the one remaining ERB caller (`names/_name.erb`).
-    # Phlex callers should `render(Components::IdBadge.new(...))`
-    # directly instead.
-    def show_title_id_badge(object, classes = "mr-4")
-      render(Components::IdBadge.new(object: object,
-                                     extra_class: classes))
     end
 
     # The record title as a string, preceded by the object type and id:
@@ -112,25 +59,11 @@ module Header
 
     def add_edit_title(object, user: nil)
       add_page_title(
-        edit_page_title(page_title_for(object, user), object),
+        render(::Views::Layouts::Header::ObjectTitle.new(
+                 object: object, user: user, mode: :edit
+               )),
         edit_document_title(document_title_for(object), object)
       )
-    end
-
-    # Needs to be separate. Called in modal forms.
-    # `html_str` is already the rendered HTML (textile applied by the
-    # model's `page_title`) — we just compose it next to the
-    # `:edit_object.t(type: …)` label.
-    def edit_page_title(html_str, object)
-      tag.div(class: "d-flex align-items-center") do
-        [
-          show_title_id_badge(object),
-          tag.span do
-            [:edit_object.t(type: object.type_tag),
-             html_str].safe_join(": ")
-          end
-        ].safe_join(" ")
-      end
     end
 
     def edit_document_title(string, object)
@@ -139,12 +72,7 @@ module Header
 
     # Translation string taking a type_tag, e.g. :add_object, :create_object
     def add_new_title(string, type_tag)
-      add_page_title(new_page_title(string, type_tag))
-    end
-
-    # Needs to be separate. Called in modal forms.
-    def new_page_title(string, type_tag)
-      :"#{string}".t(type: type_tag)
+      add_page_title(:"#{string}".t(type: type_tag))
     end
 
     # NOTE: When it's a show page for an ActiveRecord object, an

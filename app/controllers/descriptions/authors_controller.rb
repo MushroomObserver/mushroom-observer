@@ -10,7 +10,7 @@ module Descriptions
       set_object_and_authors
       if @authors.member?(@user) || @user.in_group?("reviewers")
         render(Views::Controllers::Descriptions::Authors::Show.new(
-                 object: @object, authors: @authors
+                 object: @object, authors: @authors.to_a
                ))
       else
         parent = @object.parent

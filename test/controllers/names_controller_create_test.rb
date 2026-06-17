@@ -4,7 +4,6 @@ require("test_helper")
 
 class NamesControllerCreateTest < FunctionalTestCase
   tests NamesController
-  include ObjectLinkHelper
 
   def setup
     @new_pts  = 10

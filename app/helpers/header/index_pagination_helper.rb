@@ -30,13 +30,12 @@ module Header
     private
 
     def render_index_pagination(pagination_data, args, position:)
-      render(Components::IndexPaginationNav.new(
+      render(Views::Layouts::Header::IndexPaginationNav.new(
                pagination_data: pagination_data,
                position: position,
-               args: args,
+               anchor: args[:anchor],
                request_url: request_url_for_links,
                form_action_url: form_action_url,
-               q_params: q_param(query_from_session),
                letter_param: params[:letter]
              )) do |component|
         component.with_sorter { content_for(:sorter) } if content_for?(:sorter)

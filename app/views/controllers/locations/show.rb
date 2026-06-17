@@ -7,8 +7,7 @@ module Views::Controllers::Locations
   class Show < Views::Base
     prop :location, ::Location
     prop :description, _Nilable(::LocationDescription), default: nil
-    prop :versions,
-         _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
+    prop :versions, _Array(_Interface(:user_id))
     prop :comments, _Nilable(_Array(::Comment)), default: nil
     prop :projects, _Array(::Project)
 
@@ -21,8 +20,8 @@ module Views::Controllers::Locations
 
       div(class: "row") { render_main_columns }
       div(class: "mt-3") do
-        render(::Components::VersionsFooter.new(
-                 user: current_user, obj: @location, versions: @versions
+        render(::Views::Layouts::ObjectFooter.new(
+                 user: current_user, obj: @location, versions: @versions.to_a
                ))
       end
     end
@@ -51,7 +50,7 @@ module Views::Controllers::Locations
                location: @location, description: @description
              ))
       render(Views::Controllers::Comments::CommentsForObject.new(
-               object: @location, comments: @comments, user: current_user,
+               object: @location, comments: @comments.to_a, user: current_user,
                editable: current_user.present?, limit: 2
              ))
     end
@@ -62,7 +61,7 @@ module Views::Controllers::Locations
       render(Show::AltDescriptionsPanel.new(
                user: current_user, object: @location, projects: @projects
              ))
-      render(Show::Footer.new(location: @location, versions: @versions))
+      render(Show::Footer.new(location: @location, versions: @versions.to_a))
     end
   end
 end

@@ -10,9 +10,7 @@ module Views::Controllers::CollectionNumbers
   class Index < Views::Base
     prop :query, ::Query::CollectionNumbers
     prop :pagination_data, ::PaginationData
-    prop :objects,
-         _Union(Array, ::ActiveRecord::Relation,
-                ::ActiveRecord::Associations::CollectionProxy)
+    prop :objects, _Array(::CollectionNumber)
     prop :user, ::User
     prop :observation, _Nilable(::Observation), default: nil
     prop :error, _Nilable(String), default: nil

@@ -4,8 +4,6 @@ require("test_helper")
 
 module Locations
   class VersionsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     def test_show_past_location
       location = locations(:albion)
       login
@@ -20,8 +18,9 @@ module Locations
 
     def test_show_past_location_no_version
       location = locations(:albion)
+      login
       get(:show, params: { id: location.id })
-      assert_response(:redirect)
+      assert_redirected_to(location_path(location.id))
     end
   end
 end

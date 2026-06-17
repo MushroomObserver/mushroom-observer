@@ -11,14 +11,7 @@ module Names
       return unless find_name!
 
       @name.revert_to(params[:version].to_i)
-      @versions = @name.versions
-      @correct_spelling = ""
-      if @name.is_misspelling?
-        # Old correct spellings could have gotten merged with something else
-        # and no longer exist. Note: this is a second db lookup
-        @correct_spelling = Name.where(id: @name.correct_spelling_id).
-                            pluck(:display_name)
-      end
+      @versions = @name.versions.to_a
 
       render(Views::Controllers::Names::Versions::Show.new(
                name: @name, user: @user, versions: @versions,
@@ -29,22 +22,16 @@ module Names
 
     # Looks up the user the version's classification was inherited
     # from, if any — keeps the look-up out of
-    # `Views::Controllers::Names::Versions::Show`. `find_by(version:)`
-    # hits the `(name_id, version)` index instead of loading every
-    # version into memory like `.find { ... }` would.
+    # `Views::Controllers::Names::Versions::Show`. Re-queries the AR
+    # association so `find_by(version:)` hits the `(name_id, version)`
+    # index instead of scanning the in-memory `@versions` Array.
     def inherited_classification_user
-      row = @versions.find_by(version: params[:version].to_i)
+      row = @name.versions.find_by(version: params[:version].to_i)
       data = row && @name.classification_at_version(row)
       return unless data && data[:source] == :inherited
 
       user_id = data.dig(:inherited_from, :user_id)
       user_id && User.find_by(id: user_id)
-    end
-
-    def show_includes
-      [:correct_spelling,
-       { observations: :user },
-       :user, :versions]
     end
 
     private

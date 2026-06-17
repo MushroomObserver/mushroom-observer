@@ -4,8 +4,6 @@ require("test_helper")
 
 module Names::Classification
   class PropagateControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     # Description-mirror assertions removed — classification only
     # lives on Name now (discussion #4163).
     def test_propagate_classification

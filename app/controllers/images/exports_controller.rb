@@ -24,12 +24,11 @@ module Images
 
     private
 
-    # Was `render(partial: "images/exports/update")`, the partial just
-    # emitted a single `turbo_stream.update("image_export_#{id}")`
-    # with the helper-rendered export button — inlined here.
     def image_export_toggle_stream
       turbo_stream.update("image_export_#{@image.id}") do
-        helpers.image_exporter(@image.id, @image.ok_for_export)
+        render_to_string(Views::Controllers::Images::Exports::Button.new(
+                           image: @image
+                         ), layout: false)
       end
     end
 

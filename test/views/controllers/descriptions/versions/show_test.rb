@@ -54,17 +54,6 @@ class Views::Controllers::Descriptions::Versions::ShowTest <
       base.send(:version_actions)
     end
   end
-
-  def test_default_versions_is_empty_array
-    # No `versions:` arg → default lambda fires.
-    view = TestSubclass.new(description: @desc, user: @user)
-
-    # Renders without raising — the version table just gets an empty
-    # versions array.
-    html = render(view)
-    assert_includes(html, @desc.version.to_s)
-  end
-
   # -- title_permission_label branches --------------------------
   #
   # The label is incorporated into the page title (`:show_past_*_title`

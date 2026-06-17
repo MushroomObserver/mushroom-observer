@@ -9,7 +9,7 @@ class Views::Controllers::Descriptions::AuthorsAndEditorsPanelTest <
 
     html = render(new_panel(description: desc))
 
-    # Wraps `Components::AuthorsAndEditors` in `.text-center`.
+    # Wraps `Views::Layouts::AuthorsAndEditors` in `.text-center`.
     assert_html(html, ".text-center")
   end
 
@@ -29,19 +29,6 @@ class Views::Controllers::Descriptions::AuthorsAndEditorsPanelTest <
     html = render(new_panel(description: desc))
 
     assert_no_html(html, "#license")
-  end
-
-  def test_default_versions_is_empty_array
-    desc = name_descriptions(:peltigera_user_desc)
-
-    html = render(
-      Views::Controllers::Descriptions::AuthorsAndEditorsPanel.new(
-        description: desc, user: users(:rolf)
-      )
-    )
-
-    # Renders successfully without a `versions:` arg.
-    assert_html(html, ".text-center")
   end
 
   private

@@ -7,12 +7,6 @@ module Views::Controllers::Images
   # license-badge + versions-footer row. Converted from
   # `images/show.html.erb` + four `show/_*` partials.
   class Show < Views::Base
-    # `export_status_controls` / `export_status_ml_controls` compose
-    # `link_with_query` + `tag.b` + safe_join; per the conversion
-    # rules they stay registered (multi-helper bodies).
-    register_output_helper :export_status_controls, mark_safe: true
-    register_output_helper :export_status_ml_controls, mark_safe: true
-
     prop :image, ::Image
     # In the normal `Images#show` path, `set_default_size` stores
     # `@size` / `@default_size` as Symbols (via `params[:size].to_sym`
@@ -63,8 +57,12 @@ module Views::Controllers::Images
 
     def render_reviewer_export_controls
       div(class: "mb-5 text-center") do
-        p { export_status_controls(@image) }
-        p { export_status_ml_controls(@image) }
+        p { render(::Components::ExportStatusControls.new(object: @image)) }
+        p do
+          render(::Components::ExportStatusControls.new(
+                   object: @image, flag: :diagnostic
+                 ))
+        end
       end
     end
 
@@ -89,7 +87,9 @@ module Views::Controllers::Images
     end
 
     def render_right_footer
-      render(::Components::VersionsFooter.new(user: current_user, obj: @image))
+      render(::Views::Layouts::ObjectFooter.new(
+               user: current_user, obj: @image
+             ))
     end
   end
 end

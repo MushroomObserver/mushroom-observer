@@ -422,8 +422,7 @@ class CollectionNumbersController < ApplicationController
       end
       # renders the flash in the modal
       format.turbo_stream do
-        render(partial: "shared/modal_flash_update",
-               locals: { identifier: modal_identifier }) and return
+        render_modal_flash_update(modal_identifier) and return
       end
     end
   end
@@ -451,11 +450,12 @@ class CollectionNumbersController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :COLLECTION_NUMBER)
+      :add_object.t(type: :COLLECTION_NUMBER)
     when "edit", "update"
-      helpers.edit_page_title(
-        @collection_number.format_name.t, @collection_number
-      )
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @collection_number, mode: :edit,
+                         title: @collection_number.format_name.t
+                       ))
     end
   end
 
@@ -475,17 +475,11 @@ class CollectionNumbersController < ApplicationController
 
   # this updates both the form and the flash
   def reload_collection_number_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: {
-        identifier: modal_identifier,
-        form_locals: {
-          model: @collection_number,
-          observation: @observation,
-          back: @back
-        }
-      }
-    ) and return true
+    render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                               model: @collection_number,
+                               observation: @observation,
+                               back: @back
+                             }) and return true
   end
 end
 # rubocop:enable Metrics/ClassLength

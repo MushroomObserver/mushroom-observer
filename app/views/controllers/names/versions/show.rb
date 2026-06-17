@@ -8,12 +8,12 @@
 # (as captured at this version; if `cls[:source] == :inherited`,
 # annotates with the source-Name / date / editor). Right column:
 # the versions table. Notes panel appears when the historic name
-# has notes; VersionsFooter at the bottom.
+# has notes; ObjectFooter at the bottom.
 module Views::Controllers::Names::Versions
   class Show < Views::Base
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
+    prop :versions, _Array(_Interface(:user_id))
     # `version` is the requested historic version number.
     prop :version, Integer
     # User the version's classification was inherited from, if any.
@@ -29,8 +29,8 @@ module Views::Controllers::Names::Versions
         render_right_column
       end
 
-      render(Components::VersionsFooter.new(
-               user: @user, obj: @name, versions: @versions
+      render(Views::Layouts::ObjectFooter.new(
+               user: @user, obj: @name, versions: @versions.to_a
              ))
     end
 
@@ -132,7 +132,7 @@ module Views::Controllers::Names::Versions
     def render_right_column
       div(class: content_for(:right_columns).to_s) do
         render(Views::Controllers::Versions::Table.new(
-                 obj: @name, versions: @versions,
+                 obj: @name, versions: @versions.to_a,
                  args: { bold: ->(v) { !v.deprecated } }
                ))
       end

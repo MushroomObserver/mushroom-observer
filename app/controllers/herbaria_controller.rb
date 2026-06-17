@@ -225,9 +225,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:new_object, :HERBARIUM)
+      :new_object.t(type: :HERBARIUM)
     when "edit", "update"
-      helpers.edit_page_title(:HERBARIUM_RECORD.l, @herbarium)
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @herbarium, mode: :edit,
+                         title: :HERBARIUM_RECORD.l
+                       ))
     end
   end
 
@@ -481,18 +484,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   # this updates both the form and the flash
   def reload_herbarium_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: {
-        identifier: modal_identifier,
-        form_locals: {
-          model: @herbarium,
-          user: @user,
-          location: @herbarium.location,
-          top_users: @top_users
-        }
-      }
-    ) and return true
+    render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                               model: @herbarium,
+                               user: @user,
+                               location: @herbarium.location,
+                               top_users: @top_users
+                             }) and return true
   end
 
   # Turbo-stream chain emitted from `show_modal_flash_or_show_herbarium`

@@ -57,9 +57,9 @@ module Projects
           render(turbo_stream: turbo_stream.prepend(
             :field_slip_job_trackers # the id of the div to append to
           ) do
-            helpers.render(Views::Controllers::Projects::FieldSlips::TrackerRow.new(
-                             tracker: tracker, user: @user
-                           ))
+            render_to_string(Views::Controllers::Projects::FieldSlips::TrackerRow.new(
+                               tracker: tracker, user: @user
+                             ), layout: false)
           end)
         end
         format.html

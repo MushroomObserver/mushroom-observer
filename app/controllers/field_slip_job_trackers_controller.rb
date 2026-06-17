@@ -12,9 +12,9 @@ class FieldSlipJobTrackersController < ApplicationController
         render(turbo_stream: turbo_stream.replace(
           :"field_slip_job_tracker_#{@tracker.id}" # id of row to replace
         ) do
-          helpers.render(Views::Controllers::Projects::FieldSlips::TrackerRow.new(
-                           tracker: @tracker, user: @user
-                         ))
+          render_to_string(Views::Controllers::Projects::FieldSlips::TrackerRow.new(
+                             tracker: @tracker, user: @user
+                           ), layout: false)
         end)
       end
     end

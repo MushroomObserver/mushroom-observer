@@ -22,7 +22,7 @@ module Views::Controllers::Projects
       render_summary_panel
       render_actions
       render_comments
-      render(Components::VersionsFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @project
              ))
     end
@@ -201,7 +201,7 @@ module Views::Controllers::Projects
 
     def render_comments
       render(::Views::Controllers::Comments::CommentsForObject.new(
-               object: @project, comments: @comments, user: @user,
+               object: @project, comments: @comments.to_a, user: @user,
                editable: @user.present?, limit: nil
              ))
     end

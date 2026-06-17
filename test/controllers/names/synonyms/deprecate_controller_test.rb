@@ -4,8 +4,6 @@ require("test_helper")
 
 module Names::Synonyms
   class DeprecateControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     def test_deprecate_name
       name = names(:chlorophyllum_rachodes)
       params = { id: name.id }

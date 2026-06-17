@@ -89,11 +89,10 @@ module Views::Controllers::Projects::Updates
     def render_pagination
       return unless @pagination.num_pages > 1
 
-      render(Components::IndexPaginationNav.new(
+      render(Views::Layouts::Header::IndexPaginationNav.new(
                pagination_data: @pagination,
                request_url: @request_url,
                form_action_url: @form_action_url,
-               q_params: nil,
                letter_param: nil
              ))
     end

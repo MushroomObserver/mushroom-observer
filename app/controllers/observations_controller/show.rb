@@ -50,7 +50,7 @@ module ObservationsController::Show
   def render_phlex_show
     render(Views::Controllers::Observations::Show.new(
              observation: @observation, user: @user,
-             consensus: @consensus, comments: @comments || [],
+             consensus: @consensus, comments: @comments.to_a,
              images: @images || [], other_sites: @other_sites,
              sibling_observations: @sibling_observations,
              occurrence: @occurrence, owner_name: @owner_name

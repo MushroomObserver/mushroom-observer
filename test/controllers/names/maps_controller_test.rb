@@ -4,8 +4,6 @@ require("test_helper")
 
 module Names
   class MapsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     # ----------------------------
     #  Maps
     # ----------------------------

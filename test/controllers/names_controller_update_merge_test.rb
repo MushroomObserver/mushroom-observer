@@ -4,7 +4,6 @@ require("test_helper")
 
 class NamesControllerUpdateMergeTest < FunctionalTestCase
   tests NamesController
-  include ObjectLinkHelper
 
   # EMAIL TESTS, currently in Names, Locations and their Descriptions
   # Has to be defined on class itself, include doesn't seem to work

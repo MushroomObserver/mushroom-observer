@@ -333,12 +333,8 @@ module Observations
           end and return
         end
         format.turbo_stream do
-          render(
-            partial: "shared/modal_form_reload",
-            locals: {
-              identifier: modal_identifier,
-              form_locals: naming_form_locals
-            }
+          render_modal_form_reload(
+            identifier: modal_identifier, form_locals: naming_form_locals
           ) and return true
         end
       end

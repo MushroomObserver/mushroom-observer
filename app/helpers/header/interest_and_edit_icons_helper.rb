@@ -12,18 +12,15 @@
 #
 module Header
   module InterestAndEditIconsHelper
-    # Edit and destroy icons for the show page title bar.
-    # Only shows buttons the user has permission to use.
+    # Edit and destroy icons for the show page title bar. Permission
+    # gating + button rendering live on
+    # `Views::Layouts::Header::EditDestroyIcons`.
     def add_edit_icons(object, user)
-      icons = []
-      icons << tag.li { edit_button(target: object, btn: nil) } if
-        can_edit_object?(object, user)
-      icons << tag.li { destroy_button(target: object, btn: nil) } if
-        can_destroy_object?(object, user)
-
-      return if icons.empty?
-
-      content_for(:edit_icons) { icons.safe_join }
+      content_for(:edit_icons) do
+        render(Views::Layouts::Header::EditDestroyIcons.new(
+                 object: object, user: user
+               ))
+      end
     end
 
     # Interest icons for email alerts, for the show page title bar.
@@ -107,24 +104,6 @@ module Header
     # Create small icon image.
     def interest_icon_small(type, alt) # :nodoc:
       image_tag("#{type}3.png", alt: alt, class: "interest_small", title: alt)
-    end
-
-    private
-
-    def can_edit_object?(object, user)
-      in_admin_mode? || object.can_edit?(user)
-    end
-
-    def can_destroy_object?(object, user)
-      return can_destroy_location?(object, user) if object.is_a?(Location)
-
-      can_edit_object?(object, user)
-    end
-
-    def can_destroy_location?(location, user)
-      return false unless location.destroyable?
-
-      in_admin_mode? || location.user == user
     end
   end
 end

@@ -47,7 +47,7 @@ class GlossaryTermsController < ApplicationController
     @canonical_url = glossary_term_url
     @layout = calc_layout_params
     @other_images = @glossary_term.other_images.order(vote_cache: :desc)
-    @versions = @glossary_term.versions
+    @versions = @glossary_term.versions.to_a
     render(Views::Controllers::GlossaryTerms::Show.new(
              glossary_term: @glossary_term,
              other_images: @other_images.to_a,

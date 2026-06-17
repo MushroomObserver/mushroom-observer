@@ -4,7 +4,6 @@ require("test_helper")
 
 class NamesControllerIndexTest < FunctionalTestCase
   tests NamesController
-  include ObjectLinkHelper
 
   # ----------------------------
   #  Index tests.

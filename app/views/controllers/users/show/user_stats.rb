@@ -6,13 +6,41 @@ module Views::Controllers::Users
     class UserStats < Views::Base
       prop :show_user, ::User
       prop :name, ::String
-      # Pre-computed in the controller via `UserStatsHelper#user_stats_rows`.
-      # `:label` may be either a plain string or a SafeBuffer (the
-      # languages-breakdown row).
+      # Pre-computed in the controller (via
+      # `UsersController::UserStatsBuilder#user_stats_rows`) so the
+      # `Language.pluck(...)` query for the languages-summary row
+      # doesn't run from the view. `:label` may be either a plain
+      # string or a SafeBuffer.
       prop :rows, _Array(::Hash)
-      # `{ field_symbol => path_string }`, controller-built so the
-      # view doesn't touch Rails route helpers.
-      prop :paths, _Hash(::Symbol, ::String), default: -> { {} }
+
+      # `{field => [route_helper, query_param]}`. Most rows feed
+      # `<plural>_path(by_user: uid)`; the exceptions
+      # (`*_versions` → `by_editor`, `*_description_{authors,editors}`,
+      # `comments_for`, `life_list`) tweak the helper or the param.
+      # Phlex views see every Rails route helper via
+      # `Components::Base`'s `Phlex::Rails::Helpers::Routes` include,
+      # so this lookup lives in the view rather than being
+      # controller-built.
+      FIELD_PATHS = {
+        comments: [:comments_path, :by_user],
+        comments_for: [:comments_path, :for_user],
+        images: [:images_path, :by_user],
+        locations: [:locations_path, :by_user],
+        location_versions: [:locations_path, :by_editor],
+        location_description_authors:
+          [:location_descriptions_index_path, :by_author],
+        location_description_editors:
+          [:location_descriptions_index_path, :by_editor],
+        names: [:names_path, :by_user],
+        name_versions: [:names_path, :by_editor],
+        name_description_authors:
+          [:name_descriptions_index_path, :by_author],
+        name_description_editors:
+          [:name_descriptions_index_path, :by_editor],
+        observations: [:observations_path, :by_user],
+        species_lists: [:species_lists_path, :by_user],
+        life_list: [:checklist_path, :id]
+      }.freeze
 
       def view_template
         render(::Components::Panel.new(panel_id: "user_stats")) do |panel|
@@ -58,12 +86,19 @@ module Views::Controllers::Users
       end
 
       def render_link_or_label(row)
-        url = @paths[row[:field]]
+        url = field_path(row[:field])
         if url
           link_to(url) { render_label(row[:label]) }
         else
           render_label(row[:label])
         end
+      end
+
+      def field_path(field)
+        helper, key = FIELD_PATHS[field]
+        return nil unless helper
+
+        send(helper, key => @show_user.id)
       end
 
       def render_label(label)

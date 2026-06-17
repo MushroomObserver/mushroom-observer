@@ -36,7 +36,6 @@ class Components::Base < Phlex::HTML
   register_value_helper :url_for
   register_value_helper :image_vote_as_short_string
   register_value_helper :image_vote_as_help_string
-  register_value_helper :sequence_archive_options
   register_value_helper :add_q_param
   register_value_helper :q_param
   # The Query for "what the user is currently looking at" — pulled

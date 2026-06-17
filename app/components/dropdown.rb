@@ -39,9 +39,21 @@ class Components::Dropdown < Components::Base
   # the same module the top-nav and sidebar Actions menus include.
   include Views::Layouts::ContextNav::LinkRendering
 
-  prop :id, String
-  prop :menu_id, String
-  prop :label, String
+  prop :id, ::String
+  prop :menu_id, ::String
+  prop :label, ::String
+  # Extra classes on the outer `<li class="dropdown d-inline-block">`,
+  # the toggle `<a>`, and the menu `<ul>`. Defaults are nil — only
+  # the index sort-bar (`Views::Layouts::Header::Sorter`) currently
+  # passes any of these.
+  prop :wrapper_class, _Nilable(::String), default: nil
+  prop :toggle_class, _Nilable(::String), default: nil
+  prop :menu_class, _Nilable(::String), default: nil
+  # Optional pre-section content rendered inside the menu `<ul>`
+  # above the first section. SafeBuffer (from `capture { … }`) so
+  # `trusted_html` emits it intact. Used by the sort-bar to inject
+  # the mobile-only `Sort by:` `<li>` header.
+  prop :menu_header, _Nilable(::String), default: nil
 
   def initialize(...)
     super
@@ -56,7 +68,7 @@ class Components::Dropdown < Components::Base
     rendered = @sections.map { |s| normalize_section(s) }.reject(&:empty?)
     return if rendered.empty?
 
-    li(class: "dropdown d-inline-block") do
+    li(class: class_names("dropdown d-inline-block", @wrapper_class)) do
       render_toggle
       render_menu(rendered)
     end
@@ -75,9 +87,8 @@ class Components::Dropdown < Components::Base
   private
 
   def render_toggle
-    a(class: "dropdown-toggle", id: @id,
-      role: "button",
-      href: "#",
+    a(class: class_names("dropdown-toggle", @toggle_class),
+      id: @id, role: "button", href: "#",
       data: { toggle: "dropdown" },
       aria: { haspopup: "true", expanded: "false" }) do
       span { plain(@label) }
@@ -86,8 +97,10 @@ class Components::Dropdown < Components::Base
   end
 
   def render_menu(sections)
-    ul(id: @menu_id, class: "dropdown-menu",
+    ul(id: @menu_id,
+       class: class_names("dropdown-menu", @menu_class),
        aria: { labelledby: @id }) do
+      trusted_html(@menu_header) if @menu_header
       sections.each_with_index do |tuples, idx|
         li(class: "divider") if idx.positive?
         tuples.each { |tuple| li { render_link(tuple) } }
@@ -99,14 +112,26 @@ class Components::Dropdown < Components::Base
   # the link-pipeline `Header::ContextNavHelper#context_nav_link`
   # used to provide (merge args, strip `d-block` for buttons,
   # dispatch via `LinkRendering`).
+  #
+  # `args[:active]` (sort-bar uses this) adds the BS3 `.active`
+  # class to the link and disables it so the current sort doesn't
+  # navigate away to itself.
   def render_link(tuple)
     str, url, args = tuple
     args ||= {}
+    active = args.delete(:active)
+    kwargs = build_link_kwargs(args, active: active)
+    render_crud_button_or_link(str, url, args, kwargs.compact_blank)
+  end
+
+  def build_link_kwargs(args, active:)
     kwargs = merge_context_nav_link_args(args, {})
+    kwargs[:class] = class_names(kwargs[:class], "active") if active
+    kwargs[:disabled] = true if active
     if args[:button].present? && kwargs[:class].present?
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
     end
-    render_crud_button_or_link(str, url, args, kwargs.compact_blank)
+    kwargs
   end
 
   def normalize_section(section)

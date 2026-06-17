@@ -10,7 +10,7 @@
 #            lifeform side-by-side, optional notes, alt-descriptions,
 #            optional projects, name footer (authors/editors +
 #            previous-version + export-status), and finally the
-#            VersionsFooter.
+#            ObjectFooter.
 #
 # Side-effects (page chrome) are issued from `view_template` before
 # emission: `Textile.user_register_name`, `add_show_title`,
@@ -53,8 +53,7 @@ module Views::Controllers::Names
     prop :first_child, _Nilable(::Name), default: nil
     prop :projects, _Nilable(_Array(::Project)), default: nil
     # `Name#versions` returns an AR-managed `CollectionProxy`.
-    prop :versions,
-         _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
+    prop :versions, _Array(_Interface(:user_id))
 
     def view_template
       page_chrome_side_effects
@@ -64,8 +63,8 @@ module Views::Controllers::Names
         render_right_column
       end
 
-      render(Components::VersionsFooter.new(
-               user: @user, obj: @name, versions: @versions
+      render(Views::Layouts::ObjectFooter.new(
+               user: @user, obj: @name, versions: @versions.to_a
              ))
     end
 
@@ -91,7 +90,7 @@ module Views::Controllers::Names
                  name: @name, description: @description, user: @user
                ))
         render(Views::Controllers::Comments::CommentsForObject.new(
-                 object: @name, comments: @comments, user: @user,
+                 object: @name, comments: @comments.to_a, user: @user,
                  editable: @user.present?, limit: nil
                ))
       end
@@ -159,8 +158,8 @@ module Views::Controllers::Names
 
     def render_footer_body
       div(id: "name_authors_editors") do
-        render(Components::AuthorsAndEditors.new(
-                 obj: @name, versions: @versions, user: @user
+        render(Views::Layouts::AuthorsAndEditors.new(
+                 obj: @name, versions: @versions.to_a, user: @user
                ))
       end
       # `:foo.t` returns textile-rendered HTML (e.g. `<strong>...</strong>`),
@@ -172,7 +171,7 @@ module Views::Controllers::Names
     def render_footer_meta
       div(id: "name_previous_export") do
         render(Components::PreviousVersion.new(
-                 obj: @name, versions: @versions
+                 obj: @name, versions: @versions.to_a
                ))
         render(Components::ExportStatusControls.new(object: @name))
       end

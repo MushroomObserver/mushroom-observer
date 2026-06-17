@@ -48,8 +48,12 @@ module Header
       tab2 = link_to(
         :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
       )
-      tab3 = put_button(name: "merge", path: article_path(article.id))
-      tab4 = patch_button(name: "move", path: article_path(article.id))
+      tab3 = render(Components::CrudButton::Put.new(
+                      name: "merge", target: article_path(article.id)
+                    ))
+      tab4 = render(Components::CrudButton::Patch.new(
+                      name: "move", target: article_path(article.id)
+                    ))
       tab5 = button_to("celebrate", article_path(article.id))
 
       assert_includes(tabs, tab1)

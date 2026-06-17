@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # Minimal padded-content wrapper: emits `<div class="p-3 ...">`
-# around the block. Phlex-side drop-in for the legacy
-# `ContentHelper#content_padded(**args)` ERB helper — all keyword
-# args are forwarded to the underlying `<div>`, mirroring the
-# helper's API. `class:` is composed with the default `"p-3"`.
+# around the block. All keyword args are forwarded to the
+# underlying `<div>`; `class:` is composed with the default
+# `"p-3"`. (Replaces the now-deleted `ContentHelper#content_padded`
+# ERB helper.)
 #
 # @example
 #   render(Components::ContentPadded.new(id: "details")) do

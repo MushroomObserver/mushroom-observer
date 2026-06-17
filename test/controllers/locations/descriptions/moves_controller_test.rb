@@ -4,8 +4,6 @@ require("test_helper")
 
 module Locations::Descriptions
   class MovesControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     # Dick's public desc for gualala. Readable/writable by all.
     def public_desc
       location_descriptions(:user_public_location_desc)

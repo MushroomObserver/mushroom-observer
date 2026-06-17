@@ -8,7 +8,7 @@
 #     suffix).
 #   - Per-type `VersionActions` context-nav.
 #   - The shared past-versions table.
-#   - The same `DetailsAndAltsPanel` and `VersionsFooter` the regular
+#   - The same `DetailsAndAltsPanel` and `ObjectFooter` the regular
 #     description show page uses.
 #
 # Subclasses provide:
@@ -23,8 +23,7 @@ module Views::Controllers::Descriptions::Versions
   class Show < Views::Base
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    prop :versions, _Array(_Interface(:user_id))
     prop :projects, _Nilable(_Array(::Project)), default: nil
 
     def view_template
@@ -40,7 +39,7 @@ module Views::Controllers::Descriptions::Versions
                description: @description, user: @user,
                versions: @versions, projects: @projects
              ))
-      render(Components::VersionsFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @description, versions: @versions
              ))
     end

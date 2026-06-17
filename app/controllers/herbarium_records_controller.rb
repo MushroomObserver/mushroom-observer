@@ -472,8 +472,7 @@ class HerbariumRecordsController < ApplicationController
       end
       format.turbo_stream do
         # renders the flash in the modal via js
-        render(partial: "shared/modal_flash_update",
-               locals: { identifier: modal_identifier }) and return
+        render_modal_flash_update(modal_identifier) and return
       end
     end
   end
@@ -501,13 +500,14 @@ class HerbariumRecordsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :HERBARIUM_RECORD)
+      :add_object.t(type: :HERBARIUM_RECORD)
     when "edit", "update"
-      helpers.edit_page_title(
-        [@herbarium_record.format_name.t,
-         @herbarium_record.herbarium_label].safe_join(" "),
-        @herbarium_record
-      )
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @herbarium_record, mode: :edit,
+                         title: [@herbarium_record.format_name.t,
+                                 @herbarium_record.herbarium_label].
+                                safe_join(" ")
+                       ))
     end
   end
 
@@ -528,16 +528,10 @@ class HerbariumRecordsController < ApplicationController
 
   # this updates both the form and the flash
   def reload_herbarium_record_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: {
-        identifier: modal_identifier,
-        form_locals: {
-          model: @herbarium_record,
-          observation: @observation
-        }
-      }
-    ) and return true
+    render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                               model: @herbarium_record,
+                               observation: @observation
+                             }) and return true
   end
 end
 # rubocop:enable Metrics/ClassLength

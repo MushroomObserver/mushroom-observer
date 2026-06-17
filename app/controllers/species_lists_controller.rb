@@ -269,7 +269,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     render(Views::Controllers::SpeciesLists::Show.new(
              species_list: @species_list, user: @user, query: @query,
              pagination_data: @pagination_data, objects: @objects,
-             comments: @comments, object_names: @object_names,
+             comments: @comments.to_a, object_names: @object_names,
              project: @project
            ))
   end

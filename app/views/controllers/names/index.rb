@@ -20,9 +20,7 @@ module Views::Controllers::Names
   class Index < Views::Base
     prop :query, ::Query::Names
     prop :pagination_data, ::PaginationData
-    prop :objects,
-         _Union(Array, ::ActiveRecord::Relation,
-                ::ActiveRecord::Associations::CollectionProxy)
+    prop :objects, _Array(::Name)
     prop :user, _Nilable(::User), default: nil
     prop :error, _Nilable(String), default: nil
     # The `needs_description` subaction sets `@help` to a

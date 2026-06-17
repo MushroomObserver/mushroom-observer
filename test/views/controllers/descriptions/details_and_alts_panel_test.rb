@@ -29,19 +29,6 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
     assert_html(html, "#description_details_and_alts")
   end
 
-  def test_default_versions_is_empty_array
-    desc = name_descriptions(:peltigera_user_desc)
-
-    # No `versions:` arg → default lambda yields `[]`. The previous-
-    # version line falls back to "Version: N" with no link.
-    html = render(Views::Controllers::Descriptions::DetailsAndAltsPanel.new(
-                    description: desc, user: users(:rolf)
-                  ))
-
-    assert_html(html, "#description_details_and_alts")
-    assert_no_html(html, "a.previous_version_link")
-  end
-
   def test_renders_panel_heading
     desc = name_descriptions(:peltigera_user_desc)
 

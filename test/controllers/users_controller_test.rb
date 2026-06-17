@@ -103,6 +103,24 @@ class UsersControllerTest < FunctionalTestCase
   #    show
   #   ---------------
 
+  # Exercises the bonuses-each + languages-summary branches of
+  # `UsersController::UserStatsBuilder`. The default user_stats
+  # fixtures have neither field populated, so the show-page render
+  # never hits `user_stats.bonuses&.each` or
+  # `user_stats[:languages].map`. Populate both here.
+  def test_show_user_stats_with_bonuses_and_languages
+    user = users(:rolf)
+    user_stats(:rolf).update!(
+      bonuses: [[7, "lucky_bonus"]],
+      languages: { "en" => 100 }
+    )
+
+    login
+    get(:show, params: { id: user.id })
+
+    assert_select("body.users__show")
+  end
+
   def test_show_user_no_query
     user = users(:rolf)
 
