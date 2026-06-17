@@ -189,11 +189,9 @@ module Projects
     end
 
     def reload_modal_project_alias_form
-      render(
-        partial: "shared/modal_form_reload",
-        locals: { identifier: modal_identifier,
-                  form_locals: { model: @project_alias,
-                                 user: @user } }
+      render_modal_form_reload(
+        identifier: modal_identifier,
+        form_locals: { model: @project_alias, user: @user }
       ) and return true
     end
 

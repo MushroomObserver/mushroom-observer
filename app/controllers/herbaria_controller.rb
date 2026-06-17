@@ -481,18 +481,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   # this updates both the form and the flash
   def reload_herbarium_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: {
-        identifier: modal_identifier,
-        form_locals: {
-          model: @herbarium,
-          user: @user,
-          location: @herbarium.location,
-          top_users: @top_users
-        }
-      }
-    ) and return true
+    render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                               model: @herbarium,
+                               user: @user,
+                               location: @herbarium.location,
+                               top_users: @top_users
+                             }) and return true
   end
 
   # Turbo-stream chain emitted from `show_modal_flash_or_show_herbarium`

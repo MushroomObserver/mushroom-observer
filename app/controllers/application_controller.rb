@@ -33,6 +33,7 @@ class ApplicationController < ActionController::Base
   include Queries
   include Indexes
   include SectionUpdater
+  include ModalUpdater
 
   # Allow folder organization in the app/views folder
   append_view_path Rails.root.join("app/views/controllers")

@@ -267,7 +267,7 @@ class SequencesController < ApplicationController
 
   def respond_to_form_errors
     respond_to do |format|
-      format.turbo_stream { render_modal_flash_update }
+      format.turbo_stream { render_modal_flash_update(modal_identifier) }
       format.html { render_form_error_view and return }
     end
   end
@@ -287,7 +287,7 @@ class SequencesController < ApplicationController
 
   def show_flash_and_send_back
     respond_to do |format|
-      format.turbo_stream { render_modal_flash_update }
+      format.turbo_stream { render_modal_flash_update(modal_identifier) }
       format.html do
         redirect_to(@sequence.observation.show_link_args) and return
       end
@@ -347,11 +347,6 @@ class SequencesController < ApplicationController
         obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
-  end
-
-  def render_modal_flash_update
-    render(partial: "shared/modal_flash_update",
-           locals: { identifier: modal_identifier }) and return
   end
 
   # ---------- Strong Parameters -----------------------------------------------

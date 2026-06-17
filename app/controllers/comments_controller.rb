@@ -9,7 +9,7 @@
 #  update::
 #  destroy::
 #
-class CommentsController < ApplicationController # rubocop:disable Metrics/ClassLength
+class CommentsController < ApplicationController
   before_action :login_required
   before_action :store_location, only: [:show]
 
@@ -310,9 +310,8 @@ class CommentsController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def reload_modal_form
-    render(partial: "shared/modal_form_reload",
-           locals: { identifier: modal_identifier,
-                     form_locals: { model: @comment } })
+    render_modal_form_reload(identifier: modal_identifier,
+                             form_locals: { model: @comment })
   end
 
   def modal_identifier
@@ -413,8 +412,7 @@ class CommentsController < ApplicationController # rubocop:disable Metrics/Class
       end
       # renders the flash in the modal
       format.turbo_stream do
-        render(partial: "shared/modal_flash_update",
-               locals: { identifier: modal_identifier }) and return
+        render_modal_flash_update(modal_identifier) and return
       end
     end
   end

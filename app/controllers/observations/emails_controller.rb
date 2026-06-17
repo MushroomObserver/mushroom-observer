@@ -65,8 +65,7 @@ module Observations
           redirect_to(observation_path(observation.id)) and return
         end
         format.turbo_stream do
-          render(partial: "shared/modal_flash_update",
-                 locals: { identifier: "observation_email" }) and return
+          render_modal_flash_update("observation_email") and return
         end
       end
     end
