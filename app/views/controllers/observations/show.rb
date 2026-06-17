@@ -4,7 +4,7 @@
 # obs-show sub-panel (`Components::Carousel`,
 # `ObservationDetailsPanel`, `NameInfoPanel`, `SpeciesListsPanel`,
 # `AssociatedObservationsPanel`, `ThumbnailMapPanel`, namings
-# partial, comments partial, `Views::Layouts::VersionsFooter`) into a
+# partial, comments partial, `Views::Layouts::ObjectFooter`) into a
 # two-column layout. Replaces `observations/show.html.erb`.
 #
 # Renders `add_show_title` + owner-naming line + pager / interest /
@@ -151,7 +151,7 @@ module Views::Controllers::Observations
     end
 
     def render_footer
-      render(Views::Layouts::VersionsFooter.new(user: @user, obj: @observation))
+      render(Views::Layouts::ObjectFooter.new(user: @user, obj: @observation))
     end
   end
 end

@@ -15,7 +15,7 @@ module Views::Controllers::Locations
         render(Views::Controllers::Versions::Table.new(
                  obj: @location, versions: @versions.to_a
                ))
-        render(::Views::Layouts::VersionsFooter.new(
+        render(::Views::Layouts::ObjectFooter.new(
                  user: current_user, obj: @location, versions: @versions.to_a
                ))
       end

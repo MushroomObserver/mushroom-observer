@@ -10,7 +10,7 @@
 #            lifeform side-by-side, optional notes, alt-descriptions,
 #            optional projects, name footer (authors/editors +
 #            previous-version + export-status), and finally the
-#            VersionsFooter.
+#            ObjectFooter.
 #
 # Side-effects (page chrome) are issued from `view_template` before
 # emission: `Textile.user_register_name`, `add_show_title`,
@@ -63,7 +63,7 @@ module Views::Controllers::Names
         render_right_column
       end
 
-      render(Views::Layouts::VersionsFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @name, versions: @versions.to_a
              ))
     end

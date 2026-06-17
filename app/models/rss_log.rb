@@ -57,7 +57,7 @@
 #
 #  5) Add "show log" link at bottom of model's show page:
 #
-#       <%= render(Views::Layouts::VersionsFooter.new(user: @user,
+#       <%= render(Views::Layouts::ObjectFooter.new(user: @user,
 #                                                      obj: @object)) %>
 #
 #

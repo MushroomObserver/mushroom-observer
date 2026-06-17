@@ -3,7 +3,27 @@
 require "test_helper"
 
 module Views::Layouts
-  class VersionsFooterTest < ComponentTestCase
+  class ObjectFooterTest < ComponentTestCase
+    # `minimal: true` renders the bare `Created at` / `Updated at`
+    # block that the now-deleted `Timestamps` component used to
+    # handle. Two production callers opt in
+    # (collection_numbers/show, herbarium_records/show); the
+    # contract is date-only, no user attribution, no version /
+    # views / rss chunks.
+    def test_minimal_renders_dates_only
+      obj = collection_numbers(:coprinus_comatus_coll_num)
+      html = render(ObjectFooter.new(obj: obj, minimal: true))
+
+      # `Created at: <date>` / `Updated at: <date>` inside the
+      # padded wrapper.
+      assert_html(html, "div.p-3 p")
+      assert_includes(html, "#{:CREATED_AT.l}: #{obj.created_at.web_date}")
+      assert_includes(html, "#{:UPDATED_AT.l}: #{obj.updated_at.web_date}")
+      # No user attribution, no view-stats wrapper class.
+      assert_no_html(html, ".footer-view-stats")
+      assert_no_html(html, "a[class^='user_link_']")
+    end
+
     # Test double for objects with footer metadata
     class TestObject
       attr_reader :created_at, :updated_at, :user, :user_id, :version,
@@ -37,7 +57,7 @@ module Views::Layouts
         updated_at: Time.zone.parse("2024-01-20 15:30:00")
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: nil,
                                 obj: obj,
                                 versions: []
@@ -55,7 +75,7 @@ module Views::Layouts
         user: creator
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: users(:mary),
                                 obj: obj,
                                 versions: []
@@ -68,7 +88,7 @@ module Views::Layouts
     def test_non_versioned_object_without_timestamps
       obj = TestObject.new(created_at: nil, updated_at: nil)
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: nil,
                                 obj: obj,
                                 versions: []
@@ -93,7 +113,7 @@ module Views::Layouts
       version3 = TestVersion.new(user_id: users(:katrina).id)
       versions = [version1, version2, version3]
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: versions
@@ -120,7 +140,7 @@ module Views::Layouts
       version2 = TestVersion.new(user_id: nil) # No user_id
       versions = [version1, version2]
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: versions
@@ -150,7 +170,7 @@ module Views::Layouts
       version3 = TestVersion.new(user_id: katrina.id)
       versions = [version1, version2, version3]
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: rolf,
                                 obj: obj,
                                 versions: versions
@@ -178,7 +198,7 @@ module Views::Layouts
         TestVersion.new(user_id: users(:dick).id)
       ]
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: versions
@@ -201,7 +221,7 @@ module Views::Layouts
         num_views: 1
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: []
@@ -223,7 +243,7 @@ module Views::Layouts
         num_views: 42
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: []
@@ -242,7 +262,7 @@ module Views::Layouts
         last_viewed_by_time: Time.zone.parse("2024-01-18 12:00:00")
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: []
@@ -261,7 +281,7 @@ module Views::Layouts
         last_viewed_by_time: nil
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: []
@@ -278,7 +298,7 @@ module Views::Layouts
         rss_log_id: 123
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: nil,
                                 obj: obj,
                                 versions: []
@@ -296,7 +316,7 @@ module Views::Layouts
         rss_log_id: nil
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: nil,
                                 obj: obj,
                                 versions: []
@@ -311,7 +331,7 @@ module Views::Layouts
       name = names(:fungi)
       versions = name.versions.to_a
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: users(:rolf),
                                 obj: name,
                                 versions: versions
@@ -326,7 +346,7 @@ module Views::Layouts
       location = locations(:albion)
       versions = location.versions.to_a
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: users(:rolf),
                                 obj: location,
                                 versions: versions
@@ -342,7 +362,7 @@ module Views::Layouts
         user: users(:rolf)
       )
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: users(:rolf),
                                 obj: obj,
                                 versions: []
@@ -363,7 +383,7 @@ module Views::Layouts
       version1 = TestVersion.new(user_id: user.id)
       versions = [version1]
 
-      html = render_component(VersionsFooter.new(
+      html = render_component(ObjectFooter.new(
                                 user: user,
                                 obj: obj,
                                 versions: versions

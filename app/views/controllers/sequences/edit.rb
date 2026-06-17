@@ -31,7 +31,7 @@ module Views::Controllers::Sequences
         plain(" ")
         render(::Components::UserLink.new(user: @sequence.user))
       end
-      render(::Views::Layouts::VersionsFooter.new(
+      render(::Views::Layouts::ObjectFooter.new(
                user: current_user, obj: @sequence
              ))
     end

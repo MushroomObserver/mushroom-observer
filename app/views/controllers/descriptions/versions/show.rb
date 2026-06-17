@@ -8,7 +8,7 @@
 #     suffix).
 #   - Per-type `VersionActions` context-nav.
 #   - The shared past-versions table.
-#   - The same `DetailsAndAltsPanel` and `VersionsFooter` the regular
+#   - The same `DetailsAndAltsPanel` and `ObjectFooter` the regular
 #     description show page uses.
 #
 # Subclasses provide:
@@ -39,7 +39,7 @@ module Views::Controllers::Descriptions::Versions
                description: @description, user: @user,
                versions: @versions, projects: @projects
              ))
-      render(Views::Layouts::VersionsFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @description, versions: @versions
              ))
     end

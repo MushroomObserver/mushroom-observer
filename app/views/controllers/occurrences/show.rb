@@ -17,7 +17,7 @@ module Views::Controllers::Occurrences
       add_edit_icons(@occurrence, @user)
       render_location_warning
       render_observation_grid
-      render(Views::Layouts::VersionsFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @occurrence
              ))
     end

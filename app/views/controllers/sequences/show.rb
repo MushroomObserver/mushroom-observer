@@ -12,7 +12,7 @@ module Views::Controllers::Sequences
       render(::Components::ContentPadded.new(class: "container-text")) do
         render_fields
       end
-      render(::Views::Layouts::VersionsFooter.new(
+      render(::Views::Layouts::ObjectFooter.new(
                user: current_user, obj: @sequence
              ))
     end

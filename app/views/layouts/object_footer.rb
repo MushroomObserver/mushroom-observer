@@ -1,11 +1,21 @@
 # frozen_string_literal: true
 
 module Views::Layouts
-  # Object-footer metadata block rendered at the bottom of every
-  # `show` page. Displays creation/modification dates, version info,
-  # view counts, and a link to the object's activity log.
-  class VersionsFooter < Views::Base
-    prop :user, _Nilable(::User)
+  # Object-metadata footer rendered at the bottom of every `show`
+  # page. Polymorphic across every show-able model — each chunk is
+  # gated by `@obj.respond_to?` so the component renders only what
+  # the object actually exposes: creation/modification dates (with
+  # user attribution when present), a `Version N of M` header on
+  # the old-version views, view counts, "last viewed by you," and a
+  # link to the object's activity log.
+  #
+  # `minimal: true` skips the user-attribution / view / version /
+  # rss chunks and renders the bare `Created at: <date> / Updated
+  # at: <date>` pair that `Timestamps` used to handle. Two callers
+  # opt in: `herbarium_records/show` and `collection_numbers/show`,
+  # whose pages don't want the richer footer.
+  class ObjectFooter < Views::Base
+    prop :user, _Nilable(::User), default: nil
     # Polymorphic across many model classes (Article, Description,
     # FieldSlip, GlossaryTerm, Image, Location, Name, Observation,
     # Occurrence, Sequence) with branches gated by `@obj.respond_to?`.
@@ -20,8 +30,11 @@ module Views::Layouts
     # `versions: []` shape. Duck-typed via `_Interface(:user_id)`
     # so test doubles work too.
     prop :versions, _Array(_Interface(:user_id)), default: -> { [] }
+    prop :minimal, _Boolean, default: false
 
     def view_template
+      return render_minimal if @minimal
+
       num_versions = @versions.length
 
       render(::Components::ContentPadded.new(
@@ -38,6 +51,21 @@ module Views::Layouts
     end
 
     private
+
+    # The bare-bones footer that absorbed `Views::Layouts::Timestamps`.
+    # Date-only formatting (`.web_date`), no user attribution, none
+    # of the optional chunks. Renders for `herbarium_records/show`
+    # and `collection_numbers/show`.
+    def render_minimal
+      render(::Components::ContentPadded.new(class: "small")) do
+        p do
+          plain("#{:CREATED_AT.l}: #{@obj.created_at.web_date}")
+          br
+          plain("#{:UPDATED_AT.l}: #{@obj.updated_at.web_date}")
+          br
+        end
+      end
+    end
 
     # Three of the footer lines share the
     # `:foo_by.t(user: <link>, date: <time>)` shape — the legacy

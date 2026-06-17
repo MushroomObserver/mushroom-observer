@@ -14,7 +14,7 @@ module Views::Controllers::Articles
 
       render_byline
       render_body_panel
-      render(::Views::Layouts::VersionsFooter.new(
+      render(::Views::Layouts::ObjectFooter.new(
                user: current_user, obj: @article
              ))
     end
