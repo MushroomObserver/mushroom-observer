@@ -11,7 +11,7 @@
 # composers.
 class Components::PreviousVersion < Components::Base
   prop :obj, ::AbstractModel
-  prop :versions, _Array(_Interface(:user_id))
+  prop :versions, _Array(_Interface(:user_id)), default: -> { [] }
 
   def view_template
     plain("#{:VERSION.l}: #{@obj.version}")
