@@ -57,11 +57,10 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_herbarium_link(rec)
-      herbarium = rec.herbarium
-      if herbarium
-        a(href: herbarium_path(herbarium.id)) { trusted_html(herbarium.name.t) }
-      else
-        trusted_html(:UNKNOWN.t)
+      # `herbarium_records.herbarium_id` is `NOT NULL` at the schema
+      # level, so `rec.herbarium` is always present here.
+      a(href: herbarium_path(rec.herbarium.id)) do
+        trusted_html(rec.herbarium.name.t)
       end
     end
 
