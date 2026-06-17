@@ -42,6 +42,16 @@
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/rubocop_on_save.sh && exec .claude/hooks/rubocop_on_save.sh || exit 0",
+            "timeout": 30
+          }
+        ]
       }
     ]
   }
