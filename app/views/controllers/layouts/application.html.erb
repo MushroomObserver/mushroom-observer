@@ -29,18 +29,22 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
 <html class="<%= html_class %>">
 
   <head>
-    <%= render(partial: "application/app/head") %>
+    <%= render(Views::Layouts::App::Head.new(
+          css_theme: @css_theme,
+          canonical_url: @canonical_url,
+          header: @header
+        )) %>
   </head>
 
   <body class="<%= body_class %>" data-controller="lazyload tooltip">
     <% if Rails.env == "production" %>
-      <%= render(partial: "application/app/gtm_iframe") %>
+      <%= render(Views::Layouts::App::GtmIframe.new) %>
     <% end %>
 
     <div id="main_container" class="px-sm-3"
        data-controller="nav links" data-nav-target="container">
 
-      <%= render(partial: "application/app/banners") %>
+      <%= render(Views::Layouts::App::Banners.new) %>
 
       <div class="row row-offcanvas row-offcanvas-left"
          data-nav-target="offcanvas">
@@ -56,7 +60,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
           <%= render(Views::Layouts::TopNav.new(
                 user: @user, query: @query
               )) %>
-          <%= render(partial: "application/app/page_flash") %>
+          <%= render(Views::Layouts::App::PageFlash.new) %>
           <%= render(Views::Controllers::Application::Content::Header.new(
             any_content_filters_applied: @any_content_filters_applied
           )) %>
@@ -86,8 +90,8 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
     <%= render(Components::ModalProgressSpinner.new) %>
     <!--TURBO CONFIRM MODAL -->
     <%= render(Components::ModalConfirm.new) %>
-    <%= render(partial: "application/app/media_query_tests") %>
-    <%= render(partial: "application/app/javascript_footer") %>
+    <%= render(Views::Layouts::App::MediaQueryTests.new) %>
+    <%= render(Views::Layouts::App::JavascriptFooter.new) %>
   </body>
 
 </html>
