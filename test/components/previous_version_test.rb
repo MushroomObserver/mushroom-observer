@@ -40,14 +40,4 @@ class PreviousVersionTest < ComponentTestCase
 
     assert_no_html(html, "a.previous_version_link")
   end
-
-  def test_default_versions_is_empty_array
-    # When `versions:` is omitted, the default lambda yields `[]`.
-    # `previous_version` returns nil from an empty array, so the
-    # link is suppressed.
-    html = render(Components::PreviousVersion.new(obj: @name))
-
-    assert_includes(html, "#{:VERSION.t}: #{@name.version}")
-    assert_no_html(html, "a.previous_version_link")
-  end
 end

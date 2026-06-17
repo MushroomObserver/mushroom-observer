@@ -82,7 +82,7 @@ module Views::Controllers::Descriptions
         trusted_html(description_title(desc))
       else
         render_link(desc)
-        render(Components::InlineModLinks.new(target: desc, user: @user))
+        render(Components::Link::InlineMod.new(target: desc, user: @user))
       end
     end
 
@@ -128,7 +128,7 @@ module Views::Controllers::Descriptions
     # `reader?` falls back to `in_admin_mode?` so admins see
     # drafts as "restricted" (not "private") and can click
     # through. Edit / destroy permissions are owned by
-    # `Components::InlineModLinks` (`writer?` / `is_admin?`
+    # `Components::Link::InlineMod` (`writer?` / `is_admin?`
     # branches there).
     def reader?(desc)
       desc.is_reader?(@user) || in_admin_mode?

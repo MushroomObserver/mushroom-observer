@@ -27,9 +27,9 @@ module Views::Controllers::Images
 
       def render_controls
         render_transform_controls if permission?(@image)
-        render(::Components::ImageOriginalLink.new(image: @image))
+        render(::Components::Image::OriginalLink.new(image: @image))
         plain(" | ")
-        render(::Components::ImageEXIFLink.new(image_id: @image.id))
+        render(::Components::Image::EXIFLink.new(image_id: @image.id))
       end
 
       def render_transform_controls
@@ -53,7 +53,7 @@ module Views::Controllers::Images
       # --- Body: interactive image + vote + original filename ------
 
       def render_body
-        render(::Components::InteractiveImage.new(
+        render(::Components::Image::Interactive.new(
                  user: current_user, image: @image,
                  size: :huge, image_link: "#",
                  extra_classes: "huge-image", votes: false
@@ -65,7 +65,7 @@ module Views::Controllers::Images
       end
 
       def render_vote_interface
-        render(::Components::ImageVoteInterface.new(
+        render(::Components::Image::VoteInterface.new(
                  user: current_user, image: @image, votes: true
                ))
       end

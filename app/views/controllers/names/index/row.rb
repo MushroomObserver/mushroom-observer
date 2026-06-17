@@ -65,7 +65,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
               title: :COPY_THIS_NAME.l,
               action: "clipboard#copy" }
     ) do
-      render(Components::LinkIcon.new(type: :copy))
+      render(Components::Icon.new(type: :copy))
     end
   end
 

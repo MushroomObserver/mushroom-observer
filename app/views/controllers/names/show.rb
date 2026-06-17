@@ -173,7 +173,7 @@ module Views::Controllers::Names
         render(Components::PreviousVersion.new(
                  obj: @name, versions: @versions.to_a
                ))
-        render(Components::ExportStatusControls.new(object: @name))
+        render(Components::Image::ExportStatusControls.new(object: @name))
       end
     end
   end

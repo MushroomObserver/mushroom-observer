@@ -68,7 +68,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
   # ---- proposer cell -------------------------------------------------
 
   def test_renders_proposer_user_link
-    # Selector class flows through from `Components::UserLink`:
+    # Selector class flows through from `Components::Link::Object::User`:
     # `user_link_<id>`. Mobile label "User:" prefixed so the cell
     # is readable when column headers are hidden on `xs`.
     html = render_row

@@ -144,7 +144,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     def render_suggestion_image(sugg)
       return if sugg.image_obs.blank?
 
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: @user,
                image: sugg.image_obs.thumb_image,
                image_link: image_path(id: sugg.image_obs.id)

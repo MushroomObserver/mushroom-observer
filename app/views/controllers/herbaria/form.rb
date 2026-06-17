@@ -134,7 +134,9 @@ module Views::Controllers::Herbaria
 
     def render_location_section
       render_location_autocompleter
-      BoundsHiddenFields(location: @location, target_controller: :map)
+      render(Components::Form::BoundsHiddenFields.new(
+               location: @location, target_controller: :map
+             ))
     end
 
     def render_location_autocompleter
@@ -168,8 +170,10 @@ module Views::Controllers::Herbaria
     def render_map_section
       div(class: "mb-5 d-none",
           data: { autocompleter__location_target: "mapWrap" }) do
-        FormLocationMap(id: "herbarium_form_map", map_type: "observation",
-                        user: @user)
+        render(Components::Form::LocationMap.new(
+                 id: "herbarium_form_map", map_type: "observation",
+                 user: @user
+               ))
       end
     end
 

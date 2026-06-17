@@ -4,10 +4,10 @@
 # the description details panel: Edit / Destroy / Clone / Move /
 # Merge / Adjust Permissions / Make Default / Project / Publish.
 # Each entry is a `Tab::Description::*` PORO rendered via
-# `Components::IconLink`, gated by user permissions and description
+# `Components::Link::Icon`, gated by user permissions and description
 # state.
 #
-# Sibling-in-spirit to `Components::InlineModLinks` (the bracketed
+# Sibling-in-spirit to `Components::Link::InlineMod` (the bracketed
 # `[edit | destroy]` strip that sits next to records in obs-show
 # sub-panels), but distinct in shape: this one is the icon row
 # attached to the panel heading, with " | " separators rather than
@@ -107,7 +107,7 @@ class Components::DescriptionModLinks < Components::Base
 
   def icon_from_tab(tab)
     content, path, opts = tab.to_a
-    Components::IconLink.new(content, path, **(opts || {}))
+    Components::Link::Icon.new(content, path, **(opts || {}))
   end
 
   # -- predicates -------------------------------------------------

@@ -56,7 +56,7 @@ module Views::Controllers::GlossaryTerms::Images
     end
 
     def render_image_preview(image)
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: @user,
                image: image,
                original: true,

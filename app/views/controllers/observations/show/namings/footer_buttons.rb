@@ -44,7 +44,9 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # html_options.
   def render_propose_button
     title, path, opts = propose_naming_tab.to_a
-    ModalLink("obs_#{@obs.id}_naming", title, path, **opts, icon: nil)
+    render(Components::Link::Modal.new(
+             "obs_#{@obs.id}_naming", title, path, **opts, icon: nil
+           ))
   end
 
   def propose_naming_tab

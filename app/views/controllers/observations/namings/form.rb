@@ -85,7 +85,7 @@ module Views::Controllers::Observations::Namings
     end
 
     def render_name_feedback
-      render(Components::FormNameFeedback.new(
+      render(Components::Form::NameFeedback.new(
                button_name: button_name,
                given_name: @given_name,
                names: @feedback[:names],

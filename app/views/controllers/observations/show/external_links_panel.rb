@@ -40,7 +40,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def render_new_link
-    render(Components::InlineAddLink.new(
+    render(Components::Link::InlineAdd.new(
              modal_id: "external_link",
              tab: ::Tab::ExternalLink::New.new(observation: @obs)
            ))
@@ -105,7 +105,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
     li(id: "external_link_#{link.id}") do
       render_external_link(link)
       if link.can_edit?(@user) || in_admin_mode?
-        render(Components::InlineModLinks.new(
+        render(Components::Link::InlineMod.new(
                  target: link, observation: @obs, user: @user
                ))
       end

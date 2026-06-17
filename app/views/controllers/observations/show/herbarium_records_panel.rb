@@ -52,7 +52,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   def render_editable_row(record)
     li(id: "herbarium_record_#{record.id}") do
       render_show_link(record)
-      render(Components::InlineModLinks.new(
+      render(Components::Link::InlineMod.new(
                target: record, observation: @obs, user: @user
              ))
       render_mcp_search_link(record) if record.herbarium.web_searchable?
@@ -111,7 +111,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   end
 
   def render_new_link
-    render(Components::InlineAddLink.new(
+    render(Components::Link::InlineAdd.new(
              modal_id: "herbarium_record",
              tab: ::Tab::HerbariumRecord::New.new(observation: @obs)
            ))

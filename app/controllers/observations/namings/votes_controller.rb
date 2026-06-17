@@ -174,7 +174,7 @@ module Observations::Namings
       render(turbo_stream: [
                turbo_stream.replace(
                  "observation_what_#{obs_id}",
-                 Components::LightboxObservationTitle.new(
+                 Components::Image::Lightbox::ObservationTitle.new(
                    obs: @observation, user: @user, identify: false
                  )
                ),

@@ -98,16 +98,16 @@ class Components::MatrixBox < Components::Base
     return unless @data[:image]
 
     panel.with_thumbnail do
-      InteractiveImage(
-        user: @user,
-        image: @data[:image],
-        image_link: @data[:image_link],
-        obs: @data[:obs] || {},
-        votes: @votes && @data.fetch(:votes, true),
-        full_width: @data.fetch(:full_width, true),
-        identify: @identify,
-        observation_view: @observation_view
-      )
+      render(Components::Image::Interactive.new(
+               user: @user,
+               image: @data[:image],
+               image_link: @data[:image_link],
+               obs: @data[:obs] || {},
+               votes: @votes && @data.fetch(:votes, true),
+               full_width: @data.fetch(:full_width, true),
+               identify: @identify,
+               observation_view: @observation_view
+             ))
     end
   end
 
@@ -200,7 +200,7 @@ class Components::MatrixBox < Components::Base
       observation_id: obs.id, text: :create_naming.t,
       context: "matrix_box", btn_class: btn_class
     ).to_a
-    render(Components::ModalLink.new(
+    render(Components::Link::Modal.new(
              "obs_#{obs.id}_naming", title, path, **opts, icon: nil
            ))
   end
@@ -210,7 +210,7 @@ class Components::MatrixBox < Components::Base
 
     div(class: "rss-where") do
       small do
-        render(Components::LocationLink.new(
+        render(Components::Link::Object::Location.new(
                  where: @data[:where], location: @data[:location]
                ))
       end
@@ -224,7 +224,7 @@ class Components::MatrixBox < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        render(Components::UserLink.new(
+        render(Components::Link::Object::User.new(
                  user: @data[:who],
                  attributes: { class: "rss-who" }
                ))
@@ -313,11 +313,11 @@ class Components::MatrixBox < Components::Base
     return unless @observation_view
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      MarkAsReviewedToggle(
-        observation_view: @observation_view,
-        selector: "box_reviewed",
-        label_class: "stretched-link"
-      )
+      render(Components::Image::MarkAsReviewedToggle.new(
+               observation_view: @observation_view,
+               selector: "box_reviewed",
+               label_class: "stretched-link"
+             ))
     end
   end
 

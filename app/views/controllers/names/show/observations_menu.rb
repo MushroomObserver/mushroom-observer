@@ -36,7 +36,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   private
 
   def render_tracker_link
-    render(Components::IconLink.new(tab: tracker_tab))
+    render(Components::Link::Icon.new(tab: tracker_tab))
   end
 
   def tracker_tab

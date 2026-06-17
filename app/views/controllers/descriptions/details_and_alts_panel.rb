@@ -18,11 +18,11 @@
 #
 # The heading-links icon strip is extracted to
 # `Components::DescriptionModLinks` (sibling-in-spirit to
-# `Components::InlineModLinks`), which replaces all of
+# `Components::Link::InlineMod`), which replaces all of
 # `DescriptionIconsHelper`. The "Version: N / Previous Version" line
 # is `Components::PreviousVersion`, replacing
 # `VersionsHelper#show_previous_version`. The license-badge block
-# (used by `AuthorsAndEditorsPanel`) is `Components::LicenseBadge`,
+# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`,
 # replacing the shared `_form_license_badge.erb` partial. Both
 # description helper files are deleted in the same commit.
 module Views::Controllers::Descriptions
@@ -138,7 +138,7 @@ module Views::Controllers::Descriptions
       content, path, opts = ::Tab::Description::Create.new(
         parent: object
       ).to_a
-      Components::IconLink.new(content, path, **(opts || {}))
+      Components::Link::Icon.new(content, path, **(opts || {}))
     end
 
     def alts_empty_text(type)
@@ -170,7 +170,9 @@ module Views::Controllers::Descriptions
       # the only kind exposed to the reviewer export/review flow.
       div do
         if @description.is_a?(::NameDescription)
-          render(Components::ExportStatusControls.new(object: @description))
+          render(Components::Image::ExportStatusControls.new(
+                   object: @description
+                 ))
         end
       end
       div { render_review_block }
@@ -225,7 +227,8 @@ module Views::Controllers::Descriptions
     def reviewer_link
       reviewer = @description.reviewer
       capture do
-        render(Components::UserLink.new(user: reviewer, name: reviewer.login))
+        render(Components::Link::Object::User.new(user: reviewer,
+                                                  name: reviewer.login))
       end
     end
 

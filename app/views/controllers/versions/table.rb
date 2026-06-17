@@ -51,7 +51,7 @@ module Views::Controllers::Versions
       user = ::User.safe_find(ver.user_id)
       return plain(:unknown.t) unless user
 
-      render(::Components::UserLink.new(user: user, name: user.login))
+      render(::Components::Link::Object::User.new(user: user, name: user.login))
     end
 
     def render_link_cell(ver)

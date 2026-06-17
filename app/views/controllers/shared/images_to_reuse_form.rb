@@ -6,10 +6,10 @@
 # `app/views/controllers/shared/_images_to_reuse.erb` partial.
 #
 # Two parts:
-# - `Components::ImageReuseForm` — the small form that takes an Image
+# - `Components::Image::ReuseForm` — the small form that takes an Image
 #   id and POSTs to `<target_domain>/images#attach`.
 # - A `paginated_results`-wrapped `Components::MatrixTable` of
-#   clickable thumbnails (each wrapping `Components::InteractiveImage`
+#   clickable thumbnails (each wrapping `Components::Image::Interactive`
 #   in a POST link to `attach` so a click attaches that image
 #   directly).
 #
@@ -27,7 +27,7 @@ module Views::Controllers::Shared
     prop :all_users, _Boolean, default: false
 
     def view_template
-      render(::Components::ImageReuseForm.new(
+      render(::Components::Image::ReuseForm.new(
                target: @target, all_users: @all_users
              ))
       render_image_matrix
@@ -49,7 +49,7 @@ module Views::Controllers::Shared
              )) do
         render(::Components::Panel.new) do |panel|
           panel.with_body do
-            render(::Components::InteractiveImage.new(
+            render(::Components::Image::Interactive.new(
                      user: @user,
                      image: image,
                      votes: false,
@@ -69,7 +69,7 @@ module Views::Controllers::Shared
     end
 
     def target_controller
-      ::Components::ImageReuseForm::CONTROLLERS.fetch(@target.class)
+      ::Components::Image::ReuseForm::CONTROLLERS.fetch(@target.class)
     end
   end
 end

@@ -168,12 +168,12 @@ module Views::Controllers::FieldSlips
     # --- Notes ---
 
     def render_notes_panel
-      FormNotes(
-        form: self,
-        parts: field_slip_note_parts,
-        panel_id: "field_slip_notes",
-        expanded: true
-      )
+      render(Components::Form::Notes.new(
+               form: self,
+               parts: field_slip_note_parts,
+               panel_id: "field_slip_notes",
+               expanded: true
+             ))
     end
 
     # Normalize FieldSlip's `NoteField` objects (`.name`/`.value`/`.label`)
@@ -181,7 +181,7 @@ module Views::Controllers::FieldSlips
     # consumes.
     def field_slip_note_parts
       model.notes_fields.map do |part|
-        Components::FormNotes::Part.new(
+        Components::Form::Notes::Part.new(
           key: part.name,
           value: part.value,
           label: "#{part.label}:"

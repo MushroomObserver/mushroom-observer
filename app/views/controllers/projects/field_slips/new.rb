@@ -28,7 +28,9 @@ module Views::Controllers::Projects::FieldSlips
     def page_title
       [
         :field_slips_for_project_title.t,
-        capture { render(Components::ObjectLink.new(object: @project)) },
+        capture do
+          render(Components::Link::Object::Base.new(object: @project))
+        end,
         :PROJECT.t
       ].safe_join(" ")
     end

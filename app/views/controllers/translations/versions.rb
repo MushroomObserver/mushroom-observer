@@ -74,7 +74,7 @@ module Views::Controllers::Translations
       if login.blank?
         plain("--")
       else
-        render(::Components::UserLink.new(user: user_id, name: login))
+        render(::Components::Link::Object::User.new(user: user_id, name: login))
       end
     end
   end

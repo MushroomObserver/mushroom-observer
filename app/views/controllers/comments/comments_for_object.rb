@@ -71,7 +71,7 @@ module Views::Controllers::Comments
     # `Tab::Comment::New#html_options` already carries `icon: :add`,
     # which ModalLink picks up to render an icon-styled link.
     def render_add_comment_link
-      render(Components::ModalLink.new(
+      render(Components::Link::Modal.new(
                "comment",
                tab: ::Tab::Comment::New.new(object: @object, btn_class: nil)
              ))

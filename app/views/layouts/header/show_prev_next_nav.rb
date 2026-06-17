@@ -32,7 +32,7 @@ module Views::Layouts
 
       a(href: href, class: class_names("icon-link", classes), title: title,
         data: { toggle: "tooltip", title: title }) do
-        render(::Components::LinkIcon.new(type: dir, html_class: "px-2"))
+        render(::Components::Icon.new(type: dir, html_class: "px-2"))
         span(class: "sr-only") { title }
       end
     end
@@ -45,7 +45,7 @@ module Views::Layouts
 
       a(href: href, class: class_names("icon-link", classes), title: title,
         data: { toggle: "tooltip", title: title }) do
-        render(::Components::LinkIcon.new(type: icon, html_class: "px-2"))
+        render(::Components::Icon.new(type: icon, html_class: "px-2"))
         span(class: "sr-only") { title }
       end
     end

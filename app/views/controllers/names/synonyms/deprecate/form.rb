@@ -45,7 +45,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     private
 
     def render_name_feedback
-      render(Components::FormNameFeedback.new(
+      render(Components::Form::NameFeedback.new(
                given_name: model.proposed_name,
                button_name: :SUBMIT.l,
                names: @names,

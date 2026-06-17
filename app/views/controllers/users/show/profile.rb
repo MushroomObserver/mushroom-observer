@@ -35,7 +35,7 @@ module Views::Controllers::Users
         return if @show_user == @user || @show_user.no_emails
         return unless @show_user.email_general_question
 
-        render(::Components::ModalLink.new(
+        render(::Components::Link::Modal.new(
                  "user_question_email",
                  tab: ::Tab::User::EmailQuestion.new(user: @show_user)
                ))
@@ -52,7 +52,7 @@ module Views::Controllers::Users
 
       def render_profile_image
         div(class: "float-left mr-5 mb-3") do
-          render(::Components::InteractiveImage.new(
+          render(::Components::Image::Interactive.new(
                    user: @user, image: @show_user.image, size: :small,
                    votes: false, id_prefix: "profile_image"
                  ))
@@ -63,7 +63,7 @@ module Views::Controllers::Users
         p do
           strong { "#{:show_user_primary_location.l}:" }
           plain(" ")
-          render(::Components::LocationLink.new(
+          render(::Components::Link::Object::Location.new(
                    location: @show_user.location
                  ))
         end

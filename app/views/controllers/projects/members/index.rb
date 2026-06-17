@@ -57,11 +57,11 @@ module Views::Controllers::Projects::Members
 
     def render_avatar(user)
       render_user_image(user) if user.image
-      render(Components::UserLink.new(user: user, name: user.login))
+      render(Components::Link::Object::User.new(user: user, name: user.login))
     end
 
     def render_user_image(user)
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: user,
                image: user.image,
                votes: false,

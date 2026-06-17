@@ -84,7 +84,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
       )
     )
 
-    # `Components::InlineAddLink` emits
+    # `Components::Link::InlineAdd` emits
     # `[<a data-modal="modal_external_link">…</a>]`.
     assert_html(html, "a[data-modal='modal_external_link']")
   end

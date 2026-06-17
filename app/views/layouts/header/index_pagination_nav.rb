@@ -104,7 +104,7 @@ module Views::Layouts
       )
       url = pagination_link_url(page)
       a(href: url, class: classes) do
-        render(::Components::LinkIcon.new(
+        render(::Components::Icon.new(
                  type: direction,
                  title: direction.to_s.upcase.to_sym.t,
                  html_class: "px-2"
@@ -158,7 +158,7 @@ module Views::Layouts
     def render_goto_button
       span(class: "input-group-btn") do
         button(type: :submit, class: "btn btn-outline-default px-2") do
-          render(::Components::LinkIcon.new(type: :goto, title: :GOTO.l))
+          render(::Components::Icon.new(type: :goto, title: :GOTO.l))
         end
       end
     end

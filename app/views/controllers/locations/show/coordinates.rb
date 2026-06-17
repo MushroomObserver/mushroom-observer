@@ -53,7 +53,7 @@ module Views::Controllers::Locations
         title, path, opts = ::Tab::Location::ReverseOrder.new(
           location: @location
         ).to_a
-        render(::Components::IconLink.new(title, add_q_param(path), **opts))
+        render(::Components::Link::Icon.new(title, add_q_param(path), **opts))
       end
 
       def render_body
@@ -118,7 +118,7 @@ module Views::Controllers::Locations
       end
 
       def render_footer
-        render(::Components::IconLink.new(
+        render(::Components::Link::Icon.new(
                  tab: ::Tab::Location::ObservationsAt.new(location: @location)
                ))
       end

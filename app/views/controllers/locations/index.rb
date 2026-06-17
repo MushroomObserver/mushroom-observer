@@ -78,7 +78,7 @@ module Views::Controllers::Locations
 
     def render_known_item(list, location, counts)
       list.item do
-        render(::Components::LocationLink.new(
+        render(::Components::Link::Object::Location.new(
                  where: location.name.t, location: location,
                  count: counts[location.id].to_i
                ))
@@ -105,10 +105,10 @@ module Views::Controllers::Locations
     def render_undefined_item(list, obs, count)
       location_name = obs[:where]
       list.item do
-        render(::Components::LocationLink.new(
+        render(::Components::Link::Object::Location.new(
                  where: location_name, count: count
                ))
-        render(::Components::IconLink.new(
+        render(::Components::Link::Icon.new(
                  :list_place_names_merge.l,
                  matching_locations_for_observations_path(where: location_name),
                  icon: :merge, show_text: false

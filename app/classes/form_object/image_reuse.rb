@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Backs `Components::ImageReuseForm` — the small one-field form
+# Backs `Components::Image::ReuseForm` — the small one-field form
 # that lets a viewer attach an existing image to an observation,
 # user profile, or glossary term by its numeric ID. The form's
 # only field is `img_id`; the surrounding image matrix

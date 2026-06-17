@@ -30,7 +30,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   private
 
   def render_edit_link
-    render(Components::IconLink.new(
+    render(Components::Link::Icon.new(
              tab: Tab::Name::Edit.new(name: @name)
            ))
   end
@@ -75,7 +75,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   # Inline emit (the Phlex idiom) — `render` flushes each
-  # `Components::IconLink` straight to the buffer instead of
+  # `Components::Link::Icon` straight to the buffer instead of
   # pre-building an HTML string.
   def render_synonym_links_inline
     links = [approve_link, deprecate_link].compact
@@ -123,7 +123,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     return nil unless unlocked? && @name.deprecated &&
                       @name.correct_spelling_id.nil?
 
-    Components::IconLink.new(
+    Components::Link::Icon.new(
       tab: Tab::Name::Approve.new(name: @name)
     )
   end
@@ -131,7 +131,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def deprecate_link
     return nil unless unlocked? && !@name.deprecated
 
-    Components::IconLink.new(
+    Components::Link::Icon.new(
       tab: Tab::Name::Deprecate.new(name: @name)
     )
   end
@@ -139,7 +139,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def synonyms_link
     return nil unless unlocked?
 
-    Components::IconLink.new(
+    Components::Link::Icon.new(
       tab: Tab::Name::EditSynonym.new(name: @name)
     )
   end

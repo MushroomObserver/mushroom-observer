@@ -495,7 +495,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
             class: "info-collapse-trigger",
             role: "button", data: { toggle: "collapse" },
             aria: { expanded: "false", controls: id }) do
-      render(Components::LinkIcon.new(type: :question))
+      render(Components::Icon.new(type: :question))
     end
   end
 

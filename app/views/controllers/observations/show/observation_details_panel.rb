@@ -105,7 +105,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_where_link
     if @user
-      render(Components::LocationLink.new(
+      render(Components::Link::Object::Location.new(
                where: @obs.where, location: @obs.location, click: true
              ))
     else
@@ -193,7 +193,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_user_link(target)
     if @user
-      render(Components::UserLink.new(user: target))
+      render(Components::Link::Object::User.new(user: target))
     else
       plain(target.unique_text_name)
     end
@@ -206,7 +206,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_send_question_link
     plain(" [")
-    render(Components::ModalLink.new(
+    render(Components::Link::Modal.new(
              "observation_email",
              tab: ::Tab::Observation::SendQuestion.new(observation: @obs)
            ))
@@ -266,7 +266,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       br
       @obs.projects.each do |project|
         div(class: "indent") do
-          render(Components::ObjectLink.new(object: project))
+          render(Components::Link::Object::Base.new(object: project))
         end
       end
     end
@@ -275,7 +275,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { plain("#{:FIELD_SLIP.t}: ") }
-      render(Components::ObjectLink.new(object: @obs.field_slip))
+      render(Components::Link::Object::Base.new(object: @obs.field_slip))
     end
   end
 

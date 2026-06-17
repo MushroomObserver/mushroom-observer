@@ -8,7 +8,7 @@
 # @param good_images [Array<Image>] already uploaded images
 class Views::Controllers::Observations::Form::Upload < Views::Base
   prop :form, ::Components::ApplicationForm
-  prop :good_images, _Array(Image), default: -> { [] }
+  prop :good_images, _Array(::Image), default: -> { [] }
 
   def view_template
     h4(class: "panel-title d-inline-block mr-4") { :IMAGES.l }

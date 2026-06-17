@@ -70,7 +70,7 @@ module Views::Controllers::Projects
             trusted_html(draft.name&.display_name&.t)
           end
           plain(" (")
-          render(Components::UserLink.new(user: draft.user))
+          render(Components::Link::Object::User.new(user: draft.user))
           plain(")")
           br
         end
@@ -137,7 +137,7 @@ module Views::Controllers::Projects
     end
 
     def render_trust_settings_button
-      render(Components::ModalLink.new(
+      render(Components::Link::Modal.new(
                "trust_settings",
                :show_project_trust_settings.l,
                trust_modal_project_member_path(
@@ -161,7 +161,7 @@ module Views::Controllers::Projects
     end
 
     def render_add_obs_button
-      render(Components::ModalLink.new(
+      render(Components::Link::Modal.new(
                "add_obs",
                :change_member_add_obs.t,
                add_obs_modal_project_member_path(

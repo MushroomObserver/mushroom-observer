@@ -97,7 +97,7 @@ module Views::Controllers::SpeciesLists
     def render_images_button
       return unless related_to_locations?
 
-      project_button(:IMAGES.l, related_query_path(Image))
+      project_button(:IMAGES.l, related_query_path(::Image))
     end
 
     def related_query_path(model)
@@ -112,7 +112,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def project_button(name, target)
-      render(Components::ProjectButton.new(name: name, target: target))
+      render(Components::Button::Project.new(name: name, target: target))
     end
 
     def render_list_search

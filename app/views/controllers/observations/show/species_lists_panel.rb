@@ -28,7 +28,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   end
 
   def manage_link
-    render(Components::IconLink.new(
+    render(Components::Link::Icon.new(
              tab: ::Tab::Observation::ManageLists.new(
                observation: @obs, q_param: q_param
              )

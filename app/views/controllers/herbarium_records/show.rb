@@ -74,7 +74,7 @@ module Views::Controllers::HerbariumRecords
     def render_user_field
       trusted_html(:herbarium_record_user.t)
       plain(": ")
-      render(Components::UserLink.new(user: @herbarium_record.user))
+      render(Components::Link::Object::User.new(user: @herbarium_record.user))
       br
     end
 

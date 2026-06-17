@@ -138,11 +138,11 @@ module Views::Controllers::Projects::Locations
         aria: { expanded: false,
                 controls: collapse_id }
       ) do
-        render(Components::LinkIcon.new(
+        render(Components::Icon.new(
                  type: :chevron_down, title: :OPEN.l,
                  html_class: "active-icon"
                ))
-        render(Components::LinkIcon.new(type: :chevron_up, title: :CLOSE.l))
+        render(Components::Icon.new(type: :chevron_up, title: :CLOSE.l))
       end
     end
 

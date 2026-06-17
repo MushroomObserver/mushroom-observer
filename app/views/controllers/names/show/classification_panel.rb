@@ -35,7 +35,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   private
 
   def render_edit_link
-    render(Components::IconLink.new(
+    render(Components::Link::Icon.new(
              tab: Tab::Name::EditClassification.new(name: @name)
            ))
   end

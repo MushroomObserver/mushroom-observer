@@ -40,7 +40,7 @@ module Views::Controllers::Locations
 
       def render_to_string_link(tab_class)
         capture do
-          render(::Components::IconLink.new(
+          render(::Components::Link::Icon.new(
                    tab: tab_class.new(location: @location)
                  ))
         end
