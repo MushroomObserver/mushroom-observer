@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class LifeformsControllerTest < FunctionalTestCase
-
     def test_edit_lifeform
       # Prove that anyone logged in can edit lifeform, and that the form starts
       # off with the correct current state.

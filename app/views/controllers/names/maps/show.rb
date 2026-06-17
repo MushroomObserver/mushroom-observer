@@ -8,7 +8,7 @@
 class Views::Controllers::Names::Maps::Show < Views::Base
   prop :name, ::Name
   prop :query, _Nilable(::Query::Observations), default: nil
-  prop :observations, _Array(::Observation)
+  prop :observations, _Array(_Interface(:id))
   prop :observations_capped, _Boolean, default: false
   prop :observations_loaded_count, Integer, default: 0
   prop :observations_total_count, Integer, default: 0

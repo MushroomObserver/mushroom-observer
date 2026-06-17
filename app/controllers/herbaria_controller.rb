@@ -228,9 +228,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
       :new_object.t(type: :HERBARIUM)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
-                       object: @herbarium, mode: :edit,
-                       title: :HERBARIUM_RECORD.l
-                     ))
+                         object: @herbarium, mode: :edit,
+                         title: :HERBARIUM_RECORD.l
+                       ))
     end
   end
 

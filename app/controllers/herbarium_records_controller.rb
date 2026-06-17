@@ -503,11 +503,11 @@ class HerbariumRecordsController < ApplicationController
       :add_object.t(type: :HERBARIUM_RECORD)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
-                       object: @herbarium_record, mode: :edit,
-                       title: [@herbarium_record.format_name.t,
-                               @herbarium_record.herbarium_label].
-                         safe_join(" ")
-                     ))
+                         object: @herbarium_record, mode: :edit,
+                         title: [@herbarium_record.format_name.t,
+                                 @herbarium_record.herbarium_label].
+                                safe_join(" ")
+                       ))
     end
   end
 

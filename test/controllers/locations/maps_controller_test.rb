@@ -4,7 +4,6 @@ require("test_helper")
 
 module Locations
   class MapsControllerTest < FunctionalTestCase
-
     def test_map_locations_all
       login
       get(:show)

@@ -223,9 +223,9 @@ module Observations
         :add_object.t(type: :EXTERNAL_LINK)
       when "edit", "update"
         render_to_string(Views::Layouts::Header::ObjectTitle.new(
-                         object: @external_link, mode: :edit,
-                         title: :EXTERNAL_LINK.l
-                       ))
+                           object: @external_link, mode: :edit,
+                           title: :EXTERNAL_LINK.l
+                         ))
       end
     end
 

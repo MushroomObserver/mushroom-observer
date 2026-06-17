@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class ClassificationControllerTest < FunctionalTestCase
-
     def test_get_edit_classification
       name = names(:boletus_edulis)
       # Make sure user has to be logged in.

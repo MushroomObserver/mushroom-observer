@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names::Classification
   class InheritControllerTest < FunctionalTestCase
-
     def create_name(name)
       parse = Name.parse_name(name)
       params = parse.params

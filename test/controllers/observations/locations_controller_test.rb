@@ -4,7 +4,6 @@ require("test_helper")
 
 module Observations
   class LocationsControllerTest < FunctionalTestCase
-
     def test_define_location_options
       albion = locations(:albion)
 

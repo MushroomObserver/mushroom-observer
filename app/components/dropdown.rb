@@ -120,13 +120,18 @@ class Components::Dropdown < Components::Base
     str, url, args = tuple
     args ||= {}
     active = args.delete(:active)
+    kwargs = build_link_kwargs(args, active: active)
+    render_crud_button_or_link(str, url, args, kwargs.compact_blank)
+  end
+
+  def build_link_kwargs(args, active:)
     kwargs = merge_context_nav_link_args(args, {})
     kwargs[:class] = class_names(kwargs[:class], "active") if active
     kwargs[:disabled] = true if active
     if args[:button].present? && kwargs[:class].present?
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
     end
-    render_crud_button_or_link(str, url, args, kwargs.compact_blank)
+    kwargs
   end
 
   def normalize_section(section)

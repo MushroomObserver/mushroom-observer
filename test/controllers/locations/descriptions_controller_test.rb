@@ -4,7 +4,6 @@ require("test_helper")
 
 module Locations
   class DescriptionsControllerTest < FunctionalTestCase
-
     ##########################################################################
     #
     #    SHOW

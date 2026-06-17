@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class EolDataControllerTest < FunctionalTestCase
-
     def test_eol
       login
       get("show")

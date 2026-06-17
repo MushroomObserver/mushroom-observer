@@ -631,9 +631,9 @@ class LocationsController < ApplicationController
       :create_object.t(type: :LOCATION)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
-                       object: @location, mode: :edit,
-                       title: @location.display_name
-                     ))
+                         object: @location, mode: :edit,
+                         title: @location.display_name
+                       ))
     end
   end
 

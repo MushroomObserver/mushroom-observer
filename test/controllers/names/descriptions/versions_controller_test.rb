@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names::Descriptions
   class VersionsControllerTest < FunctionalTestCase
-
     def test_show_past_name_description
       login("dick")
       desc = name_descriptions(:peltigera_desc)

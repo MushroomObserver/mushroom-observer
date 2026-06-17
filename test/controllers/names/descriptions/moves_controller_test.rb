@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names::Descriptions
   class MovesControllerTest < FunctionalTestCase
-
     # Rolf is the author of an alternative desc.
     # It's not restricted.
     def rolf_desc

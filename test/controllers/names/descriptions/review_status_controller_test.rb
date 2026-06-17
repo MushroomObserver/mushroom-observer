@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names::Descriptions
   class ReviewStatusControllerTest < FunctionalTestCase
-
     def test_set_review_status_reviewer
       desc = name_descriptions(:coprinus_comatus_desc)
       assert_equal("unreviewed", desc.review_status)

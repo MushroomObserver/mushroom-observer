@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class DescriptionsControllerTest < FunctionalTestCase
-
     def empty_notes
       NameDescription.all_note_fields.index_with do |_field|
         ""

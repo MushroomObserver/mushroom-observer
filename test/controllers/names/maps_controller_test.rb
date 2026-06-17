@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class MapsControllerTest < FunctionalTestCase
-
     # ----------------------------
     #  Maps
     # ----------------------------

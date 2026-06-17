@@ -453,9 +453,9 @@ class CollectionNumbersController < ApplicationController
       :add_object.t(type: :COLLECTION_NUMBER)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
-                       object: @collection_number, mode: :edit,
-                       title: @collection_number.format_name.t
-                     ))
+                         object: @collection_number, mode: :edit,
+                         title: @collection_number.format_name.t
+                       ))
     end
   end
 
