@@ -178,11 +178,12 @@ class InatImportJobTest < ActiveJob::TestCase
     imported_img = obs.images.first
     assert_equal(@user, imported_img.user,
                  "Image should belong to importing user")
-    assert_equal(
-      "iNat photo_id: #{inat_photo[:photo_id]}, uuid: #{inat_photo[:uuid]}",
-      imported_img.original_name,
-      "Image original_name should be iNat photo_id and uuid"
-    )
+    # Structured provenance (#4529): source + iNat photo id on the image,
+    # not stashed in the keep_filenames-governed original_name.
+    assert_equal(Source.inaturalist, imported_img.external_source,
+                 "Imported image should record its source")
+    assert_equal(inat_photo[:photo_id].to_s, imported_img.external_id,
+                 "Imported image should record the iNat photo id")
 
     assert(obs.sequences.none?)
   end
@@ -1113,7 +1114,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # The payload should contain the observation_field_value details
     payload = errors[:payload]
-    assert(payload.is_a?(Hash), "Error payload should be a hash")
+    assert_kind_of(Hash, payload, "Error payload should be a hash")
     assert_equal(@inat_import.inat_ids.to_i,
                  payload[:observation_field_value][:observation_id],
                  "Incorrect observation_id in error payload")

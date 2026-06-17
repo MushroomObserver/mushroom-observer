@@ -17,7 +17,7 @@ module Images
       assert_redirected_to(image_path(image.id))
       vote = ImageVote.find_by(image: image, user: user)
       assert_not_nil(vote, "Cannot find ImageVote")
-      assert(vote.value == value, "Vote not cast correctly")
+      assert_equal(value, vote.value, "Vote not cast correctly")
     end
 
     def test_cast_vote_next
@@ -36,7 +36,7 @@ module Images
       assert_match(%r{/images/#{image.id}\?q}, response.location)
       vote = ImageVote.find_by(image: image, user: user)
       assert_not_nil(vote, "Cannot find ImageVote")
-      assert(vote.value == value, "Vote not cast correctly")
+      assert_equal(value, vote.value, "Vote not cast correctly")
     end
 
     def test_image_vote

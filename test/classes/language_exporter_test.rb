@@ -76,7 +76,7 @@ class LanguageExporterTest < UnitTestCase
   def assert_valid_or_invalid(method, str, expected_val, expected_str)
     msg = assert_message("#{method}: Expected #{str.inspect} to be" \
                          "#{expected_str}.")
-    assert(!!@official.send_private(method, str) == !!expected_val, msg)
+    assert_equal(!!expected_val, !!@official.send_private(method, str), msg)
     Language.clear_verbose_messages
   end
 
@@ -115,11 +115,11 @@ class LanguageExporterTest < UnitTestCase
     @official.send_private(:check_export_line, str)
     pass, in_tag = @official.get_check_export_line_status
     msg = assert_message("Expected #{str.inspect} to #{expected_str}.")
-    assert(pass == expected_val, msg)
+    assert_equal(expected_val, pass, msg)
     msg = assert_message(
       "Expected #{str.inspect} to leave in_tag = #{in_tag_end.inspect}"
     )
-    assert(!!in_tag == (in_tag_end == 1), msg)
+    assert_equal(in_tag_end == 1, !!in_tag, msg)
     Language.clear_verbose_messages
   end
 
@@ -190,10 +190,10 @@ class LanguageExporterTest < UnitTestCase
       assert(data, "File read failed for #{file}")
 
       data.each do |tag, str|
-        assert(tag.is_a?(String),
-               "#{file} #{tag}: tag is a #{tag.class} not a String!")
-        assert(str.is_a?(String),
-               "#{file} #{tag}: value is a #{str.class} not a String!")
+        assert_kind_of(String, tag,
+                       "#{file} #{tag}: tag is a #{tag.class} not a String!")
+        assert_kind_of(String, str,
+                       "#{file} #{tag}: value is a #{str.class} not a String!")
       end
 
       lines = @official.send_private(:format_export_file, data, data)

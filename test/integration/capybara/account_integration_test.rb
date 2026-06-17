@@ -353,7 +353,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     end
 
     mary.reload
-    assert_equal(mary.login, "yabba dabba doo")
+    assert_equal("yabba dabba doo", mary.login)
     assert_flash_success
     assert_selector("body.preferences__edit")
 
@@ -449,7 +449,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     mary.reload
-    assert_equal(mary.content_filter[:region], "Massachusetts, USA")
+    assert_equal("Massachusetts, USA", mary.content_filter[:region])
     assert_flash_success
 
     assert_selector("body.preferences__edit")
@@ -505,10 +505,10 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("body.preferences__edit")
 
     mary.reload
-    assert_equal(mary.email_html, false)
-    assert_equal(mary.email_comments_owner, false)
-    assert_equal(mary.email_general_question, false)
-    assert_equal(mary.email_general_feature, false)
+    assert_equal(false, mary.email_html)
+    assert_equal(false, mary.email_comments_owner)
+    assert_equal(false, mary.email_general_question)
+    assert_equal(false, mary.email_general_feature)
   end
 
   def test_profile

@@ -563,28 +563,6 @@ class SearchFormTest < ComponentTestCase
     assert_includes(html, "Substrate\nCap_Color")
   end
 
-  private
-
-  def render_form(local: true)
-    form = Components::SearchForm.new(
-      @query,
-      search_controller: @search_controller,
-      local: local,
-      form_action_url: "/observations/search"
-    )
-    render(form)
-  end
-
-  def render_form_with_query(query)
-    form = Components::SearchForm.new(
-      query,
-      search_controller: @search_controller,
-      local: true,
-      form_action_url: "/observations/search"
-    )
-    render(form)
-  end
-
   # ------- Length Validation Infrastructure Tests -------
 
   def test_form_has_length_validator_stimulus_controller
@@ -617,13 +595,34 @@ class SearchFormTest < ComponentTestCase
   def test_form_has_flash_container_div
     html = render_form
 
-    assert_html(html, "#search_observations_flash",
-                "Form should have flash container for error messages")
+    assert_html(html, "#search_observations_flash")
   end
 
   def test_form_uses_post_method
     html = render_form
 
     assert_html(html, "form#observations_search_form[method='post']")
+  end
+
+  private
+
+  def render_form(local: true)
+    form = Components::SearchForm.new(
+      @query,
+      search_controller: @search_controller,
+      local: local,
+      form_action_url: "/observations/search"
+    )
+    render(form)
+  end
+
+  def render_form_with_query(query)
+    form = Components::SearchForm.new(
+      query,
+      search_controller: @search_controller,
+      local: true,
+      form_action_url: "/observations/search"
+    )
+    render(form)
   end
 end

@@ -54,7 +54,7 @@ module Locations
                     text: "Rolf Singer (rolf)")
       assert_select("select#query_locations_has_observations",
                     selected: "yes")
-      assert_equal(session[:search_type], :locations)
+      assert_equal(:locations, session[:search_type])
     end
 
     def test_create_locations_search

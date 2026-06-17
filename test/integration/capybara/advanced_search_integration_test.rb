@@ -26,7 +26,7 @@ class AdvancedSearchIntegrationTest < CapybaraIntegrationTestCase
 
     assert_equal(expected_hits.count, total_hits)
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
-    page.find("#filters").assert_text(names(:fungi).text_name)
-    page.find("#filters").assert_text(locations(:falmouth).display_name)
+    page.find_by_id("filters").assert_text(names(:fungi).text_name)
+    page.find_by_id("filters").assert_text(locations(:falmouth).display_name)
   end
 end

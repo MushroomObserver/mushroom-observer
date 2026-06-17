@@ -67,7 +67,7 @@ module Observations
                     selected: "Species")
       assert_select("select#query_observations_confidence_range",
                     selected: "Form")
-      assert_equal(session[:search_type], :observations)
+      assert_equal(:observations, session[:search_type])
     end
 
     # Test that multiple users in by_users are properly prefilled

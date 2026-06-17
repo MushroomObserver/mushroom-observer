@@ -12,7 +12,7 @@ module Images
       login("rolf")
       put(:update)
       imgs = Image.where.not(original_name: "").where(user_id: rolf.id)
-      assert(imgs.empty?)
+      assert_empty(imgs)
     end
   end
 end

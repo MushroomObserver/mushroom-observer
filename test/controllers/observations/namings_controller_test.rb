@@ -138,6 +138,7 @@ module Observations
 
       { obs:, consensus:, o_count:, g_count:, n_count:, v_count:, params: }
     end
+    private :propose_naming_setup
 
     def post_propose_naming_assertions(args)
       args => { obs:, consensus:, o_count:, g_count:, n_count:, v_count: }
@@ -417,6 +418,7 @@ module Observations
       login(nam.user.login)
       params
     end
+    private :edit_form_test_setup
 
     def test_edit_obs_owner_with_different_vote
       nam = namings(:coprinus_comatus_other_naming)
@@ -751,6 +753,7 @@ module Observations
       assert_select("#observation_details")
       assert_select(".show_images")
     end
+    private :assert_edit
 
     # POST with no naming param at all triggers the `@given_name.blank?`
     # branch of `flash_naming_errors`. The controller flashes the

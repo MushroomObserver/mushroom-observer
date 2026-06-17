@@ -11,7 +11,7 @@ class LocalTimeSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__index")
 
     # Find a matrix box with a time footer
-    time_element = find(".rss-updated-at", match: :first, wait: 5)
+    time_element = first(".rss-updated-at", wait: 5)
 
     # Verify the Stimulus controller data attribute is present
     utc_value = time_element["data-local-time-utc-value"]

@@ -192,7 +192,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     end
 
     assert_flash_error
-    assert_equal(response.status, 422)
+    assert_equal(422, response.status)
   end
 
   def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints
@@ -214,7 +214,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
 
     assert_flash_error
     assert_nil(FieldSlip.find_by(code: code))
-    assert_equal(response.status, 422)
+    assert_equal(422, response.status)
   end
 
   def test_should_create_field_slip_and_join_project
@@ -372,7 +372,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     obs = field_slip.observation
     assert_not_nil(obs, "Cannot find Observation for FieldSlip")
     assert_redirected_to(observation_url(obs.id))
-    assert_equal(obs.text_name, "Fungi")
+    assert_equal("Fungi", obs.text_name)
   end
 
   def test_should_attempt_quick_field_slip_and_redirect_to_show_obs
@@ -423,7 +423,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              project_id: projects(:eol_project).id
            }
          })
-    assert_equal(response.status, 422)
+    assert_equal(422, response.status)
   end
 
   def test_json_should_fail_to_create_field_slip
@@ -437,7 +437,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
              project_id: projects(:eol_project).id
            }
          })
-    assert_equal(response.status, 422)
+    assert_equal(422, response.status)
   end
 
   def test_should_show_field_slip
@@ -847,7 +847,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                     field_slip: { code: "-3.14",
                                   observation_id: @field_slip.observation&.id,
                                   project_id: @field_slip.project_id } })
-    assert_equal(response.status, 422)
+    assert_equal(422, response.status)
   end
 
   def test_json_should_fail_to_update_field_slip
@@ -858,7 +858,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
                     field_slip: { code: "-3.14",
                                   observation_id: @field_slip.observation&.id,
                                   project_id: @field_slip.project_id } })
-    assert_equal(response.status, 422)
+    assert_equal(422, response.status)
   end
 
   def test_should_destroy_field_slip

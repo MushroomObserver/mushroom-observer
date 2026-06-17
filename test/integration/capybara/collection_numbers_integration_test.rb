@@ -13,9 +13,9 @@ class CollectionNumbersIntegrationTest < CapybaraIntegrationTestCase
     login(user)
     visit(observation_path(obs.id))
     assert_difference("obs.collection_numbers.count", -1) do
-      page.find("#observation_collection_numbers").click_on("Remove")
+      page.find_by_id("observation_collection_numbers").click_on("Remove")
       # new edit form (appears in modal)
-      page.find("#content").click_on("Remove")
+      page.find_by_id("content").click_on("Remove")
     end
   end
 end

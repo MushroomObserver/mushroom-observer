@@ -10,6 +10,8 @@ inherit_mode:
     - Exclude
 
 plugins:
+  - rubocop-capybara
+  - rubocop-minitest
   - rubocop-performance
   - rubocop-rails
 
@@ -345,6 +347,68 @@ Style/SymbolArray:
 
 Rails/SkipsModelValidations:
   # We skip validations all the time. I'm tired of disabling this cop.
+  Enabled: false
+
+# ------------------------------------------------------------------------------
+# rubocop-minitest plugin cops permanently disabled.
+#
+# These live here (not in `.rubocop_todo.yml`) because
+# `rubocop --auto-gen-config` regenerates `.rubocop_todo.yml` from
+# scratch based on the offenses RuboCop currently reports — and a
+# cop set to `Enabled: false` reports zero offenses, so the
+# regenerator emits nothing for it and silently drops the
+# `Enabled: false` line plus its rationale comment. Permanent
+# disables must live in `.rubocop.yml`, which is not regenerated.
+
+Minitest/AssertIncludes:
+  # 152 offenses on disable. `assert(arr.include?(x))` is more
+  # readable than `assert_includes(arr, x)`. Also catches and
+  # rewrites `assert(obj.member?(other))` where `obj` is a custom
+  # `member?`-predicate object (e.g. `Project#member?` checks user
+  # membership, not collection inclusion) — those break.
+  Enabled: false
+Minitest/AssertOperator:
+  # 188 offenses on disable. `assert(x > y)` is more readable than
+  # `assert_operator(x, :>, y)`. Also confuses assignment-expression
+  # inside `assert(…)` with comparison (e.g.
+  # `assert(qb[i] = qa[i].subquery_of(model))` got rewritten as
+  # `assert_operator(qb, :[]=, i)`).
+  Enabled: false
+Minitest/AssertPredicate:
+  # 399 offenses on disable. `assert(x.present?)` is more readable
+  # than `assert_predicate(x, :present?)`.
+  Enabled: false
+Minitest/AssertTruthy:
+  # 75 offenses on disable. The cop rewrites `assert_equal(true, x)`
+  # to `assert(x)`, which relaxes a literal-`true` assertion to a
+  # truthy check. Test code that says `assert_equal(true, foo?)`
+  # documents the author's expectation that the method returns the
+  # boolean `true` itself, not any truthy value; the autocorrect
+  # erases that intent.
+  Enabled: false
+Minitest/EmptyLineBeforeAssertionMethods:
+  # 5902 offenses on disable — pure cosmetic churn at that volume.
+  # The autocorrect inserts a blank line before every assertion that
+  # follows non-whitespace; no readability win for MO's style at the
+  # cost of touching almost every test file.
+  Enabled: false
+Minitest/MultipleAssertions:
+  # 1564 offenses on disable. The cop counts assertions per test
+  # method; MO's test suite has many long property/integration-style
+  # tests (highest single test: 94 assertions) where consolidating
+  # assertions per render is actively encouraged by the project's
+  # component-test conventions (see `.claude/rules/testing.md`).
+  # Threshold-policing the assertion count doesn't fit how MO writes
+  # tests.
+  Enabled: false
+Minitest/RefuteFalse:
+  # 59 offenses on disable. Same reasoning as `Minitest/AssertTruthy`
+  # above. The cop's autocorrect rewrites `assert_equal(false, x)`
+  # to (via the `Rails/RefuteMethods` chain) `assert_not(x)`, which
+  # accepts `nil` in addition to literal `false`. `assert_equal(false,
+  # x)` documents that the method returns the boolean `false`
+  # itself, not any falsy value; the relaxation would silently hide
+  # a regression that started returning `nil`.
   Enabled: false
 
 MushroomObserver/NoUserCurrentInViews:

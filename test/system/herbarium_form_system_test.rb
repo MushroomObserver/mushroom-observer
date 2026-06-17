@@ -25,7 +25,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__new")
 
     assert_selector("#observation_naming_specimen")
-    scroll_to(find("#observation_naming_specimen"), align: :top)
+    scroll_to(find_by_id("observation_naming_specimen"), align: :top)
     check("observation_specimen")
     assert_selector("#observation_herbarium_record_herbarium_name")
     assert_selector(".create-link", text: :create_herbarium.l)
@@ -45,7 +45,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     visit("/observations/new")
-    scroll_to(find("#observation_naming_specimen"), align: :top)
+    scroll_to(find_by_id("observation_naming_specimen"), align: :top)
     check("observation_specimen")
     click_link(:create_herbarium.l)
 

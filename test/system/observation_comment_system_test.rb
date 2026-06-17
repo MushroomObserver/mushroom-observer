@@ -77,7 +77,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     com = Comment.last
 
     using_session("katrina_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       within("#comment_#{com.id}") do
         assert_text("A load of bollocks")
         assert_selector(".user_link_#{katrina.id}")
@@ -87,7 +87,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     using_session("rolf_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       within("#comment_#{com.id}") do
         assert_text("A load of bollocks")
         assert_selector(".user_link_#{katrina.id}")
@@ -97,7 +97,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     using_session("katrina_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       within("#comments_for_object") do
         find(:css, ".edit_comment_link_#{com.id}").trigger("click")
       end
@@ -124,7 +124,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     using_session("rolf_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       within("#comment_#{com.id}") do
         assert_no_text("A load of bollocks")
         assert_text("Exciting discovery")
@@ -135,7 +135,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     using_session("katrina_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       within("#comment_#{com.id}") do
         assert_no_text("A load of bollocks")
         assert_text("Exciting discovery")
@@ -149,7 +149,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     using_session("rolf_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       within("#comments_for_object") do
         assert_no_text("Exciting discovery")
         assert_no_selector(".destroy_comment_link_#{com.id}")
@@ -171,7 +171,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     # Both users should get the UFO comment without refreshing the page.
     # It's not editable by them.
     using_session("rolf_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       assert_selector("#comment_#{ufo.id}", wait: 6)
       within("#comment_#{ufo.id}") do
         assert_text("I am a UFO!")
@@ -182,7 +182,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
     end
 
     using_session("katrina_session") do
-      scroll_to(find("#comments_for_object"), align: :center)
+      scroll_to(find_by_id("comments_for_object"), align: :center)
       assert_selector("#comment_#{ufo.id}", wait: 6)
       within("#comment_#{ufo.id}") do
         assert_text("I am a UFO!")
@@ -197,7 +197,7 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
                     merge({ method: :patch, set_content: "Right on!" })
     api = API2.execute(update_params)
     ufo = api.results.first
-    assert_equal(ufo.comment, "Right on!")
+    assert_equal("Right on!", ufo.comment)
 
     # Both users should get updated UFO comment without refreshing the page.
     using_session("rolf_session") do

@@ -10,13 +10,14 @@ class API2ControllerTest < FunctionalTestCase
     @api = assigns(:api)
     assert_not(@api.errors.empty?, "Expected API to fail with errors.")
   end
+  private :assert_api_failed
 
   def assert_no_api_errors(msg = nil)
     @api = assigns(:api)
     return unless @api
 
     msg = format_api_errors(@api, msg)
-    assert(@api.errors.empty?, msg)
+    assert_empty(@api.errors, msg)
   end
 
   def format_api_errors(api, msg)
@@ -171,8 +172,8 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(false, obs.specimen)
     assert_equal(true, obs.is_collection_location)
     assert_equal(Observation.no_notes, obs.notes)
-    assert(obs.log_updated_at.is_a?(Time),
-           "Observation should have log_updated_at time")
+    assert_kind_of(Time, obs.log_updated_at,
+                   "Observation should have log_updated_at time")
     assert_obj_arrays_equal([], obs.images)
     assert_nil(obs.thumb_image)
     assert_obj_arrays_equal([], obs.projects)
@@ -227,9 +228,9 @@ class API2ControllerTest < FunctionalTestCase
     assert_names_equal(names(:coprinus_comatus), obs.name)
     assert_equal(1, obs.namings.length)
     assert_equal(1, obs.votes.length)
-    assert_equal(2.0, obs.votes.first.value)
-    assert_equal(34.5678, obs.lat)
-    assert_equal(-123.4567, obs.lng)
+    assert_in_delta(2.0, obs.votes.first.value)
+    assert_in_delta(34.5678, obs.lat)
+    assert_in_delta(-123.4567, obs.lng)
     assert_equal(376, obs.alt)
     assert_equal(true, obs.specimen)
     assert_equal(true, obs.is_collection_location)
@@ -481,7 +482,7 @@ class API2ControllerTest < FunctionalTestCase
 
   def test_get_field_slip_without_observations
     fs = field_slips(:field_slip_no_obs)
-    assert(fs.observations.empty?, "Test needs field_slip without obs")
+    assert_empty(fs.observations, "Test needs field_slip without obs")
 
     get(:field_slips,
         params: { id: fs.id, detail: :high, format: :json })
@@ -586,6 +587,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("34.1622", result["latitude"].to_s)
     assert_equal("-118.3521", result["longitude"].to_s)
   end
+  private :assert_observation_lat_lng_visible_json
 
   def assert_observation_lat_lng_visible_xml
     doc = REXML::Document.new(response.body)
@@ -593,12 +595,14 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal("34.1622", result.elements["latitude"]&.get_text.to_s)
     assert_equal("-118.3521", result.elements["longitude"]&.get_text.to_s)
   end
+  private :assert_observation_lat_lng_visible_xml
 
   def assert_observation_lat_lng_hidden_json
     result = response.parsed_body["results"][0]
     assert_nil(result["latitude"])
     assert_nil(result["longitude"])
   end
+  private :assert_observation_lat_lng_hidden_json
 
   def assert_observation_lat_lng_hidden_xml
     doc = REXML::Document.new(response.body)
@@ -606,6 +610,7 @@ class API2ControllerTest < FunctionalTestCase
     assert_nil(result.elements["latitude"])
     assert_nil(result.elements["longitude"])
   end
+  private :assert_observation_lat_lng_hidden_xml
 
   def test_get_empty_results
     params = { date: "2100-01-01" }

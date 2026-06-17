@@ -16,8 +16,8 @@ class NamesControllerCreateTest < FunctionalTestCase
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert(@@emails.empty?,
-           "Wasn't expecting any email notifications; got:\n#{msg}")
+    assert_empty(@@emails,
+                 "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
     @@emails = []
   end

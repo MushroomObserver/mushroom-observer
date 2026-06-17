@@ -56,10 +56,12 @@ class Inat
       "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}"
     end
 
-    # iNat doesn't preserve user's original filename
-    # Preserve photo_id and uuid for purposed of syncing updates
-    def original_name
-      "iNat photo_id: #{@photo[:photo_id]}, uuid: #{@photo[:uuid]}"
+    # The iNat photo id, recorded structurally on the MO image as
+    # `external_id` (with `source_id`) for syncing updates (#4529). This
+    # replaces stashing it in `original_name`, which API2::ImageAPI nulls
+    # out for users whose `keep_filenames` preference is "toss".
+    def external_id
+      @photo[:photo_id]
     end
 
     # Convert the url returned by the iNat API to
