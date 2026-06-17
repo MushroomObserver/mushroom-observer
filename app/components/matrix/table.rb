@@ -37,7 +37,12 @@ class Components::Matrix::Table < Components::Base
   # read this through `cache_key_for`. Phlex's automatic class +
   # method + line digest doesn't survive into the controller's
   # check, so we encode the version explicitly.
-  CACHE_VERSION = "v1"
+  # Bumped from "v1" to "v2" on the matrix-carousels tryout: multi-image
+  # observations now render a `Components::Matrix::Carousel` in the
+  # thumbnail slot rather than a single `Components::Image::Interactive`,
+  # so old "v1" fragments would serve stale single-image HTML on
+  # carousel-capable obs.
+  CACHE_VERSION = "v2"
 
   # The cache key MatrixBox fragments are stored under, used by
   # both the Phlex `low_level_cache` write inside this component and

@@ -63,6 +63,12 @@ class Components::Matrix::Box
       data[:image_link] = @object.show_link_args
       data[:obs] = @object
       data[:full_width] = true
+      # TRYOUT (matrix-carousels): the full image set + the thumb-image
+      # are what Matrix::Carousel consumes. Cheap to populate (the obs
+      # already has the association loaded when the controller's
+      # `includes(:images)` is in effect).
+      data[:images] = @object.images.to_a
+      data[:top_img] = @object.thumb_image
     end
 
     def extract_rss_log_data

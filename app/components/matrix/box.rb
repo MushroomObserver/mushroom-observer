@@ -98,17 +98,42 @@ class Components::Matrix::Box < Components::Base
     return unless @data[:image]
 
     panel.with_thumbnail do
-      render(Components::Image::Interactive.new(
-               user: @user,
-               image: @data[:image],
-               image_link: @data[:image_link],
-               obs: @data[:obs] || {},
-               votes: @votes && @data.fetch(:votes, true),
-               full_width: @data.fetch(:full_width, true),
-               identify: @identify,
-               observation_view: @observation_view
-             ))
+      if render_carousel?
+        render_matrix_carousel
+      else
+        render_interactive_image
+      end
     end
+  end
+
+  # TRYOUT (matrix-carousels): render `Components::Matrix::Carousel`
+  # when the obs has ≥2 images. Single-image obs stick with the
+  # `Components::Image::Interactive` thumbnail (no carousel chrome
+  # for nothing to scroll). `CACHE_VERSION` was bumped on
+  # `Components::Matrix::Table` so old cached single-image fragments
+  # don't poison the new multi-image carousel output.
+  def render_carousel?
+    @data[:images].is_a?(::Array) && @data[:images].length > 1
+  end
+
+  def render_matrix_carousel
+    render(Components::Matrix::Carousel.new(
+             user: @user, object: @object,
+             images: @data[:images], top_img: @data[:top_img]
+           ))
+  end
+
+  def render_interactive_image
+    render(Components::Image::Interactive.new(
+             user: @user,
+             image: @data[:image],
+             image_link: @data[:image_link],
+             obs: @data[:obs] || {},
+             votes: @votes && @data.fetch(:votes, true),
+             full_width: @data.fetch(:full_width, true),
+             identify: @identify,
+             observation_view: @observation_view
+           ))
   end
 
   # Render details section

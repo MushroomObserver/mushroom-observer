@@ -287,12 +287,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # queue (extends with `:observation_views`, `{ name: :synonym }`,
   # `{ namings: :name }`).
   #
-  # Swap the `thumb_image:` hash for the matrix_box_carousels
-  # alternative below when the carousel feature lands.
+  # TRYOUT (matrix-carousels): the comment above used to say
+  # "swap the `thumb_image:` hash for the alternative below when
+  # the carousel feature lands" — this is that swap. `{ images: [...] }`
+  # loads the full image set per obs so `Components::Matrix::Carousel`
+  # can iterate without N+1.
   def self.matrix_box_includes
-    [{ thumb_image: [:image_votes, :license, :projects, :user] },
-     # for matrix_box_carousels:
-     # { images: [:image_votes, :license, :projects, :user] },
+    [{ images: [:image_votes, :license, :projects, :user] },
+     :thumb_image,
      :external_source, :location, :name,
      { namings: :votes },
      { occurrence: :observations }, :projects, :rss_log, :user]
