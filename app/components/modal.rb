@@ -8,7 +8,7 @@
 # Use this directly when you have a modal whose body is arbitrary
 # content (forms, text, lists). For controller-rendered turbo-stream
 # form modals with section-update auto-close, prefer
-# `Components::ModalTurboForm`, which composes this and adds the
+# `Components::Modal::TurboForm`, which composes this and adds the
 # turbo-modal lifecycle wiring.
 #
 # Other modal-like components (`AddObsModal`, `ModalConfirm`,

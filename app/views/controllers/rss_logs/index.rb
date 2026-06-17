@@ -16,7 +16,7 @@ module Views::Controllers::RssLogs
       flash_error(@error) if @error && @rss_logs.empty?
 
       paginated_results do
-        render(::Components::MatrixTable.new(
+        render(::Components::Matrix::Table.new(
                  objects: @rss_logs, user: current_user, cached: true
                ))
       end

@@ -10,7 +10,7 @@
   ]
 %>
 
-<%= render(Components::HelpBlock.new(:p, :advanced_search_caveat.t)) %>
+<%= render(Components::Help::Block.new(:p, :advanced_search_caveat.t)) %>
 
 <%= form_with(scope: :search, url: { action: :advanced },
               method: :get, id: "advanced_search_form",
@@ -48,7 +48,7 @@
 
   <% cnt_betw = tag.span(:advanced_search_content_help.t,
                          class: "help-note mr-3") %>
-  <% cnt_appd = render(Components::HelpBlock.new(:p, :advanced_search_content_notes.t)) %>
+  <% cnt_appd = render(Components::Help::Block.new(:p, :advanced_search_content_notes.t)) %>
   <%= text_field_with_label(form: f, field: :search_content,
                             label: :advanced_search_content.t + ":",
                             between: cnt_betw, append: cnt_appd) %>

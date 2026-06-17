@@ -2,7 +2,7 @@
 
 # Three-radio form for setting a project member's trust level
 # (`no_trust` / `hidden_gps` / `editing`). Rendered inside a
-# `Components::ModalTurboForm` by
+# `Components::Modal::TurboForm` by
 # `Projects::MembersController#trust_modal`.
 #
 # The radios share `name="commit"` and submit different localized

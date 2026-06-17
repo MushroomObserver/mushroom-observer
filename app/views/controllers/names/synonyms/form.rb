@@ -46,7 +46,7 @@ module Views::Controllers::Names::Synonyms
           div(class: "font-weight-bold my-3") do
             plain("#{:form_synonyms_current_synonyms.l}:")
           end
-          render(Components::HelpBlock.new(
+          render(Components::Help::Block.new(
                    :p, :form_synonyms_current_synonyms_help.t
                  ))
 
@@ -68,7 +68,7 @@ module Views::Controllers::Names::Synonyms
           div(class: "font-weight-bold my-3") do
             plain("#{:form_synonyms_proposed_synonyms.l}:")
           end
-          render(Components::HelpBlock.new(
+          render(Components::Help::Block.new(
                    :p, :form_synonyms_proposed_synonyms_help.t
                  ))
 
@@ -106,7 +106,7 @@ module Views::Controllers::Names::Synonyms
       render_new_names_alert if @new_names.present?
 
       checkbox_field(:deprecate_all, label: :form_synonyms_deprecate_synonyms.l)
-      render(Components::HelpBlock.new(
+      render(Components::Help::Block.new(
                :p, :form_synonyms_deprecate_synonyms_help.t
              ))
 
@@ -114,7 +114,7 @@ module Views::Controllers::Names::Synonyms
                      label: "#{:form_synonyms_names.l}:",
                      data: { autofocus: true }) do |f|
         f.with_between do
-          render(Components::HelpBlock.new(:p, members_help))
+          render(Components::Help::Block.new(:p, members_help))
         end
       end
     end

@@ -446,7 +446,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     keys = [:optional, :required].freeze
     positions.each do |pos|
       keys.each do |key|
-        args[pos] = render(Components::HelpNote.new(:span, "(#{key.l})")) \
+        args[pos] = render(Components::Help::Note.new(:span, "(#{key.l})")) \
           if args[pos] == key
       end
     end
@@ -474,7 +474,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
     end
     args[:append] = capture do
       concat(args[:append])
-      concat(render(Components::HelpBlock.new(collapse_id: id)) do
+      concat(render(Components::Help::Block.new(collapse_id: id)) do
         concat(args[:help])
       end)
     end
@@ -486,7 +486,7 @@ module FormsHelper # rubocop:disable Metrics/ModuleLength
      args[:field].to_s].compact_blank.join("_")
   end
 
-  # `?` icon link that toggles the sibling `Components::HelpBlock`
+  # `?` icon link that toggles the sibling `Components::Help::Block`
   # (rendered with `collapse_id: id`). Replaces the legacy
   # `collapse_info_trigger` helper from `panel_helper.rb` — kept as a
   # local helper here because this is the only caller.

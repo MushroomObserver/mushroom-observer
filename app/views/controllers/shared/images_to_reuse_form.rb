@@ -8,7 +8,7 @@
 # Two parts:
 # - `Components::Image::ReuseForm` — the small form that takes an Image
 #   id and POSTs to `<target_domain>/images#attach`.
-# - A `paginated_results`-wrapped `Components::MatrixTable` of
+# - A `paginated_results`-wrapped `Components::Matrix::Table` of
 #   clickable thumbnails (each wrapping `Components::Image::Interactive`
 #   in a POST link to `attach` so a click attaches that image
 #   directly).
@@ -37,14 +37,14 @@ module Views::Controllers::Shared
 
     def render_image_matrix
       paginated_results do
-        render(::Components::MatrixTable.new) do
+        render(::Components::Matrix::Table.new) do
           @objects.each { |image| render_image_card(image) }
         end
       end
     end
 
     def render_image_card(image)
-      render(::Components::MatrixBox.new(
+      render(::Components::Matrix::Box.new(
                extra_class: "text-center", id: image.id
              )) do
         render(::Components::Panel.new) do |panel|

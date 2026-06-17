@@ -2,7 +2,7 @@
 
 # Inner content of one row in the projects index list-group. The
 # `<div class="list-group-item …">` wrapper is supplied by the
-# caller (the ERB index template, soon `Components::ListGroup`);
+# caller (the ERB index template, soon `Components::ListGroup::Base`);
 # this class only emits the two-column body (id badge + title /
 # meta column).
 module Views::Controllers::Projects

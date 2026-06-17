@@ -94,7 +94,7 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_observation_matrix
-      render(Components::MatrixTable.new(
+      render(Components::Matrix::Table.new(
                objects: @herbarium_record.observations.to_a, user: @user
              ))
     end

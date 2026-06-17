@@ -29,7 +29,7 @@ module Views::Controllers::Locations
 
       def render_previous_version
         div(id: "location_previous") do
-          render(::Components::PreviousVersion.new(
+          render(::Components::Description::PreviousVersion.new(
                    obj: @location, versions: @versions.to_a
                  ))
         end

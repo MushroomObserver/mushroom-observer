@@ -35,9 +35,9 @@ module Views::Controllers::SpeciesLists
 
       # The d-flex / justify-content-between / align-items-start
       # classes used to live on `Listing`'s outer wrapper. After
-      # moving the row wrapping into `Components::ListGroup#item`,
+      # moving the row wrapping into `Components::ListGroup::Base#item`,
       # those layout classes ride on the item itself.
-      render(Components::ListGroup.new) do |list|
+      render(Components::ListGroup::Base.new) do |list|
         @objects.each do |species_list|
           list.item(
             class: "d-flex justify-content-between align-items-start"

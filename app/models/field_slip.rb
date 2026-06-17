@@ -83,7 +83,7 @@ class FieldSlip < AbstractModel
       where("code LIKE ?", "#{sanitize_sql_like(prefix.to_s.upcase)}%")
   }
 
-  # Eager-load trees for `FieldSlipPanel` / `Components::MatrixBox`.
+  # Eager-load trees for `FieldSlipPanel` / `Components::Matrix::Box`.
   # Reuses `Observation.matrix_box_includes` so the obs subtree
   # matches observations#index and collection_numbers#show.
   def self.show_includes_tree

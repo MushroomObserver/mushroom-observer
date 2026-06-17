@@ -170,7 +170,7 @@ module Views::Controllers::Names
 
     def render_footer_meta
       div(id: "name_previous_export") do
-        render(Components::PreviousVersion.new(
+        render(Components::Description::PreviousVersion.new(
                  obj: @name, versions: @versions.to_a
                ))
         render(Components::Image::ExportStatusControls.new(object: @name))

@@ -22,7 +22,7 @@ module Admin
                    ))
           end
           format.turbo_stream do
-            render(Components::ModalTurboForm.new(
+            render(Components::Modal::TurboForm.new(
                      identifier: "merge_request_email",
                      title: :email_merge_request_title.t(type: @model.type_tag),
                      user: @user,

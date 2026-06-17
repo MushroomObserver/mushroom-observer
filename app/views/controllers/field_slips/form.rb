@@ -287,7 +287,8 @@ module Views::Controllers::FieldSlips
     end
 
     def render_observation_row(obs)
-      MatrixBox(user: @user, object: obs, votes: false) do
+      render(Components::Matrix::Box.new(user: @user, object: obs,
+                                         votes: false)) do
         render_include_checkbox(obs)
         render_primary_radio(obs)
         render_field_slip_link(obs.field_slip) if obs.field_slip

@@ -276,7 +276,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
-  # Eager-load tree every `Components::MatrixBox` render of an
+  # Eager-load tree every `Components::Matrix::Box` render of an
   # observation reaches into — image with vote/license/project/user
   # for `can_edit?`, location, name, namings (+ votes for
   # `Observation::NamingConsensus`), occurrence (+ observations for

@@ -19,7 +19,7 @@ module Images
                  ))
         end
         format.turbo_stream do
-          render(Components::ModalTurboForm.new(
+          render(Components::Modal::TurboForm.new(
                    identifier: "commercial_inquiry_email",
                    title: :commercial_inquiry_title.t(
                      name: @image.unique_format_name

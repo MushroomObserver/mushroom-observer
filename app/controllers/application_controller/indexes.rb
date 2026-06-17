@@ -442,7 +442,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # Two-stage gate. Both have to be true for the row to be served
   # from cache:
   #   1. `matrix_caches_in_this_request?` (per-request) — false
-  #      when `Components::MatrixTable#render_cached_boxes` would
+  #      when `Components::Matrix::Table#render_cached_boxes` would
   #      bypass the cache for this whole render (identify mode,
   #      project-admin view). Controllers override.
   #   2. `MatrixTable.should_cache_object?` (per-object) — false
@@ -455,9 +455,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # writes.
   def object_fragment_exist?(obj, locale)
     return false unless matrix_caches_in_this_request?
-    return false unless ::Components::MatrixTable.should_cache_object?(obj)
+    return false unless ::Components::Matrix::Table.should_cache_object?(obj)
 
-    Rails.cache.exist?(::Components::MatrixTable.cache_key_for(obj, locale))
+    Rails.cache.exist?(::Components::Matrix::Table.cache_key_for(obj, locale))
   end
 
   # Associations the per-object cache pre-check needs to consult

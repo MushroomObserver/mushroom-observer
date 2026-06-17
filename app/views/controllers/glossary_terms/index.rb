@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::GlossaryTerms
-  # Paginated glossary terms index. Page chrome + a `Components::ListGroup`
+  # Paginated glossary terms index. Page chrome + a `Components::ListGroup::Base`
   # of one `Index::Item` per term. Converted from
   # `glossary_terms/index.html.erb` + `glossary_terms/_object.html.erb`.
   class Index < Views::Base
@@ -30,7 +30,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_list
-      render(::Components::ListGroup.new) do |list|
+      render(::Components::ListGroup::Base.new) do |list|
         @objects.each do |term|
           list.item { render(Item.new(glossary_term: term)) }
         end

@@ -20,7 +20,7 @@ module Views::Controllers::Users
         render_admin_table
       else
         paginated_results do
-          render(::Components::MatrixTable.new(objects: @users))
+          render(::Components::Matrix::Table.new(objects: @users))
         end
       end
     end

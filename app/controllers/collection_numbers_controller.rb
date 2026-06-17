@@ -428,7 +428,7 @@ class CollectionNumbersController < ApplicationController
   end
 
   def render_modal_collection_number_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,

@@ -8,7 +8,7 @@ class Query::NameDescriptions < Query
   query_attr(:by_author, User)
   query_attr(:by_editor, User)
   query_attr(:is_public, :boolean)
-  query_attr(:sources, [{ string: Description::ALL_SOURCE_TYPES }])
+  query_attr(:sources, [{ string: ::Description::ALL_SOURCE_TYPES }])
   query_attr(:projects, [Project])
   query_attr(:ok_for_export, :boolean)
   query_attr(:content_has, :string)

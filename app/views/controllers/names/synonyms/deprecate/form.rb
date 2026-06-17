@@ -26,20 +26,30 @@ module Views::Controllers::Names::Synonyms::Deprecate
 
     def view_template
       submit(:SUBMIT.l, center: true)
-
       render_name_feedback if model.proposed_name.present?
+      render_proposed_field
+      render_misspelling_field
+      render_comment_field
+    end
 
-      proposed_label = "#{:name_deprecate_preferred.l}:"
+    def render_proposed_field
       autocompleter_field(:proposed_name,
-                          type: :name, label: proposed_label,
+                          type: :name,
+                          label: "#{:name_deprecate_preferred.l}:",
                           inline: true, data: { autofocus: true })
-      HelpNote(:div, :name_deprecate_preferred_help.tp)
+      render(Components::Help::Note.new(
+               :div, :name_deprecate_preferred_help.tp
+             ))
+    end
 
+    def render_misspelling_field
       checkbox_field(:is_misspelling, label: :form_names_misspelling.l)
+    end
 
+    def render_comment_field
       textarea_field(:comment, label: "#{:name_deprecate_comments.l}:",
                                cols: 80, rows: 5, inline: true)
-      HelpNote(:div, deprecate_comments_help)
+      render(Components::Help::Note.new(:div, deprecate_comments_help))
     end
 
     private

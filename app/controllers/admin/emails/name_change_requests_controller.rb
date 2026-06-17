@@ -27,7 +27,7 @@ module Admin
             )
           end
           format.turbo_stream do
-            render(Components::ModalTurboForm.new(
+            render(Components::Modal::TurboForm.new(
                      identifier: "name_change_request_email",
                      title: :email_name_change_request_title.l,
                      user: @user,

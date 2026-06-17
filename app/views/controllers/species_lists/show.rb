@@ -116,7 +116,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_list_search
-      render(Components::ListSearch.new(
+      render(Components::ListGroup::Search.new(
                object: @species_list,
                object_names: @object_names,
                project: @project

@@ -81,7 +81,7 @@ class CollectionNumber < AbstractModel
     search_columns(cols, phrase)
   }
 
-  # Eager-loads the observations + everything `Components::MatrixBox`
+  # Eager-loads the observations + everything `Components::Matrix::Box`
   # reaches into. Reuses `Observation.matrix_box_includes` so this
   # matches observations#index / field_slips show + index. Includes
   # the `observation_collection_numbers` join (with `:observation`

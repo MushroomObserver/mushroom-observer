@@ -30,7 +30,7 @@ module Views::Controllers::Projects
     private
 
     def render_list_search
-      render(Components::ListSearch.new(
+      render(Components::ListGroup::Search.new(
                object: @project,
                object_names: @object_names,
                project: @project
