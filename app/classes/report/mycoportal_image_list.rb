@@ -17,6 +17,7 @@ module Report
     def initialize(query)
       super
       @query = query[:query]
+      @since = query[:since]
     end
 
     # --------------------
@@ -47,21 +48,24 @@ module Report
     private
 
     def image_list
-      rows_data =
-        Image.joins(:observations, :user, :license).
-        where(observations: { id: @query.result_ids }).
-        # MCP doesn't care about order, but our tests do.
-        order(observation_id: :asc, id: :asc).
+      ::CSV.generate(col_sep: ",", encoding: "UTF-8") do |csv|
+        csv << %w[catalogNumber imageId rights]
+        image_rows.each { |row| csv << formatted_row(row) }
+      end
+    end
+
+    def image_rows
+      # MCP doesn't care about order, but our tests do.
+      image_scope.order(observation_id: :asc, id: :asc).
         pluck(:observation_id, :id,
               Image[:copyright_holder],
               User[:name], User[:login], License[:url])
+    end
 
-      ::CSV.generate(col_sep: ",", encoding: "UTF-8") do |csv|
-        csv << %w[catalogNumber imageId rights]
-        rows_data.each do |row|
-          csv << formatted_row(row)
-        end
-      end
+    def image_scope
+      scope = Image.joins(:observations, :user, :license).
+              where(observations: { id: @query.result_ids })
+      @since ? scope.where(Image[:created_at].gt(@since)) : scope
     end
 
     def formatted_row(row)

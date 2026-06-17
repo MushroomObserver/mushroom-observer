@@ -403,7 +403,7 @@ class ReportTest < UnitTestCase
     obs = observations(:minimal_unknown_obs)
     expect = hashed_expect(obs).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_notes_and_images
@@ -423,7 +423,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "Habitat: lawn Other: First line. Second line."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_sequence
@@ -434,7 +434,7 @@ class ReportTest < UnitTestCase
       locality: "North Falmouth, 68 Bay Rd., MO Inc."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_agaricus_campestrus_obs
@@ -443,7 +443,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "From somewhere else"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_compress_consecutive_whitespace
@@ -463,7 +463,7 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "Habitat: lawn Other: 1st line. 2nd line. 3rd line."
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_associated_taxa_trees_shrubs_host
@@ -482,9 +482,13 @@ class ReportTest < UnitTestCase
       occurrenceRemarks: "other remarks"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
+  # Groups: text_name ends in /(group|complex|clade)$/
+  # sciname = text_name without the ending;
+  # identificationQualifier = the ending token (e.g., "group")
+  # taxonRemarks = search_name
   def test_mycoportal_group
     location = locations(:burbank)
     name = names(:boletus_edulis_group)
@@ -498,7 +502,7 @@ class ReportTest < UnitTestCase
       taxonRemarks: "Boletus edulis group"
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_group_sensu
@@ -518,53 +522,11 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Tricholoma caligatum",
-      identificationQualifier: "group",
-      taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
+      identificationQualifier: "group", # token only, not "group sensu"
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  # Groups: text_name ends in /(group|complex|clade)$/
-  # sciname = text_name without the ending; identificationQualifier = the
-  # ending token only; taxonRemarks = full text_name + author (stripped)
-  def test_mycoportal_group_taxon_remarks
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: locations(:burbank),
-                              where: locations(:burbank).name,
-                              name: names(:boletus_edulis_group))
-
-    expect = hashed_expect(obs).merge(
-      sciname: "Boletus edulis",
-      identificationQualifier: "group",
-      taxonRemarks: "Boletus edulis group"
-    ).values
-
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
-  end
-
-  def test_mycoportal_group_sensu_id_qualifier_is_token_only
-    name = Name.create!(
-      user: rolf,
-      rank: "Group",
-      text_name: "Tricholoma caligatum group",
-      author: "sensu Besette et al.",
-      search_name: "Tricholoma caligatum group sensu Besette et al.",
-      display_name: "**__Tricholoma__** **__caligatum__** group " \
-                    "sensu Besette et al."
-    )
-    obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: locations(:burbank),
-                              where: locations(:burbank).name,
-                              name: name)
-
-    expect = hashed_expect(obs).merge(
-      sciname: "Tricholoma caligatum",
-      identificationQualifier: "group",
-      taxonRemarks: "Tricholoma caligatum group sensu Besette et al."
-    ).values
-
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_complex
@@ -583,33 +545,31 @@ class ReportTest < UnitTestCase
 
     expect = hashed_expect(obs).merge(
       sciname: "Russula emetica",
-      identificationQualifier: "complex",
-      taxonRemarks: "Russula emetica complex"
+      identificationQualifier: "complex", # token (not the rank "Group")
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   # Code names: text_name contains a single-quote (e.g. sp. 'IN34')
-  # sciname = genus only;
-  # identificationQualifier = Report::Mycoportal::CODE_NAME_QUALIFIER;
-  # taxonRemarks = full text_name plus author
   def test_mycoportal_code_name_unauthored_no_qualifier
+    name = names(:code_name)
     obs = Observation.create!(
       user: rolf,
       when: Time.zone.now,
       location: locations(:burbank),
       where: locations(:burbank).name,
-      name: names(:code_name)
+      name: name
     )
 
     expect = hashed_expect(obs).merge(
       sciname: "Cortinarius",
       identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
-      taxonRemarks: "Cortinarius sp. 'IN34'"
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_code_name_with_author
@@ -632,39 +592,39 @@ class ReportTest < UnitTestCase
     expect = hashed_expect(obs).merge(
       sciname: "Geoglossum",
       identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
-      taxonRemarks: "Geoglossum sp. 'MI01' S.D. Russell"
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
-  def test_mycoportal_explicit_provisional
+  def test_mycoportal_code_name_sp_lowercase_epithet
     name = Name.create!(
       user: rolf,
       rank: "Species",
-      text_name: "Gymnopus bakerensis",
-      author: "(A.H. Sm.) auct. comb. prov.",
-      search_name: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov.",
-      display_name: "__Gymnopus__ __bakerensis__ (A.H. Sm.) auct. comb. prov."
+      text_name: "Mycena sp. 'acicula-PNW01'",
+      author: "",
+      search_name: "Mycena sp. 'acicula-PNW01'",
+      display_name: "**__Mycena__** sp. **__'acicula-PNW01'__**"
     )
-    location = locations(:burbank)
     obs = Observation.create!(user: rolf, when: Time.zone.now,
-                              location: location, where: location.name,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Gymnopus bakerensis",
-      identificationQualifier: "comb. prov.",
-      taxonRemarks: "Gymnopus bakerensis (A.H. Sm.) auct. comb. prov."
+      sciname: "Mycena acicula", # binomial if genuine epithet present
+      identificationQualifier: Report::Mycoportal::CODE_NAME_QUALIFIER,
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
-  # Provisional names: author matches /\w+\. prov\./
-  # sciname = text_name unchanged; identificationQualifier = matched token;
-  # taxonRemarks = text_name + " " + author (stripped)
-  def test_mycoportal_provisional_bare_nom_prov
+  # Unpublished names (nom. prov., comb. prov., nom. ined., etc.):
+  # sciname = genus; identificationQualifier = "aff. <rank>";
+  # taxonRemarks = search_name
+  def test_mycoportal_explicit_nom_prov_unauthored
     name = Name.create!(
       user: rolf,
       rank: "Species",
@@ -679,15 +639,15 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Cortinarius percomis",
-      identificationQualifier: "nom. prov.",
-      taxonRemarks: "Cortinarius percomis nom. prov."
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
-  def test_mycoportal_provisional_authored_nom_prov
+  def test_mycoportal_explicit_nom_prov_authored
     name = Name.create!(
       user: rolf,
       rank: "Species",
@@ -702,12 +662,12 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Cortinarius percomis",
-      identificationQualifier: "nom. prov.",
-      taxonRemarks: "Cortinarius percomis S.D. Russell nom. prov."
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_provisional_comb_prov
@@ -725,12 +685,152 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      sciname: "Cortinarius percomis",
-      identificationQualifier: "comb. prov.",
-      taxonRemarks: "Cortinarius percomis (Fr.) auct. comb. prov."
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  def test_mycoportal_gen_name
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Gen. 'Mycena' sp. 'acicula-PNW01'",
+      author: "",
+      search_name: "Gen. 'Mycena' sp. 'acicula-PNW01'",
+      display_name: "Gen. 'Mycena' sp. 'acicula-PNW01'"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Mycena",
+      identificationQualifier: "aff. species",
+      taxonRemarks: name.search_name
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  def test_mycoportal_infrageneric_autonym
+    name = names(:sect_agaricus)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Agaricus",
+      identificationQualifier: "aff. #{name.rank.downcase}",
+      taxonRemarks: name.search_name
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  def test_mycoportal_infrageneric_authored
+    name = names(:amanita_subgenus_lepidella)
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Amanita",
+      identificationQualifier: "aff. #{name.rank.downcase}",
+      taxonRemarks: name.search_name
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  def test_mycoportal_nom_ined
+    name = Name.create!(
+      user: rolf,
+      rank: "Species",
+      text_name: "Cortinarius variicolor",
+      author: "nom. ined.",
+      search_name: "Cortinarius variicolor nom. ined.",
+      display_name: "__Cortinarius__ __variicolor__ nom. ined."
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+
+    expect = hashed_expect(obs).merge(
+      sciname: "Cortinarius",
+      identificationQualifier: "aff. species",
+      taxonRemarks: name.search_name
+    ).values
+
+    do_mycoportal_csv_test(obs, expect)
+  end
+
+  # Excluded names: observations are omitted from the report entirely
+  def test_mycoportal_omits_excluded_text_names
+    Report::Mycoportal::EXCLUDED_TEXT_NAMES.each do |text_name|
+      name = Name.find_by(text_name: text_name) ||
+             Name.create!(
+               user: rolf, rank: "Species",
+               text_name: text_name, search_name: text_name,
+               display_name: text_name
+             )
+      obs = Observation.create!(user: rolf, when: Time.zone.now,
+                                location: locations(:burbank),
+                                where: locations(:burbank).name,
+                                name: name)
+      query = Query.lookup(:Observation)
+      body = report_body(Report::Mycoportal, query)
+      table = ::CSV.parse(body, col_sep: ",")
+      row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+      assert_nil(row, "#{text_name.inspect} obs should be omitted from report")
+    end
+  end
+
+  def test_mycoportal_omits_non_fungal_kingdom
+    name = Name.create!(
+      user: rolf, rank: "Species",
+      text_name: "Rosa canina",
+      author: "L.",
+      search_name: "Rosa canina L.",
+      display_name: "__Rosa__ __canina__ L.",
+      classification: "Kingdom: _Plantae_\nPhylum: _Tracheophyta_"
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+    query = Query.lookup(:Observation)
+    body = report_body(Report::Mycoportal, query)
+    table = ::CSV.parse(body, col_sep: ",")
+    row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+    assert_nil(row, "Non-fungal (Plantae) obs should be omitted from report")
+  end
+
+  def test_mycoportal_includes_unknown_kingdom
+    name = Name.create!(
+      user: rolf, rank: "Species",
+      text_name: "Incertae sedis",
+      author: "",
+      search_name: "Incertae sedis",
+      display_name: "Incertae sedis",
+      classification: nil
+    )
+    obs = Observation.create!(user: rolf, when: Time.zone.now,
+                              location: locations(:burbank),
+                              where: locations(:burbank).name,
+                              name: name)
+    query = Query.lookup(:Observation)
+    body = report_body(Report::Mycoportal, query)
+    table = ::CSV.parse(body, col_sep: ",")
+    row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+    assert_not_nil(row,
+                   "Obs with nil classification should be included in report")
   end
 
   def test_mycoportal_identification_qualifier_sensu_non_stricto
@@ -741,17 +841,18 @@ class ReportTest < UnitTestCase
                               name: name)
 
     expect = hashed_expect(obs).merge(
-      identificationQualifier: "sensu lato"
+      identificationQualifier: "sensu lato",
+      taxonRemarks: name.search_name
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_no_lat_lng
     obs = observations(:minimal_unknown_obs)
     expect = hashed_expect(obs).merge.values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_public
@@ -767,7 +868,7 @@ class ReportTest < UnitTestCase
     expect[:coordinateUncertaintyInMeters] = nil
     expect = expect.values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_hidden
@@ -794,7 +895,7 @@ class ReportTest < UnitTestCase
       informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_nil_lat_lng_hidden
@@ -818,7 +919,7 @@ class ReportTest < UnitTestCase
       informationWithheld: Report::Mycoportal::GPS_HIDDEN_MESSAGE
     ).values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_coordinate_uncertainty_lat_lng_hidden_nil_location
@@ -846,7 +947,7 @@ class ReportTest < UnitTestCase
      :maximumElevationInMeters].each { |key| expect[key] = nil }
     expect = expect.values
 
-    do_csv_test(Report::Mycoportal, obs, expect, &:id)
+    do_mycoportal_csv_test(obs, expect)
   end
 
   def test_mycoportal_image_list_header
@@ -887,6 +988,33 @@ class ReportTest < UnitTestCase
       "© #{image.copyright_holder} CC0 #{licenses(:publicdomain).url}",
       row[2],
       "rights should use copyright_holder when present"
+    )
+  end
+
+  def test_mycoportal_image_list_since_excludes_older_images
+    obs = observations(:detailed_unknown_obs)
+    image = Image.create!(user: users(:rolf), license: licenses(:ccnc30),
+                          copyright_holder: "Test",
+                          created_at: Time.zone.parse("2025-01-15 12:00:00"))
+    obs.images << image
+    query = Query.lookup(:Observation)
+
+    since_before = Time.zone.parse("2025-01-15 11:00:00")
+    body = Report::MycoportalImageList.new(query: query,
+                                           since: since_before).body
+    table = CSV.parse(body, col_sep: ",")
+    assert_not_nil(
+      table.find { |r| r[1]&.end_with?("/#{image.id}.jpg") },
+      "Image created after 'since' should be included"
+    )
+
+    since_after = Time.zone.parse("2025-01-15 13:00:00")
+    body = Report::MycoportalImageList.new(query: query,
+                                           since: since_after).body
+    table = CSV.parse(body, col_sep: ",")
+    assert_nil(
+      table.find { |r| r[1]&.end_with?("/#{image.id}.jpg") },
+      "Image created before 'since' should be excluded"
     )
   end
 
@@ -1163,9 +1291,22 @@ class ReportTest < UnitTestCase
     query = Query.lookup(:Observation)
     body = report_body(report_type, query, user:)
     table = CSV.parse(body, col_sep: report_type.separator)
-    assert_equal(query.num_results + 1, table.count)
+    assert_equal(query.num_results + 1, table.count,
+                 "#{report_type} row count should equal query results + header")
     idx = query.results.sort_by(&block).index(obs)
-    assert_equal(expect, table[idx + 1])
+    assert_equal(expect, table[idx + 1],
+                 "#{report_type} row for obs #{obs.id} should match expected")
+  end
+
+  # Mycoportal filters some observations via include_row?, so row count !=
+  # query.num_results. Find the specific row by its catalogNumber instead.
+  def do_mycoportal_csv_test(obs, expect)
+    query = Query.lookup(:Observation)
+    body = report_body(Report::Mycoportal, query)
+    table = CSV.parse(body, col_sep: ",")
+    row = table.find { |r| r[2] == "MUOB #{obs.id}" }
+    assert_not_nil(row, "Expected Mycoportal row for obs #{obs.id}")
+    assert_equal(expect, row, "Mycoportal row for obs #{obs.id} should match")
   end
 
   def report_body(report_type, query, user: nil)
