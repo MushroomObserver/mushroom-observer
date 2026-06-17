@@ -13,8 +13,8 @@ module Observations::Images
     # This action returns formatted HTML (upload image template) for one image
     # to the Stimulus form-images_controller. This is added to the page
     # when uploading multiple images on create observation. Returns two
-    # turbo_stream actions: prepend a Form::UploadGallery::Item to `#added_images`
-    # and a CarouselThumbnail to `#added_thumbnails`.
+    # turbo_stream actions: prepend a `Form::UploadGallery::Item` to
+    # `#added_images` and a `CarouselThumbnail` to `#added_thumbnails`.
     # was multi_image_template
     def new
       @user = User.current = session_user # || raise("Must be logged in.")
