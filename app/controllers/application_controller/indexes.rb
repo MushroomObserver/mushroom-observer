@@ -5,8 +5,6 @@
 #  add_sorting_links::      Create sorting links for index pages.
 #  find_or_goto_index::     Look up object by id, displaying error and
 #                           redirecting on failure.
-#  goto_index::             Redirect to a reasonable fallback (index) page
-#                           in case of error.
 #  letter_pagination_data::       Paginate an Array by letter.
 #  number_pagination_data::       Paginate an Array normally.
 #
@@ -254,14 +252,15 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     end
   end
 
-  # Render the index view. Default renders the ERB action template
-  # (was `render(action: :index)` — must be explicit for names'
-  # `test_index` action). Controllers that have converted their
-  # index template to Phlex override this to render the class
-  # directly with explicit props. Transitional hook so the rest of
-  # the index machinery doesn't need to know about Phlex.
+  # Render the index view. Every index controller now renders a Phlex
+  # view; this method must be overridden. (No ERB index templates remain;
+  # the historical `render(action: :index)` default is gone.)
   def render_index_view
-    render(action: :index)
+    raise(NotImplementedError.new(render_index_view_error_message))
+  end
+
+  def render_index_view_error_message
+    "#{self.class}#render_index_view must render a Phlex view"
   end
 
   private ##########
@@ -527,43 +526,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     redirect_with_query(index_path)
     nil
   end
-
-  # Redirects to an appropriate fallback index in case of unrecoverable error.
-  # Most such errors are dealt with on a case-by-case basis in the controllers,
-  # however a few generic actions don't necessarily know where to send users
-  # when things go south.  This makes a good stab at guessing, at least.
-  def goto_index(redirect = nil)
-    pass_query_params
-    from = redirect_from(redirect)
-    to_model = REDIRECT_FALLBACK_MODELS[from.to_sym]
-    raise("Unsure where to go from #{from}.") unless to_model
-
-    redirect_with_query(controller: to_model.show_controller,
-                        action: to_model.index_action)
-  end
-
-  # Return string which is the class or controller to fall back from.
-  def redirect_from(redirect)
-    redirect = redirect.name.underscore if redirect.is_a?(Class)
-    (redirect || controller.name).to_s
-  end
-
-  REDIRECT_FALLBACK_MODELS = {
-    account: RssLog,
-    comment: Comment,
-    image: Image,
-    location: Location,
-    name: Name,
-    naming: Observation,
-    observation: Observation,
-    observer: RssLog,
-    project: Project,
-    rss_log: RssLog,
-    species_list: SpeciesList,
-    user: RssLog,
-    vote: Observation
-  }.freeze
-  private_constant(:REDIRECT_FALLBACK_MODELS)
 
   public ##########
 
