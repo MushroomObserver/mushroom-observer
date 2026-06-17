@@ -29,7 +29,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
-    scroll_to(find("#observation_collection_numbers"), align: :center)
+    scroll_to(find_by_id("observation_collection_numbers"), align: :center)
     within("#observation_collection_numbers") do
       assert_link(:create_collection_number.l)
       # Link is too small to click normally, use trigger
@@ -102,7 +102,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
     assert_no_link(text: /#{updated_number}/)
@@ -155,12 +155,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     within("#observation_herbarium_records") do
       # Verify remove button has text-danger class
       assert_selector("button.text-danger", text: :REMOVE.l)
-      find("button", text: :REMOVE.l).click
+      click_button(:REMOVE.l)
     end
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
 
@@ -226,7 +226,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       fill_in("sequence_notes", with: "Oh yea.")
       click_commit
     end
-    assert_equal(seq.reload.notes, "Oh yea.")
+    assert_equal("Oh yea.", seq.reload.notes)
     assert_no_selector("#modal_sequence_#{seq.id}")
 
     # try remove button (uses turbo_confirm modal)
@@ -237,7 +237,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
     assert_no_link(text: /LSU/)
@@ -296,7 +296,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_commit
     end
     assert_no_selector("#modal_external_link_#{link.id}")
-    assert_equal(link.reload.url, "https://www.mycoportal.org/portal/collections/456")
+    assert_equal("https://www.mycoportal.org/portal/collections/456",
+                 link.reload.url)
 
     # try remove button (uses turbo_confirm modal)
     within("#observation_external_links") do
@@ -306,7 +307,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
-      find("button.btn-danger").click
+      click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
     assert_no_link(text: /MycoPortal/)

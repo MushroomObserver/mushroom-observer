@@ -621,7 +621,7 @@ module ControllerExtensions
       end
       break if message.nil?
     end
-    assert(message.nil?, message)
+    assert_nil(message, message)
   end
 
   def check_select_value(elem, expect_val, id)
@@ -663,7 +663,7 @@ module ControllerExtensions
                   end
       end
     end
-    assert(message.nil?, message)
+    assert_nil(message, message)
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,

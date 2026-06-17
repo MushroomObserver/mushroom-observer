@@ -146,9 +146,9 @@ class InatObsTest < UnitTestCase
       inat_obs_field("Voucher Specimen Taken").present?,
       "Failed to find iNat observation field"
     )
-    assert(
+    assert_nil(
       mock_observation("somion_unicolor").
-      inat_obs_field("Voucher Specimen Taken").nil?,
+      inat_obs_field("Voucher Specimen Taken"),
       "iNat obs should not have a Voucher Specimen Taken observation field"
     )
   end
@@ -226,7 +226,7 @@ class InatObsTest < UnitTestCase
   end
 
   def test_tags
-    assert(2, mock_observation("inocybe")[:tags].length)
+    assert_equal(3, mock_observation("inocybe")[:tags].length)
     assert_empty(mock_observation("evernia")[:tags])
   end
 

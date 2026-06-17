@@ -161,7 +161,7 @@ class API2::HerbariumRecordsTest < UnitTestCase
     # Check default accession number if obs has one collection number.
     obs = observations(:coprinus_comatus_obs)
     num = obs.collection_numbers.reorder(id: :asc).first
-    assert_operator(obs.collection_numbers.count, :==, 1)
+    assert_equal(1, obs.collection_numbers.count)
     assert_api_pass(params.except(:accession_number).
                            merge(observation: obs.id))
     last_h_r = HerbariumRecord.find_by(herbarium: @herbarium,

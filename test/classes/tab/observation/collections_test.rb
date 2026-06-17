@@ -72,7 +72,7 @@ module Tab::Observation
         tabs = Tab::Observation::IndexActions.new(where: "Foo").to_a
 
         # AtWhereActions tabs prepend.
-        assert_equal(Tab::Observation::DefineLocation, tabs.first.class)
+        assert_instance_of(Tab::Observation::DefineLocation, tabs.first)
         assert_includes(tabs.map(&:class),
                         Tab::Observation::AssignUndefinedLocation)
         assert_includes(tabs.map(&:class), Tab::Location::Index)

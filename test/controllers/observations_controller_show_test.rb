@@ -322,6 +322,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("#associated_observations")
     assert_select("#observation_species_lists")
   end
+  private :assert_show_observation
 
   # Refactored for CRUD routes in :collection_numbers or :herbarium_records
   def assert_show_obs(types, _id, items, can_add)
@@ -331,8 +332,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
                   items.count,
                   "Wrong number of #{types} shown.")
     if can_add
-      assert(response.body.match(%r{href="/#{types}/new}),
-             "Expected to find a create link for #{types}.")
+      assert_match(%r{href="/#{types}/new}, response.body,
+                   "Expected to find a create link for #{types}.")
     else
       assert_not(response.body.match(%r{href="/#{types}/new}),
                  "Expected not to find a create link for #{types}.")
@@ -340,8 +341,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     items.each do |type_id, can_edit|
       if can_edit
-        assert(response.body.match(%r{href="/#{types}/#{type_id}/edit}),
-               "Expected to find an edit link for #{type} #{type_id}.")
+        assert_match(%r{href="/#{types}/#{type_id}/edit}, response.body,
+                     "Expected to find an edit link for #{type} #{type_id}.")
       else
         assert_not(
           response.body.match(%r{href="/#{types}/#{type_id}/edit}),
@@ -434,7 +435,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(
       :show, params: { id: observations(:owner_multiple_favorites).id }
     )
-    assert_equal(css_select("#owner_naming").length, 0)
+    assert_equal(0, css_select("#owner_naming").length)
   end
 
   def test_show_owner_naming_view_owner_id_false
@@ -535,9 +536,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # one sequence owned by rolf.
     assert_users_equal(mary, obs2.user)
     assert_empty(obs2.projects)
-    assert_operator(obs2.collection_numbers.count, :==, 1)
-    assert_operator(obs2.herbarium_records.count, :==, 1)
-    assert_operator(obs2.sequences.count, :==, 1)
+    assert_equal(1, obs2.collection_numbers.count)
+    assert_equal(1, obs2.herbarium_records.count)
+    assert_equal(1, obs2.sequences.count)
     assert_false(obs2.herbarium_records.first.can_edit?(mary))
     assert_true(obs2.herbarium_records.first.can_edit?(rolf))
     assert_true(obs2.herbarium_records.first.can_edit?(roy))

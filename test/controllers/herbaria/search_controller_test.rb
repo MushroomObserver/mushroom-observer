@@ -35,7 +35,7 @@ module Herbaria
       assert_select("input#query_herbaria_name_has", value: "Rolf")
       assert_select("input#query_herbaria_description_has", value: "Something")
       assert_select("select#query_herbaria_nonpersonal", selected: nil)
-      assert_equal(session[:search_type], :herbaria)
+      assert_equal(:herbaria, session[:search_type])
     end
 
     def test_create_herbaria_search

@@ -43,7 +43,7 @@ module Tab::Location
     def test_form_new_with_name_adds_external_search
       tabs = Tab::Location::FormNew.new(location: @location).to_a
 
-      assert_equal(Tab::Location::Index, tabs.first.class)
+      assert_instance_of(Tab::Location::Index, tabs.first)
       assert(tabs.drop(1).any?(Tab::ExternalSearch),
              "expected external search tabs after Index")
     end
@@ -51,8 +51,8 @@ module Tab::Location
     def test_form_edit
       tabs = Tab::Location::FormEdit.new(location: @location).to_a
 
-      assert_equal(Tab::Location::Index, tabs[0].class)
-      assert_equal(Tab::Object::Return, tabs[1].class)
+      assert_instance_of(Tab::Location::Index, tabs[0])
+      assert_instance_of(Tab::Object::Return, tabs[1])
       assert(tabs.drop(2).any?(Tab::ExternalSearch),
              "expected external search tabs after Index + Return")
     end

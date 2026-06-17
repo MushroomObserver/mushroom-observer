@@ -27,11 +27,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
   ensure
     @@emails = []
   end
+  private :assert_email_generated
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert(@@emails.empty?,
-           "Wasn't expecting any email notifications; got:\n#{msg}")
+    assert_empty(@@emails,
+                 "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
     @@emails = []
   end
@@ -662,7 +663,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     name2.save
     assert_not(name1.correct_spelling)
     assert_not(name1.deprecated)
-    assert(name2.correct_spelling == name1)
+    assert_equal(name2.correct_spelling, name1)
     assert(name2.deprecated)
     params = {
       id: name2.id,
@@ -691,7 +692,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     name3.change_deprecated(false)
     name3.skip_notify = true
     name3.save
-    assert(name1.correct_spelling == name3)
+    assert_equal(name1.correct_spelling, name3)
     assert(name1.deprecated)
     assert_not(name3.correct_spelling)
     assert_not(name3.deprecated)
@@ -742,7 +743,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     assert_no_emails
     assert_not(Name.exists?(name4.id))
     assert(name1.reload)
-    assert(name1.correct_spelling == Name.first)
+    assert_equal(name1.correct_spelling, Name.first)
     assert(name1.deprecated)
   end
 

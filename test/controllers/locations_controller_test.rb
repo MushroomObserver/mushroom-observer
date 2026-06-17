@@ -24,11 +24,12 @@ class LocationsControllerTest < FunctionalTestCase
   ensure
     @@emails = []
   end
+  private :assert_email_generated
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert(@@emails.empty?,
-           "Wasn't expecting any email notifications; got:\n#{msg}")
+    assert_empty(@@emails,
+                 "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
     @@emails = []
   end
@@ -177,6 +178,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select("#comments_for_object")
     assert_select("#location_general_description")
   end
+  private :assert_show_location
 
   def test_show_location_next_flow
     loc = locations(:albion)
@@ -604,7 +606,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select("body.locations__index")
     # The letter filter is applied, verify the data is filtered
     undef_data = assigns(:undef_data)
-    return if undef_data.blank?
+    skip if undef_data.blank?
 
     # `undef_data` is an Array of `[obs, count]` tuples, not a Hash —
     # `each_key` isn't available; cop false-positives on the

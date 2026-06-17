@@ -54,22 +54,22 @@ class TranslationsControllerTest < FunctionalTestCase
   end
 
   def assert_major_header(str, item)
-    assert(item.is_a?(TranslationsController::TranslationsUIMajorHeader))
+    assert_kind_of(TranslationsController::TranslationsUIMajorHeader, item)
     assert_equal(str, item.string)
   end
 
   def assert_minor_header(str, item)
-    assert(item.is_a?(TranslationsController::TranslationsUIMinorHeader))
+    assert_kind_of(TranslationsController::TranslationsUIMinorHeader, item)
     assert_equal(str, item.string)
   end
 
   def assert_comment(str, item)
-    assert(item.is_a?(TranslationsController::TranslationsUIComment))
+    assert_kind_of(TranslationsController::TranslationsUIComment, item)
     assert_equal(str, item.string)
   end
 
   def assert_tag_field(tag, item)
-    assert(item.is_a?(TranslationsController::TranslationsUITagField))
+    assert_kind_of(TranslationsController::TranslationsUITagField, item)
     assert_equal(tag, item.ttag)
   end
 
@@ -106,7 +106,7 @@ class TranslationsControllerTest < FunctionalTestCase
     assert_major_header("IMPORTANT STUFF", form.shift)
     assert_minor_header("Main Objects:", form.shift)
     assert_tag_field("name", form.shift)
-    assert(form.empty?)
+    assert_empty(form)
 
     form = @controller.build_index(lang, hashify("index", "index_help"), file)
     assert_major_header("IMPORTANT STUFF", form.shift)
@@ -119,7 +119,7 @@ class TranslationsControllerTest < FunctionalTestCase
     assert_tag_field("index_error", form.shift)
     assert_tag_field("index_help", form.shift)
     assert_tag_field("index_prefs", form.shift)
-    assert(form.empty?)
+    assert_empty(form)
   end
 
   def test_authorization_no_login_en

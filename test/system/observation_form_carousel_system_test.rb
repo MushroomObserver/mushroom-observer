@@ -18,7 +18,7 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
     sleep(2)
 
     # Check carousel item img has base64 src
-    carousel_item_img = find(".carousel-item img.set-src", match: :first)
+    carousel_item_img = first(".carousel-item img.set-src")
     src = carousel_item_img["src"]
 
     assert(src.present?, "Carousel item img should have src attribute")
@@ -28,8 +28,7 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
     )
 
     # With only 1 image, thumbnails are hidden, so use visible: false
-    thumbnail_img = find(".carousel-indicator img.set-src",
-                         match: :first, visible: false)
+    thumbnail_img = first(".carousel-indicator img.set-src", visible: false)
     thumb_src = thumbnail_img["src"]
 
     assert(thumb_src.present?, "Thumbnail img should have src attribute")

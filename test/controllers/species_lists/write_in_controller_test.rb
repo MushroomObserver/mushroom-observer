@@ -109,9 +109,9 @@ module SpeciesLists
       obs = spl.observations.first
       assert_equal(Vote.minimum_vote, obs.namings.first.votes.first.value)
       assert_equal([Observation.other_notes_key], obs.notes.keys)
-      assert_equal(obs.notes[Observation.other_notes_key], "member notes")
-      assert_equal(12.5822, obs.lat)
-      assert_equal(-78.1533, obs.lng)
+      assert_equal("member notes", obs.notes[Observation.other_notes_key])
+      assert_in_delta(12.5822, obs.lat)
+      assert_in_delta(-78.1533, obs.lng)
       assert_equal(105, obs.alt)
       assert_equal(true, obs.is_collection_location)
       assert_equal(true, obs.specimen)

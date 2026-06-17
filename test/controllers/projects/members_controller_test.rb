@@ -498,8 +498,8 @@ module Projects
       }
       put_requires_login(:update, params, target_user.login)
       assert_equal(
-        project.project_members.find_by(user: target_user).trust_level,
-        "hidden_gps"
+        "hidden_gps",
+        project.project_members.find_by(user: target_user).trust_level
       )
     end
 
@@ -514,8 +514,8 @@ module Projects
       }
       put_requires_login(:update, params, target_user.login)
       assert_equal(
-        project.project_members.find_by(user: target_user).trust_level,
-        "no_trust"
+        "no_trust",
+        project.project_members.find_by(user: target_user).trust_level
       )
     end
 
@@ -530,8 +530,8 @@ module Projects
       }
       put_requires_login(:update, params, target_user.login)
       assert_equal(
-        project.project_members.find_by(user: target_user).trust_level,
-        "editing"
+        "editing",
+        project.project_members.find_by(user: target_user).trust_level
       )
     end
 

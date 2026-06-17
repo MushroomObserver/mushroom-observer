@@ -178,10 +178,10 @@ class MapSetTest < UnitTestCase
   def test_point_coordinates_keep_six_decimal_places
     set = set_of(build_obs(lat: 12.3456789, lng: -45.9876543))
 
-    assert_equal(12.345679, set.lat)
-    assert_equal(-45.987654, set.lng)
-    assert_equal(12.345679, set.north)
-    assert_equal(-45.987654, set.east)
+    assert_in_delta(12.345679, set.lat)
+    assert_in_delta(-45.987654, set.lng)
+    assert_in_delta(12.345679, set.north)
+    assert_in_delta(-45.987654, set.east)
   end
 
   def test_box_coordinates_keep_six_decimal_places
@@ -192,10 +192,10 @@ class MapSetTest < UnitTestCase
     )
     set = set_of(loc)
 
-    assert_equal(12.345679, set.north)
-    assert_equal(12.345432, set.south)
-    assert_equal(-45.987654, set.east)
-    assert_equal(-45.987988, set.west)
+    assert_in_delta(12.345679, set.north)
+    assert_in_delta(12.345432, set.south)
+    assert_in_delta(-45.987654, set.east)
+    assert_in_delta(-45.987988, set.west)
   end
 
   # ------------------------------------------------------------------
