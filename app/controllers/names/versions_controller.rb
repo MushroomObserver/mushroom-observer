@@ -12,23 +12,12 @@ module Names
 
       @name.revert_to(params[:version].to_i)
       @versions = @name.versions.to_a
-      @correct_spelling = correct_spelling_display_names
 
       render(Views::Controllers::Names::Versions::Show.new(
                name: @name, user: @user, versions: @versions,
                version: params[:version].to_i,
                inherited_classification_user: inherited_classification_user
              ))
-    end
-
-    # Old correct spellings could have gotten merged with something else
-    # and no longer exist; an empty Array signals "no correct spelling
-    # to display." Costs one extra DB lookup when the misspelling case
-    # fires.
-    def correct_spelling_display_names
-      return "" unless @name.is_misspelling?
-
-      Name.where(id: @name.correct_spelling_id).pluck(:display_name)
     end
 
     # Looks up the user the version's classification was inherited

@@ -14,7 +14,7 @@ class Components::PreviousVersion < Components::Base
   prop :versions, _Array(_Interface(:user_id)), default: -> { [] }
 
   def view_template
-    plain("#{:VERSION.l}: #{@obj.version}")
+    plain("#{:VERSION.t}: #{@obj.version}")
     br
     return unless previous_version && previous_version.version != @obj.version
 

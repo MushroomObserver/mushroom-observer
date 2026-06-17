@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-# Builds the row + path data that `Views::Controllers::Users::Show::UserStats`
+# Builds the row data that `Views::Controllers::Users::Show::UserStats`
 # renders. Inlined from the now-deleted `UserStatsHelper` so the
 # `Language.pluck(:locale, :name)` DB query lives on the controller side
-# (per the project's "no AR queries in Phlex views" rule) and route-helper
-# calls stay out of the view too.
+# (per the project's "no AR queries in Phlex views" rule). Route helpers
+# stay in the view (`FIELD_PATHS` + `send(helper, ...)`); the builder
+# just supplies the row labels and counts.
 module UsersController::UserStatsBuilder
   private
 
