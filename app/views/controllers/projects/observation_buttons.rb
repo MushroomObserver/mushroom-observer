@@ -52,7 +52,7 @@ module Views::Controllers::Projects
 
     def related_observation_images_url
       Tab::RelatedQuery.for(
-        model: Image, filter: :Observation,
+        model: ::Image, filter: :Observation,
         current_query: @query, controller: controller
       )&.path
     end

@@ -134,7 +134,9 @@ module Views::Controllers::Herbaria
 
     def render_location_section
       render_location_autocompleter
-      BoundsHiddenFields(location: @location, target_controller: :map)
+      render(Components::Form::BoundsHiddenFields.new(
+               location: @location, target_controller: :map
+             ))
     end
 
     def render_location_autocompleter

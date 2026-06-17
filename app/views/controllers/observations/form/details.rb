@@ -128,7 +128,9 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_bounds_hidden_fields
-    BoundsHiddenFields(location: @location, target_controller: :map)
+    render(Components::Form::BoundsHiddenFields.new(
+             location: @location, target_controller: :map
+           ))
   end
 
   def render_is_collection_location
