@@ -39,7 +39,11 @@ class Components::ImageGallery < Components::Base
     @carousel_id ||= generate_carousel_id
     Panel(panel_id: @panel_id) do |panel|
       panel.with_heading { @title } if @thumbnails
-      panel.with_heading_links { @links } if @links.present?
+      # `@links` is a `SafeBuffer` from a Rails `capture { … }` block;
+      # in Phlex, slots that return a string escape it unless wrapped
+      # in `trusted_html` (matches what Locations/User show-page
+      # panels do).
+      panel.with_heading_links { trusted_html(@links) } if @links.present?
       if @images&.any?
         panel.with_body(wrapper: false) { render_carousel }
       else

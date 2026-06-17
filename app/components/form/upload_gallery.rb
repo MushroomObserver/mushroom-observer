@@ -126,12 +126,19 @@ class Components::Form::UploadGallery < Components::Base
 
   def sibling_slide_data(image)
     img_id_for_dom = image&.id || "img_id_missing"
+    # `image_status: "good"` — sibling slides are pre-existing images
+    # too (just from another observation, hence not editable here).
+    # `form-images_controller.js#itemTargetConnected` returns early on
+    # "good" / "upload"; anything else logs an error and skips. The
+    # sibling-specific UI differences are gated by the `sibling: true`
+    # prop on `Components::Form::UploadGallery::Item`, not by the
+    # status string.
     {
       form_images_target: "item",
       form_exif_target: "item",
       action: "form-exif:populated->form-images#itemExifPopulated",
       image_uuid: img_id_for_dom,
-      image_status: "sibling",
+      image_status: "good",
       geocode: "{}"
     }
   end
