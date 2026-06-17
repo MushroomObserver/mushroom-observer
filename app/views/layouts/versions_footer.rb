@@ -36,14 +36,17 @@ module Views::Layouts
 
     private
 
-    # The user-link string gets interpolated into a textile i18n
-    # template (`:footer_*_by.t(user: …, date: …)`), so we need the
-    # rendered HTML as a value — not as a side-effect on the Phlex
-    # buffer. `capture { render(Components::UserLink.new(...)) }`
-    # redirects the component's output into a temp buffer and returns
-    # the resulting SafeBuffer.
-    def user_link_html(user)
-      capture { render(Components::UserLink.new(user: user)) }
+    # Three of the footer lines share the
+    # `:foo_by.t(user: <link>, date: <time>)` shape — the legacy
+    # `_by` translation strings interpolate the rendered `<a>` user
+    # link into the textile template. `capture` redirects
+    # `Components::UserLink`'s buffer write into a returnable
+    # SafeBuffer so the rendered HTML can be threaded through `.t`.
+    def render_user_dated_line(key, user:, date:)
+      trusted_html(key.t(
+                     user: capture { render(Components::UserLink.new(user:)) },
+                     date: date.web_time
+                   ))
     end
 
     # Renders metadata for old versions of versioned objects
@@ -53,12 +56,10 @@ module Views::Layouts
 
       return unless @obj.updated_at
 
-      user = User.safe_find(@obj.user_id)
       br
-      trusted_html(:footer_updated_by.t(
-                     user: user_link_html(user),
-                     date: @obj.updated_at.web_time
-                   ))
+      render_user_dated_line(:footer_updated_by,
+                             user: User.safe_find(@obj.user_id),
+                             date: @obj.updated_at)
     end
 
     # Renders metadata for latest version or non-versioned objects
@@ -88,12 +89,10 @@ module Views::Layouts
     end
 
     def render_updated_by_with_user
-      latest_user = User.safe_find(@versions.last.user_id)
       br
-      trusted_html(:footer_last_updated_by.t(
-                     user: user_link_html(latest_user),
-                     date: @obj.updated_at.web_time
-                   ))
+      render_user_dated_line(:footer_last_updated_by,
+                             user: User.safe_find(@versions.last.user_id),
+                             date: @obj.updated_at)
     end
 
     def render_updated_at_without_user
@@ -105,10 +104,8 @@ module Views::Layouts
     def render_created_by
       return unless @obj.created_at
 
-      trusted_html(:footer_created_by.t(
-                     user: user_link_html(@obj.user),
-                     date: @obj.created_at.web_time
-                   ))
+      render_user_dated_line(:footer_created_by,
+                             user: @obj.user, date: @obj.created_at)
     end
 
     # Renders creation and update info for non-versioned objects
