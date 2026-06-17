@@ -1,127 +1,157 @@
 # frozen_string_literal: true
 
-# Bootstrap carousel component for displaying image galleries.
+# Bootstrap-3 carousel primitive — the bare skeleton (`<div class="carousel
+# slide">` + `<div class="carousel-inner">` + optional controls + optional
+# indicator strip) every carousel-shaped component in MO composes.
+# Items + thumbnails are registered via `c.item(...) { … }` /
+# `c.thumb(...) { … }` — same hybrid pattern as
+# `Components::ListGroup::Base`. The primitive owns the
+# `<div class="item">` / `<li class="carousel-indicator">` wrappers
+# and the caller's block fills the inside.
 #
-# Renders a complete carousel with:
-# - Optional heading with title and links
-# - Carousel slides (CarouselItem components)
-# - Previous/Next controls (if multiple images)
-# - Thumbnail navigation (optional)
+# Consumers:
+# - `Components::ImageGallery` — read-only image carousel inside a Panel
+#   (show-page IMAGES section).
+# - `Components::Form::UploadGallery` — editable image-upload carousel
+#   for the observation form.
+# - (planned) `Components::Matrix::Carousel` — per-matrix-box mini-carousel
+#   (see `.claude/rules/matrix_box_carousel.md`).
 #
 # @example
-#   render Components::Carousel.new(
-#     user: @user,
-#     images: @images,
-#     object: @observation,
-#     title: "Observation Images",
-#     thumbnails: true
-#   )
+#   render(Components::Carousel.new(carousel_id: "obs_42")) do |c|
+#     @images.each do |image|
+#       c.item(id: "carousel_item_#{image.id}", class: "carousel-item") do
+#         render(Components::ImageGallery::Item.new(image: image, user: @user))
+#       end
+#       c.thumb(id: "carousel_thumbnail_#{image.id}",
+#               data: { form_images_target: "thumbnail",
+#                       image_uuid: image.id, image_status: "good" }) do
+#         render(Components::ImageGallery::Thumbnail.new(image: image,
+#                                                       user: @user))
+#       end
+#     end
+#   end
 class Components::Carousel < Components::Base
-  # Properties
-  # Nil entries are filtered at render time (`next unless image`),
-  # so callers can mix nils in (e.g. a sparse Image[] from a query
-  # that left some slots empty).
-  prop :images, _Array(_Nilable(::Image)) do |value|
-    value.respond_to?(:to_a) ? value.to_a : value
+  prop :carousel_id, ::String
+  prop :wrapper_class, ::String, default: ""
+  prop :inner_id, _Nilable(::String), default: nil
+  prop :inner_class_extra, ::String, default: ""
+  prop :indicators_id, _Nilable(::String), default: nil
+  prop :indicators_class_extra, ::String, default: ""
+  prop :show_controls, _Boolean, default: true
+  prop :show_indicators, _Boolean, default: true
+  # Wraps the controls strip in a div with this class.
+  # `Form::UploadGallery` puts the prev/next arrows inside a
+  # `.carousel-control-wrap.row` outside `.carousel-inner`; default
+  # nil renders the controls inline as `ImageGallery` and the
+  # matrix-box caller do.
+  prop :controls_wrap_class, _Nilable(::String), default: nil
+  # Arbitrary `data-*` attributes merged onto the outer `<div>` (after
+  # the always-emitted `data-ride="false"` / `data-interval="false"`).
+  # Keys are symbols (Phlex/Rails dasherizes them — `:form_images_target`
+  # → `data-form-images-target`); values may be strings or anything
+  # else that responds to `#to_s` (Phlex stringifies on render).
+  prop :extra_data, ::Hash, default: -> { {} }
+
+  def initialize(...)
+    super
+    @slides = []
+    @thumbs = []
   end
-  prop :user, _Nilable(User)
-  prop :object, _Nilable(AbstractModel), default: nil
-  prop :size, Components::Image::Base::Size, default: :large
-  prop :title, String, default: -> { :IMAGES.t }
-  prop :links, String, default: ""
-  prop :thumbnails, _Boolean, default: true
-  prop :carousel_id, _Nilable(String), default: nil
-  prop :panel_id, _Nilable(String), default: nil
 
-  def view_template
-    # Generate carousel ID if not provided
-    @carousel_id ||= generate_carousel_id
+  # Register a slide. `class:` / `id:` / arbitrary attrs flow onto the
+  # wrapping `<div class="item …">` (mirroring `ListGroup::Base#item`).
+  # First registered slide auto-gets `.active`.
+  #
+  # @return [nil] so the call doesn't accidentally emit anything
+  def item(class: nil, id: nil, **attrs, &block)
+    @slides << {
+      class: binding.local_variable_get(:class),
+      id: id, attrs: attrs, block: block
+    }
+    nil
+  end
 
-    Panel(panel_id: @panel_id) do |panel|
-      # Render heading if thumbnails enabled
-      panel.with_heading { @title } if @thumbnails
-      panel.with_heading_links { @links } if @links.present?
+  # Register a thumbnail indicator. `class:` / `id:` / arbitrary attrs
+  # flow onto the wrapping `<li class="carousel-indicator …">`. The
+  # primitive auto-fills `data-target="#<carousel_id>"` and
+  # `data-slide-to="<n>"`; caller-supplied `data:` is merged on top.
+  #
+  # @return [nil]
+  def thumb(class: nil, id: nil, **attrs, &block)
+    @thumbs << {
+      class: binding.local_variable_get(:class),
+      id: id, attrs: attrs, block: block
+    }
+    nil
+  end
 
-      # Render carousel or no images message
-      if @images&.any?
-        render_carousel(panel)
-      else
-        render_no_images_message(panel)
-      end
+  def view_template(&block)
+    vanish(self, &block) if block
+
+    div(id: @carousel_id,
+        class: class_names("carousel slide", @wrapper_class),
+        data: { ride: "false", interval: "false", **@extra_data }) do
+      render_inner
+      render_indicators if @show_indicators
     end
   end
 
   private
 
-  def generate_carousel_id
-    type = @object&.type_tag || "image"
-    object_id = @object&.id || "unknown"
-    "#{type}_#{object_id}_carousel"
-  end
-
-  def render_carousel_heading
-    div(class: "panel-heading carousel-heading") do
-      h4(class: "panel-title") do
-        plain(@title)
-        span(class: "float-right") { @links } if @links.present?
-      end
+  def render_inner
+    div(id: @inner_id,
+        class: class_names("carousel-inner bg-light", @inner_class_extra),
+        role: "listbox") do
+      @slides.each_with_index { |slide, i| render_slide(slide, i) }
+      render_controls if @show_controls
     end
   end
 
-  def render_carousel(panel)
-    panel.with_thumbnail(
-      id: @carousel_id,
-      classes: "carousel slide show-carousel",
-      data: { ride: "false", interval: "false" }
-    ) do
-      # Carousel inner (slides)
-      div(class: "carousel-inner bg-light", role: "listbox") do
-        # Render each carousel item
-        @images.each_with_index do |image, index|
-          next unless image
-
-          render(Components::Carousel::Item.new(
-                   user: @user,
-                   image: image,
-                   object: @object,
-                   size: @size,
-                   index: index
-                 ))
-        end
-
-        # Carousel controls (if multiple images)
-        if @images.length > 1
-          render(
-            Components::Carousel::Controls.new(carousel_id: @carousel_id)
-          )
-        end
-      end
-
-      # Thumbnail navigation (if enabled)
-      render_thumbnail_navigation if @thumbnails
+  def render_slide(slide, index)
+    div(id: slide[:id],
+        class: class_names("item", slide[:class], active_for(index)),
+        **slide[:attrs]) do
+      slide[:block]&.call
     end
   end
 
-  def render_thumbnail_navigation
-    ol(class: "carousel-indicators panel-footer py-2 px-0 mb-0") do
-      @images.each_with_index do |image, index|
-        next unless image
-
-        render(Components::Carousel::Thumbnail.new(
-                 user: @user,
-                 image: image,
-                 index: index,
-                 carousel_id: @carousel_id
-               ))
-      end
+  def render_thumb(thumb, index)
+    base_data = { target: "##{@carousel_id}", slide_to: index.to_s }
+    extra = thumb[:attrs][:data] || {}
+    rest = thumb[:attrs].except(:data)
+    li(id: thumb[:id],
+       class: class_names("carousel-indicator mx-1",
+                          thumb[:class], active_for(index)),
+       data: base_data.merge(extra),
+       **rest) do
+      thumb[:block]&.call
     end
   end
 
-  def render_no_images_message(panel)
-    panel.with_thumbnail(
-      classes: "p-4 my-5 w-100 h-100 text-center h3 text-muted"
-    ) do
-      plain(:show_observation_no_images.l)
+  def active_for(index)
+    "active" if index.zero?
+  end
+
+  def render_indicators
+    ol(id: @indicators_id,
+       class: class_names(
+         "carousel-indicators panel-footer py-2 px-0 mb-0",
+         @indicators_class_extra
+       )) do
+      @thumbs.each_with_index { |thumb, i| render_thumb(thumb, i) }
     end
+  end
+
+  def render_controls
+    if @controls_wrap_class
+      div(class: @controls_wrap_class) { render_controls_inner }
+    else
+      render_controls_inner
+    end
+  end
+
+  def render_controls_inner
+    render(Components::Carousel::Controls.new(carousel_id: @carousel_id))
   end
 end

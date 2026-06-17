@@ -1,59 +1,39 @@
 # frozen_string_literal: true
 
-# Individual carousel slide item component.
+# Inner content of a single read-only image-gallery slide. The outer
+# `<div class="item …">` wrapper is owned by the `Components::Carousel`
+# primitive (via `c.item(...) { render(this) }`); this component emits
+# the image + overlays + caption that go inside.
 #
-# Renders a single slide in a Bootstrap carousel with:
-# - Large image with object-fit: contain
-# - Stretched link overlay
-# - Lightbox button
-# - Carousel caption with votes and image info
+# Used by `Components::ImageGallery#render_carousel`.
 #
 # @example
-#   render Components::Carousel::Item.new(
+#   render Components::ImageGallery::Item.new(
 #     user: @user,
 #     image: @image,
-#     object: @observation,
-#     index: 0
+#     object: @observation
 #   )
-class Components::Carousel::Item < Components::Image::Base
-  # Additional carousel-specific properties
-  prop :index, Integer, default: 0
-  prop :object, _Nilable(AbstractModel), default: nil
+class Components::ImageGallery::Item < Components::Image::Base
+  prop :object, _Nilable(::AbstractModel), default: nil
 
-  def initialize(index: 0, object: nil, **props)
-    # Set carousel-specific defaults
+  def initialize(object: nil, **props)
     props[:size] ||= :large
     props[:fit] ||= :contain
     props[:original] ||= true
     props[:extra_classes] ||= "carousel-image"
-
     super
   end
 
   def view_template
-    # Get image instance and ID
     @img_instance, @img_id = extract_image_and_id
-
-    # Build render data
     @data = build_render_data(@img_instance, @img_id)
 
-    # Render the carousel item
-    div(
-      id: "carousel_item_#{@img_id}",
-      class: build_item_classes
-    ) do
-      render_carousel_image
-      render_carousel_overlays
-      render_carousel_caption
-    end
+    render_carousel_image
+    render_carousel_overlays
+    render_carousel_caption
   end
 
   private
-
-  def build_item_classes
-    active = @index.zero? ? "active" : ""
-    class_names("item carousel-item", active)
-  end
 
   def render_carousel_image
     img(
@@ -71,10 +51,7 @@ class Components::Carousel::Item < Components::Image::Base
 
   def render_carousel_caption
     div(class: "carousel-caption") do
-      # Vote section
       render_image_vote_section
-
-      # Image info (copyright, notes)
       if image_info_html.present?
         div(class: "image-info d-none d-sm-block") { image_info_html }
       end
@@ -91,7 +68,6 @@ class Components::Carousel::Item < Components::Image::Base
     ].compact_blank.safe_join
   end
 
-  # Render copyright using ImageCopyright component
   def copyright
     return "" unless @img_instance
 

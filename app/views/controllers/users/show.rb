@@ -42,7 +42,7 @@ module Views::Controllers::Users
     def render_right_column
       return unless @best_images.length.positive?
 
-      render(::Components::Carousel.new(
+      render(::Components::ImageGallery.new(
                object: @show_user,
                images: @best_images,
                title: :show_user_observations_by.t(name: @show_user.login),

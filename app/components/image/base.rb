@@ -25,7 +25,7 @@ class Components::Image::Base < Components::Base
   prop :image, _Nilable(::Image)
 
   # Allow for explicitly passed img_id in uploads
-  # String IDs are needed for form components (e.g., FormCarouselItem)
+  # String IDs are needed for form components (e.g., Form::UploadGallery::Item)
   # that handle newly uploaded images with provisional IDs before persistence.
   prop :img_id, _Union(Integer, String, nil) do |value|
     case value

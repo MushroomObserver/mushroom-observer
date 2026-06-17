@@ -12,7 +12,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Multiple instances with the same `name:` form a radio group via
   # browser-native behavior — no JS needed to manage checked state
   # across them. The `data-form-images-target`-style hook in
-  # FormCarouselItem only manages the visual `.active` class on the
+  # Form::UploadGallery::Item only manages the visual `.active` class on the
   # label.
   #
   # Standalone (no Superform context) — takes raw HTML kwargs rather

@@ -1,100 +1,55 @@
 # frozen_string_literal: true
 
-# Form carousel item component for a single image in the observation form.
-#
-# This component displays an image alongside form fields for editing metadata.
-# It inherits from BaseImage to handle image presentation logic.
+# Inner content of a single editable image-upload slide. The outer
+# `<div class="item …">` wrapper (with its `data-form-images-target`,
+# `data-form-exif-target`, `data-image-uuid`, `data-image-status`,
+# `data-geocode` attributes) is owned by the `Components::Carousel`
+# primitive (via `c.item(...) { render(this) }`); this component emits
+# the image column + form column + control buttons that go inside.
 #
 # Layout:
-# - Left column: Image display
-# - Right column: Form fields and camera info
-# - Top-left overlay: Set as thumbnail button
-# - Top-right overlay: Remove image button
+# - Left column: image preview
+# - Right column: form fields + camera info
+# - Top-left overlay: set-as-thumbnail button
+# - Top-right overlay: remove button (suppressed for sibling images)
 #
 # @example
-#   render Components::FormCarousel::Item.new(
+#   render Components::Form::UploadGallery::Item.new(
 #     user: @user,
 #     image: @image,
-#     index: 0,
 #     upload: false,
 #     obs_thumb_id: 123,
-#     camera_info: { lat: "45.5", lng: "-122.6", ... }
+#     camera_info: { lat: "45.5", lng: "-122.6" }
 #   )
-class Components::FormCarousel::Item < Components::Image::Base
-  # Additional form carousel-specific properties
-  prop :index, Integer, default: 0
+class Components::Form::UploadGallery::Item < Components::Image::Base
   prop :upload, _Boolean, default: false
-  prop :obs_thumb_id, _Nilable(Integer), default: nil
-  prop :camera_info, _Hash(Symbol, _Any?), default: -> { {} }
+  prop :obs_thumb_id, _Nilable(::Integer), default: nil
+  prop :camera_info, ::Hash, default: -> { {} }
   prop :sibling, _Boolean, default: false
 
-  def initialize(index: 0, upload: false, obs_thumb_id: nil, camera_info: {},
-                 **props)
-    # Set form carousel-specific defaults
+  def initialize(upload: false, obs_thumb_id: nil, camera_info: {}, **props)
     props[:size] ||= :large
     props[:fit] ||= :contain
-
-    # Add carousel-image class, plus set-src for uploads
     extra_classes = "carousel-image"
     extra_classes += " set-src" if upload
     props[:extra_classes] ||= extra_classes
-
     super
   end
 
   def view_template
-    # Get image instance and ID
     @img_instance, @img_id = extract_image_and_id
     @img_id ||= "img_id_missing" if @upload
-
-    # Ensure img_id is not an Image object (convert to string if needed)
-    # This should not be necessary! Remove
     @img_id = @img_id.id if @img_id.is_a?(::Image)
-
-    # Build render data
     @data = build_render_data(@img_instance, @img_id)
 
-    # Render the carousel item
-    render_form_carousel_item
-  end
-
-  private
-
-  def render_form_carousel_item
-    div(
-      id: "carousel_item_#{@img_id}",
-      class: build_item_classes,
-      data: build_item_data
-    ) do
-      div(class: "row") do
-        render_image_column
-        render_form_column unless @sibling
-        render_control_buttons
-      end
+    div(class: "row") do
+      render_image_column
+      render_form_column unless @sibling
+      render_control_buttons
     end
   end
 
-  def build_item_classes
-    active = @index.zero? ? "active" : ""
-    ["item carousel-item", active]
-  end
-
-  def build_item_data
-    status = if @sibling then "sibling"
-             elsif @upload then "upload"
-             else "good"
-             end
-    item_data = {
-      form_images_target: "item",
-      form_exif_target: "item",
-      action: "form-exif:populated->form-images#itemExifPopulated",
-      image_uuid: @img_id,
-      image_status: status
-    }
-
-    item_data[:geocode] = @camera_info.to_json unless @upload
-    item_data
-  end
+  private
 
   def render_image_column
     div(class: "col-12 col-md-6") do
@@ -112,7 +67,7 @@ class Components::FormCarousel::Item < Components::Image::Base
   def render_form_column
     div(class: "col-12 col-md-6") do
       div(class: "form-panel") do
-        render(Components::FormCarousel::Fields.new(
+        render(Components::Form::UploadGallery::Fields.new(
                  user: @user,
                  image: @img_instance,
                  img_id: @img_id,
@@ -133,9 +88,7 @@ class Components::FormCarousel::Item < Components::Image::Base
   end
 
   def render_thumbnail_button
-    div(class: "top-left p-4") do
-      button_to_set_thumb_img
-    end
+    div(class: "top-left p-4") { button_to_set_thumb_img }
   end
 
   # Real `observation[thumb_image_id]` radio — browser-native radio
@@ -153,15 +106,6 @@ class Components::FormCarousel::Item < Components::Image::Base
     value = @img_instance&.id || "true"
     checked = @obs_thumb_id&.== @img_instance&.id
 
-    # `id:` uses `@img_id` (unique per carousel item: image id for
-    # server-rendered, UUID for upload placeholders) rather than
-    # `value` (which is the literal string "true" for all
-    # placeholders). Unique ids matter for the label `for=`
-    # association (clicking the second placeholder's label otherwise
-    # activates the first's radio) and for Capybara test selectors.
-    # `value:` stays as "true" / image id; the JS post-upload hook
-    # (`form-images#updateObsImages`) updates both the radio's value
-    # AND its id to the real image id once assigned.
     render(Components::ApplicationForm::ButtonStyleRadio.new(
              name: "observation[thumb_image_id]",
              value: value,

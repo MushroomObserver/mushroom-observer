@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Tests for Components::ApplicationForm::ButtonStyleRadio — the
-# button-styled radio component used by FormCarousel and elsewhere.
+# button-styled radio component used by Form::UploadGallery and elsewhere.
 # Unlike RadioField, this component is standalone (no Field/FieldProxy)
 # and has NO `.radio` div wrap.
 class ButtonStyleRadioTest < ComponentTestCase

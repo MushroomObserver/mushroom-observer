@@ -13,7 +13,7 @@ module Observations::Images
     # This action returns formatted HTML (upload image template) for one image
     # to the Stimulus form-images_controller. This is added to the page
     # when uploading multiple images on create observation. Returns two
-    # turbo_stream actions: prepend a FormCarouselItem to `#added_images`
+    # turbo_stream actions: prepend a Form::UploadGallery::Item to `#added_images`
     # and a CarouselThumbnail to `#added_thumbnails`.
     # was multi_image_template
     def new
@@ -44,7 +44,7 @@ module Observations::Images
     def prepend_form_carousel_item
       turbo_stream.prepend(
         "added_images",
-        ::Components::FormCarousel::Item.new(
+        ::Components::Form::UploadGallery::Item.new(
           user: @user, image: @image,
           img_id: params[:img_id], index: params[:index].to_i,
           upload: true, obs_thumb_id: nil,
@@ -57,7 +57,7 @@ module Observations::Images
     def prepend_carousel_thumbnail
       turbo_stream.prepend(
         "added_thumbnails",
-        ::Components::Carousel::Thumbnail.new(
+        ::Components::ImageGallery::Thumbnail.new(
           user: @user, image: @image,
           img_id: params[:img_id], index: params[:index].to_i,
           upload: true,

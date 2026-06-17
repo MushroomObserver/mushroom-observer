@@ -13,13 +13,13 @@
 # Uses FieldProxy to generate field names/IDs without requiring a form object.
 #
 # @example
-#   render Components::FormCarousel::Fields.new(
+#   render Components::Form::UploadGallery::Fields.new(
 #     user: @user,
 #     image: @image,
 #     img_id: 123,
 #     upload: false
 #   )
-class Components::FormCarousel::Fields < Components::Base
+class Components::Form::UploadGallery::Fields < Components::Base
   # Properties
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image), default: nil
