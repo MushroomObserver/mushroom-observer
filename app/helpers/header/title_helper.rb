@@ -66,35 +66,13 @@ module Header
       )
     end
 
-    # Modal-form edit title with a precomputed `html_str` (the modal
-    # callers supply a type-tag label, not the model's `page_title`).
-    # `add_edit_title` uses `Views::Layouts::Header::ObjectTitle` for
-    # the model-driven version of the same flex+badge layout.
-    def edit_page_title(html_str, object)
-      tag.div(class: "d-flex align-items-center") do
-        [
-          render(::Components::IdBadge.new(object: object,
-                                           extra_class: "mr-4")),
-          tag.span do
-            [:edit_object.t(type: object.type_tag),
-             html_str].safe_join(": ")
-          end
-        ].safe_join(" ")
-      end
-    end
-
     def edit_document_title(string, object)
       [:EDIT.l, show_document_title(string, object)].safe_join(" ")
     end
 
     # Translation string taking a type_tag, e.g. :add_object, :create_object
     def add_new_title(string, type_tag)
-      add_page_title(new_page_title(string, type_tag))
-    end
-
-    # Needs to be separate. Called in modal forms.
-    def new_page_title(string, type_tag)
-      :"#{string}".t(type: type_tag)
+      add_page_title(:"#{string}".t(type: type_tag))
     end
 
     # NOTE: When it's a show page for an ActiveRecord object, an

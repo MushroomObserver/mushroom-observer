@@ -450,11 +450,12 @@ class CollectionNumbersController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :COLLECTION_NUMBER)
+      :add_object.t(type: :COLLECTION_NUMBER)
     when "edit", "update"
-      helpers.edit_page_title(
-        @collection_number.format_name.t, @collection_number
-      )
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                       object: @collection_number, mode: :edit,
+                       title: @collection_number.format_name.t
+                     ))
     end
   end
 

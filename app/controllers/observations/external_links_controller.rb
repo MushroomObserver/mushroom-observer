@@ -220,9 +220,12 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        helpers.new_page_title(:add_object, :EXTERNAL_LINK)
+        :add_object.t(type: :EXTERNAL_LINK)
       when "edit", "update"
-        helpers.edit_page_title(:EXTERNAL_LINK.l, @external_link)
+        render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @external_link, mode: :edit,
+                         title: :EXTERNAL_LINK.l
+                       ))
       end
     end
 

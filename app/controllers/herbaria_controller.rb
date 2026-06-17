@@ -225,9 +225,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:new_object, :HERBARIUM)
+      :new_object.t(type: :HERBARIUM)
     when "edit", "update"
-      helpers.edit_page_title(:HERBARIUM_RECORD.l, @herbarium)
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                       object: @herbarium, mode: :edit,
+                       title: :HERBARIUM_RECORD.l
+                     ))
     end
   end
 

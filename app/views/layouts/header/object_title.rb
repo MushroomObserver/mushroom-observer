@@ -19,6 +19,11 @@ module Views::Layouts
     prop :object, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
     prop :mode, _Union(:show, :edit), default: :show
+    # Precomputed title-piece override. Modal-edit callers
+    # (`herbaria_controller`, `sequences_controller`, etc.) pass an
+    # object-specific format like `@sequence.unique_format_name`
+    # instead of letting the view dispatch through `page_title`.
+    prop :title, _Nilable(::String), default: nil
 
     def view_template
       div(class: "d-flex align-items-center") do
@@ -37,6 +42,8 @@ module Views::Layouts
     end
 
     def render_title
+      return trusted_html(@title) if @title
+
       if @object.is_a?(::Observation)
         render(::Views::Controllers::Observations::ConsensusNameLink.new(
                  observation: @object, user: @user

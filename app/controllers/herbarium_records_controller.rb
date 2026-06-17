@@ -500,13 +500,14 @@ class HerbariumRecordsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :HERBARIUM_RECORD)
+      :add_object.t(type: :HERBARIUM_RECORD)
     when "edit", "update"
-      helpers.edit_page_title(
-        [@herbarium_record.format_name.t,
-         @herbarium_record.herbarium_label].safe_join(" "),
-        @herbarium_record
-      )
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                       object: @herbarium_record, mode: :edit,
+                       title: [@herbarium_record.format_name.t,
+                               @herbarium_record.herbarium_label].
+                         safe_join(" ")
+                     ))
     end
   end
 

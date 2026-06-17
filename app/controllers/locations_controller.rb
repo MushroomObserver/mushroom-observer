@@ -628,9 +628,12 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:create_object, :LOCATION)
+      :create_object.t(type: :LOCATION)
     when "edit", "update"
-      helpers.edit_page_title(@location.display_name, @location)
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                       object: @location, mode: :edit,
+                       title: @location.display_name
+                     ))
     end
   end
 

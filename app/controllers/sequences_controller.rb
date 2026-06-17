@@ -332,9 +332,12 @@ class SequencesController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :SEQUENCE)
+      :add_object.t(type: :SEQUENCE)
     when "edit", "update"
-      helpers.edit_page_title(@sequence.unique_format_name, @sequence)
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @sequence, mode: :edit,
+                         title: @sequence.unique_format_name
+                       ))
     end
   end
 
