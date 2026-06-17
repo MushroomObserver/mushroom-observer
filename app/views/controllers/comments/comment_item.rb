@@ -38,7 +38,7 @@ module Views::Controllers::Comments
     # - `CommentsForObject` provides it via
     #   `ListGroup#item(class: "comment", id: dom_id(comment))`.
     # - The Comment model's `after_create_commit` broadcast wraps
-    #   this view in `Components::ListGroupItem` before prepending
+    #   this view in `Components::ListGroup::Item` before prepending
     #   to the list.
     # - `after_update_commit` broadcasts use `broadcast_update_to`
     #   with `target: "comment_<id>"`, which replaces this inner

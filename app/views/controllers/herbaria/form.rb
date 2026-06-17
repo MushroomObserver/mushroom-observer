@@ -5,7 +5,7 @@ module Views::Controllers::Herbaria
   # personal and institutional herbaria with optional location
   # selection via map. Rendered directly by the herbaria controller's
   # `new.html.erb` and `edit.html.erb`, and dynamically by
-  # `Components::ModalTurboForm` via `form_component_class_for`.
+  # `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
     # rubocop:disable Metrics/ParameterLists
     def initialize(model, user:, back: nil, location: nil,
@@ -53,7 +53,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_personal_help
-      render(Components::HelpBlock.new(arrow: :down)) do
+      render(Components::Help::Block.new(arrow: :down)) do
         trusted_html(:edit_herbarium_this_is_personal_herbarium.tp)
       end
     end

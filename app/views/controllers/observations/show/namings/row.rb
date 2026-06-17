@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # One row of the obs-show namings sub-panel. Renders the content of a
-# `Components::ListGroup` item — the wrapping `<div class="list-group-
+# `Components::ListGroup::Base` item — the wrapping `<div class="list-group-
 # item">` is supplied by the parent `Show::Namings::Rows` via
 # `list.item(id: …) { render(Row.new(…)) }`.
 #

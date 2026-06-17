@@ -61,13 +61,15 @@ class Components::Carousel < Components::Base
 
   # Register a slide. `class:` / `id:` / arbitrary attrs flow onto the
   # wrapping `<div class="item …">` (mirroring `ListGroup::Base#item`).
-  # First registered slide auto-gets `.active`.
+  # `active: true` overrides the default first-slide-active behavior
+  # (`Matrix::Carousel` uses this to active the slide matching its
+  # `top_img`); when no slide is marked active, the first one gets it.
   #
   # @return [nil] so the call doesn't accidentally emit anything
-  def item(class: nil, id: nil, **attrs, &block)
+  def item(class: nil, id: nil, active: false, **attrs, &block)
     @slides << {
       class: binding.local_variable_get(:class),
-      id: id, attrs: attrs, block: block
+      id: id, active: active, attrs: attrs, block: block
     }
     nil
   end
@@ -76,12 +78,13 @@ class Components::Carousel < Components::Base
   # flow onto the wrapping `<li class="carousel-indicator …">`. The
   # primitive auto-fills `data-target="#<carousel_id>"` and
   # `data-slide-to="<n>"`; caller-supplied `data:` is merged on top.
+  # `active:` works the same as on `#item`.
   #
   # @return [nil]
-  def thumb(class: nil, id: nil, **attrs, &block)
+  def thumb(class: nil, id: nil, active: false, **attrs, &block)
     @thumbs << {
       class: binding.local_variable_get(:class),
-      id: id, attrs: attrs, block: block
+      id: id, active: active, attrs: attrs, block: block
     }
     nil
   end
@@ -110,7 +113,8 @@ class Components::Carousel < Components::Base
 
   def render_slide(slide, index)
     div(id: slide[:id],
-        class: class_names("item", slide[:class], active_for(index)),
+        class: class_names("item", slide[:class],
+                           active_for(@slides, slide, index)),
         **slide[:attrs]) do
       slide[:block]&.call
     end
@@ -121,15 +125,20 @@ class Components::Carousel < Components::Base
     extra = thumb[:attrs][:data] || {}
     rest = thumb[:attrs].except(:data)
     li(id: thumb[:id],
-       class: class_names("carousel-indicator mx-1",
-                          thumb[:class], active_for(index)),
+       class: class_names("carousel-indicator mx-1", thumb[:class],
+                          active_for(@thumbs, thumb, index)),
        data: base_data.merge(extra),
        **rest) do
       thumb[:block]&.call
     end
   end
 
-  def active_for(index)
+  # If any registration marks `active: true`, only those get `.active`.
+  # Otherwise the first registration gets it (default behavior).
+  def active_for(set, entry, index)
+    return "active" if entry[:active]
+    return nil if set.any? { |e| e[:active] }
+
     "active" if index.zero?
   end
 
