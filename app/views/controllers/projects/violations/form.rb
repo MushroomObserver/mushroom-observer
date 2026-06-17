@@ -69,7 +69,8 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_obs_link(obs)
-      render(Components::Link::Object::Base.new(object: obs, name: obs.text_name))
+      render(Components::Link::Object::Base.new(object: obs,
+                                                name: obs.text_name))
       plain(" (#{obs.id})")
     end
 

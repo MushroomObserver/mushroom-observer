@@ -17,14 +17,18 @@ module Views::Controllers::Observations
       private
 
       def render_notes_panel
-        FormNotes(
-          form: self,
-          parts: observation_form_note_parts,
-          panel_id: "observation_notes",
-          expanded: notes_panel_expanded?,
-          single_part_mode: single_notes_part?,
-          above_help: single_notes_part? ? observation_above_notes_help : nil
-        )
+        render(Components::Form::Notes.new(
+                 form: self,
+                 parts: observation_form_note_parts,
+                 panel_id: "observation_notes",
+                 expanded: notes_panel_expanded?,
+                 single_part_mode: single_notes_part?,
+                 above_help: above_notes_help
+               ))
+      end
+
+      def above_notes_help
+        single_notes_part? ? observation_above_notes_help : nil
       end
 
       def observation_form_note_parts

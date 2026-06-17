@@ -227,7 +227,8 @@ module Views::Controllers::Descriptions
     def reviewer_link
       reviewer = @description.reviewer
       capture do
-        render(Components::Link::Object::User.new(user: reviewer, name: reviewer.login))
+        render(Components::Link::Object::User.new(user: reviewer,
+                                                  name: reviewer.login))
       end
     end
 

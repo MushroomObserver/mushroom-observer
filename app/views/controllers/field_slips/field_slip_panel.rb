@@ -107,7 +107,8 @@ module Views::Controllers::FieldSlips
       usr = @field_slip.user
       strong { plain("#{:field_slip_creator.t}:") }
       plain(" ")
-      render(Components::Link::Object::User.new(user: usr, name: usr.legal_name))
+      render(Components::Link::Object::User.new(user: usr,
+                                                name: usr.legal_name))
       br
     end
 

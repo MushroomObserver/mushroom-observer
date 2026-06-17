@@ -55,7 +55,7 @@ module Views::Layouts::App
                      version: banner.version },
              aria: { label: :CLOSE.l }) do
         render(::Components::Icon.new(type: :chevron_up,
-                                          title: :CLOSE.l))
+                                      title: :CLOSE.l))
       end
       p { trusted_html(banner.message.t) }
     end
@@ -66,7 +66,7 @@ module Views::Layouts::App
         div(class: "show_banner_icon text-green d-block",
             data: { banner_target: "showButton" }) do
           render(::Components::Icon.new(type: :chevron_down,
-                                            title: :SHOW.l))
+                                        title: :SHOW.l))
         end
       end
     end

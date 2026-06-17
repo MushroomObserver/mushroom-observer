@@ -75,7 +75,9 @@ module Views::Layouts
     # SafeBuffer so the rendered HTML can be threaded through `.t`.
     def render_user_dated_line(key, user:, date:)
       trusted_html(key.t(
-                     user: capture { render(Components::Link::Object::User.new(user:)) },
+                     user: capture do
+                       render(Components::Link::Object::User.new(user:))
+                     end,
                      date: date.web_time
                    ))
     end
