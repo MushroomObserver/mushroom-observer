@@ -91,8 +91,9 @@ class Components::Carousel < Components::Base
 
         # Carousel controls (if multiple images)
         if @images.length > 1
-          render(Components::Carousel::Controls.
-                   new(carousel_id: @carousel_id))
+          render(
+            Components::Carousel::Controls.new(carousel_id: @carousel_id)
+          )
         end
       end
 

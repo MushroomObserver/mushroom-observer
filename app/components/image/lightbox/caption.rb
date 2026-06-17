@@ -92,8 +92,9 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_reviewed_toggle
     span(class: "mx-2") { whitespace }
-    render(Components::Image::MarkAsReviewedToggle.
-             new(observation_view: @observation_view))
+    render(Components::Image::MarkAsReviewedToggle.new(
+             observation_view: @observation_view
+           ))
   end
 
   def render_obs_title

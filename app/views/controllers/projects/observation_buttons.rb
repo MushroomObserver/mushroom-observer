@@ -30,7 +30,10 @@ module Views::Controllers::Projects
     end
 
     def render_images_button
-      project_button(:IMAGES.l, related_observation_images_url)
+      images_url = related_observation_images_url
+      return unless images_url
+
+      project_button(:IMAGES.l, images_url)
     end
 
     def render_download_button

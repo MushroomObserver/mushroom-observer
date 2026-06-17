@@ -42,8 +42,9 @@ class Components::FormCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          render(Components::Carousel::Controls.
-                   new(carousel_id: @carousel_id))
+          render(
+            Components::Carousel::Controls.new(carousel_id: @carousel_id)
+          )
         end
       end
 
