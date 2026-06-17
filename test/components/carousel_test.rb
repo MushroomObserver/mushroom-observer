@@ -161,6 +161,36 @@ class CarouselTest < ComponentTestCase
     assert_no_html(html, "a.carousel-control")
   end
 
+  # Default: first registered slide gets `.active`. Explicit
+  # `active: true` on any other slide shifts the active state to it
+  # (and the first slide stops being active). `Matrix::Carousel` uses
+  # this for its `top_img` semantics.
+  def test_explicit_active_kwarg_overrides_default_first_active
+    html = render(Harness.new(
+                    carousel_args: { carousel_id: "c" },
+                    slides: [{ id: "s1", content: "first" },
+                             { id: "s2", active: true, content: "second" },
+                             { id: "s3", content: "third" }]
+                  ))
+
+    assert_html(html, "div.item.active[id='s2']", text: "second")
+    assert_no_html(html, "div.item.active[id='s1']")
+    assert_no_html(html, "div.item.active[id='s3']")
+  end
+
+  # `active:` works the same on thumbs.
+  def test_explicit_active_kwarg_overrides_first_active_thumb
+    html = render(Harness.new(
+                    carousel_args: { carousel_id: "c" },
+                    slides: [{ content: "s" }],
+                    thumbs: [{ id: "t1", content: "first" },
+                             { id: "t2", active: true, content: "second" }]
+                  ))
+
+    assert_html(html, "li.carousel-indicator.active[id='t2']")
+    assert_no_html(html, "li.carousel-indicator.active[id='t1']")
+  end
+
   # `show_indicators: false` suppresses the indicator `<ol>` entirely.
   # Registered thumbs are silently dropped (the matrix-box carousel
   # uses this — no thumbnail strip per-box).
