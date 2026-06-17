@@ -34,12 +34,6 @@ module Names
       user_id && User.find_by(id: user_id)
     end
 
-    def show_includes
-      [:correct_spelling,
-       { observations: :user },
-       :user, :versions]
-    end
-
     private
 
     def find_name!

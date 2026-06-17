@@ -22,10 +22,6 @@ module Locations
       end
     end
 
-    def show_includes
-      [:user, :versions]
-    end
-
     private
 
     def find_location!

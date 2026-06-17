@@ -7,10 +7,6 @@ module Names
 
     before_action :login_required
 
-    def controller_model_name
-      "Name"
-    end
-
     # Draw a map of all the locations where this name has been observed.
     # Uses the dynamic-clustering pipeline shared with
     # `Observations::MapsController#index` (#4159).

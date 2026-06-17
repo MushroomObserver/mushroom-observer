@@ -24,13 +24,5 @@ module GlossaryTerms
       @glossary_term = GlossaryTerm.show_includes.safe_find(params[:id]) ||
                        flash_error_and_goto_index(GlossaryTerm, params[:id])
     end
-
-    def show_includes
-      [
-        :images,
-        { thumb_image: :image_votes },
-        :user, :versions
-      ]
-    end
   end
 end
