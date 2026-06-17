@@ -101,9 +101,10 @@ class ArticlesControllerTest < FunctionalTestCase
     # which defaults `icon: nil, btn: nil` for `:destroy` so context-nav
     # `[ DESTROY ]` tabs render as plain text links (no btn frame, no
     # glyphicon). Build the expected tab the same way for the comparison.
-    tab3 = @controller.helpers.destroy_button(
-      target: article, icon: nil, btn: nil
-    )
+    tab3 = @controller.helpers.render(Components::CrudButton::Delete.new(
+                                        target: article,
+                                        icon: nil, btn: nil
+                                      ))
 
     assert_includes(tabs, tab1)
     assert_includes(tabs, tab2)

@@ -99,12 +99,18 @@ module Header
         # text links — opt out of `CrudButton::Delete`'s default icon
         # AND button-frame via `icon: nil` + `btn: nil` (callers can
         # override either by passing the kwarg).
-        destroy_button(name: str, target: args[:target] || url,
-                       **kwargs.reverse_merge(icon: nil, btn: nil))
+        render(Components::CrudButton::Delete.new(
+                 name: str, target: args[:target] || url,
+                 **kwargs.reverse_merge(icon: nil, btn: nil)
+               ))
       when :put
-        put_button(name: str, path: url, **kwargs)
+        render(Components::CrudButton::Put.new(
+                 name: str, target: url, **kwargs
+               ))
       when :patch
-        patch_button(name: str, path: url, **kwargs)
+        render(Components::CrudButton::Patch.new(
+                 name: str, target: url, **kwargs
+               ))
       else
         link_to(str, url, kwargs)
       end

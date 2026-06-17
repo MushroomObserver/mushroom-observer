@@ -2,6 +2,8 @@
 
 # display information about, and edit, users
 class UsersController < ApplicationController
+  include UserStatsBuilder
+
   before_action :login_required
   before_action :store_location, only: [:show]
 
@@ -125,8 +127,7 @@ class UsersController < ApplicationController
     define_instance_vars_for_summary!
     render(Views::Controllers::Users::Show.new(
              show_user: @show_user, life_list: @life_list,
-             user_stats_rows: helpers.user_stats_rows(@user_stats),
-             user_stats_paths: helpers.user_stats_link_paths(@show_user),
+             user_stats_rows: user_stats_rows(@user_stats),
              best_images: @best_images || []
            ))
   end

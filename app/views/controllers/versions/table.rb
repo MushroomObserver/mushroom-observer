@@ -11,8 +11,6 @@
 # file is empty and is deleted in the same commit.
 module Views::Controllers::Versions
   class Table < Views::Base
-    register_value_helper :user_link
-
     prop :obj, ::AbstractModel
     prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
          default: -> { [] }
@@ -54,7 +52,7 @@ module Views::Controllers::Versions
       user = ::User.safe_find(ver.user_id)
       return plain(:unknown.t) unless user
 
-      trusted_html(user_link(user, user.login))
+      render(::Components::UserLink.new(user: user, name: user.login))
     end
 
     def render_link_cell(ver)

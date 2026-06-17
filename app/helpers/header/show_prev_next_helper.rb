@@ -15,7 +15,9 @@ module Header
       return unless object && (query = show_page_incoming_query(object))
 
       content_for(:prev_next_object) do
-        render(Components::ShowPrevNextNav.new(object: object, query: query))
+        render(Views::Layouts::Header::ShowPrevNextNav.new(
+                 object: object, query: query
+               ))
       end
     end
 

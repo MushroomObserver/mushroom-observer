@@ -6,10 +6,10 @@ module Views::Controllers::Users
   class Show < Views::Base
     prop :show_user, ::User
     prop :life_list, ::Checklist::ForUser
-    # Pre-computed in the controller (rows + paths) so the view
-    # doesn't run AR queries or touch Rails route helpers.
+    # Pre-computed in the controller (so the `Language.pluck(...)`
+    # query stays out of the view). Field-keyed paths are built
+    # inside `UserStats` itself via the Phlex route helpers.
     prop :user_stats_rows, _Array(::Hash), default: -> { [] }
-    prop :user_stats_paths, _Hash(::Symbol, ::String), default: -> { {} }
     prop :best_images, _Array(_Nilable(::Image)), default: -> { [] }
 
     def view_template
@@ -36,7 +36,6 @@ module Views::Controllers::Users
 
       render(Show::UserStats.new(show_user: @show_user,
                                  rows: @user_stats_rows,
-                                 paths: @user_stats_paths,
                                  name: @show_user.login))
     end
 

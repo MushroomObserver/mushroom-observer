@@ -32,10 +32,10 @@ module Views::Controllers::Users
             count: nil, points: 0 },
           { label: "Bonus reason", count: nil, points: 10 }
         ]
-        paths = { observations: "/observations?by_user=#{@user.id}" }
         html = render(UserStats.new(show_user: @user, name: @user.login,
-                                    rows: rows, paths: paths))
-        assert_html(html, "tr td a[href='/observations?by_user=#{@user.id}']")
+                                    rows: rows))
+        link_path = routes.observations_path(by_user: @user.id)
+        assert_html(html, "tr td a[href='#{link_path}']")
         assert_includes(html, "Unlinked Field")
         assert_html(html, "tr td span", text: "EN: 4")
         assert_includes(html, "Bonus reason")
@@ -49,7 +49,7 @@ module Views::Controllers::Users
             weight: 1, points: 0 }
         ]
         html = render(UserStats.new(show_user: @user, name: @user.login,
-                                    rows: rows, paths: {}))
+                                    rows: rows))
         # Empty body still has the panel header but no hr/total tr.
         assert_no_html(html, "tr td hr")
       end
