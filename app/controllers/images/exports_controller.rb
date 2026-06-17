@@ -26,9 +26,9 @@ module Images
 
     def image_export_toggle_stream
       turbo_stream.update("image_export_#{@image.id}") do
-        helpers.render(Views::Controllers::Images::Exports::Button.new(
-                         image: @image
-                       ))
+        render_to_string(Views::Controllers::Images::Exports::Button.new(
+                           image: @image
+                         ), layout: false)
       end
     end
 
