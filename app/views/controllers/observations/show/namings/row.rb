@@ -125,7 +125,9 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_mod_links(naming)
     div(class: "text-nowrap") do
-      InlineModLinks(target: naming, user: @user, indent: false)
+      render(Components::Link::InlineMod.new(
+               target: naming, user: @user, indent: false
+             ))
     end
   end
 
@@ -159,8 +161,10 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_single_proposer_link
     proposer = @naming.user
-    UserLink(user: proposer, name: proposer.login,
-             attributes: { class: proposer_link_classes })
+    render(Components::Link::Object::User.new(
+             user: proposer, name: proposer.login,
+             attributes: { class: proposer_link_classes }
+           ))
   end
 
   def proposer_link_classes
@@ -197,10 +201,12 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_vote_percent_link
-    ModalLink("naming_votes_#{primary.id}",
-              "#{@naming.vote_percent.round}%",
-              vote_percent_modal_path,
-              class: "vote-percent btn btn-link px-0")
+    render(Components::Link::Modal.new(
+             "naming_votes_#{primary.id}",
+             "#{@naming.vote_percent.round}%",
+             vote_percent_modal_path,
+             class: "vote-percent btn btn-link px-0"
+           ))
   end
 
   def vote_percent_modal_path

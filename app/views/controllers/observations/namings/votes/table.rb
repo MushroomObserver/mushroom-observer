@@ -104,7 +104,9 @@ module Views::Controllers::Observations::Namings::Votes
       visible.each_with_index do |vote, i|
         plain(", ") if i.positive?
         if i < 3
-          UserLink(user: vote.user, name: vote.user.login)
+          render(Components::Link::Object::User.new(
+                   user: vote.user, name: vote.user.login
+                 ))
         else
           plain("...")
           break

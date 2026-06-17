@@ -692,31 +692,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_16_120000) do
     t.boolean "permalink", default: false
   end
 
-  create_table "queued_email_integers", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.string "key", limit: 100
-    t.integer "value", default: 0, null: false
-  end
-
-  create_table "queued_email_notes", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.text "value"
-  end
-
-  create_table "queued_email_strings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "queued_email_id", default: 0, null: false
-    t.string "key", limit: 100
-    t.string "value", limit: 100
-  end
-
-  create_table "queued_emails", id: :integer, charset: "utf8mb3", force: :cascade do |t|
-    t.integer "user_id"
-    t.datetime "queued", precision: nil
-    t.integer "num_attempts"
-    t.string "flavor", limit: 50
-    t.integer "to_user_id"
-  end
-
   create_table "rss_logs", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "observation_id"
     t.integer "species_list_id"
@@ -875,7 +850,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_16_120000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
-  create_table "sources", charset: "utf8mb3", force: :cascade do |t|
+  create_table "sources", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", limit: 100, null: false
     t.string "url", limit: 1024
     t.text "description"
