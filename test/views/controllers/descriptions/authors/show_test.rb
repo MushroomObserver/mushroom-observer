@@ -11,7 +11,7 @@ class Views::Controllers::Descriptions::Authors::ShowTest <
     desc.reload
 
     html = render(Views::Controllers::Descriptions::Authors::Show.new(
-                    object: desc, authors: desc.authors
+                    object: desc, authors: desc.authors.to_a
                   ))
 
     # Each author row has a remove-author destroy button posting to

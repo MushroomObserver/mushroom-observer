@@ -7,17 +7,16 @@ module Views::Controllers::Locations
     # the versions table, and the version footer.
     class Show < Views::Base
       prop :location, ::Location
-      prop :versions,
-           _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
+      prop :versions, _Array(_Interface(:user_id))
 
       def view_template
         register_chrome
         div(class: "row") { render_columns }
         render(Views::Controllers::Versions::Table.new(
-                 obj: @location, versions: @versions
+                 obj: @location, versions: @versions.to_a
                ))
-        render(::Components::VersionsFooter.new(
-                 user: current_user, obj: @location, versions: @versions
+        render(::Views::Layouts::VersionsFooter.new(
+                 user: current_user, obj: @location, versions: @versions.to_a
                ))
       end
 

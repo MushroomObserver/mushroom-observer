@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names::Classification
   class RefreshControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     # Description-mirror assertions removed — classification only
     # lives on Name now (discussion #4163).

@@ -4,7 +4,6 @@ require("test_helper")
 
 module Locations
   class VersionsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def test_show_past_location
       location = locations(:albion)

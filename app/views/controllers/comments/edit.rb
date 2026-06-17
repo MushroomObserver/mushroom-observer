@@ -39,7 +39,7 @@ module Views::Controllers::Comments
     def render_object_panel
       render(CommentsForObject.new(
                object: @target,
-               comments: @comments,
+               comments: @comments.to_a,
                user: @user, editable: false, limit: 10
              ))
     end

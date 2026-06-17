@@ -5,8 +5,7 @@ module Views::Controllers::Locations
     # Footer panel — authors / editors + previous-version link.
     class Footer < Views::Base
       prop :location, ::Location
-      prop :versions,
-           _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
+      prop :versions, _Array(_Interface(:user_id))
 
       def view_template
         render(::Components::Panel.new(panel_id: "location_footer")) do |panel|
@@ -19,8 +18,8 @@ module Views::Controllers::Locations
 
       def render_body
         div(id: "location_authors_editors") do
-          render(::Components::AuthorsAndEditors.new(
-                   obj: @location, versions: @versions, user: current_user
+          render(::Views::Layouts::AuthorsAndEditors.new(
+                   obj: @location, versions: @versions.to_a, user: current_user
                  ))
         end
         trusted_html(
@@ -31,7 +30,7 @@ module Views::Controllers::Locations
       def render_previous_version
         div(id: "location_previous") do
           render(::Components::PreviousVersion.new(
-                   obj: @location, versions: @versions
+                   obj: @location, versions: @versions.to_a
                  ))
         end
       end

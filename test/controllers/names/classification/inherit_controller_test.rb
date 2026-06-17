@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names::Classification
   class InheritControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def create_name(name)
       parse = Name.parse_name(name)

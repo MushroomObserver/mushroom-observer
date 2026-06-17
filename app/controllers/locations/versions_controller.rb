@@ -12,7 +12,7 @@ module Locations
 
       if params[:version]
         @location.revert_to(params[:version].to_i)
-        @versions = @location.versions
+        @versions = @location.versions.to_a
         render(Views::Controllers::Locations::Versions::Show.new(
                  location: @location, versions: @versions
                ))

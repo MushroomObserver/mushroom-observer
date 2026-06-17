@@ -34,7 +34,7 @@ module Names
     def render_phlex_show
       render(Views::Controllers::Names::Maps::Show.new(
                name: @name, query: @query,
-               observations: @observations,
+               observations: @observations.to_a,
                observations_capped: @observations_capped,
                observations_loaded_count: @observations_loaded_count,
                observations_total_count: @observations_total_count,

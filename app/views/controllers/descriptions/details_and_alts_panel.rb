@@ -33,8 +33,7 @@ module Views::Controllers::Descriptions
 
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    prop :versions, _Array(_Interface(:user_id))
     prop :projects, _Nilable(_Array(::Project)), default: nil
     # Show pages pass `review: true`; versions pages omit it.
     prop :review, _Boolean, default: false

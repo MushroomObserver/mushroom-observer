@@ -4,7 +4,6 @@ require("test_helper")
 
 module Locations
   class HelpControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def test_location_help
       login

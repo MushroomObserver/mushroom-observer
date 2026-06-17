@@ -360,8 +360,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     logger.warn("QUERY starting: #{query.sql.inspect}")
     @timer_start = Time.current
 
-    # Instantiate correct subset, with or without includes.
-    @objects = instantiated_object_subset(query, display_opts)
+    # Instantiate correct subset, with or without includes. `.to_a`
+    # materializes the page now so the Phlex index view's `:objects`
+    # prop (typed as `_Array(...)`) validates at construction —
+    # passing an AR Relation/CollectionProxy would fail Literal's
+    # type check at the controller-view boundary.
+    @objects = instantiated_object_subset(query, display_opts).to_a
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \

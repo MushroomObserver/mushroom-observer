@@ -23,8 +23,7 @@ module Views::Controllers::Descriptions::Versions
   class Show < Views::Base
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    prop :versions, _Array(_Interface(:user_id))
     prop :projects, _Nilable(_Array(::Project)), default: nil
 
     def view_template
@@ -40,7 +39,7 @@ module Views::Controllers::Descriptions::Versions
                description: @description, user: @user,
                versions: @versions, projects: @projects
              ))
-      render(Components::VersionsFooter.new(
+      render(Views::Layouts::VersionsFooter.new(
                user: @user, obj: @description, versions: @versions
              ))
     end

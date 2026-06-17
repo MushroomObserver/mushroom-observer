@@ -7,7 +7,7 @@ module Views::Controllers::Locations::Descriptions
     prop :description, ::LocationDescription
     prop :user, _Nilable(::User), default: nil
     # Controller always passes — no need for a default fallback.
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy)
+    prop :versions, _Array(_Interface(:user_id))
     prop :projects, _Nilable(_Array(::Project)), default: nil
 
     def view_template
@@ -26,7 +26,7 @@ module Views::Controllers::Locations::Descriptions
       render(Views::Controllers::Descriptions::AuthorsAndEditorsPanel.new(
                description: @description, user: @user, versions: @versions
              ))
-      render(Components::VersionsFooter.new(
+      render(Views::Layouts::VersionsFooter.new(
                user: @user, obj: @description, versions: @versions
              ))
     end

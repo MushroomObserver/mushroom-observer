@@ -98,7 +98,7 @@ module Views::Controllers::GlossaryTerms
     def render_versions_footer
       div(class: "mt-3 content-block") do
         render(::Components::PreviousVersion.new(
-                 obj: @glossary_term, versions: @versions
+                 obj: @glossary_term, versions: @versions.to_a
                ))
         p(class: "Date") { render_timestamps }
       end
@@ -119,9 +119,9 @@ module Views::Controllers::GlossaryTerms
                panel_id: "glossary_term_authors_editors"
              )) do |panel|
         panel.with_body do
-          render(::Components::AuthorsAndEditors.new(
+          render(::Views::Layouts::AuthorsAndEditors.new(
                    obj: @glossary_term,
-                   versions: @versions,
+                   versions: @versions.to_a,
                    user: current_user
                  ))
         end

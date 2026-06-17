@@ -76,7 +76,7 @@ class InfoController < ApplicationController
                     includes(thumb_image: :image_votes).
                     order(updated_at: :desc).limit(6).to_a
     render(Views::Controllers::Info::SiteStats.new(
-             site_data: @site_data, observations: @observations
+             site_data: @site_data, observations: @observations.to_a
            ))
   end
 end

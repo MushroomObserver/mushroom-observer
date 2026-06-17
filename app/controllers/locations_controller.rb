@@ -229,7 +229,7 @@ class LocationsController < ApplicationController
     update_view_stats(@location)
     update_view_stats(@description) if @description
 
-    @versions = @location.versions
+    @versions = @location.versions.to_a
     # Save two lookups in comments_for_object
     @comments = @location.comments&.sort_by(&:created_at)&.reverse
     @desc_comments = @description&.comments&.sort_by(&:created_at)&.reverse
@@ -364,7 +364,7 @@ class LocationsController < ApplicationController
              location: @location,
              description: @description,
              versions: @versions,
-             comments: @comments,
+             comments: @comments.to_a,
              projects: @projects
            ))
   end

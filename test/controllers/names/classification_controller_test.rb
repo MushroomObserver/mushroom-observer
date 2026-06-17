@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class ClassificationControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def test_get_edit_classification
       name = names(:boletus_edulis)

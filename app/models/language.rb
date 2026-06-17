@@ -50,7 +50,7 @@ class Language < AbstractModel
 
   # Lookup a Language record by its locale string, memoized per
   # process. Languages don't change at runtime, so callers (e.g.
-  # `Components::TranslatorsCredit` on every page render) avoid a
+  # `Views::Layouts::TranslatorsCredit` on every page render) avoid a
   # per-request `find_by(locale: …)` query. Uses `Hash#fetch` so a
   # nil result (unknown locale) is cached too, instead of re-querying
   # every call.

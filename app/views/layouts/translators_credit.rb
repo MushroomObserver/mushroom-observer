@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
-module Components
-  # Renders credit to translators at bottom of pages for non-official languages
-  # and/or edit translation links when tracking translation usage
-  #
-  # @example Basic usage in layout
-  #   <%= render(Components::TranslatorsCredit.new) %>
-  #
-  class TranslatorsCredit < Base
+module Views::Layouts
+  # Translator credits + edit-translation links rendered at the
+  # bottom of every page by the application layout. Empty render
+  # for the official language UNLESS `Language.tracking_usage?` is
+  # on (admin-controlled translation-tracking mode that adds
+  # per-page edit links for translators).
+  class TranslatorsCredit < Views::Base
     def view_template
       lang = Language.for_locale(I18n.locale)
       return unless lang && (!lang.official || Language.tracking_usage?)

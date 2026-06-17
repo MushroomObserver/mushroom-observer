@@ -4,7 +4,6 @@ require("test_helper")
 
 module Locations::Descriptions
   class MergesControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     # Dick's public desc for gualala. Readable/writable by all.
     def public_desc

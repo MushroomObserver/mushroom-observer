@@ -8,7 +8,7 @@ module Header
     # currently only used in RssLogsController#index
     def add_type_filters(query, types)
       content_for(:type_filters) do
-        render(Components::ActivityLogTypeFilters.new(query:, types:))
+        render(Views::Controllers::RssLogs::TypeFilters.new(query:, types:))
       end
     end
   end

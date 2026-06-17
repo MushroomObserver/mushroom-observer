@@ -4,7 +4,6 @@ require("test_helper")
 
 class NamesControllerShowTest < FunctionalTestCase
   tests NamesController
-  include ObjectLinkHelper
 
   ################################################
   #

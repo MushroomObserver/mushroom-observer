@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class VersionsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def test_show_past_name
       login

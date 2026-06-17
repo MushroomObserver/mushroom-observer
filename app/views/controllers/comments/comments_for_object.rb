@@ -29,11 +29,7 @@ module Views::Controllers::Comments
     # LocationDescription, NameDescription); all inherit from
     # `AbstractModel`.
     prop :object, ::AbstractModel
-    prop :comments,
-         _Nilable(
-           _Union(Array, ::ActiveRecord::Relation,
-                  ::ActiveRecord::Associations::CollectionProxy)
-         )
+    prop :comments, _Nilable(_Array(::Comment)), default: nil
     prop :user, _Nilable(::User), default: nil
     # When true, render the "+ Add comment" header link, per-row
     # mod-links, and the footer "and N more" link. Callers pass

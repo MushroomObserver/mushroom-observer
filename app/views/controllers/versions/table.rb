@@ -12,8 +12,7 @@
 module Views::Controllers::Versions
   class Table < Views::Base
     prop :obj, ::AbstractModel
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    prop :versions, _Array(_Interface(:user_id))
     # Optional `args[:bold]` callable — only the name-version page
     # uses it to embolden the row of a specific version (the
     # non-deprecated one).

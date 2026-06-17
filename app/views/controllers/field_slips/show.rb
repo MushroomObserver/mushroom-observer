@@ -3,7 +3,7 @@
 # Action template for `FieldSlipsController#show` — the single
 # field-slip page. Sets page chrome (title + edit icons), renders
 # any flash notice as an Alert, then the `FieldSlipPanel` inside the
-# padded content wrapper, then the standard `Components::VersionsFooter`.
+# padded content wrapper, then the standard `Views::Layouts::VersionsFooter`.
 #
 # Replaces `app/views/controllers/field_slips/show.html.erb`.
 module Views::Controllers::FieldSlips
@@ -27,8 +27,8 @@ module Views::Controllers::FieldSlips
         render(FieldSlipPanel.new(field_slip: @field_slip))
       end
 
-      render(Components::VersionsFooter.new(user: current_user,
-                                            obj: @field_slip))
+      render(Views::Layouts::VersionsFooter.new(user: current_user,
+                                                obj: @field_slip))
     end
   end
 end

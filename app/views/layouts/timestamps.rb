@@ -13,31 +13,31 @@
 # component.
 #
 # @example
-#   render(Components::Timestamps.new(object: @collection_number))
+#   render(Views::Layouts::Timestamps.new(object: @collection_number))
 # @example without the outer wrap
-#   render(Components::Timestamps.new(object: @sequence, wrap: false))
-class Components::Timestamps < Components::Base
-  prop :object, ::AbstractModel
-  prop :wrap, _Boolean, default: true
+#   render(Views::Layouts::Timestamps.new(object: @sequence, wrap: false))
+module Views::Layouts
+  class Timestamps < Views::Base
+    prop :object, ::AbstractModel
+    prop :wrap, _Boolean, default: true
 
-  def view_template
-    if @wrap
-      render(::Components::ContentPadded.new(class: "small")) { lines }
-    else
-      lines
+    def view_template
+      if @wrap
+        render(::Components::ContentPadded.new(class: "small")) { lines }
+      else
+        lines
+      end
     end
-  end
 
-  private
+    private
 
-  def lines
-    p do
-      trusted_html(:CREATED_AT.t)
-      plain(": #{@object.created_at.web_date}")
-      br
-      trusted_html(:UPDATED_AT.t)
-      plain(": #{@object.updated_at.web_date}")
-      br
+    def lines
+      p do
+        plain("#{:CREATED_AT.l}: #{@object.created_at.web_date}")
+        br
+        plain("#{:UPDATED_AT.l}: #{@object.updated_at.web_date}")
+        br
+      end
     end
   end
 end

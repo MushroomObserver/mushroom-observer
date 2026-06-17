@@ -23,7 +23,7 @@ module Views::Controllers::Occurrences
       # Sibling reference within the module.
       render(Form.new(
                model: @occurrence,
-               observations: @observations,
+               observations: @observations.to_a,
                candidates: @candidates,
                user: @user
              ))

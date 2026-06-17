@@ -197,7 +197,7 @@ class NamesController < ApplicationController
              name: @name, user: @user,
              best_images: @best_images,
              description: @name.description,
-             comments: @comments, obss: @obss,
+             comments: @comments.to_a, obss: @obss,
              has_subtaxa: @has_subtaxa,
              has_name_tracker: @has_name_tracker,
              subtaxa_query: @subtaxa_query,
@@ -246,7 +246,7 @@ class NamesController < ApplicationController
   #   @projects
 
   def init_related_query_ivars
-    @versions = @name.versions
+    @versions = @name.versions.to_a
     @has_subtaxa = 0
     # Query for names of subtaxa, used in special query link
     # Note this is only creating a schematic of a query, used in the link.

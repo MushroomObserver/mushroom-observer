@@ -23,7 +23,7 @@ module Views::Controllers::HerbariumRecords
       div(class: "container-text") { render_details }
       render_observation_matrix
       div(class: "container-text") do
-        render(Components::Timestamps.new(object: @herbarium_record))
+        render(::Views::Layouts::Timestamps.new(object: @herbarium_record))
       end
     end
 

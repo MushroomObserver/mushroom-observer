@@ -1,31 +1,22 @@
 # frozen_string_literal: true
 
-module Components
-  # Component for rendering object footer metadata on show pages.
-  #
-  # Displays creation/modification dates, version info, view counts,
-  # and links to activity logs.
-  #
-  # @example Basic usage (non-versioned object)
-  #   render(Components::VersionsFooter.new(user: @user, obj: @sequence))
-  #
-  # @example Versioned object with versions
-  #   render(Components::VersionsFooter.new(
-  #     user: @user,
-  #     obj: @name,
-  #     versions: @versions
-  #   ))
-  #
-  class VersionsFooter < Base
-    prop :user, _Nilable(User)
+module Views::Layouts
+  # Object-footer metadata block rendered at the bottom of every
+  # `show` page. Displays creation/modification dates, version info,
+  # view counts, and a link to the object's activity log.
+  class VersionsFooter < Views::Base
+    prop :user, _Nilable(::User)
     # Polymorphic across many model classes (Article, Description,
     # FieldSlip, GlossaryTerm, Image, Location, Name, Observation,
     # Occurrence, Sequence) with branches gated by `@obj.respond_to?`.
     # Duck-typed on `created_at` — the one accessor the component
     # always reaches.
     prop :obj, _Interface(:created_at)
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    # Version log entries — callers pass `@versions.to_a` (or `[]`
+    # for non-versioned objects). The view reads `length` and
+    # `last.user_id` off each entry; duck-typed via
+    # `_Interface(:user_id)` so test doubles work too.
+    prop :versions, _Array(_Interface(:user_id))
 
     def view_template
       num_versions = @versions.length

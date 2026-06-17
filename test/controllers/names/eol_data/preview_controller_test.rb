@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names::EolData
   class PreviewControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def test_eol_preview
       login

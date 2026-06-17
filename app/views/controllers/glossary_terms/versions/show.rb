@@ -23,10 +23,10 @@ module Views::Controllers::GlossaryTerms
         column_classes(:six)
 
         render_main_row
-        render(::Components::VersionsFooter.new(
+        render(::Views::Layouts::VersionsFooter.new(
                  user: current_user,
                  obj: @glossary_term,
-                 versions: @versions
+                 versions: @versions.to_a
                ))
       end
 
@@ -39,7 +39,7 @@ module Views::Controllers::GlossaryTerms
           end
           div(class: content_for(:right_columns)) do
             render(::Views::Controllers::Versions::Table.new(
-                     obj: @glossary_term, versions: @versions
+                     obj: @glossary_term, versions: @versions.to_a
                    ))
           end
         end

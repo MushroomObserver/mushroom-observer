@@ -20,7 +20,7 @@ module Views::Controllers::CollectionNumbers
       div(class: "container-text") { render_details }
       render_observation_matrix
       div(class: "container-text") do
-        render(Components::Timestamps.new(object: @collection_number))
+        render(::Views::Layouts::Timestamps.new(object: @collection_number))
       end
     end
 

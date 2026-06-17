@@ -4,7 +4,6 @@ require("test_helper")
 
 module Locations::Descriptions
   class VersionsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def test_show_past_location_description
       login("dick")

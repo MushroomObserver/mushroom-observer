@@ -10,9 +10,7 @@ module Views::Controllers::Projects
   class Index < Views::Base
     prop :query, ::Query::Projects
     prop :pagination_data, ::PaginationData
-    prop :objects,
-         _Union(Array, ::ActiveRecord::Relation,
-                ::ActiveRecord::Associations::CollectionProxy)
+    prop :objects, _Array(::Project)
     prop :error, _Nilable(String), default: nil
 
     def view_template

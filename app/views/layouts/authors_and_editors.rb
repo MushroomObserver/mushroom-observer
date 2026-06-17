@@ -1,26 +1,12 @@
 # frozen_string_literal: true
 
-module Components
-  # Component for rendering authors and editors metadata on show pages.
-  #
-  # Displays authors and editors with appropriate links for requesting
-  # authorship credit or reviewing authors (for admins).
-  #
-  # @example For description objects
-  #   render(Components::AuthorsAndEditors.new(
-  #     obj: @name_description,
-  #     versions: @versions,
-  #     user: @user
-  #   ))
-  #
-  # @example For non-description versioned objects
-  #   render(Components::AuthorsAndEditors.new(
-  #     obj: @name,
-  #     versions: @versions,
-  #     user: @user
-  #   ))
-  #
-  class AuthorsAndEditors < Base
+module Views::Layouts
+  # Authors + editors metadata block rendered on show pages. Two
+  # shapes: description-object pages show the authors list with a
+  # `request authorship` link (or the admin-only `review authors`
+  # link); other versioned object pages (`Name`, `Location`,
+  # `GlossaryTerm`) show editors with similar wiring.
+  class AuthorsAndEditors < Views::Base
     # Concrete callers are `Description` (`NameDescription` and
     # `LocationDescription` subclasses), `Name`, `Location`, and
     # `GlossaryTerm`. Duck-typed via `_Interface(:type_tag)` so
@@ -28,9 +14,13 @@ module Components
     # full AR object graph the description / non-description
     # branches each consume.
     prop :obj, _Interface(:type_tag)
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
-    prop :user, _Nilable(User)
+    # The view uses `versions.filter_map(&:user)`, so the prop only
+    # has to know each entry responds to `#user`. Callers pass a real
+    # Array (`@versions.to_a` at the render site) — the AR-association
+    # CollectionProxy isn't an `Array`, so passing it raw would fail
+    # the type check.
+    prop :versions, _Array(_Interface(:user))
+    prop :user, _Nilable(::User)
 
     def view_template
       type = @obj.type_tag
@@ -77,9 +67,7 @@ module Components
     # no DB queries here.
     def non_description_authors_and_editors
       type = @obj.type_tag
-      versions = @versions || []
-
-      editors_list = versions.filter_map(&:user).uniq - [@obj.user]
+      editors_list = @versions.filter_map(&:user).uniq - [@obj.user]
 
       p do
         render_user_list(:"show_#{type}_creator", [@obj.user])

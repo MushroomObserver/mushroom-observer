@@ -11,11 +11,10 @@
 # composers.
 class Components::PreviousVersion < Components::Base
   prop :obj, ::AbstractModel
-  prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-       default: -> { [] }
+  prop :versions, _Array(_Interface(:user_id))
 
   def view_template
-    plain("#{:VERSION.t}: #{@obj.version}")
+    plain("#{:VERSION.l}: #{@obj.version}")
     br
     return unless previous_version && previous_version.version != @obj.version
 

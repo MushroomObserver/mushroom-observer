@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class DescriptionsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
 
     def empty_notes
       NameDescription.all_note_fields.index_with do |_field|

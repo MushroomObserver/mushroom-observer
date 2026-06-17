@@ -12,7 +12,7 @@ module GlossaryTerms
       return unless find_glossary_term!
 
       @glossary_term.revert_to(params[:version].to_i)
-      @versions = @glossary_term.versions
+      @versions = @glossary_term.versions.to_a
       render(Views::Controllers::GlossaryTerms::Versions::Show.new(
                glossary_term: @glossary_term, versions: @versions.to_a
              ))

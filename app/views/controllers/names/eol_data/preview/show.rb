@@ -4,9 +4,7 @@
 # Striped list of names that are `ok_for_export`, plus a final
 # count.
 class Views::Controllers::Names::EolData::Preview::Show < Views::Base
-  prop :names,
-       _Union(Array, ::ActiveRecord::Relation,
-              ::ActiveRecord::Associations::CollectionProxy)
+  prop :names, _Array(::Name)
 
   def view_template
     add_page_title(:eol_preview_title.t)
