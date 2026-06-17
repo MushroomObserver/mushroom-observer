@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 module Views::Layouts::App
-  # Google Tag Manager bootstrap `<script>` rendered just before
-  # `</body>` in production only.
+  # Legacy Google Analytics (`analytics.js`, the `ga(...)` API)
+  # bootstrap `<script>` rendered just before `</body>` in
+  # production only. (Name preserved from the original ERB
+  # `_gtm_footer.html.erb` — the script is GA, not GTM.)
   class GtmFooter < Views::Base
     SCRIPT = <<~JS
       (function (i, s, o, g, r, a, m) {

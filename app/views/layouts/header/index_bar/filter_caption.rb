@@ -16,7 +16,7 @@
 # plus the lookup string helpers and the four constants). The helper
 # module now retains only `add_query_filters` (the public API the
 # 80 index action templates call).
-module Views::Controllers::Application::Content
+module Views::Layouts
   class Header::IndexBar::FilterCaption < Views::Base
     # `type` param sentinels (no plural form) — use `:ALL` / `:NONE`
     # directly. The `none` sentinel arises when the controller

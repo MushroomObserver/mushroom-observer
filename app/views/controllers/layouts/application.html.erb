@@ -61,7 +61,7 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
                 user: @user, query: @query
               )) %>
           <%= render(Views::Layouts::App::PageFlash.new) %>
-          <%= render(Views::Controllers::Application::Content::Header.new(
+          <%= render(Views::Layouts::Header.new(
             any_content_filters_applied: @any_content_filters_applied
           )) %>
 

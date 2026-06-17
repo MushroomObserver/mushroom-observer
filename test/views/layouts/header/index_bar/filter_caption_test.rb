@@ -13,7 +13,7 @@ require("test_helper")
 # empty / plain / boolean / array / lookup / italicized-lookup /
 # confidence / type-tags / subquery / grouped / target / truncation /
 # many-params.
-module Views::Controllers::Application::Content
+module Views::Layouts
   class Header::IndexBar::FilterCaptionTest < ComponentTestCase
     def test_empty_query_renders_all_label
       html = render_for(Query.lookup_and_save(:Observation))
@@ -303,7 +303,7 @@ module Views::Controllers::Application::Content
 
     def render_for(query)
       render(
-        Views::Controllers::Application::Content::
+        Views::Layouts::
         Header::IndexBar::FilterCaption.new(query: query)
       )
     end

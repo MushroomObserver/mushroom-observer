@@ -15,7 +15,7 @@
 # `ApplicationController::Indexes` populates on index actions; we
 # accept it explicitly (the layout passes it) rather than poking
 # `controller.instance_variable_get`. Nil for non-index actions.
-module Views::Controllers::Application::Content
+module Views::Layouts
   class Header < Views::Base
     prop :any_content_filters_applied, _Nilable(_Boolean), default: nil
 

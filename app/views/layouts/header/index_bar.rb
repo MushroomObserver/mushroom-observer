@@ -12,7 +12,7 @@
 # Returns early when neither slot is populated. When `:banner_image`
 # is set, the `:filters` row is suppressed (banner provides its own
 # context).
-module Views::Controllers::Application::Content
+module Views::Layouts
   class Header::IndexBar < Views::Base
     def view_template
       return unless content_for?(:filters) || content_for?(:filter_help)

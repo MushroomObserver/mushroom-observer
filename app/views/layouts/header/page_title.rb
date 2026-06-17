@@ -12,7 +12,7 @@
 # Both `show_page_edit_icons` and `show_page_interest_icons` (formerly
 # helper-module methods in `Header::TitleHelper`) are inlined here as
 # private methods — this was the only caller of either.
-module Views::Controllers::Application::Content
+module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
       "show_title_nav d-flex justify-content-between pl-3"

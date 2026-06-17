@@ -16,9 +16,10 @@ module Views::Layouts::App
     ADMIN_BANNER_CLASSES = "h3 text-center font-weight-bold p-2"
 
     def view_template
+      banner = ::Banner.current
       div(id: "banners", class: "hidden-print") do
         render_admin_banner
-        render_site_banner if ::Banner.current
+        render_site_banner(banner) if banner
       end
     end
 
@@ -37,26 +38,26 @@ module Views::Layouts::App
       end
     end
 
-    def render_site_banner
+    def render_site_banner(banner)
       div(data: { controller: "banner" }) do
         render(::Components::Alert.new(
                  level: :success,
                  class: "message-banner",
                  data: { banner_target: "banner" }
-               )) { render_alert_contents }
+               )) { render_alert_contents(banner) }
         render_show_button_row
       end
     end
 
-    def render_alert_contents
+    def render_alert_contents(banner)
       button(type: :button, class: "close", id: "dismiss-banner",
              data: { banner_target: "dismissButton",
-                     version: ::Banner.current.version },
+                     version: banner.version },
              aria: { label: :CLOSE.l }) do
         render(::Components::LinkIcon.new(type: :chevron_up,
                                           title: :CLOSE.l))
       end
-      p { trusted_html(::Banner.current.message.t) }
+      p { trusted_html(banner.message.t) }
     end
 
     def render_show_button_row

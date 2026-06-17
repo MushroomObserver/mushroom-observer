@@ -8,7 +8,7 @@
 #                               `Header::IndexBar` to yield
 #
 # The caption HTML itself is built by
-# `Views::Controllers::Application::Content::Header::IndexBar::FilterCaption`
+# `Views::Layouts::Header::IndexBar::FilterCaption`
 # — a Phlex view that owns the previously-helper-resident caption
 # tree (16+ methods + the four constants, including
 # `SENTINEL_TYPE_TAGS` + `type_tags_to_label`). Pre-conversion this
@@ -22,7 +22,7 @@ module Header
 
       content_for(:filters) do
         render(
-          Views::Controllers::Application::Content::
+          Views::Layouts::
           Header::IndexBar::FilterCaption.new(query: query)
         )
       end
