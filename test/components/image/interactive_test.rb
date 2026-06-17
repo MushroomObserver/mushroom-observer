@@ -26,7 +26,7 @@ class InteractiveImageTest < ComponentTestCase
   end
 
   # The vote section is rendered by `BaseImage#render_image_vote_section`,
-  # which dispatches to `Components::ImageVoteInterface`. Verify the
+  # which dispatches to `Components::Image::VoteInterface`. Verify the
   # dispatch actually happens (the previous version of this test only
   # asserted the unrelated `image-sizer` and missed a regression where
   # the sub-component call was malformed and silently no-op'd).
@@ -80,7 +80,7 @@ class InteractiveImageTest < ComponentTestCase
 
   def render_image(image: @image, size: :medium, votes: false,
                    image_link: nil, upload: false)
-    render(Components::InteractiveImage.new(
+    render(Components::Image::Interactive.new(
              user: @user,
              image: image,
              size: size,

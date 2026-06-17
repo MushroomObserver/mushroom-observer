@@ -3,18 +3,18 @@
 # Component for displaying image copyright information.
 #
 # @example Basic usage
-#   render Components::ImageCopyright.new(
+#   render Components::Image::Copyright.new(
 #     user: @user,
 #     image: @image
 #   )
 #
 # @example With context object
-#   render Components::ImageCopyright.new(
+#   render Components::Image::Copyright.new(
 #     user: @user,
 #     image: @image,
 #     object: @observation
 #   )
-class Components::ImageCopyright < Components::Base
+class Components::Image::Copyright < Components::Base
   include ApplicationHelper
 
   prop :user, _Nilable(User)

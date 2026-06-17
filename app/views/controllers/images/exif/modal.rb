@@ -3,7 +3,7 @@
 module Views::Controllers::Images
   module EXIF
     # Turbo-stream lightbox modal triggered from
-    # `Components::ImageEXIFLink`. Replaces the ERB
+    # `Components::Image::EXIFLink`. Replaces the ERB
     # `shared/_modal.erb` + `images/exif/_data.erb` pair the
     # controller used to render via the legacy
     # `render(partial: "shared/modal", locals: { body: "images/exif/data" })`

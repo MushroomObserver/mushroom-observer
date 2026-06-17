@@ -14,7 +14,7 @@
 # - Image sizing calculations
 #
 # Subclasses should implement view_template to define their specific rendering.
-class Components::BaseImage < Components::Base
+class Components::Image::Base < Components::Base
   # Type definitions
   Size = _Union(*::Image::ALL_SIZES)
   Verb = _Union(:get, :post, :put, :patch, :delete)
@@ -189,15 +189,15 @@ class Components::BaseImage < Components::Base
     return unless lightbox_data
 
     capture do
-      LightboxCaption(
-        user: @user,
-        image: lightbox_data[:image],
-        image_id: lightbox_data[:image_id],
-        obs: lightbox_data[:obs],
-        identify: lightbox_data[:identify],
-        observation_view: lightbox_data[:observation_view],
-        votes: @votes
-      )
+      render(Components::Image::Lightbox::Caption.new(
+               user: @user,
+               image: lightbox_data[:image],
+               image_id: lightbox_data[:image_id],
+               obs: lightbox_data[:obs],
+               identify: lightbox_data[:identify],
+               observation_view: lightbox_data[:observation_view],
+               votes: @votes
+             ))
     end
   end
 
@@ -205,11 +205,11 @@ class Components::BaseImage < Components::Base
   def render_image_vote_section
     return unless @votes && @img_instance
 
-    ImageVoteInterface(
-      user: @user,
-      image: @img_instance,
-      votes: @votes
-    )
+    render(Components::Image::VoteInterface.new(
+             user: @user,
+             image: @img_instance,
+             votes: @votes
+           ))
   end
 
   # Render original filename if applicable

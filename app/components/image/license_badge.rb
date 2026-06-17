@@ -5,7 +5,7 @@
 # (`DetailsAndAltsPanel`) and image show pages.
 #
 # Replaces the shared `_form_license_badge.erb` partial.
-class Components::LicenseBadge < Components::Base
+class Components::Image::LicenseBadge < Components::Base
   prop :license, ::License
 
   def view_template

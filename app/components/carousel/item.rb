@@ -9,13 +9,13 @@
 # - Carousel caption with votes and image info
 #
 # @example
-#   render Components::CarouselItem.new(
+#   render Components::Carousel::Item.new(
 #     user: @user,
 #     image: @image,
 #     object: @observation,
 #     index: 0
 #   )
-class Components::CarouselItem < Components::BaseImage
+class Components::Carousel::Item < Components::Image::Base
   # Additional carousel-specific properties
   prop :index, Integer, default: 0
   prop :object, _Nilable(AbstractModel), default: nil
@@ -95,11 +95,11 @@ class Components::CarouselItem < Components::BaseImage
   def copyright
     return "" unless @img_instance
 
-    ImageCopyright(
-      user: @user,
-      image: @img_instance,
-      object: @object
-    )
+    render(Components::Image::Copyright.new(
+             user: @user,
+             image: @img_instance,
+             object: @object
+           ))
   end
 
   def owner_original_name

@@ -1,22 +1,24 @@
 # frozen_string_literal: true
 
-module Components
+module Components::Image
   # Component for rendering a toggle to mark observations as reviewed.
   #
   # https://stackoverflow.com/questions/68624668/how-can-i-submit-a-form-on-input-change-with-turbo-streams
   #
   # @example Default usage (lightbox caption)
   #   obs_view = observation_view_for(@obs, @user)
-  #   MarkAsReviewedToggle(observation_view: obs_view)
+  #   render(Components::Image::MarkAsReviewedToggle.new(
+  #            observation_view: obs_view
+  #          ))
   #
   # @example Matrix box usage
-  #   MarkAsReviewedToggle(
+  #   render(Components::Image::MarkAsReviewedToggle.new(
   #     observation_view: obs_view,
   #     selector: "box_reviewed",
   #     label_class: "stretched-link"
-  #   )
+  #   ))
   #
-  class MarkAsReviewedToggle < ApplicationForm
+  class MarkAsReviewedToggle < ::Components::ApplicationForm
     def initialize(observation_view:, selector: "caption_reviewed",
                    label_class: "")
       @observation_view = observation_view

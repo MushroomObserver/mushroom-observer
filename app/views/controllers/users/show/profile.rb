@@ -52,7 +52,7 @@ module Views::Controllers::Users
 
       def render_profile_image
         div(class: "float-left mr-5 mb-3") do
-          render(::Components::InteractiveImage.new(
+          render(::Components::Image::Interactive.new(
                    user: @user, image: @show_user.image, size: :small,
                    votes: false, id_prefix: "profile_image"
                  ))

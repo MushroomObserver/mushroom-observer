@@ -46,7 +46,7 @@ class FormCarouselItemTest < ComponentTestCase
   private
 
   def render_item(image: @image, img_id: nil, index: 0, upload: false)
-    render(Components::FormCarouselItem.new(
+    render(Components::FormCarousel::Item.new(
              user: @user,
              image: image,
              img_id: img_id,

@@ -15,7 +15,7 @@
 #     user: @user,
 #     identify: true
 #   )
-class Components::LightboxObservationTitle < Components::Base
+class Components::Image::Lightbox::ObservationTitle < Components::Base
   prop :obs, Observation
   prop :user, _Nilable(User), default: nil
   prop :identify, _Boolean, default: false

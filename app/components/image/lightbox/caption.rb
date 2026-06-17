@@ -10,7 +10,7 @@
 # Both types include image links (original, EXIF) at the bottom.
 #
 # @example With observation
-#   render(Components::LightboxCaption.new(
+#   render(Components::Image::Lightbox::Caption.new(
 #     user: @user,
 #     image: @image,
 #     image_id: @image.id,
@@ -19,7 +19,7 @@
 #   ))
 #
 # @example With observation_view from controller (turbo stream)
-#   render(Components::LightboxCaption.new(
+#   render(Components::Image::Lightbox::Caption.new(
 #     user: @user,
 #     obs: @observation,
 #     identify: true,
@@ -27,12 +27,12 @@
 #   ))
 #
 # @example With image only
-#   render(Components::LightboxCaption.new(
+#   render(Components::Image::Lightbox::Caption.new(
 #     user: @user,
 #     image: @image,
 #     image_id: @image.id
 #   ))
-class Components::LightboxCaption < Components::Base
+class Components::Image::Lightbox::Caption < Components::Base
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
@@ -92,16 +92,17 @@ class Components::LightboxCaption < Components::Base
 
   def render_reviewed_toggle
     span(class: "mx-2") { whitespace }
-    MarkAsReviewedToggle(observation_view: @observation_view)
+    render(Components::Image::MarkAsReviewedToggle.
+             new(observation_view: @observation_view))
   end
 
   def render_obs_title
     fragment("obs_title") do
-      LightboxObservationTitle(
-        obs: @obs,
-        user: @user,
-        identify: @identify
-      )
+      render(Components::Image::Lightbox::ObservationTitle.new(
+               obs: @obs,
+               user: @user,
+               identify: @identify
+             ))
     end
   end
 
@@ -242,11 +243,11 @@ class Components::LightboxCaption < Components::Base
     return unless @votes && @user && @image
 
     div(class: "mt-3 text-center") do
-      ImageVoteInterface(
-        user: @user,
-        image: @image,
-        votes: true
-      )
+      render(Components::Image::VoteInterface.new(
+               user: @user,
+               image: @image,
+               votes: true
+             ))
     end
   end
 
@@ -262,15 +263,15 @@ class Components::LightboxCaption < Components::Base
 
   def render_original_image_link(image_or_image_id)
     if image_or_image_id.is_a?(::Image)
-      ImageOriginalLink(
-        image: image_or_image_id,
-        link_class: "lightbox_link"
-      )
+      render(Components::Image::OriginalLink.new(
+               image: image_or_image_id,
+               link_class: "lightbox_link"
+             ))
     else
-      ImageOriginalLink(
-        image_id: image_or_image_id,
-        link_class: "lightbox_link"
-      )
+      render(Components::Image::OriginalLink.new(
+               image_id: image_or_image_id,
+               link_class: "lightbox_link"
+             ))
     end
   end
 
@@ -281,9 +282,8 @@ class Components::LightboxCaption < Components::Base
                  image_or_image_id
                end
 
-    ImageEXIFLink(
-      image_id: image_id,
-      link_class: "lightbox_link"
-    )
+    render(Components::Image::EXIFLink.new(
+             image_id: image_id, link_class: "lightbox_link"
+           ))
   end
 end

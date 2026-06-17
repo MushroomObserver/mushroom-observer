@@ -210,7 +210,7 @@ class LightboxCaptionTest < ComponentTestCase
   private
 
   def render_caption(user: @user, image: @image, obs: @obs, **)
-    render(Components::LightboxCaption.new(
+    render(Components::Image::Lightbox::Caption.new(
              user: user, image: image,
              image_id: (image || @image).id,
              obs: obs, **

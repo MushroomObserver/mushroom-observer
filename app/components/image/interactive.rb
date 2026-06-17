@@ -7,13 +7,13 @@
 # functionality from BaseImage.
 #
 # @example
-#   render Components::InteractiveImage.new(
+#   render Components::Image::Interactive.new(
 #     user: @user,
 #     image: @image,
 #     size: :thumbnail,
 #     votes: true
 #   )
-class Components::InteractiveImage < Components::BaseImage
+class Components::Image::Interactive < Components::Image::Base
   # Override :image prop to only accept Image instances (not Integer IDs).
   # InteractiveImage is for displaying existing, persisted images.
   # Form components like FormCarouselItem inherit from BaseImage instead,

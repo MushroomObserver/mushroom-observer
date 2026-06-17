@@ -62,7 +62,7 @@ class LightboxObservationTitleTest < ComponentTestCase
   private
 
   def render_title(user: @user, identify: false)
-    render(Components::LightboxObservationTitle.new(
+    render(Components::Image::Lightbox::ObservationTitle.new(
              obs: @obs,
              user: user,
              identify: identify

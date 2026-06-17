@@ -9,7 +9,7 @@ class ImageOriginalLinkTest < ComponentTestCase
   end
 
   def test_renders_link_to_original_with_image_instance
-    html = render(Components::ImageOriginalLink.new(image: @image))
+    html = render(Components::Image::OriginalLink.new(image: @image))
 
     assert_html(html, "a[href='/images/#{@image.id}/original']",
                 text: :image_show_original.l)
@@ -33,14 +33,14 @@ class ImageOriginalLinkTest < ComponentTestCase
   end
 
   def test_renders_link_with_image_id
-    html = render(Components::ImageOriginalLink.new(image_id: @image.id))
+    html = render(Components::Image::OriginalLink.new(image_id: @image.id))
 
     assert_html(html, "a[href='/images/#{@image.id}/original']")
   end
 
   def test_applies_custom_link_class
-    html = render(Components::ImageOriginalLink.new(image: @image,
-                                                    link_class: "my-custom"))
+    html = render(Components::Image::OriginalLink.new(image: @image,
+                                                      link_class: "my-custom"))
 
     assert_html(html, "a.my-custom")
   end

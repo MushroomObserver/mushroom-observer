@@ -74,7 +74,7 @@ class FormImageFieldsTest < ComponentTestCase
   private
 
   def render_fields(image:, img_id:, upload:)
-    render(Components::FormImageFields.new(
+    render(Components::FormCarousel::Fields.new(
              user: @user,
              image: image,
              img_id: img_id,

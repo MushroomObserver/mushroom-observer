@@ -33,7 +33,7 @@ module Views::Controllers::SpeciesLists
 
     def render_image_column
       div(class: "col-sm-4 col-md-3") do
-        render(Components::InteractiveImage.new(
+        render(Components::Image::Interactive.new(
                  user: @user,
                  image: @observation.thumb_image,
                  image_link: observation_path(id: @observation.id),

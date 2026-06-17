@@ -11,12 +11,12 @@
 # - Current user's vote display
 #
 # @example
-#   render Components::ImageVoteInterface.new(
+#   render Components::Image::VoteInterface.new(
 #     user: @user,
 #     image: @image,
 #     votes: true
 #   )
-class Components::ImageVoteInterface < Components::Base
+class Components::Image::VoteInterface < Components::Base
   prop :user, _Nilable(User)
   prop :image, ::Image
   prop :votes, _Boolean, default: true

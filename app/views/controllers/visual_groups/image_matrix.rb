@@ -29,7 +29,7 @@ module Views::Controllers::VisualGroups
       render(Components::MatrixBox.new(id: image.id)) do
         render(Components::Panel.new) do |panel|
           panel.with_thumbnail do
-            render(Components::InteractiveImage.new(
+            render(Components::Image::Interactive.new(
                      user: @user, image: image, original: true,
                      votes: false, full_width: true
                    ))

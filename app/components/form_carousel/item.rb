@@ -12,7 +12,7 @@
 # - Top-right overlay: Remove image button
 #
 # @example
-#   render Components::FormCarouselItem.new(
+#   render Components::FormCarousel::Item.new(
 #     user: @user,
 #     image: @image,
 #     index: 0,
@@ -20,7 +20,7 @@
 #     obs_thumb_id: 123,
 #     camera_info: { lat: "45.5", lng: "-122.6", ... }
 #   )
-class Components::FormCarouselItem < Components::BaseImage
+class Components::FormCarousel::Item < Components::Image::Base
   # Additional form carousel-specific properties
   prop :index, Integer, default: 0
   prop :upload, _Boolean, default: false
@@ -112,12 +112,12 @@ class Components::FormCarouselItem < Components::BaseImage
   def render_form_column
     div(class: "col-12 col-md-6") do
       div(class: "form-panel") do
-        FormImageFields(
-          user: @user,
-          image: @img_instance,
-          img_id: @img_id,
-          upload: @upload
-        )
+        render(Components::FormCarousel::Fields.new(
+                 user: @user,
+                 image: @img_instance,
+                 img_id: @img_id,
+                 upload: @upload
+               ))
 
         FormCameraInfo(
           img_id: @img_id,

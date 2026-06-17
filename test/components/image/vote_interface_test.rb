@@ -26,7 +26,7 @@ class ImageCaptionVoteInterfaceTest < ComponentTestCase
   private
 
   def render_component(votes:)
-    render(Components::ImageVoteInterface.new(
+    render(Components::Image::VoteInterface.new(
              user: @user,
              image: @image,
              votes: votes

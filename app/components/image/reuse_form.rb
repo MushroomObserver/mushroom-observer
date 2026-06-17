@@ -6,7 +6,7 @@
 # `GlossaryTerms::ImagesController#reuse`. One `img_id` field plus
 # a "show all users' images / show only mine" toggle link beneath.
 # The surrounding image matrix lives outside this form and POSTs
-# directly via per-thumbnail links (`Components::InteractiveImage`).
+# directly via per-thumbnail links (`Components::Image::Interactive`).
 #
 # The `target` is the domain object whose images are being chosen
 # for — `Observation`, `User` (profile), or `GlossaryTerm`. The
@@ -15,10 +15,10 @@
 # subject and don't have to know any routing details.
 #
 # @example
-#   render(Components::ImageReuseForm.new(
+#   render(Components::Image::ReuseForm.new(
 #            target: @observation, all_users: @all_users
 #          ))
-class Components::ImageReuseForm < Components::ApplicationForm
+class Components::Image::ReuseForm < Components::ApplicationForm
   CONTROLLERS = {
     ::Observation => "/observations/images",
     ::User => "/account/profile/images",

@@ -43,7 +43,7 @@ module Views::Controllers::GlossaryTerms
       def render_thumbnail
         return unless @glossary_term&.thumb_image_id&.nonzero?
 
-        render(::Components::InteractiveImage.new(
+        render(::Components::Image::Interactive.new(
                  user: current_user,
                  image: @glossary_term.thumb_image,
                  votes: true

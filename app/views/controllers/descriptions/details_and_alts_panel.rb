@@ -22,7 +22,7 @@
 # `DescriptionIconsHelper`. The "Version: N / Previous Version" line
 # is `Components::PreviousVersion`, replacing
 # `VersionsHelper#show_previous_version`. The license-badge block
-# (used by `AuthorsAndEditorsPanel`) is `Components::LicenseBadge`,
+# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`,
 # replacing the shared `_form_license_badge.erb` partial. Both
 # description helper files are deleted in the same commit.
 module Views::Controllers::Descriptions
@@ -170,7 +170,9 @@ module Views::Controllers::Descriptions
       # the only kind exposed to the reviewer export/review flow.
       div do
         if @description.is_a?(::NameDescription)
-          render(Components::ExportStatusControls.new(object: @description))
+          render(Components::Image::ExportStatusControls.new(
+                   object: @description
+                 ))
         end
       end
       div { render_review_block }

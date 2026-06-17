@@ -98,16 +98,16 @@ class Components::MatrixBox < Components::Base
     return unless @data[:image]
 
     panel.with_thumbnail do
-      InteractiveImage(
-        user: @user,
-        image: @data[:image],
-        image_link: @data[:image_link],
-        obs: @data[:obs] || {},
-        votes: @votes && @data.fetch(:votes, true),
-        full_width: @data.fetch(:full_width, true),
-        identify: @identify,
-        observation_view: @observation_view
-      )
+      render(Components::Image::Interactive.new(
+               user: @user,
+               image: @data[:image],
+               image_link: @data[:image_link],
+               obs: @data[:obs] || {},
+               votes: @votes && @data.fetch(:votes, true),
+               full_width: @data.fetch(:full_width, true),
+               identify: @identify,
+               observation_view: @observation_view
+             ))
     end
   end
 
@@ -313,11 +313,11 @@ class Components::MatrixBox < Components::Base
     return unless @observation_view
 
     panel.with_footer(classes: "panel-active text-center position-relative") do
-      MarkAsReviewedToggle(
-        observation_view: @observation_view,
-        selector: "box_reviewed",
-        label_class: "stretched-link"
-      )
+      render(Components::Image::MarkAsReviewedToggle.new(
+               observation_view: @observation_view,
+               selector: "box_reviewed",
+               label_class: "stretched-link"
+             ))
     end
   end
 

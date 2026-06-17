@@ -4,7 +4,7 @@ require "test_helper"
 
 class MarkAsReviewedToggleTest < ComponentTestCase
   def test_renders_with_default_parameters
-    html = render_component(Components::MarkAsReviewedToggle.new(
+    html = render_component(Components::Image::MarkAsReviewedToggle.new(
                               observation_view: build_obs_view(123)
                             ))
 
@@ -15,7 +15,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
   end
 
   def test_renders_with_custom_selector
-    html = render_component(Components::MarkAsReviewedToggle.new(
+    html = render_component(Components::Image::MarkAsReviewedToggle.new(
                               observation_view: build_obs_view(456),
                               selector: "box_reviewed"
                             ))
@@ -25,7 +25,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
   end
 
   def test_renders_with_label_class
-    html = render_component(Components::MarkAsReviewedToggle.new(
+    html = render_component(Components::Image::MarkAsReviewedToggle.new(
                               observation_view: build_obs_view(789),
                               label_class: "stretched-link"
                             ))
@@ -36,7 +36,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
 
   def test_renders_with_reviewed_true
     html = render_component(
-      Components::MarkAsReviewedToggle.new(
+      Components::Image::MarkAsReviewedToggle.new(
         observation_view: build_obs_view(111, reviewed: true)
       )
     )
@@ -47,7 +47,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
 
   def test_renders_with_reviewed_false
     html = render_component(
-      Components::MarkAsReviewedToggle.new(
+      Components::Image::MarkAsReviewedToggle.new(
         observation_view: build_obs_view(222, reviewed: false)
       )
     )
@@ -58,7 +58,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
 
   def test_renders_with_reviewed_nil
     html = render_component(
-      Components::MarkAsReviewedToggle.new(
+      Components::Image::MarkAsReviewedToggle.new(
         observation_view: build_obs_view(333, reviewed: nil)
       )
     )
@@ -67,7 +67,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
   end
 
   def test_includes_turbo_data_attributes
-    html = render_component(Components::MarkAsReviewedToggle.new(
+    html = render_component(Components::Image::MarkAsReviewedToggle.new(
                               observation_view: build_obs_view(444)
                             ))
 
@@ -78,7 +78,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
   end
 
   def test_form_uses_put_method
-    html = render_component(Components::MarkAsReviewedToggle.new(
+    html = render_component(Components::Image::MarkAsReviewedToggle.new(
                               observation_view: build_obs_view(555)
                             ))
 
@@ -88,7 +88,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
   end
 
   def test_checkbox_has_correct_css_classes
-    html = render_component(Components::MarkAsReviewedToggle.new(
+    html = render_component(Components::Image::MarkAsReviewedToggle.new(
                               observation_view: build_obs_view(777)
                             ))
 
@@ -100,7 +100,7 @@ class MarkAsReviewedToggleTest < ComponentTestCase
 
   def test_all_parameters_together
     html = render_component(
-      Components::MarkAsReviewedToggle.new(
+      Components::Image::MarkAsReviewedToggle.new(
         observation_view: build_obs_view(999, reviewed: true),
         selector: "custom_selector",
         label_class: "custom-class"

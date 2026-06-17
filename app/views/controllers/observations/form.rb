@@ -158,13 +158,13 @@ module Views::Controllers::Observations
     def render_images_body(panel)
       panel.with_body(collapse: true, classes: "p-0",
                       id: "observation_images") do
-        FormCarousel(
-          images: @good_images,
-          sibling_images: @sibling_images,
-          exif_data: @exif_data,
-          obs_thumb_id: model.thumb_image_id,
-          user: @user
-        )
+        render(Components::FormCarousel.new(
+                 images: @good_images,
+                 sibling_images: @sibling_images,
+                 exif_data: @exif_data,
+                 obs_thumb_id: model.thumb_image_id,
+                 user: @user
+               ))
       end
     end
 

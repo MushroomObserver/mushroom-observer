@@ -51,7 +51,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   # caller now does the sort (or supplies `images_sorted`).
   def render_image_row(image)
     div(class: "list-group-item") do
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: @user,
                image: image,
                image_link: image.show_link_args.merge(obs: @obs.id),
@@ -76,7 +76,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   end
 
   def render_copyright(image)
-    render(Components::ImageCopyright.new(
+    render(Components::Image::Copyright.new(
              user: @user, image: image, object: @obs
            ))
   end

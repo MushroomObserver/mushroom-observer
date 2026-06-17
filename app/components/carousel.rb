@@ -26,7 +26,7 @@ class Components::Carousel < Components::Base
   end
   prop :user, _Nilable(User)
   prop :object, _Nilable(AbstractModel), default: nil
-  prop :size, Components::BaseImage::Size, default: :large
+  prop :size, Components::Image::Base::Size, default: :large
   prop :title, String, default: -> { :IMAGES.t }
   prop :links, String, default: ""
   prop :thumbnails, _Boolean, default: true
@@ -80,17 +80,20 @@ class Components::Carousel < Components::Base
         @images.each_with_index do |image, index|
           next unless image
 
-          CarouselItem(
-            user: @user,
-            image: image,
-            object: @object,
-            size: @size,
-            index: index
-          )
+          render(Components::Carousel::Item.new(
+                   user: @user,
+                   image: image,
+                   object: @object,
+                   size: @size,
+                   index: index
+                 ))
         end
 
         # Carousel controls (if multiple images)
-        CarouselControls(carousel_id: @carousel_id) if @images.length > 1
+        if @images.length > 1
+          render(Components::Carousel::Controls.
+                   new(carousel_id: @carousel_id))
+        end
       end
 
       # Thumbnail navigation (if enabled)
@@ -103,12 +106,12 @@ class Components::Carousel < Components::Base
       @images.each_with_index do |image, index|
         next unless image
 
-        CarouselThumbnail(
-          user: @user,
-          image: image,
-          index: index,
-          carousel_id: @carousel_id
-        )
+        render(Components::Carousel::Thumbnail.new(
+                 user: @user,
+                 image: image,
+                 index: index,
+                 carousel_id: @carousel_id
+               ))
       end
     end
   end

@@ -57,9 +57,9 @@ module Views::Controllers::Images
 
     def render_reviewer_export_controls
       div(class: "mb-5 text-center") do
-        p { render(::Components::ExportStatusControls.new(object: @image)) }
+        p { render(::Components::Image::ExportStatusControls.new(object: @image)) }
         p do
-          render(::Components::ExportStatusControls.new(
+          render(::Components::Image::ExportStatusControls.new(
                    object: @image, flag: :diagnostic
                  ))
         end
@@ -76,12 +76,12 @@ module Views::Controllers::Images
     def render_left_footer
       div(class: "small text-center") do
         div do
-          render(::Components::ImageCopyright.new(
+          render(::Components::Image::Copyright.new(
                    user: current_user, image: @image
                  ))
         end
         div(class: "py-5px mb-3") do
-          render(::Components::LicenseBadge.new(license: @image.license))
+          render(::Components::Image::LicenseBadge.new(license: @image.license))
         end
       end
     end

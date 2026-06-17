@@ -14,13 +14,13 @@
 # for non-reviewer viewers.
 #
 # @example Ok-for-export pair on a Name
-#   render(Components::ExportStatusControls.new(object: @name))
+#   render(Components::Image::ExportStatusControls.new(object: @name))
 #
 # @example ML training flag pair on an Image
-#   render(Components::ExportStatusControls.new(
+#   render(Components::Image::ExportStatusControls.new(
 #            object: @image, flag: :diagnostic
 #          ))
-class Components::ExportStatusControls < Components::Base
+class Components::Image::ExportStatusControls < Components::Base
   FLAGS = {
     ok_for_export: {
       ok_msg: :review_ok_for_export,

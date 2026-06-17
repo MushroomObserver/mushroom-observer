@@ -14,8 +14,8 @@
 #   )
 class Components::FormCarousel < Components::Base
   # Properties
-  prop :images, _Nilable(_Array(Image)), default: nil
-  prop :sibling_images, _Array(Image), default: -> { [] }
+  prop :images, _Nilable(_Array(::Image)), default: nil
+  prop :sibling_images, _Array(::Image), default: -> { [] }
   prop :user, _Nilable(User)
   prop :carousel_id, String, default: "observation_upload_images_carousel"
   prop :obs_thumb_id, _Nilable(Integer), default: nil
@@ -42,7 +42,8 @@ class Components::FormCarousel < Components::Base
 
         # Carousel controls
         div(class: "carousel-control-wrap row") do
-          CarouselControls(carousel_id: @carousel_id)
+          render(Components::Carousel::Controls.
+                   new(carousel_id: @carousel_id))
         end
       end
 
@@ -70,14 +71,14 @@ class Components::FormCarousel < Components::Base
     @images&.each_with_index do |image, index|
       upload = image&.created_at.nil?
 
-      FormCarouselItem(
-        user: @user,
-        image: image,
-        index: index,
-        upload: upload,
-        obs_thumb_id: @obs_thumb_id,
-        camera_info: @exif_data[image&.id] || {}
-      )
+      render(Components::FormCarousel::Item.new(
+               user: @user,
+               image: image,
+               index: index,
+               upload: upload,
+               obs_thumb_id: @obs_thumb_id,
+               camera_info: @exif_data[image&.id] || {}
+             ))
     end
     render_sibling_items
   end
@@ -85,35 +86,35 @@ class Components::FormCarousel < Components::Base
   def render_sibling_items
     offset = @images&.length || 0
     @sibling_images.each_with_index do |image, index|
-      FormCarouselItem(
-        user: @user,
-        image: image,
-        index: offset + index,
-        upload: false,
-        obs_thumb_id: @obs_thumb_id,
-        camera_info: {},
-        sibling: true
-      )
+      render(Components::FormCarousel::Item.new(
+               user: @user,
+               image: image,
+               index: offset + index,
+               upload: false,
+               obs_thumb_id: @obs_thumb_id,
+               camera_info: {},
+               sibling: true
+             ))
     end
   end
 
   def render_thumbnails
     @images&.each_with_index do |image, index|
-      CarouselThumbnail(
-        user: @user,
-        image: image,
-        index: index,
-        carousel_id: @carousel_id
-      )
+      render(Components::Carousel::Thumbnail.new(
+               user: @user,
+               image: image,
+               index: index,
+               carousel_id: @carousel_id
+             ))
     end
     offset = @images&.length || 0
     @sibling_images.each_with_index do |image, index|
-      CarouselThumbnail(
-        user: @user,
-        image: image,
-        index: offset + index,
-        carousel_id: @carousel_id
-      )
+      render(Components::Carousel::Thumbnail.new(
+               user: @user,
+               image: image,
+               index: offset + index,
+               carousel_id: @carousel_id
+             ))
     end
   end
 end
