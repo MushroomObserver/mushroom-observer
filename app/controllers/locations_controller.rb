@@ -55,23 +55,8 @@ class LocationsController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
+    [:pattern, :country, :project, :by_user, :by_editor,
      :by, :q, :id].freeze
-  end
-
-  # Displays matrix of advanced search results.
-  def advanced_search
-    return if handle_advanced_search_invalid_q_param?
-
-    query = find_query(:Location)
-    # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query&.params&.any?
-
-    [query, { link_all_sorts: true }]
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(search_advanced_path)
-    [nil, {}]
   end
 
   # Displays a list of all locations whose country matches the param.

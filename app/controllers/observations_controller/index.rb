@@ -64,48 +64,9 @@ class ObservationsController
 
     # Searches come 1st because they may have the other params
     def index_active_params
-      [:advanced_search, :pattern, :look_alikes, :related_taxa, :name,
+      [:pattern, :look_alikes, :related_taxa, :name,
        :by_user, :location, :where, :project, :species_list,
        :by, :q, :id].freeze
-    end
-
-    # Displays matrix of advanced search results.
-    def advanced_search
-      query = advanced_search_query
-      # `handle_advanced_search_invalid_q_param?` already responded;
-      # bail before the raise-and-rescue dance double-redirects.
-      return [nil, {}] if performed?
-
-      # Have to check this here because we're not running the query yet.
-      raise(:runtime_no_conditions.l) unless query&.params&.any?
-
-      [query, {}]
-    rescue StandardError => e
-      flash_error(e.to_s) if e.present?
-      redirect_to(search_advanced_path)
-      [nil, {}]
-    end
-
-    def advanced_search_query
-      if any_advanced_search_params_present?
-        search = params.permit(*advanced_search_params).to_h
-        create_query(:Observation, search)
-      elsif handle_advanced_search_invalid_q_param?
-        nil
-      else
-        find_query(:Observation)
-      end
-    end
-
-    def any_advanced_search_params_present?
-      advanced_search_params.any? { |k| params[k].present? }
-    end
-
-    def advanced_search_params
-      params = Query::Observations.advanced_search_params
-      return params if params.present?
-
-      raise("Query::Observations.advanced_search_params is undefined.")
     end
 
     # Different from NamesController. Returns arrays of [name, count]

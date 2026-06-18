@@ -749,9 +749,6 @@ MushroomObserver::Application.routes.draw do
   match("/search/pattern(/:id)",
         to: "search#pattern", via: [:get, :post], id: /\d+/,
         as: "search_pattern")
-  match("/search/advanced(/:id)",
-        to: "search#advanced", via: [:get, :post], id: /\d+/,
-        as: "search_advanced")
 
   # ----- Add dispatch: new -------------------------------------------------
   post "add_dispatch", to: "add_dispatch#new"
@@ -1017,7 +1014,6 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Search: legacy action redirects ---------------------------------
   get("/observer/pattern_search", to: redirect("/search/pattern"))
-  get("/observer/advanced_search_form", to: redirect("/search/advanced"))
 
   ###
   ###

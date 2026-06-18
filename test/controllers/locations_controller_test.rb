@@ -360,37 +360,6 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select(".list-group-item a", text: /#{location.display_name}/)
   end
 
-  def test_index_advanced_search
-    where = "California"
-    query = Query.lookup_and_save(:Location, search_where: where)
-    matches = Location.name_has(where)
-    params = { q: @controller.q_param(query), advanced_search: true }
-
-    login
-    get(:index, params:)
-
-    assert_response(:success)
-    assert_select("body.locations__index")
-    assert_select(
-      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
-      { count: matches.count }, "Wrong number of Locations"
-    )
-    assert_page_title(:LOCATIONS.l)
-    assert_displayed_filters("#{:query_search_where.l}: #{where}")
-  end
-
-  def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Location)
-
-    login
-    params = { q: @controller.q_param(query_no_conditions),
-               advanced_search: true }
-    get(:index, params:)
-
-    assert_flash_error(:runtime_no_conditions.l)
-    assert_redirected_to(search_advanced_path)
-  end
-
   def test_index_pattern_multiple_hits
     search_str = "California"
     matches = Location.where(Location[:name].matches("%#{search_str}%"))
