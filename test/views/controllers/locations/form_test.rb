@@ -46,6 +46,15 @@ module Views::Controllers::Locations
         "button[data-map-target='showBoxBtn'][data-action='map#showBox']"
       )
 
+      # Place input — the Stimulus target geocode_controller.js reads
+      assert_html(
+        html,
+        "input[name='location[display_name]'][data-map-target='placeInput']"
+      )
+
+      # Flash slot for Google Maps API failures (issue #4535).
+      assert_html(html, "#gmaps_flash")
+
       # Display name input group
       assert_html(html, ".input-group")
       assert_html(html, ".input-group-btn")
