@@ -44,12 +44,11 @@ module Observations::Images
     def prepend_form_carousel_item
       turbo_stream.prepend(
         "added_images",
-        ::Components::Form::UploadGallery::Item.new(
+        ::Components::Form::UploadGallery::TurboStreamSlide.new(
           user: @user, image: @image,
-          img_id: params[:img_id], index: params[:index].to_i,
-          upload: true, obs_thumb_id: nil,
-          camera_info: { file_name: params[:file_name],
-                         file_size: params[:file_size] }
+          img_id: params[:img_id],
+          file_name: params[:file_name],
+          file_size: params[:file_size]
         )
       )
     end
@@ -57,11 +56,8 @@ module Observations::Images
     def prepend_carousel_thumbnail
       turbo_stream.prepend(
         "added_thumbnails",
-        ::Components::ImageGallery::Thumbnail.new(
-          user: @user, image: @image,
-          img_id: params[:img_id], index: params[:index].to_i,
-          upload: true,
-          carousel_id: "observation_upload_images_carousel"
+        ::Components::Form::UploadGallery::TurboStreamThumb.new(
+          user: @user, image: @image, img_id: params[:img_id]
         )
       )
     end
