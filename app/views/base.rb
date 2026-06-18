@@ -9,15 +9,13 @@
 # container class, project banner — so subclasses don't have to
 # repeat `register_value_helper` calls for each one.
 class Views::Base < Components::Base
-  # All MO page-chrome helpers are side-effect-only (they call
+  # Most MO page-chrome helpers are side-effect-only (they call
   # `content_for(...)`), so they're value helpers — their return
-  # value isn't inserted into rendered output.
-  register_value_helper :add_page_title
-  register_value_helper :add_new_title
-  register_value_helper :add_edit_title
-  register_value_helper :add_show_title
-  register_value_helper :add_owner_naming
-  register_value_helper :add_index_title
+  # value isn't inserted into rendered output. The title-family
+  # (`add_page_title`, `add_show_title`, `add_edit_title`,
+  # `add_new_title`, `add_index_title`, `add_owner_naming`,
+  # `add_query_filters`) lives on `Views::FullPageBase` as instance
+  # methods now — no helper indirection.
   register_value_helper :add_context_nav
   # `context_nav_links([tuples])` — array-version of `context_nav_link`,
   # used where a view wraps each link manually. Composes the underlying

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 # Rich-HTML page-title piece (id badge + title span) rendered into
-# `content_for(:title)` for show and edit pages. Replaces the
-# `page_title_for` / `observation_page_title` / `show_page_title` /
-# `edit_page_title` chain in `Header::TitleHelper`.
+# `content_for(:title)` by `Views::FullPageBase#add_show_title` /
+# `#add_edit_title` for show and edit pages.
 #
 # `mode: :show` emits `<flex><IdBadge/> <span>{title}</span></flex>`;
 # `mode: :edit` emits

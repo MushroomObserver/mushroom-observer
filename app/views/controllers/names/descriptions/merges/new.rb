@@ -3,7 +3,7 @@
 # Action view for `names/descriptions/merges#new`. Sets the chrome and
 # renders the shared merges form.
 module Views::Controllers::Names::Descriptions::Merges
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :description, ::NameDescription
     prop :user, _Nilable(::User), default: nil
 

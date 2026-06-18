@@ -9,7 +9,7 @@
 #   than the current consensus, or
 # - there's no viewer at all.
 #
-# Used by `Header::TitleHelper#add_owner_naming(observation:,
+# Used by `Views::FullPageBase#add_owner_naming(observation:,
 # user:)` (rendered into `content_for(:owner_naming)`), and
 # consulted by `ConsensusNameLink` to decide whether to append a
 # `(Site ID)` flag to the consensus name.
