@@ -8,8 +8,6 @@ module Views::Controllers::Info
       super
       @user = users(:rolf)
       controller.instance_variable_set(:@user, @user)
-      viewer = @user
-      controller.define_singleton_method(:current_user) { viewer }
     end
 
     # Exercises both the `render_thumbs` loop (≥ 6 obs) and the

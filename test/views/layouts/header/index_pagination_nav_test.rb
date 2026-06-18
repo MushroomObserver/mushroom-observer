@@ -219,7 +219,7 @@ module Views::Layouts
     end
 
     def stub_current_query(query)
-      controller.define_singleton_method(:current_query) { query }
+      controller.instance_variable_set(:@query, query)
     end
   end
 end

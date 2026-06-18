@@ -28,7 +28,6 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
     super
     @user = users(:rolf)
     @user.update_columns(theme: "BlackOnWhite") if @user.theme.blank?
-    include_controller_modules!
     stub_request_context!
     stub_controller_state!("observations", "show")
   end
@@ -183,21 +182,12 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
   private
 
-  # MO's `flash_notices?` / `flash_notices_html` / `flash_clear` need
-  # the FlashNotices module on the test controller, so the real
-  # `Views::Layouts::App::PageFlash` renders without a NoMethodError.
-  def include_controller_modules!
-    ctrl_class = controller.class
-    ctrl_class.include(ApplicationController::FlashNotices)
-  end
-
   def stub_request_context!
     langs = Language.where.not(beta: true).to_a
     controller.instance_variable_set(:@user, @user)
     controller.instance_variable_set(:@languages, langs)
     User.current = @user
     stub_session!(layout: "")
-    stub_view_context_helpers!
   end
 
   def stub_session!(layout: "", notice: nil)
@@ -205,39 +195,17 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
     controller.define_singleton_method(:session) { s }
   end
 
-  # `controller.view_context` returns a FRESH anonymous-class instance
-  # on every call (Rails test-mode behavior). Singleton methods set on
-  # one view_context don't survive to the next render. Stub at the
-  # class level so all view_context instances of this anonymous class
-  # see the helpers — and have each helper read THROUGH the controller
-  # so tests can mutate the controller's `@user` ivar mid-test and the
-  # next `current_user` call picks it up.
-  def stub_view_context_helpers!
-    vc_class = view_context.class
-    vc_class.define_method(:current_user) do
-      controller.instance_variable_get(:@user)
-    end
-    vc_class.define_method(:current_languages) do
-      controller.instance_variable_get(:@languages) || []
-    end
-    vc_class.define_method(:current_query) { nil }
-    vc_class.define_method(:browser) { Browser.new(false) }
-  end
-
-  # Controllers are looked at by both the body-class logic and
-  # `Views::Layouts::TopNav` / `Header`. Set both controller_name and
-  # action_name on the test controller, and define the `:show` /
-  # `:create` / `:update` methods on it so TopNav's
-  # `methods.include?(:new)` etc. checks pass for visible buttons.
+  # `controller_name`, `controller_path`, `action_name`, and the
+  # action methods (`:show`, `:create`, …) drive the layout's body
+  # class + TopNav's per-action button visibility. The
+  # `ControllerLabels` module (included via
+  # `ComponentTestCase::TEST_CONTROLLER_MODULES`) reads
+  # `controller_name` to derive `controller_model_name` / `rubric` /
+  # `parent_controller_module`, so those don't need their own stubs.
   def stub_controller_state!(name, action)
     controller.define_singleton_method(:controller_name) { name }
     controller.define_singleton_method(:controller_path) { name }
     controller.define_singleton_method(:action_name) { action }
-    controller.define_singleton_method(:controller_model_name) do
-      name.classify
-    end
-    controller.define_singleton_method(:rubric) { name.upcase.to_sym.t }
-    controller.define_singleton_method(:parent_controller_module) { nil }
     list = [:index, :show, :new, :edit, :create, :update, :destroy]
     controller.define_singleton_method(:methods) { |*a| super(*a) | list }
   end

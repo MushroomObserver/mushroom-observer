@@ -48,10 +48,10 @@ class Components::Base < Phlex::HTML
   # every view-layer caller.
   register_value_helper :current_query
   # The non-beta `Language` list MO offers in the sidebar's language
-  # picker (plus a couple of preferences / translators pages). Set by
-  # `ApplicationController#set_languages` on every request — request-
-  # context, not action-specific. Same shape as `current_user` /
-  # `current_query`.
+  # picker (plus a couple of preferences / translators pages). Memoized
+  # lazily by `ApplicationController::Internationalization#current_languages`
+  # on first read — request-context, not action-specific. Same shape as
+  # `current_user` / `current_query`.
   register_value_helper :current_languages
   register_value_helper :add_args_to_url
   register_value_helper :controller

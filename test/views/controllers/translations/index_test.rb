@@ -8,9 +8,6 @@ module Views::Controllers::Translations
       super
       @user = users(:rolf)
       controller.instance_variable_set(:@user, @user)
-      viewer = @user
-      controller.define_singleton_method(:current_user) { viewer }
-      controller.define_singleton_method(:in_admin_mode?) { false }
       @lang = Language.official
     end
 

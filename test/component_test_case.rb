@@ -27,9 +27,20 @@ class ComponentTestCase < UnitTestCase
     Rails.application.routes.url_helpers
   end
 
+  # Real-looking User-Agent so the `browser` gem's request-derived
+  # `Browser` instance reports `.bot?` → false. The default blank UA
+  # on `ActionDispatch::TestRequest` makes every `browser.bot?` call
+  # in chrome rendering return true, which routes layout / nav code
+  # into bot-only branches. Pick any UA string that isn't a known bot.
+  TEST_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 14) " \
+                    "AppleWebKit/537.36 (KHTML, like Gecko) " \
+                    "Chrome/120.0.0.0 Safari/537.36"
+
   def setup
     super
-    controller.request = ActionDispatch::TestRequest.create
+    controller.request = ActionDispatch::TestRequest.create(
+      "HTTP_USER_AGENT" => TEST_USER_AGENT
+    )
   end
 
   # Stub in_admin_mode? to return true for testing admin-only features.

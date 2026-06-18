@@ -8,11 +8,13 @@ module Views::Layouts
       super
       controller.params[:controller] = "names"
       controller.params[:action] = "index"
-      # The MO controllers expose `controller_model_name` (via
-      # `ApplicationController::Indexes`) so the Sorter can derive
-      # `<plural>_by_<key>_link` identifier classes. The
-      # `ActionView::TestCase::TestController` doesn't have it; stub
-      # to the model name the test queries against.
+      # `ControllerLabels` (included via
+      # `ComponentTestCase::TEST_CONTROLLER_MODULES`) derives
+      # `controller_model_name` from `controller_name`, which defaults
+      # to `"test"` on the test controller. Override directly to the
+      # model name the test queries against — without forcing a
+      # `controller_name` override that would also rename rubric / body
+      # class for an unrelated assertion.
       controller.define_singleton_method(:controller_model_name) { "Name" }
       @sorts = [
         ["created_at", :sort_by_created_at.t],

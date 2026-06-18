@@ -9,8 +9,6 @@ module Views::Controllers::Users
         super
         @user = users(:rolf)
         controller.instance_variable_set(:@user, @user)
-        viewer = @user
-        controller.define_singleton_method(:current_user) { viewer }
       end
 
       # Exercises every render branch:
