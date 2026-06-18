@@ -18,11 +18,6 @@
             "type": "command",
             "command": "test -x .claude/hooks/check_orphaned_erb_renders.sh && exec .claude/hooks/check_orphaned_erb_renders.sh || exit 0",
             "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "test -x .claude/hooks/force_parallel_workers_for_system_tests.sh && exec .claude/hooks/force_parallel_workers_for_system_tests.sh || exit 0",
-            "timeout": 10
           }
         ]
       },
