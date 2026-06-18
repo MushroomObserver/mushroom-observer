@@ -3,7 +3,7 @@
 # Phlex view for the species-list project-management page. Replaces
 # edit.html.erb — page chrome plus the inline `Form`.
 module Views::Controllers::SpeciesLists::Projects
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     def initialize(list:, projects:, object_states:, project_states:)
       super()
       @list = list

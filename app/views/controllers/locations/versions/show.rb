@@ -5,7 +5,7 @@ module Views::Controllers::Locations
     # Past-version page for a location — the map (read-only), the
     # coordinates and notes panels for THIS version of the location,
     # the versions table, and the version footer.
-    class Show < Views::Base
+    class Show < Views::FullPageBase
       prop :location, ::Location
       prop :versions, _Array(_Interface(:user_id))
 

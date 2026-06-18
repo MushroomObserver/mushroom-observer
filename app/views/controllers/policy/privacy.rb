@@ -3,7 +3,7 @@
 module Views::Controllers::Policy
   # Privacy policy — static textile copy organized into header /
   # content sections plus a definitions table.
-  class Privacy < Views::Base
+  class Privacy < Views::FullPageBase
     DEFINITIONS = [
       [:privacy_mo_inc_say,          :privacy_mo_inc_mean],
       [:privacy_mo_website_say,      :privacy_mo_website_mean],

@@ -4,7 +4,7 @@
 # the "edit this external link" page. Renders `ExternalLinks::Form`
 # alongside a `Components::Matrix::Box` observation-summary card.
 module Views::Controllers::Observations::ExternalLinks
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :external_link, ::ExternalLink
     prop :observation, ::Observation
     prop :site, ::ExternalSite

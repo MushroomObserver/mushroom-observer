@@ -18,7 +18,7 @@
 # `container_class(:full)`, `column_classes(:seven_five)`.
 #
 module Views::Controllers::Names
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
     # `best_images` comes from `Name::Observations#best_images` —

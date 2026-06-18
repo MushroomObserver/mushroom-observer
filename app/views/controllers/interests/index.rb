@@ -3,7 +3,7 @@
 module Views::Controllers::Interests
   # Interests / subscriptions page — type filter pills + paginated
   # table of objects the current user is subscribed to.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :interests, _Array(::Interest)
     prop :types, _Array(::String)
     prop :selected_type, _Nilable(::String), default: nil

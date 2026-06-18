@@ -6,7 +6,7 @@ module Views::Controllers::GlossaryTerms
     # the version's `Term` summary on the left, `Versions::Table` on
     # the right, then a shared `ObjectFooter`. Converted from
     # `glossary_terms/versions/show.html.erb`.
-    class Show < Views::Base
+    class Show < Views::FullPageBase
       prop :glossary_term, ::GlossaryTerm
       prop :versions, _Array(::GlossaryTerm::Version)
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Locations::Descriptions
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :description, ::LocationDescription
     prop :user, _Nilable(::User), default: nil
     prop :licenses, _Array(_Tuple(String, Integer)), default: -> { [] }

@@ -43,8 +43,7 @@ module SpeciesLists
         Views::Controllers::SpeciesLists::NameLists::New.new(
           name_strings: @name_strings,
           user: @user
-        ),
-        layout: true
+        )
       )
     end
 

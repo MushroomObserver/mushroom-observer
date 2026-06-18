@@ -4,7 +4,7 @@
 # `show.html.erb` — just renders the visual-group table for the
 # current visual model.
 module Views::Controllers::VisualModels
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :visual_model, VisualModel
     prop :visual_groups, _Array(VisualGroup)
 

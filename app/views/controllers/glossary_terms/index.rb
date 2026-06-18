@@ -4,7 +4,7 @@ module Views::Controllers::GlossaryTerms
   # Paginated glossary terms index. Page chrome + a `Components::ListGroup::Base`
   # of one `Index::Item` per term. Converted from
   # `glossary_terms/index.html.erb` + `glossary_terms/_object.html.erb`.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::GlossaryTerm)

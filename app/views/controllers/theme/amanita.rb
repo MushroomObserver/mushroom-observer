@@ -2,7 +2,7 @@
 
 module Views::Controllers::Theme
   # Amanita color-theme detail page.
-  class Amanita < Views::Base
+  class Amanita < Views::FullPageBase
     SPECIES = [
       SpeciesRow[:tp, :theme_amanita_pachycolea, "Amanita pachycolea", 644],
       SpeciesRow[:tp, :theme_amanita_muscaria, "Amanita muscaria", 651],

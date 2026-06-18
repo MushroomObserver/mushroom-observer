@@ -10,7 +10,7 @@
 # the versions table. Notes panel appears when the historic name
 # has notes; ObjectFooter at the bottom.
 module Views::Controllers::Names::Versions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
     prop :versions, _Array(_Interface(:user_id))

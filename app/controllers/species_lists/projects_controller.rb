@@ -101,8 +101,7 @@ module SpeciesLists
           projects: @projects,
           object_states: @object_states,
           project_states: @project_states
-        ),
-        layout: true
+        )
       )
     end
 

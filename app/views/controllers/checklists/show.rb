@@ -2,7 +2,7 @@
 
 # Phlex view for the checklist page. Replaces show.html.erb.
 module Views::Controllers::Checklists
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     def initialize(data:, context:)
       super()
       @data = data

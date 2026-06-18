@@ -3,7 +3,7 @@
 module Views::Controllers::Users
   # Users index — admins see a verification/groups/last-login table;
   # everyone else sees the matrix of user thumbnails.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :users, _Array(::User)
     prop :pagination_data, ::PaginationData

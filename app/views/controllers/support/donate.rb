@@ -3,7 +3,7 @@
 module Views::Controllers::Support
   # Donation form page — intro/outro textile copy wrapping
   # `Support::Form`.
-  class Donate < Views::Base
+  class Donate < Views::FullPageBase
     prop :donation, ::Donation
 
     def view_template

@@ -4,7 +4,7 @@
 # banner when scoped to a project, page chrome (title, sort, pagination,
 # container width), then renders a list of `Listing` rows.
 module Views::Controllers::SpeciesLists
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     def initialize(query:, pagination_data:, objects:,
                    project: nil, error: nil)
       super()

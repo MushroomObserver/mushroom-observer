@@ -2,7 +2,7 @@
 
 module Views::Controllers::Info
   # How-to-help / volunteer page.
-  class HowToHelp < Views::Base
+  class HowToHelp < Views::FullPageBase
     KEYS = [
       :how_help_contributors, :how_help_scientists,
       :how_help_developers, :how_help_translators,

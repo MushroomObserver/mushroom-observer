@@ -3,7 +3,7 @@
 module Views::Controllers::GlossaryTerms
   # Wrap of `GlossaryTerms::Form` for the edit flow.
   # Converted from `glossary_terms/edit.html.erb`.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :glossary_term, ::GlossaryTerm
 
     def view_template

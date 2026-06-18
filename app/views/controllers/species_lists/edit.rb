@@ -4,7 +4,7 @@
 # (title, context-nav, container width) and delegates body to the
 # shared `Form` Phlex class with `button: :UPDATE`.
 module Views::Controllers::SpeciesLists
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     def initialize(species_list:, projects:, dubious_where_reasons:,
                    submitted_project_ids:, user:)
       super()

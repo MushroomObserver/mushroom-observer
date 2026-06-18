@@ -4,8 +4,7 @@ module Views::Layouts::App
   # `<head>` contents for the application layout. Renders the GTM
   # bootstrap (production only), meta / link / `<title>` tags, the
   # favicons partial, the canonical URL link (when set), CSRF tag,
-  # OpenGraph tags, theme stylesheets, importmap tags, and any
-  # per-page `@header` chunk.
+  # OpenGraph tags, theme stylesheets, and importmap tags.
   class Head < Views::Base
     register_value_helper :action_cable_meta_tag
     register_value_helper :auto_discovery_link_tag
@@ -16,7 +15,6 @@ module Views::Layouts::App
 
     prop :css_theme, ::String
     prop :canonical_url, _Nilable(::String), default: nil
-    prop :header, _Nilable(::String), default: nil
 
     OG_DESCRIPTION =
       "Mushroom Observer is a forum where amateur and professional " \
@@ -44,7 +42,6 @@ module Views::Layouts::App
       render_og_tags
       render_stylesheets
       trusted_html(javascript_importmap_tags)
-      trusted_html(@header) if @header.present?
     end
 
     private

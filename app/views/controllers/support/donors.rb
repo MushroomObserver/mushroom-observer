@@ -2,7 +2,7 @@
 
 module Views::Controllers::Support
   # Donor wall — striped table of donor names.
-  class Donors < Views::Base
+  class Donors < Views::FullPageBase
     prop :donor_names, _Array(::String)
 
     def view_template

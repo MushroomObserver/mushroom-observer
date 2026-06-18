@@ -3,7 +3,7 @@
 # Action template for `Names::SynonymsController#edit`. Page-chrome
 # + the `Names::Synonyms::Form` Phlex form (which owns the
 # existing / proposed / members fields layout).
-class Views::Controllers::Names::Synonyms::Edit < Views::Base
+class Views::Controllers::Names::Synonyms::Edit < Views::FullPageBase
   prop :name, ::Name
   prop :list_members, _Nilable(String), default: nil
   prop :deprecate_all, _Boolean, default: true

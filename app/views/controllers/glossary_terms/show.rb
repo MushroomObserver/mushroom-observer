@@ -6,7 +6,7 @@ module Views::Controllers::GlossaryTerms
   # the right, then a strip of other-image thumbnails, the previous-
   # version footer, and an authors/editors panel. Converted from
   # `glossary_terms/show.html.erb`.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :glossary_term, ::GlossaryTerm
     prop :other_images, _Array(::Image)
     prop :versions, _Array(::GlossaryTerm::Version)

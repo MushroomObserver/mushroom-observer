@@ -8,7 +8,7 @@
 # Replaces `app/views/controllers/comments/new.html.erb` (and its
 # `_object.html.erb` partial render — inlined here).
 module Views::Controllers::Comments
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :comment, ::Comment
     prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil

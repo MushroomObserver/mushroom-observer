@@ -6,7 +6,7 @@ module Views::Controllers::Locations
     # known countries (with obs counts), missing countries (the canonical
     # country list minus the ones with obs), and unmatched country
     # strings observed in the wild.
-    class Index < Views::Base
+    class Index < Views::FullPageBase
       # `CountryCounter` carries three lists: `known_by_count`,
       # `missing`, `unknown_by_count` (each an Array of [name, count]
       # pairs).

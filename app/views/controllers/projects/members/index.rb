@@ -3,7 +3,7 @@
 module Views::Controllers::Projects::Members
   # Phlex view for the project members index page.
   # Replaces members/index.html.erb.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     def initialize(project:, users:, project_member:,
                    user:)
       super()

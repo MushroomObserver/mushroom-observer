@@ -9,7 +9,7 @@
 #
 # Replaces `app/views/controllers/observations/namings/index.erb`.
 module Views::Controllers::Observations::Namings
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
 

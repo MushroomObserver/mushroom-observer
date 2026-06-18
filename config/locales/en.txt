@@ -421,6 +421,7 @@
   support: support
   TARGET: Target
   TARGET_TYPE: Target Type
+  TEST: Test
   TEST_PAGES: Test Pages
   THEME: Theme
   TRANSLATION: Translation

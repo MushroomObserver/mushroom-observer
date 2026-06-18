@@ -3,7 +3,7 @@
 module Views::Controllers::Locations
   # New-location page wrapper — registers page-title / context-nav
   # chrome and delegates to the existing `Locations::Form`.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :location, ::Location
     prop :display_name, _Nilable(::String), default: nil
     prop :original_name, _Nilable(::String), default: nil

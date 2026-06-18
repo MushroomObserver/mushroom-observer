@@ -4,7 +4,7 @@
 # account" page. Sets the page title and renders the signup form.
 # Replaces `app/views/controllers/account/new.html.erb`.
 module Views::Controllers::Account
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :new_user, ::User
 
     def view_template

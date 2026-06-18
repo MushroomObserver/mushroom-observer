@@ -6,7 +6,7 @@
 #
 # Replaces `app/views/controllers/field_slips/qr_reader/new.erb`.
 module Views::Controllers::FieldSlips::QRReader
-  class New < Views::Base
+  class New < Views::FullPageBase
     def view_template
       # `.t` runs the translation through MO's textile pipeline,
       # which turns the `"MO Field Slips":<url>` syntax into a real

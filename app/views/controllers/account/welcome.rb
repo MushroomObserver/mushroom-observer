@@ -7,7 +7,7 @@
 #
 # Replaces `app/views/controllers/account/welcome.html.erb`.
 module Views::Controllers::Account
-  class Welcome < Views::Base
+  class Welcome < Views::FullPageBase
     def view_template
       add_page_title(welcome_title)
       if current_user

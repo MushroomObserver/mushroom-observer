@@ -7,7 +7,7 @@
 # verification email" submit. Replaces
 # `app/views/controllers/account/verifications/reverify.html.erb`.
 module Views::Controllers::Account::Verifications
-  class Reverify < Views::Base
+  class Reverify < Views::FullPageBase
     prop :unverified_user, ::User
 
     def view_template

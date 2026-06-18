@@ -2,7 +2,7 @@
 
 module Views::Controllers::Admin::Banners
   # Banner-management page. Heading + Form component.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :banner, ::Banner
 
     def view_template

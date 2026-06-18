@@ -11,7 +11,7 @@
 # tags; everything goes through `trusted_html` so the markup
 # survives — `plain` would escape the embedded `<a>`.
 module Views::Controllers::Account::Login
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :login, _Nilable(String)
     prop :remember, _Nilable(_Boolean)
 

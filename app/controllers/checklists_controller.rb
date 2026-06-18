@@ -29,7 +29,7 @@ class ChecklistsController < ApplicationController
 
     render(Views::Controllers::Checklists::Show.new(
              data: @data, context: checklist_context
-           ), layout: true)
+           ))
   end
 
   ##############################################################################

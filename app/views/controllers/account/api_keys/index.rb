@@ -6,7 +6,7 @@
 #
 # Replaces `app/views/controllers/account/api_keys/index.html.erb`.
 module Views::Controllers::Account::APIKeys
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :user, ::User
 
     def view_template

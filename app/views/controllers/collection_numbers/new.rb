@@ -5,7 +5,7 @@
 # the existing `Form` Phlex component with the page chrome + a
 # side-column MatrixBox preview of the observation.
 module Views::Controllers::CollectionNumbers
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :collection_number, ::CollectionNumber
     prop :observation, ::Observation
     prop :user, ::User

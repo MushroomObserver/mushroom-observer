@@ -5,7 +5,7 @@
 # the existing `Form` Phlex component with page chrome + a
 # side-column list of MatrixBox previews (one per associated obs).
 module Views::Controllers::HerbariumRecords
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :herbarium_record, ::HerbariumRecord
     prop :user, ::User
     prop :back, _Nilable(String), default: nil

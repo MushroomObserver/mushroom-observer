@@ -73,11 +73,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
            status: :forbidden)
   end
 
-  # It's not always the controller_name, e.g. ContributorsController -> User
-  def controller_model_name
-    controller_name.classify
-  end
-
   # Currently some controller tests expect nil: Even though the sort order
   # resulting from `nil` is the default, passing no explicit :by param
   # means the index is titled "____ Index", rather than "____ by ____".

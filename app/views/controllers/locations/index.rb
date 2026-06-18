@@ -4,7 +4,7 @@ module Views::Controllers::Locations
   # Index page — paginated list of known locations on the left and
   # unmatched `Observation#where` strings on the right. Used by
   # `LocationsController#index` and its filtered_index dispatch.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :locations, _Array(::Location)
     prop :pagination_data, ::PaginationData

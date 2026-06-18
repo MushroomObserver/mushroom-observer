@@ -18,6 +18,21 @@ module ApplicationController::Internationalization
   #
   ##############################################################################
 
+  # `helper_method :current_languages` makes it callable from views;
+  # `Components::Base` registers `current_languages` as a Phlex value
+  # helper so the sidebar's language picker can read it.
+  def self.included(base)
+    base.helper_method(:current_languages)
+  end
+
+  # Request-context accessor — same shape as `current_user`. Lets
+  # Phlex views read the languages list off the controller without
+  # threading it through `prop`s. Memoized per request; lazy-loads
+  # on first read so tests don't need a before_action setup.
+  def current_languages
+    @current_languages ||= Language.where.not(beta: true).order(:order).to_a
+  end
+
   # Before filter: Decide which locale to use for this request.  Sets the
   # Globalite default.  Tries to get the locale from:
   #

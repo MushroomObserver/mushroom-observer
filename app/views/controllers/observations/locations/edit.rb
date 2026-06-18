@@ -6,7 +6,7 @@
 # as a PATCH button that, when clicked, batch-assigns all observations
 # sharing `@where` to the chosen Location.
 module Views::Controllers::Observations::Locations
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :where, String
     prop :matches, _Array(::Location)
     prop :pagination_data, ::PaginationData

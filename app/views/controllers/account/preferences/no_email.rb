@@ -5,7 +5,7 @@
 # notification type has been turned off in response to an unsubscribe
 # link clicked from one of MO's outgoing emails.
 module Views::Controllers::Account::Preferences
-  class NoEmail < Views::Base
+  class NoEmail < Views::FullPageBase
     prop :user, _Nilable(User)
     prop :note, _Nilable(Symbol)
 

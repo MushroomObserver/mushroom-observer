@@ -3,7 +3,7 @@
 module Views::Controllers::RssLogs
   # Single-RssLog detail page — formatted list of log events plus a
   # link back to the targeted object.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :rss_log, ::RssLog
 
     def view_template

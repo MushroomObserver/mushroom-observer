@@ -4,7 +4,7 @@ module Views::Controllers::Articles
   # Show-article page. Renders the byline (author + creation time),
   # the article body inside a Panel, and the standard versions
   # footer. Converted from `articles/show.html.erb`.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :article, ::Article
 
     def view_template

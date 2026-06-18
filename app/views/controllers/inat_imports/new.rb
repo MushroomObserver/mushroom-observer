@@ -4,7 +4,7 @@ module Views::Controllers::InatImports
   # Phlex view for the iNat import new/create page.
   # Sets page title and context nav, then renders the
   # form component.
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(form:, super_importer: false, admin: false)
       super()
       @form = form

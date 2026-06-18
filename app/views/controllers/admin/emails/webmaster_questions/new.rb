@@ -4,7 +4,7 @@ module Views::Controllers::Admin::Emails::WebmasterQuestions
   # Ask-the-webmaster page. Wrapper that sets the page title and
   # renders the Form, passing through the reply_to / message /
   # error state the controller computes.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :email, _Nilable(::String), default: nil
     prop :message, _Nilable(::String), default: nil
     prop :email_error, _Nilable(_Boolean), default: nil

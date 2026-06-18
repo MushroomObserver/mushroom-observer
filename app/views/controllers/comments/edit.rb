@@ -7,7 +7,7 @@
 # Replaces `app/views/controllers/comments/edit.html.erb` (and its
 # `_object.html.erb` partial render — inlined here).
 module Views::Controllers::Comments
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :comment, ::Comment
     prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil

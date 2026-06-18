@@ -2,7 +2,7 @@
 
 module Views::Controllers::Info
   # Translators' note + language picker.
-  class TranslatorsNote < Views::Base
+  class TranslatorsNote < Views::FullPageBase
     prop :languages, _Array(::Language)
 
     def view_template

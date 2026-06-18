@@ -10,7 +10,7 @@ module Views::Controllers::Info
   #     show_result: !code.nil?,
   #     submit_type: submit
   #   ))
-  class TextileSandbox < Views::Base
+  class TextileSandbox < Views::FullPageBase
     # Register Rails helpers
 
     # @param textile_sandbox [FormObject::TextileSandbox] the model

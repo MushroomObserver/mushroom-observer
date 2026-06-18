@@ -2,7 +2,7 @@
 
 module Views::Controllers::Info
   # How-to-use guide — two numbered lists (common tasks + glossary).
-  class HowToUse < Views::Base
+  class HowToUse < Views::FullPageBase
     # rubocop:disable Layout/HashAlignment
     COMMON_TASKS = {
       keeping_up:             :how_keeping_up,

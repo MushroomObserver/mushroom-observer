@@ -4,7 +4,7 @@ module Views::Controllers::GlossaryTerms
   module Images
     # Wrap of `GlossaryTerms::Images::RemoveForm`. Converted from
     # `glossary_terms/images/remove.html.erb`.
-    class Remove < Views::Base
+    class Remove < Views::FullPageBase
       prop :object, ::GlossaryTerm
 
       def view_template

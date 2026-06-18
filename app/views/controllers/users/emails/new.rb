@@ -3,7 +3,7 @@
 module Views::Controllers::Users
   module Emails
     # "Ask a User a Question" page.
-    class New < Views::Base
+    class New < Views::FullPageBase
       prop :target, ::User
 
       def view_template

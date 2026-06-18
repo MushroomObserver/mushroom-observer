@@ -3,7 +3,7 @@
 module Views::Controllers::Info
   # Site-wide stats page — three columns: image thumbnails on the
   # sides, stats table in the middle.
-  class SiteStats < Views::Base
+  class SiteStats < Views::FullPageBase
     prop :site_data, _Hash(::Symbol, ::Integer)
     prop :observations, _Nilable(_Array(::Observation)), default: nil
 

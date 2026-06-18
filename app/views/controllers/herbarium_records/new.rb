@@ -5,7 +5,7 @@
 # the existing `Form` Phlex component with page chrome + the
 # observation header + a side-column MatrixBox preview.
 module Views::Controllers::HerbariumRecords
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :herbarium_record, ::HerbariumRecord
     prop :observation, ::Observation
     prop :user, ::User

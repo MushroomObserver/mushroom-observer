@@ -191,8 +191,7 @@ module OccurrencesController::Edit
         candidates: candidate_observations,
         user: @user,
         project_gaps: @project_gaps
-      ),
-      layout: true
+      )
     )
   end
 

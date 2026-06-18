@@ -2,7 +2,7 @@
 
 module Views::Controllers::Admin::Users
   # Change-user-bonuses page. Title + BonusesForm component.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :user2, ::User
     prop :user_stats, ::UserStats
 

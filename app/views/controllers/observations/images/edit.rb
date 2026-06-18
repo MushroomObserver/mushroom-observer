@@ -4,7 +4,7 @@
 # "edit observation image" page. Renders `Images::Form` alongside a
 # `Components::Image::Interactive` preview of the image being edited.
 module Views::Controllers::Observations::Images
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :image, ::Image
     prop :licenses, _Array(Array)
     prop :projects, _Array(::Project), default: -> { [] }

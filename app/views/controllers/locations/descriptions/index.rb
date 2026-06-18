@@ -4,7 +4,7 @@ module Views::Controllers::Locations
   module Descriptions
     # Index of LocationDescriptions — a paginated list of links to each
     # description's show page.
-    class Index < Views::Base
+    class Index < Views::FullPageBase
       prop :query, ::Query
       prop :descriptions, _Array(::LocationDescription)
       prop :pagination_data, ::PaginationData

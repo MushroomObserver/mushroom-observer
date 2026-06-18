@@ -5,7 +5,7 @@
 # inline here; it's now baked into `Components::Map`, so we just
 # instantiate the component with `clustering: true` and the
 # `observations_*_count` props.
-class Views::Controllers::Names::Maps::Show < Views::Base
+class Views::Controllers::Names::Maps::Show < Views::FullPageBase
   prop :name, ::Name
   prop :query, _Nilable(::Query::Observations), default: nil
   prop :observations, _Array(_Interface(:id))

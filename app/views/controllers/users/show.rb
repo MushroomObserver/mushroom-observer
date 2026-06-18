@@ -3,7 +3,7 @@
 module Views::Controllers::Users
   # User show — left column profile + stats, right column best-images
   # carousel.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :show_user, ::User
     prop :life_list, ::Checklist::ForUser
     # Pre-computed in the controller (so the `Language.pluck(...)`

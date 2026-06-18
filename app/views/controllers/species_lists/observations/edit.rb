@@ -5,7 +5,7 @@
 # `Form` that posts a chosen species list as the destination for the
 # current query of observations.
 module Views::Controllers::SpeciesLists::Observations
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     def initialize(prefill_value:, num_results:)
       super()
       @prefill_value = prefill_value

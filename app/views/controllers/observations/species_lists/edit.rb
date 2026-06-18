@@ -7,7 +7,7 @@
 # belongs to (REMOVE button on each) and lists it doesn't (ADD
 # button on each).
 module Views::Controllers::Observations::SpeciesLists
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :observation, ::Observation
     prop :all_lists, ::Query::SpeciesLists
     prop :obs_lists, _Array(::SpeciesList)

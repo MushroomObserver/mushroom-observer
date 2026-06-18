@@ -3,7 +3,7 @@
 # Action template for `Names::EolData::PreviewController#show`.
 # Striped list of names that are `ok_for_export`, plus a final
 # count.
-class Views::Controllers::Names::EolData::Preview::Show < Views::Base
+class Views::Controllers::Names::EolData::Preview::Show < Views::FullPageBase
   prop :names, _Array(::Name)
 
   def view_template

@@ -4,7 +4,7 @@ module Views::Controllers::Locations
   # Location show page — map + general description + comments on the
   # left, coordinates / notes / alt-descriptions / authorship on the
   # right, version footer at the bottom.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :location, ::Location
     prop :description, _Nilable(::LocationDescription), default: nil
     prop :versions, _Array(_Interface(:user_id))

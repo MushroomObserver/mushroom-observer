@@ -3,7 +3,7 @@
 module Views::Controllers::Info
   # Help text for the top-nav search bar — lists the available
   # pattern-search terms for Observations and Names.
-  class SearchBarHelp < Views::Base
+  class SearchBarHelp < Views::FullPageBase
     def view_template
       add_page_title(:search_bar_help_title.l)
 

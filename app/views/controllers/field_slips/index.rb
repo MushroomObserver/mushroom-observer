@@ -12,7 +12,7 @@
 # Replaces `app/views/controllers/field_slips/index.html.erb` and
 # the `_object.erb` per-row partial it iterated.
 module Views::Controllers::FieldSlips
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :objects, _Array(::FieldSlip)
     prop :query, ::Query::FieldSlips
     prop :project, _Nilable(::Project), default: nil

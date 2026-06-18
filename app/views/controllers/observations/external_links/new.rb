@@ -5,7 +5,7 @@
 # `ExternalLinks::Form` alongside a `Components::Matrix::Box`
 # observation-summary card.
 module Views::Controllers::Observations::ExternalLinks
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :external_link, ::ExternalLink
     prop :observation, ::Observation
     prop :sites, _Array(::ExternalSite)

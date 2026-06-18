@@ -2,7 +2,7 @@
 
 module Views::Controllers::Theme
   # Index of available color themes.
-  class ColorThemes < Views::Base
+  class ColorThemes < Views::FullPageBase
     def view_template
       add_page_title(:color_themes_title.l)
 

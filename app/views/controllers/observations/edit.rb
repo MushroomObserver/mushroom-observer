@@ -5,7 +5,7 @@
 # and container width, then renders `Observations::Form` in
 # `:update` mode with the observation's edit-time state.
 module Views::Controllers::Observations
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
     prop :location, _Nilable(::Location), default: nil

@@ -4,7 +4,7 @@ module Views::Controllers::RssLogs
   # Activity logs index — the front-page matrix of recent activity
   # across observations / names / locations / etc., filtered by
   # selected RssLog types.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :rss_logs, _Array(::RssLog)
     prop :pagination_data, ::PaginationData

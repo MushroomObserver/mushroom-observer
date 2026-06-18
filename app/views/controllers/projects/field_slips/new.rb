@@ -3,7 +3,7 @@
 module Views::Controllers::Projects::FieldSlips
   # Phlex view for the field slips form page.
   # Replaces field_slips/new.html.erb.
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(project:, user:, field_slip_max:, trackers:)
       super()
       @project = project

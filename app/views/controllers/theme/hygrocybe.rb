@@ -2,7 +2,7 @@
 
 module Views::Controllers::Theme
   # Hygrocybe color-theme detail page.
-  class Hygrocybe < Views::Base
+  class Hygrocybe < Views::FullPageBase
     SPECIES = [
       SpeciesRow[:tp, :theme_hygrocybe_miniata, "Hygrocybe miniata", 369],
       SpeciesRow[:tp, :theme_hygrocybe_pittacina, "Hygrocybe pittacina", 368],

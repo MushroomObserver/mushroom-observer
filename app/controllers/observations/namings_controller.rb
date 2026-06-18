@@ -170,13 +170,13 @@ module Observations
     def render_phlex_new
       render(Views::Controllers::Observations::Namings::New.new(
                **naming_phlex_props
-             ), layout: true)
+             ))
     end
 
     def render_phlex_edit
       render(Views::Controllers::Observations::Namings::Edit.new(
                **naming_phlex_props
-             ), layout: true)
+             ))
     end
 
     # Successful-create response when the form was opened from the

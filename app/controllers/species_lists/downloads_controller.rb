@@ -24,8 +24,7 @@ module SpeciesLists
           type: @type,
           format: @format,
           encoding: @encoding
-        ),
-        layout: true
+        )
       )
     end
 

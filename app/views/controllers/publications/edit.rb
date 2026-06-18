@@ -2,7 +2,7 @@
 
 module Views::Controllers::Publications
   # Edit-publication page — chrome + the existing `Publications::Form`.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :publication, ::Publication
 
     def view_template

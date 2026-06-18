@@ -6,7 +6,7 @@ module Views::Controllers::Projects::Admin
   # section with the Delete Project action. Sub-tabs sit above
   # the form so the user can swap to Members or Aliases without
   # leaving the Admin context.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     def initialize(project:, user:, dates_any:, upload_params:)
       super()
       @project = project

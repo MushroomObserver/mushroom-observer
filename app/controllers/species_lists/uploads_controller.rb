@@ -15,8 +15,7 @@ module SpeciesLists
         render(
           Views::Controllers::SpeciesLists::Uploads::New.new(
             species_list: @species_list
-          ),
-          layout: true
+          )
         )
       else
         redirect_to(species_list_path(@species_list))

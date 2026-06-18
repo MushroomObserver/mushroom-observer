@@ -8,7 +8,7 @@
 # `Projects::ViolationsController#index` renders this class
 # directly with explicit props.
 module Views::Controllers::Projects::Violations
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :project, ::Project
     prop :violations, _Array(::Project::Violation)
     # Non-nilable: this view forwards `user` to `Violations::Form`,

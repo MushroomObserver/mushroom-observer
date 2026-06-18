@@ -6,7 +6,7 @@
 # `Components::Form::Search` against the controller's `@search`
 # (a `Query::Projects` instance).
 module Views::Controllers::Projects::Search
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :search, ::Query::Projects
     prop :local, _Boolean, default: true
 

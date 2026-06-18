@@ -17,7 +17,7 @@
 # `NamesController#render_index_view` overrides the ApplicationController
 # default to render this Phlex class directly with explicit props.
 module Views::Controllers::Names
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::Names
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Name)
