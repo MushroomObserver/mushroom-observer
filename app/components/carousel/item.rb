@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Abstract image-shaped carousel-slide inner content: the `<img>` +
-# optional stretched link + lightbox link + carousel-caption (vote
-# section + image-info block) that goes inside a
-# `Components::Carousel` slide registered via `c.item(...) { … }`.
-# Subclasses just override `initialize` to set their context-specific
-# defaults (image size, `original`, extra classes).
+# optional stretched link + lightbox link + carousel-caption (just the
+# image-vote bar) that goes inside a `Components::Carousel` slide
+# registered via `c.item(...) { … }`. Subclasses just override
+# `initialize` to set their context-specific defaults (image size,
+# `original`, extra classes).
 #
 # Concrete subclasses:
 # - `Components::ImageGallery::Item` — show-page slide,
@@ -19,6 +19,12 @@
 # `Components::Form::UploadGallery::Item` does NOT subclass this:
 # its slide layout is a row of `image-col` + `form-col` + control
 # buttons, not the read-only `img + caption` shape.
+#
+# Image copyright / notes / original-name belong on the LIGHTBOX
+# caption (the `data-sub-html` attribute of the lightbox link, built
+# by `Components::Image::Lightbox::Caption`). They are NOT emitted in
+# the visible carousel-caption overlay — that overlay is for the
+# vote bar only, so the slide image stays readable.
 class Components::Carousel::Item < Components::Image::Base
   prop :object, _Nilable(::AbstractModel), default: nil
 
@@ -57,52 +63,6 @@ class Components::Carousel::Item < Components::Image::Base
   end
 
   def render_carousel_caption
-    div(class: "carousel-caption") do
-      render_image_vote_section
-      if image_info_html.present?
-        div(class: "image-info d-none d-sm-block") { image_info_html }
-      end
-    end
-  end
-
-  def image_info_html
-    return "" unless @img_instance && @object
-
-    [
-      owner_original_name,
-      copyright,
-      notes
-    ].compact_blank.safe_join
-  end
-
-  def copyright
-    return "" unless @img_instance
-
-    render(Components::Image::Copyright.new(
-             user: @user,
-             image: @img_instance,
-             object: @object
-           ))
-  end
-
-  def owner_original_name
-    return "" unless show_original_name? &&
-                     (owner_name = @img_instance.original_name).present?
-
-    div(class: "image-original-name") { owner_name }
-  end
-
-  def show_original_name?
-    @original && @img_instance &&
-      @img_instance.original_name.present? &&
-      (permission?(@img_instance) ||
-       @img_instance.user &&
-       @img_instance.user.keep_filenames == "keep_and_show")
-  end
-
-  def notes
-    return "" if @img_instance.notes.blank?
-
-    div(class: "image-notes") { @img_instance.notes.tl.truncate_html(300) }
+    div(class: "carousel-caption") { render_image_vote_section }
   end
 end

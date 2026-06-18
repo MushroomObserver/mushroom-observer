@@ -3,8 +3,12 @@
 # Collapse help block component - collapsible help text block
 #
 # @example
-#   render(Components::Help::CollapseBlock.new(id: "help_1")) { "This is help text" }
-#   render(Components::Help::CollapseBlock.new(id: "help_2", direction: "up")) { "More help" }
+#   render(Components::Help::CollapseBlock.new(target_id: "help_1")) do
+#     "This is help text"
+#   end
+#   render(Components::Help::CollapseBlock.new(
+#            target_id: "help_2", direction: "up"
+#          )) { "More help" }
 class Components::Help::CollapseBlock < Components::Base
   prop :target_id, String
   prop :direction, _Nilable(String), default: nil

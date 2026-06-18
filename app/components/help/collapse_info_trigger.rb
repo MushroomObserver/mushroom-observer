@@ -3,9 +3,9 @@
 # Collapse info trigger component - clickable icon that toggles collapse
 #
 # @example
-#   render(Components::Help::CollapseInfoTrigger.new(id: "help_text_1"))
+#   render(Components::Help::CollapseInfoTrigger.new(target_id: "help_text_1"))
 #   render(Components::Help::CollapseInfoTrigger.new(
-#            id: "help_text_2", class: "custom-trigger"
+#            target_id: "help_text_2", extra_class: "custom-trigger"
 #          ))
 class Components::Help::CollapseInfoTrigger < Components::Base
   prop :target_id, String

@@ -52,12 +52,15 @@ class ImageGalleryTest < ComponentTestCase
       )
     end
 
-    # Controls only show with multiple images
+    # Controls only show with multiple images. Bootstrap 3 markup
+    # is `a.left.carousel-control` / `a.right.carousel-control` —
+    # `Components::Carousel::Controls#render_control` builds that
+    # shape, not the Bootstrap 4 `carousel-control-prev/next` form.
     if @images.length > 1
-      assert_includes(html, "carousel-control-prev")
-      assert_includes(html, "carousel-control-next")
+      assert_html(html, "a.left.carousel-control")
+      assert_html(html, "a.right.carousel-control")
     else
-      assert_not_includes(html, "carousel-control-prev")
+      assert_no_html(html, "a.carousel-control")
     end
   end
 
@@ -91,9 +94,9 @@ class ImageGalleryTest < ComponentTestCase
 
     assert_includes(html, "carousel")
     assert_includes(html, "carousel-item")
-    # Should not have prev/next controls with single image
-    assert_not_includes(html, "carousel-control-prev")
-    assert_not_includes(html, "carousel-control-next")
+    # Single image → no prev/next controls. Bootstrap 3 markup is
+    # `a.carousel-control`, so assert absence of that selector.
+    assert_no_html(html, "a.carousel-control")
   end
 
   def test_thumbnail_navigation_when_enabled
@@ -263,5 +266,45 @@ class ImageGalleryTest < ComponentTestCase
     html = render(component)
 
     assert_includes(html, "custom_panel_id")
+  end
+
+  # Regression: the visible `.carousel-caption` overlay on each slide
+  # should contain ONLY the vote bar — never image copyright / notes /
+  # original-name. Those belong on the lightbox caption
+  # (`data-sub-html` on the lightbox link, built by
+  # `Components::Image::Lightbox::Caption`).
+  #
+  # The original bug (caught by the matrix-box tryout): the abstract
+  # `Components::Carousel::Item#render_carousel_caption` gated the
+  # image-info block on `image_info_html.present?`. That predicate
+  # called `image_info_html`, which called `copyright` / `notes` /
+  # `owner_original_name` — all of which have Phlex side effects
+  # (they write `div(...)` / `render(...)` to the current buffer).
+  # The "present?" check therefore wrote copyright + notes directly
+  # into the `.carousel-caption` buffer, OUTSIDE the
+  # `.image-info.d-none.d-sm-block` wrapper that was supposed to
+  # gate visibility. Net effect: copyright + iNat-import note
+  # overlaid on every slide instead of being scoped to the lightbox.
+  def test_carousel_caption_contains_only_vote_section_no_image_info_leak
+    # Fixture has both `notes: "Some Notes"` and
+    # `copyright_holder: "Bob Dobbs"` — the exact shape that triggered
+    # the leak before. If the abstract `Carousel::Item` ever re-grows
+    # an image-info render path inside `render_carousel_caption`,
+    # the side-effect emission will trip this assertion.
+    leak_image = images(:connected_coprinus_comatus_image)
+    leak_obs = leak_image.observations.first || @obs
+
+    html = render(Components::ImageGallery.new(
+                    user: @user, images: [leak_image], object: leak_obs
+                  ))
+
+    # The vote bar IS in the carousel-caption.
+    assert_html(html, ".carousel-caption .vote-section")
+
+    # The image-info contents are NOT in the carousel-caption.
+    assert_no_html(html, ".carousel-caption .image-info")
+    assert_no_html(html, ".carousel-caption .image-copyright")
+    assert_no_html(html, ".carousel-caption .image-notes")
+    assert_no_html(html, ".carousel-caption .image-original-name")
   end
 end

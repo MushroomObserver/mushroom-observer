@@ -8,8 +8,8 @@
 # Replaces the `help_tooltip` helper from `panel_helper.rb`.
 #
 # @example
-#   render(Components::Help::Tooltip.new("(?)",
-#                                      title: "Click for explanation"))
+#   render(Components::Help::Tooltip.new(label: "(?)",
+#                                        title: "Click for explanation"))
 class Components::Help::Tooltip < Components::Base
   prop :label, String
   prop :title, _Nilable(String), default: nil
