@@ -11,7 +11,7 @@ module Views::Controllers::Images
     # doesn't thread the block through to a Phlex component's
     # `view_template(&block)` — every `Components::Modal` caller in this
     # codebase goes through a Phlex view, not a controller render call.
-    class Modal < Views::FullPageBase
+    class Modal < Views::Base
       prop :image, ::Image
       prop :data, _Nilable(_Array(_Array(::String))), default: nil
       prop :success, _Boolean, default: true

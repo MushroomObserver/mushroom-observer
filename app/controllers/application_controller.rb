@@ -31,6 +31,7 @@ class ApplicationController < ActionController::Base
   include FlashNotices
   include NameValidation
   include Queries
+  include ControllerLabels
   include Indexes
   include SectionUpdater
   include ModalUpdater
@@ -51,7 +52,6 @@ class ApplicationController < ActionController::Base
   before_action :set_locale
   before_action :set_timezone
   before_action :track_translations
-  before_action :set_languages
   before_action :apply_user_theme_change
 
   # Disable most filters to streamline some actions, e.g., API.
@@ -277,35 +277,6 @@ class ApplicationController < ActionController::Base
   # "Locations::Descriptions::DefaultsController" though, what we want is just
   # the "Locations" part, so we need to parse the class.module_parent.
   #
-  # NOTE: The rubric can of course be overridden in each controller.
-  #
-  # Returns a translation string.
-  #
-  def rubric
-    # Levels of nesting. parent_module is one level.
-    if (parent = parent_controller_module)
-      return parent.underscore.upcase.to_sym.t
-    end
-
-    controller_name.upcase.to_sym.t
-  end
-  helper_method :rubric
-
-  # Returns the CamelCase parent module name, e.g. "Locations" for
-  # "Locations::MapsController"
-  # gotcha - `Object` is the module_parent of a top-level controller!
-  def parent_controller_module
-    return unless (parent_module = self.class.module_parent).present? &&
-                  parent_module != Object
-
-    if (grandma_module = parent_module.to_s.rpartition("::").first).present?
-      return grandma_module
-    end
-
-    parent_module.to_s
-  end
-  helper_method :parent_controller_module
-
   def calc_layout_params
     count = @user&.layout_count || MO.default_layout_count
     count = 1 if count < 1
@@ -358,22 +329,9 @@ class ApplicationController < ActionController::Base
   helper_method :query_images_to_reuse
   helper_method :q_param
 
-  # Request-context accessor consumed by the Phlex layout (via
-  # `register_value_helper :current_languages` on `Components::Base`).
-  # Same shape as `current_user`. The `set_languages` before_action
-  # populates `@languages` once per request.
-  def current_languages
-    @languages
-  end
-  helper_method :current_languages
-
   ##############################################################################
 
   private
-
-  def set_languages
-    @languages = Language.where.not(beta: true).order(:order).to_a
-  end
 
   # defined here because used by both images_controller and
   # observations_controller

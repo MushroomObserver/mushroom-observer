@@ -38,14 +38,29 @@ class ComponentTestCase < UnitTestCase
     controller.define_singleton_method(:in_admin_mode?) { true }
   end
 
+  # `ApplicationController::*` submodules pulled into the test
+  # controller so view_context sees the same helper methods Phlex
+  # views call out to in production:
+  # - Authentication → `current_user`, `permission?`, `reviewer?`,
+  #   `in_admin_mode?`
+  # - Queries → `add_q_param`, `q_param`, `current_query`
+  # - Internationalization → `current_languages` (sidebar language
+  #   picker; the Phlex layout reads it via `register_value_helper`)
+  TEST_CONTROLLER_MODULES = [
+    ApplicationController::Authentication,
+    ApplicationController::Queries,
+    ApplicationController::Internationalization,
+    ApplicationController::ControllerLabels,
+    ApplicationController::FlashNotices
+  ].freeze
+
   # Create a test controller instance with auth methods
   def controller
     @controller ||= begin
                       ctrl = ActionView::TestCase::TestController.new
-                      # Include Authentication module for permission? method
-                      ctrl.class.include(ApplicationController::Authentication)
-                      # Include Queries module for add_q_param method
-                      ctrl.class.include(ApplicationController::Queries)
+                      TEST_CONTROLLER_MODULES.each do |mod|
+                        ctrl.class.include(mod)
+                      end
                       ctrl
                     end
   end

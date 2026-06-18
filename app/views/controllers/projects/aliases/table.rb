@@ -8,7 +8,7 @@
 # Composes via `Components::Table` in column mode; each column block
 # emits the cell's content via Phlex DSL.
 module Views::Controllers::Projects::Aliases
-  class Table < Views::FullPageBase
+  class Table < Views::Base
     TABLE_ID = "index_project_alias_table"
 
     # Callers must eager-load `:target` so the per-row

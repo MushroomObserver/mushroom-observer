@@ -3,7 +3,7 @@
 # Action view for `names/descriptions/permissions#edit`. Sets the
 # chrome and renders the shared permissions form.
 module Views::Controllers::Names::Descriptions::Permissions
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :description, ::NameDescription
     prop :groups, _Array(::UserGroup)
     # `@data` is `nil` on a fresh edit; populated on update-redo.

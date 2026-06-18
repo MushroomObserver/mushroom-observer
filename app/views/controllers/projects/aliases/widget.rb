@@ -6,7 +6,7 @@
 # aliases turbo_stream re-render. Lives under the aliases namespace
 # alongside the action views (edit, index, new, show).
 module Views::Controllers::Projects::Aliases
-  class Widget < Views::FullPageBase
+  class Widget < Views::Base
     def initialize(project:, target:)
       super()
       @project = project

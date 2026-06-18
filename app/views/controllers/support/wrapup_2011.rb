@@ -2,7 +2,7 @@
 
 module Views::Controllers::Support
   # Annual wrap-up letter (2011).
-  class Wrapup2011 < Views::Base
+  class Wrapup2011 < Views::FullPageBase
     def view_template
       add_page_title(:wrapup_2011_title.l)
       add_context_nav(::Tab::Support::GovernanceActions.new)

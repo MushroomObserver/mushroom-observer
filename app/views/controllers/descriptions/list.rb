@@ -12,7 +12,7 @@
 # composed. Both helper files have since been deleted (this view + the
 # sibling `DetailsAndAltsPanel` own every chain they used to compose).
 module Views::Controllers::Descriptions
-  class List < Views::FullPageBase
+  class List < Views::Base
     prop :user, _Nilable(::User), default: nil
     prop :object, _Union(::Name, ::Location)
     prop :type, _Union(:name, :location)
