@@ -40,6 +40,11 @@
             "type": "command",
             "command": "test -x .claude/hooks/check_coveralls_pr.sh && exec .claude/hooks/check_coveralls_pr.sh || exit 0",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/post_rebase_lang_db.sh && exec .claude/hooks/post_rebase_lang_db.sh || exit 0",
+            "timeout": 120
           }
         ]
       },
