@@ -8,9 +8,6 @@ class SearchController < ApplicationController
     :locations, :names, :observations, :projects, :species_lists, :users
   ].freeze
 
-  # Image advanced search retired in 2021
-  ADVANCED_SEARCHABLE_MODELS = [Location, Name, Observation].freeze
-
   # This is the action the search bar commits to.
   # It creates a query and forwards that to the appropriate index as :q.
   def pattern
@@ -172,79 +169,5 @@ class SearchController < ApplicationController
   def flash_and_redirect_invalid_search(type)
     flash_error(:runtime_invalid.t(type: :search, value: type.inspect))
     redirect_back_or_default("/")
-  end
-
-  public
-
-  # Advanced search form.  When it posts it just redirects to one of several
-  # "foreign" search actions:
-  #   image/advanced_search
-  #   location/advanced_search
-  #   name/advanced_search
-  #   observations/advanced_search
-  def advanced
-    @filter_defaults = users_content_filters || {}
-    return if params[:search].blank?
-
-    model = ADVANCED_SEARCHABLE_MODELS.
-            find { |m| m.name.downcase == params[:search][:model] }
-    query_params = {}
-    add_filled_in_text_fields(query_params)
-    add_applicable_filter_parameters(query_params, model)
-    query = create_query(model, query_params)
-    redirect_to_model_controller(model, query)
-  end
-
-  ##############################################################################
-
-  private
-
-  # NOTE: The autocompleters for name, location, and user all make the ids
-  # available now, so this could be a lot more efficient.
-  def add_filled_in_text_fields(query_params)
-    [:search_content, :search_where, :search_name, :search_user].each do |field|
-      val = params[:search][field].to_s
-      next if val.blank?
-
-      # Treat User field differently; remove angle-bracketed user name,
-      # since it was included by the auto-completer only as a hint.
-      if field == :search_user
-        val = user_login(params[:search])
-      elsif field == :search_name
-        val = parse_search_name(params[:search][:search_name])
-      end
-      query_params[field] = val
-    end
-  end
-
-  def parse_search_name(search_name)
-    return nil unless search_name
-
-    Name.parse_name(search_name)&.search_name || search_name
-  end
-
-  def user_login(params)
-    if params.include?(:search_user_id)
-      user = User.find_by(id: params[:search_user_id])
-      return user.login if user
-    end
-    user = User.lookup_unique_text_name(params[:search_user])
-    return user.login if user
-
-    params[:search_user]
-  end
-
-  def add_applicable_filter_parameters(query_params, model)
-    Query::Filter.by_model(model).each do |fltr|
-      query_params[fltr.sym] = params.dig(:content_filter, fltr.sym)
-    end
-  end
-
-  def redirect_to_model_controller(model, query)
-    advanced_search_path = add_q_param({ controller: model.show_controller,
-                                         action: :index,
-                                         advanced_search: 1 },
-                                       query)
-    redirect_to(advanced_search_path)
   end
 end

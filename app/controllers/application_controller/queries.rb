@@ -324,27 +324,6 @@ module ApplicationController::Queries
     url_for(add_q_param(args, query))
   end
 
-  # Handle advanced_search actions with an invalid q param,
-  # so that they get just one flash msg if the query has expired.
-  # This method avoids a call to find_safe, which would add
-  # "undefined method `id' for nil:NilClass" if there's no QueryRecord for q
-  def handle_advanced_search_invalid_q_param?
-    return false unless invalid_q_param?
-
-    flash_error(:advanced_search_bad_q_error.t)
-    redirect_to(search_advanced_path)
-  end
-
-  def invalid_q_param?
-    params && params[:q] && query_invalid?
-  end
-
-  def query_invalid?
-    return true unless (query = current_query)
-
-    query.invalid?
-  end
-
   # Need to pass list of tags used in this action to next page if redirecting.
   def redirect_to(*args)
     flash[:tags_on_last_page] = Language.save_tags if Language.tracking_usage?

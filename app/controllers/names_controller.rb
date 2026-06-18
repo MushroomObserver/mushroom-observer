@@ -53,23 +53,8 @@ class NamesController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:advanced_search, :pattern, :has_observations, :has_descriptions,
+    [:pattern, :has_observations, :has_descriptions,
      :needs_description, :by_user, :by_editor, :by, :q, :id].freeze
-  end
-
-  # Displays list of advanced search results.
-  def advanced_search
-    return if handle_advanced_search_invalid_q_param?
-
-    query = find_query(:Name)
-    # Would have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query&.params&.any?
-
-    [query, {}]
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(search_advanced_path)
-    [nil, {}]
   end
 
   def make_name_suggestions
