@@ -167,6 +167,27 @@ class RedirectsIntegrationTest < IntegrationTestCase
     assert_equal(name_path(name.id), @response.request.path)
   end
 
+  # /search/advanced — retired in favor of per-controller search forms.
+  # MO's IntegrationTestCase auto-follows redirects (see session_extensions.rb),
+  # so `@response.request.fullpath` is the final URL.
+  def test_search_advanced_redirects_to_observations_search_new
+    login
+    get("/search/advanced")
+    assert_equal(
+      new_observations_search_path(advanced_retired: 1),
+      @response.request.fullpath
+    )
+    assert_flash_text(:search_advanced_retired_notice.t)
+  end
+
+  def test_observer_advanced_search_form_redirects_through_to_search_new
+    login
+    assert_old_url_redirects_to_new_path(
+      :get, "/observer/advanced_search_form",
+      new_observations_search_path(advanced_retired: 1)
+    )
+  end
+
   # SpecisList/show  ---------------------------------
   def test_show_species_list
     spl = species_lists(:first_species_list)

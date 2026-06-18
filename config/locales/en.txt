@@ -3122,43 +3122,11 @@
   adjust_permissions_all_users: All Users
   adjust_permissions_site_admin: site admin
 
-  # search/advanced
-  advanced_search_at_least_one: Please provide at least one search parameter
-  search_input_too_long: "Search input is too long ([length] characters). Maximum allowed is [max] characters. Please shorten your search criteria."
-  advanced_search_caveat: "Advanced search has somewhat limited options because of performance issues that result in timeouts. Please \"email the webmaster\":/admin/emails/webmaster_questions/new if you experience timeouts or if there are particular types of searches you would like to have added.\n\nHints : It's okay to leave some of the fields blank, e.g., if you leave 'Observer' blank, it will return results by all [:users]. It matches the exact string given. Use \"OR\" (all caps) to tell it to match one of several possible strings, e.g. \"Xanthoria OR Xanthomendoza\". Use a star as a wildcard, e.g. \"Wells Gray*Canada\" will match \"Wells Gray, Canada\", \"Wells Gray Park, Canada\", and \"Wells Gray Provincial Park, Canada\". (See notes under 'Content', too.)"
-  advanced_search_content: Content
-  advanced_search_content_help: Text contained in [:observation] notes or [:comments]
-  advanced_search_content_notes: "Content search supports full Google syntax, including \"OR\", double quotes, and negation:\naaa bbb -> contains \"aaa\" and \"bbb\" in any order\n\"aaa bbb\" -> contains \"aaa\" followed immediately by \"bbb\"\naaa OR bbb -> contains either \"aaa\" or \"bbb\"\n-aaa -bbb -> reject anything that contains \"aaa\" or \"bbb\""
-  advanced_search_location_help: Where was the mushroom found
-  advanced_search_name_help: Name of the mushroom
-  advanced_search_none_found: No matches found
-  advanced_search_observer_help: Who observed the mushroom
-  advanced_search_result_type: Result Type
-  # Image search UI temporarily disabled for performance. 2021-09-12 JDC
-  # advanced_search_result_type_help: Do you want [:observations], [:locations] or [:names]/[:descriptions]?
-  advanced_search_result_type_help: Do you want [:observations], [:locations] or [:names]/[:descriptions]?
+  # search/advanced retired-redirect notice
+  search_advanced_retired_notice: "The Advanced Search page has been replaced by per-model search forms. You're now on the observation search form; for names, locations, projects, herbaria or species lists, open the search bar at the top of the page and click '[:search_bar_more_options]'."
 
-  advanced_search_filters: Search Filters
-  advanced_search_filters_explain: Apply to this search only, overrides your normal preferred content filters
-  advanced_search_filter_has_images: Filter observations based on whether they have images
-  advanced_search_filter_has_images_off: Include both imaged and imageless observations
-  advanced_search_filter_has_images_yes: Exclude imageless observations
-  advanced_search_filter_has_images_no: Exclude imaged observations
-  advanced_search_filter_has_specimen: Filter observations based on whether they have specimens
-  advanced_search_filter_has_specimen_off: Include both observations with and without specimens
-  advanced_search_filter_has_specimen_yes: Exclude observations without specimens
-  advanced_search_filter_has_specimen_no: Exclude observations with specimens
-  advanced_search_filter_has_occurrence: Filter observations based on whether they belong to an occurrence
-  advanced_search_filter_has_occurrence_off: Include all observations regardless of occurrence status
-  advanced_search_filter_has_occurrence_yes: Only observations that belong to an occurrence
-  advanced_search_filter_has_occurrence_no: Exclude observations that belong to an occurrence
-  advanced_search_filter_lichen: Filter observations based on whether they are lichens
-  advanced_search_filter_lichen_off: Include both lichens and nonlichens
-  advanced_search_filter_lichen_yes: Include only lichen-forming, lichenicolous and allied fungi
-  advanced_search_filter_lichen_no: Exclude lichen-forming fungi
+  # User region preference validation (`User#region_validate`)
   advanced_search_filter_region: Restrict observations and locations to a region, e.g., "California, USA" or "Europe"
-  advanced_search_filter_clade: Restrict observations to a taxonomic clade, e.g., "Ascomycota" or "Agaricales"
-  advanced_search_submit: Submit Advanced Search
 
   # observer/license_updater
   bulk_license_link: Bulk License Updater

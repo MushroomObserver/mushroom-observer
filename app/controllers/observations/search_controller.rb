@@ -27,6 +27,9 @@ module Observations
     end
 
     def new
+      if params[:advanced_retired]
+        flash_notice(:search_advanced_retired_notice.t)
+      end
       @local = params[:local] != "false"
       set_up_form_field_groupings
       @search = build_search_query
