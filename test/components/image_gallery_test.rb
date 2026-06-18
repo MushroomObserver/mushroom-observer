@@ -268,11 +268,15 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "custom_panel_id")
   end
 
-  # Regression: the visible `.carousel-caption` overlay on each slide
-  # should contain ONLY the vote bar — never image copyright / notes /
-  # original-name. Those belong on the lightbox caption
-  # (`data-sub-html` on the lightbox link, built by
-  # `Components::Image::Lightbox::Caption`).
+  # Regression: the visible `.carousel-caption` overlay must NEVER
+  # contain image copyright or notes. Those belong on the lightbox
+  # caption (`data-sub-html` on the lightbox link, built by
+  # `Components::Image::Lightbox::Caption`). Image *original
+  # filename* IS allowed in the carousel-caption (inside the
+  # `.image-info.d-none.d-sm-block` wrapper, hidden on xs and
+  # visible from sm+) when the owner's `keep_filenames` opt-in
+  # condition is met — that's a separate user-facing feature
+  # pinned by `LurkerIntegrationTest#test_show_observation`.
   #
   # The original bug (caught by the matrix-box tryout): the abstract
   # `Components::Carousel::Item#render_carousel_caption` gated the
@@ -285,12 +289,10 @@ class ImageGalleryTest < ComponentTestCase
   # `.image-info.d-none.d-sm-block` wrapper that was supposed to
   # gate visibility. Net effect: copyright + iNat-import note
   # overlaid on every slide instead of being scoped to the lightbox.
-  def test_carousel_caption_contains_only_vote_section_no_image_info_leak
+  def test_carousel_caption_does_not_leak_copyright_or_notes
     # Fixture has both `notes: "Some Notes"` and
-    # `copyright_holder: "Bob Dobbs"` — the exact shape that triggered
-    # the leak before. If the abstract `Carousel::Item` ever re-grows
-    # an image-info render path inside `render_carousel_caption`,
-    # the side-effect emission will trip this assertion.
+    # `copyright_holder: "Bob Dobbs"` — the exact shape that
+    # triggered the leak before.
     leak_image = images(:connected_coprinus_comatus_image)
     leak_obs = leak_image.observations.first || @obs
 
@@ -298,13 +300,12 @@ class ImageGalleryTest < ComponentTestCase
                     user: @user, images: [leak_image], object: leak_obs
                   ))
 
-    # The vote bar IS in the carousel-caption.
+    # Vote bar IS in the carousel-caption.
     assert_html(html, ".carousel-caption .vote-section")
 
-    # The image-info contents are NOT in the carousel-caption.
-    assert_no_html(html, ".carousel-caption .image-info")
+    # Copyright + notes are NOT in the carousel-caption. (They are
+    # in the lightbox `data-sub-html` instead.)
     assert_no_html(html, ".carousel-caption .image-copyright")
     assert_no_html(html, ".carousel-caption .image-notes")
-    assert_no_html(html, ".carousel-caption .image-original-name")
   end
 end
