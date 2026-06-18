@@ -38,7 +38,7 @@ module Views::Controllers::Sequences
 
     def render_matrix_column(obs)
       ul(class: "row list-unstyled") do
-        render(::Components::MatrixBox.new(
+        render(::Components::Matrix::Box.new(
                  user: current_user,
                  object: obs.rss_log || obs,
                  columns: "col-xs-12"

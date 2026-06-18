@@ -3,7 +3,7 @@
 # "Images" panel used by the comments / namings / suggestions pages
 # to show the observation's images vertically as a list (not the
 # carousel rendered on the main obs show page — that's
-# `Components::Carousel`, rendered directly from
+# `Components::ImageGallery`, rendered directly from
 # `observations/show.html.erb`).
 #
 # Each image gets an `InteractiveImage` plus the copyright notice

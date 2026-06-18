@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Main observation show page — the parent that composes every
-# obs-show sub-panel (`Components::Carousel`,
+# obs-show sub-panel (`Components::ImageGallery`,
 # `ObservationDetailsPanel`, `NameInfoPanel`, `SpeciesListsPanel`,
 # `AssociatedObservationsPanel`, `ThumbnailMapPanel`, namings
 # partial, comments partial, `Views::Layouts::ObjectFooter`) into a
@@ -75,7 +75,7 @@ module Views::Controllers::Observations
     end
 
     def render_carousel
-      render(Components::Carousel.new(
+      render(Components::ImageGallery.new(
                object: @observation, images: @images,
                carousel_id: "observation_images", user: @user,
                title: :IMAGES.t, links: carousel_links

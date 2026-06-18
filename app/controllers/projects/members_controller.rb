@@ -134,7 +134,7 @@ module Projects
 
       respond_to do |format|
         format.turbo_stream do
-          render(Components::ModalTurboForm.new(
+          render(Components::Modal::TurboForm.new(
                    identifier: "trust_settings",
                    title: :show_project_trust_settings_title.l(
                      project: @project.title

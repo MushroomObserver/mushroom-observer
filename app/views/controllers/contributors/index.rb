@@ -19,7 +19,7 @@ module Views::Controllers::Contributors
 
       render_legend_row
       paginated_results do
-        render(::Components::MatrixTable.new(objects: @objects))
+        render(::Components::Matrix::Table.new(objects: @objects))
       end
     end
 

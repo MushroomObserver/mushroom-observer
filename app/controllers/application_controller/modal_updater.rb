@@ -17,7 +17,7 @@
 #    actions that need to fully re-render the form (e.g.
 #    re-running validations against a different model state).
 #    Updates the flash AND replaces the `#<id>_form` body with a
-#    freshly-rendered `Components::ModalTurboForm`.
+#    freshly-rendered `Components::Modal::TurboForm`.
 #
 module ApplicationController::ModalUpdater
   private
@@ -37,7 +37,7 @@ module ApplicationController::ModalUpdater
              ),
              turbo_stream.replace(
                "#{identifier}_form",
-               Components::ModalTurboForm.render_form(
+               Components::Modal::TurboForm.render_form(
                  view_context, model: form_locals[:model],
                                form_locals: form_locals
                )

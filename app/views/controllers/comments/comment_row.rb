@@ -13,7 +13,7 @@
 #   so the wrapper has to live with the inner content.
 #
 # Inside the `CommentsForObject` panel, this composition is split:
-# `Components::ListGroup#item` provides the wrapper (so the
+# `Components::ListGroup::Base#item` provides the wrapper (so the
 # none-yet placeholder lives in the same list) and `CommentItem`
 # is rendered directly inside the block.
 module Views::Controllers::Comments
@@ -26,7 +26,7 @@ module Views::Controllers::Comments
     prop :show_name, _Boolean, default: false
 
     def view_template
-      render(Components::ListGroupItem.new(
+      render(Components::ListGroup::Item.new(
                class: "comment", id: dom_id(@comment)
              )) do
         render(CommentItem.new(comment: @comment, user: @user,

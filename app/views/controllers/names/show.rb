@@ -97,7 +97,7 @@ module Views::Controllers::Names
     end
 
     def render_best_images_carousel
-      render(Components::Carousel.new(
+      render(Components::ImageGallery.new(
                object: @name,
                images: @best_images,
                title: :show_name_most_confident.l,
@@ -170,7 +170,7 @@ module Views::Controllers::Names
 
     def render_footer_meta
       div(id: "name_previous_export") do
-        render(Components::PreviousVersion.new(
+        render(Components::Description::PreviousVersion.new(
                  obj: @name, versions: @versions.to_a
                ))
         render(Components::Image::ExportStatusControls.new(object: @name))

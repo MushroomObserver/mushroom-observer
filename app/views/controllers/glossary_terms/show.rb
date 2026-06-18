@@ -97,7 +97,7 @@ module Views::Controllers::GlossaryTerms
 
     def render_versions_footer
       div(class: "mt-3 content-block") do
-        render(::Components::PreviousVersion.new(
+        render(::Components::Description::PreviousVersion.new(
                  obj: @glossary_term, versions: @versions.to_a
                ))
         p(class: "Date") { render_timestamps }

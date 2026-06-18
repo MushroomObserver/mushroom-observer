@@ -16,8 +16,9 @@
 class Components::Image::Interactive < Components::Image::Base
   # Override :image prop to only accept Image instances (not Integer IDs).
   # InteractiveImage is for displaying existing, persisted images.
-  # Form components like FormCarouselItem inherit from BaseImage instead,
-  # which accepts Integer IDs for newly uploaded images with provisional IDs.
+  # Form components like `Form::UploadGallery::Item` inherit from
+  # `BaseImage` instead, which accepts Integer IDs for newly uploaded
+  # images with provisional IDs.
   prop :image, _Nilable(::Image)
 
   def view_template

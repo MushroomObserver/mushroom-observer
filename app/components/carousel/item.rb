@@ -1,59 +1,62 @@
 # frozen_string_literal: true
 
-# Individual carousel slide item component.
+# Abstract image-shaped carousel-slide inner content: the `<img>` +
+# optional stretched link + lightbox link + carousel-caption (vote bar
+# + optional original-filename) that goes inside a
+# `Components::Carousel` slide registered via `c.item(...) { … }`.
+# Subclasses just override `initialize` to set their context-specific
+# defaults (image size, `original`, extra classes).
 #
-# Renders a single slide in a Bootstrap carousel with:
-# - Large image with object-fit: contain
-# - Stretched link overlay
-# - Lightbox button
-# - Carousel caption with votes and image info
+# Concrete subclasses:
+# - `Components::ImageGallery::Item` — show-page slide,
+#   `:large` + `original: true` (full-resolution view inside the
+#   show-page Panel).
+# - `Components::Matrix::Carousel::Item` — per-matrix-box slide,
+#   `:medium` + `original: false` (per the matrix-box-carousel
+#   performance budget — see
+#   `.claude/rules/matrix_box_carousel.md`).
 #
-# @example
-#   render Components::Carousel::Item.new(
-#     user: @user,
-#     image: @image,
-#     object: @observation,
-#     index: 0
-#   )
+# `Components::Form::UploadGallery::Item` does NOT subclass this:
+# its slide layout is a row of `image-col` + `form-col` + control
+# buttons, not the read-only `img + caption` shape.
+#
+# Image **copyright** and **notes** belong on the LIGHTBOX caption
+# (the `data-sub-html` attribute of the lightbox link, built by
+# `Components::Image::Lightbox::Caption`). They are NOT emitted in
+# the visible carousel-caption overlay.
+#
+# Image **original filename** IS visible in the carousel-caption
+# (inside the `.image-info.d-none.d-sm-block` wrapper, hidden on xs
+# and visible from sm+ viewports) when both conditions hold:
+#   - the slide is in `original: true` mode (the show-page gallery is;
+#     the matrix-box carousel is not),
+#   - the image owner has `keep_filenames == "keep_and_show"`
+#     OR the viewing user has edit permission on the image.
+# `LurkerIntegrationTest#test_show_observation` pins this contract
+# (a lurker viewing a rolf-owned image must see the original
+# filename when rolf has opted into showing it).
 class Components::Carousel::Item < Components::Image::Base
-  # Additional carousel-specific properties
-  prop :index, Integer, default: 0
-  prop :object, _Nilable(AbstractModel), default: nil
+  prop :object, _Nilable(::AbstractModel), default: nil
 
-  def initialize(index: 0, object: nil, **props)
-    # Set carousel-specific defaults
-    props[:size] ||= :large
+  # Defaults that are constant across every carousel slide in the
+  # codebase. Subclasses add the context-specific bits (`size`,
+  # `original`).
+  def initialize(**props)
     props[:fit] ||= :contain
-    props[:original] ||= true
     props[:extra_classes] ||= "carousel-image"
-
     super
   end
 
   def view_template
-    # Get image instance and ID
     @img_instance, @img_id = extract_image_and_id
-
-    # Build render data
     @data = build_render_data(@img_instance, @img_id)
 
-    # Render the carousel item
-    div(
-      id: "carousel_item_#{@img_id}",
-      class: build_item_classes
-    ) do
-      render_carousel_image
-      render_carousel_overlays
-      render_carousel_caption
-    end
+    render_carousel_image
+    render_carousel_overlays
+    render_carousel_caption
   end
 
   private
-
-  def build_item_classes
-    active = @index.zero? ? "active" : ""
-    class_names("item carousel-item", active)
-  end
 
   def render_carousel_image
     img(
@@ -71,42 +74,25 @@ class Components::Carousel::Item < Components::Image::Base
 
   def render_carousel_caption
     div(class: "carousel-caption") do
-      # Vote section
       render_image_vote_section
-
-      # Image info (copyright, notes)
-      if image_info_html.present?
-        div(class: "image-info d-none d-sm-block") { image_info_html }
-      end
+      render_image_info_section if image_info_visible?
     end
   end
 
-  def image_info_html
-    return "" unless @img_instance && @object
-
-    [
-      owner_original_name,
-      copyright,
-      notes
-    ].compact_blank.safe_join
+  # Side-effect-free predicate. The earlier shape was
+  # `if image_info_html.present?` where `image_info_html` had Phlex
+  # render side effects — that leaked copyright/notes into the
+  # carousel-caption buffer outside the `.image-info` wrapper. The
+  # only thing the carousel-caption shows from `image-info` now is
+  # the original filename, gated solely on `show_original_name?`.
+  def image_info_visible?
+    show_original_name? && @img_instance.original_name.present?
   end
 
-  # Render copyright using ImageCopyright component
-  def copyright
-    return "" unless @img_instance
-
-    render(Components::Image::Copyright.new(
-             user: @user,
-             image: @img_instance,
-             object: @object
-           ))
-  end
-
-  def owner_original_name
-    return "" unless show_original_name? &&
-                     (owner_name = @img_instance.original_name).present?
-
-    div(class: "image-original-name") { owner_name }
+  def render_image_info_section
+    div(class: "image-info d-none d-sm-block") do
+      div(class: "image-original-name") { @img_instance.original_name }
+    end
   end
 
   def show_original_name?
@@ -115,11 +101,5 @@ class Components::Carousel::Item < Components::Image::Base
       (permission?(@img_instance) ||
        @img_instance.user &&
        @img_instance.user.keep_filenames == "keep_and_show")
-  end
-
-  def notes
-    return "" if @img_instance.notes.blank?
-
-    div(class: "image-notes") { @img_instance.notes.tl.truncate_html(300) }
   end
 end

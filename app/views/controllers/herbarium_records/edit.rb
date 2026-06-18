@@ -35,7 +35,7 @@ module Views::Controllers::HerbariumRecords
     def render_observation_boxes
       ul(class: "row list-unstyled") do
         @herbarium_record.observations.each do |obs|
-          render(Components::MatrixBox.new(
+          render(Components::Matrix::Box.new(
                    user: @user,
                    object: obs.rss_log || obs,
                    columns: "col-xs-12"

@@ -2,7 +2,7 @@
 
 # "Edit this description" icon-link. Caller is responsible for the
 # writer-permission check (`description.writer?(user)` or admin
-# mode) before instantiating — see `Components::DescriptionModLinks`.
+# mode) before instantiating — see `Components::Description::ModLinks`.
 class Tab::Description::Edit < Tab::Base
   def initialize(description:)
     super()

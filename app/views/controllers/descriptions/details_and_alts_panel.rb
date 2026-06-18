@@ -17,10 +17,10 @@
 #     #show_name_description_latest_review + #description_title
 #
 # The heading-links icon strip is extracted to
-# `Components::DescriptionModLinks` (sibling-in-spirit to
+# `Components::Description::ModLinks` (sibling-in-spirit to
 # `Components::Link::InlineMod`), which replaces all of
 # `DescriptionIconsHelper`. The "Version: N / Previous Version" line
-# is `Components::PreviousVersion`, replacing
+# is `Components::Description::PreviousVersion`, replacing
 # `VersionsHelper#show_previous_version`. The license-badge block
 # (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`,
 # replacing the shared `_form_license_badge.erb` partial. Both
@@ -44,7 +44,7 @@ module Views::Controllers::Descriptions
              )) do |panel|
         panel.with_heading { :show_observation_details.l }
         panel.with_heading_links do
-          render(Components::DescriptionModLinks.new(
+          render(Components::Description::ModLinks.new(
                    description: @description, user: @user
                  ))
         end
@@ -75,7 +75,7 @@ module Views::Controllers::Descriptions
       br
       plain("#{:show_description_write_permissions.l}: #{write_perm}")
       br
-      render(Components::PreviousVersion.new(
+      render(Components::Description::PreviousVersion.new(
                obj: @description, versions: @versions
              ))
     end

@@ -49,7 +49,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   # the currently-selected thumb image without picking another one
   # clears the model field rather than retaining a now-deleted image
   # id. The actual thumb selection is the checked radio in
-  # `FormCarouselItem#button_to_set_thumb_img`; the radios share the
+  # `Form::UploadGallery::Item#button_to_set_thumb_img`; the radios share the
   # same `name`, are posted AFTER this hidden in form order, and the
   # checked one's value wins in Rails' param parsing.
   def render_thumb_image_id_field

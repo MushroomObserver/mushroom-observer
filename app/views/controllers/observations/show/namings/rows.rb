@@ -20,7 +20,8 @@ class Views::Controllers::Observations::Show::Namings
     prop :consensus, ::Observation::NamingConsensus
 
     def view_template
-      ListGroup(id: "namings_table_rows", flush: true) do |list|
+      render(Components::ListGroup::Base.new(id: "namings_table_rows",
+                                             flush: true)) do |list|
         @consensus.merged_namings.each do |merged_naming|
           list.item do
             render(Row.new(naming: merged_naming, user: @user,

@@ -39,7 +39,7 @@ module Views::Layouts
       return unless @any_content_filters_applied
 
       content_for(:filter_help) do
-        render(Components::HelpTooltip.new(
+        render(Components::Help::Tooltip.new(
                  label: "(#{:filtered.t})",
                  title: :rss_filtered_mouseover.t,
                  extra_class: "filter-help"

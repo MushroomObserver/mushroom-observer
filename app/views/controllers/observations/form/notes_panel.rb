@@ -27,10 +27,6 @@ module Views::Controllers::Observations
                ))
       end
 
-      def above_notes_help
-        single_notes_part? ? observation_above_notes_help : nil
-      end
-
       def observation_form_note_parts
         observation_notes_form_parts.map do |part|
           Components::Form::Notes::Part.new(
@@ -62,6 +58,10 @@ module Views::Controllers::Observations
       # this only includes the prose "what to put in notes" copy.
       def observation_above_notes_help
         proc { p { :form_observations_notes_help.t } }
+      end
+
+      def above_notes_help
+        single_notes_part? ? observation_above_notes_help : nil
       end
     end
   end

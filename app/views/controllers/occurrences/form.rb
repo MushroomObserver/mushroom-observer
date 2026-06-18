@@ -190,7 +190,8 @@ module Views::Controllers::Occurrences
     # ---------- Shared per-row rendering ----------
 
     def render_obs_box(obs, &block)
-      MatrixBox(user: @user, object: obs, votes: false) do
+      render(Components::Matrix::Box.new(user: @user, object: obs,
+                                         votes: false)) do
         if block
           yield
         else

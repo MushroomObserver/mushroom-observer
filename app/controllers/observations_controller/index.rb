@@ -21,7 +21,7 @@ class ObservationsController
              ))
     end
 
-    # `Components::MatrixTable` bypasses the fragment cache when
+    # `Components::Matrix::Table` bypasses the fragment cache when
     # rendering for a project admin (the admin-only Exclude button
     # changes the markup). When the obs index is scoped to a project
     # AND the current user is an admin of it, the controller's

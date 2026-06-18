@@ -2,7 +2,7 @@
 
 # Action template for `Observations::SpeciesListsController#edit` —
 # the "manage species lists for this observation" page. Replaces
-# `edit.html.erb`. Renders two `Components::ListGroup`s of
+# `edit.html.erb`. Renders two `Components::ListGroup::Base`s of
 # `SpeciesLists::Listing` rows: lists the observation already
 # belongs to (REMOVE button on each) and lists it doesn't (ADD
 # button on each).
@@ -60,7 +60,7 @@ module Views::Controllers::Observations::SpeciesLists
       return if lists.empty?
 
       h5(class: "mt-3") { plain("#{heading}:") }
-      render(Components::ListGroup.new) do |list|
+      render(Components::ListGroup::Base.new) do |list|
         lists.each do |sl|
           list.item(
             class: "d-flex justify-content-between align-items-start"

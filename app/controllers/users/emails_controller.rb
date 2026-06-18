@@ -16,7 +16,7 @@ module Users
           render(Views::Controllers::Users::Emails::New.new(target: @target))
         end
         format.turbo_stream do
-          render(Components::ModalTurboForm.new(
+          render(Components::Modal::TurboForm.new(
                    identifier: "user_question_email",
                    title: :ask_user_question_title.t(user: @target.legal_name),
                    user: @user,

@@ -2,7 +2,7 @@
 
 module Views::Controllers::Articles
   # Paginated articles index. Page chrome (title, sorter, context-nav,
-  # pagination) + a `Components::ListGroup` of one article-summary
+  # pagination) + a `Components::ListGroup::Base` of one article-summary
   # row per result. Converted from `articles/index.html.erb` +
   # `articles/_object.html.erb`.
   class Index < Views::Base
@@ -25,7 +25,7 @@ module Views::Controllers::Articles
     private
 
     def render_list
-      render(::Components::ListGroup.new) do |list|
+      render(::Components::ListGroup::Base.new) do |list|
         @objects.each do |article|
           list.item { render(ArticleItem.new(article: article)) }
         end

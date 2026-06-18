@@ -13,8 +13,13 @@ module Observations::Images
     # This action returns formatted HTML (upload image template) for one image
     # to the Stimulus form-images_controller. This is added to the page
     # when uploading multiple images on create observation. Returns two
-    # turbo_stream actions: prepend a FormCarouselItem to `#added_images`
-    # and a CarouselThumbnail to `#added_thumbnails`.
+    # turbo_stream actions: prepend a `Form::UploadGallery::TurboStreamSlide`
+    # to `#added_images` and a `Form::UploadGallery::TurboStreamThumb` to
+    # `#added_thumbnails`. (The wrapper components reproduce the
+    # `<div class="item">` / `<li class="carousel-indicator">` shapes that
+    # `Components::Carousel`'s `c.item(...)` / `c.thumb(...)` registration
+    # owns inline — needed for the turbo_stream insertion path because
+    # there's no primitive context there.)
     # was multi_image_template
     def new
       @user = User.current = session_user # || raise("Must be logged in.")
@@ -44,12 +49,11 @@ module Observations::Images
     def prepend_form_carousel_item
       turbo_stream.prepend(
         "added_images",
-        ::Components::FormCarousel::Item.new(
+        ::Components::Form::UploadGallery::TurboStreamSlide.new(
           user: @user, image: @image,
-          img_id: params[:img_id], index: params[:index].to_i,
-          upload: true, obs_thumb_id: nil,
-          camera_info: { file_name: params[:file_name],
-                         file_size: params[:file_size] }
+          img_id: params[:img_id],
+          file_name: params[:file_name],
+          file_size: params[:file_size]
         )
       )
     end
@@ -57,11 +61,8 @@ module Observations::Images
     def prepend_carousel_thumbnail
       turbo_stream.prepend(
         "added_thumbnails",
-        ::Components::Carousel::Thumbnail.new(
-          user: @user, image: @image,
-          img_id: params[:img_id], index: params[:index].to_i,
-          upload: true,
-          carousel_id: "observation_upload_images_carousel"
+        ::Components::Form::UploadGallery::TurboStreamThumb.new(
+          user: @user, image: @image, img_id: params[:img_id]
         )
       )
     end

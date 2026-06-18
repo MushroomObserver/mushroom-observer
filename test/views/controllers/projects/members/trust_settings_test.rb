@@ -4,7 +4,7 @@ require("test_helper")
 
 module Views::Controllers::Projects::Members
   # Tests for TrustSettings (issue #4148).
-  # The form's modal chrome is provided by Components::ModalTurboForm
+  # The form's modal chrome is provided by Components::Modal::TurboForm
   # at render time; these tests cover the form contents only — but the
   # form does emit its own `.modal-body` and `.modal-footer` divs so
   # they're testable here.

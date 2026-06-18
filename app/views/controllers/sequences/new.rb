@@ -26,7 +26,7 @@ module Views::Controllers::Sequences
 
     def render_matrix_column
       ul(class: "row list-unstyled") do
-        render(::Components::MatrixBox.new(
+        render(::Components::Matrix::Box.new(
                  user: current_user,
                  object: @observation.rss_log || @observation,
                  columns: "col-xs-12"

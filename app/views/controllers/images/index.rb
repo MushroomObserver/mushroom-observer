@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Images
-  # Paginated images index — chrome + `Components::MatrixTable` of
+  # Paginated images index — chrome + `Components::Matrix::Table` of
   # one image per row. Converted from `images/index.html.erb`.
   class Index < Views::Base
     prop :query, ::Query
@@ -21,7 +21,7 @@ module Views::Controllers::Images
       flash_error(@error) if @error && @objects.empty?
 
       paginated_results do
-        render(::Components::MatrixTable.new(
+        render(::Components::Matrix::Table.new(
                  objects: @objects, user: current_user
                ))
       end

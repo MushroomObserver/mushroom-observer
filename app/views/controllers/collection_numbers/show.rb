@@ -50,7 +50,7 @@ module Views::Controllers::CollectionNumbers
     end
 
     def render_observation_matrix
-      render(Components::MatrixTable.new(
+      render(Components::Matrix::Table.new(
                objects: @collection_number.observations.to_a, user: @user
              ))
     end

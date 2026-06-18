@@ -132,7 +132,7 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(Components::ModalTurboForm.new(
+      render(Components::Modal::TurboForm.new(
                identifier: modal_identifier,
                title: modal_title,
                user: @user,
@@ -196,7 +196,7 @@ module Observations
                ),
                turbo_stream.replace(
                  "box_title_#{obs_id}",
-                 Components::MatrixBoxTitle.new(
+                 Components::Matrix::Box::Title.new(
                    id: obs_id,
                    name: @observation.user_format_name(@user).
                          t.break_name.small_author,

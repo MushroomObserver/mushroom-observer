@@ -28,7 +28,7 @@ module Views::Controllers::Projects
     private
 
     def render_list_group
-      render(Components::ListGroup.new) do |list|
+      render(Components::ListGroup::Base.new) do |list|
         @objects.each do |project|
           list.item(class: "d-flex align-items-start") do
             render(ListItem.new(project: project))

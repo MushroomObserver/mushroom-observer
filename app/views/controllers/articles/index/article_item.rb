@@ -3,7 +3,7 @@
 module Views::Controllers::Articles
   class Index
     # One row of the articles index. Renders the inner contents of a
-    # `Components::ListGroupItem` (title link + byline + truncated
+    # `Components::ListGroup::Item` (title link + byline + truncated
     # body teaser). Converted from `articles/_object.html.erb`.
     class ArticleItem < Views::Base
       prop :article, ::Article

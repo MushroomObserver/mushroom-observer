@@ -478,7 +478,7 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def render_modal_herbarium_record_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,

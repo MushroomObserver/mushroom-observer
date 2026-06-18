@@ -87,9 +87,9 @@ content_classes = class_names(yield(:container_class), yield(:content_padding))
     <!-- #main_container -->
 
     <!--PROGRESS SPINNER -->
-    <%= render(Components::ModalProgressSpinner.new) %>
+    <%= render(Components::Modal::ProgressSpinner.new) %>
     <!--TURBO CONFIRM MODAL -->
-    <%= render(Components::ModalConfirm.new) %>
+    <%= render(Components::Modal::Confirm.new) %>
     <%= render(Views::Layouts::App::MediaQueryTests.new) %>
     <%= render(Views::Layouts::App::GtmFooter.new) %>
   </body>

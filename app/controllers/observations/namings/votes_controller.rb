@@ -180,7 +180,7 @@ module Observations::Namings
                ),
                turbo_stream.replace(
                  "box_title_#{obs_id}",
-                 Components::MatrixBoxTitle.new(
+                 Components::Matrix::Box::Title.new(
                    id: obs_id,
                    name: @observation.user_format_name(@user).
                          t.break_name.small_author,

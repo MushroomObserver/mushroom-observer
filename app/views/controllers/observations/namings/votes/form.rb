@@ -11,7 +11,7 @@
 # - `Views::Controllers::Observations::Show::Namings::Row` — the
 #   "Your vote" column of the namings sub-panel on the obs show
 #   page. Context: `"namings_table"`.
-# - `Components::MatrixBox` (`#render_identify_ui`) — the
+# - `Components::Matrix::Box` (`#render_identify_ui`) — the
 #   vote-or-propose UI rendered inside a matrix box on index
 #   pages. Context: `"matrix_box"`.
 #
