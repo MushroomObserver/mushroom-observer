@@ -4,7 +4,7 @@ module Views::Controllers::Sequences
   # Sequence detail — obs link, locus, optional BASES, optional
   # deposit (archive + accession), BLAST link, notes, creator.
   # Rendered as a `ContentPadded` block; no panel chrome.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :sequence, ::Sequence
 
     def view_template

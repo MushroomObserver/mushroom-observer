@@ -3,7 +3,7 @@
 # Action template for `Observations::MapsController#show` — the map of
 # a single observation (always one minimal observation in `@observations`).
 module Views::Controllers::Observations::Maps
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :observation, ::Observation
     prop :observations, _Array(::Mappable::MinimalObservation)
     prop :query, _Nilable(::Query), default: nil

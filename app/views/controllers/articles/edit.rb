@@ -3,7 +3,7 @@
 module Views::Controllers::Articles
   # Action template for the edit-article page. Page chrome (title,
   # context-nav) + the shared `Form` component.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :article, ::Article
 
     def view_template

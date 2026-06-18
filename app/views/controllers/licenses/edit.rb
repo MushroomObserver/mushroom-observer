@@ -3,7 +3,7 @@
 module Views::Controllers::Licenses
   # Edit-license page — registers chrome and delegates to the
   # existing `Licenses::Form`.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :license, ::License
 
     def view_template

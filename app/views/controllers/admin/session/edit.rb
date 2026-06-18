@@ -3,7 +3,7 @@
 module Views::Controllers::Admin::Session
   # Form for admins to switch to another user's account. Trivial
   # wrapper: sets the page title and renders the form component.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :form, ::FormObject::AdminSession
 
     def view_template

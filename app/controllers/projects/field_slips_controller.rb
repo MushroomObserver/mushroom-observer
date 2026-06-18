@@ -17,7 +17,7 @@ module Projects
                project: @project, user: @user,
                field_slip_max: @field_slip_max,
                trackers: @trackers
-             ), layout: true)
+             ))
     end
 
     def create

@@ -4,7 +4,7 @@
 # with a different page title; renders the existing naming + vote
 # back into the same Form component.
 module Views::Controllers::Observations::Namings
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     # rubocop:disable Metrics/ParameterLists
     # See sibling `New#initialize` for the same param-list rationale.
     def initialize(observation:, naming:, vote:, given_name:, reasons:,

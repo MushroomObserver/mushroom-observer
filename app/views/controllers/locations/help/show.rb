@@ -5,7 +5,7 @@ module Views::Controllers::Locations
     # Help page for location-naming conventions. Static content —
     # intro paragraph, examples table, numbered rules list. All copy
     # lives in `en.txt`.
-    class Show < Views::Base
+    class Show < Views::FullPageBase
       EXAMPLES = [
         ["Albion,California,  USA",
          "Albion, California, USA",

@@ -2,7 +2,7 @@
 
 module Views::Controllers::Theme
   # BlackOnWhite color-theme description page.
-  class BlackOnWhite < Views::Base
+  class BlackOnWhite < Views::FullPageBase
     def view_template
       add_page_title(:theme_black_on_white.tl)
       add_context_nav(::Tab::Theme::ShowActions.new)

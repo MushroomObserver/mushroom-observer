@@ -5,7 +5,7 @@
 # the existing `Form` Phlex component with the page chrome + a
 # side-column list of MatrixBox previews (one per associated obs).
 module Views::Controllers::CollectionNumbers
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :collection_number, ::CollectionNumber
     prop :user, ::User
     prop :back, _Nilable(String), default: nil

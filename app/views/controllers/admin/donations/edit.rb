@@ -4,7 +4,7 @@ module Views::Controllers::Admin::Donations
   # Review-donations page. Delegates the body to `ReviewForm`; this
   # wrapper sets the page chrome (full-width container, title,
   # context nav).
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :donations, _Array(::Donation)
 
     def view_template

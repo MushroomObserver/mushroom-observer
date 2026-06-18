@@ -2,7 +2,7 @@
 
 module Views::Controllers::Publications
   # New-publication page — chrome + the existing `Publications::Form`.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :publication, ::Publication
 
     def view_template

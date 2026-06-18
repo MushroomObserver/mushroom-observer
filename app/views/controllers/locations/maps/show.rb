@@ -5,7 +5,7 @@
 # `locations/maps/show.html.erb`. No cap banner (Location queries
 # bound to `MO.query_max_array` rather than the obs-style 10k cap).
 module Views::Controllers::Locations::Maps
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :query, ::Query::Locations
     prop :locations, _Array(::Mappable::MinimalLocation)
 

@@ -5,7 +5,7 @@
 # and container width, then renders `Observations::Form` in
 # `:create` mode with the initial form state.
 module Views::Controllers::Observations
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
     prop :location, _Nilable(::Location), default: nil

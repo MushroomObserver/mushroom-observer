@@ -6,7 +6,7 @@ module Views::Controllers::Images
   # vote panel on the right, followed by the copyright /
   # license-badge + versions-footer row. Converted from
   # `images/show.html.erb` + four `show/_*` partials.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :image, ::Image
     # In the normal `Images#show` path, `set_default_size` stores
     # `@size` / `@default_size` as Symbols (via `params[:size].to_sym`

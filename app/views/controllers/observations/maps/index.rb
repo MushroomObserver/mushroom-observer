@@ -7,7 +7,7 @@
 # `Components::Map`, so the view just sets chrome and instantiates
 # the component.
 module Views::Controllers::Observations::Maps
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::Observations
     prop :observations, _Array(::Mappable::MinimalObservation)
     prop :observations_capped, _Boolean, default: false

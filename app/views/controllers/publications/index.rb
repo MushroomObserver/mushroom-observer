@@ -4,7 +4,7 @@ module Views::Controllers::Publications
   # Publications index — intro/citation block + striped table of all
   # publications with peer-review and MO-mentioned flags + admin
   # edit/destroy links.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, _Nilable(::Query), default: nil
     prop :publications, _Array(::Publication)
 

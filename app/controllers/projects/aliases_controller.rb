@@ -20,7 +20,7 @@ module Projects
           render(Views::Controllers::Projects::Aliases::Index.new(
                    project: @project,
                    project_aliases: @project_aliases
-                 ), layout: true)
+                 ))
         end
       end
     end
@@ -32,7 +32,7 @@ module Projects
           render(Views::Controllers::Projects::Aliases::Show.new(
                    project: @project,
                    project_alias: @project_alias
-                 ), layout: true)
+                 ))
         end
       end
     end
@@ -117,14 +117,14 @@ module Projects
       render(Views::Controllers::Projects::Aliases::New.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ), layout: true)
+             ))
     end
 
     def render_alias_edit
       render(Views::Controllers::Projects::Aliases::Edit.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ), layout: true)
+             ))
     end
 
     def redirect_to_project_aliases

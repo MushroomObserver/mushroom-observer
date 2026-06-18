@@ -3,7 +3,7 @@
 # Action template for `Names::TrackersController#edit`. Renders
 # page-chrome + a rank-aware help blurb + the
 # `Names::Trackers::Form` Phlex form on the existing tracker.
-class Views::Controllers::Names::Trackers::Edit < Views::Base
+class Views::Controllers::Names::Trackers::Edit < Views::FullPageBase
   prop :name, ::Name
   prop :name_tracker, ::NameTracker
   prop :note_template, _Nilable(String), default: nil

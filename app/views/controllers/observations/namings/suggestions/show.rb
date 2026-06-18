@@ -15,7 +15,7 @@
 # Replaces the corresponding `show.html.erb` and inlines
 # `SuggestionsHelper#suggestion_confidence`.
 module Views::Controllers::Observations::Namings::Suggestions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
     prop :suggestions, _Array(::Suggestion), default: -> { [] }

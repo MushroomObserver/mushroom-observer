@@ -7,7 +7,7 @@
 #
 # Replaces `app/views/controllers/observations/namings/votes/index.erb`.
 module Views::Controllers::Observations::Namings::Votes
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     # HTML index renders against a raw `Naming` because the page
     # title reads `unique_format_name`. The modal-rendered Table
     # accepts MergedNaming too (see Table's prop).

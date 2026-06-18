@@ -4,7 +4,7 @@ module Views::Controllers::Sequences
   # Paginated list of Sequence rows — each item links to the sequence
   # + its observation, optionally to the GenBank archive + accession,
   # and is footed with creator + timestamp.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :sequences, _Array(::Sequence)
     prop :pagination_data, ::PaginationData

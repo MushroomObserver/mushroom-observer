@@ -3,7 +3,7 @@
 module Views::Controllers::Admin::Donations
   # New-donation page. Delegates the body to `Form`; this wrapper
   # sets the page title and context nav.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :donation, ::Donation
 
     def view_template

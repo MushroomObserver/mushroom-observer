@@ -13,7 +13,7 @@
 # whole tbody) with table-level Stimulus attrs passed via
 # `attributes:`.
 module Views::Controllers::SpeciesLists::NameLists
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(name_strings:, user:)
       super()
       @name_strings = name_strings

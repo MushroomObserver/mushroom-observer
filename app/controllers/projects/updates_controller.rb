@@ -13,7 +13,7 @@ module Projects
       render(Views::Controllers::Projects::Updates::Index.new(
                project: @project, user: @user, results: results,
                show_excluded: show_excluded?
-             ), layout: true)
+             ))
     end
 
     # Single observation add via Turbo. If excluded, un-excludes as a side

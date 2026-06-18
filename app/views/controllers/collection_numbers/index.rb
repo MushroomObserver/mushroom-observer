@@ -7,7 +7,7 @@
 # `ApplicationController` default to render this class directly with
 # explicit props.
 module Views::Controllers::CollectionNumbers
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::CollectionNumbers
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::CollectionNumber)

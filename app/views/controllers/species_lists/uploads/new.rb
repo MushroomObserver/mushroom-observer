@@ -3,7 +3,7 @@
 # Phlex view for the species-list upload page. Page chrome plus the
 # inline `Form` that posts the file under `species_list[file]`.
 module Views::Controllers::SpeciesLists::Uploads
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(species_list:)
       super()
       @species_list = species_list

@@ -2,7 +2,7 @@
 
 # Action template for `Names::ClassificationController#edit`.
 # Page-chrome + the `Names::Classification::Form` Phlex form.
-class Views::Controllers::Names::Classification::Edit < Views::Base
+class Views::Controllers::Names::Classification::Edit < Views::FullPageBase
   prop :name, ::Name
 
   def view_template

@@ -2,7 +2,7 @@
 
 module Views::Controllers::Herbaria::Search
   # Action view for the herbaria search form page. Replaces new.erb.
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(search:, controller:, local:)
       super()
       @search = search

@@ -3,7 +3,7 @@
 module Views::Controllers::Licenses
   # New-license page — registers chrome and delegates to the
   # existing `Licenses::Form`.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :license, ::License
 
     def view_template

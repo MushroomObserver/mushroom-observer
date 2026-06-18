@@ -2,7 +2,7 @@
 
 module Views::Controllers::Publications
   # Read-only publication detail page.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :publication, ::Publication
 
     def view_template

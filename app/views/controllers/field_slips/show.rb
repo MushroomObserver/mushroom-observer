@@ -7,7 +7,7 @@
 #
 # Replaces `app/views/controllers/field_slips/show.html.erb`.
 module Views::Controllers::FieldSlips
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :field_slip, ::FieldSlip
     prop :notice, _Nilable(String), default: nil
 

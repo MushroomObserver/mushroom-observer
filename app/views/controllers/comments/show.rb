@@ -6,7 +6,7 @@
 #
 # Replaces `app/views/controllers/comments/show.html.erb`.
 module Views::Controllers::Comments
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :comment, ::Comment
     prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil

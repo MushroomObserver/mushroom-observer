@@ -46,8 +46,7 @@ module SpeciesLists
           member_alt: @member_alt,
           member_is_collection_location: @member_is_collection_location,
           member_specimen: @member_specimen
-        ),
-        layout: true
+        )
       )
     end
 

@@ -3,7 +3,7 @@
 module Views::Controllers::Projects::Members
   # Phlex view for the add members page.
   # Replaces members/new.html.erb.
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(project:, users:, project_member:,
                    user:)
       super()

@@ -6,7 +6,7 @@
 # project-button row (download / map / observations / names / etc.),
 # search box, observations list, comments, object footer.
 module Views::Controllers::SpeciesLists
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     # rubocop:disable Metrics/ParameterLists
     # See `Edit#initialize` — action views forward whatever the page
     # needs; `ParameterLists` isn't on the CLAUDE.md "always refactor"

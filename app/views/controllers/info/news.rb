@@ -2,7 +2,7 @@
 
 module Views::Controllers::Info
   # News page — static textile content.
-  class News < Views::Base
+  class News < Views::FullPageBase
     def view_template
       add_page_title(:news_title.l)
 

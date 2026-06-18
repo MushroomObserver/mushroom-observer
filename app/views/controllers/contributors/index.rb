@@ -5,7 +5,7 @@ module Views::Controllers::Contributors
   # context-nav, pagination) + a one-row collapsible Legend +
   # a MatrixTable of user matrix-boxes. Converted from
   # `contributors/index.html.erb` + `contributors/_legend.erb`.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::User)

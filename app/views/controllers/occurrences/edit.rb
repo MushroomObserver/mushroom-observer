@@ -3,7 +3,7 @@
 # Phlex view for the occurrence edit page.
 # Optionally overlays a project membership confirmation modal.
 module Views::Controllers::Occurrences
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     def initialize(occurrence:, observations:, candidates:,
                    user:, project_gaps: nil)
       super()

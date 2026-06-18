@@ -2,7 +2,7 @@
 
 # Action template for `Names::SearchController#new`. Renders the
 # `Components::Form::Search` inside a wide container.
-class Views::Controllers::Names::Search::New < Views::Base
+class Views::Controllers::Names::Search::New < Views::FullPageBase
   # `@search = Query.create_query(query_model, @query_params)` per
   # the `Searchable` concern — a `Query::Names` in this context.
   prop :search, _Nilable(::Query::Names), default: nil

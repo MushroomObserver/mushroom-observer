@@ -3,7 +3,7 @@
 # Action view for `locations/descriptions#show`. Sets the chrome and
 # delegates the body to the three description show-page panels.
 module Views::Controllers::Locations::Descriptions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :description, ::LocationDescription
     prop :user, _Nilable(::User), default: nil
     # Controller always passes — no need for a default fallback.

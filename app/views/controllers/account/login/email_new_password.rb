@@ -8,7 +8,7 @@
 # Replaces
 # `app/views/controllers/account/login/email_new_password.html.erb`.
 module Views::Controllers::Account::Login
-  class EmailNewPassword < Views::Base
+  class EmailNewPassword < Views::FullPageBase
     prop :new_user, _Nilable(::User)
 
     def view_template

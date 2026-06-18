@@ -4,7 +4,7 @@
 # `Names::Lifeforms::PropagateController#edit`. Page-chrome +
 # the `Names::Lifeforms::Propagate::Form` Phlex form.
 class Views::Controllers::Names::Lifeforms::Propagate::Edit <
-  Views::Base
+  Views::FullPageBase
   prop :name, ::Name
 
   def view_template

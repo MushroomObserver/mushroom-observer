@@ -4,7 +4,7 @@
 # "download observations" page. Sets the page title and renders
 # `Downloads::Form` (the format / encoding / submit form).
 module Views::Controllers::Observations::Downloads
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :query_param, _Nilable(Hash), default: nil
 
     def view_template

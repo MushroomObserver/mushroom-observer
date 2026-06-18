@@ -8,7 +8,7 @@
 #
 # Replaces `app/views/controllers/field_slips/new.html.erb`.
 module Views::Controllers::FieldSlips
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :field_slip, ::FieldSlip
     # URL-param passthrough — `params[:species_list]` carries the
     # SpeciesList's id (as a String) the new obs should also be

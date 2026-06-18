@@ -14,7 +14,7 @@
 # `ApplicationController` default to render this class directly with
 # explicit props.
 module Views::Controllers::Observations
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::Observations
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Observation)

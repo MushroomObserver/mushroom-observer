@@ -2,7 +2,7 @@
 
 # Action template for `Names::Synonyms::ApproveController#new`.
 # Page-chrome + the `Names::Synonyms::Approve::Form` Phlex form.
-class Views::Controllers::Names::Synonyms::Approve::New < Views::Base
+class Views::Controllers::Names::Synonyms::Approve::New < Views::FullPageBase
   prop :name, ::Name
   # `Name#approved_synonyms` returns an Array of Names — the form
   # lists each as a candidate to approve.

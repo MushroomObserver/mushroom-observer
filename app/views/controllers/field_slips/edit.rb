@@ -8,7 +8,7 @@
 #
 # Replaces `app/views/controllers/field_slips/edit.html.erb`.
 module Views::Controllers::FieldSlips
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :field_slip, ::FieldSlip
     prop :recent_observations, _Array(::Observation)
     # `Occurrence#project_membership_gaps` returns a Hash of the

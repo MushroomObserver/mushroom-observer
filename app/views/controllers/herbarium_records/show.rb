@@ -3,7 +3,7 @@
 # Action template for `HerbariumRecordsController#show`. Replaces
 # `app/views/controllers/herbarium_records/show.html.erb`.
 module Views::Controllers::HerbariumRecords
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :herbarium_record, ::HerbariumRecord
     prop :user, ::User
 

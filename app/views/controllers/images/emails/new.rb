@@ -4,7 +4,7 @@ module Views::Controllers::Images
   module Emails
     # Commercial-inquiry email form for one image. Converted from
     # `images/emails/new.erb`.
-    class New < Views::Base
+    class New < Views::FullPageBase
       prop :image, ::Image
       prop :message, _Nilable(::String), default: nil
 

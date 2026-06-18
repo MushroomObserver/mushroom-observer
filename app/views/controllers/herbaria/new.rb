@@ -2,7 +2,7 @@
 
 module Views::Controllers::Herbaria
   # Action view for the new herbarium form page. Replaces new.html.erb.
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(herbarium:, user:)
       super()
       @herbarium = herbarium

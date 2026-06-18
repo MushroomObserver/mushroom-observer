@@ -4,7 +4,7 @@ module Views::Controllers::Herbaria
   # Paginated herbaria index. Page chrome + optional merge-mode
   # Alert + `Components::Table` of one row per herbarium. Converted
   # from `herbaria/index.html.erb`.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Herbarium)

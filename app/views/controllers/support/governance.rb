@@ -2,7 +2,7 @@
 
 module Views::Controllers::Support
   # Project governance page — static textile body.
-  class Governance < Views::Base
+  class Governance < Views::FullPageBase
     def view_template
       add_page_title(:governance_title.l)
       add_context_nav(::Tab::Support::GovernanceActions.new)

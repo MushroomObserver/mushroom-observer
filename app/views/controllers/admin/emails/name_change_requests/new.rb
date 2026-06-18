@@ -3,7 +3,7 @@
 module Views::Controllers::Admin::Emails::NameChangeRequests
   # Email-the-curators-about-a-name-change page. Wrapper for the
   # Form, with page title + context nav.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :name, ::Name
     prop :new_name_with_icn_id, _Nilable(::String), default: nil
 

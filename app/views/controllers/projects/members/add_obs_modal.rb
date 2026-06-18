@@ -7,7 +7,7 @@ module Views::Controllers::Projects::Members
   # so there's no wrapping form to coordinate, just a Cancel +
   # Submit button row in `.modal-footer`. Renders nothing in the
   # body when count is zero except the "none match" message.
-  class AddObsModal < Views::Base
+  class AddObsModal < Views::FullPageBase
     def initialize(project:, candidate:, count:, batch_limit:)
       super()
       @project = project

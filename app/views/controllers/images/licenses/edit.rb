@@ -4,7 +4,7 @@ module Views::Controllers::Images
   module Licenses
     # Image-licenses updater page. Wrap of `Licenses::Form`.
     # Converted from `images/licenses/edit.html.erb`.
-    class Edit < Views::Base
+    class Edit < Views::FullPageBase
       prop :form, ::FormObject::ImageLicenseUpdates
       prop :user, ::User
 

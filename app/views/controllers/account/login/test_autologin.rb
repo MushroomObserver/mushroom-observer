@@ -5,7 +5,7 @@
 # autologin flow check. Replaces
 # `app/views/controllers/account/login/test_autologin.html.erb`.
 module Views::Controllers::Account::Login
-  class TestAutologin < Views::Base
+  class TestAutologin < Views::FullPageBase
     def view_template
       p { plain("This page is used to test the autologin feature.") }
     end

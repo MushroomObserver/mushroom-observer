@@ -3,7 +3,7 @@
 module Views::Controllers::GlossaryTerms
   # Wrap of `GlossaryTerms::Form` for the create-new flow.
   # Converted from `glossary_terms/new.html.erb`.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :glossary_term, ::GlossaryTerm
     prop :copyright_holder, _Nilable(::String), default: nil
     prop :copyright_year, _Nilable(::Integer), default: nil

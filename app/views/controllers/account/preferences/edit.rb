@@ -6,7 +6,7 @@
 # live inline next to their related selects inside the Privacy
 # section of the form, rather than as a footer row outside it.
 module Views::Controllers::Account::Preferences
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :user, _Nilable(User)
     prop :licenses, _Array(_Tuple(String, Integer))
     prop :languages, _Array(::Language)

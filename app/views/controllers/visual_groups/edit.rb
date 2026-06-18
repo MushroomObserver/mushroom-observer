@@ -6,7 +6,7 @@
 # lives in `Views::Controllers::VisualGroups::ImageMatrix` and is
 # shared with the show page.
 module Views::Controllers::VisualGroups
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :visual_group, VisualGroup
     prop :user, _Nilable(User)
     prop :filter, _Nilable(String)

@@ -78,7 +78,7 @@ class ProjectsController < ApplicationController
              project: @project, user: @user,
              drafts: @drafts, comments: @comments.to_a,
              object_names: @object_names
-           ), layout: true)
+           ))
   end
 
   ##############################################################################
@@ -207,7 +207,7 @@ class ProjectsController < ApplicationController
     render(Views::Controllers::Projects::New.new(
              project: @project, dates_any: @project_dates_any,
              upload_params: upload_params_hash
-           ), layout: true)
+           ))
   end
 
   # Re-renders the Admin/Details page on validation failure so the
@@ -221,7 +221,7 @@ class ProjectsController < ApplicationController
              project: @project, user: @user,
              dates_any: @project_dates_any,
              upload_params: upload_params_hash
-           ), layout: true)
+           ))
   end
 
   def upload_params_hash

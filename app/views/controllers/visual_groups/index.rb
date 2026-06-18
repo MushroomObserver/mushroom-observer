@@ -4,7 +4,7 @@
 # `index.html.erb` — just renders the shared visual-group table for
 # the current visual model.
 module Views::Controllers::VisualGroups
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :visual_model, VisualModel
     prop :visual_groups, _Array(VisualGroup)
 

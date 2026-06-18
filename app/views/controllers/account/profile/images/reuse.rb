@@ -4,7 +4,7 @@
 # the "pick an existing image as your profile picture" page. Renders
 # the shared `ImagesToReuseForm`.
 module Views::Controllers::Account::Profile::Images
-  class Reuse < Views::Base
+  class Reuse < Views::FullPageBase
     prop :user, ::User
     prop :objects, _Array(::Image)
     prop :pagination_data, ::PaginationData

@@ -4,7 +4,7 @@
 # "ask the observer a question" page. Sets the page title and
 # renders `Emails::Form` (the observer-question form).
 module Views::Controllers::Observations::Emails
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :observation, ::Observation
 
     def view_template

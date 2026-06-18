@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Projects::Updates
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     def initialize(project:, user:, results:, show_excluded:)
       super()
       @project = project

@@ -2,7 +2,7 @@
 
 module Views::Controllers::Sequences
   # Sequence-create page.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :sequence, ::Sequence
     prop :observation, ::Observation
 

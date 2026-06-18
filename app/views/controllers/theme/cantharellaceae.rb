@@ -2,7 +2,7 @@
 
 module Views::Controllers::Theme
   # Cantharellaceae color-theme detail page.
-  class Cantharellaceae < Views::Base
+  class Cantharellaceae < Views::FullPageBase
     SPECIES = [
       SpeciesRow[:tp, :theme_cantharellaceae_californicus,
                  "Cantharellus californicus", 557],

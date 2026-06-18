@@ -9,7 +9,7 @@
 # `Projects::LocationsController#render_locations_index_view` renders
 # this class directly with explicit props.
 module Views::Controllers::Projects::Locations
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :project, ::Project
     # `[{ target: Location, sub_locations: [Location, ...] }, ...]`
     # (or `[]` when the project has no target locations).

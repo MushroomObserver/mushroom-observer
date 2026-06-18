@@ -9,7 +9,7 @@
 #
 # Replaces `app/views/controllers/comments/index.html.erb`.
 module Views::Controllers::Comments
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::Comments
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Comment)

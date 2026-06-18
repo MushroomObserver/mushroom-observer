@@ -5,7 +5,7 @@
 # button beside their name, plus a user-autocompleter + "Add Author"
 # submit at the bottom (`AddAuthorForm`).
 module Views::Controllers::Descriptions::Authors
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :object, ::AbstractModel
     # Callers pass `@description.authors.to_a` — the controller
     # converts the has_many-through CollectionProxy at the boundary.

@@ -3,7 +3,7 @@
 module Views::Controllers::Locations
   module Search
     # Locations search form page.
-    class New < Views::Base
+    class New < Views::FullPageBase
       prop :search, ::Query
       prop :local, _Boolean, default: true
 

@@ -17,7 +17,7 @@ module Projects
                project: @project, user: @user,
                dates_any: @project_dates_any,
                upload_params: upload_params_hash
-             ), layout: true)
+             ))
     end
 
     private

@@ -4,7 +4,7 @@
 # edit-icons row, page width) and delegates the body to the three
 # Phlex panels that own the description show-page.
 module Views::Controllers::Names::Descriptions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :description, ::NameDescription
     prop :user, _Nilable(::User), default: nil
     # Controller always passes — no need for a default fallback.

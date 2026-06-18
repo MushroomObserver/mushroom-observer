@@ -8,7 +8,7 @@ module Views::Controllers::Herbaria
   # curator-request link, plus optional notes + mailing address;
   # right side has the location map. Converted from
   # `herbaria/show.html.erb`.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     include ::Phlex::Rails::Helpers::FormAuthenticityToken
 
     prop :herbarium, ::Herbarium

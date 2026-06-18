@@ -7,7 +7,7 @@
 #
 # Replaces `app/views/controllers/account/profile/edit.html.erb`.
 module Views::Controllers::Account::Profile
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :user, ::User
     prop :copyright_holder, _Nilable(String)
     prop :copyright_year, Integer

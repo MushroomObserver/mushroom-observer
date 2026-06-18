@@ -3,7 +3,7 @@
 module Views::Controllers::Locations
   # Edit page wrapper — renders the existing `Locations::Form` after
   # registering page-title / context-nav chrome.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :location, ::Location
     prop :display_name, _Nilable(::String), default: nil
     prop :dubious_where_reasons, _Nilable(_Array(::String)), default: nil

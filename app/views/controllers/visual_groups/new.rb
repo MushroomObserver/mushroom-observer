@@ -3,7 +3,7 @@
 # Action view for `visual_groups#new`. Replaces the 4-line
 # `new.html.erb` — just the form (already Phlex) + a back link.
 module Views::Controllers::VisualGroups
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :visual_model, VisualModel
     prop :visual_group, VisualGroup
 

@@ -6,7 +6,7 @@
 # verification instructions. Replaces
 # `app/views/controllers/account/verifications/new.html.erb`.
 module Views::Controllers::Account::Verifications
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :user, ::User
 
     def view_template

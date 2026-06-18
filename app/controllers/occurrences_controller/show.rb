@@ -59,8 +59,7 @@ module OccurrencesController::Show
         occurrence: @occurrence,
         observations: ordered_observations,
         user: @user
-      ),
-      layout: true
+      )
     )
   end
 end

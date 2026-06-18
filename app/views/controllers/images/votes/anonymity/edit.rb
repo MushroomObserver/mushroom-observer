@@ -5,7 +5,7 @@ module Views::Controllers::Images
     module Anonymity
       # Image-vote-anonymity edit page. Wrap of `Anonymity::Form`.
       # Converted from `images/votes/anonymity/edit.html.erb`.
-      class Edit < Views::Base
+      class Edit < Views::FullPageBase
         prop :num_anonymous, ::Integer
         prop :num_public, ::Integer
 

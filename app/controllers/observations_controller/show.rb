@@ -54,7 +54,7 @@ module ObservationsController::Show
              images: @images || [], other_sites: @other_sites,
              sibling_observations: @sibling_observations,
              occurrence: @occurrence, owner_name: @owner_name
-           ), layout: true)
+           ))
   end
 
   # Tell search engines what the "correct" URL is for this page.

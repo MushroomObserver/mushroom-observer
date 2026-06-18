@@ -5,7 +5,7 @@ module Views::Controllers::Articles
   # pagination) + a `Components::ListGroup::Base` of one article-summary
   # row per result. Converted from `articles/index.html.erb` +
   # `articles/_object.html.erb`.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Article)

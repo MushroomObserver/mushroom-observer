@@ -4,7 +4,7 @@ module Views::Controllers::InatImports
   # iNat import-confirmation page. Renders the form (already a
   # Phlex `ConfirmForm`) with import estimate + unlicensed-obs
   # numbers passed through.
-  class Confirm < Views::Base
+  class Confirm < Views::FullPageBase
     prop :confirm_form, ::FormObject::InatImportConfirm
     prop :estimate, ::Integer
     # `fetch_unlicensed_*_count` returns nil when the iNat licensed-

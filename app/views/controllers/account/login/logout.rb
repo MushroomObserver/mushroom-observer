@@ -5,7 +5,7 @@
 # textile-rendered farewell note. Replaces
 # `app/views/controllers/account/login/logout.html.erb`.
 module Views::Controllers::Account::Login
-  class Logout < Views::Base
+  class Logout < Views::FullPageBase
     def view_template
       add_page_title(:logout_title.t)
       trusted_html(:logout_note.tp)

@@ -3,7 +3,7 @@
 module Views::Controllers::Projects::Aliases
   # Phlex view for the project alias show page.
   # Replaces aliases/show.html.erb.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     def initialize(project:, project_alias:)
       super()
       @project = project

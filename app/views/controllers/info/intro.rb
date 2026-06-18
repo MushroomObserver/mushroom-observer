@@ -2,7 +2,7 @@
 
 module Views::Controllers::Info
   # Intro / project-overview page. Pure static textile-rendered copy.
-  class Intro < Views::Base
+  class Intro < Views::FullPageBase
     def view_template
       add_page_title(:intro_title.l)
 

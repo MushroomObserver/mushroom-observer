@@ -13,7 +13,7 @@
 # setup inside its own `view_template`, where the block IS
 # forwarded.
 module Views::Controllers::Observations::Namings::Votes
-  class Modal < Views::Base
+  class Modal < Views::FullPageBase
     prop :naming, _Union(::Naming, ::Observation::MergedNaming)
     prop :user, _Nilable(::User), default: nil
     prop :modal_id, String

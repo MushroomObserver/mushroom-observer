@@ -25,7 +25,7 @@ module Projects
       render(Views::Controllers::Projects::Members::Index.new(
                project: @project, users: users,
                project_member: project_member, user: @user
-             ), layout: true)
+             ))
     end
 
     # View that lists all verified users with links to add each as a member.
@@ -48,7 +48,7 @@ module Projects
       render(Views::Controllers::Projects::Members::New.new(
                project: @project, users: users,
                project_member: project_member, user: @user
-             ), layout: true)
+             ))
     end
 
     def create
@@ -159,7 +159,7 @@ module Projects
                project: @project,
                project_member: @project_member,
                user: @user
-             ), layout: true)
+             ))
     end
 
     def find_project!

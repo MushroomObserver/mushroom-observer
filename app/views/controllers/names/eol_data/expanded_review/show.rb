@@ -6,7 +6,7 @@
 # counts. `@data` is an `EolData` PORO (duck-typed via the methods
 # called below).
 class Views::Controllers::Names::EolData::ExpandedReview::Show <
-  Views::Base
+  Views::FullPageBase
   prop :data, _Interface(:name_count, :total_image_count,
                          :total_description_count, :names,
                          :has_images?, :image_count,

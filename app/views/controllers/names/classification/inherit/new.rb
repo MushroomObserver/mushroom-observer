@@ -4,7 +4,7 @@
 # `Names::Classification::InheritController#new`. Page-chrome +
 # the `Names::Classification::Inherit::Form` Phlex form.
 class Views::Controllers::Names::Classification::Inherit::New <
-  Views::Base
+  Views::FullPageBase
   prop :name, ::Name
   prop :parent_text_name, _Nilable(String), default: nil
   # `@candidates` carries the ambiguous-parent disambiguation list —

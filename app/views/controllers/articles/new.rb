@@ -3,7 +3,7 @@
 module Views::Controllers::Articles
   # Action template for the new-article page. Page chrome (title,
   # context-nav) + the shared `Form` component.
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :article, ::Article
 
     def view_template

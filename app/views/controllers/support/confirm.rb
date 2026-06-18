@@ -3,7 +3,7 @@
 module Views::Controllers::Support
   # Donation confirmation page — shows the user the donation details
   # they entered and provides a PayPal hand-off button.
-  class Confirm < Views::Base
+  class Confirm < Views::FullPageBase
     prop :donation, ::Donation
 
     def view_template

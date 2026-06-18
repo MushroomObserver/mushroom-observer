@@ -3,7 +3,7 @@
 # Action view for `names/descriptions#new`. Sets the chrome and
 # renders the shared description form.
 module Views::Controllers::Names::Descriptions
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :name, ::Name
     prop :description, ::NameDescription
     prop :user, _Nilable(::User), default: nil

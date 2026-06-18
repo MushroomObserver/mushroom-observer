@@ -6,7 +6,7 @@ module Views::Controllers::Images
     # standalone `<div id="exif_data_table">` table (via
     # `Components::Table` body mode). Converted from
     # `images/exif/show.erb` + `images/exif/_data.erb`.
-    class Show < Views::Base
+    class Show < Views::FullPageBase
       prop :image, ::Image
       prop :data, _Nilable(_Array(_Array(::String))), default: nil
 

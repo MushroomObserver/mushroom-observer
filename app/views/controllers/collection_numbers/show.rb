@@ -3,7 +3,7 @@
 # Action template for `CollectionNumbersController#show`. Replaces
 # `app/views/controllers/collection_numbers/show.html.erb`.
 module Views::Controllers::CollectionNumbers
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :collection_number, ::CollectionNumber
     prop :user, ::User
 

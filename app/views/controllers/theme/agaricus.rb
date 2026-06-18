@@ -2,7 +2,7 @@
 
 module Views::Controllers::Theme
   # Agaricus color-theme detail page.
-  class Agaricus < Views::Base
+  class Agaricus < Views::FullPageBase
     SPECIES = [
       SpeciesRow[:tp, :theme_agaricus_campestris, "Agaricus campestris", 694],
       SpeciesRow[:tp, :theme_agaricus_cupreobrunneus,

@@ -3,7 +3,7 @@
 module Views::Controllers::Names::Descriptions
   # Paginated list of NameDescription records — one striped table
   # of links to each description's show page.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query
     prop :descriptions, _Array(::NameDescription)
     prop :pagination_data, ::PaginationData

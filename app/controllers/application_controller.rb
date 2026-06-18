@@ -52,6 +52,7 @@ class ApplicationController < ActionController::Base
   before_action :set_timezone
   before_action :track_translations
   before_action :set_languages
+  before_action :apply_user_theme_change
 
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
@@ -117,14 +118,14 @@ class ApplicationController < ActionController::Base
     false
   end
 
-  # Enable this to test other layouts...
-  layout :choose_layout
-  def choose_layout
+  # Phlex picks the wrapping layout in `Views::Base#around_template`
+  # based on `session[:layout]`. This filter keeps the `?user_theme=…`
+  # side effect: a known theme name is persisted on the user or in
+  # the session, an unknown value lands in `session[:layout]` and
+  # the next render's Phlex layout-picker reads it.
+  def apply_user_theme_change
     change = params[:user_theme].to_s
     change_theme_to(change) if change.present?
-    layout = session[:layout].to_s
-    layout = "application" if layout.blank?
-    layout
   end
 
   def change_theme_to(change)
@@ -356,6 +357,15 @@ class ApplicationController < ActionController::Base
   end
   helper_method :query_images_to_reuse
   helper_method :q_param
+
+  # Request-context accessor consumed by the Phlex layout (via
+  # `register_value_helper :current_languages` on `Components::Base`).
+  # Same shape as `current_user`. The `set_languages` before_action
+  # populates `@languages` once per request.
+  def current_languages
+    @languages
+  end
+  helper_method :current_languages
 
   ##############################################################################
 

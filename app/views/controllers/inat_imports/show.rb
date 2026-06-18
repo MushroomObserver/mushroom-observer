@@ -4,7 +4,7 @@ module Views::Controllers::InatImports
   # Shows the progress / completion state of one iNat import. The
   # `status_<tracker_id>` container is what the Stimulus
   # `inat-import-job` controller polls to refresh.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :tracker, ::InatImportJobTracker
     prop :inat_import, ::InatImport
     prop :user, ::User

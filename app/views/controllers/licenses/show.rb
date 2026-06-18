@@ -2,7 +2,7 @@
 
 module Views::Controllers::Licenses
   # Read-only license detail page.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :license, ::License
 
     def view_template

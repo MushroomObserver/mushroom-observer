@@ -3,7 +3,7 @@
 module Views::Controllers::Admin::Emails::MergeRequests
   # Email-the-webmaster-to-merge-two-objects page. Wrapper that
   # sets the page title + context nav and renders the Form.
-  class New < Views::Base
+  class New < Views::FullPageBase
     # `@model` is the class itself (Herbarium / Location / Name);
     # `@old_obj` / `@new_obj` are instances of one of those three —
     # the only models validated as mergeable by

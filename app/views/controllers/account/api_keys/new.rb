@@ -6,7 +6,7 @@
 #
 # Replaces `app/views/controllers/account/api_keys/new.html.erb`.
 module Views::Controllers::Account::APIKeys
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :key, ::APIKey
 
     def view_template

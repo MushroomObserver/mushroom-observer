@@ -2,7 +2,7 @@
 
 module Views::Controllers::Support
   # Open letter (governance area).
-  class Letter < Views::Base
+  class Letter < Views::FullPageBase
     def view_template
       add_page_title(:letter_title.l)
       add_context_nav(::Tab::Support::GovernanceActions.new)

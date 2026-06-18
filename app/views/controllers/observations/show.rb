@@ -20,7 +20,7 @@
 # are inside `add_owner_naming` (`title_helper.rb`) and the
 # obs-title chain in `observations_helper.rb`.
 module Views::Controllers::Observations
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     # rubocop:disable Metrics/ParameterLists
     # The show page consumes every obs-derived ivar the controller
     # builds; the param list mirrors the controller's `@ivar`s.

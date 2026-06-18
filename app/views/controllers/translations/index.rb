@@ -3,7 +3,7 @@
 module Views::Controllers::Translations
   # Translations index — list of tags + headers on the left, edit
   # form + version history on the right.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :lang, ::Language
     prop :tag, _Nilable(::String), default: nil
     prop :for_page, _Nilable(::String), default: nil

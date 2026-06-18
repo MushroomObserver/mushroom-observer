@@ -5,7 +5,7 @@
 # `Views::Controllers::VisualGroups::ImageMatrix` (always with status
 # `"included"` for the show page).
 module Views::Controllers::VisualGroups
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :visual_group, VisualGroup
     prop :user, _Nilable(User)
     prop :filter, _Nilable(String)

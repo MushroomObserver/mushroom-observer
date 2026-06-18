@@ -2,7 +2,7 @@
 
 module Views::Controllers::Licenses
   # Licenses index — read-only list of every License row.
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :objects, _Array(::License)
     prop :error, _Nilable(::String), default: nil
 

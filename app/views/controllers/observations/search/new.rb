@@ -10,7 +10,7 @@
 # matches that "render full chrome" semantic in case a future caller
 # constructs this view without going through the action.
 module Views::Controllers::Observations::Search
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :search, ::Query::Observations
     prop :local, _Boolean, default: true
 

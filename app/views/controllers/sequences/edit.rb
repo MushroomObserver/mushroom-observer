@@ -2,7 +2,7 @@
 
 module Views::Controllers::Sequences
   # Sequence-edit page.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :sequence, ::Sequence
     prop :back, _Nilable(::String), default: nil
     prop :back_object, _Nilable(

@@ -7,7 +7,7 @@
 # `clone_id` is set when the user lands on `?clone=<id>` — the form
 # pre-populates from another species_list.
 module Views::Controllers::SpeciesLists
-  class New < Views::Base
+  class New < Views::FullPageBase
     # rubocop:disable Metrics/ParameterLists
     # See `Edit#initialize` — action views forward whatever the form
     # needs; `ParameterLists` isn't on the CLAUDE.md "always refactor"

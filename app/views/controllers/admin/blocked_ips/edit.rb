@@ -5,7 +5,7 @@ module Views::Controllers::Admin::BlockedIps
   # layout: left has the okay-IPs and blocked-IPs Manager forms,
   # right has the optional per-IP stats panel + global most-active-
   # users summary panel. Converted from `admin/blocked_ips/edit.html.erb`.
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :ip, _Nilable(::String), default: nil
     prop :stats, ::Hash
     prop :okay, ::Admin::BlockedIps::IpListState
