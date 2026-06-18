@@ -8,16 +8,18 @@ require("test_helper")
 # when `session[:layout] == "printable"`).
 #
 # Tests use a recording stub layout that captures the props it
-# receives + emits the captured inner HTML, so the dispatch +
-# prop-forwarding contract is asserted without pulling in every
-# sub-component helper chain. End-to-end layout structure is tested
-# in `Views::Layouts::ApplicationTest` / `…::PrintableTest`.
+# receives and yields the action's block inside its own wrapper, so
+# the dispatch + prop-forwarding contract is asserted without
+# pulling in every sub-component helper chain. End-to-end layout
+# structure is tested in `Views::Layouts::ApplicationTest` /
+# `…::PrintableTest`.
 class Views::FullPageBaseTest < ComponentTestCase
   # Records the constructed props in a class-level Hash. Emits a
-  # `<div class="stub-app">…</div>` wrapper around the captured inner
-  # HTML so tests can assert the action's content survives the wrap.
+  # `<div class="stub-app">…</div>` wrapper around the yielded action
+  # content so tests can assert the action's HTML survives the wrap
+  # by inspecting the rendered output.
   class RecordingApplication < Components::Base
-    CAPTURED = { props: nil, inner: nil }.dup
+    CAPTURED = { props: nil }.dup
 
     prop :canonical_url, _Nilable(::String), default: nil
     prop :any_content_filters_applied, _Nilable(_Boolean), default: nil
@@ -69,7 +71,6 @@ class Views::FullPageBaseTest < ComponentTestCase
   def setup
     super
     RecordingApplication::CAPTURED[:props] = nil
-    RecordingApplication::CAPTURED[:inner] = nil
     RecordingPrintable::CAPTURED[:invoked] = false
   end
 

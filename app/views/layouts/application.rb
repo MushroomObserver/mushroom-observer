@@ -16,8 +16,11 @@ module Views::Layouts
     register_value_helper :browser
     register_value_helper :request
 
-    # Action-specific chrome customizations passed through from
-    # `Views::FullPageBase` via the controller's `render(...)` call.
+    # Action-specific customizations. `Views::FullPageBase#layout_props`
+    # reads these off the controller's instance variables
+    # (`@canonical_url`, `@any_content_filters_applied`) and forwards
+    # them into this layout's constructor; the layout itself doesn't
+    # touch the controller.
     prop :canonical_url, _Nilable(::String), default: nil
     prop :any_content_filters_applied, _Nilable(_Boolean), default: nil
 

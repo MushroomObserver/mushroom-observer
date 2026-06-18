@@ -1,14 +1,16 @@
 # frozen_string_literal: true
 
-# The print-friendly application layout. Selected by `Views::Base#
-# around_template` when `session[:layout] == "printable"` (set by
-# `ApplicationController::Authentication#change_theme_to` when the
-# user picks the "printable" theme).
+# The print-friendly application layout. Selected by
+# `Views::FullPageBase#around_template` when
+# `session[:layout] == "printable"` (set by
+# `ApplicationController#change_theme_to` when the user picks the
+# "printable" theme).
 #
-# Doesn't extend `Views::Base` on purpose: `Views::Base#around_template`
-# is the one that picks the layout, and re-entering it from the layout
-# itself would recurse. Layout classes sit one level above the chain
-# `Views::Base` wraps.
+# Doesn't extend `Views::FullPageBase` on purpose:
+# `Views::FullPageBase#around_template` is the one that picks the
+# layout, and re-entering it from the layout itself would recurse.
+# Layout classes sit one level above the chain `Views::FullPageBase`
+# wraps.
 module Views::Layouts
   class Printable < Components::Base
     register_value_helper :auto_discovery_link_tag

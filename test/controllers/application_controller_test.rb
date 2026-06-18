@@ -47,7 +47,7 @@ class ApplicationControllerTest < FunctionalTestCase
 
   def test_user_theme_param_unknown_value_sets_layout_session
     # An unknown theme name lands in `session[:layout]`; the next
-    # render's Phlex layout-picker (`Views::Base#around_template`)
+    # render's Phlex layout-picker (`Views::FullPageBase#around_template`)
     # reads it. Anything that isn't `"printable"` falls back to the
     # default Application layout, so the request still renders.
     get(:intro, params: { user_theme: "BOGUS_LAYOUT" })

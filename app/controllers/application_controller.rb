@@ -118,7 +118,7 @@ class ApplicationController < ActionController::Base
     false
   end
 
-  # Phlex picks the wrapping layout in `Views::Base#around_template`
+  # Phlex picks the wrapping layout in `Views::FullPageBase#around_template`
   # based on `session[:layout]`. This filter keeps the `?user_theme=…`
   # side effect: a known theme name is persisted on the user or in
   # the session, an unknown value lands in `session[:layout]` and
