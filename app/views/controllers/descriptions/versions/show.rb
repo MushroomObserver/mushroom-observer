@@ -20,7 +20,7 @@
 #   - Any extra setup (e.g. `Textile.register_name`) via a
 #     `pre_render_setup` hook.
 module Views::Controllers::Descriptions::Versions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
     prop :versions, _Array(_Interface(:user_id))

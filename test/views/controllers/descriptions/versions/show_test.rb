@@ -12,8 +12,15 @@ require "test_helper"
 class Views::Controllers::Descriptions::Versions::ShowTest <
   ComponentTestCase
   # Subclass-with-all-extension-points-implemented, so we can render
-  # the base view without going through a real controller path.
+  # the base view without going through a real controller path. Skips
+  # `around_template` so the test renders only the action body, not the
+  # full application layout (no need to stub Sidebar / TopNav /
+  # current_languages for these content-shape assertions).
   class TestSubclass < ::Views::Controllers::Descriptions::Versions::Show
+    def around_template
+      yield
+    end
+
     private
 
     def page_title_key
