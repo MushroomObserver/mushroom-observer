@@ -1017,7 +1017,8 @@ MushroomObserver::Application.routes.draw do
   get("/search/advanced",
       to: redirect("/observations/search/new?advanced_retired=1"),
       as: "search_advanced")
-  get("/observer/advanced_search_form", to: redirect("/search/advanced"))
+  get("/observer/advanced_search_form",
+      to: redirect("/observations/search/new?advanced_retired=1"))
 
   ###
   ###

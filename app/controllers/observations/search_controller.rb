@@ -27,7 +27,7 @@ module Observations
     end
 
     def new
-      if params[:advanced_retired]
+      if params[:advanced_retired].present?
         flash_notice(:search_advanced_retired_notice.t)
       end
       @local = params[:local] != "false"
