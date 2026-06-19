@@ -68,11 +68,8 @@ class Views::Layouts::Sidebar::ContextNav < Views::Base
     strip_d_block_for_button!(kwargs, args)
     return kwargs if args[:button].present?
 
-    kwargs[:data] = (kwargs[:data] || {}).merge(
-      nav_active_target: "link",
-      action: "nav-active#navigate"
-    )
-    kwargs
+    mix(kwargs, data: { nav_active_target: "link",
+                        action: "nav-active#navigate" })
   end
 
   def strip_d_block_for_button!(kwargs, args)
