@@ -7,7 +7,9 @@ class InfoController < ApplicationController
     :how_to_use,
     :intro
   ]
-  before_action :store_location, except: [:textile_sandbox, :translators_note]
+  before_action :store_location,
+                except: [:textile_sandbox, :textile_sandbox_create,
+                         :translators_note]
 
   # Intro to site.
   def intro
@@ -41,21 +43,22 @@ class InfoController < ApplicationController
     render(Views::Controllers::Info::SearchBarHelp.new)
   end
 
-  # Simple form letting us test our implementation of Textile.
+  # GET /info/textile_sandbox/new — empty form
   def textile_sandbox
-    if request.method == "POST"
-      code = params[:code] || params.dig(:textile_sandbox, :code)
-      submit = params[:commit]
-    else
-      code = nil
-      submit = nil
-    end
-    textile_sandbox = FormObject::TextileSandbox.new(code: code)
-
     render(Views::Controllers::Info::TextileSandbox.new(
-             textile_sandbox: textile_sandbox,
+             textile_sandbox: FormObject::TextileSandbox.new(code: nil),
+             show_result: false,
+             submit_type: nil
+           ))
+  end
+
+  # POST /info/textile_sandbox — render result
+  def textile_sandbox_create
+    code = params[:code] || params.dig(:textile_sandbox, :code)
+    render(Views::Controllers::Info::TextileSandbox.new(
+             textile_sandbox: FormObject::TextileSandbox.new(code: code),
              show_result: !code.nil?,
-             submit_type: submit
+             submit_type: params[:commit]
            ))
   end
 

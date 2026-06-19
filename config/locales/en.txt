@@ -1785,7 +1785,7 @@
   form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
   form_names_author_help: "Include the author using <a href=\"https://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or -- for a name that is not a <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/legitimate+name\">legitimate name</a> -- status information. E.g.: <br/>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br/>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
   form_names_citation_help: "Citation for the <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/protologue\">protologue</a> of this name. Include the name of the journal, volume, number, the page where the protologue begins, and year.<br/> Omit “in”, title of the article, author(s).<br>&nbsp;&nbsp; Good: Brittonia 48(4): 489 (1996)<br>&nbsp;&nbsp; Bad: Halling, R.E. 1996. Notes on Collybia. V. Gymnopus section Levipedes in tropical South America with comments on Collybia. Brittonia. 48(4):487-494 <br/>"
-  form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.
+  form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox/new" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
   form_names_classification_help: "List the higher taxa containing this [rank], one name per rank. Do not include genus or lower ranks. Example:<br/> Domain: _Eukarya_<br/> Kingdom: _Fungi_<br/> Phylum: _Basidiomycota_<br/> Class: _Agaricomycetes_<br/> Order: _Agaricales_<br/> Family: _Agaricaceae_<br/>"
   form_names_gen_desc_help: Describe the general appearance of this taxon. <br/>Please limit the [:form_names_gen_desc] to (or at least begin it with) a <b>short</b> field-guide type description. Please do not dump the protologue here.
@@ -2271,11 +2271,11 @@
   rss_consensus_reached: Consensus established
 
   # shared/_textile_help
-  general_textile_link: Can be formatted with <a href="/info/textile_sandbox" target="_new">Textile</a>.
+  general_textile_link: Can be formatted with <a href="/info/textile_sandbox/new" target="_new">Textile</a>.
   shared_textile_link: More details here.
-  shared_textile_help: Notes can be formatted using the <a href="/info/textile_sandbox" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
+  shared_textile_help: Notes can be formatted using the <a href="/info/textile_sandbox/new" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
-  field_textile_link: This field can be formatted with <a href="/info/textile_sandbox" target="_new">Textile</a>.
+  field_textile_link: This field can be formatted with <a href="/info/textile_sandbox/new" target="_new">Textile</a>.
 
   # comments/_comments_for_object
   show_comments_add_comment: "[:add_object(type=:comment)]"

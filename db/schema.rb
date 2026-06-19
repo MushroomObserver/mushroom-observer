@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_16_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_19_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -850,7 +850,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_16_120000) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
-  create_table "sources", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+  create_table "sources", charset: "utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100, null: false
     t.string "url", limit: 1024
     t.text "description"
