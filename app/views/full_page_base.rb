@@ -21,6 +21,7 @@ class Views::FullPageBase < Views::Base
   include ProjectBanner
   include IndexNav
   include ShowPager
+  include ContextNav
 
   def around_template
     action_html = capture { super }

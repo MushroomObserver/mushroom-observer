@@ -33,11 +33,6 @@ class Views::Base < Components::Base
     end
   end
 
-  register_value_helper :add_context_nav
-  # `context_nav_links([tuples])` — array-version of `context_nav_link`,
-  # used where a view wraps each link manually. Composes the underlying
-  # link-building chain in Header::ContextNavHelper.
-  register_value_helper :context_nav_links
   register_value_helper :flash_error
   # Rebuilds the current request URL with the given args merged /
   # cleared (e.g. `reload_with_args(merge: nil)` strips the `?merge=`
