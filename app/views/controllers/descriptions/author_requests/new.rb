@@ -3,7 +3,7 @@
 # Action view for `descriptions/author_requests#new`. Sets the page
 # title and renders the email-compose form.
 module Views::Controllers::Descriptions::AuthorRequests
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :object, ::AbstractModel
 
     def view_template

@@ -83,14 +83,27 @@ class SequencesController < ApplicationController
   public ####################################################################
 
   def show
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Sequence, params[:id]) and return
-    when "prev"
-      redirect_to_next_object(:prev, Sequence, params[:id]) and return
-    end
+    return if redirect_show_flow?
 
     @sequence = find_or_goto_index(Sequence, params[:id].to_s)
+    return if performed? || @sequence.nil?
+
+    render(Views::Controllers::Sequences::Show.new(sequence: @sequence))
+  end
+
+  def redirect_show_flow?
+    flow = params[:flow]
+    return false unless %w[next prev].include?(flow)
+
+    redirect_to_next_object(flow.to_sym, Sequence, params[:id])
+    true
+  end
+
+  def render_index_view
+    render(Views::Controllers::Sequences::Index.new(
+             query: @query, sequences: @objects.to_a,
+             pagination_data: @pagination_data
+           ))
   end
 
   ################# Actions that modify data
@@ -107,7 +120,11 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_sequence_form }
-      format.html
+      format.html do
+        render(Views::Controllers::Sequences::New.new(
+                 sequence: @sequence, observation: @observation
+               ))
+      end
     end
   end
 
@@ -125,7 +142,11 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_sequence_form }
-      format.html
+      format.html do
+        render(Views::Controllers::Sequences::Edit.new(
+                 sequence: @sequence, back: @back, back_object: @back_object
+               ))
+      end
     end
   end
 
@@ -148,7 +169,8 @@ class SequencesController < ApplicationController
     figure_out_where_to_go_back_to
     return unless make_sure_can_delete!(@sequence)
 
-    @sequence.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    Sequence.find(@sequence.id).destroy
     flash_notice(:runtime_destroyed_id.t(type: :sequence, value: params[:id]))
 
     redirect_to(@observation.show_link_args)
@@ -173,15 +195,10 @@ class SequencesController < ApplicationController
   end
 
   def find_sequence!
-    @sequence = Sequence.includes(sequence_includes).find_by(id: params[:id]) ||
+    @sequence = Sequence.show_includes.find_by(id: params[:id]) ||
                 flash_error_and_goto_index(
                   Sequence, params[:id]
                 )
-  end
-
-  def sequence_includes
-    [{ observation: [:external_source,
-                     observation_matrix_box_image_includes] }]
   end
 
   def figure_out_where_to_go_back_to
@@ -249,21 +266,28 @@ class SequencesController < ApplicationController
   end
 
   def respond_to_form_errors
-    redo_action = case action_name
-                  when "create"
-                    :new
-                  when "update"
-                    :edit
-                  end
     respond_to do |format|
-      format.turbo_stream { render_modal_flash_update }
-      format.html { render(action: redo_action) and return }
+      format.turbo_stream { render_modal_flash_update(modal_identifier) }
+      format.html { render_form_error_view and return }
+    end
+  end
+
+  def render_form_error_view
+    case action_name
+    when "create"
+      render(Views::Controllers::Sequences::New.new(
+               sequence: @sequence, observation: @observation
+             ))
+    when "update"
+      render(Views::Controllers::Sequences::Edit.new(
+               sequence: @sequence, back: @back, back_object: @back_object
+             ))
     end
   end
 
   def show_flash_and_send_back
     respond_to do |format|
-      format.turbo_stream { render_modal_flash_update }
+      format.turbo_stream { render_modal_flash_update(modal_identifier) }
       format.html do
         redirect_to(@sequence.observation.show_link_args) and return
       end
@@ -286,7 +310,7 @@ class SequencesController < ApplicationController
   end
 
   def render_modal_sequence_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -308,24 +332,24 @@ class SequencesController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :SEQUENCE)
+      :add_object.t(type: :SEQUENCE)
     when "edit", "update"
-      helpers.edit_page_title(@sequence.unique_format_name, @sequence)
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @sequence, mode: :edit,
+                         title: @sequence.unique_format_name
+                       ))
     end
   end
 
   def render_sequences_section_update
+    # Refetch with just the sequences subtree the panel reads.
+    fresh_obs = Observation.includes(sequences: :user).find(@observation.id)
     render_obs_section_update(
       identifier: "sequences",
       panel: Views::Controllers::Observations::Show::SequencesPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
-  end
-
-  def render_modal_flash_update
-    render(partial: "shared/modal_flash_update",
-           locals: { identifier: modal_identifier }) and return
   end
 
   # ---------- Strong Parameters -----------------------------------------------

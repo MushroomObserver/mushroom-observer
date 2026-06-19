@@ -3,9 +3,8 @@
 module Views::Controllers::SpeciesLists::WriteIn
   # Action view for the species_list write-in `new` page (also
   # re-rendered by the `create` action on validation failure).
-  # Replaces `new.html.erb` — sets the page chrome and delegates
-  # to the Phlex `Form`.
-  class New < Views::Base
+  # Sets the page chrome and delegates to the Phlex `Form`.
+  class New < Views::FullPageBase
     def initialize(species_list:, user:, button:, **state)
       super()
       @species_list = species_list

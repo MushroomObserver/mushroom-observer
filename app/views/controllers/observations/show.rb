@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 # Main observation show page — the parent that composes every
-# obs-show sub-panel (`Components::Carousel`,
+# obs-show sub-panel (`Components::ImageGallery`,
 # `ObservationDetailsPanel`, `NameInfoPanel`, `SpeciesListsPanel`,
 # `AssociatedObservationsPanel`, `ThumbnailMapPanel`, namings
-# partial, comments partial, `Components::ObjectFooter`) into a
-# two-column layout. Replaces `observations/show.html.erb`.
+# partial, comments partial, `Views::Layouts::ObjectFooter`) into a
+# two-column layout.
 #
 # Renders `add_show_title` + owner-naming line + pager / interest /
 # edit icons (logged-in only) into the page chrome, then a `.row`
@@ -20,7 +20,7 @@
 # are inside `add_owner_naming` (`title_helper.rb`) and the
 # obs-title chain in `observations_helper.rb`.
 module Views::Controllers::Observations
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     # rubocop:disable Metrics/ParameterLists
     # The show page consumes every obs-derived ivar the controller
     # builds; the param list mirrors the controller's `@ivar`s.
@@ -75,7 +75,7 @@ module Views::Controllers::Observations
     end
 
     def render_carousel
-      render(Components::Carousel.new(
+      render(Components::ImageGallery.new(
                object: @observation, images: @images,
                carousel_id: "observation_images", user: @user,
                title: :IMAGES.t, links: carousel_links
@@ -86,7 +86,7 @@ module Views::Controllers::Observations
       return "" unless permission?(@observation)
 
       capture do
-        render(Components::IconLink.new(
+        render(Components::Link::Icon.new(
                  tab: ::Tab::Observation::ReuseImages.new(
                    observation: @observation
                  )
@@ -137,7 +137,7 @@ module Views::Controllers::Observations
 
     def render_comments
       render(::Views::Controllers::Comments::CommentsForObject.new(
-               object: @observation, comments: @comments, user: @user,
+               object: @observation, comments: @comments.to_a, user: @user,
                editable: @user.present?, limit: nil
              ))
     end
@@ -151,7 +151,7 @@ module Views::Controllers::Observations
     end
 
     def render_footer
-      render(Components::ObjectFooter.new(user: @user, obj: @observation))
+      render(Views::Layouts::ObjectFooter.new(user: @user, obj: @observation))
     end
   end
 end

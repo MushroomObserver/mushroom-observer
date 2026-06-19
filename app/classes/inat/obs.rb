@@ -127,12 +127,14 @@ class Inat
         gsub("\r\n", "\n").
         # strip MO back-link annotations from prior imports (#4221)
         gsub(MO_BACK_LINK_LINE_PATTERN, "").
-        # compress newlines/returns to single newline, leaving
-        # an html comment because our textiling won't render
-        # text after consecutive newlines:
+        # Collapse runs of blank lines to a single blank line (textile
+        # renders the blank line as a paragraph break). A former
+        # "<!--- blank line(s) removed --->" marker rendered as visible junk
+        # and its hyphens opened textile strikethrough spans when paired with
+        # hyphens in the description (#4536).
         #   manually typed blank lines appear as `\r\n\r\n` in iNat notes
         #   Pulk's mirror script inserts `\n\n` in iNat notes
-        gsub(/(\r?\n){2,}/, "<!--- blank line(s) removed --->\n")
+        gsub(/(\r?\n){2,}/, "\n\n")
     end
 
     # MO Location with min bounding rectangle
@@ -190,7 +192,11 @@ class Inat
       # https://github.com/MushroomObserver/mushroom-observer/issues/2232
       # NTOE: 2024-06-19 jdc. Can we figure out the following?
       # archive, accession fields
-      Inat::SequenceFieldDetector.extract_sequences(inat_obs_fields)
+      # Memoized: scanning the obs fields is pure and the fields don't
+      # change during an import, so both callers (naming_vote and
+      # add_inat_sequences) reuse one extraction.
+      @sequences ||=
+        Inat::SequenceFieldDetector.extract_sequences(inat_obs_fields)
     end
 
     def specimen?
@@ -259,6 +265,16 @@ class Inat
       return nil if inat_prov_name.blank?
 
       inat_prov_name
+    end
+
+    # The value of the iNat "Species Name Override" observation field, or nil.
+    # When present it outranks the provisional name and the Community ID as the
+    # lead naming. (#4533)
+    def name_override
+      return nil if inat_obs_fields.blank?
+
+      field = inat_obs_field("Species Name Override")
+      field.present? ? field[:value].presence : nil
     end
 
     # derive a provisional name from some specific Observation Fields

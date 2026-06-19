@@ -2,6 +2,8 @@
 
 # display information about, and edit, users
 class UsersController < ApplicationController
+  include UserStatsBuilder
+
   before_action :login_required
   before_action :store_location, only: [:show]
 
@@ -118,18 +120,31 @@ class UsersController < ApplicationController
   #############################################################################
 
   def show
-    id = params[:id].to_s
     return unless find_user!
-
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, User, id) and return
-    when "prev"
-      redirect_to_next_object(:prev, User, id) and return
-    end
+    return if redirect_show_flow?
 
     @life_list = Checklist::ForUser.new(@show_user)
     define_instance_vars_for_summary!
+    render(Views::Controllers::Users::Show.new(
+             show_user: @show_user, life_list: @life_list,
+             user_stats_rows: user_stats_rows(@user_stats),
+             best_images: @best_images || []
+           ))
+  end
+
+  def redirect_show_flow?
+    flow = params[:flow]
+    return false unless %w[next prev].include?(flow)
+
+    redirect_to_next_object(flow.to_sym, User, params[:id].to_s)
+    true
+  end
+
+  def render_index_view
+    render(Views::Controllers::Users::Index.new(
+             query: @query, users: @objects.to_a,
+             pagination_data: @pagination_data
+           ))
   end
 
   alias show_user show

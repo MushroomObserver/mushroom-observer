@@ -110,7 +110,7 @@ module Views::Controllers::Descriptions::Permissions
 
     def render_personal_group_name(group)
       user = group.users.first
-      render(Components::UserLink.new(user: user))
+      render(Components::Link::Object::User.new(user: user))
       render_user_roles(user) if user
     end
 

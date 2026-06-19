@@ -5,6 +5,7 @@ module Admin
   class DonationsController < AdminController
     def new
       @donation = Donation.new
+      render(Views::Controllers::Admin::Donations::New.new(donation: @donation))
     end
 
     def create
@@ -14,30 +15,20 @@ module Admin
     # Review donations
     def edit
       @donations = Donation.order(created_at: :desc)
-      @reviewed = {}
-      @donations.each do |d|
-        @reviewed[d.id] = d.reviewed
-      end
+      render(Views::Controllers::Admin::Donations::Edit.new(
+               donations: @donations.to_a
+             ))
     end
 
     def update
       update_donations(params[:reviewed])
       @donations = Donation.order(created_at: :desc)
-      @reviewed = {}
-      @donations.each do |d|
-        @reviewed[d.id] = d.reviewed
-      end
-      render(action: :edit)
+      render(Views::Controllers::Admin::Donations::Edit.new(
+               donations: @donations.to_a
+             ))
     end
 
     private
-
-    def check_donate_admin(error)
-      return true if in_admin_mode?
-
-      flash_error(error)
-      redirect_to(support_donate_path)
-    end
 
     def create_donation(params)
       email = params["donation"]["email"]

@@ -46,7 +46,7 @@ module Projects
     def render_admin_request_form
       render(Views::Controllers::Projects::AdminRequests::New.new(
                project: @project
-             ), layout: true)
+             ))
     end
 
     def find_project!

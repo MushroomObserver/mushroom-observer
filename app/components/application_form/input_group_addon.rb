@@ -15,8 +15,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   :button_target   `target=` attribute (e.g. `_blank`)
   #   :button_rel      `rel=`    attribute (e.g. `noopener noreferrer`)
   #   :button_title    tooltip / accessible name
-  #   :button_icon     glyph symbol from `LINK_ICON_INDEX`, rendered
-  #                    after the text via the `link_icon` helper
+  #   :button_icon     glyph symbol from `Components::Icon::GLYPHS`,
+  #                    rendered after the text via `Components::Icon`
   module InputGroupAddon
     def render_input_group_button(&block)
       div(class: "input-group") do
@@ -58,13 +58,13 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Renders the addon's visible label: the `:button` text + an
     # optional `:button_icon` (rendered after a space via the
-    # `Components::LinkIcon` component).
+    # `Components::Icon` component).
     def render_addon_label
       plain(wrapper_options[:button])
       return unless wrapper_options[:button_icon]
 
       whitespace
-      render(Components::LinkIcon.new(type: wrapper_options[:button_icon]))
+      render(Components::Icon.new(type: wrapper_options[:button_icon]))
     end
   end
 end

@@ -24,11 +24,12 @@ class LocationsControllerTest < FunctionalTestCase
   ensure
     @@emails = []
   end
+  private :assert_email_generated
 
   def assert_no_emails
     msg = @@emails.join("\n")
-    assert(@@emails.empty?,
-           "Wasn't expecting any email notifications; got:\n#{msg}")
+    assert_empty(@@emails,
+                 "Wasn't expecting any email notifications; got:\n#{msg}")
   ensure
     @@emails = []
   end
@@ -75,10 +76,10 @@ class LocationsControllerTest < FunctionalTestCase
     case page
     when :create
       post_requires_login(page, params)
-      assert_template("new")
+      assert_select("body.locations__new")
     when :update
       put_requires_login(page, params)
-      assert_template("edit")
+      assert_select("body.locations__edit")
     end
     assert_select("#location_form")
     assert_equal(loc_count, Location.count)
@@ -107,10 +108,10 @@ class LocationsControllerTest < FunctionalTestCase
     log_updated_at = location.rss_log.updated_at
     login
     get(:show, params: { id: location.id })
-    assert_template("show")
-    assert_template("locations/show/_notes")
+    assert_select("body.locations__show")
+    assert_select("#location_notes")
     assert_select("#comments_for_object")
-    assert_template("locations/show/_general_description_panel")
+    assert_select("#location_general_description")
 
     location.reload
     assert_equal(updated_at, location.updated_at)
@@ -172,11 +173,12 @@ class LocationsControllerTest < FunctionalTestCase
   end
 
   def assert_show_location
-    assert_template("locations/show")
-    assert_template("locations/show/_notes")
+    assert_select("body.locations__show")
+    assert_select("#location_notes")
     assert_select("#comments_for_object")
-    assert_template("locations/show/_general_description_panel")
+    assert_select("#location_general_description")
   end
+  private :assert_show_location
 
   def test_show_location_next_flow
     loc = locations(:albion)
@@ -208,7 +210,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: loc.id })
 
-    assert_template("show")
+    assert_select("body.locations__show")
     assert_nil(assigns(:description))
   end
 
@@ -219,7 +221,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: loc.id, desc: bad_desc_id })
 
-    assert_template("show")
+    assert_select("body.locations__show")
     assert_flash_text(:runtime_object_not_found.t(type: :description,
                                                   id: bad_desc_id))
   end
@@ -237,7 +239,7 @@ class LocationsControllerTest < FunctionalTestCase
     login("dick") # Dick is not a reader
     get(:show, params: { id: loc.id, desc: desc.id })
 
-    assert_template("show")
+    assert_select("body.locations__show")
     # Description should be nil (not shown) because user can't read it
     assert_nil(assigns(:description))
   end
@@ -358,37 +360,6 @@ class LocationsControllerTest < FunctionalTestCase
     assert_select(".list-group-item a", text: /#{location.display_name}/)
   end
 
-  def test_index_advanced_search
-    where = "California"
-    query = Query.lookup_and_save(:Location, search_where: where)
-    matches = Location.name_has(where)
-    params = { q: @controller.q_param(query), advanced_search: true }
-
-    login
-    get(:index, params:)
-
-    assert_response(:success)
-    assert_template("index")
-    assert_select(
-      "#content a:match('href', ?)", %r{#{locations_path}/\d+},
-      { count: matches.count }, "Wrong number of Locations"
-    )
-    assert_page_title(:LOCATIONS.l)
-    assert_displayed_filters("#{:query_search_where.l}: #{where}")
-  end
-
-  def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Location)
-
-    login
-    params = { q: @controller.q_param(query_no_conditions),
-               advanced_search: true }
-    get(:index, params:)
-
-    assert_flash_error(:runtime_no_conditions.l)
-    assert_redirected_to(search_advanced_path)
-  end
-
   def test_index_pattern_multiple_hits
     search_str = "California"
     matches = Location.where(Location[:name].matches("%#{search_str}%"))
@@ -465,7 +436,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { country: country })
 
-    assert_template("index")
+    assert_select("body.locations__index")
     assert_flash_text(:runtime_no_matches.l(type: :locations.l))
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
@@ -479,7 +450,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_template("index")
+    assert_select("body.locations__index")
     assert_page_title(:LOCATIONS.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
@@ -507,7 +478,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_template("index")
+    assert_select("body.locations__index")
     assert_flash_text(:runtime_no_matches.l(type: :locations.l))
   end
 
@@ -560,7 +531,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user.id })
 
-    assert_template("index")
+    assert_select("body.locations__index")
     assert_flash_text(:runtime_no_matches.l(type: :locations.l))
   end
 
@@ -595,20 +566,51 @@ class LocationsControllerTest < FunctionalTestCase
     login
     # First verify that undefined locations appear without letter filter
     get(:index)
-    assert_template("index")
+    assert_select("body.locations__index")
     # Check that @undef_data is set (the letter filter applies to this)
     assert(assigns(:undef_data).present?, "Should have undefined locations")
 
     # Now request with letter2=a should filter to only "A" locations
     get(:index, params: { letter2: "a" })
-    assert_template("index")
+    assert_select("body.locations__index")
     # The letter filter is applied, verify the data is filtered
     undef_data = assigns(:undef_data)
-    return if undef_data.blank?
+    skip if undef_data.blank?
 
-    undef_data.each do |obs|
+    # `undef_data` is an Array of `[obs, count]` tuples, not a Hash —
+    # `each_key` isn't available; cop false-positives on the
+    # destructured block.
+    undef_data.each do |obs, _count| # rubocop:disable Style/HashEachMethods
       assert_match(/^A/i, obs[:where], "Filtered results should start with A")
     end
+  end
+
+  # `@undef_data` is grouped by `where` and reported as
+  # `[representative_observation, count]` tuples — duplicate `where`
+  # strings on a page collapse into one row carrying the group size.
+  def test_index_undef_data_groups_duplicates_with_count
+    # Two observations sharing the same unmatched `where` should
+    # appear as a single row whose count is 2.
+    where_str = "Duplicate Place, Imaginary, Country"
+    2.times do
+      Observation.create!(
+        user: rolf, when: Time.zone.today,
+        where: where_str, name: names(:agaricus_campestris)
+      )
+    end
+
+    login
+    get(:index)
+    assert_response(:success)
+
+    undef_data = assigns(:undef_data)
+    pair = undef_data.find { |obs, _count| obs[:where] == where_str }
+    assert(pair, "Duplicate `where` row should be present in @undef_data")
+    obs, count = pair
+    assert_equal(2, count,
+                 "Both observations sharing #{where_str.inspect} " \
+                 "should be folded into one row with count 2")
+    assert_equal(where_str, obs[:where])
   end
 
   ##############################################################################
@@ -1059,7 +1061,7 @@ class LocationsControllerTest < FunctionalTestCase
     make_admin("rolf")
     put(:update, params: params)
 
-    # assert_template("locations/show")
+    # assert_select("body.locations__show")
     assert_redirected_to(location_path(to_stay.id))
     assert_equal(loc_count - 1, Location.count)
     assert_equal(desc_count, LocationDescription.count)

@@ -8,7 +8,7 @@ module Observations
     def test_edit_image
       image = images(:connected_coprinus_comatus_image)
       params = { "id" => image.id.to_s }
-      assert(image.user.login == "rolf")
+      assert_equal("rolf", image.user.login)
       requires_user(:edit,
                     { controller: "/images", action: :show, id: image.id },
                     params)
@@ -34,7 +34,10 @@ module Observations
         }
       }
       put_requires_login(:update, params)
-      assert_template("images/show")
+      # Action is `:update` (body class would be `images__edit`); the
+      # update success branch does `render("images/show", ...)`. Pin a
+      # stable element from the show page instead.
+      assert_select("#image_votes_container")
       assert_equal(10, rolf.reload.contribution)
 
       assert(obs.reload.rss_log)
@@ -151,9 +154,11 @@ module Observations
       }
 
       login(image.user.login)
-      # simulate image save failure
+      # Simulate image save failure. `find_or_goto_index` uses
+      # `Image.find_by` (Image has no `show_includes` scope), so stub
+      # find_by to surface our save-mocked instance.
       image.stub(:save, false) do
-        Image.stub(:safe_find, image) do
+        Image.stub(:find_by, image) do
           put(:update, params: params)
         end
       end

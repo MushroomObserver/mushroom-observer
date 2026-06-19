@@ -171,8 +171,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Check out images
     # Observation has at least 2 images
     image_count = all("#content .carousel img.carousel-thumbnail").count
-    assert(image_count == 2,
-           "expected 2 Images in Observation, got #{image_count}")
+    assert_equal(2, image_count,
+                 "expected 2 Images in Observation, got #{image_count}")
   end
 
   def test_search_names

@@ -4,8 +4,6 @@ require("test_helper")
 
 module Names::Descriptions
   class PublishControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     # Owner can publish.
     def test_publish_draft
       publish_draft_helper(name_descriptions(:draft_coprinus_comatus), nil,

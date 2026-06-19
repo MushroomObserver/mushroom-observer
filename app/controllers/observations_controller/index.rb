@@ -16,12 +16,12 @@ class ObservationsController
                objects: @objects,
                user: @user,
                project: @project,
-               error: @error,
+
                name_suggestions: @name_suggestions
              ))
     end
 
-    # `Components::MatrixTable` bypasses the fragment cache when
+    # `Components::Matrix::Table` bypasses the fragment cache when
     # rendering for a project admin (the admin-only Exclude button
     # changes the markup). When the obs index is scoped to a project
     # AND the current user is an admin of it, the controller's
@@ -64,48 +64,9 @@ class ObservationsController
 
     # Searches come 1st because they may have the other params
     def index_active_params
-      [:advanced_search, :pattern, :look_alikes, :related_taxa, :name,
+      [:pattern, :look_alikes, :related_taxa, :name,
        :by_user, :location, :where, :project, :species_list,
        :by, :q, :id].freeze
-    end
-
-    # Displays matrix of advanced search results.
-    def advanced_search
-      query = advanced_search_query
-      # `handle_advanced_search_invalid_q_param?` already responded;
-      # bail before the raise-and-rescue dance double-redirects.
-      return [nil, {}] if performed?
-
-      # Have to check this here because we're not running the query yet.
-      raise(:runtime_no_conditions.l) unless query&.params&.any?
-
-      [query, {}]
-    rescue StandardError => e
-      flash_error(e.to_s) if e.present?
-      redirect_to(search_advanced_path)
-      [nil, {}]
-    end
-
-    def advanced_search_query
-      if any_advanced_search_params_present?
-        search = params.permit(*advanced_search_params).to_h
-        create_query(:Observation, search)
-      elsif handle_advanced_search_invalid_q_param?
-        nil
-      else
-        find_query(:Observation)
-      end
-    end
-
-    def any_advanced_search_params_present?
-      advanced_search_params.any? { |k| params[k].present? }
-    end
-
-    def advanced_search_params
-      params = Query::Observations.advanced_search_params
-      return params if params.present?
-
-      raise("Query::Observations.advanced_search_params is undefined.")
     end
 
     # Different from NamesController. Returns arrays of [name, count]
@@ -238,14 +199,11 @@ class ObservationsController
       opts
     end
 
-    # An { images: } hash is necessary if we're adding the index carousels.
-    # :projects required by Bullet because it's needed to compute
-    # `can_edit?` for an image.
+    # Reuses `Observation.matrix_box_includes` — the canonical tree
+    # shared by every matrix-box render (field_slips show/index,
+    # collection_numbers show).
     def observation_index_includes
-      [observation_matrix_box_image_includes,
-       :external_source, :location, :name,
-       { namings: :votes },
-       { occurrence: :observations }, :projects, :rss_log, :user]
+      Observation.matrix_box_includes
     end
   end
 end

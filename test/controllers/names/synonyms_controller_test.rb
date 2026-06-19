@@ -4,8 +4,6 @@ require("test_helper")
 
 module Names
   class SynonymsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     def test_change_synonyms
       name = names(:chlorophyllum_rachodes)
       params = { id: name.id }

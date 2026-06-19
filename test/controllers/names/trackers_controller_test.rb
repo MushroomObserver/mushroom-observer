@@ -4,7 +4,6 @@ require("test_helper")
 
 module Names
   class TrackersControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
     include ActiveJob::TestHelper
 
     # ----------------------------

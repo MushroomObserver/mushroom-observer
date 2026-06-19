@@ -20,11 +20,10 @@
 #   - Any extra setup (e.g. `Textile.register_name`) via a
 #     `pre_render_setup` hook.
 module Views::Controllers::Descriptions::Versions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    prop :versions, _Array(_Interface(:user_id))
     prop :projects, _Nilable(_Array(::Project)), default: nil
 
     def view_template
@@ -40,7 +39,7 @@ module Views::Controllers::Descriptions::Versions
                description: @description, user: @user,
                versions: @versions, projects: @projects
              ))
-      render(Components::ObjectFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @description, versions: @versions
              ))
     end

@@ -15,12 +15,15 @@ module Views::Controllers::Names::Synonyms::Approve
 
       render_approved_names_section if @approved_names.present?
 
-      HelpNote(:div, :name_approve_deprecate_help.tp)
+      render(Components::Help::Note.new(:div, :name_approve_deprecate_help.tp))
 
       textarea_field(:comment, label: "#{:name_approve_comments.l}:",
                                cols: 80, rows: 5, inline: true,
                                data: { autofocus: true })
-      HelpNote(:div, :name_approve_comments_help.tp(name: @name.display_name))
+      render(Components::Help::Note.new(
+               :div,
+               :name_approve_comments_help.tp(name: @name.display_name)
+             ))
     end
 
     private

@@ -6,8 +6,10 @@ class VisualGroupsController < ApplicationController
   # GET /visual_groups or /visual_groups.json
   def index
     @visual_model = VisualModel.find(params[:visual_model_id])
+    @visual_groups = @visual_model.visual_groups.order(:name).to_a
     render(Views::Controllers::VisualGroups::Index.new(
-             visual_model: @visual_model
+             visual_model: @visual_model,
+             visual_groups: @visual_groups
            ))
   end
 

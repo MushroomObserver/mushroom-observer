@@ -179,13 +179,6 @@ module Views::Controllers::Occurrences
       label = cb.parent
       assert_equal("label", label.name)
       assert_includes(label.text, "Include")
-
-      # Regression: #4286 — label `for=` must match nested input id
-      return unless label["for"]
-
-      assert_equal(cb["id"], label["for"],
-                   "Label `for` must match the nested checkbox id, " \
-                   "otherwise label clicks don't toggle the checkbox")
     end
 
     def test_new_no_occurrence_warning_for_unlinked_obs

@@ -4,7 +4,7 @@
 # "attach an existing image to this observation" page. Sets the
 # action-nav and renders the shared `ImagesToReuseForm`.
 module Views::Controllers::Observations::Images
-  class Reuse < Views::Base
+  class Reuse < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
     prop :objects, _Array(::Image)

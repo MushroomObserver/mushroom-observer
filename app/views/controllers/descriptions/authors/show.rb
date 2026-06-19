@@ -5,13 +5,11 @@
 # button beside their name, plus a user-autocompleter + "Add Author"
 # submit at the bottom (`AddAuthorForm`).
 module Views::Controllers::Descriptions::Authors
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :object, ::AbstractModel
-    # Description#authors returns an `ActiveRecord::Associations::CollectionProxy`
-    # (the has_many-through), so accept either shape.
-    prop :authors,
-         _Union(_Array(::User),
-                ActiveRecord::Associations::CollectionProxy)
+    # Callers pass `@description.authors.to_a` — the controller
+    # converts the has_many-through CollectionProxy at the boundary.
+    prop :authors, _Array(::User)
 
     def view_template
       type = @object.type_tag
@@ -36,7 +34,7 @@ module Views::Controllers::Descriptions::Authors
     end
 
     def render_author_row(user, type)
-      render(Components::UserLink.new(user: user))
+      render(Components::Link::Object::User.new(user: user))
       plain(" | ")
       render(Components::CrudButton::Delete.new(
                name: :review_authors_remove_author.t,

@@ -15,7 +15,7 @@ module TestPages
         # about missing test_flash_redirection_title tag)
         # Disable cop in order to use sleight of hand
         @title = "test_flash_redirection_title".to_sym.t # rubocop:disable Lint/SymbolConversion
-        render(layout: "application", html: "")
+        render(Views::Controllers::TestPages::FlashRedirection::Show.new)
       end
     end
   end

@@ -22,6 +22,13 @@ module Locations
       "LocationDescription"
     end
 
+    def render_index_view
+      render(Views::Controllers::Locations::Descriptions::Index.new(
+               query: @query, descriptions: @objects.to_a,
+               pagination_data: @pagination_data
+             ))
+    end
+
     # Sort options for the index page. Same shape as
     # `Names::DescriptionsController#index_sort_options` — both
     # description indexes share the legacy
@@ -121,7 +128,7 @@ module Locations
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this(@location)
-      @versions = @description.versions
+      @versions = @description.versions.to_a
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
 

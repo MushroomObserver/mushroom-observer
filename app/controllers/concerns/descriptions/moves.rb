@@ -107,6 +107,9 @@ module Descriptions::Moves
 
     def set_src_parent_to_dest_and_log_it
       @src.update(parent_id: @dest.id)
+      # Refetch @src so its `.parent` (used later in flash + log msgs)
+      # is preloaded again under show_includes.
+      @src = @src.class.show_includes.find(@src.id)
       @src.parent.log(:log_object_moved_by_user,
                       user: @user.login,
                       from: @src.unique_partial_format_name,

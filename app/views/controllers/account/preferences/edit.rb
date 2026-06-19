@@ -6,15 +6,16 @@
 # live inline next to their related selects inside the Privacy
 # section of the form, rather than as a footer row outside it.
 module Views::Controllers::Account::Preferences
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :user, _Nilable(User)
-    prop :licenses, _Array(_Tuple(String, Integer)), default: -> { [] }
+    prop :licenses, _Array(_Tuple(String, Integer))
+    prop :languages, _Array(::Language)
 
     def view_template
       add_page_title(:prefs_title.t)
       add_context_nav(Tab::Account::PreferencesEditActions.new)
 
-      render(Form.new(@user, licenses: @licenses))
+      render(Form.new(@user, licenses: @licenses, languages: @languages))
     end
   end
 end

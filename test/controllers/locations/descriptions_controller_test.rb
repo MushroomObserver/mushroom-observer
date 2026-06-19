@@ -4,8 +4,6 @@ require("test_helper")
 
 module Locations
   class DescriptionsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     ##########################################################################
     #
     #    SHOW
@@ -101,7 +99,7 @@ module Locations
       login
       get(:index, params: { by_author: user.id })
 
-      assert_template("index")
+      assert_select("body.descriptions__index")
       assert_page_title(:LOCATION_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_equal(
@@ -120,7 +118,7 @@ module Locations
       get(:index, params: { by_author: user.id })
 
       assert_flash_text("No matching location descriptions found.")
-      assert_template("index")
+      assert_select("body.descriptions__index")
     end
 
     def test_index_by_author_bad_user_id
@@ -167,7 +165,7 @@ module Locations
       login
       get(:index, params: { by_editor: user.id })
 
-      assert_template("index")
+      assert_select("body.descriptions__index")
       assert_page_title(:LOCATION_DESCRIPTIONS.l)
       assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
@@ -182,7 +180,7 @@ module Locations
       get(:index, params: { by_editor: user.id })
 
       assert_flash_text("No matching location descriptions found.")
-      assert_template("index")
+      assert_select("body.descriptions__index")
     end
 
     def test_index_by_editor_bad_user_id
@@ -282,7 +280,7 @@ module Locations
       login
       get(:show, params: { flow: :next, id: })
       next_data = @controller.find_query_and_next_object(object, :next, id)
-      return unless next_data
+      skip unless next_data
 
       params = { id: next_data[:id],
                  q: @controller.q_param(next_data[:query]) }
@@ -296,7 +294,7 @@ module Locations
       login
       get(:show, params: { flow: :prev, id: })
       prev_data = @controller.find_query_and_next_object(object, :prev, id)
-      return unless prev_data
+      skip unless prev_data
 
       params = { id: prev_data[:id],
                  q: @controller.q_param(prev_data[:query]) }

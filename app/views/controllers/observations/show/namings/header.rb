@@ -8,7 +8,6 @@
 # mobile-only "+" propose-naming icon button sits in the right
 # gutter where the eyes column appears below.
 #
-# Replaces `app/views/controllers/observations/show/namings/_header.erb`
 # and inlines the `naming_header_row_content` helper that fed it
 # (just four `<small>`-wrapped translation lookups + a `<h4>` for
 # the panel title).
@@ -68,7 +67,9 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   def render_propose_icon_column
     div(class: "col-xs-2 col-sm-1") do
       span(class: "float-right d-sm-none") do
-        ModalLink("obs_#{@obs.id}_naming", tab: propose_naming_tab)
+        render(Components::Link::Modal.new(
+                 "obs_#{@obs.id}_naming", tab: propose_naming_tab
+               ))
       end
     end
   end

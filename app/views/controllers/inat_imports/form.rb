@@ -5,9 +5,9 @@ module Views::Controllers::InatImports
   # controller's `new.rb` view. Renders username, observation IDs,
   # consent, and details.
   class Form < ::Components::ApplicationForm
-    def initialize(model, super_importer: false, admin_mode: false, **)
+    def initialize(model, super_importer: false, admin: false, **)
       @super_importer = super_importer
-      @admin_mode = admin_mode
+      @admin = admin
       super(model, **)
     end
 
@@ -21,6 +21,7 @@ module Views::Controllers::InatImports
         checkbox_field(:consent,
                        label: :inat_import_consent.l,
                        wrap_class: "mt-3")
+        render_skip_writeback_field if @admin
         render_details_panel
         submit(:SUBMIT.l)
       end
@@ -41,6 +42,12 @@ module Views::Controllers::InatImports
     def render_import_others_field
       checkbox_field(:import_others,
                      label: :inat_import_others.l,
+                     wrap_class: "mt-3")
+    end
+
+    def render_skip_writeback_field
+      checkbox_field(:skip_inat_writeback,
+                     label: :inat_skip_writeback.l,
                      wrap_class: "mt-3")
     end
 

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
-# Action view for `visual_models#edit`. Replaces the 4-line
-# `edit.html.erb` — form (already Phlex) + show / back links.
+# Action view for `visual_models#edit`: form + show / back links.
 module Views::Controllers::VisualModels
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :visual_model, VisualModel
 
     def view_template

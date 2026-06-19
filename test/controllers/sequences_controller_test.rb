@@ -74,6 +74,16 @@ class SequencesControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Cover the deposit branch — `local_sequence` has no archive /
+  # accession set so `render_deposit` doesn't run on test_show.
+  def test_show_deposited_sequence
+    login
+    sequence = sequences(:deposited_sequence)
+    get(:show, params: { id: sequence.id })
+    assert_response(:success)
+    assert_select("a[href*='ncbi.nlm.nih.gov']")
+  end
+
   def test_show_nonexistent_sequence
     # Prove index displayed if called with id of sequence not in db
     login
@@ -413,7 +423,7 @@ class SequencesControllerTest < FunctionalTestCase
     # Test turbo shows flash warning
     get(:edit, params: { id: sequence.id }, format: :turbo_stream)
     assert_flash_warning
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 
   def test_edit_redirect
@@ -479,6 +489,32 @@ class SequencesControllerTest < FunctionalTestCase
     obs.rss_log.reload
     assert(obs.rss_log.notes.include?("log_sequence"),
            "Failed to include Sequence change in RssLog for Observation")
+  end
+
+  # Exercises the turbo_stream branch of `update` so
+  # `render_sequences_section_update` (panel re-render) is covered
+  # at the controller layer, not just the system test.
+  def test_update_sequence_turbo
+    sequence = sequences(:local_sequence)
+    obs = sequence.observation
+    login(obs.user.login)
+    params = {
+      id: sequence.id,
+      back: obs.id.to_s,
+      sequence: {
+        locus: sequence.locus,
+        bases: sequence.bases,
+        archive: sequence.archive,
+        accession: sequence.accession,
+        notes: "Updated notes via turbo"
+      }
+    }
+
+    patch(:update, params: params, format: :turbo_stream)
+
+    assert_response(:success)
+    assert_equal("Updated notes via turbo", sequence.reload.notes)
+    assert_select("turbo-stream[target='observation_sequences']")
   end
 
   def test_update_by_admin

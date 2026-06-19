@@ -58,10 +58,10 @@ module Views::Controllers::Locations
     def render_location_feedback
       return unless @dubious_where_reasons&.any?
 
-      FormLocationFeedback(
-        dubious_where_reasons: @dubious_where_reasons,
-        button: submit_text
-      )
+      render(Components::Form::LocationFeedback.new(
+               dubious_where_reasons: @dubious_where_reasons,
+               button: submit_text
+             ))
     end
 
     def render_fields
@@ -89,10 +89,14 @@ module Views::Controllers::Locations
     def render_coordinate_section
       div(class: "row mt-5") do
         div(class: "col-sm-8") do
-          FormCompassFields(form: self, location: model)
+          render(Components::Form::CompassFields.new(
+                   form: self, location: model
+                 ))
         end
         div(class: "col-sm-4") do
-          FormElevationFields(form: self, location: model)
+          render(Components::Form::ElevationFields.new(
+                   form: self, location: model
+                 ))
         end
       end
     end

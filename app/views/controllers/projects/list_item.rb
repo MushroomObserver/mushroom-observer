@@ -2,7 +2,7 @@
 
 # Inner content of one row in the projects index list-group. The
 # `<div class="list-group-item …">` wrapper is supplied by the
-# caller (the ERB index template, soon `Components::ListGroup`);
+# caller (`Components::ListGroup::Base`);
 # this class only emits the two-column body (id badge + title /
 # meta column).
 module Views::Controllers::Projects
@@ -42,7 +42,7 @@ module Views::Controllers::Projects
       div do
         small { plain("#{@project.created_at.web_time}:") }
         whitespace
-        render(Components::UserLink.new(user: @project.user))
+        render(Components::Link::Object::User.new(user: @project.user))
       end
     end
   end

@@ -28,7 +28,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   def render_index_view
     render(Views::Controllers::SpeciesLists::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, project: @project, error: @error
+             objects: @objects, project: @project
            ))
   end
 
@@ -176,7 +176,8 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     return unless (@species_list = find_species_list!)
 
     if permission!(@species_list)
-      @species_list.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      SpeciesList.find(@species_list.id).destroy
       id = params[:id].to_s
       flash_notice(:runtime_species_list_destroy_success.t(id: id))
       redirect_to(species_lists_path)
@@ -268,7 +269,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     render(Views::Controllers::SpeciesLists::Show.new(
              species_list: @species_list, user: @user, query: @query,
              pagination_data: @pagination_data, objects: @objects,
-             comments: @comments, object_names: @object_names,
+             comments: @comments.to_a, object_names: @object_names,
              project: @project
            ))
   end

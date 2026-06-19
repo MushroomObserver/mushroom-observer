@@ -13,6 +13,17 @@ class HerbariumRecordsController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `herbarium_records/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::HerbariumRecords::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user,
+             observation: @observation
+           ))
+  end
+
   # Sort options for the index page. Read by `add_sorter` in the
   # view. Each key must resolve to `HerbariumRecord.order_by_<key>`.
   def index_sort_options
@@ -53,11 +64,10 @@ class HerbariumRecordsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      letters: true,
-      num_per_page: 100,
-      include: [{ herbarium: :curators }, { observations: :name }, :user]
-    }.merge(opts)
+    # `:include` falls back to `HerbariumRecord.index_includes_tree`
+    # via the base `instantiated_object_subset`, so we only set the
+    # display-specific opts here.
+    { letters: true, num_per_page: 100 }.merge(opts)
   end
 
   public
@@ -75,6 +85,11 @@ class HerbariumRecordsController < ApplicationController
     @layout = calc_layout_params
     @canonical_url = HerbariumRecord.show_url(params[:id])
     find_herbarium_record!
+    return unless @herbarium_record
+
+    render(Views::Controllers::HerbariumRecords::Show.new(
+             herbarium_record: @herbarium_record, user: @user
+           ))
   end
 
   def new
@@ -85,7 +100,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html
+      format.html { render_new_phlex }
     end
   end
 
@@ -106,7 +121,7 @@ class HerbariumRecordsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_herbarium_record_form }
-      format.html
+      format.html { render_edit_phlex }
     end
   end
 
@@ -145,18 +160,24 @@ class HerbariumRecordsController < ApplicationController
     find_herbarium_record!
   end
 
-  def find_herbarium_record!
-    @herbarium_record = HerbariumRecord.includes(herbarium_record_includes).
-                        find_by(id: params[:id]) ||
-                        flash_error_and_goto_index(
-                          HerbariumRecord, params[:id]
-                        )
+  def render_new_phlex
+    render(Views::Controllers::HerbariumRecords::New.new(
+             herbarium_record: @herbarium_record,
+             observation: @observation, user: @user
+           ))
   end
 
-  def herbarium_record_includes
-    [:user,
-     { observations: [:external_source, :user,
-                      observation_matrix_box_image_includes] }]
+  def render_edit_phlex
+    render(Views::Controllers::HerbariumRecords::Edit.new(
+             herbarium_record: @herbarium_record, user: @user,
+             back: @back, back_object: @back_object
+           ))
+  end
+
+  def find_herbarium_record!
+    @herbarium_record =
+      HerbariumRecord.show_includes.find_by(id: params[:id]) ||
+      flash_error_and_goto_index(HerbariumRecord, params[:id])
   end
 
   def default_herbarium_record
@@ -331,7 +352,8 @@ class HerbariumRecordsController < ApplicationController
     else
       # Figure out where to redirect BEFORE destroying the record
       figure_out_destroy_redirect
-      @herbarium_record.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      HerbariumRecord.find(@herbarium_record.id).destroy
     end
     true
   end
@@ -450,14 +472,13 @@ class HerbariumRecordsController < ApplicationController
       end
       format.turbo_stream do
         # renders the flash in the modal via js
-        render(partial: "shared/modal_flash_update",
-               locals: { identifier: modal_identifier }) and return
+        render_modal_flash_update(modal_identifier) and return
       end
     end
   end
 
   def render_modal_herbarium_record_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -479,37 +500,38 @@ class HerbariumRecordsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :HERBARIUM_RECORD)
+      :add_object.t(type: :HERBARIUM_RECORD)
     when "edit", "update"
-      helpers.edit_page_title(
-        [@herbarium_record.format_name.t,
-         @herbarium_record.herbarium_label].safe_join(" "),
-        @herbarium_record
-      )
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @herbarium_record, mode: :edit,
+                         title: [@herbarium_record.format_name.t,
+                                 @herbarium_record.herbarium_label].
+                                safe_join(" ")
+                       ))
     end
   end
 
   def render_herbarium_records_section_update
+    # Refetch with just the herbarium-records subtree the panel reads
+    # (`obs.herbarium_records` + `obs.can_edit?`-related projects).
+    fresh_obs = Observation.includes(
+      :projects,
+      herbarium_records: [{ herbarium: :curators }, :user]
+    ).find(@observation.id)
     render_obs_section_update(
       identifier: "herbarium_records",
       panel: Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
   end
 
   # this updates both the form and the flash
   def reload_herbarium_record_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: {
-        identifier: modal_identifier,
-        form_locals: {
-          model: @herbarium_record,
-          observation: @observation
-        }
-      }
-    ) and return true
+    render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                               model: @herbarium_record,
+                               observation: @observation
+                             }) and return true
   end
 end
 # rubocop:enable Metrics/ClassLength

@@ -4,9 +4,8 @@
 # fallback for editing an API key (JS users edit inline on the
 # index). Page chrome plus help text plus the shared form.
 #
-# Replaces `app/views/controllers/account/api_keys/edit.html.erb`.
 module Views::Controllers::Account::APIKeys
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :key, ::APIKey
 
     def view_template

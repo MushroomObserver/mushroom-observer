@@ -16,9 +16,13 @@ module Admin
         end
 
         respond_to do |format|
-          format.html
+          format.html do
+            render(Views::Controllers::Admin::Emails::MergeRequests::New.new(
+                     model: @model, old_obj: @old_obj, new_obj: @new_obj
+                   ))
+          end
           format.turbo_stream do
-            render(Components::ModalTurboForm.new(
+            render(Components::Modal::TurboForm.new(
                      identifier: "merge_request_email",
                      title: :email_merge_request_title.t(type: @model.type_tag),
                      user: @user,

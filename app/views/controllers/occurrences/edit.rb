@@ -3,7 +3,7 @@
 # Phlex view for the occurrence edit page.
 # Optionally overlays a project membership confirmation modal.
 module Views::Controllers::Occurrences
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     def initialize(occurrence:, observations:, candidates:,
                    user:, project_gaps: nil)
       super()
@@ -16,11 +16,14 @@ module Views::Controllers::Occurrences
 
     def view_template
       container_class(:wide)
-      view_context.add_edit_title(@occurrence, user: @user)
+      # `add_edit_title` is registered as a value helper on
+      # `Views::Base`, so it's callable directly — no
+      # `view_context.add_edit_title(...)` dispatch needed.
+      add_edit_title(@occurrence, user: @user)
       # Sibling reference within the module.
       render(Form.new(
                model: @occurrence,
-               observations: @observations,
+               observations: @observations.to_a,
                candidates: @candidates,
                user: @user
              ))

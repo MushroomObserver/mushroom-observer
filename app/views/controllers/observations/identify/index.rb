@@ -1,34 +1,28 @@
 # frozen_string_literal: true
 
 # Action template for the "Observations needing identification"
-# index. Replaces `app/views/controllers/observations/identify/
-# index.html.erb`.
+# index.
 #
 # Composes the page chrome (container width, index title,
 # pagination), flashes the no-matches error when the query
 # returned nothing, renders the intro blurb, then paginates a
-# `Components::MatrixTable` in `identify: true` mode (each row
+# `Components::Matrix::Table` in `identify: true` mode (each row
 # carries the vote-select / footer-buttons identify chrome).
 #
 # `Observations::IdentifyController#render_index_view` overrides
 # the `ApplicationController` default to render this class
 # directly with explicit props.
 module Views::Controllers::Observations::Identify
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::Observations
     prop :pagination_data, ::PaginationData
-    prop :objects,
-         _Union(Array, ::ActiveRecord::Relation,
-                ::ActiveRecord::Associations::CollectionProxy)
+    prop :objects, _Array(::Observation)
     prop :user, _Nilable(::User), default: nil
-    prop :error, _Nilable(String), default: nil
 
     def view_template
       container_class(:full)
       add_index_title(@query)
       add_pagination(@pagination_data)
-
-      flash_error(@error) if @error && @objects.empty?
 
       div(class: "container-text content-block") do
         p { trusted_html(:obs_needing_id_intro.tp) }
@@ -40,7 +34,7 @@ module Views::Controllers::Observations::Identify
     private
 
     def render_matrix
-      render(Components::MatrixTable.new(
+      render(Components::Matrix::Table.new(
                objects: @objects,
                user: @user,
                identify: true,

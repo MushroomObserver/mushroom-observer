@@ -3,15 +3,14 @@
 # Action template for `Account::LoginController#new` — the login
 # page. Page title + login form, followed by three "why log in"
 # sections (signup invitation, spider/SEO explanation, what data
-# requires login). Replaces
-# `app/views/controllers/account/login/new.html.erb`.
+# requires login).
 #
 # The textile content (`:login_*.t` / `.tp`) often embeds
 # `"text":url` links that the translator renders as real `<a>`
 # tags; everything goes through `trusted_html` so the markup
 # survives — `plain` would escape the embedded `<a>`.
 module Views::Controllers::Account::Login
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :login, _Nilable(String)
     prop :remember, _Nilable(_Boolean)
 

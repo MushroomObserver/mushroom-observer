@@ -1,0 +1,63 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_rubocop_staged.sh && exec .claude/hooks/check_rubocop_staged.sh || exit 0",
+            "timeout": 600
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_python.sh && exec .claude/hooks/block_python.sh || exit 0",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_orphaned_erb_renders.sh && exec .claude/hooks/check_orphaned_erb_renders.sh || exit 0",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_any_phlex_props_on_save.sh && exec .claude/hooks/check_any_phlex_props_on_save.sh || exit 0",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/check_coveralls_pr.sh && exec .claude/hooks/check_coveralls_pr.sh || exit 0",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/post_rebase_lang_db.sh && exec .claude/hooks/post_rebase_lang_db.sh || exit 0",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/rubocop_on_save.sh && exec .claude/hooks/rubocop_on_save.sh || exit 0",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

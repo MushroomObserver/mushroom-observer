@@ -52,9 +52,12 @@ class ArticlesControllerTest < FunctionalTestCase
     article = articles(:premier_article)
     get(:show, params: { id: article.id })
     assert_response(:success)
-    assert_template(:show)
-    assert(/#{article.body}/ =~ @response.body,
-           "Page is missing article body")
+    # Phlex `Articles::Show` pins the article body in
+    # `#article_body .panel-body` (was `assert_template(:show)` + a
+    # `/#{article.body}/ =~ @response.body` regex on the rendered HTML).
+    assert_select("#article_body .panel-body",
+                  text: /#{Regexp.escape(article.body)}/,
+                  count: 1)
 
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
@@ -73,40 +76,6 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Partly duplicates title_and_tabset_helper_test `test_context_nav_dropdown`.
-  # But we want to test a `destroy_button` tab too.
-  # That helper calls `add_q_param` and others.
-  # NOTE: we can actually call @controller.add_q_param here, fwiw.
-  def test_context_nav_dropdown_helper
-    # any Article will do
-    article = Article.last
-    links = [["Create Article", new_article_path,
-              { class: "new_article_link" }],
-             [:EDIT.t, edit_article_path(article.id),
-              { class: "edit_article_link" }],
-             [nil, article, { button: :destroy }]]
-
-    tabs = @controller.helpers.context_nav_links(links)
-
-    tab1 = @controller.helpers.link_to(
-      "Create Article", new_article_path, { class: "new_article_link" }
-    )
-    tab2 = @controller.helpers.link_to(
-      :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
-    )
-    # `context_nav_links` routes destroy tabs through `crud_button_or_link`,
-    # which defaults `icon: nil, btn: nil` for `:destroy` so context-nav
-    # `[ DESTROY ]` tabs render as plain text links (no btn frame, no
-    # glyphicon). Build the expected tab the same way for the comparison.
-    tab3 = @controller.helpers.destroy_button(
-      target: article, icon: nil, btn: nil
-    )
-
-    assert_includes(tabs, tab1)
-    assert_includes(tabs, tab2)
-    assert_includes(tabs, tab3)
-  end
-
   ############ test Actions that Display forms -- (new, edit, etc.)
 
   def test_new
@@ -119,6 +88,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove authorized user can go to create_article form
     login(users(:article_writer).login)
     get(:new)
+    assert_select("form#article_form")
     assert_form_action(action: :create) # "new" form posts to :create action
 
     # Prove that if News Articles project doesn't exist, there's no error.
@@ -141,6 +111,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove authorized user can create article
     login(users(:article_writer).login)
     get(:edit, params: params)
+    assert_select("form#article_form")
     assert_form_action(action: :update) # "edit" form posts to :update action
   end
 
@@ -171,7 +142,9 @@ class ArticlesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash_text(:article_title_required.l)
-    assert_template(:new)
+    # Phlex `Articles::New` renders the form (id derived by
+    # ApplicationForm from the Views::Controllers::* namespace).
+    assert_select("form#article_form")
     assert_form_action(action: :create) # "new" form
 
     # Prove authorized user can create Article
@@ -225,7 +198,9 @@ class ArticlesControllerTest < FunctionalTestCase
     params[:article][:title] = ""
     post(:update, params: params)
     assert_flash_text(:article_title_required.l)
-    assert_template(:edit)
+    # Phlex `Articles::Edit` renders the form (id derived by
+    # ApplicationForm from the Views::Controllers::* namespace).
+    assert_select("form#article_form")
     assert_form_action(action: :update) # "edit" form
   end
 

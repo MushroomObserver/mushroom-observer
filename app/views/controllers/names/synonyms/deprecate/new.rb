@@ -4,7 +4,7 @@
 # Page-chrome + the `Names::Synonyms::Deprecate::Form` Phlex form
 # (which renders the misspelling-correction guidance + the
 # proposed-name field on top of suggest-corrections data).
-class Views::Controllers::Names::Synonyms::Deprecate::New < Views::Base
+class Views::Controllers::Names::Synonyms::Deprecate::New < Views::FullPageBase
   prop :name, ::Name
   prop :given_name, _Nilable(String), default: nil
   prop :misspelling, _Boolean, default: false

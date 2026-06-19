@@ -55,20 +55,35 @@ class ArticlesController < ApplicationController
 
   ##############################################################################
 
+  # Override `ApplicationController::Indexes#render_index_view` to render
+  # the Phlex `Articles::Index` class instead of the deleted
+  # `articles/index.html.erb`.
+  def render_index_view
+    render(Views::Controllers::Articles::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects
+           ))
+  end
+
   def show
     return false unless (@article = find_or_goto_index(Article, params[:id]))
 
     @canonical_url = article_url(@article.id)
+    render(Views::Controllers::Articles::Show.new(article: @article))
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
 
   def new
     @article = Article.new
+    render(Views::Controllers::Articles::New.new(article: @article))
   end
 
   def edit
     @article = find_or_goto_index(Article, params[:id])
+    return unless @article
+
+    render(Views::Controllers::Articles::Edit.new(article: @article))
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------
@@ -79,7 +94,7 @@ class ArticlesController < ApplicationController
       body: params.dig(:article, :body),
       user_id: @user.id
     )
-    return render(:new) if flash_missing_title?
+    return render_new_view if flash_missing_title?
 
     @article.save
     redirect_to(article_path(@article.id))
@@ -87,7 +102,7 @@ class ArticlesController < ApplicationController
 
   def update
     @article = Article.find(params[:id])
-    return render(:edit) if flash_missing_title?
+    return render_edit_view if flash_missing_title?
 
     @article.title = params.dig(:article, :title)
     @article.body = params.dig(:article, :body)
@@ -95,6 +110,18 @@ class ArticlesController < ApplicationController
     save_any_changes
     redirect_to(article_path(@article.id))
   end
+
+  private
+
+  def render_new_view
+    render(Views::Controllers::Articles::New.new(article: @article))
+  end
+
+  def render_edit_view
+    render(Views::Controllers::Articles::Edit.new(article: @article))
+  end
+
+  public
 
   def destroy
     if (@article = Article.find(params[:id])) && @article.destroy

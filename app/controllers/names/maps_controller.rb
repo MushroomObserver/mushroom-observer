@@ -7,10 +7,6 @@ module Names
 
     before_action :login_required
 
-    def controller_model_name
-      "Name"
-    end
-
     # Draw a map of all the locations where this name has been observed.
     # Uses the dynamic-clustering pipeline shared with
     # `Observations::MapsController#index` (#4159).
@@ -34,7 +30,7 @@ module Names
     def render_phlex_show
       render(Views::Controllers::Names::Maps::Show.new(
                name: @name, query: @query,
-               observations: @observations,
+               observations: @observations.to_a,
                observations_capped: @observations_capped,
                observations_loaded_count: @observations_loaded_count,
                observations_total_count: @observations_total_count,

@@ -7,34 +7,17 @@
 # regular show — not on versions) an export-status + review-status
 # footer.
 #
-# Inlines the full chain that the pre-Phlex
-# `_description_details_and_alts_panel.erb` composed across:
-#
-#   - `DescriptionsHelper#show_description_details` + #show_alt_descriptions
-#     + #add_list_of_projects + #show_description_export_and_review +
-#     #show_description_export_status + #show_name_description_review +
-#     #show_name_description_review_status + #show_name_description_review_ui +
-#     #show_name_description_latest_review + #description_title
-#
 # The heading-links icon strip is extracted to
-# `Components::DescriptionModLinks` (sibling-in-spirit to
-# `Components::InlineModLinks`), which replaces all of
-# `DescriptionIconsHelper`. The "Version: N / Previous Version" line
-# is `Components::PreviousVersion`, replacing
+# `Components::Description::ModLinks` (sibling-in-spirit to
+# `Components::Link::InlineMod`). The "Version: N / Previous Version" line
+# is `Components::Description::PreviousVersion`, replacing
 # `VersionsHelper#show_previous_version`. The license-badge block
-# (used by `AuthorsAndEditorsPanel`) is `Components::LicenseBadge`,
-# replacing the shared `_form_license_badge.erb` partial. Both
-# description helper files are deleted in the same commit.
+# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
-    # `review_as_string` lives in `app/helpers/localization_helper.rb`
-    # and is also called from the description list view.
-    register_value_helper :review_as_string
-
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ActiveRecord::Associations::CollectionProxy),
-         default: -> { [] }
+    prop :versions, _Array(_Interface(:user_id))
     prop :projects, _Nilable(_Array(::Project)), default: nil
     # Show pages pass `review: true`; versions pages omit it.
     prop :review, _Boolean, default: false
@@ -45,7 +28,7 @@ module Views::Controllers::Descriptions
              )) do |panel|
         panel.with_heading { :show_observation_details.l }
         panel.with_heading_links do
-          render(Components::DescriptionModLinks.new(
+          render(Components::Description::ModLinks.new(
                    description: @description, user: @user
                  ))
         end
@@ -76,7 +59,7 @@ module Views::Controllers::Descriptions
       br
       plain("#{:show_description_write_permissions.l}: #{write_perm}")
       br
-      render(Components::PreviousVersion.new(
+      render(Components::Description::PreviousVersion.new(
                obj: @description, versions: @versions
              ))
     end
@@ -139,7 +122,7 @@ module Views::Controllers::Descriptions
       content, path, opts = ::Tab::Description::Create.new(
         parent: object
       ).to_a
-      Components::IconLink.new(content, path, **(opts || {}))
+      Components::Link::Icon.new(content, path, **(opts || {}))
     end
 
     def alts_empty_text(type)
@@ -171,7 +154,9 @@ module Views::Controllers::Descriptions
       # the only kind exposed to the reviewer export/review flow.
       div do
         if @description.is_a?(::NameDescription)
-          render(Components::ExportStatusControls.new(object: @description))
+          render(Components::Image::ExportStatusControls.new(
+                   object: @description
+                 ))
         end
       end
       div { render_review_block }
@@ -226,7 +211,8 @@ module Views::Controllers::Descriptions
     def reviewer_link
       reviewer = @description.reviewer
       capture do
-        render(Components::UserLink.new(user: reviewer, name: reviewer.login))
+        render(Components::Link::Object::User.new(user: reviewer,
+                                                  name: reviewer.login))
       end
     end
 
@@ -250,6 +236,12 @@ module Views::Controllers::Descriptions
       else
         :private.l
       end
+    end
+
+    # `Description#review_status` → translation key lookup, e.g.
+    # `:unvetted` → "Needs Review".
+    def review_as_string(val)
+      :"review_#{val}".l
     end
   end
 end

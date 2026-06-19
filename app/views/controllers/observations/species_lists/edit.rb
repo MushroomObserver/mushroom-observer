@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 # Action template for `Observations::SpeciesListsController#edit` —
-# the "manage species lists for this observation" page. Replaces
-# `edit.html.erb`. Renders two `Components::ListGroup`s of
+# the "manage species lists for this observation" page.
+# Renders two `Components::ListGroup::Base`s of
 # `SpeciesLists::Listing` rows: lists the observation already
 # belongs to (REMOVE button on each) and lists it doesn't (ADD
 # button on each).
 module Views::Controllers::Observations::SpeciesLists
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :observation, ::Observation
     prop :all_lists, ::Query::SpeciesLists
     prop :obs_lists, _Array(::SpeciesList)
@@ -54,13 +54,12 @@ module Views::Controllers::Observations::SpeciesLists
     end
 
     # Skip the heading + the list-group entirely when the source
-    # array is empty (matches the ERB's `if @obs_lists.any?` /
-    # `if @other_lists.any?` guards).
+    # No-op when the array is empty.
     def render_section(heading:, lists:, remove: false, add: false)
       return if lists.empty?
 
       h5(class: "mt-3") { plain("#{heading}:") }
-      render(Components::ListGroup.new) do |list|
+      render(Components::ListGroup::Base.new) do |list|
         lists.each do |sl|
           list.item(
             class: "d-flex justify-content-between align-items-start"

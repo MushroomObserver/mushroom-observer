@@ -8,20 +8,18 @@ class Views::Layouts::Sidebar
   #     browser: browser,
   #     request: request
   #   ))
-  class Languages < ::Components::Base
+  class Languages < ::Views::Base
     # `:browser` is unused inside this view but kept for API
     # symmetry with `Sidebar`, which threads both
     # `browser:` and `request:` through to here. Duck-typed for the
     # same reason as the parent (tests pass a Struct stub).
     prop :browser, _Interface(:bot?)
-    # Used via `attr_reader :request` so `reload_with_args` (a
-    # registered `ApplicationHelper`) can read `request.url`.
+    # Used via `attr_reader :request` so `reload_with_args` (inherited
+    # from `Views::Base`) can read `request.url`.
     prop :request, _Interface(:url)
     prop :languages, _Array(Language)
 
-    register_value_helper :reload_with_args
-
-    # Make request available to registered helpers
+    # Make request available to the inherited `reload_with_args`.
     attr_reader :request
 
     def view_template

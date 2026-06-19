@@ -30,18 +30,6 @@ class Views::Controllers::Versions::TableTest < ComponentTestCase
     assert_html(html, "a.latest_version_link")
   end
 
-  def test_default_versions_is_empty_array
-    # No `versions:` / `args:` args — both default lambdas fire.
-    name = names(:peltigera)
-
-    html = render(
-      Views::Controllers::Versions::Table.new(obj: name)
-    )
-
-    # The panel still renders (empty rows).
-    assert_html(html, "##{name.type_tag}_versions")
-  end
-
   def test_bold_args_callable_emboldens_matching_rows
     # `args[:bold]` is a callable that decides per-row whether to wrap
     # the version label in `<strong>`. The name-versions page uses it

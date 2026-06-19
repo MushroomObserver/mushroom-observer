@@ -3,8 +3,6 @@
 require("test_helper")
 
 module Views::Controllers::Observations::Images
-  # Tests for Form — the Phlex Superform that
-  # replaces app/views/controllers/observations/images/edit.html.erb.
   class FormTest < ComponentTestCase
     def setup
       super

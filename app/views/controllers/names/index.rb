@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Names index. Replaces
-# `app/views/controllers/names/index.html.erb` + its per-row
-# partial `_name.erb` + the alt-spellings alert
-# `_name_suggestions.erb` (the last of which was already moved
-# out of the misleading `show/` subdirectory in this branch).
+# Action template for the Names index.
 #
 # Composes:
 #   - page chrome (container_class, index title, context-nav,
@@ -17,14 +13,11 @@
 # `NamesController#render_index_view` overrides the ApplicationController
 # default to render this Phlex class directly with explicit props.
 module Views::Controllers::Names
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::Names
     prop :pagination_data, ::PaginationData
-    prop :objects,
-         _Union(Array, ::ActiveRecord::Relation,
-                ::ActiveRecord::Associations::CollectionProxy)
+    prop :objects, _Array(::Name)
     prop :user, _Nilable(::User), default: nil
-    prop :error, _Nilable(String), default: nil
     # The `needs_description` subaction sets `@help` to a
     # translation key Symbol; other subactions leave it nil.
     prop :help, _Nilable(Symbol), default: nil
@@ -52,8 +45,6 @@ module Views::Controllers::Names
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data, @test_pagination_args)
 
-      flash_error(@error) if @error && @objects.empty?
-
       render_suggestions_alert if suggest_alternates?
       render_help_blurb if @help
 
@@ -80,7 +71,9 @@ module Views::Controllers::Names
       return unless @objects.any?
 
       counts = Name.count_observations(@objects)
-      render(Components::ListGroup.new(class: "name-index mb-3")) do |list|
+      render(Components::ListGroup::Base.new(
+               class: "name-index mb-3"
+             )) do |list|
         @objects.each do |name|
           list.item do
             render(Row.new(

@@ -309,12 +309,12 @@ class ImageScriptTest < UnitTestCase
 
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
-    assert(File.exist?("#{local_root}/orig/#{in_situ_id}.jpg"))
-    assert(File.exist?("#{local_root}/thumb/#{in_situ_id}.jpg"))
-    assert(File.exist?("#{remote_server_path(1)}/orig/#{in_situ_id}.jpg"))
-    assert(File.exist?("#{remote_server_path(1)}/thumb/#{in_situ_id}.jpg"))
+    assert_path_exists("#{local_root}/orig/#{in_situ_id}.jpg")
+    assert_path_exists("#{local_root}/thumb/#{in_situ_id}.jpg")
+    assert_path_exists("#{remote_server_path(1)}/orig/#{in_situ_id}.jpg")
+    assert_path_exists("#{remote_server_path(1)}/thumb/#{in_situ_id}.jpg")
     assert_not(File.exist?("#{remote_server_path(2)}/orig/#{in_situ_id}.jpg"))
-    assert(File.exist?("#{remote_server_path(2)}/thumb/#{in_situ_id}.jpg"))
+    assert_path_exists("#{remote_server_path(2)}/thumb/#{in_situ_id}.jpg")
 
     img = images(:in_situ_image)
     assert_equal(500, img.width)

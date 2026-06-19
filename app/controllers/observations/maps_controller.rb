@@ -82,7 +82,7 @@ module Observations
 
       render(Views::Controllers::Observations::Maps::Show.new(
                observation: @observation,
-               observations: @observations,
+               observations: @observations.to_a,
                query: @query
              ))
     end
@@ -92,7 +92,7 @@ module Observations
     def maps_index_phlex_view
       Views::Controllers::Observations::Maps::Index.new(
         query: @query,
-        observations: @observations,
+        observations: @observations.to_a,
         observations_capped: @observations_capped || false,
         observations_loaded_count: @observations_loaded_count,
         observations_total_count: @observations_total_count,

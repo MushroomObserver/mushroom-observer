@@ -48,9 +48,7 @@ class Views::Controllers::Account::Preferences::FormTest <
     assert_html(html, "select[name='user[keep_filenames]']")
     assert_html(html, "select[name='user[license_id]']")
     # License note is HTML-safe textile that includes a link to the
-    # help-page anchor. Pre-conversion ERB used `tag.span(safe_join)`
-    # to keep the `<a>` from being escaped; the Phlex view does the
-    # same via `trusted_html`.
+    # help-page anchor.
     assert_html(html, "a[href*='how_to_use#license']")
   end
 
@@ -215,7 +213,8 @@ class Views::Controllers::Account::Preferences::FormTest <
     # produce no field. The form raises to surface the bug instead.
     fake = Struct.new(:type, :sym).new(:not_a_real_type, :bogus)
     form = Views::Controllers::Account::Preferences::Form.new(
-      @user, licenses: License.available_names_and_ids(@user&.license)
+      @user, licenses: License.available_names_and_ids(@user&.license),
+             languages: Language.all.to_a
     )
     assert_raises(RuntimeError) do
       form.send(:render_filter_field, fake)
@@ -333,7 +332,7 @@ class Views::Controllers::Account::Preferences::FormTest <
   def render_form
     licenses = License.available_names_and_ids(@user&.license)
     render(Views::Controllers::Account::Preferences::Form.new(
-             @user, licenses: licenses
+             @user, licenses: licenses, languages: Language.all.to_a
            ))
   end
 

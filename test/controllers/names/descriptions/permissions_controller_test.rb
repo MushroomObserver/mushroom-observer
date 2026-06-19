@@ -4,8 +4,6 @@ require("test_helper")
 
 module Names::Descriptions
   class PermissionsControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     def peltigera_desc
       name_descriptions(:peltigera_desc)
     end

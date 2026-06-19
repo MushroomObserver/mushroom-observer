@@ -29,7 +29,6 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     stub_controller_name!("observations")
     stub_controller_path!("observations")
     define_action_methods!([:new, :index, :show])
-    stub_rubric_methods!
   end
 
   # ---- nav_create (+ Add button) -------------------------------------
@@ -170,26 +169,18 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
   # Override controller_name on the test controller so methods like
   # `nav_create_visible?` see "observations" instead of the default
-  # "test".
+  # "test". `ControllerLabels` (included via
+  # `ComponentTestCase::TEST_CONTROLLER_MODULES`) derives
+  # `controller_model_name` / `rubric` from `controller_name`, and
+  # filters `ActionView::TestCase::TestController`'s module parent
+  # so `parent_controller_module` already returns nil — no extra
+  # stubs needed for any of those.
   def stub_controller_name!(name)
     controller.define_singleton_method(:controller_name) { name }
-    controller.define_singleton_method(:controller_model_name) do
-      name.classify
-    end
-    controller.define_singleton_method(:rubric) do
-      name.upcase.to_sym.t
-    end
   end
 
   def stub_controller_path!(path)
     controller.define_singleton_method(:controller_path) { path }
-  end
-
-  # `nav_linkable_parent_controller` reads
-  # `controller.send(:parent_controller_module)`. Default to nil
-  # (top-level controller).
-  def stub_rubric_methods!
-    controller.define_singleton_method(:parent_controller_module) { nil }
   end
 
   # Make controller.methods.include?(:new) return what the test wants.

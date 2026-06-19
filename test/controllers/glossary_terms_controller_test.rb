@@ -28,7 +28,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     # make sure public can access
     term = glossary_terms(:plane_glossary_term)
     get(:index, params: { letter: "P" })
-    assert_template("index")
+    assert_select("body.glossary_terms__index")
     assert_select(
       "a[href *= '#{glossary_term_path(term.id)}']", true,
       "Glossary Index at `P` missing link to #{term.unique_text_name})"
@@ -38,7 +38,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
   def test_index_by_id
     term = glossary_terms(:plane_glossary_term)
     get(:index, params: { id: term.id })
-    assert_template("index")
+    assert_select("body.glossary_terms__index")
     assert_select(
       "a[href *= '#{glossary_term_path(term.id)}']", true,
       "Glossary Index at `P` missing link to #{term.unique_text_name})"
@@ -56,7 +56,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
     get(:index, params: q_pattern("con"))
     assert_session_query_record_is_correct
-    assert_template("index")
+    assert_select("body.glossary_terms__index")
     assert_select(
       "a[href*='glossary_terms/#{conic.id}']", text: conic.name
     )
@@ -473,9 +473,16 @@ class GlossaryTermsControllerTest < FunctionalTestCase
 
     login
     make_admin
+    # `find_or_goto_index` uses `GlossaryTerm.show_includes.find_by`,
+    # and the destroy refetches via `GlossaryTerm.find` — stub both
+    # paths so the controller sees our destroy-mocked instance.
     term.stub(:destroy, false) do
-      GlossaryTerm.stub(:safe_find, term) do
-        delete(:destroy, params: { id: term.id })
+      GlossaryTerm.stub(:show_includes, GlossaryTerm) do
+        GlossaryTerm.stub(:find_by, term) do
+          GlossaryTerm.stub(:find, term) do
+            delete(:destroy, params: { id: term.id })
+          end
+        end
       end
     end
 

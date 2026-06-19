@@ -13,6 +13,17 @@ class CollectionNumbersController < ApplicationController
     build_index_with_query
   end
 
+  # Overrides `ApplicationController::Indexes#render_index_view` so
+  # `show_index_of_objects` renders the Phlex `Index` class instead
+  # of `collection_numbers/index.html.erb` (deleted).
+  def render_index_view
+    render(Views::Controllers::CollectionNumbers::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, user: @user,
+             observation: @observation
+           ))
+  end
+
   # Sort options for the index page. Read by `add_sorter` in the
   # view. Each key must resolve to `CollectionNumber.order_by_<key>`.
   def index_sort_options
@@ -44,10 +55,8 @@ class CollectionNumbersController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    {
-      letters: true,
-      num_per_page: 100
-    }.merge(opts)
+    # `:include` falls back to `CollectionNumber.index_includes_tree`.
+    { letters: true, num_per_page: 100 }.merge(opts)
   end
 
   public
@@ -63,7 +72,12 @@ class CollectionNumbersController < ApplicationController
     end
 
     @canonical_url = CollectionNumber.show_url(params[:id])
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    @collection_number = find_collection_number_for_show
+    return unless @collection_number
+
+    render(Views::Controllers::CollectionNumbers::Show.new(
+             collection_number: @collection_number, user: @user
+           ))
   end
 
   def new
@@ -75,7 +89,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html
+      format.html { render_new_phlex }
     end
   end
 
@@ -96,7 +110,7 @@ class CollectionNumbersController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_collection_number_form }
-      format.html
+      format.html { render_edit_phlex }
     end
   end
 
@@ -132,7 +146,30 @@ class CollectionNumbersController < ApplicationController
 
   def set_ivars_for_edit
     @layout = calc_layout_params
-    @collection_number = find_or_goto_index(CollectionNumber, params[:id])
+    @collection_number = find_collection_number_for_show
+  end
+
+  # Uses `CollectionNumber.show_includes` so the show / edit views
+  # don't re-query when iterating `@collection_number.observations`
+  # (the MatrixTable / MatrixBox render walks down through
+  # `Observation::NamingConsensus` into votes + naming.name).
+  def find_collection_number_for_show
+    CollectionNumber.show_includes.find_by(id: params[:id]) ||
+      flash_error_and_goto_index(CollectionNumber, params[:id])
+  end
+
+  def render_new_phlex
+    render(Views::Controllers::CollectionNumbers::New.new(
+             collection_number: @collection_number,
+             observation: @observation, user: @user
+           ))
+  end
+
+  def render_edit_phlex
+    render(Views::Controllers::CollectionNumbers::Edit.new(
+             collection_number: @collection_number, user: @user,
+             back: @back, back_object: @back_object
+           ))
   end
 
   # create
@@ -258,7 +295,8 @@ class CollectionNumbersController < ApplicationController
     @collection_number.change_corresponding_herbarium_records(old_format_name)
     @other_number.observations += @collection_number.observations -
                                   @other_number.observations
-    @collection_number.destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade.
+    CollectionNumber.find(@collection_number.id).destroy
     @collection_number = @other_number
 
     show_flash_and_send_back
@@ -297,7 +335,8 @@ class CollectionNumbersController < ApplicationController
     else
       # Figure out where to redirect BEFORE destroying the record
       figure_out_destroy_redirect
-      @collection_number.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      CollectionNumber.find(@collection_number.id).destroy
     end
     true
   end
@@ -383,14 +422,13 @@ class CollectionNumbersController < ApplicationController
       end
       # renders the flash in the modal
       format.turbo_stream do
-        render(partial: "shared/modal_flash_update",
-               locals: { identifier: modal_identifier }) and return
+        render_modal_flash_update(modal_identifier) and return
       end
     end
   end
 
   def render_modal_collection_number_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -412,36 +450,36 @@ class CollectionNumbersController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:add_object, :COLLECTION_NUMBER)
+      :add_object.t(type: :COLLECTION_NUMBER)
     when "edit", "update"
-      helpers.edit_page_title(
-        @collection_number.format_name.t, @collection_number
-      )
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @collection_number, mode: :edit,
+                         title: @collection_number.format_name.t
+                       ))
     end
   end
 
   def render_collection_numbers_section_update
+    # Refetch with just the collection-numbers subtree the panel reads
+    # (`obs.collection_numbers` + `obs.can_edit?`-related projects).
+    fresh_obs = Observation.includes(
+      :projects, collection_numbers: :user
+    ).find(@observation.id)
     render_obs_section_update(
       identifier: "collection_numbers",
       panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
-        obs: @observation, user: @user, has_sibling_records: false
+        obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return
   end
 
   # this updates both the form and the flash
   def reload_collection_number_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: {
-        identifier: modal_identifier,
-        form_locals: {
-          model: @collection_number,
-          observation: @observation,
-          back: @back
-        }
-      }
-    ) and return true
+    render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                               model: @collection_number,
+                               observation: @observation,
+                               back: @back
+                             }) and return true
   end
 end
 # rubocop:enable Metrics/ClassLength

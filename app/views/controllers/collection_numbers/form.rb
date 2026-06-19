@@ -4,8 +4,8 @@ module Views::Controllers::CollectionNumbers
   # Form for creating or editing collection numbers. Collection
   # numbers are specimen identifiers assigned by collectors.
   # Rendered directly by the collection_numbers controller's
-  # `new.html.erb` and `edit.html.erb`, and dynamically by
-  # `Components::ModalTurboForm` via `form_component_class_for`.
+  # `new.rb` and `edit.rb`, and dynamically by
+  # `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
     def initialize(model, observation: nil, back: nil, **)
       @observation = observation || model.observations.first

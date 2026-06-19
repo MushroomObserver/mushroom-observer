@@ -8,9 +8,8 @@
 # "Collection number(s): link, link"
 # When there are no records but the user can edit: "no records [ new ]"
 #
-# Replaces `_collection_numbers.erb`. Inlines no helpers itself —
-# `remove_collection_number_button` is now handled by
-# `Components::InlineModLinks` which knows how to detach a
+# `remove_collection_number_button` is handled by
+# `Components::Link::InlineMod` which knows how to detach a
 # `CollectionNumber` from its observation.
 class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Base
   prop :obs, ::Observation
@@ -59,7 +58,7 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
   def render_editable_row(number)
     li(id: "collection_number_#{number.id}") do
       render_show_link(number)
-      render(Components::InlineModLinks.new(
+      render(Components::Link::InlineMod.new(
                target: number, observation: @obs, user: @user
              ))
     end
@@ -94,7 +93,7 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
   end
 
   def render_new_link
-    render(Components::InlineAddLink.new(
+    render(Components::Link::InlineAdd.new(
              modal_id: "collection_number",
              tab: ::Tab::CollectionNumber::New.new(observation: @obs)
            ))

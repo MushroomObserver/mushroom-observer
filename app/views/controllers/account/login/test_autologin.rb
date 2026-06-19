@@ -2,10 +2,9 @@
 
 # Action template for `Account::LoginController#test_autologin` — a
 # blank "you hit the autologin test page" stub used by the manual
-# autologin flow check. Replaces
-# `app/views/controllers/account/login/test_autologin.html.erb`.
+# autologin flow check.
 module Views::Controllers::Account::Login
-  class TestAutologin < Views::Base
+  class TestAutologin < Views::FullPageBase
     def view_template
       p { plain("This page is used to test the autologin feature.") }
     end

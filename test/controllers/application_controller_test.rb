@@ -14,8 +14,9 @@ require("test_helper")
 class ApplicationControllerTest < FunctionalTestCase
   tests InfoController
 
-  # `change_theme_to` is invoked by `choose_layout` when the
-  # request carries a `?user_theme=...` param. Three branches:
+  # `change_theme_to` is invoked by `apply_user_theme_change`
+  # (a before_action) when the request carries a `?user_theme=...`
+  # param. Three branches:
   # (1) known theme + logged-in user persists it on the user,
   # (2) known theme + no user persists it in the session,
   # (3) unknown theme falls back to layout assignment.
@@ -45,17 +46,15 @@ class ApplicationControllerTest < FunctionalTestCase
   end
 
   def test_user_theme_param_unknown_value_sets_layout_session
-    # An unknown theme name falls through to `session[:layout] =
-    # change`, which `choose_layout` then returns. With a bogus
-    # layout name, Rails raises MissingTemplate after the session
-    # assignment — that's fine; we only care that the assignment
-    # happened (covers L139 in `application_controller.rb`).
-    assert_raises(ActionView::MissingTemplate) do
-      get(:intro, params: { user_theme: "BOGUS_LAYOUT" })
-    end
+    # An unknown theme name lands in `session[:layout]`; the next
+    # render's Phlex layout-picker (`Views::FullPageBase#around_template`)
+    # reads it. Anything that isn't `"printable"` falls back to the
+    # default Application layout, so the request still renders.
+    get(:intro, params: { user_theme: "BOGUS_LAYOUT" })
 
+    assert_response(:success)
     assert_equal("BOGUS_LAYOUT", session[:layout],
-                 "Unknown theme should be treated as a layout name")
+                 "Unknown theme should be stored on session[:layout]")
   end
 
   # `fix_bad_domains` redirects GETs to `MO.http_domain` when the

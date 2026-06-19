@@ -3,7 +3,7 @@
 module Views::Controllers::InatImports
   # Confirmation form for iNat import. Shows estimated import count
   # and Proceed/Go Back buttons. Hidden fields carry form data
-  # through the confirmation step. Rendered by `confirm.html.erb`.
+  # through the confirmation step. Rendered by `confirm.rb`.
   class ConfirmForm < ::Components::ApplicationForm
     def initialize(model, estimate: nil, unlicensed_obs: nil,
                    inat_import: nil, **)
@@ -107,7 +107,7 @@ module Views::Controllers::InatImports
       hidden_field(:import_others)
       hidden_field(:inat_url)
       hidden_field(:original_inat_url)
-      hidden_field(:skip_inat_update)
+      hidden_field(:skip_inat_writeback)
     end
 
     def render_buttons

@@ -52,23 +52,31 @@ module FlashExtensions
       got = got[1..].gsub(/(\n|<br.?>)+/, "\n")
     end
     msg&.sub(/\n*$/, "\n")
-    if !expect && got
-      assert(got.nil?,
-             "#{msg} Shouldn't have been any flash errors. Got #{got.inspect}.")
+    if !expect && !got
+      # Expected no flash, got no flash — the `assert_no_flash` happy
+      # path. No assertion needed; falling through to the `else`
+      # branch below ran `assert_equal(nil, nil)` and tripped
+      # Minitest's `assert_equal nil, …` deprecation.
+      pass
+    elsif !expect && got
+      assert_nil(
+        got,
+        "#{msg} Shouldn't have been any flash errors. Got #{got.inspect}."
+      )
     elsif expect && !got
-      assert(expect.nil?, "#{msg} Expected a flash error.  Got nothing.")
+      assert_nil(expect, "#{msg} Expected a flash error.  Got nothing.")
     elsif expect.is_a?(Integer)
-      assert(expect == lvl,
-             "#{msg} Wrong flash error level. " \
-             "Message: level #{lvl}, #{got.inspect}.")
+      assert_equal(expect, lvl,
+                   "#{msg} Wrong flash error level. " \
+                   "Message: level #{lvl}, #{got.inspect}.")
     elsif expect.is_a?(Regexp)
-      assert(got.match(expect),
-             "#{msg} Got the wrong flash error(s). " \
-             "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
+      assert_match(expect, got,
+                   "#{msg} Got the wrong flash error(s). " \
+                   "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     else
-      assert(got == expect,
-             "#{msg} Got the wrong flash error(s). " \
-             "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
+      assert_equal(expect, got,
+                   "#{msg} Got the wrong flash error(s). " \
+                   "Expected: #{expect.inspect}.  Got: #{got.inspect}.")
     end
 
     clear_flash

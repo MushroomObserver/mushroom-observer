@@ -19,10 +19,18 @@ module Images
       raise("Bad value.") if @value != "0" && @value != "1"
 
       mark_image_exportable(@image, @value)
-      render(partial: "images/exports/update")
+      render(turbo_stream: image_export_toggle_stream)
     end
 
     private
+
+    def image_export_toggle_stream
+      turbo_stream.update("image_export_#{@image.id}") do
+        render_to_string(Views::Controllers::Images::Exports::Button.new(
+                           image: @image
+                         ), layout: false)
+      end
+    end
 
     def mark_image_exportable(image, value)
       @image = image

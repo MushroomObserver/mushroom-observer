@@ -46,16 +46,12 @@ module FieldSlipsController::Index
     [query, {}]
   end
 
+  # `show_index_of_objects` consumes `:include` as an array of
+  # association names (with nested hashes for deeper associations).
+  # Pull it from `FieldSlip.index_includes_tree` so the same shape
+  # used by the `index_includes` scope is the one applied here.
   def index_display_opts(opts, _query)
     { num_per_page: 50,
-      include: field_slip_includes }.merge(opts)
-  end
-
-  # Used on index, but could be used on show, edit? update? as well.
-  def field_slip_includes
-    [{ occurrence: [:primary_observation,
-                    { observations: [:location, :name, :namings,
-                                     :rss_log, :user] }] },
-     :project, :user]
+      include: FieldSlip.index_includes_tree }.merge(opts)
   end
 end

@@ -75,8 +75,8 @@ class InatObsTest < UnitTestCase
 
     # Observation form needs the Notes "parts" keys to be normalized
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
-    other = "on Quercus<!--- blank line(s) removed --->\n" \
-            "&#8212;<!--- blank line(s) removed --->\n" \
+    other = "on Quercus\n\n" \
+            "&#8212;\n\n" \
             "Originally posted to Mushroom Observer on Mar. 7, 2024."
     expected_notes = { snapshot_key => expected_snapshot,
                        Other: other }
@@ -146,9 +146,9 @@ class InatObsTest < UnitTestCase
       inat_obs_field("Voucher Specimen Taken").present?,
       "Failed to find iNat observation field"
     )
-    assert(
+    assert_nil(
       mock_observation("somion_unicolor").
-      inat_obs_field("Voucher Specimen Taken").nil?,
+      inat_obs_field("Voucher Specimen Taken"),
       "iNat obs should not have a Voucher Specimen Taken observation field"
     )
   end
@@ -188,6 +188,19 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  def test_name_override
+    with_field = inat_obs_with_fields(
+      [{ name: "Provisional Species Name", value: "ignore me" },
+       { name: "Species Name Override", value: "Boletus edulis" }]
+    )
+    assert_equal("Boletus edulis", with_field.name_override)
+
+    other_field = inat_obs_with_fields([{ name: "Other", value: "x" }])
+    assert_nil(other_field.name_override)
+
+    assert_nil(inat_obs_with_fields(nil).name_override)
+  end
+
   def test_specimen
     assert_not(mock_observation("somion_unicolor").specimen?)
     # See comment in Inat::Obs#specimen? about disabling specimen detection
@@ -213,7 +226,7 @@ class InatObsTest < UnitTestCase
   end
 
   def test_tags
-    assert(2, mock_observation("inocybe")[:tags].length)
+    assert_equal(3, mock_observation("inocybe")[:tags].length)
     assert_empty(mock_observation("evernia")[:tags])
   end
 
@@ -330,17 +343,17 @@ class InatObsTest < UnitTestCase
     )
 
     mock_obs = mock_observation("tremella_mesenterica")
-    mock_obs[:description] = "before blank line\r\n\r\nafter blank line"
+    mock_obs[:description] = "before\r\n\r\n\r\n\r\nafter blank lines"
     assert_not(
-      mock_obs.notes[:Other].match?(/\n{2,}/),
-      "Failed to compress consecutive newlines/returns from iNat Notes"
+      mock_obs.notes[:Other].match?(/\n{3,}/),
+      "Failed to collapse multiple blank lines to a single blank line"
     )
-    # Account for the solution of adding an html comment
-    # when compressing multiple blank lines
+    # Multiple blank lines collapse to a single blank line (no marker
+    # since #4536).
     assert_equal(
-      "before blank line\nafter blank line",
-      strip_html_comments(mock_obs.notes[:Other]),
-      "Failed to compress consecutive newlines/returns from iNat Notes"
+      "before\n\nafter blank lines",
+      mock_obs.notes[:Other],
+      "Failed to collapse multiple blank lines to a single blank line"
     )
   end
 
@@ -461,5 +474,14 @@ class InatObsTest < UnitTestCase
     Inat::Obs.new(
       JSON.generate(JSON.parse(mock_search)["results"].first)
     )
+  end
+
+  # A minimal Inat::Obs with the given observation fields (ofvs), or none.
+  def inat_obs_with_fields(ofvs)
+    Inat::Obs.new(JSON.generate(
+                    taxon: { name: "Boletus", rank: "species",
+                             ancestor_ids: [] },
+                    ofvs: ofvs
+                  ))
   end
 end

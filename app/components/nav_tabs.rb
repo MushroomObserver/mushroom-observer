@@ -85,8 +85,7 @@ class Components::NavTabs < Components::Base
   #
   #     tabs.tab("Details", details_path, key: "details")
   #
-  # **Array splat from a legacy `app/helpers/tabs/*_helper.rb` method**
-  # (the `[title, url, html_options]` shape):
+  # **Array splat (the `[title, url, html_options]` shape):**
   #
   #     tabs.tab(*projects_index_tab, key: "index")
   #

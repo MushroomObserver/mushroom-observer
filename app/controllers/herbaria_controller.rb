@@ -82,6 +82,14 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   private
 
+  # Phlex action template — explicit render per the conversion rule.
+  def render_index_view
+    render(Views::Controllers::Herbaria::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, merge: @merge
+           ))
+  end
+
   def full_index_sort_options
     [
       ["records",    :sort_by_records.t],
@@ -139,17 +147,21 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   ##############################################################################
   #
   # Display a single herbarium, based on :flow params
-  # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
+  # `:flow` is added by the show-page prev/next pager
+  # (`Views::Layouts::Header::ShowPrevNextNav`).
   def show
-    case params[:flow]
-    when "next"
-      redirect_to_next_object(:next, Herbarium, params[:id].to_s)
-    when "prev"
-      redirect_to_next_object(:prev, Herbarium, params[:id].to_s)
-    else
-      @canonical_url = herbarium_url(params[:id])
-      @herbarium = find_or_goto_index(Herbarium, params[:id])
-    end
+    flow = params[:flow]
+    return redirect_to_next_object(flow.to_sym, Herbarium, params[:id].to_s) \
+      if %w[next prev].include?(flow)
+
+    render_herbarium_show
+  end
+
+  def render_herbarium_show
+    @canonical_url = herbarium_url(params[:id])
+    return unless (@herbarium = find_or_goto_index(Herbarium, params[:id]))
+
+    render(Views::Controllers::Herbaria::Show.new(herbarium: @herbarium))
   end
 
   # ---------- Actions to Display forms -- (new, edit, etc.) -------------------
@@ -191,7 +203,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def render_modal_herbarium_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -214,9 +226,12 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:new_object, :HERBARIUM)
+      :new_object.t(type: :HERBARIUM)
     when "edit", "update"
-      helpers.edit_page_title(:HERBARIUM_RECORD.l, @herbarium)
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @herbarium, mode: :edit,
+                         title: :HERBARIUM_RECORD.l
+                       ))
     end
   end
 
@@ -470,18 +485,35 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   # this updates both the form and the flash
   def reload_herbarium_modal_form_and_flash
-    render(
-      partial: "shared/modal_form_reload",
-      locals: {
-        identifier: modal_identifier,
-        form_locals: {
-          model: @herbarium,
-          user: @user,
-          location: @herbarium.location,
-          top_users: @top_users
-        }
-      }
-    ) and return true
+    render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                               model: @herbarium,
+                               user: @user,
+                               location: @herbarium.location,
+                               top_users: @top_users
+                             }) and return true
+  end
+
+  # Turbo-stream chain emitted from `show_modal_flash_or_show_herbarium`
+  # success branch — closes the herbarium-create modal, flashes the
+  # success notice into the obs form's `page_flash`, updates the obs
+  # form's herbarium-name + herbarium-id inputs to the newly-saved
+  # herbarium, and removes the "Create herbarium" button. Inlined
+  # from the deleted `herbaria/_update_observation.erb` partial.
+  def update_observation_after_herbarium_save_streams
+    [
+      turbo_stream.close_modal("modal_herbarium"),
+      turbo_stream.remove("modal_herbarium"),
+      turbo_stream_flash_update,
+      # Obs form's herbarium-name field is namespaced under the
+      # observation Superform: id is `observation_herbarium_record_*`.
+      turbo_stream.update_input(
+        "observation_herbarium_record_herbarium_name", @herbarium.name
+      ),
+      turbo_stream.update_input(
+        "observation_herbarium_record_herbarium_id", @herbarium.id
+      ),
+      turbo_stream.remove("create_herbarium_btn")
+    ]
   end
 
   # What to do if the save succeeds
@@ -498,7 +530,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
         flash_notice(
           :runtime_added_to.t(type: :herbarium, name: :observation)
         )
-        render(partial: "herbaria/update_observation") and return
+        render(turbo_stream: update_observation_after_herbarium_save_streams)
       end
     end
   end

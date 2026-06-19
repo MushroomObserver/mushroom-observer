@@ -558,7 +558,13 @@ module ControllerExtensions
         controller = @controller.controller_name
         msg += "Expected it to render <#{controller}/#{arg}#{got}>"
         super(:success, msg)
-        assert_template(arg.to_s, msg)
+        # `assert_template` doesn't see Phlex action views — use the
+        # layout's `<body class="<controller>__<action>">` action
+        # marker instead. The arg may be a bare action ("show") or a
+        # "controller/action" path; strip any path prefix so the body
+        # class lookup uses the action name only.
+        action = arg.to_s.split("/").last
+        assert_select("body.#{controller}__#{action}", true, msg)
       elsif arg == :index
         msg += "Expected redirect to <root>#{got}"
         assert_redirected_to("/", msg)
@@ -615,7 +621,7 @@ module ControllerExtensions
       end
       break if message.nil?
     end
-    assert(message.nil?, message)
+    assert_nil(message, message)
   end
 
   def check_select_value(elem, expect_val, id)
@@ -657,7 +663,7 @@ module ControllerExtensions
                   end
       end
     end
-    assert(message.nil?, message)
+    assert_nil(message, message)
   end
 
   # Check the state of a checkbox.  Parameters: +id+ is element id,

@@ -4,7 +4,7 @@
 # renders the shared description form, threading the merge-flow
 # locals through to the form.
 module Views::Controllers::Names::Descriptions
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :description, ::NameDescription
     prop :user, _Nilable(::User), default: nil
     prop :licenses, _Array(_Tuple(String, Integer)), default: -> { [] }

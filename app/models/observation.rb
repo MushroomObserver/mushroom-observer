@@ -276,6 +276,60 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
+  # Eager-load tree every `Components::Matrix::Box` render of an
+  # observation reaches into — image with vote/license/project/user
+  # for `can_edit?`, location, name, namings (+ votes for
+  # `Observation::NamingConsensus`), occurrence (+ observations for
+  # the multi-obs occurrence link), projects, rss_log, user.
+  # Shared by observations#index, field_slips show/index,
+  # collection_numbers#show, herbarium_records#show, rss_logs#index,
+  # sequences#new/edit, projects/updates#index, and the identify
+  # queue (extends with `:observation_views`, `{ name: :synonym }`,
+  # `{ namings: :name }`).
+  #
+  # Swap the `thumb_image:` hash for the matrix_box_carousels
+  # alternative below when the carousel feature lands.
+  def self.matrix_box_includes
+    [{ thumb_image: [:image_votes, :license, :projects, :user] },
+     # for matrix_box_carousels:
+     # { images: [:image_votes, :license, :projects, :user] },
+     :external_source, :location, :name,
+     { namings: :votes },
+     { occurrence: :observations }, :projects, :rss_log, :user]
+  end
+
+  # Subtree consumed by `Observation.show_includes`. The
+  # `Descriptions::List#visible?` path reads each description's
+  # `.user`, so `name: { descriptions: :user }` avoids N+1 per
+  # description on the show page. The `observation_images: :image`
+  # polymorphic preload skips the `images.delete` cascade query.
+  def self.show_includes_tree
+    [:collector_user,
+     { collection_numbers: :user },
+     { comments: Comment.index_includes_tree },
+     { external_links: { external_site: { project: :user_group } } },
+     { herbarium_records: [{ herbarium: :curators }, :user] },
+     { images: [:image_votes, :license, :projects, :user] },
+     { interests: :user },
+     :location,
+     { name: [{ synonym: :names }, { descriptions: :user },
+              :interests, :description] },
+     { namings: Naming.index_includes_tree },
+     { observation_images: :image },
+     :observation_collection_numbers,
+     :observation_herbarium_records,
+     :observation_views,
+     :project_observations,
+     :species_list_observations,
+     { occurrence: [:field_slip, :observations] },
+     { projects: [{ admin_group: :users }, :image] },
+     :rss_log,
+     { sequences: :user },
+     { species_lists: [:location, :projects, :user] },
+     :thumb_image,
+     :user]
+  end
+
   # Only the field-slip flow builds observations this way, so the
   # collector default-to-creator is always skipped: a foray recorder is
   # never auto-claimed as collector. The caller assigns the resolved
@@ -422,7 +476,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # observations are destroyed or removed from it.
   def destroy_orphaned_collection_numbers
     collection_numbers.each do |col_num|
-      col_num.destroy_without_callbacks if col_num.observations == [self]
+      # SQL count so we don't lazy-load `col_num.observations`
+      # under strict_loading.
+      next if col_num.observations.where.not(id: id).exists?
+
+      col_num.destroy_without_callbacks
     end
   end
 
@@ -556,8 +614,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # name as a string, preferring +location+ over +where+ wherever both exist.
   # Also applies the location_format of the current user (defaults to "postal").
   def place_name
-    if location
-      location.display_name
+    # Use the eager-loaded `:location` when its id still matches
+    # `location_id` (the show/index render path). Fall back to an FK
+    # fetch when callers reach `place_name` after a `location_id =`
+    # assignment invalidated the cached target, so we don't lazy-load
+    # against strict_loading.
+    cached = association(:location).target if association(:location).loaded?
+    loc = if cached && cached.id == location_id
+            cached
+          elsif location_id
+            Location.find_by(id: location_id)
+          end
+    if loc
+      loc.display_name
     elsif User.current_location_format == "scientific"
       Location.reverse_name(where)
     else
@@ -1051,10 +1120,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def turn_off_specimen_if_no_more_records
     return unless specimen
-    return unless collection_numbers.empty?
-    return unless herbarium_records.empty?
-    return unless sequences.empty?
-    return if field_slip
+    # SQL `exists?` instead of loading the associations — keeps
+    # the caller from needing to `.reload` (which would drop the
+    # `show_includes` eager-loads from the strict-loading scope).
+    return if observation_collection_numbers.exists?
+    return if observation_herbarium_records.exists?
+    return if sequences.exists?
+    return if field_slip_id
 
     update(specimen: false)
   end
@@ -1444,10 +1516,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def field_slip_id_by
     return notes[:Field_Slip_ID_By] if notes.include?(:Field_Slip_ID_By)
 
-    naming = namings.find_by(name:)
-    return naming.user.textile_name if naming
+    # `pick(:user_id)` reads the column directly, avoiding the
+    # `namings.find_by(...).user` chain that would trip strict
+    # loading on the form autocompleter render path. Filter by
+    # `name_id` so we don't touch the `:name` association either.
+    user_id = namings.where(name_id:).pick(:user_id)
+    return "" unless user_id
 
-    ""
+    User.find_by(id: user_id)&.textile_name || ""
   end
 
   def other_codes

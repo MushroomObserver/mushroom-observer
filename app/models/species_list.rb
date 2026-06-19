@@ -162,8 +162,25 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   scope :show_includes, lambda {
     strict_loading.includes(
-      { comments: :user },
-      { observations: :namings }
+      { comments: Comment.index_includes_tree },
+      :interests,
+      :location,
+      # Reuse the matrix-box subtree on observations so
+      # `species_lists/projects` and `observations/species_lists`
+      # can iterate and permission-check without lazy loads.
+      # The `images` subtree mirrors `Observation.show_includes` so
+      # each image's votes / license / projects / user are preloaded
+      # for permission + render paths.
+      { observations: [{ images: [:image_votes, :license, :projects, :user] },
+                       *Observation.matrix_box_includes] },
+      :project_species_lists,
+      # Join table for `species_list.destroy` cascade preload and
+      # `observations.delete(obs)` (which iterates loaded join rows
+      # and reaches `.observation` to match).
+      { species_list_observations: :observation },
+      { projects: Project.banner_includes_tree },
+      :rss_log,
+      :user
     )
   }
 

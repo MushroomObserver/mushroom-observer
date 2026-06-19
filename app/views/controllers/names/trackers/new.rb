@@ -4,7 +4,7 @@
 # page-chrome + a rank-aware help blurb + the
 # `Names::Trackers::Form` Phlex form initialized on a new
 # `NameTracker`.
-class Views::Controllers::Names::Trackers::New < Views::Base
+class Views::Controllers::Names::Trackers::New < Views::FullPageBase
   prop :name, ::Name
   prop :note_template, _Nilable(String), default: nil
 

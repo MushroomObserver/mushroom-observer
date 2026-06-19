@@ -10,13 +10,13 @@ module Locations
     def test_show_help
       login
       get(:show)
-      assert_template("locations/search/_help")
+      assert_select("#locations_search_help")
     end
 
     def test_show_help_turbo
       login
       get(:show, format: :turbo_stream)
-      assert_template("locations/search/_help")
+      assert_select("#locations_search_help")
     end
 
     def test_new_locations_search
@@ -54,7 +54,7 @@ module Locations
                     text: "Rolf Singer (rolf)")
       assert_select("select#query_locations_has_observations",
                     selected: "yes")
-      assert_equal(session[:search_type], :locations)
+      assert_equal(:locations, session[:search_type])
     end
 
     def test_create_locations_search

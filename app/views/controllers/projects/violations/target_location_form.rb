@@ -83,9 +83,12 @@ module Views::Controllers::Projects::Violations
       (0..(parts.length - 1)).map { |i| parts[i..].join(", ") }
     end
 
-    def initialize(obs:, project:, **)
+    def initialize(obs:, project:, existing_locations:, **)
       @obs = obs
       @project = project
+      # `name => Location` for every suffix that already has a row;
+      # pre-loaded by `Projects::ViolationsController#target_location_modal`.
+      @existing_locations = existing_locations
       # The project is the thing being mutated (a target_location
       # entry is added to its target_locations list), so it's the
       # natural Superform "model" for dom.id. No fields bind to it —
@@ -157,19 +160,17 @@ module Views::Controllers::Projects::Violations
     end
 
     def suffix_create_link(suffix)
-      # `view_context.tag.a(...)` returns a SafeBuffer string
-      # without writing to the Phlex output buffer — exactly what
-      # RadioField's `:append` per-choice option needs, so the link
-      # renders inside the disabled row's `.radio` div (per-row
-      # append) and not eagerly at the call site of `suffix_options`
-      # above the radio group.
+      # Needs the link as a returned SafeBuffer string (not buffer
+      # output) so it can be passed as RadioField's `:append`
+      # per-choice option — the link renders inside the disabled
+      # row's `.radio` div and not eagerly at the `suffix_options`
+      # call site above the radio group.
       #
-      # Phlex's own output helpers (`link_to`, etc.) write to the
-      # buffer at call time, which is wrong shape here. The previous
-      # implementation used `helpers.tag.a` for this property;
-      # switched to `view_context.tag.a` to drop the deprecated
-      # `helpers` accessor while preserving the return-a-string
-      # behavior.
+      # `capture { ... }` returns Phlex's accumulated output as a
+      # SafeBuffer; the leading space is rendered inside the
+      # block via `plain` so the whole return value stays
+      # html_safe (string-+-SafeBuffer concatenation would demote
+      # to a plain String).
       #
       # `where:` (not `display_name:`) is the param
       # `LocationsController#new` reads to pre-populate the form's
@@ -183,13 +184,15 @@ module Views::Controllers::Projects::Violations
       # tab. `modal#hide` calls `$(modal).modal('hide')` without
       # passing the event, so no preventDefault — the link's new
       # tab opens *and* the modal closes.
-      " ".html_safe + view_context.tag.a(
-        :form_violations_modal_target_location_create.l,
-        href: new_location_path(where: suffix),
-        target: "_blank", rel: "noopener",
-        data: { action: "click->modal#hide" },
-        class: "btn btn-default btn-xs"
-      )
+      capture do
+        plain(" ")
+        a(href: new_location_path(where: suffix),
+          target: "_blank", rel: "noopener",
+          data: { action: "click->modal#hide" },
+          class: "btn btn-default btn-xs") do
+          plain(:form_violations_modal_target_location_create.l)
+        end
+      end
     end
 
     def suffixes
@@ -197,10 +200,11 @@ module Views::Controllers::Projects::Violations
     end
 
     # Existing Locations whose name matches one of the suffixes,
-    # indexed by name. Batch-loaded in a single query (Copilot review
-    # on PR #4182).
+    # indexed by name. Pre-loaded by
+    # `Projects::ViolationsController#target_location_modal` and
+    # passed in as `existing_locations:`.
     def existing
-      @existing ||= Location.where(name: suffixes).index_by(&:name)
+      @existing_locations
     end
 
     # Pre-check the first suffix that has a Location, not the first

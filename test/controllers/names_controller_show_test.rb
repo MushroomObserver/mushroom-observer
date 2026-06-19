@@ -4,7 +4,6 @@ require("test_helper")
 
 class NamesControllerShowTest < FunctionalTestCase
   tests NamesController
-  include ObjectLinkHelper
 
   ################################################
   #
@@ -108,8 +107,8 @@ class NamesControllerShowTest < FunctionalTestCase
 
   def test_show_name_ascomycete
     name = names(:peltigera)
-    assert(name.classification =~ /Ascomycete/,
-           "Test needs a Name fixture that's an Ascomycete")
+    assert_match(/Ascomycete/, name.classification,
+                 "Test needs a Name fixture that's an Ascomycete")
 
     login
     get(:show, params: { id: name.id })

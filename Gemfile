@@ -97,7 +97,7 @@ gem("blankslate")
 
 # Simple version models and tables for classes
 # Use our own fork, which stores enum attrs as integers in the db
-gem("mo_acts_as_versioned", ">= 0.6.6",
+gem("mo_acts_as_versioned", ">= 0.8.0",
     git: "https://github.com/MushroomObserver/acts_as_versioned")
 
 # Use ActiveModel has_secure_password
@@ -184,8 +184,10 @@ group :test, :development do
   # Use rubocop and extensions for code quality control
   # https://docs.rubocop.org/rubocop/extensions.html#cop-extensions
   gem("rubocop", require: false)
-  gem("rubocop-performance")
-  gem("rubocop-rails")
+  gem("rubocop-capybara", require: false)
+  gem("rubocop-minitest", require: false)
+  gem("rubocop-performance", require: false)
+  gem("rubocop-rails", require: false)
   gem("rubocop-thread_safety", require: false)
 end
 

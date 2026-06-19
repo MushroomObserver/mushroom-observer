@@ -22,11 +22,16 @@ module Observations
             :search_bar_help, help_phlex_view
           ))
         end
-        format.html { render(help_phlex_view) }
+        format.html do
+          render(Views::Controllers::Observations::Search::Show.new)
+        end
       end
     end
 
     def new
+      if params[:advanced_retired].present?
+        flash_notice(:search_advanced_retired_notice.t)
+      end
       @local = params[:local] != "false"
       set_up_form_field_groupings
       @search = build_search_query

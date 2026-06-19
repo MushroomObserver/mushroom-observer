@@ -3,7 +3,7 @@
 # Action template for `Names::LifeformsController#edit`.
 # Page-chrome + the `Names::Lifeforms::Form` Phlex form (which
 # builds its own `FormObject::Lifeform` from the supplied Name).
-class Views::Controllers::Names::Lifeforms::Edit < Views::Base
+class Views::Controllers::Names::Lifeforms::Edit < Views::FullPageBase
   prop :name, ::Name
 
   def view_template

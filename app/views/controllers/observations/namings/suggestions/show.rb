@@ -11,11 +11,8 @@
 #
 # A sidebar carries the observation's image carousel via
 # `Observations::Show::ImagesPanel`.
-#
-# Replaces the corresponding `show.html.erb` and inlines
-# `SuggestionsHelper#suggestion_confidence`.
 module Views::Controllers::Observations::Namings::Suggestions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
     prop :suggestions, _Array(::Suggestion), default: -> { [] }
@@ -125,7 +122,6 @@ module Views::Controllers::Observations::Namings::Suggestions
       @num_images ||= @observation.images.length
     end
 
-    # Inlined from `SuggestionsHelper#suggestion_confidence`.
     def suggestion_confidence(val)
       english = if val > 80
                   :suggestions_excellent.t
@@ -144,7 +140,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     def render_suggestion_image(sugg)
       return if sugg.image_obs.blank?
 
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: @user,
                image: sugg.image_obs.thumb_image,
                image_link: image_path(id: sugg.image_obs.id)

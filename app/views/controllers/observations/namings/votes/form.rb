@@ -11,12 +11,10 @@
 # - `Views::Controllers::Observations::Show::Namings::Row` — the
 #   "Your vote" column of the namings sub-panel on the obs show
 #   page. Context: `"namings_table"`.
-# - `Components::MatrixBox` (`#render_identify_ui`) — the
+# - `Components::Matrix::Box` (`#render_identify_ui`) — the
 #   vote-or-propose UI rendered inside a matrix box on index
 #   pages. Context: `"matrix_box"`.
 #
-# Replaces the `naming_vote_form` helper from
-# `app/helpers/namings_helper.rb`.
 module Views::Controllers::Observations::Namings::Votes
   class Form < ::Components::ApplicationForm
     # @param naming [::Naming] the naming being voted on
@@ -117,10 +115,9 @@ module Views::Controllers::Observations::Namings::Votes
       end
     end
 
-    # Does the viewer own this naming (or are they admin)? Mirrors
-    # the legacy helper's `permission?(naming)` check — written out
-    # explicitly here so the form is self-contained and doesn't
-    # depend on `User.current` or a controller-side ivar.
+    # True when the viewer owns this naming (or is admin). Written out
+    # explicitly so the form is self-contained — no `User.current`
+    # or controller-side ivar dependency.
     def proposer_view?
       return false unless @user
 

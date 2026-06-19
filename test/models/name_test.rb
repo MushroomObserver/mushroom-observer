@@ -136,7 +136,7 @@ class NameTest < UnitTestCase
 
   def do_validate_classification_test(rank, text, expected)
     result = Name.validate_classification(rank, text)
-    assert(expected == result)
+    assert_equal_even_if_nil(expected, result)
   rescue RuntimeError => e
     raise(e) if expected
   end
@@ -2873,8 +2873,8 @@ class NameTest < UnitTestCase
 
   def test_sensu_stricto
     %w[group gr gr. gp gp. clade complex].each do |str|
-      assert_equal(Name.new(text_name: "Boletus #{str}").sensu_stricto,
-                   "Boletus",
+      assert_equal("Boletus",
+                   Name.new(text_name: "Boletus #{str}").sensu_stricto,
                    "Name s.s. should not include `#{str}`")
       assert_equal(Name.new(text_name: "Boletus#{str}").sensu_stricto,
                    "Boletus#{str}",
@@ -2889,22 +2889,26 @@ class NameTest < UnitTestCase
 
   # --------------------------------------
 
-  # Just make sure mysql is collating accents and case correctly.
+  # Verify mysql collates accented authors in the expected Unicode order.
+  # Only meaningful when the DB has an accent-sensitive collation; passes
+  # trivially otherwise.
   def test_mysql_sort_order
-    return unless sql_collates_accents?
+    if sql_collates_accents?
+      names = [
+        create_test_name("Agaricus Aehou"),
+        create_test_name("Agaricus Aeiou"),
+        create_test_name("Agaricus Aeiøu"),
+        create_test_name("Agaricus Aëiou"),
+        create_test_name("Agaricus Aéiou"),
+        create_test_name("Agaricus Aejou")
+      ]
+      names[4].update(author: "aÉIOU")
 
-    names = [
-      create_test_name("Agaricus Aehou"),
-      create_test_name("Agaricus Aeiou"),
-      create_test_name("Agaricus Aeiøu"),
-      create_test_name("Agaricus Aëiou"),
-      create_test_name("Agaricus Aéiou"),
-      create_test_name("Agaricus Aejou")
-    ]
-    names[4].update(author: "aÉIOU")
-
-    x = Name.where(id: names.map(&:id)).order(:author).pluck(:author)
-    assert_equal(%w[Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou], x)
+      x = Name.where(id: names.map(&:id)).order(:author).pluck(:author)
+      assert_equal(%w[Aehou Aeiou Aëiou aÉIOU Aeiøu Aejou], x)
+    else
+      pass
+    end
   end
 
   # Prove that Name spaceship operator (<=>) uses sort_name to sort Names

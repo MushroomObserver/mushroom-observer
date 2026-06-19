@@ -91,7 +91,7 @@ module Observations
     end
 
     def destroy
-      naming = Naming.includes([:votes]).find(params[:id].to_s)
+      naming = Naming.show_includes.find(params[:id].to_s)
       @observation = Observation.naming_includes.find(params[:observation_id])
       @consensus = Observation::NamingConsensus.new(@observation)
       if destroy_if_we_can(naming) # needs to know consensus before deleting
@@ -132,7 +132,7 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(Components::ModalTurboForm.new(
+      render(Components::Modal::TurboForm.new(
                identifier: modal_identifier,
                title: modal_title,
                user: @user,
@@ -170,13 +170,13 @@ module Observations
     def render_phlex_new
       render(Views::Controllers::Observations::Namings::New.new(
                **naming_phlex_props
-             ), layout: true)
+             ))
     end
 
     def render_phlex_edit
       render(Views::Controllers::Observations::Namings::Edit.new(
                **naming_phlex_props
-             ), layout: true)
+             ))
     end
 
     # Successful-create response when the form was opened from the
@@ -190,13 +190,13 @@ module Observations
       render(turbo_stream: [
                turbo_stream.replace(
                  "observation_what_#{obs_id}",
-                 Components::LightboxObservationTitle.new(
+                 Components::Image::Lightbox::ObservationTitle.new(
                    obs: @observation, user: @user, identify: false
                  )
                ),
                turbo_stream.replace(
                  "box_title_#{obs_id}",
-                 Components::MatrixBoxTitle.new(
+                 Components::Matrix::Box::Title.new(
                    id: obs_id,
                    name: @observation.user_format_name(@user).
                          t.break_name.small_author,
@@ -333,12 +333,8 @@ module Observations
           end and return
         end
         format.turbo_stream do
-          render(
-            partial: "shared/modal_form_reload",
-            locals: {
-              identifier: modal_identifier,
-              form_locals: naming_form_locals
-            }
+          render_modal_form_reload(
+            identifier: modal_identifier, form_locals: naming_form_locals
           ) and return true
         end
       end

@@ -5,8 +5,6 @@
 #  add_sorting_links::      Create sorting links for index pages.
 #  find_or_goto_index::     Look up object by id, displaying error and
 #                           redirecting on failure.
-#  goto_index::             Redirect to a reasonable fallback (index) page
-#                           in case of error.
 #  letter_pagination_data::       Paginate an Array by letter.
 #  number_pagination_data::       Paginate an Array normally.
 #
@@ -73,11 +71,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     Rails.logger.warn(:runtime_spiders_begone.t)
     render(json: :runtime_spiders_begone.t,
            status: :forbidden)
-  end
-
-  # It's not always the controller_name, e.g. ContributorsController -> User
-  def controller_model_name
-    controller_name.classify
   end
 
   # Currently some controller tests expect nil: Even though the sort order
@@ -250,18 +243,38 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
       show_action_redirect(query)
     else
       calc_pages_and_objects(query, display_opts)
+      return if redirect_past_last_page?
+
       render_index_view
     end
   end
 
-  # Render the index view. Default renders the ERB action template
-  # (was `render(action: :index)` — must be explicit for names'
-  # `test_index` action). Controllers that have converted their
-  # index template to Phlex override this to render the class
-  # directly with explicit props. Transitional hook so the rest of
-  # the index machinery doesn't need to know about Phlex.
+  # `?page=99` on a 5-page result currently renders an empty result
+  # area silently — clamp the URL to the last valid page so the
+  # request self-corrects. Returns true (and performs the redirect)
+  # when the current request was past the last page; false otherwise.
+  def redirect_past_last_page?
+    return false unless @pagination_data&.num_pages&.positive?
+    return false unless @pagination_data.number > @pagination_data.num_pages
+
+    page_arg = @pagination_data.number_arg.to_s
+    redirect_to(
+      url_for(params.to_unsafe_h.merge(
+                page_arg => @pagination_data.num_pages, only_path: true
+              ))
+    )
+    true
+  end
+
+  # Render the index view. Every index controller now renders a Phlex
+  # view; this method must be overridden. (No ERB index templates remain;
+  # the historical `render(action: :index)` default is gone.)
   def render_index_view
-    render(action: :index)
+    raise(NotImplementedError.new(render_index_view_error_message))
+  end
+
+  def render_index_view_error_message
+    "#{self.class}#render_index_view must render a Phlex view"
   end
 
   private ##########
@@ -307,6 +320,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
     @any_content_filters_applied = check_if_preference_filters_applied
+    # "No matches" flash for the entire result set — gated on
+    # `@num_results.zero?` rather than the current page being empty.
+    # Empty-page-on-non-empty-result is handled by
+    # `redirect_past_last_page?` clamping the URL to the last
+    # valid page.
+    flash_error(@error) if @num_results.zero?
   end
 
   def check_if_preference_filters_applied
@@ -360,8 +379,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     logger.warn("QUERY starting: #{query.sql.inspect}")
     @timer_start = Time.current
 
-    # Instantiate correct subset, with or without includes.
-    @objects = instantiated_object_subset(query, display_opts)
+    # Instantiate correct subset, with or without includes. `.to_a`
+    # materializes the page now so the Phlex index view's `:objects`
+    # prop (typed as `_Array(...)`) validates at construction —
+    # passing an AR Relation/CollectionProxy would fail Literal's
+    # type check at the controller-view boundary.
+    @objects = instantiated_object_subset(query, display_opts).to_a
 
     @timer_end = Time.current
     logger.warn("QUERY finished: model=#{query.model}, " \
@@ -371,13 +394,27 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   def instantiated_object_subset(query, display_opts)
     caching = display_opts[:cache] || false
-    include = display_opts[:include] || nil
+    include = display_opts[:include] || default_index_includes_for_model
 
     if caching
       objects_with_only_needed_eager_loads(query, include)
     else
       query.paginate(@pagination_data, include: include)
     end
+  end
+
+  # Falls back to the model's `index_includes_tree` class method
+  # when a controller's `index_display_opts` doesn't specify
+  # `:include` explicitly. Lets a controller override `letters:` /
+  # `num_per_page:` without re-stating its includes tree — the
+  # model is the single source of truth.
+  def default_index_includes_for_model
+    return nil unless controller_model_name
+
+    model = controller_model_name.safe_constantize
+    return nil unless model.respond_to?(:index_includes_tree)
+
+    model.index_includes_tree
   end
 
   # If caching, only uncached objects need to eager_load the includes
@@ -425,7 +462,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # Two-stage gate. Both have to be true for the row to be served
   # from cache:
   #   1. `matrix_caches_in_this_request?` (per-request) — false
-  #      when `Components::MatrixTable#render_cached_boxes` would
+  #      when `Components::Matrix::Table#render_cached_boxes` would
   #      bypass the cache for this whole render (identify mode,
   #      project-admin view). Controllers override.
   #   2. `MatrixTable.should_cache_object?` (per-object) — false
@@ -438,9 +475,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # writes.
   def object_fragment_exist?(obj, locale)
     return false unless matrix_caches_in_this_request?
-    return false unless ::Components::MatrixTable.should_cache_object?(obj)
+    return false unless ::Components::Matrix::Table.should_cache_object?(obj)
 
-    Rails.cache.exist?(::Components::MatrixTable.cache_key_for(obj, locale))
+    Rails.cache.exist?(::Components::Matrix::Table.cache_key_for(obj, locale))
   end
 
   # Associations the per-object cache pre-check needs to consult
@@ -473,7 +510,8 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
   # appropriate index if it no longer exists.
   def find_or_goto_index(model, id)
-    model.safe_find(id) || flash_error_and_goto_index(model, id)
+    finder = model.respond_to?(:show_includes) ? model.show_includes : model
+    finder.find_by(id: id) || flash_error_and_goto_index(model, id)
   end
 
   def flash_error_and_goto_index(model, id)
@@ -508,43 +546,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     redirect_with_query(index_path)
     nil
   end
-
-  # Redirects to an appropriate fallback index in case of unrecoverable error.
-  # Most such errors are dealt with on a case-by-case basis in the controllers,
-  # however a few generic actions don't necessarily know where to send users
-  # when things go south.  This makes a good stab at guessing, at least.
-  def goto_index(redirect = nil)
-    pass_query_params
-    from = redirect_from(redirect)
-    to_model = REDIRECT_FALLBACK_MODELS[from.to_sym]
-    raise("Unsure where to go from #{from}.") unless to_model
-
-    redirect_with_query(controller: to_model.show_controller,
-                        action: to_model.index_action)
-  end
-
-  # Return string which is the class or controller to fall back from.
-  def redirect_from(redirect)
-    redirect = redirect.name.underscore if redirect.is_a?(Class)
-    (redirect || controller.name).to_s
-  end
-
-  REDIRECT_FALLBACK_MODELS = {
-    account: RssLog,
-    comment: Comment,
-    image: Image,
-    location: Location,
-    name: Name,
-    naming: Observation,
-    observation: Observation,
-    observer: RssLog,
-    project: Project,
-    rss_log: RssLog,
-    species_list: SpeciesList,
-    user: RssLog,
-    vote: Observation
-  }.freeze
-  private_constant(:REDIRECT_FALLBACK_MODELS)
 
   public ##########
 

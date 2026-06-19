@@ -4,9 +4,9 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Bootstrap autocompleter input field component with dropdown suggestions
   # Wraps a text input with Stimulus autocompleter controller
   # rubocop:disable Metrics/ClassLength
-  # Inherits from `Components::Input` (MO's thin subclass of
-  # Superform's `Components::Input`).
-  class AutocompleterField < ::Components::Input
+  # Inherits from `Components::Form::Input` (MO's thin subclass of
+  # `Superform::Rails::Components::Input`).
+  class AutocompleterField < ::Components::Form::Input
     include Phlex::Slotable
 
     # Types with dedicated Stimulus controllers
@@ -153,11 +153,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def autocompleter_field_attributes
-      {
-        placeholder: :start_typing.l,
-        autocomplete: "off",
-        data: input_data_attributes
-      }.deep_merge(attributes)
+      mix({ placeholder: :start_typing.l,
+            autocomplete: "off",
+            data: input_data_attributes },
+          attributes)
     end
 
     def input_data_attributes
@@ -215,7 +214,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_has_id_indicator
-      render(Components::LinkIcon.new(
+      render(Components::Icon.new(
                type: :check,
                title: :autocompleter_has_id.l,
                html_class: "px-2 text-success has-id-indicator",
@@ -226,7 +225,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_find_button
       return unless find_text
 
-      render(::Components::IconLink.new(
+      render(::Components::Link::Icon.new(
                find_text, "#",
                icon: :find_on_map, show_text: false,
                icon_class: "text-primary",
@@ -240,7 +239,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_keep_box_button
       return unless keep_text
 
-      render(::Components::IconLink.new(
+      render(::Components::Link::Icon.new(
                keep_text, "#",
                icon: :apply, show_text: false,
                icon_class: "text-primary",
@@ -256,7 +255,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_edit_box_button
       return unless keep_text
 
-      render(::Components::IconLink.new(
+      render(::Components::Link::Icon.new(
                edit_text, "#",
                icon: :edit, show_text: false,
                icon_class: "text-primary",
@@ -272,7 +271,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_create_button
       return if !create_text || create.present?
 
-      render(::Components::IconLink.new(
+      render(::Components::Link::Icon.new(
                create_text, "#",
                id: "create_#{autocompleter_type}_btn",
                class: "ml-3 create-button",
@@ -288,7 +287,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_modal_create_link
       return unless create_text && create.present? && create_path.present?
 
-      render(Components::ModalLink.new(
+      render(Components::Link::Modal.new(
                create, create_text, create_path,
                icon: :plus, show_text: true,
                icon_class: "text-primary",

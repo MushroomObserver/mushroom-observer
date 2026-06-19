@@ -3,7 +3,7 @@
 # Action view for `names/descriptions/moves#new`. Sets the chrome and
 # renders the shared moves form.
 module Views::Controllers::Names::Descriptions::Moves
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :description, ::NameDescription
     prop :user, _Nilable(::User), default: nil
 

@@ -4,7 +4,7 @@
 # Sets page title and renders the form component.
 # Optionally overlays a project membership confirmation modal.
 module Views::Controllers::Occurrences
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(source_obs:, recent_observations:, user:,
                    project_confirm: {})
       super()

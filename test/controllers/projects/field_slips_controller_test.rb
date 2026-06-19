@@ -42,14 +42,19 @@ module Projects
     def test_create_bad_project
       project = projects(:eol_project)
       job_start = enqueued_jobs.size
+      # `find_or_goto_index` uses `Project.show_includes.find_by`, so
+      # stub the class + find_by so the controller sees our
+      # save-mocked instance.
       project.stub(:save, false) do
-        Project.stub(:safe_find, project) do
-          params = {
-            project_id: project.id,
-            commit: "Create"
-          }
-          post_requires_login(:create, params, katrina.login)
-          assert_equal(job_start, enqueued_jobs.size)
+        Project.stub(:show_includes, Project) do
+          Project.stub(:find_by, project) do
+            params = {
+              project_id: project.id,
+              commit: "Create"
+            }
+            post_requires_login(:create, params, katrina.login)
+            assert_equal(job_start, enqueued_jobs.size)
+          end
         end
       end
     end

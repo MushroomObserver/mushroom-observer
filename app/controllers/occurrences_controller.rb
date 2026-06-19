@@ -135,8 +135,7 @@ class OccurrencesController < ApplicationController
         recent_observations: recent,
         user: @user,
         project_confirm: confirm
-      ),
-      layout: true
+      )
     )
   end
 

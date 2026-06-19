@@ -67,7 +67,7 @@ module Names
       # Form normalizes rank range to [low, high] order
       assert_select("select#query_names_rank", selected: "Form")
       assert_select("select#query_names_rank_range", selected: "Species")
-      assert_equal(session[:search_type], :names)
+      assert_equal(:names, session[:search_type])
     end
 
     def test_create_names_search

@@ -12,10 +12,12 @@ class RssLogsControllerTest < FunctionalTestCase
     assert_link_in_html(:app_intro.t, info_intro_path)
 
     get(:rss)
-    assert_template(:rss)
+    # `rss` is an XML feed (`render_xml(layout: false)`) — no `<body>`
+    # to anchor on; assert successful render instead.
+    assert_response(:success)
 
     get(:show, params: { id: rss_logs(:detailed_unknown_obs_rss_log).id })
-    assert_template(:show)
+    assert_select("body.rss_logs__show")
   end
 
   def test_rss_with_article_in_feed
@@ -30,17 +32,17 @@ class RssLogsControllerTest < FunctionalTestCase
     login
     # Show none.
     post(:index)
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
 
     # Show all via q param
     get(:index, params: { q: { type: "all" } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
 
     get(:index, params: { q: { type: %w[article glossary_term] } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
 
     get(:index, params: { q: { type: [] } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
 
     # Old-style top level :type param now redirects
     get(:index, params: { type: "all" })
@@ -85,7 +87,7 @@ class RssLogsControllerTest < FunctionalTestCase
     # Test that this actually works
     q = @controller.q_param(QueryRecord.last.query)
     get(:index, params: { q: q })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
   end
 
   # Prove that user content_filter works on rss_log
@@ -195,35 +197,35 @@ class RssLogsControllerTest < FunctionalTestCase
     # Invalid type string via q param should be sanitized to "none"
     get(:index, params: { q: { model: "RssLog",
                                type: "bad_code; DROP TABLE users;" } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     types = @controller.instance_variable_get(:@types)
     assert_equal(["none"], types)
 
     # Mixed valid and invalid types (string) - only valid ones kept
     get(:index, params: { q: { model: "RssLog",
                                type: "observation bad_stuff name" } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     types = @controller.instance_variable_get(:@types)
     # Order preserved from input
     assert_equal(%w[name observation], types)
 
     # All invalid types via q param string
     get(:index, params: { q: { model: "RssLog", type: "evil<script>" } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     types = @controller.instance_variable_get(:@types)
     assert_equal(["none"], types)
 
     # Invalid types in array format via q param
     get(:index, params: { q: { model: "RssLog",
                                type: %w[bad_code evil<script>] } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     types = @controller.instance_variable_get(:@types)
     assert_equal(["none"], types)
 
     # Mixed valid and invalid in array format via q param
     get(:index, params: { q: { model: "RssLog",
                                type: %w[observation bad_stuff name] } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     types = @controller.instance_variable_get(:@types)
     assert_equal(%w[name observation], types)
   end
@@ -236,7 +238,7 @@ class RssLogsControllerTest < FunctionalTestCase
     get(:index, params: {
           q: { model: "RssLog", type: %w[observation name] }
         })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     types = @controller.instance_variable_get(:@types)
     # Check both types are present (order may vary)
     assert_includes(types, "observation")
@@ -278,7 +280,7 @@ class RssLogsControllerTest < FunctionalTestCase
     # First, create a query with additional params (order_by)
     get(:index, params: { q: { model: "RssLog", type: "observation",
                                order_by: "created_at" } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     query = QueryRecord.last.query
     assert_equal("observation", query.params[:type])
     assert_equal("created_at", query.params[:order_by])
@@ -286,7 +288,7 @@ class RssLogsControllerTest < FunctionalTestCase
     # Now change type filter - order_by should be preserved
     get(:index, params: { q: { model: "RssLog", type: "name",
                                order_by: "created_at" } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
     query = QueryRecord.last.query
     assert_equal("name", query.params[:type])
     assert_equal("created_at", query.params[:order_by],
@@ -297,7 +299,7 @@ class RssLogsControllerTest < FunctionalTestCase
     login
 
     get(:index, params: { q: { model: "RssLog", type: "observation" } })
-    assert_template(:index)
+    assert_select("body.rss_logs__index")
 
     # Check that the filter links don't have duplicate q[model] or q[type]
     body = @response.body

@@ -33,6 +33,13 @@ module Observations
       assert_select("#observations_search_form")
     end
 
+    def test_new_observations_search_with_advanced_retired_flag
+      login("rolf")
+      get(:new, params: { advanced_retired: 1 })
+      assert_select("#observations_search_form")
+      assert_flash_text(:search_advanced_retired_notice.t)
+    end
+
     def test_new_observations_search_form_prefilled_from_existing_query
       proj1 = projects(:bolete_project)
       proj2 = projects(:two_list_project)
@@ -67,7 +74,7 @@ module Observations
                     selected: "Species")
       assert_select("select#query_observations_confidence_range",
                     selected: "Form")
-      assert_equal(session[:search_type], :observations)
+      assert_equal(:observations, session[:search_type])
     end
 
     # Test that multiple users in by_users are properly prefilled

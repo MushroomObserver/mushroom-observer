@@ -16,7 +16,7 @@ module Images::Votes
       assert(ImageVote.find_by(image_id: img2.id, user_id: rolf.id).anonymous)
 
       requires_login(:edit)
-      assert_template("edit")
+      assert_select("body.anonymity__edit")
 
       login("rolf")
       post(:update,

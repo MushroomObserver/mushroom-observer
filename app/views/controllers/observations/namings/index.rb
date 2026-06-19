@@ -7,9 +7,8 @@
 # Wraps `Show::Namings` in a `#observation_namings` div so the
 # controller's mutation broadcasts can `turbo_stream.replace` it.
 #
-# Replaces `app/views/controllers/observations/namings/index.erb`.
 module Views::Controllers::Observations::Namings
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :observation, ::Observation
     prop :user, _Nilable(::User), default: nil
 

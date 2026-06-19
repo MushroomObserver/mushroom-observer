@@ -27,9 +27,12 @@ module Admin
 
     # Form for admins to switch users
     def edit
-      redirect_back_or_default("/") if
-        !@user&.admin && session[:real_user_id].blank?
+      if !@user&.admin && session[:real_user_id].blank?
+        redirect_back_or_default("/") and return
+      end
+
       @form = FormObject::AdminSession.new
+      render(Views::Controllers::Admin::Session::Edit.new(form: @form))
     end
 
     # Action to switch the apparent logged-in user, session[:user_id]

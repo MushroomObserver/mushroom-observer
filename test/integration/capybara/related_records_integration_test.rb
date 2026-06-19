@@ -18,7 +18,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
     click_link(text: :show_location_observations.l)
 
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
-    page.find("#filters").assert_text(location.display_name)
+    page.find_by_id("filters").assert_text(location.display_name)
     # Be sure we're not getting the "within_locations" scope.
     assert_no_selector("#filters", text: :within_locations.l)
 
@@ -54,7 +54,7 @@ class RelatedRecordsIntegrationTest < CapybaraIntegrationTestCase
 
     # Should successfully load observations page without error
     assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
-    page.find("#filters").assert_text(location.display_name)
+    page.find_by_id("filters").assert_text(location.display_name)
 
     # Verify we got the observations for this location
     results = find_all("#results .matrix-box")

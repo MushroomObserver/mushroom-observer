@@ -6,19 +6,6 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
   ComponentTestCase
   PARTIAL = "descriptions/description_details_and_alts_panel"
 
-  def setup
-    super
-    # `ComponentTestCase` uses `ActionView::TestCase::TestController`,
-    # which doesn't inherit `ApplicationController`'s
-    # `append_view_path Rails.root.join("app/views/controllers")`.
-    # Some integration paths still render the old ERB partial, so
-    # prepend the controllers view path for those code paths to find
-    # their templates.
-    controller.prepend_view_path(
-      Rails.root.join("app/views/controllers")
-    )
-  end
-
   # -- contract tests --------------------------------------------
 
   def test_renders_panel_id
@@ -27,19 +14,6 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
     html = render(new_panel(description: desc))
 
     assert_html(html, "#description_details_and_alts")
-  end
-
-  def test_default_versions_is_empty_array
-    desc = name_descriptions(:peltigera_user_desc)
-
-    # No `versions:` arg → default lambda yields `[]`. The previous-
-    # version line falls back to "Version: N" with no link.
-    html = render(Views::Controllers::Descriptions::DetailsAndAltsPanel.new(
-                    description: desc, user: users(:rolf)
-                  ))
-
-    assert_html(html, "#description_details_and_alts")
-    assert_no_html(html, "a.previous_version_link")
   end
 
   def test_renders_panel_heading

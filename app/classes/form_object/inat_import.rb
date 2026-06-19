@@ -9,5 +9,5 @@ class FormObject::InatImport < FormObject::Base
   attribute :consent, :string
   attribute :import_others, :string
   attribute :inat_url, :string
-  attribute :skip_inat_update, :string
+  attribute :skip_inat_writeback, :string
 end

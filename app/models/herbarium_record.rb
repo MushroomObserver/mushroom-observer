@@ -91,6 +91,27 @@ class HerbariumRecord < AbstractModel
     search_columns(cols, phrase).distinct
   }
 
+  # Eager-loads the show / edit page (HR record + its herbarium,
+  # user, the obs panel's matrix-box tree, and the
+  # `observation_herbarium_records` join — with `:observation`
+  # preloaded on the join so `observations.delete(obs)` doesn't
+  # lazy-load the row's `:observation` during cascade).
+  def self.show_includes_tree
+    [{ observation_herbarium_records: :observation },
+     :user, { herbarium: :curators },
+     { observations: Observation.matrix_box_includes }]
+  end
+
+  # Index variant — herbarium + observations.name suffice for the
+  # row label; full matrix-box tree isn't needed. Picked up by
+  # `ApplicationController::Indexes#default_index_includes_for_model`.
+  def self.index_includes_tree
+    [:user, { herbarium: :curators }, { observations: :name }]
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
+
   def herbarium_label
     if initial_det.blank?
       accession_number
@@ -111,7 +132,17 @@ class HerbariumRecord < AbstractModel
   alias document_title herbarium_label
 
   def accession_at_herbarium
-    "#{accession_number} @ #{herbarium.try(&:format_name)}"
+    # Use the loaded association when available (no extra query on
+    # the edit path); fall back to an FK fetch on freshly-built
+    # records. The bare Herbarium load is enough — `format_name`
+    # needs both `name` and `code` to include the parenthesized code,
+    # so `pick(:name)` alone would lose it.
+    name = if association(:herbarium).loaded?
+             herbarium&.format_name
+           elsif herbarium_id
+             Herbarium.find_by(id: herbarium_id)&.format_name
+           end
+    "#{accession_number} @ #{name}"
   end
 
   def mcp_url
@@ -122,15 +153,22 @@ class HerbariumRecord < AbstractModel
   def can_edit?(user)
     return false unless user
 
-    self.user == user || herbarium&.curator?(user)
+    # FK comparison + scoped curator lookup so the check works
+    # under strict_loading without eager-loading `:user` or
+    # `:herbarium`.
+    user_id == user.id ||
+      (herbarium_id.present? &&
+       HerbariumCurator.where(herbarium_id:, user:).exists?)
   end
 
   # Send email notifications when herbarium_record created by non-curator.
   # Migrated from QueuedEmail::AddRecordToHerbarium to ActionMailer + ActiveJob.
   def notify_curators
-    sender = user
-    recipients = herbarium.try(&:curators) || []
-    return if recipients.member?(sender)
+    sender = sender_user
+    recipients =
+      User.joins(:herbarium_curators).
+      where(herbarium_curators: { herbarium_id: herbarium_id })
+    return if recipients.exists?(id: user_id)
 
     recipients.each do |receiver|
       next if receiver.no_emails
@@ -148,9 +186,18 @@ class HerbariumRecord < AbstractModel
 
     observations.push(obs)
     obs.update(specimen: true) unless obs.specimen
-    obs.user_log(user, :log_herbarium_record_added,
+    obs.user_log(sender_user, :log_herbarium_record_added,
                  name: accession_at_herbarium,
                  touch: true)
+  end
+
+  # Use the loaded `:user` if it's available (edit / show paths
+  # via `HerbariumRecord.show_includes`); fall back to a FK lookup
+  # for freshly-built records on the create path.
+  def sender_user
+    return user if association(:user).loaded?
+
+    User.find_by(id: user_id)
   end
 
   # Remove this HerbariumRecord from an Observation and log the action.
@@ -158,7 +205,7 @@ class HerbariumRecord < AbstractModel
     return unless observations.include?(obs)
 
     observations.delete(obs)
-    obs.reload.turn_off_specimen_if_no_more_records
+    obs.turn_off_specimen_if_no_more_records
     obs.log(:log_herbarium_record_removed,
             name: accession_at_herbarium,
             touch: true)

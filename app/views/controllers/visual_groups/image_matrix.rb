@@ -15,7 +15,7 @@ module Views::Controllers::VisualGroups
     def view_template
       div(id: "results") do
         paginated_results do
-          render(Components::MatrixTable.new) do
+          render(Components::Matrix::Table.new) do
             @subset.each { |row| render_matrix_box(row) }
           end
         end
@@ -26,10 +26,10 @@ module Views::Controllers::VisualGroups
 
     def render_matrix_box(row)
       image, image_status = row
-      render(Components::MatrixBox.new(id: image.id)) do
+      render(Components::Matrix::Box.new(id: image.id)) do
         render(Components::Panel.new) do |panel|
           panel.with_thumbnail do
-            render(Components::InteractiveImage.new(
+            render(Components::Image::Interactive.new(
                      user: @user, image: image, original: true,
                      votes: false, full_width: true
                    ))

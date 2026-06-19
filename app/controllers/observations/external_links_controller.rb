@@ -74,9 +74,9 @@ module Observations
     end
 
     def set_ivars_for_edit
-      @external_link = ExternalLink.find(params[:id].to_s)
-      @observation = Observation.find(@external_link.observation_id)
-      @site = ExternalSite.find(@external_link.external_site_id)
+      @external_link = ExternalLink.show_includes.find(params[:id].to_s)
+      @observation = @external_link.observation
+      @site = @external_link.external_site
       @sites = [@site]
       @base_urls = { @site.name => @site.base_url }
       @back_object = @observation
@@ -155,7 +155,8 @@ module Observations
 
     def remove_external_link
       @id = @external_link.id
-      @external_link.destroy!
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      ExternalLink.find(@external_link.id).destroy!
 
       flash_success_and_return
     end
@@ -168,7 +169,7 @@ module Observations
       respond_to do |format|
         # renders the flash in the modal, but not sure it's necessary
         # to have a response here. are they getting sent back?
-        format.turbo_stream { render_modal_flash_update }
+        format.turbo_stream { render_modal_flash_update(modal_identifier) }
         format.html do
           redirect_to(permanent_observation_path(@observation)) and return
         end
@@ -196,7 +197,7 @@ module Observations
     end
 
     def render_modal_external_link_form
-      render(Components::ModalTurboForm.new(
+      render(Components::Modal::TurboForm.new(
                identifier: modal_identifier,
                title: modal_title,
                user: @user,
@@ -219,15 +220,22 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        helpers.new_page_title(:add_object, :EXTERNAL_LINK)
+        :add_object.t(type: :EXTERNAL_LINK)
       when "edit", "update"
-        helpers.edit_page_title(:EXTERNAL_LINK.l, @external_link)
+        render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                           object: @external_link, mode: :edit,
+                           title: :EXTERNAL_LINK.l
+                         ))
       end
     end
 
     def render_external_links_section_update
-      # need to reset this in case they can now add sites
-      @observation = @observation.reload
+      # Refetch with just the external-links subtree the panel +
+      # `sites_user_can_add_links_to_for_obs` access — much cheaper
+      # than the full `show_includes` tree for a panel re-render.
+      @observation = Observation.includes(
+        external_links: { external_site: { project: :user_group } }
+      ).find(@observation.id)
       @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
@@ -239,27 +247,16 @@ module Observations
       ) and return
     end
 
-    def render_modal_flash_update
-      render(partial: "shared/modal_flash_update",
-             locals: { identifier: modal_identifier }) and return
-    end
-
     # this updates both the form and the flash
     def reload_external_link_modal_form_and_flash
-      render(
-        partial: "shared/modal_form_reload",
-        locals: {
-          identifier: modal_identifier,
-          form_locals: {
-            user: @user,
-            model: @external_link,
-            observation: @observation,
-            back: @back,
-            sites: @sites,
-            site: @site
-          }
-        }
-      ) and return true
+      render_modal_form_reload(identifier: modal_identifier, form_locals: {
+                                 user: @user,
+                                 model: @external_link,
+                                 observation: @observation,
+                                 back: @back,
+                                 sites: @sites,
+                                 site: @site
+                               }) and return true
     end
   end
 end

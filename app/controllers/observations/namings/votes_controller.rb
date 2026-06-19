@@ -174,13 +174,13 @@ module Observations::Namings
       render(turbo_stream: [
                turbo_stream.replace(
                  "observation_what_#{obs_id}",
-                 Components::LightboxObservationTitle.new(
+                 Components::Image::Lightbox::ObservationTitle.new(
                    obs: @observation, user: @user, identify: false
                  )
                ),
                turbo_stream.replace(
                  "box_title_#{obs_id}",
-                 Components::MatrixBoxTitle.new(
+                 Components::Matrix::Box::Title.new(
                    id: obs_id,
                    name: @observation.user_format_name(@user).
                          t.break_name.small_author,

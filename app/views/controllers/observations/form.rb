@@ -158,13 +158,13 @@ module Views::Controllers::Observations
     def render_images_body(panel)
       panel.with_body(collapse: true, classes: "p-0",
                       id: "observation_images") do
-        FormCarousel(
-          images: @good_images,
-          sibling_images: @sibling_images,
-          exif_data: @exif_data,
-          obs_thumb_id: model.thumb_image_id,
-          user: @user
-        )
+        render(Components::Form::UploadGallery.new(
+                 images: @good_images,
+                 sibling_images: @sibling_images,
+                 exif_data: @exif_data,
+                 obs_thumb_id: model.thumb_image_id,
+                 user: @user
+               ))
       end
     end
 
@@ -205,14 +205,14 @@ module Views::Controllers::Observations
     end
 
     def render_name_feedback
-      FormNameFeedback(
-        button_name: button_name,
-        given_name: @given_name,
-        names: @names,
-        valid_names: @valid_names,
-        suggest_corrections: @suggest_corrections,
-        parent_deprecated: @parent_deprecated.presence
-      )
+      render(Components::Form::NameFeedback.new(
+               button_name: button_name,
+               given_name: @given_name,
+               names: @names,
+               valid_names: @valid_names,
+               suggest_corrections: @suggest_corrections,
+               parent_deprecated: @parent_deprecated.presence
+             ))
     end
 
     def render_naming_specimen_row

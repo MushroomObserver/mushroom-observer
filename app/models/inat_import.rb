@@ -50,6 +50,15 @@ class InatImport < ApplicationRecord
     Done: 4
   }
 
+  # Whether to stamp the MO link back onto the source iNat observation.
+  # `default` defers to the environment (skip in development, write back
+  # in production); admins can override per import via `skip`/`force`.
+  enum :writeback, {
+    default: 0,
+    skip: 1,
+    force: 2
+  }, prefix: true
+
   belongs_to :user
   has_many :inat_import_job_trackers, dependent: :delete_all
 

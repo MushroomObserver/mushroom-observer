@@ -182,7 +182,8 @@ module Descriptions::Merges
 
         flash_notice(:runtime_description_merge_deleted.
                        t(old: @src.unique_partial_format_name))
-        @src.destroy
+        # Refetch fresh (non-strict_loading) for the destroy cascade.
+        @src.class.find(@src.id).destroy
 
         # Make destination the default if source used to be the default.
         if src_was_default && @dest.fully_public?

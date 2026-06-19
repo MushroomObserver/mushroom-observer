@@ -19,7 +19,6 @@
 # "Mixed-shape rows that don't share an iteration source" carve-out
 # in `.claude/rules/phlex_conversions.md`.
 #
-# Replaces `app/views/controllers/observations/namings/votes/_table.erb`.
 module Views::Controllers::Observations::Namings::Votes
   class Table < Views::Base
     prop :naming, _Union(::Naming, ::Observation::MergedNaming)
@@ -104,7 +103,9 @@ module Views::Controllers::Observations::Namings::Votes
       visible.each_with_index do |vote, i|
         plain(", ") if i.positive?
         if i < 3
-          UserLink(user: vote.user, name: vote.user.login)
+          render(Components::Link::Object::User.new(
+                   user: vote.user, name: vote.user.login
+                 ))
         else
           plain("...")
           break

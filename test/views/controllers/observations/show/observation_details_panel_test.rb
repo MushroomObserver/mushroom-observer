@@ -150,6 +150,27 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     assert_includes(notes, "wood")
   end
 
+  # A note value with blank lines must not truncate at the first blank
+  # line; each value renders as a textile block indented beneath its
+  # caption, with blank lines preserved as separate paragraphs.
+  def test_notes_with_blank_lines_not_truncated
+    @obs.notes = { Substrate: "wood",
+                   Other: "first paragraph\n\nsecond paragraph\n\nthird" }
+
+    html = render(panel_with(@obs))
+    notes = Nokogiri::HTML.fragment(html).at_css("#observation_notes")
+
+    # All three paragraphs present (no truncation at the first blank line).
+    assert_includes(notes.text, "first paragraph")
+    assert_includes(notes.text, "second paragraph")
+    assert_includes(notes.text, "third")
+    # The Other value's blank lines survive as separate textile
+    # paragraphs (3), plus one for the single-paragraph Substrate value.
+    assert_operator(notes.css("p").length, :>=, 4,
+                    "Blank lines should render as separate paragraphs")
+    assert_includes(notes.text, "wood")
+  end
+
   private
 
   def who_text(html)

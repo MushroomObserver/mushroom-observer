@@ -51,7 +51,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def wrapper_class
       base = "form-group"
       wrap_class = wrapper_options[:wrap_class]
-      wrap_class.present? ? "#{base} #{wrap_class}" : base
+      class_names(base, wrap_class)
     end
 
     def wrapper_data

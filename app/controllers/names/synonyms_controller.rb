@@ -90,6 +90,12 @@ module Names
         @name.transfer_synonym(n.reload) unless proposed_ids[n.id.to_s] == "0"
       end
 
+      # @name came from `find_or_goto_index` (Name.show_includes), so
+      # `synonym: :names` is preloaded. The transfers above mutated
+      # the underlying synonym membership; reload so `synonyms` reads
+      # fresh data before split.
+      @name.reload
+
       # De-synonymize any old synonyms in the "existing synonyms" list that
       # have been unchecked.  This creates a new synonym to connect them if
       # there are multiple unchecked names -- that is, it splits this

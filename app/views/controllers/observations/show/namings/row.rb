@@ -1,15 +1,10 @@
 # frozen_string_literal: true
 
 # One row of the obs-show namings sub-panel. Renders the content of a
-# `Components::ListGroup` item — the wrapping `<div class="list-group-
+# `Components::ListGroup::Base` item — the wrapping `<div class="list-group-
 # item">` is supplied by the parent `Show::Namings::Rows` via
 # `list.item(id: …) { render(Row.new(…)) }`.
 #
-# Replaces `app/views/controllers/observations/show/namings/_row.erb`
-# and inlines the helper methods that fed it: `naming_row_content`
-# and its collaborators (`naming_name_html`, `naming_proposer_html`,
-# `vote_tally_html`, `your_vote_html`, `vote_icons_html`,
-# `reasons_html` + their sub-helpers).
 class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # `naming` can be either a plain `Naming` (single observation) or
   # an `Observation::MergedNaming` (occurrence-grouped roll-up of
@@ -125,7 +120,9 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_mod_links(naming)
     div(class: "text-nowrap") do
-      InlineModLinks(target: naming, user: @user, indent: false)
+      render(Components::Link::InlineMod.new(
+               target: naming, user: @user, indent: false
+             ))
     end
   end
 
@@ -159,8 +156,10 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_single_proposer_link
     proposer = @naming.user
-    UserLink(user: proposer, name: proposer.login,
-             attributes: { class: proposer_link_classes })
+    render(Components::Link::Object::User.new(
+             user: proposer, name: proposer.login,
+             attributes: { class: proposer_link_classes }
+           ))
   end
 
   def proposer_link_classes
@@ -197,10 +196,12 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_vote_percent_link
-    ModalLink("naming_votes_#{primary.id}",
-              "#{@naming.vote_percent.round}%",
-              vote_percent_modal_path,
-              class: "vote-percent btn btn-link px-0")
+    render(Components::Link::Modal.new(
+             "naming_votes_#{primary.id}",
+             "#{@naming.vote_percent.round}%",
+             vote_percent_modal_path,
+             class: "vote-percent btn btn-link px-0"
+           ))
   end
 
   def vote_percent_modal_path
@@ -292,7 +293,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # `.tl` (textile-line) renderer needs unescaped textile markup
   # to interpret; without `html_safe` the `#{…}` interpolation
   # double-escapes `<i>` / `<b>` tags that legitimately appear in
-  # user-typed reason notes. Matches the legacy helper exactly.
+  # user-typed reason notes
   def simple_reason_text(reason)
     return reason.label.t if reason.notes.blank?
 

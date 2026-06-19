@@ -2,7 +2,7 @@
 
 module Views::Controllers::Articles
   # Form for creating or editing articles. Rendered directly by the
-  # articles controller's `new.html.erb` and `edit.html.erb`.
+  # articles controller's `new.rb` and `edit.rb`.
   # Articles support Textile markup for formatting.
   class Form < ::Components::ApplicationForm
     def view_template
@@ -19,7 +19,7 @@ module Views::Controllers::Articles
       text_field(:title, label: "#{:article_title.t}:",
                          data: { autofocus: true }) do |field_component|
         field_component.with_append do
-          render(Components::HelpBlock.new) do
+          render(Components::Help::Block.new) do
             trusted_html(
               [:form_article_title_help.t,
                :field_textile_link.t].safe_join(" ")
@@ -33,7 +33,7 @@ module Views::Controllers::Articles
       textarea_field(:body, label: "#{:article_body.t}:",
                             rows: 10) do |field_component|
         field_component.with_append do
-          render(Components::HelpBlock.new) do
+          render(Components::Help::Block.new) do
             trusted_html(:field_textile_link.t)
           end
         end

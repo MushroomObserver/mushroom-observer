@@ -4,15 +4,13 @@
 # banner when scoped to a project, page chrome (title, sort, pagination,
 # container width), then renders a list of `Listing` rows.
 module Views::Controllers::SpeciesLists
-  class Index < Views::Base
-    def initialize(query:, pagination_data:, objects:,
-                   project: nil, error: nil)
+  class Index < Views::FullPageBase
+    def initialize(query:, pagination_data:, objects:, project: nil)
       super()
       @query = query
       @pagination_data = pagination_data
       @objects = objects
       @project = project
-      @error = error
     end
 
     def view_template
@@ -22,8 +20,6 @@ module Views::Controllers::SpeciesLists
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
       container_class(:wide)
-
-      flash_error(@error) if @error && @objects.empty?
 
       paginated_results { render_list }
     end
@@ -35,9 +31,9 @@ module Views::Controllers::SpeciesLists
 
       # The d-flex / justify-content-between / align-items-start
       # classes used to live on `Listing`'s outer wrapper. After
-      # moving the row wrapping into `Components::ListGroup#item`,
+      # moving the row wrapping into `Components::ListGroup::Base#item`,
       # those layout classes ride on the item itself.
-      render(Components::ListGroup.new) do |list|
+      render(Components::ListGroup::Base.new) do |list|
         @objects.each do |species_list|
           list.item(
             class: "d-flex justify-content-between align-items-start"

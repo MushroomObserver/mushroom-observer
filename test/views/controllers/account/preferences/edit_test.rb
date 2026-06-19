@@ -17,7 +17,8 @@ module Views::Controllers::Account::Preferences
     # itself now (one per related Privacy select) — see
     # AccountPreferencesFormTest for their assertions.
     def test_renders_form
-      html = render(Edit.new(user: @user, licenses: @licenses))
+      html = render(Edit.new(user: @user, licenses: @licenses,
+                             languages: Language.all.to_a))
 
       assert_html(html, "form#account_preferences_form")
       # No legacy `button_to` PUT forms sitting after the main form.

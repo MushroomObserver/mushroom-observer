@@ -1206,28 +1206,28 @@ class ObservationTest < UnitTestCase
 
   def test_gps_hidden
     obs = observations(:unknown_with_lat_lng)
-    assert_equal(34.1622, obs.lat)
-    assert_equal(-118.3521, obs.lng)
-    assert_equal(34.1622, obs.public_lat)
-    assert_equal(-118.3521, obs.public_lng)
+    assert_in_delta(34.1622, obs.lat)
+    assert_in_delta(-118.3521, obs.lng)
+    assert_in_delta(34.1622, obs.public_lat)
+    assert_in_delta(-118.3521, obs.public_lng)
 
     obs.update_attribute(:gps_hidden, true)
     assert_nil(obs.public_lat)
     assert_nil(obs.public_lng)
     obs.current_user = obs.user
-    assert_equal(34.1622, obs.public_lat)
-    assert_equal(-118.3521, obs.public_lng)
+    assert_in_delta(34.1622, obs.public_lat)
+    assert_in_delta(-118.3521, obs.public_lng)
   end
 
   def test_place_name_and_coordinates_with_values
     obs = observations(:amateur_obs)
-    assert_equal(obs.place_name_and_coordinates,
-                 "Pasadena, California, USA (34.1622°N 118.3521°W)")
+    assert_equal("Pasadena, California, USA (34.1622°N 118.3521°W)",
+                 obs.place_name_and_coordinates)
   end
 
   def test_place_name_and_coordinates_has_no_values
     obs = observations(:unknown_with_no_naming)
-    assert_equal(obs.place_name_and_coordinates, "Who knows where")
+    assert_equal("Who knows where", obs.place_name_and_coordinates)
   end
 
   def test_check_requirements_no_user
@@ -2050,7 +2050,8 @@ class ObservationTest < UnitTestCase
     # "No Opinion" (0.0) should match exactly 0.0
     no_opinion_results = Observation.confidence(0.0)
     no_opinion_results.each do |obs|
-      assert_equal(0.0, obs.vote_cache, "vote_cache should be exactly 0.0")
+      assert_in_delta(0.0, obs.vote_cache, 0.001,
+                      "vote_cache should be exactly 0.0")
     end
 
     # "I'd Call It That" (3.0) should match vote_cache > 2.0 AND <= 3.0

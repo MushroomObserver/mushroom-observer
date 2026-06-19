@@ -55,23 +55,8 @@ class LocationsController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:advanced_search, :pattern, :country, :project, :by_user, :by_editor,
+    [:pattern, :country, :project, :by_user, :by_editor,
      :by, :q, :id].freeze
-  end
-
-  # Displays matrix of advanced search results.
-  def advanced_search
-    return if handle_advanced_search_invalid_q_param?
-
-    query = find_query(:Location)
-    # Have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query&.params&.any?
-
-    [query, { link_all_sorts: true }]
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(search_advanced_path)
-    [nil, {}]
   end
 
   # Displays a list of all locations whose country matches the param.
@@ -152,6 +137,21 @@ class LocationsController < ApplicationController
     end
     @undef_pages.num_total = @undef_data.length
     @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
+    # `Observation.location_undefined` already groups by `where`, so
+    # each row in `@undef_data` is the representative observation for
+    # one unique unmatched location string. `Query#paginate` strips
+    # the per-group count during ID rehydration, so look up the per-
+    # `where` count via a single aggregated query, then emit
+    # `[representative_obs, count]` tuples — what the view expects.
+    @undef_data = attach_undef_counts(@undef_data)
+  end
+
+  def attach_undef_counts(observations)
+    # `observations` is the Array returned by paginate; can't pluck.
+    wheres = observations.map { |obs| obs[:where] } # rubocop:disable Rails/Pluck
+    counts = ::Observation.where(where: wheres, location_id: nil).
+             group(:where).count
+    observations.map { |obs| [obs, counts[obs[:where]] || 1] }
   end
 
   ##############################################################################
@@ -199,6 +199,7 @@ class LocationsController < ApplicationController
     when "prev"
       redirect_to_next_object(:prev, Location, params[:id].to_s)
     end
+    return if performed?
 
     # Load Location and LocationDescription along with a bunch of associated
     # objects.
@@ -213,11 +214,12 @@ class LocationsController < ApplicationController
     update_view_stats(@location)
     update_view_stats(@description) if @description
 
-    @versions = @location.versions
+    @versions = @location.versions.to_a
     # Save two lookups in comments_for_object
     @comments = @location.comments&.sort_by(&:created_at)&.reverse
     @desc_comments = @description&.comments&.sort_by(&:created_at)&.reverse
     init_projects_ivar
+    render_show_view
   end
 
   def new
@@ -233,7 +235,7 @@ class LocationsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_location_form }
-      format.html
+      format.html { render_new_view }
     end
   end
 
@@ -279,7 +281,7 @@ class LocationsController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_location_form }
-      format.html
+      format.html { render_edit_view }
     end
   end
 
@@ -302,7 +304,10 @@ class LocationsController < ApplicationController
     return unless find_location!
     return unless can_destroy_location?
 
-    if @location.destroy
+    # Refetch as a fresh (non-strict_loading) record so the destroy
+    # cascade can reach `:project_aliases` (not in `show_includes`)
+    # without lazy-load violations.
+    if Location.find(@location.id).destroy
       flash_notice(:runtime_destroyed_id.t(type: :location, value: params[:id]))
     end
     redirect_to(locations_path)
@@ -332,11 +337,82 @@ class LocationsController < ApplicationController
   end
 
   def render_new
-    render("new", location: new_location_path)
+    render_new_view
   end
 
   def render_edit
-    render("edit", location: edit_location_path(@location))
+    render_edit_view
+  end
+
+  def render_show_view
+    render(Views::Controllers::Locations::Show.new(
+             location: @location,
+             description: @description,
+             versions: @versions,
+             comments: @comments.to_a,
+             projects: @projects
+           ))
+  end
+
+  def render_index_view
+    locations = @objects.to_a
+    render(Views::Controllers::Locations::Index.new(
+             query: @query, locations: locations,
+             pagination_data: @pagination_data,
+             undef_pages: @undef_pages || ::PaginationData.new,
+             undef_data: @undef_data || [],
+             observation_counts: known_observation_counts(locations),
+             default_orders: @default_orders || false
+           ))
+  end
+
+  # Per-location observation counts for the left "known places" panel.
+  # Mirrors `attach_undef_counts`: a single aggregated count query
+  # against the page's paginated set, because `Query#paginate`
+  # rehydrates by ID and would strip any count column we put on the
+  # base Location query.
+  def known_observation_counts(locations)
+    list = species_list_filter_for(@query)
+    base = ::Observation.where(location: locations)
+    base = base.joins(:species_lists).where(species_lists: { id: list }) if list
+    base.group(:location_id).count
+  end
+
+  # If the query was filtered down to a single species list, only
+  # count observations belonging to that list.
+  def species_list_filter_for(query)
+    return nil unless query.respond_to?(:params)
+    return nil unless query.params.is_a?(Hash)
+
+    obs_query = query.params[:observation_query]
+    return nil unless obs_query.is_a?(Hash)
+
+    species_lists = obs_query[:species_lists]
+    return nil unless species_lists.is_a?(Array)
+    return nil unless species_lists.length == 1
+
+    ::SpeciesList.safe_find(species_lists[0])
+  end
+
+  def render_new_view
+    render(Views::Controllers::Locations::New.new(
+             location: @location,
+             display_name: @display_name,
+             original_name: @original_name,
+             set_observation: @set_observation,
+             set_species_list: @set_species_list,
+             set_user: @set_user,
+             set_herbarium: @set_herbarium,
+             dubious_where_reasons: @dubious_where_reasons
+           ))
+  end
+
+  def render_edit_view
+    render(Views::Controllers::Locations::Edit.new(
+             location: @location,
+             display_name: @display_name,
+             dubious_where_reasons: @dubious_where_reasons
+           ))
   end
 
   def init_description_ivar(desc_id)
@@ -515,7 +591,7 @@ class LocationsController < ApplicationController
   end
 
   def render_modal_location_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -536,9 +612,12 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      helpers.new_page_title(:create_object, :LOCATION)
+      :create_object.t(type: :LOCATION)
     when "edit", "update"
-      helpers.edit_page_title(@location.display_name, @location)
+      render_to_string(Views::Layouts::Header::ObjectTitle.new(
+                         object: @location, mode: :edit,
+                         title: @location.display_name
+                       ))
     end
   end
 

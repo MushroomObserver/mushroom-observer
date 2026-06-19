@@ -68,6 +68,9 @@ class InatImportsController < ApplicationController
   def show
     @tracker = InatImportJobTracker.find(params[:tracker_id])
     @inat_import = InatImport.find(params[:id])
+    render(Views::Controllers::InatImports::Show.new(
+             tracker: @tracker, inat_import: @inat_import, user: @user
+           ))
   end
 
   def new
@@ -113,7 +116,10 @@ class InatImportsController < ApplicationController
     warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = build_confirm_form
-    render(:confirm)
+    render(Views::Controllers::InatImports::Confirm.new(
+             confirm_form: @confirm_form, estimate: @estimate,
+             unlicensed_obs: @unlicensed_obs, inat_import: @inat_import
+           ))
   end
 
   def build_confirm_form
@@ -125,7 +131,7 @@ class InatImportsController < ApplicationController
       import_all: params[:all],
       consent: params[:consent],
       import_others: (import_others? ? "1" : nil),
-      skip_inat_update: (skip_inat_update? ? "1" : nil)
+      skip_inat_writeback: params[:skip_inat_writeback]
     )
   end
 
@@ -146,7 +152,7 @@ class InatImportsController < ApplicationController
     merge_form_param(confirm, :original_inat_url)
     merge_form_param(confirm, :consent)
     merge_form_param(confirm, :import_others)
-    merge_form_param(confirm, :skip_inat_update)
+    merge_form_param(confirm, :skip_inat_writeback)
     params[:all] ||= confirm[:import_all]
   end
 
@@ -155,35 +161,46 @@ class InatImportsController < ApplicationController
   end
 
   def reload_form
-    render_new_form(form: reload_form_object)
+    render_new_form(submitted: {
+                      username: params[:inat_username],
+                      inat_ids: params[:inat_ids],
+                      all: params[:all],
+                      consent: params[:consent],
+                      import_others: params[:import_others],
+                      skip_writeback: params[:skip_inat_writeback]
+                    })
   end
 
-  def render_new_form(form: nil)
-    form ||= FormObject::InatImport.new(inat_username: @user.inat_username)
+  def render_new_form(submitted: {})
     render(
       Views::Controllers::InatImports::New.new(
-        form: form,
+        form: build_new_form(submitted),
         super_importer: InatImport.super_importer?(@user),
-        admin_mode: in_admin_mode?
-      ),
-      layout: true
+        admin: in_admin_mode?
+      )
     )
   end
 
-  def reload_form_object
+  def build_new_form(submitted)
     FormObject::InatImport.new(
-      inat_username: params[:inat_username],
-      inat_ids: params[:inat_ids],
-      inat_url: params[:original_inat_url].presence || params[:inat_url],
-      all: flag_param(:all),
-      consent: flag_param(:consent),
-      import_others: flag_param(:import_others),
-      skip_inat_update: flag_param(:skip_inat_update)
+      inat_username: submitted.fetch(:username, @user.inat_username),
+      inat_ids: submitted[:inat_ids],
+      all: ("1" if submitted[:all] == "1"),
+      consent: ("1" if submitted[:consent] == "1"),
+      import_others: ("1" if submitted[:import_others] == "1"),
+      skip_inat_writeback: initial_skip_writeback(submitted)
     )
   end
 
-  def flag_param(key)
-    "1" if params[key] == "1"
+  # The fresh form (no :skip_writeback key) pre-checks the box to mirror the
+  # default that will apply if the admin doesn't touch it: skip in
+  # development, write back in production. On reload, honor the submitted
+  # state.
+  def initial_skip_writeback(submitted)
+    return ("1" if Rails.env.development?) unless
+      submitted.key?(:skip_writeback)
+
+    ("1" if submitted[:skip_writeback] == "1")
   end
 
   # Superform namespaces fields under the model key.
@@ -198,7 +215,7 @@ class InatImportsController < ApplicationController
     merge_form_param(new_form, :inat_url)
     merge_form_param(new_form, :consent)
     merge_form_param(new_form, :import_others)
-    merge_form_param(new_form, :skip_inat_update)
+    merge_form_param(new_form, :skip_inat_writeback)
     params[:all] ||= new_form[:all]
   end
 
@@ -284,7 +301,7 @@ class InatImportsController < ApplicationController
       inat_ids: clean_inat_ids,
       inat_url: params[:inat_url].presence,
       import_others: import_others?,
-      skip_inat_update: skip_inat_update?,
+      writeback: writeback_policy,
       response_errors: "",
       token: "",
       log: [],
@@ -307,10 +324,14 @@ class InatImportsController < ApplicationController
     params[:import_others] == "1"
   end
 
-  def skip_inat_update?
-    return false unless in_admin_mode?
+  # Admins can toggle the iNat write-back per import via a form checkbox
+  # (checked = skip, unchecked = force it on). Everyone else gets `default`
+  # so the importer applies its environment default (skip in development,
+  # write back in production).
+  def writeback_policy
+    return :default unless in_admin_mode?
 
-    params[:skip_inat_update] == "1"
+    params[:skip_inat_writeback] == "1" ? :skip : :force
   end
 
   def clean_inat_ids
@@ -387,6 +408,8 @@ class InatImportsController < ApplicationController
     @inat_import.update(cancel: true)
     @tracker = InatImportJobTracker.where(inat_import: @inat_import).
                order(:created_at).last
-    render(:show)
+    render(Views::Controllers::InatImports::Show.new(
+             tracker: @tracker, inat_import: @inat_import, user: @user
+           ))
   end
 end

@@ -4,8 +4,8 @@ module Views::Controllers::Herbaria
   # Form for creating or editing herbaria (fungaria). Handles both
   # personal and institutional herbaria with optional location
   # selection via map. Rendered directly by the herbaria controller's
-  # `new.html.erb` and `edit.html.erb`, and dynamically by
-  # `Components::ModalTurboForm` via `form_component_class_for`.
+  # `new.rb` and `edit.rb`, and dynamically by
+  # `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
     # rubocop:disable Metrics/ParameterLists
     def initialize(model, user:, back: nil, location: nil,
@@ -53,7 +53,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_personal_help
-      render(Components::HelpBlock.new(arrow: :down)) do
+      render(Components::Help::Block.new(arrow: :down)) do
         trusted_html(:edit_herbarium_this_is_personal_herbarium.tp)
       end
     end
@@ -134,7 +134,9 @@ module Views::Controllers::Herbaria
 
     def render_location_section
       render_location_autocompleter
-      BoundsHiddenFields(location: @location, target_controller: :map)
+      render(Components::Form::BoundsHiddenFields.new(
+               location: @location, target_controller: :map
+             ))
     end
 
     def render_location_autocompleter
@@ -168,8 +170,10 @@ module Views::Controllers::Herbaria
     def render_map_section
       div(class: "mb-5 d-none",
           data: { autocompleter__location_target: "mapWrap" }) do
-        FormLocationMap(id: "herbarium_form_map", map_type: "observation",
-                        user: @user)
+        render(Components::Form::LocationMap.new(
+                 id: "herbarium_form_map", map_type: "observation",
+                 user: @user
+               ))
       end
     end
 

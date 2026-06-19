@@ -4,8 +4,8 @@ module Views::Controllers::Sequences
   # Form for creating or editing DNA sequences attached to
   # observations. Sequences can contain genetic data (bases) or
   # reference external archives. Rendered directly by the sequences
-  # controller's `new.html.erb` and `edit.html.erb`, and dynamically
-  # by `Components::ModalTurboForm` via `form_component_class_for`.
+  # controller's `new.rb` and `edit.rb`, and dynamically
+  # by `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
     def initialize(model, observation: nil, back: nil, **)
       @observation = observation
@@ -34,7 +34,7 @@ module Views::Controllers::Sequences
     end
 
     def render_locus_help
-      render(Components::HelpBlock.new(
+      render(Components::Help::Block.new(
                arrow: :up, id: "sequence_locus_help"
              )) do
         trusted_html(:form_sequence_locus_help.t(
@@ -95,7 +95,7 @@ module Views::Controllers::Sequences
     end
 
     def render_accession_help
-      render(Components::HelpBlock.new(
+      render(Components::Help::Block.new(
                arrow: :up, id: "sequence_accession_help"
              )) do
         trusted_html(:form_sequence_accession_help.t)
@@ -110,7 +110,7 @@ module Views::Controllers::Sequences
     end
 
     def render_notes_help
-      render(Components::HelpBlock.new(arrow: :up, id: "textile_help")) do
+      render(Components::Help::Block.new(arrow: :up, id: "textile_help")) do
         trusted_html(:field_textile_link.t)
       end
     end
@@ -140,6 +140,14 @@ module Views::Controllers::Sequences
 
     def observation
       @observation || model.observation
+    end
+
+    # Dropdown options for the archive select: each entry is a
+    # `[label, value]` pair where label == value == archive name.
+    def sequence_archive_options
+      ::WebSequenceArchive.archives.each_with_object([]) do |archive, array|
+        array << Array.new(2, archive[:name])
+      end
     end
   end
 end

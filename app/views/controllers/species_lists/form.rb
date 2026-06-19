@@ -2,7 +2,7 @@
 
 module Views::Controllers::SpeciesLists
   # Phlex Superform for the SpeciesList create/edit page. Rendered
-  # directly by `species_lists/new.html.erb` and `edit.html.erb`.
+  # directly by `species_lists/new.rb` and `edit.rb`.
   #
   # Preserves the existing controller contract exactly:
   # - SpeciesList attributes posted as `species_list[title]`,
@@ -97,7 +97,7 @@ module Views::Controllers::SpeciesLists
                 help: :shared_textile_help.l
       )
       date_field(:when, inline: true, label: "#{:WHEN.l}:")
-      render(Components::FormLocationFeedback.new(
+      render(Components::Form::LocationFeedback.new(
                dubious_where_reasons: @dubious_where_reasons,
                button: @button
              ))

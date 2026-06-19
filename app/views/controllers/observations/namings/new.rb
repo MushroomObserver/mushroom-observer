@@ -4,7 +4,7 @@
 # columns: a left column with the observation details + the naming
 # form, and a right column with the observation's images.
 module Views::Controllers::Observations::Namings
-  class New < Views::Base
+  class New < Views::FullPageBase
     # rubocop:disable Metrics/ParameterLists
     # Forwards every prop the Form component needs — `observation`
     # for chrome (title + context-nav + observation_details +

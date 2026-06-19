@@ -29,7 +29,7 @@ module API2Extensions
 
   def assert_no_errors(api, msg = "API2 errors")
     msg = "#{msg}: <\n#{api.errors.join("\n")}\n>"
-    assert(api.errors.empty?, msg)
+    assert_empty(api.errors, msg)
   end
 
   def assert_api_fail(params)
@@ -77,9 +77,13 @@ module API2Extensions
     msg = "Expected: <#{show_val(expect)}>\n" \
           "Got: <#{show_val(actual)}>\n"
     if expect.is_a?(Class) && expect <= API2::Error
-      assert(actual.is_a?(expect), msg)
+      assert_kind_of(expect, actual, msg)
+    elsif expect.nil?
+      # `expect == nil` triggers Minitest's `assert_equal nil, …`
+      # deprecation; use the explicit nil-aware form instead.
+      assert_nil(actual, msg)
     else
-      assert(actual == expect, msg)
+      assert_equal(expect, actual, msg)
     end
   end
 
@@ -266,9 +270,9 @@ module API2Extensions
     assert_equal(0, obs.num_views)
     assert_nil(obs.last_view)
     assert_not_nil(obs.rss_log)
-    assert(@lat == obs.lat)
-    assert(@long == obs.lng)
-    assert(@alt == obs.alt)
+    assert_equal_even_if_nil(@lat, obs.lat)
+    assert_equal_even_if_nil(@long, obs.lng)
+    assert_equal_even_if_nil(@alt, obs.alt)
     assert_obj_arrays_equal([@proj].compact,
                             obs.projects.reorder(id: :asc))
     assert_obj_arrays_equal([@spl].compact,
@@ -377,20 +381,6 @@ module API2Extensions
     assert_in_delta(Time.zone.now, vote.created_at, 1.minute)
     assert_in_delta(Time.zone.now, vote.updated_at, 1.minute)
     assert_true(vote.favorite)
-  end
-
-  # Used to be we could just used assert_equal, but now it complains that that
-  # assertion will soon no longer work if expect is nil.  We can change it to
-  # just assert(expect == actual), but that doesn't show as nice diagnostics
-  # when it fails.  So I'm restoring the old behavior of assert_equal here.
-  # This should probably move into a more general set of extensions, but for
-  # now this is the only place it is used.  -JPH 20220519
-  def assert_equal_even_if_nil(expect, actual)
-    if expect.nil?
-      assert_nil(actual)
-    else
-      assert_equal(expect, actual)
-    end
   end
 
   def do_basic_get_test(model, *args)

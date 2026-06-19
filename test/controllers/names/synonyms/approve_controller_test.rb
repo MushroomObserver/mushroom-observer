@@ -4,8 +4,6 @@ require("test_helper")
 
 module Names::Synonyms
   class ApproveControllerTest < FunctionalTestCase
-    include ObjectLinkHelper
-
     # ----------------------------
     #  Approval.
     # ----------------------------

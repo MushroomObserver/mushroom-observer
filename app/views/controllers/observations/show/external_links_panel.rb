@@ -4,14 +4,6 @@
 # links + sibling-obs external links (read-only) when present.
 # Header has a `[ new ]` modal link when there are any
 # eligible sites the obs doesn't already have a link to.
-#
-# Replaces `_external_links.erb`. Inlines the
-# `external_link(link)` helper as a private method (it just
-# returned a link to the site URL).
-#
-# The `sibling_external_link_items` helper lives in
-# `Observations::SiblingRecordsHelper` for now; will inline once
-# all sibling-records callers are Phlex too.
 class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -40,7 +32,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def render_new_link
-    render(Components::InlineAddLink.new(
+    render(Components::Link::InlineAdd.new(
              modal_id: "external_link",
              tab: ::Tab::ExternalLink::New.new(observation: @obs)
            ))
@@ -60,9 +52,6 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
     end
   end
 
-  # Inlined from `Observations::SiblingRecordsHelper#sibling_external_link_items`
-  # (and its `sibling_external_link_content` / `sibling_attribution`
-  # / `inat_label` siblings).
   def sibling_external_links
     @siblings.flat_map do |sib|
       sib.external_links.map { |el| [el, sib] }
@@ -105,16 +94,13 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
     li(id: "external_link_#{link.id}") do
       render_external_link(link)
       if link.can_edit?(@user) || in_admin_mode?
-        render(Components::InlineModLinks.new(
+        render(Components::Link::InlineMod.new(
                  target: link, observation: @obs, user: @user
                ))
       end
     end
   end
 
-  # Inlined from `ExternalLinksHelper#external_link` — emits a
-  # plain `<a>` with the site name as the link text. Pre-Phlex
-  # the helper used `link_to` so we match that contract.
   def render_external_link(link)
     a(href: link.url, target: "_blank", rel: "noopener") do
       plain(link.site_name)

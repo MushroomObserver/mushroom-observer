@@ -42,7 +42,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   #   one option (compound multi-element labels without string-building).
   class RadioField < Phlex::HTML
     include Phlex::Slotable
-    include Components::TrustedHtml
+    include Phlex::TrustedHtml
 
     slot :between
     slot :append

@@ -12,7 +12,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Multiple instances with the same `name:` form a radio group via
   # browser-native behavior — no JS needed to manage checked state
   # across them. The `data-form-images-target`-style hook in
-  # FormCarouselItem only manages the visual `.active` class on the
+  # Form::UploadGallery::Item only manages the visual `.active` class on the
   # label.
   #
   # Standalone (no Superform context) — takes raw HTML kwargs rather
@@ -31,7 +31,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     span(class: "set_thumb_img_text") { :image_set_default.l }
   #   end
   class ButtonStyleRadio < Phlex::HTML
-    include Components::TrustedHtml
+    include Phlex::TrustedHtml
 
     # @param name [String] HTML name (shared across radios in the group)
     # @param value [String] value submitted when this radio is checked

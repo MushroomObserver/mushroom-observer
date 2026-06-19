@@ -15,7 +15,6 @@
 #  extra_gc::               (filter: calls <tt>ObjectSpace.garbage_collect</tt>)
 #
 #  ==== Other stuff
-#  observation_matrix_box_image_includes:: Hash of includes for eager-loading
 #  name_flash_for_project::      Flash message for adding obs to projects
 #  default_thumbnail_size::      Default thumbnail size: :thumbnail or :small.
 #  default_thumbnail_size_set::  Change default thumbnail size for current user.
@@ -32,8 +31,10 @@ class ApplicationController < ActionController::Base
   include FlashNotices
   include NameValidation
   include Queries
+  include ControllerLabels
   include Indexes
   include SectionUpdater
+  include ModalUpdater
 
   # Allow folder organization in the app/views folder
   append_view_path Rails.root.join("app/views/controllers")
@@ -51,7 +52,7 @@ class ApplicationController < ActionController::Base
   before_action :set_locale
   before_action :set_timezone
   before_action :track_translations
-  before_action :set_languages
+  before_action :apply_user_theme_change
 
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
@@ -117,14 +118,14 @@ class ApplicationController < ActionController::Base
     false
   end
 
-  # Enable this to test other layouts...
-  layout :choose_layout
-  def choose_layout
+  # Phlex picks the wrapping layout in `Views::FullPageBase#around_template`
+  # based on `session[:layout]`. This filter keeps the `?user_theme=…`
+  # side effect: a known theme name is persisted on the user or in
+  # the session, an unknown value lands in `session[:layout]` and
+  # the next render's Phlex layout-picker reads it.
+  def apply_user_theme_change
     change = params[:user_theme].to_s
     change_theme_to(change) if change.present?
-    layout = session[:layout].to_s
-    layout = "application" if layout.blank?
-    layout
   end
 
   def change_theme_to(change)
@@ -225,12 +226,6 @@ class ApplicationController < ActionController::Base
   #
   ##############################################################################
 
-  def observation_matrix_box_image_includes
-    { thumb_image: [:image_votes, :license, :projects, :user] }.freeze
-    # for matrix_box_carousels:
-    # { images: [:image_votes, :license, :projects, :user] }.freeze
-  end
-
   def name_flash_for_project(name, project)
     return unless name && project
 
@@ -282,35 +277,6 @@ class ApplicationController < ActionController::Base
   # "Locations::Descriptions::DefaultsController" though, what we want is just
   # the "Locations" part, so we need to parse the class.module_parent.
   #
-  # NOTE: The rubric can of course be overridden in each controller.
-  #
-  # Returns a translation string.
-  #
-  def rubric
-    # Levels of nesting. parent_module is one level.
-    if (parent = parent_controller_module)
-      return parent.underscore.upcase.to_sym.t
-    end
-
-    controller_name.upcase.to_sym.t
-  end
-  helper_method :rubric
-
-  # Returns the CamelCase parent module name, e.g. "Locations" for
-  # "Locations::MapsController"
-  # gotcha - `Object` is the module_parent of a top-level controller!
-  def parent_controller_module
-    return unless (parent_module = self.class.module_parent).present? &&
-                  parent_module != Object
-
-    if (grandma_module = parent_module.to_s.rpartition("::").first).present?
-      return grandma_module
-    end
-
-    parent_module.to_s
-  end
-  helper_method :parent_controller_module
-
   def calc_layout_params
     count = @user&.layout_count || MO.default_layout_count
     count = 1 if count < 1
@@ -366,10 +332,6 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   private
-
-  def set_languages
-    @languages = Language.where.not(beta: true).order(:order).to_a
-  end
 
   # defined here because used by both images_controller and
   # observations_controller

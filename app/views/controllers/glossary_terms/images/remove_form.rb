@@ -9,8 +9,7 @@ module Views::Controllers::GlossaryTerms::Images
   #
   # Generic across any model with an `.images` collection — currently
   # only glossary terms use it, hence its location under the nested
-  # glossary_terms/images controller subtree. Rendered by
-  # `glossary_terms/images/remove.html.erb`.
+  # glossary_terms/images controller subtree.
   #
   # @param model [#images] the parent object (e.g. a GlossaryTerm)
   # @param form_action [String, Hash] URL or url_for-compatible hash
@@ -43,20 +42,20 @@ module Views::Controllers::GlossaryTerms::Images
     end
 
     def render_image_matrix
-      render(Components::MatrixTable.new) do
+      render(Components::Matrix::Table.new) do
         model.images.each { |image| render_image_cell(image) }
       end
     end
 
     def render_image_cell(image)
-      render(Components::MatrixBox.new(id: image.id)) do
+      render(Components::Matrix::Box.new(id: image.id)) do
         div(class: "py-3 text-center") { render_image_preview(image) }
         div(class: "pb-3 text-center") { render_select_checkbox(image) }
       end
     end
 
     def render_image_preview(image)
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: @user,
                image: image,
                original: true,

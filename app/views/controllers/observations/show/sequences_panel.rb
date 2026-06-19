@@ -4,7 +4,7 @@
 # obs-show sub-panels but with an additional `[archive]` inline
 # link when the sequence has a deposit accession URL.
 #
-# Replaces `_sequences.erb`. `Components::InlineModLinks` handles
+# `Components::Link::InlineMod` handles
 # the `[ archive | edit | destroy ]` triplet — sequences are a
 # real-DELETE target with a `back: observation_path(obs)` query
 # string so the controller returns to the obs after destroy.
@@ -47,7 +47,7 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
   end
 
   def render_new_link
-    render(Components::InlineAddLink.new(
+    render(Components::Link::InlineAdd.new(
              modal_id: "sequence",
              tab: ::Tab::Sequence::New.new(observation: @obs)
            ))
@@ -62,7 +62,7 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
   def render_row(sequence)
     li(id: "sequence_#{sequence.id}") do
       render_show_link(sequence)
-      render(Components::InlineModLinks.new(
+      render(Components::Link::InlineMod.new(
                target: sequence, observation: @obs, user: @user,
                extras: [archive_link(sequence)].compact
              ))

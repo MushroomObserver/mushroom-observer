@@ -77,9 +77,11 @@ class Components::Table < Components::Base
     @columns = []
     @row_block = nil
     @body_block = nil
+    @heading_block = nil
+    @heading_attrs = {}
     @show_headers = show_headers
     @tbody_id = tbody_id
-    @html_class = binding.local_variable_get(:class)
+    @html_class = grab(class:)
     @html_id = id
     @attributes = attributes
   end
@@ -109,10 +111,11 @@ class Components::Table < Components::Base
   # @yield [row] block that receives each row and returns cell content
   # @return [nil] returns nil to prevent ERB output
   def column(header, class: nil, **attributes, &content)
-    klass = binding.local_variable_get(:class)
-    attrs = attributes.dup
-    attrs[:class] = klass if klass
-    @columns << { header: header, attributes: attrs, content: content }
+    @columns << {
+      header: header,
+      attributes: mix(attributes, class: grab(class:)),
+      content: content
+    }
     nil
   end
 
@@ -144,24 +147,57 @@ class Components::Table < Components::Base
     nil
   end
 
+  # Register a section heading row — a single `<th>` with
+  # `colspan` = number of columns, rendered inside the `<thead>`
+  # instead of the standard per-column header row. Use for tables
+  # whose header is a label ("Curators:", "Recent activity:", etc.)
+  # rather than per-column titles.
+  #
+  # When `heading` is set, the per-column `header:` text on each
+  # `column(...)` is ignored — only the heading row is emitted in
+  # `<thead>`. `show_headers: false` still suppresses the `<thead>`
+  # entirely; pass `show_headers: true` (the default) for the
+  # heading to render.
+  #
+  # @param attributes [Hash] arbitrary HTML attrs forwarded to the
+  #   heading `<th>` (`class:`, `data:`, etc.)
+  # @yield block that renders the heading cell content
+  # @return [nil]
+  def heading(**attributes, &block)
+    @heading_block = block
+    @heading_attrs = attributes
+    nil
+  end
+
   private
 
   def table_attributes
-    base_class = "table"
-    combined_class =
-      @html_class ? "#{base_class} #{@html_class}" : base_class
     attrs = @attributes.dup
-    attrs[:class] = combined_class
+    attrs[:class] = class_names("table", @html_class)
     attrs[:id] = @html_id if @html_id
     attrs
   end
 
   def render_thead
     thead do
-      tr do
-        @columns.each do |column|
-          th(**column[:attributes]) { column[:header] }
-        end
+      if @heading_block
+        render_heading_row
+      else
+        render_column_header_row
+      end
+    end
+  end
+
+  def render_heading_row
+    tr do
+      th(colspan: @columns.length, **@heading_attrs, &@heading_block)
+    end
+  end
+
+  def render_column_header_row
+    tr do
+      @columns.each do |column|
+        th(**column[:attributes]) { column[:header] }
       end
     end
   end

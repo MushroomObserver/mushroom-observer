@@ -15,7 +15,7 @@ class UsersControllerTest < FunctionalTestCase
   def test_page_loads
     login
     get(:show, params: { id: rolf.id })
-    assert_template(:show)
+    assert_select("body.users__show")
   end
 
   #   -------------
@@ -61,7 +61,7 @@ class UsersControllerTest < FunctionalTestCase
     unmatched_pattern = "NonexistentUserContent"
     get_without_clearing_flash(:index,
                                params: { pattern: unmatched_pattern })
-    assert_template("users/index")
+    assert_select("body.users__index")
 
     assert_page_title(:USERS.l)
     assert_empty(css_select(".sorts"), "There should be no sort links")
@@ -103,13 +103,31 @@ class UsersControllerTest < FunctionalTestCase
   #    show
   #   ---------------
 
+  # Exercises the bonuses-each + languages-summary branches of
+  # `UsersController::UserStatsBuilder`. The default user_stats
+  # fixtures have neither field populated, so the show-page render
+  # never hits `user_stats.bonuses&.each` or
+  # `user_stats[:languages].map`. Populate both here.
+  def test_show_user_stats_with_bonuses_and_languages
+    user = users(:rolf)
+    user_stats(:rolf).update!(
+      bonuses: [[7, "lucky_bonus"]],
+      languages: { "en" => 100 }
+    )
+
+    login
+    get(:show, params: { id: user.id })
+
+    assert_select("body.users__show")
+  end
+
   def test_show_user_no_query
     user = users(:rolf)
 
     login
     get(:show, params: { id: user.id })
 
-    assert_template(:show)
+    assert_select("body.users__show")
     assert_select(
       "a[href = '#{location_descriptions_index_path}?by_author=#{user.id}']"
     )
@@ -148,6 +166,19 @@ class UsersControllerTest < FunctionalTestCase
     assert_redirected_to({ action: :index })
   end
 
+  # An unverified user has verified: nil; the profile heading must not
+  # crash on nil.strftime when rendering the "Joined" date (#4551).
+  def test_show_unverified_user
+    user = users(:unverified)
+    assert_nil(user.verified)
+
+    login
+    get(:show, params: { id: user.id })
+
+    assert_response(:success)
+    assert_select("body.users__show")
+  end
+
   #   ---------------------
   #    show_selected users
   #   ---------------------
@@ -159,6 +190,7 @@ class UsersControllerTest < FunctionalTestCase
     sorting_links = css_select(".sorts")
     assert_match(/Contribution/, sorting_links.text)
   end
+  private :prove_sorting_links_include_contribution
 
   def test_show_next
     query = Query.lookup_and_save(:User)

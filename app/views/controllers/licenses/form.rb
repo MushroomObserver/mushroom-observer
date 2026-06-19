@@ -2,7 +2,7 @@
 
 module Views::Controllers::Licenses
   # Form for creating/editing licenses. Rendered directly by the
-  # licenses controller's `new.html.erb` and `edit.html.erb`.
+  # licenses controller's `new.rb` and `edit.rb`.
   class Form < ::Components::ApplicationForm
     def view_template
       render_display_name_field

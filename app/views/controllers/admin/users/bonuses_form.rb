@@ -2,7 +2,7 @@
 
 module Views::Controllers::Admin::Users
   # Form for editing user contribution bonuses (admin only).
-  # Rendered by the admin/users controller's `edit.html.erb`. Allows
+  # Rendered by the admin/users controller's `edit.rb`. Allows
   # admins to manually adjust user bonus points. Descriptive
   # `BonusesForm` name kept since the form is specifically for
   # bonuses, not generic user edits.

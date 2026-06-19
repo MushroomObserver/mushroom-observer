@@ -3,10 +3,10 @@
 # Comments-for-object panel: the boxed list of comments shown on
 # `observations/show`, `names/show`, `projects/show`,
 # `locations/show`, `species_lists/show`, and the
-# `comments/new` / `comments/edit` pages (via `_object.html.erb`).
+# `comments/new` / `comments/edit` pages (via `_object.rb`).
 #
 # Renders a `Components::Panel` whose body is a flush
-# `Components::ListGroup` of `CommentItem`s — wired to an Action
+# `Components::ListGroup::Base` of `CommentItem`s — wired to an Action
 # Cable Turbo Stream from `[object, :comments]` so the
 # `Comment` model's broadcast callbacks can prepend new rows,
 # replace edited rows, and remove deleted rows in place.
@@ -15,9 +15,6 @@
 # - The heading carries a "+ Add comment" modal-link button.
 # - Each `CommentItem` renders mod-links + a real author UserLink.
 # - The footer shows an "and N more →" link when truncated.
-#
-# Replaces `app/views/controllers/comments/_comments_for_object.erb`
-# and inlines the `new_comment_link` helper that fed it.
 module Views::Controllers::Comments
   class CommentsForObject < Views::Base
     include Phlex::Rails::Helpers::TurboStreamFrom
@@ -29,11 +26,7 @@ module Views::Controllers::Comments
     # LocationDescription, NameDescription); all inherit from
     # `AbstractModel`.
     prop :object, ::AbstractModel
-    prop :comments,
-         _Nilable(
-           _Union(Array, ::ActiveRecord::Relation,
-                  ::ActiveRecord::Associations::CollectionProxy)
-         )
+    prop :comments, _Nilable(_Array(::Comment)), default: nil
     prop :user, _Nilable(::User), default: nil
     # When true, render the "+ Add comment" header link, per-row
     # mod-links, and the footer "and N more" link. Callers pass
@@ -58,8 +51,8 @@ module Views::Controllers::Comments
     # `#comments` is the Action Cable broadcast target — the model
     # callbacks broadcast `[object, :comments]` with `target: "comments"`.
     def render_comments_list
-      render(Components::ListGroup.new(id: "comments", flush: true,
-                                       class: "comments")) do |list|
+      render(Components::ListGroup::Base.new(id: "comments", flush: true,
+                                             class: "comments")) do |list|
         visible_comments.each do |comment|
           list.item(class: "comment", id: dom_id(comment)) do
             render(CommentItem.new(comment: comment, user: @user,
@@ -75,7 +68,7 @@ module Views::Controllers::Comments
     # `Tab::Comment::New#html_options` already carries `icon: :add`,
     # which ModalLink picks up to render an icon-styled link.
     def render_add_comment_link
-      render(Components::ModalLink.new(
+      render(Components::Link::Modal.new(
                "comment",
                tab: ::Tab::Comment::New.new(object: @object, btn_class: nil)
              ))

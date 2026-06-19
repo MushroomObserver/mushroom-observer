@@ -3,7 +3,7 @@
 # Form for creating or editing external links for observations. Rendered
 # by `Observations::ExternalLinksController#{new,edit}`, both as an
 # inline page form and as the body of the new/edit modal (via
-# `Components::ModalTurboForm`, which auto-resolves this class from
+# `Components::Modal::TurboForm`, which auto-resolves this class from
 # `controller_path`).
 module Views::Controllers::Observations::ExternalLinks
   class Form < ::Components::ApplicationForm

@@ -2,8 +2,8 @@
 
 module Views::Controllers::Comments
   # Form for creating or editing a Comment. Rendered directly by the
-  # comments controller's `new.html.erb` and `edit.html.erb`, and
-  # also looked up dynamically by `Components::ModalTurboForm` via
+  # comments controller's `new.rb` and `edit.rb`, and also looked up
+  # dynamically by `Components::Modal::TurboForm` via
   # `form_component_class_for(comment)`.
   class Form < ::Components::ApplicationForm
     def view_template

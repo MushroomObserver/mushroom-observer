@@ -139,7 +139,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
                    with: "#{list1.title}\n#{list2.title}")
 
       # Simulate autocompleter setting the hidden IDs field
-      form.find("#query_observations_species_lists_id", visible: :all).
+      form.find_by_id("query_observations_species_lists_id", visible: :all).
         set("#{list1.id},#{list2.id}")
 
       first(:button, type: "submit").click
@@ -172,7 +172,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
       form.fill_in("query_observations_project_lists", with: proj.title)
 
       # Simulate autocompleter setting the hidden IDs field
-      form.find("#query_observations_project_lists_id", visible: :all).
+      form.find_by_id("query_observations_project_lists_id", visible: :all).
         set(proj.id.to_s)
 
       first(:button, type: "submit").click
@@ -203,7 +203,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
                    with: "#{herb1.name}\n#{herb2.name}")
 
       # Simulate autocompleter setting the hidden IDs field
-      form.find("#query_observations_herbaria_id", visible: :all).
+      form.find_by_id("query_observations_herbaria_id", visible: :all).
         set("#{herb1.id},#{herb2.id}")
 
       first(:button, type: "submit").click
@@ -226,7 +226,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
       form.fill_in("query_observations_by_users",
                    with: "#{user1.unique_text_name}\n#{user2.unique_text_name}")
       # Simulate autocompleter setting the hidden IDs field
-      form.find("#query_observations_by_users_id", visible: :all).
+      form.find_by_id("query_observations_by_users_id", visible: :all).
         set("#{user1.id},#{user2.id}")
 
       first(:button, type: "submit").click
@@ -240,12 +240,13 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
 
     within("#observations_search_form") do |form|
       # Verify textarea is prefilled with display names
-      textarea = form.find("#query_observations_by_users", visible: :all)
+      textarea = form.find_by_id("query_observations_by_users", visible: :all)
       assert_includes(textarea.value, user1.unique_text_name)
       assert_includes(textarea.value, user2.unique_text_name)
 
       # Verify hidden ID field is prefilled (this was the bug)
-      hidden_field = form.find("#query_observations_by_users_id", visible: :all)
+      hidden_field = form.find_by_id("query_observations_by_users_id",
+                                     visible: :all)
       expected_ids = "#{user1.id},#{user2.id}"
       assert_equal(expected_ids, hidden_field.value,
                    "Hidden ID field should be prefilled with IDs")

@@ -165,6 +165,6 @@ class ChecklistsControllerTest < FunctionalTestCase
     end
 
     assert_select(".checklist a", count: expect.size)
-    assert(missing_names.empty?, "Species List missing #{missing_names}")
+    assert_empty(missing_names, "Species List missing #{missing_names}")
   end
 end

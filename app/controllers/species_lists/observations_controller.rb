@@ -20,8 +20,7 @@ module SpeciesLists
         Views::Controllers::SpeciesLists::Observations::Edit.new(
           prefill_value: @id,
           num_results: @query.num_results
-        ),
-        layout: true
+        )
       )
     end
 

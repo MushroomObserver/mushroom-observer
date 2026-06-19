@@ -2,7 +2,7 @@
 
 module Views::Controllers::Account::Login
   # Form for user login. Rendered by the account/login controller's
-  # `new.html.erb`.
+  # `new.rb`.
   class Form < ::Components::ApplicationForm
     def view_template
       render_login_field

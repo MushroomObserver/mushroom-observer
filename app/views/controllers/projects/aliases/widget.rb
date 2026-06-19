@@ -47,7 +47,7 @@ module Views::Controllers::Projects::Aliases
         tab_name, path, opts = ::Tab::Project::AliasEdit.new(
           project_id: @project.id, name: name, id: id
         ).to_a
-        render(Components::ModalLink.new(
+        render(Components::Link::Modal.new(
                  "project_alias_#{id}", tab_name, path, **(opts || {})
                ))
       end
@@ -59,7 +59,7 @@ module Views::Controllers::Projects::Aliases
           project_id: @project.id,
           target_id: @target.id, target_type: @target.class
         ).to_a
-        render(Components::ModalLink.new(
+        render(Components::Link::Modal.new(
                  "project_alias", tab_name, path, **(opts || {})
                ))
       end

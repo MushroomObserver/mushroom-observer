@@ -32,7 +32,7 @@
 #     end
 #   end
 #
-#   # In new.html.erb and edit.html.erb, just render the form directly:
+#   # In new.rb and edit.rb, just render the form directly:
 #   <%= render(Views::Controllers::Licenses::Form.new(@license)) %>
 #
 # @example Deriving action URL from model associations
@@ -82,6 +82,12 @@
 class Components::ApplicationForm < Superform::Rails::Form
   include Phlex::Slotable
   include Phlex::Rails::Helpers::TurboFrameTag
+  # `Components::Base` includes this; ApplicationForm subclasses
+  # don't inherit from Base (they go through `Superform::Rails::Form`),
+  # so we include it here too. Lets subclasses call
+  # `trusted_html(:foo.t)` instead of `raw(:foo.t) # rubocop:disable
+  # Rails/OutputSafety`.
+  include Phlex::TrustedHtml
   include FieldHelpers
   include UploadHelpers
 
@@ -176,7 +182,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Use register_value_helper for helpers that return values (not HTML)
   register_value_helper :in_admin_mode?
   register_value_helper :pluralize
-  register_value_helper :rank_as_string
 
   # We don't need to register form helpers anymore - using Superform fields
 

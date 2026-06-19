@@ -597,12 +597,19 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_project_destroy_fail
     project = projects(:eol_project)
+    # `find_or_goto_index` uses `Project.show_includes.find_by`, and
+    # the destroy refetches via `Project.find` — stub both paths so
+    # the controller sees our destroy-mocked instance.
     project.stub(:destroy, false) do
-      Project.stub(:safe_find, project) do
-        project_id = project.id
-        params = { id: project_id.to_s }
-        requires_user(:destroy, { action: :show }, params, "rolf")
-        assert_flash_error
+      Project.stub(:show_includes, Project) do
+        Project.stub(:find_by, project) do
+          Project.stub(:find, project) do
+            project_id = project.id
+            params = { id: project_id.to_s }
+            requires_user(:destroy, { action: :show }, params, "rolf")
+            assert_flash_error
+          end
+        end
       end
     end
   end

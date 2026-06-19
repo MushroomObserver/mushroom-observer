@@ -3,10 +3,9 @@
 # Action template for `Account::VerificationsController#new` — the
 # "we just sent you a verification email" landing page. Welcomes
 # the new user by their legal name and emits the textile-rendered
-# verification instructions. Replaces
-# `app/views/controllers/account/verifications/new.html.erb`.
+# verification instructions.
 module Views::Controllers::Account::Verifications
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :user, ::User
 
     def view_template

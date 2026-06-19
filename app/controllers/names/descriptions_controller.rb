@@ -30,6 +30,13 @@ module Names
       build_index_with_query
     end
 
+    def render_index_view
+      render(Views::Controllers::Names::Descriptions::Index.new(
+               query: @query, descriptions: @objects.to_a,
+               pagination_data: @pagination_data
+             ))
+    end
+
     def controller_model_name
       "NameDescription"
     end
@@ -132,7 +139,7 @@ module Names
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
       @projects = users_projects_which_dont_have_desc_of_this(@name)
-      @versions = @description.versions
+      @versions = @description.versions.to_a
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
 

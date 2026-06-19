@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Projects::Updates
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     def initialize(project:, user:, results:, show_excluded:)
       super()
       @project = project
@@ -89,19 +89,18 @@ module Views::Controllers::Projects::Updates
     def render_pagination
       return unless @pagination.num_pages > 1
 
-      render(Components::IndexPaginationNav.new(
+      render(Views::Layouts::Header::IndexPaginationNav.new(
                pagination_data: @pagination,
                request_url: @request_url,
                form_action_url: @form_action_url,
-               q_params: nil,
                letter_param: nil
              ))
     end
 
     def render_matrix
-      render(Components::MatrixTable.new) do
+      render(Components::Matrix::Table.new) do
         @observations.each do |obs|
-          render(Components::MatrixBox.new(
+          render(Components::Matrix::Box.new(
                    user: @user, object: obs
                  )) do
             render(Views::Controllers::Projects::Updates::ObsFooter.new(

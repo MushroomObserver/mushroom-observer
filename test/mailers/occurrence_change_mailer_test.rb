@@ -35,8 +35,8 @@ class OccurrenceChangeMailerTest < UnitTestCase
       sender: rolf, receiver: mary,
       observation: obs, action: :added
     )
-    assert(mail.respond_to?(:deliver_now),
-           "Mail should be deliverable")
+    assert_respond_to(mail, :deliver_now,
+                      "Mail should be deliverable")
     assert_not_nil(mail.from)
     assert_not_nil(mail.body)
   end

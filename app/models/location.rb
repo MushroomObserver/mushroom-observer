@@ -106,21 +106,23 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :herbaria     # should be at most one, but nothing preventing more
   has_many :users        # via profile location
 
-  acts_as_versioned(
-    if_changed: %w[
-      name
-      north
-      south
-      west
-      east
-      high
-      low
-      notes
-      box_area
-      center_lat
-      center_lng
-    ]
-  )
+  # Columns whose change creates a new `Location::Version` row.
+  # Companion to the gem's `non_versioned_columns` setting below.
+  VERSIONED_COLUMNS = %w[
+    name
+    north
+    south
+    west
+    east
+    high
+    low
+    notes
+    box_area
+    center_lat
+    center_lng
+  ].freeze
+
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS)
   non_versioned_columns.push(
     "created_at",
     "updated_at",
@@ -803,9 +805,16 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def log_and_destroy_location(user, old_loc)
     old_loc.rss_log&.orphan(user, old_loc.name, :log_location_merged,
                             this: old_loc.name, that: name)
-    old_loc.rss_log = nil
+    # Persist the disassociation so the refetched record below doesn't
+    # re-attach the now-orphaned rss_log and double-log the destroy.
+    Location.where(id: old_loc.id).update_all(rss_log_id: nil)
     remove_old_location_versions(old_loc)
-    old_loc.destroy
+    # Refetch as a fresh (non-strict_loading) record so the destroy
+    # cascade reads stable associations rather than the stale loaded
+    # collections (e.g. project_aliases were reassigned in
+    # `move_interests_and_aliases` but the preloaded collection on
+    # `old_loc` still references them).
+    Location.find(old_loc.id).destroy
   end
 
   def remove_old_location_versions(old_loc)

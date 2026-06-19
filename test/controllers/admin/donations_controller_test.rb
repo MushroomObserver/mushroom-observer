@@ -13,7 +13,8 @@ module Admin
       assert_response(:redirect)
       make_admin("rolf")
       get(:new)
-      assert_template(:new)
+      # Phlex `Admin::Donations::New` renders the create-donation form.
+      assert_select("form[action='#{admin_donations_path}']")
     end
 
     def test_create_donation
@@ -38,7 +39,9 @@ module Admin
       assert_response(:redirect)
       make_admin
       get(:edit)
-      assert_template(:edit)
+      # Phlex `Admin::Donations::Edit` renders the review form (id pinned
+      # by the form Phlex class).
+      assert_select("form#admin_review_donations_form")
     end
 
     def test_update_reviewed_donations

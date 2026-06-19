@@ -23,7 +23,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     tracker = field_slip_job_trackers(:fsjt_page_two)
     FieldSlipJobTracker.stub(:pdf_directory, @pdf_dir) do
       job.perform(tracker.id)
-      assert(File.exist?(tracker.filepath))
+      assert_path_exists(tracker.filepath)
       File.delete(tracker.filepath)
     end
   end
@@ -33,7 +33,7 @@ class FieldSlipJobTest < ActiveJob::TestCase
     tracker = field_slip_job_trackers(:fsjt_one_per_page)
     FieldSlipJobTracker.stub(:pdf_directory, @pdf_dir) do
       job.perform(tracker.id)
-      assert(File.exist?(tracker.filepath))
+      assert_path_exists(tracker.filepath)
       File.delete(tracker.filepath)
     end
   end

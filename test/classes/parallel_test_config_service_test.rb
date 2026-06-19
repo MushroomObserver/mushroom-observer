@@ -51,7 +51,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
     # Verify config files were created
     worker_count.times do |i|
       config_file = @rails_root.join("config/mysql-test-#{i}.cnf")
-      assert(File.exist?(config_file), "Config file #{i} should exist")
+      assert_path_exists(config_file, "Config file #{i} should exist")
 
       content = File.read(config_file)
       assert_match(/user=test_user/, content)
@@ -76,7 +76,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
       # Verify only 3 config files were created
       worker_count.times do |i|
         config_file = @rails_root.join("config/mysql-test-#{i}.cnf")
-        assert(File.exist?(config_file), "Config file #{i} should exist")
+        assert_path_exists(config_file, "Config file #{i} should exist")
       end
 
       # Verify no extra files
@@ -129,18 +129,18 @@ class ParallelTestConfigServiceTest < UnitTestCase
   def test_setup_config_files_write_error
     create_database_yml
 
-    # Make config directory read-only to cause write failure
-    config_path = @rails_root.join("config")
-    FileUtils.chmod(0o444, config_path)
-
-    begin
+    # Stub File.write to raise. Provoking the failure via
+    # `FileUtils.chmod(0o444, config_path)` is flaky on CI runners
+    # whose process UID can write through a read-only directory bit
+    # (Docker root, some tmpfs mounts), leaving the rescue branch in
+    # `setup_config_files` uncovered.
+    error = StandardError.new("Write failed")
+    File.stub(:write, ->(_path, _content) { raise(error) }) do
       result = @service.setup_config_files
 
       assert_not(result,
                  "setup_config_files should return false on write error")
-      assert_match(/ERROR:/, output_messages)
-    ensure
-      FileUtils.chmod(0o755, config_path)
+      assert_match(/ERROR: Write failed/, output_messages)
     end
   end
 
@@ -267,10 +267,10 @@ class ParallelTestConfigServiceTest < UnitTestCase
 
     # Verify only parallel test configs were deleted
     assert_not(File.exist?(config_path.join("mysql-test-0.cnf")))
-    assert(File.exist?(config_path.join("mysql-production.cnf")),
-           "Should not delete non-test config files")
-    assert(File.exist?(config_path.join("other.txt")),
-           "Should not delete other files")
+    assert_path_exists(config_path.join("mysql-production.cnf"),
+                       "Should not delete non-test config files")
+    assert_path_exists(config_path.join("other.txt"),
+                       "Should not delete other files")
   end
 end
 

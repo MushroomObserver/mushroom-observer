@@ -69,6 +69,22 @@ class Sequence < AbstractModel
     joins(:observation).subquery(:Observation, hash)
   }
 
+  # Eager-loads the show/edit page (sequence + its user + the obs
+  # the sequence belongs to, rendered as a MatrixBox).
+  def self.show_includes_tree
+    [:user, { observation: Observation.matrix_box_includes }]
+  end
+
+  # Index row links to the underlying observation; preload :user and
+  # the obs name. Picked up by
+  # `ApplicationController::Indexes#default_index_includes_for_model`.
+  def self.index_includes_tree
+    [:user, { observation: :name }]
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
+
   ##############################################################################
   #
   #  :section: Matchers
@@ -107,10 +123,13 @@ class Sequence < AbstractModel
     locus.truncate(locus_width, separator: " ")
   end
 
-  # Page heading + browser tab title — `format_name` is already
-  # plain text (truncated locus identifier).
-  alias page_title format_name
-  alias document_title format_name
+  # Page heading + browser tab title. The locus is shown in the
+  # page body ("Locus: …") so the title identifies the sequence
+  # by its observation instead.
+  def page_title
+    :show_sequence_title.l(id: observation_id)
+  end
+  alias document_title page_title
 
   # used in views and by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name
@@ -268,7 +287,9 @@ class Sequence < AbstractModel
 
   # array of other Sequences in same Observation
   def other_sequences_same_obs
-    observation.try(:sequences) ? observation.sequences - [self] : []
+    return [] unless observation_id
+
+    Sequence.where(observation_id:).where.not(id:).to_a
   end
 
   # Validate proper formatting of bases

@@ -3,7 +3,7 @@
 # Herbarium-records sub-panel — same shape as
 # `CollectionNumbersPanel` but for `HerbariumRecord`s, with an
 # additional "search MCP" indented link for records whose
-# herbarium is `web_searchable?`. Replaces `_herbarium_records.erb`.
+# herbarium is `web_searchable?`
 class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -52,7 +52,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   def render_editable_row(record)
     li(id: "herbarium_record_#{record.id}") do
       render_show_link(record)
-      render(Components::InlineModLinks.new(
+      render(Components::Link::InlineMod.new(
                target: record, observation: @obs, user: @user
              ))
       render_mcp_search_link(record) if record.herbarium.web_searchable?
@@ -76,8 +76,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
     end
   end
 
-  # Read-only list: column-stacked link list (matches pre-Phlex
-  # shape — `tag.div` heading + tight-list with show-link + br +
+  # Read-only list: `div` heading + tight-list with show-link + br +
   # MCP search link when web-searchable).
   def render_readonly_list(records)
     div { plain("#{:Herbarium_record.t}:") }
@@ -111,7 +110,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   end
 
   def render_new_link
-    render(Components::InlineAddLink.new(
+    render(Components::Link::InlineAdd.new(
              modal_id: "herbarium_record",
              tab: ::Tab::HerbariumRecord::New.new(observation: @obs)
            ))

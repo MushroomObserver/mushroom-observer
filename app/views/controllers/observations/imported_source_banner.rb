@@ -2,7 +2,7 @@
 
 # Banner shown at the top of an Observation show page when the obs
 # was imported from an external source (iNat, MyCoPortal, etc.).
-# Rendered by `observations/show.html.erb`.
+# Rendered by `observations/show.rb`.
 #
 # Renders in its own panel with two pieces:
 #  - "Imported from <Source>" — a single link to the per-observation
@@ -58,7 +58,7 @@ module Views::Controllers::Observations
       a(href: article_path(HELP_ARTICLE_ID),
         title: :source_credit_help_link.l,
         aria: { label: :source_credit_help_link.l }) do
-        render(Components::LinkIcon.new(type: :question))
+        render(Components::Icon.new(type: :question))
       end
     end
   end

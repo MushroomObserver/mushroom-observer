@@ -13,9 +13,13 @@ module Images
         can_email_user_question?(@image, method: :email_general_commercial)
 
       respond_to do |format|
-        format.html
+        format.html do
+          render(Views::Controllers::Images::Emails::New.new(
+                   image: @image, message: @message
+                 ))
+        end
         format.turbo_stream do
-          render(Components::ModalTurboForm.new(
+          render(Components::Modal::TurboForm.new(
                    identifier: "commercial_inquiry_email",
                    title: :commercial_inquiry_title.t(
                      name: @image.unique_format_name
@@ -53,7 +57,10 @@ module Images
 
       flash_error(:runtime_missing.t(field: :message.l))
       @image = image
-      render(:new)
+      @message = params.dig(:email, :message)
+      render(Views::Controllers::Images::Emails::New.new(
+               image: @image, message: @message
+             ))
       false
     end
 
@@ -63,8 +70,7 @@ module Images
           redirect_to(image_path(image.id)) and return
         end
         format.turbo_stream do
-          render(partial: "shared/modal_flash_update",
-                 locals: { identifier: "commercial_inquiry_email" }) and return
+          render_modal_flash_update("commercial_inquiry_email") and return
         end
       end
     end

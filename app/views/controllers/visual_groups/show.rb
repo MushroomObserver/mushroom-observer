@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# Action view for `visual_groups#show`. Replaces the
-# `show.html.erb`. The image matrix is rendered via
-# `Views::Controllers::VisualGroups::ImageMatrix` (always with status
-# `"included"` for the show page).
+# Action view for `visual_groups#show`. The image matrix is rendered
+# via `Views::Controllers::VisualGroups::ImageMatrix` (always with
+# status `"included"` for the show page).
 module Views::Controllers::VisualGroups
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :visual_group, VisualGroup
     prop :user, _Nilable(User)
     prop :filter, _Nilable(String)

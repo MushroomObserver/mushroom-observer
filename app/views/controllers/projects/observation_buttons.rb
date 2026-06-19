@@ -30,7 +30,10 @@ module Views::Controllers::Projects
     end
 
     def render_images_button
-      project_button(:IMAGES.l, related_observation_images_url)
+      images_url = related_observation_images_url
+      return unless images_url
+
+      project_button(:IMAGES.l, images_url)
     end
 
     def render_download_button
@@ -44,12 +47,12 @@ module Views::Controllers::Projects
     end
 
     def project_button(name, target)
-      render(Components::ProjectButton.new(name: name, target: target))
+      render(Components::Button::Project.new(name: name, target: target))
     end
 
     def related_observation_images_url
       Tab::RelatedQuery.for(
-        model: Image, filter: :Observation,
+        model: ::Image, filter: :Observation,
         current_query: @query, controller: controller
       )&.path
     end

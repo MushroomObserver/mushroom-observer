@@ -3,14 +3,14 @@
 # Edit-comment page: the comment form followed by the
 # `CommentsForObject` panel for the target (so the editor can see
 # existing comments in context).
-#
-# Replaces `app/views/controllers/comments/edit.html.erb` (and its
-# `_object.html.erb` partial render — inlined here).
 module Views::Controllers::Comments
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :comment, ::Comment
     prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
+    # Comments on `target` pre-loaded by the controller, fed into
+    # `CommentsForObject` below.
+    prop :comments, _Array(::Comment)
 
     def view_template
       add_page_title(:comment_edit_title.t(
@@ -18,10 +18,9 @@ module Views::Controllers::Comments
                      ))
       add_context_nav(::Tab::Comment::FormEdit.new(comment: @comment))
 
-      # `[form:comment]…[eoform:comment]` HTML-comment markers
-      # carried over from the legacy ERB (no in-tree caller; kept
-      # in case external scrapers / integration tools look for
-      # them).
+      # `[form:comment]…[eoform:comment]` HTML-comment markers.
+      # No in-tree caller; kept in case external scrapers /
+      # integration tools look for them.
       comment { "[form:comment]" }
       render(Form.new(@comment, local: true))
       comment { "[eoform:comment]" }
@@ -31,13 +30,12 @@ module Views::Controllers::Comments
 
     private
 
-    # Mirrors `_object.html.erb`: render the comments-for-object
-    # panel for the target. `@comments` isn't set on the edit
-    # action, so fall back to a fresh fetch.
+    # Mirrors `_object.rb`: render the comments-for-object
+    # panel for the target.
     def render_object_panel
       render(CommentsForObject.new(
                object: @target,
-               comments: ::Comment.where(target: @target).to_a,
+               comments: @comments.to_a,
                user: @user, editable: false, limit: 10
              ))
     end

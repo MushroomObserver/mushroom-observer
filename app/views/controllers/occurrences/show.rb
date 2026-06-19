@@ -3,7 +3,7 @@
 # Phlex view for the occurrence show page.
 # Displays observations in matrix boxes with the primary first.
 module Views::Controllers::Occurrences
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     def initialize(occurrence:, observations:, user:)
       super()
       @occurrence = occurrence
@@ -17,7 +17,9 @@ module Views::Controllers::Occurrences
       add_edit_icons(@occurrence, @user)
       render_location_warning
       render_observation_grid
-      render(Components::ObjectFooter.new(user: @user, obj: @occurrence))
+      render(Views::Layouts::ObjectFooter.new(
+               user: @user, obj: @occurrence
+             ))
     end
 
     private
@@ -36,7 +38,7 @@ module Views::Controllers::Occurrences
     end
 
     def render_observation_grid
-      render(Components::MatrixTable.new(
+      render(Components::Matrix::Table.new(
                objects: @observations,
                user: @user
              ))

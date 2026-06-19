@@ -3,7 +3,7 @@
 # Action template for `NamesController#edit`. Sets the edit-page
 # chrome and delegates to the `Names::Form` Phlex form.
 module Views::Controllers::Names
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
     prop :name_string, _Nilable(String), default: nil

@@ -25,7 +25,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     n_d = names(:namings_deprecated) # Xa current
     nd1 = names(:namings_deprecated_1)
 
-    scroll_to(find("#observation_namings"), align: :center)
+    scroll_to(find_by_id("observation_namings"), align: :center)
     within("#observation_namings") do
       assert_link(text: /Propose/)
       click_link(text: /Propose/)
@@ -74,7 +74,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
     # When this happens, naming_table is refreshed with no edit/destroy buttons.
     # Capybara author suggests trying sleep(5) after a CRUD action
     # Ah. Maybe it was just missing the scroll_to
-    scroll_to(find("#observation_namings"), align: :center)
+    scroll_to(find_by_id("observation_namings"), align: :center)
     sleep(2)
 
     nam = Naming.last
@@ -157,7 +157,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       # (no-default) — reason 1 is pre-checked server-side for new
       # namings (NAMING_RECOGNIZED_BY_SIGHT default).
       assert_selector("#naming_reasons_4_notes", visible: false)
-      find("#naming_reasons_4_check").click
+      find_by_id("naming_reasons_4_check").click
       assert_selector("#naming_reasons_4_notes.in", wait: 4)
     end
     within("#modal_obs_#{obs.id}_naming_#{nam.id}") do

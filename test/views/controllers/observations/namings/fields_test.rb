@@ -3,8 +3,7 @@
 require("test_helper")
 
 module Views::Controllers::Observations::Namings
-  # Tests for NamingFields component (Superform mode only).
-  # For ERB form tests, see the system tests for observation form.
+  # Tests for NamingFields component.
   class FieldsTest < ComponentTestCase
     def setup
       super

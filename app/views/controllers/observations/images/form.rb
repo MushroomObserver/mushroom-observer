@@ -89,7 +89,7 @@ module Views::Controllers::Observations::Images
         cb.option(project.id,
                   checked: project_checked?(project.id)) do
           whitespace
-          render(Components::ObjectLink.new(object: project))
+          render(Components::Link::Object::Base.new(object: project))
         end
       end
     end
@@ -103,8 +103,8 @@ module Views::Controllers::Observations::Images
       end
     end
 
-    # Same permission rule as the ERB partial: only the image owner
-    # OR a member of the project can toggle.
+    # Only the image owner
+    # or a member of the project can toggle.
     def cannot_modify_project?(project)
       model.user_id != @user.id && !project.member?(@user)
     end

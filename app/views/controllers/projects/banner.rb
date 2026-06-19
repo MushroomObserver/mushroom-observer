@@ -81,7 +81,7 @@ module Views::Controllers::Projects
         div(class: "d-flex align-items-center") do
           render(Components::IdBadge.new(object: @project))
           plain(" ")
-          render(Components::ObjectLink.new(object: @project))
+          render(Components::Link::Object::Base.new(object: @project))
         end
       end
     end

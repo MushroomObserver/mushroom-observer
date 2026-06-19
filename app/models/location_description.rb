@@ -112,11 +112,11 @@ class LocationDescription < Description
 
   scope :show_includes, lambda {
     strict_loading.includes(
-      :authors,
-      { comments: :user },
-      :editors,
-      :interests,
-      { location: [:descriptions, :interests, :rss_log] },
+      *permissions_subtree,
+      { comments: Comment.index_includes_tree },
+      { interests: :user },
+      :license,
+      { location: [:descriptions, { interests: :user }, :rss_log, :user] },
       :project,
       :user,
       :versions

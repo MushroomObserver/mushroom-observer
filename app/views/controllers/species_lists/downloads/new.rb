@@ -5,7 +5,7 @@
 # and the shared observations-download form
 # (`Views::Controllers::Observations::Downloads::Form`).
 module Views::Controllers::SpeciesLists::Downloads
-  class New < Views::Base
+  class New < Views::FullPageBase
     def initialize(list:, query:, type:, format:, encoding:)
       super()
       @list = list

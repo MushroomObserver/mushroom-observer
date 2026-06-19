@@ -13,7 +13,7 @@ class ExternalSiteTest < UnitTestCase
     assert_empty(site.errors)
     assert_equal("https://genbank.org", site.reload.base_url)
 
-    assert_raises("Name has already been taken") do
+    assert_raises(ActiveRecord::RecordInvalid) do
       ExternalSite.create!(
         name: "genbank",
         project: Project.first,

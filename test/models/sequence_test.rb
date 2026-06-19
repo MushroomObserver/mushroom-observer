@@ -3,6 +3,17 @@
 require("test_helper")
 
 class SequenceTest < UnitTestCase
+  # `page_title` is used by `Views::FullPageBase#add_show_title` as
+  # the H1 + browser-tab title. Sequence's locus is shown in the
+  # body, so the title identifies the sequence by its observation.
+  def test_page_title_aliases
+    seq = sequences(:local_sequence)
+    assert_equal(:show_sequence_title.l(id: seq.observation_id),
+                 seq.page_title)
+    # `document_title` is aliased to `page_title`.
+    assert_equal(seq.page_title, seq.document_title)
+  end
+
   def test_validators
     # Prove that Sequence with all proper fields is valid.
     sequence = Sequence.new(
@@ -14,7 +25,7 @@ class SequenceTest < UnitTestCase
       accession: "KY366491.1",
       notes: "Random notes"
     )
-    assert(sequence.valid?, sequence.errors.messages)
+    assert(sequence.valid?, "Errors: #{sequence.errors.messages}")
 
     # Prove that Sequence with a blank locus is invalid.
     sequence = Sequence.new(
@@ -62,7 +73,8 @@ class SequenceTest < UnitTestCase
       accession: "",
       notes: "Random notes"
     )
-    assert(sequence.valid?, :validate_sequence_bases_or_archive.l)
+    assert(sequence.valid?,
+           "Validation: #{:validate_sequence_bases_or_archive.l}")
 
     # Prove that Sequence with bases blank, archive & access present is valid
     sequence = Sequence.new(
@@ -74,7 +86,8 @@ class SequenceTest < UnitTestCase
       accession: "KY366491.1",
       notes: "Random notes"
     )
-    assert(sequence.valid?, :validate_sequence_bases_or_archive.l)
+    assert(sequence.valid?,
+           "Validation: #{:validate_sequence_bases_or_archive.l}")
 
     # Prove that Sequence with blank bases, archive, and accession is invalid
     sequence = Sequence.new(
@@ -86,7 +99,8 @@ class SequenceTest < UnitTestCase
       accession: "",
       notes: "Random notes"
     )
-    assert(sequence.invalid?, :validate_sequence_bases_or_archive.l)
+    assert(sequence.invalid?,
+           "Validation: #{:validate_sequence_bases_or_archive.l}")
 
     # Prove that Sequence with blank bases and archive is invalid
     sequence = Sequence.new(
@@ -98,7 +112,8 @@ class SequenceTest < UnitTestCase
       accession: "KY366491.1",
       notes: "Random notes"
     )
-    assert(sequence.invalid?, :validate_sequence_bases_or_archive.l)
+    assert(sequence.invalid?,
+           "Validation: #{:validate_sequence_bases_or_archive.l}")
 
     # Prove that Sequence with blank bases and blank accession is invalid
     sequence = Sequence.new(
@@ -110,7 +125,8 @@ class SequenceTest < UnitTestCase
       accession: "",
       notes: "Random notes"
     )
-    assert(sequence.invalid?, :validate_sequence_bases_or_archive.l)
+    assert(sequence.invalid?,
+           "Validation: #{:validate_sequence_bases_or_archive.l}")
 
     # Prove that Sequence with archive but no accession is invalid
     sequence = Sequence.new(
@@ -122,7 +138,8 @@ class SequenceTest < UnitTestCase
       accession: "",
       notes: "Random notes"
     )
-    assert(sequence.invalid?, :validate_sequence_deposit_complete.l)
+    assert(sequence.invalid?,
+           "Validation: #{:validate_sequence_deposit_complete.l}")
 
     # Prove that Sequence with accession but no archive is invalid
     sequence = Sequence.new(
@@ -134,7 +151,8 @@ class SequenceTest < UnitTestCase
       accession: "KY366491",
       notes: "Random notes"
     )
-    assert(sequence.invalid?, :validate_sequence_deposit_complete.l)
+    assert(sequence.invalid?,
+           "Validation: #{:validate_sequence_deposit_complete.l}")
 
     # Prove that Sequence raw base codes must be unique for an Observation
     existing_seq = sequences(:local_sequence)
@@ -148,7 +166,8 @@ class SequenceTest < UnitTestCase
       accession: "",
       notes: "Random notes"
     )
-    assert(sequence.invalid?, :validate_sequence_bases_unique.l)
+    assert(sequence.invalid?,
+           "Validation: #{:validate_sequence_bases_unique.l}")
 
     # Prove Observation can have Sequences with non-unique, blank Bases
     existing_seq = sequences(:deposited_sequence)
@@ -162,7 +181,8 @@ class SequenceTest < UnitTestCase
       accession: "#{existing_seq.accession}2",
       notes: "Random notes"
     )
-    assert(sequence.valid?, :validate_sequence_accession_unique.l)
+    assert(sequence.valid?,
+           "Validation: #{:validate_sequence_accession_unique.l}")
 
     # Prove that Sequence Accessions must be unique for an Observation
     existing_seq = sequences(:deposited_sequence)
@@ -176,7 +196,8 @@ class SequenceTest < UnitTestCase
       accession: existing_seq.accession,
       notes: "Random notes"
     )
-    assert(sequence.invalid?, :validate_sequence_accession_unique.l)
+    assert(sequence.invalid?,
+           "Validation: #{:validate_sequence_accession_unique.l}")
 
     # Prove Observation can have Sequences with non-unique, blank Accessions
     existing_seq = sequences(:local_sequence)
@@ -190,19 +211,20 @@ class SequenceTest < UnitTestCase
       accession: "", # same as existing_sequence
       notes: "Random notes"
     )
-    assert(sequence.valid?, :validate_sequence_accession_unique.l)
+    assert(sequence.valid?,
+           "Validation: #{:validate_sequence_accession_unique.l}")
   end
 
   def test_bases_validators
     # Prove validity of accepted formats
     sequence = sequences(:bare_formatted_sequence)
-    assert(sequence.valid?, sequence.errors.messages)
+    assert(sequence.valid?, "Errors: #{sequence.errors.messages}")
 
     sequence = sequences(:bare_with_numbers_sequence)
-    assert(sequence.valid?, sequence.errors.messages)
+    assert(sequence.valid?, "Errors: #{sequence.errors.messages}")
 
     sequence = sequences(:fasta_formatted_sequence)
-    assert(sequence.valid?, sequence.errors.messages)
+    assert(sequence.valid?, "Errors: #{sequence.errors.messages}")
 
     # Prove various formats invalid
     params = {

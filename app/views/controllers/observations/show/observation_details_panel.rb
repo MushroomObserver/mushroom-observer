@@ -5,27 +5,6 @@
 # slip, collection-numbers / herbarium-records / sequences sub-
 # panels, and external links. The center column of the obs show
 # page (and also rendered into the naming form pages).
-#
-# Replaces `_observation_details.erb`. Inlines six helpers that
-# this partial was the only/primary caller of:
-#
-# - `obs_details_links` (and its `print_labels_button` dependency)
-#   — the "print labels" heading-link
-# - `observation_details_when_where_who` + 4 sub-helpers
-#   (`observation_details_when` / `_where` / `_where_gps` /
-#   `_who`)
-# - `observation_where_vague_notice`
-# - `observation_details_notes`
-#
-# The collection_numbers / herbarium_records / sequences /
-# external_links sub-panels are still rendered via Phlex views in
-# this same directory; the `sibling_*` helpers (read-only
-# aggregated records from sibling observations in an occurrence)
-# continue to live in `Observations::SiblingRecordsHelper` for now
-# — they're called from a partial we haven't converted yet
-# (`_observation_details.erb` was the only obs-show caller; once
-# the sibling-records-helper callers all go to Phlex, the helpers
-# themselves can be inlined into their respective sub-panels).
 class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::Base
   include Views::Controllers::Observations::Show::SiblingRecords
 
@@ -48,9 +27,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   private
 
-  # Inlined from `Tabs::ObservationsHelper#obs_details_links` +
-  # `print_labels_button` (the only caller of either, here in
-  # the heading-link slot).
   def print_labels_button
     name = :download_observations_print_labels.l
     query = ::Query.lookup(::Observation, id_in_set: [@obs.id])
@@ -105,7 +81,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_where_link
     if @user
-      render(Components::LocationLink.new(
+      render(Components::Link::Object::Location.new(
                where: @obs.where, location: @obs.location, click: true
              ))
     else
@@ -113,7 +89,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     end
   end
 
-  # Inlined from `ObservationsHelper#observation_where_vague_notice`.
   def render_vague_notice
     return unless @obs.location&.vague?
 
@@ -193,7 +168,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_user_link(target)
     if @user
-      render(Components::UserLink.new(user: target))
+      render(Components::Link::Object::User.new(user: target))
     else
       plain(target.unique_text_name)
     end
@@ -206,7 +181,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_send_question_link
     plain(" [")
-    render(Components::ModalLink.new(
+    render(Components::Link::Modal.new(
              "observation_email",
              tab: ::Tab::Observation::SendQuestion.new(observation: @obs)
            ))
@@ -225,32 +200,38 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     end
   end
 
-  # Inlined from `ObservationsHelper#observation_details_notes`.
-  # Per the helper's preserved comment: passes each notes value
-  # to textile independently rather than the whole block — a
-  # `+photo` value at the start of a line would otherwise be
-  # interpreted as textile bold-emphasis across subsequent lines.
+  # Passes each notes value to textile independently rather than
+  # the whole block — a `+photo` value at the start of a line
+  # would otherwise be interpreted as textile bold-emphasis across
+  # subsequent lines.
   def render_notes
     notes = @obs.notes
     return if notes == ::Observation.no_notes
 
-    if notes.keys == [:Other]
-      trusted_html("#{:NOTES.t}:\n#{notes[:Other]}".tpl)
-    else
-      render_structured_notes(notes)
-    end
-  end
-
-  def render_structured_notes(notes)
     div(class: "obs-notes textile", id: "observation_notes") do
       ::Textile.clear_textile_cache
       ::Textile.register_name(@obs.name)
-      trusted_html("<p>#{:NOTES.t}:<br>".t)
-      notes.each do |key, value|
-        trusted_html("+#{key.to_s.tr("_", " ")}+: #{value}<br>".tl)
-      end
-      trusted_html("</p>".t)
+      trusted_html("#{:NOTES.t}:".t)
+      div(class: "indent") { render_note_values(notes) }
     end
+  end
+
+  # "Other"-only notes show just the value (MO omits the lone "Other"
+  # caption); multi-part notes show each caption with its value indented
+  # beneath it. Values render via `.tpl` (full textile) so blank lines
+  # survive as paragraph breaks — `.tl` keeps only the first paragraph
+  # and would truncate the note at its first blank line (#4536).
+  def render_note_values(notes)
+    if notes.keys == [:Other]
+      trusted_html(notes[:Other].to_s.tpl)
+    else
+      notes.each { |key, value| render_note_part(key, value) }
+    end
+  end
+
+  def render_note_part(key, value)
+    trusted_html("+#{key.to_s.tr("_", " ")}+:".tl)
+    div(class: "indent") { trusted_html(value.to_s.tpl) }
   end
 
   def render_projects
@@ -259,7 +240,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       br
       @obs.projects.each do |project|
         div(class: "indent") do
-          render(Components::ObjectLink.new(object: project))
+          render(Components::Link::Object::Base.new(object: project))
         end
       end
     end
@@ -268,7 +249,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { plain("#{:FIELD_SLIP.t}: ") }
-      render(Components::ObjectLink.new(object: @obs.field_slip))
+      render(Components::Link::Object::Base.new(object: @obs.field_slip))
     end
   end
 

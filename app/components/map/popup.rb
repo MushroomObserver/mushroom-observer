@@ -20,9 +20,6 @@
 # - Multi-observation (group) → count header with Show All / Map All
 #   buttons pointing at filtered MO indexes, plus the top
 #   `MAX_GROUP_NAMES` observation name links and the box coords.
-#
-# Behavior ported from the deleted `MapPopupHelper#mapset_info_window`
-# chain; structure unchanged.
 class Components::Map::Popup < Components::Base
   MAX_GROUP_NAMES = 3
 

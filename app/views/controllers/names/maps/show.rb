@@ -1,16 +1,13 @@
 # frozen_string_literal: true
 
 # Action template for `Names::MapsController#show`. Renders the
-# observations map for a given Name. The cap banner used to be
-# inline here; it's now baked into `Components::Map`, so we just
-# instantiate the component with `clustering: true` and the
-# `observations_*_count` props.
-class Views::Controllers::Names::Maps::Show < Views::Base
+# observations map for a given Name. The cap banner is baked into
+# `Components::Map`, so this view just instantiates the component
+# with `clustering: true` and the `observations_*_count` props.
+class Views::Controllers::Names::Maps::Show < Views::FullPageBase
   prop :name, ::Name
   prop :query, _Nilable(::Query::Observations), default: nil
-  prop :observations,
-       _Union(Array, ::ActiveRecord::Relation,
-              ::ActiveRecord::Associations::CollectionProxy)
+  prop :observations, _Array(_Interface(:id))
   prop :observations_capped, _Boolean, default: false
   prop :observations_loaded_count, Integer, default: 0
   prop :observations_total_count, Integer, default: 0

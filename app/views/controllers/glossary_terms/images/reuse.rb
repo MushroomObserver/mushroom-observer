@@ -4,7 +4,7 @@
 # "attach an existing image to this glossary term" page. Sets the
 # action-nav and renders the shared `ImagesToReuseForm`.
 module Views::Controllers::GlossaryTerms::Images
-  class Reuse < Views::Base
+  class Reuse < Views::FullPageBase
     prop :object, ::GlossaryTerm
     prop :user, _Nilable(::User), default: nil
     prop :objects, _Array(::Image)

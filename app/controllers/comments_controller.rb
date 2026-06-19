@@ -30,7 +30,7 @@ class CommentsController < ApplicationController
   def render_index_view
     render(Views::Controllers::Comments::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, user: @user, error: @error
+             objects: @objects, user: @user
            ))
   end
 
@@ -96,12 +96,11 @@ class CommentsController < ApplicationController
   end
 
   def index_display_opts(opts, query)
-    opts = {
-      num_per_page: 25,
-      # (Eager-loading of names might fail when comments start to apply to
-      # objects other than observations.)
-      include: [:target, :user]
-    }.merge(opts)
+    # `:include` falls back to `Comment.index_includes_tree` via
+    # `default_index_includes_for_model`. (Re: the historical
+    # eager-loading note — :target is polymorphic and Rails handles
+    # the multi-type case correctly.)
+    opts = { num_per_page: 25 }.merge(opts)
 
     # Paginate by letter if sorting by user.
     if %w[user reverse_user].include?(query.params[:order_by])
@@ -273,21 +272,36 @@ class CommentsController < ApplicationController
 
   def render_phlex_new
     render(Views::Controllers::Comments::New.new(
-             comment: @comment, target: @target, user: @user
+             comment: @comment, target: @target, user: @user,
+             comments: load_target_comments
            ))
   end
 
   def render_phlex_edit
     render(Views::Controllers::Comments::Edit.new(
-             comment: @comment, target: @target, user: @user
+             comment: @comment, target: @target, user: @user,
+             comments: load_target_comments
            ))
+  end
+
+  # Comments-for-target list used by the read-only `CommentsForObject`
+  # block on both the `new` and `edit` Phlex pages. Pulled into the
+  # controller so the views don't run a query.
+  #
+  # Eager-loads `:user` (each `CommentItem` reads `comment.user`
+  # multiple times — UserLink, avatar image, display name) and
+  # `:target` (the polymorphic target — `CommentItem` calls
+  # `comment.target.show_link_args` / `target.class.name`, which
+  # would otherwise issue one query per comment).
+  def load_target_comments
+    Comment.includes(:user, :target).where(target: @target).to_a
   end
 
   # The identifier needs to be more specific for an edit form, because
   # we give users the option to edit any number of their own comments on a
   # show page. "comment" disambiguates :new, because :edit always has id
   def render_modal_comment_form
-    render(Components::ModalTurboForm.new(
+    render(Components::Modal::TurboForm.new(
              identifier: modal_identifier,
              title: modal_title,
              user: @user,
@@ -296,9 +310,8 @@ class CommentsController < ApplicationController
   end
 
   def reload_modal_form
-    render(partial: "shared/modal_form_reload",
-           locals: { identifier: modal_identifier,
-                     form_locals: { model: @comment } })
+    render_modal_form_reload(identifier: modal_identifier,
+                             form_locals: { model: @comment })
   end
 
   def modal_identifier
@@ -399,8 +412,7 @@ class CommentsController < ApplicationController
       end
       # renders the flash in the modal
       format.turbo_stream do
-        render(partial: "shared/modal_flash_update",
-               locals: { identifier: modal_identifier }) and return
+        render_modal_flash_update(modal_identifier) and return
       end
     end
   end

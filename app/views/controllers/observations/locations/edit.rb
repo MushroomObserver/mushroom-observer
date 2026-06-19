@@ -6,7 +6,7 @@
 # as a PATCH button that, when clicked, batch-assigns all observations
 # sharing `@where` to the chosen Location.
 module Views::Controllers::Observations::Locations
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :where, String
     prop :matches, _Array(::Location)
     prop :pagination_data, ::PaginationData
@@ -28,7 +28,7 @@ module Views::Controllers::Observations::Locations
     def render_matches
       div(class: "h4") { plain(:list_merge_options_near_matches.t) }
       paginated_results do
-        render(::Components::ListGroup.new) do |list|
+        render(::Components::ListGroup::Base.new) do |list|
           @matches.each { |location| render_match(list, location) }
         end
       end

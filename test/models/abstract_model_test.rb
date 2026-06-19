@@ -21,7 +21,8 @@ class AbstractModelTest < UnitTestCase
       elsif key == "updated_at"
         assert(new_val >= old_val, "#{msg}#{key} is older than it was")
       else
-        assert(old_val == new_val, "#{msg}#{key} shouldn't have changed!")
+        assert_equal_even_if_nil(old_val, new_val,
+                                 "#{msg}#{key} shouldn't have changed!")
       end
     end
   end

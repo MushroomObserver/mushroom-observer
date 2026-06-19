@@ -19,6 +19,17 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_link_in_html("Destroy", action: :destroy, id: pub_id)
   end
 
+  # Covers the `link_cell` branch in
+  # `Views::Controllers::Publications::Index` when the publication
+  # has a `link` set (current fixtures have none).
+  def test_index_with_linked_publication
+    publications(:one_pub).update_columns(link: "https://example.org/pub")
+    login
+    get(:index)
+    assert_response(:success)
+    assert_select("a[href*='example.org']")
+  end
+
   def test_should_get_new
     login
     get(:new)
@@ -76,6 +87,23 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # Show with peer_reviewed + mo_mentioned + link set + an
+  # updated_at distinct from created_at. Covers the branches in
+  # `Views::Controllers::Publications::Show` for those four
+  # conditionals.
+  def test_show_publication_with_all_flags_and_link
+    pub = publications(:one_pub)
+    pub.update_columns(
+      peer_reviewed: true, mo_mentioned: true,
+      link: "https://example.org/pub",
+      updated_at: pub.created_at + 1.day
+    )
+    login
+    get(:show, params: { id: pub.id })
+    assert_response(:success)
+    assert_select("a[href*='example.org']")
+  end
+
   def test_should_update_publication
     login
     put(:update, params: { id: publications(:one_pub).id, publication: {} })
@@ -104,7 +132,7 @@ class PublicationsControllerTest < FunctionalTestCase
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "" } })
     assert_response(:success)
-    assert_template(:edit)
+    assert_select("body.publications__edit")
   end
 
   def test_should_not_destroy_publication_without_permission

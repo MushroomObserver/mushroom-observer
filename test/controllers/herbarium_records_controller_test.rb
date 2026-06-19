@@ -87,7 +87,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     get(:show, params: { id: herbarium_record.id })
 
-    assert_template(:show)
+    assert_select("body.herbarium_records__show")
     assert_select("a[href=?]", new_herbarium_record_path, false,
                   "Fungarium Index should not have a `new` button")
   end
@@ -97,7 +97,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert(herbarium_record)
     login
     get(:show, params: { id: herbarium_record.id })
-    assert_template(:show)
+    assert_select("body.herbarium_records__show")
   end
 
   def test_show_herbarium_record_mcp_searchable
@@ -157,7 +157,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new, params: { observation_id: obs_id })
-    assert_template("new")
+    assert_select("body.herbarium_records__new")
     assert_equal(assigns(:herbarium_record).accession_number, "MO #{obs_id}")
   end
 
@@ -178,7 +178,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new, params: { observation_id: obs.id })
-    assert_template("new")
+    assert_select("body.herbarium_records__new")
     assert(assigns(:herbarium_record))
     assert_equal(assigns(:herbarium_record).accession_number,
                  obs.collection_numbers.first.format_name)
@@ -191,7 +191,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:new, params: { observation_id: obs.id })
-    assert_template("new")
+    assert_select("body.herbarium_records__new")
     assert(assigns(:herbarium_record))
     assert_equal(assigns(:herbarium_record).accession_number,
                  obs.field_slip.code)
@@ -212,11 +212,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("rolf")
     get(:edit, params: { id: nybg.id })
-    assert_template(:edit)
+    assert_select("body.herbarium_records__edit")
 
     make_admin("mary") # Non-curator, but an admin
     get(:edit, params: { id: nybg.id })
-    assert_template(:edit)
+    assert_select("body.herbarium_records__edit")
   end
 
   def test_edit_herbarium_record_turbo
@@ -331,7 +331,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params:, format: :turbo_stream)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_flash_text(/already exists/i)
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 
   # I keep thinking only curators should be able to add herbarium_records.
@@ -469,7 +469,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
     assert_flash_text(/missing/i)
-    assert_template("shared/_modal_form_reload")
+    assert_select("turbo-stream[action='replace'][target$='_form']")
   end
 
   def test_update_herbarium_record_wrong_user
@@ -482,7 +482,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
     assert_flash_text(/permission denied/i)
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 
   def test_update_herbarium_record_label_already_used
@@ -560,6 +560,22 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
       obs_rec_count > observations.sum { |o| o.herbarium_records.count }
     )
     assert_response(:redirect)
+  end
+
+  # Exercises the turbo_stream branch of `destroy` so
+  # `render_herbarium_records_section_update` (panel re-render) is
+  # covered at the controller layer.
+  def test_destroy_herbarium_record_turbo
+    login("rolf")
+    herbarium_record = herbarium_records(:interesting_unknown)
+    obs = herbarium_record.observations.first
+    params = { id: herbarium_record.id, back: obs.id.to_s }
+
+    assert_difference("HerbariumRecord.count", -1) do
+      delete(:destroy, params: params, format: :turbo_stream)
+    end
+    assert_response(:success)
+    assert_select("turbo-stream[target='observation_herbarium_records']")
   end
 
   def test_destroy_herbarium_record_not_curator

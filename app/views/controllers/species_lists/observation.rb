@@ -33,7 +33,7 @@ module Views::Controllers::SpeciesLists
 
     def render_image_column
       div(class: "col-sm-4 col-md-3") do
-        render(Components::InteractiveImage.new(
+        render(Components::Image::Interactive.new(
                  user: @user,
                  image: @observation.thumb_image,
                  image_link: observation_path(id: @observation.id),
@@ -66,7 +66,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_location_link
       div(class: "font-weight-bold") do
-        render(Components::LocationLink.new(
+        render(Components::Link::Object::Location.new(
                  where: @observation.where, location: @observation.location
                ))
       end
@@ -74,7 +74,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_who_and_when
       div do
-        render(Components::UserLink.new(user: @observation.user))
+        render(Components::Link::Object::User.new(user: @observation.user))
         plain(": ")
         plain(@observation.when.web_date)
       end
@@ -84,12 +84,8 @@ module Views::Controllers::SpeciesLists
       div(class: "manage_observation") { render_remove_obs_button }
     end
 
-    # Inlined from `SpeciesListsHelper#species_list_remove_obs_button` —
-    # only this view and `Listing` rendered it, and `Listing` inlines
-    # it the same way. `confirm:` is the modern Turbo-confirm kwarg
-    # (replaces the legacy `data: { confirm: … }` the old helper
-    # passed; rails-ujs is no longer wired and that data attr was a
-    # no-op under Turbo).
+    # `confirm:` is the Turbo-confirm kwarg; `data: { confirm: … }` is
+    # a no-op under Turbo (rails-ujs is not wired).
     def render_remove_obs_button
       render(Components::CrudButton::Put.new(
                name: :REMOVE.t,

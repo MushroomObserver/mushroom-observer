@@ -119,7 +119,8 @@ module Names
 
     def destroy_name_tracker_interest_and_flash
       @interest = Interest.find_by(target: @name_tracker)
-      @name_tracker.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      NameTracker.find(@name_tracker.id).destroy
       @interest.destroy
       flash_notice(
         :email_tracking_no_longer_tracking.t(name: @name.display_name)

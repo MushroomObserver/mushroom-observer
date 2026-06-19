@@ -5,20 +5,27 @@
 # visual-model show page and the visual-group index page (both pages
 # are effectively "this visual model's groups").
 #
-# Replaces `shared/_visual_group_table.html.erb`. Lives under
-# `visual_models/` because it's a visual-model-scoped table, not a
-# generic table — the `shared/` path was a hangover from the rails
+# Lives under `visual_models/` because it's a visual-model-scoped table,
+# not a generic table — the `shared/` path was a hangover from the rails
 # scaffold's habit of dumping such partials there.
 module Views::Controllers::VisualModels
   class VisualGroupTable < Views::Base
     prop :visual_model, VisualModel
+    # Pre-loaded by the host controllers (`VisualGroupsController#index`
+    # / `VisualModelsController#show`); the view no longer runs the
+    # `.order(:name)` query itself.
+    prop :visual_groups, _Array(VisualGroup)
 
     def view_template
-      add_show_title(@visual_model)
       render_top_nav
       h3 { plain("Visual Groups") }
       render_table
     end
+
+    # Both callers (`VisualGroups::Index`, `VisualModels::Show`)
+    # render this table as the entire page body. Each calls
+    # `add_show_title(@visual_model)` itself so the page-chrome
+    # call sits on the action view, not on the sub-partial.
 
     private
 
@@ -76,7 +83,7 @@ module Views::Controllers::VisualModels
     end
 
     def groups
-      @groups ||= @visual_model.visual_groups.order(:name)
+      @visual_groups
     end
 
     def included_counts

@@ -5,8 +5,6 @@
 # blurb on the right. Admins / image-model beta testers also see
 # a "Suggest names" button stacked under the propose button.
 #
-# Replaces `app/views/controllers/observations/show/namings/_footer_buttons.erb`
-# and inlines `observation_naming_buttons` + `suggest_namings_link`.
 class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Base
   prop :user, ::User
   prop :obs, ::Observation
@@ -44,7 +42,9 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # html_options.
   def render_propose_button
     title, path, opts = propose_naming_tab.to_a
-    ModalLink("obs_#{@obs.id}_naming", title, path, **opts, icon: nil)
+    render(Components::Link::Modal.new(
+             "obs_#{@obs.id}_naming", title, path, **opts, icon: nil
+           ))
   end
 
   def propose_naming_tab
@@ -56,7 +56,7 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
     )
   end
 
-  # Gating mirrors the legacy helper: a thumb image must exist (so
+  # Gating: a thumb image must exist (so
   # the JS has something to send to the model) AND the user must
   # be admin or on the image-model beta-tester list.
   def suggest_namings_enabled?
@@ -88,7 +88,7 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
 
   # NOTE: the URL is never actually visited — the JS uses it as a
   # template for its fetch — so the placeholder `names: :xxx`
-  # segment matches what the legacy helper sent.
+  # segment matches the naming endpoint contract.
   def suggest_results_url
     add_q_param(
       naming_suggestions_for_observation_path(id: @obs.id, names: :xxx)

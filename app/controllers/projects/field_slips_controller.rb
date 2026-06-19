@@ -12,10 +12,12 @@ module Projects
       return unless find_project!
 
       @field_slip_max = field_slip_max
+      @trackers = @project.trackers.order(id: :desc).to_a
       render(Views::Controllers::Projects::FieldSlips::New.new(
                project: @project, user: @user,
-               field_slip_max: @field_slip_max
-             ), layout: true)
+               field_slip_max: @field_slip_max,
+               trackers: @trackers
+             ))
     end
 
     def create
@@ -55,9 +57,9 @@ module Projects
           render(turbo_stream: turbo_stream.prepend(
             :field_slip_job_trackers # the id of the div to append to
           ) do
-            helpers.render(Views::Controllers::Projects::FieldSlips::TrackerRow.new(
-                             tracker: tracker, user: @user
-                           ))
+            render_to_string(Views::Controllers::Projects::FieldSlips::TrackerRow.new(
+                               tracker: tracker, user: @user
+                             ), layout: false)
           end)
         end
         format.html

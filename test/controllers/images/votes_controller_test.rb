@@ -17,7 +17,7 @@ module Images
       assert_redirected_to(image_path(image.id))
       vote = ImageVote.find_by(image: image, user: user)
       assert_not_nil(vote, "Cannot find ImageVote")
-      assert(vote.value == value, "Vote not cast correctly")
+      assert_equal(value, vote.value, "Vote not cast correctly")
     end
 
     def test_cast_vote_next
@@ -36,7 +36,7 @@ module Images
       assert_match(%r{/images/#{image.id}\?q}, response.location)
       vote = ImageVote.find_by(image: image, user: user)
       assert_not_nil(vote, "Cannot find ImageVote")
-      assert(vote.value == value, "Vote not cast correctly")
+      assert_equal(value, vote.value, "Vote not cast correctly")
     end
 
     def test_image_vote
@@ -55,6 +55,18 @@ module Images
       assert_raises(RuntimeError) do
         put(:update, xhr: true, params: { image_id: image.id, value: 99 })
       end
+    end
+
+    def test_cast_vote_turbo_stream
+      image = images(:in_situ_image)
+      login(users(:mary).login)
+
+      put(:update, params: { image_id: image.id, value: Image.maximum_vote },
+                   format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("turbo-stream[action='update']" \
+                    "[target='image_vote_#{image.id}']")
     end
 
     # These try to test the results of ajax calls.

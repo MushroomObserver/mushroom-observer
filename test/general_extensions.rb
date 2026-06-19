@@ -190,7 +190,7 @@ module GeneralExtensions
     expect = expect.strftime("%Y%m%d")
     actual = actual.strftime("%Y%m%d")
     msg = build_message(msg, "Expected <#{expect}> to be <#{actual}>.")
-    assert(expect == actual, msg)
+    assert_equal(expect, actual, msg)
   end
 
   # Assert that two instances are equal.
@@ -355,7 +355,7 @@ module GeneralExtensions
     assert(@doc, "XML response is nil!")
     key.sub(%r{^/}, "").split("/").inject(@doc) do |elem, k|
       elem = elem.elements[/^\d+$/.match?(key) ? k.to_i : k]
-      assert(nil, msg || "XML response should have \"#{k}\".") unless elem
+      flunk(msg || "XML response should have \"#{k}\".") unless elem
       elem
     end
   end
@@ -415,7 +415,7 @@ module GeneralExtensions
   #
   def _assert_xml(val, str, msg = nil)
     if val.is_a?(Regexp)
-      assert(str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " ").match(val), msg)
+      assert_match(val, str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), msg)
     else
       assert_equal(val.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "),
                    str.to_s.gsub(/^\s+|\s+$/, "").gsub(/\s+/, " "), msg)
@@ -614,5 +614,16 @@ module GeneralExtensions
     log_output.string
   ensure
     Rails.logger = old_logger
+  end
+
+  # assert_equal raises a deprecation warning in Minitest 5 when the
+  # expected value is nil. Use this instead of assert_equal when the
+  # expected value may legitimately be nil.
+  def assert_equal_even_if_nil(expect, actual, msg = nil)
+    if expect.nil?
+      assert_nil(actual, msg)
+    else
+      assert_equal(expect, actual, msg)
+    end
   end
 end

@@ -51,7 +51,10 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Calostoma lutescens", rank: "Species")
-    standard_assertions(obs: obs, name: name, loc: loc)
+    assert_equal(loc, obs.location)
+    # casual grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
 
     # This iNat obs has only 1 suggested ID.
     # The suggester is the person who made the iNat observation.
@@ -165,18 +168,22 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Evernia", rank: "Genus")
-    standard_assertions(obs: obs, name: name, loc: loc)
+    assert_equal(loc, obs.location)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
 
     inat_photo = @parsed_results.
                  first[:observation_photos].first
     imported_img = obs.images.first
     assert_equal(@user, imported_img.user,
                  "Image should belong to importing user")
-    assert_equal(
-      "iNat photo_id: #{inat_photo[:photo_id]}, uuid: #{inat_photo[:uuid]}",
-      imported_img.original_name,
-      "Image original_name should be iNat photo_id and uuid"
-    )
+    # Structured provenance (#4529): source + iNat photo id on the image,
+    # not stashed in the keep_filenames-governed original_name.
+    assert_equal(Source.inaturalist, imported_img.external_source,
+                 "Imported image should record its source")
+    assert_equal(inat_photo[:photo_id].to_s, imported_img.external_id,
+                 "Imported image should record the iNat photo id")
 
     assert(obs.sequences.none?)
   end
@@ -193,16 +200,18 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Tremellales", rank: "Order")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
     assert(obs.sequences.none?)
   end
 
   def test_import_job_blank_line_in_description
     create_ivars_from_filename("tremella_mesenterica")
 
-    # modify iNat observation description to include blank line
+    # modify iNat observation description to include multiple blank lines
     parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
-    description = "before blank line\r\n\r\nafter blank line"
+    description = "before blank lines\r\n\r\n\r\n\r\nafter blank lines"
     parsed_response[:results].first[:description] = description
     @mock_inat_response = parsed_response.to_json
 
@@ -215,11 +224,71 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     assert_equal(
-      "before blank line<!--- blank line(s) removed --->\n" \
-      "after blank line",
+      "before blank lines\n\nafter blank lines",
       obs.notes[:Other],
-      "Failed to compress consecutive newlines/returns in Notes[:Other]"
+      "Failed to collapse multiple blank lines to a single blank line"
     )
+  end
+
+  # In development the importer skips the iNat write-back by default, so a
+  # local import never annotates a real iNat observation.
+  def test_import_skips_inat_writeback_by_default_in_development
+    create_ivars_from_filename("tremella_mesenterica")
+    stub_inat_interactions
+
+    # Count only this import's requests (see reset_inat_request_log).
+    reset_inat_request_log
+    Rails.env.stub(:development?, true) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_not_requested(:post, "#{API_BASE}/observation_field_values")
+  end
+
+  # Outside development (production, and the WebMock-isolated test env) the
+  # importer stamps the MO URL back onto the iNat observation by default.
+  def test_import_writes_mo_url_back_to_inat_by_default
+    create_ivars_from_filename("tremella_mesenterica")
+    stub_inat_interactions
+
+    reset_inat_request_log
+    InatImportJob.perform_now(@inat_import)
+
+    assert_requested(:post, "#{API_BASE}/observation_field_values", times: 1)
+  end
+
+  # An admin's per-import writeback: :skip forces the write-back off
+  # everywhere, overriding the environment default.
+  def test_import_writeback_forced_off_by_import_setting
+    create_ivars_from_filename("tremella_mesenterica", writeback: :skip)
+    stub_inat_interactions
+
+    reset_inat_request_log
+    InatImportJob.perform_now(@inat_import)
+
+    assert_not_requested(:post, "#{API_BASE}/observation_field_values")
+  end
+
+  # An admin's per-import writeback: :force turns the write-back on,
+  # overriding the development default (e.g. to exercise it locally).
+  def test_import_writeback_forced_on_overrides_development_default
+    create_ivars_from_filename("tremella_mesenterica", writeback: :force)
+    stub_inat_interactions
+
+    reset_inat_request_log
+    Rails.env.stub(:development?, true) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_requested(:post, "#{API_BASE}/observation_field_values", times: 1)
+  end
+
+  # webmock/minitest's per-test reset does not clear the request log between
+  # these write-back tests, and assert_(not_)requested reads the cumulative
+  # log; clear just the request counter (not the stubs) so each assertion
+  # counts only its own import's requests.
+  def reset_inat_request_log
+    WebMock::RequestRegistry.instance.reset!
   end
 
   # Had 2 photos, 6 identifications of 3 taxa, a different taxon,
@@ -267,7 +336,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Morchella sect. Distantes", rank: "Section")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
     assert_snapshot_suggested_ids(obs)
   end
 
@@ -288,7 +359,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     obs = Observation.last
     name = Name.find_by(text_name: "Amanita sect. Validae", rank: "Section")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
   end
 
   def test_import_job_infra_specific_name
@@ -303,7 +376,9 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     name = Name.find_by(text_name: "Inonotus obliquus f. sterilis",
                         rank: "Form")
-    standard_assertions(obs: obs, name: name)
+    # research grade, no sequence, no provisional name -> Promising
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::NEXT_BEST_VOTE)
     assert(obs.sequences.none?)
   end
 
@@ -319,7 +394,9 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     name = Name.find_by(text_name: "Xeromphalina campanella complex",
                         rank: "Group")
-    standard_assertions(obs: obs, name: name)
+    # needs_id grade, no sequence, no provisional name -> Could Be
+    standard_assertions(obs: obs, name: name,
+                        expected_vote: Vote::MIN_POS_VOTE)
     assert(obs.sequences.none?)
   end
 
@@ -350,7 +427,8 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")
 
-    standard_assertions(obs: obs, name: name)
+    # iNat Community ID + the provisional name (lead) -> two namings.
+    standard_assertions(obs: obs, name: name, naming_count: 2)
 
     proposed_name = obs.namings.first
     assert_equal(@user,
@@ -452,7 +530,8 @@ class InatImportJobTest < ActiveJob::TestCase
       "It should create only 3 names: provisional, its genus, suggested ID"
     )
 
-    standard_assertions(obs: obs, name: expected_consensus)
+    # iNat Community ID + the provisional name (lead) -> two namings.
+    standard_assertions(obs: obs, name: expected_consensus, naming_count: 2)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
   end
@@ -1071,7 +1150,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     # The payload should contain the observation_field_value details
     payload = errors[:payload]
-    assert(payload.is_a?(Hash), "Error payload should be a hash")
+    assert_kind_of(Hash, payload, "Error payload should be a hash")
     assert_equal(@inat_import.inat_ids.to_i,
                  payload[:observation_field_value][:observation_id],
                  "Incorrect observation_id in error payload")
@@ -1165,19 +1244,19 @@ class InatImportJobTest < ActiveJob::TestCase
 
   # -------- Standard Test assertions
 
-  def standard_assertions(obs:, user: @user, name: nil, loc: nil)
+  def standard_assertions(obs:, user: @user, name: nil,
+                          expected_vote: Vote::MAXIMUM_VOTE, naming_count: 1)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_nil(obs.source, "Imported obs should have no entry-agent source")
     assert_equal(Source.inaturalist, obs.external_source,
                  "Imported obs should link to iNaturalist Source")
-    assert_equal(loc, obs.location) if loc
 
     expected_photo_count = expected_imported_photo_count
     assert_equal(expected_photo_count, obs.images.length,
                  "Observation should have #{expected_photo_count} image(s)")
 
-    assert_equal(1, obs.namings.length,
-                 "iNatImport should create exactly one Naming")
+    assert_equal(naming_count, obs.namings.length,
+                 "iNatImport created the wrong number of Namings")
     obs.namings.each do |naming|
       assert_not(
         naming.vote_cache.zero?,
@@ -1196,8 +1275,8 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     vote = Vote.find_by(naming: naming, user: naming.user)
     assert(vote.present?, "Naming is missing a Vote")
-    assert_equal(Vote::MAXIMUM_VOTE, vote.value,
-                 "Vote for MO consensus should be highest possible vote")
+    assert_equal(expected_vote, vote.value,
+                 "Vote for MO consensus has the wrong confidence weight")
 
     view = ObservationView.
            find_by(observation_id: obs.id, user_id: user.id)

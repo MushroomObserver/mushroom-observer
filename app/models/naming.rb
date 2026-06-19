@@ -58,6 +58,25 @@ class Naming < AbstractModel
   after_destroy :log_destruction
   after_save :create_emails
 
+  # Eager-loads the Naming + its votes / name / user / observation,
+  # for any code that fetches a Naming directly (rather than via
+  # `Observation.show_includes` / `Observation.naming_includes`,
+  # which already cover this tree). `observation:` covers
+  # `notify_users` (user, interests) and `log_destruction` (rss_log).
+  def self.show_includes_tree
+    [:user, :name,
+     { observation: [:user, :name, :rss_log, :thumb_image,
+                     { interests: :user }] },
+     { votes: [:user, :observation] }]
+  end
+
+  def self.index_includes_tree
+    show_includes_tree
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
+
   # Override the default show_controller
   def self.show_controller
     "/observations"

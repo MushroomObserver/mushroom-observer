@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Herbaria
-  # Action view for the new herbarium form page. Replaces new.html.erb.
-  class New < Views::Base
+  # Action view for the new herbarium form page.
+  class New < Views::FullPageBase
     def initialize(herbarium:, user:)
       super()
       @herbarium = herbarium

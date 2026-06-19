@@ -586,47 +586,31 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       joins(:sequences).subquery(:Sequence, hash)
     }
 
-    scope :show_includes, lambda {
-      strict_loading.includes(
-        :collection_numbers,
-        { comments: :user },
-        { external_links: { external_site: { project: :user_group } } },
-        { herbarium_records: [{ herbarium: :curators }, :user] },
-        { images: [:image_votes, :license, :projects, :user] },
-        { interests: :user },
-        :location,
-        { name: { synonym: :names } },
-        { namings: [:name, :user, { votes: [:observation, :user] }] },
-        { occurrence: :field_slip },
-        { projects: :admin_group },
-        :rss_log,
-        :sequences,
-        { species_lists: [:projects, :user] },
-        :thumb_image,
-        :user
-      )
-    }
+    # `Descriptions::List#visible?` reads each description's `.user`
+    # to decide visibility — without `name: { descriptions: :user }`
+    # this is N+1 per description on the show page.
+    scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
     scope :not_logged_in_show_includes, lambda {
       strict_loading.includes(
-        { comments: :user },
+        { comments: Comment.index_includes_tree },
         { images: [:image_votes, :license, :user] },
         :location,
-        { name: { synonym: :names } },
-        { namings: [:name, :user, { votes: [:observation, :user] }] },
-        :projects,
+        { name: [{ synonym: :names }, { descriptions: :user },
+                 :interests, :description] },
+        { namings: Naming.index_includes_tree },
+        { projects: :image },
         :thumb_image,
         :user
       )
     }
     scope :naming_includes, lambda {
       includes(
-        { herbarium_records: [:herbarium] }, # in case naming is "Imageless"
-        :location, # ugh. worth it because of cache_content_filter_data
+        { herbarium_records: [{ herbarium: :curators }, :user] },
+        :location,
         :name,
-        # Observation#find_matches complains synonym is not eager-loaded. TBD
-        { namings: [{ name: { synonym: :names } }, :user,
+        { namings: [{ name: { synonym: :names } }, :user, :observation,
                     { votes: [:observation, :user] }] },
-        :species_lists, # in case naming is "Imageless"
+        { species_lists: [:location, :projects, :user] },
         :user
       )
     }
@@ -639,7 +623,14 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         { interests: :user },
         :location,
         { name: { synonym: :names } },
-        { projects: :admin_group },
+        { occurrence: [:field_slip, :observations] },
+        # Join tables for cascade preload. `observation_images: :image`
+        # so `obs.images.delete(img)` doesn't lazy-load the image on
+        # each loaded ObservationImage row.
+        { observation_images: :image },
+        :observation_collection_numbers,
+        :observation_herbarium_records,
+        { projects: [:admin_group, { user_group: :users }] },
         :rss_log,
         :sequences,
         { species_lists: [:projects, :user] },

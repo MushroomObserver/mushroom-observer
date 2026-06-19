@@ -2,12 +2,11 @@
 
 # Renders one field-slip's details: project line, observation details
 # (date / collector / location / notes / id / id_by / other_codes),
-# creator line, and a `Components::MatrixBox` matrix of every
+# creator line, and a `Components::Matrix::Box` matrix of every
 # observation attached via the field-slip's occurrence. Used by the
 # field-slip `Show` action template and by the index page's
 # `ObjectRow` (one entry per slip).
 #
-# Replaces `app/views/controllers/field_slips/_field_slip.html.erb`.
 # The `:prepend` slot is the index-page's per-row heading (an `<h4>`
 # with `#{:field_slip_code.l}: <CODE>`); `Show` passes nothing.
 module Views::Controllers::FieldSlips
@@ -39,7 +38,7 @@ module Views::Controllers::FieldSlips
       strong { plain("#{:PROJECT.t}:") }
       plain(" ")
       if @field_slip.project
-        render(Components::ObjectLink.new(object: @field_slip.project))
+        render(Components::Link::Object::Base.new(object: @field_slip.project))
       else
         plain(:field_slip_no_project.t)
       end
@@ -77,8 +76,6 @@ module Views::Controllers::FieldSlips
     end
 
     # Emits `<strong>LABEL: </strong>` + the block's content + `<br>`.
-    # Matches the per-row shape the ERB partial repeated for every
-    # observation-detail field.
     def labeled(key)
       strong { plain("#{key.t}: ") }
       yield
@@ -86,7 +83,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_location_link(obs)
-      render(Components::LocationLink.new(
+      render(Components::Link::Object::Location.new(
                where: obs.where, location: obs.location, click: true
              ))
     end
@@ -107,13 +104,17 @@ module Views::Controllers::FieldSlips
       usr = @field_slip.user
       strong { plain("#{:field_slip_creator.t}:") }
       plain(" ")
-      render(Components::UserLink.new(user: usr, name: usr.legal_name))
+      render(Components::Link::Object::User.new(user: usr,
+                                                name: usr.legal_name))
       br
     end
 
+    # Reads `@field_slip.observations` without running a query —
+    # the controller eager-loads `occurrence: { observations: [...]}`
+    # at lookup time, so this hits the cached collection. New
+    # callers of `FieldSlipPanel` must preserve that contract.
     def render_observations_section
-      all_obs = @field_slip.observations.
-                includes(:name, :user, :thumb_image).to_a
+      all_obs = @field_slip.observations.to_a
       strong { plain("#{:OBSERVATIONS.t}:") }
       if all_obs.any?
         render_observations_matrix(all_obs)
@@ -128,7 +129,7 @@ module Views::Controllers::FieldSlips
          data: { controller: "matrix-table",
                  action: "resize@window->matrix-table#rearrange" }) do
         all_obs.each do |obs_item|
-          render(Components::MatrixBox.new(
+          render(Components::Matrix::Box.new(
                    user: current_user, object: obs_item
                  ))
         end

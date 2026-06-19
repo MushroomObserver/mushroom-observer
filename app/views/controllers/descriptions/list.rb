@@ -4,13 +4,6 @@
 # each visible description as a `<div>` containing a link to the
 # description + its mod-controls (Edit / Destroy when the user has
 # the appropriate permission).
-#
-# Owns the full filter / sort / link / mod-link chain that the
-# pre-Phlex `DescriptionsHelper#list_descriptions` +
-# `#sort_description_list` + `#make_list_links` + `#description_link`
-# + `#description_title` + `DescriptionIconsHelper#description_mod_links`
-# composed. Both helper files have since been deleted (this view + the
-# sibling `DetailsAndAltsPanel` own every chain they used to compose).
 module Views::Controllers::Descriptions
   class List < Views::Base
     prop :user, _Nilable(::User), default: nil
@@ -34,10 +27,15 @@ module Views::Controllers::Descriptions
 
     private
 
+    # `@object.descriptions` is expected to be pre-loaded with
+    # `:user` (and friends) by the host page's `show_includes`
+    # scope. The `Name.show_includes` and `Location.show_includes`
+    # scopes carry that — new callers must keep it that way to
+    # avoid an N+1 here.
     def visible_descriptions
       @visible_descriptions ||=
         sort_descriptions(
-          @object.descriptions.includes(:user).select { |d| visible?(d) }
+          @object.descriptions.select { |d| visible?(d) }
         )
     end
 
@@ -77,7 +75,7 @@ module Views::Controllers::Descriptions
         trusted_html(description_title(desc))
       else
         render_link(desc)
-        render(Components::InlineModLinks.new(target: desc, user: @user))
+        render(Components::Link::InlineMod.new(target: desc, user: @user))
       end
     end
 
@@ -123,7 +121,7 @@ module Views::Controllers::Descriptions
     # `reader?` falls back to `in_admin_mode?` so admins see
     # drafts as "restricted" (not "private") and can click
     # through. Edit / destroy permissions are owned by
-    # `Components::InlineModLinks` (`writer?` / `is_admin?`
+    # `Components::Link::InlineMod` (`writer?` / `is_admin?`
     # branches there).
     def reader?(desc)
       desc.is_reader?(@user) || in_admin_mode?

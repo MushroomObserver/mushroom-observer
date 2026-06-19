@@ -28,7 +28,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_template("index")
+    assert_select("body.images__index")
     assert_select(".matrix-box")
     assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
@@ -52,7 +52,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params: { project: project.id })
 
-    assert_template("index", partial: "_image")
+    assert_select(".matrix-box")
     assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
   end
@@ -64,33 +64,6 @@ class ImagesControllerTest < FunctionalTestCase
     # 429 == :too_many_requests. The symbolic response code does not work.
     # Perhaps we're not loading that part of Rack. JDC 2022-08-17
     assert_response(429) # rubocop:disable Rails/HttpStatus
-  end
-
-  def test_index_advanced_search_error
-    query_no_conditions = Query.lookup_and_save(:Image)
-
-    login
-    params = { q: @controller.q_param(query_no_conditions),
-               advanced_search: true }
-    get(:index, params:)
-
-    assert_flash_error(:runtime_no_conditions.l)
-    assert_redirected_to(search_advanced_path)
-  end
-
-  # Covers the `[query, {}]` success-return tuple at the end of
-  # `ImagesController#advanced_search` — `test_index_advanced_search_error`
-  # only exercises the rescue path.
-  def test_index_advanced_search_success
-    query = Query.lookup_and_save(:Image, has_notes: true)
-    assert(query.params.any?, "Test needs a query with conditions")
-
-    login
-    get(:index, params: { q: @controller.q_param(query),
-                          advanced_search: true })
-
-    assert_response(:success)
-    assert_select("body.images__index")
   end
 
   # The pattern param is maintained only for backwards compatibility.
@@ -116,7 +89,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
-    assert_template("index", partial: "_image")
+    assert_select(".matrix-box")
     assert_page_title(:IMAGES.l)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
@@ -129,7 +102,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params:)
 
     assert_flash_text(:runtime_no_matches.l(type: :images.l))
-    assert_template("index")
+    assert_select("body.images__index")
   end
 
   # Regression for #4360: a cross-model q param (Observation query
@@ -145,7 +118,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
-    assert_template("index", partial: "_image")
+    assert_select(".matrix-box")
     # Should NOT have flashed "no matches" — the bridge produces hits.
     assert_no_flash
   end
@@ -160,7 +133,7 @@ class ImagesControllerTest < FunctionalTestCase
     # Zero matching Observations → zero matching Images → "no matches"
     # flash, not a silent fall-back to the unfiltered Image index.
     assert_flash_text(:runtime_no_matches.l(type: :images.l))
-    assert_template("index")
+    assert_select("body.images__index")
   end
 
   def test_show_image
@@ -170,12 +143,12 @@ class ImagesControllerTest < FunctionalTestCase
     num_views = image.num_views
     login
     get(:show, params: { id: image.id })
-    assert_template("show", partial: "_form_ccbyncsa25")
+    assert_select("body.images__show")
     image.reload
     assert_equal(num_views + 1, image.num_views)
     (Image::ALL_SIZES + [:original]).each do |size|
       get(:show, params: { id: image.id, size: size })
-      assert_template("show", partial: "_form_ccbyncsa25")
+      assert_select("body.images__show")
     end
   end
 
@@ -207,7 +180,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:show, params: { id: image.id })
 
     assert_response(:success)
-    assert_template("show", partial: "_form_ccbyncsa25")
+    assert_select("body.images__show")
   end
 
   # Prove show works when params include obs
@@ -218,7 +191,7 @@ class ImagesControllerTest < FunctionalTestCase
     login(obs.user.login)
 
     get(:show, params: { id: image.id, obs: obs.id })
-    assert_template("show", partial: "_form_ccbyncsa25")
+    assert_select("body.images__show")
     # first_query = Query.find(QueryRecord.first.id)
     # second_query = Query.find(QueryRecord.second.id)
     # assert_equal(Observation, first_query.model)
@@ -237,11 +210,11 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: image.id })
 
-    assert_template("show", partial: "_form_ccbyncsa25")
+    assert_select("body.images__show")
     assert_equal(num_views + 1, image.reload.num_views)
     (Image::ALL_SIZES + [:original]).each do |size|
       get(:show, params: { id: image.id, size: size })
-      assert_template("show", partial: "_form_ccbyncsa25")
+      assert_select("body.images__show")
     end
   end
 

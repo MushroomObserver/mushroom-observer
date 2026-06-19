@@ -22,7 +22,7 @@ class NamesController < ApplicationController
   def render_index_view
     args = {
       query: @query, pagination_data: @pagination_data,
-      objects: @objects, user: @user, error: @error,
+      objects: @objects, user: @user,
       help: @help, has_descriptions: @has_descriptions || false,
       name_suggestions: @name_suggestions
     }
@@ -53,23 +53,8 @@ class NamesController < ApplicationController
 
   # ApplicationController uses this to dispatch #index to a private method
   def index_active_params
-    [:advanced_search, :pattern, :has_observations, :has_descriptions,
+    [:pattern, :has_observations, :has_descriptions,
      :needs_description, :by_user, :by_editor, :by, :q, :id].freeze
-  end
-
-  # Displays list of advanced search results.
-  def advanced_search
-    return if handle_advanced_search_invalid_q_param?
-
-    query = find_query(:Name)
-    # Would have to check this here because we're not running the query yet.
-    raise(:runtime_no_conditions.l) unless query&.params&.any?
-
-    [query, {}]
-  rescue StandardError => e
-    flash_error(e.to_s) if e.present?
-    redirect_to(search_advanced_path)
-    [nil, {}]
   end
 
   def make_name_suggestions
@@ -186,13 +171,20 @@ class NamesController < ApplicationController
 
     init_projects_ivar
     init_related_query_ivars
+    @has_name_tracker = if @user
+                          NameTracker.where(name_id: @name.id,
+                                            user_id: @user.id).exists?
+                        else
+                          false
+                        end
 
     render(Views::Controllers::Names::Show.new(
              name: @name, user: @user,
              best_images: @best_images,
              description: @name.description,
-             comments: @comments, obss: @obss,
+             comments: @comments.to_a, obss: @obss,
              has_subtaxa: @has_subtaxa,
+             has_name_tracker: @has_name_tracker,
              subtaxa_query: @subtaxa_query,
              children_query: @children_query,
              first_child: @first_child,
@@ -239,7 +231,7 @@ class NamesController < ApplicationController
   #   @projects
 
   def init_related_query_ivars
-    @versions = @name.versions
+    @versions = @name.versions.to_a
     @has_subtaxa = 0
     # Query for names of subtaxa, used in special query link
     # Note this is only creating a schematic of a query, used in the link.

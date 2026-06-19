@@ -12,9 +12,11 @@ module Users
       return unless @target && can_email_user_question?(@target)
 
       respond_to do |format|
-        format.html
+        format.html do
+          render(Views::Controllers::Users::Emails::New.new(target: @target))
+        end
         format.turbo_stream do
-          render(Components::ModalTurboForm.new(
+          render(Components::Modal::TurboForm.new(
                    identifier: "user_question_email",
                    title: :ask_user_question_title.t(user: @target.legal_name),
                    user: @user,
@@ -60,8 +62,7 @@ module Users
           redirect_to(user_path(receiver.id)) and return
         end
         format.turbo_stream do
-          render(partial: "shared/modal_flash_update",
-                 locals: { identifier: "user_question_email" }) and return
+          render_modal_flash_update("user_question_email") and return
         end
       end
     end

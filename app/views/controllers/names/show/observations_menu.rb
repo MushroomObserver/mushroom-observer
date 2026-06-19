@@ -17,6 +17,10 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   prop :obss, _Interface(:of_taxon_this_name)
   prop :subtaxa_query, _Nilable(::Query::Observations), default: nil
   prop :has_subtaxa, Integer, default: 0
+  # Whether the current user has a NameTracker on this name. The
+  # controller pre-computes this so `tracker_tab` doesn't fire an
+  # `exists?` query.
+  prop :has_name_tracker, _Boolean
   prop :user, _Nilable(::User), default: nil
 
   def view_template
@@ -32,11 +36,11 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   private
 
   def render_tracker_link
-    render(Components::IconLink.new(tab: tracker_tab))
+    render(Components::Link::Icon.new(tab: tracker_tab))
   end
 
   def tracker_tab
-    if NameTracker.find_by(name_id: @name.id, user_id: @user&.id)
+    if @has_name_tracker
       Tab::Name::EditTracker.new(name: @name)
     else
       Tab::Name::NewTracker.new(name: @name)

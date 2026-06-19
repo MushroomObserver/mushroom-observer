@@ -3,16 +3,12 @@
 # "Images" panel used by the comments / namings / suggestions pages
 # to show the observation's images vertically as a list (not the
 # carousel rendered on the main obs show page — that's
-# `Components::Carousel`, rendered directly from
-# `observations/show.html.erb`).
+# `Components::ImageGallery`, rendered directly from
+# `observations/show.rb`).
 #
 # Each image gets an `InteractiveImage` plus the copyright notice
 # (when the photographer ≠ obs owner) and the image's own notes
 # (textilized + truncated to 300 chars).
-#
-# Replaces `_images.erb`. The `observation_show_image_links`
-# helper that built the "reuse images" heading link is inlined as
-# a private method here.
 class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   prop :obs, ::Observation
   prop :images, _Array(::Image)
@@ -30,13 +26,12 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
 
   private
 
-  # Inlined from `ObservationsHelper#observation_show_image_links`.
   # The "reuse images" link is only meaningful to a user with
   # edit permission on the obs.
   def heading_links
     return unless permission?(@obs)
 
-    render(Components::IconLink.new(
+    render(Components::Link::Icon.new(
              tab: ::Tab::Observation::ReuseImages.new(observation: @obs)
            ))
   end
@@ -51,7 +46,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   # caller now does the sort (or supplies `images_sorted`).
   def render_image_row(image)
     div(class: "list-group-item") do
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: @user,
                image: image,
                image_link: image.show_link_args.merge(obs: @obs.id),
@@ -76,7 +71,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   end
 
   def render_copyright(image)
-    render(Components::ImageCopyright.new(
+    render(Components::Image::Copyright.new(
              user: @user, image: image, object: @obs
            ))
   end

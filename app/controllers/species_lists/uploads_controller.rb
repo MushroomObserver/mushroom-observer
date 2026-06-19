@@ -15,8 +15,7 @@ module SpeciesLists
         render(
           Views::Controllers::SpeciesLists::Uploads::New.new(
             species_list: @species_list
-          ),
-          layout: true
+          )
         )
       else
         redirect_to(species_list_path(@species_list))
@@ -33,8 +32,7 @@ module SpeciesLists
         @species_list.process_file_data(@user, sorter)
         init_name_vars_from_sorter(@species_list, sorter)
         init_project_vars_for_edit(@species_list)
-        # `species_lists/edit.html.erb` is now Phlex (see #4389) — render
-        # the class directly. No form re-render path here, so the
+        # render the class directly. No form re-render path here, so the
         # dubious-where / submitted-project ivars stay empty.
         render(Views::Controllers::SpeciesLists::Edit.new(
                  species_list: @species_list,

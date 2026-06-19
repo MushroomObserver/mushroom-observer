@@ -241,7 +241,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :species_lists
   has_many :collection_numbers
   has_many :herbarium_records
-  has_many :test_add_image_logs
   has_many :votes
 
   has_many :reviewed_images, class_name: "Image", foreign_key: "reviewer_id",
@@ -321,6 +320,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # NOTE: the obs images are a separate optimized query
   scope :show_includes, lambda {
     strict_loading.includes(
+      { image: :license },
       :location,
       :user_stats
     )

@@ -17,7 +17,7 @@ module FieldSlipsController::Show
 
   def resolve_field_slip_from_params
     if params[:id].match?(/^\d+$/)
-      set_field_slip
+      @field_slip = FieldSlip.show_includes.find_by(id: params[:id])
     else
       handle_by_code
     end
@@ -41,7 +41,7 @@ module FieldSlipsController::Show
   end
 
   def handle_by_code
-    @field_slip = FieldSlip.find_by(code: params[:id].upcase)
+    @field_slip = FieldSlip.show_includes.find_by(code: params[:id].upcase)
     return unless @field_slip&.observations&.any?
 
     obs = @field_slip.observation

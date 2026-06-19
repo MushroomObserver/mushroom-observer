@@ -9,7 +9,6 @@
 # `Show::Namings::Row`), so single-row swaps can target individual
 # children too.
 #
-# Replaces `app/views/controllers/observations/show/namings/_rows.erb`.
 # Reopen the parent `Namings` class so the nested `Rows` body can
 # refer to its sibling `Row` by short name. Without this nesting,
 # the lexical scope chain doesn't include `Namings`, and `Row.new`
@@ -20,7 +19,8 @@ class Views::Controllers::Observations::Show::Namings
     prop :consensus, ::Observation::NamingConsensus
 
     def view_template
-      ListGroup(id: "namings_table_rows", flush: true) do |list|
+      render(Components::ListGroup::Base.new(id: "namings_table_rows",
+                                             flush: true)) do |list|
         @consensus.merged_namings.each do |merged_naming|
           list.item do
             render(Row.new(naming: merged_naming, user: @user,

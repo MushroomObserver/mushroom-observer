@@ -13,13 +13,14 @@ module Projects
 
     def index
       @project = Project.find(params[:project_id])
-      @project_aliases = ProjectAlias.where(project: @project).order(name: :asc)
+      @project_aliases = ProjectAlias.index_includes.
+                         where(project: @project).order(name: :asc)
       respond_to do |format|
         format.html do
           render(Views::Controllers::Projects::Aliases::Index.new(
                    project: @project,
                    project_aliases: @project_aliases
-                 ), layout: true)
+                 ))
         end
       end
     end
@@ -31,7 +32,7 @@ module Projects
           render(Views::Controllers::Projects::Aliases::Show.new(
                    project: @project,
                    project_alias: @project_alias
-                 ), layout: true)
+                 ))
         end
       end
     end
@@ -97,7 +98,8 @@ module Projects
 
     def destroy
       project = @project_alias.project
-      @project_alias.destroy
+      # Refetch fresh (non-strict_loading) for the destroy cascade.
+      ProjectAlias.find(@project_alias.id).destroy
       respond_to do |format|
         format.html do
           redirect_to(project_aliases_path(project_id: project&.id),
@@ -115,14 +117,14 @@ module Projects
       render(Views::Controllers::Projects::Aliases::New.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ), layout: true)
+             ))
     end
 
     def render_alias_edit
       render(Views::Controllers::Projects::Aliases::Edit.new(
                project_alias: @project_alias,
                project: @project, user: @user
-             ), layout: true)
+             ))
     end
 
     def redirect_to_project_aliases
@@ -137,7 +139,7 @@ module Projects
     # `projects/aliases/_target_update.erb` partial. Emits four
     # turbo_stream actions.
     def render_project_alias_target_change(project)
-      project_aliases = project.aliases.order(name: :asc)
+      project_aliases = project.aliases.includes(:target).order(name: :asc)
       render(turbo_stream: [
                replace_target_alias_widget,
                replace_aliases_table(project_aliases),
@@ -177,7 +179,7 @@ module Projects
     end
 
     def render_modal_project_alias_form
-      render(Components::ModalTurboForm.new(
+      render(Components::Modal::TurboForm.new(
                identifier: modal_identifier,
                title: modal_title,
                user: @user,
@@ -187,11 +189,9 @@ module Projects
     end
 
     def reload_modal_project_alias_form
-      render(
-        partial: "shared/modal_form_reload",
-        locals: { identifier: modal_identifier,
-                  form_locals: { model: @project_alias,
-                                 user: @user } }
+      render_modal_form_reload(
+        identifier: modal_identifier,
+        form_locals: { model: @project_alias, user: @user }
       ) and return true
     end
 
@@ -219,7 +219,7 @@ module Projects
     end
 
     def set_project_alias
-      @project_alias = ProjectAlias.find(params[:id])
+      @project_alias = ProjectAlias.show_includes.find(params[:id])
     end
 
     def project_alias_params

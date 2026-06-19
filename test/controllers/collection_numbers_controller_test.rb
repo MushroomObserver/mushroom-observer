@@ -144,7 +144,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     get(:new, params: { observation_id: obs.id })
     assert_response(:success)
-    assert_template("new", partial: "_matrix_box")
+    assert_select("body.collection_numbers__new")
+    # Sidebar preview of the target Observation is rendered.
+    assert_select(".matrix-box", minimum: 1)
     assert(assigns(:collection_number))
 
     make_admin("mary")
@@ -182,7 +184,9 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: number.id })
     assert_response(:success)
-    assert_template(:edit, partial: "_rss_log")
+    assert_select("body.collection_numbers__edit")
+    # Sidebar list of MatrixBox previews for each associated obs.
+    assert_select(".matrix-box", minimum: number.observations.size)
     assert_objs_equal(number, assigns(:collection_number))
 
     make_admin("mary")
@@ -410,7 +414,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     # Test turbo shows flash warning
     patch(:update, params:, format: :turbo_stream)
     assert_flash_text(/permission denied/i)
-    assert_template("shared/_modal_flash_update")
+    assert_select("turbo-stream[action='update'][target$='_flash']")
 
     login("rolf")
     patch(:update, params: params.deep_merge(collection_number: { name: "" }))
@@ -479,7 +483,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     patch(:update,
           params: { id: num2.id, collection_number: params })
     assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
-    assert(collection_number_count - 1, CollectionNumber.count)
+    assert_equal(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
     assert_obj_arrays_equal([new_num], obs1.collection_numbers)
     assert_obj_arrays_equal([new_num], obs2.reload.collection_numbers)

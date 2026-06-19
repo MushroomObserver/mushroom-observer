@@ -1,8 +1,0 @@
-<% add_page_title(:image_vote_anonymity_title.t) %>
-
-<%= render(Views::Controllers::Images::Votes::Anonymity::Form.new(
-      FormObject::ImageVoteAnonymity.new(
-        num_anonymous: @num_anonymous,
-        num_public: @num_public
-      )
-    )) %>

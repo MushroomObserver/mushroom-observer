@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# Action view for `account/preferences#no_email`. Replaces
-# `account/preferences/no_email.html.erb`. Confirms that a single email
+# Action view for `account/preferences#no_email`. Confirms that a single email
 # notification type has been turned off in response to an unsubscribe
 # link clicked from one of MO's outgoing emails.
 module Views::Controllers::Account::Preferences
-  class NoEmail < Views::Base
+  class NoEmail < Views::FullPageBase
     prop :user, _Nilable(User)
     prop :note, _Nilable(Symbol)
 

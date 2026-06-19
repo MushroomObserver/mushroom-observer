@@ -25,7 +25,7 @@ class DonationsIntegrationTest < CapybaraIntegrationTestCase
     # Verify database effect (controller doesn't redirect, just creates)
     donation = Donation.find_by(who: "Test Donor")
     assert(donation, "Donation should have been created")
-    assert_equal(100.0, donation.amount)
+    assert_in_delta(100.0, donation.amount)
   end
 
   def test_edit_donation

@@ -147,13 +147,13 @@ class PatternSearchTest < UnitTestCase
     x.vals = ["10"]
     assert_equal(10, x.parse_float(-10, 10))
     x.vals = [".123"]
-    assert_equal(0.123, x.parse_float(-10, 10))
+    assert_in_delta(0.123, x.parse_float(-10, 10))
     x.vals = ["-.123"]
-    assert_equal(-0.123, x.parse_float(-10, 10))
+    assert_in_delta(-0.123, x.parse_float(-10, 10))
     x.vals = ["1.234"]
-    assert_equal(1.234, x.parse_float(-10, 10))
+    assert_in_delta(1.234, x.parse_float(-10, 10))
     x.vals = ["-1.234"]
-    assert_equal(-1.234, x.parse_float(-10, 10))
+    assert_in_delta(-1.234, x.parse_float(-10, 10))
   end
 
   def test_parse_confidence

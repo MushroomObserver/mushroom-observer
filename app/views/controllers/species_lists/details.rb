@@ -62,14 +62,13 @@ module Views::Controllers::SpeciesLists
     end
 
     # `location_link` raises if `@species_list.where` is blank — fall
-    # back to a plain `:UNKNOWN.t` label in that case (matches the
-    # `rescue :UNKNOWN.t` in the original ERB).
+    # back to a plain `:UNKNOWN.t` label in that case.
     def render_where
       div do
         b { plain("#{:WHERE.t}:") }
         whitespace
         begin
-          render(Components::LocationLink.new(
+          render(Components::Link::Object::Location.new(
                    where: @species_list.where,
                    location: @species_list.location, click: true
                  ))
@@ -83,7 +82,7 @@ module Views::Controllers::SpeciesLists
       div do
         b { plain("#{:WHO.t}:") }
         whitespace
-        render(Components::UserLink.new(user: @species_list.user))
+        render(Components::Link::Object::User.new(user: @species_list.user))
       end
     end
 
@@ -93,14 +92,13 @@ module Views::Controllers::SpeciesLists
         whitespace
         @species_list.projects.each_with_index do |project, idx|
           plain(" | ") if idx.positive?
-          render(Components::ObjectLink.new(object: project))
+          render(Components::Link::Object::Base.new(object: project))
         end
       end
     end
 
-    # Notes get the same `*NOTES:* …`-into-textile treatment the ERB
-    # used; render through `trusted_html` because `.tpl` returns
-    # already-safe markup.
+    # Notes get the `*NOTES:* …`-into-textile treatment;
+    # render through `trusted_html` because `.tpl` returns already-safe markup.
     def render_notes
       div do
         trusted_html("*#{:NOTES.t}:* #{@species_list.notes}".tpl)

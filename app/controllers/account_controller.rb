@@ -155,8 +155,8 @@ class AccountController < ApplicationController
     # Block known test denial login
     return false if login == "test_denied"
 
-    # RANDOM means user wants a different theme on each page load
-    # Store nil so css_theme helper will call MO.themes.sample
+    # RANDOM means user wants a different theme on each page load —
+    # store nil so the layout's `css_theme` picks one each request.
     if theme == "RANDOM"
       @new_user.theme = nil
       return true

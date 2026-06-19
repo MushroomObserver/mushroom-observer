@@ -2,9 +2,9 @@
 
 # Action template for `Observations::ImagesController#edit` — the
 # "edit observation image" page. Renders `Images::Form` alongside a
-# `Components::InteractiveImage` preview of the image being edited.
+# `Components::Image::Interactive` preview of the image being edited.
 module Views::Controllers::Observations::Images
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :image, ::Image
     prop :licenses, _Array(Array)
     prop :projects, _Array(::Project), default: -> { [] }
@@ -37,7 +37,7 @@ module Views::Controllers::Observations::Images
     end
 
     def render_image_preview
-      render(::Components::InteractiveImage.new(
+      render(::Components::Image::Interactive.new(
                user: @user,
                image: @image,
                size: :medium,

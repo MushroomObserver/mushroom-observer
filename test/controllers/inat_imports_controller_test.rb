@@ -455,7 +455,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     body = @response.body
     assert_match(:inat_import_confirm_estimate_caption.l, body)
     assert_select("#estimated_count", "2")
@@ -487,7 +487,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "1",
       "Estimate should not filter by user_login if a super_importer " \
@@ -519,6 +519,90 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Should flatten inat_username from namespaced params")
   end
 
+  def test_skip_writeback_checkbox_admin_only
+    login(users(:rolf).login)
+    get(:new)
+    assert_select(
+      "input[type=checkbox][id=inat_import_skip_inat_writeback]", false,
+      "Non-admin should not see the skip-writeback checkbox"
+    )
+
+    make_admin
+    get(:new)
+    assert_select(
+      "input[type=checkbox][id=inat_import_skip_inat_writeback]", true,
+      "Admin should see the skip-writeback checkbox"
+    )
+  end
+
+  def test_skip_writeback_checkbox_checked_by_default_in_development
+    make_admin
+    Rails.env.stub(:development?, true) do
+      get(:new)
+    end
+
+    assert_select(
+      "input[type=checkbox]" \
+      "[id=inat_import_skip_inat_writeback][checked]", true,
+      "In development the skip-writeback box should default to checked"
+    )
+  end
+
+  def test_admin_checked_skip_writeback_persists_as_skip
+    inat_import = inat_imports(:rolf_inat_import)
+    make_admin
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           skip_inat_writeback: "1",
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123", consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_equal("skip", inat_import.reload.writeback,
+                 "Admin's checked skip-writeback box should persist as :skip")
+  end
+
+  def test_admin_unchecked_skip_writeback_persists_as_force
+    inat_import = inat_imports(:rolf_inat_import)
+    make_admin
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123", consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_equal("force", inat_import.reload.writeback,
+                 "Admin's unchecked skip box should persist as :force")
+  end
+
+  def test_non_admin_leaves_writeback_default
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           skip_inat_writeback: "1", # ignored: only admins may set it
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123", consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_equal("default", inat_import.reload.writeback,
+                 "Non-admin import should leave writeback :default so the " \
+                 "importer applies its environment default")
+  end
+
   def test_superimporter_own_import_all_estimate_filters_by_user
     user = users(:dick) # Dick is a super_importer with inat_username "dick"
     assert(InatImport.super_importer?(user),
@@ -542,7 +626,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "1",
       "Estimate for a super_importer's own import-all should filter " \
@@ -568,7 +652,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "1",
       "Estimate should include unlicensed own observations"
@@ -598,7 +682,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#estimated_count", "3",
       "Estimate for import-others should be licensed obs count"
@@ -621,7 +705,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
     assert_select(
       "#unlicensed_obs_count", "",
       "Unlicensed count should be blank when licensed estimate fails"
@@ -816,7 +900,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, all: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_template(:confirm)
+    assert_select("#estimated_count")
   end
 
   def test_superimporter_not_own_import_all_without_username_blocked
@@ -922,7 +1006,7 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:cancel, params: { id: import.id })
 
     assert_response(:success)
-    assert_template(:show)
+    assert_select("[data-controller='inat-import-job']")
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
   end

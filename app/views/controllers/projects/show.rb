@@ -2,8 +2,7 @@
 
 module Views::Controllers::Projects
   # Phlex view for the project show page.
-  # Replaces show.html.erb.
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     def initialize(project:, user:, drafts:, comments:, object_names:)
       super()
       @project = project
@@ -22,7 +21,7 @@ module Views::Controllers::Projects
       render_summary_panel
       render_actions
       render_comments
-      render(Components::ObjectFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @project
              ))
     end
@@ -30,7 +29,7 @@ module Views::Controllers::Projects
     private
 
     def render_list_search
-      render(Components::ListSearch.new(
+      render(Components::ListGroup::Search.new(
                object: @project,
                object_names: @object_names,
                project: @project
@@ -70,7 +69,7 @@ module Views::Controllers::Projects
             trusted_html(draft.name&.display_name&.t)
           end
           plain(" (")
-          render(Components::UserLink.new(user: draft.user))
+          render(Components::Link::Object::User.new(user: draft.user))
           plain(")")
           br
         end
@@ -137,7 +136,7 @@ module Views::Controllers::Projects
     end
 
     def render_trust_settings_button
-      render(Components::ModalLink.new(
+      render(Components::Link::Modal.new(
                "trust_settings",
                :show_project_trust_settings.l,
                trust_modal_project_member_path(
@@ -161,7 +160,7 @@ module Views::Controllers::Projects
     end
 
     def render_add_obs_button
-      render(Components::ModalLink.new(
+      render(Components::Link::Modal.new(
                "add_obs",
                :change_member_add_obs.t,
                add_obs_modal_project_member_path(
@@ -183,10 +182,8 @@ module Views::Controllers::Projects
       ) { plain(:show_project_admin_request.l) }
     end
 
-    # Inlined from `Tabs::ProjectsHelper#violations_button` — single
-    # caller, and not a CrudButton candidate (it's a count-badge link
-    # with `btn-warning` styling when constraints are violated, not
-    # an action button).
+    # Not a CrudButton candidate — count-badge link with `btn-warning`
+    # styling when constraints are violated, not a standard action button.
     def render_violations_button
       return unless @project.constraints?
 
@@ -201,7 +198,7 @@ module Views::Controllers::Projects
 
     def render_comments
       render(::Views::Controllers::Comments::CommentsForObject.new(
-               object: @project, comments: @comments, user: @user,
+               object: @project, comments: @comments.to_a, user: @user,
                editable: @user.present?, limit: nil
              ))
     end

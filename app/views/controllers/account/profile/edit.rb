@@ -5,9 +5,8 @@
 # location, notes, image upload, mailing address), the user's
 # current profile image plus a remove button on the right.
 #
-# Replaces `app/views/controllers/account/profile/edit.html.erb`.
 module Views::Controllers::Account::Profile
-  class Edit < Views::Base
+  class Edit < Views::FullPageBase
     prop :user, ::User
     prop :copyright_holder, _Nilable(String)
     prop :copyright_year, Integer
@@ -40,7 +39,7 @@ module Views::Controllers::Account::Profile
     def render_image_column
       return unless @user.image
 
-      render(Components::InteractiveImage.new(
+      render(Components::Image::Interactive.new(
                user: @user, image: @user.image, votes: false
              ))
       render(Components::CrudButton::Put.new(

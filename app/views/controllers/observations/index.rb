@@ -1,28 +1,24 @@
 # frozen_string_literal: true
 
-# Action template for the Observations index. Replaces
-# `app/views/controllers/observations/index.html.erb`.
+# Action template for the Observations index.
 #
 # Composes the page chrome (project banner / observation buttons row
 # when scoped to a project, container width, index title, action-nav,
 # sorter, pagination), flashes the no-matches error when the query
 # returned nothing, optionally renders the alternate-spellings alert
 # (pattern-search-with-zero-results path), and renders the paginated
-# `Components::MatrixTable` grid of Observation thumbnails.
+# `Components::Matrix::Table` grid of Observation thumbnails.
 #
 # `ObservationsController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly with
 # explicit props.
 module Views::Controllers::Observations
-  class Index < Views::Base
+  class Index < Views::FullPageBase
     prop :query, ::Query::Observations
     prop :pagination_data, ::PaginationData
-    prop :objects,
-         _Union(Array, ::ActiveRecord::Relation,
-                ::ActiveRecord::Associations::CollectionProxy)
+    prop :objects, _Array(::Observation)
     prop :user, _Nilable(::User), default: nil
     prop :project, _Nilable(::Project), default: nil
-    prop :error, _Nilable(String), default: nil
     # `[Name, Integer]` pairs from
     # `ObservationsController::Index#make_name_suggestions`. Only
     # populated on the pattern-search-with-zero-results path.
@@ -38,7 +34,6 @@ module Views::Controllers::Observations
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      flash_error(@error) if @error && @objects.empty?
       render_suggestions_alert if suggest_alternates?
 
       paginated_results { render_matrix }
@@ -48,8 +43,7 @@ module Views::Controllers::Observations
 
     # Stash the Map / Images / Download / FieldSlips button row
     # into `content_for(:observation_buttons)` so the layout's project
-    # chrome can place it under the banner. Equivalent to the old
-    # `ProjectsHelper#project_observation_buttons` (deleted).
+    # chrome can place it under the banner.
     def add_project_observation_buttons
       content_for(:observation_buttons) do
         render(Views::Controllers::Projects::ObservationButtons.new(
@@ -82,7 +76,7 @@ module Views::Controllers::Observations
     end
 
     def render_matrix
-      render(Components::MatrixTable.new(
+      render(Components::Matrix::Table.new(
                objects: @objects,
                user: @user,
                cached: true,

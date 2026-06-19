@@ -6,7 +6,7 @@
 # project-button row (download / map / observations / names / etc.),
 # search box, observations list, comments, object footer.
 module Views::Controllers::SpeciesLists
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     # rubocop:disable Metrics/ParameterLists
     # See `Edit#initialize` — action views forward whatever the page
     # needs; `ParameterLists` isn't on the CLAUDE.md "always refactor"
@@ -62,7 +62,7 @@ module Views::Controllers::SpeciesLists
       render_list_search
       paginated_results { render_observations }
       render_comments
-      render(Components::ObjectFooter.new(
+      render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @species_list
              ))
     end
@@ -97,7 +97,7 @@ module Views::Controllers::SpeciesLists
     def render_images_button
       return unless related_to_locations?
 
-      project_button(:IMAGES.l, related_query_path(Image))
+      project_button(:IMAGES.l, related_query_path(::Image))
     end
 
     def related_query_path(model)
@@ -112,11 +112,11 @@ module Views::Controllers::SpeciesLists
     end
 
     def project_button(name, target)
-      render(Components::ProjectButton.new(name: name, target: target))
+      render(Components::Button::Project.new(name: name, target: target))
     end
 
     def render_list_search
-      render(Components::ListSearch.new(
+      render(Components::ListGroup::Search.new(
                object: @species_list,
                object_names: @object_names,
                project: @project
@@ -145,7 +145,7 @@ module Views::Controllers::SpeciesLists
 
     def render_comments
       render(::Views::Controllers::Comments::CommentsForObject.new(
-               object: @species_list, comments: @comments, user: @user,
+               object: @species_list, comments: @comments.to_a, user: @user,
                editable: @user.present?, limit: nil
              ))
     end

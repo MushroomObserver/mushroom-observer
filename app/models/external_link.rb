@@ -46,6 +46,22 @@ class ExternalLink < AbstractModel
   scope :observations,
         ->(ids) { where(observation_id: ids) }
 
+  # Eager-loads the show/edit page: user, owning observation (with
+  # the matrix-box subtree for the edit page's preview render and
+  # `:user` for the permission check in `external_links_controller`),
+  # and the external site (rendered as a link).
+  def self.show_includes_tree
+    [:user, { observation: Observation.matrix_box_includes },
+     { external_site: { project: :user_group } }]
+  end
+
+  def self.index_includes_tree
+    show_includes_tree
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
+
   def check_url_syntax
     return if format_url_for_external_site
 

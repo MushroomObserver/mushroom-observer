@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Herbaria::Search
-  # Action view for the herbaria search form page. Replaces new.erb.
-  class New < Views::Base
+  # Action view for the herbaria search form page.
+  class New < Views::FullPageBase
     def initialize(search:, controller:, local:)
       super()
       @search = search
@@ -15,7 +15,7 @@ module Views::Controllers::Herbaria::Search
       container_class(:wide)
 
       div(id: "herbaria_search_container") do
-        render(Components::SearchForm.new(
+        render(Components::Form::Search.new(
                  @search,
                  search_controller: @controller,
                  local: @local != false

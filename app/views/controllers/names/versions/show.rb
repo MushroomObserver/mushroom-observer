@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # Action template for the Name version-show page (a Name reverted
-# to a historic version). Replaces
-# `app/views/controllers/names/versions/show.html.erb`.
+# to a historic version).
 #
 # Left column: nomenclature panel + lifeform panel + classification
 # (as captured at this version; if `cls[:source] == :inherited`,
@@ -10,12 +9,16 @@
 # the versions table. Notes panel appears when the historic name
 # has notes; ObjectFooter at the bottom.
 module Views::Controllers::Names::Versions
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
-    prop :versions, _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
+    prop :versions, _Array(_Interface(:user_id))
     # `version` is the requested historic version number.
     prop :version, Integer
+    # User the version's classification was inherited from, if any.
+    # The controller pre-computes it so this view doesn't do a
+    # per-render `User.find_by(...)`.
+    prop :inherited_classification_user, _Nilable(::User)
 
     def view_template
       page_chrome_side_effects
@@ -25,8 +28,8 @@ module Views::Controllers::Names::Versions
         render_right_column
       end
 
-      render(Components::ObjectFooter.new(
-               user: @user, obj: @name, versions: @versions
+      render(Views::Layouts::ObjectFooter.new(
+               user: @user, obj: @name, versions: @versions.to_a
              ))
     end
 
@@ -101,19 +104,26 @@ module Views::Controllers::Names::Versions
 
     def inherited_classification_text
       src = classification_data[:inherited_from]
-      editor = src[:user_id] && ::User.find_by(id: src[:user_id])
       :show_past_name_classification_inherited.t(
         name: name_link_for_source(src),
         date: src[:edited_at].to_date.to_s,
-        user: editor ? editor.unique_text_name : "—"
+        user: @inherited_classification_user&.unique_text_name || "—"
       )
     end
 
     def name_link_for_source(src)
-      ApplicationController.helpers.link_to(
-        src[:name].user_display_name(@user).t,
-        name_path(src[:name].id)
-      )
+      # Returned (not buffered) — interpolated into a `.t(name: …)`
+      # translation in `inherited_classification_text`. `capture`
+      # returns the rendered Phlex tag as an
+      # `ActiveSupport::SafeBuffer`, so the `<a>` markup survives
+      # the i18n interpolation without any explicit html-safe
+      # annotation. `trusted_html` inside the block is the right
+      # marker for the translated link text.
+      capture do
+        a(href: name_path(src[:name].id)) do
+          trusted_html(src[:name].user_display_name(@user).t)
+        end
+      end
     end
 
     # --- Right column --------------------------------------------
@@ -121,7 +131,7 @@ module Views::Controllers::Names::Versions
     def render_right_column
       div(class: content_for(:right_columns).to_s) do
         render(Views::Controllers::Versions::Table.new(
-                 obj: @name, versions: @versions,
+                 obj: @name, versions: @versions.to_a,
                  args: { bold: ->(v) { !v.deprecated } }
                ))
       end

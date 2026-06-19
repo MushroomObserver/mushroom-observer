@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Name show page. Replaces
-# `app/views/controllers/names/show.html.erb`.
+# Action template for the Name show page.
 #
 # Two-column layout (`column_classes(:seven_five)` → 7/5 split):
 #   - left:  best-images carousel, best-description panel,
@@ -18,7 +17,7 @@
 # `container_class(:full)`, `column_classes(:seven_five)`.
 #
 module Views::Controllers::Names
-  class Show < Views::Base
+  class Show < Views::FullPageBase
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
     # `best_images` comes from `Name::Observations#best_images` —
@@ -43,13 +42,17 @@ module Views::Controllers::Names
     # `0` as “no subtaxa” and only renders the subtaxa-observations link
     # when this value is positive.
     prop :has_subtaxa, Integer, default: 0
+    # Whether the current user already has a NameTracker on this
+    # name (the menu's "edit tracker" vs "new tracker" link picker
+    # toggles on this). Pre-computed by the controller so the view
+    # doesn't run an `exists?` query.
+    prop :has_name_tracker, _Boolean
     prop :subtaxa_query, _Nilable(::Query::Observations), default: nil
     prop :children_query, _Nilable(::Query::Names), default: nil
     prop :first_child, _Nilable(::Name), default: nil
     prop :projects, _Nilable(_Array(::Project)), default: nil
     # `Name#versions` returns an AR-managed `CollectionProxy`.
-    prop :versions,
-         _Union(Array, ::ActiveRecord::Associations::CollectionProxy)
+    prop :versions, _Array(_Interface(:user_id))
 
     def view_template
       page_chrome_side_effects
@@ -59,8 +62,8 @@ module Views::Controllers::Names
         render_right_column
       end
 
-      render(Components::ObjectFooter.new(
-               user: @user, obj: @name, versions: @versions
+      render(Views::Layouts::ObjectFooter.new(
+               user: @user, obj: @name, versions: @versions.to_a
              ))
     end
 
@@ -86,14 +89,14 @@ module Views::Controllers::Names
                  name: @name, description: @description, user: @user
                ))
         render(Views::Controllers::Comments::CommentsForObject.new(
-                 object: @name, comments: @comments, user: @user,
+                 object: @name, comments: @comments.to_a, user: @user,
                  editable: @user.present?, limit: nil
                ))
       end
     end
 
     def render_best_images_carousel
-      render(Components::Carousel.new(
+      render(Components::ImageGallery.new(
                object: @name,
                images: @best_images,
                title: :show_name_most_confident.l,
@@ -114,7 +117,8 @@ module Views::Controllers::Names
       render(Show::ObservationsMenu.new(
                name: @name, obss: @obss,
                subtaxa_query: @subtaxa_query,
-               has_subtaxa: @has_subtaxa, user: @user
+               has_subtaxa: @has_subtaxa,
+               has_name_tracker: @has_name_tracker, user: @user
              ))
       render(Show::Nomenclature.new(name: @name, user: @user))
       render_classification_and_lifeform_row
@@ -153,8 +157,8 @@ module Views::Controllers::Names
 
     def render_footer_body
       div(id: "name_authors_editors") do
-        render(Components::AuthorsAndEditors.new(
-                 obj: @name, versions: @versions, user: @user
+        render(Views::Layouts::AuthorsAndEditors.new(
+                 obj: @name, versions: @versions.to_a, user: @user
                ))
       end
       # `:foo.t` returns textile-rendered HTML (e.g. `<strong>...</strong>`),
@@ -165,10 +169,10 @@ module Views::Controllers::Names
 
     def render_footer_meta
       div(id: "name_previous_export") do
-        render(Components::PreviousVersion.new(
-                 obj: @name, versions: @versions
+        render(Components::Description::PreviousVersion.new(
+                 obj: @name, versions: @versions.to_a
                ))
-        render(Components::ExportStatusControls.new(object: @name))
+        render(Components::Image::ExportStatusControls.new(object: @name))
       end
     end
   end

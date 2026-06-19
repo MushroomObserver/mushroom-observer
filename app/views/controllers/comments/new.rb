@@ -4,14 +4,14 @@
 # `CommentsForObject` panel for the target. When the target is an
 # Observation, a sidebar Images panel sits next to the form so the
 # commenter can reference the photos while typing.
-#
-# Replaces `app/views/controllers/comments/new.html.erb` (and its
-# `_object.html.erb` partial render — inlined here).
 module Views::Controllers::Comments
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :comment, ::Comment
     prop :target, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
+    # Comments on `target` pre-loaded by the controller, fed into
+    # `CommentsForObject` below.
+    prop :comments, _Array(::Comment)
 
     def view_template
       container_class(:full)
@@ -40,7 +40,7 @@ module Views::Controllers::Comments
     def render_object_panel
       render(CommentsForObject.new(
                object: @target,
-               comments: ::Comment.where(target: @target).to_a,
+               comments: @comments.to_a,
                user: @user, editable: false, limit: 10
              ))
     end
