@@ -82,17 +82,18 @@ module Views::Controllers::Checklists
       return unless @context.admin?
       return unless @context.project.target_name_ids.include?(name_id)
 
-      button_to(
-        project_target_name_path(project_id: @context.project.id, id: name_id),
-        method: :delete,
-        class: "btn btn-link text-danger p-0 ml-1",
-        form: { data: {
-          turbo: true,
-          turbo_confirm: :project_target_name_confirm_remove.t(
-            name: Name.safe_find(name_id)&.text_name
-          )
-        } }
-      ) { span(class: "glyphicon glyphicon-remove") }
+      render(Components::CrudButton::Delete.new(
+               name: :REMOVE.l,
+               target: project_target_name_path(
+                 project_id: @context.project.id, id: name_id
+               ),
+               confirm: :project_target_name_confirm_remove.t(
+                 name: Name.safe_find(name_id)&.text_name
+               ),
+               icon: :x,
+               btn: nil,
+               class: "btn btn-link p-0 ml-1"
+             ))
     end
   end
 end

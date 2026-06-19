@@ -225,22 +225,18 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_remove_button(loc)
-      button_to(
-        project_target_location_path(
-          project_id: @project.id, id: loc.id
-        ),
-        method: :delete,
-        class: "btn btn-link text-danger p-0",
-        form: { data: {
-          turbo: true,
-          turbo_confirm:
-            :project_target_location_confirm_remove.t(
-              name: loc.display_name
-            )
-        } }
-      ) do
-        span(class: "glyphicon glyphicon-remove")
-      end
+      render(Components::CrudButton::Delete.new(
+               name: :REMOVE.l,
+               target: project_target_location_path(
+                 project_id: @project.id, id: loc.id
+               ),
+               confirm: :project_target_location_confirm_remove.t(
+                 name: loc.display_name
+               ),
+               icon: :x,
+               btn: nil,
+               class: "btn btn-link p-0"
+             ))
     end
   end
 end

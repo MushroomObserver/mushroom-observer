@@ -30,7 +30,7 @@ module Components::LinkRendering
   def render_crud_button_or_link(str, url, args, kwargs)
     case args[:button]
     when :post
-      button_to(str, url, **kwargs)
+      render(Components::CrudButton::Post.new(name: str, target: url, **kwargs))
     when :destroy
       # Context-nav destroy tabs render as plain `[ DESTROY ]`-style
       # text links — opt out of `CrudButton::Delete`'s default icon

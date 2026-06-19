@@ -72,18 +72,15 @@ module Views::Controllers::Projects::Updates
     end
 
     def render_add_all_button
-      button_to(
-        :project_updates_add_all.t,
-        add_all_project_updates_path(
-          project_id: @project.id,
-          show_excluded: @show_excluded
-        ),
-        method: :post,
-        class: "btn btn-default",
-        form: { data: {
-          turbo_confirm: :project_updates_confirm_add_all.t
-        } }
-      )
+      render(Components::CrudButton::Post.new(
+               name: :project_updates_add_all.t,
+               target: add_all_project_updates_path(
+                 project_id: @project.id,
+                 show_excluded: @show_excluded
+               ),
+               confirm: :project_updates_confirm_add_all.t,
+               class: "btn btn-default"
+             ))
     end
 
     def render_pagination
