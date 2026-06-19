@@ -2,7 +2,7 @@
 
 module Views::Controllers::Account
   # Signup form for creating a new user account. Rendered by the
-  # AccountController's `new.html.erb` (the top-level account
+  # AccountController's `new.rb` (the top-level account
   # controller's only form-bearing page).
   # Collects login, password, email, name, and theme preference.
   class Form < ::Components::ApplicationForm

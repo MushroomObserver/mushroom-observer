@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the CollectionNumbers index. Replaces
-# `app/views/controllers/collection_numbers/index.html.erb`.
+# Action template for the CollectionNumbers index.
 #
 # `CollectionNumbersController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly with

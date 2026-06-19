@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# The top-of-page navbar. Renders into the application layout
-# in place of `app/views/controllers/application/_top_nav.html.erb`
-# (deleted). Composes:
+# The top-of-page navbar. Composes:
 #
 #   - the left side (mobile nav-toggle button, the page title /
 #     "rubric", and the "+ Add" create-button)
@@ -11,9 +9,7 @@
 #     and either `Views::Layouts::TopNav::UserNav` or
 #     `Views::Layouts::TopNav::Login` depending on
 #     `@user.nil?`)
-#   - the collapsible search-bar row (rendered via the existing
-#     `application/top_nav/_search_bar.html.erb` ERB partial —
-#     not yet Phlexified)
+#   - the collapsible search-bar row
 #
 # Helpers from `Header::TogglesHelper` (`left_nav_toggle`,
 # `search_nav_toggle`) and `Header::RubricHelper` (`nav_rubric`,
@@ -30,8 +26,7 @@ class Views::Layouts::TopNav < Views::Base
   prop :user, _Nilable(::User), default: nil
   prop :query, _Nilable(::Query), default: nil
 
-  # Controllers / actions where the search-help dropdown is
-  # available; see `application/top_nav/_search_bar.html.erb`.
+  # Controllers / actions where the search-help dropdown is available
   SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
   SEARCH_FORM_TYPES = [
     :names, :observations, :locations,

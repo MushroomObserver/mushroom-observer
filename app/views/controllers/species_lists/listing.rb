@@ -4,7 +4,7 @@
 # `Components::ListGroup::Base#item`. Used by:
 #   - `Views::Controllers::SpeciesLists::Index#render_list` (the
 #     species_lists index page)
-#   - `observations/species_lists/edit.html.erb` (the
+#   - `observations/species_lists/edit.rb` (the
 #     "manage species lists for this observation" page)
 # Title row + place / user row on the left, optional REMOVE / ADD
 # button on the right (mutually exclusive, driven by which page the

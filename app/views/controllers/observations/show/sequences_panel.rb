@@ -4,7 +4,7 @@
 # obs-show sub-panels but with an additional `[archive]` inline
 # link when the sequence has a deposit accession URL.
 #
-# Replaces `_sequences.erb`. `Components::Link::InlineMod` handles
+# `Components::Link::InlineMod` handles
 # the `[ archive | edit | destroy ]` triplet — sequences are a
 # real-DELETE target with a `back: observation_path(obs)` query
 # string so the controller returns to the obs after destroy.

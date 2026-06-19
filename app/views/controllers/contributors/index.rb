@@ -3,8 +3,7 @@
 module Views::Controllers::Contributors
   # Paginated contributors index. Page chrome (title, sorter,
   # context-nav, pagination) + a one-row collapsible Legend +
-  # a MatrixTable of user matrix-boxes. Converted from
-  # `contributors/index.html.erb` + `contributors/_legend.erb`.
+  # a MatrixTable of user matrix-boxes.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData

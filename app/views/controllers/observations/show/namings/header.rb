@@ -8,7 +8,6 @@
 # mobile-only "+" propose-naming icon button sits in the right
 # gutter where the eyes column appears below.
 #
-# Replaces `app/views/controllers/observations/show/namings/_header.erb`
 # and inlines the `naming_header_row_content` helper that fed it
 # (just four `<small>`-wrapped translation lookups + a `<h4>` for
 # the panel title).

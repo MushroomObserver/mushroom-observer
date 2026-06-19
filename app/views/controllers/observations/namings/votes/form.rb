@@ -115,10 +115,9 @@ module Views::Controllers::Observations::Namings::Votes
       end
     end
 
-    # Does the viewer own this naming (or are they admin)? Mirrors
-    # the legacy helper's `permission?(naming)` check — written out
-    # explicitly here so the form is self-contained and doesn't
-    # depend on `User.current` or a controller-side ivar.
+    # True when the viewer owns this naming (or is admin). Written out
+    # explicitly so the form is self-contained — no `User.current`
+    # or controller-side ivar dependency.
     def proposer_view?
       return false unless @user
 

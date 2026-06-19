@@ -6,7 +6,6 @@
 # columns of the panel-footer grid (the rightmost column matches
 # the eye gutter in the row body above).
 #
-# Replaces `app/views/controllers/observations/show/namings/_footer_legend.erb`
 # and inlines `vote_legend_yours` / `vote_legend_consensus` + their
 # `vote_icon_*` helpers.
 class Views::Controllers::Observations::Show::Namings::FooterLegend < Views::Base

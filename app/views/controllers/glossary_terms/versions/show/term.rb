@@ -4,9 +4,7 @@ module Views::Controllers::GlossaryTerms
   module Versions
     class Show
       # The name + description + thumbnail block for a past version
-      # of a glossary term. Converted from
-      # `glossary_terms/_glossary_term.html.erb` (which was only ever
-      # rendered from the versions/show page).
+      # of a glossary term.
       class Term < Views::Base
         prop :glossary_term, ::GlossaryTerm
 

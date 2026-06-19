@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::InatImports::JobTrackers
-  # Current-status block for an iNat import job. Mirrors the ERB
-  # element-for-element so the Turbo-Stream update target's DOM
-  # stays identical. Time-format logic inlined (was the
-  # `InatImportJobTrackersHelper` helper before this conversion).
+  # Current-status block for an iNat import job.
   class Current < Views::Base
     prop :tracker, ::InatImportJobTracker
 

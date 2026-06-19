@@ -64,7 +64,7 @@ module Views::Controllers::Account::APIKeys
     # Edit-layout tests — the persisted-model branch renders a
     # metadata table (created, last_used, num_uses, API key value)
     # plus the notes input plus Update / Cancel submit buttons. Used
-    # by `account/api_keys/edit.html.erb` (the no-JS fallback view).
+    # by `account/api_keys/edit.rb` (the no-JS fallback view).
 
     def test_edit_layout_renders_metadata_table_for_persisted_key
       key = api_keys(:rolfs_api_key)

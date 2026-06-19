@@ -8,8 +8,7 @@
 # "Collection number(s): link, link"
 # When there are no records but the user can edit: "no records [ new ]"
 #
-# Replaces `_collection_numbers.erb`. Inlines no helpers itself —
-# `remove_collection_number_button` is now handled by
+# `remove_collection_number_button` is handled by
 # `Components::Link::InlineMod` which knows how to detach a
 # `CollectionNumber` from its observation.
 class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Base

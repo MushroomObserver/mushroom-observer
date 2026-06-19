@@ -4,7 +4,7 @@
 # to show the observation's images vertically as a list (not the
 # carousel rendered on the main obs show page — that's
 # `Components::ImageGallery`, rendered directly from
-# `observations/show.html.erb`).
+# `observations/show.rb`).
 #
 # Each image gets an `InteractiveImage` plus the copyright notice
 # (when the photographer ≠ obs owner) and the image's own notes

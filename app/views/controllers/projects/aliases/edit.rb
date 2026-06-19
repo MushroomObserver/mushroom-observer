@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects::Aliases
   # Phlex view for the edit project alias form page.
-  # Replaces aliases/edit.html.erb.
   class Edit < Views::FullPageBase
     def initialize(project_alias:, project:, user:)
       super()

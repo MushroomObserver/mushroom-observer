@@ -6,7 +6,6 @@
 # with an inline `[REMOVE]` button for any list the user has
 # permission to edit.
 #
-# Replaces `_species_lists.erb`.
 class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil

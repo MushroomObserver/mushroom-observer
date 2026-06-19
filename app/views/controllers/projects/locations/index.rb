@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Project Locations index. Replaces
-# `app/views/controllers/projects/locations/index.html.erb`.
+# Action template for the Project Locations index.
 #
 # Renders the project banner + (admins only) the target-location
 # form, then the grouped-locations table.

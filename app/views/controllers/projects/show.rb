@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects
   # Phlex view for the project show page.
-  # Replaces show.html.erb.
   class Show < Views::FullPageBase
     def initialize(project:, user:, drafts:, comments:, object_names:)
       super()

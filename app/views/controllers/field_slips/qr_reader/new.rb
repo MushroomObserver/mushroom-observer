@@ -4,7 +4,6 @@
 # "scan a QR code to find a field slip" landing page. Just a one-
 # liner intro paragraph above the `Views::Controllers::FieldSlips::QRReader::Form`.
 #
-# Replaces `app/views/controllers/field_slips/qr_reader/new.erb`.
 module Views::Controllers::FieldSlips::QRReader
   class New < Views::FullPageBase
     def view_template

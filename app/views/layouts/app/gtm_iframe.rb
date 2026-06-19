@@ -2,7 +2,7 @@
 
 module Views::Layouts::App
   # Google Tag Manager `<noscript>` iframe — rendered immediately
-  # after the opening `<body>` in `application.html.erb`, where
+  # after the opening `<body>`, where
   # the surrounding `if Rails.env == "production"` check gates it.
   # The markup itself is static.
   class GtmIframe < Views::Base

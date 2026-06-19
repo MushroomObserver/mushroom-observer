@@ -3,7 +3,7 @@
 # Comments-for-object panel: the boxed list of comments shown on
 # `observations/show`, `names/show`, `projects/show`,
 # `locations/show`, `species_lists/show`, and the
-# `comments/new` / `comments/edit` pages (via `_object.html.erb`).
+# `comments/new` / `comments/edit` pages (via `_object.rb`).
 #
 # Renders a `Components::Panel` whose body is a flush
 # `Components::ListGroup::Base` of `CommentItem`s — wired to an Action

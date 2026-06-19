@@ -4,7 +4,7 @@
 # page. Page title + login form, followed by three "why log in"
 # sections (signup invitation, spider/SEO explanation, what data
 # requires login). Replaces
-# `app/views/controllers/account/login/new.html.erb`.
+# `app/views/controllers/account/login/new.rb`.
 #
 # The textile content (`:login_*.t` / `.tp`) often embeds
 # `"text":url` links that the translator renders as real `<a>`

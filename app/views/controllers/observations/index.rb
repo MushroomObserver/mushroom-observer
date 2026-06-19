@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Observations index. Replaces
-# `app/views/controllers/observations/index.html.erb`.
+# Action template for the Observations index.
 #
 # Composes the page chrome (project banner / observation buttons row
 # when scoped to a project, container width, index title, action-nav,
@@ -44,8 +43,7 @@ module Views::Controllers::Observations
 
     # Stash the Map / Images / Download / FieldSlips button row
     # into `content_for(:observation_buttons)` so the layout's project
-    # chrome can place it under the banner. Equivalent to the old
-    # `ProjectsHelper#project_observation_buttons` (deleted).
+    # chrome can place it under the banner.
     def add_project_observation_buttons
       content_for(:observation_buttons) do
         render(Views::Controllers::Projects::ObservationButtons.new(

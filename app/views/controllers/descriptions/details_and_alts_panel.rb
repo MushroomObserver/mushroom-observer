@@ -7,24 +7,12 @@
 # regular show — not on versions) an export-status + review-status
 # footer.
 #
-# Inlines the full chain that the pre-Phlex
-# `_description_details_and_alts_panel.erb` composed across:
-#
-#   - `DescriptionsHelper#show_description_details` + #show_alt_descriptions
-#     + #add_list_of_projects + #show_description_export_and_review +
-#     #show_description_export_status + #show_name_description_review +
-#     #show_name_description_review_status + #show_name_description_review_ui +
-#     #show_name_description_latest_review + #description_title
-#
 # The heading-links icon strip is extracted to
 # `Components::Description::ModLinks` (sibling-in-spirit to
-# `Components::Link::InlineMod`), which replaces all of
-# `DescriptionIconsHelper`. The "Version: N / Previous Version" line
+# `Components::Link::InlineMod`). The "Version: N / Previous Version" line
 # is `Components::Description::PreviousVersion`, replacing
 # `VersionsHelper#show_previous_version`. The license-badge block
-# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`,
-# replacing the shared `_form_license_badge.erb` partial. Both
-# description helper files are deleted in the same commit.
+# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
     prop :description, ::Description

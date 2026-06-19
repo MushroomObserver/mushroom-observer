@@ -4,8 +4,7 @@
 # shown when an unverified user (or a logged-in user trying to verify
 # someone else) lands on a verification link. Page title plus the
 # textile-rendered reverification instructions and a "send another
-# verification email" submit. Replaces
-# `app/views/controllers/account/verifications/reverify.html.erb`.
+# verification email" submit.
 module Views::Controllers::Account::Verifications
   class Reverify < Views::FullPageBase
     prop :unverified_user, ::User

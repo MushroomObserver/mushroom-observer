@@ -2,10 +2,7 @@
 
 module Views::Controllers::SpeciesLists::WriteIn
   # Phlex form for the "write-in species names" workflow under a
-  # species list. Replaces `_form.html.erb` (the form partial) and
-  # inlines `species_lists/form/_fields_for_member.erb` (its per-
-  # observation member-defaults section, only ever rendered from
-  # this form).
+  # species list.
   #
   # The species_list model is passed for the action-URL derivation
   # (`form_action` -> `write_in_species_list_path(@species_list)`).

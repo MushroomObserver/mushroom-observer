@@ -4,8 +4,6 @@
 # field-slip page. Sets page chrome (title + edit icons), renders
 # any flash notice as an Alert, then the `FieldSlipPanel` inside the
 # padded content wrapper, then the standard `Views::Layouts::ObjectFooter`.
-#
-# Replaces `app/views/controllers/field_slips/show.html.erb`.
 module Views::Controllers::FieldSlips
   class Show < Views::FullPageBase
     prop :field_slip, ::FieldSlip

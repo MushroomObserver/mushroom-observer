@@ -4,7 +4,6 @@
 # fallback for creating an API key (JS users use the inline collapse
 # panel on the index). Page chrome + help text + the shared form.
 #
-# Replaces `app/views/controllers/account/api_keys/new.html.erb`.
 module Views::Controllers::Account::APIKeys
   class New < Views::FullPageBase
     prop :key, ::APIKey

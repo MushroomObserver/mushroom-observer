@@ -2,7 +2,7 @@
 
 module Views::Controllers::SpeciesLists::Downloads
   # Form for printing labels for species list observations.
-  # Rendered by `species_lists/downloads/new.html.erb`.
+  # Rendered by `species_lists/downloads/new.rb`.
   #
   # @example
   #   render(Views::Controllers::SpeciesLists::Downloads::Form.new(

@@ -8,7 +8,7 @@
 #   wrapper element with the right id and class so subsequent
 #   `broadcast_update_to(target: "comment_<id>")` calls can find
 #   the row in place.
-# - The site-wide `comments/index.html.erb` listing — each row
+# - The site-wide `comments/index.rb` listing — each row
 #   stands on its own (no surrounding `CommentsForObject` panel),
 #   so the wrapper has to live with the inner content.
 #

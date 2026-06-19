@@ -3,12 +3,12 @@
 module Views::Controllers::Account::APIKeys
   # Form for creating or editing an API key. Only used by the
   # api_keys controller — its three callers are `table.rb` (inline
-  # create + inline edit), `new.html.erb` (standalone create), and
-  # `edit.html.erb` (standalone edit).
+  # create + inline edit), `new.rb` (standalone create), and
+  # `edit.rb` (standalone edit).
   #
   # Four layouts:
   # - Standalone edit (persisted, no cancel_target): metadata table +
-  #   notes + Update / Cancel link. Used by `edit.html.erb` (no-JS
+  #   notes + Update / Cancel link. Used by `edit.rb` (no-JS
   #   fallback).
   # - Inline edit (persisted + cancel_target): input-group with cancel
   #   icon + notes input + Save button. Used by the JS-driven per-row
@@ -17,7 +17,7 @@ module Views::Controllers::Account::APIKeys
   #   icon + notes input + Create button. Used by the JS-driven inline
   #   create UI on the index page (collapse toggle to dismiss).
   # - Standalone create (new, no cancel_target): notes input + centered
-  #   Create button. Used by `new.html.erb` (no-JS fallback).
+  #   Create button. Used by `new.rb` (no-JS fallback).
   class Form < ::Components::ApplicationForm
     def initialize(model, cancel_target: nil, cancel_parent: nil, **)
       @cancel_target = cancel_target
@@ -97,11 +97,8 @@ module Views::Controllers::Account::APIKeys
       text_field(:notes, label: "#{:NOTES.t}:", wrap_class: "mt-3")
       div(class: "text-center mt-3") do
         submit(:UPDATE.l)
-        # Cancel is a real navigation link (was a submit button in
-        # the pre-Phlex ERB — clicking it actually submitted the form
-        # and the controller did an update with current values, the
-        # opposite of what a Cancel button should do). Now it just
-        # navigates back to the index without touching anything.
+        # A plain link (not a submit button) — Cancel should navigate
+        # back without submitting the form.
         link_to(:CANCEL.l, account_api_keys_path,
                 class: "btn btn-default ml-3")
       end

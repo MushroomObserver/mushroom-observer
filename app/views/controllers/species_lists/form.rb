@@ -2,7 +2,7 @@
 
 module Views::Controllers::SpeciesLists
   # Phlex Superform for the SpeciesList create/edit page. Rendered
-  # directly by `species_lists/new.html.erb` and `edit.html.erb`.
+  # directly by `species_lists/new.rb` and `edit.rb`.
   #
   # Preserves the existing controller contract exactly:
   # - SpeciesList attributes posted as `species_list[title]`,

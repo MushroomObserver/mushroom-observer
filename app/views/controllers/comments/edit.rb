@@ -30,7 +30,7 @@ module Views::Controllers::Comments
 
     private
 
-    # Mirrors `_object.html.erb`: render the comments-for-object
+    # Mirrors `_object.rb`: render the comments-for-object
     # panel for the target.
     def render_object_panel
       render(CommentsForObject.new(

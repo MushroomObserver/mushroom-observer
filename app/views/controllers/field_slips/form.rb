@@ -2,8 +2,6 @@
 
 module Views::Controllers::FieldSlips
   # Phlex form for creating and editing FieldSlip records.
-  # Replaces app/views/controllers/field_slips/_form.html.erb plus
-  # its matrix sub-partials (_recent_observations, _edit_observations).
   #
   # When the field slip has no code yet, renders a minimal "enter
   # code" form that GETs to /field_slips/new. Otherwise renders the

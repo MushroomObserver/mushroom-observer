@@ -4,7 +4,7 @@ module Views::Controllers::VisualGroups
   # Form for creating or editing visual groups within a visual model.
   # Visual groups are used to organize and categorize images for
   # visual classification training. Rendered directly by the
-  # visual_groups controller's `edit.html.erb`.
+  # visual_groups controller's `edit.rb`.
   class Form < ::Components::ApplicationForm
     def initialize(model, visual_model:, **)
       @visual_model = visual_model

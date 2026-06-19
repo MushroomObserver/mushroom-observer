@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for `CollectionNumbersController#edit`. Replaces
-# `app/views/controllers/collection_numbers/edit.html.erb`. Wraps
+# Action template for `CollectionNumbersController#edit`. Wraps
 # the existing `Form` Phlex component with the page chrome + a
 # side-column list of MatrixBox previews (one per associated obs).
 module Views::Controllers::CollectionNumbers

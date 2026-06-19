@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Phlex view for the project aliases index page.
-# Replaces aliases/index.html.erb.
 module Views::Controllers::Projects::Aliases
   class Index < Views::FullPageBase
     def initialize(project:, project_aliases:)

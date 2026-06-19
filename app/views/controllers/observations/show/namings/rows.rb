@@ -9,7 +9,6 @@
 # `Show::Namings::Row`), so single-row swaps can target individual
 # children too.
 #
-# Replaces `app/views/controllers/observations/show/namings/_rows.erb`.
 # Reopen the parent `Namings` class so the nested `Rows` body can
 # refer to its sibling `Row` by short name. Without this nesting,
 # the lexical scope chain doesn't include `Namings`, and `Row.new`

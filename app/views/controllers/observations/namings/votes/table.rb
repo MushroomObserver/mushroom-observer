@@ -19,7 +19,6 @@
 # "Mixed-shape rows that don't share an iteration source" carve-out
 # in `.claude/rules/phlex_conversions.md`.
 #
-# Replaces `app/views/controllers/observations/namings/votes/_table.erb`.
 module Views::Controllers::Observations::Namings::Votes
   class Table < Views::Base
     prop :naming, _Union(::Naming, ::Observation::MergedNaming)

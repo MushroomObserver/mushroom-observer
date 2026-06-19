@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::GlossaryTerms
-  # Paginated glossary terms index. Page chrome + a `Components::ListGroup::Base`
-  # of one `Index::Item` per term. Converted from
-  # `glossary_terms/index.html.erb` + `glossary_terms/_object.html.erb`.
+  # Paginated glossary terms index. Page chrome +
+  # a `Components::ListGroup::Base` of one `Index::Item` per term.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData

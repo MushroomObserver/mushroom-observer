@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects::Members
   # Phlex view for the change member status page.
-  # Replaces members/edit.html.erb.
   class Edit < Views::FullPageBase
     def initialize(project:, project_member:, user:)
       super()

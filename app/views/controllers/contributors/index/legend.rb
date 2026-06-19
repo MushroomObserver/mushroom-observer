@@ -13,8 +13,7 @@ module Views::Controllers::Contributors
     #    showing how a few activities sum to a total contribution
     #    score, with a footer row holding the running total.
     #
-    # Both tables run with `show_headers: false` because the
-    # original ERB rendered them without a `<thead>`.
+    # Both tables run with `show_headers: false`.
     class Legend < Views::Base
       EXAMPLE_WEIGHTS = [
         { field: :images, number: 3, text_key: :users_by_contribution_2a },

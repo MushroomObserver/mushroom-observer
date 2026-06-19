@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Superform component for rendering faceted search forms.
-# Replaces shared/search_form.erb and shared/search_panel.erb partials.
 #
 # Uses the Query model (e.g., Query::Observations) directly as the form model.
 # Field layout is determined by FIELD_COLUMNS on the controller.
