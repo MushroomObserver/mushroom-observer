@@ -259,8 +259,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
     page_arg = @pagination_data.number_arg.to_s
     redirect_to(
-      url_for(params.to_unsafe_h.merge(page_arg => @pagination_data.num_pages,
-                                      only_path: true))
+      url_for(params.to_unsafe_h.merge(
+                page_arg => @pagination_data.num_pages, only_path: true
+              ))
     )
     true
   end
