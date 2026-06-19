@@ -9,6 +9,30 @@
 # container class, project banner — so subclasses don't have to
 # repeat `register_value_helper` calls for each one.
 class Views::Base < Components::Base
+  # `paginated_results { render_results }` — wraps the supplied result-set
+  # block in the `<div id="results" data-q="...">` shell with the
+  # pre-rendered `:index_pagination_top` / `:index_pagination_bottom`
+  # strips woven around it. Action templates and sub-partials that own
+  # the results body (e.g. `Shared::ImagesToReuseForm`,
+  # `VisualGroups::ImageMatrix`) both call it. The matching
+  # `add_pagination` SETTER (which fills the content_for slots this
+  # method reads) lives on `Views::FullPageBase::IndexNav` because only
+  # action views set chrome.
+  def paginated_results(args = {})
+    html_id = args[:html_id] || "results"
+    encoded_q = URI.parse(observations_path(q: q_param)).query
+
+    div(id: html_id, data: { q: encoded_q }) do
+      if content_for?(:index_pagination_top)
+        trusted_html(content_for(:index_pagination_top))
+      end
+      yield
+      if content_for?(:index_pagination_bottom)
+        trusted_html(content_for(:index_pagination_bottom))
+      end
+    end
+  end
+
   register_value_helper :add_context_nav
   # `context_nav_links([tuples])` — array-version of `context_nav_link`,
   # used where a view wraps each link manually. Composes the underlying

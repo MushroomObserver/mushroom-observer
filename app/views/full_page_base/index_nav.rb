@@ -6,29 +6,12 @@
 # respective Phlex sub-view's HTML into a `content_for` slot that the
 # layout's index-bar reads on every index action.
 #
-# `paginated_results` is the body wrapper: takes a block (the matrix /
-# table / list of results), emits the wrapping `<div>` and weaves the
-# top/bottom pagination strips around it.
+# `paginated_results` (the body wrapper that emits the result-set
+# `<div>` with the pagination strips woven around the block) lives on
+# `Views::Base` — sub-partials that own the results body
+# (`Shared::ImagesToReuseForm`, `VisualGroups::ImageMatrix`, etc.)
+# call it too, and they don't inherit from `FullPageBase`.
 module Views::FullPageBase::IndexNav
-  # `paginated_results { render_results }` — wraps the action body in
-  # the result-set `<div>` with the top + bottom pagination strips
-  # already attached. Emits to the surrounding Phlex buffer (this is
-  # a body-shape helper, not a `content_for` setter).
-  def paginated_results(args = {})
-    html_id = args[:html_id] || "results"
-    encoded_q = URI.parse(observations_path(q: q_param)).query
-
-    div(id: html_id, data: { q: encoded_q }) do
-      if content_for?(:index_pagination_top)
-        trusted_html(content_for(:index_pagination_top))
-      end
-      yield
-      if content_for?(:index_pagination_bottom)
-        trusted_html(content_for(:index_pagination_bottom))
-      end
-    end
-  end
-
   # Top + bottom pagination strips. Skips the bottom strip when there's
   # only one page — no need to repeat the (already empty) "page 1 of 1"
   # at the bottom of a short result list.
