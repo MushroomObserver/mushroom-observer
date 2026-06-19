@@ -136,11 +136,7 @@ class NameTest < UnitTestCase
 
   def do_validate_classification_test(rank, text, expected)
     result = Name.validate_classification(rank, text)
-    if expected.nil?
-      assert_nil(result)
-    else
-      assert_equal(expected, result)
-    end
+    assert_equal_even_if_nil(expected, result)
   rescue RuntimeError => e
     raise(e) if expected
   end
