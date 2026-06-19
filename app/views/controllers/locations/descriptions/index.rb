@@ -8,11 +8,9 @@ module Views::Controllers::Locations
       prop :query, ::Query
       prop :descriptions, _Array(::LocationDescription)
       prop :pagination_data, ::PaginationData
-      prop :error, _Nilable(::String), default: nil
 
       def view_template
         register_chrome
-        flash_error(@error) if @error && @descriptions.empty?
 
         paginated_results { render_list if @descriptions.any? }
       end

@@ -16,12 +16,8 @@ module Views::Controllers::Locations
     prop :observation_counts, _Hash(::Integer, ::Integer),
          default: -> { {} }
     prop :default_orders, _Boolean, default: false
-    prop :error, _Nilable(::String), default: nil
     def view_template
       register_chrome
-      if @error && @pagination_data.empty? && @undef_pages.empty?
-        flash_error(@error)
-      end
 
       div(class: "row mt-3") do
         div(class: "col-md-7") { render_known(@observation_counts) }

@@ -5,8 +5,6 @@
 # and a `user_link_<id>` CSS class for selector hooks. Falls back to
 # a "User #<id>" label when only an Integer id is available, and
 # renders the plain "Unknown User" string when `user` is nil.
-#
-# Replaces the `user_link` helper from `app/helpers/object_link_helper.rb`.
 class Components::Link::Object::User < Components::Base
   prop :user, _Nilable(_Union(::User, Integer)), default: nil
   prop :name, _Nilable(String), default: nil

@@ -81,7 +81,7 @@ class Components::Table < Components::Base
     @heading_attrs = {}
     @show_headers = show_headers
     @tbody_id = tbody_id
-    @html_class = binding.local_variable_get(:class)
+    @html_class = grab(class:)
     @html_id = id
     @attributes = attributes
   end
@@ -111,10 +111,11 @@ class Components::Table < Components::Base
   # @yield [row] block that receives each row and returns cell content
   # @return [nil] returns nil to prevent ERB output
   def column(header, class: nil, **attributes, &content)
-    klass = binding.local_variable_get(:class)
-    attrs = attributes.dup
-    attrs[:class] = klass if klass
-    @columns << { header: header, attributes: attrs, content: content }
+    @columns << {
+      header: header,
+      attributes: mix(attributes, class: grab(class:)),
+      content: content
+    }
     nil
   end
 

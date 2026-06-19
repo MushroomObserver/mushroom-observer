@@ -8,8 +8,6 @@ module Views::Controllers::Images
     # helper that lived in `app/helpers/images_helper.rb` is inlined
     # here (`#sorted_votes`) and the helper file deleted in this PR.
     class VotePanel < Views::Base
-      register_value_helper :image_vote_as_long_string
-
       prop :image, ::Image
       prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil
       prop :default_size, _Nilable(_Union(::Symbol, ::String)), default: nil

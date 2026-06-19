@@ -27,10 +27,6 @@
 # description helper files are deleted in the same commit.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
-    # `review_as_string` lives in `app/helpers/localization_helper.rb`
-    # and is also called from the description list view.
-    register_value_helper :review_as_string
-
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
     prop :versions, _Array(_Interface(:user_id))
@@ -252,6 +248,12 @@ module Views::Controllers::Descriptions
       else
         :private.l
       end
+    end
+
+    # `Description#review_status` → translation key lookup, e.g.
+    # `:unvetted` → "Needs Review".
+    def review_as_string(val)
+      :"review_#{val}".l
     end
   end
 end

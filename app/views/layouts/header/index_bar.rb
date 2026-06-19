@@ -4,7 +4,7 @@
 # and the page body on index actions (and on `maps` show). Replaces
 # `_index_bar.erb`. Reads two content_for slots:
 #
-#   - `:filters`     — set by `Header::FiltersHelper#add_query_filters`,
+#   - `:filters`     — set by `Views::FullPageBase#add_query_filters`,
 #                      the long filter-caption HTML
 #   - `:filter_help` — set by `Header#maybe_set_filter_help`, the
 #                      "(filtered)" mouseover tooltip

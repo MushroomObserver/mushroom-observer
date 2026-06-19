@@ -6,10 +6,6 @@
 # highlight which nav item the user is currently on. Allows nav
 # fragments to be cached and reused across pages.
 #
-# Drop-in equivalent of `active_link_to(text, path, **opts, &block)`
-# in `app/helpers/link_helper.rb`. The helper now renders this
-# component so existing ERB and Phlex callers keep working unchanged.
-#
 # Caller-supplied `data:` is deep-merged onto the nav-active wiring,
 # so callers can add their own data attrs without overriding the
 # Stimulus target/action attrs.

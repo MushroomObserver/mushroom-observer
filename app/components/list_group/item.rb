@@ -30,7 +30,7 @@ class Components::ListGroup::Item < Components::Base
   def initialize(element: :div, class: nil, id: nil, attributes: {})
     super()
     @element = element
-    @html_class = binding.local_variable_get(:class)
+    @html_class = grab(class:)
     @html_id = id
     @attributes = attributes
   end

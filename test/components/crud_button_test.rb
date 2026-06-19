@@ -163,11 +163,7 @@ end
 # `Components::CrudButton` subclasses (`Delete`, `Edit`, `Download`,
 # `Post`, `Put`, `Patch`) — verify each subclass's destroy / edit /
 # fetch defaults stack correctly on top of the base `CrudButton`
-# rendering. These were previously routed through the
-# `LinkHelper#destroy_button` / `#edit_button` / etc. ERB helper
-# wrappers (now thin one-liners that just `render(...)` the same
-# component subclasses); the helpers stay in `link_helper.rb` for
-# ERB callers but the tests render the components directly.
+# rendering.
 class CrudButtonSubclassesTest < ComponentTestCase
   def test_delete_with_model_target
     herbarium = herbaria(:nybg_herbarium)

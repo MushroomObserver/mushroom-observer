@@ -6,10 +6,6 @@
 # URL); other external sites show as "On <site>" with a trailing
 # date.
 #
-# Drop-in equivalent of the long-standing `external_link(link)`
-# helper in `app/helpers/link_helper.rb`. The helper now renders
-# this component so existing ERB callers keep working unchanged.
-#
 # Named for the *destination* (an external site) rather than the
 # AR record's class name (`ExternalLink`) — using the model's name
 # would collide visually with `ExternalLink` and read as "ah, a

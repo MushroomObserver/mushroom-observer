@@ -23,18 +23,12 @@ module ApplicationController::ModalUpdater
   private
 
   def render_modal_flash_update(identifier)
-    render(turbo_stream: turbo_stream.update(
-      "modal_#{identifier}_flash",
-      ActiveSupport::SafeBuffer.new(view_context.flash_notices_html.to_s)
-    ))
+    render(turbo_stream: turbo_stream_flash_update("modal_#{identifier}_flash"))
   end
 
   def render_modal_form_reload(identifier:, form_locals:)
     render(turbo_stream: [
-             turbo_stream.update(
-               "modal_#{identifier}_flash",
-               ActiveSupport::SafeBuffer.new(view_context.flash_notices_html.to_s)
-             ),
+             turbo_stream_flash_update("modal_#{identifier}_flash"),
              turbo_stream.replace(
                "#{identifier}_form",
                Components::Modal::TurboForm.render_form(

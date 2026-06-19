@@ -20,7 +20,6 @@ module Views::Controllers::Observations
     prop :objects, _Array(::Observation)
     prop :user, _Nilable(::User), default: nil
     prop :project, _Nilable(::Project), default: nil
-    prop :error, _Nilable(String), default: nil
     # `[Name, Integer]` pairs from
     # `ObservationsController::Index#make_name_suggestions`. Only
     # populated on the pattern-search-with-zero-results path.
@@ -36,7 +35,6 @@ module Views::Controllers::Observations
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      flash_error(@error) if @error && @objects.empty?
       render_suggestions_alert if suggest_alternates?
 
       paginated_results { render_matrix }

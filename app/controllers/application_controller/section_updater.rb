@@ -30,9 +30,7 @@ module ApplicationController::SectionUpdater
   def render_obs_section_update(identifier:, panel:)
     render(turbo_stream: [
              turbo_stream.replace("observation_#{identifier}", panel),
-             turbo_stream.update("page_flash") do
-               helpers.flash_notices_html
-             end
+             turbo_stream_flash_update
            ])
   end
 end

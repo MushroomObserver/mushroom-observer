@@ -22,7 +22,7 @@ class NamesController < ApplicationController
   def render_index_view
     args = {
       query: @query, pagination_data: @pagination_data,
-      objects: @objects, user: @user, error: @error,
+      objects: @objects, user: @user,
       help: @help, has_descriptions: @has_descriptions || false,
       name_suggestions: @name_suggestions
     }

@@ -15,7 +15,7 @@ class RssLogsController < ApplicationController
     render(Views::Controllers::RssLogs::Index.new(
              query: @query, rss_logs: @objects.to_a,
              pagination_data: @pagination_data,
-             types: @types || [], error: @error
+             types: @types || []
            ))
   end
 

@@ -11,8 +11,6 @@
 # `Views::Controllers::Names::Show` and `Views::Controllers::Names::Versions::Show`
 # (and any remaining legacy callers should render this view directly).
 class Views::Controllers::Names::Show::Nomenclature < Views::Base
-  register_value_helper :rank_as_string
-
   prop :name, ::Name
   prop :user, _Nilable(::User), default: nil
 

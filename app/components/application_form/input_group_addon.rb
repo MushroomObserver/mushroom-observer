@@ -15,8 +15,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   :button_target   `target=` attribute (e.g. `_blank`)
   #   :button_rel      `rel=`    attribute (e.g. `noopener noreferrer`)
   #   :button_title    tooltip / accessible name
-  #   :button_icon     glyph symbol from `LINK_ICON_INDEX`, rendered
-  #                    after the text via the `link_icon` helper
+  #   :button_icon     glyph symbol from `Components::Icon::GLYPHS`,
+  #                    rendered after the text via `Components::Icon`
   module InputGroupAddon
     def render_input_group_button(&block)
       div(class: "input-group") do

@@ -24,8 +24,6 @@ class Components::ContentPadded < Components::Base
   end
 
   def view_template(&block)
-    attrs = @attrs.dup
-    attrs[:class] = class_names("p-3", attrs[:class])
-    div(**attrs, &block)
+    div(**mix({ class: "p-3" }, @attrs), &block)
   end
 end

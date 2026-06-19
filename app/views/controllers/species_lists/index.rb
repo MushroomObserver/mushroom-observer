@@ -5,14 +5,12 @@
 # container width), then renders a list of `Listing` rows.
 module Views::Controllers::SpeciesLists
   class Index < Views::FullPageBase
-    def initialize(query:, pagination_data:, objects:,
-                   project: nil, error: nil)
+    def initialize(query:, pagination_data:, objects:, project: nil)
       super()
       @query = query
       @pagination_data = pagination_data
       @objects = objects
       @project = project
-      @error = error
     end
 
     def view_template
@@ -22,8 +20,6 @@ module Views::Controllers::SpeciesLists
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
       container_class(:wide)
-
-      flash_error(@error) if @error && @objects.empty?
 
       paginated_results { render_list }
     end

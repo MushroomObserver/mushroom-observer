@@ -6,7 +6,8 @@
 #  Simple class to hold the minimal info needed to paginate a set of objects by
 #  page number and/or letter.  This class knows nothing about how to query the
 #  results (see Query#paginate), nor does it know anything about how to render
-#  the results or pagination controls (see ApplicationHelper::Paginator).
+#  the results or pagination controls (see
+#  Views::Layouts::Header::IndexPaginationNav).
 #
 #  You give it a page number and number of results; it in return can tell you
 #  which results you should display.
@@ -15,7 +16,7 @@
 #  and/or render mechanisms need access to, such as the URL parameter used to
 #  select page and letter, and the list of letters for which there are results.
 #
-#  == Query and ApplicationHelper::Paginator
+#  == Query and IndexPaginationNav
 #
 #  Together these three classes and modules make it possible to gather a set of
 #  results to an arbitrary query, and render them on an HTML view together with

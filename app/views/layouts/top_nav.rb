@@ -132,12 +132,8 @@ class Views::Layouts::TopNav < Views::Base
     end
   end
 
-  # --- Inlined from `Header::TogglesHelper` ----------------------
-
   # The hamburger that opens the offcanvas sidebar on mobile /
-  # small-tablet widths. Uses the MO favicon as the glyph, per
-  # the long-standing helper (see the commented-out alternative
-  # `link_icon(:menu, …)` in the original).
+  # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
     div(class: "visible-xs visible-sm pr-3 pr-sm-4") do
       button(

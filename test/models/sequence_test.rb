@@ -3,7 +3,7 @@
 require("test_helper")
 
 class SequenceTest < UnitTestCase
-  # `page_title` is used by `Header::TitleHelper#add_show_title` as
+  # `page_title` is used by `Views::FullPageBase#add_show_title` as
   # the H1 + browser-tab title. Sequence's locus is shown in the
   # body, so the title identifies the sequence by its observation.
   def test_page_title_aliases

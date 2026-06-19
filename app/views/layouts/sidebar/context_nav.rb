@@ -13,14 +13,14 @@
 # Renders the same `[text, url, args]` tuples as the top-nav
 # variant, flattened into indented rows under a heading (no
 # dropdown). Dispatches each tuple through
-# `Views::Layouts::ContextNav::LinkRendering#render_crud_button_or_link`
-# so `button: :destroy` / `:post` / `:put` / `:patch` render as
-# their respective forms — pre-Phlex `sidebar_nav_link` collapsed
-# every tuple to a plain `active_link_to`, which meant mobile users
+# `Components::LinkRendering#render_crud_button_or_link` so
+# `button: :destroy` / `:post` / `:put` / `:patch` render as their
+# respective forms — pre-Phlex `sidebar_nav_link` collapsed every
+# tuple to a plain `active_link_to`, which meant mobile users
 # couldn't trigger destroy / post actions from the sidebar at all.
 # Fixed here.
 class Views::Layouts::Sidebar::ContextNav < Views::Base
-  include Views::Layouts::ContextNav::LinkRendering
+  include Components::LinkRendering
 
   # Lexical-parent namespace (`Views::Layouts::Sidebar`) provides
   # the same CSS class set that the desktop sidebar partials

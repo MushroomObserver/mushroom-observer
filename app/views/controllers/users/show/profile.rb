@@ -86,18 +86,38 @@ module Views::Controllers::Users
         end
       end
 
+      include ::Components::LinkRendering
+
       def render_action_links
         div(class: "mt-3") do
-          links = ::Tab::User::ProfileActions.new(
-            show_user: @show_user, user: @user, admin: in_admin_mode?
-          ).map(&:to_a)
-          links = context_nav_links(links)
           ul(class: "list-unstyled mb-0") do
-            links.compact.each do |link|
-              li { trusted_html(link) }
+            ::Tab::User::ProfileActions.new(
+              show_user: @show_user, user: @user, admin: in_admin_mode?
+            ).each do |tab|
+              li { render_action_link(tab.to_a) }
             end
           end
         end
+      end
+
+      # `tuple` is `[text, url, args]`. The block emits one
+      # link / button into the surrounding `<li>` via the same
+      # `Components::LinkRendering` dispatch the two
+      # `Views::Layouts::*::ContextNav` views use. The conditional
+      # `d-block` strip mirrors the legacy
+      # `Header::ContextNavHelper#context_nav_link` behaviour: for
+      # `button:` tuples that ALSO came in with `d-block` in their
+      # class list, drop it so the form/button isn't laid out as a
+      # block — `button_to`'s wrapping `<form>` already provides the
+      # block-level container. Plain anchor tuples keep `d-block`.
+      def render_action_link(tuple)
+        str, url, args = tuple
+        args ||= {}
+        kwargs = merge_context_nav_link_args(args, {})
+        if args[:button].present? && kwargs[:class].present?
+          kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
+        end
+        render_crud_button_or_link(str, url, args, kwargs.compact_blank)
       end
 
       def render_footer

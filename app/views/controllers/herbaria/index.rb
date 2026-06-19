@@ -9,7 +9,6 @@ module Views::Controllers::Herbaria
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Herbarium)
     prop :merge, _Nilable(::Herbarium), default: nil
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       container_class(:full)
@@ -18,7 +17,6 @@ module Views::Controllers::Herbaria
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      flash_error(@error) if @error && @objects.empty?
       render_merge_alert if @merge
 
       paginated_results { render_table if @objects.any? }

@@ -35,9 +35,7 @@
 #     ))
 #   end
 class Components::Dropdown < Components::Base
-  # Shared dispatch logic for the `[text, url, args]` link tuples —
-  # the same module the top-nav and sidebar Actions menus include.
-  include Views::Layouts::ContextNav::LinkRendering
+  include Components::LinkRendering
 
   prop :id, ::String
   prop :menu_id, ::String
@@ -126,7 +124,7 @@ class Components::Dropdown < Components::Base
 
   def build_link_kwargs(args, active:)
     kwargs = merge_context_nav_link_args(args, {})
-    kwargs[:class] = class_names(kwargs[:class], "active") if active
+    kwargs = mix(kwargs, class: "active") if active
     kwargs[:disabled] = true if active
     if args[:button].present? && kwargs[:class].present?
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip

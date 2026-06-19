@@ -9,6 +9,7 @@ module Views::Controllers::VisualGroups
     prop :visual_groups, _Array(VisualGroup)
 
     def view_template
+      add_show_title(@visual_model)
       render(Views::Controllers::VisualModels::VisualGroupTable.new(
                visual_model: @visual_model,
                visual_groups: @visual_groups

@@ -146,6 +146,22 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_flash_error(:runtime_no_matches.t(type: :observation))
   end
 
+  # `?page=999` on a result set with fewer than 999 pages should
+  # redirect to the last valid page rather than render an empty
+  # result-area. Implementation: `ApplicationController::Indexes
+  # #redirect_past_last_page?`.
+  def test_index_page_past_last_redirects_to_last_page
+    login
+    get(:index, params: { page: 999 })
+
+    pagination = @controller.instance_variable_get(:@pagination_data)
+    assert_operator(
+      pagination.num_pages, :>=, 1,
+      "Fixture needs at least one observation for this test to mean anything"
+    )
+    assert_redirected_to(action: :index, page: pagination.num_pages)
+  end
+
   # Created in response to a bug seen in the wild
   # place_name isn't a param for Observation#index
   # but is an API param and a param for Observation#create

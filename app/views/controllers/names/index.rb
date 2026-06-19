@@ -22,7 +22,6 @@ module Views::Controllers::Names
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Name)
     prop :user, _Nilable(::User), default: nil
-    prop :error, _Nilable(String), default: nil
     # The `needs_description` subaction sets `@help` to a
     # translation key Symbol; other subactions leave it nil.
     prop :help, _Nilable(Symbol), default: nil
@@ -49,8 +48,6 @@ module Views::Controllers::Names
       # `NamesController#index_sort_options` — single source of truth.
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data, @test_pagination_args)
-
-      flash_error(@error) if @error && @objects.empty?
 
       render_suggestions_alert if suggest_alternates?
       render_help_blurb if @help

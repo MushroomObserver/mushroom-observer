@@ -8,13 +8,11 @@ module Views::Controllers::Sequences
     prop :query, ::Query
     prop :sequences, _Array(::Sequence)
     prop :pagination_data, ::PaginationData
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       add_index_title(@query)
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-      flash_error(@error) if @error && @sequences.empty?
 
       paginated_results { render_list }
     end

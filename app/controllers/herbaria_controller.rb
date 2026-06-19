@@ -86,7 +86,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def render_index_view
     render(Views::Controllers::Herbaria::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, merge: @merge, error: @error
+             objects: @objects, merge: @merge
            ))
   end
 
@@ -147,7 +147,8 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   ##############################################################################
   #
   # Display a single herbarium, based on :flow params
-  # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
+  # `:flow` is added by the show-page prev/next pager
+  # (`Views::Layouts::Header::ShowPrevNextNav`).
   def show
     flow = params[:flow]
     return redirect_to_next_object(flow.to_sym, Herbarium, params[:id].to_s) \
@@ -502,9 +503,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     [
       turbo_stream.close_modal("modal_herbarium"),
       turbo_stream.remove("modal_herbarium"),
-      turbo_stream.update("page_flash") do
-        helpers.flash_notices_html
-      end,
+      turbo_stream_flash_update,
       # Obs form's herbarium-name field is namespaced under the
       # observation Superform: id is `observation_herbarium_record_*`.
       turbo_stream.update_input(
