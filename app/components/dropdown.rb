@@ -35,9 +35,7 @@
 #     ))
 #   end
 class Components::Dropdown < Components::Base
-  # Shared dispatch logic for the `[text, url, args]` link tuples —
-  # the same module the top-nav and sidebar Actions menus include.
-  include Views::Layouts::ContextNav::LinkRendering
+  include Components::LinkRendering
 
   prop :id, ::String
   prop :menu_id, ::String

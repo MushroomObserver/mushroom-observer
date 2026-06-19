@@ -13,7 +13,7 @@ require("test_helper")
 # End-to-end HTML output for each link-tuple shape is exercised by
 # the focused tests on `Views::Layouts::TopNav::ContextNav` /
 # `Views::Layouts::Sidebar::ContextNav` and (transitively)
-# `Views::Layouts::ContextNav::LinkRendering` /
+# `Components::LinkRendering` /
 # `Components::Dropdown`.
 class Views::FullPageBase::ContextNavTest < ComponentTestCase
   # ----- guard clauses (no-op when nothing to render) ---------------

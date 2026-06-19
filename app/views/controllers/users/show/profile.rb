@@ -86,7 +86,7 @@ module Views::Controllers::Users
         end
       end
 
-      include ::Views::Layouts::ContextNav::LinkRendering
+      include ::Components::LinkRendering
 
       def render_action_links
         div(class: "mt-3") do

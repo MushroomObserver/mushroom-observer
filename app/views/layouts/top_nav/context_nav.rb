@@ -9,7 +9,7 @@
 #
 # The mobile-only counterpart lives at
 # `Views::Layouts::Sidebar::ContextNav` — same tuple shape, same
-# dispatch logic (via `Views::Layouts::ContextNav::LinkRendering`),
+# dispatch logic (via `Components::LinkRendering`),
 # different layout container.
 #
 # Wraps `Components::Dropdown` — the Bootstrap nav-dropdown
