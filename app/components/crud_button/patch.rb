@@ -10,7 +10,7 @@ class Components::CrudButton
   #   ))
   class Patch < Components::CrudButton
     def initialize(target:, name:, **args)
-      args[:btn] ||= Components::Button::DEFAULT_BTN
+      args[:btn] = Components::Button::DEFAULT_BTN unless args.key?(:btn)
       super(target: target, name: name, method: :patch, **args)
     end
   end

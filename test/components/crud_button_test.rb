@@ -391,16 +391,47 @@ class CrudButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button", text: "Replace")
   end
 
-  # Patch with custom class: form, `_method=patch`, class applied to
-  # the button.
-  def test_patch_with_class
+  # Post defaults to `btn btn-default`.
+  def test_post_default_btn_frame
+    html = render(
+      Components::CrudButton::Post.new(name: "Submit", target: "/items")
+    )
+
+    assert_html(html, "button.btn.btn-default")
+  end
+
+  # Explicit `btn:` overrides the default.
+  def test_post_btn_override
+    html = render(
+      Components::CrudButton::Post.new(name: "Submit", target: "/items",
+                                       btn: "btn btn-primary")
+    )
+
+    assert_html(html, "button.btn.btn-primary")
+    assert_no_html(html, "button.btn-default")
+  end
+
+  # `btn: nil` suppresses the frame entirely (icon-only inline buttons).
+  def test_post_btn_nil_suppresses_frame
+    html = render(
+      Components::CrudButton::Post.new(name: "Submit", target: "/items",
+                                       btn: nil, class: "btn btn-link p-0")
+    )
+
+    assert_no_html(html, "button.btn-default")
+    assert_html(html, "button.btn.btn-link")
+  end
+
+  # Patch with `btn:` override: form, `_method=patch`, btn class applied.
+  def test_patch_with_btn_override
     html = render(Components::CrudButton::Patch.new(
                     name: "Update", target: "/items/1",
-                    class: "btn btn-primary"
+                    btn: "btn btn-primary"
                   ))
 
     assert_html(html, "form[action='/items/1']")
     assert_html(html, "input[name='_method'][value='patch']")
     assert_html(html, "button.btn.btn-primary", text: "Update")
+    assert_no_html(html, "button.btn-default")
   end
 end
