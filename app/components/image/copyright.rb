@@ -15,8 +15,6 @@
 #     object: @observation
 #   )
 class Components::Image::Copyright < Components::Base
-  include ApplicationHelper
-
   prop :user, _Nilable(User)
   prop :image, _Nilable(::Image)
   prop :object, _Nilable(AbstractModel), default: nil
