@@ -132,6 +132,10 @@ class ExternalLink < AbstractModel
     target if target_type == "Observation"
   end
 
+  def observation_id
+    target_id if target_type == "Observation"
+  end
+
   def observation=(obs)
     self.target = obs
   end
