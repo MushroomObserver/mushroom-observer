@@ -257,7 +257,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     return false unless @pagination_data&.num_pages&.positive?
     return false unless @pagination_data.number > @pagination_data.num_pages
 
-    page_arg = @pagination_data.number_arg
+    page_arg = @pagination_data.number_arg.to_s
     redirect_to(url_for(
                   params.permit!.to_h.merge(
                     page_arg => @pagination_data.num_pages
