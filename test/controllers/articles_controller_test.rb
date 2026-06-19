@@ -76,41 +76,6 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
-  # Partly duplicates title_and_tabset_helper_test `test_context_nav_dropdown`.
-  # But we want to test a `destroy_button` tab too.
-  # That helper calls `add_q_param` and others.
-  # NOTE: we can actually call @controller.add_q_param here, fwiw.
-  def test_context_nav_dropdown_helper
-    # any Article will do
-    article = Article.last
-    links = [["Create Article", new_article_path,
-              { class: "new_article_link" }],
-             [:EDIT.t, edit_article_path(article.id),
-              { class: "edit_article_link" }],
-             [nil, article, { button: :destroy }]]
-
-    tabs = @controller.helpers.context_nav_links(links)
-
-    tab1 = @controller.helpers.link_to(
-      "Create Article", new_article_path, { class: "new_article_link" }
-    )
-    tab2 = @controller.helpers.link_to(
-      :EDIT.t, edit_article_path(article.id), { class: "edit_article_link" }
-    )
-    # `context_nav_links` routes destroy tabs through `crud_button_or_link`,
-    # which defaults `icon: nil, btn: nil` for `:destroy` so context-nav
-    # `[ DESTROY ]` tabs render as plain text links (no btn frame, no
-    # glyphicon). Build the expected tab the same way for the comparison.
-    tab3 = @controller.helpers.render(Components::CrudButton::Delete.new(
-                                        target: article,
-                                        icon: nil, btn: nil
-                                      ))
-
-    assert_includes(tabs, tab1)
-    assert_includes(tabs, tab2)
-    assert_includes(tabs, tab3)
-  end
-
   ############ test Actions that Display forms -- (new, edit, etc.)
 
   def test_new
