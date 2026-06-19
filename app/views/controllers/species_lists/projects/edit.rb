@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-# Phlex view for the species-list project-management page — page chrome plus the inline `Form`.
+# Phlex view for the species-list project-management page — page
+# chrome plus the inline `Form`.
 module Views::Controllers::SpeciesLists::Projects
   class Edit < Views::FullPageBase
     def initialize(list:, projects:, object_states:, project_states:)

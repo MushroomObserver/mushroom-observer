@@ -6,19 +6,6 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
   ComponentTestCase
   PARTIAL = "descriptions/description_details_and_alts_panel"
 
-  def setup
-    super
-    # `ComponentTestCase` uses `ActionView::TestCase::TestController`,
-    # which doesn't inherit `ApplicationController`'s
-    # `append_view_path Rails.root.join("app/views/controllers")`.
-    # Some integration paths still render the old ERB partial, so
-    # prepend the controllers view path for those code paths to find
-    # their templates. NOTE: NO MORE ERB, delete?
-    controller.prepend_view_path(
-      Rails.root.join("app/views/controllers")
-    )
-  end
-
   # -- contract tests --------------------------------------------
 
   def test_renders_panel_id
