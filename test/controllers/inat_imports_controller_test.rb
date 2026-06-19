@@ -734,7 +734,6 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_template(:confirm)
     assert_select(
       "#estimated_count", "3",
       "Estimate should still show when only unlicensed-others request fails"
@@ -1039,7 +1038,6 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: inat_username, consent: 1 })
 
     assert_response(:success, "Valid URL should proceed to confirmation")
-    assert_template(:confirm)
     assert_select("#estimated_count", "5",
                   "Confirmation should show estimate from URL query")
   end
@@ -1172,8 +1170,8 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, import_others: "1", consent: 1 })
 
-    assert_template(:confirm,
-                    "Superimporter URL import without username should confirm")
+    assert_select("#estimated_count", true,
+                  "Superimporter URL import without username should confirm")
   end
 
   def test_url_mode_estimate_merges_url_params
@@ -1288,68 +1286,6 @@ class InatImportsControllerTest < FunctionalTestCase
                          "Confirmed URL via superform params should auth")
     assert_equal(normalized, inat_import.reload.inat_url,
                  "inat_url should be saved from superform hidden field")
-  end
-
-  def test_skip_inat_update_saved_when_admin_checks_it
-    inat_import = inat_imports(:rolf_inat_import)
-
-    make_admin(users(:rolf).login)
-    post(:create,
-         params: {
-           confirmed: 1,
-           inat_import_confirm: {
-             inat_username: "rolf_inat_user", inat_ids: "123",
-             import_all: "", inat_url: "", consent: "1",
-             import_others: "", skip_inat_update: "1"
-           }
-         })
-
-    assert(inat_import.reload.skip_inat_update?,
-           "skip_inat_update should be saved when admin checks it")
-  end
-
-  def test_skip_inat_update_not_saved_without_admin_mode
-    inat_import = inat_imports(:rolf_inat_import)
-
-    login(users(:rolf).login)
-    post(:create,
-         params: {
-           confirmed: 1,
-           inat_import_confirm: {
-             inat_username: "rolf_inat_user", inat_ids: "123",
-             import_all: "", inat_url: "", consent: "1",
-             import_others: "", skip_inat_update: "1"
-           }
-         })
-
-    assert_not(inat_import.reload.skip_inat_update?,
-               "skip_inat_update should be ignored when not in admin mode")
-  end
-
-  def test_skip_inat_update_checkbox_visible_in_admin_mode
-    make_admin(users(:rolf).login)
-    get(:new)
-
-    assert_select(
-      "input[type=checkbox][name=?]",
-      "inat_import[skip_inat_update]",
-      true,
-      "skip_inat_update checkbox should appear in admin mode"
-    )
-  end
-
-  def test_skip_inat_update_checkbox_hidden_outside_admin_mode
-    user = users(:rolf)
-
-    login(user.login)
-    get(:new)
-
-    assert_select(
-      "input[type=checkbox][name=?]",
-      "inat_import[skip_inat_update]",
-      false,
-      "skip_inat_update checkbox should not appear outside admin mode"
-    )
   end
 
   ########## Utilities

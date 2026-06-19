@@ -117,7 +117,7 @@ class Inat
     end
 
     def finalize_import
-      update_inat_observation unless @inat_import.skip_inat_update?
+      update_inat_observation unless skip_inat_writeback?
       log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
       increment_imported_counts
       update_timings
