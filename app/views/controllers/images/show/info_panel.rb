@@ -3,8 +3,7 @@
 module Views::Controllers::Images
   class Show
     # Top-right info panel: when / owner / projects / observations /
-    # profile-users / glossary-terms / notes. Converted from
-    # `images/show/_info_panel.html.erb`.
+    # profile-users / glossary-terms / notes.
     class InfoPanel < Views::Base
       prop :image, ::Image
 

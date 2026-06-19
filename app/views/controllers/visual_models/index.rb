@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Action view for `visual_models#index`. Replaces `index.html.erb` —
+# Action view for `visual_models#index`.
 # admin-only page listing every visual model with edit / destroy
 # links + a "New Visual Model" link.
 module Views::Controllers::VisualModels

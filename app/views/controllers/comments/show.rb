@@ -4,7 +4,6 @@
 # list and the comments index. Renders four lines: created-at,
 # by-user link, summary, and the Textile-rendered body.
 #
-# Replaces `app/views/controllers/comments/show.html.erb`.
 module Views::Controllers::Comments
   class Show < Views::FullPageBase
     prop :comment, ::Comment
@@ -67,9 +66,7 @@ module Views::Controllers::Comments
     end
 
     def render_body
-      # Legacy ERB joined the label, ": ", and the body in one
-      # string then rendered with `.tpl` (Textile paragraph). Keep
-      # that single-textile-render shape so paragraph break
+      # Keep single-textile-render shape so paragraph break
       # placement matches.
       trusted_html(
         # rubocop:disable Rails/OutputSafety -- mirrors the legacy

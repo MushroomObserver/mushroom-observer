@@ -119,7 +119,7 @@ module Projects
                  )
                ),
                turbo_stream_project_tabs("checklists"),
-               helpers.render_turbo_stream_flash_messages
+               turbo_stream_flash_update
              ])
     end
   end

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 # Rich-HTML page-title piece (id badge + title span) rendered into
-# `content_for(:title)` for show and edit pages. Replaces the
-# `page_title_for` / `observation_page_title` / `show_page_title` /
-# `edit_page_title` chain in `Header::TitleHelper`.
+# `content_for(:title)` by `Views::FullPageBase#add_show_title` /
+# `#add_edit_title` for show and edit pages.
 #
 # `mode: :show` emits `<flex><IdBadge/> <span>{title}</span></flex>`;
 # `mode: :edit` emits
@@ -11,9 +10,10 @@
 # The title piece itself is:
 # - Observation → `Views::Controllers::Observations::ConsensusNameLink`
 #   (wraps the consensus name in a link to the name page).
-# - Any model that exposes `#page_title` → that string (arity-aware so
-#   models can alias to a zero-arg method).
-# - Otherwise → the model's localized type-tag label.
+# - Any other model → its `#page_title` (arity-aware so models can
+#   alias to a zero-arg method). `AbstractModel#page_title` defaults
+#   to the type-tag label, so models that don't override still get a
+#   sensible string.
 module Views::Layouts
   class Header::ObjectTitle < Views::Base
     prop :object, ::AbstractModel
@@ -48,10 +48,8 @@ module Views::Layouts
         render(::Views::Controllers::Observations::ConsensusNameLink.new(
                  observation: @object, user: @user
                ))
-      elsif @object.respond_to?(:page_title)
-        trusted_html(model_page_title)
       else
-        plain(:"#{@object.type_tag.to_s.upcase}".l)
+        trusted_html(model_page_title)
       end
     end
 

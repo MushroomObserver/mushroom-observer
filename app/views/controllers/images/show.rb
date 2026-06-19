@@ -4,8 +4,7 @@ module Views::Controllers::Images
   # Image show page: two-column layout — image + license-history
   # panels on the left, info + (reviewer-only) export controls +
   # vote panel on the right, followed by the copyright /
-  # license-badge + versions-footer row. Converted from
-  # `images/show.html.erb` + four `show/_*` partials.
+  # license-badge + versions-footer row.
   class Show < Views::FullPageBase
     prop :image, ::Image
     # In the normal `Images#show` path, `set_default_size` stores

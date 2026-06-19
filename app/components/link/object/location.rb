@@ -7,9 +7,6 @@
 # so per-user formatting can swap them via CSS. An optional `count:`
 # appends " (N)"; an optional `click: true` appends " [Click for map]"
 # / " [Search]" depending on the link target.
-#
-# Replaces the `location_link` helper from
-# `app/helpers/object_link_helper.rb`.
 class Components::Link::Object::Location < Components::Base
   prop :where, _Nilable(String), default: nil
   prop :location, _Nilable(_Union(::Location, Integer)), default: nil

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Name show page. Replaces
-# `app/views/controllers/names/show.html.erb`.
+# Action template for the Name show page.
 #
 # Two-column layout (`column_classes(:seven_five)` → 7/5 split):
 #   - left:  best-images carousel, best-description panel,

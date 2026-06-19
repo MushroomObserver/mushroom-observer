@@ -4,8 +4,7 @@ module Views::Controllers::Images
   module EXIF
     # EXIF data page for an image. Renders the EXIF data inside a
     # standalone `<div id="exif_data_table">` table (via
-    # `Components::Table` body mode). Converted from
-    # `images/exif/show.erb` + `images/exif/_data.erb`.
+    # `Components::Table` body mode).
     class Show < Views::FullPageBase
       prop :image, ::Image
       prop :data, _Nilable(_Array(_Array(::String))), default: nil

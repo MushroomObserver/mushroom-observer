@@ -362,8 +362,7 @@ class LocationsController < ApplicationController
              undef_pages: @undef_pages || ::PaginationData.new,
              undef_data: @undef_data || [],
              observation_counts: known_observation_counts(locations),
-             default_orders: @default_orders || false,
-             error: @error
+             default_orders: @default_orders || false
            ))
   end
 

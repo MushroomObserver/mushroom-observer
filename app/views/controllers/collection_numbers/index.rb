@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the CollectionNumbers index. Replaces
-# `app/views/controllers/collection_numbers/index.html.erb`.
+# Action template for the CollectionNumbers index.
 #
 # `CollectionNumbersController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly with
@@ -13,7 +12,6 @@ module Views::Controllers::CollectionNumbers
     prop :objects, _Array(::CollectionNumber)
     prop :user, ::User
     prop :observation, _Nilable(::Observation), default: nil
-    prop :error, _Nilable(String), default: nil
 
     def view_template
       container_class(:wide)
@@ -24,15 +22,12 @@ module Views::Controllers::CollectionNumbers
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      flash_error(@error) if @error && @objects.empty?
-
       paginated_results { render_rows_table if @objects.any? }
     end
 
     private
 
-    # Headerless `Components::Table` (`show_headers: false`) — matches
-    # the bare-table markup of the original ERB.
+    # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
       render(Components::Table.new(@objects, class: "table-striped mt-3",
                                              show_headers: false)) do |t|

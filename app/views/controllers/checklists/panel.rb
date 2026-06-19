@@ -5,9 +5,8 @@ module Views::Controllers::Checklists
   # the shared Panel component. Used by the Contents component for
   # each section (unobserved / species-level / higher-level / default).
   #
-  # Inlines what used to be the `ChecklistHelper` module — every
-  # taxon row, its display content, link path, and the optional
-  # "remove target name" button now live here as private methods.
+  # Every taxon row, its display content, link path, and the optional
+  # "remove target name" button live here as private methods.
   class Panel < ::Components::Base
     def initialize(data:, context:, taxa: nil,
                    panel_id: "checklist_panel",

@@ -2,7 +2,7 @@
 
 module Views::Controllers::Account::Profile
   # Form for editing a user's profile. Rendered by the
-  # account/profile controller's `edit.html.erb`. Renders name,
+  # account/profile controller's `edit.rb`. Renders name,
   # location, notes, image upload, and mailing address fields. Upload
   # fields are nested under user[upload][...] via ApplicationForm's
   # upload_fields helper (namespace(:upload) inside the user form).

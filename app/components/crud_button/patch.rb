@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class Components::CrudButton
-  # PATCH-method `CrudButton`. Used as the Phlex-side equivalent of
-  # `LinkHelper#patch_button` (which delegates here).
+  # PATCH-method `CrudButton`.
   #
   # @example
   #   render(Components::CrudButton::Patch.new(

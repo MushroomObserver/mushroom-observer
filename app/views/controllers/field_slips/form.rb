@@ -2,8 +2,6 @@
 
 module Views::Controllers::FieldSlips
   # Phlex form for creating and editing FieldSlip records.
-  # Replaces app/views/controllers/field_slips/_form.html.erb plus
-  # its matrix sub-partials (_recent_observations, _edit_observations).
   #
   # When the field slip has no code yet, renders a minimal "enter
   # code" form that GETs to /field_slips/new. Otherwise renders the
@@ -70,8 +68,8 @@ module Views::Controllers::FieldSlips
       # submits with the rest — hence the in-form wrap rather than a
       # page-level `container_class(:text)`.
       #
-      # `species_list` hidden field always emitted (matching ERB
-      # `hidden_field_tag`): the param key has to exist on submit;
+      # `species_list` hidden field always emitted:
+      # the param key has to exist on submit;
       # an empty value is fine and the form context
       # (`?species_list=...`) is what carries the actual id.
       hidden_field("species_list", value: @species_list)
@@ -265,9 +263,8 @@ module Views::Controllers::FieldSlips
 
     def render_observation_matrix(observations, checked_ids:, primary_id:)
       # FieldSlip submits matrix params as flat `observation_ids[]`
-      # and namespaced `field_slip[primary_observation_id]` — both
-      # unchanged from the ERB version, so the controller doesn't
-      # need to move. FieldSlip doesn't have an `observation_ids=`
+      # and namespaced `field_slip[primary_observation_id]`.
+      # FieldSlip doesn't have an `observation_ids=`
       # accessor (the join is via the occurrence), so we drive both
       # fields through the String form of `checkbox_field` /
       # `radio_field` — raw `name=` attribute, value carried by the

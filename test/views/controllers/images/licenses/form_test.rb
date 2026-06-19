@@ -3,8 +3,7 @@
 require("test_helper")
 
 # Tests for Views::Controllers::Images::Licenses::Form — the bulk
-# image-license updater that replaces the old `form_with(scope:
-# :updates)` ERB. Verifies the rendered form shape matches the wire
+# image-license updater. Verifies the rendered form shape matches the wire
 # contract the controller expects.
 module Views::Controllers::Images::Licenses
   class FormTest < ComponentTestCase

@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
-# Abstract base class for image components.
-#
-# This component replaces the ImagePresenter class, handling all image
-# presentation logic internally through Literal properties and methods.
-#
-# Provides shared functionality for rendering images with:
+# Abstract base class for image components. Provides shared functionality
+# for rendering images with:
 # - Lazy loading with aspect ratio preservation
 # - Lightbox support
 # - Vote sections

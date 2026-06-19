@@ -12,13 +12,6 @@
 # sub-panels), but distinct in shape: this one is the icon row
 # attached to the panel heading, with " | " separators rather than
 # brackets.
-#
-# Replaces the pre-Phlex `DescriptionIconsHelper#description_change_links`
-# + its 7 sub-helpers (`#description_edit_icon`,
-# `#description_admin_icons`, `#description_state_icons`,
-# `#description_make_default_icon`, `#description_project_icon`,
-# `#description_publish_icon`, plus the inlined `destroy_button`
-# call). The helper file is deleted in the same commit.
 class Components::Description::ModLinks < Components::Base
   prop :description, ::Description
   prop :user, _Nilable(::User), default: nil

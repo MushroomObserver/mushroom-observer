@@ -5,12 +5,6 @@
 # and (off SearchController pages) the form toggle that opens
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
-#
-# Replaces `app/views/controllers/application/top_nav/_search_bar.html.erb`.
-# The `search_help_toggle` / `search_form_toggle` Bootstrap-collapse
-# buttons (previously `SearchBarHelper` methods) are inlined as
-# private renderers — `search_bar_toggle` was already inlined into
-# `Components::Form::Search`, this finishes the job.
 class Views::Layouts::TopNav::SearchBar < Views::Base
   BAR_TOGGLE_CLASSES = %w[btn btn-link navbar-link px-2].freeze
 
@@ -121,8 +115,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # `SearchController#pattern` (after it pluralizes the submitted
   # form value) or by `ApplicationController::Queries` (which
   # stores `Query#search_type`, already plural from the
-  # controller's module name) — so the legacy "safe pluralize"
-  # the original ERB ran is no longer needed.
+  # controller's module name).
   def default_search_type
     controller.session[:search_type]&.to_sym || :observations
   end

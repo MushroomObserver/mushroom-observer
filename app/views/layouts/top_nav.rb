@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# The top-of-page navbar. Renders into the application layout
-# in place of `app/views/controllers/application/_top_nav.html.erb`
-# (deleted). Composes:
+# The top-of-page navbar. Composes:
 #
 #   - the left side (mobile nav-toggle button, the page title /
 #     "rubric", and the "+ Add" create-button)
@@ -11,9 +9,7 @@
 #     and either `Views::Layouts::TopNav::UserNav` or
 #     `Views::Layouts::TopNav::Login` depending on
 #     `@user.nil?`)
-#   - the collapsible search-bar row (rendered via the existing
-#     `application/top_nav/_search_bar.html.erb` ERB partial —
-#     not yet Phlexified)
+#   - the collapsible search-bar row
 #
 # Helpers from `Header::TogglesHelper` (`left_nav_toggle`,
 # `search_nav_toggle`) and `Header::RubricHelper` (`nav_rubric`,
@@ -30,8 +26,7 @@ class Views::Layouts::TopNav < Views::Base
   prop :user, _Nilable(::User), default: nil
   prop :query, _Nilable(::Query), default: nil
 
-  # Controllers / actions where the search-help dropdown is
-  # available; see `application/top_nav/_search_bar.html.erb`.
+  # Controllers / actions where the search-help dropdown is available
   SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
   SEARCH_FORM_TYPES = [
     :names, :observations, :locations,
@@ -53,8 +48,7 @@ class Views::Layouts::TopNav < Views::Base
 
   # Controllers whose index pages are linkable from the rubric.
   # When the current page IS one of these and isn't the index
-  # itself, the rubric becomes a link to the index. (Inlined from
-  # `Header::RubricHelper::NAV_INDEXABLES`.)
+  # itself, the rubric becomes a link to the index.
   NAV_INDEXABLES = %w[
     observations names species_lists projects locations images herbaria
     glossary_terms comments rss_logs field_slips
@@ -63,8 +57,7 @@ class Views::Layouts::TopNav < Views::Base
   # Controllers that support the green "+ Add" button. Description
   # / herbarium-record controllers are excluded: descriptions don't
   # get a create button at all, and herbarium records are created
-  # from observation pages. (Inlined from
-  # `Header::RubricHelper::NAV_CREATABLES`.)
+  # from observation pages.
   NAV_CREATABLES = %w[
     observations names species_lists projects locations images herbaria
     glossary_terms field_slips articles publications
@@ -132,12 +125,8 @@ class Views::Layouts::TopNav < Views::Base
     end
   end
 
-  # --- Inlined from `Header::TogglesHelper` ----------------------
-
   # The hamburger that opens the offcanvas sidebar on mobile /
-  # small-tablet widths. Uses the MO favicon as the glyph, per
-  # the long-standing helper (see the commented-out alternative
-  # `link_icon(:menu, …)` in the original).
+  # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
     div(class: "visible-xs visible-sm pr-3 pr-sm-4") do
       button(
@@ -167,8 +156,6 @@ class Views::Layouts::TopNav < Views::Base
       end
     end
   end
-
-  # --- Inlined from `Header::RubricHelper` -----------------------
 
   # The page title in the navbar. Becomes a link to the
   # controller's index page when one exists AND the current page

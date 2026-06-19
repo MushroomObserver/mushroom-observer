@@ -5,11 +5,6 @@
 # `path` as a turbo-stream response and shows the modal — if a modal
 # is already up under the same `identifier`, it reuses it.
 #
-# Drop-in equivalent of the long-standing
-# `modal_link_to(identifier, name, path, args)` helper in
-# `app/helpers/link_helper.rb`. The helper now renders this
-# component so existing ERB and Phlex callers keep working unchanged.
-#
 # If the caller passes an `:icon`, the anchor renders through
 # `Components::Link::Icon` (icon + sr-only label, tooltip, etc.);
 # otherwise it's a plain `link_to`.

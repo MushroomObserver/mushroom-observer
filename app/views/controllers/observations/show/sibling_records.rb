@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
 # Sibling-records concern for the observation details panel:
-# inlined from `Observations::SiblingRecordsHelper`. Extracted out
-# of `ObservationDetailsPanel` to keep that class under the Phlex
-# `Metrics/ClassLength` cop limit — the sibling rendering is a
-# distinct concern (read-only aggregation across siblings in an
-# occurrence) from the obs's own details.
+# extracted out of `ObservationDetailsPanel` to keep that class
+# under the Phlex `Metrics/ClassLength` cop limit — the sibling
+# rendering is a distinct concern (read-only aggregation across
+# siblings in an occurrence) from the obs's own details.
 #
 # Mixed into `ObservationDetailsPanel`. The methods read
 # `@siblings` directly; the host class owns the prop.
@@ -15,7 +14,6 @@ module Views::Controllers::Observations::Show::SiblingRecords
   # `(record, sibling)` per row. No-op when no siblings have
   # records for the requested association.
   #
-  # Inlined from `Observations::SiblingRecordsHelper#sibling_record_list`.
   def render_sibling_records(association)
     items = @siblings.flat_map do |sib|
       sib.send(association).map { |rec| [rec, sib] }
@@ -29,7 +27,6 @@ module Views::Controllers::Observations::Show::SiblingRecords
 
   # Renders the trailing "(MO <id>)" link in
   # `<small class="text-muted">` after every sibling row.
-  # Inlined from `Observations::SiblingRecordsHelper#sibling_attribution`.
   def sibling_attribution(sibling)
     small(class: "text-muted") do
       plain("(")
@@ -40,8 +37,6 @@ module Views::Controllers::Observations::Show::SiblingRecords
     end
   end
 
-  # Inlined from `Observations::SiblingRecordsHelper#sibling_herbarium_record_content`
-  # + `mcp_search_link`.
   def render_sibling_herbarium_record(record, sibling)
     a(href: herbarium_record_path(record.id)) do
       trusted_html(record.accession_at_herbarium.t)
@@ -61,7 +56,6 @@ module Views::Controllers::Observations::Show::SiblingRecords
     end
   end
 
-  # Inlined from `Observations::SiblingRecordsHelper#sibling_sequence_archive_link`.
   def render_sibling_sequence_archive(sequence)
     plain(" [")
     a(href: sequence.accession_url,

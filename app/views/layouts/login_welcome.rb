@@ -2,8 +2,8 @@
 
 # Welcome/description banner shown to unverified users — MO logo
 # (mobile only) and description text. Currently uncalled: the render
-# site in `application.html.erb` is commented out (an `unless
-# @user&.verified?` block); keeping the class around for when that's
+# site is commented out (an `unless @user&.verified?` block);
+# keeping the class around for when that's
 # re-enabled. Renamed from `Components::LoginLayout` since it's not
 # really a layout — it's app-wide chrome that *the* layout was
 # expected to render.

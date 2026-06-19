@@ -73,7 +73,7 @@ class Components::ListGroup::Base < Components::Base
     @html_id = id
     @flush = flush
     @element = element
-    @html_class = binding.local_variable_get(:class)
+    @html_class = grab(class:)
     @attributes = attributes
     @items = []
     @empty_block = nil
@@ -99,7 +99,7 @@ class Components::ListGroup::Base < Components::Base
   # @return [nil] so the call doesn't accidentally emit anything
   def item(class: nil, id: nil, **attrs, &block)
     @items << {
-      class: binding.local_variable_get(:class),
+      class: grab(class:),
       id: id,
       attrs: attrs,
       block: block

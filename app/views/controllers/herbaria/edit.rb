@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Herbaria
-  # Action view for the edit herbarium form page. Replaces
-  # edit.html.erb.
+  # Action view for the edit herbarium form page.
   class Edit < Views::FullPageBase
     def initialize(herbarium:, user:, top_users:)
       super()

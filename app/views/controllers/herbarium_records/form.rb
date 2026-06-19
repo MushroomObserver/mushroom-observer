@@ -3,7 +3,7 @@
 module Views::Controllers::HerbariumRecords
   # Form for creating or editing herbarium records attached to
   # observations. Rendered directly by the herbarium_records
-  # controller's `new.html.erb` and `edit.html.erb`, and dynamically
+  # controller's `new.rb` and `edit.rb`, and dynamically
   # by `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
     def initialize(model, observation: nil, back: nil, **)

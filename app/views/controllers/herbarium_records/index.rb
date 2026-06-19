@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the HerbariumRecords index. Replaces
-# `app/views/controllers/herbarium_records/index.html.erb`.
+# Action template for the HerbariumRecords index.
 #
 # `HerbariumRecordsController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly
@@ -13,7 +12,6 @@ module Views::Controllers::HerbariumRecords
     prop :objects, _Array(::HerbariumRecord)
     prop :user, ::User
     prop :observation, _Nilable(::Observation), default: nil
-    prop :error, _Nilable(String), default: nil
 
     def view_template
       container_class(:wide)
@@ -25,8 +23,6 @@ module Views::Controllers::HerbariumRecords
       )
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-
-      flash_error(@error) if @error && @objects.empty?
 
       paginated_results { render_rows_table if @objects.any? }
     end

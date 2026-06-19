@@ -14,8 +14,28 @@ module ApplicationController::FlashNotices
   def self.included(base)
     base.helper_method(
       :flash_notices?, :flash_get_notices, :flash_notice_level,
-      :flash_clear, :flash_notice, :flash_warning, :flash_error
+      :flash_clear, :flash_notice, :flash_warning, :flash_error,
+      :flash_notices_html
     )
+  end
+
+  # Renders the `Views::Layouts::App::FlashNotices` view to a string
+  # — for controllers that need to splice the rendered alert into a
+  # turbo-stream response. `Views::Layouts::App::PageFlash` renders
+  # the view directly so the in-page render doesn't go through this
+  # method.
+  def flash_notices_html
+    render_to_string(::Views::Layouts::App::FlashNotices.new)
+  end
+
+  # Build a `<turbo-stream action="update" target="...">` payload
+  # that swaps in the current flash notices. Default target is the
+  # layout's `page_flash` slot; modal flows pass `"modal_<id>_flash"`
+  # to update the modal's own slot. Compose into a multi-stream
+  # response alongside the action-specific updates that triggered the
+  # flash.
+  def turbo_stream_flash_update(target = "page_flash")
+    turbo_stream.update(target) { flash_notices_html }
   end
 
   ##############################################################################

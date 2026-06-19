@@ -2,7 +2,7 @@
 
 module Views::Controllers::Admin::Donations
   # Form for creating donations (admin only). Rendered by the
-  # admin/donations controller's `new.html.erb`. Allows admins to
+  # admin/donations controller's `new.rb`. Allows admins to
   # manually enter donation information.
   class Form < ::Components::ApplicationForm
     def view_template

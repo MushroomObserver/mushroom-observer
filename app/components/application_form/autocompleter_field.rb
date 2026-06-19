@@ -153,11 +153,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def autocompleter_field_attributes
-      {
-        placeholder: :start_typing.l,
-        autocomplete: "off",
-        data: input_data_attributes
-      }.deep_merge(attributes)
+      mix({ placeholder: :start_typing.l,
+            autocomplete: "off",
+            data: input_data_attributes },
+          attributes)
     end
 
     def input_data_attributes

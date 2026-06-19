@@ -5,27 +5,6 @@
 # slip, collection-numbers / herbarium-records / sequences sub-
 # panels, and external links. The center column of the obs show
 # page (and also rendered into the naming form pages).
-#
-# Replaces `_observation_details.erb`. Inlines six helpers that
-# this partial was the only/primary caller of:
-#
-# - `obs_details_links` (and its `print_labels_button` dependency)
-#   — the "print labels" heading-link
-# - `observation_details_when_where_who` + 4 sub-helpers
-#   (`observation_details_when` / `_where` / `_where_gps` /
-#   `_who`)
-# - `observation_where_vague_notice`
-# - `observation_details_notes`
-#
-# The collection_numbers / herbarium_records / sequences /
-# external_links sub-panels are still rendered via Phlex views in
-# this same directory; the `sibling_*` helpers (read-only
-# aggregated records from sibling observations in an occurrence)
-# continue to live in `Observations::SiblingRecordsHelper` for now
-# — they're called from a partial we haven't converted yet
-# (`_observation_details.erb` was the only obs-show caller; once
-# the sibling-records-helper callers all go to Phlex, the helpers
-# themselves can be inlined into their respective sub-panels).
 class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::Base
   include Views::Controllers::Observations::Show::SiblingRecords
 
@@ -48,9 +27,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   private
 
-  # Inlined from `Tabs::ObservationsHelper#obs_details_links` +
-  # `print_labels_button` (the only caller of either, here in
-  # the heading-link slot).
   def print_labels_button
     name = :download_observations_print_labels.l
     query = ::Query.lookup(::Observation, id_in_set: [@obs.id])
@@ -113,7 +89,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     end
   end
 
-  # Inlined from `ObservationsHelper#observation_where_vague_notice`.
   def render_vague_notice
     return unless @obs.location&.vague?
 
@@ -225,11 +200,10 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     end
   end
 
-  # Inlined from `ObservationsHelper#observation_details_notes`.
-  # Per the helper's preserved comment: passes each notes value
-  # to textile independently rather than the whole block — a
-  # `+photo` value at the start of a line would otherwise be
-  # interpreted as textile bold-emphasis across subsequent lines.
+  # Passes each notes value to textile independently rather than
+  # the whole block — a `+photo` value at the start of a line
+  # would otherwise be interpreted as textile bold-emphasis across
+  # subsequent lines.
   def render_notes
     notes = @obs.notes
     return if notes == ::Observation.no_notes

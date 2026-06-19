@@ -4,7 +4,7 @@ module Views::Controllers::GlossaryTerms
   class Index
     # One row in the glossary terms index list. Two columns: name +
     # description on the left, admin destroy button + thumbnail on
-    # the right. Converted from `glossary_terms/_object.html.erb`.
+    # the right.
     class Item < Views::Base
       prop :glossary_term, ::GlossaryTerm
 
@@ -31,9 +31,6 @@ module Views::Controllers::GlossaryTerms
         render_thumbnail
       end
 
-      # Inlined from the `glossary_term_destroy_button` helper —
-      # `destroy_button` is the only call there, so the helper file
-      # is deleted in this same PR.
       def render_destroy_button
         destroy_button(target: @glossary_term,
                        name: :destroy_object.t(type: :glossary_term),

@@ -2,7 +2,7 @@
 
 # Banner shown at the top of an Observation show page when the obs
 # was imported from an external source (iNat, MyCoPortal, etc.).
-# Rendered by `observations/show.html.erb`.
+# Rendered by `observations/show.rb`.
 #
 # Renders in its own panel with two pieces:
 #  - "Imported from <Source>" — a single link to the per-observation

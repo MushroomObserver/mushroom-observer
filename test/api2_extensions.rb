@@ -383,20 +383,6 @@ module API2Extensions
     assert_true(vote.favorite)
   end
 
-  # Used to be we could just used assert_equal, but now it complains that that
-  # assertion will soon no longer work if expect is nil.  We can change it to
-  # just assert(expect == actual), but that doesn't show as nice diagnostics
-  # when it fails.  So I'm restoring the old behavior of assert_equal here.
-  # This should probably move into a more general set of extensions, but for
-  # now this is the only place it is used.  -JPH 20220519
-  def assert_equal_even_if_nil(expect, actual)
-    if expect.nil?
-      assert_nil(actual)
-    else
-      assert_equal(expect, actual)
-    end
-  end
-
   def do_basic_get_test(model, *args)
     expected_object = args.empty? ? model.first : model.where(*args).first
     api = API2.execute(

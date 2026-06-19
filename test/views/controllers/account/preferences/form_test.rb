@@ -48,9 +48,7 @@ class Views::Controllers::Account::Preferences::FormTest <
     assert_html(html, "select[name='user[keep_filenames]']")
     assert_html(html, "select[name='user[license_id]']")
     # License note is HTML-safe textile that includes a link to the
-    # help-page anchor. Pre-conversion ERB used `tag.span(safe_join)`
-    # to keep the `<a>` from being escaped; the Phlex view does the
-    # same via `trusted_html`.
+    # help-page anchor.
     assert_html(html, "a[href*='how_to_use#license']")
   end
 

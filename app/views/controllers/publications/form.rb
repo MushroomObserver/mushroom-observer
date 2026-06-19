@@ -2,7 +2,7 @@
 
 module Views::Controllers::Publications
   # Form for creating/editing publications. Rendered directly by the
-  # publications controller's `new.html.erb` and `edit.html.erb`.
+  # publications controller's `new.rb` and `edit.rb`.
   class Form < ::Components::ApplicationForm
     def view_template
       render_full_field

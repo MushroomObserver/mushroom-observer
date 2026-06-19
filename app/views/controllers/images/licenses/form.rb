@@ -8,7 +8,7 @@ module Views::Controllers::Images::Licenses
   # hash keyed by row index, each row holding new/old
   # copyright_holder and new/old license_id.
   #
-  # Rendered directly by `edit.html.erb`. Driven by
+  # Rendered directly by `edit.rb`. Driven by
   # `FormObject::ImageLicenseUpdates`, which carries an array of
   # `FormObject::ImageLicenseRow` and overrides Superform's default
   # scope so the wire shape stays `params[:updates]`.

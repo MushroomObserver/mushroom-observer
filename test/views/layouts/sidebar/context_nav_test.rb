@@ -6,7 +6,7 @@ class Views::Layouts::Sidebar
   # Tests for the mobile (`xs`-only) sidebar Actions block that
   # renders into `content_for(:context_nav_mobile)`. Dispatches
   # each link tuple via
-  # `Views::Layouts::ContextNav::LinkRendering#render_crud_button_or_link`
+  # `Components::LinkRendering#render_crud_button_or_link`
   # (same as the top-nav variant) so destroy / post / put / patch
   # tuples render as their actual forms — pre-Phlex
   # `sidebar_nav_link` collapsed everything to plain links, which

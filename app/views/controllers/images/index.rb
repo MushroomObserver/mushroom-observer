@@ -2,12 +2,11 @@
 
 module Views::Controllers::Images
   # Paginated images index — chrome + `Components::Matrix::Table` of
-  # one image per row. Converted from `images/index.html.erb`.
+  # one image per row.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Image)
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       container_class(:full)
@@ -17,8 +16,6 @@ module Views::Controllers::Images
                       ))
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-
-      flash_error(@error) if @error && @objects.empty?
 
       paginated_results do
         render(::Components::Matrix::Table.new(

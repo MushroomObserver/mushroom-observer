@@ -51,13 +51,11 @@ module Views::Controllers::InatImports
     # NOTE: when available, swap this to a link filtered to the
     # observations created by `@user` between the tracker's
     # started_at and ended_at (and ideally with `source: :InatImport`),
-    # ordered by created_at desc. For now, use the today/tomorrow
-    # pattern the ERB used. (jdc 2025-02-08)
+    # ordered by created_at desc. (jdc 2025-02-08)
     def results_observations_path
       # `Date#strftime` with no format string raises `ArgumentError`;
-      # the legacy ERB had the same bug. Use `Date#to_s` (default
-      # `:iso8601` → `YYYY-MM-DD`), which is what the observations
-      # `pattern:` parser expects anyway.
+      # use `Date#to_s` (default `:iso8601` → `YYYY-MM-DD`), which
+      # is what the observations `pattern:` parser expects.
       observations_path(
         pattern: "user:#{@user.id} created:" \
                  "#{Time.zone.today}-#{Time.zone.tomorrow}"

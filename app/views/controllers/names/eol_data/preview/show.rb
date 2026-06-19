@@ -21,9 +21,8 @@ class Views::Controllers::Names::EolData::Preview::Show < Views::FullPageBase
       odd_or_even = 1 - odd_or_even
       div(class: "ListLine#{odd_or_even} py-10px") do
         # Preserve textile-rendered italics/bold for scientific
-        # names — the legacy ERB used `.t` (which emits HTML). The
-        # initial conversion stripped the tags, dropping the
-        # italics; restored after Copilot review on #4474.
+        # names — `display_name.t` emits HTML, so trusted_html is
+        # required (plain text would double-escape the tags).
         trusted_html(name.display_name.t)
       end
     end

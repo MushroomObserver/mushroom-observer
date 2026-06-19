@@ -3,9 +3,7 @@
 class Components::CrudButton
   # GET `CrudButton` — emits `<a>` (link_to), not a form-wrapped
   # button. Idempotent navigations (edit, download, etc.) use this
-  # rather than the form-button branch. Used as the Phlex-side
-  # equivalent of `LinkHelper#edit_button` and `download_button`
-  # (which delegate here).
+  # rather than the form-button branch.
   #
   # The `action:` kwarg controls path-prefixing for model targets
   # via the parent `NAMED_ROUTE_ACTIONS` whitelist (`:edit`, `:new`,

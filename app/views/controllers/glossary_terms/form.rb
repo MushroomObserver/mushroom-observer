@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::GlossaryTerms
-  # Form for creating/editing glossary terms. Rendered directly by
-  # the glossary_terms controller's `new.html.erb` and `edit.html.erb`.
+  # Form for creating/editing glossary terms.
   class Form < ::Components::ApplicationForm
     # Override initialize to accept upload field props (only for new
     # form).

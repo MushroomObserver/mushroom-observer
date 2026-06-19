@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Superform component for rendering faceted search forms.
-# Replaces shared/search_form.erb and shared/search_panel.erb partials.
 #
 # Uses the Query model (e.g., Query::Observations) directly as the form model.
 # Field layout is determined by FIELD_COLUMNS on the controller.
@@ -112,8 +111,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  # Inlined from `SearchBarHelper#search_bar_toggle` — Bootstrap
-  # collapse-trigger button that hides the search-bar elements row
+  # Bootstrap collapse-trigger button that hides the search-bar elements row
   # in the top nav.
   def render_search_bar_toggle
     button(class: class_names(BAR_TOGGLE_CLASSES),

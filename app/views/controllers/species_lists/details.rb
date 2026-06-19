@@ -62,8 +62,7 @@ module Views::Controllers::SpeciesLists
     end
 
     # `location_link` raises if `@species_list.where` is blank — fall
-    # back to a plain `:UNKNOWN.t` label in that case (matches the
-    # `rescue :UNKNOWN.t` in the original ERB).
+    # back to a plain `:UNKNOWN.t` label in that case.
     def render_where
       div do
         b { plain("#{:WHERE.t}:") }
@@ -98,9 +97,8 @@ module Views::Controllers::SpeciesLists
       end
     end
 
-    # Notes get the same `*NOTES:* …`-into-textile treatment the ERB
-    # used; render through `trusted_html` because `.tpl` returns
-    # already-safe markup.
+    # Notes get the `*NOTES:* …`-into-textile treatment;
+    # render through `trusted_html` because `.tpl` returns already-safe markup.
     def render_notes
       div do
         trusted_html("*#{:NOTES.t}:* #{@species_list.notes}".tpl)

@@ -20,7 +20,7 @@ class HerbariumRecordsController < ApplicationController
     render(Views::Controllers::HerbariumRecords::Index.new(
              query: @query, pagination_data: @pagination_data,
              objects: @objects, user: @user,
-             observation: @observation, error: @error
+             observation: @observation
            ))
   end
 

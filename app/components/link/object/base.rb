@@ -4,7 +4,6 @@
 # the link text and a `<type>_link_<id>` CSS class for selector-based
 # tests / JS hooks.
 #
-# Replaces the `link_to_object` helper from `app/helpers/object_link_helper.rb`.
 # Callers pass the AR object and, optionally, an override link text
 # (defaults to the object's textilized `#title`).
 class Components::Link::Object::Base < Components::Base

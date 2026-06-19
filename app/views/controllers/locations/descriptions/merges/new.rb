@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Locations::Descriptions::Merges
-  class New < Views::Base
+  class New < Views::FullPageBase
     prop :description, ::LocationDescription
     prop :user, _Nilable(::User), default: nil
 

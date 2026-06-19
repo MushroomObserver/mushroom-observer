@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Projects index. Replaces
-# `app/views/controllers/projects/index.html.erb`.
+# Action template for the Projects index.
 #
 # `ProjectsController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly with
@@ -11,7 +10,6 @@ module Views::Controllers::Projects
     prop :query, ::Query::Projects
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Project)
-    prop :error, _Nilable(String), default: nil
 
     def view_template
       add_index_title(@query)
@@ -19,8 +17,6 @@ module Views::Controllers::Projects
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
       container_class(:text_image)
-
-      flash_error(@error) if @error && @objects.empty?
 
       paginated_results { render_list_group }
     end

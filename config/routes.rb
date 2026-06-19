@@ -467,7 +467,12 @@ MushroomObserver::Application.routes.draw do
   get("/info/news", to: "info#news")
   get("/info/search_bar_help", to: "info#search_bar_help")
   get("/info/site_stats", to: "info#site_stats")
-  match("/info/textile_sandbox", to: "info#textile_sandbox", via: [:get, :post])
+  get("/info/textile_sandbox",     to: redirect("/info/textile_sandbox/new"),
+                                   as: nil)
+  get("/info/textile_sandbox/new", to: "info#textile_sandbox",
+                                   as: "new_info_textile_sandbox")
+  post("/info/textile_sandbox",    to: "info#textile_sandbox_create",
+                                   as: "info_textile_sandbox")
   get("/info/translators_note", to: "info#translators_note")
 
   resources :interests, only: [:index, :create, :update, :destroy]
@@ -938,8 +943,8 @@ MushroomObserver::Application.routes.draw do
   get("/observer/news", to: redirect("/info/news"))
   get("/observer/search_bar_help", to: redirect("/info/search_bar_help"))
   get("/observer/show_site_stats", to: redirect("/info/site_stats"))
-  get("/observer/textile", to: redirect("/info/textile_sandbox"))
-  get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox"))
+  get("/observer/textile", to: redirect("/info/textile_sandbox/new"))
+  get("/observer/textile_sandbox", to: redirect("/info/textile_sandbox/new"))
   get("/observer/translators_note", to: redirect("/info/translators_note"))
 
   # ----- Names: legacy action redirects -----------------------------------

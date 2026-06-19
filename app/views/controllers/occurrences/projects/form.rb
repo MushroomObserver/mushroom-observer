@@ -4,7 +4,7 @@
 # Renders the intro text, project list, and Cancel/Skip/Add All
 # buttons — but no modal chrome. Callers wrap this in
 # `Components::Modal` with `auto_open: true` to get the auto-opening
-# Bootstrap modal (see `field_slips/new.html.erb` and `edit.html.erb`).
+# Bootstrap modal (see `field_slips/new.rb` and `edit.rb`).
 #
 # Two render modes:
 #   - "create" (when `selected:` is passed) — POSTs the selection

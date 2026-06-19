@@ -4,7 +4,7 @@ module Views::Controllers::Sequences
   # Form for creating or editing DNA sequences attached to
   # observations. Sequences can contain genetic data (bases) or
   # reference external archives. Rendered directly by the sequences
-  # controller's `new.html.erb` and `edit.html.erb`, and dynamically
+  # controller's `new.rb` and `edit.rb`, and dynamically
   # by `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
     def initialize(model, observation: nil, back: nil, **)
@@ -142,7 +142,6 @@ module Views::Controllers::Sequences
       @observation || model.observation
     end
 
-    # Inlined from the now-deleted `SequencesHelper#sequence_archive_options`.
     # Dropdown options for the archive select: each entry is a
     # `[label, value]` pair where label == value == archive name.
     def sequence_archive_options

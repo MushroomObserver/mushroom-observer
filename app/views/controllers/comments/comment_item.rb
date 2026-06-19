@@ -7,17 +7,14 @@
 #   the comments-for-object Panel. `editable:` is whether the
 #   viewer should see edit/destroy mod-links + a real author
 #   UserLink (truthy on logged-in viewers); `show_name:` is false.
-# - **`comments/index.html.erb`** — the site-wide searchable
+# - **`comments/index.rb`** — the site-wide searchable
 #   comments index. `show_name: true` adds a heading with a link
 #   to the comment's target.
 #
 # Also rendered indirectly via the `Comment` model's
 # `after_create_commit` / `after_update_commit` Turbo-Stream
 # broadcasts — those callbacks render this view to HTML and pass
-# it as the broadcast payload, replacing the legacy
-# `partial: "comments/comment"` lookup.
-#
-# Replaces `app/views/controllers/comments/_comment.erb`.
+# it as the broadcast payload.
 module Views::Controllers::Comments
   class CommentItem < Views::Base
     include Phlex::Rails::Helpers::ImageTag
@@ -26,9 +23,7 @@ module Views::Controllers::Comments
     prop :user, _Nilable(::User), default: nil
     # When true, render edit/destroy mod-links and a real author
     # UserLink. When false, the author shows as plain text and no
-    # mod-links wrapper is emitted. The legacy ERB called this
-    # prop `controls`; the rename keeps it clear that the flag is
-    # about edit-affordance, not the comment's existence.
+    # mod-links wrapper is emitted.
     prop :editable, _Boolean, default: false
     prop :show_name, _Boolean, default: false
 
@@ -85,11 +80,10 @@ module Views::Controllers::Comments
     # ---- target heading (comments-index "show_name" mode) ---------
 
     # `target_name_link` and `target_type` are wrapped in `rescue`
-    # blocks in the legacy helper — a comment can outlive its
-    # target (deleted observation, project, etc.), and the
-    # comments-index list still needs to render the row. The
-    # rescues swallow nil-target / missing-method errors and
-    # substitute a "deleted" placeholder.
+    # blocks — a comment can outlive its target (deleted
+    # observation, project, etc.), and the comments-index list
+    # still needs to render the row. The rescues swallow nil-target
+    # / missing-method errors and substitute a "deleted" placeholder.
     def render_target_heading
       h4(class: "mt-0") do
         target_name_link
@@ -142,7 +136,7 @@ module Views::Controllers::Comments
     #   `comment.user` so the gate passes; the markup ships
     #   unconditionally. The wrapping `[data-user-specific]`
     #   span teams up with the site-wide CSS rule (see
-    #   `_user_specific_css.html.erb`) to hide it for everyone
+    #   `_user_specific_css.rb`) to hide it for everyone
     #   except the comment's author on the receiving end. Admins
     #   bypass the CSS so they still see mod links.
     def render_mod_links_span

@@ -84,12 +84,8 @@ module Views::Controllers::SpeciesLists
       div(class: "manage_observation") { render_remove_obs_button }
     end
 
-    # Inlined from `SpeciesListsHelper#species_list_remove_obs_button` —
-    # only this view and `Listing` rendered it, and `Listing` inlines
-    # it the same way. `confirm:` is the modern Turbo-confirm kwarg
-    # (replaces the legacy `data: { confirm: … }` the old helper
-    # passed; rails-ujs is no longer wired and that data attr was a
-    # no-op under Turbo).
+    # `confirm:` is the Turbo-confirm kwarg; `data: { confirm: … }` is
+    # a no-op under Turbo (rails-ujs is not wired).
     def render_remove_obs_button
       render(Components::CrudButton::Put.new(
                name: :REMOVE.t,

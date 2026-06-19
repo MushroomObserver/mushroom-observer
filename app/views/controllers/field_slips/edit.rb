@@ -5,8 +5,6 @@
 # `Components::Occurrences::Projects::Form` modal when the
 # controller computed unresolved project memberships
 # (`@field_slip_project_gaps`) for the obs about to be linked.
-#
-# Replaces `app/views/controllers/field_slips/edit.html.erb`.
 module Views::Controllers::FieldSlips
   class Edit < Views::FullPageBase
     prop :field_slip, ::FieldSlip

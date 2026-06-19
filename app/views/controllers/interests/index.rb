@@ -8,13 +8,11 @@ module Views::Controllers::Interests
     prop :types, _Array(::String)
     prop :selected_type, _Nilable(::String), default: nil
     prop :pagination_data, ::PaginationData
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       add_page_title(:list_interests_title.l)
       add_pagination(@pagination_data)
       container_class(:wide)
-      flash_error(@error) if @error && @interests.none?(&:target)
 
       render_type_filter if show_type_filter?
       paginated_results { render_interests_table if @interests.any?(&:target) }

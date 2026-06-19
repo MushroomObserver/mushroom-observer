@@ -4,8 +4,7 @@ module Views::Controllers::GlossaryTerms
   module Versions
     # Past-version display for a glossary term. Two-column layout:
     # the version's `Term` summary on the left, `Versions::Table` on
-    # the right, then a shared `ObjectFooter`. Converted from
-    # `glossary_terms/versions/show.html.erb`.
+    # the right, then a shared `ObjectFooter`.
     class Show < Views::FullPageBase
       prop :glossary_term, ::GlossaryTerm
       prop :versions, _Array(::GlossaryTerm::Version)

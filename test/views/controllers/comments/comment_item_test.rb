@@ -120,8 +120,7 @@ module Views::Controllers::Comments
 
       html = render_item(comment: author_comment)
 
-      # `.user-image-sizer` is the wrapper the legacy ERB used —
-      # also asserted as the marker for the avatar branch.
+      # `.user-image-sizer` is the avatar-branch marker.
       assert_html(html, ".user-image-sizer img")
       assert_html(html, "img[data-role='link']",
                   attribute: { "data-url" =>

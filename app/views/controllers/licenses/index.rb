@@ -4,13 +4,11 @@ module Views::Controllers::Licenses
   # Licenses index — read-only list of every License row.
   class Index < Views::FullPageBase
     prop :objects, _Array(::License)
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       container_class(:wide)
       add_page_title(:index_license_header.l)
       add_context_nav(::Tab::License::IndexActions.new)
-      flash_error(@error) if @error && @objects.empty?
 
       div { render_table }
     end

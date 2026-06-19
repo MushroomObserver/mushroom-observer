@@ -32,9 +32,6 @@ module Views::Layouts
 
     private
 
-    # Inlined from the former `Header::FiltersHelper#add_filter_help` —
-    # `_header.html.erb` was the only caller, and Phlex needs this to run
-    # in a context that can `content_for`.
     def maybe_set_filter_help
       return unless @any_content_filters_applied
 

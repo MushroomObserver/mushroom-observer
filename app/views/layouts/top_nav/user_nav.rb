@@ -4,8 +4,7 @@
 # someone is logged in. Two sections separated by a divider:
 # logged-in actions (profile / preferences / etc., from
 # `Tab::UserNav::LoggedIn`) and log-out actions (from
-# `Tab::UserNav::LogOut`). Replaces
-# `app/views/controllers/application/top_nav/_user_nav.html.erb`.
+# `Tab::UserNav::LogOut`).
 #
 # Wraps `Components::Dropdown` — Bootstrap nav-dropdown markup,
 # toggle, per-item link/button dispatch, and the auto-divider

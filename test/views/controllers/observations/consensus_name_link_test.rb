@@ -2,9 +2,7 @@
 
 require("test_helper")
 
-# Pins the rendered markup of the obs-show title zone — the
-# `ConsensusNameLink` Phlex view that replaced the legacy
-# `ObservationsHelper#obs_title_consensus_name_link` chain.
+# Pins the rendered markup of the obs-show title zone.
 #
 # Covers four orthogonal modes:
 #
@@ -18,8 +16,7 @@ require("test_helper")
 #   vs matches it
 #
 # The four-mode matrix is what controls whether `(Site ID)` and/or
-# `(<preferred synonym>)` decorations append to the consensus
-# link.
+# `(<preferred synonym>)` decorations append to the consensus link.
 module Views::Controllers::Observations
   class ConsensusNameLinkTest < ComponentTestCase
     def setup

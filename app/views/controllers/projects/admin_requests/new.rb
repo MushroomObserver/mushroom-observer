@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects::AdminRequests
   # Phlex view for the admin request form page.
-  # Replaces admin_requests/new.html.erb.
   class New < Views::FullPageBase
     def initialize(project:)
       super()

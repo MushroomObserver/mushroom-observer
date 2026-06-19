@@ -5,7 +5,7 @@
 # `ObservationDetailsPanel`, `NameInfoPanel`, `SpeciesListsPanel`,
 # `AssociatedObservationsPanel`, `ThumbnailMapPanel`, namings
 # partial, comments partial, `Views::Layouts::ObjectFooter`) into a
-# two-column layout. Replaces `observations/show.html.erb`.
+# two-column layout.
 #
 # Renders `add_show_title` + owner-naming line + pager / interest /
 # edit icons (logged-in only) into the page chrome, then a `.row`

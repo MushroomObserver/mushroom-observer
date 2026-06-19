@@ -8,7 +8,7 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
   # MO displays what the entered text looks like.
   def test_post_textile
     login
-    visit("/info/textile_sandbox")
+    visit("/info/textile_sandbox/new")
     fill_in("textile_sandbox_code", with: "Jabberwocky")
     click_button("Test")
     page.assert_text("Jabberwocky", count: 2)

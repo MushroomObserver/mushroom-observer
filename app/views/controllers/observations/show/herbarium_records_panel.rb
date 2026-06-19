@@ -3,7 +3,7 @@
 # Herbarium-records sub-panel — same shape as
 # `CollectionNumbersPanel` but for `HerbariumRecord`s, with an
 # additional "search MCP" indented link for records whose
-# herbarium is `web_searchable?`. Replaces `_herbarium_records.erb`.
+# herbarium is `web_searchable?`
 class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -76,8 +76,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
     end
   end
 
-  # Read-only list: column-stacked link list (matches pre-Phlex
-  # shape — `tag.div` heading + tight-list with show-link + br +
+  # Read-only list: `div` heading + tight-list with show-link + br +
   # MCP search link when web-searchable).
   def render_readonly_list(records)
     div { plain("#{:Herbarium_record.t}:") }

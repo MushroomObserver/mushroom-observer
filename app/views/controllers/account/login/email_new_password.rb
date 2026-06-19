@@ -4,9 +4,6 @@
 # the "I forgot my password, email me a reset link" page. Page title
 # plus the textile-rendered help/spam note plus the
 # `EmailNewPasswordForm`.
-#
-# Replaces
-# `app/views/controllers/account/login/email_new_password.html.erb`.
 module Views::Controllers::Account::Login
   class EmailNewPassword < Views::FullPageBase
     prop :new_user, _Nilable(::User)

@@ -4,9 +4,6 @@
 # field on the observation form. Localized example locations are
 # flipped between postal and scientific order based on the current
 # user's `location_format`.
-#
-# Replaces the `observation_location_help` helper from
-# `app/helpers/observations_helper.rb`.
 module Views::Controllers::Observations
   class Form::LocationHelp < Views::Base
     POSTAL_LOC1 = "Albion, Mendocino Co., California, USA"

@@ -2,7 +2,7 @@
 
 module Views::Controllers::Admin::Session
   # Form for admins to switch to another user's account. Rendered by
-  # the admin/session controller's `edit.html.erb`. Allows admins to
+  # the admin/session controller's `edit.rb`. Allows admins to
   # impersonate users for debugging/support.
   class Form < ::Components::ApplicationForm
     def initialize(model, **)

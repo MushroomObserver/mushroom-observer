@@ -6,11 +6,6 @@
 # (`ImageGallery::Item`) + thumbnail indicators (`ImageGallery::Thumbnail`)
 # via the carousel's `c.item(...) { … }` / `c.thumb(...) { … }` API.
 #
-# Replaces the legacy `Components::Carousel` (which inlined the Bootstrap
-# carousel skeleton). The skeleton now lives in
-# `Components::Carousel`; this component owns the Panel chrome,
-# heading, no-images fallback, and the per-image render logic.
-#
 # @example
 #   render Components::ImageGallery.new(
 #     user: @user,
