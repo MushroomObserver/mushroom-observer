@@ -6,7 +6,7 @@ require("test_helper")
 class TextileIntegrationTest < CapybaraIntegrationTestCase
   def test_sequential_term_links
     login(mary)
-    visit(info_textile_sandbox_path)
+    visit(new_info_textile_sandbox_path)
 
     fill_in("textile_sandbox_code", with: "_Aborts_\n_aborts_")
     click_on("Test")

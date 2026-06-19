@@ -55,6 +55,11 @@ class NamesControllerUpdateTest < FunctionalTestCase
     end
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")
+    # Translation strings that embed a textile sandbox link must point
+    # at the GET route, not the POST /info/textile_sandbox endpoint.
+    assert_select("a[href='/info/textile_sandbox/new']",
+                  minimum: 1,
+                  text: /[Tt]extile/)
   end
 
   def test_edit_name_get_deprecated_genus
