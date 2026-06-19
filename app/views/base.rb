@@ -1,14 +1,26 @@
 # frozen_string_literal: true
 
-# Abstract base class for all `Views::Controllers::*` Phlex view
-# classes (and other classes under `Views::*` that render content).
+# Base class for `Views::Controllers::*` Phlex view classes and
+# other view-layer classes under `Views::*` that render content
+# (layouts' sub-pieces, sidebar items, etc.). Inherits from
+# `Components::Base` so view classes get the same Phlex/Rails wiring
+# as generic UI components.
 #
-# Inherits from `Components::Base` so view classes get the same
-# Phlex/Rails wiring as ordinary components. Pre-registers the
-# page-chrome helpers every action view uses — title, context nav,
-# container class, project banner — so subclasses don't have to
-# repeat `register_value_helper` calls for each one.
+# Things that belong here, not on `Components::Base`: view-layer
+# state assumptions — `paginated_results` reads
+# `content_for(:index_pagination_*)` slots only set on index pages;
+# `reload_with_args` reads `request.url` and is meaningful only
+# inside a request lifecycle; `flash_error` belongs to the
+# request-flash flow. Pure UI components (modals, dropdowns,
+# buttons) don't need any of these.
+#
+# Per-concern setters that pair with these readers (e.g.
+# `add_pagination` for `paginated_results`) live on
+# `Views::FullPageBase::*` modules — action views set; sub-partials
+# read.
 class Views::Base < Components::Base
+  register_value_helper :flash_error
+
   # `paginated_results { render_results }` — wraps the supplied result-set
   # block in the `<div id="results" data-q="...">` shell with the
   # pre-rendered `:index_pagination_top` / `:index_pagination_bottom`
@@ -33,8 +45,6 @@ class Views::Base < Components::Base
     end
   end
 
-  register_value_helper :flash_error
-
   # Rebuilds the current request URL with the given args merged /
   # cleared (e.g. `reload_with_args(merge: nil)` strips the `?merge=`
   # param). Used by the herbaria index merge-mode Alert + language
@@ -43,10 +53,4 @@ class Views::Base < Components::Base
     uri = request.url.sub(%r{^\w+:/+[^/]+}, "")
     add_args_to_url(uri, new_args)
   end
-  # Stable request-context predicate exposed to all Phlex views.
-  # Reads `session[:admin]` via `ApplicationController::Authentication`
-  # (`base.helper_method(:permission?, :reviewer?, :in_admin_mode?)`),
-  # so ERB views see it for free. Phlex needs the explicit register.
-  # Matches `register_value_helper :permission?` in `Components::Base`.
-  register_value_helper :in_admin_mode?
 end
