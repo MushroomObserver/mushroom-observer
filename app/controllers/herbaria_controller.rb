@@ -502,9 +502,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
     [
       turbo_stream.close_modal("modal_herbarium"),
       turbo_stream.remove("modal_herbarium"),
-      turbo_stream.update("page_flash") do
-        helpers.flash_notices_html
-      end,
+      turbo_stream_flash_update,
       # Obs form's herbarium-name field is namespaced under the
       # observation Superform: id is `observation_herbarium_record_*`.
       turbo_stream.update_input(

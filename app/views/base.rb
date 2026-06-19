@@ -34,10 +34,15 @@ class Views::Base < Components::Base
   end
 
   register_value_helper :flash_error
+
   # Rebuilds the current request URL with the given args merged /
   # cleared (e.g. `reload_with_args(merge: nil)` strips the `?merge=`
-  # param). Used by the herbaria index merge-mode Alert.
-  register_value_helper :reload_with_args
+  # param). Used by the herbaria index merge-mode Alert + language
+  # picker.
+  def reload_with_args(new_args)
+    uri = request.url.sub(%r{^\w+:/+[^/]+}, "")
+    add_args_to_url(uri, new_args)
+  end
   # Stable request-context predicate exposed to all Phlex views.
   # Reads `session[:admin]` via `ApplicationController::Authentication`
   # (`base.helper_method(:permission?, :reviewer?, :in_admin_mode?)`),

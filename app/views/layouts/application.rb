@@ -9,7 +9,6 @@
 # from the layout itself would recurse.
 module Views::Layouts
   class Application < Components::Base
-    register_value_helper :css_theme
     register_value_helper :browser
 
     # Action-specific customizations. `Views::FullPageBase#layout_props`
@@ -34,6 +33,37 @@ module Views::Layouts
     end
 
     private
+
+    # Picks the stylesheet bundle for this page. Admin-mode flips to
+    # the admin stylesheet, sudo-mode flags itself visually; otherwise
+    # `theme_for(user)` picks the user's stylesheet.
+    def css_theme(user)
+      return "Admin" if in_admin_mode?
+      return "Sudo" if session[:real_user_id].present?
+
+      theme_for(user)
+    end
+
+    # Bots and themeless users fall back to `MO.default_theme`; an
+    # `action_name` that matches a theme name renders THAT theme (so
+    # browsing a theme's info page shows the theme); a logged-in user
+    # with a registered preference wins; otherwise a random theme
+    # (logged-in users see the variety).
+    def theme_for(user)
+      return MO.default_theme if browser.bot? || !user
+      return action_name if theme_matches_action?
+      return user.theme if user_has_valid_theme?(user)
+
+      MO.themes.sample
+    end
+
+    def theme_matches_action?
+      MO.themes.member?(action_name)
+    end
+
+    def user_has_valid_theme?(user)
+      user.theme.present? && MO.themes.member?(user.theme)
+    end
 
     def html_class
       Rails.env.test? ? "" : "scroll-behavior-smooth"
