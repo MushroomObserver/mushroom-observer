@@ -14,7 +14,6 @@ module Views::Controllers::Account
         render(Components::CrudButton::Post.new(
                  name: :app_logout.t,
                  target: account_logout_path,
-                 class: "btn btn-default",
                  id: "nav_user_logout_link"
                ))
       else

@@ -78,8 +78,7 @@ module Views::Controllers::Projects::Updates
                  project_id: @project.id,
                  show_excluded: @show_excluded
                ),
-               confirm: :project_updates_confirm_add_all.t,
-               class: "btn btn-default"
+               confirm: :project_updates_confirm_add_all.t
              ))
     end
 

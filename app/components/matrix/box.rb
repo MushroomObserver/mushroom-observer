@@ -332,7 +332,7 @@ class Components::Matrix::Box < Components::Base
                target: exclude_observation_project_update_path(
                  project_id: @project.id, id: @data[:what].id
                ),
-               class: "btn btn-default btn-sm"
+               class: "btn-sm"
              ))
     end
   end

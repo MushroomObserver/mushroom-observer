@@ -10,6 +10,7 @@ class Components::CrudButton
   #   ))
   class Put < Components::CrudButton
     def initialize(target:, name:, **args)
+      args[:btn] ||= Components::Button::DEFAULT_BTN
       super(target: target, name: name, method: :put, **args)
     end
   end
