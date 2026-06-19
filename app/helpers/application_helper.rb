@@ -69,10 +69,6 @@ module ApplicationHelper
     end
   end
 
-  def logged_in_status
-    User.current ? "logged_in" : "no_user"
-  end
-
   # ----------------------------------------------------------------------------
 
   # Take URL that got us to this page and add one or more parameters to it.
@@ -128,14 +124,5 @@ module ApplicationHelper
     return addr if args.empty?
 
     "#{addr}?#{args.to_query}"
-  end
-
-  def form_submit_text(obj)
-    obj_name = obj.class.model_name.singular.upcase.to_sym.t
-    if obj.new_record?
-      :create_object.t(TYPE: obj_name)
-    else
-      :update_object.t(TYPE: obj_name)
-    end
   end
 end
