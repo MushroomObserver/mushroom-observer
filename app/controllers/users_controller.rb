@@ -143,7 +143,7 @@ class UsersController < ApplicationController
   def render_index_view
     render(Views::Controllers::Users::Index.new(
              query: @query, users: @objects.to_a,
-             pagination_data: @pagination_data, error: @error
+             pagination_data: @pagination_data
            ))
   end
 

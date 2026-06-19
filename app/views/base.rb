@@ -10,24 +10,14 @@
 # state assumptions — `paginated_results` reads
 # `content_for(:index_pagination_*)` slots only set on index pages;
 # `reload_with_args` reads `request.url` and is meaningful only
-# inside a request lifecycle; `flash_error` belongs to the
-# request-flash flow. Pure UI components (modals, dropdowns,
-# buttons) don't need any of these.
+# inside a request lifecycle. Pure UI components (modals, dropdowns,
+# buttons) don't need either.
 #
 # Per-concern setters that pair with these readers (e.g.
 # `add_pagination` for `paginated_results`) live on
 # `Views::FullPageBase::*` modules — action views set; sub-partials
 # read.
 class Views::Base < Components::Base
-  # TODO: 19 index action views call `flash_error(@error)` to push a
-  # "no matches" message onto the flash session — but the controller
-  # already sets `@error` AND knows `query.num_results.zero?`, so the
-  # whole conditional can be consolidated controller-side
-  # (`set_index_view_ivars`). After that refactor this registration
-  # goes away. Tracked in
-  # `project_flash_error_from_views_to_controller.md`.
-  register_value_helper :flash_error
-
   # `paginated_results { render_results }` — wraps the supplied result-set
   # block in the `<div id="results" data-q="...">` shell with the
   # pre-rendered `:index_pagination_top` / `:index_pagination_bottom`

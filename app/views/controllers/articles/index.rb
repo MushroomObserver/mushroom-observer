@@ -9,7 +9,6 @@ module Views::Controllers::Articles
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Article)
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       container_class(:wide)
@@ -18,7 +17,6 @@ module Views::Controllers::Articles
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      flash_error(@error) if @error && @objects.empty?
       paginated_results { render_list }
     end
 

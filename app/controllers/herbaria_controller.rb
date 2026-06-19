@@ -86,7 +86,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def render_index_view
     render(Views::Controllers::Herbaria::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, merge: @merge, error: @error
+             objects: @objects, merge: @merge
            ))
   end
 

@@ -243,8 +243,27 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
       show_action_redirect(query)
     else
       calc_pages_and_objects(query, display_opts)
+      return if redirect_past_last_page?
+
       render_index_view
     end
+  end
+
+  # `?page=99` on a 5-page result currently renders an empty result
+  # area silently — clamp the URL to the last valid page so the
+  # request self-corrects. Returns true (and performs the redirect)
+  # when the current request was past the last page; false otherwise.
+  def redirect_past_last_page?
+    return false unless @pagination_data&.num_pages&.positive?
+    return false unless @pagination_data.number > @pagination_data.num_pages
+
+    page_arg = @pagination_data.number_arg
+    redirect_to(url_for(
+                  params.permit!.to_h.merge(
+                    page_arg => @pagination_data.num_pages
+                  )
+                ))
+    true
   end
 
   # Render the index view. Every index controller now renders a Phlex
@@ -301,6 +320,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     @layout = calc_layout_params if display_opts[:matrix]
     @num_results = query.num_results
     @any_content_filters_applied = check_if_preference_filters_applied
+    # "No matches" flash for the entire result set — gated on
+    # `@num_results.zero?` rather than the current page being empty.
+    # Empty-page-on-non-empty-result is handled by
+    # `redirect_past_last_page?` clamping the URL to the last
+    # valid page.
+    flash_error(@error) if @num_results.zero?
   end
 
   def check_if_preference_filters_applied

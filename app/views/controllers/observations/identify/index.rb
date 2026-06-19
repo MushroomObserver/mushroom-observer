@@ -19,14 +19,11 @@ module Views::Controllers::Observations::Identify
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Observation)
     prop :user, _Nilable(::User), default: nil
-    prop :error, _Nilable(String), default: nil
 
     def view_template
       container_class(:full)
       add_index_title(@query)
       add_pagination(@pagination_data)
-
-      flash_error(@error) if @error && @objects.empty?
 
       div(class: "container-text content-block") do
         p { trusted_html(:obs_needing_id_intro.tp) }

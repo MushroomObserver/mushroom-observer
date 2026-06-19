@@ -25,7 +25,7 @@ module Locations
     def render_index_view
       render(Views::Controllers::Locations::Descriptions::Index.new(
                query: @query, descriptions: @objects.to_a,
-               pagination_data: @pagination_data, error: @error
+               pagination_data: @pagination_data
              ))
     end
 

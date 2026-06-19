@@ -7,7 +7,6 @@ module Views::Controllers::Images
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Image)
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       container_class(:full)
@@ -17,8 +16,6 @@ module Views::Controllers::Images
                       ))
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-
-      flash_error(@error) if @error && @objects.empty?
 
       paginated_results do
         render(::Components::Matrix::Table.new(
