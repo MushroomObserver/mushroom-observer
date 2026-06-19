@@ -27,8 +27,7 @@ module Views::Controllers::CollectionNumbers
 
     private
 
-    # Headerless `Components::Table` (`show_headers: false`) — matches
-    # the bare-table markup of the original ERB.
+    # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
       render(Components::Table.new(@objects, class: "table-striped mt-3",
                                              show_headers: false)) do |t|

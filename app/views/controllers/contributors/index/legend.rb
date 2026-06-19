@@ -76,7 +76,6 @@ module Views::Controllers::Contributors
           # no HTML markup so `plain` is sufficient.
           t.column("field") { |f| plain(:"user_stats_#{f}".t) }
           t.column("weight") { |f| plain(::UserStats::ALL_FIELDS[f][:weight]) }
-          # Original ERB rendered an empty third `<td></td>`; mirror it.
           t.column("spacer") { plain("") }
         end
       end

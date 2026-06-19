@@ -32,8 +32,8 @@ module Views::Controllers::SpeciesLists
 
     private
 
-    # `place_name.t` can blow up on lists without a place — the ERB
-    # used a bare `rescue :UNKNOWN.l`; we preserve that fallback.
+    # `place_name.t` can blow up on lists without a place -
+    # `rescue :UNKNOWN.l` is fallback.
     def place
       @place ||= begin
                    @species_list.place_name.t

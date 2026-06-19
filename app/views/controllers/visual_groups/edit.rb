@@ -44,12 +44,6 @@ module Views::Controllers::VisualGroups
 
     private
 
-    # NOTE: The pre-conversion ERB rendered `<p id="notice"><%= notice %></p>`
-    # — a rails-scaffold-generated remnant. Dropped: the global flash
-    # banner in the application layout already surfaces flash[:notice]
-    # for every controller, so this paragraph was a near-empty no-op
-    # on every page load. No tests pinned `#notice`.
-
     def render_top_nav
       p { render_back_nav_links }
     end
@@ -142,8 +136,7 @@ module Views::Controllers::VisualGroups
     # snapshot (stale data), and HTTP-layer caching is less reliable
     # than the explicit `reload(true)` for force-refetch. Phlex's
     # native `a` strips `javascript:` hrefs as a safety measure, but
-    # the registered Rails `link_to` helper keeps them — same
-    # mechanism the ERB this replaces relied on.
+    # the registered Rails `link_to` helper keeps them.
     def render_reload_link
       link_to(:RELOAD.t, "javascript:window.location.reload(true)",
               class: "btn btn-default ml-2")

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Page-title strip below the top nav, rendered on non-index actions.
-# Replaces `_page_title.erb`. Two columns:
+# Two columns:
 #
 #   - left: `<h1 id="title">` (consensus title from content_for(:title))
 #     plus the edit-icons strip; on obs show, the owner-naming line

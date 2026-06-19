@@ -115,8 +115,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # `SearchController#pattern` (after it pluralizes the submitted
   # form value) or by `ApplicationController::Queries` (which
   # stores `Query#search_type`, already plural from the
-  # controller's module name) — so the legacy "safe pluralize"
-  # the original ERB ran is no longer needed.
+  # controller's module name).
   def default_search_type
     controller.session[:search_type]&.to_sym || :observations
   end

@@ -100,9 +100,8 @@ module Views::Controllers::Account::APIKeys
 
       # Critical: the input must post under `api_key[notes]` so the
       # controller's `params[:api_key].permit(:notes)` picks it up.
-      # The pre-Phlex ERB used `scope: :key` which posted under
-      # `key[notes]` — a latent bug; Superform derives the scope from
-      # the model class (`APIKey` → `:api_key`).
+      # Superform derives the scope from the model class (`APIKey` →
+      # `:api_key`).
       assert_html(html, "input[name='api_key[notes]']")
     end
 

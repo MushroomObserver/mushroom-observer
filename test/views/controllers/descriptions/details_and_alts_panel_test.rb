@@ -13,7 +13,7 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
     # `append_view_path Rails.root.join("app/views/controllers")`.
     # Some integration paths still render the old ERB partial, so
     # prepend the controllers view path for those code paths to find
-    # their templates.
+    # their templates. NOTE: NO MORE ERB, delete?
     controller.prepend_view_path(
       Rails.root.join("app/views/controllers")
     )

@@ -77,7 +77,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
 
   # `has_descriptions` subaction columns: when a description
   # exists, show authors / note status / review status; when it
-  # doesn't, show the placeholder text the legacy ERB used.
+  # doesn't, show the placeholder text.
   def render_description_columns
     desc = @name.description
     return span { plain("--- not the default ---") } unless desc

@@ -76,8 +76,6 @@ module Views::Controllers::FieldSlips
     end
 
     # Emits `<strong>LABEL: </strong>` + the block's content + `<br>`.
-    # Matches the per-row shape the ERB partial repeated for every
-    # observation-detail field.
     def labeled(key)
       strong { plain("#{key.t}: ") }
       yield

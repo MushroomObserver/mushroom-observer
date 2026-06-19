@@ -249,8 +249,7 @@ class Views::Controllers::Account::Preferences::Form <
     div(class: "form-group mt-3") do
       span(class: "font-weight-bold") { plain(:prefs_content_filters.t) }
       # Two paragraphs: explanation, then a blank one to push the
-      # first filter row down (the ERB this replaces had an unclosed
-      # `<p>` after the explanation).
+      # first filter row down.
       p { plain(:prefs_content_filters_explanation.t) }
       p { nil }
     end

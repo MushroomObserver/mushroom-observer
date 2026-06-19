@@ -66,9 +66,7 @@ module Views::Controllers::Comments
     end
 
     def render_body
-      # Legacy ERB joined the label, ": ", and the body in one
-      # string then rendered with `.tpl` (Textile paragraph). Keep
-      # that single-textile-render shape so paragraph break
+      # Keep single-textile-render shape so paragraph break
       # placement matches.
       trusted_html(
         # rubocop:disable Rails/OutputSafety -- mirrors the legacy
