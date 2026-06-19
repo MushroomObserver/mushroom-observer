@@ -21,7 +21,6 @@ module Views::Controllers::Account
 
     private
 
-    # Inlined from `AccountHelper#account_welcome_title`.
     def welcome_title
       return :welcome_no_user_title.t unless current_user
 

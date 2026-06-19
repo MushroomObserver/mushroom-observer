@@ -53,8 +53,7 @@ class Views::Layouts::TopNav < Views::Base
 
   # Controllers whose index pages are linkable from the rubric.
   # When the current page IS one of these and isn't the index
-  # itself, the rubric becomes a link to the index. (Inlined from
-  # `Header::RubricHelper::NAV_INDEXABLES`.)
+  # itself, the rubric becomes a link to the index.
   NAV_INDEXABLES = %w[
     observations names species_lists projects locations images herbaria
     glossary_terms comments rss_logs field_slips
@@ -63,8 +62,7 @@ class Views::Layouts::TopNav < Views::Base
   # Controllers that support the green "+ Add" button. Description
   # / herbarium-record controllers are excluded: descriptions don't
   # get a create button at all, and herbarium records are created
-  # from observation pages. (Inlined from
-  # `Header::RubricHelper::NAV_CREATABLES`.)
+  # from observation pages.
   NAV_CREATABLES = %w[
     observations names species_lists projects locations images herbaria
     glossary_terms field_slips articles publications
@@ -163,8 +161,6 @@ class Views::Layouts::TopNav < Views::Base
       end
     end
   end
-
-  # --- Inlined from `Header::RubricHelper` -----------------------
 
   # The page title in the navbar. Becomes a link to the
   # controller's index page when one exists AND the current page

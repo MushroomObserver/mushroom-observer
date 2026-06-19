@@ -11,9 +11,6 @@
 #
 # A sidebar carries the observation's image carousel via
 # `Observations::Show::ImagesPanel`.
-#
-# Replaces the corresponding `show.html.erb` and inlines
-# `SuggestionsHelper#suggestion_confidence`.
 module Views::Controllers::Observations::Namings::Suggestions
   class Show < Views::FullPageBase
     prop :observation, ::Observation
@@ -125,7 +122,6 @@ module Views::Controllers::Observations::Namings::Suggestions
       @num_images ||= @observation.images.length
     end
 
-    # Inlined from `SuggestionsHelper#suggestion_confidence`.
     def suggestion_confidence(val)
       english = if val > 80
                   :suggestions_excellent.t

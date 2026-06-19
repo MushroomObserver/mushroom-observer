@@ -15,8 +15,6 @@
 #   vote-or-propose UI rendered inside a matrix box on index
 #   pages. Context: `"matrix_box"`.
 #
-# Replaces the `naming_vote_form` helper from
-# `app/helpers/namings_helper.rb`.
 module Views::Controllers::Observations::Namings::Votes
   class Form < ::Components::ApplicationForm
     # @param naming [::Naming] the naming being voted on

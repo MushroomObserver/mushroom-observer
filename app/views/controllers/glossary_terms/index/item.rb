@@ -31,9 +31,6 @@ module Views::Controllers::GlossaryTerms
         render_thumbnail
       end
 
-      # Inlined from the `glossary_term_destroy_button` helper —
-      # `destroy_button` is the only call there, so the helper file
-      # is deleted in this same PR.
       def render_destroy_button
         destroy_button(target: @glossary_term,
                        name: :destroy_object.t(type: :glossary_term),

@@ -3,9 +3,6 @@
 # Edit-comment page: the comment form followed by the
 # `CommentsForObject` panel for the target (so the editor can see
 # existing comments in context).
-#
-# Replaces `app/views/controllers/comments/edit.html.erb` (and its
-# `_object.html.erb` partial render — inlined here).
 module Views::Controllers::Comments
   class Edit < Views::FullPageBase
     prop :comment, ::Comment
@@ -21,10 +18,9 @@ module Views::Controllers::Comments
                      ))
       add_context_nav(::Tab::Comment::FormEdit.new(comment: @comment))
 
-      # `[form:comment]…[eoform:comment]` HTML-comment markers
-      # carried over from the legacy ERB (no in-tree caller; kept
-      # in case external scrapers / integration tools look for
-      # them).
+      # `[form:comment]…[eoform:comment]` HTML-comment markers.
+      # No in-tree caller; kept in case external scrapers /
+      # integration tools look for them.
       comment { "[form:comment]" }
       render(Form.new(@comment, local: true))
       comment { "[eoform:comment]" }

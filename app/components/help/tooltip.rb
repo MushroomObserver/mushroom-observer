@@ -5,8 +5,6 @@
 # Used for inline label-decorating glyphs (the `?` next to a filter
 # header, etc.).
 #
-# Replaces the `help_tooltip` helper from `panel_helper.rb`.
-#
 # @example
 #   render(Components::Help::Tooltip.new(label: "(?)",
 #                                        title: "Click for explanation"))

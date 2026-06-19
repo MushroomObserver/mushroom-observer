@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class Components::CrudButton
-  # POST-method `CrudButton`. Used as the Phlex-side equivalent of
-  # `LinkHelper#post_button` (which delegates here).
+  # POST-method `CrudButton`.
   #
   # @example
   #   render(Components::CrudButton::Post.new(

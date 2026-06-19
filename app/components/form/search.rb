@@ -112,8 +112,7 @@ class Components::Form::Search < Components::ApplicationForm
     end
   end
 
-  # Inlined from `SearchBarHelper#search_bar_toggle` — Bootstrap
-  # collapse-trigger button that hides the search-bar elements row
+  # Bootstrap collapse-trigger button that hides the search-bar elements row
   # in the top nav.
   def render_search_bar_toggle
     button(class: class_names(BAR_TOGGLE_CLASSES),

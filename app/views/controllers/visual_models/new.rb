@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action view for `visual_models#new`. Replaces the 4-line
-# `new.html.erb` — form (already Phlex) + a back link.
+# Action view for `visual_models#new`: form + back link.
 module Views::Controllers::VisualModels
   class New < Views::FullPageBase
     prop :visual_model, VisualModel

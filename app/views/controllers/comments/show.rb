@@ -4,7 +4,6 @@
 # list and the comments index. Renders four lines: created-at,
 # by-user link, summary, and the Textile-rendered body.
 #
-# Replaces `app/views/controllers/comments/show.html.erb`.
 module Views::Controllers::Comments
   class Show < Views::FullPageBase
     prop :comment, ::Comment

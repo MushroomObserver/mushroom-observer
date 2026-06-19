@@ -91,10 +91,6 @@ module Views::Controllers::SpeciesLists
       end
     end
 
-    # Inlined from `SpeciesListsHelper#species_list_remove_obs_button` —
-    # same body as `Observation#render_remove_obs_button` in the
-    # sibling Phlex class (helpers.rb deletes after both inlinings
-    # land).
     def render_remove_obs_button
       render(Components::CrudButton::Put.new(
                name: :REMOVE.t,
@@ -107,10 +103,8 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
-    # Inlined from `SpeciesListsHelper#species_list_add_obs_button`.
-    # `btn: "btn btn-default"` gives the ADD button the Bootstrap
-    # button-shape it had under the legacy helper — without it,
-    # the row's ADD action renders as a bare link.
+    # `btn: "btn btn-default"` gives the ADD button Bootstrap button-shape —
+    # without it the row's ADD action renders as a bare link.
     def render_add_obs_button
       render(Components::CrudButton::Put.new(
                name: :ADD.t,

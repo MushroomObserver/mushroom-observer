@@ -5,9 +5,6 @@ class Components::CrudButton
   # `action: :edit`, `icon: :edit`. Path prefixing follows the parent
   # `NAMED_ROUTE_ACTIONS` whitelist (`edit_<model>_path`).
   #
-  # Used as the Phlex-side equivalent of `LinkHelper#edit_button` —
-  # that ERB helper now delegates here.
-  #
   # @example Phlex caller
   #   render(Components::CrudButton::Edit.new(target: @herbarium))
   #

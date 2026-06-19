@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# A single row in the Names index list. Replaces the per-row
-# `app/views/controllers/names/_name.erb` partial.
+# A single row in the Names index list.
 #
 # Each row carries:
 #   - `Components::IdBadge` with the Name's id

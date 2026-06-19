@@ -90,13 +90,11 @@ module Views::Controllers::InatImports::JobTrackers
       br
     end
 
-    # Inlined from `InatImportJobTrackersHelper#remaining_time_…`.
     def remaining_time_in_hours_minutes_seconds(tracker)
       time = tracker.status == "Done" ? 0 : tracker.estimated_remaining_time
       time_in_hours_minutes_seconds(time)
     end
 
-    # Inlined from `InatImportJobTrackersHelper`.
     def time_in_hours_minutes_seconds(seconds)
       return :inat_import_tracker_calculating_time.l if seconds.nil?
 

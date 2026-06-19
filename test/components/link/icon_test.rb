@@ -28,8 +28,6 @@ class IconLinkTest < ComponentTestCase
     html = render(Components::Link::Icon.new("Label", "/x"))
 
     # Without an `:icon`, render as a plain link with the text.
-    # (The legacy helper had a typo here referencing undefined `link`
-    # — fixed in the component to render correctly.)
     assert_html(html, "a[href='/x']", text: "Label")
     # No icon span when no icon was passed.
     assert_no_html(html, "a span.glyphicon")

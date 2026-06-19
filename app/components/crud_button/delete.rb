@@ -7,9 +7,6 @@ class Components::CrudButton
   # `confirm:` to `:are_you_sure.l`. Caller can override any of
   # those by passing the kwarg explicitly.
   #
-  # Used as the Phlex-side equivalent of `LinkHelper#destroy_button`
-  # — that ERB helper now delegates here.
-  #
   # @example Phlex caller
   #   render(Components::CrudButton::Delete.new(target: @api_key))
   #

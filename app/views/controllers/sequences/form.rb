@@ -142,7 +142,6 @@ module Views::Controllers::Sequences
       @observation || model.observation
     end
 
-    # Inlined from the now-deleted `SequencesHelper#sequence_archive_options`.
     # Dropdown options for the archive select: each entry is a
     # `[label, value]` pair where label == value == archive name.
     def sequence_archive_options

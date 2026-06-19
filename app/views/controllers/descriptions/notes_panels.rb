@@ -4,8 +4,6 @@
 # `Components::Panel` per non-empty notes field (general description,
 # diagnostic features, distribution, look-alikes, …) plus a
 # fallback "no notes yet" message when all notes are empty.
-#
-# Replaces the pre-Phlex `_show_description_notes.erb` partial.
 module Views::Controllers::Descriptions
   class NotesPanels < Views::Base
     prop :description, ::Description

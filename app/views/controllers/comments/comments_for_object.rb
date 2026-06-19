@@ -15,9 +15,6 @@
 # - The heading carries a "+ Add comment" modal-link button.
 # - Each `CommentItem` renders mod-links + a real author UserLink.
 # - The footer shows an "and N more →" link when truncated.
-#
-# Replaces `app/views/controllers/comments/_comments_for_object.erb`
-# and inlines the `new_comment_link` helper that fed it.
 module Views::Controllers::Comments
   class CommentsForObject < Views::Base
     include Phlex::Rails::Helpers::TurboStreamFrom

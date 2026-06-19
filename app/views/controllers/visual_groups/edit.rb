@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-# Action view for `visual_groups#edit`. Replaces the 94-line
-# `edit.html.erb`. The form itself is already Phlex
-# (`Views::Controllers::VisualGroups::Form`). The image-matrix grid
-# lives in `Views::Controllers::VisualGroups::ImageMatrix` and is
-# shared with the show page.
+# Action view for `visual_groups#edit`. The form is
+# `Views::Controllers::VisualGroups::Form`; the image-matrix grid is
+# `Views::Controllers::VisualGroups::ImageMatrix` (shared with the
+# show page).
 module Views::Controllers::VisualGroups
   class Edit < Views::FullPageBase
     prop :visual_group, VisualGroup

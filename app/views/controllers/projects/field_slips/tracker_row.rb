@@ -74,9 +74,6 @@ module Views::Controllers::Projects::FieldSlips
              ))
     end
 
-    # Inlined from `ProjectsHelper#field_slip_link` — this was the
-    # only caller, and the helper's body is small enough that a
-    # private method keeps the rendering logic local.
     def render_field_slip_link
       if @tracker.status == "Done" && @user == @tracker.user
         link_to(@tracker.filename, @tracker.link)

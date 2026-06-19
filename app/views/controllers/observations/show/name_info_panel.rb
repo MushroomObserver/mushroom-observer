@@ -4,13 +4,6 @@
 # columns: "On MO" (related-name links + alt-descriptions list +
 # distribution map) and "On the web" (external taxonomic search
 # sites the user has enabled).
-#
-# Replaces `_name_info.erb`. Inlines two `Tabs::ObservationsHelper`
-# helpers (`name_links_on_mo` + `user_name_links_web`) plus the
-# `obs_name_description_tabs` helper that was their bridge to
-# `DescriptionsHelper#list_descriptions` — the alt-description
-# list now renders through `Views::Controllers::Descriptions::List`
-# (the Phlex view that replaced the helper chain in #4438).
 class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -40,7 +33,6 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
     end
   end
 
-  # Inlined from `Tabs::ObservationsHelper#name_links_on_mo`.
   # Three groups, each emitted as `<a class="d-block">` lines:
   # related-name filtered indexes, alt-descriptions list, and
   # the per-name distribution map link.
@@ -50,7 +42,6 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
     render_tab_link(occurrence_map_tab)
   end
 
-  # Inlined from `Tabs::ObservationsHelper#user_name_links_web`.
   def render_links_on_web
     web_name_tabs.each { |tab| render_tab_link(tab) }
   end
@@ -73,17 +64,14 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
 
   # Renders the alt-description list inline — same view used by
   # the names / locations show pages, just no panel chrome here.
-  # Replaces the `obs_name_description_tabs` helper.
   def render_alt_descriptions
     render(::Views::Controllers::Descriptions::List.new(
              user: @user, object: @obs.name, type: :name
            ))
   end
 
-  # Renders a single Tab::Base as `<a class="d-block">...</a>`,
-  # the shape `Tabs::ObservationsHelper` previously got through
-  # `context_nav_links(..., class: "d-block")`. The tabs in this
-  # panel are all link-style (no `button:` html_options).
+  # Renders a single Tab::Base as `<a class="d-block">...</a>`.
+  # The tabs in this panel are all link-style (no `button:` html_options).
   def render_tab_link(tab)
     content, path, opts = tab.to_a
     classes = ["d-block", opts[:class]].compact.join(" ").strip
