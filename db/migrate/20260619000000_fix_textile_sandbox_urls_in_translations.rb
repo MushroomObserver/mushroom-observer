@@ -5,13 +5,6 @@
 # as raw <a href="..."> markup need to be updated. Some translations
 # still reference the even-older /observer/textile redirect; fix those too.
 class FixTextileSandboxUrlsInTranslations < ActiveRecord::Migration[7.2]
-  OLD_URLS = [
-    '/observer/textile"',
-    '/observer/textile_sandbox"',
-    '/info/textile_sandbox"'
-  ].freeze
-  NEW_URL = '/info/textile_sandbox/new"'
-
   def up
     # Use nested REPLACE() so a single SQL statement handles all three
     # old URL variants without risk of double-replacing already-updated rows
