@@ -2,9 +2,10 @@
 
 # Phlex view that renders the filter-caption HTML for the index-bar.
 # Wired up via `Views::FullPageBase#add_query_filters(query)`, which
-# stores `render(FilterCaption.new(query: query))` in
-# `content_for(:filters)` so the layout's `IndexBar` can yield it on
-# index actions.
+# `capture { render(FilterCaption.new(...)) }`s the HTML (Phlex's
+# `render` emits to the buffer rather than returning a string) and
+# stashes it in `content_for(:filters)` so the layout's `IndexBar`
+# can yield it on index actions.
 module Views::Layouts
   class Header::IndexBar::FilterCaption < Views::Base
     # `type` param sentinels (no plural form) — use `:ALL` / `:NONE`

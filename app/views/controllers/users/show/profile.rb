@@ -102,9 +102,14 @@ module Views::Controllers::Users
 
       # `tuple` is `[text, url, args]`. The block emits one
       # link / button into the surrounding `<li>` via the same
-      # dispatch the two `Views::Layouts::*::ContextNav` views
-      # use. Inline `d-block`-class strip is preserved from the
-      # legacy `Header::ContextNavHelper#context_nav_link`.
+      # `Components::LinkRendering` dispatch the two
+      # `Views::Layouts::*::ContextNav` views use. The conditional
+      # `d-block` strip mirrors the legacy
+      # `Header::ContextNavHelper#context_nav_link` behaviour: for
+      # `button:` tuples that ALSO came in with `d-block` in their
+      # class list, drop it so the form/button isn't laid out as a
+      # block — `button_to`'s wrapping `<form>` already provides the
+      # block-level container. Plain anchor tuples keep `d-block`.
       def render_action_link(tuple)
         str, url, args = tuple
         args ||= {}
