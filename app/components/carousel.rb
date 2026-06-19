@@ -68,7 +68,7 @@ class Components::Carousel < Components::Base
   # @return [nil] so the call doesn't accidentally emit anything
   def item(class: nil, id: nil, active: false, **attrs, &block)
     @slides << {
-      class: binding.local_variable_get(:class),
+      class: grab(class:),
       id: id, active: active, attrs: attrs, block: block
     }
     nil
@@ -83,7 +83,7 @@ class Components::Carousel < Components::Base
   # @return [nil]
   def thumb(class: nil, id: nil, active: false, **attrs, &block)
     @thumbs << {
-      class: binding.local_variable_get(:class),
+      class: grab(class:),
       id: id, active: active, attrs: attrs, block: block
     }
     nil

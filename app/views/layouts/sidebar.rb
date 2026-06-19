@@ -32,8 +32,8 @@ class Views::Layouts::Sidebar < Views::Base
   # `_user_sections`). Accepts a real `Browser::Base` or any stub
   # that responds to `#bot?`.
   prop :browser, _Interface(:bot?)
-  # Duck-typed: only `#url` is read via `reload_with_args` from
-  # `ApplicationHelper`. Accepts an `ActionDispatch::Request` or any
+  # Duck-typed: only `#url` is read via `reload_with_args` (inherited
+  # from `Views::Base`). Accepts an `ActionDispatch::Request` or any
   # stub with `#url`.
   prop :request, _Interface(:url)
   prop :languages, _Array(Language)

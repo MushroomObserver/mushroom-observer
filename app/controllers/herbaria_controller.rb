@@ -147,7 +147,8 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   ##############################################################################
   #
   # Display a single herbarium, based on :flow params
-  # :flow is added in _prev_next_page partial, ApplicationHelper#link_next
+  # `:flow` is added by the show-page prev/next pager
+  # (`Views::Layouts::Header::ShowPrevNextNav`).
   def show
     flow = params[:flow]
     return redirect_to_next_object(flow.to_sym, Herbarium, params[:id].to_s) \
