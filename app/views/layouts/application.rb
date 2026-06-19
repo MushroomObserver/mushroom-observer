@@ -10,11 +10,7 @@
 module Views::Layouts
   class Application < Components::Base
     register_value_helper :css_theme
-    register_value_helper :default_container_class
-    register_value_helper :default_column_classes
-    register_value_helper :default_content_padding
     register_value_helper :browser
-    register_value_helper :request
 
     # Action-specific customizations. `Views::FullPageBase#layout_props`
     # reads these off the controller's instance variables
@@ -56,13 +52,12 @@ module Views::Layouts
       render_bottom_singletons
     end
 
-    # Side-effecting `content_for(:container_class)` /
-    # `content_for(:content_padding)` defaults are populated before
-    # being read back here.
+    # `content_for(:container_class)` + `(:content_padding)` are
+    # guaranteed populated by the time the layout renders —
+    # `Views::FullPageBase#around_template` fills any unset slot
+    # with the matching default after the action's `view_template`
+    # has finished.
     def content_classes_for_main
-      default_container_class
-      default_column_classes
-      default_content_padding
       class_names(content_for(:container_class),
                   content_for(:content_padding))
     end

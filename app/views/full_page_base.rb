@@ -15,6 +15,7 @@
 # `add_*` setters that action views call to populate those slots
 # (page-title, etc.). Each module is `include`d below.
 class Views::FullPageBase < Views::Base
+  include LayoutClasses
   include Title
   include Icons
   include ProjectBanner
@@ -23,10 +24,22 @@ class Views::FullPageBase < Views::Base
 
   def around_template
     action_html = capture { super }
+    populate_default_layout_class_slots
     render(layout_class.new(**layout_props)) { trusted_html(action_html) }
   end
 
   private
+
+  # After the action's `view_template` has set whichever
+  # `content_for(:container_class)` / `(:left_columns)` /
+  # `(:content_padding)` slots it cares about, fill the rest with
+  # defaults so the Application layout can just `content_for(slot)`
+  # without nil-handling.
+  def populate_default_layout_class_slots
+    default_container_class
+    default_column_classes
+    default_content_padding
+  end
 
   def layout_class
     case controller.session[:layout].to_s

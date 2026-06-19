@@ -14,14 +14,6 @@ class Views::Base < Components::Base
   # used where a view wraps each link manually. Composes the underlying
   # link-building chain in Header::ContextNavHelper.
   register_value_helper :context_nav_links
-  register_value_helper :container_class
-  register_value_helper :column_classes
-  # `content_padding` is the MO-specific layout-class setter
-  # (`:panels` / `:no_panels` / etc.) that the application layout
-  # reads. Not part of `Phlex::Rails::Helpers::ContentFor`.
-  # (`Phlex::Rails::Helpers::ContentFor` itself is on Components::Base
-  # — `content_for` and `content_for?` are available everywhere.)
-  register_value_helper :content_padding
   register_value_helper :flash_error
   # Rebuilds the current request URL with the given args merged /
   # cleared (e.g. `reload_with_args(merge: nil)` strips the `?merge=`
