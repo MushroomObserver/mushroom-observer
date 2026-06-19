@@ -19,6 +19,13 @@
 # `Views::FullPageBase::*` modules — action views set; sub-partials
 # read.
 class Views::Base < Components::Base
+  # TODO: 19 index action views call `flash_error(@error)` to push a
+  # "no matches" message onto the flash session — but the controller
+  # already sets `@error` AND knows `query.num_results.zero?`, so the
+  # whole conditional can be consolidated controller-side
+  # (`set_index_view_ivars`). After that refactor this registration
+  # goes away. Tracked in
+  # `project_flash_error_from_views_to_controller.md`.
   register_value_helper :flash_error
 
   # `paginated_results { render_results }` — wraps the supplied result-set
