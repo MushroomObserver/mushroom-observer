@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects
   # Phlex view for the project show page.
-  # Replaces show.html.erb.
   class Show < Views::FullPageBase
     def initialize(project:, user:, drafts:, comments:, object_names:)
       super()
@@ -183,10 +182,8 @@ module Views::Controllers::Projects
       ) { plain(:show_project_admin_request.l) }
     end
 
-    # Inlined from `Tabs::ProjectsHelper#violations_button` — single
-    # caller, and not a CrudButton candidate (it's a count-badge link
-    # with `btn-warning` styling when constraints are violated, not
-    # an action button).
+    # Not a CrudButton candidate — count-badge link with `btn-warning`
+    # styling when constraints are violated, not a standard action button.
     def render_violations_button
       return unless @project.constraints?
 

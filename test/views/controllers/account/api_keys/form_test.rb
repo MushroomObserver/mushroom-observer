@@ -64,7 +64,7 @@ module Views::Controllers::Account::APIKeys
     # Edit-layout tests — the persisted-model branch renders a
     # metadata table (created, last_used, num_uses, API key value)
     # plus the notes input plus Update / Cancel submit buttons. Used
-    # by `account/api_keys/edit.html.erb` (the no-JS fallback view).
+    # by `account/api_keys/edit.rb` (the no-JS fallback view).
 
     def test_edit_layout_renders_metadata_table_for_persisted_key
       key = api_keys(:rolfs_api_key)
@@ -100,9 +100,8 @@ module Views::Controllers::Account::APIKeys
 
       # Critical: the input must post under `api_key[notes]` so the
       # controller's `params[:api_key].permit(:notes)` picks it up.
-      # The pre-Phlex ERB used `scope: :key` which posted under
-      # `key[notes]` — a latent bug; Superform derives the scope from
-      # the model class (`APIKey` → `:api_key`).
+      # Superform derives the scope from the model class (`APIKey` →
+      # `:api_key`).
       assert_html(html, "input[name='api_key[notes]']")
     end
 

@@ -23,7 +23,6 @@ class ObjectLinkTest < ComponentTestCase
   end
 
   def test_nil_object_renders_nothing
-    # Matches the legacy `link_to_object` helper's nil guard.
     assert_equal("", render(Components::Link::Object::Base.new(object: nil)))
   end
 end

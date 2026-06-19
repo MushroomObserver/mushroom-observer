@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects
   # Phlex view for the new project form page.
-  # Replaces new.html.erb.
   class New < Views::FullPageBase
     def initialize(project:, dates_any:, upload_params:)
       super()

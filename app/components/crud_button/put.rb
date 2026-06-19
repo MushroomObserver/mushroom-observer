@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class Components::CrudButton
-  # PUT-method `CrudButton`. Used as the Phlex-side equivalent of
-  # `LinkHelper#put_button` (which delegates here).
+  # PUT-method `CrudButton`.
   #
   # @example
   #   render(Components::CrudButton::Put.new(

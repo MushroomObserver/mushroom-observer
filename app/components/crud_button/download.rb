@@ -10,8 +10,6 @@ class Components::CrudButton
   # is `new_download_species_list_path`), so the caller passes an
   # explicit String target rather than a model.
   #
-  # Used as the Phlex-side equivalent of `LinkHelper#download_button`.
-  #
   # @example Phlex caller (explicit-path target)
   #   render(Components::CrudButton::Download.new(
   #     name: :DOWNLOAD.t,

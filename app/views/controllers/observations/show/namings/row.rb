@@ -5,11 +5,6 @@
 # item">` is supplied by the parent `Show::Namings::Rows` via
 # `list.item(id: …) { render(Row.new(…)) }`.
 #
-# Replaces `app/views/controllers/observations/show/namings/_row.erb`
-# and inlines the helper methods that fed it: `naming_row_content`
-# and its collaborators (`naming_name_html`, `naming_proposer_html`,
-# `vote_tally_html`, `your_vote_html`, `vote_icons_html`,
-# `reasons_html` + their sub-helpers).
 class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # `naming` can be either a plain `Naming` (single observation) or
   # an `Observation::MergedNaming` (occurrence-grouped roll-up of
@@ -298,7 +293,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # `.tl` (textile-line) renderer needs unescaped textile markup
   # to interpret; without `html_safe` the `#{…}` interpolation
   # double-escapes `<i>` / `<b>` tags that legitimately appear in
-  # user-typed reason notes. Matches the legacy helper exactly.
+  # user-typed reason notes
   def simple_reason_text(reason)
     return reason.label.t if reason.notes.blank?
 

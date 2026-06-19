@@ -2,7 +2,7 @@
 
 module Views::Controllers::Images
   # Paginated images index — chrome + `Components::Matrix::Table` of
-  # one image per row. Converted from `images/index.html.erb`.
+  # one image per row.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData

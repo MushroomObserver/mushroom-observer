@@ -5,7 +5,6 @@
 # or to "create a new occurrence from this observation" (when none
 # exists yet). Body lists sibling observations as a tight ul.
 #
-# Replaces `_associated_observations.html.erb`.
 class Views::Controllers::Observations::Show::AssociatedObservationsPanel < Views::Base
   prop :obs, ::Observation
   prop :occurrence, _Nilable(::Occurrence), default: nil

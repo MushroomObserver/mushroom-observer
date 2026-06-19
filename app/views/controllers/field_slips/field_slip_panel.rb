@@ -7,7 +7,6 @@
 # field-slip `Show` action template and by the index page's
 # `ObjectRow` (one entry per slip).
 #
-# Replaces `app/views/controllers/field_slips/_field_slip.html.erb`.
 # The `:prepend` slot is the index-page's per-row heading (an `<h4>`
 # with `#{:field_slip_code.l}: <CODE>`); `Show` passes nothing.
 module Views::Controllers::FieldSlips
@@ -77,8 +76,6 @@ module Views::Controllers::FieldSlips
     end
 
     # Emits `<strong>LABEL: </strong>` + the block's content + `<br>`.
-    # Matches the per-row shape the ERB partial repeated for every
-    # observation-detail field.
     def labeled(key)
       strong { plain("#{key.t}: ") }
       yield

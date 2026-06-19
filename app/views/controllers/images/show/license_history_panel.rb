@@ -5,8 +5,7 @@ module Views::Controllers::Images
     # License-history panel — one row per `Image::CopyrightChange`
     # showing the date range, license, and copyright holder, plus a
     # final row for the current license. Hidden when the image has
-    # no copyright changes. Converted from
-    # `images/show/_license_history_panel.html.erb`.
+    # no copyright changes.
     class LicenseHistoryPanel < Views::Base
       prop :image, ::Image
 

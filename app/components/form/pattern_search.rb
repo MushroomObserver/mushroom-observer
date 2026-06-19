@@ -9,9 +9,6 @@
 # land under `pattern_search[…]` — the shape
 # `SearchController#pattern` reads.
 #
-# Replaces the inner `form_with(:pattern_search …)` block of the
-# original `application/top_nav/_search_bar.html.erb` partial.
-#
 # @example In the search-bar layout
 #   render(Components::Form::PatternSearch.new(
 #            FormObject::PatternSearch.new(
@@ -20,8 +17,6 @@
 #            )
 #          ))
 class Components::Form::PatternSearch < Components::ApplicationForm
-  # Search-type options for the type select. Inlined from the
-  # since-deleted `SearchBarHelper#search_type_options`.
   SEARCH_TYPE_OPTIONS = [
     [:COMMENTS, :comments],
     [:GLOSSARY, :glossary_terms],
@@ -41,8 +36,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   def initialize(model, **options)
     options[:id] ||= "pattern_search_form"
     options[:class] = [FORM_CLASS, options[:class]].flatten.compact.join(" ")
-    # Match Rails `form_with`'s default `<form accept-charset="UTF-8">`
-    # so HTML parity holds against the legacy ERB partial.
+    # Match Rails `form_with`'s default `<form accept-charset="UTF-8">`.
     options[:"accept-charset"] ||= "UTF-8"
     super(model, method: :get, **options)
   end

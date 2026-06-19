@@ -5,12 +5,6 @@
 # `Components::Panel`; the panel heading carries a "create new
 # description" icon-link. When the caller passes a `projects:`
 # array, appends a "create draft for project" row at the bottom.
-# Replaces `_alt_descriptions_panel.html.erb`.
-#
-# The pre-Phlex partial used `safe_join(safe_br)` to vertically
-# separate descriptions while the names panel used `<div>` wrapping.
-# The visual result is identical; standardize on `<div>` to match
-# the names panel and keep `Descriptions::List` shape-agnostic.
 module Views::Controllers::Locations
   class Show
     class AltDescriptionsPanel < Views::Base

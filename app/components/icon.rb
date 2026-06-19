@@ -105,7 +105,7 @@ class Components::Icon < Components::Base
 
   def span_class(glyph)
     base = "glyphicon glyphicon-#{glyph} link-icon"
-    @html_class ? "#{base} #{@html_class}" : base
+    class_names(base, @html_class)
   end
 
   def span_data

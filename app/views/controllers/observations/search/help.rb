@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 # Search-bar help blurb for the observations pattern-search input.
-# Replaces `_help.erb` + the one-line `show.erb` wrapper around it.
 # Rendered by `Observations::SearchController#show` — both the
 # `format.html` standalone page and the `format.turbo_stream`
 # update of the `#search_bar_help` slot in the top-nav.

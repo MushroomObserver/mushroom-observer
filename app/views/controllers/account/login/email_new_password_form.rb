@@ -2,7 +2,7 @@
 
 module Views::Controllers::Account::Login
   # Form for requesting a new password via email. Rendered by the
-  # account/login controller's `email_new_password.html.erb`. Keeps
+  # account/login controller's `email_new_password.rb`. Keeps
   # the descriptive name (sibling to `Login::Form`) since the login
   # controller has multiple form-bearing pages.
   class EmailNewPasswordForm < ::Components::ApplicationForm

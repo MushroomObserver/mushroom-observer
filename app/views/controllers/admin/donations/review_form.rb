@@ -2,7 +2,7 @@
 
 module Views::Controllers::Admin::Donations
   # Admin form for reviewing donations. Rendered by the
-  # admin/donations controller's `edit.html.erb`. Sibling to
+  # admin/donations controller's `edit.rb`. Sibling to
   # `Donations::Form` (the new-donation form); the descriptive
   # suffix distinguishes the two flows.
   # Renders a table of donations with checkboxes for marking each

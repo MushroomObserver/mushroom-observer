@@ -4,7 +4,6 @@
 # "manage your API keys" page. Page chrome plus a textile-rendered
 # help block plus the `APIKeys::Table` of the user's keys.
 #
-# Replaces `app/views/controllers/account/api_keys/index.html.erb`.
 module Views::Controllers::Account::APIKeys
   class Index < Views::FullPageBase
     prop :user, ::User

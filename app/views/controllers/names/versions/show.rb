@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # Action template for the Name version-show page (a Name reverted
-# to a historic version). Replaces
-# `app/views/controllers/names/versions/show.html.erb`.
+# to a historic version).
 #
 # Left column: nomenclature panel + lifeform panel + classification
 # (as captured at this version; if `cls[:source] == :inherited`,

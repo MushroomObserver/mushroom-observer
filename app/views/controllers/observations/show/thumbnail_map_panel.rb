@@ -7,9 +7,8 @@
 # zooms / pans the image client-side. Heading link toggles the
 # panel off via a user-pref endpoint.
 #
-# Replaces `_thumbnail_map.erb`. The `observation_map_coordinates`
-# helper that computed (n, s, e, w, lat, long, x, y) is inlined
-# below as `coordinates`.
+# `coordinates` computes the (n, s, e, w, lat, long, x, y) tuple
+# for the map marker.
 class Views::Controllers::Observations::Show::ThumbnailMapPanel < Views::Base
   include Phlex::Rails::Helpers::ImageTag
   include Phlex::Rails::Helpers::ImageURL

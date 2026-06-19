@@ -6,8 +6,6 @@
 # `CommentsForObject` panel. Each row is a `CommentRow` with
 # `show_name: true` so the target each comment is attached to is
 # labeled in the heading.
-#
-# Replaces `app/views/controllers/comments/index.html.erb`.
 module Views::Controllers::Comments
   class Index < Views::FullPageBase
     prop :query, ::Query::Comments

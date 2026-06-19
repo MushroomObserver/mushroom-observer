@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for `HerbariumRecordsController#show`. Replaces
-# `app/views/controllers/herbarium_records/show.html.erb`.
+# Action template for `HerbariumRecordsController#show`.
 module Views::Controllers::HerbariumRecords
   class Show < Views::FullPageBase
     prop :herbarium_record, ::HerbariumRecord

@@ -59,7 +59,7 @@ module SpeciesLists
     end
 
     def assert_create_species_list
-      # `species_lists/new.html.erb` is now Phlex (see #4389) — Phlex
+      # `species_lists/new.rb` is now Phlex (see #4389) — Phlex
       # views don't show up in `assert_template`. The form has a
       # unique `#species_list_form` id; that's the action marker.
       assert_select("form#species_list_form", { count: 1 },

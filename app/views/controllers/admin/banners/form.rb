@@ -2,7 +2,7 @@
 
 module Views::Controllers::Admin::Banners
   # Form for admins to create or update site-wide banners. Rendered
-  # by the admin/banners controller's `index.html.erb`. Displays a
+  # by the admin/banners controller's `index.rb`. Displays a
   # textarea for the banner message with a submit button. Always
   # creates a new banner record (with incremented version) rather
   # than updating existing records, so always uses POST method.

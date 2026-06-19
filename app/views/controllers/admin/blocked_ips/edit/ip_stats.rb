@@ -4,7 +4,6 @@ module Views::Controllers::Admin::BlockedIps
   class Edit
     # Sub-partial of the IP-access-manager page (the
     # right-hand column's "Stats for <ip>" panel).
-    # Converted from `admin/blocked_ips/_ip_stats.html.erb`.
     class IpStats < Views::Base
       prop :stats, ::Hash
       prop :ip, ::String

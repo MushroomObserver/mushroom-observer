@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Action template for `Observations::SpeciesListsController#edit` —
-# the "manage species lists for this observation" page. Replaces
-# `edit.html.erb`. Renders two `Components::ListGroup::Base`s of
+# the "manage species lists for this observation" page.
+# Renders two `Components::ListGroup::Base`s of
 # `SpeciesLists::Listing` rows: lists the observation already
 # belongs to (REMOVE button on each) and lists it doesn't (ADD
 # button on each).
@@ -54,8 +54,7 @@ module Views::Controllers::Observations::SpeciesLists
     end
 
     # Skip the heading + the list-group entirely when the source
-    # array is empty (matches the ERB's `if @obs_lists.any?` /
-    # `if @other_lists.any?` guards).
+    # No-op when the array is empty.
     def render_section(heading:, lists:, remove: false, add: false)
       return if lists.empty?
 

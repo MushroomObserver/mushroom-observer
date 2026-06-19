@@ -4,7 +4,6 @@ module Views::Controllers::Admin::BlockedIps
   class Edit
     # Sub-partial of the IP-access-manager page (the
     # right-hand column's "Most active users" panel).
-    # Converted from `admin/blocked_ips/_ip_summary.html.erb`.
     class IpSummary < Views::Base
       prop :stats, ::Hash
       # `{ user_id => User }` + `{ api_key_str => APIKey }` preloaded

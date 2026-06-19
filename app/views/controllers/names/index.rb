@@ -1,10 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Names index. Replaces
-# `app/views/controllers/names/index.html.erb` + its per-row
-# partial `_name.erb` + the alt-spellings alert
-# `_name_suggestions.erb` (the last of which was already moved
-# out of the misleading `show/` subdirectory in this branch).
+# Action template for the Names index.
 #
 # Composes:
 #   - page chrome (container_class, index title, context-nav,

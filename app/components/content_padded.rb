@@ -3,8 +3,7 @@
 # Minimal padded-content wrapper: emits `<div class="p-3 ...">`
 # around the block. All keyword args are forwarded to the
 # underlying `<div>`; `class:` is composed with the default
-# `"p-3"`. (Replaces the now-deleted `ContentHelper#content_padded`
-# ERB helper.)
+# `"p-3"`.
 #
 # @example
 #   render(Components::ContentPadded.new(id: "details")) do

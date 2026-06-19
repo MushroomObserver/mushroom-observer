@@ -3,8 +3,7 @@
 module Views::Controllers::Articles
   # Paginated articles index. Page chrome (title, sorter, context-nav,
   # pagination) + a `Components::ListGroup::Base` of one article-summary
-  # row per result. Converted from `articles/index.html.erb` +
-  # `articles/_object.html.erb`.
+  # row per result.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData

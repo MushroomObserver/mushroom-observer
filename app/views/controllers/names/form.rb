@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Form for creating and editing Name records.
-# Rendered by `names/{new,edit}.html.erb`.
+# Rendered by `names/{new,edit}.rb`.
 module Views::Controllers::Names
   class Form < ::Components::ApplicationForm
     def initialize(model, **options)

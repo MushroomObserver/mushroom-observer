@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Action template for `Observations::SearchController#new` — the
-# faceted observations-search form page. Replaces `new.erb`. Renders
+# faceted observations-search form page. Renders
 # `Components::Form::Search` against the controller's `@search`
 # (a `Query::Observations` instance).
 #

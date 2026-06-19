@@ -7,7 +7,7 @@ module Views::Controllers::FieldSlips::QRReader
   class Form < ::Components::ApplicationForm
     def initialize(model, **options)
       options[:id] ||= "qr_reader_form"
-      options[:data] = { controller: "qr-reader" }.merge(options[:data] || {})
+      options = mix({ data: { controller: "qr-reader" } }, options)
       super(model, **options) # rubocop:disable Style/SuperArguments
     end
 

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the CollectionNumbers index. Replaces
-# `app/views/controllers/collection_numbers/index.html.erb`.
+# Action template for the CollectionNumbers index.
 #
 # `CollectionNumbersController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly with
@@ -28,8 +27,7 @@ module Views::Controllers::CollectionNumbers
 
     private
 
-    # Headerless `Components::Table` (`show_headers: false`) — matches
-    # the bare-table markup of the original ERB.
+    # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
       render(Components::Table.new(@objects, class: "table-striped mt-3",
                                              show_headers: false)) do |t|

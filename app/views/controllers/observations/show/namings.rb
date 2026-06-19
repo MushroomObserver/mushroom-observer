@@ -11,7 +11,6 @@
 # closes any open in-flight modal so the user sees the result
 # of their action immediately.
 #
-# Replaces `app/views/controllers/observations/show/_namings.erb`.
 class Views::Controllers::Observations::Show::Namings < Views::Base
   prop :obs, ::Observation
   prop :user, ::User

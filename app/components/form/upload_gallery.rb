@@ -7,10 +7,6 @@
 # only one image) and registers per-image slides + thumbnails via the
 # carousel's `c.item(...) { … }` / `c.thumb(...) { … }` API.
 #
-# Replaces the legacy `Components::FormCarousel`. The Bootstrap carousel
-# skeleton now lives in `Components::Carousel`; this component owns the
-# form-mode props and the slide / thumbnail iteration.
-#
 # @example
 #   render Components::Form::UploadGallery.new(
 #     user: @user,

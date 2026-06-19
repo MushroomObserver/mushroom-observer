@@ -172,11 +172,8 @@ class Components::Table < Components::Base
   private
 
   def table_attributes
-    base_class = "table"
-    combined_class =
-      @html_class ? "#{base_class} #{@html_class}" : base_class
     attrs = @attributes.dup
-    attrs[:class] = combined_class
+    attrs[:class] = class_names("table", @html_class)
     attrs[:id] = @html_id if @html_id
     attrs
   end

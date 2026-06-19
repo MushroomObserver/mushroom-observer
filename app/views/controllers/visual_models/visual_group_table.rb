@@ -5,9 +5,8 @@
 # visual-model show page and the visual-group index page (both pages
 # are effectively "this visual model's groups").
 #
-# Replaces `shared/_visual_group_table.html.erb`. Lives under
-# `visual_models/` because it's a visual-model-scoped table, not a
-# generic table — the `shared/` path was a hangover from the rails
+# Lives under `visual_models/` because it's a visual-model-scoped table,
+# not a generic table — the `shared/` path was a hangover from the rails
 # scaffold's habit of dumping such partials there.
 module Views::Controllers::VisualModels
   class VisualGroupTable < Views::Base

@@ -32,7 +32,7 @@
 #     end
 #   end
 #
-#   # In new.html.erb and edit.html.erb, just render the form directly:
+#   # In new.rb and edit.rb, just render the form directly:
 #   <%= render(Views::Controllers::Licenses::Form.new(@license)) %>
 #
 # @example Deriving action URL from model associations

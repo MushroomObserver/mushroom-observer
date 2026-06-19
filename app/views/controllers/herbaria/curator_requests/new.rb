@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Herbaria::CuratorRequests
-  # Action view for the herbarium curator-request form. Replaces
-  # new.html.erb.
+  # Action view for the herbarium curator-request form.
   class New < Views::FullPageBase
     def initialize(herbarium:, back: nil)
       super()

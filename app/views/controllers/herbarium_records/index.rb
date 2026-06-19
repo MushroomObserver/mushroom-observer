@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the HerbariumRecords index. Replaces
-# `app/views/controllers/herbarium_records/index.html.erb`.
+# Action template for the HerbariumRecords index.
 #
 # `HerbariumRecordsController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly

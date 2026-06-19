@@ -5,9 +5,6 @@
 # form fields ("(optional)", "(required)") and for short
 # textile-rendered notes that sit next to a section title.
 #
-# Replaces the `help_note` helper that lived in
-# `app/helpers/panel_helper.rb`.
-#
 # @example Inline `(optional)` marker next to a label
 #   render(Components::Help::Note.new("(#{:optional.l})"))
 #
@@ -24,9 +21,6 @@ class Components::Help::Note < Components::Base
   # coverage gap).
   prop :attributes, _Hash(_Union(Symbol, String), _Any?)
 
-  # Match the legacy helper's positional shape — callers wrote
-  # `help_note(:p, "...", class: "...")` and we want the same call
-  # site to work via `Components::Help::Note.new(:p, "...", ...)`.
   def initialize(element = :span, string = nil, **kwargs)
     extra_class = kwargs.delete(:class)
     super(element: element, string: string,

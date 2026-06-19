@@ -36,8 +36,7 @@ module Views::Controllers::SpeciesLists
     end
 
     # `remove: true` → put-button with `commit=remove`, modern Turbo
-    # confirm (data-turbo-confirm, not the legacy data-confirm the old
-    # helper used to ship).
+    # confirm (data-turbo-confirm, not the legacy data-confirm).
     def test_renders_remove_button_when_remove_true
       html = render_listing(observation: @observation, remove: true)
 
@@ -69,8 +68,7 @@ module Views::Controllers::SpeciesLists
       assert_html(html, "form button", text: :ADD.t)
     end
 
-    # `remove` wins when both flags set — defensive guard mirroring
-    # the ERB `if remove … elsif add` precedence.
+    # `remove` wins when both flags set — defensive guard.
     def test_remove_wins_when_both_remove_and_add_set
       html = render_listing(observation: @observation,
                             remove: true, add: true)

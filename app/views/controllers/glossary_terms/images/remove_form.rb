@@ -9,8 +9,7 @@ module Views::Controllers::GlossaryTerms::Images
   #
   # Generic across any model with an `.images` collection — currently
   # only glossary terms use it, hence its location under the nested
-  # glossary_terms/images controller subtree. Rendered by
-  # `glossary_terms/images/remove.html.erb`.
+  # glossary_terms/images controller subtree.
   #
   # @param model [#images] the parent object (e.g. a GlossaryTerm)
   # @param form_action [String, Hash] URL or url_for-compatible hash

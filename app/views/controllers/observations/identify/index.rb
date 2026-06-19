@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 # Action template for the "Observations needing identification"
-# index. Replaces `app/views/controllers/observations/identify/
-# index.html.erb`.
+# index.
 #
 # Composes the page chrome (container width, index title,
 # pagination), flashes the no-matches error when the query

@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
 # Action template for `Observations::MapsController#index` — the
-# "map of observations matching a query" page. Replaces the inline
-# `<div id="map_cap_banner">` + `make_map(...)` call that used to live
-# in `index.html.erb`; the cap-banner is now baked into
-# `Components::Map`, so the view just sets chrome and instantiates
-# the component.
+# "map of observations matching a query" page. The cap-banner is
+# baked into `Components::Map`, so this view just sets chrome and
+# instantiates the component.
 module Views::Controllers::Observations::Maps
   class Index < Views::FullPageBase
     prop :query, ::Query::Observations

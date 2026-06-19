@@ -3,7 +3,7 @@
 # Notes section of a form, with a collapsible Bootstrap Panel wrap.
 #
 # Shared between forms that have user-configurable notes "parts"
-# (currently observation; field-slip migration is in flight).
+# (currently observation and field-slip).
 # Owns:
 #   - The Panel (collapsible card with "Notes" heading and caret).
 #   - The panel body, containing (in order):

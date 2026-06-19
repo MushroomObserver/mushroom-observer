@@ -10,7 +10,8 @@ class ExternalSiteLinkTest < ComponentTestCase
     # iNat URLs render as "iNat <id>" where <id> is the URL minus the
     # iNat base URL. No date suffix on iNat — they're already date-
     # stamped on the iNat side.
-    assert_html(html, "a[href='#{link.url}']", text: "iNat 234723")
+    assert_html(html, "a[href='#{link.url}'][target='_blank'][rel='noopener']",
+                text: "iNat 234723")
     assert_no_html(html, "small")
   end
 
@@ -20,7 +21,8 @@ class ExternalSiteLinkTest < ComponentTestCase
 
     # Non-iNat sites render with "On <site>" label + a small element
     # carrying the link's creation date.
-    assert_html(html, "a[href='#{link.url}']",
+    assert_html(html,
+                "a[href='#{link.url}'][target='_blank'][rel='noopener']",
                 text: :on_site.t(site: link.external_site.name))
     assert_html(html, "small", text: link.created_at.web_date)
   end
