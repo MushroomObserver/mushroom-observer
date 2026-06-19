@@ -59,6 +59,8 @@ class Components::Base < Phlex::HTML
   register_value_helper :controller_path
   register_value_helper :action_name
   register_value_helper :params
+  register_value_helper :request
+  register_value_helper :session
 
   # Enable fragment caching
   def cache_store
