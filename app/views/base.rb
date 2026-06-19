@@ -21,8 +21,8 @@ class Views::Base < Components::Base
   # used where a view wraps each link manually. Composes the underlying
   # link-building chain in Header::ContextNavHelper.
   register_value_helper :context_nav_links
-  register_value_helper :add_project_banner
-  # `add_edit_icons` / `add_interest_icons` are instance methods on
+  # `add_project_banner` / `add_edit_icons` / `add_interest_icons`
+  # are instance methods on `Views::FullPageBase::ProjectBanner` /
   # `Views::FullPageBase::Icons` — no helper indirection.
   register_value_helper :add_pager_for
   register_value_helper :add_pagination

@@ -17,6 +17,7 @@
 class Views::FullPageBase < Views::Base
   include Title
   include Icons
+  include ProjectBanner
 
   def around_template
     action_html = capture { super }
