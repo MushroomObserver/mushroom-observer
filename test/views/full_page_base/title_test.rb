@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-# Tests for the title-chrome utility methods on `Views::FullPageBase`:
-# `document_title_for`, `show_document_title`, `edit_document_title`,
-# `title_tag_contents`.
+# Tests for the page-title utility methods on
+# `Views::FullPageBase::Title`: `document_title_for`,
+# `show_document_title`, `edit_document_title`, `title_tag_contents`.
 #
 # The `add_*_title` side-effect setters that use these utilities are
 # exercised end-to-end through the controller tests for each
@@ -12,7 +12,7 @@ require("test_helper")
 # `Names::Descriptions::VersionsControllerTest#test_show_past_*`
 # which checks `<title>` rendering after the full Application layout
 # fires).
-class Views::FullPageBase::TitleChromeTest < ComponentTestCase
+class Views::FullPageBase::TitleTest < ComponentTestCase
   def setup
     super
     @page = page_subclass.new

@@ -22,8 +22,8 @@ class Views::Base < Components::Base
   # link-building chain in Header::ContextNavHelper.
   register_value_helper :context_nav_links
   register_value_helper :add_project_banner
-  register_value_helper :add_edit_icons
-  register_value_helper :add_interest_icons
+  # `add_edit_icons` / `add_interest_icons` are instance methods on
+  # `Views::FullPageBase::Icons` — no helper indirection.
   register_value_helper :add_pager_for
   register_value_helper :add_pagination
   register_value_helper :add_sorter
