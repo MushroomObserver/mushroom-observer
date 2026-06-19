@@ -32,11 +32,11 @@ class ScriptTest < UnitTestCase
     subject = "RE: do not reply"
     header = "To: blah\nFrom: blah\nSubject: blah"
     body = "Some sort of comment.\nObject notification."
-    tempfile = Tempfile.new("test").path
+    tmpfile = Tempfile.new("test")
     script = script_file("autoreply")
     env = script_env.merge("SENDER" => sender)
     cmd = "echo \"#{header}\n\n#{body}\" | #{script} \"#{subject}\" " \
-          "> #{tempfile}"
+          "> #{tmpfile.path}"
     assert(system(env, cmd))
     expect = <<-EMAIL.unindent
       To: #{sender}
@@ -48,7 +48,7 @@ class ScriptTest < UnitTestCase
 
       #{body}
     EMAIL
-    actual = File.read(tempfile)
+    actual = File.read(tmpfile.path)
     assert_equal(expect, actual)
   end
 
@@ -67,56 +67,56 @@ class ScriptTest < UnitTestCase
 
   def test_lookup_user
     script = script_file("lookup_user")
-    tempfile = Tempfile.new("test").path
-    cmd = "#{script} dick > #{tempfile}"
+    tmpfile = Tempfile.new("test")
+    cmd = "#{script} dick > #{tmpfile.path}"
     assert(system(script_env, cmd))
     expect =
       "id login name email verified last_use\n" \
       "#{users(:dick).id} dick Tricky Dick dick@collectivesource.com " \
       "2006-03-02 21:14:00 NULL\n"
-    actual = File.read(tempfile).squeeze(" ")
+    actual = File.read(tmpfile.path).squeeze(" ")
     assert_equal(expect, actual)
   end
 
   def test_make_eol_xml
     script = script_file("make_eol_xml")
-    dest_file = Tempfile.new("test").path
-    stdout_file = Tempfile.new("test").path
-    assert(!File.exist?(dest_file) || File.empty?(dest_file))
-    cmd = "#{script} #{dest_file} > #{stdout_file}"
+    dest_tmpfile = Tempfile.new("test")
+    stdout_tmpfile = Tempfile.new("test")
+    assert(!File.exist?(dest_tmpfile.path) || File.empty?(dest_tmpfile.path))
+    cmd = "#{script} #{dest_tmpfile.path} > #{stdout_tmpfile.path}"
 
     script_succeeded = system(script_env, cmd)
 
     assert(script_succeeded, "Script failed.")
-    assert(File.size(dest_file).positive?,
-           "#{dest_file} should have content but is empty.")
-    assert_equal("", File.read(stdout_file),
-                 "#{stdout_file} should be empty, but has content")
+    assert(File.size(dest_tmpfile.path).positive?,
+           "#{dest_tmpfile.path} should have content but is empty.")
+    assert_equal("", File.read(stdout_tmpfile.path),
+                 "#{stdout_tmpfile.path} should be empty, but has content")
     # In test mode, the script just grabs first observation from api
     # (or mocks grabbing the first observation from api).
     # We don't care about testing name/eol, we just want to test that
     # the script can successfully wget any page from the server!
-    assert(File.read(dest_file).include?('<results number="1">'))
-    # system("cp #{dest_file} x.xml")
+    assert(File.read(dest_tmpfile.path).include?('<results number="1">'))
+    # system("cp #{dest_tmpfile.path} x.xml")
   end
 
   def test_parse_log
     script = script_file("parse_log")
-    tempfile = Tempfile.new("test").path
-    cmd = "#{script} &>#{tempfile}"
+    tmpfile = Tempfile.new("test")
+    cmd = "#{script} &>#{tmpfile.path}"
     status = system(script_env, cmd)
-    errors = File.read(tempfile)
+    errors = File.read(tmpfile.path)
     assert(status, "Something went wrong with #{script}:\n#{errors}")
   end
 
   def test_refresh_name_lister_cache
     script = script_file("refresh_name_lister_cache")
-    tempfile = Tempfile.new("test").path
+    tmpfile = Tempfile.new("test")
     output_file = MO.name_lister_cache_file
     FileUtils.rm(output_file) if File.exist?(output_file)
-    cmd = "#{script} 2>&1 > #{tempfile}"
+    cmd = "#{script} 2>&1 > #{tmpfile.path}"
     status = system(script_env, cmd)
-    errors = File.read(tempfile)
+    errors = File.read(tmpfile.path)
     assert(status && errors.blank?,
            "Something went wrong with #{script}:\n#{errors}")
     assert_path_exists(output_file,
