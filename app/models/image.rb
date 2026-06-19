@@ -253,12 +253,24 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :user
   belongs_to :license
 
-  # External data source for imported images (#4208/#4529). `source_id` +
-  # `external_id` record where the image came from (e.g. the iNat photo id),
-  # mirroring the Observation source/external_id pair.
+  # External import provenance for imported images (#4208/#4529/#4299). Each
+  # imported image carries a polymorphic import ExternalLink (target: the
+  # image) recording its source site + the iNat photo id (external_id). The
+  # legacy `external_source` (Source via source_id) is retained until the
+  # phase-2 drop migration removes `source_id`.
+  has_many :external_links, as: :target, dependent: :destroy
   belongs_to :external_source, class_name: "Source",
                                foreign_key: :source_id, optional: true,
                                inverse_of: :images
+
+  # The import ExternalLink for this image (its source photo), if any.
+  def import_link
+    if external_links.loaded?
+      external_links.detect(&:import?)
+    else
+      external_links.import.first
+    end
+  end
 
   has_many :copyright_changes, as: :target,
                                dependent: :destroy,

@@ -198,7 +198,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                            provisional_name: provisional_name,
                            name_override: name_override)
     Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
-                                   inat_source: :stub)
+                                   external_site: :stub)
   end
 
   def proposed(community:, provisional: nil, override: nil,
@@ -214,9 +214,10 @@ class InatMoObservationBuilderTest < UnitTestCase
       provisional_name: provisional ? "Boletus sp. 'T01'" : nil,
       quality_grade: quality_grade
     )
-    # inat_source: :stub keeps the constructor from hitting Source.inaturalist.
+    # external_site: :stub keeps the constructor from hitting
+    # ExternalSite.inaturalist.
     Inat::MoObservationBuilder.new(
-      inat_obs: fake, user: users(:rolf), inat_source: :stub
+      inat_obs: fake, user: users(:rolf), external_site: :stub
     ).send(:naming_vote)
   end
 end

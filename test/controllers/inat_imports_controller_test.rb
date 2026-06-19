@@ -321,12 +321,16 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_confirm_warns_about_previously_imported
     user = users(:rolf)
     inat_id = "1123456"
-    Observation.create(
+    site = ExternalSite.inaturalist
+    obs = Observation.create(
       where: "North Falmouth, Massachusetts, USA",
       user: user,
-      when: "2024-09-08",
-      external_source: Source.inaturalist,
-      external_id: inat_id
+      when: "2024-09-08"
+    )
+    ExternalLink.create!(
+      user: user, observation: obs, external_site: site,
+      relationship: :import, external_id: inat_id,
+      url: "#{site.base_url}#{inat_id}"
     )
     estimate_response = { total_results: 1 }.to_json
 
@@ -351,12 +355,16 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_create_previously_imported
     user = users(:rolf)
     inat_id = "1123456"
-    Observation.create(
+    site = ExternalSite.inaturalist
+    obs = Observation.create(
       where: "North Falmouth, Massachusetts, USA",
       user: user,
-      when: "2024-09-08",
-      external_source: Source.inaturalist,
-      external_id: inat_id
+      when: "2024-09-08"
+    )
+    ExternalLink.create!(
+      user: user, observation: obs, external_site: site,
+      relationship: :import, external_id: inat_id,
+      url: "#{site.base_url}#{inat_id}"
     )
 
     params = { inat_username: "anything", inat_ids: inat_id,

@@ -20,11 +20,12 @@ class ExternalLinkTest < UnitTestCase
   def test_create_missing_attributes
     link = ExternalLink.create
     assert_not_empty(link.errors[:user], "ExternalLink should require a user")
-    assert_not_empty(link.errors[:observation],
-                     "ExternalLink should require an observation")
+    assert_not_empty(link.errors[:target],
+                     "ExternalLink should require a target")
     assert_not_empty(link.errors[:external_site],
                      "ExternalLink should require an external_site")
-    assert_not_empty(link.errors[:url], "ExternalLink should require a url")
+    # url is optional now (derived from the site template); no presence error.
+    assert_empty(link.errors[:url], "url is not required")
   end
 
   def test_create_validate_url
@@ -108,5 +109,33 @@ class ExternalLinkTest < UnitTestCase
     )
     assert_empty(link3.errors,
                  "Link for different observation should be valid")
+  end
+
+  def test_relationship_defaults_to_cross_reference
+    site = external_sites(:mycoportal)
+    link = ExternalLink.create!(
+      user: mary, observation: observations(:minimal_unknown_obs),
+      external_site: site, url: "#{site.base_url}1"
+    )
+    assert(link.cross_reference?,
+           "New links default to cross_reference (historical meaning)")
+  end
+
+  def test_only_one_import_per_target
+    obs = observations(:imported_inat_obs) # already has an iNat import link
+    site = external_sites(:mycoportal)
+    link = ExternalLink.new(
+      user: mary, observation: obs, external_site: site,
+      relationship: :import, url: "#{site.base_url}999"
+    )
+    assert_not(link.valid?, "A second import link per target is invalid")
+    assert_not_empty(link.errors[:relationship])
+  end
+
+  def test_cross_reference_can_be_upgraded_to_import
+    link = external_links(:coprinus_comatus_obs_inaturalist_link)
+    assert(link.cross_reference?, "Fixture link starts as cross_reference")
+    link.update!(relationship: :import, external_id: "234723")
+    assert(link.reload.import?, "Link should upgrade to import in place")
   end
 end

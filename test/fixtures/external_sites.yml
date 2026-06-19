@@ -7,6 +7,7 @@ mycoportal:
   name:     MycoPortal
   project:  empty_project # mary is only member and admin
   base_url: "https://www.mycoportal.org/portal/collections/"
+  url_template: "https://www.mycoportal.org/portal/collections/individual/index.php?occid={id}"
 
 inaturalist:
   name:     iNaturalist

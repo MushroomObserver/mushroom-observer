@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_16_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_19_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -82,15 +82,26 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_16_120000) do
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
-    t.integer "observation_id"
+    t.integer "target_id"
     t.integer "external_site_id"
     t.string "url", limit: 100
+    t.string "target_type", limit: 64
+    t.string "external_id", limit: 64
+    t.integer "relationship", default: 0, null: false
+    t.datetime "last_synced_at"
+    t.virtual "import_target", type: :string, as: "(case when (`relationship` = 1) then concat(`target_type`,_utf8mb4':',`target_id`) end)", stored: true
+    t.index ["external_site_id", "relationship", "target_type", "external_id"], name: "index_external_links_on_site_rel_target_extid"
+    t.index ["import_target"], name: "index_external_links_on_import_target", unique: true
+    t.index ["target_type", "target_id"], name: "index_external_links_on_target"
   end
 
   create_table "external_sites", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.string "name", limit: 100
     t.integer "project_id"
     t.string "base_url", null: false
+    t.text "description"
+    t.datetime "last_successful_sync_at"
+    t.string "url_template"
   end
 
   create_table "field_slip_job_trackers", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

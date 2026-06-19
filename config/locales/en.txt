@@ -420,6 +420,8 @@
   SUPPORT: Support
   support: support
   TARGET: Target
+  target: target
+  target_id: target id
   TARGET_TYPE: Target Type
   TEST: Test
   TEST_PAGES: Test Pages
@@ -4241,6 +4243,7 @@
   validate_missing: Missing [field].
   validate_not_a_number: "[Field] is not a number."
   validate_not_in_range: "[Field] is out of range."
+  validate_one_import_per_target: Only one import link is allowed per record.
   validate_this_more_than_that: "[That] should be greater than [this]."
   validate_too_large: "[Field] should be at most [max]."
   validate_too_long: "[Field] must be less than [max] characters long."

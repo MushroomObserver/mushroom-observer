@@ -24,15 +24,36 @@
 #  url::           Actual URL, complete with transport ("http://"), etc.
 #
 class ExternalLink < AbstractModel
-  belongs_to :observation
+  # The kind of relationship this link records between the target and the
+  # external site (#4299). `cross_reference` (0) is the historical meaning of
+  # pre-existing rows, so it is the default. `import` marks the external
+  # source the target was imported from — at most one per target (enforced
+  # below and by a DB unique index on a generated column). New values are
+  # added by migration as needed.
+  enum :relationship,
+       { cross_reference: 0, import: 1, export: 2, mirror: 3, unknown: 4 },
+       default: :cross_reference
+
+  # Polymorphic so a link can attach to an Observation or an Image (per-photo
+  # import provenance, #4529) — one model, one code path (#4299).
+  belongs_to :target, polymorphic: true
   belongs_to :external_site
+  # NOTE: (future, #4529 image-provenance work): imports/exports and verified
+  # provenance should set user to the admin user (id=0), not the importer;
+  # once everything is admin-owned the user_id column may be droppable. Not
+  # changed as part of #4299.
   belongs_to :user
 
-  validates :observation, presence: true, uniqueness: { scope: :external_site }
+  validates :target, presence: true
+  # Uniqueness is on the column, not the polymorphic association (Rails can't
+  # compute the class for a polymorphic uniqueness check).
+  validates :target_id,
+            uniqueness: { scope: [:target_type, :external_site_id] }
   validates :external_site, presence: true
   validates :user, presence: true
-  validates :url, presence: true, length: { maximum: 100 }
+  validates :url, length: { maximum: 100 }, allow_blank: true
   validate  :check_url_syntax
+  validate  :only_one_import_per_target, if: :import?
   before_validation :format_url_for_external_site
 
   scope :order_by_default,
@@ -44,42 +65,45 @@ class ExternalLink < AbstractModel
     where(external_site_id: ids)
   }
   scope :observations,
-        ->(ids) { where(observation_id: ids) }
+        ->(ids) { where(target_type: "Observation", target_id: ids) }
 
-  # Eager-loads the show/edit page: user, owning observation (with
-  # the matrix-box subtree for the edit page's preview render and
-  # `:user` for the permission check in `external_links_controller`),
-  # and the external site (rendered as a link).
+  # Eager-loads the show/edit page: user, polymorphic target, and the
+  # external site (rendered as a link). Not strict-loaded: the target is
+  # polymorphic, so its own subtree (e.g. an observation's matrix-box
+  # associations) can't be nested in `includes` and is lazy-loaded.
   def self.show_includes_tree
-    [:user, { observation: Observation.matrix_box_includes },
-     { external_site: { project: :user_group } }]
+    [:user, :target, { external_site: { project: :user_group } }]
   end
 
   def self.index_includes_tree
     show_includes_tree
   end
 
-  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
-  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
+  scope :show_includes, -> { includes(show_includes_tree) }
+  scope :index_includes, -> { includes(index_includes_tree) }
 
   def check_url_syntax
-    return if format_url_for_external_site
+    return if url.blank? || format_url_for_external_site
 
     errors.add(:url, :validate_invalid_url.t)
   end
 
+  # A target has at most one import link (its authoritative external
+  # source). A DB unique index on a generated column also guards this; the
+  # validation produces a friendly error instead of RecordNotUnique.
+  def only_one_import_per_target
+    others = ExternalLink.import.where(target_type: target_type,
+                                       target_id: target_id)
+    others = others.where.not(id: id) if id
+    return unless others.exists?
+
+    errors.add(:relationship, :validate_one_import_per_target.t)
+  end
+
   def format_url_for_external_site
+    return true if url.blank?
     return false unless (base_url = external_site&.base_url)
-
-    # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
-    # causing FormatURL#url_exists? to fail. Skip the reachability check,
-    # instead validating the URL format vs a regexp.
-    if external_site.name == "iNaturalist"
-      inat_url_re = /\A#{Regexp.escape(base_url)}\d+\z/
-      return url if url.to_s.match?(inat_url_re)
-
-      return false
-    end
+    return inat_url?(base_url) if external_site.name == "iNaturalist"
 
     test_url = FormatURL.new(url, base_url)
     return false unless test_url.valid?
@@ -88,15 +112,40 @@ class ExternalLink < AbstractModel
     url
   end
 
+  # iNaturalist's Cloudflare CDN blocks automated HEAD requests with 403,
+  # causing FormatURL#url_exists? to fail. Skip the reachability check,
+  # validating the URL format against a regexp instead.
+  def inat_url?(base_url)
+    url.to_s.match?(/\A#{Regexp.escape(base_url)}\d+\z/) && url
+  end
+
   # Convenience function to allow +sort_by(&:site_name)+.
   def site_name
     external_site.name
   end
 
+  # Backward-compat for the observation-only manual-link feature
+  # (external_links_controller, Query, views). Manual cross-reference links
+  # are always observation-targeted; image links exist only as import
+  # provenance and never flow through these readers/writers.
+  def observation
+    target if target_type == "Observation"
+  end
+
+  def observation=(obs)
+    self.target = obs
+  end
+
+  # The display URL: the stored override if present, else derived from the
+  # site's url_template + external_id (#4299). Import links store no url.
+  def link_url
+    url.presence || external_site&.observation_url(external_id)
+  end
+
   def can_edit?(user)
     return false unless user
 
-    user.id == observation.user_id ||
+    user.id == target&.user_id ||
       external_site&.project&.member?(user)
   end
 

@@ -306,24 +306,8 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     assert_includes(html, "Imported from iNaturalist")
-    expected_url = obs.external_source.observation_url(obs.external_id)
+    expected_url = obs.import_link.url
     assert_html(html, "a[href='#{expected_url}'][target='_blank']" \
                       "[rel='noopener noreferrer']")
-  end
-
-  # External source whose observation_url returns nil falls back
-  # to plain text — covers render_external_credit_link's no-URL
-  # branch (matrix_box.rb line 241).
-  def test_external_source_credit_renders_plain_text_when_no_url
-    obs = observations(:imported_inat_obs)
-    blank_source = Source.create!(name: "BlankSource")
-    obs.update!(external_source: blank_source)
-
-    component = Components::Matrix::Box.new(user: @user, object: obs)
-    html = render(component)
-
-    assert_includes(html, "Imported from BlankSource")
-    assert_no_match(/<a[^>]*BlankSource/, html,
-                    "Should not wrap text in an anchor when URL is nil")
   end
 end
