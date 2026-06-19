@@ -45,6 +45,22 @@ class Views::FullPageBase::TitleChromeTest < ComponentTestCase
     assert_equal("Russula", result)
   end
 
+  def test_title_tag_contents_strips_entity_encoded_html_tags
+    # Regression — `unescape_html` runs BEFORE `strip_html` so
+    # entity-encoded tags (`&lt;i&gt;…&lt;/i&gt;` from translation
+    # files) collapse to real tags first, then the strip removes
+    # them. The other order would leave the entities, then unescape
+    # them into real tags AFTER the strip, and the layout's
+    # `trusted_html(content_for(:document_title))` would render
+    # them literally.
+    result = @page.send(:title_tag_contents,
+                        "&lt;i&gt;Russula&lt;/i&gt;",
+                        action: "show")
+
+    assert_no_match(/[<>]/, result)
+    assert_equal("Russula", result)
+  end
+
   # ----- document_title_for ---------------------------------------------
   #
   # Regression #4316 — the browser-tab `<title>` was showing literal

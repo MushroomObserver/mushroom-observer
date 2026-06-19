@@ -155,7 +155,13 @@ class Views::FullPageBase < Views::Base
   # was set.
   def title_tag_contents(title, action: action_name)
     if title.present?
-      title.strip_html.unescape_html
+      # `unescape_html` first so `&lt;i&gt;…&lt;/i&gt;` (entity-encoded
+      # tags from translations) becomes `<i>…</i>` BEFORE `strip_html`
+      # removes the tags. Doing it in the other order leaves escaped
+      # entities untouched, then unescapes them into real tags after
+      # the strip — which the layout's `trusted_html(content_for(
+      # :document_title))` would then render literally.
+      title.unescape_html.strip_html
     else
       action.tr("_", " ").titleize
     end
