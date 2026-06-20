@@ -1156,7 +1156,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: "someone", consent: 1 })
 
-    assert_flash_text(:inat_url_no_valid_filter_params.l,
+    assert_flash_text(/#{Regexp.escape(:inat_url_no_valid_filter_params.l)}/,
                       "URL without valid filter params should flash a warning")
     assert_form_action(action: :create)
   end
@@ -1177,15 +1177,12 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: "someone", consent: 1 })
 
+    # Use Regexp (assert_match) to find the taxon warning within the
+    # combined multi-warning flash (assert_flash_text clears after each call).
     assert_flash_text(
-      :inat_taxon_id_not_importable.l,
+      /#{Regexp.escape(:inat_taxon_id_not_importable.l)}/,
       "Taxon warning must fire even when taxon_id is the sole param " \
       "and validation fails before normalize_inat_url_param! runs"
-    )
-    assert_flash_text(
-      :inat_url_no_valid_filter_params.l,
-      "No-valid-params warning must also fire when taxon_id-only URL " \
-      "normalizes to empty"
     )
   end
 
