@@ -1279,6 +1279,35 @@ class InatImportsControllerTest < FunctionalTestCase
                   "MO taxon_id and only_id must override user-supplied values")
   end
 
+  def test_url_mode_estimate_uses_user_supplied_importable_taxon_id
+    user = users(:rolf)
+    # taxon_id=54134 is a Fungi child — importable. The estimate must send
+    # taxon_id=54134, not MO's IMPORTABLE_TAXON_IDS_ARG (47170,47685).
+    url = "#{INAT_API_OBS_URL}?project_id=291058&taxon_id=54134"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 54_134,
+                    ancestor_ids: [48_460, 47_170, 54_134] }]
+      }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => "54134")).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "3",
+                  "Importable user-supplied taxon_id should be used " \
+                  "in the estimate, not replaced by IMPORTABLE_TAXON_IDS_ARG")
+  end
+
   def test_url_mode_estimate_excludes_id_param
     user = users(:rolf)
     # URL supplies id=12345; PageParser drops it in URL mode, estimate must too.

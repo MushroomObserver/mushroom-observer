@@ -51,16 +51,16 @@ module InatImportsController::Estimators
   # used to derive how many will be skipped.
   def total_others_estimate_query_args
     args = listing_url? ? url_query_args : {}
-    args.merge!(BASE_FILTER_PARAMS, taxon_id: IMPORTABLE_TAXON_IDS_ARG,
-                                    only_id: true)
+    args.merge!(BASE_FILTER_PARAMS, only_id: true)
+    args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
     args[:id] = params[:inat_ids] if listing_ids?
     args
   end
 
   def import_estimate_query_args
     args = listing_url? ? url_query_args : {}
-    args.merge!(BASE_FILTER_PARAMS, taxon_id: IMPORTABLE_TAXON_IDS_ARG,
-                                    only_id: true)
+    args.merge!(BASE_FILTER_PARAMS, only_id: true)
+    args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
     if import_others?
       args.merge!(LICENSED_FILTER)
     else
