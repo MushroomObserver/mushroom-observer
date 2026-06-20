@@ -111,16 +111,17 @@ module Views::Controllers::Account::APIKeys
 
     def render_view_notes(key)
       span(class: "current_notes mr-4") { trusted_html(key.notes.t) }
-      button(type: :button,
-             class: "btn btn-default collapsed",
-             aria: { expanded: "false",
-                     controls: "edit_notes_#{key.id}_container" },
-             data: { toggle: "collapse",
-                     role: "edit_api_key",
-                     target: "#edit_notes_#{key.id}_container",
-                     parent: "#notes_#{key.id}" }) do
-        render(Components::Icon.new(type: :edit, title: :EDIT.l))
-      end
+      render(Components::Button.new(
+               name: :EDIT.l,
+               icon: :edit,
+               class: "collapsed",
+               aria: { expanded: "false",
+                       controls: "edit_notes_#{key.id}_container" },
+               data: { toggle: "collapse",
+                       role: "edit_api_key",
+                       target: "#edit_notes_#{key.id}_container",
+                       parent: "#notes_#{key.id}" }
+             ))
     end
 
     def render_edit_notes_form(key)
@@ -163,18 +164,17 @@ module Views::Controllers::Account::APIKeys
     # click via `data-toggle="collapse"` and prevents the
     # default navigation.
     def render_new_button
-      link_to(new_account_api_key_path,
-              id: "new_key_button",
-              class: "btn btn-default collapsed",
-              aria: { expanded: "false",
-                      controls: "new_key_form_container" },
-              data: { toggle: "collapse",
-                      target: "#new_key_form_container",
-                      parent: "#new_key_row" }) do
-        render(Components::Icon.new(type: :add))
-        whitespace
-        plain(:account_api_keys_create_button.l)
-      end
+      render(Components::Button::Get.new(
+               name: :account_api_keys_create_button.l,
+               target: new_account_api_key_path,
+               id: "new_key_button",
+               class: "collapsed",
+               aria: { expanded: "false",
+                       controls: "new_key_form_container" },
+               data: { toggle: "collapse",
+                       target: "#new_key_form_container",
+                       parent: "#new_key_row" }
+             ))
     end
 
     def render_new_form
