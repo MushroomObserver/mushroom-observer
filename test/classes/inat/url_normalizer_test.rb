@@ -165,13 +165,24 @@ class Inat
                    "Should strip user_id for non-superimporter")
     end
 
-    def test_superimporter_own_import_strips_user_id
+    def test_superimporter_own_import_strips_user_login_and_user_id
+      # In own-import mode, inat_username controls whose observations to import;
+      # user_login from the URL is redundant/misleading and must be stripped.
       url = "#{API_URL}?project_id=291058&user_login=testuser&user_id=12345"
       result = URLNormalizer.new(url, superimporter: true).normalize
 
-      assert_equal("project_id=291058&user_login=testuser", result,
-                   "user_id stripped for own-import superimporter; " \
-                   "user_login preserved")
+      assert_equal("project_id=291058", result,
+                   "Both user_login and user_id must be stripped for " \
+                   "superimporter in own-import mode")
+    end
+
+    def test_superimporter_own_import_user_login_appears_in_ignored_params
+      url = "#{API_URL}?project_id=291058&user_login=someone_else"
+      ignored = URLNormalizer.new(url, superimporter: true).ignored_params
+
+      assert_includes(ignored, "user_login",
+                      "user_login stripped in own-import mode must appear " \
+                      "in ignored_params so the controller can warn the user")
     end
 
     def test_superimporter_import_others_preserves_user_id

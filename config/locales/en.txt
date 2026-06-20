@@ -3234,10 +3234,10 @@
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
   inat_url_label: "iNat observations URL"
-  inat_url_hint: "Paste an iNat observation search URL or API URL to filter which observations to import (e.g. by project or place). Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
+  inat_url_hint: "Paste an iNat filtered observation search URL or API URL to limit which observations to import (e.g. by taxon or place). Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
   inat_invalid_url: "URL must be a filtered iNat observations URL or iNat API observation search URL"
-  inat_url_no_valid_filter_params: "URL has no valid filter parameters — please add at least one (e.g. project_id, place_id, quality_grade)"
-  inat_url_params_ignored: "MO ignores these URL parameters: [params]"
+  inat_url_no_valid_filter_params: "URL has no valid filter parameters — please add at least one (e.g. place_id, quality_grade)"
+  inat_url_params_ignored: "MO ignores these parameters because they interfere with those which MO uses internally or because they have no effect: [params]"
   inat_taxon_id_not_importable: "The taxon_id URL parameter was ignored because it includes taxa that are neither fungi nor slime molds"
   inat_previous_import: "[count] listed ids previously imported and will not be re-imported"
   inat_too_many_ids_listed: Too many ids listed

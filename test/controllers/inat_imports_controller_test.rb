@@ -1210,6 +1210,54 @@ class InatImportsControllerTest < FunctionalTestCase
                  "validation failure, not blank or normalized")
   end
 
+  def test_stripped_sole_param_warns_which_param_was_ignored
+    # When a context-stripped param (user_login) is the only param in the
+    # URL, validation fails because the normalized URL is empty. The
+    # ignored-params warning must fire in valid_inat_url_param? so the user
+    # knows WHY the URL was rejected (not just that no valid params remain).
+    login
+    url = "#{INAT_API_OBS_URL}?user_login=someone_else"
+
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    # Use Regexp: the flash also contains the no-valid-params rejection
+    # message; assert_flash_text clears after the call so only one check
+    # is possible. The rejection message itself is covered by
+    # test_create_url_with_no_surviving_params_rejected.
+    assert_flash_text(
+      /#{Regexp.escape(:inat_url_params_ignored.t(params: "user_login"))}/,
+      "Ignored-params warning must name user_login when it is stripped " \
+      "as the sole URL param and validation fails before " \
+      "normalize_inat_url_param! runs"
+    )
+  end
+
+  def test_confirm_page_shows_ignored_url_params_warning
+    # When a URL has ignored params alongside surviving ones, the user
+    # reaches the Confirm page and must see the ignored-params warning
+    # rendered by the layout's FlashNotices component.
+    user = users(:rolf)
+    url = "#{INAT_API_OBS_URL}?project_id=291058&user_login=someone_else"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      :inat_url_params_ignored.t(params: "user_login"),
+      "Confirm page must show the ignored-params warning for user_login " \
+      "stripped from the URL for a non-superimporter"
+    )
+    assert_select("#estimated_count",
+                  "Confirm page should render with the estimate")
+  end
+
   def test_create_warns_about_ignored_url_params
     user = users(:rolf)
     # page=2 in an API URL is MO-controlled and stripped; using an API URL

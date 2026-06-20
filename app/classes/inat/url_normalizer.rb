@@ -103,7 +103,9 @@ class Inat
 
     def context_strip_params
       strips = []
-      strips += ["user_login"] unless @superimporter
+      # user_login is only meaningful in import-others mode — the inat_username
+      # field controls whose observations to import in own-import mode.
+      strips += ["user_login"] unless @superimporter && @import_others
       strips += ["licensed"] if @superimporter || @import_others
       strips
     end
