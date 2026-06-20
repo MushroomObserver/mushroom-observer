@@ -1161,6 +1161,58 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  def test_non_importable_sole_taxon_id_flashes_taxon_warning
+    # When taxon_id is the only param and is non-importable,
+    # valid_inat_url_param? fails before normalize_inat_url_param! runs.
+    # The taxon-specific warning
+    # must still fire so the user knows why the URL was rejected.
+    login
+    url = "#{INAT_API_OBS_URL}?taxon_id=3"
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
+
+    post(:create,
+         params: { inat_url: url, inat_username: "someone", consent: 1 })
+
+    assert_flash_text(
+      :inat_taxon_id_not_importable.l,
+      "Taxon warning must fire even when taxon_id is the sole param " \
+      "and validation fails before normalize_inat_url_param! runs"
+    )
+    assert_flash_text(
+      :inat_url_no_valid_filter_params.l,
+      "No-valid-params warning must also fire when taxon_id-only URL " \
+      "normalizes to empty"
+    )
+  end
+
+  def test_non_importable_sole_taxon_id_restores_url_on_reload
+    # When validation fails (URL empty after stripping non-importable taxon_id),
+    # the form must reload with the original URL. original_inat_url is only set
+    # in normalize_inat_url_param!, which is skipped on validation failure, so
+    # reload_form must fall back to params[:inat_url].
+    login
+    url = "#{INAT_API_OBS_URL}?taxon_id=3"
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
+
+    post(:create,
+         params: { inat_url: url, inat_username: "someone", consent: 1 })
+
+    url_field = css_select("input#inat_import_inat_url").first
+    assert_not_nil(url_field,
+                   "inat_url field must be present in reloaded form")
+    assert_equal(url, url_field["value"],
+                 "Form must be pre-populated with the original URL after " \
+                 "validation failure, not blank or normalized")
+  end
+
   def test_create_warns_about_ignored_url_params
     user = users(:rolf)
     # page=2 in an API URL is MO-controlled and stripped; using an API URL

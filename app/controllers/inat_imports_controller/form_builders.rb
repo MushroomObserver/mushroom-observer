@@ -17,15 +17,19 @@ module InatImportsController::FormBuilders
   end
 
   def reload_form
-    render_new_form(submitted: {
-                      username: params[:inat_username],
-                      inat_ids: params[:inat_ids],
-                      inat_url: params[:original_inat_url],
-                      all: params[:all],
-                      consent: params[:consent],
-                      import_others: params[:import_others],
-                      skip_writeback: params[:skip_inat_writeback]
-                    })
+    render_new_form(submitted: reload_form_params)
+  end
+
+  def reload_form_params
+    {
+      username: params[:inat_username],
+      inat_ids: params[:inat_ids],
+      inat_url: params[:original_inat_url] || params[:inat_url],
+      all: params[:all],
+      consent: params[:consent],
+      import_others: params[:import_others],
+      skip_writeback: params[:skip_inat_writeback]
+    }
   end
 
   def render_new_form(submitted: {})

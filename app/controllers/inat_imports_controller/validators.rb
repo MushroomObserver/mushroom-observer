@@ -89,12 +89,15 @@ module InatImportsController::Validators
                                 keep_taxon_id: keep).normalize
     return true if normalized.present?
 
-    msg =
-      if normalized.nil?
-        :inat_invalid_url.l
-      else
-        :inat_url_no_valid_filter_params.l
-      end
+    # Taxon warning fires here when taxon_id is the sole param that was
+    # stripped; normally it fires in normalize_inat_url_param!, which is
+    # never reached when validation fails.
+    warn_about_non_importable_taxon if !keep && normalized == ""
+    msg = if normalized.nil?
+            :inat_invalid_url.l
+          else
+            :inat_url_no_valid_filter_params.l
+          end
     flash_warning(msg)
     false
   end
