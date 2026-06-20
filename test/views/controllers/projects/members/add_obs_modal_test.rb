@@ -53,38 +53,15 @@ module Views::Controllers::Projects::Members
       assert_html(html, "form[action='#{expected_path}']")
     end
 
-    # Parity: `btn: "btn btn-primary"` (new) produces the same button
-    # class as the old `class: "btn btn-primary"` call on the base CrudButton
-    # (which had no btn: default on Put).
-    def test_btn_kwarg_parity_with_old_class_kwarg
-      target = routes.project_member_path(
-        project_id: @project.id,
-        candidate: @candidate.id,
-        commit: :change_member_add_obs.l,
-        target: :project_index
-      )
-      old_html = render(
-        Components::CrudButton.new(
+    def test_raises_when_raw_btn_class_passed
+      assert_raises(ArgumentError) do
+        Components::Button::CRUDBase.new(
           name: :add_obs_modal_add_all.l,
-          target: target,
+          target: "/ignored",
           method: :put,
           class: "btn btn-primary"
         )
-      )
-      new_html = render(
-        Components::CrudButton::Put.new(
-          name: :add_obs_modal_add_all.l,
-          target: target,
-          style: :primary
-        )
-      )
-
-      assert_html_element_equivalent(
-        "<div>#{old_html}</div>",
-        "<div>#{new_html}</div>",
-        selector: "div",
-        label: "add_obs_modal_submit"
-      )
+      end
     end
 
     private

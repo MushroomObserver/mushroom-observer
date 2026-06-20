@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-class CrudButtonTest < ComponentTestCase
+class ButtonCRUDBaseTest < ComponentTestCase
   def test_basic_post_button
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Submit",
                     target: "/some/path",
                     method: :post
@@ -16,7 +16,7 @@ class CrudButtonTest < ComponentTestCase
   end
 
   def test_patch_button_with_confirm
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Remove",
                     target: "/items/1/remove",
                     method: :patch,
@@ -31,7 +31,7 @@ class CrudButtonTest < ComponentTestCase
 
   def test_delete_button_with_destroy_action
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Destroy",
                     target: herbarium,
                     method: :delete,
@@ -49,7 +49,7 @@ class CrudButtonTest < ComponentTestCase
   end
 
   def test_button_with_icon
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Remove",
                     target: "/items/1",
                     method: :patch,
@@ -62,20 +62,20 @@ class CrudButtonTest < ComponentTestCase
     assert_html(html, "span.sr-only", text: "Remove")
   end
 
-  def test_button_with_custom_class
-    html = render(Components::CrudButton.new(
-                    name: "Submit",
-                    target: "/path",
-                    method: :post,
-                    class: "btn btn-primary"
-                  ))
-
-    assert_html(html, "button.btn.btn-primary")
+  def test_raises_on_btn_class_in_class_kwarg
+    assert_raises(ArgumentError) do
+      render(Components::Button::CRUDBase.new(
+               name: "Submit",
+               target: "/path",
+               method: :post,
+               class: "btn btn-primary"
+             ))
+    end
   end
 
   def test_button_with_model_target_builds_path_and_identifier
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Update",
                     target: herbarium,
                     method: :patch
@@ -89,7 +89,7 @@ class CrudButtonTest < ComponentTestCase
   end
 
   def test_button_with_confirm_shows_title_and_button_name
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Remove",
                     target: "/items/1/remove",
                     method: :patch,
@@ -108,7 +108,7 @@ class CrudButtonTest < ComponentTestCase
   # work and keeps the element inline. Same html_options shape (class,
   # title, tooltip data) as the form-button branch.
   def test_get_method_emits_link_not_form
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Download",
                     target: "/items/1/download",
                     method: :get,
@@ -129,7 +129,7 @@ class CrudButtonTest < ComponentTestCase
   # accessible label for icon-only buttons; for text-only links the
   # tooltip would just duplicate the visible label, so we skip it.
   def test_get_method_without_icon_skips_tooltip
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Map",
                     target: "/map",
                     method: :get
@@ -147,26 +147,26 @@ class CrudButtonTest < ComponentTestCase
   # without spelling out the full class string. Caller's `class:` layers
   # on top for sizing/spacing.
   def test_get_method_variant_kwarg_prepends_classes
-    html = render(Components::CrudButton.new(
+    html = render(Components::Button::CRUDBase.new(
                     name: "Map",
                     target: "/map",
                     method: :get,
                     style: :default,
-                    class: "btn-lg"
+                    size: :lg
                   ))
 
     assert_html(html, "a.btn.btn-default.btn-lg[href='/map']")
   end
 end
 
-# `Components::CrudButton` subclasses (`Delete`, `Edit`, `Download`,
+# `Components::Button::CRUDBase` subclasses (`Delete`, `Edit`, `Download`,
 # `Post`, `Put`, `Patch`) — verify each subclass's destroy / edit /
-# fetch defaults stack correctly on top of the base `CrudButton`
+# fetch defaults stack correctly on top of the base `Button::CRUDBase`
 # rendering.
-class CrudButtonSubclassesTest < ComponentTestCase
+class ButtonSubclassesTest < ComponentTestCase
   def test_delete_with_model_target
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::CrudButton::Delete.new(target: herbarium))
+    html = render(Components::Button::Delete.new(target: herbarium))
 
     assert_html(html,
                 "form[action='#{routes.herbarium_path(herbarium)}']")
@@ -179,7 +179,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   def test_delete_with_custom_name
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Delete.new(target: herbarium, name: "Delete it")
+      Components::Button::Delete.new(target: herbarium, name: "Delete it")
     )
 
     assert_html(html, "button", text: "Delete it")
@@ -189,7 +189,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # renders the remove-circle glyphicon + sr-only label wrapper.
   def test_delete_default_icon
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::CrudButton::Delete.new(target: herbarium))
+    html = render(Components::Button::Delete.new(target: herbarium))
 
     assert_html(html, "button span.glyphicon-remove-circle")
     assert_html(html, "button span.sr-only")
@@ -200,7 +200,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   def test_delete_icon_nil_opts_out
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Delete.new(target: herbarium, icon: nil)
+      Components::Button::Delete.new(target: herbarium, icon: nil)
     )
 
     assert_no_html(html, "button span.glyphicon")
@@ -213,7 +213,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   def test_delete_icon_override
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Delete.new(target: herbarium, icon: :remove)
+      Components::Button::Delete.new(target: herbarium, icon: :remove)
     )
 
     assert_html(html, "button span.glyphicon-remove-circle")
@@ -224,7 +224,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # across destroy buttons.
   def test_delete_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::CrudButton::Delete.new(target: herbarium))
+    html = render(Components::Button::Delete.new(target: herbarium))
 
     assert_html(html, "button.btn.btn-outline-default")
   end
@@ -234,7 +234,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   def test_delete_variant_nil_opts_out_of_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Delete.new(target: herbarium, style: nil)
+      Components::Button::Delete.new(target: herbarium, style: nil)
     )
 
     assert_no_html(html, "button.btn-outline-default")
@@ -246,10 +246,10 @@ class CrudButtonSubclassesTest < ComponentTestCase
 
   # Caller `class:` layers on top of the `style:` default — e.g.
   # `btn-sm` combines with the outline frame.
-  def test_delete_class_layered_on_btn_default
+  def test_delete_size_kwarg
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Delete.new(target: herbarium, class: "btn-sm")
+      Components::Button::Delete.new(target: herbarium, size: :sm)
     )
 
     assert_html(html, "button.btn.btn-outline-default.btn-sm")
@@ -261,7 +261,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # back to `:DESTROY.l` since there's no type to interpolate.
   def test_delete_with_string_target
     html = render(
-      Components::CrudButton::Delete.new(target: "/items/42", name: "Destroy")
+      Components::Button::Delete.new(target: "/items/42", name: "Destroy")
     )
 
     assert_html(html, "form[action='/items/42']")
@@ -274,7 +274,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # Edit default: GET + `edit_<type>_path` + icon `:edit`.
   def test_edit_with_model_target
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::CrudButton::Edit.new(target: herbarium))
+    html = render(Components::Button::Edit.new(target: herbarium))
 
     assert_html(html,
                 "a[href='#{routes.edit_herbarium_path(herbarium)}']")
@@ -290,7 +290,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   def test_edit_icon_nil_opts_out
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Edit.new(target: herbarium, icon: nil)
+      Components::Button::Edit.new(target: herbarium, icon: nil)
     )
 
     path = routes.edit_herbarium_path(herbarium)
@@ -304,7 +304,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # Edit shares Delete's btn-frame default (`btn btn-outline-default`).
   def test_edit_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
-    html = render(Components::CrudButton::Edit.new(target: herbarium))
+    html = render(Components::Button::Edit.new(target: herbarium))
 
     assert_html(html, "a.btn.btn-outline-default")
   end
@@ -313,7 +313,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   def test_edit_variant_nil_opts_out_of_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Edit.new(target: herbarium, style: nil)
+      Components::Button::Edit.new(target: herbarium, style: nil)
     )
 
     assert_no_html(html, "a.btn-outline-default")
@@ -323,9 +323,9 @@ class CrudButtonSubclassesTest < ComponentTestCase
 
   # Edit with String target + explicit `class:` override.
   def test_edit_with_string_target_and_class
-    html = render(Components::CrudButton::Edit.new(
+    html = render(Components::Button::Edit.new(
                     target: "/items/42/edit", name: "Edit it",
-                    class: "btn btn-link"
+                    style: :link
                   ))
 
     assert_html(html, "a.btn.btn-link[href='/items/42/edit']")
@@ -338,7 +338,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # `:edit_object.t(type: …)`.
   def test_edit_with_string_target_default_name
     html = render(
-      Components::CrudButton::Edit.new(target: "/items/42/edit")
+      Components::Button::Edit.new(target: "/items/42/edit")
     )
 
     assert_html(html, "a span.sr-only", text: :EDIT.l)
@@ -354,7 +354,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   def test_download_with_explicit_path
     species_list = species_lists(:first_species_list)
     path = routes.new_download_species_list_path(id: species_list.id)
-    html = render(Components::CrudButton::Download.new(target: path))
+    html = render(Components::Button::Download.new(target: path))
 
     assert_html(html, "a[href='#{path}']")
     assert_no_html(html, "form")
@@ -366,7 +366,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # button body is the name verbatim.
   def test_post
     html = render(
-      Components::CrudButton::Post.new(name: "Create", target: "/items")
+      Components::Button::Post.new(name: "Create", target: "/items")
     )
 
     assert_html(html, "form[action='/items'][data-turbo='true']")
@@ -378,7 +378,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # Put + confirm: form action, `_method=put`, turbo-confirm title
   # and button data, body text.
   def test_put_with_confirm
-    html = render(Components::CrudButton::Put.new(
+    html = render(Components::Button::Put.new(
                     name: "Replace", target: "/items/1", confirm: "Sure?"
                   ))
 
@@ -393,7 +393,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # Post defaults to `btn btn-default`.
   def test_post_default_btn_frame
     html = render(
-      Components::CrudButton::Post.new(name: "Submit", target: "/items")
+      Components::Button::Post.new(name: "Submit", target: "/items")
     )
 
     assert_html(html, "button.btn.btn-default")
@@ -402,8 +402,8 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # Explicit `style:` overrides the default.
   def test_post_variant_override
     html = render(
-      Components::CrudButton::Post.new(name: "Submit", target: "/items",
-                                       style: :primary)
+      Components::Button::Post.new(name: "Submit", target: "/items",
+                                   style: :primary)
     )
 
     assert_html(html, "button.btn.btn-primary")
@@ -413,17 +413,16 @@ class CrudButtonSubclassesTest < ComponentTestCase
   # `style: nil` suppresses the frame entirely (icon-only inline buttons).
   def test_post_variant_nil_suppresses_frame
     html = render(
-      Components::CrudButton::Post.new(name: "Submit", target: "/items",
-                                       style: nil, class: "btn btn-link p-0")
+      Components::Button::Post.new(name: "Submit", target: "/items",
+                                   style: nil)
     )
 
-    assert_no_html(html, "button.btn-default")
-    assert_html(html, "button.btn.btn-link")
+    assert_no_html(html, "button.btn")
   end
 
   # Patch with `style:` override: form, `_method=patch`, variant applied.
   def test_patch_with_variant_override
-    html = render(Components::CrudButton::Patch.new(
+    html = render(Components::Button::Patch.new(
                     name: "Update", target: "/items/1",
                     style: :primary
                   ))

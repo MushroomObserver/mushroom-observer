@@ -25,24 +25,24 @@ module Views::Controllers::Projects::Updates
     private
 
     def render_add_button
-      render(Components::CrudButton::Post.new(
+      render(Components::Button::Post.new(
                name: :ADD.t,
                target: add_observation_project_update_path(
                  project_id: @project.id, id: @obs.id,
                  show_excluded: @show_excluded
                ),
-               style: :default, class: "btn-sm mx-1"
+               size: :sm, class: "mx-1"
              ))
     end
 
     def render_exclude_button
-      render(Components::CrudButton::Post.new(
+      render(Components::Button::Post.new(
                name: :EXCLUDE.t,
                target: exclude_observation_project_update_path(
                  project_id: @project.id, id: @obs.id,
                  show_excluded: @show_excluded
                ),
-               style: :default, class: "btn-sm mx-1"
+               size: :sm, class: "mx-1"
              ))
     end
   end

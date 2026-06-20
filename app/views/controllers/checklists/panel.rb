@@ -82,7 +82,7 @@ module Views::Controllers::Checklists
       return unless @context.admin?
       return unless @context.project.target_name_ids.include?(name_id)
 
-      render(Components::CrudButton::Delete.new(
+      render(Components::Button::Delete.new(
                name: :REMOVE.l,
                target: project_target_name_path(
                  project_id: @context.project.id, id: name_id
@@ -91,8 +91,8 @@ module Views::Controllers::Checklists
                  name: Name.safe_find(name_id)&.text_name
                ),
                icon: :x,
-               style: nil,
-               class: "btn btn-link p-0 ml-1"
+               style: :link,
+               class: "p-0 ml-1"
              ))
     end
   end

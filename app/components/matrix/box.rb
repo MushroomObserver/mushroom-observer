@@ -327,12 +327,12 @@ class Components::Matrix::Box < Components::Base
     return unless show_project_exclude_button?
 
     panel.with_footer(classes: "text-center") do
-      render(Components::CrudButton::Post.new(
+      render(Components::Button::Post.new(
                name: :EXCLUDE.t,
                target: exclude_observation_project_update_path(
                  project_id: @project.id, id: @data[:what].id
                ),
-               class: "btn-sm"
+               size: :sm
              ))
     end
   end

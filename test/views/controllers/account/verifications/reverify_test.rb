@@ -20,33 +20,14 @@ module Views::Controllers::Account::Verifications
       assert_no_html(html, "form[data-turbo='true'] button.btn-default")
     end
 
-    # Parity: `style: :primary` produces the same class as the old
-    # `class: "btn btn-primary"` call on the base CrudButton.
-    def test_variant_kwarg_parity_with_old_class_kwarg
-      old_html = render(
-        Components::CrudButton.new(
+    def test_raises_when_raw_btn_class_passed
+      assert_raises(ArgumentError) do
+        Components::Button::Post.new(
           name: :reverify_link.t,
           target: routes.account_resend_verification_email_path(id: @user.id),
-          method: :post,
-          class: "btn btn-primary",
-          id: "account_reverify_link"
+          class: "btn btn-primary"
         )
-      )
-      new_html = render(
-        Components::CrudButton::Post.new(
-          name: :reverify_link.t,
-          target: routes.account_resend_verification_email_path(id: @user.id),
-          style: :primary,
-          id: "account_reverify_link"
-        )
-      )
-
-      assert_html_element_equivalent(
-        "<div>#{old_html}</div>",
-        "<div>#{new_html}</div>",
-        selector: "div",
-        label: "reverify_button"
-      )
+      end
     end
 
     private

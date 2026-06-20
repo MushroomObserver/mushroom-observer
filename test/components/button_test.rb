@@ -17,23 +17,28 @@ class ButtonTest < ComponentTestCase
   end
 
   def test_variant_nil_drops_frame
-    html = render_button(name: "Bare", style: nil, class: "btn btn-link p-0")
+    html = render_button(name: "Bare", style: nil, class: "p-0")
 
-    assert_html(html, "button.btn.btn-link")
+    assert_no_html(html, "button.btn")
   end
 
   def test_extra_class_merged
-    html = render_button(name: "Sized", class: "btn-sm")
+    html = render_button(name: "Sized", size: :sm)
 
     assert_html(html, "button.btn.btn-default.btn-sm")
   end
 
   def test_icon_only_with_sr_only_name
-    html = render_button(name: "Remove", icon: :x, style: nil,
-                         class: "btn btn-link p-0")
+    html = render_button(name: "Remove", icon: :x, style: nil, class: "p-0")
 
     assert_html(html, "button span.sr-only", text: "Remove")
     assert_html(html, "button span.glyphicon")
+  end
+
+  def test_raises_on_btn_class_in_class_kwarg
+    assert_raises(ArgumentError) do
+      render_button(name: "Bad", class: "btn btn-primary")
+    end
   end
 
   def test_data_attrs_pass_through

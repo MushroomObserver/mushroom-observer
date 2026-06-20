@@ -8,6 +8,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Consult this file (alongside +application_form.rb+) to see the full
   # set of field helpers available in form components.
   module FieldHelpers
+    include Components::ButtonStyling
+
     # Wrapper option keys that should not be passed to the field itself
     WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
                        :wrap_data, :between, :button, :button_data,
@@ -388,9 +390,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @option options [Boolean] :center center the button (default false)
     # @option options [String] :submits_with text shown while submitting
     # @option options [Symbol] :style button style (default `:default`).
-    #   Valid values: `Components::Button::BTN_STYLES.keys`.
+    #   Valid values: `Components::ButtonStyling::PERMITTED_STYLES`.
     # @option options [Symbol] :size button size modifier (optional).
-    #   Valid values: `Components::Button::BTN_SIZES.keys`.
+    #   Valid values: `Components::ButtonStyling::BTN_SIZES.keys`.
     # @option options [Symbol] :as `:input` (default) renders
     #   `<input type="submit">`; `:button` renders
     #   `<button type="submit">value</button>`.
@@ -400,19 +402,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     # disabled-state label for non-Turbo submits). Defaults to the button
     # label (just disable, no text swap).
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
-               disable_with: nil, style: Components::Button::DEFAULT_STYLE,
+               disable_with: nil, style: DEFAULT_STYLE,
                size: nil, as: :input, **options)
       submits_with ||= default_submits_with(value)
       disable_with ||= value
-      classes = [Components::Button.btn_class(style),
-                 Components::Button.size_class(size)]
-      classes << "center-block my-3" if center
-      classes << options[:class] if options[:class].present?
-
-      data = { turbo_submits_with: submits_with,
-               disable_with: disable_with }.merge(options[:data] || {})
-      merged = options.merge(class: classes.join(" "), data: data)
-
+      merged = submit_merged_options(options, style: style, size: size,
+                                              center: center,
+                                              submits_with: submits_with,
+                                              disable_with: disable_with)
       if as == :button
         button(type: "submit", name: "commit", **merged) { value }
       else
@@ -427,6 +424,16 @@ class Components::ApplicationForm < Superform::Rails::Form
     # "Submitting".
     def default_submits_with(value)
       value == :UPDATE.l ? :UPDATING.l : :SUBMITTING.l
+    end
+
+    def submit_merged_options(options, **opts)
+      classes = [("btn" if opts[:style]), btn_class(opts[:style]),
+                 size_class(opts[:size]),
+                 ("center-block my-3" if opts[:center]),
+                 options[:class]].compact
+      data = { turbo_submits_with: opts[:submits_with],
+               disable_with: opts[:disable_with] }.merge(options[:data] || {})
+      options.merge(class: classes.join(" "), data: data)
     end
 
     # Convert help: option to with_help slot for help icon rendering

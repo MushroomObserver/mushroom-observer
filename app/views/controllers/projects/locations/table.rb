@@ -225,7 +225,7 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_remove_button(loc)
-      render(Components::CrudButton::Delete.new(
+      render(Components::Button::Delete.new(
                name: :REMOVE.l,
                target: project_target_location_path(
                  project_id: @project.id, id: loc.id
@@ -234,8 +234,8 @@ module Views::Controllers::Projects::Locations
                  name: loc.display_name
                ),
                icon: :x,
-               style: nil,
-               class: "btn btn-link p-0"
+               style: :link,
+               class: "p-0"
              ))
     end
   end

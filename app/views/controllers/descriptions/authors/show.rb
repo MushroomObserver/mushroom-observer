@@ -36,7 +36,7 @@ module Views::Controllers::Descriptions::Authors
     def render_author_row(user, type)
       render(Components::Link::Object::User.new(user: user))
       plain(" | ")
-      render(Components::CrudButton::Delete.new(
+      render(Components::Button::Delete.new(
                name: :review_authors_remove_author.t,
                target: description_authors_path(
                  id: @object.id, type: type, remove: user.id

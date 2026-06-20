@@ -36,7 +36,7 @@ module Views::Controllers::Observations::Locations
 
     def render_match(list, location)
       list.item do
-        render(::Components::CrudButton::Patch.new(
+        render(::Components::Button::Patch.new(
                  name: location.display_name.t,
                  target: assign_location_to_observations_path(
                    where: @where, location: location

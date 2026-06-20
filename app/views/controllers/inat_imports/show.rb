@@ -40,10 +40,9 @@ module Views::Controllers::InatImports
         link_to(:inat_import_tracker_results.l,
                 results_observations_path,
                 class: "btn btn-default")
-        render(::Components::CrudButton::Put.new(
+        render(::Components::Button::Put.new(
                  name: :CANCEL.l,
-                 target: inat_import_cancel_path(id: @tracker.inat_import),
-                 class: "btn btn-default"
+                 target: inat_import_cancel_path(id: @tracker.inat_import)
                ))
       end
     end

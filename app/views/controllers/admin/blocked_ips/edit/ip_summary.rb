@@ -55,10 +55,10 @@ module Views::Controllers::Admin::BlockedIps
         return if ::IpStats.blocked?(ip)
 
         # Inline of the `patch_button` helper (LinkHelper#patch_button).
-        render(::Components::CrudButton::Patch.new(
+        render(::Components::Button::Patch.new(
                  name: "Block",
                  target: admin_blocked_ips_path(add_bad: ip),
-                 class: "btn btn-default"
+                 style: :default
                ))
       end
 

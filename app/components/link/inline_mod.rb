@@ -167,7 +167,7 @@ class Components::Link::InlineMod < Components::Base
   def destroy_component
     return nil unless can_destroy?
 
-    Components::CrudButton::Delete.new(**destroy_args)
+    Components::Button::Delete.new(**destroy_args)
   end
 
   def destroy_args
@@ -262,7 +262,7 @@ class Components::Link::InlineMod < Components::Base
 
   # ---- :destroy_path handlers -------------------------------
 
-  # Default — pass the model and let `CrudButton::Delete` build
+  # Default — pass the model and let `Button::Delete` build
   # `record_path(id)`.
   def path_target = @target
 

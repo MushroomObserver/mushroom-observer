@@ -102,7 +102,7 @@ module Views::Controllers::Projects
     def render_administer_button
       return unless @user&.admin && !@project.is_admin?(@user)
 
-      render(Components::CrudButton::Post.new(
+      render(Components::Button::Post.new(
                name: :show_project_administer.l,
                target: project_administration_path(project_id: @project.id),
                class: action_button_class
@@ -118,7 +118,7 @@ module Views::Controllers::Projects
     end
 
     def render_join_button
-      render(Components::CrudButton::Post.new(
+      render(Components::Button::Post.new(
                name: :show_project_join.l,
                target: project_members_path(
                  project_id: @project.id,
@@ -148,7 +148,7 @@ module Views::Controllers::Projects
     end
 
     def render_leave_button
-      render(Components::CrudButton::Put.new(
+      render(Components::Button::Put.new(
                name: :show_project_leave.t,
                target: project_member_path(
                  project_id: @project.id,
@@ -182,18 +182,21 @@ module Views::Controllers::Projects
       ) { plain(:show_project_admin_request.l) }
     end
 
-    # Not a CrudButton candidate — count-badge link with `btn-warning`
-    # styling when constraints are violated, not a standard action button.
+    # Explicit String target because the violations route uses
+    # `:project_id` (not `:id`), so Button::Get can't auto-build the
+    # path from a model. See the `violations_route_endpoint_smell`
+    # memory for the planned fix.
     def render_violations_button
       return unless @project.constraints?
 
       count = @project.count_violations
-      btn_type = count.positive? ? "btn-warning" : "btn-default"
-      link_to(
-        "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
-        project_violations_path(project_id: @project.id),
-        class: "btn btn-lg #{btn_type} my-2 mr-2"
-      )
+      render(Components::Button::Get.new(
+               name: "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
+               target: project_violations_path(project_id: @project.id),
+               style: count.positive? ? :warning : :default,
+               size: :lg,
+               class: "my-2 mr-2"
+             ))
     end
 
     def render_comments

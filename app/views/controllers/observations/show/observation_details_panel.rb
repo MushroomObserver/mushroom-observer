@@ -31,7 +31,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     name = :download_observations_print_labels.l
     query = ::Query.lookup(::Observation, id_in_set: [@obs.id])
     path = add_q_param(observations_downloads_path(commit: name), query)
-    render(Components::CrudButton::Post.new(
+    render(Components::Button::Post.new(
              name: name, target: path, icon: :print,
              class: "print_label_observation_#{@obs.id}",
              form: { data: { turbo: false } }

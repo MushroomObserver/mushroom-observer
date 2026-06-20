@@ -15,7 +15,7 @@ module Views::Controllers::Account::Verifications
         :reverify_note.tp(user: @unverified_user.login) +
           :email_spam_notice.tp
       )
-      render(Components::CrudButton::Post.new(
+      render(Components::Button::Post.new(
                name: :reverify_link.t,
                target: account_resend_verification_email_path(
                  id: @unverified_user.id

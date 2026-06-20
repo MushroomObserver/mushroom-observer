@@ -48,7 +48,7 @@ module Views::Controllers::Projects::Members
     end
 
     def render_submit_button
-      render(Components::CrudButton::Put.new(
+      render(Components::Button::Put.new(
                name: submit_label,
                target: project_member_path(
                  project_id: @project.id,

@@ -75,10 +75,9 @@ module Views::Controllers::Account::APIKeys
         if key.verified
           render_verified_check_box(key)
         else
-          render(Components::CrudButton::Patch.new(
+          render(Components::Button::Patch.new(
                    name: :ACTIVATE.l,
                    target: account_activate_api_key_path(key.id),
-                   class: "btn btn-default",
                    id: "activate_api_key_#{key.id}"
                  ))
         end
@@ -136,10 +135,10 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_remove_button(key)
-      # `style: :outline_default` comes from `CrudButton::Delete`.
+      # `style: :outline_default` comes from `Button::Delete`.
       # `icon: :remove` overrides the default `:delete` glyph to match
       # the table's "REMOVE" label.
-      render(Components::CrudButton::Delete.new(
+      render(Components::Button::Delete.new(
                target: account_api_key_path(key.id),
                name: :REMOVE.l,
                icon: :remove,
