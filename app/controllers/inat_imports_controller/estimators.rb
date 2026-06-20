@@ -11,9 +11,18 @@ module InatImportsController::Estimators
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
     JSON.parse(response.body)["total_results"]
+  rescue RestClient::UnprocessableEntity => e
+    flash_warning(:inat_unknown_param.t(error: inat_error_text(e)))
+    false
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
     nil
+  end
+
+  def inat_error_text(exception)
+    JSON.parse(exception.response.body)["error"]
+  rescue JSON::ParserError
+    exception.message
   end
 
   # Counts unlicensed observations for the own-observations case.

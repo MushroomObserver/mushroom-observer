@@ -108,6 +108,7 @@ class InatImportsController < ApplicationController
   def confirm_import
     @estimate = fetch_import_estimate
     return inat_unreachable if @estimate.nil?
+    return reload_form if @estimate == false
 
     @unlicensed_obs = if import_others?
                         fetch_unlicensed_others_count

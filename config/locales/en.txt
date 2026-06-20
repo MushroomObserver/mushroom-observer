@@ -3244,6 +3244,7 @@
   inat_importing_all_anothers: You cannot import all observations of another person
   inat_observed_missing_date: Observed Missing Date
   inat_cannot_communicate: Cannot communicate with iNat. Please try again later. If you keep getting this message, please notify webmaster.
+  inat_unknown_param: "iNat rejected the request: [error]"
 
   inat_import_started: Your import has started. Refresh page to update results.
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data

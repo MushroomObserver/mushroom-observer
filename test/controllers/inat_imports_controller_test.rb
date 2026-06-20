@@ -1476,6 +1476,30 @@ class InatImportsControllerTest < FunctionalTestCase
                  "inat_url should be saved from superform hidden field")
   end
 
+  def test_estimate_422_surfaces_inat_error_message
+    user = users(:rolf)
+    url = "#{INAT_API_OBS_URL}?place_id=678910"
+    inat_error = "Unknown place_id 678910"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 422,
+                body: { error: inat_error, status: 422 }.to_json,
+                headers: { "Content-Type" => "application/json" })
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      /#{Regexp.escape(inat_error)}/,
+      "Flash should surface iNat's error text instead of the generic " \
+      "'Cannot communicate' message"
+    )
+    assert_select("input#inat_import_inat_url",
+                  "Form should be reloaded, not the confirm page")
+  end
+
   ########## Utilities
 
   def authorization_denial_callback_params
