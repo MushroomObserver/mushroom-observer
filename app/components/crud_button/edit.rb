@@ -13,16 +13,16 @@ class Components::CrudButton
   #                                           icon: nil))
   #
   # @example icon-only inline in a table row (opt out of the btn frame)
-  #   render(Components::CrudButton::Edit.new(target: alias_, btn: nil))
+  #   render(Components::CrudButton::Edit.new(target: alias_, style: nil))
   class Edit < Components::CrudButton::Get
     def initialize(target:, name: nil, **args)
       # `unless args.key?(:icon)` (not `||=`) so callers can opt out of
       # the default icon by passing `icon: nil` explicitly.
       args[:icon] = :edit unless args.key?(:icon)
       # Same `key?` opt-out for the button-frame default: icon-only
-      # inline edits (dense table rows, list cells) pass `btn: nil`
+      # inline edits (dense table rows, list cells) pass `style: nil`
       # to render a bare glyph without the surrounding `btn` styling.
-      args[:btn] = "btn btn-outline-default" unless args.key?(:btn)
+      args[:style] = :outline_default unless args.key?(:style)
       super(target: target,
             name: name || default_name(target),
             action: :edit,

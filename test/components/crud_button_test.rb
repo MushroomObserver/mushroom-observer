@@ -142,21 +142,20 @@ class CrudButtonTest < ComponentTestCase
     assert_no_html(html, "span.glyphicon")
   end
 
-  # `btn:` is an opt-in class-prepend for caller-side button styling.
-  # Callers that want a `btn btn-default` link pass
-  # `btn: "btn btn-default"` without having to spell out the full
-  # `class:`. Caller's `class:` layers on top for sizing/spacing.
-  def test_get_method_btn_kwarg_prepends_classes
+  # `style:` is an opt-in button-style for caller-side styling.
+  # Callers that want a `btn btn-default` link pass `style: :default`
+  # without spelling out the full class string. Caller's `class:` layers
+  # on top for sizing/spacing.
+  def test_get_method_variant_kwarg_prepends_classes
     html = render(Components::CrudButton.new(
                     name: "Map",
                     target: "/map",
                     method: :get,
-                    btn: "btn btn-default",
+                    style: :default,
                     class: "btn-lg"
                   ))
 
     assert_html(html, "a.btn.btn-default.btn-lg[href='/map']")
-    assert_no_html(html, "a[btn]")
   end
 end
 
@@ -220,8 +219,8 @@ class CrudButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button span.glyphicon-remove-circle")
   end
 
-  # Default btn frame. `Delete` auto-applies
-  # `btn: "btn btn-outline-default"` for a consistent outline frame
+  # Default variant frame. `Delete` auto-applies
+  # `style: :outline_default` for a consistent outline frame
   # across destroy buttons.
   def test_delete_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
@@ -230,12 +229,12 @@ class CrudButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button.btn.btn-outline-default")
   end
 
-  # Opt out of the btn frame via `btn: nil` — icon-only inline
+  # Opt out of the variant frame via `style: nil` — icon-only inline
   # destroys in dense table cells / list rows.
-  def test_delete_btn_nil_opts_out_of_frame
+  def test_delete_variant_nil_opts_out_of_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Delete.new(target: herbarium, btn: nil)
+      Components::CrudButton::Delete.new(target: herbarium, style: nil)
     )
 
     assert_no_html(html, "button.btn-outline-default")
@@ -245,7 +244,7 @@ class CrudButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button span.glyphicon-remove-circle")
   end
 
-  # Caller `class:` layers on top of the `btn:` default — e.g.
+  # Caller `class:` layers on top of the `style:` default — e.g.
   # `btn-sm` combines with the outline frame.
   def test_delete_class_layered_on_btn_default
     herbarium = herbaria(:nybg_herbarium)
@@ -310,11 +309,11 @@ class CrudButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a.btn.btn-outline-default")
   end
 
-  # `btn: nil` opt-out — icon-only inline edits in dense table rows.
-  def test_edit_btn_nil_opts_out_of_frame
+  # `style: nil` opt-out — icon-only inline edits in dense table rows.
+  def test_edit_variant_nil_opts_out_of_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::CrudButton::Edit.new(target: herbarium, btn: nil)
+      Components::CrudButton::Edit.new(target: herbarium, style: nil)
     )
 
     assert_no_html(html, "a.btn-outline-default")
@@ -400,33 +399,33 @@ class CrudButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button.btn.btn-default")
   end
 
-  # Explicit `btn:` overrides the default.
-  def test_post_btn_override
+  # Explicit `style:` overrides the default.
+  def test_post_variant_override
     html = render(
       Components::CrudButton::Post.new(name: "Submit", target: "/items",
-                                       btn: "btn btn-primary")
+                                       style: :primary)
     )
 
     assert_html(html, "button.btn.btn-primary")
     assert_no_html(html, "button.btn-default")
   end
 
-  # `btn: nil` suppresses the frame entirely (icon-only inline buttons).
-  def test_post_btn_nil_suppresses_frame
+  # `style: nil` suppresses the frame entirely (icon-only inline buttons).
+  def test_post_variant_nil_suppresses_frame
     html = render(
       Components::CrudButton::Post.new(name: "Submit", target: "/items",
-                                       btn: nil, class: "btn btn-link p-0")
+                                       style: nil, class: "btn btn-link p-0")
     )
 
     assert_no_html(html, "button.btn-default")
     assert_html(html, "button.btn.btn-link")
   end
 
-  # Patch with `btn:` override: form, `_method=patch`, btn class applied.
-  def test_patch_with_btn_override
+  # Patch with `style:` override: form, `_method=patch`, variant applied.
+  def test_patch_with_variant_override
     html = render(Components::CrudButton::Patch.new(
                     name: "Update", target: "/items/1",
-                    btn: "btn btn-primary"
+                    style: :primary
                   ))
 
     assert_html(html, "form[action='/items/1']")

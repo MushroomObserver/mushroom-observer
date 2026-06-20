@@ -387,9 +387,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @param options [Hash] submit button options
     # @option options [Boolean] :center center the button (default false)
     # @option options [String] :submits_with text shown while submitting
-    # @option options [String] :btn_class Bootstrap button class
-    #   (default `"btn-default"`). Pass the full class name, e.g.
-    #   `"btn-outline-default"` to match the top-nav search bar style.
+    # @option options [Symbol] :style button style (default `:default`).
+    #   Valid values: `Components::Button::BTN_STYLES.keys`.
+    # @option options [Symbol] :size button size modifier (optional).
+    #   Valid values: `Components::Button::BTN_SIZES.keys`.
     # @option options [Symbol] :as `:input` (default) renders
     #   `<input type="submit">`; `:button` renders
     #   `<button type="submit">value</button>`.
@@ -399,11 +400,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # disabled-state label for non-Turbo submits). Defaults to the button
     # label (just disable, no text swap).
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
-               disable_with: nil, btn_class: "btn-default", as: :input,
-               **options)
+               disable_with: nil, style: Components::Button::DEFAULT_STYLE,
+               size: nil, as: :input, **options)
       submits_with ||= default_submits_with(value)
       disable_with ||= value
-      classes = ["btn", btn_class]
+      classes = [Components::Button.btn_class(style),
+                 Components::Button.size_class(size)]
       classes << "center-block my-3" if center
       classes << options[:class] if options[:class].present?
 

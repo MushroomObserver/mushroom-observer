@@ -91,14 +91,17 @@ class Components::CrudButton < Components::Base
   # `btn:` (button-shape default, e.g. `"btn btn-outline-default"`) +
   # caller-supplied `class:` (sizing/spacing, e.g. `"btn-sm"`).
   def merged_class
-    class_names(identifier, @args[:btn], @args[:class])
+    class_names(identifier,
+                Components::Button.btn_class(@args[:style]),
+                Components::Button.size_class(@args[:size]),
+                @args[:class])
   end
 
   # Keys consumed by CrudButton itself — must be stripped before
   # `@args` is merged into the underlying `link_to` / `button_to`
   # call, otherwise they'd leak through as HTML attributes.
   def ignored_arg_keys
-    [:class, :icon, :icon_class, :action, :back, :btn]
+    [:class, :icon, :icon_class, :action, :back, :style, :size]
   end
 
   def tooltip_data

@@ -44,7 +44,7 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def destroy_icon
-    Components::CrudButton::Delete.new(target: @description, btn: nil)
+    Components::CrudButton::Delete.new(target: @description, style: nil)
   end
 
   def admin_icons

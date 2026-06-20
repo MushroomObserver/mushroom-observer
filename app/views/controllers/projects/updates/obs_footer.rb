@@ -31,7 +31,7 @@ module Views::Controllers::Projects::Updates
                  project_id: @project.id, id: @obs.id,
                  show_excluded: @show_excluded
                ),
-               btn: "btn btn-default", class: "btn-sm mx-1"
+               style: :default, class: "btn-sm mx-1"
              ))
     end
 
@@ -42,7 +42,7 @@ module Views::Controllers::Projects::Updates
                  project_id: @project.id, id: @obs.id,
                  show_excluded: @show_excluded
                ),
-               btn: "btn btn-default", class: "btn-sm mx-1"
+               style: :default, class: "btn-sm mx-1"
              ))
     end
   end

@@ -179,7 +179,7 @@ class Components::Link::InlineMod < Components::Base
       # destroy icon doesn't hug the surrounding `|` divider while
       # the edit `IconLink` next to it has breathing room.
       icon_class: "px-2",
-      btn: nil,
+      style: nil,
       class: handler[:destroy_class] && send(handler[:destroy_class]),
       confirm: handler[:destroy_confirm] && send(handler[:destroy_confirm])
     }

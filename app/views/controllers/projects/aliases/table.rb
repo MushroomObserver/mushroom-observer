@@ -45,14 +45,14 @@ module Views::Controllers::Projects::Aliases
                  project_id: alias_.project_id, id: alias_.id
                ),
                name: :edit_object.t(type: :project_alias),
-               btn: nil
+               style: nil
              ))
       span(class: "mx-2")
       render(Components::CrudButton::Delete.new(
                target: project_alias_path(
                  project_id: alias_.project_id, id: alias_.id
                ),
-               btn: nil
+               style: nil
              ))
     end
   end

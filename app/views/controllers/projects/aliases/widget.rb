@@ -36,7 +36,7 @@ module Views::Controllers::Projects::Aliases
                  target: project_alias_path(
                    project_id: @project.id, id: id
                  ),
-                 btn: nil
+                 style: nil
                ))
         br
       end

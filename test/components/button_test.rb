@@ -10,14 +10,14 @@ class ButtonTest < ComponentTestCase
     assert_html(html, "button.btn.btn-default")
   end
 
-  def test_custom_btn_class
-    html = render_button(name: "Danger", btn: "btn btn-danger")
+  def test_custom_variant
+    html = render_button(name: "Danger", style: :danger)
 
     assert_html(html, "button.btn.btn-danger")
   end
 
-  def test_btn_nil_drops_frame
-    html = render_button(name: "Bare", btn: nil, class: "btn btn-link p-0")
+  def test_variant_nil_drops_frame
+    html = render_button(name: "Bare", style: nil, class: "btn btn-link p-0")
 
     assert_html(html, "button.btn.btn-link")
   end
@@ -29,7 +29,7 @@ class ButtonTest < ComponentTestCase
   end
 
   def test_icon_only_with_sr_only_name
-    html = render_button(name: "Remove", icon: :x, btn: nil,
+    html = render_button(name: "Remove", icon: :x, style: nil,
                          class: "btn btn-link p-0")
 
     assert_html(html, "button span.sr-only", text: "Remove")
@@ -51,8 +51,15 @@ class ButtonTest < ComponentTestCase
     assert_html(html, "button#my_button")
   end
 
-  def test_default_btn_constant
-    assert_equal("btn btn-default", Components::Button::DEFAULT_BTN)
+  def test_default_variant_constant
+    assert_equal(:default, Components::Button::DEFAULT_STYLE)
+  end
+
+  def test_tag_a_renders_link
+    html = render_button(name: "Go", tag: :a, href: "/path", style: :primary)
+
+    assert_html(html, "a.btn.btn-primary[href='/path']", text: "Go")
+    assert_no_html(html, "button")
   end
 
   private

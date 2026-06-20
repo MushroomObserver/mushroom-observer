@@ -16,8 +16,9 @@ class Components::Button::Project < Components::Base
     render(Components::CrudButton::Get.new(
              name: @name,
              target: @target,
-             btn: "btn btn-default",
-             class: "btn-lg my-3 mr-3"
+             style: :default,
+             size: :lg,
+             class: "my-3 mr-3"
            ))
   end
 end

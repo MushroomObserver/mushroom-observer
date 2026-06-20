@@ -38,7 +38,7 @@ module Components::LinkRendering
       # override either by passing the kwarg).
       render(Components::CrudButton::Delete.new(
                name: str, target: args[:target] || url,
-               **kwargs.reverse_merge(icon: nil, btn: nil)
+               **kwargs.reverse_merge(icon: nil, style: nil)
              ))
     when :put
       render(Components::CrudButton::Put.new(

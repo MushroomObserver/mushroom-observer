@@ -19,7 +19,7 @@ class Components::CrudButton
   #   render(Components::CrudButton::Delete.new(target: @term, icon: nil))
   #
   # @example icon-only inline in a table row (opt out of the btn frame)
-  #   render(Components::CrudButton::Delete.new(target: alias_, btn: nil))
+  #   render(Components::CrudButton::Delete.new(target: alias_, style: nil))
   class Delete < Components::CrudButton
     def initialize(target:, name: nil, **args)
       args[:class] = [args[:class], "text-danger"].compact.join(" ").strip
@@ -29,9 +29,9 @@ class Components::CrudButton
       # destroy buttons (e.g. context-nav `[ DESTROY ]` tabs).
       args[:icon] = :delete unless args.key?(:icon)
       # Same `key?` opt-out for the button-frame default: icon-only
-      # inline destroys (dense table rows, list cells) pass `btn: nil`
+      # inline destroys (dense table rows, list cells) pass `style: nil`
       # to render a bare glyph without the surrounding `btn` styling.
-      args[:btn] = "btn btn-outline-default" unless args.key?(:btn)
+      args[:style] = :outline_default unless args.key?(:style)
       super(
         target: target,
         name: name || default_name(target),

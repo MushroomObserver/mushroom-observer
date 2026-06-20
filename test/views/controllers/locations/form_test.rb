@@ -110,7 +110,7 @@ module Views::Controllers::Locations
                       local: true
                     ))
 
-      # Locked-display variant: the explanatory text lives in a
+      # Locked-display style: the explanatory text lives in a
       # `.help-block` div next to the read-only fields.
       assert_html(html, ".help-block", text: :show_location_locked.l)
     end

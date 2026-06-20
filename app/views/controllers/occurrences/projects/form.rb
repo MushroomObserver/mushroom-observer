@@ -141,11 +141,11 @@ module Views::Controllers::Occurrences::Projects
       # `value="add_all"`, so any other present value (here "skip") is
       # treated as "create/keep the occurrence, leave projects alone".
       submit(:SKIP.l,
-             as: :button, btn_class: "btn-default", value: "skip",
+             as: :button, value: "skip",
              name: "occurrence_projects[resolution]")
       whitespace
       submit(:ADD_ALL.l,
-             as: :button, btn_class: "btn-primary", value: "add_all",
+             as: :button, style: :primary, value: "add_all",
              name: "occurrence_projects[resolution]")
     end
   end

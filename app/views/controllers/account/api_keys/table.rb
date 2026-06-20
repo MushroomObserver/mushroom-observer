@@ -136,7 +136,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_remove_button(key)
-      # `btn: "btn btn-outline-default"` comes from `CrudButton::Delete`.
+      # `style: :outline_default` comes from `CrudButton::Delete`.
       # `icon: :remove` overrides the default `:delete` glyph to match
       # the table's "REMOVE" label.
       render(Components::CrudButton::Delete.new(

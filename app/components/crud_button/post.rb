@@ -10,7 +10,10 @@ class Components::CrudButton
   #   ))
   class Post < Components::CrudButton
     def initialize(target:, name:, **args)
-      args[:btn] = Components::Button::DEFAULT_BTN unless args.key?(:btn)
+      unless args.key?(:style)
+        args[:style] =
+          Components::Button::DEFAULT_STYLE
+      end
       super(target: target, name: name, method: :post, **args)
     end
   end

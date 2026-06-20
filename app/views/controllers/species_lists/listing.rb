@@ -103,7 +103,7 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
-    # `btn: "btn btn-default"` gives the ADD button Bootstrap button-shape —
+    # `style: :default` gives the ADD button Bootstrap button-shape —
     # without it the row's ADD action renders as a bare link.
     def render_add_obs_button
       render(Components::CrudButton::Put.new(
@@ -113,7 +113,7 @@ module Views::Controllers::SpeciesLists
                  species_list_id: @species_list.id,
                  commit: "add"
                ),
-               btn: "btn btn-default"
+               style: :default
              ))
     end
   end

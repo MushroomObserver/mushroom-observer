@@ -234,7 +234,7 @@ module Views::Controllers::Projects::Locations
                  name: loc.display_name
                ),
                icon: :x,
-               btn: nil,
+               style: nil,
                class: "btn btn-link p-0"
              ))
     end
