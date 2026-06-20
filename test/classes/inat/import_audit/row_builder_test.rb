@@ -7,7 +7,7 @@ module Inat::ImportAudit
   # directly, so these don't hit the iNat API.
   class RowBuilderTest < UnitTestCase
     def setup
-      @builder = RowBuilder.new(source: sources(:inaturalist))
+      @builder = RowBuilder.new(site: external_sites(:inaturalist))
     end
 
     def test_clean_import_has_no_delta
@@ -47,7 +47,7 @@ module Inat::ImportAudit
 
     def test_fetch_error_flag
       row = @builder.call(observation(snapshot_notes("x")), nil,
-                          fetch_failed: true)
+                          external_id: "999", fetch_failed: true)
       assert_equal("fetch_error", row[:inat_status])
     end
 
@@ -61,40 +61,44 @@ module Inat::ImportAudit
       users(:rolf).update!(inat_username: "rolf_inat")
       obs = collector_obs(user_login: "rolf_inat",
                           collector_user_id: users(:rolf).id)
-      assert_not(@builder.call(obs, inat_raw("x"))[:collector_differs])
+      assert_not(call(obs)[:collector_differs])
     end
 
     def test_collector_user_differing_from_uploader_is_a_diff
       users(:rolf).update!(inat_username: "rolf_inat")
       obs = collector_obs(user_login: "rolf_inat",
                           collector_user_id: users(:mary).id)
-      assert(@builder.call(obs, inat_raw("x"))[:collector_differs])
+      assert(call(obs)[:collector_differs])
     end
 
     def test_free_text_collector_matching_uploader_is_not_a_diff
       obs = collector_obs(user_login: "joe", collector: "joe")
-      assert_not(@builder.call(obs, inat_raw("x"))[:collector_differs])
+      assert_not(call(obs)[:collector_differs])
     end
 
     def test_free_text_collector_naming_another_person_is_a_diff
       obs = collector_obs(user_login: "bdthomas", collector: "Daniel Oshiro")
-      assert(@builder.call(obs, inat_raw("x"))[:collector_differs])
+      assert(call(obs)[:collector_differs])
     end
 
     private
 
+    # external_id is passed in by the runner (#4299), not read off the obs.
+    def call(obs, raw = inat_raw("x"))
+      @builder.call(obs, raw, external_id: "999")
+    end
+
     def build(notes:, raw:)
-      @builder.call(observation(notes), raw)
+      call(observation(notes), raw)
     end
 
     def collector_obs(user_login:, **attrs)
-      Observation.new({ external_id: "999",
-                        notes: { iNat_imported_data: "User: #{user_login}",
+      Observation.new({ notes: { iNat_imported_data: "User: #{user_login}",
                                  Other: "x" } }.merge(attrs))
     end
 
     def observation(notes)
-      Observation.new(external_id: "999", notes: notes)
+      Observation.new(notes: notes)
     end
 
     def snapshot_notes(description)

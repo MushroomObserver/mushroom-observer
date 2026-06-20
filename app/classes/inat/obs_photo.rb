@@ -56,8 +56,8 @@ class Inat
       "Imported from iNat #{DateTime.now.utc.strftime("%Y-%m-%d %H:%M:%S %z")}"
     end
 
-    # The iNat photo id, recorded structurally on the MO image as
-    # `external_id` (with `source_id`) for syncing updates (#4529). This
+    # The iNat photo id, recorded structurally on the MO image's import
+    # ExternalLink (`external_id`) for syncing updates (#4529/#4299). This
     # replaces stashing it in `original_name`, which API2::ImageAPI nulls
     # out for users whose `keep_filenames` preference is "toss".
     def external_id
