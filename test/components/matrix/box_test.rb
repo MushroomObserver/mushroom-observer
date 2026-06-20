@@ -306,7 +306,9 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     assert_includes(html, "Imported from iNaturalist")
-    expected_url = obs.import_link.url
+    # link_url is the rendered href (stored override or derived); import
+    # links may have a NULL url column, so assert against link_url.
+    expected_url = obs.import_link.link_url
     assert_html(html, "a[href='#{expected_url}'][target='_blank']" \
                       "[rel='noopener noreferrer']")
   end

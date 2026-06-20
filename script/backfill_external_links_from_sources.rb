@@ -37,8 +37,11 @@ end
 def upgrade_obs_links(ctx, src, site)
   join = "external_links el JOIN observations o " \
          "ON o.id = el.target_id AND el.target_type = 'Observation'"
+  # Only upgrade when the obs has a real external_id — an import link must be
+  # syncable/dedupable by id (mirrors the create path's filter).
   where = "o.source_id = #{src.id} AND el.external_site_id = #{site.id} " \
-          "AND el.relationship = 0"
+          "AND el.relationship = 0 AND o.external_id IS NOT NULL " \
+          "AND o.external_id <> ''"
   ctx.run_or_count(
     :obs_link_upgraded,
     "SELECT COUNT(*) FROM #{join} WHERE #{where}",

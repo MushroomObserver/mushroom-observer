@@ -10,9 +10,9 @@
 #  - A (?) info icon — links to the MO docs article about imports
 #    (article 39). On-site, so does NOT open in a new tab.
 #
-# Hides silently if the obs has no import link. If the link has no
-# URL, the credit is rendered as plain text without a link; the (?)
-# widget still appears.
+# Hides silently if the obs has no import link. The credit always
+# renders as a link — an import link's URL is the stored override or
+# derived from the site template, so it always resolves.
 module Views::Controllers::Observations
   class ImportedSourceBanner < Views::Base
     HELP_ARTICLE_ID = 39
@@ -20,9 +20,10 @@ module Views::Controllers::Observations
     prop :observation, Observation
 
     def view_template
-      return unless @observation.import_link
+      # One call: external_credit_link resolves the import link, its URL,
+      # and the external id together (nil when not imported).
+      return unless (link = @observation.external_credit_link)
 
-      link = @observation.external_credit_link
       panel = Components::Panel.new(panel_class: "imported-source-banner")
       render(panel) do |panel|
         panel.with_body do
@@ -41,9 +42,8 @@ module Views::Controllers::Observations
     end
 
     def credit_text(link)
-      external_id = @observation.import_link&.external_id
-      if external_id.present?
-        "#{link[:text]} #{external_id}"
+      if link[:external_id].present?
+        "#{link[:text]} #{link[:external_id]}"
       else
         link[:text]
       end

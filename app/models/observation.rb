@@ -1186,7 +1186,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     {
       text: :source_credit_external_text.l(name: link.external_site.name),
-      url: link.link_url
+      url: link.link_url,
+      external_id: link.external_id
     }
   end
 

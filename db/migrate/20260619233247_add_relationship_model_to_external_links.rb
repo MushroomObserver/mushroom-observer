@@ -56,6 +56,9 @@ class AddRelationshipModelToExternalLinks < ActiveRecord::Migration[7.2]
     change_table(:external_links, bulk: true) do |t|
       t.remove_index(name: "index_external_links_on_site_rel_target_extid")
       t.remove_index(name: "index_external_links_on_target")
+      # Drop the unique index before its generated column — MySQL refuses to
+      # drop a column still "needed in" an index.
+      t.remove_index(name: "index_external_links_on_import_target")
       t.remove(:external_id, :relationship, :last_synced_at, :import_target,
                :target_type)
     end
