@@ -4,7 +4,7 @@
 #
 # The #4213 audit found imported images whose iNat source photo was later
 # deleted on iNat. Each row of the reviewed CSV (inat_orphan_reviewed.csv)
-# carries a human decision in column 2:
+# carries a human decision in its `action` column (the reason is in `why`):
 #
 #   Adopt  -> keep as MO-native. An adopted orphan has no live iNat photo
 #             (that is why it is adopted), so its stored provenance is stale:
