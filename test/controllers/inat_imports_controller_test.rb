@@ -1254,7 +1254,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Confirm page must show the ignored-params warning for user_login " \
       "stripped from the URL for a non-superimporter"
     )
-    assert_select("#estimated_count",
+    assert_select("#estimated_count", "3",
                   "Confirm page should render with the estimate")
   end
 
@@ -1496,7 +1496,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Flash should surface iNat's error text instead of the generic " \
       "'Cannot communicate' message"
     )
-    assert_select("input#inat_import_inat_url",
+    assert_select("input#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
   end
 
