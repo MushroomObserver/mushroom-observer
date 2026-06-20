@@ -296,4 +296,24 @@ class ImageTest < UnitTestCase
     assert_not_equal("/place_holder_thumb.jpg", url.url)
     assert_not_equal("/place_holder_320.jpg", url.url)
   end
+
+  def test_import_link
+    img = images(:in_situ_image)
+    assert_nil(img.import_link, "Image starts with no import link")
+
+    link = ExternalLink.create!(
+      user: img.user, target: img, external_site: ExternalSite.inaturalist,
+      relationship: :import, external_id: "p1"
+    )
+
+    # Not-loaded branch: queries only the import row.
+    img.external_links.reset
+    assert_not(img.external_links.loaded?)
+    assert_equal(link, img.import_link)
+
+    # Loaded branch: detects within the already-loaded association.
+    img.external_links.load
+    assert(img.external_links.loaded?)
+    assert_equal(link, img.import_link)
+  end
 end
