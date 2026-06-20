@@ -2,12 +2,12 @@
 
 module Views::Controllers::Account
   # Signup form for creating a new user account. Rendered by the
-  # AccountController's `new.html.erb` (the top-level account
+  # AccountController's `new.rb` (the top-level account
   # controller's only form-bearing page).
   # Collects login, password, email, name, and theme preference.
   class Form < ::Components::ApplicationForm
     def initialize(model, **)
-      # Explicit id preserves the legacy `#account_signup_form` —
+      # Explicit id preserves `#account_signup_form` —
       # integration tests use it in `within(...)` blocks, and the
       # default Views/-namespaced derive_form_id would pick
       # `account_form` (loses the "signup" specificity).

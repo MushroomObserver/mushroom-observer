@@ -4,13 +4,6 @@
 # each visible description as a `<div>` containing a link to the
 # description + its mod-controls (Edit / Destroy when the user has
 # the appropriate permission).
-#
-# Owns the full filter / sort / link / mod-link chain that the
-# pre-Phlex `DescriptionsHelper#list_descriptions` +
-# `#sort_description_list` + `#make_list_links` + `#description_link`
-# + `#description_title` + `DescriptionIconsHelper#description_mod_links`
-# composed. Both helper files have since been deleted (this view + the
-# sibling `DetailsAndAltsPanel` own every chain they used to compose).
 module Views::Controllers::Descriptions
   class List < Views::Base
     prop :user, _Nilable(::User), default: nil

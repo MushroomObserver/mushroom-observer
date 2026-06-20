@@ -4,12 +4,7 @@ require("test_helper")
 
 # Contract tests for the FilterCaption Phlex view.
 #
-# Originally written as parity tests against the legacy
-# `Header::FiltersHelper#query_filters` (the 16-method chain that
-# this view replaced); once parity was confirmed and the helper
-# methods were deleted, these tests were rewritten to assert
-# structural properties of the Phlex view directly. They cover the
-# same 14 branches the parity tests covered:
+# Covers 14 caption-shape branches:
 # empty / plain / boolean / array / lookup / italicized-lookup /
 # confidence / type-tags / subquery / grouped / target / truncation /
 # many-params.

@@ -6,7 +6,7 @@ module Views::Controllers::SpeciesLists::WriteIn
   # - Names are deprecated (with valid synonyms)
   # - Names are ambiguous (multiple matches)
   #
-  # Rendered by `species_lists/write_in/_form.html.erb`.
+  # Rendered by `species_lists/write_in/_form.rb`.
   #
   # @param new_names [Array<String>, nil] unrecognized name strings
   # @param deprecated_names [Array<Name>, nil] deprecated Name objects

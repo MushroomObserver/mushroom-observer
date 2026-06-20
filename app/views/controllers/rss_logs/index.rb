@@ -9,11 +9,9 @@ module Views::Controllers::RssLogs
     prop :rss_logs, _Array(::RssLog)
     prop :pagination_data, ::PaginationData
     prop :types, _Array(::String), default: -> { [] }
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       register_chrome
-      flash_error(@error) if @error && @rss_logs.empty?
 
       paginated_results do
         render(::Components::Matrix::Table.new(

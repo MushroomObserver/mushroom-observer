@@ -4,7 +4,7 @@ module Views::Controllers::VisualModels
   # Form for creating or editing visual models. Visual models are
   # used to organize visual groups for image classification.
   # Rendered directly by the visual_models controller's
-  # `new.html.erb`.
+  # `new.rb`.
   class Form < ::Components::ApplicationForm
     def view_template
       super do

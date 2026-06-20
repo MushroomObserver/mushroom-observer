@@ -8,9 +8,6 @@
 # Body is a `Components::ListGroup::Base` of `FieldSlipPanel`-rendered
 # entries, one per `@object`, each with a per-row code-link heading
 # fed in via the panel's `:prepend` slot.
-#
-# Replaces `app/views/controllers/field_slips/index.html.erb` and
-# the `_object.erb` per-row partial it iterated.
 module Views::Controllers::FieldSlips
   class Index < Views::FullPageBase
     prop :objects, _Array(::FieldSlip)

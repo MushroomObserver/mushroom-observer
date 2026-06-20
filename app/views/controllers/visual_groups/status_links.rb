@@ -6,11 +6,6 @@
 # response from `visual_groups/images#update` (the click on one of
 # the status links re-renders just that image's block) can both
 # render it.
-#
-# Replaces the `visual_group_status_links` /
-# `visual_group_status_link` / `visual_group_status_text` helpers in
-# `app/helpers/visual_groups_helper.rb` — the only callers were the
-# matrix render + the turbo_stream response, both now using this view.
 module Views::Controllers::VisualGroups
   class StatusLinks < Views::Base
     prop :visual_group, VisualGroup

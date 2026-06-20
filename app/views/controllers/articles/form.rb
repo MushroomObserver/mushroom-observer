@@ -2,7 +2,7 @@
 
 module Views::Controllers::Articles
   # Form for creating or editing articles. Rendered directly by the
-  # articles controller's `new.html.erb` and `edit.html.erb`.
+  # articles controller's `new.rb` and `edit.rb`.
   # Articles support Textile markup for formatting.
   class Form < ::Components::ApplicationForm
     def view_template

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Phlex view for the name-lister page. Replaces new.erb. The bulk of
+# Phlex view for the name-lister page. The bulk of
 # the UX is JavaScript (Stimulus `name-list` controller); this view
 # wires the table chrome the JS hooks into, then renders the submit
 # form for the resulting newline-separated name list.

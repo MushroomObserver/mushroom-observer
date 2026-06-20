@@ -3,12 +3,10 @@
 # Interactive map component for displaying locations and observations.
 # Works with the Stimulus map controller to render Google Maps with
 # markers and bounding boxes.
-#
-# Ports the logic that previously lived in `MapHelper`,
-# `MapPopupHelper`, and `MapLegendHelper` so that those helpers can be
-# deleted. The popup markup is the richer (`#4131`) flavor: a Bootstrap
-# `.media` layout with a thumbnail for single-obs popups, and a header
-# with "Show All" / "Map All" buttons for group popups.
+
+# The popup markup is a Bootstrap `.media` layout with a thumbnail for
+# single-obs popups, and a header with "Show All" / "Map All" buttons
+# for group popups.
 #
 # The rendering logic is split across three siblings under
 # `app/components/map/`:

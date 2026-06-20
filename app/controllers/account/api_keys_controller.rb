@@ -99,9 +99,7 @@ module Account
                    Views::Controllers::Account::APIKeys::Table.new(user: @user)
                  )
                ),
-               turbo_stream.update(
-                 "page_flash", view_context.flash_notices_html
-               )
+               turbo_stream_flash_update
              ])
     end
 

@@ -2,8 +2,7 @@
 
 # Action template for `Account::LoginController#logout` — the
 # "you've been logged out" landing page. Page title plus the
-# textile-rendered farewell note. Replaces
-# `app/views/controllers/account/login/logout.html.erb`.
+# textile-rendered farewell note.
 module Views::Controllers::Account::Login
   class Logout < Views::FullPageBase
     def view_template

@@ -9,10 +9,6 @@
 # Data attrs wire the panel up to the `name-panels` Stimulus
 # controller for the side-by-side collapse with the lifeform panel.
 class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
-  # `rank_as_string` (LocalizationHelper) maps the integer rank
-  # column to its localized label ("Genus", "Family", ...).
-  register_value_helper :rank_as_string
-
   prop :name, ::Name
   prop :children_query, _Nilable(::Query::Names), default: nil
   prop :first_child, _Nilable(::Name), default: nil

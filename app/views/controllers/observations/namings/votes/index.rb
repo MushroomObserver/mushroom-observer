@@ -5,7 +5,6 @@
 # just the `Table` rendering; the page title carries the
 # naming's display name.
 #
-# Replaces `app/views/controllers/observations/namings/votes/index.erb`.
 module Views::Controllers::Observations::Namings::Votes
   class Index < Views::FullPageBase
     # HTML index renders against a raw `Naming` because the page

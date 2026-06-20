@@ -1,21 +1,11 @@
 # frozen_string_literal: true
 
 # Phlex view that renders the filter-caption HTML for the index-bar.
-# Wired up via `Header::FiltersHelper#add_query_filters(query)`, which
-# stores `render(FilterCaption.new(query: query))` in
-# `content_for(:filters)` so the layout's `IndexBar` can yield it on
-# index actions.
-#
-# Owns the entire caption tree that used to live as ~270 lines of
-# helper methods (`query_filters`, `filter_caption_truncated`,
-# `filter_caption_full`, `filter_caption_toggle_button`,
-# `filter_caption_params`, `filter_caption_param_text`,
-# `filter_caption_params_joined`, `filter_caption_one_param`,
-# `filter_caption_subquery`, `filter_caption_grouped_params`,
-# `filter_caption_nested_params`, `filter_caption_plain_param`,
-# plus the lookup string helpers and the four constants). The helper
-# module now retains only `add_query_filters` (the public API the
-# 80 index action templates call).
+# Wired up via `Views::FullPageBase#add_query_filters(query)`, which
+# `capture { render(FilterCaption.new(...)) }`s the HTML (Phlex's
+# `render` emits to the buffer rather than returning a string) and
+# stashes it in `content_for(:filters)` so the layout's `IndexBar`
+# can yield it on index actions.
 module Views::Layouts
   class Header::IndexBar::FilterCaption < Views::Base
     # `type` param sentinels (no plural form) — use `:ALL` / `:NONE`
@@ -69,18 +59,17 @@ module Views::Layouts
             query_record: @query.record.id,
             query_alph: @query.record.id.alphabetize
           }) do
-        render_collapse(truncate: true, klass: "collapse in",
+        render_collapse(truncate: true, class: "collapse in",
                         id: "caption-truncated", target: "truncated")
-        render_collapse(truncate: false, klass: "collapse",
+        render_collapse(truncate: false, class: "collapse",
                         id: "caption-full", target: "full")
       end
     end
 
     private
 
-    def render_collapse(truncate:, klass:, id:, target:)
-      div(class: klass, id: id,
-          data: { filter_caption_target: target }) do
+    def render_collapse(truncate:, class:, id:, target:)
+      div(class:, id:, data: { filter_caption_target: target }) do
         render_toggle_button(truncate: truncate)
         render_caption_params(truncate: truncate)
       end

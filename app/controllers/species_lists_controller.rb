@@ -28,7 +28,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   def render_index_view
     render(Views::Controllers::SpeciesLists::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, project: @project, error: @error
+             objects: @objects, project: @project
            ))
   end
 

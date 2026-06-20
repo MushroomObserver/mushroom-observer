@@ -2,8 +2,7 @@
 
 # Type-filter form for the rss_logs (activity logs) index. Renders
 # a row of checkbox buttons (one per RssLog type) plus an "all"
-# button and an Apply submit. Rendered by
-# `Header::TypeFilterHelper#add_type_filters_for_activity_log`.
+# button and an Apply submit.
 module Views::Controllers::RssLogs
   class TypeFilters < Views::Base
     prop :query, _Nilable(::Query)

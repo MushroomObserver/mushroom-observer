@@ -4,7 +4,7 @@ module Views::Controllers::Herbaria
   # Form for creating or editing herbaria (fungaria). Handles both
   # personal and institutional herbaria with optional location
   # selection via map. Rendered directly by the herbaria controller's
-  # `new.html.erb` and `edit.html.erb`, and dynamically by
+  # `new.rb` and `edit.rb`, and dynamically by
   # `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
     # rubocop:disable Metrics/ParameterLists

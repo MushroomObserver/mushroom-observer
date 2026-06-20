@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for the Project Violations index. Replaces
-# `app/views/controllers/projects/violations/index.html.erb`.
+# Action template for the Project Violations index.
 #
 # Renders the project banner + the violations form.
 #

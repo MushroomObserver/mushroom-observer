@@ -3,7 +3,7 @@
 # "Descriptions" panel on the Name show page. Renders the
 # `Views::Controllers::Descriptions::List` inside a `Components::Panel`; the
 # panel heading carries a "create new description" icon-link for
-# logged-in users. Replaces `_alt_descriptions_panel.html.erb`.
+# logged-in users.
 class Views::Controllers::Names::Show::AltDescriptionsPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
   prop :name, ::Name

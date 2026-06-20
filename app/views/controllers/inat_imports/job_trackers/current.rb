@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::InatImports::JobTrackers
-  # Current-status block for an iNat import job. Mirrors the ERB
-  # element-for-element so the Turbo-Stream update target's DOM
-  # stays identical. Time-format logic inlined (was the
-  # `InatImportJobTrackersHelper` helper before this conversion).
+  # Current-status block for an iNat import job.
   class Current < Views::Base
     prop :tracker, ::InatImportJobTracker
 
@@ -90,13 +87,11 @@ module Views::Controllers::InatImports::JobTrackers
       br
     end
 
-    # Inlined from `InatImportJobTrackersHelper#remaining_time_…`.
     def remaining_time_in_hours_minutes_seconds(tracker)
       time = tracker.status == "Done" ? 0 : tracker.estimated_remaining_time
       time_in_hours_minutes_seconds(time)
     end
 
-    # Inlined from `InatImportJobTrackersHelper`.
     def time_in_hours_minutes_seconds(seconds)
       return :inat_import_tracker_calculating_time.l if seconds.nil?
 

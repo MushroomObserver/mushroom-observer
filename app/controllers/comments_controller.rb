@@ -30,7 +30,7 @@ class CommentsController < ApplicationController
   def render_index_view
     render(Views::Controllers::Comments::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, user: @user, error: @error
+             objects: @objects, user: @user
            ))
   end
 

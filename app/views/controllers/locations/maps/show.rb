@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Action template for `Locations::MapsController#show` — the map of
-# all locations matching the current Location query. Replaces
-# `locations/maps/show.html.erb`. No cap banner (Location queries
-# bound to `MO.query_max_array` rather than the obs-style 10k cap).
+# all locations matching the current Location query. No cap banner
+# (Location queries bound to `MO.query_max_array` rather than the
+# obs-style 10k cap).
 module Views::Controllers::Locations::Maps
   class Show < Views::FullPageBase
     prop :query, ::Query::Locations

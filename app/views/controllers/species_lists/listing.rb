@@ -4,7 +4,7 @@
 # `Components::ListGroup::Base#item`. Used by:
 #   - `Views::Controllers::SpeciesLists::Index#render_list` (the
 #     species_lists index page)
-#   - `observations/species_lists/edit.html.erb` (the
+#   - `observations/species_lists/edit.rb` (the
 #     "manage species lists for this observation" page)
 # Title row + place / user row on the left, optional REMOVE / ADD
 # button on the right (mutually exclusive, driven by which page the
@@ -32,8 +32,8 @@ module Views::Controllers::SpeciesLists
 
     private
 
-    # `place_name.t` can blow up on lists without a place — the ERB
-    # used a bare `rescue :UNKNOWN.l`; we preserve that fallback.
+    # `place_name.t` can blow up on lists without a place -
+    # `rescue :UNKNOWN.l` is fallback.
     def place
       @place ||= begin
                    @species_list.place_name.t
@@ -91,10 +91,6 @@ module Views::Controllers::SpeciesLists
       end
     end
 
-    # Inlined from `SpeciesListsHelper#species_list_remove_obs_button` —
-    # same body as `Observation#render_remove_obs_button` in the
-    # sibling Phlex class (helpers.rb deletes after both inlinings
-    # land).
     def render_remove_obs_button
       render(Components::CrudButton::Put.new(
                name: :REMOVE.t,
@@ -107,10 +103,8 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
-    # Inlined from `SpeciesListsHelper#species_list_add_obs_button`.
-    # `btn: "btn btn-default"` gives the ADD button the Bootstrap
-    # button-shape it had under the legacy helper — without it,
-    # the row's ADD action renders as a bare link.
+    # `btn: "btn btn-default"` gives the ADD button Bootstrap button-shape —
+    # without it the row's ADD action renders as a bare link.
     def render_add_obs_button
       render(Components::CrudButton::Put.new(
                name: :ADD.t,

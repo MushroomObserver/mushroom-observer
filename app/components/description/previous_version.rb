@@ -5,10 +5,6 @@
 # exists. Used on every versioned-model show page (name, location,
 # description, glossary_term) and inside the description-details
 # panel.
-#
-# Replaces the pre-Phlex `VersionsHelper#show_previous_version` +
-# its private `previous_version_link` / `current_version_html`
-# composers.
 class Components::Description::PreviousVersion < Components::Base
   prop :obj, ::AbstractModel
   prop :versions, _Array(_Interface(:user_id)), default: -> { [] }

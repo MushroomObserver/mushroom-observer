@@ -3,11 +3,8 @@
 module Views::Controllers::Images
   module EXIF
     # Turbo-stream lightbox modal triggered from
-    # `Components::Image::EXIFLink`. Replaces the ERB
-    # `shared/_modal.erb` + `images/exif/_data.erb` pair the
-    # controller used to render via the legacy
-    # `render(partial: "shared/modal", locals: { body: "images/exif/data" })`
-    # shape. A Phlex view wrapper is required because controller `render`
+    # `Components::Image::EXIFLink`. A Phlex view wrapper is required
+    # because controller `render`
     # doesn't thread the block through to a Phlex component's
     # `view_template(&block)` — every `Components::Modal` caller in this
     # codebase goes through a Phlex view, not a controller render call.

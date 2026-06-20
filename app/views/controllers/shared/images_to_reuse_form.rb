@@ -2,8 +2,7 @@
 
 # "Reuse an existing image" page rendered by the `reuse` action of
 # `Observations::ImagesController`, `Account::Profile::ImagesController`,
-# and `GlossaryTerms::ImagesController`. Replaces the
-# `app/views/controllers/shared/_images_to_reuse.erb` partial.
+# and `GlossaryTerms::ImagesController`.
 #
 # Two parts:
 # - `Components::Image::ReuseForm` — the small form that takes an Image

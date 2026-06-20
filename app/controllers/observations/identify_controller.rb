@@ -13,8 +13,7 @@ module Observations
                query: @query,
                pagination_data: @pagination_data,
                objects: @objects,
-               user: @user,
-               error: @error
+               user: @user
              ))
     end
 

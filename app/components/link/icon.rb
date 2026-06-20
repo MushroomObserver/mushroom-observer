@@ -6,11 +6,6 @@
 # "active" icon + label pair driven by JS state — used by
 # bookmark-style toggles where the same target switches appearance.
 #
-# Drop-in equivalent of the long-standing `icon_link_to(text, path,
-# **opts)` helper in `app/helpers/link_helper.rb`. The helper now
-# renders this component so existing ERB and Phlex callers keep
-# working unchanged.
-#
 # @example Plain icon link
 #   render(Components::Link::Icon.new("Edit", edit_path(@obj),
 #                                   icon: :edit))
@@ -73,8 +68,8 @@ class Components::Link::Icon < Components::Base
     @opts[:active_icon] && @opts[:active_content]
   end
 
-  # Output order matches the legacy `icon_link_to` helper:
-  # icon, active_icon (if stateful), label, active_label (if stateful).
+  # Output order: icon, active_icon (if stateful), label,
+  # active_label (if stateful).
   def render_inner
     render_icons
     render_labels

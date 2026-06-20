@@ -3,7 +3,7 @@
 # Comments-for-object panel: the boxed list of comments shown on
 # `observations/show`, `names/show`, `projects/show`,
 # `locations/show`, `species_lists/show`, and the
-# `comments/new` / `comments/edit` pages (via `_object.html.erb`).
+# `comments/new` / `comments/edit` pages (via `_object.rb`).
 #
 # Renders a `Components::Panel` whose body is a flush
 # `Components::ListGroup::Base` of `CommentItem`s — wired to an Action
@@ -15,9 +15,6 @@
 # - The heading carries a "+ Add comment" modal-link button.
 # - Each `CommentItem` renders mod-links + a real author UserLink.
 # - The footer shows an "and N more →" link when truncated.
-#
-# Replaces `app/views/controllers/comments/_comments_for_object.erb`
-# and inlines the `new_comment_link` helper that fed it.
 module Views::Controllers::Comments
   class CommentsForObject < Views::Base
     include Phlex::Rails::Helpers::TurboStreamFrom

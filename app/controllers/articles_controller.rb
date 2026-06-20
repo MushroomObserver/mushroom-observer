@@ -61,7 +61,7 @@ class ArticlesController < ApplicationController
   def render_index_view
     render(Views::Controllers::Articles::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, error: @error
+             objects: @objects
            ))
   end
 

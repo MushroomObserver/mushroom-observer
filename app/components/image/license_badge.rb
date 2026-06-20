@@ -3,8 +3,6 @@
 # Tiny `<a><img/></a>` block displaying a license's badge with a
 # link to its canonical URL. Used by description show pages
 # (`DetailsAndAltsPanel`) and image show pages.
-#
-# Replaces the shared `_form_license_badge.erb` partial.
 class Components::Image::LicenseBadge < Components::Base
   prop :license, ::License
 

@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects::Members
   # Phlex view for the project members index page.
-  # Replaces members/index.html.erb.
   class Index < Views::FullPageBase
     def initialize(project:, users:, project_member:,
                    user:)
@@ -38,7 +37,7 @@ module Views::Controllers::Projects::Members
     end
 
     # Column class lands on BOTH `<th>` and `<td>` (current
-    # Table#column behavior). The pre-conversion ERB had distinct
+    # Table#column behavior). An earlier version had distinct
     # th-only / td-only classes; consolidated here to a single
     # per-column class (the redundant `.align-middle` on single-line
     # thead rows is invisible in standard Bootstrap).

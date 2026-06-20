@@ -113,4 +113,79 @@ class BaseTest < ComponentTestCase
 
     assert_equal("no-query", render(CurrentQueryReader.new))
   end
+
+  # ----- add_args_to_url -----------------------------------------------
+
+  # `add_args_to_url(url, new_args)` lives on `Components::Base` as a
+  # plain instance method — these tests call it via a renderless
+  # subclass (`Components::Base.new`) since `add_args_to_url` doesn't
+  # depend on Phlex render state, just on `Rack::Utils` + Ruby.
+  def adder
+    @adder ||= Class.new(Components::Base).new
+  end
+
+  def test_add_args_to_url_two_args
+    assert_equal("/abcdef?foo=bar&this=that",
+                 adder.add_args_to_url("/abcdef",
+                                       foo: "bar", this: "that"))
+  end
+
+  def test_add_args_to_url_arg_replaces_url_parameter
+    assert_equal("/abcdef?foo=bar&this=that",
+                 adder.add_args_to_url("/abcdef?foo=wrong",
+                                       foo: "bar", this: "that"))
+  end
+
+  def test_add_args_to_url_append_args_to_url
+    result = adder.add_args_to_url("/abcdef?foo=wrong&a=2",
+                                   foo: '"bar"', this: "that")
+    assert(result.start_with?("/abcdef?"), "Should start with path")
+    assert_includes(result, "a=2", "Should preserve existing param")
+    assert_includes(result, "foo=%22bar%22", "Should replace foo param")
+    assert_includes(result, "this=that", "Should add new param")
+  end
+
+  def test_add_args_to_url_ending_with_id
+    assert_equal("/blah/blah/5?arg=new",
+                 adder.add_args_to_url("/blah/blah/5", arg: "new"))
+  end
+
+  def test_add_args_to_url_id_arg_replaces_id_in_url
+    assert_equal("/blah/blah/4?arg=new",
+                 adder.add_args_to_url("/blah/blah/5",
+                                       arg: "new", id: 4))
+  end
+
+  def test_add_args_to_url_valid_utf_8_address_and_arg
+    assert_equal("/voilà?arg=a%C4%8D%E2%82%AC%CE%B5nt",
+                 adder.add_args_to_url("/voilà", arg: "ač€εnt"))
+  end
+
+  def test_add_args_to_url_invalid_utf_8_address_and_arg
+    assert_equal("/blah\x80",
+                 adder.add_args_to_url("/blah\x80", x: "foo\xA0"))
+  end
+
+  # Array params (`q[by_user][]=1&q[by_user][]=2`) must round-trip.
+  def test_add_args_to_url_preserves_array_params
+    query_string = { q: { by_user: [1, 2] } }.to_query
+    url = "/observations?#{query_string}"
+
+    result = adder.add_args_to_url(url, page: 2)
+
+    by_user_1 = { q: { by_user: [1] } }.to_query
+    by_user_2 = { q: { by_user: [2] } }.to_query
+    assert_includes(result, by_user_1, "Should preserve first array value")
+    assert_includes(result, by_user_2, "Should preserve second array value")
+    assert_includes(result, "page=2", "Should add new page param")
+  end
+
+  def test_add_args_to_url_with_active_record_value
+    obs = observations(:minimal_unknown_obs)
+
+    result = adder.add_args_to_url("/observations", target: obs)
+
+    assert_includes(result, "target=#{obs.id}",
+                    "ActiveRecord value should be serialized as its id")
+  end
 end

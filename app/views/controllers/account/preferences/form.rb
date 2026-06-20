@@ -1,14 +1,11 @@
 # frozen_string_literal: true
 
-# Phlex form for `account/preferences#edit` — replaces the
-# `account/preferences/edit.html.erb` `form_with` block and its 6
-# section partials (_login, _privacy, _appearance, _filters, _notes,
-# _email) + 3 filter sub-partials.
+# Phlex form for `account/preferences#edit`.
 #
-# Multiple submit buttons (one per section) preserve the pre-Phlex
-# convenience that lets users save changes from any section without
-# scrolling to the bottom of the page. The form's URL is the
-# resource path (PATCH to `account_preferences_path`).
+# Multiple submit buttons (one per section) let users save changes
+# from any section without scrolling to the bottom of the page.
+# The form's URL is the resource path (PATCH to
+# `account_preferences_path`).
 #
 # Content-filter fields (`Query::Filter.all`) live under the
 # `user[<filter_sym>]` namespace and read their `checked` /
@@ -252,8 +249,7 @@ class Views::Controllers::Account::Preferences::Form <
     div(class: "form-group mt-3") do
       span(class: "font-weight-bold") { plain(:prefs_content_filters.t) }
       # Two paragraphs: explanation, then a blank one to push the
-      # first filter row down (the ERB this replaces had an unclosed
-      # `<p>` after the explanation).
+      # first filter row down.
       p { plain(:prefs_content_filters_explanation.t) }
       p { nil }
     end

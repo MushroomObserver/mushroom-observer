@@ -23,6 +23,11 @@ class InfoControllerTest < FunctionalTestCase
 
     get(:textile_sandbox)
     assert_response(:success)
+
+    post(:textile_sandbox_create,
+         params: { textile_sandbox: { code: "**bold**" },
+                   commit: :sandbox_test.l })
+    assert_response(:success)
   end
 
   def test_normal_permissions
@@ -30,6 +35,9 @@ class InfoControllerTest < FunctionalTestCase
     get(:intro)
     assert_equal(200, @response.status)
     get(:textile_sandbox)
+    assert_equal(200, @response.status)
+    post(:textile_sandbox_create,
+         params: { textile_sandbox: { code: "test" } })
     assert_equal(200, @response.status)
   end
 
@@ -40,6 +48,9 @@ class InfoControllerTest < FunctionalTestCase
     get(:intro) # authorized robots and anonymous users are allowed here
     assert_equal(200, @response.status)
     get(:textile_sandbox)
+    assert_equal(403, @response.status)
+    post(:textile_sandbox_create,
+         params: { textile_sandbox: { code: "test" } })
     assert_equal(403, @response.status)
   end
 

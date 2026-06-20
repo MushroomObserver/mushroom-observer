@@ -4,8 +4,7 @@ module Views::Controllers::GlossaryTerms
   # GlossaryTerm show page: title + edit icons in the header,
   # description + external-search panel on the left, thumbnail on
   # the right, then a strip of other-image thumbnails, the previous-
-  # version footer, and an authors/editors panel. Converted from
-  # `glossary_terms/show.html.erb`.
+  # version footer, and an authors/editors panel.
   class Show < Views::FullPageBase
     prop :glossary_term, ::GlossaryTerm
     prop :other_images, _Array(::Image)

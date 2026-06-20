@@ -1,21 +1,27 @@
 # frozen_string_literal: true
 
-# Shared link-rendering logic for context-nav. Included by both
-# `Views::Layouts::TopNav::ContextNav` (desktop top-bar dropdown)
-# and `Views::Layouts::Sidebar::ContextNav` (mobile offcanvas
-# sidebar). Pulled out as a module so the two components don't
-# have to inherit from a common base just to share a few methods,
-# which would interfere with Phlex wiring.
-module Views::Layouts::ContextNav::LinkRendering
+# Shared link-rendering dispatcher: turns a `[text, url, args]`
+# tuple into the right HTML element based on `args[:button]`
+# (`:post` / `:destroy` / `:put` / `:patch` / nil-for-plain-link).
+#
+# Included by every component / view that needs to render a flat
+# list of action-link tuples — currently `Components::Dropdown`
+# (dropdown menus, including the top-nav context-nav and the
+# sort-bar), `Views::Layouts::Sidebar::ContextNav` (mobile
+# offcanvas), and `Views::Controllers::Users::Show::Profile`
+# (action-links list).
+#
+# Tuples come from either `Tab::Base#to_a` (most callers) or a
+# raw `[label, path, args]` build (e.g. `Views::Layouts::Header::
+# Sorter#sort_tuple`). The dispatcher doesn't care which.
+module Components::LinkRendering
   private
 
   # Strips MO-specific keys from the args hash and blends in any
   # extra_args' class. Returns a kwargs hash safe to splat into a
   # `link_to` / `button_to` / `CrudButton::*` call.
   def merge_context_nav_link_args(args, extra_args)
-    kwargs = args.except(:button, :target)
-    kwargs[:class] = class_names(kwargs[:class], extra_args[:class])
-    kwargs.merge(extra_args.except(:class))
+    mix(args.except(:button, :target), extra_args)
   end
 
   # Dispatch one `[text, url, args]` link tuple to the right HTML

@@ -5,7 +5,6 @@
 # welcome note + logout button for logged-in users, or a "no user
 # yet" textile note for anonymous viewers.
 #
-# Replaces `app/views/controllers/account/welcome.html.erb`.
 module Views::Controllers::Account
   class Welcome < Views::FullPageBase
     def view_template
@@ -21,7 +20,6 @@ module Views::Controllers::Account
 
     private
 
-    # Inlined from `AccountHelper#account_welcome_title`.
     def welcome_title
       return :welcome_no_user_title.t unless current_user
 

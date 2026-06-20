@@ -7,9 +7,8 @@
 # be shown elsewhere on the page (the same site-id flag, used
 # to differentiate which line is which).
 #
-# Used by `Header::TitleHelper#observation_page_title` for the
-# obs page title; via that for the obs-show and suggestions
-# pages.
+# Used by `Views::Layouts::Header::ObjectTitle` for the obs page
+# title; via that for the obs-show and suggestions pages.
 module Views::Controllers::Observations
   class ConsensusNameLink < Views::Base
     prop :observation, ::Observation

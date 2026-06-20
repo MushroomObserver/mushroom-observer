@@ -5,7 +5,6 @@
 # location, notes, image upload, mailing address), the user's
 # current profile image plus a remove button on the right.
 #
-# Replaces `app/views/controllers/account/profile/edit.html.erb`.
 module Views::Controllers::Account::Profile
   class Edit < Views::FullPageBase
     prop :user, ::User

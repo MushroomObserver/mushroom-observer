@@ -4,10 +4,6 @@
 # displayed next to an object's title (matrix box, project banner,
 # species-list listing row, etc.). Clicking the badge copies the
 # numeric id into the clipboard.
-#
-# Replaces the `show_title_id_badge` helper that lived in
-# `app/helpers/header/title_helper.rb`. Callers pass the object and
-# optional extra CSS classes (defaults to `"mr-4"`).
 class Components::IdBadge < Components::Base
   prop :object, ::AbstractModel
   prop :extra_class, _Nilable(String), default: "mr-4"

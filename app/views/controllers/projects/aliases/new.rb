@@ -2,7 +2,6 @@
 
 module Views::Controllers::Projects::Aliases
   # Phlex view for the new project alias form page.
-  # Replaces aliases/new.html.erb.
   class New < Views::FullPageBase
     def initialize(project_alias:, project:, user:)
       super()

@@ -6,15 +6,12 @@
 # `CommentsForObject` panel. Each row is a `CommentRow` with
 # `show_name: true` so the target each comment is attached to is
 # labeled in the heading.
-#
-# Replaces `app/views/controllers/comments/index.html.erb`.
 module Views::Controllers::Comments
   class Index < Views::FullPageBase
     prop :query, ::Query::Comments
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Comment)
     prop :user, _Nilable(::User), default: nil
-    prop :error, _Nilable(String), default: nil
 
     def view_template
       container_class(:text_image)
@@ -22,7 +19,6 @@ module Views::Controllers::Comments
       # Sort table lives on the controller — single source of truth.
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-      flash_error(@error) if @error && @objects.empty?
 
       paginated_results { render_list }
     end

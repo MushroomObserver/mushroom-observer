@@ -7,14 +7,12 @@ module Views::Controllers::Users
     prop :query, ::Query
     prop :users, _Array(::User)
     prop :pagination_data, ::PaginationData
-    prop :error, _Nilable(::String), default: nil
 
     def view_template
       container_class(:full)
       add_index_title(@query)
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-      flash_error(@error) if @error && @users.empty?
 
       if in_admin_mode?
         render_admin_table

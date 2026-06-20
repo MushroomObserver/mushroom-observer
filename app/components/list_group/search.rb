@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 # Bootstrap panel + search-status form for list-style show pages
-# (project show, species_list show). Replaces the
-# `shared/_list_search.html.erb` partial and its single-caller inner
-# `shared/_search_status_autocompleter.erb` partial.
+# (project show, species_list show).
 #
 # The form posts to `AddDispatchController#new`, which reads flat
 # top-level params (`name`, `field_slip`, `object_id`, `object_type`,

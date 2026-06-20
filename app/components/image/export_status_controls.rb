@@ -8,10 +8,7 @@
 # flag (`:ok_for_export`, the default) and an Image's `diagnostic`
 # flag (`:diagnostic`, used by the ML-training data pipeline).
 #
-# Drop-in replacement for the long-standing `export_status_controls`
-# and `export_status_ml_controls` helpers in
-# `app/helpers/exports_helper.rb`. Returns nothing (empty render)
-# for non-reviewer viewers.
+# Returns nothing (empty render) for non-reviewer viewers.
 #
 # @example Ok-for-export pair on a Name
 #   render(Components::Image::ExportStatusControls.new(object: @name))

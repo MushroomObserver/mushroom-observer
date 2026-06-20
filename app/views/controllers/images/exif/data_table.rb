@@ -5,9 +5,7 @@ module Views::Controllers::Images
     # EXIF key/value table chunk. Wraps the rows in
     # `<div id="exif_data_table">` so the standalone `EXIF::Show`
     # page and the controller's turbo_stream modal-body branch can
-    # share the same rendering. Split out of `EXIF::Show` when the
-    # turbo_stream branch's `images/exif/_data.html.erb` partial
-    # was deleted in the ERB→Phlex sweep.
+    # share the same rendering.
     class DataTable < Views::Base
       prop :data, _Nilable(_Array(_Array(::String))), default: nil
 

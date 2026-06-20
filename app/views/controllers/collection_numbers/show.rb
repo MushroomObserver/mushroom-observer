@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for `CollectionNumbersController#show`. Replaces
-# `app/views/controllers/collection_numbers/show.html.erb`.
+# Action template for `CollectionNumbersController#show`.
 module Views::Controllers::CollectionNumbers
   class Show < Views::FullPageBase
     prop :collection_number, ::CollectionNumber

@@ -615,4 +615,15 @@ module GeneralExtensions
   ensure
     Rails.logger = old_logger
   end
+
+  # assert_equal raises a deprecation warning in Minitest 5 when the
+  # expected value is nil. Use this instead of assert_equal when the
+  # expected value may legitimately be nil.
+  def assert_equal_even_if_nil(expect, actual, msg = nil)
+    if expect.nil?
+      assert_nil(actual, msg)
+    else
+      assert_equal(expect, actual, msg)
+    end
+  end
 end

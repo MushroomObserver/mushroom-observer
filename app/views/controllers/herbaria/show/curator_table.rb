@@ -5,8 +5,7 @@ module Views::Controllers::Herbaria
     # Curators list rendered above the add-curator form on
     # `Herbaria::Show`. Uses `Components::Table` with the
     # `t.heading { ... }` section-heading row (single colspan th)
-    # rather than per-column headers. Converted from
-    # `herbaria/_curator_table.html.erb`.
+    # rather than per-column headers.
     class CuratorTable < Views::Base
       prop :herbarium, ::Herbarium
 

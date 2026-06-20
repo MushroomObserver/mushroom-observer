@@ -7,30 +7,14 @@
 # regular show — not on versions) an export-status + review-status
 # footer.
 #
-# Inlines the full chain that the pre-Phlex
-# `_description_details_and_alts_panel.erb` composed across:
-#
-#   - `DescriptionsHelper#show_description_details` + #show_alt_descriptions
-#     + #add_list_of_projects + #show_description_export_and_review +
-#     #show_description_export_status + #show_name_description_review +
-#     #show_name_description_review_status + #show_name_description_review_ui +
-#     #show_name_description_latest_review + #description_title
-#
 # The heading-links icon strip is extracted to
 # `Components::Description::ModLinks` (sibling-in-spirit to
-# `Components::Link::InlineMod`), which replaces all of
-# `DescriptionIconsHelper`. The "Version: N / Previous Version" line
+# `Components::Link::InlineMod`). The "Version: N / Previous Version" line
 # is `Components::Description::PreviousVersion`, replacing
 # `VersionsHelper#show_previous_version`. The license-badge block
-# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`,
-# replacing the shared `_form_license_badge.erb` partial. Both
-# description helper files are deleted in the same commit.
+# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
-    # `review_as_string` lives in `app/helpers/localization_helper.rb`
-    # and is also called from the description list view.
-    register_value_helper :review_as_string
-
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
     prop :versions, _Array(_Interface(:user_id))
@@ -252,6 +236,12 @@ module Views::Controllers::Descriptions
       else
         :private.l
       end
+    end
+
+    # `Description#review_status` → translation key lookup, e.g.
+    # `:unvetted` → "Needs Review".
+    def review_as_string(val)
+      :"review_#{val}".l
     end
   end
 end

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Action template for `HerbariumRecordsController#edit`. Replaces
-# `app/views/controllers/herbarium_records/edit.html.erb`. Wraps
+# Action template for `HerbariumRecordsController#edit`. Wraps
 # the existing `Form` Phlex component with page chrome + a
 # side-column list of MatrixBox previews (one per associated obs).
 module Views::Controllers::HerbariumRecords

@@ -5,8 +5,7 @@ module Views::Controllers::Images
     # Top-left panel on the image show page: image-controls bar
     # (rotate / mirror / original / EXIF links), the interactive
     # image itself, the vote interface (when logged in), and the
-    # original filename caption when the owner shares it. Converted
-    # from `images/show/_image_panel.html.erb`.
+    # original filename caption when the owner shares it.
     class ImagePanel < Views::Base
       prop :image, ::Image
       prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil

@@ -16,7 +16,7 @@ class ObservationsController
                objects: @objects,
                user: @user,
                project: @project,
-               error: @error,
+
                name_suggestions: @name_suggestions
              ))
     end
