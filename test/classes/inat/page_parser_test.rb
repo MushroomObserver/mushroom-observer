@@ -61,11 +61,29 @@ class Inat
                    "URL param place_id should be in query args")
     end
 
-    def test_url_request_query_args_safety_params_override_url
+    def test_url_request_query_args_user_taxon_id_honored
+      # A taxon_id in the stored URL was validated by TaxonValidator at submit
+      # time; the job honors it rather than replacing it with IMPORTABLE_IDS.
       import = inat_imports(:dick_inat_import).tap do |i|
-        # URL tries to override taxon_id and without_field — both should
-        # be replaced by MO's required values.
-        i.inat_url = "project_id=291058&taxon_id=1&without_field=something"
+        i.inat_url = "project_id=291058&taxon_id=47170&without_field=something"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_equal("47170", args[:taxon_id],
+                   "User-supplied taxon_id from stored URL should be honored")
+      assert_equal(
+        "Mushroom Observer URL",
+        args[:without_field],
+        "MO without_field should override any without_field in user URL"
+      )
+    end
+
+    def test_url_request_query_args_taxon_id_defaults_to_importable_ids
+      # When no taxon_id in the URL, fall back to MO's importable taxa.
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058"
       end
       parser = PageParser.new(import)
 
@@ -74,12 +92,7 @@ class Inat
       assert_equal(
         Inat::Constants::IMPORTABLE_TAXON_IDS_ARG,
         args[:taxon_id],
-        "MO taxon_id should override any taxon_id in user URL"
-      )
-      assert_equal(
-        "Mushroom Observer URL",
-        args[:without_field],
-        "MO without_field should override any without_field in user URL"
+        "taxon_id should fall back to IMPORTABLE_TAXON_IDS_ARG when absent"
       )
     end
 
@@ -108,8 +121,10 @@ class Inat
     end
 
     def test_url_request_query_args_strips_mo_controlled_keys_from_stored_query
-      # Simulate a stored query string that somehow contains MO-controlled keys
-      # (e.g. from a confirm round-trip of an older normalized value).
+      # Simulate a stored query string containing MO-controlled pagination keys.
+      # taxon_id=9999 is preserved (validated at submit time); other MO keys
+      # (page, per_page, order, order_by, without_field, only_id, ttl, id)
+      # are stripped/overridden.
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058&taxon_id=9999&page=2&per_page=50" \
                      "&order=desc&order_by=created_at&without_field=foo" \
@@ -121,14 +136,14 @@ class Inat
 
       assert_equal("291058", args[:project_id],
                    "project_id should be preserved")
+      assert_equal("9999", args[:taxon_id],
+                   "taxon_id from stored URL is honored (validated at submit)")
       # Stripped and not re-set — must be nil
       [:page, :only_id, :ttl, :id].each do |key|
         assert_nil(args[key],
                    "#{key} should be stripped and not re-set")
       end
-      # Stripped but overridden with MO's values — user value must not win
-      assert_equal(IMPORTABLE_TAXON_IDS_ARG, args[:taxon_id],
-                   "taxon_id must be MO's value, not user-supplied 9999")
+      # Overridden with MO's pagination values — user value must not win
       assert_equal(200, args[:per_page],
                    "per_page must be MO's value, not user-supplied 50")
       assert_equal("asc", args[:order],

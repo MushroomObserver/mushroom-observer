@@ -71,8 +71,9 @@ class Inat
     end
 
     # Build a request from the user-supplied URL query string, merged with
-    # MO's required safety params. Safety params (taxon_id, without_field)
-    # and pagination params always win over the user URL.
+    # MO's required safety params. without_field and pagination params always
+    # win; taxon_id falls back to IMPORTABLE_TAXON_IDS_ARG only when the user
+    # did not supply a validated taxon filter.
     def next_url_request(id_above:)
       query_args = url_request_query_args(id_above: id_above)
       add_ownership_filter(query_args)
@@ -96,7 +97,7 @@ class Inat
       strip_keys = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym) + [:id]
       args.except!(*strip_keys)
       args.merge!(BASE_FILTER_PARAMS)
-      args[:taxon_id] = IMPORTABLE_TAXON_IDS_ARG
+      args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
       args.merge!(id_above: effective_id_above, per_page: 200,
                   order: "asc", order_by: "id")
       args

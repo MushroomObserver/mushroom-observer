@@ -61,9 +61,17 @@ class Inat
 
       assert_equal(
         "project_id=291058", result,
-        "Should strip taxon_id, without_field, only_id, ttl, " \
-        "apply_project_rules_for"
+        "Should strip taxon_id (default keep_taxon_id: false), " \
+        "without_field, only_id, ttl, apply_project_rules_for"
       )
+    end
+
+    def test_keep_taxon_id_preserves_taxon_id
+      url = "#{API_URL}?project_id=291058&taxon_id=47170"
+      result = URLNormalizer.new(url, keep_taxon_id: true).normalize
+
+      assert_equal("project_id=291058&taxon_id=47170", result,
+                   "taxon_id should be preserved when keep_taxon_id: true")
     end
 
     def test_preserves_project_place_quality_and_license_params
@@ -251,15 +259,24 @@ class Inat
       url = "#{API_URL}?project_id=291058&taxon_id=47170&page=2"
       ignored = URLNormalizer.new(url).ignored_params
 
-      assert_includes(ignored, "taxon_id",
-                      "taxon_id is always stripped and should appear in " \
-                      "ignored_params")
       assert_includes(ignored, "page",
                       "page is always stripped and should appear in " \
                       "ignored_params")
       assert_not_includes(ignored, "project_id",
                           "project_id is kept and should not appear in " \
                           "ignored_params")
+    end
+
+    def test_ignored_params_excludes_taxon_id_regardless_of_keep_flag
+      url = "#{API_URL}?project_id=291058&taxon_id=47170"
+
+      assert_not_includes(URLNormalizer.new(url).ignored_params, "taxon_id",
+                          "taxon_id excluded from generic ignored_params " \
+                          "when stripped (controller warns separately)")
+      assert_not_includes(
+        URLNormalizer.new(url, keep_taxon_id: true).ignored_params, "taxon_id",
+        "taxon_id excluded from ignored_params when kept"
+      )
     end
 
     def test_ignored_params_returns_context_stripped_params

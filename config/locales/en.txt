@@ -3238,6 +3238,7 @@
   inat_invalid_url: "URL must be a filtered iNat observations URL or iNat API observation search URL"
   inat_url_no_valid_filter_params: "URL has no valid filter parameters — please add at least one (e.g. project_id, place_id, quality_grade)"
   inat_url_params_ignored: "MO ignores these URL parameters: [params]"
+  inat_taxon_id_not_importable: "The taxon_id URL parameter was ignored because it includes taxa that are neither fungi nor slime molds"
   inat_previous_import: "[count] listed ids previously imported and will not be re-imported"
   inat_too_many_ids_listed: Too many ids listed
   inat_importing_all_anothers: You cannot import all observations of another person

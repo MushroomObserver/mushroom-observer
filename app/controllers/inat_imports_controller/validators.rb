@@ -84,7 +84,9 @@ module InatImportsController::Validators
     # it was validated on the first submit so accept it as-is.
     return true if confirmed_url_mode?
 
-    normalized = url_normalizer(params[:inat_url]).normalize
+    keep = url_taxon_ids_importable?
+    normalized = url_normalizer(params[:inat_url],
+                                keep_taxon_id: keep).normalize
     return true if normalized.present?
 
     msg =

@@ -1042,6 +1042,56 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Confirmation should show estimate from URL query")
   end
 
+  def test_importable_taxon_id_preserved_in_normalized_url
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058&taxon_id=47170"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 47_170, ancestor_ids: [48_460, 47_170] }]
+      }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user", consent: 1 })
+
+    url_field = css_select("input#inat_import_confirm_inat_url").first
+    assert_not_nil(url_field,
+                   "inat_url hidden field should be present in confirm form")
+    assert_equal("project_id=291058&taxon_id=47170", url_field["value"],
+                 "taxon_id should be preserved in confirm form when importable")
+  end
+
+  def test_non_importable_taxon_id_stripped_with_warning
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058&taxon_id=3"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash_text(
+      :inat_taxon_id_not_importable.l,
+      "Warning should appear when taxon_id is outside Fungi/Mycetozoa"
+    )
+    url_field = css_select("input#inat_import_confirm_inat_url").first
+    assert_not_nil(url_field,
+                   "inat_url hidden field should be present in confirm form")
+    assert_equal("project_id=291058", url_field["value"],
+                 "taxon_id stripped from confirm form URL when not importable")
+  end
+
   def test_create_url_and_ids_both_present_rejected
     user = users(:rolf)
     url = "#{INAT_SITE_OBS_URL}?project_id=291058"
@@ -1095,9 +1145,14 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_url_with_no_surviving_params_rejected
     login
-    # All params in this URL are stripped by URLNormalizer (taxon_id is
-    # MO-controlled), leaving an empty query string.
-    url = "#{INAT_API_OBS_URL}?taxon_id=47170"
+    # taxon_id=3 (Animalia) is non-importable — URLNormalizer strips it,
+    # leaving an empty query string that fails validation.
+    url = "#{INAT_API_OBS_URL}?taxon_id=3"
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
     post(:create,
          params: { inat_url: url, inat_username: "someone", consent: 1 })
 
@@ -1108,9 +1163,9 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_warns_about_ignored_url_params
     user = users(:rolf)
-    # taxon_id is always stripped (MO enforces its own fungi/myxo filter);
-    # using an API URL so it is not treated as silent UI noise.
-    url = "#{INAT_API_OBS_URL}?project_id=291058&taxon_id=47170"
+    # page=2 in an API URL is MO-controlled and stripped; using an API URL
+    # so page is not treated as silent UI noise.
+    url = "#{INAT_API_OBS_URL}?project_id=291058&page=2"
 
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 5 }.to_json)
@@ -1121,7 +1176,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_flash_text(
-      :inat_url_params_ignored.t(params: "taxon_id"),
+      :inat_url_params_ignored.t(params: "page"),
       "URL with stripped params should warn the user which were ignored"
     )
   end
@@ -1198,8 +1253,15 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_url_mode_estimate_mo_params_win_over_url_params
     user = users(:rolf)
     # URL supplies conflicting taxon_id and only_id; MO's values must win.
+    # taxon_id=9999 is non-importable so it is stripped; MO's IMPORTABLE_IDS
+    # and only_id=true should appear in the estimate request.
     url = "#{INAT_API_OBS_URL}?project_id=291058&taxon_id=9999&only_id=false"
 
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 9999, ancestor_ids: [9999] }]
+      }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 0 }.to_json)
 

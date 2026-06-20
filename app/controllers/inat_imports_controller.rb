@@ -150,10 +150,17 @@ class InatImportsController < ApplicationController
     return unless listing_url?
     return unless params[:inat_url].include?("://")
 
-    normalizer = url_normalizer(params[:inat_url])
-    warn_about_ignored_url_params(normalizer)
+    normalizer = build_url_normalizer_with_warnings
     params[:original_inat_url] = params[:inat_url]
     params[:inat_url] = normalizer.normalize.to_s
+  end
+
+  def build_url_normalizer_with_warnings
+    taxon_id_ok = url_taxon_ids_importable?
+    normalizer = url_normalizer(params[:inat_url], keep_taxon_id: taxon_id_ok)
+    warn_about_non_importable_taxon unless taxon_id_ok
+    warn_about_ignored_url_params(normalizer)
+    normalizer
   end
 
   def warn_about_ignored_url_params(normalizer)
@@ -163,12 +170,36 @@ class InatImportsController < ApplicationController
     flash_warning(:inat_url_params_ignored.t(params: ignored.join(", ")))
   end
 
-  def url_normalizer(url)
+  def url_normalizer(url, keep_taxon_id: false)
     Inat::URLNormalizer.new(
       url,
       superimporter: InatImport.super_importer?(@user),
-      import_others: import_others?
+      import_others: import_others?,
+      keep_taxon_id: keep_taxon_id
     )
+  end
+
+  # True when every taxon_id value in the URL is a Fungi/Mycetozoa descendant,
+  # or when no taxon_id is present. Result is memoized — the iNat API call
+  # runs at most once per request.
+  def url_taxon_ids_importable?
+    unless instance_variable_defined?(:@url_taxon_ids_importable)
+      ids = taxon_ids_from_url(params[:inat_url].to_s)
+      @url_taxon_ids_importable =
+        ids.empty? || Inat::TaxonValidator.new(ids).all_importable?
+    end
+    @url_taxon_ids_importable
+  end
+
+  def taxon_ids_from_url(url)
+    Rack::Utils.parse_query(URI.parse(url).query.to_s)["taxon_id"].
+      to_s.split(",").map(&:strip).compact_blank
+  rescue URI::InvalidURIError
+    []
+  end
+
+  def warn_about_non_importable_taxon
+    flash_warning(:inat_taxon_id_not_importable.l)
   end
 
   # Were any listed iNat IDs previously imported?

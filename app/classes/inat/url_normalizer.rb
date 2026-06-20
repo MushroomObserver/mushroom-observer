@@ -40,8 +40,6 @@ class Inat
       "per_page",
       # UI-only param, would make API return 0 results
       "subview",
-      # We use taxon_id to restrict imports to fungi and myxos
-      "taxon_id",
       # Don't let users mess with cache control
       "ttl",
       # UI-only param, would make API return 0 results
@@ -50,10 +48,12 @@ class Inat
       "without_field"
     ].freeze
 
-    def initialize(url, superimporter: false, import_others: false)
-      @url           = url.to_s.strip
-      @superimporter = superimporter
-      @import_others = import_others
+    def initialize(url, superimporter: false, import_others: false,
+                   keep_taxon_id: false)
+      @url            = url.to_s.strip
+      @superimporter  = superimporter
+      @import_others  = import_others
+      @keep_taxon_id  = keep_taxon_id
     end
 
     # Returns the cleaned query string, or nil if the URL is invalid.
@@ -75,7 +75,10 @@ class Inat
       parsed = Rack::Utils.parse_query(uri.query.to_s)
       all_strips = STRIP_PARAMS + context_strip_params +
                    content_strip_params(parsed)
-      silent = ui_url?(uri) ? UI_NOISE_PARAMS : []
+      # taxon_id is never reported in the generic "ignored params" warning —
+      # when stripped, the controller gives a more specific message instead;
+      # when kept, it is not stripped so it wouldn't appear anyway.
+      silent = (ui_url?(uri) ? UI_NOISE_PARAMS.dup : []) + ["taxon_id"]
       parsed.keys & (all_strips - silent)
     end
 
@@ -112,15 +115,16 @@ class Inat
       params.sort.to_h.to_query
     end
 
-    # user_id is safe for superimporters importing others' obs because the
-    # ownership filter uses LICENSED_FILTER (no user_login) — no iNat OR risk.
-    # Exception: if user_login is also present, iNat ORs them; strip user_id.
+    # taxon_id: strip unless all values are importable (Fungi/Slime Molds).
+    # user_id: safe for superimporters importing others' obs
+    # strip if user_login is also present to prevent iNat from ORing the two.
     def content_strip_params(params)
+      strips = @keep_taxon_id ? [] : ["taxon_id"]
       if @superimporter && @import_others && !params.key?("user_login")
-        return []
+        return strips
       end
 
-      ["user_id"]
+      strips + ["user_id"]
     end
   end
 end
