@@ -123,27 +123,30 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_exclude_button(obs)
-      button_to(
-        :form_violations_action_exclude.l, violations_path,
-        method: :put, class: "btn btn-default btn-xs",
-        params: { project: { do: "exclude", obs_id: obs.id } }
-      )
+      render(::Components::Button::Put.new(
+               name: :form_violations_action_exclude.l,
+               target: violations_path,
+               params: { project: { do: "exclude", obs_id: obs.id } },
+               size: :xs
+             ))
     end
 
     def render_extend_button(obs)
-      button_to(
-        :form_violations_action_extend.l, violations_path,
-        method: :put, class: "btn btn-default btn-xs",
-        params: { project: { do: "extend", obs_id: obs.id } }
-      )
+      render(::Components::Button::Put.new(
+               name: :form_violations_action_extend.l,
+               target: violations_path,
+               params: { project: { do: "extend", obs_id: obs.id } },
+               size: :xs
+             ))
     end
 
     def render_add_target_name_button(obs)
-      button_to(
-        :form_violations_action_add_target_name.l, violations_path,
-        method: :put, class: "btn btn-default btn-xs",
-        params: { project: { do: "add_target_name", obs_id: obs.id } }
-      )
+      render(::Components::Button::Put.new(
+               name: :form_violations_action_add_target_name.l,
+               target: violations_path,
+               params: { project: { do: "add_target_name", obs_id: obs.id } },
+               size: :xs
+             ))
     end
 
     # The modal markup itself is no longer rendered eagerly — each

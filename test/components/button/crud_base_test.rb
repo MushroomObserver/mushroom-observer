@@ -611,4 +611,17 @@ class ButtonSubclassesTest < ComponentTestCase
 
     assert_html(html, "button.map-toggle")
   end
+
+  # `params:` threads hidden fields into the generated form so callers
+  # can dispatch multiple actions to one endpoint without separate routes.
+  def test_params_adds_hidden_fields_to_form
+    html = render(Components::Button::Put.new(
+                    name: "Exclude",
+                    target: "/projects/1/violations",
+                    params: { project: { do: "exclude", obs_id: 42 } }
+                  ))
+
+    assert_html(html, "form input[name='project[do]'][value='exclude']")
+    assert_html(html, "form input[name='project[obs_id]'][value='42']")
+  end
 end

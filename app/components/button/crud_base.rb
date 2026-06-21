@@ -45,6 +45,7 @@ class Components::Button::CRUDBase < Components::Button
     @confirm = options.delete(:confirm)
     @action  = options.delete(:action)
     @back    = options.delete(:back)
+    @params  = options.delete(:params)
     @block   = block
     super(name: name, **options)
   end
@@ -101,12 +102,14 @@ class Components::Button::CRUDBase < Components::Button
       button_data[:turbo_confirm_button] = @name
     end
 
-    {
+    opts = {
       method: @method,
       class: merged_class,
       form: { data: form_data },
       data: button_data
-    }.merge(@html_attrs.except(:class))
+    }
+    opts[:params] = @params if @params
+    opts.merge(@html_attrs.except(:class))
   end
 
   def tooltip_data
