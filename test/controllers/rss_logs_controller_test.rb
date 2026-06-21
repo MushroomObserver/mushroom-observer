@@ -164,7 +164,7 @@ class RssLogsControllerTest < FunctionalTestCase
       { text: /Imported from iNaturalist/ },
       "RssLog is missing Source credit"
     )
-    expected_url = obs.external_source.observation_url(obs.external_id)
+    expected_url = obs.import_link.link_url
     assert_select(
       "a[href=?][target=?][rel=?]",
       expected_url, "_blank", "noopener noreferrer", true,

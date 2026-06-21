@@ -21,15 +21,15 @@ module Inat::ImportAudit
       @seed = seed || rand(1_000_000)
       @out = out
       @io = io
-      @source = Source.find_by(name: Source::INATURALIST_NAME)
-      raise("No iNaturalist Source row in this database") unless @source
+      @site = ExternalSite.find_by(name: ExternalSite::INATURALIST_NAME)
+      raise("No iNaturalist ExternalSite row in this database") unless @site
     end
 
     def run
       scope = select_observations
       @io.puts("Auditing #{count(scope)} observation(s) " \
                "(seed=#{@seed}) -> #{@out}")
-      @builder = RowBuilder.new(source: @source)
+      @builder = RowBuilder.new(site: @site)
       @tally = Hash.new(0)
       @total = 0
       @started = clock
@@ -42,9 +42,13 @@ module Inat::ImportAudit
     # --- Selection ---
 
     def select_observations
-      scope = Observation.where(source_id: @source.id).
-              where.not(external_id: nil).
-              includes(:collector_user, :images, :rss_log)
+      import_ids = ExternalLink.import.
+                   where(external_site_id: @site.id,
+                         target_type: "Observation").
+                   select(:target_id)
+      scope = Observation.where(id: import_ids).
+              includes(:collector_user, :images, :rss_log,
+                       external_links: :external_site)
       return scope.where(id: @explicit_ids.map(&:to_i)).to_a if @explicit_ids
       return scope.order(:id) if @sample.zero? # full run: stream a relation
 
@@ -86,14 +90,22 @@ module Inat::ImportAudit
     end
 
     def write_batch(csv, batch)
-      by_id, failed = fetcher.fetch_batch(batch.map(&:external_id))
+      ext_ids = batch.index_with { |obs| import_external_id(obs) }
+      by_id, failed = fetcher.fetch_batch(ext_ids.values)
       batch.each do |obs|
-        row = @builder.call(obs, by_id[obs.external_id.to_s],
-                            fetch_failed: failed)
+        ext = ext_ids[obs]
+        row = @builder.call(obs, by_id[ext.to_s], external_id: ext,
+                                                  fetch_failed: failed)
         write_row(csv, row)
         tally_row(row)
         @total += 1
       end
+    end
+
+    # The iNat observation id for this obs, from its import ExternalLink
+    # (eager-loaded by select_observations).
+    def import_external_id(obs)
+      obs.import_link&.external_id
     end
 
     def write_row(csv, row)

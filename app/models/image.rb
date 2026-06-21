@@ -255,17 +255,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # External import provenance for imported images (#4208/#4529/#4299). Each
   # imported image carries a polymorphic import ExternalLink (target: the
-  # image) recording its source site + the iNat photo id (external_id). The
-  # legacy `external_source` (Source via source_id) is retained until the
-  # phase-2 drop migration removes `source_id`.
+  # image) recording its source site + the iNat photo id (external_id).
   # delete_all (not destroy): ExternalLink has no destroy callbacks/children,
   # and a bulk DELETE avoids loading the association — which would raise a
   # StrictLoadingViolation when a strict-loaded image is destroyed (e.g. the
   # glossary unused-image cleanup).
   has_many :external_links, as: :target, dependent: :delete_all
-  belongs_to :external_source, class_name: "Source",
-                               foreign_key: :source_id, optional: true,
-                               inverse_of: :images
 
   # The import ExternalLink for this image (its source photo), if any.
   def import_link

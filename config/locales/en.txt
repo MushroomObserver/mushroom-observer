@@ -1460,7 +1460,6 @@
   source_credit_mo_iphone_app: Created via the "Mushroom Observer iPhone app":https://mushroomobserver.org/articles/34
   source_credit_mo_api: Created via the "Mushroom Observer API":https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md.
   source_credit_external: '"Imported from [name]":[url]'
-  source_credit_external_no_url: Imported from [name]
   source_credit_external_text: Imported from [name]
   source_credit_help_link: About imported observations
 

@@ -54,13 +54,10 @@
 #  num_views::              Number of times it has been viewed.
 #  last_view::              Last time it was viewed.
 #  log_updated_at::         Cache of RssLogs.updated_at, for speedier index
-#  source_id::              FK to Source for external imports (iNat, etc.)
-#  external_id::            Source-system id (iNat obs number, etc.)
-#  last_synced_at::         When the sync job last refreshed this obs
 #  collector::              Display string for who collected the specimen.
 #  collector_user_id::      FK to the User who collected it, when known.
-#  inat_id::                iNaturalist id (deprecated; superseded by
-#                           external_id, will be dropped post-deploy)
+#  inat_id::                iNaturalist id (deprecated; the import provenance
+#                           now lives on an import ExternalLink, #4299)
 #
 #  ==== "Fake" attributes
 #  place_name::             Wrapper on top of +where+ and +location+.
@@ -180,11 +177,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Distinct from `user` (who entered the record). Null for imports until
   # the identity is claimed (#4217) and for legacy native obs. See #4211.
   belongs_to :collector_user, class_name: "User", optional: true
-  # Avoids colliding with the `source` enum below (entry agent vs.
-  # external data source — see #4208 two-axis model).
-  belongs_to :external_source, class_name: "Source",
-                               foreign_key: :source_id, optional: true,
-                               inverse_of: :observations
 
   # Has to go before "has many interests" or interests will be destroyed
   # before it has a chance to notify the interested users of the destruction.
@@ -1152,7 +1144,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # External imports take precedence over the entry agent: an obs
   # synced from iNat surfaces as "Imported from iNaturalist" even if
   # the user originally created it via mo_website. Returns nil only
-  # when neither external_source nor source is present.
+  # when neither an import_link nor a source enum value is present.
   # Intended for use with .tpl to render as HTML:
   #   <%= observation.source_credit.tpl %>
   def source_credit
