@@ -97,9 +97,11 @@ module Views::Controllers::Observations::Images
     def render_footer_buttons
       div(class: "text-center mt-3 mb-5") do
         submit(:SAVE_EDITS.l)
-        link_to(:cancel_and_show.t(type: :image),
-                image_path(model.id),
-                class: "btn btn-default ml-2")
+        render(Components::Button::Get.new(
+                 name: :cancel_and_show.t(type: :image),
+                 target: image_path(model.id),
+                 class: "ml-2"
+               ))
       end
     end
 

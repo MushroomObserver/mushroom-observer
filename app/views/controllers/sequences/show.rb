@@ -95,8 +95,10 @@ module Views::Controllers::Sequences
 
     def render_blast_link
       p do
-        link_to(:show_observation_blast_link.l, @sequence.blast_url,
-                class: "btn btn-default", target: "_blank", rel: "noopener")
+        render(Components::Button::ExternalLink.new(
+                 name: :show_observation_blast_link.l,
+                 url: @sequence.blast_url
+               ))
       end
     end
 

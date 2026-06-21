@@ -45,11 +45,12 @@ module Views::Controllers::HerbariumRecords
     def render_edit_link(rec)
       return unless can_edit?(rec)
 
-      a(href: edit_herbarium_record_path(id: rec.id, back: :index,
-                                         q: q_param),
-        class: "btn btn-default btn-sm edit_herbarium_record_link_#{rec.id}") do
-        plain(:EDIT.t)
-      end
+      render(Components::Button::Edit.new(
+               target: edit_herbarium_record_path(id: rec.id, back: :index,
+                                                  q: q_param),
+               size: :sm,
+               class: "edit_herbarium_record_link_#{rec.id}"
+             ))
     end
 
     def render_herbarium_link(rec)

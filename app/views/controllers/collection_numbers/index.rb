@@ -41,9 +41,8 @@ module Views::Controllers::CollectionNumbers
     def render_edit_link(collection_number)
       return unless can_edit?(collection_number)
 
-      a(href: edit_collection_number_path(id: collection_number.id,
-                                          params: { back: :index }),
-        class: "btn btn-default btn-sm") { plain(:EDIT.t) }
+      render(Components::Button::Edit.new(target: collection_number,
+                                          size: :sm))
     end
 
     def render_format_name_link(collection_number)

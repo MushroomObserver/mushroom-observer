@@ -54,9 +54,9 @@ module Views::Controllers::Info
       div(class: "sandbox-up-ptr center-block mt-3 mb-3") do
         img(src: asset_path("up_arrow.png"), alt: "Up arrow")
         whitespace
-        submit(:sandbox_test.l, class: "btn btn-default")
+        submit(:sandbox_test.l)
         whitespace
-        submit(:sandbox_test_codes.l, class: "btn btn-default")
+        submit(:sandbox_test_codes.l)
         whitespace
         img(src: asset_path("up_arrow.png"), alt: "Up arrow")
       end

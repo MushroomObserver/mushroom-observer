@@ -57,9 +57,12 @@ module Views::Controllers::FieldSlips
         b { plain("#{:show_project_field_slip_prefix.t}:") }
         plain(" #{@project.field_slip_prefix} ")
         if @project.member?(current_user)
-          link_to(:show_project_field_slip_create.t,
-                  new_project_field_slip_path(project_id: @project.id),
-                  class: "btn btn-default")
+          render(Components::Button::Get.new(
+                   name: :show_project_field_slip_create.t,
+                   target: new_project_field_slip_path(
+                     project_id: @project.id
+                   )
+                 ))
         end
       end
     end

@@ -432,4 +432,97 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button.btn.btn-primary", text: "Update")
     assert_no_html(html, "button.btn-default")
   end
+
+  # --- Button::Get --------------------------------------------------
+
+  def test_get_button_renders_anchor_with_btn_default
+    herbarium = herbaria(:nybg_herbarium)
+    html = render(Components::Button::Get.new(
+                    name: "View",
+                    target: herbarium
+                  ))
+
+    expected_href = routes.herbarium_path(herbarium)
+    assert_html(html, "a.btn.btn-default[href='#{expected_href}']",
+                text: "View")
+    assert_no_html(html, "form")
+  end
+
+  def test_get_button_with_string_target
+    html = render(Components::Button::Get.new(
+                    name: "Merge",
+                    target: routes.herbaria_path(merge: 42),
+                    style: nil
+                  ))
+
+    # `style: nil` → no btn classes; still an anchor with the path
+    assert_html(html, "a[href*='merge=42']", text: "Merge")
+    assert_no_html(html, "a.btn-default")
+  end
+
+  def test_get_button_accepts_size
+    html = render(Components::Button::Get.new(
+                    name: "Edit",
+                    target: "/foo",
+                    size: :sm
+                  ))
+
+    assert_html(html, "a.btn-sm[href='/foo']")
+  end
+
+  # --- Button::ModalToggle ------------------------------------------
+
+  def test_modal_toggle_renders_anchor_with_stimulus_data
+    html = render(Components::Button::ModalToggle.new(
+                    name: "Open Trust Settings",
+                    target: "/trust/path",
+                    modal_id: "trust_settings"
+                  ))
+
+    assert_html(html,
+                "a[data-controller='modal-toggle']" \
+                "[data-action='modal-toggle#showModal:prevent']" \
+                "[data-modal='modal_trust_settings']" \
+                "[href='/trust/path']")
+    assert_html(html, "a.btn.btn-default", text: "Open Trust Settings")
+  end
+
+  def test_modal_toggle_plain_text_style
+    html = render(Components::Button::ModalToggle.new(
+                    name: "Edit",
+                    target: "/edit/path",
+                    modal_id: "comment",
+                    style: nil
+                  ))
+
+    assert_html(html, "a[data-controller='modal-toggle'][href='/edit/path']")
+    assert_no_html(html, "a.btn-default")
+  end
+
+  # --- Button::Toggle -----------------------------------------------
+
+  def test_toggle_renders_button_with_show_and_hide_spans
+    html = render(Components::Button::Toggle.new(
+                    show_text: "Open Map",
+                    hide_text: "Hide Map",
+                    show_class: "map-show",
+                    hide_class: "map-hide"
+                  ))
+
+    assert_html(html, "button[type='button']")
+    assert_html(html, "button span.map-show", text: "Open Map")
+    assert_html(html, "button span.map-hide", text: "Hide Map")
+  end
+
+  def test_toggle_accepts_extra_class
+    html = render(Components::Button::Toggle.new(
+                    show_text: "Show",
+                    hide_text: "Hide",
+                    show_class: "s",
+                    hide_class: "h",
+                    class: "map-toggle"
+                  ))
+
+    assert_html(html, "button.map-toggle")
+  end
 end
