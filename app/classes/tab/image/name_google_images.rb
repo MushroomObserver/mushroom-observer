@@ -18,6 +18,6 @@ class Tab::Image::NameGoogleImages < Tab::Base
   end
 
   def html_options
-    { target: "_blank", rel: "noopener" }
+    { external: true }
   end
 end

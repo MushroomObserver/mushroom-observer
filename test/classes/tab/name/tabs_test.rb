@@ -119,8 +119,7 @@ module Tab::Name
 
       assert_equal("MyCoPortal", tab.title)
       assert_includes(tab.path, "mycoportal.org")
-      assert_equal(:_blank, tab.html_options[:target])
-      assert_equal(:noopener, tab.html_options[:rel])
+      assert(tab.html_options[:external])
       assert_equal(@name, tab.model)
     end
 
@@ -147,8 +146,7 @@ module Tab::Name
 
       assert_equal("EOL", tab.title, "EOL tab title")
       assert_equal(eol_url, tab.path, "EOL tab path delegates to eol_url")
-      assert_equal(:_blank, tab.html_options[:target],
-                   "EOL tab opens in new tab")
+      assert(tab.html_options[:external], "EOL tab opens in new tab")
     end
 
     def test_gbif_external_link

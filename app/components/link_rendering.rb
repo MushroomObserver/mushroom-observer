@@ -31,13 +31,18 @@ module Components::LinkRendering
   # extra_args' class. Returns a kwargs hash safe to splat into a
   # `link_to` / `button_to` / `Button::*` call.
   def merge_context_nav_link_args(args, extra_args)
-    mix(args.except(:button, :icon, :help, :target), extra_args)
+    mix(args.except(:button, :external, :icon, :help, :target), extra_args)
   end
 
   # Dispatch one `[text, url, args]` link tuple to the right HTML
-  # element. Mutation buttons go through the BUTTON_DISPATCH table;
-  # plain `link_to` is the default for GET navigation links.
+  # element. External links go through Link::External; mutation buttons
+  # go through BUTTON_DISPATCH; plain `link_to` is the default.
   def render_crud_button_or_link(str, url, args, kwargs)
+    if args[:external]
+      return render(Components::Link::External.new(str, url,
+                                                   **kwargs))
+    end
+
     klass, extra = BUTTON_DISPATCH[args[:button]]
     return link_to(str, url, kwargs) unless klass
 

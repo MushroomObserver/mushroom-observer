@@ -42,8 +42,8 @@ class Tab::Base
   include Rails.application.routes.url_helpers
 
   # Keys subclasses may return from `#html_options`. All others raise.
-  ALLOWED_HTML_OPTION_KEYS = [:class, :id, :button, :back, :icon, :data,
-                              :target, :rel, :title, :help].freeze
+  ALLOWED_HTML_OPTION_KEYS = [:class, :id, :button, :back, :icon, :external,
+                              :data, :title, :help].freeze
 
   # Valid values for the `:button` key.
   ALLOWED_BUTTON_VALUES = [:post, :put, :patch, :destroy].freeze
