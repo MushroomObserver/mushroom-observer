@@ -1,16 +1,15 @@
 # frozen_string_literal: true
 
 # "Propose a new naming on this observation" link. Caller supplies
-# the text + button class because this tab is rendered from the
-# namings_table in several visual contexts (table footer button,
-# matrix-box button, etc.) with different framing.
+# the text + rendering context (namings_table, matrix_box, etc.).
+# Visual framing (btn classes, icon visibility) is the caller's
+# responsibility via `Components::Button::ModalToggle`.
 class Tab::Naming::New < Tab::Base
-  def initialize(observation_id:, text:, context:, btn_class:)
+  def initialize(observation_id:, text:, context:)
     super()
     @observation_id = observation_id
     @text = text
     @context = context
-    @btn_class = btn_class
   end
 
   def title
@@ -24,10 +23,7 @@ class Tab::Naming::New < Tab::Base
   end
 
   def html_options
-    {
-      class: [@btn_class, "propose-naming-link"].compact.join(" "),
-      icon: :add
-    }
+    { class: "propose-naming-link", icon: :add }
   end
 
   def model

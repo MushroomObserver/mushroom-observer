@@ -196,11 +196,11 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_vote_percent_link
-    render(Components::Link::Modal.new(
-             "naming_votes_#{primary.id}",
-             "#{@naming.vote_percent.round}%",
-             vote_percent_modal_path,
-             class: "vote-percent btn btn-link px-0"
+    render(Components::Button::ModalToggle.new(
+             name: "#{@naming.vote_percent.round}%",
+             target: vote_percent_modal_path,
+             modal_id: "naming_votes_#{primary.id}",
+             style: :link, class: "vote-percent px-0"
            ))
   end
 

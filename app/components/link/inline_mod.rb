@@ -203,7 +203,13 @@ class Components::Link::InlineMod < Components::Base
     tab = send(handler[:tab])
     return nil unless tab
 
-    Components::Link::Modal.new(modal_id, tab: tab)
+    Components::Button::ModalToggle.new(
+      name: tab.title,
+      target: tab.path,
+      modal_id: modal_id,
+      style: nil,
+      **tab.html_options
+    )
   end
 
   def icon_link_edit

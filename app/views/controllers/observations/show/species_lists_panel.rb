@@ -54,7 +54,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
     render(Components::Button::Put.new(
              name: "[#{:REMOVE.t}]",
              target: remove_path,
-             data: { confirm: :are_you_sure.l }
+             confirm: :are_you_sure.l
            ))
   end
 end

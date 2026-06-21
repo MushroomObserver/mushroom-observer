@@ -1,29 +1,10 @@
 # frozen_string_literal: true
 
-# Anchor that triggers a Bootstrap modal via the `modal-toggle`
-# Stimulus controller. The controller fetches the modal body from
-# `path` as a turbo-stream response and shows the modal — if a modal
-# is already up under the same `identifier`, it reuses it.
-#
-# If the caller passes an `:icon`, the anchor renders through
-# `Components::Link::Icon` (icon + sr-only label, tooltip, etc.);
-# otherwise it's a plain `link_to`.
-#
-# @example Plain modal link
-#   render(Components::Link::Modal.new(
-#     "comment", "Edit", edit_comment_path(comment)
-#   ))
-#
-# @example Icon-styled modal link
-#   render(Components::Link::Modal.new(
-#     "comment", "Edit", edit_comment_path(comment), icon: :edit
-#   ))
-#
-# @example From a Tab PORO (shortcut)
-#   render(Components::Link::Modal.new(
-#     "user_question_email",
-#     tab: Tab::User::EmailQuestion.new(user: @show_user)
-#   ))
+# Legacy modal-trigger link. Kept for `Components::ApplicationForm::
+# AutocompleterField`, which passes an HTML `name=` attribute on
+# the anchor — a use that conflicts with `Button::ModalToggle`'s
+# `name:` kwarg (display text). All other callers use
+# `Components::Button::ModalToggle` instead.
 class Components::Link::Modal < Components::Base
   attr_reader :identifier, :name, :path, :args
 

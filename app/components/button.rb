@@ -33,7 +33,7 @@
 class Components::Button < Components::Base
   include Components::ButtonStyling
 
-  def initialize(name:, style: DEFAULT_STYLE, size: nil, icon: nil,
+  def initialize(name:, style: BTN_DEFAULT_STYLE, size: nil, icon: nil,
                  **html_attrs)
     super()
     @name = name

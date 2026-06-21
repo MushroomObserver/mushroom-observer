@@ -390,7 +390,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @option options [Boolean] :center center the button (default false)
     # @option options [String] :submits_with text shown while submitting
     # @option options [Symbol] :style button style (default `:default`).
-    #   Valid values: `Components::ButtonStyling::PERMITTED_STYLES`.
+    #   Valid values: `Components::ButtonStyling::BTN_STYLES`.
     # @option options [Symbol] :size button size modifier (optional).
     #   Valid values: `Components::ButtonStyling::BTN_SIZES.keys`.
     # @option options [Symbol] :as `:input` (default) renders
@@ -402,7 +402,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # disabled-state label for non-Turbo submits). Defaults to the button
     # label (just disable, no text swap).
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
-               disable_with: nil, style: DEFAULT_STYLE,
+               disable_with: nil, style: BTN_DEFAULT_STYLE,
                size: nil, as: :input, **options)
       submits_with ||= default_submits_with(value)
       disable_with ||= value

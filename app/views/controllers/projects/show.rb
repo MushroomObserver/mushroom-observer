@@ -93,19 +93,13 @@ module Views::Controllers::Projects
       end
     end
 
-    # Shared classes for every button in render_actions so the row reads
-    # consistently at narrow and wide viewports. Issue #4145.
-    def action_button_class
-      "btn btn-default btn-lg my-2 mr-2"
-    end
-
     def render_administer_button
       return unless @user&.admin && !@project.is_admin?(@user)
 
       render(Components::Button::Post.new(
                name: :show_project_administer.l,
                target: project_administration_path(project_id: @project.id),
-               class: action_button_class
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
@@ -125,7 +119,7 @@ module Views::Controllers::Projects
                  candidate: @user.id,
                  target: :project_index
                ),
-               class: action_button_class
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
@@ -136,14 +130,13 @@ module Views::Controllers::Projects
     end
 
     def render_trust_settings_button
-      render(Components::Link::Modal.new(
-               "trust_settings",
-               :show_project_trust_settings.l,
-               trust_modal_project_member_path(
-                 project_id: @project.id,
-                 candidate: @user.id
+      render(Components::Button::ModalToggle.new(
+               name: :show_project_trust_settings.l,
+               target: trust_modal_project_member_path(
+                 project_id: @project.id, candidate: @user.id
                ),
-               class: action_button_class
+               modal_id: "trust_settings",
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
@@ -155,31 +148,31 @@ module Views::Controllers::Projects
                  candidate: @user.id,
                  target: :project_index
                ),
-               class: action_button_class
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
     def render_add_obs_button
-      render(Components::Link::Modal.new(
-               "add_obs",
-               :change_member_add_obs.t,
-               add_obs_modal_project_member_path(
-                 project_id: @project.id,
-                 candidate: @user.id
+      render(Components::Button::ModalToggle.new(
+               name: :change_member_add_obs.t,
+               target: add_obs_modal_project_member_path(
+                 project_id: @project.id, candidate: @user.id
                ),
-               class: action_button_class
+               modal_id: "add_obs",
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
     def render_admin_links
       return if permission?(@project)
 
-      a(
-        href: new_project_admin_request_path(
-          project_id: @project.id
-        ),
-        class: action_button_class
-      ) { plain(:show_project_admin_request.l) }
+      render(Components::Button::Get.new(
+               name: :show_project_admin_request.l,
+               target: new_project_admin_request_path(
+                 project_id: @project.id
+               ),
+               size: :lg, class: "my-2 mr-2"
+             ))
     end
 
     # Explicit String target because the violations route uses

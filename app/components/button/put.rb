@@ -8,7 +8,7 @@
 #     target: project_member_path(...)
 #   ))
 class Components::Button::Put < Components::Button::CRUDBase
-  def initialize(target:, name:, style: DEFAULT_STYLE, **)
+  def initialize(target:, name:, style: BTN_DEFAULT_STYLE, **)
     super(target: target, name: name, method: :put, style: style, **)
   end
 end

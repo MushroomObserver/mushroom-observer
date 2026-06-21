@@ -57,7 +57,7 @@ class ButtonTest < ComponentTestCase
   end
 
   def test_default_variant_constant
-    assert_equal(:default, Components::Button::DEFAULT_STYLE)
+    assert_equal(:default, Components::ButtonStyling::BTN_DEFAULT_STYLE)
   end
 
   def test_tag_a_renders_link

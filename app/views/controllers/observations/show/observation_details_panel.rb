@@ -181,9 +181,11 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_send_question_link
     plain(" [")
-    render(Components::Link::Modal.new(
-             "observation_email",
-             tab: ::Tab::Observation::SendQuestion.new(observation: @obs)
+    render(Components::Button::ModalToggle.new(
+             name: :show_observation_send_question.l,
+             target: new_question_for_observation_path(@obs.id),
+             modal_id: "observation_email",
+             style: nil, icon: :email
            ))
     plain("]")
   end

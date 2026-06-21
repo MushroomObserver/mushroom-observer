@@ -88,7 +88,7 @@ module Views::Controllers::Herbaria
                target: herbaria_merges_path(src: @merge.id,
                                             dest: herbarium.id),
                class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
-               confirm: :are_you_sure.t
+               confirm: :are_you_sure.l
              ))
     end
 

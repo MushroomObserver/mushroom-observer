@@ -77,9 +77,9 @@ module Views::Controllers::VisualModels
     end
 
     def render_destroy_link(group)
-      link_to(:DESTROY.t, visual_group_path(group),
-              method: :delete,
-              data: { confirm: :are_you_sure.t })
+      render(Components::Button::Delete.new(
+               target: visual_group_path(group)
+             ))
     end
 
     def groups

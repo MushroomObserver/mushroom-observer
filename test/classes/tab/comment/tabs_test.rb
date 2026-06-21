@@ -25,13 +25,6 @@ module Tab::Comment
       assert_equal(@target, tab.model)
     end
 
-    def test_new_with_btn_class
-      tab = Tab::Comment::New.new(object: @target, btn_class: "btn btn-sm")
-
-      assert_includes(tab.html_options[:class], "btn")
-      assert_includes(tab.html_options[:class], "btn-sm")
-    end
-
     def test_edit
       tab = Tab::Comment::Edit.new(comment: @comment)
 

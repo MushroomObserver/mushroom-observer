@@ -26,9 +26,9 @@ module Views::Controllers::VisualModels
     private
 
     def render_destroy_link(visual_model)
-      link_to("Destroy", visual_model_path(visual_model),
-              method: :delete,
-              data: { confirm: :are_you_sure.t })
+      render(Components::Button::Delete.new(
+               target: visual_model_path(visual_model)
+             ))
     end
   end
 end

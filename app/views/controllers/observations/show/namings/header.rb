@@ -67,16 +67,16 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   def render_propose_icon_column
     div(class: "col-xs-2 col-sm-1") do
       span(class: "float-right d-sm-none") do
-        render(Components::Link::Modal.new(
-                 "obs_#{@obs.id}_naming", tab: propose_naming_tab
+        render(Components::Button::ModalToggle.new(
+                 name: :show_namings_propose_new_name.t,
+                 target: new_observation_naming_path(
+                   observation_id: @obs.id,
+                   context: "namings_table"
+                 ),
+                 modal_id: "obs_#{@obs.id}_naming",
+                 style: nil, icon: :add
                ))
       end
     end
-  end
-
-  def propose_naming_tab
-    ::Tab::Naming::New.new(observation_id: @obs.id,
-                           text: :show_namings_propose_new_name.t,
-                           context: "namings_table", btn_class: "")
   end
 end

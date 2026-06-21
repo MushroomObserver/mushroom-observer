@@ -17,11 +17,11 @@ class Components::Image::EXIFLink < Components::Base
   prop :link_class, String, default: ""
 
   def view_template
-    render(Components::Link::Modal.new(
-             "image_exif_#{@image_id}",
-             :image_show_exif.t,
-             exif_image_path(id: @image_id),
-             class: @link_class
+    render(Components::Button::ModalToggle.new(
+             name: :image_show_exif.t,
+             target: exif_image_path(id: @image_id),
+             modal_id: "image_exif_#{@image_id}",
+             style: nil, class: @link_class
            ))
   end
 end

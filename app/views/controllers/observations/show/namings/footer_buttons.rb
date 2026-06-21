@@ -32,28 +32,19 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
     render_suggest_button
   end
 
-  # Text-button variant of the propose-naming link (the icon-only
-  # variant lives in the panel `Header` for mobile). Strips the
-  # `icon: :add` that `Tab::Naming::New.html_options` carries by
-  # default — this button is text-only on `sm+`. ModalLink's
-  # `tab:` shortcut takes name/path/opts from the tab as a unit
-  # and doesn't expose a "merge an override" hook, so destructure
-  # the tab manually here to merge `icon: nil` over its
-  # html_options.
+  # Text-button variant of the propose-naming link (icon-only
+  # variant lives in the panel `Header` for mobile).
   def render_propose_button
-    title, path, opts = propose_naming_tab.to_a
-    render(Components::Link::Modal.new(
-             "obs_#{@obs.id}_naming", title, path, **opts, icon: nil
+    render(Components::Button::ModalToggle.new(
+             name: :show_namings_propose_new_name.t,
+             target: new_observation_naming_path(
+               observation_id: @obs.id,
+               context: "namings_table"
+             ),
+             modal_id: "obs_#{@obs.id}_naming",
+             style: :default, size: :sm,
+             class: "d-none d-sm-inline-block propose-naming-link"
            ))
-  end
-
-  def propose_naming_tab
-    ::Tab::Naming::New.new(
-      observation_id: @obs.id,
-      text: :show_namings_propose_new_name.t,
-      context: "namings_table",
-      btn_class: "btn btn-default btn-sm d-none d-sm-inline-block"
-    )
   end
 
   # Gating: a thumb image must exist (so

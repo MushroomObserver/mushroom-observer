@@ -23,7 +23,13 @@ class Components::Link::InlineAdd < Components::Base
 
   def view_template
     plain("[")
-    render(Components::Link::Modal.new(@modal_id, tab: @tab))
+    render(Components::Button::ModalToggle.new(
+             name: @tab.title,
+             target: @tab.path,
+             modal_id: @modal_id,
+             style: nil,
+             **@tab.html_options
+           ))
     plain("]")
   end
 end
