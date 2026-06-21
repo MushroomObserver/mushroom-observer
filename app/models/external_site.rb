@@ -11,6 +11,8 @@
 #                  may edit external_links to this site for any observation.
 #
 class ExternalSite < AbstractModel
+  INATURALIST_NAME = "iNaturalist"
+
   belongs_to :project
   has_many   :external_links
   has_many   :observations, through: :external_links
@@ -44,6 +46,23 @@ class ExternalSite < AbstractModel
 
     self.base_url = test_url.formatted
     base_url
+  end
+
+  # The iNaturalist site row, seeded by fixtures/migration. Cheap lookup
+  # by indexed unique name.
+  def self.inaturalist
+    find_by!(name: INATURALIST_NAME)
+  end
+
+  # URL of the per-record page on this site for the given external_id
+  # (#4299). Built from `url_template` with its `{id}` placeholder
+  # substituted; falls back to appending the id to `base_url` when no
+  # template is set (correct for iNat, whose base_url is the per-obs path).
+  # This is the single source of truth for an ExternalLink's URL — links
+  # store only `external_id`, not the full URL.
+  def observation_url(external_id)
+    template = url_template.presence || "#{base_url}{id}"
+    template.sub("{id}", external_id.to_s)
   end
 
   def member?(user)

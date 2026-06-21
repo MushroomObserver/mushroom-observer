@@ -75,7 +75,11 @@ module Observations
 
     def set_ivars_for_edit
       @external_link = ExternalLink.show_includes.find(params[:id].to_s)
-      @observation = @external_link.observation
+      # The link is strict-loaded with a shallow polymorphic target, so load
+      # the observation with its own matrix-box subtree for the edit card.
+      @observation = Observation.strict_loading.
+                     includes(Observation.matrix_box_includes).
+                     find(@external_link.observation.id)
       @site = @external_link.external_site
       @sites = [@site]
       @base_urls = { @site.name => @site.base_url }
@@ -87,11 +91,18 @@ module Observations
         obs  = link.observation
         site = link.external_site
       end
-      return true if obs&.user == @user || site&.member?(@user) || @user.admin
+      return true if permitted_external_link?(obs, site)
 
       flash_warning(:permission_denied.t)
       show_flash_and_send_back
       false
+    end
+
+    # Compare by id (not the loaded user object): the link's polymorphic
+    # target is strict-loaded shallowly, so touching obs.user would lazily
+    # load it. user_id is already on the record.
+    def permitted_external_link?(obs, site)
+      obs&.user_id == @user&.id || site&.member?(@user) || @user.admin
     end
 
     def create_external_link

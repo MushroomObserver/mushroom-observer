@@ -143,7 +143,7 @@ module Views::Controllers::Observations
     end
 
     def show_source_credit?
-      @observation.source_noteworthy? && !@observation.external_source
+      @observation.source_noteworthy? && !@observation.import_link
     end
 
     def render_source_credit

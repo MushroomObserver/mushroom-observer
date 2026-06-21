@@ -194,7 +194,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :comments,  as: :target, dependent: :destroy, inverse_of: :target
   has_many :interests, as: :target, dependent: :destroy, inverse_of: :target
   has_many :sequences, dependent: :destroy
-  has_many :external_links, dependent: :destroy
+  has_many :external_links, as: :target, dependent: :destroy
 
   # DO NOT use :dependent => :destroy -- this causes it to recalc the
   # consensus several times and send bogus emails!!
@@ -293,7 +293,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
      # for matrix_box_carousels:
      # { images: [:image_votes, :license, :projects, :user] },
-     :external_source, :location, :name,
+     { external_links: :external_site }, :location, :name,
      { namings: :votes },
      { occurrence: :observations }, :projects, :rss_log, :user]
   end
@@ -1138,8 +1138,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Which agent created this observation?
-  # The `mo_inat_import` value (5) was retired in #4209; iNat-imported
-  # observations are now identified by `external_source.present?`,
+  # The `mo_inat_import` value (5) was retired in #4209; imported
+  # observations are now identified by `import_link.present?` (#4299),
   # not by an entry-agent enum value.
   enum :source, {
     mo_website: 1,
@@ -1156,42 +1156,45 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Intended for use with .tpl to render as HTML:
   #   <%= observation.source_credit.tpl %>
   def source_credit
-    if external_source
-      external_source_credit
+    if (link = import_link)
+      :source_credit_external.l(name: link.external_site.name,
+                                url: link.link_url)
     elsif source.present?
       :"source_credit_#{source}"
     end
   end
 
-  def external_source_credit
-    obs_url = external_source.observation_url(external_id)
-    if obs_url.present?
-      :source_credit_external.l(name: external_source.name, url: obs_url)
+  # The ExternalLink (if any) recording where this observation was imported
+  # from — the external-source axis of #4208 (#4299). At most one per obs.
+  # Uses the loaded `external_links` association when present (matrix box,
+  # show page) to avoid a query; otherwise queries only the import row.
+  def import_link
+    if external_links.loaded?
+      external_links.detect(&:import?)
     else
-      :source_credit_external_no_url.l(name: external_source.name)
+      external_links.import.first
     end
   end
 
   # Structured form of source_credit for external imports — returns
   # { text:, url: } so renderers can build the link element with
   # whatever attributes they need (e.g. target="_blank" for off-site).
-  # Returns nil for non-external observations; callers fall back to
+  # Returns nil for non-imported observations; callers fall back to
   # source_credit (textile / enum) in that case.
   def external_credit_link
-    return nil unless external_source
+    return nil unless (link = import_link)
 
     {
-      text: :source_credit_external_text.l(name: external_source.name),
-      url: external_source.observation_url(external_id)
+      text: :source_credit_external_text.l(name: link.external_site.name),
+      url: link.link_url,
+      external_id: link.external_id
     }
   end
 
   # Do we want to prominently advertise the source of this observation?
-  # When source_id is set, requires the Source row to actually load —
-  # an orphaned source_id (Source row deleted) shouldn't produce a
-  # noteworthy banner whose contents would render as nothing.
+  # An import link makes it noteworthy; otherwise a non-website entry agent.
   def source_noteworthy?
-    return true if source_id.present? && external_source.present?
+    return true if import_link.present?
 
     source.present? && source != "mo_website"
   end
