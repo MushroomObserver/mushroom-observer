@@ -41,11 +41,13 @@ module Observations
       # Every editable list lands in exactly one bucket.
       assert_equal(assigns(:all_lists).results.map(&:id).sort,
                    (obs_ids + other_ids).sort)
-      # The partition matches actual membership.
-      assigns(:other_lists).each do |list|
-        assert_not(list.observations.member?(obs),
-                   "other_lists must exclude the observation")
-      end
+      # The partition matches actual membership (one query for the truth set,
+      # not a per-list check).
+      member_ids = obs.species_list_ids.to_set
+      assert(obs_ids.all? { |id| member_ids.include?(id) },
+             "obs_lists must all contain the observation")
+      assert(other_ids.none? { |id| member_ids.include?(id) },
+             "other_lists must exclude the observation")
     end
 
     def test_add_observation_to_species_list
