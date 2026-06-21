@@ -2,11 +2,10 @@
 
 # Renders a styled button or button-like element. The default tag is
 # `<button type="button">` (Stimulus actions, modal triggers). Pass
-# `type: "submit"` for form submits (or use `Components::Button::Submit`
-# which adds `submits_with:` / `disable_with:` Turbo kwargs), `tag: :a`
-# for link-shaped buttons, or `tag: :span` for non-interactive
-# btn-group members (disabled pills, active-state pills).
-# For server mutations needing CSRF, use `Components::Button::CRUDBase`.
+# `tag: :a` for link-shaped buttons, or `tag: :span` for non-interactive
+# btn-group members (disabled pills, active-state pills). For server
+# mutations needing CSRF, use `Components::Button::CRUDBase`. For form
+# submits, use `Components::Button::Submit`.
 #
 # Button styling is shared with `Components::Button::CRUDBase` via the
 # `Components::ButtonStyling` concern.
