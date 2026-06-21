@@ -19,10 +19,7 @@ class Tab::Description::AdjustPermissions < Tab::Base
   end
 
   def html_options
-    {
-      help: :show_description_adjust_permissions_help.l,
-      icon: :adjust
-    }
+    { help: :show_description_adjust_permissions_help.l, icon: :adjust }
   end
 
   def model

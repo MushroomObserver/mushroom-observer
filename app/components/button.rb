@@ -38,7 +38,7 @@
 class Components::Button < Components::Base
   include Components::ButtonStyling
 
-  ALLOWED_TAGS = [:button, :a, :span].freeze
+  ALLOWED_TAGS = [:button, :a, :span, :label].freeze
 
   def initialize(name: nil, variant: nil, size: nil, icon: nil,
                  **html_attrs)

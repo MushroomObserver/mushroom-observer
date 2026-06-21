@@ -16,7 +16,7 @@ class Tab::CollectionNumber::Destroy < Tab::Base
   end
 
   def html_options
-    { button: :destroy, icon: :delete }
+    { button: :destroy }
   end
 
   def model

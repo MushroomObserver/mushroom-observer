@@ -13,6 +13,18 @@ module Tab
     class Bare < Tab::Base
     end
 
+    class WithUnknownKey < Tab::Base
+      def title = "Foo"
+      def path  = "/foo"
+      def html_options = { tooltip: "bad" }
+    end
+
+    class WithBadButtonValue < Tab::Base
+      def title = "Bar"
+      def path  = "/bar"
+      def html_options = { button: :link }
+    end
+
     def test_title_raises_not_implemented
       e = assert_raises(NotImplementedError) { Bare.new.title }
 
@@ -30,6 +42,20 @@ module Tab
       # nav_key falls through to the demodulized + underscored class
       # name. `Tab::BaseTest::Bare` → "bare".
       assert_equal("bare", Bare.new.nav_key)
+    end
+
+    def test_html_options_raises_on_unknown_key
+      e = assert_raises(ArgumentError) { WithUnknownKey.new.html_options }
+
+      assert_match(/unknown key/, e.message)
+      assert_match(/:tooltip/, e.message)
+    end
+
+    def test_html_options_raises_on_invalid_button_value
+      e = assert_raises(ArgumentError) { WithBadButtonValue.new.html_options }
+
+      assert_match(/:button must be/, e.message)
+      assert_match(/:link/, e.message)
     end
   end
 end

@@ -119,7 +119,8 @@ module Views::Controllers::Locations
 
       def render_footer
         render(::Components::Link::Icon.new(
-                 tab: ::Tab::Location::ObservationsAt.new(location: @location)
+                 tab: ::Tab::Location::ObservationsAt.new(location: @location),
+                 show_text: true
                ))
       end
     end

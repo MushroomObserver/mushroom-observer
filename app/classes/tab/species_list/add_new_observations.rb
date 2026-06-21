@@ -15,7 +15,7 @@ class Tab::SpeciesList::AddNewObservations < Tab::Base
   end
 
   def html_options
-    { help: :species_list_show_add_new_observations_help.l }
+    { title: :species_list_show_add_new_observations_help.l }
   end
 
   def model

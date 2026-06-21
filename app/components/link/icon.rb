@@ -31,7 +31,7 @@ class Components::Link::Icon < Components::Base
   LABEL_SHOW_CLASSES = "pl-2 d-none d-sm-inline font-weight-bold"
 
   CONSUMED_OPTS = [:class, :icon, :icon_class, :show_text,
-                   :active_icon, :active_content, :button_to].freeze
+                   :active_icon, :active_content, :button_to, :help].freeze
 
   attr_reader :content, :path, :opts
 
@@ -40,7 +40,7 @@ class Components::Link::Icon < Components::Base
     if tab
       @content = tab.title
       @path = tab.path
-      @opts = tab.html_options
+      @opts = tab.html_options.merge(opts)
     else
       @content = content
       @path = path

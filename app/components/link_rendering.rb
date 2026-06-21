@@ -31,7 +31,7 @@ module Components::LinkRendering
   # extra_args' class. Returns a kwargs hash safe to splat into a
   # `link_to` / `button_to` / `Button::*` call.
   def merge_context_nav_link_args(args, extra_args)
-    mix(args.except(:button, :target), extra_args)
+    mix(args.except(:button, :icon, :help, :target), extra_args)
   end
 
   # Dispatch one `[text, url, args]` link tuple to the right HTML

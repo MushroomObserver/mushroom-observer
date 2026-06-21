@@ -18,11 +18,7 @@ class Tab::Description::PublishDraft < Tab::Base
   end
 
   def html_options
-    {
-      button: :put,
-      help: :show_description_publish_help.l,
-      icon: :publish
-    }
+    { button: :put, help: :show_description_publish_help.l, icon: :publish }
   end
 
   def model

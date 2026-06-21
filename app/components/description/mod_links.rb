@@ -99,8 +99,7 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def icon_from_tab(tab)
-    content, path, opts = tab.to_a
-    Components::Link::Icon.new(content, path, **(opts || {}))
+    Components::Link::Icon.new(tab: tab)
   end
 
   # -- predicates -------------------------------------------------

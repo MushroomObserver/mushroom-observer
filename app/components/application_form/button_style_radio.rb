@@ -12,8 +12,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Multiple instances with the same `name:` form a radio group via
   # browser-native behavior — no JS needed to manage checked state
   # across them. The `data-form-images-target`-style hook in
-  # Form::UploadGallery::Item only manages the visual `.active` class on the
-  # label.
+  # Form::UploadGallery::Item only manages the visual `.active` class on
+  # the label.
   #
   # Standalone (no Superform context) — takes raw HTML kwargs rather
   # than a `Field` / `FieldProxy`, since the call sites (carousel
@@ -30,19 +30,16 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     span(class: "set_thumb_img_text") { :image_set_default.l }
   #   end
   class ButtonStyleRadio < Phlex::HTML
-    include Phlex::TrustedHtml
-    include Phlex::Rails::Helpers::ClassNames
-    include Components::ButtonStyling
-
     # @param name [String] HTML name (shared across radios in the group)
     # @param value [String] value submitted when this radio is checked
     # @param id [String] HTML id (matches the label's `for`)
     # @param checked [Boolean] initial checked state
-    # @param variant [Symbol, nil] btn variant (default `:default`); `:strip`
-    #   for a plain label with no btn classes
+    # @param variant [Symbol, nil] btn variant; nil (default) for btn-default
+    #   frame, :strip for a plain label with no btn classes
     # @param size [Symbol, nil] btn size modifier (`:sm`, `:lg`, etc.)
     # @param label [Hash] extra HTML attrs for the `<label>` (e.g.
-    #   `class:` for identifier classes, `data:`)
+    #   `class:` for identifier classes, `data:`). Do not pass btn classes
+    #   here — use `variant:` and `size:` instead.
     # @param input_attrs [Hash] HTML attrs passed through to `<input>`
     def initialize(name:, value:, id:, **opts)
       super()
@@ -57,19 +54,20 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template(&block)
-      label(for: @id, class: label_class,
-            **@label_attrs.except(:class)) do
+      render(Components::Button.new(
+               tag: :label,
+               for: @id,
+               variant: @variant,
+               size: @size,
+               class: @label_attrs[:class],
+               **@label_attrs.except(:class)
+             )) do
         input(**input_attributes)
-        yield if block
+        block&.call
       end
     end
 
     private
-
-    def label_class
-      class_names(("btn" unless @variant.nil? || @variant == :strip),
-                  btn_class(@variant), size_class(@size), @label_attrs[:class])
-    end
 
     def input_attributes
       { type: :radio, name: @name, id: @id, value: @value,

@@ -15,7 +15,7 @@ class Tab::SpeciesList::ManageProjects < Tab::Base
   end
 
   def html_options
-    { help: :species_list_show_manage_projects_help.l }
+    { title: :species_list_show_manage_projects_help.l }
   end
 
   def model

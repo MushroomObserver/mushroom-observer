@@ -23,7 +23,7 @@ class Tab::Location::ObservationsAt < Tab::Base
   end
 
   def html_options
-    { icon: :observations, show_text: true }
+    { icon: :observations }
   end
 
   def model
