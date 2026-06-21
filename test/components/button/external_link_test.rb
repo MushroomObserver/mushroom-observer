@@ -20,7 +20,7 @@ class Components::Button::ExternalLinkTest < ComponentTestCase
     html = render(Components::Button::ExternalLink.new(
                     name: "Go",
                     url: "https://example.com",
-                    style: :link
+                    variant: :btn_link
                   ))
 
     assert_html(html, "a.btn-link[target='_blank'][rel='noopener noreferrer']")

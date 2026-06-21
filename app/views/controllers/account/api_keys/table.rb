@@ -136,12 +136,10 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_remove_button(key)
-      # `style: :outline_default` comes from `Button::Delete`.
-      # `icon: :remove` overrides the default `:delete` glyph to match
-      # the table's "REMOVE" label.
       render(Components::Button::Delete.new(
                target: account_api_key_path(key.id),
                name: :REMOVE.l,
+               variant: :outline,
                icon: :remove,
                id: "remove_api_key_#{key.id}"
              ))

@@ -42,7 +42,7 @@ module Views::Controllers::CollectionNumbers
       return unless can_edit?(collection_number)
 
       render(Components::Button::Edit.new(target: collection_number,
-                                          size: :sm))
+                                          variant: :outline, size: :sm))
     end
 
     def render_format_name_link(collection_number)
@@ -66,7 +66,7 @@ module Views::Controllers::CollectionNumbers
       return unless can_edit?(collection_number)
 
       render(Components::Button::Delete.new(
-               target: collection_number, size: :sm
+               target: collection_number, variant: :outline, size: :sm
              ))
     end
 

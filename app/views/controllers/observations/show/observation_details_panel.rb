@@ -185,7 +185,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
              name: :show_observation_send_question.l,
              target: new_question_for_observation_path(@obs.id),
              modal_id: "observation_email",
-             style: nil, icon: :email
+             variant: :strip, icon: :email
            ))
     plain("]")
   end

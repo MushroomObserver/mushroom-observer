@@ -41,7 +41,7 @@ module Views::Controllers::Descriptions::Authors
                target: description_authors_path(
                  id: @object.id, type: type, remove: user.id
                ),
-               style: nil
+               variant: :strip
              ))
       br
     end

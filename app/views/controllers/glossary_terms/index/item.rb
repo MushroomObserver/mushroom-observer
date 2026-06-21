@@ -34,7 +34,7 @@ module Views::Controllers::GlossaryTerms
       def render_destroy_button
         destroy_button(target: @glossary_term,
                        name: :destroy_object.t(type: :glossary_term),
-                       style: nil)
+                       variant: :strip)
       end
 
       def render_thumbnail

@@ -45,7 +45,7 @@ module Views::Controllers::Images
                  name: label_key.t,
                  target: transform_image_path(id: @image.id,
                                               op: operation, size: @size),
-                 style: nil, icon: nil
+                 variant: :strip, icon: nil
                ))
       end
 

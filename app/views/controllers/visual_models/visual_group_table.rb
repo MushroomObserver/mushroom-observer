@@ -78,7 +78,8 @@ module Views::Controllers::VisualModels
 
     def render_destroy_link(group)
       render(Components::Button::Delete.new(
-               target: visual_group_path(group)
+               target: visual_group_path(group),
+               variant: :outline
              ))
     end
 

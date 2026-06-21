@@ -39,7 +39,7 @@ class DropdownTest < ComponentTestCase
   # Post/put/patch/destroy tuples dispatched through the dropdown must
   # NOT carry `.btn` styling — they should render as plain form-submits
   # inside a `<li>`, not as Bootstrap-styled action buttons.
-  # Regression guard for the `style: nil` default added to
+  # Regression guard for the `variant: :strip` default added to
   # `Components::LinkRendering#render_crud_button_or_link`.
   def test_post_tuple_renders_without_btn_styling
     html = render_dropdown_with_button(button: :post)

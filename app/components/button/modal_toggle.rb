@@ -8,9 +8,9 @@
 # turbo-stream response and shows the modal. If a modal is already
 # open under the same `modal_id`, it reuses the element.
 #
-# Defaults to `style: :default` (btn btn-default). Callers that need
-# a plain text link pass `style: nil`; icon-only action links use
-# `style: nil, icon: :edit` etc.
+# Defaults to `variant: :default` (btn btn-default). Callers that need
+# a plain text link pass `variant: :strip`; icon-only action links use
+# `variant: :strip, icon: :edit` etc.
 #
 # @example Button-shaped modal trigger (the common case)
 #   render(Components::Button::ModalToggle.new(
@@ -23,7 +23,7 @@
 # @example Plain text modal link
 #   render(Components::Button::ModalToggle.new(
 #     name: "Edit", target: edit_comment_path(comment),
-#     modal_id: "comment", style: nil
+#     modal_id: "comment", variant: :strip
 #   ))
 #
 # @example Icon-only modal trigger (tooltip from name:)
@@ -31,7 +31,7 @@
 #     name: :show_comments_add_comment.l,
 #     target: new_comment_path(target: obj.id, type: obj.class.name),
 #     modal_id: "comment",
-#     style: nil, icon: :add
+#     variant: :strip, icon: :add
 #   ))
 class Components::Button::ModalToggle < Components::Button::Get
   def initialize(name:, target:, modal_id:, **)

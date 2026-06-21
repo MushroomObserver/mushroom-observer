@@ -72,7 +72,7 @@ module Views::Controllers::Comments
                  target: @object.id, type: @object.class.name
                ),
                modal_id: "comment",
-               style: nil, icon: :add
+               variant: :strip, icon: :add
              ))
     end
 

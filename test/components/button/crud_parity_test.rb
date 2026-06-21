@@ -151,7 +151,6 @@ end
 class LegacyCrudButtonEdit < LegacyCrudButtonGet
   def initialize(target:, name: nil, **args)
     args[:icon] = :edit unless args.key?(:icon)
-    args[:btn] = "btn btn-outline-default" unless args.key?(:btn)
     super(target: target,
           name: name || default_name(target),
           action: :edit,
@@ -172,7 +171,6 @@ class LegacyCrudButtonDelete < LegacyCrudButton
     args[:class] = [args[:class], "text-danger"].compact.join(" ").strip
     args[:confirm] ||= :are_you_sure.l
     args[:icon] = :delete unless args.key?(:icon)
-    args[:btn] = "btn btn-outline-default" unless args.key?(:btn)
     super(
       target: target,
       name: name || default_name(target),
@@ -482,7 +480,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   # --- Button::Download (explicit-path target) ---
   #
   # Old CrudButton::Download had no btn: default (no button frame).
-  # The real caller (SpeciesLists::Details) now passes style: nil
+  # The real caller (SpeciesLists::Details) now passes variant: :strip
   # explicitly to preserve that appearance.
 
   def test_download_parity_defaults
@@ -490,7 +488,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
     old_html = render(LegacyCrudButtonDownload.new(target: dl_path))
     new_html = render(Components::Button::Download.new(
                         target: dl_path,
-                        style: nil
+                        variant: :strip
                       ))
 
     assert_html_element_equivalent(old_html, new_html,
@@ -508,7 +506,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
     new_html = render(Components::Button::Download.new(
                         name: "Export CSV",
                         target: dl_path,
-                        style: nil,
+                        variant: :strip,
                         icon: nil
                       ))
 
@@ -521,12 +519,12 @@ class Components::Button::CrudParityTest < ComponentTestCase
   #
   # Real-world callers always passed `class: "btn btn-default ..."` to
   # Link::Modal explicitly. The new ModalToggle bakes that in via the
-  # default `style: :default` inherited from Button::Get.
+  # default `variant: :default` inherited from Button::Get.
 
   def test_modal_toggle_parity_defaults
     modal_path = "/projects/1/members/trust"
     # Old callers explicitly threaded "btn btn-default" through the
-    # class kwarg; new callers rely on Button::Get's style: :default.
+    # class kwarg; new callers rely on Button::Get's variant: :default.
     old_html = render(LegacyLinkModal.new(
                         "trust_settings",
                         "Trust Settings",

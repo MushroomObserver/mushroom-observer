@@ -74,7 +74,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
                    context: "namings_table"
                  ),
                  modal_id: "obs_#{@obs.id}_naming",
-                 style: nil, icon: :add
+                 variant: :strip, icon: :add
                ))
       end
     end

@@ -22,8 +22,8 @@ module Views::Controllers::Observations::Identify
       super do
         render_autocompleter_wrap
         render_type_select_group
-        submit(:SEARCH.l, style: :outline_default, class: "px-2")
-        submit(:CLEAR.l, style: :outline_default, class: "px-2")
+        submit(:SEARCH.l, variant: :outline, class: "px-2")
+        submit(:CLEAR.l, variant: :outline, class: "px-2")
       end
     end
 

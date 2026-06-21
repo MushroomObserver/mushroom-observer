@@ -142,8 +142,8 @@ class ButtonCRUDBaseTest < ComponentTestCase
     assert_no_html(html, "span.glyphicon")
   end
 
-  # `style:` is an opt-in button-style for caller-side styling.
-  # Callers that want a `btn btn-default` link pass `style: :default`
+  # `variant:` is an opt-in button-style for caller-side styling.
+  # Callers that want a `btn btn-default` link pass `variant: :default`
   # without spelling out the full class string. Caller's `class:` layers
   # on top for sizing/spacing.
   def test_get_method_variant_kwarg_prepends_classes
@@ -151,7 +151,7 @@ class ButtonCRUDBaseTest < ComponentTestCase
                     name: "Map",
                     target: "/map",
                     method: :get,
-                    style: :default,
+                    variant: :default,
                     size: :lg
                   ))
 
@@ -219,22 +219,33 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button span.glyphicon-remove-circle")
   end
 
-  # Default variant frame. `Delete` auto-applies
-  # `style: :outline_default` for a consistent outline frame
-  # across destroy buttons.
-  def test_delete_default_btn_frame
+  # Default renders no btn frame — callers must be explicit about variant.
+  def test_delete_default_no_btn_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(Components::Button::Delete.new(target: herbarium))
+
+    assert_no_html(html, "button.btn")
+    assert_html(html, "input[name='_method'][value='delete']")
+    assert_html(html, ".text-danger")
+  end
+
+  # `variant: :outline` produces the outline button frame — the common
+  # choice for CRUD index rows.
+  def test_delete_outline_variant
+    herbarium = herbaria(:nybg_herbarium)
+    html = render(
+      Components::Button::Delete.new(target: herbarium, variant: :outline)
+    )
 
     assert_html(html, "button.btn.btn-outline-default")
   end
 
-  # Opt out of the variant frame via `style: nil` — icon-only inline
-  # destroys in dense table cells / list rows.
-  def test_delete_variant_nil_opts_out_of_frame
+  # `variant: :strip` is explicit bare — icon-only inline destroys in
+  # dense table cells / list rows.
+  def test_delete_strip_variant
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::Button::Delete.new(target: herbarium, style: nil)
+      Components::Button::Delete.new(target: herbarium, variant: :strip)
     )
 
     assert_no_html(html, "button.btn-outline-default")
@@ -244,12 +255,13 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button span.glyphicon-remove-circle")
   end
 
-  # Caller `class:` layers on top of the `style:` default — e.g.
-  # `btn-sm` combines with the outline frame.
+  # `size: :sm` + `variant: :outline` — the typical index-row
+  # delete button shape.
   def test_delete_size_kwarg
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::Button::Delete.new(target: herbarium, size: :sm)
+      Components::Button::Delete.new(target: herbarium,
+                                     variant: :outline, size: :sm)
     )
 
     assert_html(html, "button.btn.btn-outline-default.btn-sm")
@@ -301,19 +313,30 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "a[data-toggle='tooltip']")
   end
 
-  # Edit shares Delete's btn-frame default (`btn btn-outline-default`).
-  def test_edit_default_btn_frame
+  # Default renders no btn frame — callers must be explicit about variant.
+  def test_edit_default_no_btn_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(Components::Button::Edit.new(target: herbarium))
+
+    assert_no_html(html, "a.btn")
+  end
+
+  # `variant: :outline` produces the outline button frame — the common
+  # choice for CRUD index rows.
+  def test_edit_outline_variant
+    herbarium = herbaria(:nybg_herbarium)
+    html = render(
+      Components::Button::Edit.new(target: herbarium, variant: :outline)
+    )
 
     assert_html(html, "a.btn.btn-outline-default")
   end
 
-  # `style: nil` opt-out — icon-only inline edits in dense table rows.
-  def test_edit_variant_nil_opts_out_of_frame
+  # `variant: :strip` opt-out — icon-only inline edits in dense table rows.
+  def test_edit_strip_variant
     herbarium = herbaria(:nybg_herbarium)
     html = render(
-      Components::Button::Edit.new(target: herbarium, style: nil)
+      Components::Button::Edit.new(target: herbarium, variant: :strip)
     )
 
     assert_no_html(html, "a.btn-outline-default")
@@ -325,7 +348,7 @@ class ButtonSubclassesTest < ComponentTestCase
   def test_edit_with_string_target_and_class
     html = render(Components::Button::Edit.new(
                     target: "/items/42/edit", name: "Edit it",
-                    style: :link
+                    variant: :btn_link
                   ))
 
     assert_html(html, "a.btn.btn-link[href='/items/42/edit']")
@@ -399,32 +422,32 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button.btn.btn-default")
   end
 
-  # Explicit `style:` overrides the default.
+  # Explicit `variant:` overrides the default.
   def test_post_variant_override
     html = render(
       Components::Button::Post.new(name: "Submit", target: "/items",
-                                   style: :primary)
+                                   variant: :primary)
     )
 
     assert_html(html, "button.btn.btn-primary")
     assert_no_html(html, "button.btn-default")
   end
 
-  # `style: nil` suppresses the frame entirely (icon-only inline buttons).
+  # `variant: :strip` suppresses the frame entirely (icon-only inline buttons).
   def test_post_variant_nil_suppresses_frame
     html = render(
       Components::Button::Post.new(name: "Submit", target: "/items",
-                                   style: nil)
+                                   variant: :strip)
     )
 
     assert_no_html(html, "button.btn")
   end
 
-  # Patch with `style:` override: form, `_method=patch`, variant applied.
+  # Patch with `variant:` override: form, `_method=patch`, variant applied.
   def test_patch_with_variant_override
     html = render(Components::Button::Patch.new(
                     name: "Update", target: "/items/1",
-                    style: :primary
+                    variant: :primary
                   ))
 
     assert_html(html, "form[action='/items/1']")
@@ -452,10 +475,10 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render(Components::Button::Get.new(
                     name: "Merge",
                     target: routes.herbaria_path(merge: 42),
-                    style: nil
+                    variant: :strip
                   ))
 
-    # `style: nil` → no btn classes; still an anchor with the path
+    # `variant: :strip` → no btn classes; still an anchor with the path
     assert_html(html, "a[href*='merge=42']", text: "Merge")
     assert_no_html(html, "a.btn-default")
   end
@@ -492,7 +515,7 @@ class ButtonSubclassesTest < ComponentTestCase
                     name: "Edit",
                     target: "/edit/path",
                     modal_id: "comment",
-                    style: nil
+                    variant: :strip
                   ))
 
     assert_html(html, "a[data-controller='modal-toggle'][href='/edit/path']")

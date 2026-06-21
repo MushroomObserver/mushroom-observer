@@ -11,42 +11,53 @@
 # (`Components::ButtonStyling.btn_class(:primary)`). The nested
 # `ClassMethods` module (auto-extended by `ActiveSupport::Concern`) exposes
 # them as class methods on each includer so class-level helpers
-# (e.g. `FieldHelpers#submit`) can call `klass.btn_class(style)` directly.
+# (e.g. `FieldHelpers#submit`) can call `klass.btn_class(variant)` directly.
 #
-# Style symbols are kebab-cased and prefixed with `"btn-"` — `:primary`
-# becomes `"btn-primary"`, `:outline_default` becomes
-# `"btn-outline-default"`. The base `"btn"` class is added separately
-# by each component's `merged_class` so `style: nil` renders no
-# Bootstrap button framing at all.
+# `BTN_VARIANTS` maps variant symbols to their Bootstrap CSS class. The base
+# `"btn"` class is added separately by each component's `merged_class`, so
+# `variant: :strip` renders no Bootstrap button framing at all. Omit
+# `variant:` or pass `variant: :default` for the standard grey button.
 module Components::ButtonStyling
   extend ActiveSupport::Concern
 
-  BTN_STYLES = [
-    :default, :primary, :danger, :warning, :success, :info, :link,
-    :outline_default, :outline_primary, :outline_danger,
-    :outline_warning, :outline_success, :outline_info
-  ].freeze
+  BTN_VARIANTS = {
+    default: "btn-default",
+    primary: "btn-primary",
+    danger: "btn-danger",
+    warning: "btn-warning",
+    success: "btn-success",
+    info: "btn-info",
+    btn_link: "btn-link",
+    outline: "btn-outline-default",
+    outline_primary: "btn-outline-primary",
+    outline_danger: "btn-outline-danger",
+    outline_warning: "btn-outline-warning",
+    outline_success: "btn-outline-success",
+    outline_info: "btn-outline-info"
+  }.freeze
 
   BTN_SIZES = { lg: "btn-lg", sm: "btn-sm", xs: "btn-xs" }.freeze
 
-  BTN_DEFAULT_STYLE = :default
+  BTN_DEFAULT_VARIANT = :default
 
   module ClassMethods
-    def btn_class(style) = Components::ButtonStyling.btn_class(style)
+    def btn_class(variant) = Components::ButtonStyling.btn_class(variant)
     def size_class(size) = Components::ButtonStyling.size_class(size)
   end
 
   module_function
 
-  def btn_class(style)
-    return nil if style.nil?
+  def btn_class(variant)
+    return nil if variant.nil? || variant == :strip
 
-    unless BTN_STYLES.include?(style)
-      raise(ArgumentError.new("Unknown style: #{style.inspect}. " \
-                              "Valid: #{BTN_STYLES.join(", ")}"))
+    css = BTN_VARIANTS[variant]
+    if css.nil?
+      raise(ArgumentError.new("Unknown variant: #{variant.inspect}. " \
+                              "Valid: #{BTN_VARIANTS.keys.join(", ")}, " \
+                              "or :strip to suppress btn classes."))
     end
 
-    "btn-#{style.to_s.tr("_", "-")}"
+    css
   end
 
   def size_class(size)
@@ -69,8 +80,8 @@ module Components::ButtonStyling
     raise(ArgumentError.new(
             "Don't pass Bootstrap btn classes via class: " \
             "(found: #{offenders.join(" ")}). " \
-            "Use style: and size: kwargs instead — " \
-            "e.g. style: :primary, size: :sm."
+            "Use variant: and size: kwargs instead — " \
+            "e.g. variant: :primary, size: :sm."
           ))
   end
 end

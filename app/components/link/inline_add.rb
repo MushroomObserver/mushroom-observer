@@ -27,7 +27,7 @@ class Components::Link::InlineAdd < Components::Base
              name: @tab.title,
              target: @tab.path,
              modal_id: @modal_id,
-             style: nil,
+             variant: :strip,
              **@tab.html_options
            ))
     plain("]")

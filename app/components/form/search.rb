@@ -107,7 +107,7 @@ class Components::Form::Search < Components::ApplicationForm
   # in the top nav.
   def render_search_bar_toggle
     render(Components::Button.new(
-             style: :link, class: "navbar-link px-2",
+             variant: :btn_link, class: "navbar-link px-2",
              data: { toggle: "collapse", search_type_target: "barToggle",
                      target: "#search_bar_elements" },
              aria: { expanded: "false", controls: "search_bar_elements" }

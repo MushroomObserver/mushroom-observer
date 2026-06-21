@@ -32,26 +32,26 @@ module Components::LinkRendering
     when :post
       render(Components::Button::Post.new(
                name: str, target: url,
-               style: nil, **kwargs
+               variant: :strip, **kwargs
              ))
     when :destroy
       # Context-nav destroy tabs render as plain `[ DESTROY ]`-style
       # text links — opt out of `Button::Delete`'s default icon
-      # AND button-frame via `icon: nil` + `style: nil` (callers can
+      # AND button-frame via `icon: nil` + `variant: :strip` (callers can
       # override either by passing the kwarg).
       render(Components::Button::Delete.new(
                name: str, target: args[:target] || url,
-               icon: nil, style: nil, **kwargs
+               icon: nil, variant: :strip, **kwargs
              ))
     when :put
       render(Components::Button::Put.new(
                name: str, target: url,
-               style: nil, **kwargs
+               variant: :strip, **kwargs
              ))
     when :patch
       render(Components::Button::Patch.new(
                name: str, target: url,
-               style: nil, **kwargs
+               variant: :strip, **kwargs
              ))
     else
       link_to(str, url, kwargs)

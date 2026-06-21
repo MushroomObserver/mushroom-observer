@@ -81,7 +81,7 @@ class Components::Image::Lightbox::Caption < Components::Base
                observation_id: @obs.id, context: "lightgallery"
              ),
              modal_id: "obs_#{@obs.id}_naming",
-             style: :primary,
+             variant: :primary,
              class: "d-inline-block propose-naming-link"
            ))
   end
@@ -202,7 +202,7 @@ class Components::Image::Lightbox::Caption < Components::Base
              name: :show_observation_send_question.l,
              target: new_question_for_observation_path(@obs.id),
              modal_id: "observation_email",
-             style: nil, icon: :email
+             variant: :strip, icon: :email
            ))
     plain("]")
   end

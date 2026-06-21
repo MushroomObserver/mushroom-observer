@@ -19,13 +19,13 @@
 # @example Danger variant
 #   render(Components::Button.new(
 #     name: :OK.l,
-#     style: :danger,
+#     variant: :danger,
 #     data: { action: "confirm-modal#confirm",
 #             confirm_modal_target: "confirmButton" }
 #   ))
 #
 # @example Icon-only (sr-only label)
-#   render(Components::Button.new(name: :REMOVE.l, icon: :x, style: nil))
+#   render(Components::Button.new(name: :REMOVE.l, icon: :x, variant: :strip))
 #
 # @example Rich content via block (name: optional)
 #   render(Components::Button.new(
@@ -40,11 +40,11 @@ class Components::Button < Components::Base
 
   ALLOWED_TAGS = [:button, :a, :span].freeze
 
-  def initialize(name: nil, style: BTN_DEFAULT_STYLE, size: nil, icon: nil,
+  def initialize(name: nil, variant: BTN_DEFAULT_VARIANT, size: nil, icon: nil,
                  **html_attrs)
     super()
     @name = name
-    @style = style
+    @variant = variant
     @size = size
     @tag = html_attrs.delete(:tag) || :button
     @type = html_attrs.delete(:type) || :button
@@ -66,8 +66,8 @@ class Components::Button < Components::Base
   private
 
   def merged_class
-    class_names(("btn" if @style),
-                btn_class(@style),
+    class_names(("btn" unless @variant.nil? || @variant == :strip),
+                btn_class(@variant),
                 size_class(@size),
                 @html_attrs[:class])
   end

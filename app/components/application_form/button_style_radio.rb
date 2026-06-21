@@ -38,26 +38,26 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @param value [String] value submitted when this radio is checked
     # @param id [String] HTML id (matches the label's `for`)
     # @param checked [Boolean] initial checked state
-    # @param style [Symbol, nil] btn style (default `:default`); `nil`
+    # @param variant [Symbol, nil] btn variant (default `:default`); `:strip`
     #   for a plain label with no btn classes
     # @param size [Symbol, nil] btn size modifier (`:sm`, `:lg`, etc.)
     # @param label [Hash] extra HTML attrs for the `<label>` (e.g.
     #   `class:` for identifier classes, `data:`)
     # @param input_attrs [Hash] HTML attrs passed through to `<input>`
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, value:, id:, checked: false,
-                   style: BTN_DEFAULT_STYLE, size: nil,
-                   label: {}, **input_attrs)
-      # rubocop:enable Metrics/ParameterLists
+    def initialize(name:, value:, id:, **opts)
       super()
       @name = name
       @value = value
       @id = id
-      @checked = checked
-      @style = style
-      @size = size
-      @label_attrs = label
-      @input_attrs = input_attrs
+      @checked = opts.delete(:checked) { false }
+      @variant = if opts.key?(:variant)
+                   opts.delete(:variant)
+                 else
+                   BTN_DEFAULT_VARIANT
+                 end
+      @size = opts.delete(:size)
+      @label_attrs = opts.delete(:label) || {}
+      @input_attrs = opts
     end
 
     def view_template(&block)
@@ -71,8 +71,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     private
 
     def label_class
-      class_names(("btn" if @style), btn_class(@style),
-                  size_class(@size), @label_attrs[:class])
+      class_names(("btn" unless @variant.nil? || @variant == :strip),
+                  btn_class(@variant), size_class(@size), @label_attrs[:class])
     end
 
     def input_attributes

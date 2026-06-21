@@ -34,10 +34,10 @@ class Components::Button::SubmitTest < ComponentTestCase
     assert_html(html, "button[data-turbo-submits-with='Saving…']")
   end
 
-  def test_accepts_style_override
+  def test_accepts_variant_override
     html = render(Components::Button::Submit.new(
                     name: "Create",
-                    style: :primary
+                    variant: :primary
                   ))
 
     assert_html(html, "button[type='submit'].btn-primary")

@@ -61,7 +61,7 @@ class Components::Modal::Confirm < Components::Base
     whitespace
     render(Components::Button.new(
              name: :OK.l,
-             style: :danger,
+             variant: :danger,
              data: { action: "confirm-modal#confirm",
                      confirm_modal_target: "confirmButton" }
            ))

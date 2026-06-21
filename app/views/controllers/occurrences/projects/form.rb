@@ -148,7 +148,7 @@ module Views::Controllers::Occurrences::Projects
              name: "occurrence_projects[resolution]")
       whitespace
       submit(:ADD_ALL.l,
-             as: :button, style: :primary, value: "add_all",
+             as: :button, variant: :primary, value: "add_all",
              name: "occurrence_projects[resolution]")
     end
   end

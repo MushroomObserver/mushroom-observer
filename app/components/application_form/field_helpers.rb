@@ -389,8 +389,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @param options [Hash] submit button options
     # @option options [Boolean] :center center the button (default false)
     # @option options [String] :submits_with text shown while submitting
-    # @option options [Symbol] :style button style (default `:default`).
-    #   Valid values: `Components::ButtonStyling::BTN_STYLES`.
+    # @option options [Symbol] :variant button variant (default `:default`).
+    #   Valid values: `Components::ButtonStyling::BTN_VARIANTS`.
     # @option options [Symbol] :size button size modifier (optional).
     #   Valid values: `Components::ButtonStyling::BTN_SIZES.keys`.
     # @option options [Symbol] :as `:input` (default) renders
@@ -402,11 +402,11 @@ class Components::ApplicationForm < Superform::Rails::Form
     # disabled-state label for non-Turbo submits). Defaults to the button
     # label (just disable, no text swap).
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
-               disable_with: nil, style: BTN_DEFAULT_STYLE,
+               disable_with: nil, variant: BTN_DEFAULT_VARIANT,
                size: nil, as: :input, **options)
       submits_with ||= default_submits_with(value)
       disable_with ||= value
-      merged = submit_merged_options(options, style: style, size: size,
+      merged = submit_merged_options(options, variant: variant, size: size,
                                               center: center,
                                               submits_with: submits_with,
                                               disable_with: disable_with)
@@ -419,7 +419,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         render(Components::Button::Submit.new(
                  name: value,
                  html_name: html_name,
-                 style: style, size: size,
+                 variant: variant, size: size,
                  submits_with: submits_with,
                  disable_with: disable_with,
                  class: [extra_class, options[:class]].compact.
@@ -441,7 +441,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def submit_merged_options(options, **opts)
-      classes = [("btn" if opts[:style]), btn_class(opts[:style]),
+      classes = [("btn" if opts[:variant]), btn_class(opts[:variant]),
                  size_class(opts[:size]),
                  ("center-block my-3" if opts[:center]),
                  options[:class]].compact

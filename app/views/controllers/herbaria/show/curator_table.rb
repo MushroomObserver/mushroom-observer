@@ -38,7 +38,7 @@ module Views::Controllers::Herbaria
                  name: "X",
                  target: herbaria_curator_path(@herbarium, user: user.id),
                  id: "delete_herbarium_curator_link_#{user.id}",
-                 style: nil
+                 variant: :strip
                ))
       end
 

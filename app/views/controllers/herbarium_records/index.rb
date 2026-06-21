@@ -48,7 +48,7 @@ module Views::Controllers::HerbariumRecords
       render(Components::Button::Edit.new(
                target: edit_herbarium_record_path(id: rec.id, back: :index,
                                                   q: q_param),
-               size: :sm,
+               variant: :outline, size: :sm,
                class: "edit_herbarium_record_link_#{rec.id}"
              ))
     end
@@ -83,7 +83,7 @@ module Views::Controllers::HerbariumRecords
       render(Components::Button::Delete.new(
                target: herbarium_record_path(rec.id, back: :index),
                name: :destroy_object.t(type: :herbarium_record),
-               size: :sm,
+               variant: :outline, size: :sm,
                class: "destroy_herbarium_record_link_#{rec.id}"
              ))
     end

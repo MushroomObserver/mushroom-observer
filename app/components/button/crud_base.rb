@@ -10,7 +10,7 @@
 #   Button::Edit   — GET to the edit route (inherits Button::Get)
 #   Button::Download — GET to download route (inherits Button::Get)
 #
-# Inherits `@name`, `@style`, `@size`, `@icon`, `@icon_class`,
+# Inherits `@name`, `@variant`, `@size`, `@icon`, `@icon_class`,
 # `@html_attrs`, `validate_no_btn_classes!`, `btn_class`, and
 # `size_class` from `Components::Button`. Adds `@target`, `@method`,
 # `@confirm`, `@action`, and `@back`.
@@ -36,12 +36,11 @@ class Components::Button::CRUDBase < Components::Button
   # arbitrary HTML attrs) plus CRUDBase-only keys: confirm:, action:,
   # back:. CRUDBase-only keys are stripped before delegating to Button.
   #
-  # Default style is nil — no Bootstrap btn classes at all (bare
+  # Default variant is `:strip` — no Bootstrap btn classes at all (bare
   # glyph / element). This differs from `Components::Button` which
   # defaults to `:default`. Subclasses (Post, Patch, Put) override to
-  # `:default`; Edit and Delete override to `:outline_default`. Pass
-  # `style: :link` for an underlined-link appearance; `style: nil` is
-  # a bare element with no btn wrapper, not a link style.
+  # `:default`. Pass `variant: :btn_link` for an underlined-link
+  # appearance; `variant: :strip` is a bare element with no btn wrapper.
   def initialize(name:, target:, method: :post, **options, &block)
     @target  = target
     @method  = method
@@ -49,7 +48,7 @@ class Components::Button::CRUDBase < Components::Button
     @action  = options.delete(:action)
     @back    = options.delete(:back)
     @block   = block
-    options[:style] = nil unless options.key?(:style)
+    options[:variant] = :strip unless options.key?(:variant)
     super(name: name, **options)
   end
 
@@ -86,11 +85,11 @@ class Components::Button::CRUDBase < Components::Button
   end
 
   # Prepend the identifier class before the Bootstrap btn classes so
-  # it always survives even when `style: nil` drops the btn frame.
+  # it always survives even when `variant: :strip` drops the btn frame.
   def merged_class
     class_names(identifier,
-                ("btn" if @style),
-                btn_class(@style),
+                ("btn" unless @variant.nil? || @variant == :strip),
+                btn_class(@variant),
                 size_class(@size),
                 @html_attrs[:class])
   end

@@ -116,7 +116,7 @@ module Views::Controllers::Projects::Members
       # the controller switches on params[:commit] from the radios.
       submit(
         :trust_settings_save.l,
-        as: :button, name: "save", style: :primary
+        as: :button, name: "save", variant: :primary
       )
     end
   end

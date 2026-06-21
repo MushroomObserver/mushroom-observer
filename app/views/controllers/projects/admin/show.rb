@@ -60,7 +60,7 @@ module Views::Controllers::Projects::Admin
       render(Components::Button::Delete.new(
                target: @project,
                name: :destroy_object.t(type: :project),
-               style: :default, size: :lg
+               variant: :default, size: :lg
              ))
     end
   end

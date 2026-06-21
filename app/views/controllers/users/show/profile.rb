@@ -41,7 +41,7 @@ module Views::Controllers::Users
                  ),
                  target: new_question_for_user_path(@show_user.id),
                  modal_id: "user_question_email",
-                 style: nil, icon: :email
+                 variant: :strip, icon: :email
                ))
       end
 

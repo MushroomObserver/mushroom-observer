@@ -12,7 +12,7 @@
 #
 # @example Rich content (block form)
 #   render(Components::Button::Submit.new(
-#     style: :outline_default, class: "px-2"
+#     variant: :outline, class: "px-2"
 #   )) do
 #     span(class: "d-sm-none") { render(Components::Icon.new(type: :search)) }
 #     span(class: "hidden-xs") { plain(:SEARCH.l) }

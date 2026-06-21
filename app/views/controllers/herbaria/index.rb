@@ -109,14 +109,14 @@ module Views::Controllers::Herbaria
       render(::Components::Button::Edit.new(
                target: herbarium,
                name: :EDIT.l,
-               icon: nil, style: nil,
+               icon: nil, variant: :strip,
                class: "edit_herbarium_link_#{herbarium.id}"
              ))
       plain(" | ")
       render(::Components::Button::Get.new(
                name: :MERGE.l,
                target: herbaria_path(merge: herbarium.id),
-               icon: nil, style: nil,
+               icon: nil, variant: :strip,
                class: "merge_herbarium_link_#{herbarium.id}"
              ))
       plain("]")

@@ -20,7 +20,7 @@ module Views::Controllers::Account::Verifications
                target: account_resend_verification_email_path(
                  id: @unverified_user.id
                ),
-               style: :primary,
+               variant: :primary,
                id: "account_reverify_link"
              ))
     end

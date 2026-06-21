@@ -1,30 +1,26 @@
 # frozen_string_literal: true
 
 # GET button with edit-action defaults: `action: :edit`, `icon: :edit`,
-# `style: :outline_default`. Caller can override any kwarg explicitly.
+# `variant: :strip` (no btn frame). Pass `variant: :outline` for the
+# standard outline button, or any other variant explicitly.
 #
-# `style: nil` suppresses ALL Bootstrap btn classes — the element
-# renders as a bare glyph with no btn wrapper. To render as an
-# underlined link, pass `style: :link` instead.
-#
-# @example
+# @example default (bare edit icon)
 #   render(Components::Button::Edit.new(target: @herbarium))
 #
-# @example text-only
+# @example outline button (common CRUD row usage)
+#   render(Components::Button::Edit.new(target: @herbarium, variant: :outline))
+#
+# @example text-only, no btn frame
 #   render(Components::Button::Edit.new(target: @herbarium, icon: nil))
 #
-# @example bare glyph (no btn wrapper at all, not a link style)
-#   render(Components::Button::Edit.new(target: alias_, style: nil))
-#
-# @example render as an underlined link
-#   render(Components::Button::Edit.new(target: alias_, style: :link))
+# @example rendered as an underlined link
+#   render(Components::Button::Edit.new(target: alias_, variant: :btn_link))
 class Components::Button::Edit < Components::Button::Get
-  def initialize(target:, name: nil,
-                 style: :outline_default, icon: :edit, **)
+  def initialize(target:, name: nil, variant: :strip, icon: :edit, **)
     super(target: target,
           name: name || default_name(target),
           action: :edit,
-          style: style,
+          variant: variant,
           icon: icon,
           **)
   end

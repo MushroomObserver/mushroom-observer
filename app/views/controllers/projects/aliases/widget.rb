@@ -36,7 +36,7 @@ module Views::Controllers::Projects::Aliases
                  target: project_alias_path(
                    project_id: @project.id, id: id
                  ),
-                 style: nil
+                 variant: :strip
                ))
         br
       end
@@ -50,7 +50,7 @@ module Views::Controllers::Projects::Aliases
                    project_id: @project.id, id: id
                  ),
                  modal_id: "project_alias_#{id}",
-                 style: nil
+                 variant: :strip
                ))
       end
     end

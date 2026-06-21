@@ -56,7 +56,7 @@ module Views::Controllers::Projects::Members
                  commit: :change_member_add_obs.l,
                  target: :project_index
                ),
-               style: :primary
+               variant: :primary
              ))
     end
 

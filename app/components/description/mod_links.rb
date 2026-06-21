@@ -44,7 +44,7 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def destroy_icon
-    Components::Button::Delete.new(target: @description, style: nil)
+    Components::Button::Delete.new(target: @description, variant: :strip)
   end
 
   def admin_icons
