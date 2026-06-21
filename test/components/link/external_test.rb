@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class ExternalLinkTest < ComponentTestCase
+class Components::Link::ExternalTest < ComponentTestCase
   # ---- Generic (content, path) form ----
 
   def test_renders_link_with_target_blank_and_noopener

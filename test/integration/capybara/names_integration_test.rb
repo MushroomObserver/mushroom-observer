@@ -228,14 +228,11 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     login(rolf)
     visit(edit_name_path(bad_name))
 
-    # Check the misspelling checkbox
-    check("name_misspelling")
-
-    # Fill in the correct spelling (autocompleter field)
-    fill_in("name_correct_spelling", with: good_name.search_name)
-
-    # Submit the form (click first submit button)
-    first("button[type='submit']").click
+    within("form#name_form") do
+      check("name_misspelling")
+      fill_in("name_correct_spelling", with: good_name.search_name)
+      first("button[type='submit']").click
+    end
 
     # Reload to get current state
     bad_name.reload

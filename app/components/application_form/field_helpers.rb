@@ -415,10 +415,11 @@ class Components::ApplicationForm < Superform::Rails::Form
         # `options[:name]` is the HTML name= attribute on the button, NOT
         # the display text — keep it separate so it doesn't clobber `name:
         # value` (the label) in Button::Submit.
-        html_name = options[:name]
+        html_name = options[:name] || "commit"
         render(Components::Button::Submit.new(
                  name: value,
                  html_name: html_name,
+                 value: value,
                  variant: variant, size: size,
                  submits_with: submits_with,
                  disable_with: disable_with,
