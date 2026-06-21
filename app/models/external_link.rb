@@ -68,9 +68,12 @@ class ExternalLink < AbstractModel
         ->(ids) { where(target_type: "Observation", target_id: ids) }
 
   # Eager-loads the show/edit page: user, polymorphic target, and the
-  # external site (rendered as a link). Not strict-loaded: the target is
-  # polymorphic, so its own subtree (e.g. an observation's matrix-box
-  # associations) can't be nested in `includes` and is lazy-loaded.
+  # external site (rendered as a link). The target is loaded shallowly — a
+  # polymorphic association can't nest a per-type subtree in `includes`, so
+  # a consumer that needs the target's own associations (e.g. the edit
+  # page's matrix-box card) loads the typed record separately with its own
+  # includes (see Observations::ExternalLinksController#set_ivars_for_edit).
+  # That keeps this scope strict-loaded.
   def self.show_includes_tree
     [:user, :target, { external_site: { project: :user_group } }]
   end
@@ -79,8 +82,8 @@ class ExternalLink < AbstractModel
     show_includes_tree
   end
 
-  scope :show_includes, -> { includes(show_includes_tree) }
-  scope :index_includes, -> { includes(index_includes_tree) }
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+  scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   def check_url_syntax
     return if url.blank? || format_url_for_external_site
