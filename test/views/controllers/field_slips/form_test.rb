@@ -32,7 +32,7 @@ module Views::Controllers::FieldSlips
       assert_html(html, "form[action='/field_slips/new'][method='get']")
       assert_html(html, "input[type='text'][name='field_slip[code]']" \
                         "[id='field_slip_code']")
-      assert_html(html, "input[type='submit']")
+      assert_html(html, "button[type='submit']")
       # Main-form fields shouldn't appear in code-only mode.
       assert_no_html(html, "input[name='field_slip[other_codes]']")
       assert_no_html(html, "input[name='field_slip[inat]']")

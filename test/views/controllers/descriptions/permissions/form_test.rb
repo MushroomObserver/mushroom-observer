@@ -19,7 +19,7 @@ module Views::Controllers::Descriptions::Permissions
       assert_html(html, "form[action*='/permissions']")
 
       # Two submit buttons (top and bottom)
-      assert_html(html, "input[type='submit']", count: 2)
+      assert_html(html, "button[type='submit']", count: 2)
 
       # Table structure
       assert_html(html, "table.table-description-permissions")

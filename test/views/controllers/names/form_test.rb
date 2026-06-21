@@ -15,7 +15,7 @@ module Views::Controllers::Names
       # Form structure
       assert_html(html, "form#name_form")
       assert_html(html, "form[action='/names'][method='post']")
-      assert_html(html, "input[type='submit'][value='#{:CREATE.t}']")
+      assert_html(html, "button[type='submit']", text: :CREATE.t)
 
       # Help and fields
       assert_includes(html, :form_names_detailed_help.l)
@@ -73,7 +73,7 @@ module Views::Controllers::Names
       name = names(:coprinus_comatus)
       html = render_form(model: name, name_string: name.text_name)
 
-      assert_html(html, "input[type='submit'][value='#{:SAVE_EDITS.t}']")
+      assert_html(html, "button[type='submit']", text: :SAVE_EDITS.t)
       assert_html(html, "form[action='/names/#{name.id}'][method='post']")
       assert_html(html, "input[name='_method'][value='patch']")
     end

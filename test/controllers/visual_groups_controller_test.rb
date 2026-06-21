@@ -130,8 +130,8 @@ class VisualGroupsControllerTest < FunctionalTestCase
       # Text filter input + its dedicated submit button.
       assert_select("input[type=text][name=filter]#filter")
       assert_select(
-        "input[type=submit][value=?]",
-        :edit_visual_group_update_filter.t
+        "button[type=submit]",
+        text: :edit_visual_group_update_filter.t
       )
     end
     # Reload link only on needs_review (which is the default).

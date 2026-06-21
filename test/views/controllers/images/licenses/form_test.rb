@@ -50,7 +50,7 @@ module Views::Controllers::Images::Licenses
 
       assert_html(html, ".container-text")
       assert_html(html,
-                  "input[type='submit'][value='#{:image_updater_update.l}']")
+                  "button[type='submit']", text: :image_updater_update.l)
     end
 
     def test_uses_patch_method_for_update_route
@@ -66,7 +66,7 @@ module Views::Controllers::Images::Licenses
       assert_no_html(html, "table.table-license-updater")
       # Submit button still rendered (no rows, but the form shell shows).
       assert_html(html,
-                  "input[type='submit'][value='#{:image_updater_update.l}']")
+                  "button[type='submit']", text: :image_updater_update.l)
     end
 
     private

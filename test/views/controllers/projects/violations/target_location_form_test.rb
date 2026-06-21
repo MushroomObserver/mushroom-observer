@@ -209,7 +209,7 @@ module Views::Controllers::Projects::Violations
       # and suppresses the new tab.
       create_link = ".radio a[href*='/locations/new?where=']" \
                     "[target='_blank']" \
-                    "[rel='noopener']" \
+                    "[rel='noopener noreferrer']" \
                     "[data-action='click->modal#hide']"
       assert_html(html, create_link,
                   text: :form_violations_modal_target_location_create.l)

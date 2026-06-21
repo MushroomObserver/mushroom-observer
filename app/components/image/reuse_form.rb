@@ -57,9 +57,8 @@ class Components::Image::ReuseForm < Components::ApplicationForm
       text_field(:img_id, label: "#{:image_reuse_id.t}:",
                           inline: true, size: 8,
                           data: { autofocus: "true" })
-      input(type: "submit", name: "commit",
-            value: :image_reuse_reuse.l,
-            class: "btn btn-default ml-3")
+      submit(:image_reuse_reuse.l, as: :button,
+                                   name: "commit", class: "ml-3")
     end
   end
 

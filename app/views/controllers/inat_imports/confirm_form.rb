@@ -115,17 +115,13 @@ module Views::Controllers::InatImports
     end
 
     def proceed_button
-      button(name: "confirmed", value: "1",
-             type: "submit", class: "btn btn-default") do
-        plain(:inat_import_confirm_proceed.l)
-      end
+      submit(:inat_import_confirm_proceed.l, as: :button,
+                                             name: "confirmed", value: "1")
     end
 
     def go_back_button
-      button(name: "go_back", value: "1",
-             type: "submit", class: "btn btn-default") do
-        plain(:inat_import_confirm_go_back.l)
-      end
+      submit(:inat_import_confirm_go_back.l, as: :button,
+                                             name: "go_back", value: "1")
     end
 
     def import_others?

@@ -235,7 +235,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     fill_in("name_correct_spelling", with: good_name.search_name)
 
     # Submit the form (click first submit button)
-    first("input[type='submit']").click
+    first("button[type='submit']").click
 
     # Reload to get current state
     bad_name.reload

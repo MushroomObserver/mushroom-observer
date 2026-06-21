@@ -149,9 +149,10 @@ module Views::Controllers::VisualGroups
           input(type: "text", name: "filter", id: "filter",
                 value: @filter, size: 40, class: "form-control")
         end
-        input(type: "submit", name: "commit",
-              value: :edit_visual_group_update_filter.t,
-              class: "btn btn-default")
+        render(::Components::Button::Submit.new(
+                 name: :edit_visual_group_update_filter.t,
+                 html_name: "commit"
+               ))
       end
     end
 

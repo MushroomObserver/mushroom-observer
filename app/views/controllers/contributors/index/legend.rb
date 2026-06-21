@@ -43,13 +43,13 @@ module Views::Controllers::Contributors
       end
 
       def render_toggle_button
-        button(class: "btn btn-xs btn-link",
-               data: { toggle: "collapse",
-                       target: "#contribution_legend" },
-               aria: { expanded: "false",
-                       controls: "contribution_legend" }) do
-          span(class: "glyphicon glyphicon-info-sign")
-        end
+        render(::Components::Button.new(
+                 variant: :btn_link, size: :xs,
+                 data: { toggle: "collapse",
+                         target: "#contribution_legend" },
+                 aria: { expanded: "false",
+                         controls: "contribution_legend" }
+               )) { span(class: "glyphicon glyphicon-info-sign") }
       end
 
       def render_body

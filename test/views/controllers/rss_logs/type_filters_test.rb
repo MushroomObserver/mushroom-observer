@@ -102,9 +102,7 @@ module Views::Controllers::RssLogs
       # action. Filter buttons use `.btn-outline-default` (subtle);
       # the Apply button uses solid `.btn-default` so it stands out
       # as the commit action.
-      assert_html(html,
-                  "input[type='submit'][value='#{:APPLY.t}']" \
-                  ".btn.btn-default")
+      assert_html(html, "button[type='submit']", text: :APPLY.t)
     end
 
     # NOTE: Testing with a real query requires the controller to have q_param

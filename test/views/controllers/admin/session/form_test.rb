@@ -25,7 +25,7 @@ module Views::Controllers::Admin::Session
                   text: :LOGIN_NAME.l)
 
       # Submit button
-      assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
+      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
     end
 
     def test_renders_with_prefilled_user

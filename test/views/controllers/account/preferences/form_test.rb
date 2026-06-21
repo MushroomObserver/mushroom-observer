@@ -36,7 +36,7 @@ class Views::Controllers::Account::Preferences::FormTest <
     assert_html(html, "input[type='password']" \
                       "[name='user[password_confirmation]'][value='']")
     # Each section has its own submit button (one of 6).
-    assert_html(html, "input[type='submit'][value='#{:SAVE_EDITS.l}']")
+    assert_html(html, "button[type='submit']", text: :SAVE_EDITS.l)
   end
 
   # ---- Section 2: Privacy ----
@@ -324,7 +324,7 @@ class Views::Controllers::Account::Preferences::FormTest <
 
     # Each of login, privacy, appearance, filters, notes, email has
     # its own submit so users don't have to scroll to the bottom.
-    assert_html(html, "input[type='submit']", count: 6)
+    assert_html(html, "button[type='submit']", count: 6)
   end
 
   private

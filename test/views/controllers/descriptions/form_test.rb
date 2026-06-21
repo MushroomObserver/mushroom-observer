@@ -74,8 +74,8 @@ module Views::Controllers::Descriptions
 
       # Two submit buttons (top + bottom), value = CREATE for a new record.
       assert_html(html,
-                  "input[type='submit'][value='#{:CREATE.l}']",
-                  count: 2)
+                  "button[type='submit']", text: :CREATE.l,
+                                           count: 2)
     end
 
     def test_admin_mode_renders_all_source_types
@@ -103,8 +103,8 @@ module Views::Controllers::Descriptions
 
       # Submit buttons read SAVE_EDITS, not CREATE, for an existing record.
       assert_html(html,
-                  "input[type='submit'][value='#{:SAVE_EDITS.l}']",
-                  count: 2)
+                  "button[type='submit']", text: :SAVE_EDITS.l,
+                                           count: 2)
     end
 
     # Regression for #4491: project/foreign descriptions show the source

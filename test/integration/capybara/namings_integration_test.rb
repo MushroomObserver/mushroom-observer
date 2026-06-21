@@ -47,7 +47,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       assert_true(form.has_unchecked_field?("naming_reasons_2_check"))
       assert_true(form.has_unchecked_field?("naming_reasons_3_check"))
       assert_true(form.has_unchecked_field?("naming_reasons_4_check"))
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
 
     namer_session.assert_selector("body.namings__new")
@@ -58,7 +58,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
 
     namer_session.within("#obs_#{obs.id}_naming_form") do |form|
       form.fill_in("naming_name", with: text_name)
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
     namer_session.assert_selector("body.namings__new")
     assert_true(namer_session.has_selector?(
@@ -73,7 +73,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       assert_true(form.has_unchecked_field?("naming_reasons_3_check"))
       assert_true(form.has_unchecked_field?("naming_reasons_4_check"))
       form.select("I'd Call It That", from: "naming_vote_value")
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
     namer_session.assert_selector("body.observations__show")
     assert_flash_success(session: namer_session)
@@ -108,7 +108,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.check("naming_reasons_2_check")
       form.fill_in("naming_reasons_2_notes", with: reason)
       form.select("I'd Call It That", from: "naming_vote_value")
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
     namer_session.assert_selector("body.observations__show")
     assert_true(namer_session.has_text?(obs.id))
@@ -152,7 +152,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.select("I'd Call It That", from: "vote_value_#{naming.id}")
       assert_true(form.has_select?("vote_value_#{naming.id}",
                                    selected: "I'd Call It That"))
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
     # assert_template("observations/show")
     assert_true(voter_session.has_text?("I'd Call It That"))
@@ -168,7 +168,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.select("As If!", from: "vote_value_#{naming.id}")
       assert_true(form.has_select?("vote_value_#{naming.id}",
                                    selected: "As If!"))
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
 
     # namer_session.successful_delete(obs, naming, text_name, orignal_name)

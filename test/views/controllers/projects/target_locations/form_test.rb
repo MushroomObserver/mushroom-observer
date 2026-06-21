@@ -40,11 +40,8 @@ module Views::Controllers::Projects::TargetLocations
 
       html = render_widget(project: project)
 
-      assert_html(
-        html,
-        "input[type='submit']" \
-        "[value='#{:project_target_location_add.l}']"
-      )
+      assert_html(html, "button[type='submit']",
+                  text: :project_target_location_add.l)
     end
 
     # Same shared class as the names widget — see the names-widget

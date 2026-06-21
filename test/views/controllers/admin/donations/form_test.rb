@@ -38,10 +38,8 @@ module Views::Controllers::Admin::Donations
     end
 
     def test_renders_submit_button
-      assert_html(@html,
-                  "input[type='submit']" \
-                  "[value='#{:create_donation_add.l}']")
-      assert_html(@html, ".center-block")
+      assert_html(@html, "button[type='submit']",
+                  text: :create_donation_add.l)
     end
 
     private

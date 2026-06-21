@@ -73,14 +73,12 @@ module Views::Controllers::Account::APIKeys
 
     def render_cancel_button
       span(class: "input-group-btn") do
-        button(type: :button,
-               class: "btn btn-default",
-               aria: { expanded: "true", controls: @cancel_target },
-               data: { toggle: "collapse",
-                       target: "##{@cancel_target}",
-                       parent: "##{@cancel_parent}" }) do
-          render(Components::Icon.new(type: :cancel, title: :CANCEL.l))
-        end
+        render(::Components::Button.new(
+                 aria: { expanded: "true", controls: @cancel_target },
+                 data: { toggle: "collapse",
+                         target: "##{@cancel_target}",
+                         parent: "##{@cancel_parent}" }
+               )) { render(Components::Icon.new(type: :cancel, title: :CANCEL.l)) }
       end
     end
 
@@ -99,8 +97,11 @@ module Views::Controllers::Account::APIKeys
         submit(:UPDATE.l)
         # A plain link (not a submit button) — Cancel should navigate
         # back without submitting the form.
-        link_to(:CANCEL.l, account_api_keys_path,
-                class: "btn btn-default ml-3")
+        render(::Components::Button::Get.new(
+                 name: :CANCEL.l,
+                 target: account_api_keys_path,
+                 class: "ml-3"
+               ))
       end
     end
 

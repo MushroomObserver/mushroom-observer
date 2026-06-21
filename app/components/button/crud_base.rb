@@ -39,9 +39,11 @@ class Components::Button::CRUDBase < Components::Button
   # Pass `variant: :btn_link` for an underlined-link appearance;
   # `variant: :strip` for a bare element with no btn wrapper.
   # Omit `variant:` for the standard `btn btn-default` frame.
-  def initialize(name:, target:, method: :post, **options, &block)
+  def initialize(name:, target:, method: :post, new_tab: false,
+                 **options, &block)
     @target  = target
     @method  = method
+    @new_tab = new_tab
     @confirm = options.delete(:confirm)
     @action  = options.delete(:action)
     @back    = options.delete(:back)
@@ -79,6 +81,10 @@ class Components::Button::CRUDBase < Components::Button
   def link_html_options
     base = { class: merged_class }
     base.merge!(tooltip_data) if @icon
+    if @new_tab
+      base[:target] = "_blank"
+      base[:rel] = "noopener noreferrer"
+    end
     base.deep_merge(@html_attrs.except(:class))
   end
 

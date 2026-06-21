@@ -40,6 +40,30 @@ class Components::Button < Components::Base
 
   ALLOWED_TAGS = [:button, :a, :span, :label].freeze
 
+  # Single-entry-point dispatcher. Pass `method:` to route to the
+  # appropriate CRUD subclass; pass `type: :submit` to get a Submit.
+  # Omit both for a plain `<button type="button">`.
+  #
+  # @example
+  #   Components::Button.new(method: :put, name: "Save", target: url)
+  #   Components::Button.new(method: :get, name: "Show", target: url)
+  #   Components::Button.new(type: :submit, name: "Go")
+  #   Components::Button.new(name: "Cancel", data: { dismiss: "modal" })
+  def self.new(**kwargs, &block)
+    method = kwargs.delete(:method)
+    klass = { post: Post, put: Put, patch: Patch,
+              delete: Delete, get: Get }[method]
+    if klass
+      klass.new(**kwargs, &block)
+    elsif kwargs[:type].to_s == "submit"
+      kwargs.delete(:type)
+      Submit.new(**kwargs, &block)
+    else
+      kwargs[:method] = method if method
+      super
+    end
+  end
+
   def initialize(name: nil, variant: nil, size: nil, icon: nil,
                  **html_attrs)
     super()

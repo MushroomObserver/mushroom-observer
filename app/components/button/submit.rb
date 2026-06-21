@@ -20,11 +20,14 @@
 #
 class Components::Button::Submit < Components::Button
   def initialize(name: nil, submits_with: nil, disable_with: nil,
-                 html_name: nil, **)
+                 html_name: nil, **opts)
+    raise(ArgumentError.new("variant: :strip not valid on Submit")) if
+      opts[:variant] == :strip
+
     @submits_with = submits_with
     @disable_with = disable_with || name
     @html_name = html_name
-    super(name: name, type: "submit", **)
+    super(name: name, type: "submit", **opts)
   end
 
   private
