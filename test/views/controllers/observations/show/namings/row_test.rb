@@ -240,6 +240,38 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     )
   end
 
+  # ---- parity tests ------------------------------------------------
+
+  class OldMatchingObsLink < Components::Base
+    def initialize(url:, name:)
+      super()
+      @url = url
+      @name = name
+    end
+
+    def view_template
+      a(href: @url,
+        class: "btn btn-link text-wrap text-left px-0") { plain(@name) }
+    end
+  end
+
+  def test_matching_observations_link_parity
+    url = "/occurrences/1"
+    name = :show_observation_matching_observations.l
+
+    old_html = render(OldMatchingObsLink.new(url: url, name: name))
+    new_html = render(Components::Button::Get.new(
+                        target: url,
+                        name: name,
+                        style: :link,
+                        class: "text-wrap text-left px-0"
+                      ))
+
+    assert_html_element_equivalent(old_html, new_html,
+                                   selector: "a",
+                                   label: "matching_observations_link")
+  end
+
   private
 
   def render_row(naming: @naming, user: @user, consensus: @consensus)

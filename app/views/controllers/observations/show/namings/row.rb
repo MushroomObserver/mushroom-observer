@@ -148,10 +148,12 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_matching_observations_link
-    a(href: url_for(occurrence_path(@naming.observation.occurrence)),
-      class: "btn btn-link text-wrap text-left px-0") do
-      plain(:show_observation_matching_observations.l)
-    end
+    render(Components::Button::Get.new(
+             target: url_for(occurrence_path(@naming.observation.occurrence)),
+             name: :show_observation_matching_observations.l,
+             style: :link,
+             class: "text-wrap text-left px-0"
+           ))
   end
 
   def render_single_proposer_link

@@ -60,11 +60,12 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # Stimulus `suggestions#suggestTaxa` action that fetches via
   # `data-results-url` and replaces page content.
   def render_suggest_button
-    button(
-      type: :button,
-      class: "btn btn-default btn-sm mt-2",
-      data: suggest_button_data
-    ) { plain(:show_namings_suggest_names.l) }
+    render(Components::Button.new(
+             name: :show_namings_suggest_names.l,
+             size: :sm,
+             class: "mt-2",
+             data: suggest_button_data
+           ))
   end
 
   def suggest_button_data
