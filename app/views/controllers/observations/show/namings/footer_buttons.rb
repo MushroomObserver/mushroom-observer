@@ -42,7 +42,7 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
                context: "namings_table"
              ),
              modal_id: "obs_#{@obs.id}_naming",
-             style: :default, size: :sm,
+             size: :sm,
              class: "d-none d-sm-inline-block propose-naming-link"
            ))
   end

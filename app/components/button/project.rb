@@ -16,7 +16,6 @@ class Components::Button::Project < Components::Base
     render(Components::Button::Get.new(
              name: @name,
              target: @target,
-             style: :default,
              size: :lg,
              class: "my-3 mr-3"
            ))

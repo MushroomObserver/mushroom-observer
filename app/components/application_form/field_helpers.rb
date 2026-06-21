@@ -411,7 +411,16 @@ class Components::ApplicationForm < Superform::Rails::Form
                                               submits_with: submits_with,
                                               disable_with: disable_with)
       if as == :button
-        button(type: "submit", name: "commit", **merged) { value }
+        extra_class = "center-block my-3" if center
+        render(Components::Button::Submit.new(
+                 name: value,
+                 style: style, size: size,
+                 submits_with: submits_with,
+                 disable_with: disable_with,
+                 class: [extra_class, options[:class]].compact.
+                        join(" ").presence,
+                 **options.except(:class)
+               ))
       else
         super(value, **merged)
       end

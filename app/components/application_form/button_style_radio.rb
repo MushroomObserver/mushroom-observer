@@ -25,24 +25,28 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   render(Components::ApplicationForm::ButtonStyleRadio.new(
   #     name: "observation[thumb_image_id]", value: image.id,
   #     id: "thumb_image_id_#{image.id}", checked: thumb?,
-  #     label_class: "btn btn-default thumb_img_btn",
-  #     label_data: { action: "click->form-images#setObsThumbnail" }
+  #     size: :sm, label: { class: "thumb_img_btn" }
   #   )) do
   #     span(class: "set_thumb_img_text") { :image_set_default.l }
   #   end
   class ButtonStyleRadio < Phlex::HTML
     include Phlex::TrustedHtml
+    include Phlex::Rails::Helpers::ClassNames
+    include Components::ButtonStyling
 
     # @param name [String] HTML name (shared across radios in the group)
     # @param value [String] value submitted when this radio is checked
     # @param id [String] HTML id (matches the label's `for`)
     # @param checked [Boolean] initial checked state
-    # @param label [Hash] HTML attrs for the `<label>` wrap
-    #   (e.g. `class:`, `data:`)
-    # @param input_attrs [Hash] HTML attrs passed through to the
-    #   `<input>` (e.g. `class:`, `data:`)
+    # @param style [Symbol, nil] btn style (default `:default`); `nil`
+    #   for a plain label with no btn classes
+    # @param size [Symbol, nil] btn size modifier (`:sm`, `:lg`, etc.)
+    # @param label [Hash] extra HTML attrs for the `<label>` (e.g.
+    #   `class:` for identifier classes, `data:`)
+    # @param input_attrs [Hash] HTML attrs passed through to `<input>`
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, value:, id:, checked: false,
+                   style: BTN_DEFAULT_STYLE, size: nil,
                    label: {}, **input_attrs)
       # rubocop:enable Metrics/ParameterLists
       super()
@@ -50,18 +54,26 @@ class Components::ApplicationForm < Superform::Rails::Form
       @value = value
       @id = id
       @checked = checked
+      @style = style
+      @size = size
       @label_attrs = label
       @input_attrs = input_attrs
     end
 
     def view_template(&block)
-      label(for: @id, **@label_attrs) do
+      label(for: @id, class: label_class,
+            **@label_attrs.except(:class)) do
         input(**input_attributes)
         yield if block
       end
     end
 
     private
+
+    def label_class
+      class_names(("btn" if @style), btn_class(@style),
+                  size_class(@size), @label_attrs[:class])
+    end
 
     def input_attributes
       { type: :radio, name: @name, id: @id, value: @value,

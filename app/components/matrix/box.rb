@@ -197,7 +197,6 @@ class Components::Matrix::Box < Components::Base
                observation_id: obs.id, context: "matrix_box"
              ),
              modal_id: "obs_#{obs.id}_naming",
-             style: :default,
              class: "d-inline-block mb-3 propose-naming-link"
            ))
   end
