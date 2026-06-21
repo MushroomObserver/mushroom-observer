@@ -74,8 +74,9 @@ class RouteRuntimes
   private
 
   def report_done(route_count)
-    warn(format("Done in %s: %d lines, %d counted, %d routes -> %s",
-                hms(clock - @started), @scanned, @counted, route_count, @out))
+    warn(format("Done in %s: %d lines (%d TIME), %d counted, %d routes -> %s",
+                hms(clock - @started), @lines, @scanned, @counted,
+                route_count, @out))
   end
 
   def clock
@@ -192,6 +193,10 @@ class RouteRuntimes
              end
     reader.each_line(&block)
   ensure
+    # Closing the GzipReader closes the underlying file too; @current_io&.close
+    # is then a no-op (idempotent) and also covers the case where GzipReader
+    # construction raised and left the file open.
+    reader&.close
     @current_io&.close
     @current_io = nil
   end
