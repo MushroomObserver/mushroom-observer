@@ -412,14 +412,19 @@ class Components::ApplicationForm < Superform::Rails::Form
                                               disable_with: disable_with)
       if as == :button
         extra_class = "center-block my-3" if center
+        # `options[:name]` is the HTML name= attribute on the button, NOT
+        # the display text — keep it separate so it doesn't clobber `name:
+        # value` (the label) in Button::Submit.
+        html_name = options[:name]
         render(Components::Button::Submit.new(
                  name: value,
+                 html_name: html_name,
                  style: style, size: size,
                  submits_with: submits_with,
                  disable_with: disable_with,
                  class: [extra_class, options[:class]].compact.
                         join(" ").presence,
-                 **options.except(:class)
+                 **options.except(:class, :name)
                ))
       else
         super(value, **merged)

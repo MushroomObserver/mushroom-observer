@@ -19,9 +19,11 @@
 #   end
 #
 class Components::Button::Submit < Components::Button
-  def initialize(name: nil, submits_with: nil, disable_with: nil, **)
+  def initialize(name: nil, submits_with: nil, disable_with: nil,
+                 html_name: nil, **)
     @submits_with = submits_with
     @disable_with = disable_with || name
+    @html_name = html_name
     super(name: name, type: "submit", **)
   end
 
@@ -31,6 +33,7 @@ class Components::Button::Submit < Components::Button
     turbo = {}
     turbo[:turbo_submits_with] = @submits_with if @submits_with
     turbo[:disable_with] = @disable_with if @disable_with
-    turbo.any? ? super.deep_merge(data: turbo) : super
+    result = turbo.any? ? super.deep_merge(data: turbo) : super
+    @html_name ? { name: @html_name }.merge(result) : result
   end
 end

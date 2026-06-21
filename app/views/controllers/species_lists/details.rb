@@ -49,7 +49,8 @@ module Views::Controllers::SpeciesLists
     # as a String target.
     def render_download_button
       render(Components::Button::Download.new(
-               target: new_download_species_list_path(id: @species_list.id)
+               target: new_download_species_list_path(id: @species_list.id),
+               style: nil
              ))
     end
 
