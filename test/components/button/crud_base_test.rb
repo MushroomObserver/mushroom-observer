@@ -142,20 +142,18 @@ class ButtonCRUDBaseTest < ComponentTestCase
     assert_no_html(html, "span.glyphicon")
   end
 
-  # `variant:` is an opt-in button-style for caller-side styling.
-  # Callers that want a `btn btn-default` link pass `variant: :default`
-  # without spelling out the full class string. Caller's `class:` layers
-  # on top for sizing/spacing.
-  def test_get_method_variant_kwarg_prepends_classes
+  # `variant:` opts into a specific button style; `size:` adds sizing.
+  # Caller's `class:` layers on top.
+  def test_get_method_variant_and_size_kwarg_prepend_classes
     html = render(Components::Button::CRUDBase.new(
                     name: "Map",
                     target: "/map",
                     method: :get,
-                    variant: :default,
+                    variant: :primary,
                     size: :lg
                   ))
 
-    assert_html(html, "a.btn.btn-default.btn-lg[href='/map']")
+    assert_html(html, "a.btn.btn-primary.btn-lg[href='/map']")
   end
 end
 
@@ -219,12 +217,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "button span.glyphicon-remove-circle")
   end
 
-  # Default renders no btn frame — callers must be explicit about variant.
-  def test_delete_default_no_btn_frame
+  # Default renders the standard btn-default frame.
+  def test_delete_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(Components::Button::Delete.new(target: herbarium))
 
-    assert_no_html(html, "button.btn")
+    assert_html(html, "button.btn.btn-default")
     assert_html(html, "input[name='_method'][value='delete']")
     assert_html(html, ".text-danger")
   end
@@ -313,12 +311,12 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "a[data-toggle='tooltip']")
   end
 
-  # Default renders no btn frame — callers must be explicit about variant.
-  def test_edit_default_no_btn_frame
+  # Default renders the standard btn-default frame.
+  def test_edit_default_btn_frame
     herbarium = herbaria(:nybg_herbarium)
     html = render(Components::Button::Edit.new(target: herbarium))
 
-    assert_no_html(html, "a.btn")
+    assert_html(html, "a.btn.btn-default")
   end
 
   # `variant: :outline` produces the outline button frame — the common
@@ -365,6 +363,71 @@ class ButtonSubclassesTest < ComponentTestCase
     )
 
     assert_html(html, "a span.sr-only", text: :EDIT.l)
+  end
+
+  # New: GET + explicit path + icon `:add`. Always pass an explicit
+  # string path — new-form routes often require extra params
+  # (e.g. `observation_id:`) that a model-instance target can't
+  # express. The default name is the generic `:ADD.l`; callers
+  # should pass an explicit `name:`.
+  def test_new_with_string_target_and_icon
+    path = routes.new_herbarium_path
+    html = render(Components::Button::New.new(
+                    target: path,
+                    name: :new_object.t(type: :herbarium)
+                  ))
+
+    assert_html(html, "a[href='#{path}']")
+    assert_no_html(html, "form")
+    assert_html(html, "a span.glyphicon-plus")
+    assert_html(html, "a span.sr-only",
+                text: :new_object.t(type: :herbarium))
+    assert_html(html, "a[data-toggle='tooltip']")
+  end
+
+  # `icon: nil` opt-out: text-only new links.
+  def test_new_icon_nil_opts_out
+    path = routes.new_herbarium_path
+    html = render(
+      Components::Button::New.new(
+        target: path, name: "New Herbarium", icon: nil
+      )
+    )
+
+    assert_html(html, "a[href='#{path}']", text: "New Herbarium")
+    assert_no_html(html, "a span.glyphicon")
+    assert_no_html(html, "a span.sr-only")
+    assert_no_html(html, "a[data-toggle='tooltip']")
+  end
+
+  # Default renders the standard btn-default frame.
+  def test_new_default_btn_frame
+    html = render(
+      Components::Button::New.new(target: routes.new_herbarium_path)
+    )
+
+    assert_html(html, "a.btn.btn-default")
+  end
+
+  # `variant: :outline` produces the outline button frame.
+  def test_new_outline_variant
+    html = render(
+      Components::Button::New.new(
+        target: routes.new_herbarium_path,
+        variant: :outline
+      )
+    )
+
+    assert_html(html, "a.btn.btn-outline-default")
+  end
+
+  # Generic `:ADD.l` fallback when no `name:` is supplied.
+  def test_new_default_name_add_l
+    html = render(
+      Components::Button::New.new(target: routes.new_herbarium_path)
+    )
+
+    assert_html(html, "a span.sr-only", text: :ADD.l)
   end
 
   # Download: GET + explicit path + icon `:download`. The species

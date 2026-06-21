@@ -23,7 +23,7 @@ module Tab::Naming
       )
       assert_equal(expected, tab.path)
       assert_includes(tab.html_options[:class], "propose-naming-link")
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
       assert_equal(Naming, tab.model)
     end
 

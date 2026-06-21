@@ -36,11 +36,9 @@ class Components::Button::CRUDBase < Components::Button
   # arbitrary HTML attrs) plus CRUDBase-only keys: confirm:, action:,
   # back:. CRUDBase-only keys are stripped before delegating to Button.
   #
-  # Default variant is `:strip` — no Bootstrap btn classes at all (bare
-  # glyph / element). This differs from `Components::Button` which
-  # defaults to `:default`. Subclasses (Post, Patch, Put) override to
-  # `:default`. Pass `variant: :btn_link` for an underlined-link
-  # appearance; `variant: :strip` is a bare element with no btn wrapper.
+  # Pass `variant: :btn_link` for an underlined-link appearance;
+  # `variant: :strip` for a bare element with no btn wrapper.
+  # Omit `variant:` for the standard `btn btn-default` frame.
   def initialize(name:, target:, method: :post, **options, &block)
     @target  = target
     @method  = method
@@ -48,7 +46,6 @@ class Components::Button::CRUDBase < Components::Button
     @action  = options.delete(:action)
     @back    = options.delete(:back)
     @block   = block
-    options[:variant] = :strip unless options.key?(:variant)
     super(name: name, **options)
   end
 
@@ -88,7 +85,7 @@ class Components::Button::CRUDBase < Components::Button
   # it always survives even when `variant: :strip` drops the btn frame.
   def merged_class
     class_names(identifier,
-                ("btn" unless @variant.nil? || @variant == :strip),
+                ("btn" unless @variant == :strip),
                 btn_class(@variant),
                 size_class(@size),
                 @html_attrs[:class])

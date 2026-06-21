@@ -15,6 +15,16 @@
 # raw `[label, path, args]` build (e.g. `Views::Layouts::Header::
 # Sorter#sort_tuple`). The dispatcher doesn't care which.
 module Components::LinkRendering
+  # Maps `args[:button]` to the Button component class + any
+  # per-type extra kwargs (e.g. `icon: nil` for destroy so context-
+  # nav menus stay text-only).
+  BUTTON_DISPATCH = {
+    post: [Components::Button::Post, {}],
+    destroy: [Components::Button::Delete, { icon: nil }],
+    put: [Components::Button::Put, {}],
+    patch: [Components::Button::Patch, {}]
+  }.freeze
+
   private
 
   # Strips MO-specific keys from the args hash and blends in any
@@ -25,36 +35,18 @@ module Components::LinkRendering
   end
 
   # Dispatch one `[text, url, args]` link tuple to the right HTML
-  # element. Buttons go through the corresponding `Button::*`
-  # subclass; plain `link_to` is the default.
+  # element. Mutation buttons go through the BUTTON_DISPATCH table;
+  # plain `link_to` is the default for GET navigation links.
   def render_crud_button_or_link(str, url, args, kwargs)
-    case args[:button]
-    when :post
-      render(Components::Button::Post.new(
-               name: str, target: url,
-               variant: :strip, **kwargs
-             ))
-    when :destroy
-      # Context-nav destroy tabs render as plain `[ DESTROY ]`-style
-      # text links — opt out of `Button::Delete`'s default icon
-      # AND button-frame via `icon: nil` + `variant: :strip` (callers can
-      # override either by passing the kwarg).
-      render(Components::Button::Delete.new(
-               name: str, target: args[:target] || url,
-               icon: nil, variant: :strip, **kwargs
-             ))
-    when :put
-      render(Components::Button::Put.new(
-               name: str, target: url,
-               variant: :strip, **kwargs
-             ))
-    when :patch
-      render(Components::Button::Patch.new(
-               name: str, target: url,
-               variant: :strip, **kwargs
-             ))
-    else
-      link_to(str, url, kwargs)
-    end
+    klass, extra = BUTTON_DISPATCH[args[:button]]
+    return link_to(str, url, kwargs) unless klass
+
+    render(klass.new(
+             name: str,
+             target: args[:target] || url,
+             variant: :strip,
+             **extra,
+             **kwargs
+           ))
   end
 end

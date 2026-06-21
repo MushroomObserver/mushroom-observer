@@ -8,7 +8,7 @@
 #     target: project_members_path(project_id: @project.id)
 #   ))
 class Components::Button::Post < Components::Button::CRUDBase
-  def initialize(target:, name:, variant: BTN_DEFAULT_VARIANT, **)
-    super(target: target, name: name, method: :post, variant: variant, **)
+  def initialize(target:, name:, **)
+    super(target: target, name: name, method: :post, **)
   end
 end

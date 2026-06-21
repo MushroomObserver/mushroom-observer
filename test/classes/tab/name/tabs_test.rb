@@ -27,7 +27,7 @@ module Tab::Name
 
       assert_equal(:show_name_add_name.l, tab.title)
       assert_equal(routes.new_name_path, tab.path)
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
       assert_equal(Name, tab.model)
     end
 
@@ -67,7 +67,7 @@ module Tab::Name
 
       assert_equal(:show_name_create_description.l, tab.title)
       assert_equal(routes.new_name_description_path(@name.id), tab.path)
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
     end
 
     def test_edit_classification

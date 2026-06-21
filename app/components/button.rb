@@ -40,7 +40,7 @@ class Components::Button < Components::Base
 
   ALLOWED_TAGS = [:button, :a, :span].freeze
 
-  def initialize(name: nil, variant: BTN_DEFAULT_VARIANT, size: nil, icon: nil,
+  def initialize(name: nil, variant: nil, size: nil, icon: nil,
                  **html_attrs)
     super()
     @name = name
@@ -66,7 +66,7 @@ class Components::Button < Components::Base
   private
 
   def merged_class
-    class_names(("btn" unless @variant.nil? || @variant == :strip),
+    class_names(("btn" unless @variant == :strip),
                 btn_class(@variant),
                 size_class(@size),
                 @html_attrs[:class])

@@ -8,9 +8,9 @@
 # turbo-stream response and shows the modal. If a modal is already
 # open under the same `modal_id`, it reuses the element.
 #
-# Defaults to `variant: :default` (btn btn-default). Callers that need
-# a plain text link pass `variant: :strip`; icon-only action links use
-# `variant: :strip, icon: :edit` etc.
+# Defaults to the standard btn frame (`btn btn-default`) — no variant:
+# needed for the common case. Pass `variant: :strip` for a plain text
+# link or icon-only trigger (e.g. `variant: :strip, icon: :edit`).
 #
 # @example Button-shaped modal trigger (the common case)
 #   render(Components::Button::ModalToggle.new(

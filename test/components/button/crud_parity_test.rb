@@ -217,6 +217,16 @@ class LegacyCrudButtonDownload < LegacyCrudButtonGet
   end
 end
 
+class LegacyCrudButtonNew < LegacyCrudButtonGet
+  def initialize(target:, name: nil, **args)
+    args[:icon] = :add unless args.key?(:icon)
+    super(target: target,
+          name: name || :ADD.l,
+          action: :new,
+          **args)
+  end
+end
+
 # Pre-refactor Link::Modal implementation, verbatim from main.
 class LegacyLinkModal < Components::Base
   def initialize(identifier, name = nil, path = nil, **args)
@@ -267,7 +277,8 @@ class Components::Button::CrudParityTest < ComponentTestCase
 
   def test_edit_parity_defaults
     old_html = render(LegacyCrudButtonEdit.new(target: @herb))
-    new_html = render(Components::Button::Edit.new(target: @herb))
+    new_html = render(Components::Button::Edit.new(target: @herb,
+                                                   variant: :strip))
 
     assert_html_element_equivalent(old_html, new_html,
                                    selector: "a",
@@ -284,6 +295,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
     new_html = render(Components::Button::Edit.new(
                         target: @herb,
                         name: "Custom Edit",
+                        variant: :strip,
                         icon: nil,
                         class: "mt-2"
                       ))
@@ -297,7 +309,8 @@ class Components::Button::CrudParityTest < ComponentTestCase
 
   def test_delete_parity_defaults
     old_html = render(LegacyCrudButtonDelete.new(target: @herb))
-    new_html = render(Components::Button::Delete.new(target: @herb))
+    new_html = render(Components::Button::Delete.new(target: @herb,
+                                                     variant: :strip))
 
     assert_html_element_equivalent(old_html, new_html,
                                    selector: "form",
@@ -316,6 +329,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
                         target: @herb,
                         name: :REMOVE.l,
                         confirm: "Remove this herbarium?",
+                        variant: :strip,
                         icon: nil,
                         class: "d-inline"
                       ))
@@ -515,11 +529,50 @@ class Components::Button::CrudParityTest < ComponentTestCase
                                    label: "download_overrides")
   end
 
+  # --- Button::New (explicit-path target) ---
+  #
+  # Old CrudButton::New had no btn: default (no button frame).
+  # Pass variant: :strip to the new component to match that shape.
+
+  def test_new_parity_defaults
+    new_path = routes.new_herbarium_path
+    old_html = render(LegacyCrudButtonNew.new(target: new_path))
+    new_html = render(Components::Button::New.new(
+                        target: new_path,
+                        variant: :strip
+                      ))
+
+    assert_html_element_equivalent(old_html, new_html,
+                                   selector: "a",
+                                   label: "new_defaults")
+  end
+
+  def test_new_parity_text_only_with_extra_class
+    new_path = routes.new_herbarium_path
+    old_html = render(LegacyCrudButtonNew.new(
+                        target: new_path,
+                        name: "Add Herbarium",
+                        icon: nil,
+                        class: "mt-2"
+                      ))
+    new_html = render(Components::Button::New.new(
+                        target: new_path,
+                        name: "Add Herbarium",
+                        variant: :strip,
+                        icon: nil,
+                        class: "mt-2"
+                      ))
+
+    assert_html_element_equivalent(old_html, new_html,
+                                   selector: "a",
+                                   label: "new_overrides")
+  end
+
   # --- Button::ModalToggle vs LegacyLinkModal ---
   #
   # Real-world callers always passed `class: "btn btn-default ..."` to
-  # Link::Modal explicitly. The new ModalToggle bakes that in via the
-  # default `variant: :default` inherited from Button::Get.
+  # Link::Modal explicitly. The new ModalToggle gets that via the
+  # nil-variant default inherited from Button::Get.
 
   def test_modal_toggle_parity_defaults
     modal_path = "/projects/1/members/trust"

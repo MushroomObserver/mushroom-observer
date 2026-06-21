@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 # DELETE button with destroy-action defaults: `text-danger` appended to
-# the CSS class, `action: :destroy`, `icon: :delete`, `variant: :strip`
-# (no btn frame), and `confirm:` defaulting to `:are_you_sure.l`.
-# Pass `variant: :outline` for the standard outline button.
+# the CSS class, `action: :destroy`, `icon: :delete`, and `confirm:`
+# defaulting to `:are_you_sure.l`. Defaults to the standard btn frame.
+# Pass `variant: :strip` for a bare icon, `variant: :outline` for the
+# outline style.
 #
-# @example default (bare danger icon)
+# @example default (standard btn-default frame with danger icon)
 #   render(Components::Button::Delete.new(target: @api_key))
 #
 # @example outline button (common CRUD row usage)
@@ -16,18 +17,16 @@
 #     target: @api_key, name: :REMOVE.l, icon: :remove
 #   ))
 #
-# @example text-only, no btn frame
-#   render(Components::Button::Delete.new(target: @term, icon: nil))
+# @example bare icon, no btn frame
+#   render(Components::Button::Delete.new(target: @term, variant: :strip))
 class Components::Button::Delete < Components::Button::CRUDBase
-  def initialize(target:, name: nil, variant: :strip, icon: :delete,
-                 **html_attrs)
+  def initialize(target:, name: nil, icon: :delete, **html_attrs)
     confirm = html_attrs.delete(:confirm) || :are_you_sure.l
     html_class = [html_attrs.delete(:class), "text-danger"].compact.join(" ")
     super(target: target,
           name: name || default_name(target),
           method: :delete,
           action: :destroy,
-          variant: variant,
           icon: icon,
           confirm: confirm,
           class: html_class,

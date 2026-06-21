@@ -1,14 +1,18 @@
 # frozen_string_literal: true
 
-# GET button with edit-action defaults: `action: :edit`, `icon: :edit`,
-# `variant: :strip` (no btn frame). Pass `variant: :outline` for the
-# standard outline button, or any other variant explicitly.
+# GET button with edit-action defaults: `action: :edit`, `icon: :edit`.
+# Defaults to the standard btn frame. Pass `variant: :strip` for a bare
+# edit icon, `variant: :outline` for the outline style, or any other
+# variant explicitly.
 #
-# @example default (bare edit icon)
+# @example default (standard btn-default frame with edit icon)
 #   render(Components::Button::Edit.new(target: @herbarium))
 #
 # @example outline button (common CRUD row usage)
 #   render(Components::Button::Edit.new(target: @herbarium, variant: :outline))
+#
+# @example bare icon, no btn frame
+#   render(Components::Button::Edit.new(target: @herbarium, variant: :strip))
 #
 # @example text-only, no btn frame
 #   render(Components::Button::Edit.new(target: @herbarium, icon: nil))
@@ -16,11 +20,10 @@
 # @example rendered as an underlined link
 #   render(Components::Button::Edit.new(target: alias_, variant: :btn_link))
 class Components::Button::Edit < Components::Button::Get
-  def initialize(target:, name: nil, variant: :strip, icon: :edit, **)
+  def initialize(target:, name: nil, icon: :edit, **)
     super(target: target,
           name: name || default_name(target),
           action: :edit,
-          variant: variant,
           icon: icon,
           **)
   end

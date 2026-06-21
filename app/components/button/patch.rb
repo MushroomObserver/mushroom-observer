@@ -8,7 +8,7 @@
 #     target: account_activate_api_key_path(key.id)
 #   ))
 class Components::Button::Patch < Components::Button::CRUDBase
-  def initialize(target:, name:, variant: BTN_DEFAULT_VARIANT, **)
-    super(target: target, name: name, method: :patch, variant: variant, **)
+  def initialize(target:, name:, **)
+    super(target: target, name: name, method: :patch, **)
   end
 end

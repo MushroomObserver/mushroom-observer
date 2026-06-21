@@ -16,12 +16,12 @@
 # `BTN_VARIANTS` maps variant symbols to their Bootstrap CSS class. The base
 # `"btn"` class is added separately by each component's `merged_class`, so
 # `variant: :strip` renders no Bootstrap button framing at all. Omit
-# `variant:` or pass `variant: :default` for the standard grey button.
+# `variant:` (or pass `nil`) for the standard grey button (`btn btn-default`).
+# `:default` is NOT a valid variant symbol — omit the kwarg instead.
 module Components::ButtonStyling
   extend ActiveSupport::Concern
 
   BTN_VARIANTS = {
-    default: "btn-default",
     primary: "btn-primary",
     danger: "btn-danger",
     warning: "btn-warning",
@@ -38,8 +38,6 @@ module Components::ButtonStyling
 
   BTN_SIZES = { lg: "btn-lg", sm: "btn-sm", xs: "btn-xs" }.freeze
 
-  BTN_DEFAULT_VARIANT = :default
-
   module ClassMethods
     def btn_class(variant) = Components::ButtonStyling.btn_class(variant)
     def size_class(size) = Components::ButtonStyling.size_class(size)
@@ -48,13 +46,15 @@ module Components::ButtonStyling
   module_function
 
   def btn_class(variant)
-    return nil if variant.nil? || variant == :strip
+    return "btn-default" if variant.nil?
+    return nil if variant == :strip
 
     css = BTN_VARIANTS[variant]
     if css.nil?
       raise(ArgumentError.new("Unknown variant: #{variant.inspect}. " \
                               "Valid: #{BTN_VARIANTS.keys.join(", ")}, " \
-                              "or :strip to suppress btn classes."))
+                              "or :strip for no btn frame. " \
+                              "Omit variant: for the default grey button."))
     end
 
     css

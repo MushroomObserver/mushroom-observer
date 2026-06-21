@@ -402,7 +402,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # disabled-state label for non-Turbo submits). Defaults to the button
     # label (just disable, no text swap).
     def submit(value = submit_value, center: false, submits_with: nil, # rubocop:disable Metrics/ParameterLists
-               disable_with: nil, variant: BTN_DEFAULT_VARIANT,
+               disable_with: nil, variant: nil,
                size: nil, as: :input, **options)
       submits_with ||= default_submits_with(value)
       disable_with ||= value

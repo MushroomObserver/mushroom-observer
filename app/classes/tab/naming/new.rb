@@ -23,7 +23,7 @@ class Tab::Naming::New < Tab::Base
   end
 
   def html_options
-    { class: "propose-naming-link", icon: :add }
+    { class: "propose-naming-link" }
   end
 
   def model

@@ -10,7 +10,7 @@
 #     target: @herbarium, action: :edit, icon: :edit
 #   ))
 class Components::Button::Get < Components::Button::CRUDBase
-  def initialize(target:, name:, variant: BTN_DEFAULT_VARIANT, **)
-    super(target: target, name: name, method: :get, variant: variant, **)
+  def initialize(target:, name:, **)
+    super(target: target, name: name, method: :get, **)
   end
 end

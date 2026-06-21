@@ -50,11 +50,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       @value = value
       @id = id
       @checked = opts.delete(:checked) { false }
-      @variant = if opts.key?(:variant)
-                   opts.delete(:variant)
-                 else
-                   BTN_DEFAULT_VARIANT
-                 end
+      @variant = opts.delete(:variant)
       @size = opts.delete(:size)
       @label_attrs = opts.delete(:label) || {}
       @input_attrs = opts
