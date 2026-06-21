@@ -68,15 +68,15 @@ module Observations
         :SpeciesList, editable_by_user: @user, order_by:
       )
 
-      @obs_lists = []
-      @other_lists = []
-      @all_lists.results.each do |list|
-        if list.observations.member?(@observation)
-          @obs_lists << list
-        else
-          @other_lists << list
-        end
-      end
+      # Which of these lists already contain the observation, in ONE query
+      # (its species_list_ids) instead of a per-list `observations.member?`
+      # check — that was an N+1 across all the user's editable lists. Eager-
+      # load :user and :location so the listing view doesn't reload them
+      # per row (place_name -> location, the user link).
+      member_ids = @observation.species_list_ids.to_set
+      @obs_lists, @other_lists =
+        @all_lists.results(include: [:user, :location]).
+        partition { |list| member_ids.include?(list.id) }
     end
 
     def find_observation!
