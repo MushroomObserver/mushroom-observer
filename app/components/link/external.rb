@@ -5,21 +5,36 @@
 # Generic form (context-nav tabs, one-off external links):
 #   render(Components::Link::External.new("GBIF", gbif_url))
 #
+# Tab PORO form (extracts title/path/html_options from the tab):
+#   render(Components::Link::External.new(tab: some_tab))
+#
 # ExternalLink AR record form (observation external-links panel):
 #   render(Components::Link::External.new(link: external_link))
 #   # iNaturalist records render as "iNat <id>"; others as
 #   # "On <site>" with a trailing <small> date.
 #
-# Via Tab PORO:
-#   # Tab sets html_options: { external: true }
-#   # Dispatcher routes here automatically.
+# Via context-nav dispatcher:
+#   # Tab sets html_options: { external: true }; dispatcher routes here.
 class Components::Link::External < Components::Base
-  def initialize(content = nil, path = nil, link: nil, **opts)
+  # Keys from Tab::Base::ALLOWED_HTML_OPTION_KEYS that must not reach link_to.
+  NON_HTML_OPTS = [:external, :button, :back, :icon, :help].freeze
+
+  def initialize(content = nil, path = nil, tab: nil, link: nil, **opts)
     super()
     @link = link
-    @content = link ? link_content : content
-    @path = link ? link.url : path
-    @opts = opts
+    if tab
+      @content = tab.title
+      @path = tab.path
+      @opts = tab.html_options.except(*NON_HTML_OPTS).merge(opts)
+    elsif link
+      @content = link_content
+      @path = link.url
+      @opts = opts
+    else
+      @content = content
+      @path = path
+      @opts = opts
+    end
   end
 
   def view_template
