@@ -40,28 +40,50 @@ class Components::Button < Components::Base
 
   ALLOWED_TAGS = [:button, :a, :span, :label].freeze
 
-  # Single-entry-point dispatcher. Pass `method:` to route to the
-  # appropriate CRUD subclass; pass `type: :submit` to get a Submit.
-  # Omit both for a plain `<button type="button">`.
+  # Single dispatch table mapping type: → subclass constant name.
+  # Every Button shape is identified by a single `type:` kwarg.
+  # The kwarg is stripped before the subclass call so subclasses
+  # don't need to declare it.
+  DISPATCH = {
+    # HTTP-method buttons
+    post: :Post, put: :Put, patch: :Patch,
+    delete: :Delete, get: :Get,
+    # Semantic GET shortcuts (icon + action presets)
+    edit: :Edit, new: :New, download: :Download, project: :Project,
+    # Behavioral subclasses
+    submit: :Submit, external: :External,
+    modal: :ModalToggle, toggle: :Toggle
+  }.freeze
+
+  # Single-entry-point dispatcher. Pass `type:` to route to the
+  # matching subclass. Omit for a plain `<button type="button">`.
   #
-  # @example
-  #   Components::Button.new(method: :put, name: "Save", target: url)
-  #   Components::Button.new(method: :get, name: "Show", target: url)
-  #   Components::Button.new(type: :submit, name: "Go")
+  #   Components::Button.new(type: :post,     name: "Join",   target: url)
+  #   Components::Button.new(type: :put,      name: "Save",   target: url)
+  #   Components::Button.new(type: :patch,    name: "Update", target: url)
+  #   Components::Button.new(type: :delete,   target: @obj)
+  #   Components::Button.new(type: :get,      name: "Show",   target: url)
+  #   Components::Button.new(type: :edit,     target: @herbarium)
+  #   Components::Button.new(type: :new,      target: path,
+  #                          name: :new_object.t(type: :herbarium))
+  #   Components::Button.new(type: :download, target: path)
+  #   Components::Button.new(type: :project,  name: ..., target: ...)
+  #   Components::Button.new(type: :submit,   name: "Go")
+  #   Components::Button.new(type: :external, url: url, name: "BLAST")
+  #   Components::Button.new(type: :modal,    name: "Settings",
+  #                          target: path, modal_id: "trust_settings")
+  #   Components::Button.new(type: :toggle,   show_text: "Open",
+  #                          hide_text: "Close", show_class: "map-show",
+  #                          hide_class: "map-hide")
   #   Components::Button.new(name: "Cancel", data: { dismiss: "modal" })
   def self.new(**kwargs, &block)
-    method = kwargs.delete(:method)
-    klass = { post: Post, put: Put, patch: Patch,
-              delete: Delete, get: Get }[method]
-    if klass
-      klass.new(**kwargs, &block)
-    elsif kwargs[:type].to_s == "submit"
+    type_sym = kwargs[:type]&.to_sym
+    if (klass_name = DISPATCH[type_sym])
       kwargs.delete(:type)
-      Submit.new(**kwargs, &block)
-    else
-      kwargs[:method] = method if method
-      super
+      return const_get(klass_name).new(**kwargs, &block)
     end
+
+    super
   end
 
   def initialize(name: nil, variant: nil, size: nil, icon: nil,
