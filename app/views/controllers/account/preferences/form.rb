@@ -150,7 +150,7 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_license_note
-    span(class: "help-note mr-3") do
+    render(::Components::Help::Note.new) do
       plain("(")
       trusted_html(:prefs_license_note.t)
       plain(")")
@@ -327,7 +327,7 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_notes_help
-    p(class: "help-note mr-3") do
+    render(::Components::Help::Note.new(:p)) do
       plain(:prefs_notes_template_explanation.t)
     end
   end

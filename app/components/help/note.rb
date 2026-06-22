@@ -28,7 +28,7 @@ class Components::Help::Note < Components::Base
   end
 
   def view_template(&block)
-    classes = class_names("help-note mr-3", @extra_class)
+    classes = class_names("help-note", @extra_class)
     send(@element, class: classes, **@attributes) do
       if block
         yield

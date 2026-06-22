@@ -25,7 +25,7 @@ module Views::Controllers::Licenses
       text_field(:display_name, label: "#{:license_display_name.t}:",
                                 data: { autofocus: true }) do |f|
         f.with_append do
-          div(class: "help-block") { :license_display_name_help.t }
+          render(::Components::Help::Block.new(:license_display_name_help.t))
         end
       end
     end
@@ -33,7 +33,7 @@ module Views::Controllers::Licenses
     def render_url_field
       text_field(:url, label: "#{:license_url.t}:") do |f|
         f.with_append do
-          div(class: "help-block") { :license_url_help.t }
+          render(::Components::Help::Block.new(:license_url_help.t))
         end
       end
     end

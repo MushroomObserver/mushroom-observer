@@ -18,7 +18,7 @@
 #   app/components/table.rb
 #   app/components/panel.rb and app/components/panel/**
 #   app/components/dropdown.rb
-#   app/components/application_form/field_with_help.rb (owns help-block)
+#   app/components/link/external.rb (owns target="_blank")
 set -euo pipefail
 
 INPUT="$(cat)"
@@ -54,7 +54,7 @@ is_exempt_file() {
     app/components/panel.rb|\
     app/components/panel/*|\
     app/components/dropdown.rb|\
-    app/components/application_form/field_with_help.rb) return 0 ;;
+    app/components/link/external.rb) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -94,7 +94,7 @@ case "$TOOL" in
       ':(exclude)app/components/panel.rb' \
       ':(exclude)app/components/panel/**' \
       ':(exclude)app/components/dropdown.rb' \
-      ':(exclude)app/components/application_form/field_with_help.rb' \
+      ':(exclude)app/components/link/external.rb' \
       | grep '^+[^+]' \
       | sed 's/^+//' \
       | grep -v '^[[:space:]]*#' \
@@ -209,6 +209,13 @@ check \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\bpanel\b' \
   'panel_class:|panel-(body|heading|footer|title|group|collapse)'
 
+# target="_blank" / target: "_blank" — use Link::External instead
+check \
+  'raw target="_blank" on a link' \
+  'Components::Link::External.new("text", url)' \
+  'target:[[:space:]]*["\x27]_blank["\x27]' \
+  ''
+
 [ -z "$VIOLATIONS" ] && exit 0
 
 # ---------------------------------------------------------------------------
@@ -237,6 +244,7 @@ Quick reference:
   glyphicon        → Components::Icon.new(type: :symbol)
   table            → Components::Table.new(collection) do |t| … end
   panel            → Components::Panel.new
+  target="_blank"  → Components::Link::External.new("text", url)
 FOOTER
 
 exit 2
