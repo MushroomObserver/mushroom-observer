@@ -251,12 +251,11 @@ class Views::Layouts::TopNav < Views::Base
 
     render(::Components::Button.new(
              type: :get,
-             name: nil,
+             name: :app_qrcode.l,
+             icon: :qrcode,
              target: field_slips_qr_reader_new_path,
              variant: :outline, size: :sm,
              class: "mx-0 mx-sm-2 top_nav_button"
-           )) do
-      render(::Components::Icon.new(type: :qrcode, title: :app_qrcode.l))
-    end
+           ))
   end
 end
