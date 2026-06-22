@@ -86,8 +86,7 @@ class Components::Button < Components::Base
     super
   end
 
-  def initialize(name: nil, variant: nil, size: nil, icon: nil,
-                 **html_attrs)
+  def initialize(name: nil, variant: nil, size: nil, icon: nil, **html_attrs)
     super()
     @name = name
     @variant = variant
@@ -96,7 +95,10 @@ class Components::Button < Components::Base
     @type = html_attrs.delete(:type) || :button
     @icon = icon
     @icon_class = html_attrs.delete(:icon_class)
+    onclick = html_attrs.delete(:onclick)
     @html_attrs = html_attrs
+    # Phlex blocks `onclick` by name; wrap in SafeValue to opt in.
+    @html_attrs[:onclick] = Phlex::SGML::SafeValue.new(onclick) if onclick
     validate_no_btn_classes!(@html_attrs[:class])
   end
 
@@ -111,11 +113,14 @@ class Components::Button < Components::Base
 
   private
 
+  def btn_styling
+    return nil if @variant == :strip
+
+    class_names("btn", btn_class(@variant))
+  end
+
   def merged_class
-    class_names(("btn" unless @variant == :strip),
-                btn_class(@variant),
-                size_class(@size),
-                @html_attrs[:class])
+    class_names(btn_styling, size_class(@size), @html_attrs[:class])
   end
 
   def extra_attrs

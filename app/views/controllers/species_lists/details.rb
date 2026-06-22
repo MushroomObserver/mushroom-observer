@@ -70,7 +70,7 @@ module Views::Controllers::SpeciesLists
         b { plain("#{:WHERE.t}:") }
         whitespace
         begin
-          render(Components::Link::Object::Location.new(
+          render(Components::Link::Location.new(
                    where: @species_list.where,
                    location: @species_list.location, click: true
                  ))
@@ -84,7 +84,7 @@ module Views::Controllers::SpeciesLists
       div do
         b { plain("#{:WHO.t}:") }
         whitespace
-        render(Components::Link::Object::User.new(user: @species_list.user))
+        render(Components::Link::User.new(user: @species_list.user))
       end
     end
 
@@ -94,7 +94,7 @@ module Views::Controllers::SpeciesLists
         whitespace
         @species_list.projects.each_with_index do |project, idx|
           plain(" | ") if idx.positive?
-          render(Components::Link::Object::Base.new(object: project))
+          render(Components::Link::Object.new(object: project))
         end
       end
     end

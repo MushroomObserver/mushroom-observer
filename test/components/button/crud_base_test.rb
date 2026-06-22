@@ -101,60 +101,6 @@ class ButtonCRUDBaseTest < ComponentTestCase
     assert_html(html, "[data-turbo-confirm-title]")
     assert_html(html, "[data-turbo-confirm-button='Remove']")
   end
-
-  # GET method emits a plain `<a>` (link_to), not a `<form><button>`
-  # (button_to). GET is idempotent so the form wrapper is overkill —
-  # the anchor lets right-click "save link as" / "open in new tab"
-  # work and keeps the element inline. Same html_options shape (class,
-  # title, tooltip data) as the form-button branch.
-  def test_get_method_emits_link_not_form
-    html = render(Components::Button::CRUDBase.new(
-                    name: "Download",
-                    target: "/items/1/download",
-                    method: :get,
-                    icon: :download
-                  ))
-
-    assert_html(html, "a[href='/items/1/download']")
-    assert_no_html(html, "form")
-    assert_no_html(html, "button")
-    assert_html(html, "a[title='Download']")
-    assert_html(html, "a[data-toggle='tooltip']")
-    assert_html(html, "a[data-placement='top']")
-    assert_html(html, "a span.sr-only", text: "Download")
-    assert_html(html, "a span.glyphicon-download-alt")
-  end
-
-  # GET branch without an icon: no tooltip data attrs. Tooltip is the
-  # accessible label for icon-only buttons; for text-only links the
-  # tooltip would just duplicate the visible label, so we skip it.
-  def test_get_method_without_icon_skips_tooltip
-    html = render(Components::Button::CRUDBase.new(
-                    name: "Map",
-                    target: "/map",
-                    method: :get
-                  ))
-
-    assert_html(html, "a[href='/map']", text: "Map")
-    assert_no_html(html, "a[data-toggle='tooltip']")
-    assert_no_html(html, "a[title]")
-    assert_no_html(html, "span.sr-only")
-    assert_no_html(html, "span.glyphicon")
-  end
-
-  # `variant:` opts into a specific button style; `size:` adds sizing.
-  # Caller's `class:` layers on top.
-  def test_get_method_variant_and_size_kwarg_prepend_classes
-    html = render(Components::Button::CRUDBase.new(
-                    name: "Map",
-                    target: "/map",
-                    method: :get,
-                    variant: :primary,
-                    size: :lg
-                  ))
-
-    assert_html(html, "a.btn.btn-primary.btn-lg[href='/map']")
-  end
 end
 
 # `Components::Button::CRUDBase` subclasses (`Delete`, `Edit`, `Download`,
@@ -501,6 +447,44 @@ class ButtonSubclassesTest < ComponentTestCase
     html = render(
       Components::Button::Post.new(name: "Submit", target: "/items",
                                    variant: :strip)
+    )
+
+    assert_no_html(html, "button.btn")
+  end
+
+  # Patch defaults to `btn btn-default`.
+  def test_patch_default_btn_frame
+    html = render(
+      Components::Button::Patch.new(name: "Update", target: "/items/1")
+    )
+
+    assert_html(html, "button.btn.btn-default")
+  end
+
+  # `variant: :strip` suppresses the frame (icon-only / inline patches).
+  def test_patch_strip_suppresses_frame
+    html = render(
+      Components::Button::Patch.new(name: "Update", target: "/items/1",
+                                    variant: :strip)
+    )
+
+    assert_no_html(html, "button.btn")
+  end
+
+  # Put defaults to `btn btn-default`.
+  def test_put_default_btn_frame
+    html = render(
+      Components::Button::Put.new(name: "Replace", target: "/items/1")
+    )
+
+    assert_html(html, "button.btn.btn-default")
+  end
+
+  # `variant: :strip` suppresses the frame (icon-only / inline puts).
+  def test_put_strip_suppresses_frame
+    html = render(
+      Components::Button::Put.new(name: "Replace", target: "/items/1",
+                                  variant: :strip)
     )
 
     assert_no_html(html, "button.btn")

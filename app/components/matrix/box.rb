@@ -207,7 +207,7 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "rss-where") do
       small do
-        render(Components::Link::Object::Location.new(
+        render(Components::Link::Location.new(
                  where: @data[:where], location: @data[:location]
                ))
       end
@@ -221,7 +221,7 @@ class Components::Matrix::Box < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        render(Components::Link::Object::User.new(
+        render(Components::Link::User.new(
                  user: @data[:who],
                  attributes: { class: "rss-who" }
                ))
@@ -326,6 +326,7 @@ class Components::Matrix::Box < Components::Base
     panel.with_footer(classes: "text-center") do
       render(Components::Button.new(
                type: :post,
+               variant: :strip,
                name: :EXCLUDE.t,
                target: exclude_observation_project_update_path(
                  project_id: @project.id, id: @data[:what].id

@@ -68,7 +68,7 @@ module Views::Controllers::Users
         p do
           strong { "#{:show_user_primary_location.l}:" }
           plain(" ")
-          render(::Components::Link::Object::Location.new(
+          render(::Components::Link::Location.new(
                    location: @show_user.location
                  ))
         end

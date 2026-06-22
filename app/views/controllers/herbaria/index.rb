@@ -85,6 +85,7 @@ module Views::Controllers::Herbaria
     def render_merge_target_button(herbarium)
       render(::Components::Button.new(
                type: :post,
+               variant: :strip,
                name: herbarium.name.t,
                target: herbaria_merges_path(src: @merge.id,
                                             dest: herbarium.id),
@@ -131,7 +132,7 @@ module Views::Controllers::Herbaria
       return if nonpersonal? || herbarium.personal_user.blank?
 
       span(title: herbarium.personal_user.unique_text_name) do
-        render(::Components::Link::Object::User.new(
+        render(::Components::Link::User.new(
                  user: herbarium.personal_user
                ))
       end

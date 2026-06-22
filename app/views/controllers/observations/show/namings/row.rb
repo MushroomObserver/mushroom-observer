@@ -159,14 +159,12 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_single_proposer_link
     proposer = @naming.user
-    render(Components::Link::Object::User.new(
-             user: proposer, name: proposer.login,
-             attributes: { class: proposer_link_classes }
+    render(Components::Link::User.new(
+             user: proposer,
+             name: proposer.login,
+             button: :btn_link,
+             attributes: { class: "text-wrap text-left px-0" }
            ))
-  end
-
-  def proposer_link_classes
-    "btn btn-link text-wrap text-left px-0"
   end
 
   # ---- vote tally cell ------------------------------------------

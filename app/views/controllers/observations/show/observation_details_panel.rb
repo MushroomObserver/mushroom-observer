@@ -33,6 +33,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     path = add_q_param(observations_downloads_path(commit: name), query)
     render(Components::Button.new(
              type: :post,
+             variant: :strip,
              name: name, target: path, icon: :print,
              class: "print_label_observation_#{@obs.id}",
              form: { data: { turbo: false } }
@@ -82,7 +83,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_where_link
     if @user
-      render(Components::Link::Object::Location.new(
+      render(Components::Link::Location.new(
                where: @obs.where, location: @obs.location, click: true
              ))
     else
@@ -169,7 +170,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_user_link(target)
     if @user
-      render(Components::Link::Object::User.new(user: target))
+      render(Components::Link::User.new(user: target))
     else
       plain(target.unique_text_name)
     end
@@ -244,7 +245,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       br
       @obs.projects.each do |project|
         div(class: "indent") do
-          render(Components::Link::Object::Base.new(object: project))
+          render(Components::Link::Object.new(object: project))
         end
       end
     end
@@ -253,7 +254,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { plain("#{:FIELD_SLIP.t}: ") }
-      render(Components::Link::Object::Base.new(object: @obs.field_slip))
+      render(Components::Link::Object.new(object: @obs.field_slip))
     end
   end
 

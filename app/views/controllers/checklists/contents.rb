@@ -74,7 +74,7 @@ module Views::Controllers::Checklists
     def render_location_header
       h4 do
         plain("#{:checklist_for.t} ")
-        render(Components::Link::Object::Location.new(
+        render(Components::Link::Location.new(
                  location: @context.location
                ))
       end

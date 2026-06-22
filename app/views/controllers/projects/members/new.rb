@@ -32,7 +32,7 @@ module Views::Controllers::Projects::Members
                                    class: "table-striped " \
                                           "table-project-members mt-3")) do |t|
         t.column(:Login_name.t) do |u|
-          render(Components::Link::Object::User.new(user: u, name: u.login))
+          render(Components::Link::User.new(user: u, name: u.login))
         end
         t.column(:Full_name.t) { |u| plain(u.name) }
         t.column(nil) { |u| render_add_button(u) }
@@ -42,6 +42,7 @@ module Views::Controllers::Projects::Members
     def render_add_button(user)
       render(Components::Button.new(
                type: :post,
+               variant: :strip,
                name: :ADD.t,
                target: project_members_path(
                  project_id: @project.id,

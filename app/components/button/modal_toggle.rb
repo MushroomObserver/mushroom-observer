@@ -1,16 +1,11 @@
 # frozen_string_literal: true
 
 # Modal-trigger link (`<a>`) that opens a Bootstrap modal via the
-# `modal-toggle` Stimulus controller. Inherits full button-styling
-# support from `Components::Button::Get`.
+# `modal-toggle` Stimulus controller. Inherits all rendering from
+# `Components::Link::Modal`; adds button styling so the default output
+# is a `btn btn-default` anchor rather than a plain link.
 #
-# The Stimulus controller fetches the modal body from `target` as a
-# turbo-stream response and shows the modal. If a modal is already
-# open under the same `modal_id`, it reuses the element.
-#
-# Defaults to the standard btn frame (`btn btn-default`) — no variant:
-# needed for the common case. Pass `variant: :strip` for a plain text
-# link or icon-only trigger (e.g. `variant: :strip, icon: :edit`).
+# Pass `variant: :strip` for a plain text link or icon-only trigger.
 #
 # @example Button-shaped modal trigger (the common case)
 #   render(Components::Button.new(type: :modal,
@@ -33,23 +28,16 @@
 #     modal_id: "comment",
 #     variant: :strip, icon: :add
 #   ))
-class Components::Button::ModalToggle < Components::Button::Get
-  def initialize(name:, target:, modal_id:, **)
-    super(name: name, target: target, **)
-    @modal_id = modal_id
+class Components::Button::ModalToggle < Components::Link::Modal
+  def initialize(name:, target:, modal_id:, variant: nil, **)
+    super(modal_id: modal_id, name: name, target: target, button: variant, **)
   end
 
   private
 
-  def link_html_options
-    super.deep_merge(data: modal_data)
-  end
+  def btn_styling
+    return nil if @button == :strip
 
-  def modal_data
-    {
-      modal: "modal_#{@modal_id}",
-      controller: "modal-toggle",
-      action: "modal-toggle#showModal:prevent"
-    }
+    class_names("btn", btn_class(@button))
   end
 end

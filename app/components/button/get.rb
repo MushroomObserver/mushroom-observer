@@ -1,16 +1,28 @@
 # frozen_string_literal: true
 
-# GET button — emits `<a>` (link_to), not a form-wrapped button.
-# Idempotent navigations (edit, download, etc.) use this rather than
-# the form-button branch. Pass `action:` to trigger named-route
-# prefixing for model targets (`:edit`, `:new`, `:download`).
+# GET link — delegates to `Components::Link::Get`, adding button styling.
+# Defaults to `btn btn-default` (no variant needed for the common case).
+# Pass `variant:` to override (e.g. `variant: :outline`, `variant: :strip`).
 #
-# @example edit link via a model target
+# @example via dispatcher
 #   render(Components::Button.new(type: :get,
-#     target: @herbarium, action: :edit, icon: :edit
+#     name: "View", target: @herbarium
 #   ))
-class Components::Button::Get < Components::Button::CRUDBase
-  def initialize(target:, name:, **)
-    super(target: target, name: name, method: :get, **)
+#
+# @example btn-link variant (no btn frame, underlined)
+#   render(Components::Button.new(type: :get,
+#     name: user.login, target: user, variant: :btn_link
+#   ))
+class Components::Button::Get < Components::Link::Get
+  def initialize(name:, target:, variant: nil, **)
+    super(name: name, target: target, button: variant, **)
+  end
+
+  private
+
+  def btn_styling
+    return nil if @button == :strip
+
+    class_names("btn", btn_class(@button))
   end
 end

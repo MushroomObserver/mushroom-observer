@@ -58,7 +58,7 @@ module Views::Controllers::Users
 
     def admin_row_cells(usr)
       admin_meta_cells(usr)
-      td { render(::Components::Link::Object::User.new(user: usr, name: usr.login)) }
+      td { render(::Components::Link::User.new(user: usr, name: usr.login)) }
       admin_profile_cells(usr)
     end
 

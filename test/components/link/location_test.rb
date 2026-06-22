@@ -5,7 +5,7 @@ require("test_helper")
 class LocationLinkTest < ComponentTestCase
   def test_renders_show_location_link_when_location_given
     burbank = locations(:burbank)
-    html = render(Components::Link::Object::Location.new(
+    html = render(Components::Link::Location.new(
                     where: burbank.name, location: burbank
                   ))
 
@@ -23,7 +23,7 @@ class LocationLinkTest < ComponentTestCase
 
   def test_location_integer_id_is_looked_up
     burbank = locations(:burbank)
-    html = render(Components::Link::Object::Location.new(
+    html = render(Components::Link::Location.new(
                     where: burbank.name, location: burbank.id
                   ))
 
@@ -34,7 +34,7 @@ class LocationLinkTest < ComponentTestCase
 
   def test_count_suffix_appended
     burbank = locations(:burbank)
-    html = render(Components::Link::Object::Location.new(
+    html = render(Components::Link::Location.new(
                     where: burbank.name, location: burbank, count: 7
                   ))
 
@@ -44,7 +44,7 @@ class LocationLinkTest < ComponentTestCase
 
   def test_click_appends_map_suffix
     burbank = locations(:burbank)
-    html = render(Components::Link::Object::Location.new(
+    html = render(Components::Link::Location.new(
                     where: burbank.name, location: burbank, click: true
                   ))
 
@@ -53,7 +53,7 @@ class LocationLinkTest < ComponentTestCase
 
   def test_without_location_renders_observations_index_link
     where = "Some Place, USA"
-    html = render(Components::Link::Object::Location.new(where: where))
+    html = render(Components::Link::Location.new(where: where))
 
     # Fallback: no resolved Location → link to observations index
     # filtered by `where=`, with a distinct selector class.
@@ -63,7 +63,7 @@ class LocationLinkTest < ComponentTestCase
   end
 
   def test_click_on_where_link_appends_search_suffix
-    html = render(Components::Link::Object::Location.new(
+    html = render(Components::Link::Location.new(
                     where: "Some Place, USA", click: true
                   ))
 

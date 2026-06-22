@@ -44,6 +44,7 @@ module Views::Controllers::Account::Profile
              ))
       render(Components::Button.new(
                type: :put,
+               variant: :strip,
                name: :profile_image_remove.t,
                target: account_profile_remove_image_path,
                confirm: :are_you_sure.l

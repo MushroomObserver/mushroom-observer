@@ -28,7 +28,7 @@ module Views::Controllers::Projects::Violations
     def view_template
       h4 do
         trusted_html("#{:PROJECT.l}: ")
-        render(Components::Link::Object::Base.new(object: @project))
+        render(Components::Link::Object.new(object: @project))
       end
 
       if @violations.empty?
@@ -69,8 +69,8 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_obs_link(obs)
-      render(Components::Link::Object::Base.new(object: obs,
-                                                name: obs.text_name))
+      render(Components::Link::Object.new(object: obs,
+                                          name: obs.text_name))
       plain(" (#{obs.id})")
     end
 
@@ -125,6 +125,7 @@ module Views::Controllers::Projects::Violations
     def render_exclude_button(obs)
       render(::Components::Button.new(
                type: :put,
+               variant: :strip,
                name: :form_violations_action_exclude.l,
                target: violations_path,
                params: { project: { do: "exclude", obs_id: obs.id } },
@@ -135,6 +136,7 @@ module Views::Controllers::Projects::Violations
     def render_extend_button(obs)
       render(::Components::Button.new(
                type: :put,
+               variant: :strip,
                name: :form_violations_action_extend.l,
                target: violations_path,
                params: { project: { do: "extend", obs_id: obs.id } },
@@ -145,6 +147,7 @@ module Views::Controllers::Projects::Violations
     def render_add_target_name_button(obs)
       render(::Components::Button.new(
                type: :put,
+               variant: :strip,
                name: :form_violations_action_add_target_name.l,
                target: violations_path,
                params: { project: { do: "add_target_name", obs_id: obs.id } },

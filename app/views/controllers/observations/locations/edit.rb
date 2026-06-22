@@ -38,6 +38,7 @@ module Views::Controllers::Observations::Locations
       list.item do
         render(::Components::Button.new(
                  type: :patch,
+                 variant: :strip,
                  name: location.display_name.t,
                  target: assign_location_to_observations_path(
                    where: @where, location: location

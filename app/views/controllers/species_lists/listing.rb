@@ -77,7 +77,7 @@ module Views::Controllers::SpeciesLists
         whitespace
         plain("|")
         whitespace
-        render(Components::Link::Object::User.new(user: @species_list.user))
+        render(Components::Link::User.new(user: @species_list.user))
       end
     end
 
@@ -94,6 +94,7 @@ module Views::Controllers::SpeciesLists
     def render_remove_obs_button
       render(Components::Button.new(
                type: :put,
+               variant: :strip,
                name: :REMOVE.t,
                target: observation_species_list_path(
                  id: @observation.id,
@@ -107,6 +108,7 @@ module Views::Controllers::SpeciesLists
     def render_add_obs_button
       render(Components::Button.new(
                type: :put,
+               variant: :strip,
                name: :ADD.t,
                target: observation_species_list_path(
                  id: @observation.id,

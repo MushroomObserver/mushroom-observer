@@ -53,6 +53,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
     )
     render(Components::Button.new(
              type: :put,
+             variant: :strip,
              name: "[#{:REMOVE.t}]",
              target: remove_path,
              confirm: :are_you_sure.l

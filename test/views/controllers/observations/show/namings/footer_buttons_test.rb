@@ -33,10 +33,12 @@ class Views::Controllers::Observations::Show::Namings::FooterButtonsTest <
                         "span.glyphicon-plus")
   end
 
-  def test_propose_button_carries_text_button_classes
+  def test_propose_button_is_modal_trigger_link
     html = render_footer_buttons
 
-    assert_html(html, "a.btn.btn-default.btn-sm.d-none.d-sm-inline-block")
+    assert_html(html, "a.propose-naming-link" \
+                      "[data-controller='modal-toggle']" \
+                      "[data-modal='modal_obs_#{@obs.id}_naming']")
   end
 
   def test_renders_consensus_help_blurb

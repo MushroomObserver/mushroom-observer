@@ -119,6 +119,7 @@ class Components::Image::VoteInterface < Components::Base
 
     render(Components::Button.new(
              type: :put,
+             variant: :strip,
              name: vote_text,
              class: "image-vote-link",
              target: image_vote_path(image_id: @image.id, value: vote),

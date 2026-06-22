@@ -185,6 +185,7 @@ module Views::Controllers::Descriptions
           span { plain(" | ") } if idx.positive?
           render(Components::Button.new(
                    type: :put,
+                   variant: :strip,
                    target: review_status_name_description_path(
                      @description.id, value: w
                    ),
@@ -212,8 +213,8 @@ module Views::Controllers::Descriptions
     def reviewer_link
       reviewer = @description.reviewer
       capture do
-        render(Components::Link::Object::User.new(user: reviewer,
-                                                  name: reviewer.login))
+        render(Components::Link::User.new(user: reviewer,
+                                          name: reviewer.login))
       end
     end
 
