@@ -64,7 +64,22 @@ class ButtonTest < ComponentTestCase
     assert_no_html(html, "button")
   end
 
+  def test_block_content_renders_inside_button
+    html = render(ButtonWithBlock.new)
+
+    assert_html(html, "button span.block-sentinel", text: "from block")
+  end
+
   private
+
+  # Wrapper so the block executes in a Phlex render context.
+  class ButtonWithBlock < Components::Base
+    def view_template
+      render(Components::Button.new) do
+        span(class: "block-sentinel") { plain("from block") }
+      end
+    end
+  end
 
   def render_button(name:, **)
     render(Components::Button.new(name: name, **))
@@ -299,5 +314,30 @@ class Components::ButtonDispatcherTest < ComponentTestCase
                   ))
 
     assert_html(html, "a.btn-sm[href='#{path}']")
+  end
+
+  # ---- block content passes through dispatcher -------------------------
+
+  def test_type_get_block_renders_inside_anchor
+    html = render(GetWithBlock.new(
+                    path: routes.herbarium_path(id: @herbarium.id)
+                  ))
+
+    assert_html(html, "a span.block-sentinel", text: "from block")
+    assert_no_html(html, "a span.sr-only")
+  end
+
+  class GetWithBlock < Components::Base
+    def initialize(path:)
+      super()
+      @path = path
+    end
+
+    def view_template
+      render(Components::Button.new(type: :get, name: "Go",
+                                    target: @path)) do
+        span(class: "block-sentinel") { plain("from block") }
+      end
+    end
   end
 end
