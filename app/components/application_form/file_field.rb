@@ -74,7 +74,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_file_input_button
-      span(class: "file-field btn btn-default") do
+      render(::Components::Button.new(tag: :span, class: "file-field")) do
         plain(button_text)
         input(**file_input_attributes, type: "file")
       end

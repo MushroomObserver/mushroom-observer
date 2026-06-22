@@ -62,6 +62,21 @@ class Views::Controllers::Account::Preferences::FormTest <
                 "select[name='user[votes_anonymous]'] option[value='old']")
   end
 
+  def test_addon_buttons_are_links_inside_input_group_btn_with_icon
+    html = render_form
+
+    # All three addon triggers sit inside .input-group-btn and render
+    # as <a> elements containing the new-window SVG icon. Pinned as
+    # the "before" snapshot for the button_class → Button component
+    # conversion so any structural regression is caught immediately.
+    %w[/images/purge_filenames /images/votes/anonymity
+       /images/licenses/edit].each do |href|
+      assert_html(html, ".input-group-btn a[href='#{href}']")
+      assert_html(html,
+                  ".input-group-btn a[href='#{href}'] span[class*='glyphicon']")
+    end
+  end
+
   def test_privacy_section_renders_three_retroactive_buttons_inline
     html = render_form
 
