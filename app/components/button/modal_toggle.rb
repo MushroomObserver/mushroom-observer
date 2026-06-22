@@ -13,7 +13,7 @@
 # link or icon-only trigger (e.g. `variant: :strip, icon: :edit`).
 #
 # @example Button-shaped modal trigger (the common case)
-#   render(Components::Button::ModalToggle.new(
+#   render(Components::Button.new(type: :modal,
 #     name: :show_project_trust_settings.l,
 #     target: trust_modal_project_member_path(...),
 #     modal_id: "trust_settings",
@@ -21,13 +21,13 @@
 #   ))
 #
 # @example Plain text modal link
-#   render(Components::Button::ModalToggle.new(
+#   render(Components::Button.new(type: :modal,
 #     name: "Edit", target: edit_comment_path(comment),
 #     modal_id: "comment", variant: :strip
 #   ))
 #
 # @example Icon-only modal trigger (tooltip from name:)
-#   render(Components::Button::ModalToggle.new(
+#   render(Components::Button.new(type: :modal,
 #     name: :show_comments_add_comment.l,
 #     target: new_comment_path(target: obj.id, type: obj.class.name),
 #     modal_id: "comment",

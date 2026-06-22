@@ -117,7 +117,8 @@ class Components::Image::VoteInterface < Components::Base
   def render_vote_button(vote)
     vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
 
-    render(Components::Button::Put.new(
+    render(Components::Button.new(
+             type: :put,
              name: vote_text,
              class: "image-vote-link",
              target: image_vote_path(image_id: @image.id, value: vote),

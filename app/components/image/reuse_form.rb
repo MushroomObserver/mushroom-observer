@@ -64,8 +64,8 @@ class Components::Image::ReuseForm < Components::ApplicationForm
 
   def render_toggle_link
     div(class: "form-group mt-3") do
-      render(Components::Button::Get.new(target: toggle_url,
-                                         name: toggle_label))
+      render(Components::Button.new(type: :get, target: toggle_url,
+                                    name: toggle_label))
     end
   end
 

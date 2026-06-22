@@ -225,7 +225,8 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_remove_button(loc)
-      render(Components::Button::Delete.new(
+      render(Components::Button.new(
+               type: :delete,
                name: :REMOVE.l,
                target: project_target_location_path(
                  project_id: @project.id, id: loc.id

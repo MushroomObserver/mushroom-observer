@@ -3,7 +3,7 @@
 # PUT-method button.
 #
 # @example
-#   render(Components::Button::Put.new(
+#   render(Components::Button.new(type: :put,
 #     name: :show_project_leave.t,
 #     target: project_member_path(...)
 #   ))

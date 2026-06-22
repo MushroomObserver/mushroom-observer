@@ -148,7 +148,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_matching_observations_link
-    render(Components::Button::Get.new(
+    render(Components::Button.new(
+             type: :get,
              target: url_for(occurrence_path(@naming.observation.occurrence)),
              name: :show_observation_matching_observations.l,
              variant: :btn_link,
@@ -198,7 +199,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_vote_percent_link
-    render(Components::Button::ModalToggle.new(
+    render(Components::Button.new(
+             type: :modal,
              name: "#{@naming.vote_percent.round}%",
              target: vote_percent_modal_path,
              modal_id: "naming_votes_#{primary.id}",

@@ -75,7 +75,8 @@ module Views::Controllers::Account::APIKeys
         if key.verified
           render_verified_check_box(key)
         else
-          render(Components::Button::Patch.new(
+          render(Components::Button.new(
+                   type: :patch,
                    name: :ACTIVATE.l,
                    target: account_activate_api_key_path(key.id),
                    id: "activate_api_key_#{key.id}"
@@ -136,7 +137,8 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_remove_button(key)
-      render(Components::Button::Delete.new(
+      render(Components::Button.new(
+               type: :delete,
                target: account_api_key_path(key.id),
                name: :REMOVE.l,
                variant: :outline,
@@ -162,7 +164,8 @@ module Views::Controllers::Account::APIKeys
     # click via `data-toggle="collapse"` and prevents the
     # default navigation.
     def render_new_button
-      render(Components::Button::Get.new(
+      render(Components::Button.new(
+               type: :get,
                name: :account_api_keys_create_button.l,
                target: new_account_api_key_path,
                id: "new_key_button",

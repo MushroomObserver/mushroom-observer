@@ -183,7 +183,8 @@ module Views::Controllers::Descriptions
         span { plain(" | ") }
         %w[unvetted vetted inaccurate].each_with_index do |w, idx|
           span { plain(" | ") } if idx.positive?
-          render(Components::Button::Put.new(
+          render(Components::Button.new(
+                   type: :put,
                    target: review_status_name_description_path(
                      @description.id, value: w
                    ),

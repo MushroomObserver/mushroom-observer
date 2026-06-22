@@ -90,7 +90,8 @@ class Components::Form::PatternSearch < Components::ApplicationForm
 
   def render_submit
     div(class: "form-group text-nowrap") do
-      render(Components::Button::Submit.new(
+      render(Components::Button.new(
+               type: :submit,
                variant: :outline, class: "px-2"
              )) do
         span(class: "d-sm-none") do

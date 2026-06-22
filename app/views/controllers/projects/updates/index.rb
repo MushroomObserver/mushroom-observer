@@ -72,7 +72,8 @@ module Views::Controllers::Projects::Updates
     end
 
     def render_add_all_button
-      render(Components::Button::Post.new(
+      render(Components::Button.new(
+               type: :post,
                name: :project_updates_add_all.t,
                target: add_all_project_updates_path(
                  project_id: @project.id,

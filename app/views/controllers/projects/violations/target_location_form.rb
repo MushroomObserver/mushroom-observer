@@ -188,7 +188,8 @@ module Views::Controllers::Projects::Violations
       # tab opens *and* the modal closes.
       capture do
         plain(" ")
-        render(::Components::Button::Get.new(
+        render(::Components::Button.new(
+                 type: :get,
                  name: :form_violations_modal_target_location_create.l,
                  target: new_location_path(where: suffix),
                  size: :xs,

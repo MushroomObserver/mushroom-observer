@@ -53,7 +53,8 @@ module Views::Controllers::Projects::Admin
 
     def render_destroy
       p { plain(:show_project_admin_destroy_help.l) }
-      render(Components::Button::Delete.new(
+      render(Components::Button.new(
+               type: :delete,
                target: @project,
                name: :destroy_object.t(type: :project),
                size: :lg

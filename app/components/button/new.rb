@@ -11,14 +11,14 @@
 # other than the generic "Add" fallback.
 #
 # @example bare add icon (no btn frame)
-#   render(Components::Button::New.new(
+#   render(Components::Button.new(type: :new,
 #     target: new_herbarium_path,
 #     name: :new_object.t(type: :herbarium),
 #     variant: :strip
 #   ))
 #
 # @example outline "New" button
-#   render(Components::Button::New.new(
+#   render(Components::Button.new(type: :new,
 #     target: new_name_description_path(@name.id),
 #     name: :show_name_create_description.t,
 #     variant: :outline

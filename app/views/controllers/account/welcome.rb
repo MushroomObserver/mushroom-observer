@@ -11,7 +11,8 @@ module Views::Controllers::Account
       add_page_title(welcome_title)
       if current_user
         trusted_html(:welcome_note.tp)
-        render(Components::Button::Post.new(
+        render(Components::Button.new(
+                 type: :post,
                  name: :app_logout.t,
                  target: account_logout_path,
                  id: "nav_user_logout_link"

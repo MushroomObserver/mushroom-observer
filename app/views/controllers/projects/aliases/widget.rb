@@ -32,7 +32,8 @@ module Views::Controllers::Projects::Aliases
       alias_data.each do |name, id|
         render_edit_link(name, id)
         span(class: "mx-2")
-        render(Components::Button::Delete.new(
+        render(Components::Button.new(
+                 type: :delete,
                  target: project_alias_path(
                    project_id: @project.id, id: id
                  ),
@@ -44,7 +45,8 @@ module Views::Controllers::Projects::Aliases
 
     def render_edit_link(name, id)
       span(id: "project_alias_#{id}") do
-        render(Components::Button::ModalToggle.new(
+        render(Components::Button.new(
+                 type: :modal,
                  name: name,
                  target: edit_project_alias_path(
                    project_id: @project.id, id: id
@@ -57,7 +59,8 @@ module Views::Controllers::Projects::Aliases
 
     def render_new_link
       span(id: "project_alias") do
-        render(Components::Button::ModalToggle.new(
+        render(Components::Button.new(
+                 type: :modal,
                  name: :ADD.t,
                  target: new_project_alias_path(
                    project_id: @project.id,

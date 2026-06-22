@@ -466,7 +466,8 @@ class Components::Form::Search < Components::ApplicationForm
 
   def render_clear_button
     data_attrs = @local ? {} : turbo_stream_data
-    render(Components::Button::Get.new(
+    render(Components::Button.new(
+             type: :get,
              name: :CLEAR.l,
              target: clear_url,
              class: "d-inline-block mx-3 clear-button",

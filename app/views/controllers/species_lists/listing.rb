@@ -92,7 +92,8 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_remove_obs_button
-      render(Components::Button::Put.new(
+      render(Components::Button.new(
+               type: :put,
                name: :REMOVE.t,
                target: observation_species_list_path(
                  id: @observation.id,
@@ -104,7 +105,8 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_add_obs_button
-      render(Components::Button::Put.new(
+      render(Components::Button.new(
+               type: :put,
                name: :ADD.t,
                target: observation_species_list_path(
                  id: @observation.id,

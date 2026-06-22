@@ -67,7 +67,8 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   def render_propose_icon_column
     div(class: "col-xs-2 col-sm-1") do
       span(class: "float-right d-sm-none") do
-        render(Components::Button::ModalToggle.new(
+        render(Components::Button.new(
+                 type: :modal,
                  name: :show_namings_propose_new_name.t,
                  target: new_observation_naming_path(
                    observation_id: @obs.id,

@@ -6,7 +6,7 @@
 # prefixing for model targets (`:edit`, `:new`, `:download`).
 #
 # @example edit link via a model target
-#   render(Components::Button::Get.new(
+#   render(Components::Button.new(type: :get,
 #     target: @herbarium, action: :edit, icon: :edit
 #   ))
 class Components::Button::Get < Components::Button::CRUDBase

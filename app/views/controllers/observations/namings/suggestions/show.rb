@@ -82,7 +82,8 @@ module Views::Controllers::Observations::Namings::Suggestions
       if already_proposed?(sugg)
         plain("(#{:suggestions_already_proposed.t})")
       else
-        render(Components::Button::Get.new(
+        render(Components::Button.new(
+                 type: :get,
                  name: :suggestions_propose_name.t,
                  target: propose_path(sugg),
                  class: "mt-3"

@@ -6,7 +6,7 @@
 # tab's html_options, or called directly for prominent external links.
 #
 # @example Sequence BLAST link
-#   render(Components::Button::External.new(
+#   render(Components::Button.new(type: :external,
 #     name: :show_observation_blast_link.l,
 #     url: @sequence.blast_url
 #   ))

@@ -37,11 +37,13 @@ module Views::Controllers::InatImports
 
     def render_actions
       div(class: "mt-3") do
-        render(Components::Button::Get.new(
+        render(Components::Button.new(
+                 type: :get,
                  name: :inat_import_tracker_results.l,
                  target: results_observations_path
                ))
-        render(::Components::Button::Put.new(
+        render(::Components::Button.new(
+                 type: :put,
                  name: :CANCEL.l,
                  target: inat_import_cancel_path(id: @tracker.inat_import)
                ))

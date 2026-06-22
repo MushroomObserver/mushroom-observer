@@ -123,7 +123,8 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_exclude_button(obs)
-      render(::Components::Button::Put.new(
+      render(::Components::Button.new(
+               type: :put,
                name: :form_violations_action_exclude.l,
                target: violations_path,
                params: { project: { do: "exclude", obs_id: obs.id } },
@@ -132,7 +133,8 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_extend_button(obs)
-      render(::Components::Button::Put.new(
+      render(::Components::Button.new(
+               type: :put,
                name: :form_violations_action_extend.l,
                target: violations_path,
                params: { project: { do: "extend", obs_id: obs.id } },
@@ -141,7 +143,8 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_add_target_name_button(obs)
-      render(::Components::Button::Put.new(
+      render(::Components::Button.new(
+               type: :put,
                name: :form_violations_action_add_target_name.l,
                target: violations_path,
                params: { project: { do: "add_target_name", obs_id: obs.id } },

@@ -3,7 +3,7 @@
 # PATCH-method button.
 #
 # @example
-#   render(Components::Button::Patch.new(
+#   render(Components::Button.new(type: :patch,
 #     name: :ACTIVATE.l,
 #     target: account_activate_api_key_path(key.id)
 #   ))

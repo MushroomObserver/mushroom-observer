@@ -132,7 +132,8 @@ module Views::Controllers::Occurrences::Projects
     end
 
     def render_buttons
-      render(Components::Button::Get.new(
+      render(Components::Button.new(
+               type: :get,
                target: cancel_path,
                name: :CANCEL.l,
                data: { dismiss: "modal" }

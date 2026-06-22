@@ -35,7 +35,8 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # Text-button variant of the propose-naming link (icon-only
   # variant lives in the panel `Header` for mobile).
   def render_propose_button
-    render(Components::Button::ModalToggle.new(
+    render(Components::Button.new(
+             type: :modal,
              name: :show_namings_propose_new_name.t,
              target: new_observation_naming_path(
                observation_id: @obs.id,

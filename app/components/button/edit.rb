@@ -6,19 +6,23 @@
 # variant explicitly.
 #
 # @example default (standard btn-default frame with edit icon)
-#   render(Components::Button::Edit.new(target: @herbarium))
+#   render(Components::Button.new(type: :edit, target: @herbarium))
 #
 # @example outline button (common CRUD row usage)
-#   render(Components::Button::Edit.new(target: @herbarium, variant: :outline))
+#   render(Components::Button.new(type: :edit, target: @herbarium,
+#                                 variant: :outline))
 #
 # @example bare icon, no btn frame
-#   render(Components::Button::Edit.new(target: @herbarium, variant: :strip))
+#   render(Components::Button.new(type: :edit, target: @herbarium,
+#                                 variant: :strip))
 #
 # @example text-only, no btn frame
-#   render(Components::Button::Edit.new(target: @herbarium, icon: nil))
+#   render(Components::Button.new(type: :edit, target: @herbarium,
+#                                 icon: nil))
 #
 # @example rendered as an underlined link
-#   render(Components::Button::Edit.new(target: alias_, variant: :btn_link))
+#   render(Components::Button.new(type: :edit, target: alias_,
+#                                 variant: :btn_link))
 class Components::Button::Edit < Components::Button::Get
   def initialize(target:, name: nil, icon: :edit, **)
     super(target: target,

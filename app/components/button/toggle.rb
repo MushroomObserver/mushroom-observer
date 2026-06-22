@@ -6,7 +6,7 @@
 # hides each span depending on the toggle state.
 #
 # @example Map expand/collapse toggle (parent adds `.map-open`)
-#   render(Components::Button::Toggle.new(
+#   render(Components::Button.new(type: :toggle,
 #     show_text: :form_observations_open_map.l,
 #     hide_text: :form_observations_hide_map.l,
 #     show_class: "map-show",

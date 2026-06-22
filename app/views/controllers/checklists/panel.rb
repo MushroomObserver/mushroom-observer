@@ -82,7 +82,8 @@ module Views::Controllers::Checklists
       return unless @context.admin?
       return unless @context.project.target_name_ids.include?(name_id)
 
-      render(Components::Button::Delete.new(
+      render(Components::Button.new(
+               type: :delete,
                name: :REMOVE.l,
                target: project_target_name_path(
                  project_id: @context.project.id, id: name_id

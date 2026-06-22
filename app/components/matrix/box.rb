@@ -191,7 +191,8 @@ class Components::Matrix::Box < Components::Base
   end
 
   def render_propose_naming_modal(obs)
-    render(Components::Button::ModalToggle.new(
+    render(Components::Button.new(
+             type: :modal,
              name: :create_naming.t,
              target: new_observation_naming_path(
                observation_id: obs.id, context: "matrix_box"
@@ -323,7 +324,8 @@ class Components::Matrix::Box < Components::Base
     return unless show_project_exclude_button?
 
     panel.with_footer(classes: "text-center") do
-      render(Components::Button::Post.new(
+      render(Components::Button.new(
+               type: :post,
                name: :EXCLUDE.t,
                target: exclude_observation_project_update_path(
                  project_id: @project.id, id: @data[:what].id

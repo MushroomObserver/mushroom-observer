@@ -167,7 +167,7 @@ class Components::Link::InlineMod < Components::Base
   def destroy_component
     return nil unless can_destroy?
 
-    Components::Button::Delete.new(**destroy_args)
+    Components::Button.new(type: :delete, **destroy_args)
   end
 
   def destroy_args
@@ -203,7 +203,8 @@ class Components::Link::InlineMod < Components::Base
     tab = send(handler[:tab])
     return nil unless tab
 
-    Components::Button::ModalToggle.new(
+    Components::Button.new(
+      type: :modal,
       name: tab.title,
       target: tab.path,
       modal_id: modal_id,

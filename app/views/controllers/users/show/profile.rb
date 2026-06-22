@@ -35,7 +35,8 @@ module Views::Controllers::Users
         return if @show_user == @user || @show_user.no_emails
         return unless @show_user.email_general_question
 
-        render(::Components::Button::ModalToggle.new(
+        render(::Components::Button.new(
+                 type: :modal,
                  name: :show_user_email_to.t(
                    name: @show_user.unique_text_name
                  ),

@@ -85,7 +85,8 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
   end
 
   def render_prev_button
-    render(Components::Button::Get.new(
+    render(Components::Button.new(
+             type: :get,
              name: "« Prev",
              target: prev_path || "#",
              size: :sm,
@@ -95,7 +96,8 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
   end
 
   def render_next_button
-    render(Components::Button::Get.new(
+    render(Components::Button.new(
+             type: :get,
              name: "Next »",
              target: next_path || "#",
              size: :sm,

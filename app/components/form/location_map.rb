@@ -52,7 +52,8 @@ class Components::Form::LocationMap < Components::Base
   end
 
   def render_toggle_button
-    render(Components::Button::Toggle.new(
+    render(Components::Button.new(
+             type: :toggle,
              show_text: :form_observations_open_map.l,
              hide_text: :form_observations_hide_map.l,
              show_class: "map-show",

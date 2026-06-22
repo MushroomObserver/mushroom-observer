@@ -45,7 +45,8 @@ module Views::Controllers::HerbariumRecords
     def render_edit_link(rec)
       return unless can_edit?(rec)
 
-      render(Components::Button::Edit.new(
+      render(Components::Button.new(
+               type: :edit,
                target: edit_herbarium_record_path(id: rec.id, back: :index,
                                                   q: q_param),
                variant: :outline, size: :sm,
@@ -80,7 +81,8 @@ module Views::Controllers::HerbariumRecords
     def render_delete_button(rec)
       return unless can_edit?(rec)
 
-      render(Components::Button::Delete.new(
+      render(Components::Button.new(
+               type: :delete,
                target: herbarium_record_path(rec.id, back: :index),
                name: :destroy_object.t(type: :herbarium_record),
                variant: :outline, size: :sm,

@@ -225,7 +225,8 @@ module Views::Controllers::Translations
     end
 
     def render_reload_link
-      render(::Components::Button::Get.new(
+      render(::Components::Button.new(
+               type: :get,
                name: :RELOAD.l,
                target: edit_translation_path(
                  id: @tag, locale: @lang.locale

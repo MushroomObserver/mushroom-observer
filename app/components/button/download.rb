@@ -7,7 +7,7 @@
 # its route doesn't match `download_<resource>_path`.
 #
 # @example
-#   render(Components::Button::Download.new(
+#   render(Components::Button.new(type: :download,
 #     name: :DOWNLOAD.t,
 #     target: new_download_species_list_path(id: @sl.id)
 #   ))

@@ -48,7 +48,8 @@ module Views::Controllers::Projects::Members
     end
 
     def render_submit_button
-      render(Components::Button::Put.new(
+      render(Components::Button.new(
+               type: :put,
                name: submit_label,
                target: project_member_path(
                  project_id: @project.id,
