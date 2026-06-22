@@ -98,7 +98,6 @@ module Views::Controllers::Projects
 
       render(Components::Button.new(
                type: :post,
-               variant: :strip,
                name: :show_project_administer.l,
                target: project_administration_path(project_id: @project.id),
                size: :lg, class: "my-2 mr-2"
@@ -116,7 +115,6 @@ module Views::Controllers::Projects
     def render_join_button
       render(Components::Button.new(
                type: :post,
-               variant: :strip,
                name: :show_project_join.l,
                target: project_members_path(
                  project_id: @project.id,
@@ -148,7 +146,6 @@ module Views::Controllers::Projects
     def render_leave_button
       render(Components::Button.new(
                type: :put,
-               variant: :strip,
                name: :show_project_leave.t,
                target: project_member_path(
                  project_id: @project.id,
@@ -196,7 +193,7 @@ module Views::Controllers::Projects
                type: :get,
                name: "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
                target: project_violations_path(project_id: @project.id),
-               style: count.positive? ? :warning : :default,
+               variant: count.positive? ? :warning : nil,
                size: :lg,
                class: "my-2 mr-2"
              ))

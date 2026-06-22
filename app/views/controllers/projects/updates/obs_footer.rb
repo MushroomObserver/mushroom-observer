@@ -27,7 +27,6 @@ module Views::Controllers::Projects::Updates
     def render_add_button
       render(Components::Button.new(
                type: :post,
-               variant: :strip,
                name: :ADD.t,
                target: add_observation_project_update_path(
                  project_id: @project.id, id: @obs.id,
@@ -40,7 +39,6 @@ module Views::Controllers::Projects::Updates
     def render_exclude_button
       render(Components::Button.new(
                type: :post,
-               variant: :strip,
                name: :EXCLUDE.t,
                target: exclude_observation_project_update_path(
                  project_id: @project.id, id: @obs.id,

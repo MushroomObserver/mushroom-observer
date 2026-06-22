@@ -326,7 +326,6 @@ class Components::Matrix::Box < Components::Base
     panel.with_footer(classes: "text-center") do
       render(Components::Button.new(
                type: :post,
-               variant: :strip,
                name: :EXCLUDE.t,
                target: exclude_observation_project_update_path(
                  project_id: @project.id, id: @data[:what].id

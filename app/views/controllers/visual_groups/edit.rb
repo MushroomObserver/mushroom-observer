@@ -122,7 +122,8 @@ module Views::Controllers::VisualGroups
       if @status == value
         render(Components::Button.new(
                  name: label, variant: :outline,
-                 tag: :span, aria_disabled: "true"
+                 tag: :span, aria_disabled: "true",
+                 class: "active disabled"
                ))
       else
         render(Components::Button.new(

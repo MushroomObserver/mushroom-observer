@@ -44,7 +44,6 @@ module Views::Controllers::InatImports
                ))
         render(::Components::Button.new(
                  type: :put,
-                 variant: :strip,
                  name: :CANCEL.l,
                  target: inat_import_cancel_path(id: @tracker.inat_import)
                ))

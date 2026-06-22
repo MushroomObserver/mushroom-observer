@@ -49,7 +49,7 @@ module Views::Controllers::HerbariumRecords
                type: :edit,
                target: edit_herbarium_record_path(id: rec.id, back: :index,
                                                   q: q_param),
-               variant: :outline, size: :sm,
+               size: :sm,
                class: "edit_herbarium_record_link_#{rec.id}"
              ))
     end

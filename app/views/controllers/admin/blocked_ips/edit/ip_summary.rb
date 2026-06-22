@@ -57,7 +57,6 @@ module Views::Controllers::Admin::BlockedIps
         # Inline of the `patch_button` helper (LinkHelper#patch_button).
         render(::Components::Button.new(
                  type: :patch,
-                 variant: :strip,
                  name: "Block",
                  target: admin_blocked_ips_path(add_bad: ip)
                ))

@@ -108,7 +108,6 @@ module Views::Controllers::SpeciesLists
     def render_add_obs_button
       render(Components::Button.new(
                type: :put,
-               variant: :strip,
                name: :ADD.t,
                target: observation_species_list_path(
                  id: @observation.id,

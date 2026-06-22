@@ -77,7 +77,6 @@ module Views::Controllers::Account::APIKeys
         else
           render(Components::Button.new(
                    type: :patch,
-                   variant: :strip,
                    name: :ACTIVATE.l,
                    target: account_activate_api_key_path(key.id),
                    id: "activate_api_key_#{key.id}"

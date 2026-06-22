@@ -13,7 +13,6 @@ module Views::Controllers::Account
         trusted_html(:welcome_note.tp)
         render(Components::Button.new(
                  type: :post,
-                 variant: :strip,
                  name: :app_logout.t,
                  target: account_logout_path,
                  id: "nav_user_logout_link"

@@ -67,7 +67,8 @@ module Views::Controllers::Projects::Aliases
                    target_id: @target.id,
                    target_type: @target.class
                  ),
-                 modal_id: "project_alias"
+                 modal_id: "project_alias",
+                 variant: :strip
                ))
       end
     end
