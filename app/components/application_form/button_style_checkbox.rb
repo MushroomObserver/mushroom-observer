@@ -21,28 +21,43 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   render(Components::ApplicationForm::ButtonStyleCheckbox.new(
   #     name: "q[type][]", value: "observation",
   #     id: "type_observation", checked: types.include?("observation"),
-  #     label: { class: "btn btn-default filter-checkbox" }
+  #     variant: :outline, size: :sm,
+  #     label: { class: "filter-checkbox" }
   #   )) do
   #     plain "Observations"
   #   end
   class ButtonStyleCheckbox < Phlex::HTML
-    include Phlex::TrustedHtml
-
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, value:, id:, checked: false,
-                   label: {}, **input_attrs)
-      # rubocop:enable Metrics/ParameterLists
+    # @param name [String] HTML name (shared across checkboxes in a group)
+    # @param value [String] value submitted when this checkbox is checked
+    # @param id [String] HTML id (matches the label's `for`)
+    # @param checked [Boolean] initial checked state
+    # @param variant [Symbol, nil] btn variant; nil for btn-default,
+    #   :strip for a plain label with no btn classes
+    # @param size [Symbol, nil] btn size modifier (`:sm`, `:lg`, etc.)
+    # @param label [Hash] extra HTML attrs for the `<label>` (e.g.
+    #   `class:` for identifier classes, `data:`). Do not pass btn
+    #   classes here — use `variant:` and `size:` instead.
+    # @param input_attrs [Hash] HTML attrs passed through to `<input>`
+    def initialize(name:, value:, id:, **opts)
       super()
       @name = name
       @value = value
       @id = id
-      @checked = checked
-      @label_attrs = label
-      @input_attrs = input_attrs
+      @checked = opts.delete(:checked) { false }
+      @variant = opts.delete(:variant)
+      @size = opts.delete(:size)
+      @label_attrs = opts.delete(:label) || {}
+      @input_attrs = opts
     end
 
     def view_template(&block)
-      label(for: @id, **@label_attrs) do
+      render(::Components::Button.new(
+               tag: :label,
+               for: @id,
+               variant: @variant,
+               size: @size,
+               **@label_attrs
+             )) do
         input(**input_attributes)
         yield if block
       end

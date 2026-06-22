@@ -53,9 +53,12 @@ module Views::Controllers::RssLogs
     end
 
     def render_everything_button
-      span(class: everything_button_classes) do
-        filter_for_everything
-      end
+      render(::Components::Button.new(
+               tag: :span,
+               variant: :outline,
+               size: :sm,
+               class: ("active" if @types == ["all"])
+             )) { filter_for_everything }
     end
 
     def render_type_buttons
@@ -83,7 +86,8 @@ module Views::Controllers::RssLogs
       render(::Components::ApplicationForm::ButtonStyleCheckbox.new(
                name: "q[type][]", value: type,
                id: "type_#{type}", checked: type_checked?(type),
-               label: { class: type_button_classes },
+               variant: :outline, size: :sm,
+               label: { class: "filter-checkbox my-0" },
                class: "mt-0 mr-2"
              )) do
         filter_for_type(type)
@@ -110,23 +114,6 @@ module Views::Controllers::RssLogs
       a(href: link,
         title: :rss_one_help.t(type: type.to_sym),
         class: "filter-only") { label_text }
-    end
-
-    # CSS class helpers
-
-    def everything_button_classes
-      class_names("btn btn-outline-default btn-sm",
-                  { active: @types == ["all"] })
-    end
-
-    # No server-side `active:` class — the SCSS rule
-    # `.filter-checkbox:has(input:checked)` paints the pressed visual
-    # whenever the inner checkbox is checked. Side effect: multi-
-    # selected filters now ALL show as active (previously, only
-    # sole-selected types did because of the strict `@types == [type]`
-    # check). Honest UX — selected = visually active.
-    def type_button_classes
-      "btn btn-outline-default btn-sm filter-checkbox my-0"
     end
 
     # Query param helpers
