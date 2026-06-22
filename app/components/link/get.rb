@@ -41,8 +41,10 @@ class Components::Link::Get < Components::Link
     super(button: button)
   end
 
-  def view_template
-    link_to(path, link_html_options) { button_content }
+  def view_template(&block)
+    link_to(path, link_html_options) do
+      block ? yield : button_content
+    end
   end
 
   private
