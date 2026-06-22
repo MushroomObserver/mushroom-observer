@@ -36,6 +36,7 @@
 #   end
 class Components::Dropdown < Components::Base
   include Components::LinkRendering
+  include Components::ButtonStyling
 
   prop :id, ::String
   prop :menu_id, ::String
@@ -45,6 +46,12 @@ class Components::Dropdown < Components::Base
   # the index sort-bar (`Views::Layouts::Header::Sorter`) currently
   # passes any of these.
   prop :wrapper_class, _Nilable(::String), default: nil
+  # `toggle_variant:` / `toggle_size:` add Bootstrap btn styling to the
+  # toggle `<a>`. Extra non-btn classes (e.g. "font-weight-normal") still
+  # go in `toggle_class:`. When `toggle_variant:` is nil the toggle is a
+  # plain unstyled link (no "btn" class added).
+  prop :toggle_variant, _Nilable(::Symbol), default: nil
+  prop :toggle_size, _Nilable(::Symbol), default: nil
   prop :toggle_class, _Nilable(::String), default: nil
   prop :menu_class, _Nilable(::String), default: nil
   # Optional pre-section content rendered inside the menu `<ul>`
@@ -85,12 +92,22 @@ class Components::Dropdown < Components::Base
   private
 
   def render_toggle
-    a(class: class_names("dropdown-toggle", @toggle_class),
+    a(class: toggle_link_class,
       id: @id, role: "button", href: "#",
       data: { toggle: "dropdown" },
       aria: { haspopup: "true", expanded: "false" }) do
       span { plain(@label) }
       span(class: "caret ml-2")
+    end
+  end
+
+  def toggle_link_class
+    if @toggle_variant
+      class_names("dropdown-toggle btn",
+                  btn_class(@toggle_variant), size_class(@toggle_size),
+                  @toggle_class)
+    else
+      class_names("dropdown-toggle", @toggle_class)
     end
   end
 
