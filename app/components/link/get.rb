@@ -33,8 +33,9 @@ class Components::Link::Get < Components::Link
     @back    = opts.delete(:back)
     @params  = opts.delete(:params)
     @size    = opts.delete(:size)
-    @icon    = opts.delete(:icon)
+    @icon = opts.delete(:icon)
     @icon_class = opts.delete(:icon_class)
+    @label = opts.delete(:label)
     @html_attrs = opts
     validate_no_btn_classes!(@html_attrs[:class])
     super(button: button)

@@ -86,6 +86,8 @@ class Components::Button < Components::Base
     super
   end
 
+  include Components::ButtonContent
+
   def initialize(name: nil, variant: nil, size: nil, icon: nil, **html_attrs)
     super()
     @name = name
@@ -95,6 +97,7 @@ class Components::Button < Components::Base
     @type = html_attrs.delete(:type) || :button
     @icon = icon
     @icon_class = html_attrs.delete(:icon_class)
+    @label = html_attrs.delete(:label)
     onclick = html_attrs.delete(:onclick)
     @html_attrs = html_attrs
     # Phlex blocks `onclick` by name; wrap in SafeValue to opt in.
@@ -125,14 +128,5 @@ class Components::Button < Components::Base
 
   def extra_attrs
     @html_attrs.except(:class)
-  end
-
-  def button_content
-    if @icon
-      span(class: "sr-only") { trusted_html(@name) } if @name
-      render(Components::Icon.new(type: @icon, html_class: @icon_class))
-    elsif @name
-      trusted_html(@name)
-    end
   end
 end

@@ -82,10 +82,10 @@ class LegacyCrudButton < Components::Base
   def button_content
     capture do
       if @args[:icon]
-        span(class: "sr-only") { trusted_html(@name) }
         render(Components::Icon.new(
                  type: @args[:icon], html_class: @args[:icon_class]
                ))
+        span(class: "sr-only") { trusted_html(@name) }
       else
         trusted_html(@name)
       end

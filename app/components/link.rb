@@ -10,6 +10,7 @@
 # `button:` as a named kwarg and pass it through via `super(button:)`.
 class Components::Link < Components::Base
   include Components::ButtonStyling
+  include Components::ButtonContent
 
   prop :button, _Nilable(Symbol), default: nil
 
@@ -23,14 +24,5 @@ class Components::Link < Components::Base
     return nil if @button == :strip
 
     class_names("btn", btn_class(@button))
-  end
-
-  def button_content
-    if @icon
-      span(class: "sr-only") { trusted_html(@name) } if @name
-      render(Components::Icon.new(type: @icon, html_class: @icon_class))
-    elsif @name
-      trusted_html(@name)
-    end
   end
 end
