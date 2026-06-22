@@ -150,12 +150,12 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       # Verify autocompleter switched to location_google mode
       assert_selector("[data-type='location_google']", wait: 5)
 
-      # In a real browser the user's focus/click sequence fires
-      # `ourClick` on the place-name input after the mode swap,
-      # which triggers `scheduleGoogleRefresh` → geocoding. The
-      # JS-driven `execute_script("...click()")` above bypasses
-      # those events, so we have to fire one manually here.
-      find_field("herbarium_place_name").click
+      # Trigger geocoding: `ourClick` on the input → `scheduleRefresh`
+      # → `scheduleGoogleRefresh`. Capybara's `.click` doesn't reliably
+      # fire the event to Stimulus after the JS-driven mode swap above,
+      # so dispatch via JS — same pattern as the create-button click.
+      execute_script("arguments[0].click()",
+                     find_field("herbarium_place_name"))
 
       # Wait for hidden ID to be set (proves geocoding worked)
       assert_field("herbarium_location_id", with: "-1", type: :hidden, wait: 10)
