@@ -1,26 +1,28 @@
 # frozen_string_literal: true
 
-# Page-title-bar edit/destroy icons. Renders a pair of `<li>` items
-# with the CrudButton::Edit + CrudButton::Delete buttons, gated by
-# what the viewer can do to the object. Empty render when the viewer
-# has no permissions — the parent `<ul>` in
-# `Views::Layouts::Header::PageTitle` always renders so the flex
-# layout reserves the right-side slot even when no icons fire.
+# Page-title-bar edit/delete icons. Renders a `<ul>` with edit +
+# delete buttons gated by what the viewer can do to the object.
+# Always emits the `<ul>` — empty when the viewer has no permissions —
+# so the parent flex layout in `Views::Layouts::Header::PageTitle`
+# is consistent regardless of permission state.
 #
 # Rendered into `content_for(:edit_icons)` by
-# `Header::InterestAndEditIconsHelper#add_edit_icons`.
+# `Views::FullPageBase::Icons#add_edit_icons`.
 #
 # `Location` has a stricter destroy gate (model `destroyable?` + the
 # viewer owns the record or is in admin mode); other models follow
 # the edit-permission shape.
 module Views::Layouts
-  class Header::EditDestroyIcons < Views::Base
+  class Header::EditDeleteIcons < Views::Base
     prop :object, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      li { render_edit_button } if can_edit_object?
-      li { render_destroy_button } if can_destroy_object?
+      ul(class: "nav d-flex align-items-center " \
+                "justify-content-end mt-0 h4 object_edit") do
+        li { render_edit_button } if can_edit_object?
+        li { render_delete_button } if can_destroy_object?
+      end
     end
 
     private
@@ -31,7 +33,7 @@ module Views::Layouts
              ))
     end
 
-    def render_destroy_button
+    def render_delete_button
       render(::Components::CrudButton::Delete.new(
                target: @object, btn: nil
              ))

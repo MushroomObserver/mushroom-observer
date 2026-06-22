@@ -24,7 +24,7 @@ module Views::Layouts
     def view_template
       return unless visible?
 
-      ul(class: "navbar-flex pl-3 sorter") do
+      ul(class: "list-unstyled navbar-flex pl-3 sorter") do
         li(class: "navbar-text mx-0 hidden-xs") do
           plain("#{:sort_by_header.l}:")
         end

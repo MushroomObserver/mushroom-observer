@@ -16,12 +16,6 @@ module Views::Layouts
     SHOW_TITLE_CLASSES =
       "show_title_nav d-flex justify-content-between pl-3"
 
-    EDIT_ICONS_CLASSES = %w[
-      nav d-flex align-items-center justify-content-end mt-0 h4 object_edit
-    ].freeze
-
-    INTEREST_ICONS_CLASSES = "nav navbar-flex interest-eyes h4 my-0"
-
     def view_template
       div(class: "row", id: "title_bar") do
         render_left_column unless suppress_title?
@@ -37,7 +31,7 @@ module Views::Layouts
           h1(class: "h3 page-title mt-3 mb-4", id: "title") do
             trusted_html(content_for(:title))
           end
-          render_edit_icons
+          trusted_html(content_for(:edit_icons))
         end
         trusted_html(content_for(:owner_naming)) if content_for?(:owner_naming)
       end
@@ -47,25 +41,8 @@ module Views::Layouts
       div(class: class_names(content_for(:right_columns),
                              "hidden-print text-right")) do
         nav(class: "show_object_nav d-flex justify-content-between pr-3") do
-          render_interest_icons
-          trusted_html(content_for(:prev_next_object))
-        end
-      end
-    end
-
-    # Always-rendered <ul> even when no edit icons are queued — the
-    # flex layout reserves the right-side slot so titles don't
-    # jitter left when icons appear/disappear across pages.
-    def render_edit_icons
-      ul(class: class_names(EDIT_ICONS_CLASSES)) do
-        trusted_html(content_for(:edit_icons)) if content_for?(:edit_icons)
-      end
-    end
-
-    def render_interest_icons
-      ul(class: INTEREST_ICONS_CLASSES) do
-        if content_for?(:interest_icons)
           trusted_html(content_for(:interest_icons))
+          trusted_html(content_for(:prev_next_object))
         end
       end
     end
