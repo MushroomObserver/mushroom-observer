@@ -83,6 +83,14 @@ class Components::Button < Components::Base
       return const_get(klass_name).new(**kwargs, &block)
     end
 
+    if kwargs.key?(:type)
+      raise(ArgumentError.new(
+              "Unknown type: #{kwargs[:type].inspect}. " \
+              "Valid types: #{DISPATCH.keys.join(", ")}. " \
+              "Omit type: for a plain <button type=\"button\">."
+            ))
+    end
+
     super
   end
 

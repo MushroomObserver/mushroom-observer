@@ -3,7 +3,7 @@
 # GET link — emits `<a>` with CRUD path-building and optional btn styling.
 # Source of truth for model-targeted and path-targeted navigational links.
 # `Components::Button::Get` and its subclasses (Edit, New, Download)
-# delegate here with `button: :default`, producing `btn btn-default`.
+# delegate here with `button: nil`, producing `btn btn-default`.
 #
 # @example plain link (no button styling)
 #   render(Components::Link::Get.new(
@@ -28,11 +28,11 @@ class Components::Link::Get < Components::Link
     @target  = target
     @method  = :get
     @new_tab = new_tab
-    @confirm = opts.delete(:confirm)
+    opts.delete(:confirm)
     @action  = opts.delete(:action)
     @back    = opts.delete(:back)
-    @params  = opts.delete(:params)
-    @size    = opts.delete(:size)
+    opts.delete(:params)
+    @size = opts.delete(:size)
     @icon = opts.delete(:icon)
     @icon_class = opts.delete(:icon_class)
     @label = opts.delete(:label)
@@ -56,11 +56,12 @@ class Components::Link::Get < Components::Link
   def link_html_options
     base = { class: merged_class }
     base.merge!(tooltip_data) if @icon
+    base = base.deep_merge(@html_attrs.except(:class))
     if @new_tab
       base[:target] = "_blank"
       base[:rel] = "noopener noreferrer"
     end
-    base.deep_merge(@html_attrs.except(:class))
+    base
   end
 
   def tooltip_data
