@@ -16,6 +16,7 @@ class Components::CopyToClipboardButton < Components::Base
       type: "button",
       class: class_names("btn btn-default btn-xs", @extra_class),
       role: "button",
+      aria: { label: @title },
       data: {
         toggle: "tooltip", placement: "bottom", title: @title,
         controller: "clipboard", clipboard_text_value: @text,
