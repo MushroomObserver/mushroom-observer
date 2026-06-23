@@ -124,7 +124,7 @@ module Views::Controllers::Checklists
 
     def render_target_remove_footnote
       p do
-        span(class: "glyphicon glyphicon-remove text-danger")
+        render(::Components::Icon.new(type: :x, html_class: "text-danger"))
         plain(" #{:checklist_target_remove_footnote.l}")
       end
     end

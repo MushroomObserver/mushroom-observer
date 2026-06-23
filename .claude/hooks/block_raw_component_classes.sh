@@ -19,6 +19,7 @@
 #   app/components/panel.rb and app/components/panel/**
 #   app/components/dropdown.rb
 #   app/components/link/external.rb (owns target="_blank")
+#   app/components/carousel/controls.rb (owns chevron interpolation)
 set -euo pipefail
 
 INPUT="$(cat)"
@@ -54,7 +55,8 @@ is_exempt_file() {
     app/components/panel.rb|\
     app/components/panel/*|\
     app/components/dropdown.rb|\
-    app/components/link/external.rb) return 0 ;;
+    app/components/link/external.rb|\
+    app/components/carousel/controls.rb) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -95,6 +97,7 @@ case "$TOOL" in
       ':(exclude)app/components/panel/**' \
       ':(exclude)app/components/dropdown.rb' \
       ':(exclude)app/components/link/external.rb' \
+      ':(exclude)app/components/carousel/controls.rb' \
       | grep '^+[^+]' \
       | sed 's/^+//' \
       | grep -v '^[[:space:]]*#' \
@@ -193,6 +196,13 @@ check \
   'raw glyphicon/link-icon class' \
   'Components::Icon.new(type: :symbol)' \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\blink-icon\b' \
+  ''
+
+# raw glyphicon class (untyped, without going through Icon component)
+check \
+  'raw glyphicon class' \
+  'Components::Icon.new(type: :symbol)' \
+  'class:[[:space:]]*["'"'"'][^"'"'"']*\bglyphicon\b' \
   ''
 
 # table — raw table() calls or class: "table …"

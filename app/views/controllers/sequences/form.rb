@@ -48,6 +48,7 @@ module Views::Controllers::Sequences
                              class: "font-monospace") do |f|
         f.with_between do
           render(::Components::Help::Note.new(
+                   :span,
                    "(#{:form_sequence_bases_or_deposit_required.t})"
                  ))
           render(::Components::Link::External.new(
@@ -67,6 +68,7 @@ module Views::Controllers::Sequences
     def render_deposit_fields
       label(for: "sequence_deposit", class: "mr-3") { :DEPOSIT.l }
       render(::Components::Help::Note.new(
+               :span,
                "(#{:form_sequence_valid_deposit.t})"
              ))
       render_archive_select

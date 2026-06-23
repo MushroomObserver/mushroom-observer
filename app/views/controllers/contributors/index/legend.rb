@@ -49,7 +49,7 @@ module Views::Controllers::Contributors
                          target: "#contribution_legend" },
                  aria: { expanded: "false",
                          controls: "contribution_legend" }
-               )) { span(class: "glyphicon glyphicon-info-sign") }
+               )) { render(::Components::Icon.new(type: :info_circle)) }
       end
 
       def render_body

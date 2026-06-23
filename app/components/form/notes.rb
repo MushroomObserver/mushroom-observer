@@ -84,7 +84,7 @@ class Components::Form::Notes < Components::Base
   # Always-shown textile-formatting help, at the bottom of the body.
   # Same content for both modes.
   def render_textile_help
-    render(::Components::Help::Block.new(:shared_textile_help.l))
+    render(::Components::Help::Block.new(:div, :shared_textile_help.l))
   end
 
   def render_part(notes_ns, part)

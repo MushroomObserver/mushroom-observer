@@ -162,7 +162,7 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "small mt-3") do
       a(href: occurrence_path(occ), class: "occurrence-link") do
-        span(class: "glyphicon glyphicon-th-large")
+        render(::Components::Icon.new(type: :matrix))
         plain(" ")
         plain(:matrix_box_occurrence.l)
       end
