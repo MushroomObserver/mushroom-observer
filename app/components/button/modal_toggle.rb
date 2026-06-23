@@ -19,16 +19,22 @@
 class Components::Button::ModalToggle < Components::Base
   include Components::ButtonStyling
 
-  def initialize(name:, target:, modal_id:, variant: nil, **)
-    @name     = name
-    @path     = target
-    @modal_id = modal_id
-    @button   = variant
+  def initialize(name:, target:, modal_id:, variant: nil, **opts)
+    @name       = name
+    @path       = target
+    @modal_id   = modal_id
+    @button     = variant
+    @extra_data = opts.delete(:data) || {}
+    @html_class = opts.delete(:class)
+    @html_attrs = opts
     super()
   end
 
   def view_template
-    link_to(@name, @path, class: merged_class, data: modal_data)
+    link_to(@name, @path,
+            class: merged_class,
+            data: modal_data.merge(@extra_data),
+            **@html_attrs)
   end
 
   private
@@ -40,7 +46,7 @@ class Components::Button::ModalToggle < Components::Base
   end
 
   def merged_class
-    btn_styling
+    class_names(btn_styling, @html_class)
   end
 
   def modal_data
