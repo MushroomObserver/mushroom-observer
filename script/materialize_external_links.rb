@@ -35,6 +35,9 @@ class MaterializeExternalLinks
               (?:observations/|obs/|observer/show_observation/)?(\d+)}x
   MIRROR_RE = /Mirrored on iNaturalist/i
   MANUAL_RE = /inaturalist\.org/i
+  # Pre-#4299 manual links stored only a url (no external_id); recover the
+  # iNat obs id from it so dedup compares correctly.
+  INAT_URL_RE = %r{inaturalist\.org/observations/(\d+)}
 
   def initialize(opts)
     @csv = opts.fetch(:csv)
@@ -104,10 +107,16 @@ class MaterializeExternalLinks
   # run), plus the DB link if any.
   def existing_inat_id(mo_id, links)
     if (link = links[mo_id])
-      [link.external_id.to_s, link]
+      [link_inat_id(link), link]
     else
       [@materialized[mo_id], nil]
     end
+  end
+
+  # The iNat obs id a link points at: its external_id, or — for legacy
+  # manual links that only stored a url — parsed from the url.
+  def link_inat_id(link)
+    (link.external_id.presence || link.url.to_s[INAT_URL_RE, 1]).to_s
   end
 
   def create_link(obs, row)
