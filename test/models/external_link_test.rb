@@ -111,14 +111,14 @@ class ExternalLinkTest < UnitTestCase
                  "Link for different observation should be valid")
   end
 
-  def test_relationship_defaults_to_cross_reference
+  def test_relationship_defaults_to_manual
     site = external_sites(:mycoportal)
     link = ExternalLink.create!(
       user: mary, observation: observations(:minimal_unknown_obs),
       external_site: site, url: "#{site.base_url}1"
     )
-    assert(link.cross_reference?,
-           "New links default to cross_reference (historical meaning)")
+    assert(link.manual?,
+           "New links default to manual (user-added cross-links)")
   end
 
   def test_only_one_import_per_target
@@ -132,9 +132,9 @@ class ExternalLinkTest < UnitTestCase
     assert_not_empty(link.errors[:relationship])
   end
 
-  def test_cross_reference_can_be_upgraded_to_import
+  def test_manual_link_can_be_upgraded_to_import
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
-    assert(link.cross_reference?, "Fixture link starts as cross_reference")
+    assert(link.manual?, "Fixture link starts as manual")
     link.update!(relationship: :import, external_id: "234723")
     assert(link.reload.import?, "Link should upgrade to import in place")
   end

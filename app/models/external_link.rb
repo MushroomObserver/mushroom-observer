@@ -25,14 +25,21 @@
 #
 class ExternalLink < AbstractModel
   # The kind of relationship this link records between the target and the
-  # external site (#4299). `cross_reference` (0) is the historical meaning of
-  # pre-existing rows, so it is the default. `import` marks the external
-  # source the target was imported from — at most one per target (enforced
-  # below and by a DB unique index on a generated column). New values are
-  # added by migration as needed.
+  # external site (#4299/#4565). Drives the Show-page credit wording (the
+  # site name comes from ExternalSite):
+  #   manual  — a user hand-linked the obs            "Manual link to <site>"
+  #   import  — MO created the obs from the source     "Imported from <site>"
+  #   export  — (future) MO pushes the obs out         "Exported to <site>"
+  #   mirror  — MO mirrored its native obs to source   "Mirrored to <site>"
+  #   copy    — the source copied/back-referenced it   "Copied by <site>"
+  #   unknown — link exists, type unrecorded           "Linked to <site>"
+  # `manual` (0) is the default — pre-existing rows are user-added links.
+  # `import` marks the external source the target was imported from — at most
+  # one per target (enforced below and by a DB unique index on a generated
+  # column). Only 0/1 were ever in production, so 2-5 are free to define.
   enum :relationship,
-       { cross_reference: 0, import: 1, export: 2, mirror: 3, unknown: 4 },
-       default: :cross_reference
+       { manual: 0, import: 1, export: 2, mirror: 3, copy: 4, unknown: 5 },
+       default: :manual
 
   # Polymorphic so a link can attach to an Observation or an Image (per-photo
   # import provenance, #4529) — one model, one code path (#4299).
