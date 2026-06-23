@@ -748,6 +748,7 @@
   close: close
   COPY_THIS_ID: "Copy this [:ID]"
   COPY_THIS_NAME: "Copy this [:NAME]"
+  COPY_THIS_SEQUENCE: "Copy this [:SEQUENCE]"
   COPIED: Copied
   CREATE: Create
   create: create
@@ -2466,7 +2467,8 @@
   show_observation_dna_sequences: DNA sequences
   show_observation_no_sequences: No DNA sequences
   show_observation_archive_link: Show Archive Record
-  show_observation_blast_link: Run BLAST®
+  show_observation_blast_link: Run NCBI BLAST®
+  show_observation_mycoblast_link: Open MycoBLAST
   show_observation_more_like_this: More like this
   show_observation_look_alikes: Look-alikes
   show_observation_related_taxa: Related taxa
