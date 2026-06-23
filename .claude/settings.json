@@ -27,6 +27,16 @@
         ]
       },
       {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/enforce_batch_reads.sh && exec .claude/hooks/enforce_batch_reads.sh || exit 0",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
           {

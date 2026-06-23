@@ -68,13 +68,13 @@ Reach for the appropriate `Components::Button` subclass instead:
   POST action      → Components::Button::Post.new(name: …, target: …)
   PATCH/PUT action → Components::Button::Patch / Button::Put
   Plain GET link   → Components::Button::Get.new(name: …, target: …)
-  Download link    → Components::Button::Download.new(target: …, style: nil)
+  Download link    → Components::Button::Download.new(target: …)
   Modal trigger    → Components::Button::ModalToggle.new(…, modal_id: …)
-  External link    → Components::Button::ExternalLink.new(name: …, url: …)
+  External link    → Components::Button::External.new(url: …, name: …)
   Submit button    → Components::Button::Submit.new(name: …)
 
 If you genuinely need a one-off btn style that no subclass covers,
-pass `style: :primary` (or the named style) to the closest subclass
+pass `variant: :primary` (or the named variant) to the closest subclass
 rather than hand-rolling the class string.
 
 Offending lines:
