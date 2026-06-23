@@ -45,10 +45,10 @@ module Views::Controllers::SpeciesLists
 
     # The species_list download path is irregular
     # (`new_download_species_list_path`, not `download_species_list_path`)
-    # so build the path explicitly and pass it to `CrudButton::Download`
+    # so build the path explicitly and pass it to `CRUDButton::Download`
     # as a String target.
     def render_download_button
-      render(Components::CrudButton::Download.new(
+      render(Components::CRUDButton::Download.new(
                target: new_download_species_list_path(id: @species_list.id)
              ))
     end

@@ -117,7 +117,7 @@ class Views::Controllers::Descriptions::DetailsAndAltsPanelTest <
     html = render(new_panel(description: desc, user: reviewer, review: true))
 
     # `reviewers-only` block carries the unvetted/vetted/inaccurate
-    # `CrudButton::Put` row.
+    # `CRUDButton::Put` row.
     assert_html(html, ".panel-footer .reviewers-only")
   end
 

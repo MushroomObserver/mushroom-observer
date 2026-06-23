@@ -15,7 +15,7 @@
 #   CSRF/turbo wiring.
 #
 # Usage:
-#   render(Components::CrudButton.new(
+#   render(Components::CRUDButton.new(
 #     name: :REMOVE.l,
 #     target: @herbarium,  # or a path string
 #     method: :patch,
@@ -24,7 +24,7 @@
 #     icon: :remove
 #   ))
 #
-class Components::CrudButton < Components::Base
+class Components::CRUDButton < Components::Base
   # Actions that map to a Rails-generated named route prefix. Anything
   # else (HTTP-verb actions like `:patch`, or undefined custom actions)
   # gets the bare resource path; the HTTP method is set separately via
@@ -35,7 +35,7 @@ class Components::CrudButton < Components::Base
   # the parent obs `show` page or from their own `index` page — the
   # `?back=show|index` query string round-trips that context so the
   # controller can redirect back to where the user came from after the
-  # edit/destroy. When `Components::CrudButton::{Edit,Delete}` is
+  # edit/destroy. When `Components::CRUDButton::{Edit,Delete}` is
   # rendered from one of these controllers, the appropriate `back:`
   # default is injected automatically (unless the caller passes
   # `back:` explicitly). See `default_back_param` below.
@@ -94,7 +94,7 @@ class Components::CrudButton < Components::Base
     class_names(identifier, @args[:btn], @args[:class])
   end
 
-  # Keys consumed by CrudButton itself — must be stripped before
+  # Keys consumed by CRUDButton itself — must be stripped before
   # `@args` is merged into the underlying `link_to` / `button_to`
   # call, otherwise they'd leak through as HTML attributes.
   def ignored_arg_keys

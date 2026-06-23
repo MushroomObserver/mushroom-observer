@@ -38,7 +38,7 @@ class Tab::Name::RefreshClassification < Tab::Base
     refresh_classification_of_name_path(@name.id)
   end
 
-  # `button: :put` tells `Components::CrudButton::Put` (or any
+  # `button: :put` tells `Components::CRUDButton::Put` (or any
   # tab-rendering consumer) to emit a `<button>` posting PUT,
   # matching the legacy `put_button(...)` helper output.
   def html_options

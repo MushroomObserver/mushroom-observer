@@ -32,7 +32,7 @@ module Views::Controllers::Projects::Aliases
       alias_data.each do |name, id|
         render_edit_link(name, id)
         span(class: "mx-2")
-        render(Components::CrudButton::Delete.new(
+        render(Components::CRUDButton::Delete.new(
                  target: project_alias_path(
                    project_id: @project.id, id: id
                  ),

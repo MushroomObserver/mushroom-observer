@@ -52,7 +52,7 @@ class Views::Layouts::TopNav
                   text: :app_context_actions.l)
     end
 
-    # `args[:button] => :destroy` routes through `CrudButton::Delete`
+    # `args[:button] => :destroy` routes through `CRUDButton::Delete`
     # with the context-nav opt-outs (`icon: nil`, `btn: nil`) so the
     # destroy renders as plain `[ DESTROY ]`-style text.
     def test_destroy_button_renders_as_plain_text_link
@@ -74,7 +74,7 @@ class Views::Layouts::TopNav
       assert_html(html, "button", text: "Click")
     end
 
-    # `args[:button] => :put` dispatches through `CrudButton::Put`,
+    # `args[:button] => :put` dispatches through `CRUDButton::Put`,
     # used by Tab::Description::MakeDefault / PublishDraft etc.
     def test_put_button_renders_as_form
       links = [["Make Default", "/x/1/make_default", { button: :put }]]
@@ -84,7 +84,7 @@ class Views::Layouts::TopNav
       assert_html(html, "input[name='_method'][value='put']")
     end
 
-    # `args[:button] => :patch` dispatches through `CrudButton::Patch`.
+    # `args[:button] => :patch` dispatches through `CRUDButton::Patch`.
     def test_patch_button_renders_as_form
       links = [["Update", "/x/1", { button: :patch }]]
       html = render_top_bar(links)

@@ -28,13 +28,13 @@ module Views::Layouts
     private
 
     def render_edit_button
-      render(::Components::CrudButton::Edit.new(
+      render(::Components::CRUDButton::Edit.new(
                target: @object, btn: nil
              ))
     end
 
     def render_delete_button
-      render(::Components::CrudButton::Delete.new(
+      render(::Components::CRUDButton::Delete.new(
                target: @object, btn: nil
              ))
     end

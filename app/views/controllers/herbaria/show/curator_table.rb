@@ -34,7 +34,7 @@ module Views::Controllers::Herbaria
       end
 
       def render_delete_cell(user)
-        render(::Components::CrudButton::Delete.new(
+        render(::Components::CRUDButton::Delete.new(
                  name: "X",
                  target: herbaria_curator_path(@herbarium, user: user.id),
                  id: "delete_herbarium_curator_link_#{user.id}",

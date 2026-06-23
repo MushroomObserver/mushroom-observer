@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-# Pre-refactor CrudButton implementation, verbatim from main.
+# Pre-refactor CRUDButton implementation, verbatim from main.
 # Used as the "before" state in parity comparisons.
-class LegacyCrudButton < Components::Base
+class LegacyCRUDButton < Components::Base
   NAMED_ROUTE_ACTIONS = [:edit, :new, :download].freeze
   LEGACY_SHOW_OBS_EDITABLES = %w[
     collection_numbers herbarium_records sequences external_links
@@ -142,13 +142,13 @@ class LegacyCrudButton < Components::Base
   end
 end
 
-class LegacyCrudButtonGet < LegacyCrudButton
+class LegacyCRUDButtonGet < LegacyCRUDButton
   def initialize(target:, name:, **args)
     super(target: target, name: name, method: :get, **args)
   end
 end
 
-class LegacyCrudButtonEdit < LegacyCrudButtonGet
+class LegacyCRUDButtonEdit < LegacyCRUDButtonGet
   def initialize(target:, name: nil, **args)
     args[:icon] = :edit unless args.key?(:icon)
     super(target: target,
@@ -166,7 +166,7 @@ class LegacyCrudButtonEdit < LegacyCrudButtonGet
   end
 end
 
-class LegacyCrudButtonDelete < LegacyCrudButton
+class LegacyCRUDButtonDelete < LegacyCRUDButton
   def initialize(target:, name: nil, **args)
     args[:class] = [args[:class], "text-danger"].compact.join(" ").strip
     args[:confirm] ||= :are_you_sure.l
@@ -189,25 +189,25 @@ class LegacyCrudButtonDelete < LegacyCrudButton
   end
 end
 
-class LegacyCrudButtonPost < LegacyCrudButton
+class LegacyCRUDButtonPost < LegacyCRUDButton
   def initialize(target:, name:, **args)
     super(target: target, name: name, method: :post, **args)
   end
 end
 
-class LegacyCrudButtonPut < LegacyCrudButton
+class LegacyCRUDButtonPut < LegacyCRUDButton
   def initialize(target:, name:, **args)
     super(target: target, name: name, method: :put, **args)
   end
 end
 
-class LegacyCrudButtonPatch < LegacyCrudButton
+class LegacyCRUDButtonPatch < LegacyCRUDButton
   def initialize(target:, name:, **args)
     super(target: target, name: name, method: :patch, **args)
   end
 end
 
-class LegacyCrudButtonDownload < LegacyCrudButtonGet
+class LegacyCRUDButtonDownload < LegacyCRUDButtonGet
   def initialize(target:, name: nil, **args)
     args[:icon] = :download unless args.key?(:icon)
     super(target: target,
@@ -217,7 +217,7 @@ class LegacyCrudButtonDownload < LegacyCrudButtonGet
   end
 end
 
-class LegacyCrudButtonNew < LegacyCrudButtonGet
+class LegacyCRUDButtonNew < LegacyCRUDButtonGet
   def initialize(target:, name: nil, **args)
     args[:icon] = :add unless args.key?(:icon)
     super(target: target,
@@ -276,7 +276,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   # --- Button::Edit ---
 
   def test_edit_parity_defaults
-    old_html = render(LegacyCrudButtonEdit.new(target: @herb))
+    old_html = render(LegacyCRUDButtonEdit.new(target: @herb))
     new_html = render(Components::Button::Edit.new(target: @herb,
                                                    variant: :strip))
 
@@ -286,7 +286,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   end
 
   def test_edit_parity_text_only_with_extra_class
-    old_html = render(LegacyCrudButtonEdit.new(
+    old_html = render(LegacyCRUDButtonEdit.new(
                         target: @herb,
                         name: "Custom Edit",
                         icon: nil,
@@ -308,7 +308,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   # --- Button::Delete ---
 
   def test_delete_parity_defaults
-    old_html = render(LegacyCrudButtonDelete.new(target: @herb))
+    old_html = render(LegacyCRUDButtonDelete.new(target: @herb))
     new_html = render(Components::Button::Delete.new(target: @herb,
                                                      variant: :strip))
 
@@ -318,7 +318,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   end
 
   def test_delete_parity_custom_confirm_and_name
-    old_html = render(LegacyCrudButtonDelete.new(
+    old_html = render(LegacyCRUDButtonDelete.new(
                         target: @herb,
                         name: :REMOVE.l,
                         confirm: "Remove this herbarium?",
@@ -342,7 +342,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   # --- Button::Post ---
 
   def test_post_parity_defaults
-    old_html = render(LegacyCrudButtonPost.new(
+    old_html = render(LegacyCRUDButtonPost.new(
                         name: :show_project_join.l,
                         target: @path,
                         btn: "btn btn-default"
@@ -358,7 +358,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   end
 
   def test_post_parity_with_confirm_and_extra_data
-    old_html = render(LegacyCrudButtonPost.new(
+    old_html = render(LegacyCRUDButtonPost.new(
                         name: "Submit",
                         target: @path,
                         btn: "btn btn-default",
@@ -380,7 +380,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   # --- Button::Patch ---
 
   def test_patch_parity_defaults
-    old_html = render(LegacyCrudButtonPatch.new(
+    old_html = render(LegacyCRUDButtonPatch.new(
                         name: "Update",
                         target: @path,
                         btn: "btn btn-default"
@@ -396,7 +396,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   end
 
   def test_patch_parity_with_confirm
-    old_html = render(LegacyCrudButtonPatch.new(
+    old_html = render(LegacyCRUDButtonPatch.new(
                         name: "Update",
                         target: @path,
                         btn: "btn btn-default",
@@ -416,7 +416,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   # --- Button::Put ---
 
   def test_put_parity_defaults
-    old_html = render(LegacyCrudButtonPut.new(
+    old_html = render(LegacyCRUDButtonPut.new(
                         name: "Replace",
                         target: @path,
                         btn: "btn btn-default"
@@ -432,7 +432,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   end
 
   def test_put_parity_with_confirm_and_extra_class
-    old_html = render(LegacyCrudButtonPut.new(
+    old_html = render(LegacyCRUDButtonPut.new(
                         name: "Replace",
                         target: @path,
                         btn: "btn btn-default",
@@ -454,7 +454,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   # --- Button::Get (plain string target) ---
 
   def test_get_parity_defaults
-    old_html = render(LegacyCrudButtonGet.new(
+    old_html = render(LegacyCRUDButtonGet.new(
                         name: "View",
                         target: @path,
                         btn: "btn btn-default"
@@ -470,7 +470,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
   end
 
   def test_get_parity_with_icon_and_extra_attrs
-    old_html = render(LegacyCrudButtonGet.new(
+    old_html = render(LegacyCRUDButtonGet.new(
                         name: "View",
                         target: @path,
                         btn: "btn btn-default",
@@ -493,13 +493,13 @@ class Components::Button::CrudParityTest < ComponentTestCase
 
   # --- Button::Download (explicit-path target) ---
   #
-  # Old CrudButton::Download had no btn: default (no button frame).
+  # Old CRUDButton::Download had no btn: default (no button frame).
   # The real caller (SpeciesLists::Details) now passes variant: :strip
   # explicitly to preserve that appearance.
 
   def test_download_parity_defaults
     dl_path = "/species_lists/123/download"
-    old_html = render(LegacyCrudButtonDownload.new(target: dl_path))
+    old_html = render(LegacyCRUDButtonDownload.new(target: dl_path))
     new_html = render(Components::Button::Download.new(
                         target: dl_path,
                         variant: :strip
@@ -512,7 +512,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
 
   def test_download_parity_custom_name_text_only
     dl_path = "/species_lists/456/download"
-    old_html = render(LegacyCrudButtonDownload.new(
+    old_html = render(LegacyCRUDButtonDownload.new(
                         target: dl_path,
                         name: "Export CSV",
                         icon: nil
@@ -531,12 +531,12 @@ class Components::Button::CrudParityTest < ComponentTestCase
 
   # --- Button::New (explicit-path target) ---
   #
-  # Old CrudButton::New had no btn: default (no button frame).
+  # Old CRUDButton::New had no btn: default (no button frame).
   # Pass variant: :strip to the new component to match that shape.
 
   def test_new_parity_defaults
     new_path = routes.new_herbarium_path
-    old_html = render(LegacyCrudButtonNew.new(target: new_path))
+    old_html = render(LegacyCRUDButtonNew.new(target: new_path))
     new_html = render(Components::Button::New.new(
                         target: new_path,
                         variant: :strip
@@ -549,7 +549,7 @@ class Components::Button::CrudParityTest < ComponentTestCase
 
   def test_new_parity_text_only_with_extra_class
     new_path = routes.new_herbarium_path
-    old_html = render(LegacyCrudButtonNew.new(
+    old_html = render(LegacyCRUDButtonNew.new(
                         target: new_path,
                         name: "Add Herbarium",
                         icon: nil,

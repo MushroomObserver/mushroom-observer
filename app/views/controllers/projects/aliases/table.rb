@@ -40,7 +40,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_actions_cell(alias_)
-      render(Components::CrudButton::Edit.new(
+      render(Components::CRUDButton::Edit.new(
                target: edit_project_alias_path(
                  project_id: alias_.project_id, id: alias_.id
                ),
@@ -48,7 +48,7 @@ module Views::Controllers::Projects::Aliases
                btn: nil
              ))
       span(class: "mx-2")
-      render(Components::CrudButton::Delete.new(
+      render(Components::CRUDButton::Delete.new(
                target: project_alias_path(
                  project_id: alias_.project_id, id: alias_.id
                ),

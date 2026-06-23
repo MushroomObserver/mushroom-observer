@@ -41,7 +41,7 @@ module Views::Controllers::Images
       end
 
       def render_transform_button(operation, label_key)
-        render(::Components::CrudButton::Put.new(
+        render(::Components::CRUDButton::Put.new(
                  name: label_key.t,
                  target: transform_image_path(id: @image.id,
                                               op: operation, size: @size),

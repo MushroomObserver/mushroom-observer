@@ -102,7 +102,7 @@ module Views::Controllers::Projects
     def render_administer_button
       return unless @user&.admin && !@project.is_admin?(@user)
 
-      render(Components::CrudButton::Post.new(
+      render(Components::CRUDButton::Post.new(
                name: :show_project_administer.l,
                target: project_administration_path(project_id: @project.id),
                class: action_button_class
@@ -118,7 +118,7 @@ module Views::Controllers::Projects
     end
 
     def render_join_button
-      render(Components::CrudButton::Post.new(
+      render(Components::CRUDButton::Post.new(
                name: :show_project_join.l,
                target: project_members_path(
                  project_id: @project.id,
@@ -148,7 +148,7 @@ module Views::Controllers::Projects
     end
 
     def render_leave_button
-      render(Components::CrudButton::Put.new(
+      render(Components::CRUDButton::Put.new(
                name: :show_project_leave.t,
                target: project_member_path(
                  project_id: @project.id,
@@ -182,7 +182,7 @@ module Views::Controllers::Projects
       ) { plain(:show_project_admin_request.l) }
     end
 
-    # Not a CrudButton candidate — count-badge link with `btn-warning`
+    # Not a CRUDButton candidate — count-badge link with `btn-warning`
     # styling when constraints are violated, not a standard action button.
     def render_violations_button
       return unless @project.constraints?

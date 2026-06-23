@@ -19,13 +19,13 @@ module Components::LinkRendering
 
   # Strips MO-specific keys from the args hash and blends in any
   # extra_args' class. Returns a kwargs hash safe to splat into a
-  # `link_to` / `button_to` / `CrudButton::*` call.
+  # `link_to` / `button_to` / `CRUDButton::*` call.
   def merge_context_nav_link_args(args, extra_args)
     mix(args.except(:button, :target), extra_args)
   end
 
   # Dispatch one `[text, url, args]` link tuple to the right HTML
-  # element. Buttons go through the corresponding `CrudButton::*`
+  # element. Buttons go through the corresponding `CRUDButton::*`
   # subclass; plain `link_to` is the default.
   def render_crud_button_or_link(str, url, args, kwargs)
     case args[:button]
@@ -33,19 +33,19 @@ module Components::LinkRendering
       button_to(str, url, **kwargs)
     when :destroy
       # Context-nav destroy tabs render as plain `[ DESTROY ]`-style
-      # text links — opt out of `CrudButton::Delete`'s default icon
+      # text links — opt out of `CRUDButton::Delete`'s default icon
       # AND button-frame via `icon: nil` + `btn: nil` (callers can
       # override either by passing the kwarg).
-      render(Components::CrudButton::Delete.new(
+      render(Components::CRUDButton::Delete.new(
                name: str, target: args[:target] || url,
                **kwargs.reverse_merge(icon: nil, btn: nil)
              ))
     when :put
-      render(Components::CrudButton::Put.new(
+      render(Components::CRUDButton::Put.new(
                name: str, target: url, **kwargs
              ))
     when :patch
-      render(Components::CrudButton::Patch.new(
+      render(Components::CRUDButton::Patch.new(
                name: str, target: url, **kwargs
              ))
     else

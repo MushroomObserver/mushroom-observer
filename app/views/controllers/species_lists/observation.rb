@@ -87,7 +87,7 @@ module Views::Controllers::SpeciesLists
     # `confirm:` is the Turbo-confirm kwarg; `data: { confirm: … }` is
     # a no-op under Turbo (rails-ujs is not wired).
     def render_remove_obs_button
-      render(Components::CrudButton::Put.new(
+      render(Components::CRUDButton::Put.new(
                name: :REMOVE.t,
                target: observation_species_list_path(
                  id: @observation.id,

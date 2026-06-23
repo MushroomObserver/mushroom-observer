@@ -66,7 +66,7 @@ module Views::Controllers::CollectionNumbers
     def render_delete_button(collection_number)
       return unless can_edit?(collection_number)
 
-      render(Components::CrudButton::Delete.new(
+      render(Components::CRUDButton::Delete.new(
                target: collection_number, class: "btn-sm"
              ))
     end

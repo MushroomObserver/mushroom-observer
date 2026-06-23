@@ -79,7 +79,7 @@ module Views::Controllers::HerbariumRecords
     def render_delete_button(rec)
       return unless can_edit?(rec)
 
-      render(Components::CrudButton::Delete.new(
+      render(Components::CRUDButton::Delete.new(
                target: herbarium_record_path(rec.id, back: :index),
                name: :destroy_object.t(type: :herbarium_record),
                class: "btn-sm destroy_herbarium_record_link_#{rec.id}"

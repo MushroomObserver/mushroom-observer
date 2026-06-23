@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-class Components::CrudButton
-  # PATCH-method `CrudButton`.
+class Components::CRUDButton
+  # PATCH-method `CRUDButton`.
   #
   # @example
-  #   render(Components::CrudButton::Patch.new(
+  #   render(Components::CRUDButton::Patch.new(
   #     name: :ACTIVATE.l,
   #     target: account_activate_api_key_path(key.id)
   #   ))
-  class Patch < Components::CrudButton
+  class Patch < Components::CRUDButton
     def initialize(target:, name:, **args)
       super(target: target, name: name, method: :patch, **args)
     end

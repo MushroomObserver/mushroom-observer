@@ -44,7 +44,7 @@ module Views::Controllers::Locations
       end
 
       def render_destroy_button
-        render(::Components::CrudButton::Delete.new(
+        render(::Components::CRUDButton::Delete.new(
                  target: @location, btn: nil
                ))
       end

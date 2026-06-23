@@ -92,7 +92,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_remove_obs_button
-      render(Components::CrudButton::Put.new(
+      render(Components::CRUDButton::Put.new(
                name: :REMOVE.t,
                target: observation_species_list_path(
                  id: @observation.id,
@@ -106,7 +106,7 @@ module Views::Controllers::SpeciesLists
     # `btn: "btn btn-default"` gives the ADD button Bootstrap button-shape —
     # without it the row's ADD action renders as a bare link.
     def render_add_obs_button
-      render(Components::CrudButton::Put.new(
+      render(Components::CRUDButton::Put.new(
                name: :ADD.t,
                target: observation_species_list_path(
                  id: @observation.id,
