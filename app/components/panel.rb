@@ -133,16 +133,12 @@ class Components::Panel < Components::Base
   end
 
   def render_collapse_icons
-    classes = class_names(
-      "panel-collapse-trigger ml-3", @expanded ? "" : "collapsed"
-    )
-    link_to(
-      "javascript:void(0)",
-      role: :button,
-      class: classes,
-      data: { toggle: "collapse", target: @collapse_target },
-      aria: { expanded: @expanded, controls: @collapse_id }
-    ) do
+    render(::Components::Link::CollapseToggle.new(
+             target_id: @collapse_id || "",
+             collapsed: !@expanded,
+             class: "panel-collapse-trigger ml-3",
+             data: { target: @collapse_target }
+           )) do
       render_collapse_message
 
       render(Components::Icon.new(

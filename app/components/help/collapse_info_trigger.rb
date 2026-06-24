@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-# Collapse info trigger component - clickable icon that toggles collapse
+# Question-icon collapse trigger — thin wrapper over
+# `Components::Link::CollapseToggle` that fixes the icon and the
+# `info-collapse-trigger` class so callers don't repeat them.
 #
 # @example
 #   render(Components::Help::CollapseInfoTrigger.new(target_id: "help_text_1"))
@@ -12,13 +14,10 @@ class Components::Help::CollapseInfoTrigger < Components::Base
   prop :extra_class, String, default: ""
 
   def view_template
-    a(
-      href: "##{@target_id}",
-      class: class_names("info-collapse-trigger", @extra_class),
-      role: "button",
-      data: { toggle: "collapse" },
-      aria: { expanded: "false", controls: @target_id }
-    ) do
+    render(::Components::Link::CollapseToggle.new(
+             target_id: @target_id,
+             class: class_names("info-collapse-trigger", @extra_class)
+           )) do
       render(::Components::Icon.new(type: :question))
     end
   end
