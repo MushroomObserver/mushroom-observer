@@ -95,7 +95,11 @@ module Views::Controllers::Sequences
 
     def render_blast_link
       tab = ::Tab::Sequence::Blast.new(sequence: @sequence)
-      p { render(::Components::Button.new(type: :external, name: tab.title, url: tab.path)) }
+      p do
+        render(::Components::Button.new(type: :external,
+                                        name: tab.title,
+                                        url: tab.path))
+      end
     end
 
     def render_archive_link

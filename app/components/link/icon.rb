@@ -122,12 +122,15 @@ class Components::Link::Icon < Components::Base
   end
 
   def link_attrs
+    # help: carries the confirm-dialog text (e.g. description Clone/Merge/Move).
+    # Turbo intercepts the navigation and shows the dialog before proceeding.
     base = {
       title: @content,
       class: class_names("icon-link", @opts[:class]),
       data: { toggle: "tooltip", title: @content,
               active_title: @opts[:active_content] }
     }
+    base[:data][:turbo_confirm] = @opts[:help] if @opts[:help]
     base[:role] = "button" if @opts[:button_to]
     base.deep_merge(@opts.except(*CONSUMED_OPTS))
   end
