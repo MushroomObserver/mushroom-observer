@@ -268,18 +268,17 @@ root> cat > /etc/postfix/sasl_passwd <<'EOF'
 [smtp.gmail.com]:587 SENDER:APPPW
 EOF
 root> chmod 600 /etc/postfix/sasl_passwd && postmap /etc/postfix/sasl_passwd
-  # Rewrite outbound From to the authed sender (Gmail rejects a mismatched From):
-root> printf '@mushroomobserver.org\tSENDER\n@mushroomobserver\tSENDER\n' \
-        > /etc/postfix/generic && postmap /etc/postfix/generic
 root> postconf -e \
         'relayhost = [smtp.gmail.com]:587' \
         'smtp_sasl_auth_enable = yes' \
         'smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd' \
         'smtp_sasl_security_options = noanonymous' \
         'smtp_tls_security_level = encrypt' \
-        'smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt' \
-        'smtp_generic_maps = hash:/etc/postfix/generic'
+        'smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt'
 root> systemctl reload postfix
+  # No From-rewriting needed: smtp.gmail.com rewrites the From to the
+  # authenticated account itself. (Do NOT add smtp_generic_maps for this --
+  # a `@domain -> addr` generic rewrites RECIPIENTS too and will misroute mail.)
   # Verify: confirm "status=sent" (not "bounced") in the mail log:
 root> echo "relay test $(date)" | mail -s "relay test" webmaster@mushroomobserver.org
 root> tail -20 /var/log/mail.log
