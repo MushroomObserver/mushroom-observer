@@ -54,7 +54,7 @@ class Components::Link::External < Components::Base
   # off it to get the bare iNat id either way.
   def link_content
     if inaturalist?
-      "iNat #{@link.link_url.sub(@link.external_site.base_url, "")}"
+      "iNat #{@link.link_url.delete_prefix(@link.external_site.base_url)}"
     else
       :on_site.t(site: @link.external_site.name)
     end

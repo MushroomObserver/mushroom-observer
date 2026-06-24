@@ -73,7 +73,7 @@ class Components::Link::ExternalTest < ComponentTestCase
     html = render(Components::Link::External.new(link: link))
 
     assert_html(html, "a[href='#{site.observation_url("372490529")}']" \
-                      "[target='_blank']",
+                      "[target='_blank'][rel='noopener noreferrer']",
                 text: "iNat 372490529")
   end
 
