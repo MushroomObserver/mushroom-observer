@@ -21,6 +21,7 @@ class Components::Base < Phlex::HTML
   # so chrome components, popup builders, etc. don't have to inherit
   # from Views::Base just for the stash/read pair.
   include Phlex::Rails::Helpers::ContentFor
+  include Phlex::Rails::Helpers::DOMID
   # `rank_as_string`, `image_vote_as_*_string` — translation-key
   # shortcuts for enum-like model attributes.
   include Components::Localization
