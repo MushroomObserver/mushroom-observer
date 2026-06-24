@@ -50,6 +50,11 @@ gem("mission_control-jobs")
 # solid_cable for ActionCable without Redis
 gem("solid_cable")
 
+# Real-time exception alerts to Slack — see
+# config/initializers/exception_notification.rb
+gem("exception_notification")
+gem("slack-notifier")
+
 # sprockets for asset compilation and versioning
 gem("sprockets-rails")
 # Fix a version problem betw stimulus and sprockets. (not sprockets-rails)
