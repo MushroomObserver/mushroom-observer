@@ -37,13 +37,10 @@ module Views::Controllers::Observations::Downloads
                   "[value='UTF-8']")
 
       # Submit buttons
-      assert_html(html, "input[type='submit'][value='Download']")
-      assert_html(html, "input[type='submit'][value='Cancel']")
-      assert_html(
-        html,
-        "input[type='submit']" \
-        "[value='#{:download_observations_print_labels.l}']"
-      )
+      assert_html(html, "button[type='submit']", text: "Download")
+      assert_html(html, "button[type='submit']", text: "Cancel")
+      assert_html(html, "button[type='submit']",
+                  text: :download_observations_print_labels.l)
     end
 
     def test_no_admin_options_for_regular_user

@@ -12,24 +12,29 @@
 # - default   — small watch eye + small ignore eye, no big eye.
 #
 # Rendered into `content_for(:interest_icons)` by
-# `Views::FullPageBase::Icons#add_interest_icons`. The setter
-# guards on `user.present?` upstream — this view assumes a user.
+# `Views::FullPageBase::Icons#add_interest_icons`. Always emits
+# a `<ul>` — empty when no user, so the parent flex layout is
+# consistent regardless of login state.
 module Views::Layouts
   class Header::InterestIcons < Views::Base
-    prop :user, ::User
+    prop :user, _Nilable(::User), default: nil
     prop :object, ::AbstractModel
 
     def view_template
       ul(class: "nav navbar-flex interest-eyes h4 my-0") do
-        case @user.interest_in(@object)
-        when :watching then render_watching
-        when :ignoring then render_ignoring
-        else render_default
-        end
+        render_icons if @user
       end
     end
 
     private
+
+    def render_icons
+      case @user.interest_in(@object)
+      when :watching then render_watching
+      when :ignoring then render_ignoring
+      else render_default
+      end
+    end
 
     def type
       @type ||= @object.type_tag

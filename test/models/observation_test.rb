@@ -2133,24 +2133,13 @@ class ObservationTest < UnitTestCase
 
     obs = observations(:imported_inat_obs)
     assert_nil(obs.source)
-    assert_equal(sources(:inaturalist), obs.external_source)
+    link = obs.import_link
+    assert_equal(external_links(:imported_inat_obs_inat_link), link)
     assert_match(/"Imported from iNaturalist":/, obs.source_credit,
                  "Whole phrase should be the link text")
-    assert_match(%r{www\.inaturalist\.org/observations/#{obs.external_id}},
+    assert_match(%r{www\.inaturalist\.org/observations/#{link.external_id}},
                  obs.source_credit,
                  "Link should target the per-observation iNat URL")
-    assert(obs.source_noteworthy?)
-  end
-
-  def test_source_credit_external_source_without_observation_url
-    obs = observations(:imported_inat_obs)
-    # Replace the iNat source with one whose name doesn't match the
-    # known per-obs URL pattern AND whose homepage url is blank, so
-    # observation_url returns nil and we fall back to plain text.
-    blank_source = Source.create!(name: "BlankSource")
-    obs.update!(external_source: blank_source)
-    assert_equal("Imported from BlankSource", obs.source_credit,
-                 "Should fall back to non-linked text when no URL is known")
     assert(obs.source_noteworthy?)
   end
 

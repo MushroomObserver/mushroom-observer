@@ -60,19 +60,9 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
 
   def render_sibling_row(link, sibling)
     li do
-      a(href: link.url, target: "_blank", rel: "noopener") do
-        plain(sibling_link_text(link))
-      end
+      render(Components::Link::External.new(link: link))
       plain(" ")
       sibling_attribution(sibling)
-    end
-  end
-
-  def sibling_link_text(link)
-    if link.external_site.name == "iNaturalist"
-      "iNat #{link.url.sub(link.external_site.base_url, "")}"
-    else
-      link.site_name
     end
   end
 
@@ -102,8 +92,6 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def render_external_link(link)
-    a(href: link.url, target: "_blank", rel: "noopener") do
-      plain(link.site_name)
-    end
+    render(Components::Link::External.new(link: link))
   end
 end

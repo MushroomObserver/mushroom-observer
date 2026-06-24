@@ -178,12 +178,14 @@ class InatImportJobTest < ActiveJob::TestCase
     imported_img = obs.images.first
     assert_equal(@user, imported_img.user,
                  "Image should belong to importing user")
-    # Structured provenance (#4529): source + iNat photo id on the image,
-    # not stashed in the keep_filenames-governed original_name.
-    assert_equal(Source.inaturalist, imported_img.external_source,
-                 "Imported image should record its source")
-    assert_equal(inat_photo[:photo_id].to_s, imported_img.external_id,
-                 "Imported image should record the iNat photo id")
+    # Structured provenance (#4529/#4299): an import ExternalLink on the
+    # image records its source site + the iNat photo id (external_id).
+    img_link = imported_img.import_link
+    assert_not_nil(img_link, "Imported image should have an import link")
+    assert_equal(ExternalSite.inaturalist, img_link.external_site,
+                 "Imported image link should record its source site")
+    assert_equal(inat_photo[:photo_id].to_s, img_link.external_id,
+                 "Imported image link should record the iNat photo id")
 
     assert(obs.sequences.none?)
   end
@@ -721,10 +723,15 @@ class InatImportJobTest < ActiveJob::TestCase
     @user.update(inat_username: @inat_import.inat_username)
 
     inat_id = @parsed_results.first[:id]
-    Observation.create!(
+    site = ExternalSite.inaturalist
+    obs = Observation.create!(
       user: @user, when: Time.zone.today, where: "Earth",
-      name: Name.unknown,
-      external_source: Source.inaturalist, external_id: inat_id.to_s
+      name: Name.unknown
+    )
+    ExternalLink.create!(
+      user: @user, observation: obs, external_site: site,
+      relationship: :import, external_id: inat_id.to_s,
+      url: "#{site.base_url}#{inat_id}"
     )
 
     stub_inat_interactions
@@ -741,10 +748,10 @@ class InatImportJobTest < ActiveJob::TestCase
   end
 
   # If a simultaneous import job inserts the same iNat obs between
-  # already_imported? and Observation.create!, the unique index on
-  # (source_id, external_id) raises RecordNotUnique. The importer
-  # should swallow it and log a "race" skip — same effect as the
-  # already_imported? pre-check.
+  # already_imported? and Observation.create, RecordNotUnique is raised
+  # (the import ExternalLink's unique index). The importer should swallow
+  # it and log a "race" skip — same effect as the already_imported?
+  # pre-check.
   def test_import_handles_record_not_unique_race
     create_ivars_from_filename("calostoma_lutescens")
     @user.update(inat_username: @inat_import.inat_username)
@@ -1192,8 +1199,8 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     inat_id = @parsed_results.first[:id]
-    obs = Observation.find_by(external_source: Source.inaturalist,
-                              external_id: inat_id.to_s)
+    name = Name.find_by(text_name: "Calostoma lutescens", rank: "Species")
+    obs = Observation.find_by(user: @user, name: name)
     assert_not_nil(obs, "Cannot find imported Observation")
     assert(obs.external_links.none?,
            "Observation should have no ExternalLink when creation fails")
@@ -1248,8 +1255,11 @@ class InatImportJobTest < ActiveJob::TestCase
                           expected_vote: Vote::MAXIMUM_VOTE, naming_count: 1)
     assert_not_nil(obs.rss_log, "Failed to log Observation")
     assert_nil(obs.source, "Imported obs should have no entry-agent source")
-    assert_equal(Source.inaturalist, obs.external_source,
-                 "Imported obs should link to iNaturalist Source")
+    import_link = obs.import_link
+    assert_not_nil(import_link,
+                   "Imported obs should have an import ExternalLink")
+    assert_equal(ExternalSite.inaturalist, import_link.external_site,
+                 "Import link should point to the iNaturalist site")
 
     expected_photo_count = expected_imported_photo_count
     assert_equal(expected_photo_count, obs.images.length,
@@ -1282,16 +1292,13 @@ class InatImportJobTest < ActiveJob::TestCase
            find_by(observation_id: obs.id, user_id: user.id)
     assert(view.present?, "Failed to create ObservationView")
 
-    external_link = obs.external_links.first
     assert_equal(
       "#{@external_link_base_url}#{@parsed_results.first[:id]}",
-      external_link&.url,
+      import_link.link_url,
       "MO Observation should have ExternalLink to iNat observation"
     )
-
-    assert(obs.external_id.present?, "Failed to set Observation external_id")
-    assert_equal(Source.inaturalist, obs.external_source,
-                 "Imported obs should link to iNaturalist Source")
+    assert_equal(@parsed_results.first[:id].to_s, import_link.external_id,
+                 "Import link should carry the iNat observation id")
 
     snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
     assert_empty(

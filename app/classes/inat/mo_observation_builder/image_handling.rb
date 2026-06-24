@@ -45,8 +45,7 @@ class Inat
       # uploader's `keep_filenames` preference (which the Image API applies
       # to the filename-bearing `original_name`). See #4529.
       def record_image_provenance(image, photo)
-        image.update_columns(source_id: @inat_source.id,
-                             external_id: photo.external_id)
+        create_import_link(image, photo.external_id)
       end
 
       def post_photo_params(photo, license: photo.license_id)

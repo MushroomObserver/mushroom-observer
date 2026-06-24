@@ -207,21 +207,22 @@ class InatImportsController < ApplicationController
   def warn_about_listed_previous_imports
     return if importing_all? || !listing_ids?
 
-    previous_imports = previously_imported_observations
+    previous_imports = previously_imported_links
     return if previous_imports.none?
 
     flash_warning(:inat_previous_import.t(count: previous_imports.count))
   end
 
-  def previously_imported_observations
-    return Observation.none if inat_id_list.blank?
+  def previously_imported_links
+    return ExternalLink.none if inat_id_list.blank?
 
-    Observation.where(external_source: inat_source,
-                      external_id: inat_id_list.map(&:to_s))
+    ExternalLink.import.where(target_type: "Observation",
+                              external_site: inat_site,
+                              external_id: inat_id_list.map(&:to_s))
   end
 
-  def inat_source
-    @inat_source ||= Source.inaturalist
+  def inat_site
+    @inat_site ||= ExternalSite.inaturalist
   end
 
   def assure_user_has_inat_import_api_key
@@ -277,7 +278,7 @@ class InatImportsController < ApplicationController
 
   def clean_inat_ids
     inat_ids = normalize_inat_ids(params[:inat_ids])
-    previous_imports = previously_imported_observations
+    previous_imports = previously_imported_links
     return inat_ids if previous_imports.none?
 
     remove_previously_imported_ids(inat_ids, previous_imports)

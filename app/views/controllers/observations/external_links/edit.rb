@@ -38,7 +38,7 @@ module Views::Controllers::Observations::ExternalLinks
       ul(class: "row list-unstyled") do
         render(::Components::Matrix::Box.new(
                  user: @user,
-                 object: @external_link.observation,
+                 object: @observation,
                  columns: "col-xs-12"
                ))
       end

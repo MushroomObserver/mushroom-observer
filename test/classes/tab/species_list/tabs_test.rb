@@ -22,7 +22,7 @@ module Tab::SpeciesList
       assert_equal(:species_list_show_add_new_observations.t, tab.title)
       assert_equal(routes.new_write_in_species_list_path(@list.id), tab.path)
       assert_equal(@list, tab.model)
-      assert_includes(tab.html_options.keys, :help)
+      assert_includes(tab.html_options.keys, :title)
     end
 
     def test_manage_projects
@@ -57,7 +57,7 @@ module Tab::SpeciesList
 
       assert_equal(:species_list_show_set_source.t, tab.title)
       assert_equal(routes.species_list_path(@list.id, set_source: 1), tab.path)
-      assert_includes(tab.html_options.keys, :help)
+      assert_includes(tab.html_options.keys, :title)
     end
 
     def test_cancel_to_show

@@ -58,6 +58,14 @@ class BaseTest < ComponentTestCase
     assert_equal("safe html", div.text.strip)
   end
 
+  def test_nbsp_emits_non_breaking_space_entity
+    html = render(Class.new(Components::Base) do
+                    def view_template = span { nbsp }
+                  end.new)
+
+    assert_html(html, "span", text: "&nbsp;".as_displayed)
+  end
+
   def test_cache_store_returns_rails_cache
     component = TestComponent.new
     assert_equal(Rails.cache, component.cache_store)

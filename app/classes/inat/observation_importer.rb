@@ -62,13 +62,14 @@ class Inat
     # Upstream filters (iNat-side `without_field` and the controller's
     # `clean_inat_ids`) miss observations whose back-link write to iNat
     # failed silently after a prior import, and the controller filter
-    # is bypassed entirely on import-all runs. The unique index on
-    # (source_id, external_id) is the actual race-safety guarantee;
-    # this pre-check just keeps benign duplicates from emitting noisy
-    # RecordNotUnique exceptions.
+    # is bypassed entirely on import-all runs. The import ExternalLink's
+    # unique index (one import per target) is the actual race-safety
+    # guarantee; this pre-check just keeps benign duplicates from emitting
+    # noisy RecordNotUnique exceptions.
     def already_imported?
-      return false unless Observation.exists?(
-        source_id: inat_source.id,
+      return false unless ExternalLink.import.exists?(
+        target_type: "Observation",
+        external_site_id: inat_site.id,
         external_id: @inat_obs[:id].to_s
       )
 
@@ -76,11 +77,11 @@ class Inat
       true
     end
 
-    # Cached iNaturalist Source row for this importer instance — avoids
+    # Cached iNaturalist ExternalSite for this importer instance — avoids
     # one find_by per imported observation across already_imported? and
-    # the builder's new_obs_params.
-    def inat_source
-      @inat_source ||= Source.inaturalist
+    # the builder's import ExternalLink (#4299).
+    def inat_site
+      @inat_site ||= ExternalSite.inaturalist
     end
 
     def log_with_response_error(msg)
@@ -92,14 +93,14 @@ class Inat
       builder = Inat::MoObservationBuilder.new(
         inat_obs: @inat_obs, user: @user,
         import_others: @inat_import.import_others,
-        inat_source: inat_source
+        external_site: inat_site
       )
       @observation = builder.mo_observation
       builder
     rescue ActiveRecord::RecordNotUnique
-      # The (source_id, external_id) unique index caught a race
-      # between simultaneous jobs after `already_imported?` returned
-      # false. Treat the same as the pre-check skip.
+      # The import ExternalLink's unique index caught a race between
+      # simultaneous jobs after `already_imported?` returned false.
+      # Treat the same as the pre-check skip.
       @observation = nil
       log("Skipped #{@inat_obs[:id]} already imported (race)")
       nil

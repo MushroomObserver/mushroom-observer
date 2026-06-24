@@ -7,7 +7,7 @@ coprinus_comatus_obs_mycoportal_link:
   user:          mary
   created_at:    2016-12-29 15:21:00
   updated_at:    2016-12-29 15:21:00
-  observation:   coprinus_comatus_obs # owned by rolf
+  target:        coprinus_comatus_obs (Observation) # owned by rolf
   external_site: mycoportal
   url:           "https://mycoportal.org/portal/collections/individual/index.php?occid=1950183"
 
@@ -15,12 +15,14 @@ coprinus_comatus_obs_inaturalist_link:
   user:          mary
   created_at:    2017-11-11 14:14:00
   updated_at:    2017-11-11 14:14:00
-  observation:   coprinus_comatus_obs # owned by rolf
+  target:        coprinus_comatus_obs (Observation) # owned by rolf
   external_site: inaturalist
   url:           "https://www.inaturalist.org/observations/234723"
 
 imported_inat_obs_inat_link:
   user:          dick
-  observation:   imported_inat_obs
+  target:        imported_inat_obs (Observation)
   external_site: inaturalist
+  relationship:  import
+  external_id:   "12345"
   url:           "https://www.inaturalist.org/observations/12345"

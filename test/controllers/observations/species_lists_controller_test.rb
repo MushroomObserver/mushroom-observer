@@ -20,6 +20,36 @@ module Observations
       assert(assigns_exist, "Missing species_lists!")
     end
 
+    # The edit page partitions the user's editable lists into those that
+    # already contain the observation (obs_lists) and those that don't
+    # (other_lists). Guards the membership refactor (species_list_ids in one
+    # query, replacing a per-list observations.member? N+1).
+    def test_edit_partitions_lists_by_membership
+      obs = observations(:minimal_unknown_obs)
+      member_list = species_lists(:unknown_species_list)
+      assert(member_list.observations.member?(obs))
+      login(member_list.user.login)
+
+      get(:edit, params: { id: obs.id })
+      assert_response(:success)
+
+      obs_ids = assigns(:obs_lists).map(&:id)
+      other_ids = assigns(:other_lists).map(&:id)
+      assert_includes(obs_ids, member_list.id,
+                      "List containing the obs belongs in obs_lists")
+      assert_not_includes(other_ids, member_list.id)
+      # Every editable list lands in exactly one bucket.
+      assert_equal(assigns(:all_lists).results.map(&:id).sort,
+                   (obs_ids + other_ids).sort)
+      # The partition matches actual membership (one query for the truth set,
+      # not a per-list check).
+      member_ids = obs.species_list_ids.to_set
+      assert(obs_ids.all? { |id| member_ids.include?(id) },
+             "obs_lists must all contain the observation")
+      assert(other_ids.none? { |id| member_ids.include?(id) },
+             "other_lists must exclude the observation")
+    end
+
     def test_add_observation_to_species_list
       spl = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)

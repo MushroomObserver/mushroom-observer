@@ -29,7 +29,7 @@ module Views::Controllers::Translations
 
     def render_help_block
       div(class: "container-text") do
-        p(class: "help-block") { trusted_html(:edit_translations_help.t) }
+        render(::Components::Help::Block.new(:p, :edit_translations_help.t))
       end
     end
 

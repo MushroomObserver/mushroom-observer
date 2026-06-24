@@ -27,7 +27,7 @@ module Tab::Name
 
       assert_equal(:show_name_add_name.l, tab.title)
       assert_equal(routes.new_name_path, tab.path)
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
       assert_equal(Name, tab.model)
     end
 
@@ -67,7 +67,7 @@ module Tab::Name
 
       assert_equal(:show_name_create_description.l, tab.title)
       assert_equal(routes.new_name_description_path(@name.id), tab.path)
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
     end
 
     def test_edit_classification
@@ -119,8 +119,7 @@ module Tab::Name
 
       assert_equal("MyCoPortal", tab.title)
       assert_includes(tab.path, "mycoportal.org")
-      assert_equal(:_blank, tab.html_options[:target])
-      assert_equal(:noopener, tab.html_options[:rel])
+      assert(tab.html_options[:external])
       assert_equal(@name, tab.model)
     end
 
@@ -147,8 +146,7 @@ module Tab::Name
 
       assert_equal("EOL", tab.title, "EOL tab title")
       assert_equal(eol_url, tab.path, "EOL tab path delegates to eol_url")
-      assert_equal(:_blank, tab.html_options[:target],
-                   "EOL tab opens in new tab")
+      assert(tab.html_options[:external], "EOL tab opens in new tab")
     end
 
     def test_gbif_external_link

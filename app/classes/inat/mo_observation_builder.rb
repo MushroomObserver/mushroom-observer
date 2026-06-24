@@ -10,11 +10,11 @@ class Inat
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
-    def initialize(inat_obs:, user:, import_others: false, inat_source: nil)
+    def initialize(inat_obs:, user:, import_others: false, external_site: nil)
       @inat_obs = inat_obs
       @user = user
       @import_others = import_others
-      @inat_source = inat_source || Source.inaturalist
+      @external_site = external_site || ExternalSite.inaturalist
       @skipped_images = 0
       @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
     end
@@ -56,9 +56,7 @@ class Inat
         name_id: lead_name.id,
         specimen: inat_obs.specimen?,
         text_name: lead_name.text_name,
-        notes: inat_obs.notes,
-        external_source: @inat_source,
-        external_id: inat_obs[:id].to_s }.merge(collector_attrs)
+        notes: inat_obs.notes }.merge(collector_attrs)
     end
 
     # Link the collector to an MO user when the iNat collector (a custom
@@ -166,16 +164,22 @@ class Inat
     end
 
     def add_external_link
-      external_site = ExternalSite.find_by(name: "iNaturalist")
+      create_import_link(@observation, inat_obs[:id].to_s)
+    end
+
+    # Records import provenance as a polymorphic import ExternalLink on the
+    # target (Observation or Image, #4299). The URL is derived from the
+    # site's template + external_id, so none is stored.
+    def create_import_link(target, external_id)
       ExternalLink.create!(
-        user: user,
-        observation: @observation,
-        external_site: external_site,
-        url: "#{external_site.base_url}#{inat_obs[:id]}"
+        user: user, target: target, external_site: @external_site,
+        external_id: external_id, relationship: :import
       )
     rescue ActiveRecord::RecordInvalid => e
-      Rails.logger.warn("InatImport: failed to create ExternalLink " \
-                        "for iNat obs #{inat_obs[:id]}: #{e.message}")
+      Rails.logger.warn(
+        "InatImport: failed to create ExternalLink for " \
+        "#{target.class} #{target.id} (iNat #{external_id}): #{e.message}"
+      )
     end
 
     def create_missing_identification_names

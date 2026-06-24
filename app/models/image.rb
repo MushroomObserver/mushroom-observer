@@ -253,12 +253,23 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   belongs_to :user
   belongs_to :license
 
-  # External data source for imported images (#4208/#4529). `source_id` +
-  # `external_id` record where the image came from (e.g. the iNat photo id),
-  # mirroring the Observation source/external_id pair.
-  belongs_to :external_source, class_name: "Source",
-                               foreign_key: :source_id, optional: true,
-                               inverse_of: :images
+  # External import provenance for imported images (#4208/#4529/#4299). Each
+  # imported image carries a polymorphic import ExternalLink (target: the
+  # image) recording its source site + the iNat photo id (external_id).
+  # delete_all (not destroy): ExternalLink has no destroy callbacks/children,
+  # and a bulk DELETE avoids loading the association — which would raise a
+  # StrictLoadingViolation when a strict-loaded image is destroyed (e.g. the
+  # glossary unused-image cleanup).
+  has_many :external_links, as: :target, dependent: :delete_all
+
+  # The import ExternalLink for this image (its source photo), if any.
+  def import_link
+    if external_links.loaded?
+      external_links.detect(&:import?)
+    else
+      external_links.import.first
+    end
+  end
 
   has_many :copyright_changes, as: :target,
                                dependent: :destroy,

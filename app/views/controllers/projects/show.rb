@@ -69,7 +69,7 @@ module Views::Controllers::Projects
             trusted_html(draft.name&.display_name&.t)
           end
           plain(" (")
-          render(Components::Link::Object::User.new(user: draft.user))
+          render(Components::Link::User.new(user: draft.user))
           plain(")")
           br
         end
@@ -93,19 +93,14 @@ module Views::Controllers::Projects
       end
     end
 
-    # Shared classes for every button in render_actions so the row reads
-    # consistently at narrow and wide viewports. Issue #4145.
-    def action_button_class
-      "btn btn-default btn-lg my-2 mr-2"
-    end
-
     def render_administer_button
       return unless @user&.admin && !@project.is_admin?(@user)
 
-      render(Components::CrudButton::Post.new(
+      render(Components::Button.new(
+               type: :post,
                name: :show_project_administer.l,
                target: project_administration_path(project_id: @project.id),
-               class: action_button_class
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
@@ -118,14 +113,15 @@ module Views::Controllers::Projects
     end
 
     def render_join_button
-      render(Components::CrudButton::Post.new(
+      render(Components::Button.new(
+               type: :post,
                name: :show_project_join.l,
                target: project_members_path(
                  project_id: @project.id,
                  candidate: @user.id,
                  target: :project_index
                ),
-               class: action_button_class
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
@@ -136,64 +132,71 @@ module Views::Controllers::Projects
     end
 
     def render_trust_settings_button
-      render(Components::Link::Modal.new(
-               "trust_settings",
-               :show_project_trust_settings.l,
-               trust_modal_project_member_path(
-                 project_id: @project.id,
-                 candidate: @user.id
+      render(Components::Button.new(
+               type: :modal,
+               name: :show_project_trust_settings.l,
+               target: trust_modal_project_member_path(
+                 project_id: @project.id, candidate: @user.id
                ),
-               class: action_button_class
+               modal_id: "trust_settings",
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
     def render_leave_button
-      render(Components::CrudButton::Put.new(
+      render(Components::Button.new(
+               type: :put,
                name: :show_project_leave.t,
                target: project_member_path(
                  project_id: @project.id,
                  candidate: @user.id,
                  target: :project_index
                ),
-               class: action_button_class
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
     def render_add_obs_button
-      render(Components::Link::Modal.new(
-               "add_obs",
-               :change_member_add_obs.t,
-               add_obs_modal_project_member_path(
-                 project_id: @project.id,
-                 candidate: @user.id
+      render(Components::Button.new(
+               type: :modal,
+               name: :change_member_add_obs.t,
+               target: add_obs_modal_project_member_path(
+                 project_id: @project.id, candidate: @user.id
                ),
-               class: action_button_class
+               modal_id: "add_obs",
+               size: :lg, class: "my-2 mr-2"
              ))
     end
 
     def render_admin_links
       return if permission?(@project)
 
-      a(
-        href: new_project_admin_request_path(
-          project_id: @project.id
-        ),
-        class: action_button_class
-      ) { plain(:show_project_admin_request.l) }
+      render(Components::Button.new(
+               type: :get,
+               name: :show_project_admin_request.l,
+               target: new_project_admin_request_path(
+                 project_id: @project.id
+               ),
+               size: :lg, class: "my-2 mr-2"
+             ))
     end
 
-    # Not a CrudButton candidate — count-badge link with `btn-warning`
-    # styling when constraints are violated, not a standard action button.
+    # Explicit String target because the violations route uses
+    # `:project_id` (not `:id`), so Button::Get can't auto-build the
+    # path from a model. See the `violations_route_endpoint_smell`
+    # memory for the planned fix.
     def render_violations_button
       return unless @project.constraints?
 
       count = @project.count_violations
-      btn_type = count.positive? ? "btn-warning" : "btn-default"
-      link_to(
-        "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
-        project_violations_path(project_id: @project.id),
-        class: "btn btn-lg #{btn_type} my-2 mr-2"
-      )
+      render(Components::Button.new(
+               type: :get,
+               name: "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
+               target: project_violations_path(project_id: @project.id),
+               variant: count.positive? ? :warning : nil,
+               size: :lg,
+               class: "my-2 mr-2"
+             ))
     end
 
     def render_comments

@@ -68,7 +68,7 @@ module Views::Controllers::Observations::Images
     def render_project_checkboxes
       div(class: "form-group") do
         p(class: "font-weight-bold") { plain("#{:PROJECTS.t}:") }
-        div(class: "help-note mr-3") do
+        render(::Components::Help::Note.new(:div)) do
           trusted_html(:form_images_project_help.t)
         end
         div(class: "form-group") do
@@ -89,7 +89,7 @@ module Views::Controllers::Observations::Images
         cb.option(project.id,
                   checked: project_checked?(project.id)) do
           whitespace
-          render(Components::Link::Object::Base.new(object: project))
+          render(Components::Link::Object.new(object: project))
         end
       end
     end
@@ -97,9 +97,12 @@ module Views::Controllers::Observations::Images
     def render_footer_buttons
       div(class: "text-center mt-3 mb-5") do
         submit(:SAVE_EDITS.l)
-        link_to(:cancel_and_show.t(type: :image),
-                image_path(model.id),
-                class: "btn btn-default ml-2")
+        render(Components::Button.new(
+                 type: :get,
+                 name: :cancel_and_show.t(type: :image),
+                 target: image_path(model.id),
+                 class: "ml-2"
+               ))
       end
     end
 

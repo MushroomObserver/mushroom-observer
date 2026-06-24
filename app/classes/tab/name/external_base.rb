@@ -17,7 +17,7 @@ class Tab::Name::ExternalBase < Tab::Base
   end
 
   def html_options
-    { target: :_blank, rel: :noopener }
+    { external: true }
   end
 
   def model

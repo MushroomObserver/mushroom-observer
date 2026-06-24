@@ -10,7 +10,9 @@ module Views::Controllers::Images::Exports
 
     def view_template
       div(id: "image_export_#{@image.id}") do
-        render(::Components::CrudButton::Put.new(
+        render(::Components::Button.new(
+                 type: :put,
+                 variant: :strip,
                  name: button_name,
                  target: export_image_path(id: @image.id, value: button_value)
                ))

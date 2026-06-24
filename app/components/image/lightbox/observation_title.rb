@@ -48,12 +48,19 @@ class Components::Image::Lightbox::ObservationTitle < Components::Base
   end
 
   def render_link
-    btn_style = @identify ? "text-bold" : "btn btn-primary"
-
-    a(
-      href: url_for(@obs.show_link_args),
-      class: "#{btn_style} mr-3",
-      id: "caption_obs_link_#{@obs.id}"
-    ) { @obs.id }
+    if @identify
+      a(href: url_for(@obs.show_link_args),
+        class: "text-bold mr-3",
+        id: "caption_obs_link_#{@obs.id}") { @obs.id }
+    else
+      render(::Components::Button.new(
+               type: :get,
+               name: @obs.id.to_s,
+               target: url_for(@obs.show_link_args),
+               variant: :primary,
+               id: "caption_obs_link_#{@obs.id}",
+               class: "mr-3"
+             ))
+    end
   end
 end

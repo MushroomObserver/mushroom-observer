@@ -6,12 +6,12 @@
 # that owns the actual icon markup; the setter writes the rendered
 # HTML into the `content_for` slot the layout reads.
 module Views::FullPageBase::Icons
-  # Edit / destroy icons for the show-page title bar. Permission gating
-  # + button rendering live on `Views::Layouts::Header::EditDestroyIcons`.
+  # Edit / delete icons for the show-page title bar. Permission gating
+  # + button rendering live on `Views::Layouts::Header::EditDeleteIcons`.
   def add_edit_icons(object, user)
     content_for(:edit_icons) do
       capture do
-        render(::Views::Layouts::Header::EditDestroyIcons.new(
+        render(::Views::Layouts::Header::EditDeleteIcons.new(
                  object: object, user: user
                ))
       end
@@ -19,10 +19,9 @@ module Views::FullPageBase::Icons
   end
 
   # Watching / ignoring / default eye-icons for email-alert state, on
-  # the show-page title bar. Skipped when no viewer (logged-out).
+  # the show-page title bar. Always renders — the component emits an
+  # empty `<ul>` when no user so the parent flex layout is consistent.
   def add_interest_icons(user, object)
-    return unless user
-
     content_for(:interest_icons) do
       capture do
         render(::Views::Layouts::Header::InterestIcons.new(

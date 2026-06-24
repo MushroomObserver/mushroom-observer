@@ -52,17 +52,17 @@ class Components::Form::LocationMap < Components::Base
   end
 
   def render_toggle_button
-    button(
-      type: "button",
-      name: "map_toggle",
-      class: "btn btn-default map-toggle",
-      data: toggle_button_data,
-      aria: { expanded: "false", controls: @id }
-    ) do
-      render(Components::Icon.new(type: :globe))
-      span(class: "map-show mx-2") { :form_observations_open_map.l }
-      span(class: "map-hide mx-2") { :form_observations_hide_map.l }
-    end
+    render(Components::Button.new(
+             type: :toggle,
+             show_text: :form_observations_open_map.l,
+             hide_text: :form_observations_hide_map.l,
+             show_class: "map-show",
+             hide_class: "map-hide",
+             icon: :globe,
+             class: "map-toggle",
+             data: toggle_button_data,
+             aria: { expanded: "false", controls: @id }
+           ))
   end
 
   def toggle_button_data
@@ -75,14 +75,13 @@ class Components::Form::LocationMap < Components::Base
   end
 
   def render_clear_button
-    button(
-      type: "button",
-      name: "map_clear",
-      class: "btn btn-default map-clear",
-      data: {
-        map_target: "mapClearBtn",
-        action: "map#clearMap form-exif#reenableButtons"
-      }
-    ) { :form_observations_clear_map.l }
+    render(Components::Button.new(
+             name: :form_observations_clear_map.l,
+             class: "map-clear",
+             data: {
+               map_target: "mapClearBtn",
+               action: "map#clearMap form-exif#reenableButtons"
+             }
+           ))
   end
 end

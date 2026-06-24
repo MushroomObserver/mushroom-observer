@@ -36,24 +36,29 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_addon_element
       if wrapper_options[:button_href]
-        a(href: wrapper_options[:button_href], **addon_attributes) do
+        render(::Components::Button.new(
+                 tag: :a,
+                 href: wrapper_options[:button_href],
+                 **addon_button_kwargs
+               )) { render_addon_label }
+      else
+        render(::Components::Button.new(**addon_button_kwargs)) do
           render_addon_label
         end
-      else
-        button(type: "button", **addon_attributes) { render_addon_label }
       end
     end
 
-    def addon_attributes
-      attrs = {
-        class: wrapper_options[:button_class] || "btn btn-default",
+    def addon_button_kwargs
+      kwargs = {
+        variant: wrapper_options[:button_variant],
+        size: wrapper_options[:button_size],
         data: wrapper_options[:button_data] || {}
       }
       [:target, :rel, :title].each do |key|
         val = wrapper_options[:"button_#{key}"]
-        attrs[key] = val if val
+        kwargs[key] = val if val
       end
-      attrs
+      kwargs
     end
 
     # Renders the addon's visible label: the `:button` text + an

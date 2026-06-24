@@ -25,7 +25,7 @@ module Views::Controllers::Articles
       render(::Components::ContentPadded.new) do
         plain(:BY.t)
         plain(" ")
-        render(::Components::Link::Object::User.new(user: @article.user))
+        render(::Components::Link::User.new(user: @article.user))
         plain(", ")
         small { plain(@article.created_at.display_time) }
       end

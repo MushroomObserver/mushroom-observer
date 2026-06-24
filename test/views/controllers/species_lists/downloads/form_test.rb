@@ -11,12 +11,8 @@ module Views::Controllers::SpeciesLists::Downloads
       assert_html(html, "form[action*='print_labels']" \
                         "[action*='q=abc123']")
       assert_includes(html, "#{:species_list_labels_header.l}:")
-      assert_html(
-        html,
-        "input[type='submit']" \
-        "[value='#{:species_list_labels_button.l}']" \
-        "[class*='center-block']"
-      )
+      assert_html(html, "button[type='submit']",
+                  text: :species_list_labels_button.l)
     end
 
     private

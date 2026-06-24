@@ -6,6 +6,7 @@ module Views::Controllers::Observations
   class ImportedSourceBannerTest < ComponentTestCase
     def test_renders_for_imported_observation
       obs = observations(:imported_inat_obs)
+      inat_id = obs.import_link.external_id
       html = render(ImportedSourceBanner.new(observation: obs))
 
       assert_html(html, "div.imported-source-banner")
@@ -15,7 +16,7 @@ module Views::Controllers::Observations
       # Link text includes the external (iNat) id so users can see / search
       # for the specific record on the source platform.
       assert_html(html, selector,
-                  text: "Imported from iNaturalist #{obs.external_id}")
+                  text: "Imported from iNaturalist #{inat_id}")
       # (?) help link to article 39, on-site, NOT a new tab.
       assert_html(html, "a[href='/articles/39']")
       assert_html(html, "span.glyphicon.glyphicon-question-sign")
@@ -23,24 +24,10 @@ module Views::Controllers::Observations
                      "Help link should not open in a new tab")
     end
 
-    def test_renders_plain_text_when_no_observation_url
-      obs = observations(:imported_inat_obs)
-      blank_source = Source.create!(name: "BlankSource")
-      obs.update!(external_source: blank_source)
-
-      html = render(ImportedSourceBanner.new(observation: obs))
-
-      assert_html(html, "div.imported-source-banner",
-                  text: "Imported from BlankSource #{obs.external_id}")
-      assert_no_html(html, "a[target='_blank']",
-                     "Should not render a target=_blank link without a URL")
-      # Help link still appears.
-      assert_html(html, "a[href='/articles/39']")
-    end
-
     def test_renders_without_trailing_id_when_external_id_blank
       obs = observations(:imported_inat_obs)
-      obs.update!(external_id: nil)
+      obs.import_link.update!(external_id: nil)
+      obs.external_links.reload
 
       html = render(ImportedSourceBanner.new(observation: obs))
 
@@ -60,7 +47,7 @@ module Views::Controllers::Observations
 
     def test_renders_nothing_for_non_external_observation
       obs = observations(:detailed_unknown_obs) # source: mo_website
-      assert_nil(obs.external_source)
+      assert_nil(obs.import_link)
 
       html = render(ImportedSourceBanner.new(observation: obs))
 

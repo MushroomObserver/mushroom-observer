@@ -94,15 +94,18 @@ module Views::Controllers::Sequences
     end
 
     def render_blast_link
+      tab = ::Tab::Sequence::Blast.new(sequence: @sequence)
       p do
-        link_to(:show_observation_blast_link.l, @sequence.blast_url,
-                class: "btn btn-default", target: "_blank", rel: "noopener")
+        render(::Components::Button.new(type: :external,
+                                        name: tab.title,
+                                        url: tab.path))
       end
     end
 
     def render_archive_link
-      url = ::WebSequenceArchive.archive_home(@sequence.archive)
-      link_to(@sequence.archive.t, url, target: "_blank", rel: "noopener")
+      render(::Components::Link::External.new(
+               tab: ::Tab::Sequence::Archive.new(sequence: @sequence)
+             ))
     end
 
     def render_accession_link

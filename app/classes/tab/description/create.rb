@@ -19,10 +19,6 @@ class Tab::Description::Create < Tab::Base
          { "#{@type}_id": @parent.id })
   end
 
-  def html_options
-    { icon: :add }
-  end
-
   def model
     @type == :name ? NameDescription : LocationDescription
   end

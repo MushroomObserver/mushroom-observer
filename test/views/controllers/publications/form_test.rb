@@ -29,10 +29,8 @@ module Views::Controllers::Publications
     def test_renders_submit_button
       html = render_component_form
 
-      assert_html(html, "input[type='submit'][value='#{:CREATE.t}']")
-      assert_html(html, ".btn.btn-default")
-      assert_html(html, ".center-block.my-3")
-      assert_html(html, "input[data-turbo-submits-with]")
+      assert_html(html, "button[type='submit']", text: :CREATE.t)
+      assert_html(html, "button[type='submit'][data-turbo-submits-with]")
     end
 
     def test_form_has_correct_attributes

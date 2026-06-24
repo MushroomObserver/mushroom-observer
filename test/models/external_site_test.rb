@@ -70,4 +70,24 @@ class ExternalSiteTest < UnitTestCase
     )
     assert_empty(site4.errors)
   end
+
+  def test_observation_url_falls_back_to_base_url
+    site = external_sites(:inaturalist) # no url_template
+    assert_equal("#{site.base_url}12345", site.observation_url("12345"),
+                 "without a template, appends external_id to base_url")
+  end
+
+  def test_observation_url_uses_template
+    site = external_sites(:mycoportal) # has a {id} url_template
+    assert_equal(
+      "https://www.mycoportal.org/portal/collections/individual/" \
+      "index.php?occid=999",
+      site.observation_url("999"),
+      "substitutes external_id into the url_template {id} placeholder"
+    )
+  end
+
+  def test_inaturalist_finder
+    assert_equal(external_sites(:inaturalist), ExternalSite.inaturalist)
+  end
 end

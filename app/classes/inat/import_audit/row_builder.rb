@@ -8,30 +8,30 @@ module Inat::ImportAudit
   class RowBuilder
     include Compare
 
-    def initialize(source:)
-      @source = source
+    def initialize(site:)
+      @site = site
     end
 
-    def call(obs, raw, fetch_failed: false)
+    def call(obs, raw, external_id:, fetch_failed: false)
       inat = raw ? Inat::Obs.new(JSON.generate(raw)) : nil
       snapshot = obs_snapshot(obs).to_s
       status = inat_status(raw, fetch_failed)
       notes = notes_delta_columns(obs, inat)
       collector = collector_columns(obs, snapshot)
       images = image_columns(obs, raw)
-      base_columns(obs, snapshot, status).
+      base_columns(obs, snapshot, status, external_id).
         merge(notes).merge(collector).merge(images).
         merge(flag_columns(raw, snapshot, notes, collector, images))
     end
 
     private
 
-    def base_columns(obs, snapshot, status)
+    def base_columns(obs, snapshot, status, external_id)
       {
         mo_id: obs.id,
         mo_url: "#{MO.http_domain}/#{obs.id}",
-        inat_id: obs.external_id,
-        inat_url: @source.observation_url(obs.external_id),
+        inat_id: external_id,
+        inat_url: @site.observation_url(external_id),
         inat_status: status,
         snapshot_present: snapshot.present?
       }.merge(timestamp_columns(obs))

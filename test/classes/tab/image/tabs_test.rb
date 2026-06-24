@@ -38,8 +38,7 @@ module Tab::Image
 
       assert_equal("EOL", tab.title, "EOL tab title")
       assert_equal(eol_url, tab.path, "EOL tab path delegates to eol_url")
-      assert_equal("_blank", tab.html_options[:target],
-                   "EOL tab opens in new tab")
+      assert(tab.html_options[:external], "EOL tab opens in new tab")
     end
 
     def test_commercial_inquiry
@@ -58,7 +57,7 @@ module Tab::Image
       assert_equal(:google_images.t, tab.title)
       assert(tab.path.start_with?("http://images.google.com/images?q="))
       assert_includes(tab.path, @name.search_name)
-      assert_equal("_blank", tab.html_options[:target])
+      assert(tab.html_options[:external])
     end
   end
 end

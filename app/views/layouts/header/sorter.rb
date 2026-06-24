@@ -24,7 +24,7 @@ module Views::Layouts
     def view_template
       return unless visible?
 
-      ul(class: "navbar-flex pl-3 sorter") do
+      ul(class: "list-unstyled navbar-flex pl-3 sorter") do
         li(class: "navbar-text mx-0 hidden-xs") do
           plain("#{:sort_by_header.l}:")
         end
@@ -33,8 +33,8 @@ module Views::Layouts
                  menu_id: "sort_nav_menu",
                  label: toggle_title.to_s,
                  wrapper_class: "navbar-form px-2",
-                 toggle_class: "btn btn-sm btn-outline-default " \
-                               "font-weight-normal",
+                 toggle_variant: :outline, toggle_size: :sm,
+                 toggle_class: "font-weight-normal",
                  menu_class: "sorts",
                  menu_header: mobile_header_html
                )) do |menu|

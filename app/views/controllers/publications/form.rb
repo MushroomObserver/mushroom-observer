@@ -24,13 +24,10 @@ module Views::Controllers::Publications
     end
 
     def render_full_field
-      textarea_field(
-        :full,
-        rows: 10,
-        label: "#{:publication_full.t}:",
-        wrap_class: "mt-3",
-        between: span(class: "help-note mr-3") { :publication_full_help.t }
-      )
+      textarea_field(:full, rows: 10, label: "#{:publication_full.t}:",
+                            wrap_class: "mt-3") do |f|
+        f.with_between { render(::Components::Help::Note.new(:publication_full_help.t)) }
+      end
     end
 
     def render_link_field

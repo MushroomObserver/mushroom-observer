@@ -20,8 +20,7 @@ module Views::Controllers::Sequences
       assert_html(html, "input[name='sequence[accession]']")
 
       # Submit button for new record
-      assert_html(html, "input[type='submit'][value='#{:ADD.l}']")
-      assert_html(html, "input.btn.btn-default")
+      assert_html(html, "button[type='submit']", text: :ADD.l)
 
       # Turbo enabled by default
       assert_html(html, "form[data-turbo='true']")
@@ -38,7 +37,7 @@ module Views::Controllers::Sequences
       sequence = sequences(:local_sequence)
       html = render_form(model: sequence)
 
-      assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
+      assert_html(html, "button[type='submit']", text: :UPDATE.l)
     end
 
     def test_existing_record_auto_determines_url

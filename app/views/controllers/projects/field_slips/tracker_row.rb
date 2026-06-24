@@ -69,7 +69,7 @@ module Views::Controllers::Projects::FieldSlips
     def render_user_link
       return unless @tracker.user
 
-      render(Components::Link::Object::User.new(
+      render(Components::Link::User.new(
                user: @tracker.user_id, name: @tracker.user.login
              ))
     end

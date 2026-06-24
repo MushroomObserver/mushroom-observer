@@ -247,9 +247,6 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Helper ------------------------------------------------------
 
   def render_tab_link(tab)
-    text, url, opts = tab.to_a
-    a(href: url, **(opts || {}).slice(:class, :target, :rel)) do
-      plain(text)
-    end
+    render(Components::Link::External.new(tab: tab))
   end
 end

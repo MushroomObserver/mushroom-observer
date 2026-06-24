@@ -74,19 +74,16 @@ class Components::Image::Lightbox::Caption < Components::Base
     end
   end
 
-  # Tab::Naming::New carries `icon: :add` by default; lightbox
-  # wants the text-only "Propose" button so the icon: gets nilled
-  # in the merge.
   def render_propose_naming_modal
-    title, path, opts = Tab::Naming::New.new(
-      observation_id: @obs.id,
-      text: :create_naming.t,
-      context: "lightgallery",
-      btn_class: "btn btn-primary d-inline-block"
-    ).to_a
-    render(Components::Link::Modal.new(
-             "obs_#{@obs.id}_naming", title, path,
-             **opts, icon: nil
+    render(Components::Button.new(
+             type: :modal,
+             name: :create_naming.t,
+             target: new_observation_naming_path(
+               observation_id: @obs.id, context: "lightgallery"
+             ),
+             modal_id: "obs_#{@obs.id}_naming",
+             variant: :primary,
+             class: "d-inline-block propose-naming-link"
            ))
   end
 
@@ -139,7 +136,7 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_obs_location
     if @user
-      render(Components::Link::Object::Location.new(
+      render(Components::Link::Location.new(
                where: @obs.where, location: @obs.location, click: true
              ))
     else
@@ -189,7 +186,7 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_obs_user(obs_user)
     if @user
-      render(Components::Link::Object::User.new(user: obs_user))
+      render(Components::Link::User.new(user: obs_user))
     else
       plain(obs_user.unique_text_name)
     end
@@ -202,11 +199,12 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_contact_link(_obs_user)
     plain(" [")
-    name, path, opts = Tab::Observation::SendQuestion.new(
-      observation: @obs
-    ).to_a
-    render(Components::Link::Modal.new(
-             "observation_email", name, path, **(opts || {})
+    render(Components::Button.new(
+             type: :modal,
+             name: :show_observation_send_question.l,
+             target: new_question_for_observation_path(@obs.id),
+             modal_id: "observation_email",
+             variant: :strip, icon: :email
            ))
     plain("]")
   end

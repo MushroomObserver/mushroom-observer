@@ -288,10 +288,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless create_text && create.present? && create_path.present?
 
       render(Components::Link::Modal.new(
-               create, create_text, create_path,
+               modal_id: create,
+               name: create_text,
+               target: create_path,
                icon: :plus, show_text: true,
                icon_class: "text-primary",
-               name: "create_#{autocompleter_type}",
                class: "ml-3 create-link",
                data: { target_attr_key => "createBtn" }
              ))

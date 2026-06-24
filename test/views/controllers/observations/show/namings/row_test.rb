@@ -68,7 +68,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
   # ---- proposer cell -------------------------------------------------
 
   def test_renders_proposer_user_link
-    # Selector class flows through from `Components::Link::Object::User`:
+    # Selector class flows through from `Components::Link::User`:
     # `user_link_<id>`. Mobile label "User:" prefixed so the cell
     # is readable when column headers are hidden on `xs`.
     html = render_row
@@ -238,6 +238,38 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
       "#{routes.permanent_observation_path(sibling_obs.id)}']",
       text: "MO #{sibling_obs.id}"
     )
+  end
+
+  # ---- parity tests ------------------------------------------------
+
+  class OldMatchingObsLink < Components::Base
+    def initialize(url:, name:)
+      super()
+      @url = url
+      @name = name
+    end
+
+    def view_template
+      a(href: @url,
+        class: "btn btn-link text-wrap text-left px-0") { plain(@name) }
+    end
+  end
+
+  def test_matching_observations_link_parity
+    url = "/occurrences/1"
+    name = :show_observation_matching_observations.l
+
+    old_html = render(OldMatchingObsLink.new(url: url, name: name))
+    new_html = render(Components::Button::Get.new(
+                        target: url,
+                        name: name,
+                        variant: :btn_link,
+                        class: "text-wrap text-left px-0"
+                      ))
+
+    assert_html_element_equivalent(old_html, new_html,
+                                   selector: "a",
+                                   label: "matching_observations_link")
   end
 
   private

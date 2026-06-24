@@ -11,7 +11,7 @@ module Inat::ImportAudit
       obs = observations(:imported_inat_obs)
       io = StringIO.new
       audit(ids: [obs.id], io: io,
-            fetcher: stub_fetcher(obs.external_id => inat_raw)) do |path|
+            fetcher: stub_fetcher(inat_ext_id(obs) => inat_raw)) do |path|
         rows = CSV.read(path, headers: true)
         assert_equal(1, rows.size)
         assert_equal(obs.id.to_s, rows.first["mo_id"])
@@ -24,7 +24,7 @@ module Inat::ImportAudit
     def test_full_run_streams_the_relation_path
       obs = observations(:imported_inat_obs)
       audit(sample: 0,
-            fetcher: stub_fetcher(obs.external_id => inat_raw)) do |path|
+            fetcher: stub_fetcher(inat_ext_id(obs) => inat_raw)) do |path|
         rows = CSV.read(path, headers: true)
         assert_operator(rows.size, :>=, 1)
         assert(rows.any? { |r| r["mo_id"] == obs.id.to_s })
@@ -55,8 +55,8 @@ module Inat::ImportAudit
       assert_match(/seed=1/, io.string)
     end
 
-    def test_raises_without_inaturalist_source
-      sources(:inaturalist).update!(name: "Renamed Source")
+    def test_raises_without_inaturalist_site
+      external_sites(:inaturalist).update!(name: "Renamed Site")
       assert_raises(RuntimeError) { Runner.new(ids: []) }
     end
 
@@ -66,6 +66,11 @@ module Inat::ImportAudit
     end
 
     private
+
+    # The iNat observation id from the obs's import ExternalLink (#4299).
+    def inat_ext_id(obs)
+      obs.import_link.external_id
+    end
 
     def audit(fetcher:, **)
       file = Tempfile.new(["audit", ".csv"])
