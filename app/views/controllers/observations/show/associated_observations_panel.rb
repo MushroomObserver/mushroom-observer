@@ -29,13 +29,13 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
   def render_heading_link
     if siblings?
       a(href: occurrence_path(@occurrence)) do
-        span(class: "glyphicon glyphicon-th-large")
+        render(::Components::Icon.new(type: :matrix))
         plain(" ")
         plain(:show_observation_matching_observations.l)
       end
     else
       a(href: new_occurrence_path(observation_id: @obs.id)) do
-        span(class: "glyphicon glyphicon-th-large")
+        render(::Components::Icon.new(type: :matrix))
         plain(" ")
         plain(:show_observation_add_matching_observations.l)
       end

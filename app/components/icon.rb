@@ -80,7 +80,10 @@ class Components::Icon < Components::Base
     goto: "share-alt",
     grid: "th",
     menu: "align-justify",
-    info: "question-sign"
+    info: "question-sign",
+    fullscreen: "fullscreen",
+    matrix: "th-large",
+    info_circle: "info-sign"
   }.freeze
 
   prop :type, _Nilable(Symbol), default: nil

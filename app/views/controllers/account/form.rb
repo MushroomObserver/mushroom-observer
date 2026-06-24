@@ -64,8 +64,8 @@ module Views::Controllers::Account
     end
 
     def render_email_help
-      div(class: "help-note mr-3") do
-        [:signup_email_help.tp, :email_spam_notice.tp].safe_join
+      render(::Components::Help::Note.new(:div)) do
+        trusted_html([:signup_email_help.tp, :email_spam_notice.tp].safe_join)
       end
     end
 

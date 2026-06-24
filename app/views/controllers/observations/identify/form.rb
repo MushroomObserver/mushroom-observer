@@ -4,7 +4,8 @@
 # search form with a swappable autocompleter (clade/region) for
 # filtering observations that need identification. Rendered by
 # `Observations::IdentifyController` via its `_form_identify_filter`
-# partial.
+# partial. This is handrolled because it would require extensive
+# modifications to autocompleter_field to reuse that component.
 #
 # Uses dual Stimulus autocompleter targets (clade + region) on all
 # elements so the swap mechanism can find them regardless of which

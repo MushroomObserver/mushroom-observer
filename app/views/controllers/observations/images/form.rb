@@ -68,7 +68,7 @@ module Views::Controllers::Observations::Images
     def render_project_checkboxes
       div(class: "form-group") do
         p(class: "font-weight-bold") { plain("#{:PROJECTS.t}:") }
-        div(class: "help-note mr-3") do
+        render(::Components::Help::Note.new(:div)) do
           trusted_html(:form_images_project_help.t)
         end
         div(class: "form-group") do

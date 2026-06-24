@@ -32,14 +32,14 @@ module Views::Controllers::Account::Preferences::Form::EmailSection
     EMAIL_GROUPS.each do |(label_key, fields)|
       render_email_group(label_key, fields)
     end
-    div(class: "help-block mt-4") { trusted_html(:prefs_email_note.tp) }
+    render(::Components::Help::Block.new(:prefs_email_note.tp, class: "mt-4"))
     submit(:SAVE_EDITS.l, center: true)
   end
 
   def render_email_group(label_key, fields)
     div(class: "mt-4") do
       plain("#{label_key.t}: ")
-      span(class: "help-note mr-3") do
+      render(::Components::Help::Note.new) do
         plain("(")
         trusted_html(:prefs_email_please_notify.t)
         plain(")")

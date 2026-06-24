@@ -51,7 +51,7 @@ module Views::Controllers::Names
     end
 
     def render_editable_fields
-      div(class: "help-block") { :form_names_detailed_help.l }
+      render(::Components::Help::Block.new(:form_names_detailed_help.l))
 
       render_icn_id_field
       render_rank_and_status_fields
@@ -66,7 +66,8 @@ module Views::Controllers::Names
                    inline: true,
                    size: 8) do |f|
           f.with_append do
-            p(class: "help-block") { :form_names_identifier_help.l }
+            render(::Components::Help::Block.new(:p,
+                                                 :form_names_identifier_help.l))
           end
         end
       end
@@ -92,7 +93,8 @@ module Views::Controllers::Names
                      rows: 1,
                      data: { autofocus: true }) do |f|
         f.with_append do
-          p(class: "help-block") { :form_names_text_name_help.l }
+          render(::Components::Help::Block.new(:p,
+                                               :form_names_text_name_help.l))
         end
       end
     end
@@ -102,7 +104,7 @@ module Views::Controllers::Names
                      label: "#{:Authority.l}:",
                      rows: 2) do |f|
         f.with_append do
-          p(class: "help-block") { :form_names_author_help.l }
+          render(::Components::Help::Block.new(:p, :form_names_author_help.l))
         end
       end
     end
@@ -113,9 +115,7 @@ module Views::Controllers::Names
         render_locked_status_field
         render_locked_text_name_field
         render_locked_author_field
-        # rubocop:disable Rails/OutputSafety
-        div(class: "help-block") { raw(:show_name_locked.tp) }
-        # rubocop:enable Rails/OutputSafety
+        render(::Components::Help::Block.new(:show_name_locked.tp))
       end
     end
 
@@ -157,12 +157,10 @@ module Views::Controllers::Names
                      label: "#{:Citation.l}:",
                      rows: 3) do |f|
         f.with_append do
-          # rubocop:disable Rails/OutputSafety
-          p(class: "help-block") do
-            raw(:form_names_citation_help.l)
-            raw(:form_names_citation_textilize_note.l)
+          render(::Components::Help::Block.new(:p)) do
+            trusted_html(:form_names_citation_help.l)
+            trusted_html(:form_names_citation_textilize_note.l)
           end
-          # rubocop:enable Rails/OutputSafety
         end
       end
     end

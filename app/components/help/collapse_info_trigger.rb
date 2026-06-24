@@ -19,7 +19,7 @@ class Components::Help::CollapseInfoTrigger < Components::Base
       data: { toggle: "collapse" },
       aria: { expanded: "false", controls: @target_id }
     ) do
-      span(class: "glyphicon glyphicon-question-sign link-icon")
+      render(::Components::Icon.new(type: :question))
     end
   end
 end

@@ -65,7 +65,7 @@ module Views::Controllers::Projects::Locations
 
     def render_target_remove_footnote
       p(class: "mt-3") do
-        span(class: "glyphicon glyphicon-remove text-danger")
+        render(::Components::Icon.new(type: :x, html_class: "text-danger"))
         plain(" #{:project_target_locations_remove_footnote.l}")
       end
     end
