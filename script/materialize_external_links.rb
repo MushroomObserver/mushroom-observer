@@ -181,13 +181,13 @@ class MaterializeExternalLinks
 end
 
 def parse_options(argv)
-  opts = { apply: ENV["APPLY"] == "1", csv: "observations-750205.csv",
+  opts = { apply: ENV["APPLY"] == "1", csv: "inat-obs-report.csv",
            multi_out: "external_link_multilink.csv",
            missing_out: "external_link_mo_missing.csv" }
   OptionParser.new do |o|
     o.banner = "Usage: bin/rails runner script/materialize_external_links.rb"
     o.on("--csv FILE",
-         "Field-5005 report (default observations-750205.csv)") do |v|
+         "Field-5005 report (default inat-obs-report.csv)") do |v|
       opts[:csv] = v
     end
     o.on("--multi-out FILE") { |v| opts[:multi_out] = v }
