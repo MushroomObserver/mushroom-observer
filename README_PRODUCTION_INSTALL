@@ -253,12 +253,12 @@ root> vi /etc/aliases
   root: $USER,...
 root> newaliases
 
-# Relay outbound mail through Gmail with SMTP AUTH. REQUIRED: Gmail rejects
-# direct-to-MX delivery from our server IP ("550-5.7.1 ... not authorized to
-# send email directly to our servers; use the SMTP relay at your service
-# provider"), so without this EVERY outbound mail bounces -- including the cron
-# error-alert digest (script/parse_log -> webmaster@). This is the real cause
-# of the "blacklisted after IP change" symptom noted further below.
+# Relay outbound mail through Gmail with SMTP AUTH. REQUIRED as of ~2026-05:
+# outbound mail worked without a relay before then, but around then Google
+# stopped accepting direct-to-MX delivery from our server IP ("550-5.7.1 ...
+# not authorized to send email directly to our servers; use the SMTP relay at
+# your service provider"), so without this EVERY outbound mail bounces --
+# including the cron error-alert digest (script/parse_log -> webmaster@).
 #
 # Use the same Google account + app password the Rails app uses:
 #   cd /var/web/mo && RAILS_ENV=production bin/rails runner \
@@ -327,11 +327,11 @@ root> cp /var/web/mushroom-observer/config/etc/no-reply.forward   /home/no-reply
 root> chmod 644 /home/no-reply/.[maf]*
 root> chmod 755 /usr/local/bin/autoreply
 
-# Historically we blamed "blacklisting after IP change" for outbound mail
-# failures, but the usual cause is the Gmail relay above not being configured
-# (550-5.7.1 unauthorized direct-to-MX) -- set that up first and confirm
-# status=sent in /var/log/mail.log. Beyond that, check the SPF/DKIM "TXT"
-# records in DNS, and look for bounced mail in /var/mail/news.
+# Separately -- and predating the ~2026-05 relay requirement above -- we have
+# historically hit outbound-mail problems after changing IP address, blamed on
+# spam-filter blacklisting. This is an old, unconfirmed concern, likely
+# unrelated to the relay change. Things to check: the "TXT" (SPF/DKIM) records
+# in DNS, and bounced mail in /var/mail/news.
 
 --------------------------------------------------------------------------------
 
