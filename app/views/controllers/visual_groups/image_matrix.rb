@@ -14,7 +14,7 @@ module Views::Controllers::VisualGroups
 
     def view_template
       div(id: "results") do
-        paginated_results do
+        render(::Components::PaginatedResults.new) do
           render(Components::Matrix::Table.new) do
             @subset.each { |row| render_matrix_box(row) }
           end

@@ -15,7 +15,7 @@ module Views::Controllers::GlossaryTerms
 
       content_for(:filters) { documentation_link }
 
-      paginated_results { render_list }
+      render(::Components::PaginatedResults.new) { render_list }
     end
 
     private

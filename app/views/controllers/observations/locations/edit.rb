@@ -27,7 +27,7 @@ module Views::Controllers::Observations::Locations
 
     def render_matches
       div(class: "h4") { plain(:list_merge_options_near_matches.t) }
-      paginated_results do
+      render(::Components::PaginatedResults.new) do
         render(::Components::ListGroup::Base.new) do |list|
           @matches.each { |location| render_match(list, location) }
         end

@@ -11,7 +11,7 @@ module Views::Controllers::Names::Descriptions
     def view_template
       register_chrome
 
-      paginated_results { render_table if @descriptions.any? }
+      render(::Components::PaginatedResults.new) { render_table if @descriptions.any? }
     end
 
     private

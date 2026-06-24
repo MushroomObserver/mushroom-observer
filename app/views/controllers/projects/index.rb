@@ -18,7 +18,7 @@ module Views::Controllers::Projects
       add_pagination(@pagination_data)
       container_class(:text_image)
 
-      paginated_results { render_list_group }
+      render(::Components::PaginatedResults.new) { render_list_group }
     end
 
     private

@@ -12,7 +12,7 @@ module Views::Controllers::Locations
       def view_template
         register_chrome
 
-        paginated_results { render_list if @descriptions.any? }
+        render(::Components::PaginatedResults.new) { render_list if @descriptions.any? }
       end
 
       private
