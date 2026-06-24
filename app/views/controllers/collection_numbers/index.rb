@@ -22,7 +22,9 @@ module Views::Controllers::CollectionNumbers
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      render(::Components::PaginatedResults.new) { render_rows_table if @objects.any? }
+      render(::Components::PaginatedResults.new) do
+        render_rows_table if @objects.any?
+      end
     end
 
     private

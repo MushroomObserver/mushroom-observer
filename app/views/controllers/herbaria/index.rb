@@ -18,7 +18,9 @@ module Views::Controllers::Herbaria
 
       render_merge_alert if @merge
 
-      render(::Components::PaginatedResults.new) { render_table if @objects.any? }
+      render(::Components::PaginatedResults.new) do
+        render_table if @objects.any?
+      end
     end
 
     private
