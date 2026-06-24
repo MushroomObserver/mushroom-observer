@@ -28,7 +28,7 @@ class Components::Link::External < Components::Base
       @opts = tab.html_options.except(*NON_HTML_OPTS).merge(opts)
     elsif link
       @content = link_content
-      @path = link.url
+      @path = link.link_url
       @opts = opts
     else
       @content = content
@@ -49,9 +49,12 @@ class Components::Link::External < Components::Base
 
   private
 
+  # Import links store external_id with a nil url (the url is derived), while
+  # manual links store the url. link_url resolves both, so strip the base_url
+  # off it to get the bare iNat id either way.
   def link_content
     if inaturalist?
-      "iNat #{@link.url.sub(@link.external_site.base_url, "")}"
+      "iNat #{@link.link_url.delete_prefix(@link.external_site.base_url)}"
     else
       :on_site.t(site: @link.external_site.name)
     end
