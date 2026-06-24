@@ -86,6 +86,21 @@ class ButtonTest < ComponentTestCase
   end
 end
 
+# Tests for the Components::ButtonStyling concern's raise paths.
+class Components::ButtonStylingTest < ComponentTestCase
+  def test_unknown_variant_raises_argument_error
+    assert_raises(ArgumentError) do
+      Components::ButtonStyling.btn_class(:nonexistent)
+    end
+  end
+
+  def test_unknown_size_raises_argument_error
+    assert_raises(ArgumentError) do
+      Components::ButtonStyling.size_class(:jumbo)
+    end
+  end
+end
+
 # Tests for the Components::Button.new dispatcher. Each test verifies
 # that the right subclass is invoked by asserting the behavioral HTML
 # contract of that subclass, not just the return class.
@@ -279,6 +294,14 @@ class Components::ButtonDispatcherTest < ComponentTestCase
     assert_html(html, "a.btn-lg")
   end
 
+  # ---- unknown type: raises ArgumentError ------------------------------
+
+  def test_unknown_type_raises_argument_error
+    assert_raises(ArgumentError) do
+      Components::Button.new(type: :kaboom, name: "X")
+    end
+  end
+
   # ---- plain button (no dispatch) --------------------------------------
 
   def test_no_type_renders_plain_button_element
@@ -293,6 +316,15 @@ class Components::ButtonDispatcherTest < ComponentTestCase
   end
 
   # ---- variant/size flow through dispatcher ----------------------------
+
+  def test_delete_with_string_target_uses_destroy_label
+    html = render(Components::Button.new(type: :delete,
+                                         target: "/items/1/delete",
+                                         name: nil))
+
+    assert_html(html, "form[action='/items/1/delete']")
+    assert_html(html, "button[type='submit']", text: :DESTROY.l)
+  end
 
   def test_variant_passes_through_mutation_dispatch
     html = render(Components::Button.new(
