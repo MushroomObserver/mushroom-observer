@@ -416,7 +416,7 @@ module SessionExtensions
       val  = CGI.unescapeHTML(input.attributes["value"])
       params[name] = val
     end
-    params["submit"] = CGI.unescapeHTML(button.attributes["value"])
+    params["submit"] = CGI.unescapeHTML(button.attributes["value"].to_s)
     params
   end
 

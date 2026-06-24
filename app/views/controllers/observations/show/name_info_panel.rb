@@ -33,7 +33,7 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
     end
   end
 
-  # Three groups, each emitted as `<a class="d-block">` lines:
+  # Three groups, each rendered as a block-level div wrapping the link:
   # related-name filtered indexes, alt-descriptions list, and
   # the per-name distribution map link.
   def render_links_on_mo
