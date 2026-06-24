@@ -62,6 +62,21 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_no_html(html, "small")
   end
 
+  # Regression: import links store external_id with a nil url (url is derived).
+  # The component used to call link.url.sub(...) -> NoMethodError on nil.
+  def test_inat_import_link_with_nil_url_renders_derived_id
+    site = external_sites(:inaturalist)
+    link = ExternalLink.new(external_site: site, relationship: :import,
+                            external_id: "372490529")
+    assert_nil(link.url, "Import links store external_id, not url")
+
+    html = render(Components::Link::External.new(link: link))
+
+    assert_html(html, "a[href='#{site.observation_url("372490529")}']" \
+                      "[target='_blank']",
+                text: "iNat 372490529")
+  end
+
   def test_other_site_renders_on_site_label_and_date
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     html = render(Components::Link::External.new(link: link))
