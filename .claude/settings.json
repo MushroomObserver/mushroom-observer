@@ -18,6 +18,21 @@
             "type": "command",
             "command": "test -x .claude/hooks/check_orphaned_erb_renders.sh && exec .claude/hooks/check_orphaned_erb_renders.sh || exit 0",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_raw_btn_classes.sh && exec .claude/hooks/block_raw_btn_classes.sh || exit 0",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/enforce_batch_reads.sh && exec .claude/hooks/enforce_batch_reads.sh || exit 0",
+            "timeout": 10
           }
         ]
       },

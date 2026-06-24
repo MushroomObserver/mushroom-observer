@@ -122,12 +122,22 @@ module SessionExtensions
     # +inputs+ and +submits+ Arrays with the results.  Called automatically
     # by the constructor.
     def fill_in_initial_values!
-      context.assert_select(form, "input, textarea, select") do |elems|
+      context.assert_select(form, "input, textarea, select, button") do |elems|
         elems.each do |elem|
           id   = find_value(elem, "id")
           name = find_value(elem, "name")
-          val  = find_value(elem, "value")
-          type = elem.name == "input" ? find_value(elem, "type") : elem.name
+          type = if elem.name == "button"
+                   find_value(elem, "type").presence || "submit"
+                 elsif elem.name == "input"
+                   find_value(elem, "type")
+                 else
+                   elem.name
+                 end
+          val = if elem.name == "button"
+                  elem.text.strip
+                else
+                  find_value(elem, "value")
+                end
           disabled = find_value(elem, "disabled") == "disabled"
 
           field = Field.new(

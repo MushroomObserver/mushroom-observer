@@ -40,14 +40,15 @@ class ButtonStyleCheckboxTest < ComponentTestCase
     assert_html(html, "input[type='checkbox']:not([checked])")
   end
 
-  def test_label_attrs_passed_through
+  def test_variant_and_size_applied_to_label
     html = render(klass.new(
                     name: "n[]", value: "1", id: "x",
-                    label: { class: "btn btn-default filter-checkbox",
+                    variant: :outline, size: :sm,
+                    label: { class: "filter-checkbox",
                              data: { action: "click->filter#toggle" } }
                   ))
 
-    assert_html(html, "label.btn.btn-default.filter-checkbox[for='x']")
+    assert_html(html, "label[for='x']")
     assert_html(html, "label[data-action='click->filter#toggle']")
   end
 

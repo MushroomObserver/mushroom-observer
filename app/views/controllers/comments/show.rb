@@ -54,7 +54,7 @@ module Views::Controllers::Comments
     def render_author
       p do
         plain("#{:comment_show_by.t}: ")
-        render(Components::Link::Object::User.new(user: @comment.user))
+        render(Components::Link::User.new(user: @comment.user))
       end
     end
 

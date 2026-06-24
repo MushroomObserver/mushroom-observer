@@ -21,6 +21,13 @@ module Views::Controllers::Observations::Images
                   "input[type='hidden'][name='_method'][value='patch']")
     end
 
+    def test_cancel_link_navigates_to_image_show
+      img = images(:agaricus_campestris_image)
+      html = render_form(image: img)
+
+      assert_html(html, "a[href='#{routes.image_path(img.id)}']")
+    end
+
     def test_renders_core_fields
       img = images(:agaricus_campestris_image)
       html = render_form(image: img)
@@ -124,8 +131,8 @@ module Views::Controllers::Observations::Images
       html = render_form(image: img)
 
       # One above the fields, one in the footer.
-      assert_html(html, "input[type='submit'][value='#{:SAVE_EDITS.l}']",
-                  count: 2)
+      assert_html(html, "button[type='submit']", text: :SAVE_EDITS.l,
+                                                 count: 2)
     end
 
     private

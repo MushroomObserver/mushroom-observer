@@ -111,7 +111,8 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
              value: value,
              id: "thumb_image_id_#{@img_id}",
              checked: checked,
-             label: { class: "btn btn-default btn-sm thumb_img_btn" },
+             size: :sm,
+             label: { class: "thumb_img_btn" },
              class: "mr-3"
            )) do
       span(class: "set_thumb_img_text") { :image_set_default.l }
@@ -131,10 +132,11 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
              action: "form-images##{action}:prevent" }
     data[:image_id] = image_id if image_id
 
-    button_classes = class_names("btn btn-default",
-                                 "remove_image_button btn-sm fade in")
-
-    button(type: "button", class: button_classes, data: data) do
+    render(Components::Button.new(
+             size: :sm,
+             class: "remove_image_button fade in",
+             data: data
+           )) do
       span { :image_remove_remove.l }
       render(Components::Icon.new(
                type: :remove, html_class: "text-danger ml-3"

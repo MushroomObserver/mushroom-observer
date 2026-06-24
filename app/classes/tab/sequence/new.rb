@@ -15,10 +15,6 @@ class Tab::Sequence::New < Tab::Base
     new_sequence_path(observation_id: @observation.id)
   end
 
-  def html_options
-    { icon: :add }
-  end
-
   def model
     Sequence
   end

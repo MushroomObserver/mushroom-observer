@@ -67,8 +67,9 @@ class DescriptionModLinksTest < ComponentTestCase
                     description: desc, user: users(:rolf)
                   ))
 
-    assert_html(html,
-                "a[href='#{routes.publish_name_description_path(desc.id)}']")
+    path = routes.publish_name_description_path(desc.id)
+    assert_html(html, "form[action='#{path}']")
+    assert_html(html, "input[name='_method'][value='put']")
   end
 
   def test_renders_project_link_for_project_sourced_description
@@ -96,9 +97,8 @@ class DescriptionModLinksTest < ComponentTestCase
                     description: desc, user: users(:rolf)
                   ))
 
-    assert_html(
-      html,
-      "a[href='#{routes.make_default_name_description_path(desc.id)}']"
-    )
+    path = routes.make_default_name_description_path(desc.id)
+    assert_html(html, "form[action='#{path}']")
+    assert_html(html, "input[name='_method'][value='put']")
   end
 end

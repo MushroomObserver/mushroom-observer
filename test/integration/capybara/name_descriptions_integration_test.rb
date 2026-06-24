@@ -84,7 +84,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
                                        disabled: false))
       assert(form.has_unchecked_field?("description_public",
                                        disabled: false))
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
     assert_flash_success(session: session)
     # assert_template("name/show_name_description")
@@ -112,7 +112,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
       assert(form.has_unchecked_field?("description_public",
                                        disabled: false))
       form.fill_in("description_gen_desc", with: gen_desc)
-      form.first("input[type='submit']").click
+      form.first("button[type='submit']").click
     end
     assert_flash_success(session: session)
     assert_not_nil(NameDescription.find_by(gen_desc: gen_desc))

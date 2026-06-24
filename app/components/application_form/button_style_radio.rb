@@ -12,8 +12,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Multiple instances with the same `name:` form a radio group via
   # browser-native behavior — no JS needed to manage checked state
   # across them. The `data-form-images-target`-style hook in
-  # Form::UploadGallery::Item only manages the visual `.active` class on the
-  # label.
+  # Form::UploadGallery::Item only manages the visual `.active` class on
+  # the label.
   #
   # Standalone (no Superform context) — takes raw HTML kwargs rather
   # than a `Field` / `FieldProxy`, since the call sites (carousel
@@ -25,39 +25,45 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   render(Components::ApplicationForm::ButtonStyleRadio.new(
   #     name: "observation[thumb_image_id]", value: image.id,
   #     id: "thumb_image_id_#{image.id}", checked: thumb?,
-  #     label_class: "btn btn-default thumb_img_btn",
-  #     label_data: { action: "click->form-images#setObsThumbnail" }
+  #     size: :sm, label: { class: "thumb_img_btn" }
   #   )) do
   #     span(class: "set_thumb_img_text") { :image_set_default.l }
   #   end
   class ButtonStyleRadio < Phlex::HTML
-    include Phlex::TrustedHtml
-
     # @param name [String] HTML name (shared across radios in the group)
     # @param value [String] value submitted when this radio is checked
     # @param id [String] HTML id (matches the label's `for`)
     # @param checked [Boolean] initial checked state
-    # @param label [Hash] HTML attrs for the `<label>` wrap
-    #   (e.g. `class:`, `data:`)
-    # @param input_attrs [Hash] HTML attrs passed through to the
-    #   `<input>` (e.g. `class:`, `data:`)
-    # rubocop:disable Metrics/ParameterLists
-    def initialize(name:, value:, id:, checked: false,
-                   label: {}, **input_attrs)
-      # rubocop:enable Metrics/ParameterLists
+    # @param variant [Symbol, nil] btn variant; nil (default) for btn-default
+    #   frame, :strip for a plain label with no btn classes
+    # @param size [Symbol, nil] btn size modifier (`:sm`, `:lg`, etc.)
+    # @param label [Hash] extra HTML attrs for the `<label>` (e.g.
+    #   `class:` for identifier classes, `data:`). Do not pass btn classes
+    #   here — use `variant:` and `size:` instead.
+    # @param input_attrs [Hash] HTML attrs passed through to `<input>`
+    def initialize(name:, value:, id:, **opts)
       super()
       @name = name
       @value = value
       @id = id
-      @checked = checked
-      @label_attrs = label
-      @input_attrs = input_attrs
+      @checked = opts.delete(:checked) { false }
+      @variant = opts.delete(:variant)
+      @size = opts.delete(:size)
+      @label_attrs = opts.delete(:label) || {}
+      @input_attrs = opts
     end
 
     def view_template(&block)
-      label(for: @id, **@label_attrs) do
+      render(Components::Button.new(
+               tag: :label,
+               for: @id,
+               variant: @variant,
+               size: @size,
+               class: @label_attrs[:class],
+               **@label_attrs.except(:class)
+             )) do
         input(**input_attributes)
-        yield if block
+        block&.call
       end
     end
 

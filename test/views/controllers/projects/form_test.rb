@@ -16,7 +16,7 @@ module Views::Controllers::Projects
       assert_html(html, "form[action='/projects']")
 
       # Submit button
-      assert_html(html, "input[type='submit'][value='#{:CREATE.l}']")
+      assert_html(html, "button[type='submit']", text: :CREATE.l)
 
       # Fields
       assert_html(html,
@@ -66,7 +66,7 @@ module Views::Controllers::Projects
       assert_html(html,
                   "form[action='/projects/#{project.id}']")
       assert_html(html,
-                  "input[type='submit'][value='#{:SAVE_EDITS.l}']")
+                  "button[type='submit']", text: :SAVE_EDITS.l)
     end
 
     def test_dates_any_false

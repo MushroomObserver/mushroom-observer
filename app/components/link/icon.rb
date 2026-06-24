@@ -31,7 +31,7 @@ class Components::Link::Icon < Components::Base
   LABEL_SHOW_CLASSES = "pl-2 d-none d-sm-inline font-weight-bold"
 
   CONSUMED_OPTS = [:class, :icon, :icon_class, :show_text,
-                   :active_icon, :active_content, :button_to].freeze
+                   :active_icon, :active_content, :button_to, :confirm].freeze
 
   attr_reader :content, :path, :opts
 
@@ -40,7 +40,7 @@ class Components::Link::Icon < Components::Base
     if tab
       @content = tab.title
       @path = tab.path
-      @opts = tab.html_options
+      @opts = tab.html_options.merge(opts)
     else
       @content = content
       @path = path
@@ -122,12 +122,15 @@ class Components::Link::Icon < Components::Base
   end
 
   def link_attrs
+    # confirm: carries the Turbo confirm-dialog text (e.g. description
+    # Clone/Merge/Move). Turbo shows the dialog before following the link.
     base = {
       title: @content,
       class: class_names("icon-link", @opts[:class]),
       data: { toggle: "tooltip", title: @content,
               active_title: @opts[:active_content] }
     }
+    base[:data][:turbo_confirm] = @opts[:confirm] if @opts[:confirm]
     base[:role] = "button" if @opts[:button_to]
     base.deep_merge(@opts.except(*CONSUMED_OPTS))
   end

@@ -220,8 +220,6 @@ module Tab::Project
 
       opts = tab.html_options
       assert_includes(opts[:class], "add_project_alias_link")
-      assert_includes(opts[:class], "btn")
-      assert_includes(opts[:class], "btn-default")
     end
 
     private

@@ -19,7 +19,7 @@ class Tab::Description::Merge < Tab::Base
   end
 
   def html_options
-    { help: :show_description_merge_help.l, icon: :merge }
+    { confirm: :show_description_merge_help.l, icon: :merge }
   end
 
   def model

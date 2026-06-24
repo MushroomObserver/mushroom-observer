@@ -53,14 +53,11 @@ module Views::Controllers::Projects::Admin
 
     def render_destroy
       p { plain(:show_project_admin_destroy_help.l) }
-      # Danger Zone overrides the default outline button entirely —
-      # this is a primary, page-level destructive action and we want
-      # a filled, large button. Everything goes through `btn:` since
-      # it's a full override of `CrudButton::Delete`'s default.
-      render(Components::CrudButton::Delete.new(
+      render(Components::Button.new(
+               type: :delete,
                target: @project,
                name: :destroy_object.t(type: :project),
-               btn: "btn btn-default btn-lg"
+               size: :lg
              ))
     end
   end

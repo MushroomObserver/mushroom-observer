@@ -14,8 +14,7 @@ module Views::Controllers::CollectionNumbers
 
       assert_html(html, "input[name='collection_number[name]']")
       assert_html(html, "input[name='collection_number[number]']")
-      assert_html(html, "input[type='submit'][value='#{:ADD.l}']")
-      assert_html(html, "input.btn.btn-default")
+      assert_html(html, "button[type='submit']", text: :ADD.l)
       assert_html(html, "form[data-turbo='true']")
     end
 
@@ -23,7 +22,7 @@ module Views::Controllers::CollectionNumbers
       record = collection_numbers(:coprinus_comatus_coll_num)
       html = render_form(model: record)
 
-      assert_html(html, "input[type='submit'][value='#{:SAVE.l}']")
+      assert_html(html, "button[type='submit']", text: :SAVE.l)
     end
 
     def test_multiple_observations_warning

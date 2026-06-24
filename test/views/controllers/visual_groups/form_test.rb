@@ -31,7 +31,7 @@ module Views::Controllers::VisualGroups
     end
 
     def test_renders_submit_button
-      assert_html(@html, "input[type='submit'][value='#{:SUBMIT.t}']")
+      assert_html(@html, "button[type='submit']", text: :SUBMIT.t)
       assert_html(@html, ".center-block")
     end
 

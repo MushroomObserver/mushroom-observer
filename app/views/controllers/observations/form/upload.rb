@@ -11,7 +11,6 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
   prop :good_images, _Array(::Image), default: -> { [] }
 
   def view_template
-    h4(class: "panel-title d-inline-block mr-4") { :IMAGES.l }
     render_file_select_button
     render_good_image_ids_field
     render_thumb_image_id_field
@@ -29,7 +28,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         multiple: true,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
-        wrapper_options: { label: false }
+        wrapper_options: { label: "#{:IMAGES.l}:", class: "my-3" }
       )
     )
   end

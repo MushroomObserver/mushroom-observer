@@ -77,7 +77,7 @@ module Tab::Sequence
 
       assert_equal(:show_observation_archive_link.t, tab.title)
       assert_equal(@sequence.accession_url, tab.path)
-      assert_equal("_blank", tab.html_options[:target])
+      assert(tab.html_options[:external])
       assert_equal(@sequence, tab.model)
     end
 
@@ -86,7 +86,7 @@ module Tab::Sequence
 
       assert_equal(:show_observation_blast_link.t, tab.title)
       assert_equal(@sequence.blast_url, tab.path)
-      assert_equal("_blank", tab.html_options[:target])
+      assert(tab.html_options[:external])
       assert_equal(@sequence, tab.model)
     end
   end

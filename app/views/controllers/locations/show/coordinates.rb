@@ -44,8 +44,9 @@ module Views::Controllers::Locations
       end
 
       def render_destroy_button
-        render(::Components::CrudButton::Delete.new(
-                 target: @location, btn: nil
+        render(::Components::Button.new(
+                 type: :delete,
+                 target: @location, variant: :strip
                ))
       end
 
@@ -119,7 +120,8 @@ module Views::Controllers::Locations
 
       def render_footer
         render(::Components::Link::Icon.new(
-                 tab: ::Tab::Location::ObservationsAt.new(location: @location)
+                 tab: ::Tab::Location::ObservationsAt.new(location: @location),
+                 show_text: true
                ))
       end
     end

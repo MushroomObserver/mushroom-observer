@@ -53,10 +53,8 @@ module Views::Controllers::GlossaryTerms::Images
     def test_renders_submit_buttons_above_and_below_matrix
       html = render_form
 
-      # Two submit inputs (top + bottom), both centered.
-      submits = html.scan(/<input[^>]*type="submit"/).count
-      assert_equal(2, submits,
-                   "expected 2 submit buttons (top + bottom)")
+      # Two submit buttons (top + bottom), both centered.
+      assert_html(html, "button[type='submit']", count: 2)
     end
 
     def test_renders_matrix_with_one_box_per_image

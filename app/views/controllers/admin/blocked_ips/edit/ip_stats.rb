@@ -43,7 +43,7 @@ module Views::Controllers::Admin::BlockedIps
         return unless (user_id = ip_stats[:user])
 
         plain("User: ")
-        render(::Components::Link::Object::User.new(
+        render(::Components::Link::User.new(
                  user: @users_by_id[user_id] || user_id
                ))
         br
@@ -55,7 +55,7 @@ module Views::Controllers::Admin::BlockedIps
         api_key = @api_keys_by_str[api_key_str]
         plain("API key: #{api_key_str} (")
         if api_key
-          render(::Components::Link::Object::User.new(user: api_key.user))
+          render(::Components::Link::User.new(user: api_key.user))
         else
           plain("bogus!")
         end
