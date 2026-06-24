@@ -160,7 +160,7 @@ $(printf '%s\n' "$matches" | sed 's/^/    /')
 check \
   'raw btn class' \
   'Components::Button subclass (Edit/Delete/Post/Patch/Put/Get/Download/ModalToggle/Submit)' \
-  '["'"'"'][^"'"'"']*\bbtn\b[^"'"'"']*["'"'"']' \
+  'class:[[:space:]]*["'"'"'][^"'"'"']*\bbtn\b' \
   ''
 
 # help-note / help-block
@@ -210,7 +210,7 @@ check \
   'raw Bootstrap table class' \
   'Components::Table.new(collection) do |t| … end' \
   '(^[[:space:]]*table\(class:|class:[[:space:]]*["'"'"'][^"'"'"']*\btable\b)' \
-  'table_class:|# '
+  'table_class:|Components::Table|# '
 
 # panel
 check \

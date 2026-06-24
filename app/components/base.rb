@@ -111,6 +111,10 @@ class Components::Base < Phlex::HTML
     end
   end
 
+  def nbsp
+    trusted_html("&nbsp;")
+  end
+
   def before_template
     comment { "Before #{self.class.name}" } if Rails.env.development?
     super

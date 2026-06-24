@@ -40,6 +40,12 @@ class HelpNoteTest < ComponentTestCase
     assert_html(html, "span[data-foo='bar']")
   end
 
+  def test_string_as_first_arg_uses_default_span_element
+    html = render(Components::Help::Note.new("(optional)"))
+
+    assert_html(html, "span.help-note", text: "(optional)")
+  end
+
   def test_renders_no_content_when_neither_string_nor_block
     html = render(Components::Help::Note.new(:span))
 
