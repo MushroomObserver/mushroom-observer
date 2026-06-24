@@ -3,6 +3,12 @@
 require("test_helper")
 
 class Components::Link::ExternalTest < ComponentTestCase
+  FakeTab = Struct.new(:title, :path, :html_options) do
+    def initialize
+      super("External Resource", "https://example.com",
+            { class: "tab-class" })
+    end
+  end
   # ---- Generic (content, path) form ----
 
   def test_renders_link_with_target_blank_and_noopener
@@ -30,6 +36,18 @@ class Components::Link::ExternalTest < ComponentTestCase
     )
 
     assert_html(html, "a.my-class[target='_blank']")
+  end
+
+  # ---- Tab PORO form ----
+
+  def test_tab_form_uses_tab_title_path_and_html_options
+    tab = FakeTab.new
+    html = render(Components::Link::External.new(tab: tab))
+
+    assert_html(html, "a[href='https://example.com']" \
+                      "[target='_blank'][rel='noopener noreferrer']",
+                text: "External Resource")
+    assert_html(html, "a.tab-class")
   end
 
   # ---- ExternalLink AR record (link:) form ----
