@@ -15,10 +15,6 @@ class Tab::CollectionNumber::New < Tab::Base
     new_collection_number_path(observation_id: @observation.id)
   end
 
-  def html_options
-    {}
-  end
-
   def model
     CollectionNumber
   end

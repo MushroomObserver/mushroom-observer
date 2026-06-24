@@ -14,8 +14,4 @@ class Tab::ExternalLink::New < Tab::Base
   def path
     new_external_link_path(id: @observation.id)
   end
-
-  def html_options
-    {}
-  end
 end

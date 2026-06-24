@@ -21,10 +21,6 @@ class Tab::Project::AliasNew < Tab::Base
                            target_type: @target_type)
   end
 
-  def html_options
-    {}
-  end
-
   def model
     ProjectAlias
   end

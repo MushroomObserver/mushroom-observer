@@ -14,10 +14,6 @@ class Tab::Name::NewDescription < Tab::Base
     new_name_description_path(@name.id)
   end
 
-  def html_options
-    {}
-  end
-
   def model
     @name
   end

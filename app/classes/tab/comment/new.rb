@@ -16,10 +16,6 @@ class Tab::Comment::New < Tab::Base
     new_comment_path(target: @object.id, type: @object.class.name)
   end
 
-  def html_options
-    {}
-  end
-
   def model
     @object
   end
