@@ -312,7 +312,7 @@ module Names
       assert_select("a[href*='descriptions/#{did}/merges/new']")
       assert_select("a[href*='descriptions/#{did}/permissions']")
       assert_select("a[href*='descriptions/new?clone=#{did}']")
-      assert_select("a[href*='descriptions/#{did}/publish']")
+      assert_select("form[action*='descriptions/#{did}/publish']")
       assert_select(
         "form[action*='descriptions/#{did}'] input[value='delete']"
       )
