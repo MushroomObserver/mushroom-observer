@@ -81,34 +81,22 @@ class ExternalLinkTest < UnitTestCase
     )
   end
 
-  def test_uniqueness
+  # An MO obs can correspond to several external records (e.g. iNat-side
+  # duplicates of one collection), so a second non-import link to the same
+  # site on the same obs is allowed (#4565). Only one import per target is
+  # constrained — see test_only_one_import_per_target.
+  def test_multiple_links_per_target_allowed
     link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
     site = link1.external_site
-    base_url = site.base_url
 
-    another_obs = observations(:minimal_unknown_obs)
-    assert_not_equal(link1.observation.id, another_obs.id,
-                     "Fixture observations should be different")
-
-    # same observation
     link2 = ExternalLink.create(
       user: mary,
       observation: link1.observation,
       external_site: site,
-      url: "#{base_url}and_an_id"
+      url: "#{site.base_url}another_id"
     )
-    assert_not_empty(link2.errors,
-                     "Duplicate link for same observation should be invalid")
-
-    # different observation
-    link3 = ExternalLink.create(
-      user: mary,
-      observation: another_obs,
-      external_site: site,
-      url: "#{base_url}and_an_id"
-    )
-    assert_empty(link3.errors,
-                 "Link for different observation should be valid")
+    assert_empty(link2.errors,
+                 "A second link for the same observation+site should be valid")
   end
 
   def test_relationship_defaults_to_manual

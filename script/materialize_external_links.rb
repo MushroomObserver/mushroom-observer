@@ -4,22 +4,22 @@
 # Materialize MO<->iNat correspondences as typed ExternalLinks (#4565), from
 # the iNat "Mushroom Observer URL" observation field (5005) report.
 #
-# For each row (an iNat obs whose field 5005 points at an MO obs URL):
-#   - parse the MO obs id from the URL; if the obs doesn't exist -> mo_missing
-#     (skip + report; deferred per #4576 orphan triage).
-#   - if the MO obs already has an iNat ExternalLink:
-#       * same iNat id  -> already materialized (import from #4529, or our own
-#         link on a re-run) -> skip. Idempotent.
-#       * different iNat id -> CONFLICT (the obs is linked to a *different*
-#         iNat obs). Should not happen; written in full to the conflicts CSV
-#         for review (≈ the analysis's import_diff multi-link bucket).
-#   - otherwise create ONE admin-owned link (one link per (obs, site)), typed
-#     from the MO-side note signal:
-#       "Mirrored on iNaturalist"  -> mirror
-#       contains an inaturalist.org URL -> manual
-#       else (no iNat URL in notes) -> copy   (the historical bulk back-refs)
+# An MO obs may correspond to several iNat obs (iNat-side duplicates of one
+# collection), so it can carry multiple iNat links; dedup is per correspondence
+# (obs + iNat id), not per obs. Per row (iNat obs X -> MO obs M):
+#   1. M missing -> mo_missing (skip + report; #4576 orphan triage).
+#   2. M already links to X (same iNat id) -> skip (idempotent).
+#   3. M has an import link (to a different iNat obs) -> manual: the importer
+#      only stamps the one obs it created, so an extra ref is hand-set. (Unless
+#      M's notes carry a "Mirrored on iNaturalist" stamp -> mirror.)
+#   4. M has no import link -> type by MO-side trace:
+#        "Mirrored on iNaturalist" note -> mirror
+#        notes contain an inaturalist.org URL -> manual (user cross-reference)
+#        else -> copy (the historic iNat-team back-reference)
 #
-# URL is left derived (ExternalSite#observation_url from external_id).
+# import + copy can never co-occur on one obs (step 3 short-circuits). Obs that
+# end up with 2+ iNat links are written to the multi-link report — the input to
+# reflection resolution (#4585). URL is left derived from external_id.
 #
 # Dry run by default; APPLY=1 writes. Idempotent.
 #   bin/rails runner script/materialize_external_links.rb
@@ -42,14 +42,13 @@ class MaterializeExternalLinks
   def initialize(opts)
     @csv = opts.fetch(:csv)
     @apply = opts.fetch(:apply)
-    @conflicts_out = opts.fetch(:conflicts_out)
+    @multi_out = opts.fetch(:multi_out)
     @missing_out = opts.fetch(:missing_out)
     @site = ExternalSite.inaturalist
     @admin = User.admin
     @stats = Hash.new(0)
-    @conflicts = []
     @missing = []
-    @materialized = {} # mo_id => iNat id created this run (intra-run dedup)
+    @refs = {} # mo_id => Set of iNat ids it links to (existing + created)
     @seen = 0
   end
 
@@ -59,6 +58,7 @@ class MaterializeExternalLinks
     warn("Materializing #{@total} correspondences (site=#{@site.name}, " \
          "#{@apply ? "APPLY" : "dry run"})")
     rows.each_slice(BATCH) { |batch| process_batch(batch) }
+    @multi = multilink_rows
     write_reports
     print_summary
   end
@@ -81,7 +81,8 @@ class MaterializeExternalLinks
     ids = batch.filter_map { |r| r[:mo_id] }
     obs_by_id = Observation.where(id: ids).index_by(&:id)
     links = ExternalLink.where(target_type: "Observation", target_id: ids,
-                               external_site_id: @site.id).index_by(&:target_id)
+                               external_site_id: @site.id).
+            group_by(&:target_id)
     batch.each { |row| process_row(row, obs_by_id, links) }
     @seen += batch.size
     warn("  #{@seen}/#{@total} processed") if (@seen % PROGRESS_EVERY).zero?
@@ -91,48 +92,46 @@ class MaterializeExternalLinks
     return (@stats[:unparseable] += 1) unless row[:mo_id]
 
     obs = obs_by_id[row[:mo_id]]
-    return record_missing(row) unless obs
-
-    existing_id, link = existing_inat_id(row[:mo_id], links)
-    if existing_id.nil?
-      create_link(obs, row)
-    elsif existing_id == row[:inat_id]
-      @stats[:already_present] += 1
-    else
-      record_conflict(row, existing_id, link)
-    end
+    obs ? materialize(obs, row, links) : record_missing(row)
   end
 
-  # The iNat id this obs is already linked to (DB link or one created this
-  # run), plus the DB link if any.
-  def existing_inat_id(mo_id, links)
-    if (link = links[mo_id])
-      [link_inat_id(link), link]
-    else
-      [@materialized[mo_id], nil]
-    end
+  def materialize(obs, row, links)
+    db_links = links[row[:mo_id]] || []
+    refs = refs_for(row[:mo_id], db_links)
+    return (@stats[:already_present] += 1) if refs.include?(row[:inat_id])
+
+    create_link(obs, row, classify(obs, db_links))
+    refs << row[:inat_id]
   end
 
-  # The iNat obs id a link points at: its external_id, or — for legacy
-  # manual links that only stored a url — parsed from the url.
+  # Accumulated set of iNat ids this obs links to — seeded from its existing
+  # DB links (across re-runs / multi-link batches) and grown as we create more.
+  def refs_for(mo_id, db_links)
+    set = (@refs[mo_id] ||= Set.new)
+    db_links.each { |link| set << link_inat_id(link) }
+    set
+  end
+
+  # The iNat obs id a link points at: its external_id, or — for legacy manual
+  # links that only stored a url — parsed from the url.
   def link_inat_id(link)
     (link.external_id.presence || link.url.to_s[INAT_URL_RE, 1]).to_s
   end
 
-  def create_link(obs, row)
-    type = classify(obs)
+  def create_link(obs, row, type)
     if @apply
       ExternalLink.create!(user: @admin, target: obs, external_site: @site,
                            external_id: row[:inat_id], relationship: type)
     end
-    @materialized[row[:mo_id]] = row[:inat_id]
     @stats[type] += 1
   end
 
-  # Mirror notes also contain an inaturalist.org URL, so check mirror first.
-  def classify(obs)
+  # Order matters — see the file header. Mirror stamp first (mirror notes also
+  # contain an inaturalist.org URL); an extra ref on an import obs is manual.
+  def classify(obs, db_links)
     blob = notes_blob(obs)
     return :mirror if blob.match?(MIRROR_RE)
+    return :manual if db_links.any?(&:import?)
     return :manual if blob.match?(MANUAL_RE)
 
     :copy
@@ -148,18 +147,15 @@ class MaterializeExternalLinks
     @missing << [row[:mo_id], row[:inat_id], row[:url]]
   end
 
-  def record_conflict(row, existing_id, link)
-    @stats[:conflict] += 1
-    @conflicts << [row[:mo_id], row[:url], row[:inat_id], existing_id,
-                   link&.relationship, link&.id]
+  def multilink_rows
+    @refs.select { |_id, set| set.size >= 2 }.
+      map { |id, set| [id, set.size, set.to_a.sort.join(" ")] }.
+      sort_by(&:first)
   end
 
   def write_reports
-    write_csv(@conflicts_out,
-              %w[mo_obs_id mo_url row_inat_id existing_inat_id
-                 existing_relationship existing_link_id], @conflicts)
-    write_csv(@missing_out,
-              %w[mo_obs_id row_inat_id mo_url], @missing)
+    write_csv(@multi_out, %w[mo_obs_id inat_link_count inat_ids], @multi)
+    write_csv(@missing_out, %w[mo_obs_id row_inat_id mo_url], @missing)
   end
 
   def write_csv(path, header, rows)
@@ -176,7 +172,7 @@ class MaterializeExternalLinks
     puts("== summary#{" (dry run)" unless @apply} ==")
     [:copy, :mirror, :manual].each { |t| puts("  created #{t}: #{@stats[t]}") }
     puts("  already present (skipped): #{@stats[:already_present]}")
-    puts("  conflicts: #{@stats[:conflict]} -> #{@conflicts_out}")
+    puts("  multi-link obs (2+ iNat links): #{@multi.size} -> #{@multi_out}")
     puts("  mo_missing: #{@stats[:mo_missing]} -> #{@missing_out}")
     puts("  unparseable url: #{@stats[:unparseable]}")
     puts
@@ -186,7 +182,7 @@ end
 
 def parse_options(argv)
   opts = { apply: ENV["APPLY"] == "1", csv: "observations-750205.csv",
-           conflicts_out: "external_link_conflicts.csv",
+           multi_out: "external_link_multilink.csv",
            missing_out: "external_link_mo_missing.csv" }
   OptionParser.new do |o|
     o.banner = "Usage: bin/rails runner script/materialize_external_links.rb"
@@ -194,7 +190,7 @@ def parse_options(argv)
          "Field-5005 report (default observations-750205.csv)") do |v|
       opts[:csv] = v
     end
-    o.on("--conflicts-out FILE") { |v| opts[:conflicts_out] = v }
+    o.on("--multi-out FILE") { |v| opts[:multi_out] = v }
     o.on("--missing-out FILE") { |v| opts[:missing_out] = v }
   end.parse!(argv)
   opts

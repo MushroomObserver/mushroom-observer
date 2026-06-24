@@ -52,14 +52,14 @@ class ExternalLink < AbstractModel
   belongs_to :user
 
   validates :target, presence: true
-  # Uniqueness is on the column, not the polymorphic association (Rails can't
-  # compute the class for a polymorphic uniqueness check).
-  validates :target_id,
-            uniqueness: { scope: [:target_type, :external_site_id] }
   validates :external_site, presence: true
   validates :user, presence: true
   validates :url, length: { maximum: 100 }, allow_blank: true
   validate  :check_url_syntax
+  # No general one-link-per-(target, site) rule: an MO obs can legitimately
+  # correspond to several iNat obs (iNat-side duplicates of one collection),
+  # so it may carry multiple iNat links (#4565). Only one IMPORT (reflection)
+  # per target is still enforced (below + the import_target unique index).
   validate  :only_one_import_per_target, if: :import?
   before_validation :format_url_for_external_site
 
