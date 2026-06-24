@@ -107,7 +107,7 @@ class Components::Description::ModLinks < Components::Base
                            name: opts[:title] || tab.title,
                            target: tab.path,
                            icon: opts[:icon],
-                           confirm: opts[:help],
+                           confirm: opts[:confirm],
                            variant: :strip,
                            class: "icon-link")
   end

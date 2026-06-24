@@ -60,7 +60,7 @@ module Tab::Description
       assert_equal(routes.new_name_description_path(
                      clone: @name_desc.id, name_id: @name_desc.parent_id
                    ), tab.path)
-      assert_equal(:show_description_clone_help.l, tab.html_options[:help])
+      assert_equal(:show_description_clone_help.l, tab.html_options[:confirm])
       assert_equal(:clone, tab.html_options[:icon])
     end
 
@@ -80,7 +80,7 @@ module Tab::Description
       assert_equal(routes.new_move_location_description_path(@location_desc.id),
                    tab.path)
       assert_equal(:show_description_move_help.l(parent: "location"),
-                   tab.html_options[:help])
+                   tab.html_options[:confirm])
     end
 
     def test_adjust_permissions

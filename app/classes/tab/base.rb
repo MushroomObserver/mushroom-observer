@@ -43,7 +43,7 @@ class Tab::Base
 
   # Keys subclasses may return from `#html_options`. All others raise.
   ALLOWED_HTML_OPTION_KEYS = [:class, :id, :button, :back, :icon, :external,
-                              :data, :title, :help].freeze
+                              :data, :title, :confirm].freeze
 
   # Valid values for the `:button` key.
   ALLOWED_BUTTON_VALUES = [:post, :put, :patch, :destroy].freeze

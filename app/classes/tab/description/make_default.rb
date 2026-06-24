@@ -20,7 +20,7 @@ class Tab::Description::MakeDefault < Tab::Base
   end
 
   def html_options
-    { button: :put, help: :show_description_make_default_help.l,
+    { button: :put, confirm: :show_description_make_default_help.l,
       icon: :make_default }
   end
 

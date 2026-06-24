@@ -21,7 +21,7 @@ class Tab::Description::Clone < Tab::Base
   end
 
   def html_options
-    { help: :show_description_clone_help.l, icon: :clone }
+    { confirm: :show_description_clone_help.l, icon: :clone }
   end
 
   def model

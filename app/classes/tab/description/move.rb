@@ -19,7 +19,7 @@ class Tab::Description::Move < Tab::Base
   end
 
   def html_options
-    { help: :show_description_move_help.l(parent: @type.to_s), icon: :move }
+    { confirm: :show_description_move_help.l(parent: @type.to_s), icon: :move }
   end
 
   def model
