@@ -38,11 +38,11 @@ class ButtonStyleRadioTest < ComponentTestCase
   def test_label_attrs_passed_through
     html = render(klass.new(
                     name: "n", value: "1", id: "x",
-                    label: { class: "btn btn-default thumb_img_btn",
+                    label: { class: "thumb_img_btn",
                              data: { action: "click->form-images#set" } }
                   ))
 
-    assert_html(html, "label.btn.btn-default.thumb_img_btn[for='x']")
+    assert_html(html, "label.thumb_img_btn[for='x']")
     assert_html(html, "label[data-action='click->form-images#set']")
   end
 

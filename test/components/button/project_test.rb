@@ -8,7 +8,7 @@ class Components::ProjectButtonTest < ComponentTestCase
       Components::Button::Project.new(name: "Map", target: "/some/path")
     )
 
-    # Renders a CRUDButton::Get → plain anchor link.
+    # Renders a Button::Get → plain anchor link.
     assert_html(html, "a[href='/some/path']", text: "Map")
   end
 

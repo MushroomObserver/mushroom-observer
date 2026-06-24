@@ -15,41 +15,42 @@
 # raw `[label, path, args]` build (e.g. `Views::Layouts::Header::
 # Sorter#sort_tuple`). The dispatcher doesn't care which.
 module Components::LinkRendering
+  # Maps `args[:button]` to the Button component class + any
+  # per-type extra kwargs (e.g. `icon: nil` for destroy so context-
+  # nav menus stay text-only).
+  BUTTON_DISPATCH = {
+    post: [Components::Button::Post, {}],
+    destroy: [Components::Button::Delete, { icon: nil }],
+    put: [Components::Button::Put, {}],
+    patch: [Components::Button::Patch, {}]
+  }.freeze
+
   private
 
   # Strips MO-specific keys from the args hash and blends in any
   # extra_args' class. Returns a kwargs hash safe to splat into a
-  # `link_to` / `button_to` / `CRUDButton::*` call.
+  # `link_to` / `button_to` / `Button::*` call.
   def merge_context_nav_link_args(args, extra_args)
-    mix(args.except(:button, :target), extra_args)
+    mix(args.except(:button, :external, :icon, :help, :target), extra_args)
   end
 
   # Dispatch one `[text, url, args]` link tuple to the right HTML
-  # element. Buttons go through the corresponding `CRUDButton::*`
-  # subclass; plain `link_to` is the default.
+  # element. External links go through Link::External; mutation buttons
+  # go through BUTTON_DISPATCH; plain `link_to` is the default.
   def render_crud_button_or_link(str, url, args, kwargs)
-    case args[:button]
-    when :post
-      button_to(str, url, **kwargs)
-    when :destroy
-      # Context-nav destroy tabs render as plain `[ DESTROY ]`-style
-      # text links — opt out of `CRUDButton::Delete`'s default icon
-      # AND button-frame via `icon: nil` + `btn: nil` (callers can
-      # override either by passing the kwarg).
-      render(Components::CRUDButton::Delete.new(
-               name: str, target: args[:target] || url,
-               **kwargs.reverse_merge(icon: nil, btn: nil)
-             ))
-    when :put
-      render(Components::CRUDButton::Put.new(
-               name: str, target: url, **kwargs
-             ))
-    when :patch
-      render(Components::CRUDButton::Patch.new(
-               name: str, target: url, **kwargs
-             ))
-    else
-      link_to(str, url, kwargs)
+    if args[:external]
+      return render(Components::Link::External.new(str, url, **kwargs))
     end
+
+    klass, extra = BUTTON_DISPATCH[args[:button]]
+    return link_to(str, url, kwargs) unless klass
+
+    render(klass.new(
+             name: str,
+             target: args[:target] || url,
+             variant: :strip,
+             **extra,
+             **kwargs
+           ))
   end
 end

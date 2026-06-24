@@ -186,22 +186,19 @@ class Components::Matrix::Box < Components::Base
                ))
       end
     else
-      render_propose_naming_modal(
-        obs, btn_class: "btn btn-default d-inline-block mb-3"
-      )
+      render_propose_naming_modal(obs)
     end
   end
 
-  # Tab::Naming::New carries `icon: :add` by default; matrix-box
-  # wants a text-only button, so the `icon: nil` override nils it
-  # out in the kwargs splat to ModalLink.
-  def render_propose_naming_modal(obs, btn_class:)
-    title, path, opts = Tab::Naming::New.new(
-      observation_id: obs.id, text: :create_naming.t,
-      context: "matrix_box", btn_class: btn_class
-    ).to_a
-    render(Components::Link::Modal.new(
-             "obs_#{obs.id}_naming", title, path, **opts, icon: nil
+  def render_propose_naming_modal(obs)
+    render(Components::Button.new(
+             type: :modal,
+             name: :create_naming.t,
+             target: new_observation_naming_path(
+               observation_id: obs.id, context: "matrix_box"
+             ),
+             modal_id: "obs_#{obs.id}_naming",
+             class: "d-inline-block mb-3 propose-naming-link"
            ))
   end
 
@@ -210,7 +207,7 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "rss-where") do
       small do
-        render(Components::Link::Object::Location.new(
+        render(Components::Link::Location.new(
                  where: @data[:where], location: @data[:location]
                ))
       end
@@ -224,7 +221,7 @@ class Components::Matrix::Box < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        render(Components::Link::Object::User.new(
+        render(Components::Link::User.new(
                  user: @data[:who],
                  attributes: { class: "rss-who" }
                ))
@@ -327,15 +324,14 @@ class Components::Matrix::Box < Components::Base
     return unless show_project_exclude_button?
 
     panel.with_footer(classes: "text-center") do
-      button_to(
-        :EXCLUDE.t,
-        exclude_observation_project_update_path(
-          project_id: @project.id, id: @data[:what].id
-        ),
-        method: :post,
-        class: "btn btn-default btn-sm",
-        form: { data: { turbo: true } }
-      )
+      render(Components::Button.new(
+               type: :post,
+               name: :EXCLUDE.t,
+               target: exclude_observation_project_update_path(
+                 project_id: @project.id, id: @data[:what].id
+               ),
+               size: :sm
+             ))
     end
   end
 

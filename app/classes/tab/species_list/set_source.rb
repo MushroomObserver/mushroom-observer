@@ -16,7 +16,7 @@ class Tab::SpeciesList::SetSource < Tab::Base
   end
 
   def html_options
-    { help: :species_list_show_set_source_help.l }
+    { title: :species_list_show_set_source_help.l }
   end
 
   def model

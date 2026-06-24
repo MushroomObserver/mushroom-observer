@@ -49,7 +49,7 @@ module Views::Controllers::Herbaria
                   "input[type='checkbox'][name='herbarium[personal]']")
 
       # Submit button and form action
-      assert_html(html, "input[type='submit'][value='#{:CREATE.l}']")
+      assert_html(html, "button[type='submit']", text: :CREATE.l)
       assert_html(html, "form[action='/herbaria']")
 
       # No back field when not provided
@@ -63,7 +63,7 @@ module Views::Controllers::Herbaria
       herbarium = herbaria(:nybg_herbarium)
       html = render_form(model: herbarium)
 
-      assert_html(html, "input[type='submit'][value='#{:SAVE.l}']")
+      assert_html(html, "button[type='submit']", text: :SAVE.l)
       assert_html(html, "form[action*='/herbaria/#{herbarium.id}']")
     end
 

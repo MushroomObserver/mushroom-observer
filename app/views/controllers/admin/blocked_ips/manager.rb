@@ -132,18 +132,15 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_add_button
-      button(type: "submit", class: "btn btn-default mr-3") { :ADD.l }
+      submit(:ADD.l, as: :button, class: "mr-3")
     end
 
     def render_clear_button
-      button(type: "submit",
-             id: "clear_#{@type}_ips_list",
-             name: clear_param,
-             value: "1",
-             class: "btn btn-default ml-auto",
-             data: { confirm: :are_you_sure.t }) do
-        "Clear List"
-      end
+      submit("Clear List", as: :button,
+                           name: clear_param, value: "1",
+                           id: "clear_#{@type}_ips_list",
+                           class: "ml-auto",
+                           data: { confirm: :are_you_sure.t })
     end
 
     def clear_param
@@ -164,13 +161,11 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_remove_button(ip)
-      button(type: "submit",
-             id: "remove_#{@type}_ip_#{ip}",
-             name: remove_param,
-             value: ip,
-             class: "btn btn-sm btn-link font-weight-bold") do
-        :REMOVE.l
-      end
+      submit(:REMOVE.l, as: :button,
+                        name: remove_param, value: ip,
+                        id: "remove_#{@type}_ip_#{ip}",
+                        variant: :btn_link, size: :sm,
+                        class: "font-weight-bold")
     end
 
     def remove_param

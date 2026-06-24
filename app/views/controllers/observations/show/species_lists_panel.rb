@@ -51,10 +51,12 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
     remove_path = observation_species_list_path(
       id: @obs.id, species_list_id: spl.id, commit: "remove"
     )
-    render(Components::CRUDButton::Put.new(
+    render(Components::Button.new(
+             type: :put,
+             variant: :strip,
              name: "[#{:REMOVE.t}]",
              target: remove_path,
-             data: { confirm: :are_you_sure.l }
+             confirm: :are_you_sure.l
            ))
   end
 end

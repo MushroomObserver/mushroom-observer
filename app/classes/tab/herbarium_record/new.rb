@@ -16,7 +16,7 @@ class Tab::HerbariumRecord::New < Tab::Base
   end
 
   def html_options
-    { icon: :add }
+    {}
   end
 
   def model

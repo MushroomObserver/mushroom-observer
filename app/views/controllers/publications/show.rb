@@ -56,7 +56,7 @@ module Views::Controllers::Publications
       p do
         b { :show_publication_added_by.l }
         plain(": ")
-        render(::Components::Link::Object::User.new(user: @publication.user))
+        render(::Components::Link::User.new(user: @publication.user))
         plain(" #{@publication.created_at.web_date}")
         br
         render_updated_at_line

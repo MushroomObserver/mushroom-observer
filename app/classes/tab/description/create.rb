@@ -20,7 +20,7 @@ class Tab::Description::Create < Tab::Base
   end
 
   def html_options
-    { icon: :add }
+    {}
   end
 
   def model

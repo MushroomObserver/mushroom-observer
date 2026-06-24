@@ -33,8 +33,8 @@ module Views::Layouts
                  menu_id: "sort_nav_menu",
                  label: toggle_title.to_s,
                  wrapper_class: "navbar-form px-2",
-                 toggle_class: "btn btn-sm btn-outline-default " \
-                               "font-weight-normal",
+                 toggle_variant: :outline, toggle_size: :sm,
+                 toggle_class: "font-weight-normal",
                  menu_class: "sorts",
                  menu_header: mobile_header_html
                )) do |menu|

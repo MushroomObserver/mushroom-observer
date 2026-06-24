@@ -196,11 +196,9 @@ module Views::Controllers::Translations
     end
 
     def render_save_button
-      button(
-        type: :submit, name: :commit, value: :submit,
-        id: "save_button", class: "btn btn-default",
-        data: save_button_data
-      ) { plain(:SAVE.l) }
+      submit(:SAVE.l, as: :button,
+                      name: :commit, value: :submit,
+                      id: "save_button", data: save_button_data)
     end
 
     def save_button_data
@@ -212,12 +210,11 @@ module Views::Controllers::Translations
     end
 
     def render_cancel_button
-      button(
-        type: :button, name: :commit, value: :cancel,
-        id: "cancel_button",
-        class: "btn btn-default",
-        data: cancel_button_data
-      ) { plain(:CANCEL.l) }
+      render(::Components::Button.new(
+               name: :CANCEL.l,
+               id: "cancel_button",
+               data: cancel_button_data
+             ))
     end
 
     def cancel_button_data
@@ -228,13 +225,15 @@ module Views::Controllers::Translations
     end
 
     def render_reload_link
-      a(
-        href: edit_translation_path(
-          id: @tag, locale: @lang.locale
-        ),
-        id: "reload_button", class: "btn btn-default",
-        data: reload_link_data
-      ) { plain(:RELOAD.l) }
+      render(::Components::Button.new(
+               type: :get,
+               name: :RELOAD.l,
+               target: edit_translation_path(
+                 id: @tag, locale: @lang.locale
+               ),
+               id: "reload_button",
+               data: reload_link_data
+             ))
     end
 
     def reload_link_data

@@ -12,7 +12,7 @@ module Views::Controllers::Names::Lifeforms::Propagate
       # Form structure and action
       assert_html(html, "form#name_lifeform_propagate_form")
       assert_html(html, "form[action*='/names/#{name.id}/lifeforms/propagate']")
-      assert_html(html, "input[type='submit'][value='#{:APPLY.l}']")
+      assert_html(html, "button[type='submit']", text: :APPLY.l)
 
       # Add section
       assert_includes(html, :ADD.l)

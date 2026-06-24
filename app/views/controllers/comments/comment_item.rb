@@ -119,7 +119,7 @@ module Views::Controllers::Comments
       span(class: "comment-author text-nowrap") do
         plain("#{:BY.t}: ")
         if @editable
-          render(Components::Link::Object::User.new(user: @comment.user))
+          render(Components::Link::User.new(user: @comment.user))
         else
           plain(@comment.user.unique_text_name)
         end

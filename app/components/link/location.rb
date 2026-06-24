@@ -7,7 +7,7 @@
 # so per-user formatting can swap them via CSS. An optional `count:`
 # appends " (N)"; an optional `click: true` appends " [Click for map]"
 # / " [Search]" depending on the link target.
-class Components::Link::Object::Location < Components::Base
+class Components::Link::Location < Components::Link::Object
   prop :where, _Nilable(String), default: nil
   prop :location, _Nilable(_Union(::Location, Integer)), default: nil
   prop :count, _Nilable(Integer), default: nil

@@ -36,15 +36,14 @@ class Components::Form::ElevationFields < Components::Base
   end
 
   def render_get_elevation_button
-    button(
-      type: :button,
-      class: "btn btn-default",
-      data: {
-        map_target: "getElevation",
-        action: "map#getElevations",
-        map_points_param: "input",
-        map_type_param: "rectangle"
-      }
-    ) { :form_locations_get_elevation.l }
+    render(Components::Button.new(
+             name: :form_locations_get_elevation.l,
+             data: {
+               map_target: "getElevation",
+               action: "map#getElevations",
+               map_points_param: "input",
+               map_type_param: "rectangle"
+             }
+           ))
   end
 end

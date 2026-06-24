@@ -39,8 +39,7 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def test_renders_submit_button_for_new_record
-      assert_html(@html, "input[type='submit'][value='#{:ADD.l}']")
-      assert_html(@html, "input.btn.btn-default")
+      assert_html(@html, "button[type='submit']", text: :ADD.l)
     end
 
     def test_enables_turbo_by_default
@@ -56,7 +55,7 @@ module Views::Controllers::Observations::ExternalLinks
       @external_link = external_links(:coprinus_comatus_obs_mycoportal_link)
       html = render_form
 
-      assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
+      assert_html(html, "button[type='submit']", text: :UPDATE.l)
     end
 
     def test_omits_turbo_when_local_true

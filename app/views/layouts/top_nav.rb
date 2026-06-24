@@ -129,13 +129,14 @@ class Views::Layouts::TopNav < Views::Base
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
     div(class: "visible-xs visible-sm pr-3 pr-sm-4") do
-      button(
-        class: "btn btn-outline-default rounded-circle overflow-hidden p-0",
-        type: :button, id: "left_nav_toggle",
-        data: { toggle: "offcanvas", nav_target: "toggle",
-                action: "nav#toggleOffcanvas" },
-        aria: { expanded: "false", controls: "search_nav" }
-      ) do
+      render(::Components::Button.new(
+               variant: :outline,
+               class: "rounded-circle overflow-hidden p-0",
+               id: "left_nav_toggle",
+               data: { toggle: "offcanvas", nav_target: "toggle",
+                       action: "nav#toggleOffcanvas" },
+               aria: { expanded: "false", controls: "search_nav" }
+             )) do
         img(src: asset_path("mo_icon_bg.svg"),
             width: "30px", alt: :MENU.t, title: :MENU.t)
       end
@@ -146,14 +147,12 @@ class Views::Layouts::TopNav < Views::Base
   # row below the top nav.
   def render_search_nav_toggle
     div(class: "navbar-form px-2 px-sm-3") do
-      button(
-        class: "btn btn-sm btn-outline-default top_nav_button",
-        type: :button,
-        data: { toggle: "collapse", target: "#search_nav" },
-        aria: { expanded: "false", controls: "search_nav" }
-      ) do
-        render(Components::Icon.new(type: :search, title: :SEARCH.l))
-      end
+      render(::Components::Button.new(
+               variant: :outline, size: :sm,
+               class: "top_nav_button",
+               data: { toggle: "collapse", target: "#search_nav" },
+               aria: { expanded: "false", controls: "search_nav" }
+             )) { render(::Components::Icon.new(type: :search, title: :SEARCH.l)) }
     end
   end
 
@@ -216,11 +215,7 @@ class Views::Layouts::TopNav < Views::Base
   def render_nav_create
     return unless nav_create_visible?
 
-    link_to({ controller: "/#{controller.controller_path}", action: :new },
-            nav_create_link_options) do
-      render(Components::Icon.new(type: :add))
-      span(class: "d-none d-sm-inline ml-1") { plain(:ADD.l) }
-    end
+    render(::Components::Button.new(**nav_create_button_options))
   end
 
   def nav_create_visible?
@@ -228,15 +223,22 @@ class Views::Layouts::TopNav < Views::Base
       NAV_CREATABLES.include?(controller.controller_name)
   end
 
-  def nav_create_link_options
-    obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
-    full_label = [:NEW.l, obj_name].safe_join(" ")
-    {
-      class: "btn btn-success btn-sm ml-1 mr-0 mx-sm-3 top_nav_button",
+  def nav_create_button_options
+    full_label = nav_create_label
+    { type: :new,
+      target: url_for(controller: "/#{controller.controller_path}",
+                      action: :new),
+      name: :ADD.l, label: true,
+      variant: :success, size: :sm,
+      class: "ml-1 mr-0 mx-sm-3 top_nav_button",
       title: full_label,
       aria: { label: full_label },
-      data: { toggle: "tooltip" }
-    }
+      data: { toggle: "tooltip" } }
+  end
+
+  def nav_create_label
+    obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
+    [:NEW.l, obj_name].safe_join(" ")
   end
 
   # QR-scanner link, only for the Observations / FieldSlips
@@ -247,11 +249,13 @@ class Views::Layouts::TopNav < Views::Base
       controller.controller_name
     )
 
-    link_to(
-      field_slips_qr_reader_new_path,
-      class: "btn btn-sm btn-outline-default mx-0 mx-sm-2 top_nav_button"
-    ) do
-      render(Components::Icon.new(type: :qrcode, title: :app_qrcode.l))
-    end
+    render(::Components::Button.new(
+             type: :get,
+             name: :app_qrcode.l,
+             icon: :qrcode,
+             target: field_slips_qr_reader_new_path,
+             variant: :outline, size: :sm,
+             class: "mx-0 mx-sm-2 top_nav_button"
+           ))
   end
 end

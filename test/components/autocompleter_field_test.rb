@@ -217,7 +217,7 @@ class AutocompleterFieldTest < ComponentTestCase
     form = TestModalCreateAutocompleterForm.new(comment, action: "/test")
     html = render(form)
 
-    assert_html(html, "a.create-link[name='create_location']")
+    assert_html(html, "a.create-link[data-controller='modal-toggle']")
   end
 
   def test_autocompleter_with_between_slot

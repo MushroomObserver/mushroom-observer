@@ -37,7 +37,7 @@ module Views::Controllers::VisualGroups
     end
 
     # One status link: bold if it's the current status (a non-clickable
-    # marker), otherwise a `CRUDButton::Patch` that flips this image's
+    # marker), otherwise a `Button::Patch` that flips this image's
     # status to the link value.
     def render_status_link(link)
       link_text = status_text(link)
@@ -50,7 +50,9 @@ module Views::Controllers::VisualGroups
     end
 
     def render_status_patch_button(link, link_text)
-      render(Components::CRUDButton::Patch.new(
+      render(Components::Button.new(
+               type: :patch,
+               variant: :strip,
                name: link_text,
                target: visual_group_image_path(
                  id: @image_id, visual_group_id: @visual_group.id,

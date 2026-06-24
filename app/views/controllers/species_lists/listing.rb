@@ -77,7 +77,7 @@ module Views::Controllers::SpeciesLists
         whitespace
         plain("|")
         whitespace
-        render(Components::Link::Object::User.new(user: @species_list.user))
+        render(Components::Link::User.new(user: @species_list.user))
       end
     end
 
@@ -92,7 +92,9 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_remove_obs_button
-      render(Components::CRUDButton::Put.new(
+      render(Components::Button.new(
+               type: :put,
+               variant: :strip,
                name: :REMOVE.t,
                target: observation_species_list_path(
                  id: @observation.id,
@@ -103,17 +105,15 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
-    # `btn: "btn btn-default"` gives the ADD button Bootstrap button-shape —
-    # without it the row's ADD action renders as a bare link.
     def render_add_obs_button
-      render(Components::CRUDButton::Put.new(
+      render(Components::Button.new(
+               type: :put,
                name: :ADD.t,
                target: observation_species_list_path(
                  id: @observation.id,
                  species_list_id: @species_list.id,
                  commit: "add"
-               ),
-               btn: "btn btn-default"
+               )
              ))
     end
   end

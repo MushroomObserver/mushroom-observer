@@ -33,7 +33,7 @@ module Views::Controllers::SpeciesLists
       assert_includes(html, "#{:WHO.t}:")
     end
 
-    # Download button is `CRUDButton::Download` pointed at the irregular
+    # Download button is `Button::Download` pointed at the irregular
     # `new_download_species_list_path` route — assert the rendered <a>
     # href to lock that route in (the helper has the only knowledge of
     # the path; if this regresses, the download button silently links

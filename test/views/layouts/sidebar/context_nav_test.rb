@@ -36,7 +36,7 @@ class Views::Layouts::Sidebar
                   count: simple_links.length)
     end
 
-    # `button: :destroy` now dispatches through `CRUDButton::Delete`
+    # `button: :destroy` now dispatches through `Button::Delete`
     # (with the `icon: nil` + `btn: nil` context-nav opt-outs from
     # `LinkRendering`) — sidebar users get a working REMOVE form.
     def test_destroy_tuple_renders_as_form_in_sidebar

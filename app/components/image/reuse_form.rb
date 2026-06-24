@@ -57,15 +57,15 @@ class Components::Image::ReuseForm < Components::ApplicationForm
       text_field(:img_id, label: "#{:image_reuse_id.t}:",
                           inline: true, size: 8,
                           data: { autofocus: "true" })
-      input(type: "submit", name: "commit",
-            value: :image_reuse_reuse.l,
-            class: "btn btn-default ml-3")
+      submit(:image_reuse_reuse.l, as: :button,
+                                   name: "commit", class: "ml-3")
     end
   end
 
   def render_toggle_link
     div(class: "form-group mt-3") do
-      link_to(toggle_label, toggle_url, class: "btn btn-default")
+      render(Components::Button.new(type: :get, target: toggle_url,
+                                    name: toggle_label))
     end
   end
 

@@ -97,13 +97,15 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   # --- Link / button rendering ----------------------------------
 
   # Each Collection-returned tab renders inside its own `<li>`.
-  # PUT-button tabs go through `Components::CRUDButton::Put`;
+  # PUT-button tabs go through `Components::Button::Put`;
   # plain-link tabs render as `<a>`.
   def render_link_tab(tab)
     li do
       text, url, opts = tab.to_a
       if opts[:button] == :put
-        render(Components::CRUDButton::Put.new(name: text, target: url))
+        render(Components::Button.new(
+                 type: :put, variant: :strip, name: text, target: url
+               ))
       else
         a(href: url, **opts.slice(:class, :data, :target, :rel)) do
           plain(text)

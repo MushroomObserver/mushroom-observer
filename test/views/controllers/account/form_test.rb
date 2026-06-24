@@ -52,7 +52,7 @@ module Views::Controllers::Account
 
       # Submit button
       assert_html(html,
-                  "input[type='submit'][value='#{:signup_button.l}']")
+                  "button[type='submit']", text: :signup_button.l)
     end
 
     def test_renders_theme_options

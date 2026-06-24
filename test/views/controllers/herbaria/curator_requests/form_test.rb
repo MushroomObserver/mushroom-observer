@@ -25,10 +25,8 @@ module Views::Controllers::Herbaria::CuratorRequests
     end
 
     def test_renders_submit_button
-      assert_html(@html, "input[type='submit'][value='#{:SEND.l}']")
-      assert_html(@html, ".btn.btn-default")
-      assert_html(@html, ".center-block.my-3")
-      assert_html(@html, "input[data-turbo-submits-with]")
+      assert_html(@html, "button[type='submit']", text: :SEND.l)
+      assert_html(@html, "button[type='submit'][data-turbo-submits-with]")
     end
 
     private

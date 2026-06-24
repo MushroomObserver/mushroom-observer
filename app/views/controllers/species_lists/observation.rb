@@ -66,7 +66,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_location_link
       div(class: "font-weight-bold") do
-        render(Components::Link::Object::Location.new(
+        render(Components::Link::Location.new(
                  where: @observation.where, location: @observation.location
                ))
       end
@@ -74,7 +74,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_who_and_when
       div do
-        render(Components::Link::Object::User.new(user: @observation.user))
+        render(Components::Link::User.new(user: @observation.user))
         plain(": ")
         plain(@observation.when.web_date)
       end
@@ -87,7 +87,9 @@ module Views::Controllers::SpeciesLists
     # `confirm:` is the Turbo-confirm kwarg; `data: { confirm: … }` is
     # a no-op under Turbo (rails-ujs is not wired).
     def render_remove_obs_button
-      render(Components::CRUDButton::Put.new(
+      render(Components::Button.new(
+               type: :put,
+               variant: :strip,
                name: :REMOVE.t,
                target: observation_species_list_path(
                  id: @observation.id,

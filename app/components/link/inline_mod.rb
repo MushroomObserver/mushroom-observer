@@ -167,7 +167,7 @@ class Components::Link::InlineMod < Components::Base
   def destroy_component
     return nil unless can_destroy?
 
-    Components::CRUDButton::Delete.new(**destroy_args)
+    Components::Button.new(type: :delete, **destroy_args)
   end
 
   def destroy_args
@@ -179,7 +179,7 @@ class Components::Link::InlineMod < Components::Base
       # destroy icon doesn't hug the surrounding `|` divider while
       # the edit `IconLink` next to it has breathing room.
       icon_class: "px-2",
-      btn: nil,
+      variant: :strip,
       class: handler[:destroy_class] && send(handler[:destroy_class]),
       confirm: handler[:destroy_confirm] && send(handler[:destroy_confirm])
     }
@@ -203,7 +203,14 @@ class Components::Link::InlineMod < Components::Base
     tab = send(handler[:tab])
     return nil unless tab
 
-    Components::Link::Modal.new(modal_id, tab: tab)
+    Components::Button.new(
+      type: :modal,
+      name: tab.title,
+      target: tab.path,
+      modal_id: modal_id,
+      variant: :strip,
+      **tab.html_options
+    )
   end
 
   def icon_link_edit
@@ -262,7 +269,7 @@ class Components::Link::InlineMod < Components::Base
 
   # ---- :destroy_path handlers -------------------------------
 
-  # Default — pass the model and let `CRUDButton::Delete` build
+  # Default — pass the model and let `Button::Delete` build
   # `record_path(id)`.
   def path_target = @target
 

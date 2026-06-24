@@ -19,7 +19,7 @@ module Views::Controllers::Info
 
       # Submit button (only Test button when no result)
       assert_html(html,
-                  "input[type='submit'][value='#{:sandbox_test.l}']")
+                  "button[type='submit']", text: :sandbox_test.l)
 
       # No result section
       assert_no_html(html, ".sandbox")
@@ -69,13 +69,12 @@ module Views::Controllers::Info
       assert_html(html, ".sandbox-up-ptr")
       assert_html(html, "img[src*='up_arrow']", count: 2)
       assert_html(html,
-                  "input[type='submit'][value='#{:sandbox_test.l}']")
-      assert_html(html,
-                  "input[type='submit']" \
-                  "[value='#{:sandbox_test_codes.l}']")
+                  "button[type='submit']", text: :sandbox_test.l)
+      assert_html(html, "button[type='submit']",
+                  text: :sandbox_test_codes.l)
 
       # Only 2 submit buttons (in up arrows section)
-      assert_html(html, "input[type='submit']", count: 2)
+      assert_html(html, "button[type='submit']", count: 2)
     end
 
     def test_textile_renders_as_html

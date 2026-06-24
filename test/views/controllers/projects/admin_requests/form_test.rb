@@ -24,7 +24,7 @@ module Views::Controllers::Projects::AdminRequests
     end
 
     def test_renders_submit_button
-      assert_html(@html, "input[type='submit'][value='#{:SEND.l}']")
+      assert_html(@html, "button[type='submit']", text: :SEND.l)
       assert_html(@html, ".btn.btn-default")
       assert_html(@html, ".center-block.my-3")
     end

@@ -45,11 +45,13 @@ module Views::Controllers::HerbariumRecords
     def render_edit_link(rec)
       return unless can_edit?(rec)
 
-      a(href: edit_herbarium_record_path(id: rec.id, back: :index,
-                                         q: q_param),
-        class: "btn btn-default btn-sm edit_herbarium_record_link_#{rec.id}") do
-        plain(:EDIT.t)
-      end
+      render(Components::Button.new(
+               type: :edit,
+               target: edit_herbarium_record_path(id: rec.id, back: :index,
+                                                  q: q_param),
+               size: :sm,
+               class: "edit_herbarium_record_link_#{rec.id}"
+             ))
     end
 
     def render_herbarium_link(rec)
@@ -79,10 +81,12 @@ module Views::Controllers::HerbariumRecords
     def render_delete_button(rec)
       return unless can_edit?(rec)
 
-      render(Components::CRUDButton::Delete.new(
+      render(Components::Button.new(
+               type: :delete,
                target: herbarium_record_path(rec.id, back: :index),
                name: :destroy_object.t(type: :herbarium_record),
-               class: "btn-sm destroy_herbarium_record_link_#{rec.id}"
+               variant: :outline, size: :sm,
+               class: "destroy_herbarium_record_link_#{rec.id}"
              ))
     end
 

@@ -39,7 +39,7 @@ module Tab::CollectionNumber
         routes.new_collection_number_path(observation_id: @observation.id),
         tab.path
       )
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
       assert_equal(CollectionNumber, tab.model)
     end
 

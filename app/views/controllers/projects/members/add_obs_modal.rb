@@ -39,16 +39,17 @@ module Views::Controllers::Projects::Members
     end
 
     def render_footer_buttons
-      button(type: :button, class: "btn btn-default",
-             data: { dismiss: "modal" }) do
-        plain(:CANCEL.l)
-      end
+      render(::Components::Button.new(
+               name: :CANCEL.l,
+               data: { dismiss: "modal" }
+             ))
       whitespace
       render_submit_button if @count.positive?
     end
 
     def render_submit_button
-      render(Components::CRUDButton::Put.new(
+      render(Components::Button.new(
+               type: :put,
                name: submit_label,
                target: project_member_path(
                  project_id: @project.id,
@@ -56,7 +57,7 @@ module Views::Controllers::Projects::Members
                  commit: :change_member_add_obs.l,
                  target: :project_index
                ),
-               class: "btn btn-primary"
+               variant: :primary
              ))
     end
 

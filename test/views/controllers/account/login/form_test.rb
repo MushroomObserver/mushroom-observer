@@ -39,7 +39,7 @@ module Views::Controllers::Account::Login
 
     def test_renders_submit_button
       assert_html(@html,
-                  "input[type='submit'][value='#{:login_login.l}']")
+                  "button[type='submit']", text: :login_login.l)
       assert_html(@html, ".btn.btn-default")
       assert_html(@html, ".center-block.my-3")
     end

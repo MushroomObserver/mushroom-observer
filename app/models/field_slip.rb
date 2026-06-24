@@ -90,7 +90,7 @@ class FieldSlip < AbstractModel
     [{ occurrence: { observations: Observation.matrix_box_includes } }]
   end
 
-  # Index variant: the page renders one panel per slip and also
+  # Index style: the page renders one panel per slip and also
   # walks `occurrence.primary_observation`; the panel's `:project`
   # and `:user` lines need those preloaded too.
   def self.index_includes_tree
