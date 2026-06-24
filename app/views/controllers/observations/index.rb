@@ -36,7 +36,7 @@ module Views::Controllers::Observations
 
       render_suggestions_alert if suggest_alternates?
 
-      paginated_results { render_matrix }
+      render(::Components::PaginatedResults.new) { render_matrix }
     end
 
     private

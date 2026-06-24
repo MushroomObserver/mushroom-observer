@@ -15,7 +15,9 @@ module Views::Controllers::Interests
       container_class(:wide)
 
       render_type_filter if show_type_filter?
-      paginated_results { render_interests_table if @interests.any?(&:target) }
+      render(::Components::PaginatedResults.new) do
+        render_interests_table if @interests.any?(&:target)
+      end
     end
 
     private

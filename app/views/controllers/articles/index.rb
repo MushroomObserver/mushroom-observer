@@ -16,7 +16,7 @@ module Views::Controllers::Articles
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      paginated_results { render_list }
+      render(::Components::PaginatedResults.new) { render_list }
     end
 
     private

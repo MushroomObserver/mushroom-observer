@@ -48,7 +48,7 @@ module Views::Controllers::Names
       render_suggestions_alert if suggest_alternates?
       render_help_blurb if @help
 
-      paginated_results { render_name_rows }
+      render(::Components::PaginatedResults.new) { render_name_rows }
     end
 
     private

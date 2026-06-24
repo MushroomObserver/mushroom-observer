@@ -13,7 +13,7 @@ module Views::Controllers::RssLogs
     def view_template
       register_chrome
 
-      paginated_results do
+      render(::Components::PaginatedResults.new) do
         render(::Components::Matrix::Table.new(
                  objects: @rss_logs, user: current_user, cached: true
                ))
