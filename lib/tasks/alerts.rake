@@ -4,9 +4,9 @@ namespace :alerts do
   desc "Send a test exception alert to verify exception_notification -> Slack"
   task test: :environment do
     unless alerts_active?
-      puts("Alerting is gated off in this environment — nothing sent. Use " \
-           "`NOTIFY_EXCEPTIONS=1 bin/rails alerts:test` (with the webhook in " \
-           "credentials), or run in production.")
+      puts("Alerting is gated off here — nothing sent. Locally use " \
+           "`NOTIFY_EXCEPTIONS=1 SLACK_ALERTS_WEBHOOK_URL=<url> bin/rails " \
+           "alerts:test`, or run in production.")
       next
     end
 
@@ -17,7 +17,8 @@ namespace :alerts do
   end
 
   def alerts_active?
-    webhook = Rails.application.credentials.slack_alerts_webhook_url
+    webhook = ENV["SLACK_ALERTS_WEBHOOK_URL"].presence ||
+              Rails.application.credentials.slack_alerts_webhook_url
     webhook.present? && !Rails.env.test? &&
       (Rails.env.production? || ENV["NOTIFY_EXCEPTIONS"] == "1")
   end

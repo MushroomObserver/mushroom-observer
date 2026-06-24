@@ -3,18 +3,21 @@
 # Real-time exception alerts to Slack (#alerts) via the exception_notification
 # gem. Complements -- does not replace -- script/parse_log's cron email digest.
 #
-# Needs the Slack incoming-webhook URL in credentials:
-#   bin/rails credentials:edit
+# Needs the Slack incoming-webhook URL. In production it lives in the
+# production credentials (edit on the server, where the prod key is):
+#   RAILS_ENV=production bin/rails credentials:edit
 #     slack_alerts_webhook_url: https://hooks.slack.com/services/T.../B.../...
 #
 # Active in production; also activatable anywhere except tests with
-# NOTIFY_EXCEPTIONS=1, so you can verify the wiring pre-deploy (credentials are
-# shared across envs, so the production-only default keeps dev/CI quiet). Verify
-# with `NOTIFY_EXCEPTIONS=1 bin/rails alerts:test` (see lib/tasks/alerts.rake).
+# NOTIFY_EXCEPTIONS=1. Since the credential is production-only, a local
+# pre-deploy check passes the webhook via env var instead:
+#   NOTIFY_EXCEPTIONS=1 SLACK_ALERTS_WEBHOOK_URL=<url> bin/rails alerts:test
+# (see lib/tasks/alerts.rake).
 #
 # This middleware reports web-request exceptions; background-job (SolidQueue /
 # ActiveJob) failures are reported from ApplicationJob via the same notifier.
-webhook = Rails.application.credentials.slack_alerts_webhook_url
+webhook = ENV["SLACK_ALERTS_WEBHOOK_URL"].presence ||
+          Rails.application.credentials.slack_alerts_webhook_url
 enabled = webhook.present? && !Rails.env.test? &&
           (Rails.env.production? || ENV["NOTIFY_EXCEPTIONS"] == "1")
 
