@@ -30,6 +30,13 @@ class PaginatedResultsTest < ComponentTestCase
     assert_html(html, "div#results", text: "content")
   end
 
+  def test_data_q_encodes_q_param
+    controller.define_singleton_method(:q_param) { "42" }
+    html = render_it
+
+    assert_html(html, "div#results[data-q='q=42']")
+  end
+
   private
 
   def render_it(html_id: "results")
