@@ -73,10 +73,10 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_api_fail(params.merge(external_site: "spammer"))
     assert_api_fail(params.merge(url: "spammer"))
     assert_api_fail(params.merge(observation: marys_obs.id))
-    # A second link to the same obs+site is now allowed (#4565): an MO obs can
-    # correspond to several external records, so the one-link-per-(obs, site)
-    # constraint was dropped. mary may add it via her mycoportal membership.
-    assert_api_pass(params.merge(api_key: marys_key.key))
+    # The model allows multiple links per (obs, site), but the API rejects an
+    # exact duplicate (same obs/site/url) (#4565). mary is permitted via her
+    # mycoportal membership, so this fails on duplication, not permission.
+    assert_api_fail(params.merge(api_key: marys_key.key))
     assert_api_pass(params.merge(api_key: marys_key.key,
                                  observation: katys_obs.id))
   end
