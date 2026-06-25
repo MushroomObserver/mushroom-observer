@@ -3,26 +3,38 @@
 require "test_helper"
 
 class InatImportJobTrackerTest < ActiveSupport::TestCase
-  def test_elapsed_and_remaining_time
+  def test_elapsed_time
     import = inat_imports(:rolf_inat_import)
-    import.update(avg_import_time: import.initial_avg_import_seconds)
     tracker = InatImportJobTracker.find_or_create_by(inat_import: import.id)
 
     assert_in_delta(0, tracker.elapsed_time, 1,
                     "elapsed_time should be ~0 at creation")
-    assert_in_delta(
-      import.total_expected_time, tracker.estimated_remaining_time, 1,
-      "estimated_remaining_time should equal total_expected_time at start"
-    )
 
     travel_to(tracker.created_at + 5.seconds) do
       assert_in_delta(5, tracker.elapsed_time, 1,
                       "elapsed_time should reflect time since creation")
-      assert_in_delta(
-        import.total_expected_time - 5, tracker.estimated_remaining_time, 1,
-        "estimated_remaining_time should decrease as time elapses"
-      )
     end
+  end
+
+  def test_estimated_remaining_time_at_job_start
+    import = inat_imports(:rolf_inat_import)
+    import.update(avg_import_time: import.initial_avg_import_seconds)
+    tracker = InatImportJobTracker.find_or_create_by(inat_import: import.id)
+
+    expected = (import.importables * import.avg_import_time).ceil
+    assert_equal(expected, tracker.estimated_remaining_time,
+                 "estimated_remaining_time should be importables × " \
+                 "avg_import_time at job start")
+  end
+
+  def test_estimated_remaining_time_updates_with_avg_import_time
+    import = inat_imports(:rolf_inat_import)
+    import.update(avg_import_time: 30, imported_count: 1)
+    tracker = InatImportJobTracker.find_or_create_by(inat_import: import.id)
+
+    remaining = import.importables - import.imported_count
+    assert_equal((remaining * 30).ceil, tracker.estimated_remaining_time,
+                 "estimated_remaining_time should use live avg_import_time")
   end
 
   def test_estimated_remaining_time_nil_without_importables
@@ -43,13 +55,12 @@ class InatImportJobTrackerTest < ActiveSupport::TestCase
 
   def test_estimated_remaining_time_floors_at_zero
     import = inat_imports(:rolf_inat_import)
-    import.update(avg_import_time: import.initial_avg_import_seconds)
+    import.update(avg_import_time: 10,
+                  imported_count: import.importables + 1)
     tracker = InatImportJobTracker.find_or_create_by(inat_import: import.id)
 
-    # Travel past the total expected time so elapsed > total_expected_time
-    travel_to(tracker.created_at + import.total_expected_time + 60) do
-      assert_equal(0, tracker.estimated_remaining_time,
-                   "estimated_remaining_time should not go negative")
-    end
+    assert_equal(0, tracker.estimated_remaining_time,
+                 "estimated_remaining_time should not go negative " \
+                 "when imported_count exceeds importables")
   end
 end

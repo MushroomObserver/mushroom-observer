@@ -8,6 +8,7 @@
 # == Methods
 #  status::        state of the iNat import of this tracker
 #  elapsed_time::  time since the tracker was created
+#  estimated_remaining_time:: estimated time remaining for the job to complete
 #  help::          help message displayed at the bottom of the page
 #
 class InatImportJobTracker < ApplicationRecord
@@ -16,7 +17,6 @@ class InatImportJobTracker < ApplicationRecord
   delegate :imported_count, to: :import
   delegate :avg_import_time, to: :import
   delegate :response_errors, to: :import
-  delegate :total_expected_time, to: :import
 
   def status
     import.state
@@ -32,11 +32,11 @@ class InatImportJobTracker < ApplicationRecord
   end
 
   def estimated_remaining_time
-    # Can't calculate remaining time unless we know # of Obss to be imported
     return nil unless importables.to_i.positive?
     return 0 if status == "Done"
 
-    [total_expected_time - elapsed_time, 0].max
+    remaining_imports = importables - imported_count.to_i
+    [(remaining_imports * avg_import_time.to_f).ceil, 0].max
   end
 
   def error_caption
