@@ -33,8 +33,8 @@ module Views::Controllers::Occurrences
                   "[value='#{@source.id}']")
 
       # Submit button
-      assert_html(html, "input[type='submit']",
-                  attribute: { "value" => :create_occurrence_submit.l })
+      assert_html(html, "button[type='submit']",
+                  text: :create_occurrence_submit.l)
     end
 
     def test_new_source_observation_box
@@ -211,10 +211,8 @@ module Views::Controllers::Occurrences
                    form["data-occurrence-form-fallback-value"])
 
       # Submit button
-      assert_html(html, "input[type='submit']",
-                  attribute: {
-                    "value" => :edit_occurrence_submit.l
-                  })
+      assert_html(html, "button[type='submit']",
+                  text: :edit_occurrence_submit.l)
 
       # Empty hidden observation_ids[] for unchecked state
       assert_html(html, "input[type='hidden']" \

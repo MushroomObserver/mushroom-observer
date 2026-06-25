@@ -340,7 +340,7 @@ module SessionExtensions
     select = "#{section_select_spec(args[:in])} #{select}" if args[:in]
     assert_select(select, *extra_args) do |forms|
       forms.each do |form|
-        form.css("input[type=submit]").each do |button|
+        form.css("button[type=submit]").each do |button|
           next unless match_link_by_label(button, args[:label])
 
           url = CGI.unescapeHTML(form.attributes["action"])
@@ -416,7 +416,8 @@ module SessionExtensions
       val  = CGI.unescapeHTML(input.attributes["value"])
       params[name] = val
     end
-    params["submit"] = CGI.unescapeHTML(button.attributes["value"])
+    val = button.attributes["value"].to_s
+    params["submit"] = CGI.unescapeHTML(val.presence || button.text.to_s)
     params
   end
 

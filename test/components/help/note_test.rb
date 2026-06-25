@@ -6,10 +6,7 @@ class HelpNoteTest < ComponentTestCase
   def test_default_renders_span_with_help_note_classes
     html = render(Components::Help::Note.new(:span, "(optional)"))
 
-    # Default `<span>` shape — used inline as a parenthetical
-    # hint next to a label. `mr-3` gives breathing room to the
-    # right of the inline marker.
-    assert_html(html, "span.help-note.mr-3", text: "(optional)")
+    assert_html(html, "span.help-note", text: "(optional)")
   end
 
   def test_element_override_picks_tag
@@ -31,7 +28,7 @@ class HelpNoteTest < ComponentTestCase
                     :span, "x", class: "extra-thing"
                   ))
 
-    assert_html(html, "span.help-note.mr-3.extra-thing")
+    assert_html(html, "span.help-note.extra-thing")
   end
 
   def test_extra_attributes_pass_through
@@ -41,6 +38,12 @@ class HelpNoteTest < ComponentTestCase
 
     assert_html(html, "span#h.help-note")
     assert_html(html, "span[data-foo='bar']")
+  end
+
+  def test_string_as_first_arg_uses_default_span_element
+    html = render(Components::Help::Note.new("(optional)"))
+
+    assert_html(html, "span.help-note", text: "(optional)")
   end
 
   def test_renders_no_content_when_neither_string_nor_block

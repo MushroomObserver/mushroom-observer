@@ -48,7 +48,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_name_between
-      span(class: "help-note") { "(#{:required.l})" }
+      render(::Components::Help::Note.new("(#{:required.l})"))
       render_personal_help if personal_herbarium?
     end
 

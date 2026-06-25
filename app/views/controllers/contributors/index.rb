@@ -17,7 +17,7 @@ module Views::Controllers::Contributors
       add_pagination(@pagination_data)
 
       render_legend_row
-      paginated_results do
+      render(::Components::PaginatedResults.new) do
         render(::Components::Matrix::Table.new(objects: @objects))
       end
     end

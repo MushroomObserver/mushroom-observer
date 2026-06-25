@@ -10,7 +10,7 @@ module Views::Controllers::Account::Login
 
     def view_template
       add_page_title(:email_new_password_title.t)
-      div(class: "help-note") do
+      render(::Components::Help::Note.new(:div)) do
         trusted_html(:email_new_password_help.tp +
                      :email_spam_notice.tp)
       end

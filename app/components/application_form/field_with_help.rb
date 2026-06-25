@@ -36,7 +36,7 @@ class Components::ApplicationForm < Superform::Rails::Form
           role: "button",
           data: { toggle: "collapse" },
           aria: { expanded: "false", controls: help_id }) do
-          span(class: "glyphicon glyphicon-question-sign link-icon")
+          render(::Components::Icon.new(type: :question))
         end
       end
     end
@@ -44,9 +44,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_help_text
       help_id = "#{field.dom.id}_help"
       div(class: "collapse", id: help_id) do
-        div(class: "well well-sm mb-3 help-block position-relative") do
-          render(help_slot)
-        end
+        render(::Components::Help::Block.new(well: true)) { render(help_slot) }
       end
     end
   end

@@ -55,7 +55,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
     def test_renders_submit_button
       html = render_form
 
-      assert_html(html, "input[type='submit'][value='#{:SEND.l}']")
+      assert_html(html, "button[type='submit']", text: :SEND.l)
       assert_html(html, ".center-block")
     end
 

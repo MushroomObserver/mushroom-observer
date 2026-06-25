@@ -17,7 +17,7 @@ module Views::Controllers::Projects::Members
       # Form structure
       assert_html(html, "form#project_member_form")
       assert_html(html, "form[action='/projects/#{@project.id}/members']")
-      assert_html(html, "input[type='submit'][value='#{:ADD.l}']")
+      assert_html(html, "button[type='submit']", text: :ADD.l)
 
       # Autocompleter field
       assert_html(html, "[data-controller*='autocompleter']")
@@ -36,12 +36,12 @@ module Views::Controllers::Projects::Members
       assert_html(html, "form[action='#{expected_action}']")
 
       # Status buttons
-      assert_html(html, "input[type='submit']" \
-                        "[value='#{:change_member_status_make_member.l}']")
-      assert_html(html, "input[type='submit']" \
-                        "[value='#{:change_member_status_remove_member.l}']")
-      assert_html(html, "input[type='submit']" \
-                        "[value='#{:change_member_status_make_admin.l}']")
+      assert_html(html, "button[type='submit']",
+                  text: :change_member_status_make_member.l)
+      assert_html(html, "button[type='submit']",
+                  text: :change_member_status_remove_member.l)
+      assert_html(html, "button[type='submit']",
+                  text: :change_member_status_make_admin.l)
 
       # Help text
       assert_includes(html, :change_member_status_make_member_help.t)

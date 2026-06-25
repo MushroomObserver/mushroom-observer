@@ -4,7 +4,8 @@
 # search form with a swappable autocompleter (clade/region) for
 # filtering observations that need identification. Rendered by
 # `Observations::IdentifyController` via its `_form_identify_filter`
-# partial.
+# partial. This is handrolled because it would require extensive
+# modifications to autocompleter_field to reuse that component.
 #
 # Uses dual Stimulus autocompleter targets (clade + region) on all
 # elements so the swap mechanism can find them regardless of which
@@ -22,8 +23,8 @@ module Views::Controllers::Observations::Identify
       super do
         render_autocompleter_wrap
         render_type_select_group
-        submit(:SEARCH.l, btn_class: "btn-outline-default", class: "px-2")
-        submit(:CLEAR.l, btn_class: "btn-outline-default", class: "px-2")
+        submit(:SEARCH.l, variant: :outline, class: "px-2")
+        submit(:CLEAR.l, variant: :outline, class: "px-2")
       end
     end
 

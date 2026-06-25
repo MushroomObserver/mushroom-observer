@@ -19,7 +19,7 @@ module Views::Controllers::Account::APIKeys
       assert_html(html, "#api_key_notes")
       assert_html(
         html,
-        "input[type='submit'][value='#{:account_api_keys_create_button.l}']"
+        "button[type='submit']", text: :account_api_keys_create_button.l
       )
     end
 
@@ -84,14 +84,13 @@ module Views::Controllers::Account::APIKeys
       html = render_edit_form(key)
 
       # Update is a real submit button on the form.
-      assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
+      assert_html(html, "button[type='submit']", text: :UPDATE.l)
       # Cancel is a navigation link back to the index — NOT a submit.
       # (Pre-Phlex was a submit, which paradoxically meant clicking
       # Cancel ran an update via the controller's update action.)
-      assert_html(html, "a.btn.btn-default[href='/account/api_keys']",
-                  text: :CANCEL.l)
+      assert_html(html, "a[href='/account/api_keys']", text: :CANCEL.l)
       assert_no_html(html,
-                     "input[type='submit'][value='#{:CANCEL.l}']")
+                     "button[type='submit']", text: :CANCEL.l)
     end
 
     def test_edit_layout_renders_notes_input_under_api_key_scope
@@ -131,9 +130,9 @@ module Views::Controllers::Account::APIKeys
                   "[data-parent='#notes_#{key.id}']")
       # Save submit (not Update — that's the standalone-edit layout).
       assert_html(html,
-                  "input[type='submit'][value='#{:SAVE.l}']")
+                  "button[type='submit']", text: :SAVE.l)
       assert_no_html(html,
-                     "input[type='submit'][value='#{:UPDATE.l}']")
+                     "button[type='submit']", text: :UPDATE.l)
     end
 
     def test_inline_edit_notes_input_has_per_key_id_to_avoid_collisions

@@ -41,13 +41,20 @@
 class Tab::Base
   include Rails.application.routes.url_helpers
 
+  # Keys subclasses may return from `#html_options`. All others raise.
+  ALLOWED_HTML_OPTION_KEYS = [:class, :id, :button, :back, :icon, :external,
+                              :data, :title, :confirm].freeze
+
+  # Valid values for the `:button` key.
+  ALLOWED_BUTTON_VALUES = [:post, :put, :patch, :destroy].freeze
+
   # Auto-prepend `HtmlOptionsComposer` onto every subclass so the
   # subclass-supplied `#html_options` (or the Base default `{}`)
   # is wrapped with the auto-derived `<alt_title>_link` selector
-  # class. Subclasses don't need to know about the composer — they
-  # define `html_options` returning whatever extra attrs they want
-  # (`{ icon: :edit }`, `{ button: :post }`, etc.) and the
-  # composition happens transparently.
+  # class and validated against `ALLOWED_HTML_OPTION_KEYS`. Subclasses
+  # define `html_options` returning the extra attrs they want
+  # (`{ button: :post }`, `{ data: { action: "links#disable" } }`, etc.)
+  # and the composition + validation happen transparently.
   def self.inherited(subclass)
     super
     subclass.prepend(HtmlOptionsComposer)
@@ -55,14 +62,37 @@ class Tab::Base
 
   # Merges the auto-derived `<alt_title>_link` selector class
   # (or `<title>_<model_name>_link <…_link_<id>>` when `#model`
-  # is set) into whatever `html_options` the subclass returned.
+  # is set) into whatever `html_options` the subclass returned,
+  # then validates keys against `ALLOWED_HTML_OPTION_KEYS`.
   # See `Tab::Base#derived_html_class` for the derivation rules.
   module HtmlOptionsComposer
     def html_options
       base = super.dup
+      validate_html_options!(base)
       base[:class] = [base[:class], derived_html_class].
                      compact_blank.join(" ")
       base
+    end
+
+    private
+
+    def validate_html_options!(opts)
+      unknown = opts.keys - ALLOWED_HTML_OPTION_KEYS
+      if unknown.any?
+        raise(ArgumentError.new(
+                "#{self.class}#html_options unknown key(s): " \
+                "#{unknown.map(&:inspect).join(", ")}. " \
+                "Allowed: #{ALLOWED_HTML_OPTION_KEYS.join(", ")}"
+              ))
+      end
+
+      return unless (btn = opts[:button])
+      return if ALLOWED_BUTTON_VALUES.include?(btn)
+
+      raise(ArgumentError.new(
+              "#{self.class}#html_options :button must be one of " \
+              "#{ALLOWED_BUTTON_VALUES.join(", ")}, got #{btn.inspect}"
+            ))
     end
   end
 

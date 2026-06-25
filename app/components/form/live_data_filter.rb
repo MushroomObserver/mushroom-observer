@@ -85,15 +85,25 @@ class Components::Form::LiveDataFilter < Components::ApplicationForm
   end
 
   def render_prev_button
-    a(href: prev_path || "#",
-      class: class_names("btn btn-default btn-sm", "opacity-0": !show_prev?),
-      disabled: !show_prev?) { "« Prev" }
+    render(Components::Button.new(
+             type: :get,
+             name: "« Prev",
+             target: prev_path || "#",
+             size: :sm,
+             class: ("opacity-0" unless show_prev?),
+             disabled: !show_prev?
+           ))
   end
 
   def render_next_button
-    a(href: next_path || "#",
-      class: class_names("btn btn-default btn-sm", "opacity-0": !show_next?),
-      disabled: !show_next?) { "Next »" }
+    render(Components::Button.new(
+             type: :get,
+             name: "Next »",
+             target: next_path || "#",
+             size: :sm,
+             class: ("opacity-0" unless show_next?),
+             disabled: !show_next?
+           ))
   end
 
   def show_prev?

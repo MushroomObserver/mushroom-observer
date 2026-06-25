@@ -61,7 +61,7 @@ module Views::Controllers::Account::APIKeys
                   "input##{"api_key_#{key.id}_notes"}")
       assert_html(html,
                   "#edit_api_key_#{key.id}_form " \
-                  "input[type='submit'][value='#{:SAVE.l}']")
+                  "button[type='submit']", text: :SAVE.l)
     end
 
     def test_renders_remove_button_per_row
@@ -85,7 +85,7 @@ module Views::Controllers::Account::APIKeys
       assert_html(html, "#new_key_form_container #new_api_key_form")
       assert_html(html,
                   "#new_api_key_form " \
-                  "input[type='submit'][value='#{:CREATE.l}']")
+                  "button[type='submit']", text: :CREATE.l)
     end
 
     def test_renders_empty_table_when_user_has_no_keys

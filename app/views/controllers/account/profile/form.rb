@@ -72,7 +72,7 @@ module Views::Controllers::Account::Profile
     end
 
     def render_file_field_between
-      span(class: "help-note") { plain("(33%)") }
+      render(::Components::Help::Note.new) { plain("(33%)") }
       a(href: account_profile_select_image_path, class: "mx-2") do
         plain(:profile_image_reuse.t)
       end

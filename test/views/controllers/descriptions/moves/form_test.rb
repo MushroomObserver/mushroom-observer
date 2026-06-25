@@ -40,7 +40,7 @@ module Views::Controllers::Descriptions::Moves
       assert_includes(html, :merge_descriptions_delete_after.t)
 
       # Submit button
-      assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
+      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
     end
 
     def test_name_description_without_synonyms
@@ -58,7 +58,7 @@ module Views::Controllers::Descriptions::Moves
       assert_no_html(html, "input[type='radio']")
 
       # No submit button when nothing to move to
-      assert_no_html(html, "input[type='submit']")
+      assert_no_html(html, "button[type='submit']")
     end
 
     # When the parent has exactly one non-misspelling synonym,

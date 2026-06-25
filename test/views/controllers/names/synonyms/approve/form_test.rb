@@ -11,7 +11,7 @@ module Views::Controllers::Names::Synonyms::Approve
       # Form structure and action
       assert_html(html, "form#name_synonym_approve_form")
       assert_html(html, "form[action*='/names/#{name.id}/synonyms/approve']")
-      assert_html(html, "input[type='submit'][value='#{:APPROVE.l}']")
+      assert_html(html, "button[type='submit']", text: :APPROVE.l)
 
       # Comment textarea
       assert_html(html, "textarea[name='approve_synonym[comment]']")

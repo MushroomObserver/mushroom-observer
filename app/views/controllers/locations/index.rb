@@ -63,7 +63,7 @@ module Views::Controllers::Locations
       render(::Components::ContentPadded.new) do
         small { plain(:list_place_names_parenthetical.l) }
       end
-      paginated_results { render_known_list(counts) }
+      render(::Components::PaginatedResults.new) { render_known_list(counts) }
     end
 
     def render_known_list(counts)
@@ -74,7 +74,7 @@ module Views::Controllers::Locations
 
     def render_known_item(list, location, counts)
       list.item do
-        render(::Components::Link::Object::Location.new(
+        render(::Components::Link::Location.new(
                  where: location.name.t, location: location,
                  count: counts[location.id].to_i
                ))
@@ -101,7 +101,7 @@ module Views::Controllers::Locations
     def render_undefined_item(list, obs, count)
       location_name = obs[:where]
       list.item do
-        render(::Components::Link::Object::Location.new(
+        render(::Components::Link::Location.new(
                  where: location_name, count: count
                ))
         render(::Components::Link::Icon.new(

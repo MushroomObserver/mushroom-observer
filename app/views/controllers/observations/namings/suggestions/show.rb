@@ -82,10 +82,12 @@ module Views::Controllers::Observations::Namings::Suggestions
       if already_proposed?(sugg)
         plain("(#{:suggestions_already_proposed.t})")
       else
-        link_to(propose_path(sugg),
-                class: "btn btn-default mt-3") do
-          plain(:suggestions_propose_name.t)
-        end
+        render(Components::Button.new(
+                 type: :get,
+                 name: :suggestions_propose_name.t,
+                 target: propose_path(sugg),
+                 class: "mt-3"
+               ))
       end
     end
 

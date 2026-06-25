@@ -108,7 +108,7 @@ module Views::Controllers::SpeciesLists
     def render_project_checkboxes
       div(class: "form-group") do
         label(for: "project") { plain("#{:PROJECTS.t}:") }
-        div(class: "help-note mr-3") do
+        render(::Components::Help::Note.new(:div)) do
           plain(:form_species_lists_project_help.t)
         end
         div(class: "form-group") do

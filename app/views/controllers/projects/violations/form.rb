@@ -28,7 +28,7 @@ module Views::Controllers::Projects::Violations
     def view_template
       h4 do
         trusted_html("#{:PROJECT.l}: ")
-        render(Components::Link::Object::Base.new(object: @project))
+        render(Components::Link::Object.new(object: @project))
       end
 
       if @violations.empty?
@@ -69,8 +69,8 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_obs_link(obs)
-      render(Components::Link::Object::Base.new(object: obs,
-                                                name: obs.text_name))
+      render(Components::Link::Object.new(object: obs,
+                                          name: obs.text_name))
       plain(" (#{obs.id})")
     end
 
@@ -123,27 +123,33 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_exclude_button(obs)
-      button_to(
-        :form_violations_action_exclude.l, violations_path,
-        method: :put, class: "btn btn-default btn-xs",
-        params: { project: { do: "exclude", obs_id: obs.id } }
-      )
+      render(::Components::Button.new(
+               type: :put,
+               name: :form_violations_action_exclude.l,
+               target: violations_path,
+               params: { project: { do: "exclude", obs_id: obs.id } },
+               size: :xs
+             ))
     end
 
     def render_extend_button(obs)
-      button_to(
-        :form_violations_action_extend.l, violations_path,
-        method: :put, class: "btn btn-default btn-xs",
-        params: { project: { do: "extend", obs_id: obs.id } }
-      )
+      render(::Components::Button.new(
+               type: :put,
+               name: :form_violations_action_extend.l,
+               target: violations_path,
+               params: { project: { do: "extend", obs_id: obs.id } },
+               size: :xs
+             ))
     end
 
     def render_add_target_name_button(obs)
-      button_to(
-        :form_violations_action_add_target_name.l, violations_path,
-        method: :put, class: "btn btn-default btn-xs",
-        params: { project: { do: "add_target_name", obs_id: obs.id } }
-      )
+      render(::Components::Button.new(
+               type: :put,
+               name: :form_violations_action_add_target_name.l,
+               target: violations_path,
+               params: { project: { do: "add_target_name", obs_id: obs.id } },
+               size: :xs
+             ))
     end
 
     # The modal markup itself is no longer rendered eagerly — each
@@ -156,20 +162,21 @@ module Views::Controllers::Projects::Violations
     # first so DB state from the other tab (a newly-created suffix
     # Location) is picked up on reopen (#4304).
     def render_add_target_location_trigger(obs)
-      link_to(
-        :form_violations_action_add_target_location.l,
-        target_location_modal_project_violations_path(
-          project_id: @project.id, obs_id: obs.id
-        ),
-        class: "btn btn-default btn-xs",
-        data: {
-          modal: Views::Controllers::Projects::Violations::
-                   TargetLocationForm.modal_id_for(obs),
-          controller: "modal-toggle",
-          action: "modal-toggle#showModal:prevent",
-          modal_toggle_always_fresh_value: true
-        }
-      )
+      render(::Components::Button.new(
+               type: :get,
+               name: :form_violations_action_add_target_location.l,
+               target: target_location_modal_project_violations_path(
+                 project_id: @project.id, obs_id: obs.id
+               ),
+               size: :xs,
+               data: {
+                 modal: Views::Controllers::Projects::Violations::
+                          TargetLocationForm.modal_id_for(obs),
+                 controller: "modal-toggle",
+                 action: "modal-toggle#showModal:prevent",
+                 modal_toggle_always_fresh_value: true
+               }
+             ))
     end
   end
 end

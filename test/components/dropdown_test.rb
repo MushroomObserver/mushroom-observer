@@ -36,6 +36,39 @@ class DropdownTest < ComponentTestCase
     )
   end
 
+  # Post/put/patch/destroy tuples dispatched through the dropdown must
+  # NOT carry `.btn` styling — they should render as plain form-submits
+  # inside a `<li>`, not as Bootstrap-styled action buttons.
+  # Regression guard for the `variant: :strip` default added to
+  # `Components::LinkRendering#render_crud_button_or_link`.
+  def test_post_tuple_renders_without_btn_styling
+    html = render_dropdown_with_button(button: :post)
+
+    assert_html(html, "li form")
+    assert_no_html(html, "button.btn")
+  end
+
+  def test_patch_tuple_renders_without_btn_styling
+    html = render_dropdown_with_button(button: :patch)
+
+    assert_html(html, "li form")
+    assert_no_html(html, "button.btn")
+  end
+
+  def test_put_tuple_renders_without_btn_styling
+    html = render_dropdown_with_button(button: :put)
+
+    assert_html(html, "li form")
+    assert_no_html(html, "button.btn")
+  end
+
+  def test_destroy_tuple_renders_without_btn_styling
+    html = render_dropdown_with_button(button: :destroy)
+
+    assert_html(html, "li form")
+    assert_no_html(html, "button.btn")
+  end
+
   # Sections that are `nil` (or any unrecognized type) normalize to
   # `[]` and get filtered out by `reject(&:empty?)`. With nothing
   # left to render, the entire dropdown wrapper is suppressed.
@@ -51,5 +84,17 @@ class DropdownTest < ComponentTestCase
     end
 
     assert_equal("", html)
+  end
+
+  private
+
+  def render_dropdown_with_button(button:)
+    render(Components::Dropdown.new(
+             id: "test_toggle",
+             menu_id: "test_menu",
+             label: "Menu"
+           )) do |menu|
+      menu.section([["Action", "/some/path", { button: button }]])
+    end
   end
 end

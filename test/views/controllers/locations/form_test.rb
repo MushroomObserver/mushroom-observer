@@ -51,7 +51,7 @@ module Views::Controllers::Locations
       assert_html(html, ".input-group-btn")
 
       # Submit button for new record
-      assert_html(html, "input[type='submit'][value='#{:CREATE.l}']")
+      assert_html(html, "button[type='submit']", text: :CREATE.l)
 
       # No turbo for local form
       assert_no_html(html, "form[data-turbo]")
@@ -73,7 +73,7 @@ module Views::Controllers::Locations
                     ))
 
       assert_html(html, "form[action*='/locations/#{location.id}']")
-      assert_html(html, "input[type='submit'][value='#{:UPDATE.l}']")
+      assert_html(html, "button[type='submit']", text: :UPDATE.l)
     end
 
     def test_renders_locked_checkbox_in_admin_mode
@@ -110,7 +110,7 @@ module Views::Controllers::Locations
                       local: true
                     ))
 
-      # Locked-display variant: the explanatory text lives in a
+      # Locked-display style: the explanatory text lives in a
       # `.help-block` div next to the read-only fields.
       assert_html(html, ".help-block", text: :show_location_locked.l)
     end

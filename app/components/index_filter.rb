@@ -38,6 +38,8 @@
 #            ))
 #   end
 class Components::IndexFilter < Components::Base
+  include Components::ButtonStyling
+
   # Submit target — either a route helper's String path or a Rails-
   # style routing Hash (`{ controller:, action:, … }`). `url_for`
   # normalizes either shape into the `<form action="…">` string.
@@ -51,8 +53,8 @@ class Components::IndexFilter < Components::Base
          class: form_class, id: @form_id) do
       div(class: "d-flex gap-2 align-items-end") do
         yield if block
-        input(type: "submit", name: "commit", value: @submit_text,
-              class: "btn btn-default")
+        render(::Components::Button.new(type: :submit, name: @submit_text,
+                                        html_name: "commit"))
       end
     end
   end

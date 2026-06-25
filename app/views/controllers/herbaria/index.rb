@@ -18,7 +18,9 @@ module Views::Controllers::Herbaria
 
       render_merge_alert if @merge
 
-      paginated_results { render_table if @objects.any? }
+      render(::Components::PaginatedResults.new) do
+        render_table if @objects.any?
+      end
     end
 
     private
@@ -83,12 +85,14 @@ module Views::Controllers::Herbaria
 
     # Cannot POST from a link without js; use a button instead.
     def render_merge_target_button(herbarium)
-      render(::Components::CrudButton::Post.new(
+      render(::Components::Button.new(
+               type: :post,
+               variant: :strip,
                name: herbarium.name.t,
                target: herbaria_merges_path(src: @merge.id,
                                             dest: herbarium.id),
                class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
-               confirm: :are_you_sure.t
+               confirm: :are_you_sure.l
              ))
     end
 
@@ -106,17 +110,19 @@ module Views::Controllers::Herbaria
 
     def render_admin_actions(herbarium)
       plain(" [")
-      render(::Components::CrudButton::Edit.new(
+      render(::Components::Button.new(
+               type: :edit,
                target: herbarium,
                name: :EDIT.l,
-               icon: nil, btn: nil,
+               icon: nil, variant: :strip,
                class: "edit_herbarium_link_#{herbarium.id}"
              ))
       plain(" | ")
-      render(::Components::CrudButton::Get.new(
+      render(::Components::Button.new(
+               type: :get,
                name: :MERGE.l,
                target: herbaria_path(merge: herbarium.id),
-               icon: nil, btn: nil,
+               icon: nil, variant: :strip,
                class: "merge_herbarium_link_#{herbarium.id}"
              ))
       plain("]")
@@ -128,7 +134,7 @@ module Views::Controllers::Herbaria
       return if nonpersonal? || herbarium.personal_user.blank?
 
       span(title: herbarium.personal_user.unique_text_name) do
-        render(::Components::Link::Object::User.new(
+        render(::Components::Link::User.new(
                  user: herbarium.personal_user
                ))
       end

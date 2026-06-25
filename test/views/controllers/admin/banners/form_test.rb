@@ -22,7 +22,7 @@ module Views::Controllers::Admin::Banners
 
       # Submit button
       assert_html(html,
-                  "input[type='submit'][value='#{:banner_update.l}']")
+                  "button[type='submit']", text: :banner_update.l)
     end
 
     def test_renders_with_existing_banner

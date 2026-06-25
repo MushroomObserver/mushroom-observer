@@ -3,10 +3,9 @@
 # "Add comment" link. `object` is the target the comment will be
 # attached to (Observation, Project, etc.).
 class Tab::Comment::New < Tab::Base
-  def initialize(object:, btn_class: nil)
+  def initialize(object:)
     super()
     @object = object
-    @btn_class = btn_class
   end
 
   def title
@@ -15,10 +14,6 @@ class Tab::Comment::New < Tab::Base
 
   def path
     new_comment_path(target: @object.id, type: @object.class.name)
-  end
-
-  def html_options
-    { class: @btn_class, icon: :add }
   end
 
   def model

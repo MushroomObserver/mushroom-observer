@@ -148,8 +148,9 @@ module Views::Controllers::Observations::Namings::Votes
       # The noscript-wrapped submit is the JS-disabled fallback. The
       # Stimulus target lets the JS hide it once it takes over.
       assert_includes(html, "<noscript>")
-      assert_html(html, "noscript input[type='submit']")
-      assert_html(html, "noscript input[data-naming-vote-target='submit']")
+      assert_html(html,
+                  "noscript button[type='submit']" \
+                  "[data-naming-vote-target='submit']")
     end
 
     private

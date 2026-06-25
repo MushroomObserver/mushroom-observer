@@ -44,7 +44,7 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def destroy_icon
-    Components::CrudButton::Delete.new(target: @description, btn: nil)
+    Components::Button.new(type: :delete, target: @description, variant: :strip)
   end
 
   def admin_icons
@@ -99,8 +99,17 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def icon_from_tab(tab)
-    content, path, opts = tab.to_a
-    Components::Link::Icon.new(content, path, **(opts || {}))
+    return Components::Link::Icon.new(tab: tab) unless tab.html_options[:button]
+
+    method = tab.html_options[:button]
+    opts = tab.html_options
+    Components::Button.new(type: method,
+                           name: opts[:title] || tab.title,
+                           target: tab.path,
+                           icon: opts[:icon],
+                           confirm: opts[:confirm],
+                           variant: :strip,
+                           class: "icon-link")
   end
 
   # -- predicates -------------------------------------------------

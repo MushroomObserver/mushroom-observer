@@ -112,22 +112,31 @@ class ComponentTestCase < UnitTestCase
 
     doc = Nokogiri::HTML(html)
 
+    elements = doc.css(selector)
+
     if count
-      elements = doc.css(selector)
       assert_equal(
         count, elements.size,
         "Expected #{count} element(s) matching '#{selector}', " \
         "found #{elements.size}"
       )
       return if count.zero?
-
-      element = elements.first
     else
-      element = doc.at_css(selector)
-      assert(element, "Expected to find element matching '#{selector}'")
+      assert(
+        elements.any?,
+        "Expected to find element matching '#{selector}'"
+      )
     end
 
-    assert_includes(element.text, text) if text
+    if text
+      element = elements.find { |el| el.text.include?(text.to_s) }
+      assert(element,
+             "Expected to find '#{selector}' containing text " \
+             "#{text.inspect}; found elements with: " \
+             "#{elements.map { |el| el.text.strip[0, 40] }.inspect}")
+    else
+      element = elements.first
+    end
 
     if classes
       element_classes = element["class"]&.split || []
@@ -149,15 +158,28 @@ class ComponentTestCase < UnitTestCase
     end
   end
 
-  # Assert HTML does NOT contain a specific CSS selector
-  # @param html [String] The HTML to search
-  # @param selector [String] CSS selector that should NOT be found
-  # @param message [String] Optional custom failure message
-  def assert_no_html(html, selector, message = nil)
+  # Assert HTML does NOT contain a specific CSS selector.
+  # Accepts the same `text:` and `attribute:` filters as `assert_html`
+  # so you can assert the absence of a specific element variant (e.g.
+  # no submit button whose text is "Cancel") without asserting the
+  # complete absence of all elements matching the base selector.
+  def assert_no_html(html, selector, message = nil, text: nil,
+                     attribute: nil)
     doc = Nokogiri::HTML(html)
-    element = doc.at_css(selector)
-    message ||= "Expected NOT to find element matching '#{selector}'"
-    assert_nil(element, message)
+    elements = doc.css(selector)
+
+    elements = elements.select { |el| el.text.include?(text.to_s) } if text
+
+    if attribute
+      elements = elements.select do |el|
+        attribute.all? { |k, v| el[k.to_s] == v }
+      end
+    end
+
+    label = selector
+    label += " text=#{text.inspect}" if text
+    message ||= "Expected NOT to find element matching '#{label}'"
+    assert_empty(elements, message)
   end
 
   # Assert that a child selector is nested within a parent selector.

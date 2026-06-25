@@ -83,17 +83,16 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_keep_filenames_select
-    # Reuses the `:new_window` glyph the two external triggers carry,
-    # even though this one doesn't navigate. The icon signals "this
-    # click opens something" (in this case the turbo-confirm modal),
-    # which softens the "destructive button" read. No `target=_blank`
-    # / `rel` / new-tab `title` here — those would be lies.
+    # Reuses the `:new_window` glyph the external triggers carry even
+    # though this one doesn't navigate. The icon signals "this click
+    # opens something" (the turbo-confirm modal), softening the
+    # "destructive button" read. No target=_blank / rel / new-tab
+    # title here — those would be lies.
     select_field(:keep_filenames, filename_values,
                  label: :prefs_keep_image_filenames.l,
+                 **addon_button_defaults,
                  button: :prefs_purge_filenames.t,
                  button_href: images_bulk_filename_purge_path,
-                 button_class: addon_button_class,
-                 button_icon: :new_window,
                  button_data: filename_purge_data)
   end
 
@@ -111,18 +110,21 @@ class Views::Controllers::Account::Preferences::Form <
     end
   end
 
-  # Shared shape for the two GET retroactive triggers: button text +
-  # href, opened in a new tab (rel-hardened), with a `new-window`
-  # glyph + accessible tooltip so the new-tab signal isn't only
-  # visual.
-  def external_addon(text, href)
-    { button: text, button_href: href, button_class: addon_button_class,
-      button_target: "_blank", button_rel: "noopener noreferrer",
-      button_title: :opens_in_new_tab.t, button_icon: :new_window }
+  # Shared defaults for all three addon buttons: outline-sm styling +
+  # new-window glyph. Callers merge their own button:, button_href:,
+  # and any target/rel/title/data particulars on top.
+  def addon_button_defaults
+    { button_variant: :outline, button_size: :sm, button_icon: :new_window }
   end
 
-  def addon_button_class
-    "btn btn-sm btn-outline-default"
+  # GET trigger opened in a new tab — rel-hardened, with a tooltip so
+  # the new-tab signal isn't only visual.
+  def external_addon(text, href)
+    addon_button_defaults.merge(
+      button: text, button_href: href,
+      button_target: "_blank", button_rel: "noopener noreferrer",
+      button_title: :opens_in_new_tab.t
+    )
   end
 
   def anon_values
@@ -148,7 +150,7 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_license_note
-    span(class: "help-note mr-3") do
+    render(::Components::Help::Note.new) do
       plain("(")
       trusted_html(:prefs_license_note.t)
       plain(")")
@@ -325,7 +327,7 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_notes_help
-    p(class: "help-note mr-3") do
+    render(::Components::Help::Note.new(:p)) do
       plain(:prefs_notes_template_explanation.t)
     end
   end

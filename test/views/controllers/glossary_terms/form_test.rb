@@ -25,7 +25,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def test_renders_submit_button
-      assert_html(@html, "input[type='submit'][value='#{:SAVE.t}']")
+      assert_html(@html, "button[type='submit']", text: :SAVE.t)
       assert_html(@html, ".btn.btn-default")
       assert_html(@html, ".center-block.my-3")
     end

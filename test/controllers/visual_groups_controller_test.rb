@@ -113,10 +113,10 @@ class VisualGroupsControllerTest < FunctionalTestCase
         "input[type=hidden][name=status][value=needs_review]", count: 1
       )
       # Three status submit buttons; the current one ("needs_review")
-      # is a non-clickable `<span>` so the user can't redundantly
-      # re-submit the active status.
+      # is a non-clickable `<span>` (aria-disabled) so the user can't
+      # redundantly re-submit the active status.
       assert_select(
-        "span.btn.btn-outline-default.active.disabled",
+        "span[aria-disabled='true']",
         text: :visual_group_needs_review.t
       )
       assert_select(
@@ -130,24 +130,24 @@ class VisualGroupsControllerTest < FunctionalTestCase
       # Text filter input + its dedicated submit button.
       assert_select("input[type=text][name=filter]#filter")
       assert_select(
-        "input[type=submit][value=?]",
-        :edit_visual_group_update_filter.t
+        "button[type=submit]",
+        text: :edit_visual_group_update_filter.t
       )
     end
-    # Reload link only on needs_review (which is the default).
-    assert_select("a[href^='javascript:']", text: :RELOAD.t)
+    # Reload button only on needs_review (which is the default).
+    assert_select("button[onclick]", text: :RELOAD.t)
   end
 
   def test_edit_filter_form_reload_link_hidden_on_included
     login
     get(:edit, params: { id: @visual_group.id, status: "included" })
 
-    # Active button is the "Included" span now.
+    # Active button is the "Included" span (aria-disabled) now.
     assert_select(
-      "span.btn.active", text: :visual_group_included.t
+      "span[aria-disabled='true']", text: :visual_group_included.t
     )
-    # Reload link only shows on needs_review.
-    assert_select("a[href^='javascript:']", count: 0)
+    # Reload button only shows on needs_review.
+    assert_select("button[onclick]", count: 0)
   end
 
   # Submitting the form with both `status` and `filter` set: the

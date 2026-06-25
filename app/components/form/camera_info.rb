@@ -143,16 +143,13 @@ class Components::Form::CameraInfo < Components::Base
 
   def transfer_exif_button
     has_exif = @date.present? || @lat.present?
-    button_classes = class_names("btn btn-default",
-                                 "use_exif_btn btn-sm ab-top-right",
-                                 "d-none": !has_exif)
-
-    button(
-      type: "button",
-      class: button_classes,
-      data: { form_exif_target: "useExifBtn",
-              action: "form-exif#transferExifToObs:prevent" }
-    ) do
+    render(Components::Button.new(
+             size: :sm,
+             class: class_names("use_exif_btn ab-top-right",
+                                "d-none": !has_exif),
+             data: { form_exif_target: "useExifBtn",
+                     action: "form-exif#transferExifToObs:prevent" }
+           )) do
       span(class: "when-enabled") { :image_use_exif.l }
       span(class: "when-disabled") { :image_exif_copied.l }
     end

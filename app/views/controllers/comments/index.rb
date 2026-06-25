@@ -20,7 +20,7 @@ module Views::Controllers::Comments
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      paginated_results { render_list }
+      render(::Components::PaginatedResults.new) { render_list }
     end
 
     private
@@ -28,13 +28,15 @@ module Views::Controllers::Comments
     def render_list
       return unless @objects.any?
 
-      div(class: "list-group") do
+      render(::Components::ListGroup::Base.new) do |list|
         @objects.each do |comment|
           # Editable on logged-out viewers matches the legacy
           # `controls: @user.nil?` semantics — leaving the
           # apparent inversion intact pending a separate review.
-          render(CommentRow.new(comment: comment, user: @user,
-                                show_name: true, editable: @user.nil?))
+          list.item(class: "comment", id: dom_id(comment)) do
+            render(CommentItem.new(comment: comment, user: @user,
+                                   show_name: true, editable: @user.nil?))
+          end
         end
       end
     end

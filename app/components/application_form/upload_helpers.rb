@@ -77,7 +77,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_copyright_warning
-      div(class: "help-block") do
+      render(::Components::Help::Block.new) do
         plain("(")
         plain(:image_copyright_warning.t)
         plain(")")

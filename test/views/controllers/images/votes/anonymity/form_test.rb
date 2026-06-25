@@ -31,7 +31,7 @@ module Views::Controllers::Images::Votes::Anonymity
 
       assert_html(
         html,
-        "input[type='submit'][value='#{:image_vote_anonymity_make_public.l}']"
+        "button[type='submit']", text: :image_vote_anonymity_make_public.l
       )
     end
 
@@ -47,7 +47,7 @@ module Views::Controllers::Images::Votes::Anonymity
       html = render_form(num_anonymous: 0, num_public: 10)
 
       button_value = :image_vote_anonymity_make_public.l
-      assert_html(html, "input[disabled][value='#{button_value}']")
+      assert_html(html, "button[type='submit'][disabled]", text: button_value)
     end
 
     private
