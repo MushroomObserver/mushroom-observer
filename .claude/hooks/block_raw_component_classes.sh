@@ -20,7 +20,7 @@
 #   app/components/dropdown.rb
 #   app/components/link/external.rb (owns target="_blank")
 #   app/components/link/collapse_toggle.rb (owns data-toggle="collapse")
-#   app/components/form/location_map.rb (Button::Toggle + collapse mix)
+#   app/components/form/location_map.rb (Button::CollapseToggle via type: kwarg)
 #   app/views/controllers/observations/namings/reasons_fields.rb (checkbox-driven)
 #   app/views/controllers/observations/form/details.rb (checkbox-driven)
 #   app/components/carousel/controls.rb (owns chevron interpolation)
@@ -239,8 +239,8 @@ check \
   ''
 
 # data-toggle="collapse" — use Link::CollapseToggle instead
-# (exempt: collapse_toggle.rb itself; location_map.rb Button::Toggle+collapse
-#  mix; reasons_fields.rb and observations/form/details.rb checkbox-driven)
+# (exempt: collapse_toggle.rb itself; location_map.rb uses Button::CollapseToggle
+#  via type: kwarg; reasons_fields.rb and form/details.rb checkbox-driven)
 check \
   'raw data-toggle="collapse"' \
   'Components::Link::CollapseToggle.new(target_id: "…")' \

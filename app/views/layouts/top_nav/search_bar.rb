@@ -68,7 +68,6 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   def render_help_toggle
     render(::Components::Link::CollapseToggle.new(
              target_id: "search_bar_help",
-             collapsed: true,
              icon: :info,
              icon_title: :search_bar_help.t,
              class: bar_toggle_class(visible: help_visible?),
@@ -82,7 +81,6 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   def render_form_toggle
     render(::Components::Link::CollapseToggle.new(
              target_id: "search_nav_form",
-             collapsed: true,
              icon: :plus,
              icon_title: :search_bar_more_options.l,
              class: bar_toggle_class(visible: form_visible?),

@@ -75,6 +75,7 @@ module Views::Controllers::Account::APIKeys
       span(class: "input-group-btn") do
         render(::Components::Link::CollapseToggle.new(
                  target_id: @cancel_target,
+                 collapsed: false,
                  icon: :cancel,
                  icon_title: :CANCEL.l,
                  button: :default,

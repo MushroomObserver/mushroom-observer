@@ -108,6 +108,7 @@ class Components::Form::Search < Components::ApplicationForm
   def render_search_bar_toggle
     render(::Components::Link::CollapseToggle.new(
              target_id: "search_bar_elements",
+             collapsed: false,
              icon: :minus,
              icon_title: :search_bar_fewer_options.l,
              button: :btn_link,

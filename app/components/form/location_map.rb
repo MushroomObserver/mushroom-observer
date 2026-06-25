@@ -57,7 +57,6 @@ class Components::Form::LocationMap < Components::Base
              target_id: @id,
              open_text: :form_observations_hide_map.l,
              closed_text: :form_observations_open_map.l,
-             collapsed: true,
              icon: :globe,
              class: "map-toggle",
              data: { map_target: "toggleMapBtn",

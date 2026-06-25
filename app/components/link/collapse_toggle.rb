@@ -2,8 +2,10 @@
 
 # Bootstrap 3 collapse-trigger `<a>`. Renders an `href="#target_id"`
 # link with `data-toggle="collapse"` and the matching ARIA attrs.
-# Pass `collapsed: true` to add the `.collapsed` class (Bootstrap uses
-# this to flip chevron icons via CSS when the pane is hidden).
+# The default `collapsed: true` adds the `.collapsed` class (Bootstrap uses
+# this to flip chevron icons via CSS when the pane is hidden). Pass
+# `collapsed: false` when the target pane starts open (e.g. a cancel button
+# shown inside an already-expanded accordion pane).
 #
 # Accepts `icon:`, `icon_title:`, `open_text:`, `closed_text:` kwargs
 # for content when no block is given. The icon title defaults to the
@@ -22,7 +24,6 @@
 # @example icon kwarg toggle (starts closed)
 #   render(Components::Link::CollapseToggle.new(
 #     target_id: "contribution_legend",
-#     collapsed: true,
 #     icon: :info_circle,
 #     button: :btn_link,
 #     size: :xs
@@ -32,7 +33,6 @@
 #   render(Components::Link::CollapseToggle.new(
 #     target_id: "new_form_container",
 #     fallback_href: new_thing_path,
-#     collapsed: true,
 #     closed_text: :CREATE.l
 #   ))
 #
@@ -44,7 +44,7 @@
 class Components::Link::CollapseToggle < Components::Link
   include Components::Button::CollapseContent
 
-  def initialize(target_id:, collapsed: false, fallback_href: nil,
+  def initialize(target_id:, collapsed: true, fallback_href: nil,
                  size: nil, **opts)
     @target_id     = target_id
     @collapsed     = collapsed
@@ -71,7 +71,7 @@ class Components::Link::CollapseToggle < Components::Link
                          { "collapsed" => @collapsed }),
       data: { toggle: "collapse", **collapse_data },
       aria: { expanded: @collapsed ? "false" : "true",
-              controls: @target_id },
+              **(@target_id.present? ? { controls: @target_id } : {}) },
       **@html_attrs
     ) do
       block ? yield : collapse_content
@@ -91,6 +91,6 @@ class Components::Link::CollapseToggle < Components::Link
   end
 
   def size_class
-    "btn-#{@size}" if @size
+    Components::Button::Styling.size_class(@size)
   end
 end

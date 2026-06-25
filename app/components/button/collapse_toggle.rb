@@ -24,7 +24,7 @@ class Components::Button::CollapseToggle < Components::Button
   include Components::Button::CollapseContent
 
   def initialize(target_id:, open_text: nil, closed_text: nil,
-                 collapsed: false, **opts)
+                 collapsed: true, **opts)
     @target_id   = target_id
     @open_text   = open_text
     @closed_text = closed_text
