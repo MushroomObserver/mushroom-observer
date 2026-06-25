@@ -31,7 +31,7 @@ module Views::Controllers::Projects::FieldSlips
 
       # Submit button
       assert_html(html,
-                  "input[type='submit'][value='#{:CREATE.l}']")
+                  "button[type='submit']", text: :CREATE.l)
     end
 
     def test_default_field_slip_count

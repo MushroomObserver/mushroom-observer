@@ -44,26 +44,20 @@ module Views::Controllers::Sequences
     end
 
     def render_bases_field
-      between_content = [
-        span(class: "help-note mr-3") do
-          "(#{:form_sequence_bases_or_deposit_required.t})"
-        end,
-        link_to(
-          "(#{:form_sequence_bases_format.t})",
-          WebSequenceArchive.blast_format_help,
-          class: "d-inline-block float-right",
-          target: "_blank", rel: "noopener"
-        )
-      ].join.html_safe # rubocop:disable Rails/OutputSafety
-
-      textarea_field(:bases,
-                     cols: 80,
-                     rows: 5,
-                     label: :BASES.l,
-                     # rubocop:disable Rails/OutputSafety
-                     between: raw(between_content),
-                     # rubocop:enable Rails/OutputSafety
-                     class: "font-monospace")
+      textarea_field(:bases, cols: 80, rows: 5, label: :BASES.l,
+                             class: "font-monospace") do |f|
+        f.with_between do
+          render(::Components::Help::Note.new(
+                   :span,
+                   "(#{:form_sequence_bases_or_deposit_required.t})"
+                 ))
+          render(::Components::Link::External.new(
+                   "(#{:form_sequence_bases_format.t})",
+                   WebSequenceArchive.blast_format_help,
+                   class: "d-inline-block float-right"
+                 ))
+        end
+      end
     end
 
     def render_deposit_info
@@ -73,9 +67,10 @@ module Views::Controllers::Sequences
 
     def render_deposit_fields
       label(for: "sequence_deposit", class: "mr-3") { :DEPOSIT.l }
-      span(class: "help-note mr-3") do
-        "(#{:form_sequence_valid_deposit.t})"
-      end
+      render(::Components::Help::Note.new(
+               :span,
+               "(#{:form_sequence_valid_deposit.t})"
+             ))
       render_archive_select
       render_accession_field
     end

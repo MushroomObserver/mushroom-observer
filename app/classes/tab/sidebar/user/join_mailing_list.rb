@@ -11,6 +11,6 @@ class Tab::Sidebar::User::JoinMailingList < Tab::Base
   end
 
   def html_options
-    { id: "nav_join_mailing_list_link" }
+    { external: true, id: "nav_join_mailing_list_link" }
   end
 end

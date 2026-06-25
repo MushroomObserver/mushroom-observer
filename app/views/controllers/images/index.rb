@@ -17,7 +17,7 @@ module Views::Controllers::Images
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      paginated_results do
+      render(::Components::PaginatedResults.new) do
         render(::Components::Matrix::Table.new(
                  objects: @objects, user: current_user
                ))

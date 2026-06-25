@@ -256,7 +256,7 @@ module Views::Controllers::Occurrences
     def render_occurrence_link(obs)
       br
       a(href: occurrence_path(obs.occurrence_id)) do
-        span(class: "glyphicon glyphicon-th-large")
+        render(::Components::Icon.new(type: :matrix))
         plain(" ")
         plain(:in_existing_occurrence.l)
       end

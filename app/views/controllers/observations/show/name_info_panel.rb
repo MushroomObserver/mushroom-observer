@@ -33,7 +33,7 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
     end
   end
 
-  # Three groups, each emitted as `<a class="d-block">` lines:
+  # Three groups, each rendered as a block-level div wrapping the link:
   # related-name filtered indexes, alt-descriptions list, and
   # the per-name distribution map link.
   def render_links_on_mo
@@ -70,15 +70,15 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
            ))
   end
 
-  # Renders a single Tab::Base as `<a class="d-block">...</a>`.
-  # The tabs in this panel are all link-style (no `button:` html_options).
   def render_tab_link(tab)
-    content, path, opts = tab.to_a
-    classes = ["d-block", opts[:class]].compact.join(" ").strip
-    # Strip :class, :button, :target from opts — these are context-nav
-    # attrs, not <a> attrs; :button would switch link_to to button_to.
-    attrs = opts.except(:class, :button, :target).
-            merge(href: url_for(path), class: classes)
-    a(**attrs) { trusted_html(content) }
+    div do
+      if tab.html_options[:external]
+        render(::Components::Link::External.new(tab: tab))
+      else
+        content, path, opts = tab.to_a
+        a(href: url_for(path),
+          class: opts[:class]) { trusted_html(content) }
+      end
+    end
   end
 end

@@ -11,7 +11,7 @@ module Views::Controllers::Names::Lifeforms
       # Form structure and action
       assert_html(html, "form#name_lifeform_form")
       assert_html(html, "form[action*='/names/#{name.id}/lifeform']")
-      assert_html(html, "input[type='submit'][value='#{:SAVE.t}']")
+      assert_html(html, "button[type='submit']", text: :SAVE.t)
 
       # Help text
       assert_includes(html, :edit_lifeform_help.t)

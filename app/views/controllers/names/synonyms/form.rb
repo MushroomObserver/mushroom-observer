@@ -125,7 +125,7 @@ module Views::Controllers::Names::Synonyms
         div(class: "pl-3") do
           @new_names.each { |n| div { n } }
         end
-        span(class: "help-note mr-3") { :form_synonyms_missing_names_help.t }
+        render(::Components::Help::Note.new(:form_synonyms_missing_names_help.t))
       end
     end
 

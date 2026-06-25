@@ -7,6 +7,21 @@ class ApplicationJob < ActiveJob::Base
   # Most jobs are safe to ignore if the underlying records are no
   # longer available discard_on ActiveJob::DeserializationError
 
+  # Report background-job failures to the same place web errors go (Slack via
+  # exception_notification), then re-raise so SolidQueue still records the
+  # failed execution. The notifiers check keeps this in lockstep with the
+  # initializer's gating (no notifier is registered outside production) without
+  # duplicating its env logic. Subclass retry_on/discard_on handlers are
+  # registered later and take precedence for the errors they cover.
+  rescue_from(StandardError) do |exception|
+    if ExceptionNotifier.notifiers.any?
+      ExceptionNotifier.notify_exception(
+        exception, data: { job: self.class.name, arguments: arguments }
+      )
+    end
+    raise(exception)
+  end
+
   def log(str)
     time = Time.zone.now.to_s
     log_entry = "#{time}: #{self.class.name} #{arguments.join(" ")} #{str}\n"

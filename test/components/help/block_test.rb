@@ -18,6 +18,12 @@ class HelpBlockTest < ComponentTestCase
     assert_html(html, "div.help-block", text: "From block")
   end
 
+  def test_string_as_first_arg_uses_default_div_element
+    html = render(Components::Help::Block.new("Help text"))
+
+    assert_html(html, "div.help-block", text: "Help text")
+  end
+
   def test_well_wraps_in_bootstrap_well
     html = render(Components::Help::Block.new(:p, "Help", well: true))
 

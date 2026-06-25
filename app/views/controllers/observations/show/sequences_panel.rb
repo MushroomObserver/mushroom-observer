@@ -95,8 +95,8 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
   def copy_link(sequence)
     return nil if sequence.bases.blank?
 
-    Components::CopyToClipboardButton.new(
-      text: sequence.bases, title: :COPY_THIS_SEQUENCE.l
+    Components::Button::Clipboard.new(
+      text: sequence.bases, name: :COPY_THIS_SEQUENCE.l
     )
   end
 end

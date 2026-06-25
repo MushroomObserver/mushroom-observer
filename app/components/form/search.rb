@@ -17,14 +17,6 @@
 class Components::Form::Search < Components::ApplicationForm
   include ApplicationForm::AutocompleterPrefill
 
-  # Bootstrap classes shared by the search-bar collapse-trigger
-  # buttons (`search_bar_toggle`, inlined below as
-  # `render_search_bar_toggle`). The same shape is duplicated on
-  # `Views::Layouts::TopNav::SearchBar::BAR_TOGGLE_CLASSES` —
-  # accept the small duplication so neither file has to reach
-  # outside its own namespace for a 4-token CSS class list.
-  BAR_TOGGLE_CLASSES = %w[btn btn-link navbar-link px-2].freeze
-
   # Boolean select option styles. Rails-shape `[label, value]` pairs.
   BOOL_OPTIONS = {
     nil_yes: [["", ""], ["yes", "true"]],
@@ -114,11 +106,12 @@ class Components::Form::Search < Components::ApplicationForm
   # Bootstrap collapse-trigger button that hides the search-bar elements row
   # in the top nav.
   def render_search_bar_toggle
-    button(class: class_names(BAR_TOGGLE_CLASSES),
-           type: :button,
-           data: { toggle: "collapse", search_type_target: "barToggle",
-                   target: "#search_bar_elements" },
-           aria: { expanded: "false", controls: "search_bar_elements" }) do
+    render(Components::Button.new(
+             variant: :btn_link, class: "navbar-link px-2",
+             data: { toggle: "collapse", search_type_target: "barToggle",
+                     target: "#search_bar_elements" },
+             aria: { expanded: "false", controls: "search_bar_elements" }
+           )) do
       render(Components::Icon.new(
                type: :minus, title: :search_bar_fewer_options.l
              ))
@@ -473,11 +466,13 @@ class Components::Form::Search < Components::ApplicationForm
 
   def render_clear_button
     data_attrs = @local ? {} : turbo_stream_data
-    a(href: clear_url,
-      class: "btn btn-default d-inline-block mx-3 clear-button",
-      data: data_attrs) do
-      :CLEAR.l
-    end
+    render(Components::Button.new(
+             type: :get,
+             name: :CLEAR.l,
+             target: clear_url,
+             class: "d-inline-block mx-3 clear-button",
+             data: data_attrs
+           ))
   end
 
   def clear_url

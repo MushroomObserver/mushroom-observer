@@ -36,7 +36,7 @@ class Views::Controllers::Account::Preferences::FormTest <
     assert_html(html, "input[type='password']" \
                       "[name='user[password_confirmation]'][value='']")
     # Each section has its own submit button (one of 6).
-    assert_html(html, "input[type='submit'][value='#{:SAVE_EDITS.l}']")
+    assert_html(html, "button[type='submit']", text: :SAVE_EDITS.l)
   end
 
   # ---- Section 2: Privacy ----
@@ -60,6 +60,21 @@ class Views::Controllers::Account::Preferences::FormTest <
     # picking "public going forward".
     assert_html(html,
                 "select[name='user[votes_anonymous]'] option[value='old']")
+  end
+
+  def test_addon_buttons_are_links_inside_input_group_btn_with_icon
+    html = render_form
+
+    # All three addon triggers sit inside .input-group-btn and render
+    # as <a> elements containing the new-window SVG icon. Pinned as
+    # the "before" snapshot for the button_class → Button component
+    # conversion so any structural regression is caught immediately.
+    %w[/images/purge_filenames /images/votes/anonymity
+       /images/licenses/edit].each do |href|
+      assert_html(html, ".input-group-btn a[href='#{href}']")
+      assert_html(html,
+                  ".input-group-btn a[href='#{href}'] span[class*='glyphicon']")
+    end
   end
 
   def test_privacy_section_renders_three_retroactive_buttons_inline
@@ -324,7 +339,7 @@ class Views::Controllers::Account::Preferences::FormTest <
 
     # Each of login, privacy, appearance, filters, notes, email has
     # its own submit so users don't have to scroll to the bottom.
-    assert_html(html, "input[type='submit']", count: 6)
+    assert_html(html, "button[type='submit']", count: 6)
   end
 
   private

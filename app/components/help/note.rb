@@ -22,13 +22,17 @@ class Components::Help::Note < Components::Base
   prop :attributes, _Hash(_Union(Symbol, String), _Any?)
 
   def initialize(element = :span, string = nil, **kwargs)
+    if element.is_a?(String)
+      string = element
+      element = :span
+    end
     extra_class = kwargs.delete(:class)
     super(element: element, string: string,
           extra_class: extra_class, attributes: kwargs)
   end
 
   def view_template(&block)
-    classes = class_names("help-note mr-3", @extra_class)
+    classes = class_names("help-note", @extra_class)
     send(@element, class: classes, **@attributes) do
       if block
         yield

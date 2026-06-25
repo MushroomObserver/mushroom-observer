@@ -183,7 +183,9 @@ module Views::Controllers::Descriptions
         span { plain(" | ") }
         %w[unvetted vetted inaccurate].each_with_index do |w, idx|
           span { plain(" | ") } if idx.positive?
-          render(Components::CrudButton::Put.new(
+          render(Components::Button.new(
+                   type: :put,
+                   variant: :strip,
                    target: review_status_name_description_path(
                      @description.id, value: w
                    ),
@@ -194,8 +196,8 @@ module Views::Controllers::Descriptions
     end
 
     def render_latest_review_row
-      span(class: "help-note") do
-        span(class: "ml-3") { trusted_html("&nbsp;".html_safe) }
+      render(::Components::Help::Note.new) do
+        span(class: "ml-3") { nbsp }
         plain("(")
         trusted_html(:show_name_latest_review.t(
                        date: latest_review_date, user: reviewer_link
@@ -211,8 +213,8 @@ module Views::Controllers::Descriptions
     def reviewer_link
       reviewer = @description.reviewer
       capture do
-        render(Components::Link::Object::User.new(user: reviewer,
-                                                  name: reviewer.login))
+        render(Components::Link::User.new(user: reviewer,
+                                          name: reviewer.login))
       end
     end
 

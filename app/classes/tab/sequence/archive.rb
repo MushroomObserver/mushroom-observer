@@ -16,7 +16,7 @@ class Tab::Sequence::Archive < Tab::Base
   end
 
   def html_options
-    { target: "_blank" }
+    { external: true }
   end
 
   def model

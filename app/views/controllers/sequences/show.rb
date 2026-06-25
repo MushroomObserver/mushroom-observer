@@ -77,8 +77,9 @@ module Views::Controllers::Sequences
       p do
         strong { "#{:BASES.l}:" }
         plain(" ")
-        render(::Components::CopyToClipboardButton.new(
-                 text: @sequence.bases, title: :COPY_THIS_SEQUENCE.l
+        render(::Components::Button::Clipboard.new(
+                 text: @sequence.bases, name: :COPY_THIS_SEQUENCE.l,
+                 class: "ml-1"
                ))
       end
       pre(class: "text-monospace",
@@ -101,18 +102,24 @@ module Views::Controllers::Sequences
     # it's just a plain link to the tool rather than a per-Sequence
     # report — shown unconditionally, same as the NCBI button.
     def render_blast_link
+      blast_tab = ::Tab::Sequence::Blast.new(sequence: @sequence)
       p do
-        link_to(:show_observation_blast_link.l, @sequence.blast_url,
-                class: "btn btn-default", target: "_blank", rel: "noopener")
+        render(::Components::Button.new(type: :external,
+                                        name: blast_tab.title,
+                                        url: blast_tab.path))
         plain(" ")
-        link_to(:show_observation_mycoblast_link.l, ::Sequence.mycoblast_url,
-                class: "btn btn-default", target: "_blank", rel: "noopener")
+        render(::Components::Button.new(
+                 type: :external,
+                 name: :show_observation_mycoblast_link.l,
+                 url: ::Sequence.mycoblast_url
+               ))
       end
     end
 
     def render_archive_link
-      url = ::WebSequenceArchive.archive_home(@sequence.archive)
-      link_to(@sequence.archive.t, url, target: "_blank", rel: "noopener")
+      render(::Components::Link::External.new(
+               tab: ::Tab::Sequence::Archive.new(sequence: @sequence)
+             ))
     end
 
     def render_accession_link

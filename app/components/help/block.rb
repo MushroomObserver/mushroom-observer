@@ -42,6 +42,10 @@ class Components::Help::Block < Components::Base
   # familiar positional/keyword shape. `arrow:` and `collapse_id:`
   # both imply `well:`.
   def initialize(element = :div, string = nil, **kwargs)
+    if element.is_a?(String)
+      string = element
+      element = :div
+    end
     extra_class = kwargs.delete(:class)
     arrow = kwargs.delete(:arrow)
     collapse_id = kwargs.delete(:collapse_id)

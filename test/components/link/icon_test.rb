@@ -104,4 +104,13 @@ class IconLinkTest < ComponentTestCase
 
     assert_html(html, "a[href='#{tab.path}']", text: tab.title)
   end
+
+  def test_confirm_kwarg_wires_turbo_confirm_on_link
+    desc = name_descriptions(:peltigera_user_desc)
+    tab = Tab::Description::Clone.new(description: desc)
+
+    html = render(Components::Link::Icon.new(tab: tab))
+
+    assert_html(html, "a[data-turbo-confirm]")
+  end
 end

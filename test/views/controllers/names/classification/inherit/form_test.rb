@@ -12,7 +12,7 @@ module Views::Controllers::Names::Classification::Inherit
       assert_html(html, "form#name_classification_inherit_form")
       assert_html(html,
                   "form[action*='/names/#{name.id}/classification/inherit']")
-      assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
+      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
 
       # Parent name text field
       assert_html(html, "input[name='inherit_classification[parent]']")

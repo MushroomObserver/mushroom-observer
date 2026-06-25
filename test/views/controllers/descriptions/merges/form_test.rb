@@ -34,7 +34,7 @@ module Views::Controllers::Descriptions::Merges
       assert_includes(html, :merge_descriptions_delete_after.t)
 
       # Submit button
-      assert_html(html, "input[type='submit'][value='#{:SUBMIT.l}']")
+      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
 
       # Permission labels: peltigera_alt_desc is public, not default
       assert_includes(html, "(#{:public.l})")
@@ -58,7 +58,7 @@ module Views::Controllers::Descriptions::Merges
       assert_includes(html, :merge_descriptions_no_others.t)
 
       # No submit button when nothing to merge
-      assert_no_html(html, "input[type='submit']")
+      assert_no_html(html, "button[type='submit']")
     end
 
     def test_description_title_default_and_restricted

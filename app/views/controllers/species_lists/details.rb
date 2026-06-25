@@ -45,11 +45,13 @@ module Views::Controllers::SpeciesLists
 
     # The species_list download path is irregular
     # (`new_download_species_list_path`, not `download_species_list_path`)
-    # so build the path explicitly and pass it to `CrudButton::Download`
+    # so build the path explicitly and pass it to `Button::Download`
     # as a String target.
     def render_download_button
-      render(Components::CrudButton::Download.new(
-               target: new_download_species_list_path(id: @species_list.id)
+      render(Components::Button.new(
+               type: :download,
+               target: new_download_species_list_path(id: @species_list.id),
+               variant: :strip
              ))
     end
 
@@ -68,7 +70,7 @@ module Views::Controllers::SpeciesLists
         b { plain("#{:WHERE.t}:") }
         whitespace
         begin
-          render(Components::Link::Object::Location.new(
+          render(Components::Link::Location.new(
                    where: @species_list.where,
                    location: @species_list.location, click: true
                  ))
@@ -82,7 +84,7 @@ module Views::Controllers::SpeciesLists
       div do
         b { plain("#{:WHO.t}:") }
         whitespace
-        render(Components::Link::Object::User.new(user: @species_list.user))
+        render(Components::Link::User.new(user: @species_list.user))
       end
     end
 
@@ -92,7 +94,7 @@ module Views::Controllers::SpeciesLists
         whitespace
         @species_list.projects.each_with_index do |project, idx|
           plain(" | ") if idx.positive?
-          render(Components::Link::Object::Base.new(object: project))
+          render(Components::Link::Object.new(object: project))
         end
       end
     end

@@ -35,8 +35,11 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_refresh_link
-      link_to("Refresh Stats", edit_admin_blocked_ips_path,
-              class: "btn btn-default")
+      render(Components::Button.new(
+               type: :get,
+               name: "Refresh Stats",
+               target: edit_admin_blocked_ips_path
+             ))
     end
 
     def render_manager(form:, type:, list:)

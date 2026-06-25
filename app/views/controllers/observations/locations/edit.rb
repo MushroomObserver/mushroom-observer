@@ -27,7 +27,7 @@ module Views::Controllers::Observations::Locations
 
     def render_matches
       div(class: "h4") { plain(:list_merge_options_near_matches.t) }
-      paginated_results do
+      render(::Components::PaginatedResults.new) do
         render(::Components::ListGroup::Base.new) do |list|
           @matches.each { |location| render_match(list, location) }
         end
@@ -36,7 +36,9 @@ module Views::Controllers::Observations::Locations
 
     def render_match(list, location)
       list.item do
-        render(::Components::CrudButton::Patch.new(
+        render(::Components::Button.new(
+                 type: :patch,
+                 variant: :strip,
                  name: location.display_name.t,
                  target: assign_location_to_observations_path(
                    where: @where, location: location

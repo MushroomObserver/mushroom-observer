@@ -14,8 +14,7 @@ module Tab::Naming
 
     def test_new
       tab = Tab::Naming::New.new(
-        observation_id: 42, text: "Propose", context: "blank",
-        btn_class: "btn"
+        observation_id: 42, text: "Propose", context: "blank"
       )
 
       assert_equal("Propose", tab.title)
@@ -23,18 +22,9 @@ module Tab::Naming
         observation_id: 42, context: "blank"
       )
       assert_equal(expected, tab.path)
-      assert_includes(tab.html_options[:class], "btn")
       assert_includes(tab.html_options[:class], "propose-naming-link")
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
       assert_equal(Naming, tab.model)
-    end
-
-    def test_new_without_btn_class
-      tab = Tab::Naming::New.new(
-        observation_id: 1, text: "x", context: "y", btn_class: nil
-      )
-
-      assert_includes(tab.html_options[:class], "propose-naming-link")
     end
 
     def test_edit

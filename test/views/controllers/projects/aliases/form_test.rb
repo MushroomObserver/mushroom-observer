@@ -15,7 +15,7 @@ module Views::Controllers::Projects::Aliases
 
       # Form structure
       assert_html(html, "form#project_alias_form")
-      assert_html(html, "input[type='submit']")
+      assert_html(html, "button[type='submit']")
 
       # Fields
       assert_html(html, "input[name='project_alias[name]']")

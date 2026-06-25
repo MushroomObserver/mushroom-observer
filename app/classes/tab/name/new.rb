@@ -9,10 +9,6 @@ class Tab::Name::New < Tab::Base
     new_name_path
   end
 
-  def html_options
-    { icon: :add }
-  end
-
   def model
     Name
   end

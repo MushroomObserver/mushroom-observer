@@ -17,7 +17,7 @@ module Views::Controllers::Users
       if in_admin_mode?
         render_admin_table
       else
-        paginated_results do
+        render(::Components::PaginatedResults.new) do
           render(::Components::Matrix::Table.new(objects: @users))
         end
       end
@@ -27,7 +27,7 @@ module Views::Controllers::Users
 
     def render_admin_table
       style { ".permissions td { padding: 3px 5px 3px 5px }" }
-      paginated_results do
+      render(::Components::PaginatedResults.new) do
         table(align: "center",
               class: "table table-striped permissions",
               cellspacing: "2") do
@@ -58,7 +58,7 @@ module Views::Controllers::Users
 
     def admin_row_cells(usr)
       admin_meta_cells(usr)
-      td { render(::Components::Link::Object::User.new(user: usr, name: usr.login)) }
+      td { render(::Components::Link::User.new(user: usr, name: usr.login)) }
       admin_profile_cells(usr)
     end
 

@@ -65,12 +65,15 @@ module Views::Controllers::Comments
 
     # ---- header "+ Add comment" link ------------------------------
 
-    # `Tab::Comment::New#html_options` already carries `icon: :add`,
-    # which ModalLink picks up to render an icon-styled link.
     def render_add_comment_link
-      render(Components::Link::Modal.new(
-               "comment",
-               tab: ::Tab::Comment::New.new(object: @object, btn_class: nil)
+      render(Components::Button.new(
+               type: :modal,
+               name: :show_comments_add_comment.l,
+               target: new_comment_path(
+                 target: @object.id, type: @object.class.name
+               ),
+               modal_id: "comment",
+               variant: :strip, icon: :add
              ))
     end
 

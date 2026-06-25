@@ -85,8 +85,10 @@ type instead of \`_Any\` so caller mistakes fail at construction
 (\`Literal::TypeError\`) rather than later inside \`view_template\`.
 
 \`_Any\` is only OK when the arg genuinely can be any type AND the
-view has explicit polymorphic handling (case-by-class) — rare. If
-you think this is one of those cases, ask the user before saving.
+view has explicit polymorphic handling (case-by-class) — rare.
+
+If you believe this is a legitimate case, stop and tell the user.
+They must save the file themselves to bypass this hook.
 EOF
   exit 2
 fi

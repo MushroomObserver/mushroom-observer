@@ -88,7 +88,7 @@ class ListSearchTest < ComponentTestCase
 
     assert_html(html, "input[type='text'][name='field_slip']")
     assert_html(html, "input[type='text'][name='name']")
-    assert_html(html, "input[type='submit'][value='Add']")
+    assert_html(html, "button[type='submit']", text: "Add")
   end
 
   private

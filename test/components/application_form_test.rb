@@ -653,7 +653,7 @@ class ApplicationFormTest < ComponentTestCase
       submit("Save", center: true)
     end
 
-    assert_html(form, "input[type='submit'].center-block")
+    assert_html(form, "button[type='submit'].center-block")
     assert_includes(form, "my-3")
   end
 
@@ -662,7 +662,8 @@ class ApplicationFormTest < ComponentTestCase
       submit("Save", submits_with: "Saving...")
     end
 
-    assert_html(form, "input[data-turbo-submits-with='Saving...']")
+    assert_html(form,
+                "button[type='submit'][data-turbo-submits-with='Saving...']")
   end
 
   # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
@@ -670,13 +671,15 @@ class ApplicationFormTest < ComponentTestCase
   def test_submit_default_submits_with_for_update_button
     form = render_form { submit(:UPDATE.l) }
 
-    assert_html(form, "input[data-turbo-submits-with='#{:UPDATING.l}']")
+    submits_with = "data-turbo-submits-with='#{:UPDATING.l}'"
+    assert_html(form, "button[type='submit'][#{submits_with}]")
   end
 
   def test_submit_default_submits_with_for_create_button
     form = render_form { submit(:CREATE.l) }
 
-    assert_html(form, "input[data-turbo-submits-with='#{:SUBMITTING.l}']")
+    submits_with = "data-turbo-submits-with='#{:SUBMITTING.l}'"
+    assert_html(form, "button[type='submit'][#{submits_with}]")
   end
 
   # `between_class` (FieldWithHelp) mirrors ERB:
@@ -704,7 +707,7 @@ class ApplicationFormTest < ComponentTestCase
       submit("Save", data: { confirm: "Are you sure?" })
     end
 
-    assert_html(form, "input[data-confirm='Are you sure?']")
+    assert_html(form, "button[type='submit'][data-confirm='Are you sure?']")
   end
 
   # Upload fields tests

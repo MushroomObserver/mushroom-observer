@@ -31,9 +31,9 @@ module Views::Controllers::SpeciesLists::WriteIn
         div(class: "font-weight-bold") do
           :form_list_feedback_missing_names.t
         end
-        div(class: "help-note mr-3") do
-          :form_list_feedback_missing_names_help.t
-        end
+        render(::Components::Help::Note.new(
+                 :div, :form_list_feedback_missing_names_help.t
+               ))
         p do
           @new_names.each do |name|
             br
@@ -50,9 +50,9 @@ module Views::Controllers::SpeciesLists::WriteIn
         div(class: "font-weight-bold") do
           :form_species_lists_deprecated.t
         end
-        div(class: "help-note mr-3") do
-          :form_species_lists_deprecated_help.t
-        end
+        render(::Components::Help::Note.new(
+                 :div, :form_species_lists_deprecated_help.t
+               ))
         p do
           @deprecated_names.each do |name|
             render_deprecated_name_choice(name)
@@ -79,9 +79,9 @@ module Views::Controllers::SpeciesLists::WriteIn
         div(class: "font-weight-bold") do
           :form_species_lists_multiple_names.t
         end
-        div(class: "help-note mr-3") do
-          :form_species_lists_multiple_names_help.t
-        end
+        render(::Components::Help::Note.new(
+                 :div, :form_species_lists_multiple_names_help.t
+               ))
         p do
           @multiple_names.each do |name, other_authors|
             render_multiple_name_choice(name, other_authors)

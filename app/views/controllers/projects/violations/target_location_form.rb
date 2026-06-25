@@ -126,10 +126,12 @@ module Views::Controllers::Projects::Violations
 
     def render_footer_buttons
       submit(:form_violations_modal_target_location_submit.l,
-             as: :button, btn_class: "btn-primary")
+             as: :button, variant: :primary)
       whitespace
-      button(type: "button", class: "btn btn-default",
-             data: { dismiss: "modal" }) { :CANCEL.l }
+      render(::Components::Button.new(
+               name: :CANCEL.l,
+               data: { dismiss: "modal" }
+             ))
     end
 
     def render_suffix_radios
@@ -186,12 +188,14 @@ module Views::Controllers::Projects::Violations
       # tab opens *and* the modal closes.
       capture do
         plain(" ")
-        a(href: new_location_path(where: suffix),
-          target: "_blank", rel: "noopener",
-          data: { action: "click->modal#hide" },
-          class: "btn btn-default btn-xs") do
-          plain(:form_violations_modal_target_location_create.l)
-        end
+        render(::Components::Button.new(
+                 type: :get,
+                 name: :form_violations_modal_target_location_create.l,
+                 target: new_location_path(where: suffix),
+                 size: :xs,
+                 new_tab: true,
+                 data: { action: "click->modal#hide" }
+               ))
       end
     end
 

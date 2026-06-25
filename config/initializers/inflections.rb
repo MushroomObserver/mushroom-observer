@@ -30,6 +30,7 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("TSV")
   inflect.acronym("QR")
   inflect.acronym("UI")
+  inflect.acronym("CRUD")
   inflect.irregular("bonus", "bonuses")
   inflect.irregular("info", "info")
   inflect.irregular("google", "google")

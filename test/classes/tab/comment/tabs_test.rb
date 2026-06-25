@@ -21,15 +21,8 @@ module Tab::Comment
         routes.new_comment_path(target: @target.id, type: @target.class.name),
         tab.path
       )
-      assert_equal(:add, tab.html_options[:icon])
+      assert_nil(tab.html_options[:icon])
       assert_equal(@target, tab.model)
-    end
-
-    def test_new_with_btn_class
-      tab = Tab::Comment::New.new(object: @target, btn_class: "btn btn-sm")
-
-      assert_includes(tab.html_options[:class], "btn")
-      assert_includes(tab.html_options[:class], "btn-sm")
     end
 
     def test_edit

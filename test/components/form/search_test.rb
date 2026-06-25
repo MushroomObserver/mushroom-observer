@@ -49,8 +49,7 @@ class SearchFormTest < ComponentTestCase
   def test_renders_submit_button
     html = render_form
 
-    assert_html(html, "input[type='submit']")
-    assert_html(html, "input[value='#{:SEARCH.l}']")
+    assert_html(html, "button[type='submit']", text: :SEARCH.l)
   end
 
   def test_renders_clear_button

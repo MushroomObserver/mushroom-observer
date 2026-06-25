@@ -175,7 +175,7 @@ class Components::Image::Base < Components::Base
       class: "theater-btn",
       data: { sub_html: lightbox_caption_html(lightbox_data) }
     ) do
-      i(class: "glyphicon glyphicon-fullscreen")
+      render(::Components::Icon.new(type: :fullscreen))
     end
   end
 

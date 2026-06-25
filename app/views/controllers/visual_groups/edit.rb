@@ -120,13 +120,19 @@ module Views::Controllers::VisualGroups
 
     def render_status_button(value, label)
       if @status == value
-        span(class: "btn btn-outline-default active disabled",
-             aria_disabled: "true") { plain(label) }
+        render(Components::Button.new(
+                 name: label, variant: :outline,
+                 tag: :span, aria_disabled: "true",
+                 class: "active disabled"
+               ))
       else
-        button(type: "submit", name: "status", value: value,
-               class: "btn btn-outline-default") do
-          plain(label)
-        end
+        render(Components::Button.new(
+                 type: :submit,
+                 name: label,
+                 html_name: "status",
+                 value: value,
+                 variant: :outline
+               ))
       end
     end
 
@@ -138,8 +144,11 @@ module Views::Controllers::VisualGroups
     # native `a` strips `javascript:` hrefs as a safety measure, but
     # the registered Rails `link_to` helper keeps them.
     def render_reload_link
-      link_to(:RELOAD.t, "javascript:window.location.reload(true)",
-              class: "btn btn-default ml-2")
+      render(Components::Button.new(
+               name: :RELOAD.t,
+               class: "ml-2",
+               onclick: "window.location.reload(true)"
+             ))
     end
 
     def render_filter_text_row
@@ -149,9 +158,11 @@ module Views::Controllers::VisualGroups
           input(type: "text", name: "filter", id: "filter",
                 value: @filter, size: 40, class: "form-control")
         end
-        input(type: "submit", name: "commit",
-              value: :edit_visual_group_update_filter.t,
-              class: "btn btn-default")
+        render(::Components::Button.new(
+                 type: :submit,
+                 name: :edit_visual_group_update_filter.t,
+                 html_name: "commit"
+               ))
       end
     end
 

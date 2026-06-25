@@ -114,15 +114,15 @@ module Views::Controllers::SpeciesLists::WriteIn
       render_vote_field
       render_notes_block
       render_coord_fields
-      div(class: "help-note mr-3") do
+      render(::Components::Help::Note.new(:div)) do
         trusted_html(:form_observations_lat_long_help.t)
       end
       render_is_collection_location_checkbox
-      div(class: "help-note mr-3") do
+      render(::Components::Help::Note.new(:div)) do
         trusted_html(:form_observations_is_collection_location_help.t)
       end
       render_specimen_checkbox
-      div(class: "help-note mr-3") do
+      render(::Components::Help::Note.new(:div)) do
         trusted_html(:form_observations_specimen_available_help.t)
       end
     end

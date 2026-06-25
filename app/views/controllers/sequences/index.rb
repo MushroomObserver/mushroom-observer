@@ -14,7 +14,7 @@ module Views::Controllers::Sequences
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      paginated_results { render_list }
+      render(::Components::PaginatedResults.new) { render_list }
     end
 
     private
@@ -30,7 +30,7 @@ module Views::Controllers::Sequences
       render_deposit_line(seq) if seq.deposit?
       small { plain(seq.created_at.web_time) }
       plain(": ")
-      render(::Components::Link::Object::User.new(user: seq.user))
+      render(::Components::Link::User.new(user: seq.user))
     end
 
     def render_top_links(seq)

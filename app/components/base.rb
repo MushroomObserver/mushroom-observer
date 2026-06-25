@@ -21,6 +21,7 @@ class Components::Base < Phlex::HTML
   # so chrome components, popup builders, etc. don't have to inherit
   # from Views::Base just for the stash/read pair.
   include Phlex::Rails::Helpers::ContentFor
+  include Phlex::Rails::Helpers::DOMID
   # `rank_as_string`, `image_vote_as_*_string` — translation-key
   # shortcuts for enum-like model attributes.
   include Components::Localization
@@ -108,6 +109,10 @@ class Components::Base < Phlex::HTML
         args[var.to_s] = val.is_a?(ActiveRecord::Base) ? val.id.to_s : val.to_s
       end
     end
+  end
+
+  def nbsp
+    trusted_html("&nbsp;")
   end
 
   def before_template
