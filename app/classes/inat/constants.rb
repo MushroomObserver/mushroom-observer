@@ -73,7 +73,7 @@ class Inat
     # observations that are licensed, and subtract from total to get the
     # unlicensed count.
     LICENSED_FILTER =
-      { license: "cc0,cc-by,cc-by-nc,cc-by-nd,cc-by-nc-nd" \
+      { license: "cc0,cc-by,cc-by-nc,cc-by-nd,cc-by-nc-nd," \
                  "cc-by-sa,cc-by-nc-sa" }.freeze
 
     # Kept for backwards compatibility; some callers may still reference this.
