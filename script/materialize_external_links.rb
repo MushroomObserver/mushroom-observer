@@ -9,13 +9,15 @@
 # (obs + iNat id), not per obs. Per row (iNat obs X -> MO obs M):
 #   1. M missing -> mo_missing (skip + report; #4576 orphan triage).
 #   2. M already links to X (same iNat id) -> skip (idempotent).
-#   3. M has an import link (to a different iNat obs) -> manual: the importer
-#      only stamps the one obs it created, so an extra ref is hand-set. (Unless
-#      M's notes carry a "Mirrored on iNaturalist" stamp -> mirror.)
-#   4. M has no import link -> type by MO-side trace:
+#   3. M has an import link (to a different iNat obs) -> remote_manual: the
+#      importer only stamps the obs it created, so an extra ref was hand-set on
+#      the iNat side. (Unless M's notes carry a "Mirrored on iNaturalist" stamp
+#      -> mirror.)
+#   4. M has no import link:
 #        "Mirrored on iNaturalist" note -> mirror
-#        notes contain an inaturalist.org URL -> manual (user cross-reference)
-#        else -> copy (the historic iNat-team back-reference)
+#        notes contain an inaturalist.org URL -> manual (MO-side cross-ref)
+#        else -> copy if the iNat obs predates the copy-service cutoff (2022),
+#          otherwise remote_manual (a hand-set link on the iNat side)
 #
 # import + copy can never co-occur on one obs (step 3 short-circuits). Obs that
 # end up with 2+ iNat links are written to the multi-link report — the input to
@@ -38,6 +40,10 @@ class MaterializeExternalLinks
   # Pre-#4299 manual links stored only a url (no external_id); recover the
   # iNat obs id from it so dedup compares correctly.
   INAT_URL_RE = %r{inaturalist\.org/observations/(\d+)}
+  # The iNat-team copy service ran through 2021 (multi-user machine bursts). An
+  # iNat obs created on/after this in the residual bucket is a hand-set link on
+  # the iNat side (remote_manual), not a copy. See #4565.
+  COPY_CUTOFF = "2022-01-01"
 
   def initialize(opts)
     @csv = opts.fetch(:csv)
@@ -68,7 +74,8 @@ class MaterializeExternalLinks
   def load_rows
     CSV.read(@csv, headers: true).map do |r|
       url = r["field:mushroom observer url"].to_s.strip
-      { inat_id: r["id"].to_s.strip, mo_id: mo_id_from_url(url), url: url }
+      { inat_id: r["id"].to_s.strip, mo_id: mo_id_from_url(url), url: url,
+        inat_created: r["created_at"].to_s[0, 10] }
     end
   end
 
@@ -100,7 +107,7 @@ class MaterializeExternalLinks
     refs = refs_for(row[:mo_id], db_links)
     return (@stats[:already_present] += 1) if refs.include?(row[:inat_id])
 
-    create_link(obs, row, classify(obs, db_links))
+    create_link(obs, row, classify(obs, db_links, row[:inat_created]))
     refs << row[:inat_id]
   end
 
@@ -127,14 +134,21 @@ class MaterializeExternalLinks
   end
 
   # Order matters — see the file header. Mirror stamp first (mirror notes also
-  # contain an inaturalist.org URL); an extra ref on an import obs is manual.
-  def classify(obs, db_links)
+  # contain an inaturalist.org URL). An extra ref on an import obs is a hand-set
+  # link on the iNat side (remote_manual). A notes URL is an MO-side manual. The
+  # residual is the historic copy service only when created before the cutoff;
+  # newer residual rows are iNat-side manual.
+  def classify(obs, db_links, inat_created)
     blob = notes_blob(obs)
     return :mirror if blob.match?(MIRROR_RE)
-    return :manual if db_links.any?(&:import?)
+    return :remote_manual if db_links.any?(&:import?)
     return :manual if blob.match?(MANUAL_RE)
 
-    :copy
+    historic_copy?(inat_created) ? :copy : :remote_manual
+  end
+
+  def historic_copy?(inat_created)
+    inat_created.present? && inat_created < COPY_CUTOFF
   end
 
   def notes_blob(obs)
@@ -170,7 +184,9 @@ class MaterializeExternalLinks
   def print_summary
     puts
     puts("== summary#{" (dry run)" unless @apply} ==")
-    [:copy, :mirror, :manual].each { |t| puts("  created #{t}: #{@stats[t]}") }
+    [:copy, :mirror, :manual, :remote_manual].each do |t|
+      puts("  created #{t}: #{@stats[t]}")
+    end
     puts("  already present (skipped): #{@stats[:already_present]}")
     puts("  multi-link obs (2+ iNat links): #{@multi.size} -> #{@multi_out}")
     puts("  mo_missing: #{@stats[:mo_missing]} -> #{@missing_out}")
