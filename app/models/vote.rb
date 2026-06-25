@@ -242,17 +242,17 @@ class Vote < AbstractModel
       where(observation_views: { id: nil }).
       select("votes.observation_id, votes.user_id, votes.updated_at").
       map do |vote|
-      unless dry_run
-        ObservationView.create!(
-          observation_id: vote.observation_id,
-          user_id: vote.user_id,
-          last_view: vote.updated_at,
-          reviewed: 1
-        )
+        unless dry_run
+          ObservationView.create!(
+            observation_id: vote.observation_id,
+            user_id: vote.user_id,
+            last_view: vote.updated_at,
+            reviewed: 1
+          )
+        end
+        "User #{vote.user_id} has reviewed observation #{vote.observation_id} " \
+          "(insert)."
       end
-      "User #{vote.user_id} has reviewed observation #{vote.observation_id} " \
-        "(insert)."
-    end
   end
 
   def self.votes_views_join_condition
