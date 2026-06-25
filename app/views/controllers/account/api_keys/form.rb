@@ -73,12 +73,13 @@ module Views::Controllers::Account::APIKeys
 
     def render_cancel_button
       span(class: "input-group-btn") do
-        render(::Components::Button.new(
-                 aria: { expanded: "true", controls: @cancel_target },
-                 data: { toggle: "collapse",
-                         target: "##{@cancel_target}",
-                         parent: "##{@cancel_parent}" }
-               )) { render(Components::Icon.new(type: :cancel, title: :CANCEL.l)) }
+        render(::Components::Link::CollapseToggle.new(
+                 target_id: @cancel_target,
+                 icon: :cancel,
+                 icon_title: :CANCEL.l,
+                 button: :default,
+                 data: { parent: "##{@cancel_parent}" }
+               ))
       end
     end
 

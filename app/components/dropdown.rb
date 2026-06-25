@@ -36,7 +36,7 @@
 #   end
 class Components::Dropdown < Components::Base
   include Components::LinkRendering
-  include Components::ButtonStyling
+  include Components::Button::Styling
 
   prop :id, ::String
   prop :menu_id, ::String

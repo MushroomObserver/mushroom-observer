@@ -569,27 +569,27 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_no_html(html, "a.btn-default")
   end
 
-  # --- Button::Toggle -----------------------------------------------
+  # --- Button::CollapseToggle -------------------------------------------
 
-  def test_toggle_renders_button_with_show_and_hide_spans
-    html = render(Components::Button::Toggle.new(
-                    show_text: "Open Map",
-                    hide_text: "Hide Map",
-                    show_class: "map-show",
-                    hide_class: "map-hide"
+  def test_collapse_toggle_renders_button_with_state_spans
+    html = render(Components::Button::CollapseToggle.new(
+                    target_id: "map_div",
+                    open_text: "Hide Map",
+                    closed_text: "Open Map",
+                    collapsed: true
                   ))
 
-    assert_html(html, "button[type='button']")
-    assert_html(html, "button span.map-show", text: "Open Map")
-    assert_html(html, "button span.map-hide", text: "Hide Map")
+    assert_html(html, "button[type='button'][data-toggle='collapse']" \
+                      "[data-target='#map_div']")
+    assert_html(html, "button.collapsed")
+    assert_html(html, "button span.collapse-toggle-open", text: "Hide Map")
+    assert_html(html,
+                "button span.collapse-toggle-closed", text: "Open Map")
   end
 
-  def test_toggle_accepts_extra_class
-    html = render(Components::Button::Toggle.new(
-                    show_text: "Show",
-                    hide_text: "Hide",
-                    show_class: "s",
-                    hide_class: "h",
+  def test_collapse_toggle_accepts_extra_class
+    html = render(Components::Button::CollapseToggle.new(
+                    target_id: "map_div",
                     class: "map-toggle"
                   ))
 

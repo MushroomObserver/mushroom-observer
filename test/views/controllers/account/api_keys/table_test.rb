@@ -53,8 +53,18 @@ module Views::Controllers::Account::APIKeys
       # View pane (read-only notes + edit trigger).
       assert_html(html, "#view_notes_#{key.id}_container .current_notes")
       assert_html(html,
-                  "button[data-role='edit_api_key']" \
-                  "[data-target='#edit_notes_#{key.id}_container']")
+                  "a[data-role='edit_api_key']" \
+                  "[data-toggle='collapse']" \
+                  "[href='#edit_notes_#{key.id}_container']" \
+                  "[aria-controls='edit_notes_#{key.id}_container']" \
+                  "[aria-expanded='false']")
+      assert_html(html,
+                  "a[data-role='edit_api_key']" \
+                  "[data-parent='#notes_#{key.id}']")
+      assert_html(html, "a[data-role='edit_api_key'] span.glyphicon")
+      assert_html(html,
+                  "a[data-role='edit_api_key'] span.collapse-toggle-closed",
+                  text: " #{:EDIT.l.as_displayed}")
       # Edit pane (inline-edit Form with Save button).
       assert_html(html,
                   "#edit_api_key_#{key.id}_form " \
@@ -79,8 +89,15 @@ module Views::Controllers::Account::APIKeys
       html = render_table
 
       # "+ Add Key" link triggers expansion to the inline form.
-      assert_html(html, "#new_key_row #new_key_button_container " \
-                        "a#new_key_button[href='/account/api_keys/new']")
+      assert_html(html,
+                  "#new_key_row #new_key_button_container " \
+                  "a#new_key_button[href='/account/api_keys/new']" \
+                  "[data-toggle='collapse']" \
+                  "[aria-controls='new_key_form_container']" \
+                  "[aria-expanded='false']")
+      assert_html(html,
+                  "a#new_key_button span.collapse-toggle-closed",
+                  text: :account_api_keys_create_button.l.as_displayed)
       # Inline create form lives in the hidden pane.
       assert_html(html, "#new_key_form_container #new_api_key_form")
       assert_html(html,

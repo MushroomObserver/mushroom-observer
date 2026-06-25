@@ -62,40 +62,32 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
                   "$shown.bs.collapse->search-type#closeBar" })
   end
 
-  # Bootstrap collapse-trigger button for the per-type help
-  # fragment (`#search_bar_help`). Starts hidden via `d-none`
-  # when the current search-type has no help content.
+  # Bootstrap collapse-trigger for the per-type help fragment
+  # (`#search_bar_help`). Starts hidden via `d-none` when the
+  # current search-type has no help content.
   def render_help_toggle
-    button(
-      class: bar_toggle_class(visible: help_visible?),
-      type: "button",
-      data: { toggle: "collapse",
-              search_type_target: "helpToggle",
-              target: "#search_bar_help" },
-      aria: { expanded: "false", controls: "search_bar_help" }
-    ) do
-      render(Components::Icon.new(
-               type: :info, title: :search_bar_help.t
-             ))
-    end
+    render(::Components::Link::CollapseToggle.new(
+             target_id: "search_bar_help",
+             collapsed: true,
+             icon: :info,
+             icon_title: :search_bar_help.t,
+             class: bar_toggle_class(visible: help_visible?),
+             data: { search_type_target: "helpToggle" }
+           ))
   end
 
-  # Bootstrap collapse-trigger button for the advanced-search
-  # form expander (`#search_nav_form`). Starts hidden via
-  # `d-none` when the current search-type has no advanced form.
+  # Bootstrap collapse-trigger for the advanced-search form
+  # expander (`#search_nav_form`). Starts hidden via `d-none`
+  # when the current search-type has no advanced form.
   def render_form_toggle
-    button(
-      class: bar_toggle_class(visible: form_visible?),
-      type: "button",
-      data: { toggle: "collapse",
-              search_type_target: "formToggle",
-              target: "#search_nav_form" },
-      aria: { expanded: "false", controls: "search_nav_form" }
-    ) do
-      render(Components::Icon.new(
-               type: :plus, title: :search_bar_more_options.l
-             ))
-    end
+    render(::Components::Link::CollapseToggle.new(
+             target_id: "search_nav_form",
+             collapsed: true,
+             icon: :plus,
+             icon_title: :search_bar_more_options.l,
+             class: bar_toggle_class(visible: form_visible?),
+             data: { search_type_target: "formToggle" }
+           ))
   end
 
   def bar_toggle_class(visible:)

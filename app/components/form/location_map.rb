@@ -53,25 +53,17 @@ class Components::Form::LocationMap < Components::Base
 
   def render_toggle_button
     render(Components::Button.new(
-             type: :toggle,
-             show_text: :form_observations_open_map.l,
-             hide_text: :form_observations_hide_map.l,
-             show_class: "map-show",
-             hide_class: "map-hide",
+             type: :collapse_toggle,
+             target_id: @id,
+             open_text: :form_observations_hide_map.l,
+             closed_text: :form_observations_open_map.l,
+             collapsed: true,
              icon: :globe,
              class: "map-toggle",
-             data: toggle_button_data,
+             data: { map_target: "toggleMapBtn",
+                     action: "map#toggleMap form-exif#showFields" },
              aria: { expanded: "false", controls: @id }
            ))
-  end
-
-  def toggle_button_data
-    {
-      map_target: "toggleMapBtn",
-      action: "map#toggleMap form-exif#showFields",
-      toggle: "collapse",
-      target: "##{@id}"
-    }
   end
 
   def render_clear_button

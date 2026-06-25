@@ -78,6 +78,77 @@ class CollapseToggleLinkTest < ComponentTestCase
     assert_html(html, "a[data-toggle='collapse']")
   end
 
+  def test_fallback_href_sets_href_and_adds_data_target
+    html = render_it(fallback_href: "/things/new")
+
+    # href is the navigation fallback, not the collapse anchor
+    assert_html(html, "a[href='/things/new']")
+    # Bootstrap reads data-target before href; both must be present
+    assert_html(html, "a[data-target='#help_foo']")
+    assert_html(html, "a[data-toggle='collapse']")
+  end
+
+  def test_without_fallback_href_href_is_anchor
+    html = render_it
+
+    assert_html(html, "a[href='#help_foo']")
+    assert_no_html(html, "a[data-target]")
+  end
+
+  def test_button_variant_adds_btn_classes
+    html = render_it(button: :btn_link)
+
+    assert_html(html, "a[data-toggle='collapse']")
+  end
+
+  def test_default_button_variant_adds_btn_default
+    html = render_it(button: :default)
+
+    assert_html(html, "a[data-toggle='collapse']")
+  end
+
+  def test_size_adds_btn_size_class_alongside_button
+    html = render_it(button: :btn_link, size: :xs)
+
+    assert_html(html, "a[data-toggle='collapse']")
+  end
+
+  def test_icon_kwarg_renders_icon_in_link
+    html = render_it(icon: :info)
+
+    assert_html(html, "a span.glyphicon")
+  end
+
+  def test_icon_title_forwarded_to_icon
+    html = render_it(icon: :info, icon_title: "Help content")
+
+    assert_html(html, "a span.sr-only", text: "Help content")
+  end
+
+  def test_icon_title_defaults_to_closed_text
+    html = render_it(icon: :plus, closed_text: "Show more")
+
+    assert_html(html, "a span.sr-only", text: "Show more")
+  end
+
+  def test_open_text_renders_collapse_toggle_open_span
+    html = render_it(open_text: "Hide details")
+
+    assert_html(html, "a span.collapse-toggle-open", text: "Hide details")
+  end
+
+  def test_closed_text_renders_collapse_toggle_closed_span
+    html = render_it(closed_text: "Show details")
+
+    assert_html(html, "a span.collapse-toggle-closed", text: "Show details")
+  end
+
+  def test_no_content_kwargs_renders_empty_link
+    html = render_it
+
+    assert_no_html(html, "a span")
+  end
+
   private
 
   def render_it(target_id: "help_foo", **)
