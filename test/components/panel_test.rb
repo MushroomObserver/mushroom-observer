@@ -33,7 +33,7 @@ class PanelTest < ComponentTestCase
     assert_nested(
       html,
       parent_selector: "span.panel-heading-links",
-      child_selector: "a.panel-collapse-trigger"
+      child_selector: "button.panel-collapse-trigger"
     )
     # Test that other heading links are printed
     assert_nested(
@@ -51,10 +51,10 @@ class PanelTest < ComponentTestCase
       child: ".panel-body"
     )
 
-    # Test that collapse message is within the trigger link
+    # Test that collapse message is within the trigger button
     assert_nested(
       html,
-      parent_selector: "a.panel-collapse-trigger",
+      parent_selector: "button.panel-collapse-trigger",
       child_selector: "span.font-weight-normal",
       text: "Show details"
     )

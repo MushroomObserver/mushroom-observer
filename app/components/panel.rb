@@ -133,11 +133,14 @@ class Components::Panel < Components::Base
   end
 
   def render_collapse_icons
-    render(::Components::Link::CollapseToggle.new(
+    render(::Components::Button.new(
+             type: :collapse_toggle,
              target_id: @collapse_id || "",
              collapsed: !@expanded,
+             variant: :strip,
              class: "panel-collapse-trigger ml-3",
-             data: { target: @collapse_target }
+             data: { target: @collapse_target },
+             aria: collapse_aria
            )) do
       render_collapse_message
 
@@ -147,6 +150,12 @@ class Components::Panel < Components::Base
              ))
       render(Components::Icon.new(type: :chevron_up, title: :CLOSE.l))
     end
+  end
+
+  def collapse_aria
+    aria = { expanded: @expanded ? "true" : "false" }
+    aria[:controls] = @collapse_id if @collapse_id.present?
+    aria
   end
 
   def render_collapse_message
