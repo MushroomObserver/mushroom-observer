@@ -4666,6 +4666,7 @@
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
   api_dubious_location_name: "Location name is invalid: [reasons]"
+  api_external_link_already_exists: There is already an external link to "[url]".
   api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
   api_field_slip_in_use: Field Slip "[code]" is already in use.
   api_file_missing: File "[file]" is missing.
