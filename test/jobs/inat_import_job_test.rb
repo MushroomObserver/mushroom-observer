@@ -909,6 +909,58 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # With id_above cursor pagination, iNat's total_results is the count of
+  # observations remaining from the current cursor position forward — it
+  # shrinks with each page. importables must be set once from the first
+  # page so the tracker always shows the full job total, not the tail.
+  def test_importables_set_from_first_page_only
+    raw = File.read("test/inat/import_all.txt")
+    page1 = JSON.parse(raw)
+    last_first_page_id = page1["results"].last["id"]
+
+    first_page_total = 250
+    page1["total_results"] = first_page_total
+    @mock_inat_response = page1.to_json
+    @parsed_results =
+      JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
+
+    @inat_import = InatImport.create(
+      user: @user, inat_ids: "", import_all: true,
+      token: "MockCode", inat_username: "anything", imported_count: 0
+    )
+    InatImportJobTracker.create(inat_import: @inat_import.id)
+
+    stub_token_requests
+    stub_check_username_match(@inat_import.inat_username)
+    # Page 1: total_results = 250, per_page = 2 → more_pages? is true
+    stub_inat_observation_request(id_above: 0)
+    # Page 2: total_results = 2 ≤ per_page → more_pages? is false (stop)
+    second_page_query = {
+      taxon_id: IMPORTABLE_TAXON_IDS_ARG,
+      id: @inat_import.inat_ids,
+      id_above: last_first_page_id,
+      per_page: 200,
+      only_id: false,
+      order: "asc",
+      order_by: "id",
+      **BASE_FILTER_PARAMS,
+      user_login: @inat_import.inat_username
+    }
+    stub_request(:get,
+                 "#{API_BASE}/observations?#{second_page_query.to_query}").
+      to_return(body: page1.merge("total_results" => 2).to_json)
+    stub_inat_photo_requests
+    stub_modify_inat_observations
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_equal(
+      first_page_total, @inat_import.reload.importables,
+      "importables should be set from the first page total_results " \
+      "(#{first_page_total}) and not overwritten by subsequent pages"
+    )
+  end
+
   def test_import_anothers_observation
     create_ivars_from_filename("calostoma_lutescens")
 

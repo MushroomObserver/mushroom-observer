@@ -127,7 +127,10 @@ class InatImportJob < ApplicationJob
 
   def import_parsed_page_of_observations(parsed_page)
     log_new_page(parsed_page)
-    inat_import.update(importables: parsed_page["total_results"])
+    unless @importables_set
+      inat_import.update(importables: parsed_page["total_results"])
+      @importables_set = true
+    end
     observation_importer.import_page(parsed_page)
     log("Finished importing observations on parsed page")
   end
