@@ -240,7 +240,8 @@ class Vote < AbstractModel
     # (user 0 is used for anonymous votes, ignore those)
     Vote.where.not(user_id: 0).joins(join).
       where(observation_views: { id: nil }).
-      select(:observation_id, :user_id, :updated_at).map do |vote|
+      select("votes.observation_id, votes.user_id, votes.updated_at").
+      map do |vote|
       unless dry_run
         ObservationView.create!(
           observation_id: vote.observation_id,
