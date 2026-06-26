@@ -38,18 +38,22 @@ module Description::Scopes
     # The admin/reader/writer join records belong_to `:user_group`
     # (preloaded for `update_groups` in the permissions concern); the
     # author/editor join records belong_to `:user`. The
-    # admin/reader/writer through groups preload `users: :user_groups`
-    # so the permissions form can render personal-group user rows
-    # (`group.users.first`) and check `user.in_group?("reviewers")`
-    # without lazy-loading.
+    # admin/reader/writer through groups are preloaded for their names /
+    # `include?(all_users)` checks, but their `users` are NOT: the
+    # permissions form reads `group.users.first` only on small personal
+    # groups (a LIMIT 1 lazy query) and renders standard groups
+    # ("all users" / "reviewers") by name. Preloading group `users` would
+    # materialize the entire ~90k-member `all_users` group on every public
+    # description show page — a multi-second render + OOM. The permissions
+    # form uses the non-strict `permissions_includes` and lazy-loads instead.
     def permissions_subtree
       prefix = name.underscore # "name_description" / "location_description"
       [
-        { admin_groups: { users: :user_groups } },
+        :admin_groups,
         :authors,
         :editors,
-        { reader_groups: { users: :user_groups } },
-        { writer_groups: { users: :user_groups } },
+        :reader_groups,
+        :writer_groups,
         { "#{prefix}_admins": :user_group },
         { "#{prefix}_authors": :user },
         { "#{prefix}_editors": :user },
