@@ -80,8 +80,8 @@ module Views::Controllers::Observations::Identify
     end
 
     def render_search_icon
-      span(class:
-        "glyphicon glyphicon-search form-control-feedback")
+      render(::Components::Icon.new(type: :search,
+                                    html_class: "form-control-feedback"))
     end
 
     def render_hidden_field
