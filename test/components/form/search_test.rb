@@ -83,6 +83,16 @@ class SearchFormTest < ComponentTestCase
     assert_html(html, ".navbar-flex")
     assert_html(html, "body",
                 text: :search_form_title.t(type: :OBSERVATIONS))
+    assert_html(html,
+                "a[data-toggle='collapse']" \
+                "[href='#search_bar_elements']" \
+                "[aria-controls='search_bar_elements']" \
+                "[aria-expanded='true']" \
+                "[data-search-type-target='barToggle']")
+    assert_html(html, "a[data-search-type-target='barToggle'] span.glyphicon")
+    assert_html(html,
+                "a[data-search-type-target='barToggle'] span.sr-only",
+                text: :search_bar_fewer_options.l.as_displayed)
   end
 
   def test_does_not_render_header_when_local

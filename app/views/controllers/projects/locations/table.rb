@@ -129,15 +129,11 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_chevron(collapse_id)
-      link_to(
-        "javascript:void(0)",
-        role: :button,
-        class: "panel-collapse-trigger collapsed",
-        data: { toggle: "collapse",
-                target: "##{collapse_id}" },
-        aria: { expanded: false,
-                controls: collapse_id }
-      ) do
+      render(::Components::Link::CollapseToggle.new(
+               target_id: collapse_id,
+               collapsed: true,
+               class: "panel-collapse-trigger"
+             )) do
         render(Components::Icon.new(
                  type: :chevron_down, title: :OPEN.l,
                  html_class: "active-icon"

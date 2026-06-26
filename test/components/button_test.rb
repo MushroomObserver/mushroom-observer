@@ -86,17 +86,17 @@ class ButtonTest < ComponentTestCase
   end
 end
 
-# Tests for the Components::ButtonStyling concern's raise paths.
-class Components::ButtonStylingTest < ComponentTestCase
+# Tests for the Components::Button::Styling concern's raise paths.
+class Components::Button::StylingTest < ComponentTestCase
   def test_unknown_variant_raises_argument_error
     assert_raises(ArgumentError) do
-      Components::ButtonStyling.btn_class(:nonexistent)
+      Components::Button::Styling.btn_class(:nonexistent)
     end
   end
 
   def test_unknown_size_raises_argument_error
     assert_raises(ArgumentError) do
-      Components::ButtonStyling.size_class(:jumbo)
+      Components::Button::Styling.size_class(:jumbo)
     end
   end
 end
@@ -264,20 +264,23 @@ class Components::ButtonDispatcherTest < ComponentTestCase
                 "a[data-action='modal-toggle#showModal:prevent']")
   end
 
-  # ---- type: :toggle ---------------------------------------------------
+  # ---- type: :collapse_toggle ------------------------------------------
 
-  def test_type_toggle_renders_two_state_spans
+  def test_type_collapse_toggle_renders_two_state_spans
     html = render(Components::Button.new(
-                    type: :toggle,
-                    show_text: "Open map",
-                    hide_text: "Hide map",
-                    show_class: "map-show",
-                    hide_class: "map-hide"
+                    type: :collapse_toggle,
+                    target_id: "map_div",
+                    open_text: "Hide map",
+                    closed_text: "Open map",
+                    collapsed: true
                   ))
 
-    assert_html(html, "button[type='button']")
-    assert_html(html, "button span.map-show", text: "Open map")
-    assert_html(html, "button span.map-hide", text: "Hide map")
+    assert_html(html, "button[type='button'][data-toggle='collapse']" \
+                      "[data-target='#map_div']")
+    assert_html(html, "button.collapsed")
+    assert_html(html, "button span.collapse-toggle-open", text: "Hide map")
+    assert_html(html,
+                "button span.collapse-toggle-closed", text: "Open map")
   end
 
   # ---- type: :project --------------------------------------------------
