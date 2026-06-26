@@ -129,7 +129,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
 
     within("#observations_search_form") do |form|
       # Expand the "connected" panel to reveal species_lists field
-      find("a[href='#observations_connected']").click
+      click_link(href: "#observations_connected")
 
       # Wait for the panel to expand
       assert_selector("#query_observations_species_lists", visible: true)
@@ -163,7 +163,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
 
     within("#observations_search_form") do |form|
       # Expand the "connected" panel to reveal project_lists field
-      find("a[href='#observations_connected']").click
+      click_link(href: "#observations_connected")
 
       # Wait for the panel to expand
       assert_selector("#query_observations_project_lists", visible: true)
@@ -193,7 +193,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
 
     within("#observations_search_form") do |form|
       # Expand the "connected" panel to reveal herbaria field
-      find("a[href='#observations_connected']").click
+      click_link(href: "#observations_connected")
 
       # Wait for the panel to expand
       assert_selector("#query_observations_herbaria", visible: true)
