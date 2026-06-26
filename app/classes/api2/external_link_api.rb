@@ -54,9 +54,15 @@ class API2
       raise(ExternalLinkAlreadyExists.new(params[:url])) if duplicate?(params)
     end
 
+    # Compare against the model-normalized url (scheme/www are rewritten before
+    # save), so an equivalent-but-unformatted url can't slip past as "new".
     def duplicate?(params)
+      candidate = ExternalLink.new(observation: params[:observation],
+                                   external_site: params[:external_site],
+                                   url: params[:url])
+      candidate.valid? # runs the before_validation url normalization
       params[:observation].external_links.exists?(
-        external_site: params[:external_site], url: params[:url]
+        external_site: params[:external_site], url: candidate.url
       )
     end
   end
