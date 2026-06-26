@@ -96,6 +96,34 @@ module Views::Layouts
                   )}'] img[src*='halfopen3']")
     end
 
+    # ---- li structure (regression: two links were in one <li>) ----
+
+    def test_default_state_each_link_in_own_li
+      html = render_view
+
+      assert_html(html, "li a[href*='state=1']")
+      assert_html(html, "li a[href*='state=-1']")
+      assert_no_html(html, "li a[href*='state=1'] ~ a")
+    end
+
+    def test_watching_state_each_link_in_own_li
+      ::Interest.create!(user: @viewer, target: @obs, state: true)
+      html = render_view
+
+      assert_html(html, "li a[href*='state=0']")
+      assert_html(html, "li a[href*='state=-1']")
+      assert_no_html(html, "li a[href*='state=0'] ~ a")
+    end
+
+    def test_ignoring_state_each_link_in_own_li
+      ::Interest.create!(user: @viewer, target: @obs, state: false)
+      html = render_view
+
+      assert_html(html, "li a[href*='state=1']")
+      assert_html(html, "li a[href*='state=0']")
+      assert_no_html(html, "li a[href*='state=1'] ~ a")
+    end
+
     # ---- Turbo wiring ---------------------------------------------
 
     def test_all_links_get_data_turbo_stream_attribute
