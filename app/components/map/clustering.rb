@@ -69,7 +69,7 @@ module Components::Map::Clustering
       queries[:observation_bbox_query] =
         controller.find_or_create_query(:Observation, in_box: box)
     end
-    if mapset.locations.length > 1
+    if mapset.underlying_locations.length > 1
       queries[:location_bbox_query] =
         controller.find_or_create_query(:Location, in_box: box)
     end
