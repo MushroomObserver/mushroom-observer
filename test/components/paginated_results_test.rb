@@ -38,38 +38,36 @@ class PaginatedResultsTest < ComponentTestCase
   end
 
   def test_weaves_pagination_strips_when_present
-    html = render_it(
-      top: "PAGINATION_TOP",
-      bottom: "PAGINATION_BOTTOM"
-    )
+    html = render_it(top: "PGNTN_TOP", bottom: "PGNTN_BTM",
+                     block_content: "BLCK_CNTNT")
 
-    assert_text_in_nested_selector(html, text: "PAGINATION_TOP",
-                                         parent: "div#results")
-    assert_text_in_nested_selector(html, text: "content",
-                                         parent: "div#results")
-    assert_text_in_nested_selector(html, text: "PAGINATION_BOTTOM",
-                                         parent: "div#results")
-    inner = Nokogiri::HTML(html).at_css("div#results").text
-    assert_operator(inner.index("PAGINATION_TOP"), :<, inner.index("content"))
-    assert_operator(inner.index("content"), :<,
-                    inner.index("PAGINATION_BOTTOM"))
+    inner = Nokogiri::HTML(html).at_css("div#results")
+    assert(inner, "Expected to find div#results")
+    text = inner.text
+    assert_includes(text, "PGNTN_TOP")
+    assert_includes(text, "BLCK_CNTNT")
+    assert_includes(text, "PGNTN_BTM")
+    assert_operator(text.index("PGNTN_TOP"), :<, text.index("BLCK_CNTNT"))
+    assert_operator(text.index("BLCK_CNTNT"), :<, text.index("PGNTN_BTM"))
   end
 
   def test_omits_pagination_strips_when_absent
     html = render_it
 
-    assert_text_in_nested_selector(html, text: "content",
-                                         parent: "div#results")
+    inner = Nokogiri::HTML(html).at_css("div#results")
+    assert_equal("content", inner.text.strip)
   end
 
   private
 
-  def render_it(html_id: "results", top: nil, bottom: nil)
+  def render_it(html_id: "results", top: nil, bottom: nil,
+                block_content: "content")
     render(
       Class.new(Components::Base) do
         define_method(:_html_id) { html_id }
         define_method(:_top) { top }
         define_method(:_bottom) { bottom }
+        define_method(:_block_content) { block_content }
 
         def view_template
           # Set content_for from inside the render so Phlex's view
@@ -77,7 +75,7 @@ class PaginatedResultsTest < ComponentTestCase
           content_for(:index_pagination_top, _top) if _top
           content_for(:index_pagination_bottom, _bottom) if _bottom
           render(::Components::PaginatedResults.new(html_id: _html_id)) do
-            plain("content")
+            plain(_block_content)
           end
         end
       end.new
