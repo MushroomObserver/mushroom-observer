@@ -49,8 +49,7 @@ module Views::Controllers::Licenses
 
     def link_to_url
       capture do
-        link_to(@license.url, @license.url,
-                target: "_blank", rel: "noopener noreferrer")
+        render(::Components::Link::External.new(@license.url, @license.url))
       end
     end
 

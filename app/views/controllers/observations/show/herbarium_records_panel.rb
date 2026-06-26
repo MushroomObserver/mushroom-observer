@@ -69,10 +69,10 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   def render_mcp_search_link(record)
     br
     span(class: "indent") do
-      a(href: record.herbarium.mcp_url(record.accession_number),
-        target: "_blank", rel: "noopener") do
-        plain(:herbarium_record_collection.t)
-      end
+      render(::Components::Link::External.new(
+               :herbarium_record_collection.t,
+               record.herbarium.mcp_url(record.accession_number)
+             ))
     end
   end
 
@@ -90,11 +90,11 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
       render_show_link(record)
       if record.herbarium.web_searchable?
         br
-        a(href: record.herbarium.mcp_url(record.accession_number),
-          target: "_blank", rel: "noopener") do
-          plain("#{record.herbarium.code} " \
-                "#{:herbarium_record_collection.t}")
-        end
+        render(::Components::Link::External.new(
+                 "#{record.herbarium.code} " \
+                 "#{:herbarium_record_collection.t}",
+                 record.herbarium.mcp_url(record.accession_number)
+               ))
       end
     end
   end
