@@ -56,8 +56,30 @@ module Components::Map::Clustering
     mapset.title = mapset_marker_title(mapset)
     mapset.caption = capture do
       render(::Components::Map::Popup.new(set: mapset,
-                                          query: effective_query))
+                                          query: effective_query,
+                                          **popup_bbox_queries(mapset)))
     end
     mapset.objects = nil # can't delete, it's part of the MapSet object
+  end
+
+  def popup_bbox_queries(mapset)
+    return {} if mapset.observations.length <= 1
+
+    box = popup_box_params(mapset)
+    {
+      observation_bbox_query: controller.find_or_create_query(
+        :Observation, in_box: box
+      ),
+      location_bbox_query: controller.find_or_create_query(
+        :Location, in_box: box
+      )
+    }
+  end
+
+  def popup_box_params(mapset)
+    { north: [mapset.north.to_f + 0.001, 90].min,
+      south: [mapset.south.to_f - 0.001, -90].max,
+      east: [mapset.east.to_f + 0.001, 180].min,
+      west: [mapset.west.to_f - 0.001, -180].max }
   end
 end
