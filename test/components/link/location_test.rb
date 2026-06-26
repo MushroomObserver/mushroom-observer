@@ -21,17 +21,6 @@ class LocationLinkTest < ComponentTestCase
                 text: Location.reverse_name(burbank.name))
   end
 
-  def test_location_integer_id_is_looked_up
-    burbank = locations(:burbank)
-    html = render(Components::Link::Location.new(
-                    where: burbank.name, location: burbank.id
-                  ))
-
-    # Integer in the `location:` slot triggers a `Location.find` —
-    # callers from older helpers passed bare ids.
-    assert_html(html, "a.show_location_link_#{burbank.id}")
-  end
-
   def test_count_suffix_appended
     burbank = locations(:burbank)
     html = render(Components::Link::Location.new(

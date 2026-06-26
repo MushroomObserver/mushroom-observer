@@ -6,19 +6,13 @@ class MapTest < ComponentTestCase
   def setup
     super
     @location = locations(:burbank)
-    # Group-popup tab links (Show All / Map All) call
-    # `controller.find_or_create_query(...)` to mint a saved-query id
-    # for the box, then `add_q_param(path, query)` which reads
-    # `query.id` / `query.q_param`. The ComponentTestCase controller
-    # disables sessions, so we stub a duck-typed Query that satisfies
-    # both downstream calls without touching the session. The stubbed
-    # `q_param` returns a Hash, matching `ApplicationController#q_param`
-    # / `Query#q_param`'s real shape — a String here would route
-    # through `add_q_param`'s legacy `?q=ABC` branch and mask the
-    # modern URL shape under test.
-    stub_class = Struct.new(:id, :q_param, :params)
-    controller.define_singleton_method(:find_or_create_query) do |*_a, **kw|
-      stub_class.new(1, { model: :Observation }, kw)
+    # Group-popup Show All / Map All buttons call
+    # `controller.find_or_create_query(...)` to mint a saved-query id.
+    # The ComponentTestCase controller disables sessions, so we stub
+    # it to call `Query.lookup_and_save` directly, which creates a real
+    # Query record without touching the session.
+    controller.define_singleton_method(:find_or_create_query) do |model, **kw|
+      Query.lookup_and_save(model, kw)
     end
   end
 
