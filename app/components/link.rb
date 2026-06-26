@@ -9,8 +9,8 @@
 # Subclasses with a manual `initialize` (e.g. `Link::Get`) accept
 # `button:` as a named kwarg and pass it through via `super(button:)`.
 class Components::Link < Components::Base
-  include Components::ButtonStyling
-  include Components::ButtonContent
+  include Components::Button::Styling
+  include Components::Button::Content
 
   prop :button, _Nilable(Symbol), default: nil
 
@@ -18,10 +18,12 @@ class Components::Link < Components::Base
 
   # Returns the btn class string when `button:` is set, or nil for a
   # plain link. Intentionally different from `Button#btn_styling`:
-  # nil here means "plain link", not "btn-default".
+  # nil means "plain link". Pass `:default` for the grey btn-default
+  # frame (same as omitting `variant:` on Components::Button).
   def btn_styling
     return nil unless @button
     return nil if @button == :strip
+    return class_names("btn", "btn-default") if @button == :default
 
     class_names("btn", btn_class(@button))
   end

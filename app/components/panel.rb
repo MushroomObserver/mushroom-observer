@@ -133,16 +133,13 @@ class Components::Panel < Components::Base
   end
 
   def render_collapse_icons
-    classes = class_names(
-      "panel-collapse-trigger ml-3", @expanded ? "" : "collapsed"
-    )
-    link_to(
-      "javascript:void(0)",
-      role: :button,
-      class: classes,
-      data: { toggle: "collapse", target: @collapse_target },
-      aria: { expanded: @expanded, controls: @collapse_id }
-    ) do
+    render(::Components::Link::CollapseToggle.new(
+             target_id: @collapse_id || "",
+             collapsed: !@expanded,
+             class: "panel-collapse-trigger ml-3",
+             data: collapse_toggle_data,
+             aria: collapse_aria
+           )) do
       render_collapse_message
 
       render(Components::Icon.new(
@@ -151,6 +148,20 @@ class Components::Panel < Components::Base
              ))
       render(Components::Icon.new(type: :chevron_up, title: :CLOSE.l))
     end
+  end
+
+  # For ID-based targets, omit data-target so Bootstrap reads href="#id"
+  # and calls e.preventDefault() — preventing Turbo from navigating the
+  # frame. For CSS class selectors (rare, never inside Turbo frames),
+  # data-target is required so Bootstrap can match multiple panes.
+  def collapse_toggle_data
+    @collapse_class ? { target: @collapse_target } : {}
+  end
+
+  def collapse_aria
+    aria = { expanded: @expanded ? "true" : "false" }
+    aria[:controls] = @collapse_id if @collapse_id.present?
+    aria
   end
 
   def render_collapse_message

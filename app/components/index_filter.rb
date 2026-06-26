@@ -38,7 +38,7 @@
 #            ))
 #   end
 class Components::IndexFilter < Components::Base
-  include Components::ButtonStyling
+  include Components::Button::Styling
 
   # Submit target — either a route helper's String path or a Rails-
   # style routing Hash (`{ controller:, action:, … }`). `url_for`

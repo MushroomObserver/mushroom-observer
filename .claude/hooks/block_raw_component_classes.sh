@@ -19,6 +19,10 @@
 #   app/components/panel.rb and app/components/panel/**
 #   app/components/dropdown.rb
 #   app/components/link/external.rb (owns target="_blank")
+#   app/components/link/collapse_toggle.rb (owns data-toggle="collapse")
+#   app/components/form/location_map.rb (Button::CollapseToggle via type: kwarg)
+#   app/views/controllers/observations/namings/reasons_fields.rb (checkbox-driven)
+#   app/views/controllers/observations/form/details.rb (checkbox-driven)
 #   app/components/carousel/controls.rb (owns chevron interpolation)
 set -euo pipefail
 
@@ -56,7 +60,11 @@ is_exempt_file() {
     app/components/panel/*|\
     app/components/dropdown.rb|\
     app/components/link/external.rb|\
-    app/components/carousel/controls.rb) return 0 ;;
+    app/components/link/collapse_toggle.rb|\
+    app/components/form/location_map.rb|\
+    app/components/carousel/controls.rb|\
+    app/views/controllers/observations/namings/reasons_fields.rb|\
+    app/views/controllers/observations/form/details.rb) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -97,7 +105,11 @@ case "$TOOL" in
       ':(exclude)app/components/panel/**' \
       ':(exclude)app/components/dropdown.rb' \
       ':(exclude)app/components/link/external.rb' \
+      ':(exclude)app/components/link/collapse_toggle.rb' \
+      ':(exclude)app/components/form/location_map.rb' \
       ':(exclude)app/components/carousel/controls.rb' \
+      ':(exclude)app/views/controllers/observations/namings/reasons_fields.rb' \
+      ':(exclude)app/views/controllers/observations/form/details.rb' \
       | grep '^+[^+]' \
       | sed 's/^+//' \
       | grep -v '^[[:space:]]*#' \
@@ -224,6 +236,15 @@ check \
   'raw target="_blank" on a link' \
   'Components::Link::External.new("text", url)' \
   'target:[[:space:]]*["\x27]_blank["\x27]' \
+  ''
+
+# data-toggle="collapse" — use Link::CollapseToggle instead
+# (exempt: collapse_toggle.rb itself; location_map.rb uses Button::CollapseToggle
+#  via type: kwarg; reasons_fields.rb and form/details.rb checkbox-driven)
+check \
+  'raw data-toggle="collapse"' \
+  'Components::Link::CollapseToggle.new(target_id: "…")' \
+  'toggle:[[:space:]]*["'"'"']collapse["'"'"']' \
   ''
 
 [ -z "$VIOLATIONS" ] && exit 0

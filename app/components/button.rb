@@ -8,7 +8,7 @@
 # submits, use `Components::Button::Submit`.
 #
 # Button styling is shared with `Components::Button::CRUDBase` via the
-# `Components::ButtonStyling` concern.
+# `Components::Button::Styling` concern.
 #
 # @example Stimulus action button
 #   render(Components::Button.new(
@@ -36,7 +36,7 @@
 #   end
 #
 class Components::Button < Components::Base
-  include Components::ButtonStyling
+  include Components::Button::Styling
 
   ALLOWED_TAGS = [:button, :a, :span, :label].freeze
 
@@ -52,7 +52,7 @@ class Components::Button < Components::Base
     edit: :Edit, new: :New, download: :Download, project: :Project,
     # Behavioral subclasses
     submit: :Submit, external: :External,
-    modal: :ModalToggle, toggle: :Toggle
+    modal: :ModalToggle, collapse_toggle: :CollapseToggle
   }.freeze
 
   # Single-entry-point dispatcher. Pass `type:` to route to the
@@ -72,9 +72,10 @@ class Components::Button < Components::Base
   #   Components::Button.new(type: :external, url: url, name: "BLAST")
   #   Components::Button.new(type: :modal,    name: "Settings",
   #                          target: path, modal_id: "trust_settings")
-  #   Components::Button.new(type: :toggle,   show_text: "Open",
-  #                          hide_text: "Close", show_class: "map-show",
-  #                          hide_class: "map-hide")
+  #   Components::Button.new(type: :collapse_toggle,
+  #                          target_id: "map_div",
+  #                          open_text: "Close", closed_text: "Open",
+  #                          collapsed: true, icon: :globe)
   #   Components::Button.new(name: "Cancel", data: { dismiss: "modal" })
   def self.new(**kwargs, &block)
     type_sym = kwargs[:type]&.to_sym
@@ -94,7 +95,7 @@ class Components::Button < Components::Base
     super
   end
 
-  include Components::ButtonContent
+  include Components::Button::Content
 
   def initialize(name: nil, variant: nil, size: nil, icon: nil, **html_attrs)
     super()
@@ -105,6 +106,7 @@ class Components::Button < Components::Base
     @type = html_attrs.delete(:type) || :button
     @icon = icon
     @icon_class = html_attrs.delete(:icon_class)
+    @icon_title = html_attrs.delete(:icon_title)
     @label = html_attrs.delete(:label)
     onclick = html_attrs.delete(:onclick)
     @html_attrs = html_attrs

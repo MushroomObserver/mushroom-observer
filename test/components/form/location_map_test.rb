@@ -17,8 +17,12 @@ class FormLocationMapTest < ComponentTestCase
     # Button group with toggle and clear buttons. `role='group'` is
     # the ARIA contract; `.btn-group` is Bootstrap-styling decoration.
     assert_html(html, "div[role='group']")
-    assert_html(html, "span.map-show")
-    assert_html(html, "span.map-hide")
+    assert_html(html, "button[data-toggle='collapse']")
+    assert_html(html, "button span.glyphicon")
+    assert_html(html, "span.collapse-toggle-open",
+                text: :form_observations_hide_map.l.as_displayed)
+    assert_html(html, "span.collapse-toggle-closed",
+                text: :form_observations_open_map.l.as_displayed)
     assert_html(html, "button.map-clear[type='button']",
                 attribute: { "data-map-target" => "mapClearBtn" })
   end
@@ -31,10 +35,13 @@ class FormLocationMapTest < ComponentTestCase
     assert_html(html, "div#my_custom_map.form-map.collapse")
     assert_html(html, "div#my_custom_map[data-editable]",
                 attribute: { "data-map-target" => "mapDiv" })
-    assert_html(html, "button.map-toggle[type='button']",
-                attribute: { "data-map-target" => "toggleMapBtn",
-                             "aria-expanded" => "false",
-                             "aria-controls" => "my_custom_map" })
+    assert_html(html,
+                "button.map-toggle[type='button']" \
+                "[data-toggle='collapse'][data-target='#my_custom_map']" \
+                "[aria-expanded='false'][aria-controls='my_custom_map']",
+                attribute: { "data-map-target" => "toggleMapBtn" })
+    assert_html(html, "button[data-action=" \
+                      "'map#toggleMap form-exif#showFields']")
   end
 
   def test_with_custom_map_type

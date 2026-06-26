@@ -10,12 +10,13 @@
 #     (visible at sm+ breakpoints, hidden on xs — for nav buttons
 #     that show an icon on mobile and icon+text on wider screens)
 # When only `@name` is set: plain text, no span wrapper.
-module Components::ButtonContent
+module Components::Button::Content
   private
 
   def button_content
     if @icon
-      render(Components::Icon.new(type: @icon, html_class: @icon_class))
+      render(Components::Icon.new(type: @icon, html_class: @icon_class,
+                                  title: @icon_title))
       if @name
         label_class = @label ? "d-none d-sm-inline ml-1" : "sr-only"
         span(class: label_class) { trusted_html(@name) }

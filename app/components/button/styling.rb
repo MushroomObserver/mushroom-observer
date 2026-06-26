@@ -8,7 +8,7 @@
 # `module_function` makes `btn_class`, `size_class`, and
 # `validate_no_btn_classes!` available as both private instance methods on
 # any includer AND as module-level methods
-# (`Components::ButtonStyling.btn_class(:primary)`). The nested
+# (`Components::Button::Styling.btn_class(:primary)`). The nested
 # `ClassMethods` module (auto-extended by `ActiveSupport::Concern`) exposes
 # them as class methods on each includer so class-level helpers
 # (e.g. `FieldHelpers#submit`) can call `klass.btn_class(variant)` directly.
@@ -18,7 +18,7 @@
 # `variant: :strip` renders no Bootstrap button framing at all. Omit
 # `variant:` (or pass `nil`) for the standard grey button (`btn btn-default`).
 # `:default` is NOT a valid variant symbol — omit the kwarg instead.
-module Components::ButtonStyling
+module Components::Button::Styling
   extend ActiveSupport::Concern
 
   BTN_VARIANTS = {
@@ -39,8 +39,8 @@ module Components::ButtonStyling
   BTN_SIZES = { lg: "btn-lg", sm: "btn-sm", xs: "btn-xs" }.freeze
 
   module ClassMethods
-    def btn_class(variant) = Components::ButtonStyling.btn_class(variant)
-    def size_class(size) = Components::ButtonStyling.size_class(size)
+    def btn_class(variant) = Components::Button::Styling.btn_class(variant)
+    def size_class(size) = Components::Button::Styling.size_class(size)
   end
 
   module_function
@@ -73,15 +73,13 @@ module Components::ButtonStyling
     return if html_class.blank?
 
     offenders = html_class.split.select do |c|
-      c == "btn" || c.start_with?("btn-")
+      c.start_with?("btn-") || c == "btn"
     end
     return if offenders.empty?
 
     raise(ArgumentError.new(
-            "Don't pass Bootstrap btn classes via class: " \
-            "(found: #{offenders.join(" ")}). " \
-            "Use variant: and size: kwargs instead — " \
-            "e.g. variant: :primary, size: :sm."
+            "Pass btn classes via variant:/size: kwargs, not class:. " \
+            "Offending class(es): #{offenders.join(", ")}"
           ))
   end
 end
