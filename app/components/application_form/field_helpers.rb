@@ -8,7 +8,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Consult this file (alongside +application_form.rb+) to see the full
   # set of field helpers available in form components.
   module FieldHelpers
-    include Components::ButtonStyling
+    include Components::Button::Styling
 
     # Wrapper option keys that should not be passed to the field itself
     WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
@@ -390,9 +390,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @option options [Boolean] :center center the button (default false)
     # @option options [String] :submits_with text shown while submitting
     # @option options [Symbol] :variant button variant (default `:default`).
-    #   Valid values: `Components::ButtonStyling::BTN_VARIANTS`.
+    #   Valid values: `Components::Button::Styling::BTN_VARIANTS`.
     # @option options [Symbol] :size button size modifier (optional).
-    #   Valid values: `Components::ButtonStyling::BTN_SIZES.keys`.
+    #   Valid values: `Components::Button::Styling::BTN_SIZES.keys`.
     # @option options [Symbol] :as `:button` (default) renders
     #   `<button type="submit">value</button>`; `:input` renders
     #   `<input type="submit">`.

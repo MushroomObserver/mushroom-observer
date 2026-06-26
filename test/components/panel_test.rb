@@ -51,7 +51,7 @@ class PanelTest < ComponentTestCase
       child: ".panel-body"
     )
 
-    # Test that collapse message is within the trigger link
+    # Test that collapse message is within the trigger button
     assert_nested(
       html,
       parent_selector: "a.panel-collapse-trigger",
