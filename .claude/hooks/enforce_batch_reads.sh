@@ -8,9 +8,12 @@
 #      was already read, silently allow it — it is in context alongside
 #      the other files in the batch and the re-read is an accident, not
 #      a pattern.
-#    - As a solo read (gap > 3s): if the file was already read, BLOCK
-#      with an explanation. Solo re-reads across separate messages mean
-#      Claude is reading files one at a time instead of batching.
+#    - As a solo read (gap > 3s): if the file was already read ON THE
+#      SAME BRANCH, BLOCK with an explanation. Solo re-reads across
+#      separate messages mean Claude is reading files one at a time
+#      instead of batching.
+#    - Branch switch: if the file was read on a different branch,
+#      allow the re-read (the on-disk content may have changed).
 #
 # 2. WARN on previous solo-read batch: if the previous group of Read
 #    calls contained only ONE new file, warn at the start of the next
@@ -18,7 +21,7 @@
 #    message.
 #
 # State files (under /tmp — cleared on session start via SessionStart hook):
-#   /tmp/claude_reads.txt         — one path per line, files read this session
+#   /tmp/claude_reads.txt         — "BRANCH\tPATH" per line
 #   /tmp/claude_read_batch_ts     — epoch seconds of the most-recent Read call
 #   /tmp/claude_read_batch_count  — new-file reads in the current batch
 #
@@ -32,6 +35,8 @@ READS_FILE="/tmp/claude_reads.txt"
 BATCH_TS_FILE="/tmp/claude_read_batch_ts"
 BATCH_COUNT_FILE="/tmp/claude_read_batch_count"
 
+BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "__nobranch__")"
+
 # Timing first — needed for both re-read and solo-read logic
 NOW=$(date +%s)
 LAST_TS=$(cat "$BATCH_TS_FILE" 2>/dev/null || echo 0)
@@ -39,12 +44,16 @@ PREV_COUNT=$(cat "$BATCH_COUNT_FILE" 2>/dev/null || echo 0)
 GAP=$((NOW - LAST_TS))
 
 # ── 1. Re-read handling ────────────────────────────────────────────
-if grep -qxF "$FILE" "$READS_FILE" 2>/dev/null; then
+# Check if this file appears in the reads log at all
+if grep -qF "	$FILE" "$READS_FILE" 2>/dev/null; then
   if [ "$GAP" -le 3 ]; then
     # Same parallel batch — file is in context, silently proceed
     exit 0
-  else
-    # Solo re-read across messages — this is the pattern to break
+  fi
+
+  # Check whether it was read on the current branch
+  if grep -qxF "${BRANCH}	${FILE}" "$READS_FILE" 2>/dev/null; then
+    # Same branch — solo re-read across messages: block
     cat >&2 <<EOF
 🚫 RE-READ BLOCKED: $FILE
 
@@ -64,11 +73,15 @@ and file content was genuinely dropped, ask the user to run:
   rm /tmp/claude_reads.txt
 EOF
     exit 2
+  else
+    # Different branch — file content may have changed, allow
+    # Remove the stale entry so it gets re-recorded below under the new branch
+    grep -vF "	$FILE" "$READS_FILE" > "${READS_FILE}.tmp" && mv "${READS_FILE}.tmp" "$READS_FILE" || true
   fi
 fi
 
 # ── Record new file + update batch tracking ────────────────────────
-echo "$FILE" >> "$READS_FILE"
+echo "${BRANCH}	${FILE}" >> "$READS_FILE"
 
 if [ "$GAP" -gt 3 ]; then
   # New batch starting — warn if previous batch was a solo read

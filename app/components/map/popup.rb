@@ -33,10 +33,8 @@ class Components::Map::Popup < Components::Base
   # Bbox queries for Show All / Map All group-popup buttons. Computed
   # by the caller (clustering module or controller) to keep the popup
   # a pure renderer. When nil the buttons are omitted.
-  prop :observation_bbox_query,
-       _Nilable(_Interface(:id, :q_param, :params)), default: nil
-  prop :location_bbox_query,
-       _Nilable(_Interface(:id, :q_param, :params)), default: nil
+  prop :observation_bbox_query, _Nilable(::Query), default: nil
+  prop :location_bbox_query, _Nilable(::Query), default: nil
 
   def view_template
     if single_obs_set?
