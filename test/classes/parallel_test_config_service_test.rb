@@ -36,27 +36,55 @@ class ParallelTestConfigServiceTest < UnitTestCase
     @output.string
   end
 
+  # Run `block` with `PARALLEL_WORKERS` forced to `value` (nil means
+  # unset, to exercise the `Etc.nprocessors` default), restoring
+  # whatever was there before — including when running inside an
+  # environment (e.g. this project's Docker dev container) that
+  # already sets `PARALLEL_WORKERS` globally. Without restoring the
+  # ORIGINAL value (vs. unconditionally deleting it), this test and
+  # its siblings fight over a shared global and pass or fail
+  # depending on MiniTest's random run order.
+  def with_parallel_workers(value)
+    original = ENV.fetch("PARALLEL_WORKERS", nil)
+    if value.nil?
+      ENV.delete("PARALLEL_WORKERS")
+    else
+      ENV["PARALLEL_WORKERS"] = value.to_s
+    end
+    yield
+  ensure
+    if original.nil?
+      ENV.delete("PARALLEL_WORKERS")
+    else
+      ENV["PARALLEL_WORKERS"] = original
+    end
+  end
+
   # Test: Successfully set up config files with default worker count
   def test_setup_config_files_success
     create_database_yml
     worker_count = Etc.nprocessors
 
-    result = @service.setup_config_files
+    with_parallel_workers(nil) do
+      result = @service.setup_config_files
 
-    assert(result, "setup_config_files should return true")
-    assert_match(/Setting up parallel test configuration for #{worker_count}/,
-                 output_messages)
-    assert_match(/Parallel test setup complete!/, output_messages)
+      assert(result, "setup_config_files should return true")
+      assert_match(
+        /Setting up parallel test configuration for #{worker_count}/,
+        output_messages
+      )
+      assert_match(/Parallel test setup complete!/, output_messages)
 
-    # Verify config files were created
-    worker_count.times do |i|
-      config_file = @rails_root.join("config/mysql-test-#{i}.cnf")
-      assert_path_exists(config_file, "Config file #{i} should exist")
+      # Verify config files were created
+      worker_count.times do |i|
+        config_file = @rails_root.join("config/mysql-test-#{i}.cnf")
+        assert_path_exists(config_file, "Config file #{i} should exist")
 
-      content = File.read(config_file)
-      assert_match(/user=test_user/, content)
-      assert_match(/password=test_pass/, content)
-      assert_match(/database=mo_test-#{i}/, content)
+        content = File.read(config_file)
+        assert_match(/user=test_user/, content)
+        assert_match(/password=test_pass/, content)
+        assert_match(/database=mo_test-#{i}/, content)
+      end
     end
   end
 
@@ -65,8 +93,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
     create_database_yml
     worker_count = 3
 
-    ENV["PARALLEL_WORKERS"] = worker_count.to_s
-    begin
+    with_parallel_workers(worker_count) do
       result = @service.setup_config_files
 
       assert(result, "setup_config_files should return true")
@@ -82,8 +109,6 @@ class ParallelTestConfigServiceTest < UnitTestCase
       # Verify no extra files
       assert_not(File.exist?(@rails_root.join("config/mysql-test-3.cnf")),
                  "Should not create extra config files")
-    ensure
-      ENV.delete("PARALLEL_WORKERS")
     end
   end
 
@@ -203,8 +228,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
                           "password" => "custom_pass"
                         })
 
-    ENV["PARALLEL_WORKERS"] = "1"
-    begin
+    with_parallel_workers(1) do
       @service.setup_config_files
 
       config_file = @rails_root.join("config/mysql-test-0.cnf")
@@ -229,8 +253,6 @@ class ParallelTestConfigServiceTest < UnitTestCase
       assert_equal("\n", lines[3])
       assert_equal("[mysql]\n", lines[4])
       assert_equal("database=mo_test-0\n", lines[5])
-    ensure
-      ENV.delete("PARALLEL_WORKERS")
     end
   end
 
@@ -238,8 +260,7 @@ class ParallelTestConfigServiceTest < UnitTestCase
   def test_setup_displays_instructions
     create_database_yml
 
-    ENV["PARALLEL_WORKERS"] = "2"
-    begin
+    with_parallel_workers(2) do
       @service.setup_config_files
 
       output = output_messages
@@ -247,8 +268,6 @@ class ParallelTestConfigServiceTest < UnitTestCase
       assert_match(/rails test/, output)
       assert_match(/To force parallel testing even for small files:/, output)
       assert_match(/PARALLEL_TEST_THRESHOLD=0 rails test/, output)
-    ensure
-      ENV.delete("PARALLEL_WORKERS")
     end
   end
 

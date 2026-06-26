@@ -72,6 +72,13 @@ class SequencesControllerTest < FunctionalTestCase
     sequence = sequences(:local_sequence)
     get(:show, params: { id: sequence.id })
     assert_response(:success)
+    # `local_sequence` has bases, so the bases block gets a
+    # copy-to-clipboard button next to its heading.
+    assert_select("button[data-controller='clipboard']")
+    assert_select("button[data-clipboard-text-value='#{sequence.bases}']")
+    # BLAST links render unconditionally — both NCBI and MycoBLAST.
+    assert_select("a[href='#{sequence.blast_url}']")
+    assert_select("a[href='#{Sequence.mycoblast_url}']")
   end
 
   # Cover the deposit branch — `local_sequence` has no archive /
@@ -82,6 +89,11 @@ class SequencesControllerTest < FunctionalTestCase
     get(:show, params: { id: sequence.id })
     assert_response(:success)
     assert_select("a[href*='ncbi.nlm.nih.gov']")
+    # No bases on this sequence — no bases block, so no copy-bases
+    # button. (The page still has an unrelated id-copy badge near
+    # the title, hence scoping to the clipboard-text-value attr
+    # rather than the generic clipboard controller.)
+    assert_select("button[data-clipboard-text-value]", false)
   end
 
   def test_show_nonexistent_sequence
