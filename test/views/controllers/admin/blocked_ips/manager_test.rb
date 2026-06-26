@@ -94,10 +94,12 @@ module Views::Controllers::Admin::BlockedIps
     def test_panel_is_collapsible_and_expanded
       html = render_manager(type: :blocked, ips: ["1.2.3.4"])
 
-      # Has collapse trigger
-      assert_html(html, ".panel-collapse-trigger")
-      assert_html(html, "[data-toggle='collapse']")
-      assert_html(html, "a[href='#blocked_ips_body']")
+      # Has collapse trigger — all on the same <a>
+      assert_html(
+        html,
+        "a.panel-collapse-trigger[data-toggle='collapse']" \
+        "[href='#blocked_ips_body']"
+      )
 
       # Body is expanded by default (has "in" class)
       assert_html(html, ".panel-collapse.collapse.in")
