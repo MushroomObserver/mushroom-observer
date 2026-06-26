@@ -21,17 +21,6 @@ class LocationLinkTest < ComponentTestCase
                 text: Location.reverse_name(burbank.name))
   end
 
-  def test_location_integer_id_is_looked_up
-    burbank = locations(:burbank)
-    html = render(Components::Link::Location.new(
-                    where: burbank.name, location: burbank.id
-                  ))
-
-    # Integer in the `location:` slot triggers a `Location.find` —
-    # callers from older helpers passed bare ids.
-    assert_html(html, "a.show_location_link_#{burbank.id}")
-  end
-
   def test_count_suffix_appended
     burbank = locations(:burbank)
     html = render(Components::Link::Location.new(
@@ -60,6 +49,18 @@ class LocationLinkTest < ComponentTestCase
     assert_html(html, "a[href='#{routes.observations_path(where: where)}']")
     assert_html(html, "a.index_observations_at_where_link")
     assert_html(html, "a span.location-postal", text: where)
+  end
+
+  def test_query_param_forwarded_on_location_link
+    burbank = locations(:burbank)
+    query = Query.lookup_and_save(:Location)
+    html = render(Components::Link::Location.new(
+                    location: burbank, query: query
+                  ))
+
+    # query: is forwarded via add_q_param — href gets a ?q[...] query string
+    base_path = routes.location_path(id: burbank.id)
+    assert_html(html, "a[href^='#{base_path}?']")
   end
 
   def test_click_on_where_link_appends_search_suffix

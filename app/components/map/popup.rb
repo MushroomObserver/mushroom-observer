@@ -30,6 +30,11 @@ class Components::Map::Popup < Components::Base
   # session-current query, already validated) when omitted, so
   # callers like `Components::Map` don't have to forward it.
   prop :query, _Nilable(::Query), default: nil
+  # Bbox queries for Show All / Map All group-popup buttons. Computed
+  # by the caller (clustering module or controller) to keep the popup
+  # a pure renderer. When nil the buttons are omitted.
+  prop :observation_bbox_query, _Nilable(::Query), default: nil
+  prop :location_bbox_query, _Nilable(::Query), default: nil
 
   def view_template
     if single_obs_set?
@@ -163,19 +168,19 @@ class Components::Map::Popup < Components::Base
   # Show All / Map All buttons pointing at filtered MO indexes for the
   # mapset's bounding box.
   def render_associated_links(type)
-    return unless [:observation, :location, :name].include?(type)
+    return unless [:observation, :location].include?(type)
+
+    bbox_query = if type == :observation
+                   @observation_bbox_query
+                 else
+                   @location_bbox_query
+                 end
+    return unless bbox_query
 
     path_helper = :"#{type.to_s.pluralize}_path"
-    query = mapset_links_query(type)
-    render_mapset_link(:show_all, send(path_helper), query)
+    render_mapset_link(:show_all, send(path_helper), bbox_query)
     plain(" ")
-    render_mapset_link(:map_all, send(:"map_#{path_helper}"), query)
-  end
-
-  def mapset_links_query(type)
-    query_type = type.to_s.camelize.to_sym
-    controller.find_or_create_query(query_type,
-                                    in_box: mapset_box_params)
+    render_mapset_link(:map_all, send(:"map_#{path_helper}"), bbox_query)
   end
 
   def render_mapset_link(label_sym, path, query)
@@ -194,10 +199,12 @@ class Components::Map::Popup < Components::Base
   # ----------------------------------------------------------------
 
   def render_observation_link(obs)
-    a(href: observation_path(id: obs.id, params: query_path_params),
-      target: "_blank", rel: "noopener noreferrer") do
-      render_observation_label(obs)
-    end
+    render(::Components::Link::Get.new(
+             name: obs.text_name.presence || "Observation ##{obs.id}",
+             target: observation_path(id: obs.id,
+                                      params: query_path_params),
+             new_tab: true
+           )) { render_observation_label(obs) }
   end
 
   # Emits the label inside the observation-popup link. Preferred order:
@@ -227,9 +234,7 @@ class Components::Map::Popup < Components::Base
   end
 
   def render_location_link(loc)
-    a(href: location_path(id: loc.id, params: query_path_params)) do
-      trusted_html(loc.display_name.t)
-    end
+    render(::Components::Link::Location.new(location: loc, query: @query))
   end
 
   def mapset_observation_date(obs)
@@ -262,7 +267,7 @@ class Components::Map::Popup < Components::Base
 
   def render_point_coords
     plain(format_latitude(@set.lat))
-    trusted_html("&nbsp;".html_safe)
+    nbsp
     plain(format_longitude(@set.lng))
   end
 
@@ -271,7 +276,7 @@ class Components::Map::Popup < Components::Base
       plain(format_latitude(@set.north))
       br
       plain(format_longitude(@set.west))
-      trusted_html("&nbsp;".html_safe)
+      nbsp
       plain(format_longitude(@set.east))
       br
       plain(format_latitude(@set.south))
@@ -289,26 +294,6 @@ class Components::Map::Popup < Components::Base
   def format_coordinate(val, positive_dir, negative_dir)
     deg = val.abs.round(4)
     "#{deg}°#{val.negative? ? negative_dir : positive_dir}"
-  end
-
-  # ----------------------------------------------------------------
-  # Mapset bbox params (slightly enlarged for edge-case obs whose
-  # coordinate sits on the box boundary — issue #4318).
-  # ----------------------------------------------------------------
-
-  def mapset_box_params
-    { north: tweak_up(@set.north, 0.001, 90),
-      south: tweak_down(@set.south, 0.001, -90),
-      east: tweak_up(@set.east, 0.001, 180),
-      west: tweak_down(@set.west, 0.001, -180) }
-  end
-
-  def tweak_up(value, amount, max)
-    [max, value.to_f + amount].min
-  end
-
-  def tweak_down(value, amount, min)
-    [min, value.to_f - amount].max
   end
 
   # Phlex 2.x doesn't ship `<center>` since it's a deprecated HTML

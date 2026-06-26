@@ -9,9 +9,12 @@
 # / " [Search]" depending on the link target.
 class Components::Link::Location < Components::Link::Object
   prop :where, _Nilable(String), default: nil
-  prop :location, _Nilable(_Union(::Location, Integer)), default: nil
+  prop :location,
+       _Nilable(_Union(::Location, ::Mappable::MinimalLocation)),
+       default: nil
   prop :count, _Nilable(Integer), default: nil
   prop :click, _Boolean, default: false
+  prop :query, _Nilable(::Query), default: nil
 
   def view_template
     if location_obj
@@ -24,7 +27,7 @@ class Components::Link::Location < Components::Link::Object
   private
 
   def render_location_link
-    a(href: url_for(location_path(id: location_obj.id)),
+    a(href: add_q_param(location_path(id: location_obj.id), @query),
       class: "show_location_link show_location_link_#{location_obj.id}") do
       render_label(location_obj.name)
       plain(" [#{:click_for_map.t}]") if @click
@@ -40,13 +43,7 @@ class Components::Link::Location < Components::Link::Object
   end
 
   def location_obj
-    return nil unless @location
-
-    @location_obj ||= if @location.is_a?(Integer)
-                        ::Location.find(@location)
-                      else
-                        @location
-                      end
+    @location
   end
 
   def render_label(name)

@@ -6,6 +6,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "test -x .claude/hooks/check_branch_up_to_date.sh && exec .claude/hooks/check_branch_up_to_date.sh || exit 0",
+            "timeout": 30
+          },
+          {
+            "type": "command",
             "command": "test -x .claude/hooks/check_rubocop_staged.sh && exec .claude/hooks/check_rubocop_staged.sh || exit 0",
             "timeout": 600
           },
