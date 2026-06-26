@@ -97,7 +97,7 @@ module Views::Controllers::Admin::BlockedIps
       # Has collapse trigger
       assert_html(html, ".panel-collapse-trigger")
       assert_html(html, "[data-toggle='collapse']")
-      assert_html(html, "[data-target='#blocked_ips_body']")
+      assert_html(html, "a[href='#blocked_ips_body']")
 
       # Body is expanded by default (has "in" class)
       assert_html(html, ".panel-collapse.collapse.in")
