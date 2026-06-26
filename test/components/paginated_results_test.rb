@@ -43,18 +43,23 @@ class PaginatedResultsTest < ComponentTestCase
       bottom: "PAGINATION_BOTTOM"
     )
 
-    assert_includes(html, "PAGINATION_TOP")
-    assert_includes(html, "PAGINATION_BOTTOM")
-    # Top strip precedes content; bottom follows it.
-    assert(html.index("PAGINATION_TOP") < html.index("content"))
-    assert(html.index("content") < html.index("PAGINATION_BOTTOM"))
+    assert_text_in_nested_selector(html, text: "PAGINATION_TOP",
+                                         parent: "div#results")
+    assert_text_in_nested_selector(html, text: "content",
+                                         parent: "div#results")
+    assert_text_in_nested_selector(html, text: "PAGINATION_BOTTOM",
+                                         parent: "div#results")
+    inner = Nokogiri::HTML(html).at_css("div#results").text
+    assert_operator(inner.index("PAGINATION_TOP"), :<, inner.index("content"))
+    assert_operator(inner.index("content"), :<,
+                    inner.index("PAGINATION_BOTTOM"))
   end
 
   def test_omits_pagination_strips_when_absent
     html = render_it
 
-    assert_not_includes(html, "PAGINATION_TOP")
-    assert_not_includes(html, "PAGINATION_BOTTOM")
+    assert_text_in_nested_selector(html, text: "content",
+                                         parent: "div#results")
   end
 
   private
