@@ -109,9 +109,11 @@ module Views::Controllers::Sequences
     end
 
     def render_accession_link
-      link_to(truncate(@sequence.accession,
-                       length: @sequence.locus_width / 2).t,
-              @sequence.accession_url, target: "_blank", rel: "noopener")
+      render(::Components::Link::External.new(
+               truncate(@sequence.accession,
+                        length: @sequence.locus_width / 2).t,
+               @sequence.accession_url
+             ))
     end
   end
 end

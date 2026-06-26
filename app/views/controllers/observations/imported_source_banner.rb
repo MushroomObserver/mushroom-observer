@@ -37,8 +37,7 @@ module Views::Controllers::Observations
     private
 
     def render_credit(link)
-      a(href: link[:url], target: "_blank",
-        rel: "noopener noreferrer") { credit_text(link) }
+      render(::Components::Link::External.new(credit_text(link), link[:url]))
     end
 
     def credit_text(link)

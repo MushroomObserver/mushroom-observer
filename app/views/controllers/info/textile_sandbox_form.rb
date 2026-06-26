@@ -89,10 +89,11 @@ module Views::Controllers::Info
       strong { plain("#{:sandbox_more_help.l}:") }
       div(class: "pl-3") do
         # Translation not needed as document title is static
-        a(href: "https://docs.google.com/document/d/" \
-                "10NiaPDKoK_k3bRIoU1smGXSycDczf_jdkmW-xt-Wf20",
-          target: "_blank",
-          rel: "noopener noreferrer") { "MO Flavored Textile" }
+        render(::Components::Link::External.new(
+                 "MO Flavored Textile",
+                 "https://docs.google.com/document/d/" \
+                 "10NiaPDKoK_k3bRIoU1smGXSycDczf_jdkmW-xt-Wf20"
+               ))
         br
       end
     end
@@ -100,23 +101,20 @@ module Views::Controllers::Info
     def render_web_reference_links
       strong { plain("#{:sandbox_web_refs.l}:") }
       div(class: "pl-3") do
-        a(href: "https://hobix.com/textile",
-          target: "_blank",
-          rel: "noopener noreferrer") do
-          plain(:sandbox_link_hobix_textile_reference.l)
-        end
+        render(::Components::Link::External.new(
+                 :sandbox_link_hobix_textile_reference.l,
+                 "https://hobix.com/textile"
+               ))
         br
-        a(href: "https://hobix.com/quick",
-          target: "_blank",
-          rel: "noopener noreferrer") do
-          plain(:sandbox_link_hobix_textile_cheatsheet.l)
-        end
+        render(::Components::Link::External.new(
+                 :sandbox_link_hobix_textile_cheatsheet.l,
+                 "https://hobix.com/quick"
+               ))
         br
-        a(href: "https://textile-lang.com/",
-          target: "_blank",
-          rel: "noopener noreferrer") do
-          plain(:sandbox_link_textile_language_website.l)
-        end
+        render(::Components::Link::External.new(
+                 :sandbox_link_textile_language_website.l,
+                 "https://textile-lang.com/"
+               ))
         br
       end
     end

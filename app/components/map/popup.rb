@@ -70,7 +70,8 @@ class Components::Map::Popup < Components::Base
 
     url = observation_path(id: obs.id, params: query_path_params)
     div(class: "media-left") do
-      a(href: url, target: "_blank", rel: "noopener noreferrer") do
+      render(::Components::Link::Get.new(name: "", target: url,
+                                         new_tab: true)) do
         # Empty alt: the adjacent taxon-name link inside the same
         # .media already provides the accessible label, so the
         # thumbnail is decorative in this context.
@@ -194,10 +195,12 @@ class Components::Map::Popup < Components::Base
   # ----------------------------------------------------------------
 
   def render_observation_link(obs)
-    a(href: observation_path(id: obs.id, params: query_path_params),
-      target: "_blank", rel: "noopener noreferrer") do
-      render_observation_label(obs)
-    end
+    render(::Components::Link::Get.new(
+             name: obs.text_name.presence || "Observation ##{obs.id}",
+             target: observation_path(id: obs.id,
+                                      params: query_path_params),
+             new_tab: true
+           )) { render_observation_label(obs) }
   end
 
   # Emits the label inside the observation-popup link. Preferred order:
