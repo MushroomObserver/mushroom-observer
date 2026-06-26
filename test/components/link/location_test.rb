@@ -51,6 +51,18 @@ class LocationLinkTest < ComponentTestCase
     assert_html(html, "a span.location-postal", text: where)
   end
 
+  def test_query_param_forwarded_on_location_link
+    burbank = locations(:burbank)
+    query = Query.lookup_and_save(:Location)
+    html = render(Components::Link::Location.new(
+                    location: burbank, query: query
+                  ))
+
+    # query: is forwarded via add_q_param — href gets a ?q[...] query string
+    base_path = routes.location_path(id: burbank.id)
+    assert_html(html, "a[href^='#{base_path}?']")
+  end
+
   def test_click_on_where_link_appends_search_suffix
     html = render(Components::Link::Location.new(
                     where: "Some Place, USA", click: true

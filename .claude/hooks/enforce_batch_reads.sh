@@ -45,7 +45,8 @@ GAP=$((NOW - LAST_TS))
 
 # ── 1. Re-read handling ────────────────────────────────────────────
 # Check if this file appears in the reads log at all
-if grep -qF "	$FILE" "$READS_FILE" 2>/dev/null; then
+if awk -F'\t' -v f="$FILE" '$2 == f {found=1; exit} END {exit !found}' \
+     "$READS_FILE" 2>/dev/null; then
   if [ "$GAP" -le 3 ]; then
     # Same parallel batch — file is in context, silently proceed
     exit 0
@@ -76,7 +77,8 @@ EOF
   else
     # Different branch — file content may have changed, allow
     # Remove the stale entry so it gets re-recorded below under the new branch
-    grep -vF "	$FILE" "$READS_FILE" > "${READS_FILE}.tmp" && mv "${READS_FILE}.tmp" "$READS_FILE" || true
+    awk -F'\t' -v f="$FILE" '$2 != f' "$READS_FILE" \
+      > "${READS_FILE}.tmp" && mv "${READS_FILE}.tmp" "$READS_FILE" || true
   fi
 fi
 

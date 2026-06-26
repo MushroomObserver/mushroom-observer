@@ -168,7 +168,7 @@ class Components::Map::Popup < Components::Base
   # Show All / Map All buttons pointing at filtered MO indexes for the
   # mapset's bounding box.
   def render_associated_links(type)
-    return unless [:observation, :location, :name].include?(type)
+    return unless [:observation, :location].include?(type)
 
     bbox_query = if type == :observation
                    @observation_bbox_query
@@ -234,7 +234,7 @@ class Components::Map::Popup < Components::Base
   end
 
   def render_location_link(loc)
-    render(::Components::Link::Location.new(location: loc))
+    render(::Components::Link::Location.new(location: loc, query: @query))
   end
 
   def mapset_observation_date(obs)

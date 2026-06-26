@@ -14,6 +14,7 @@ class Components::Link::Location < Components::Link::Object
        default: nil
   prop :count, _Nilable(Integer), default: nil
   prop :click, _Boolean, default: false
+  prop :query, _Nilable(::Query), default: nil
 
   def view_template
     if location_obj
@@ -26,7 +27,7 @@ class Components::Link::Location < Components::Link::Object
   private
 
   def render_location_link
-    a(href: url_for(location_path(id: location_obj.id)),
+    a(href: add_q_param(location_path(id: location_obj.id), @query),
       class: "show_location_link show_location_link_#{location_obj.id}") do
       render_label(location_obj.name)
       plain(" [#{:click_for_map.t}]") if @click
