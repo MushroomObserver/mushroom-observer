@@ -81,6 +81,7 @@ module Views::Controllers::Observations::Identify
 
     def render_search_icon
       render(::Components::Icon.new(type: :search,
+                                    title: :SEARCH.l,
                                     html_class: "form-control-feedback"))
     end
 
