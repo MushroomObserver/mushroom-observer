@@ -163,6 +163,12 @@ class NameDescription < Description
     )
   }
 
+  # Load path for the permissions form. Unlike show_includes it is NOT
+  # strict_loading: the form lazily reads `group.users.first` on personal
+  # groups (a LIMIT 1) and `user.in_group?`. It deliberately does NOT preload
+  # group users, so it never materializes the ~90k-member all_users group.
+  scope :permissions_includes, -> { includes(*permissions_subtree) }
+
   EOL_NOTE_FIELDS = [
     :gen_desc, :diag_desc, :distribution, :habitat, :look_alikes, :uses
   ].freeze

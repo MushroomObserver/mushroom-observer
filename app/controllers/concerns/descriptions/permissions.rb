@@ -86,7 +86,8 @@ module Descriptions::Permissions
   included do
     # Form to adjust permissions on a description.
     def edit
-      return unless (@description = find_description!(params[:id].to_s))
+      return unless (@description = find_description!(params[:id].to_s,
+                                                      for_permissions: true))
 
       done = false
       # Doesn't have permission.
@@ -114,7 +115,8 @@ module Descriptions::Permissions
     end
 
     def update
-      return unless (@description = find_description!(params[:id].to_s))
+      return unless (@description = find_description!(params[:id].to_s,
+                                                      for_permissions: true))
 
       done = false
       # Doesn't have permission.
