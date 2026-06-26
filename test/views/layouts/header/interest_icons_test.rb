@@ -103,7 +103,7 @@ module Views::Layouts
 
       assert_html(html, "li a[href*='state=1']")
       assert_html(html, "li a[href*='state=-1']")
-      assert_no_html(html, "li a[href*='state=1'] ~ a")
+      assert_no_html(html, "ul.interest-eyes li a ~ a")
     end
 
     def test_watching_state_each_link_in_own_li
@@ -112,7 +112,7 @@ module Views::Layouts
 
       assert_html(html, "li a[href*='state=0']")
       assert_html(html, "li a[href*='state=-1']")
-      assert_no_html(html, "li a[href*='state=0'] ~ a")
+      assert_no_html(html, "ul.interest-eyes li a ~ a")
     end
 
     def test_ignoring_state_each_link_in_own_li
@@ -121,7 +121,7 @@ module Views::Layouts
 
       assert_html(html, "li a[href*='state=1']")
       assert_html(html, "li a[href*='state=0']")
-      assert_no_html(html, "li a[href*='state=1'] ~ a")
+      assert_no_html(html, "ul.interest-eyes li a ~ a")
     end
 
     # ---- Turbo wiring ---------------------------------------------
