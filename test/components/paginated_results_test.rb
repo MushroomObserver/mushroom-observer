@@ -37,14 +37,40 @@ class PaginatedResultsTest < ComponentTestCase
     assert_html(html, "div#results[data-q='q=42']")
   end
 
+  def test_weaves_pagination_strips_when_present
+    html = render_it(
+      top: "PAGINATION_TOP",
+      bottom: "PAGINATION_BOTTOM"
+    )
+
+    assert_includes(html, "PAGINATION_TOP")
+    assert_includes(html, "PAGINATION_BOTTOM")
+    # Top strip precedes content; bottom follows it.
+    assert(html.index("PAGINATION_TOP") < html.index("content"))
+    assert(html.index("content") < html.index("PAGINATION_BOTTOM"))
+  end
+
+  def test_omits_pagination_strips_when_absent
+    html = render_it
+
+    assert_not_includes(html, "PAGINATION_TOP")
+    assert_not_includes(html, "PAGINATION_BOTTOM")
+  end
+
   private
 
-  def render_it(html_id: "results")
+  def render_it(html_id: "results", top: nil, bottom: nil)
     render(
       Class.new(Components::Base) do
         define_method(:_html_id) { html_id }
+        define_method(:_top) { top }
+        define_method(:_bottom) { bottom }
 
         def view_template
+          # Set content_for from inside the render so Phlex's view
+          # context sees the same store the component reads from.
+          content_for(:index_pagination_top, _top) if _top
+          content_for(:index_pagination_bottom, _bottom) if _bottom
           render(::Components::PaginatedResults.new(html_id: _html_id)) do
             plain("content")
           end
