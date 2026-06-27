@@ -268,8 +268,8 @@ class Inat
     end
 
     # The value of the iNat "Species Name Override" observation field, or nil.
-    # When present it outranks the provisional name and the Observation Taxon as the
-    # lead naming. (#4533)
+    # When present it outranks the provisional name and the Observation Taxon
+    # as the lead naming. (#4533)
     def name_override
       return nil if inat_obs_fields.blank?
 

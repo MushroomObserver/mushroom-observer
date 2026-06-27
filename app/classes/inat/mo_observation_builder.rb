@@ -74,7 +74,8 @@ class Inat
 
     # The MO name for the iNat provisional-name observation field, or nil.
     # iNat can't use a provisional name as its own identification, so it is a
-    # separate proposal from the Observation Taxon. Creates the MO name if absent.
+    # separate proposal from the Observation Taxon. Creates the MO name if
+    # absent.
     # NOTE: iNat users seem to add a prov name only when there's a sequence.
     def prov_name
       return nil if inat_obs.provisional_name.blank?
@@ -87,9 +88,9 @@ class Inat
     end
 
     # The MO name for the iNat "Species Name Override" obs field, or nil. The
-    # override outranks the provisional name and the Observation Taxon as the lead
-    # (#4533). Returns nil - falling back to the provisional/Community lead -
-    # when the override value can't be parsed or created as an MO Name.
+    # override outranks the provisional name and the Observation Taxon as the
+    # lead (#4533). Returns nil - falling back to the provisional/Community
+    # lead - when the override value can't be parsed or created as an MO Name.
     def override_name
       return @override_name if defined?(@override_name)
 
@@ -140,9 +141,10 @@ class Inat
       name.best_preferred_synonym.presence || name
     end
 
-    # Pure: the namings to create as [name, vote] for the given Observation Taxon
-    # name, provisional name (or nil), override name (or nil), and the lead's
-    # confidence vote. The lead (override, else provisional, else Observation Taxon)
+    # Pure: the namings to create as [name, vote] for the given Observation
+    # Taxon name, provisional name (or nil), override name (or nil), and the
+    # lead's confidence vote. The lead (override, else provisional, else
+    # Observation Taxon)
     # leads at lead_vote; every other name and the preferred synonym of any
     # deprecated name follow at Could Be. Lead is first so it wins
     # calc_consensus ties. (#4212, #4533)
