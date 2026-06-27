@@ -720,6 +720,38 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_confirm_renders_gracefully_when_unlicensed_others_estimate_fails
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+
+    # Total-others request (no license filter) returns 200 with invalid JSON,
+    # triggers JSON::ParserError and the rescue in fetch_unlicensed_others_count
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: "not json")
+    # Licensed estimate returns valid JSON — registered last, matched first.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including(
+        "license" => Inat::Constants::LICENSED_FILTER[:license]
+      )).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "anyone",
+                   consent: 1, import_others: "1" })
+
+    assert_response(:success)
+    assert_select(
+      "#estimated_count", "3",
+      "Estimate should still show when only unlicensed-others request fails"
+    )
+    assert_select(
+      "#unlicensed_obs_count", "",
+      "Unlicensed count should be blank when total-others estimate fails"
+    )
+  end
+
   def test_create_go_back_with_superform_params
     login(users(:rolf).login)
 
@@ -768,6 +800,33 @@ class InatImportsControllerTest < FunctionalTestCase
       { text: inat_ids, count: 1 },
       "Form should preserve inat_ids when going back"
     )
+  end
+
+  def test_go_back_from_confirm_restores_original_url
+    user = users(:rolf)
+    original_url = "#{INAT_SITE_OBS_URL}?project_id=291058&place_id=5"
+    normalized = "place_id=5&project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: {
+           go_back: 1,
+           inat_import_confirm: {
+             inat_username: "rolf_inat_user",
+             inat_ids: "",
+             inat_url: normalized,
+             original_inat_url: original_url,
+             import_all: "",
+             consent: "1"
+           }
+         })
+
+    assert_response(:success)
+    url_field = css_select("input#inat_import_inat_url").first
+    assert_not_nil(url_field, "inat_url input field not found in response")
+    assert_equal(original_url, url_field["value"],
+                 "Go Back must restore the original URL, not the " \
+                 "normalized query string")
   end
 
   def test_create_confirmation_estimate_unavailable
@@ -957,6 +1016,496 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("[data-controller='inat-import-job']")
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
+  end
+
+  ########## URL-mode tests
+
+  INAT_SITE_OBS_URL = "https://www.inaturalist.org/observations"
+  INAT_API_OBS_URL  = "https://api.inaturalist.org/v1/observations"
+
+  def test_new_inat_import_has_inat_url_field
+    login
+    get(:new)
+
+    assert_select(
+      "input[name='inat_import[inat_url]']", true,
+      "Form should include an inat_url text field"
+    )
+  end
+
+  def test_create_with_valid_url_shows_confirmation
+    user = users(:rolf)
+    inat_username = "rolf_inat_user"
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: inat_username, consent: 1 })
+
+    assert_response(:success, "Valid URL should proceed to confirmation")
+    assert_select("#estimated_count", "5",
+                  "Confirmation should show estimate from URL query")
+  end
+
+  def test_importable_taxon_id_preserved_in_normalized_url
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058&taxon_id=47170"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 47_170, ancestor_ids: [48_460, 47_170] }]
+      }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user", consent: 1 })
+
+    url_field = css_select("input#inat_import_confirm_inat_url").first
+    assert_not_nil(url_field,
+                   "inat_url hidden field should be present in confirm form")
+    assert_equal("project_id=291058&taxon_id=47170", url_field["value"],
+                 "taxon_id should be preserved in confirm form when importable")
+  end
+
+  def test_non_importable_taxon_id_stripped_with_warning
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058&taxon_id=3"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash_text(
+      :inat_taxon_id_not_importable.l,
+      "Warning should appear when taxon_id is outside Fungi/Mycetozoa"
+    )
+    url_field = css_select("input#inat_import_confirm_inat_url").first
+    assert_not_nil(url_field,
+                   "inat_url hidden field should be present in confirm form")
+    assert_equal("project_id=291058", url_field["value"],
+                 "taxon_id stripped from confirm form URL when not importable")
+  end
+
+  def test_create_url_and_ids_both_present_rejected
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_ids: "123",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash_text(:inat_list_xor_all.l,
+                      "Supplying both URL and IDs should flash XOR error")
+    assert_form_action(action: :create)
+  end
+
+  def test_create_url_and_all_both_present_rejected
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, all: "1",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash_text(:inat_list_xor_all.l,
+                      "URL + Import All should flash XOR error")
+    assert_form_action(action: :create)
+  end
+
+  def test_create_invalid_url_rejected
+    login
+    post(:create,
+         params: { inat_url: "https://example.com/not-inat",
+                   inat_username: "someone", consent: 1 })
+
+    assert_flash_text(:inat_invalid_url.l,
+                      "Non-iNat URL should flash invalid URL error")
+    assert_form_action(action: :create)
+  end
+
+  def test_create_bare_query_string_rejected
+    login
+    post(:create,
+         params: { inat_url: "project_id=291058&user_id=12345",
+                   inat_username: "someone", consent: 1 })
+
+    assert_flash_text(:inat_invalid_url.l,
+                      "Bare query string should be rejected — " \
+                      "user must supply a full iNat observations URL")
+    assert_form_action(action: :create)
+  end
+
+  def test_create_url_with_no_surviving_params_rejected
+    login
+    # taxon_id=3 (Animalia) is non-importable — URLNormalizer strips it,
+    # leaving an empty query string that fails validation.
+    url = "#{INAT_API_OBS_URL}?taxon_id=3"
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
+    post(:create,
+         params: { inat_url: url, inat_username: "someone", consent: 1 })
+
+    assert_flash_text(/#{Regexp.escape(:inat_url_no_valid_filter_params.l)}/,
+                      "URL without valid filter params should flash a warning")
+    assert_form_action(action: :create)
+  end
+
+  def test_non_importable_sole_taxon_id_flashes_taxon_warning
+    # When taxon_id is the only param and is non-importable,
+    # valid_inat_url_param? fails before normalize_inat_url_param! runs.
+    # The taxon-specific warning
+    # must still fire so the user knows why the URL was rejected.
+    login
+    url = "#{INAT_API_OBS_URL}?taxon_id=3"
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
+
+    post(:create,
+         params: { inat_url: url, inat_username: "someone", consent: 1 })
+
+    # Use Regexp (assert_match) to find the taxon warning within the
+    # combined multi-warning flash (assert_flash_text clears after each call).
+    assert_flash_text(
+      /#{Regexp.escape(:inat_taxon_id_not_importable.l)}/,
+      "Taxon warning must fire even when taxon_id is the sole param " \
+      "and validation fails before normalize_inat_url_param! runs"
+    )
+  end
+
+  def test_non_importable_sole_taxon_id_restores_url_on_reload
+    # When validation fails (URL empty after stripping non-importable taxon_id),
+    # the form must reload with the original URL. original_inat_url is only set
+    # in normalize_inat_url_param!, which is skipped on validation failure, so
+    # reload_form must fall back to params[:inat_url].
+    login
+    url = "#{INAT_API_OBS_URL}?taxon_id=3"
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 3, ancestor_ids: [3] }]
+      }.to_json)
+
+    post(:create,
+         params: { inat_url: url, inat_username: "someone", consent: 1 })
+
+    url_field = css_select("input#inat_import_inat_url").first
+    assert_not_nil(url_field,
+                   "inat_url field must be present in reloaded form")
+    assert_equal(url, url_field["value"],
+                 "Form must be pre-populated with the original URL after " \
+                 "validation failure, not blank or normalized")
+  end
+
+  def test_stripped_sole_param_warns_which_param_was_ignored
+    # When a context-stripped param (user_login) is the only param in the
+    # URL, validation fails because the normalized URL is empty. The
+    # ignored-params warning must fire in valid_inat_url_param? so the user
+    # knows WHY the URL was rejected (not just that no valid params remain).
+    login
+    url = "#{INAT_API_OBS_URL}?user_login=someone_else"
+
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    # Use Regexp: the flash also contains the no-valid-params rejection
+    # message; assert_flash_text clears after the call so only one check
+    # is possible. The rejection message itself is covered by
+    # test_create_url_with_no_surviving_params_rejected.
+    assert_flash_text(
+      /#{Regexp.escape(:inat_url_params_ignored.t(params: "user_login"))}/,
+      "Ignored-params warning must name user_login when it is stripped " \
+      "as the sole URL param and validation fails before " \
+      "normalize_inat_url_param! runs"
+    )
+  end
+
+  def test_confirm_page_shows_ignored_url_params_warning
+    # When a URL has ignored params alongside surviving ones, the user
+    # reaches the Confirm page and must see the ignored-params warning
+    # rendered by the layout's FlashNotices component.
+    user = users(:rolf)
+    url = "#{INAT_API_OBS_URL}?project_id=291058&user_login=someone_else"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      :inat_url_params_ignored.t(params: "user_login"),
+      "Confirm page must show the ignored-params warning for user_login " \
+      "stripped from the URL for a non-superimporter"
+    )
+    assert_select("#estimated_count", "3",
+                  "Confirm page should render with the estimate")
+  end
+
+  def test_create_warns_about_ignored_url_params
+    user = users(:rolf)
+    # page=2 in an API URL is MO-controlled and stripped; using an API URL
+    # so page is not treated as silent UI noise.
+    url = "#{INAT_API_OBS_URL}?project_id=291058&page=2"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      :inat_url_params_ignored.t(params: "page"),
+      "URL with stripped params should warn the user which were ignored"
+    )
+  end
+
+  def test_create_confirmed_with_url_saves_inat_url
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+    normalized = "project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1, confirmed: 1 })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Confirmed URL import should redirect to iNat auth")
+    assert_equal(normalized, inat_import.reload.inat_url,
+                 "Normalized URL query string should be saved on InatImport")
+  end
+
+  def test_url_mode_importables_is_nil
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1, confirmed: 1 })
+
+    assert_nil(inat_import.reload.importables,
+               "URL mode should save nil importables (unknown until job runs)")
+  end
+
+  def test_superimporter_not_own_can_import_via_url_without_username
+    user = users(:dick)
+    assert(InatImport.super_importer?(user),
+           "Test requires a super_importer fixture")
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, import_others: "1", consent: 1 })
+
+    assert_select("#estimated_count", true,
+                  "Superimporter URL import without username should confirm")
+  end
+
+  def test_url_mode_estimate_merges_url_params
+    user = users(:rolf)
+    url = "#{INAT_SITE_OBS_URL}?project_id=291058"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    # Sentinel: return a distinct count only when project_id is included
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("project_id" => "291058")).
+      to_return(status: 200, body: { total_results: 7 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "7",
+                  "Estimate should include project_id from user URL")
+  end
+
+  def test_url_mode_estimate_mo_params_win_over_url_params
+    user = users(:rolf)
+    # URL supplies conflicting taxon_id and only_id; MO's values must win.
+    # taxon_id=9999 is non-importable so it is stripped; MO's IMPORTABLE_IDS
+    # and only_id=true should appear in the estimate request.
+    url = "#{INAT_API_OBS_URL}?project_id=291058&taxon_id=9999&only_id=false"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 9999, ancestor_ids: [9999] }]
+      }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => "47170,47685",
+                                 "only_id" => "true")).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "5",
+                  "MO taxon_id and only_id must override user-supplied values")
+  end
+
+  def test_url_mode_estimate_uses_user_supplied_importable_taxon_id
+    user = users(:rolf)
+    # taxon_id=54134 is a Fungi child — importable. The estimate must send
+    # taxon_id=54134, not MO's IMPORTABLE_TAXON_IDS_ARG (47170,47685).
+    url = "#{INAT_API_OBS_URL}?project_id=291058&taxon_id=54134"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/taxa}).
+      to_return(status: 200, body: {
+        total_results: 1,
+        results: [{ id: 54_134,
+                    ancestor_ids: [48_460, 47_170, 54_134] }]
+      }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => "54134")).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "3",
+                  "Importable user-supplied taxon_id should be used " \
+                  "in the estimate, not replaced by IMPORTABLE_TAXON_IDS_ARG")
+  end
+
+  def test_url_mode_estimate_excludes_id_param
+    user = users(:rolf)
+    # URL supplies id=12345; PageParser drops it in URL mode, estimate must too.
+    url = "#{INAT_API_OBS_URL}?project_id=291058&id=12345"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    # Returns 9 only when id is absent (i.e. not scoped to a specific obs).
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("project_id" => "291058")).
+      to_return(status: 200, body: { total_results: 9 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "9",
+                  "id param from URL must be excluded from the estimate")
+  end
+
+  def test_non_superuser_url_with_foreign_user_id_strips_user_id_from_estimate
+    user = users(:rolf)
+    # user_id is stripped for non-superimporters — iNat ORs user_id and
+    # user_login, so a user-supplied user_id alongside the injected user_login
+    # would return unexpected observations. The estimate must not include it.
+    url = "#{INAT_SITE_OBS_URL}?place_id=1&user_id=someone_else"
+
+    # Returns 5 for any request (user_id stripped; user_login injected by MO).
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    # Would return 99 if user_id leaked into the estimate request.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("user_id" => "someone_else")).
+      to_return(status: 200, body: { total_results: 99 }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_select("#estimated_count", "5",
+                  "user_id must be stripped from the estimate request")
+  end
+
+  def test_url_params_preserved_through_confirm_round_trip
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    normalized = "project_id=291058"
+
+    login(user.login)
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf_inat_user",
+             inat_ids: "",
+             inat_url: normalized,
+             import_all: "",
+             consent: "1"
+           }
+         })
+
+    assert_redirected_to(INAT_AUTHORIZATION_URL,
+                         "Confirmed URL via superform params should auth")
+    assert_equal(normalized, inat_import.reload.inat_url,
+                 "inat_url should be saved from superform hidden field")
+  end
+
+  def test_estimate_422_surfaces_inat_error_message
+    user = users(:rolf)
+    url = "#{INAT_API_OBS_URL}?place_id=678910"
+    inat_error = "Unknown place_id 678910"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 422,
+                body: { error: inat_error, status: 422 }.to_json,
+                headers: { "Content-Type" => "application/json" })
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      /#{Regexp.escape(inat_error)}/,
+      "Flash should surface iNat's error text instead of the generic " \
+      "'Cannot communicate' message"
+    )
+    assert_select("input#inat_import_inat_url", true,
+                  "Form should be reloaded, not the confirm page")
   end
 
   ########## Utilities

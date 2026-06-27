@@ -21,9 +21,9 @@ module InatImportsController::Validators
   # See InatImport.adequate_constraints?
   def import_adequately_constrained?
     return true if params[:inat_username].present?
-    # Superimporters importing by specific ID list don't need a username;
-    # the ID list + licensed + taxon filters constrain the query adequately.
-    return true if superimporter_not_own? && listing_ids?
+    # Superimporters importing by specific ID list or URL don't need a
+    # username; the filter constraints are sufficient.
+    return true if superimporter_not_own? && (listing_ids? || listing_url?)
 
     flash_warning(:inat_missing_username.l)
     false
@@ -32,14 +32,14 @@ module InatImportsController::Validators
   def imports_valid?
     imports_unambiguously_designated? &&
       valid_inat_ids_param? &&
+      valid_inat_url_param? &&
       list_within_size_limits? &&
       not_importing_all_anothers?
   end
 
   def imports_unambiguously_designated?
-    if (importing_all? && !listing_ids?) || (listing_ids? && !importing_all?)
-      return true
-    end
+    modes = [importing_all?, listing_ids?, listing_url?].count(true)
+    return true if modes == 1
 
     flash_warning(:inat_list_xor_all.l)
     false
@@ -51,6 +51,10 @@ module InatImportsController::Validators
 
   def listing_ids?
     params[:inat_ids].present?
+  end
+
+  def listing_url?
+    params[:inat_url].present?
   end
 
   def valid_inat_ids_param?
@@ -74,8 +78,39 @@ module InatImportsController::Validators
     end
   end
 
+  def valid_inat_url_param?
+    return true unless listing_url?
+    # On the confirm round-trip the URL is already a normalized query string;
+    # it was validated on the first submit so accept it as-is.
+    return true if confirmed_url_mode?
+
+    keep = url_taxon_ids_importable?
+    normalizer = url_normalizer(params[:inat_url], keep_taxon_id: keep)
+    normalized = normalizer.normalize
+    return true if normalized.present?
+
+    # When all URL params were stripped, warn about what was ignored.
+    # Normally these warnings fire in normalize_inat_url_param!, which is
+    # never reached when validation fails.
+    if normalized == ""
+      warn_about_ignored_url_params(normalizer)
+      warn_about_non_importable_taxon unless keep
+    end
+    msg = if normalized.nil?
+            :inat_invalid_url.l
+          else
+            :inat_url_no_valid_filter_params.l
+          end
+    flash_warning(msg)
+    false
+  end
+
+  def confirmed_url_mode?
+    params[:confirmed] == "1" && params[:inat_url].exclude?("://")
+  end
+
   def list_within_size_limits?
-    return true if importing_all? || # ignore list size if importing all
+    return true if importing_all? || listing_url? ||
                    params[:inat_ids].length <= MAX_ID_LIST_SIZE
 
     flash_warning(:inat_too_many_ids_listed.t)

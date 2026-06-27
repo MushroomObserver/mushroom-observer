@@ -118,7 +118,7 @@ class Inat
     end
 
     def finalize_import
-      update_inat_observation
+      update_inat_observation unless skip_inat_writeback?
       log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
       increment_imported_counts
       update_timings
@@ -179,12 +179,17 @@ class Inat
       @inat_import.increment!(:total_imported_count)
     end
 
+    # Use cumulative moving average to update user's historical avg import time
+    # (which is then used to estimate remaining time for the job).
+    # https://en.wikipedia.org/wiki/Moving_average#Cumulative_moving_average
     def update_timings
-      total_seconds =
-        @inat_import.total_seconds.to_i + @inat_import.last_obs_elapsed_time
+      elapsed = @inat_import.last_obs_elapsed_time
+      count = @inat_import.imported_count.to_i
+      current_avg = @inat_import.avg_import_time.to_f
+      new_avg = current_avg + (elapsed - current_avg) / count
       @inat_import.update(
-        total_seconds: total_seconds,
-        avg_import_time: total_seconds / (@inat_import.imported_count || 1)
+        total_seconds: @inat_import.total_seconds.to_i + elapsed,
+        avg_import_time: new_avg
       )
       @inat_import.reset_last_obs_start
     end
