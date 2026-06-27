@@ -42,14 +42,14 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
       )
     )
 
-    # Generic sibling link (mycoportal): uses `link.site_name` as
-    # the visible text.
+    # Generic sibling link (mycoportal): relationship is the link text.
     mycoportal = external_links(:coprinus_comatus_obs_mycoportal_link)
     assert_html(html, "a[href='#{mycoportal.url}']",
-                text: mycoportal.site_name)
-    # iNaturalist sibling link: special-cased to "iNat <suffix>"
+                text: "Manual link to MycoPortal")
+    # iNaturalist sibling link: "<relationship> (<id>)"
     inat = external_links(:coprinus_comatus_obs_inaturalist_link)
-    assert_html(html, "a[href='#{inat.url}']", text: "iNat ")
+    assert_html(html, "a[href='#{inat.url}']",
+                text: "Manual link to iNaturalist (234723)")
     # Per-sibling attribution: `<small class="text-muted">(MO N)</small>`
     sib_path = routes.permanent_observation_path(sibling.id)
     assert_html(html, "small.text-muted a[href='#{sib_path}']",
@@ -87,6 +87,16 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
     # `Components::Link::InlineAdd` emits
     # `[<a data-modal="modal_external_link">…</a>]`.
     assert_html(html, "a[data-modal='modal_external_link']")
+  end
+
+  def test_renders_relationship_description
+    link = external_links(:imported_inat_obs_inat_link)
+    obs = link.observation
+
+    html = render(panel_with(obs, link.user))
+
+    assert_html(html, "li#external_link_#{link.id} a",
+                text: "Imported from iNaturalist (12345)")
   end
 
   private

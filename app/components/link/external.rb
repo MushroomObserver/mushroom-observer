@@ -10,8 +10,9 @@
 #
 # ExternalLink AR record form (observation external-links panel):
 #   render(Components::Link::External.new(link: external_link))
-#   # iNaturalist records render as "iNat <id>"; others as
-#   # "On <site>" with a trailing <small> date.
+#   # The relationship IS the link text: iNaturalist records render as
+#   # "<relationship> (<id>)" (e.g. "Imported from iNaturalist (12345)");
+#   # other sites as "<relationship>" with a trailing <small> date.
 #
 # Via context-nav dispatcher:
 #   # Tab sets html_options: { external: true }; dispatcher routes here.
@@ -44,7 +45,7 @@ class Components::Link::External < Components::Base
             **@opts) do
       plain(@content)
     end
-    render_date if @link && !inaturalist?
+    render_date if @link
   end
 
   private
@@ -53,11 +54,10 @@ class Components::Link::External < Components::Base
   # manual links store the url. link_url resolves both, so strip the base_url
   # off it to get the bare iNat id either way.
   def link_content
-    if inaturalist?
-      "iNat #{@link.link_url.delete_prefix(@link.external_site.base_url)}"
-    else
-      :on_site.t(site: @link.external_site.name)
-    end
+    return @link.relationship_description unless inaturalist?
+
+    id = @link.link_url.delete_prefix(@link.external_site.base_url)
+    "#{@link.relationship_description} (#{id})"
   end
 
   def inaturalist?
@@ -65,6 +65,8 @@ class Components::Link::External < Components::Base
   end
 
   def render_date
-    small { plain(" #{@link.created_at.web_date}") }
+    date = @link.relationship_date or return
+
+    small { plain(" #{date.web_date}") }
   end
 end

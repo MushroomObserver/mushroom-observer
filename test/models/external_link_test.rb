@@ -3,6 +3,42 @@
 require("test_helper")
 
 class ExternalLinkTest < UnitTestCase
+  def test_relationship_description
+    # import link to iNaturalist
+    assert_equal(
+      "Imported from iNaturalist",
+      external_links(:imported_inat_obs_inat_link).relationship_description
+    )
+    # default (manual) relationship, interpolates a non-iNat site name
+    assert_equal(
+      "Manual link to MycoPortal",
+      external_links(:coprinus_comatus_obs_mycoportal_link).
+        relationship_description
+    )
+    # every relationship has a phrase
+    link = external_links(:coprinus_comatus_obs_inaturalist_link)
+    link.relationship = :copy
+    assert_equal("Copied by iNaturalist", link.relationship_description)
+  end
+
+  def test_relationship_date
+    link = external_links(:imported_inat_obs_inat_link)
+    obs = link.observation
+
+    # no external_created_on -> falls back to the link's own created_at
+    link.update!(external_created_on: nil)
+    assert_equal(link.created_at.to_date, link.relationship_date)
+
+    # external record created AFTER the obs -> use the external date
+    later = obs.created_at.to_date + 10
+    link.update!(external_created_on: later)
+    assert_equal(later, link.relationship_date)
+
+    # external record created BEFORE the obs -> use the obs date (the later)
+    link.update!(external_created_on: obs.created_at.to_date - 10)
+    assert_equal(obs.created_at.to_date, link.relationship_date)
+  end
+
   def test_create_valid
     site = ExternalSite.first
     base_url = site.base_url
@@ -81,44 +117,32 @@ class ExternalLinkTest < UnitTestCase
     )
   end
 
-  def test_uniqueness
+  # An MO obs can correspond to several external records (e.g. iNat-side
+  # duplicates of one collection), so a second non-import link to the same
+  # site on the same obs is allowed (#4565). Only one import per target is
+  # constrained — see test_only_one_import_per_target.
+  def test_multiple_links_per_target_allowed
     link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
     site = link1.external_site
-    base_url = site.base_url
 
-    another_obs = observations(:minimal_unknown_obs)
-    assert_not_equal(link1.observation.id, another_obs.id,
-                     "Fixture observations should be different")
-
-    # same observation
     link2 = ExternalLink.create(
       user: mary,
       observation: link1.observation,
       external_site: site,
-      url: "#{base_url}and_an_id"
+      url: "#{site.base_url}another_id"
     )
-    assert_not_empty(link2.errors,
-                     "Duplicate link for same observation should be invalid")
-
-    # different observation
-    link3 = ExternalLink.create(
-      user: mary,
-      observation: another_obs,
-      external_site: site,
-      url: "#{base_url}and_an_id"
-    )
-    assert_empty(link3.errors,
-                 "Link for different observation should be valid")
+    assert_empty(link2.errors,
+                 "A second link for the same observation+site should be valid")
   end
 
-  def test_relationship_defaults_to_cross_reference
+  def test_relationship_defaults_to_manual
     site = external_sites(:mycoportal)
     link = ExternalLink.create!(
       user: mary, observation: observations(:minimal_unknown_obs),
       external_site: site, url: "#{site.base_url}1"
     )
-    assert(link.cross_reference?,
-           "New links default to cross_reference (historical meaning)")
+    assert(link.manual?,
+           "New links default to manual (user-added cross-links)")
   end
 
   def test_only_one_import_per_target
@@ -132,9 +156,9 @@ class ExternalLinkTest < UnitTestCase
     assert_not_empty(link.errors[:relationship])
   end
 
-  def test_cross_reference_can_be_upgraded_to_import
+  def test_manual_link_can_be_upgraded_to_import
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
-    assert(link.cross_reference?, "Fixture link starts as cross_reference")
+    assert(link.manual?, "Fixture link starts as manual")
     link.update!(relationship: :import, external_id: "234723")
     assert(link.reload.import?, "Link should upgrade to import in place")
   end

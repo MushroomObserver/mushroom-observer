@@ -25,14 +25,23 @@
 #
 class ExternalLink < AbstractModel
   # The kind of relationship this link records between the target and the
-  # external site (#4299). `cross_reference` (0) is the historical meaning of
-  # pre-existing rows, so it is the default. `import` marks the external
-  # source the target was imported from — at most one per target (enforced
-  # below and by a DB unique index on a generated column). New values are
-  # added by migration as needed.
+  # external site (#4299/#4565). Drives the Show-page credit wording (the
+  # site name comes from ExternalSite):
+  #   manual        — user linked it on MO    "Manual link to <site>"
+  #   remote_manual — user linked it on site  "Manual link from <site>"
+  #   import  — MO created the obs from the source     "Imported from <site>"
+  #   export  — (future) MO pushes the obs out         "Exported to <site>"
+  #   mirror  — MO mirrored its native obs to source   "Mirrored to <site>"
+  #   copy    — the source's bulk service copied it    "Copied by <site>"
+  #   unknown — link exists, type unrecorded           "Linked to <site>"
+  # `manual` (0) is the default — pre-existing rows are MO-side user links.
+  # `import` marks the external source the target was imported from — at most
+  # one per target (enforced below and by a DB unique index on a generated
+  # column). Only 0/1 were ever in production, so 2-6 are free to define.
   enum :relationship,
-       { cross_reference: 0, import: 1, export: 2, mirror: 3, unknown: 4 },
-       default: :cross_reference
+       { manual: 0, import: 1, export: 2, mirror: 3, copy: 4, unknown: 5,
+         remote_manual: 6 },
+       default: :manual
 
   # Polymorphic so a link can attach to an Observation or an Image (per-photo
   # import provenance, #4529) — one model, one code path (#4299).
@@ -45,14 +54,14 @@ class ExternalLink < AbstractModel
   belongs_to :user
 
   validates :target, presence: true
-  # Uniqueness is on the column, not the polymorphic association (Rails can't
-  # compute the class for a polymorphic uniqueness check).
-  validates :target_id,
-            uniqueness: { scope: [:target_type, :external_site_id] }
   validates :external_site, presence: true
   validates :user, presence: true
   validates :url, length: { maximum: 100 }, allow_blank: true
   validate  :check_url_syntax
+  # No general one-link-per-(target, site) rule: an MO obs can legitimately
+  # correspond to several iNat obs (iNat-side duplicates of one collection),
+  # so it may carry multiple iNat links (#4565). Only one IMPORT (reflection)
+  # per target is still enforced (below + the import_target unique index).
   validate  :only_one_import_per_target, if: :import?
   before_validation :format_url_for_external_site
 
@@ -125,6 +134,27 @@ class ExternalLink < AbstractModel
   # Convenience function to allow +sort_by(&:site_name)+.
   def site_name
     external_site.name
+  end
+
+  # Human-readable description of how this link relates to the external site,
+  # e.g. "Copied by iNaturalist" / "Imported from iNaturalist". Shown on the
+  # observation page so the relationship (not just the bare link) is visible.
+  def relationship_description
+    :"external_link_relationship_#{relationship}".l(site: site_name)
+  end
+
+  # Best estimate of when this relationship arose, for display next to the
+  # link. When we know the external record's creation date the relationship
+  # can only exist once both records do, so use the later of (external record,
+  # our target). Otherwise (imports, legacy manual cross-refs) fall back to
+  # when the link row itself was created.
+  def relationship_date
+    if external_created_on && target
+      [external_created_on, target.created_at.to_date].max
+    else
+      # created_at is nil only for unsaved records (saved links always have one)
+      created_at&.to_date
+    end
   end
 
   # Backward-compat for the observation-only manual-link feature
