@@ -54,7 +54,28 @@ class API2ControllerTest < FunctionalTestCase
     @request.user_agent = "Googlebot"
     obs = Observation.first
     get(:observations, params: { id: obs.id })
-    assert_equal(200, @response.status)
+    assert_equal(200, @response.status, "Robot GET should succeed")
+  end
+
+  def test_index_returns_bad_request
+    get(:index)
+    assert_equal(400, @response.status,
+                 "GET /api2 without a resource path should return 400")
+    error = @response.parsed_body["errors"].first
+    assert_equal("API2::BadAction", error["code"],
+                 "Error code should identify the bad action")
+    assert_equal("true", error["fatal"],
+                 "Error should be fatal")
+
+    get(:index, params: { format: :xml })
+    assert_equal(400, @response.status,
+                 "XML: GET /api2 without a resource path should return 400")
+    doc = REXML::Document.new(@response.body)
+    xml_error = doc.root.elements["errors/error"]
+    assert_equal("API2::BadAction", xml_error.elements["code"].text,
+                 "XML error code should identify the bad action")
+    assert_equal("true", xml_error.elements["fatal"].text,
+                 "XML error should be fatal")
   end
 
   def test_basic_collection_number_get_request
@@ -618,6 +639,34 @@ class API2ControllerTest < FunctionalTestCase
     get(:observations, params: params.merge(format: :json, detail: :high))
     get(:observations, params: params.merge(format: :xml, detail: :none))
     get(:observations, params: params.merge(format: :xml, detail: :high))
+  end
+
+  def test_render_api_results_rescue_wraps_unexpected_errors
+    boom = RuntimeError.new("unexpected")
+    API2.stub(:execute, ->(_) { raise(boom) }) do
+      get(:observations, params: { format: :json })
+    end
+    assert_equal(200, @response.status,
+                 "Rescued render should still return a response")
+    error = @response.parsed_body["errors"].first
+    assert_equal("API2::RenderFailed", error["code"],
+                 "Unexpected error should be wrapped in RenderFailed")
+    assert_equal("true", error["fatal"],
+                 "RenderFailed error should be fatal")
+  end
+
+  def test_index_rescue_wraps_unexpected_errors
+    boom = RuntimeError.new("unexpected")
+    API2.stub(:execute, ->(_) { raise(boom) }) do
+      get(:index, params: { format: :json })
+    end
+    assert_equal(400, @response.status,
+                 "Rescued index should still return 400")
+    error = @response.parsed_body["errors"].first
+    assert_equal("API2::RenderFailed", error["code"],
+                 "Unexpected error in index should be wrapped in RenderFailed")
+    assert_equal("true", error["fatal"],
+                 "RenderFailed error should be fatal")
   end
 
   def test_routing
