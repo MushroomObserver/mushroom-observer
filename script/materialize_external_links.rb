@@ -16,8 +16,12 @@
 #   4. M has no import link:
 #        "Mirrored on iNaturalist" note -> mirror
 #        notes contain an inaturalist.org URL -> manual (MO-side cross-ref)
-#        else -> copy if the iNat obs predates the copy-service cutoff (2022),
-#          otherwise remote_manual (a hand-set link on the iNat side)
+#        else -> copy ONLY for the oldest (lowest-id) iNat obs of M, and only
+#          if it predates the copy-service cutoff (2022): the copy service made
+#          a single copy. Every newer link — and the oldest itself when it
+#          postdates the cutoff — is remote_manual (hand-set on the iNat side).
+#          So an MO obs has at most one copy link. (Re-runs demote any extra
+#          copy links left by earlier runs.)
 #
 # import + copy can never co-occur on one obs (step 3 short-circuits). Obs that
 # end up with 2+ iNat links are written to the multi-link report — the input to
@@ -61,6 +65,7 @@ class MaterializeExternalLinks
   def run
     rows = load_rows
     @total = rows.size
+    @oldest_inat_by_mo = compute_oldest_inat(rows)
     warn("Materializing #{@total} correspondences (site=#{@site.name}, " \
          "#{@apply ? "APPLY" : "dry run"})")
     rows.each_slice(BATCH) { |batch| process_batch(batch) }
@@ -82,6 +87,19 @@ class MaterializeExternalLinks
   def mo_id_from_url(url)
     m = URL_RE.match(url)
     m && m[1].to_i
+  end
+
+  # The oldest (lowest-id) iNat obs per MO obs — its sole copy candidate. iNat
+  # ids are assigned chronologically, so the lowest id is the earliest obs.
+  def compute_oldest_inat(rows)
+    oldest = {}
+    rows.each do |r|
+      next unless r[:mo_id]
+
+      cur = oldest[r[:mo_id]]
+      oldest[r[:mo_id]] = r[:inat_id] if cur.nil? || r[:inat_id].to_i < cur.to_i
+    end
+    oldest
   end
 
   def process_batch(batch)
@@ -107,11 +125,25 @@ class MaterializeExternalLinks
     refs = refs_for(row[:mo_id], db_links)
     if refs.include?(row[:inat_id])
       backfill_external_date(db_links, row)
+      demote_extra_copy(db_links, row)
       return (@stats[:already_present] += 1)
     end
 
-    create_link(obs, row, classify(obs, db_links, row[:inat_created]))
+    create_link(obs, row, classify(obs, db_links, row))
     refs << row[:inat_id]
+  end
+
+  # Repair data from earlier runs that allowed multiple copies per MO obs: any
+  # copy link that is not the designated copy (the oldest iNat obs) becomes
+  # remote_manual. At most one copy survives per MO obs.
+  def demote_extra_copy(db_links, row)
+    return if copy?(row)
+
+    link = db_links.find { |l| l.external_id.to_s == row[:inat_id] }
+    return unless link&.copy?
+
+    link.update!(relationship: :remote_manual) if @apply
+    @stats[:demoted_copy] += 1
   end
 
   # Idempotency for the external_created_on column: a link materialized before
@@ -154,15 +186,24 @@ class MaterializeExternalLinks
   # Order matters — see the file header. Mirror stamp first (mirror notes also
   # contain an inaturalist.org URL). An extra ref on an import obs is a hand-set
   # link on the iNat side (remote_manual). A notes URL is an MO-side manual. The
-  # residual is the historic copy service only when created before the cutoff;
-  # newer residual rows are iNat-side manual.
-  def classify(obs, db_links, inat_created)
+  # residual is the historic copy service only for the oldest iNat obs of the
+  # MO obs and only when it predates the cutoff (see copy?); every other
+  # residual row is iNat-side manual (remote_manual).
+  def classify(obs, db_links, row)
     blob = notes_blob(obs)
     return :mirror if blob.match?(MIRROR_RE)
     return :remote_manual if db_links.any?(&:import?)
     return :manual if blob.match?(MANUAL_RE)
 
-    historic_copy?(inat_created) ? :copy : :remote_manual
+    copy?(row) ? :copy : :remote_manual
+  end
+
+  # Copy applies to at most the oldest iNat obs of an MO obs (the copy service
+  # made a single copy), and only if it predates the cutoff. Newer links — and
+  # the oldest itself when it postdates the cutoff — are remote_manual.
+  def copy?(row)
+    @oldest_inat_by_mo[row[:mo_id]] == row[:inat_id] &&
+      historic_copy?(row[:inat_created])
   end
 
   def historic_copy?(inat_created)
@@ -214,6 +255,7 @@ class MaterializeExternalLinks
     end
     puts("  already present (skipped): #{@stats[:already_present]}")
     puts("  backfilled external date: #{@stats[:backfilled_date]}")
+    puts("  demoted extra copy -> remote_manual: #{@stats[:demoted_copy]}")
   end
 
   def print_other_counts
