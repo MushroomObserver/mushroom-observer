@@ -247,6 +247,38 @@ class InatTaxonTest < UnitTestCase
                "Plant identification taxon should not be importable")
   end
 
+  def test_maps_inat_infrageneric_to_mo_misspelled_name
+    correct = Name.create(
+      user: rolf, rank: "Subsection",
+      text_name: "Leccinum subsect. Scabri",
+      search_name: "Leccinum subsect. Scabri",
+      display_name: "**__Leccinum__** subsect. **__Scabri__**",
+      sort_name: "Leccinum  {3subsect.  Scabri",
+      author: ""
+    )
+    misspelling = Name.create(
+      user: rolf, rank: "Subsection",
+      text_name: "Leccinum subsect. Scabra",
+      search_name: "Leccinum subsect. Scabra",
+      display_name: "__Leccinum__ subsect. __Scabra__",
+      sort_name: "Leccinum  {3subsect.  Scabra",
+      author: "", deprecated: true, correct_spelling: correct
+    )
+
+    ancestor_ids = [Inat::Constants::FUNGI_TAXON_ID]
+    inat_taxon = Inat::Taxon.new(
+      rank: "subsection", name: "Scabra", ancestor_ids: ancestor_ids
+    )
+    stub_genus_lookup(
+      ancestor_ids: ancestor_ids.join(","),
+      body: { results: [{ name: "Leccinum" }] }
+    )
+
+    assert_equal(misspelling, inat_taxon.name,
+                 "iNat subsection should map to misspelled MO Name " \
+                 "when only a misspelling has that text_name")
+  end
+
   def test_returns_nil_when_no_mo_match
     assert_not(Name.exists?(text_name: "Calostoma lutescens"),
                "Test needs iNat taxon without an MO matching Name")
