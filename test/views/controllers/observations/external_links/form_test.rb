@@ -72,6 +72,31 @@ module Views::Controllers::Observations::ExternalLinks
                   "form[action*='/external_links/#{@external_link.id}']")
     end
 
+    def test_new_form_omits_external_id_and_relationship
+      # @html (from setup) is a new, unpersisted link
+      assert_no_html(@html, "input[name='external_link[external_id]']")
+      assert_no_html(@html, "select[name='external_link[relationship]']")
+    end
+
+    def test_edit_form_renders_external_id_and_url_toggle
+      @external_link = external_links(:imported_inat_obs_inat_link)
+      html = render_form
+
+      assert_html(html, "input[name='external_link[external_id]']" \
+                        "[data-external-link-form-target='externalId']")
+      assert_html(html, "input[name='external_link[url]']" \
+                        "[data-external-link-form-target='url']")
+      assert_html(html, "form[data-controller*='external-link-form']")
+    end
+
+    def test_edit_form_relationship_select_is_admin_only
+      @external_link = external_links(:imported_inat_obs_inat_link)
+      assert_no_html(render_form, "select[name='external_link[relationship]']")
+
+      stub_admin_mode!
+      assert_html(render_form, "select[name='external_link[relationship]']")
+    end
+
     private
 
     # Sibling reference within the namespace (`Form` resolves to

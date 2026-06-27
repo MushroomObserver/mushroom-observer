@@ -193,6 +193,37 @@ module Observations
       assert_flash_error
     end
 
+    def test_update_external_id_clears_url
+      # url-bearing link; setting external_id drops the url (XOR invariant)
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      login("mary") # site-project member of the link's site
+
+      put(:update,
+          params: { id: link.id, external_link: { external_id: "424242" } })
+
+      link.reload
+      assert_equal("424242", link.external_id)
+      assert_nil(link.url)
+    end
+
+    def test_update_relationship_is_admin_only
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+
+      # site member, not in admin mode -> relationship change is dropped
+      login("mary")
+      put(:update,
+          params: { id: link.id, external_link: { relationship: "mirror" } })
+      assert_not_equal("mirror", link.reload.relationship)
+
+      # admin in admin mode -> relationship changes
+      users(:dick).update(admin: true)
+      login("dick")
+      put(:update,
+          params: { id: link.id, external_link: { relationship: "mirror" } },
+          session: { admin: true })
+      assert_equal("mirror", link.reload.relationship)
+    end
+
     # Exercises the turbo_stream branch of `update` so
     # `render_external_links_section_update` (panel re-render) is
     # covered at the controller layer, not just the system test.

@@ -63,6 +63,7 @@ class ExternalLink < AbstractModel
   # so it may carry multiple iNat links (#4565). Only one IMPORT (reflection)
   # per target is still enforced (below + the import_target unique index).
   validate  :only_one_import_per_target, if: :import?
+  before_validation :normalize_external_id_and_url
   before_validation :format_url_for_external_site
 
   scope :order_by_default,
@@ -110,6 +111,16 @@ class ExternalLink < AbstractModel
     return unless others.exists?
 
     errors.add(:relationship, :validate_one_import_per_target.t)
+  end
+
+  # Enforce the external_id XOR url invariant: a blank external_id is stored as
+  # nil, and whenever an external_id is present the url is dropped (it is
+  # derived from the external_id via link_url). So a link is identified by
+  # external_id OR url, never both (#4565). Runs before format_url so a cleared
+  # url is never format-validated.
+  def normalize_external_id_and_url
+    self.external_id = nil if external_id.blank?
+    self.url = nil if external_id.present?
   end
 
   def format_url_for_external_site

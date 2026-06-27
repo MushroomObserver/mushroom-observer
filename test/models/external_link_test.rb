@@ -21,6 +21,24 @@ class ExternalLinkTest < UnitTestCase
     assert_equal("Copied by iNaturalist", link.relationship_description)
   end
 
+  def test_normalize_external_id_and_url
+    inat = external_sites(:inaturalist)
+    obs = observations(:detailed_unknown_obs)
+
+    # external_id present -> url is dropped (link identified by external_id)
+    link = ExternalLink.create!(
+      user: users(:rolf), target: obs, external_site: inat,
+      external_id: "5550000", url: "#{inat.base_url}123"
+    )
+    assert_nil(link.url)
+    assert_equal("5550000", link.external_id)
+
+    # clearing external_id -> a url may be set again
+    link.update!(external_id: "", url: "#{inat.base_url}777")
+    assert_nil(link.external_id)
+    assert_equal("#{inat.base_url}777", link.url)
+  end
+
   def test_relationship_date
     link = external_links(:imported_inat_obs_inat_link)
     obs = link.observation

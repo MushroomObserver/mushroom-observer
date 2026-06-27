@@ -277,6 +277,8 @@
   external_link_relationship_unknown: Linked to [site]
   EXTERNAL_SITE: External Site
   external_site: external site
+  EXTERNAL_ID: External ID
+  RELATIONSHIP: Relationship
   EXTERNAL_SITES: External Sites
   external_sites: external sites
   FIELD_SLIP: Field Slip

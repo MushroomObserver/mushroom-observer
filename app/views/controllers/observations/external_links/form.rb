@@ -17,13 +17,27 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def view_template
+      render_external_id_field if model.persisted?
       render_url_field
       render_hidden_fields
       render_site_select
+      render_relationship_field if model.persisted? && in_admin_mode?
       submit(submit_text, center: true)
     end
 
     private
+
+    # A link is identified by external_id OR url. When external_id is present
+    # the url field is disabled client-side (external-link-form Stimulus
+    # controller) and dropped server-side; otherwise url is required.
+    def render_external_id_field
+      text_field(:external_id,
+                 size: 40,
+                 label: :EXTERNAL_ID.l,
+                 wrap_class: "w-100",
+                 data: { external_link_form_target: "externalId",
+                         action: "input->external-link-form#toggleUrl" })
+    end
 
     def render_url_field
       selected_site = @site || @sites&.first
@@ -31,11 +45,20 @@ module Views::Controllers::Observations::ExternalLinks
                  size: 40,
                  placeholder: selected_site.base_url,
                  label: :URL.l,
-                 between: :required,
+                 between: (:required if model.external_id.blank?),
                  wrap_class: "w-100",
-                 data: { placeholder_target: "textField" }) do |f|
+                 data: { placeholder_target: "textField",
+                         external_link_form_target: "url" }) do |f|
         f.with_append { :show_observation_add_link_dialog.l }
       end
+    end
+
+    def render_relationship_field
+      select_field(:relationship,
+                   ExternalLink.relationships.keys.map { |k| [k.humanize, k] },
+                   label: :RELATIONSHIP.l,
+                   inline: true,
+                   selected: model.relationship)
     end
 
     def render_hidden_fields
@@ -92,11 +115,18 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def around_template
-      # Add stimulus controller for placeholder behavior
+      # placeholder (site base-url hints) always; external-link-form (url vs
+      # external_id toggle) only on edit, where both fields are present.
       @attributes[:data] ||= {}
-      @attributes[:data][:controller] = "placeholder"
+      @attributes[:data][:controller] = form_controllers
       @attributes[:data][:placeholders] = base_urls.to_json
       super
+    end
+
+    def form_controllers
+      controllers = ["placeholder"]
+      controllers << "external-link-form" if model.persisted?
+      controllers.join(" ")
     end
   end
 end

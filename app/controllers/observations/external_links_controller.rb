@@ -46,7 +46,6 @@ module Observations
 
     def update
       set_ivars_for_edit
-      @url = params.dig(:external_link, :url).to_s
       return unless check_external_link_permission!(link: @external_link)
 
       update_external_link
@@ -155,13 +154,21 @@ module Observations
     end
 
     def update_external_link
-      @external_link.update(url: @url)
+      @external_link.update(permitted_external_link_params)
 
       if @external_link.errors.any?
         flash_error_and_reload
       else
         flash_success_and_return
       end
+    end
+
+    # Editable on update: url + external_id (mutually exclusive — the model
+    # drops url when external_id is present). relationship is admin-only.
+    def permitted_external_link_params
+      permitted = [:url, :external_id]
+      permitted << :relationship if in_admin_mode?
+      params.require(:external_link).permit(*permitted)
     end
 
     def remove_external_link
