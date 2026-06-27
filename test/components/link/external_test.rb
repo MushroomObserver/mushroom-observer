@@ -52,14 +52,14 @@ class Components::Link::ExternalTest < ComponentTestCase
 
   # ---- ExternalLink AR record (link:) form ----
 
-  def test_inat_link_renders_inat_label_and_id_no_date
+  def test_inat_link_renders_relationship_id_and_date
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     html = render(Components::Link::External.new(link: link))
 
     assert_html(html, "a[href='#{link.url}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
-                text: "iNat 234723")
-    assert_no_html(html, "small")
+                text: "Manual link to iNaturalist (234723)")
+    assert_html(html, "small", text: link.relationship_date.web_date)
   end
 
   # Regression: import links store external_id with a nil url (url is derived).
@@ -74,17 +74,17 @@ class Components::Link::ExternalTest < ComponentTestCase
 
     assert_html(html, "a[href='#{site.observation_url("372490529")}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
-                text: "iNat 372490529")
+                text: "Imported from iNaturalist (372490529)")
   end
 
-  def test_other_site_renders_on_site_label_and_date
+  def test_other_site_renders_relationship_label_and_date
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     html = render(Components::Link::External.new(link: link))
 
     assert_html(html,
                 "a[href='#{link.url}']" \
                 "[target='_blank'][rel='noopener noreferrer']",
-                text: :on_site.t(site: link.external_site.name))
+                text: "Manual link to MycoPortal")
     assert_html(html, "small", text: link.created_at.web_date)
   end
 end

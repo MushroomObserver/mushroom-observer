@@ -136,6 +136,27 @@ class ExternalLink < AbstractModel
     external_site.name
   end
 
+  # Human-readable description of how this link relates to the external site,
+  # e.g. "Copied by iNaturalist" / "Imported from iNaturalist". Shown on the
+  # observation page so the relationship (not just the bare link) is visible.
+  def relationship_description
+    :"external_link_relationship_#{relationship}".l(site: site_name)
+  end
+
+  # Best estimate of when this relationship arose, for display next to the
+  # link. When we know the external record's creation date the relationship
+  # can only exist once both records do, so use the later of (external record,
+  # our target). Otherwise (imports, legacy manual cross-refs) fall back to
+  # when the link row itself was created.
+  def relationship_date
+    if external_created_on && target
+      [external_created_on, target.created_at.to_date].max
+    else
+      # created_at is nil only for unsaved records (saved links always have one)
+      created_at&.to_date
+    end
+  end
+
   # Backward-compat for the observation-only manual-link feature
   # (external_links_controller, Query, views). Manual cross-reference links
   # are always observation-targeted; image links exist only as import

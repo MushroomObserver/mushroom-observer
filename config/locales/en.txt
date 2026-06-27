@@ -268,6 +268,13 @@
   external_link: external link
   EXTERNAL_LINKS: External Links
   external_links: external links
+  external_link_relationship_import: Imported from [site]
+  external_link_relationship_export: Exported to [site]
+  external_link_relationship_copy: Copied by [site]
+  external_link_relationship_mirror: Mirrored on [site]
+  external_link_relationship_manual: Manual link to [site]
+  external_link_relationship_remote_manual: Linked from [site]
+  external_link_relationship_unknown: Linked to [site]
   EXTERNAL_SITE: External Site
   external_site: external site
   EXTERNAL_SITES: External Sites

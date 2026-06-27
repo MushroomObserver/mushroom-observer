@@ -3,6 +3,42 @@
 require("test_helper")
 
 class ExternalLinkTest < UnitTestCase
+  def test_relationship_description
+    # import link to iNaturalist
+    assert_equal(
+      "Imported from iNaturalist",
+      external_links(:imported_inat_obs_inat_link).relationship_description
+    )
+    # default (manual) relationship, interpolates a non-iNat site name
+    assert_equal(
+      "Manual link to MycoPortal",
+      external_links(:coprinus_comatus_obs_mycoportal_link).
+        relationship_description
+    )
+    # every relationship has a phrase
+    link = external_links(:coprinus_comatus_obs_inaturalist_link)
+    link.relationship = :copy
+    assert_equal("Copied by iNaturalist", link.relationship_description)
+  end
+
+  def test_relationship_date
+    link = external_links(:imported_inat_obs_inat_link)
+    obs = link.observation
+
+    # no external_created_on -> falls back to the link's own created_at
+    link.update!(external_created_on: nil)
+    assert_equal(link.created_at.to_date, link.relationship_date)
+
+    # external record created AFTER the obs -> use the external date
+    later = obs.created_at.to_date + 10
+    link.update!(external_created_on: later)
+    assert_equal(later, link.relationship_date)
+
+    # external record created BEFORE the obs -> use the obs date (the later)
+    link.update!(external_created_on: obs.created_at.to_date - 10)
+    assert_equal(obs.created_at.to_date, link.relationship_date)
+  end
+
   def test_create_valid
     site = ExternalSite.first
     base_url = site.base_url

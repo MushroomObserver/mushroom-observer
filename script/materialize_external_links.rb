@@ -105,10 +105,27 @@ class MaterializeExternalLinks
   def materialize(obs, row, links)
     db_links = links[row[:mo_id]] || []
     refs = refs_for(row[:mo_id], db_links)
-    return (@stats[:already_present] += 1) if refs.include?(row[:inat_id])
+    if refs.include?(row[:inat_id])
+      backfill_external_date(db_links, row)
+      return (@stats[:already_present] += 1)
+    end
 
     create_link(obs, row, classify(obs, db_links, row[:inat_created]))
     refs << row[:inat_id]
+  end
+
+  # Idempotency for the external_created_on column: a link materialized before
+  # the column existed has external_id but a nil date. Backfill it from the
+  # report. Legacy url-only manual links have no external_id and keep their
+  # own created_at as the relationship date, so they are left untouched.
+  def backfill_external_date(db_links, row)
+    return if row[:inat_created].blank?
+
+    link = db_links.find { |l| l.external_id.to_s == row[:inat_id] }
+    return unless link && link.external_created_on.nil?
+
+    link.update_column(:external_created_on, row[:inat_created]) if @apply
+    @stats[:backfilled_date] += 1
   end
 
   # Accumulated set of iNat ids this obs links to — seeded from its existing
@@ -128,7 +145,8 @@ class MaterializeExternalLinks
   def create_link(obs, row, type)
     if @apply
       ExternalLink.create!(user: @admin, target: obs, external_site: @site,
-                           external_id: row[:inat_id], relationship: type)
+                           external_id: row[:inat_id], relationship: type,
+                           external_created_on: row[:inat_created].presence)
     end
     @stats[type] += 1
   end
@@ -184,15 +202,24 @@ class MaterializeExternalLinks
   def print_summary
     puts
     puts("== summary#{" (dry run)" unless @apply} ==")
+    print_created_counts
+    print_other_counts
+    puts
+    puts(@apply ? "APPLIED." : "Dry run. Re-run with APPLY=1 to write.")
+  end
+
+  def print_created_counts
     [:copy, :mirror, :manual, :remote_manual].each do |t|
       puts("  created #{t}: #{@stats[t]}")
     end
     puts("  already present (skipped): #{@stats[:already_present]}")
+    puts("  backfilled external date: #{@stats[:backfilled_date]}")
+  end
+
+  def print_other_counts
     puts("  multi-link obs (2+ iNat links): #{@multi.size} -> #{@multi_out}")
     puts("  mo_missing: #{@stats[:mo_missing]} -> #{@missing_out}")
     puts("  unparseable url: #{@stats[:unparseable]}")
-    puts
-    puts(@apply ? "APPLIED." : "Dry run. Re-run with APPLY=1 to write.")
   end
 end
 
