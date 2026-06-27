@@ -58,7 +58,7 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def test_index_returns_bad_request
-    get(:index, params: { format: :json })
+    get(:index)
     assert_equal(400, @response.status,
                  "GET /api2 without a resource path should return 400")
     error = @response.parsed_body["errors"].first

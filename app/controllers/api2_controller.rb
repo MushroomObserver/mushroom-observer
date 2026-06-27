@@ -193,7 +193,7 @@ class API2Controller < ApplicationController
 
   def do_render_bad_request
     set_cors_headers
-    request.format = "json" if request.format == "html"
+    request.format = "json" unless request.format.json? || request.format.xml?
     respond_to do |format|
       format.xml  do
         render(layout: false, template: "/api2/results",
