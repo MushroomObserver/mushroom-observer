@@ -12,14 +12,19 @@ class InatMoObservationBuilderTest < UnitTestCase
   # Minimal stand-in for an ::Inat::Obs, exposing only what naming_vote reads.
   class FakeInatObs
     def initialize(sequences:, provisional_name:, quality_grade:,
-                   name_override: nil)
+                   name_override: nil, obs_taxon_name: nil)
       @sequences = sequences
       @provisional_name = provisional_name
       @quality_grade = quality_grade
       @name_override = name_override
+      @obs_taxon_name = obs_taxon_name
     end
 
     attr_reader :sequences, :provisional_name, :name_override
+
+    def name
+      @obs_taxon_name
+    end
 
     def [](key)
       { quality_grade: @quality_grade, license_code: "cc-by",
@@ -200,17 +205,37 @@ class InatMoObservationBuilderTest < UnitTestCase
     expected = "#{:inat_observation_taxon.l} " \
                "#{Time.zone.today.strftime("%Y-%m-%d")}"
     assert_equal(expected,
-                 builder_for.send(:used_references_explanation, name),
+                 builder_for(obs_taxon_name: name).
+                   send(:used_references_explanation, name),
                  "Observation taxon explanation should use " \
                  "inat_observation_taxon translation key")
   end
 
+  # When the obs taxon is a misspelling and the proposed name is its correct
+  # spelling, the observation taxon explanation appends the corrected spelling
+  # note.
+  def test_observation_taxon_naming_reason_corrected_spelling
+    misspelling = names(:petigera)
+    correct = misspelling.correct_spelling
+    assert(correct, "Test requires a name fixture with correct_spelling set")
+    expected = "#{:inat_observation_taxon.l} " \
+               "#{Time.zone.today.strftime("%Y-%m-%d")} " \
+               "#{:inat_corrected_spelling.l}"
+    assert_equal(expected,
+                 builder_for(obs_taxon_name: misspelling).
+                   send(:used_references_explanation, correct),
+                 "Observation taxon explanation should append corrected " \
+                 "spelling note when proposed name corrects the obs taxon")
+  end
+
   private
 
-  def builder_for(provisional_name: nil, name_override: nil)
+  def builder_for(provisional_name: nil, name_override: nil,
+                  obs_taxon_name: nil)
     fake = FakeInatObs.new(sequences: [], quality_grade: "needs_id",
                            provisional_name: provisional_name,
-                           name_override: name_override)
+                           name_override: name_override,
+                           obs_taxon_name: obs_taxon_name)
     Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
                                    external_site: :stub)
   end

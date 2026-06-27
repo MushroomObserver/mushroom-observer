@@ -15,14 +15,22 @@ class Inat
         elsif same_name?(name, prov_name)
           provisional_explanation
         elsif suggested?(name)
-          suggester_with_date(name)
+          "#{suggester_with_date(name)}#{corrected_spelling_note(name)}"
         else
-          "#{:inat_observation_taxon.l} #{Time.zone.today.strftime("%Y-%m-%d")}"
+          "#{:inat_observation_taxon.l} " \
+          "#{Time.zone.today.strftime("%Y-%m-%d")}" \
+          "#{corrected_spelling_note(name)}"
         end
       end
 
       def same_name?(name, other)
         other && name.id == other.id
+      end
+
+      def corrected_spelling_note(name)
+        return "" unless community_name.correct_spelling == name
+
+        " #{:inat_corrected_spelling.l}"
       end
 
       def provisional_explanation

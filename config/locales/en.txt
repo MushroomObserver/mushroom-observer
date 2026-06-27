@@ -3255,6 +3255,7 @@
   inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
   inat_observation_taxon: iNat Observation Taxon
+  inat_corrected_spelling: (corrected spelling)
   inat_snapshot_caption: iNat imported data
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
