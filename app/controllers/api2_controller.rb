@@ -22,19 +22,12 @@ class API2Controller < ApplicationController
 
   def index
     @start_time = Time.zone.now
-    @api = API2.execute(method: "GET", action: "index")
-    set_cors_headers
-    request.format = "json" if request.format == "html"
-    respond_to do |format|
-      format.xml  do
-        render(layout: false, template: "/api2/results",
-               status: :bad_request)
-      end
-      format.json do
-        render(layout: false, template: "/api2/results",
-               status: :bad_request)
-      end
-    end
+    @api = API2.execute(method: request.method, action: "index")
+    do_render_bad_request
+  rescue StandardError => e
+    @api ||= API2.new
+    @api.errors << API2::RenderFailed.new(e)
+    do_render_bad_request
   end
 
   # Standard entry point for REST requests.
@@ -196,6 +189,21 @@ class API2Controller < ApplicationController
 
   def do_render_json
     render(layout: false, template: "/api2/results")
+  end
+
+  def do_render_bad_request
+    set_cors_headers
+    request.format = "json" if request.format == "html"
+    respond_to do |format|
+      format.xml  do
+        render(layout: false, template: "/api2/results",
+               status: :bad_request)
+      end
+      format.json do
+        render(layout: false, template: "/api2/results",
+               status: :bad_request)
+      end
+    end
   end
 
   def set_cors_headers

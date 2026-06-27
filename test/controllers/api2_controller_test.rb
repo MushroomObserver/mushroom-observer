@@ -655,6 +655,20 @@ class API2ControllerTest < FunctionalTestCase
                  "RenderFailed error should be fatal")
   end
 
+  def test_index_rescue_wraps_unexpected_errors
+    boom = RuntimeError.new("unexpected")
+    API2.stub(:execute, ->(_) { raise(boom) }) do
+      get(:index, params: { format: :json })
+    end
+    assert_equal(400, @response.status,
+                 "Rescued index should still return 400")
+    error = @response.parsed_body["errors"].first
+    assert_equal("API2::RenderFailed", error["code"],
+                 "Unexpected error in index should be wrapped in RenderFailed")
+    assert_equal("true", error["fatal"],
+                 "RenderFailed error should be fatal")
+  end
+
   def test_routing
     assert_routing({ path: "/api2/comments", method: :delete },
                    { controller: "api2", action: "comments" })
