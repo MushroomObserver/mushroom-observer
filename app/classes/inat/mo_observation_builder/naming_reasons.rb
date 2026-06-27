@@ -4,7 +4,7 @@ class Inat
   class MoObservationBuilder
     # How the importer explains each naming it creates (the reasons[2] text):
     # Species Name Override (#4533), Provisional Species Name, an iNat
-    # suggester, or the Community ID. Mixed into MoObservationBuilder.
+    # suggester, or the Observation Taxon. Mixed into MoObservationBuilder.
     module NamingReasons
       private
 
@@ -17,7 +17,7 @@ class Inat
         elsif suggested?(name)
           suggester_with_date(name)
         else
-          "iNat `Community ID` #{Time.zone.today.strftime("%Y-%m-%d")}"
+          "iNat `Observation Taxon` #{Time.zone.today.strftime("%Y-%m-%d")}"
         end
       end
 
