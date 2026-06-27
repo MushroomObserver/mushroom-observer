@@ -35,6 +35,7 @@ class Components::Link::Get < Components::Link
     @size = opts.delete(:size)
     @icon = opts.delete(:icon)
     @icon_class = opts.delete(:icon_class)
+    @icon_title = opts.delete(:icon_title)
     @label = opts.delete(:label)
     @html_attrs = opts
     validate_no_btn_classes!(@html_attrs[:class])

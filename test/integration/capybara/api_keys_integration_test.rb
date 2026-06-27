@@ -93,7 +93,7 @@ class APIKeysIntegrationTest < CapybaraIntegrationTestCase
 
     # Click the edit button to expand the edit form
     within("#notes_#{key.id}") do
-      find("button[data-role='edit_api_key']").click
+      find("a[data-role='edit_api_key']").click
     end
 
     # Fill in the notes field

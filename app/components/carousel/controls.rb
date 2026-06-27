@@ -18,7 +18,7 @@ class Components::Carousel::Controls < Components::Base
 
   def render_control(direction)
     position = direction == :prev ? "left" : "right"
-    icon = direction == :prev ? "chevron-left" : "chevron-right"
+    icon_type = direction == :prev ? :chevron_left : :chevron_right
     label = direction == :prev ? :PREV : :NEXT
 
     link_to("##{@carousel_id}",
@@ -26,7 +26,8 @@ class Components::Carousel::Controls < Components::Base
             role: "button",
             data: { slide: direction.to_s }) do
       div(class: "btn") do
-        span(class: "glyphicon glyphicon-#{icon}", aria: { hidden: "true" })
+        render(::Components::Icon.new(type: icon_type,
+                                      attributes: { aria: { hidden: "true" } }))
         span(class: "sr-only") { label.l }
       end
     end

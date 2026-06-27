@@ -21,6 +21,7 @@
 #  == Class Methods
 #
 #  blast_url_prefix    part of url prepended to BLAST QUERY
+#  mycoblast_url       url of MycoMap's BLAST tool (no QUERY param)
 #  locus_width         Default # of chars (including diaresis) to truncate locus
 #
 #  == Instance Methods
@@ -181,6 +182,13 @@ class Sequence < AbstractModel
 
   # convenience wrapper around class method of same name
   delegate :blast_url_prefix, to: :Sequence
+
+  # MycoMap's BLAST tool — unlike NCBI, it has no query parameter to
+  # pre-fill with a sequence/accession, so this is just a plain link
+  # to the tool itself rather than a per-Sequence BLAST report.
+  def self.mycoblast_url
+    "https://mycomap.org/mycoblast"
+  end
 
   # Just the nucleotide codes: no description, no digits, no whitespace
   def bases_nucleotides

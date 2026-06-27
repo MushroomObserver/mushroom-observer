@@ -245,20 +245,26 @@ form {
 }
 
 .map-point,
-.map-location,
-.map-hide {
+.map-location {
   display: none;
 }
 
 .map-open {
-  .map-show {
-    display: none;
-  }
   .map-point,
-  .map-location,
-  .map-hide {
+  .map-location {
     display: inline-block;
   }
+}
+
+// Open/closed spans on collapse-trigger buttons and links. Bootstrap's
+// `.collapsed` class on the trigger element drives which span is visible.
+// Default state = target IS open (no `.collapsed` on the trigger).
+.collapse-toggle-open { display: inline; }
+.collapse-toggle-closed { display: none; }
+
+.collapsed {
+  .collapse-toggle-open { display: none; }
+  .collapse-toggle-closed { display: inline; }
 }
 
 .overflow-scroll-checklist {

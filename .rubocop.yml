@@ -423,3 +423,6 @@ MushroomObserver/NoUserCurrentInViews:
     - "app/controllers/application_controller.rb"
     - "app/controllers/account/login_controller.rb"
     - "app/controllers/admin/session_controller.rb"
+
+Capybara/SpecificActions:
+  Enabled: true

@@ -41,38 +41,28 @@ module Views::Layouts
     end
 
     def render_watching
-      li { interest_icon(:big, "watch", :interest_watching) }
-      li do
-        interest_link(state: 0) do
-          interest_icon(:small, "halfopen", :interest_default_help)
-        end
-        interest_link(state: -1) do
-          interest_icon(:small, "ignore", :interest_ignore_help)
-        end
-      end
+      icon_li(:big, "watch", :interest_watching)
+      link_li(0, "halfopen", :interest_default_help)
+      link_li(-1, "ignore", :interest_ignore_help)
     end
 
     def render_ignoring
-      li { interest_icon(:big, "ignore", :interest_ignoring) }
-      li do
-        interest_link(state: 1) do
-          interest_icon(:small, "watch", :interest_watch_help)
-        end
-        interest_link(state: 0) do
-          interest_icon(:small, "halfopen", :interest_default_help)
-        end
-      end
+      icon_li(:big, "ignore", :interest_ignoring)
+      link_li(1, "watch", :interest_watch_help)
+      link_li(0, "halfopen", :interest_default_help)
     end
 
     def render_default
-      li do
-        interest_link(state: 1) do
-          interest_icon(:small, "watch", :interest_watch_help)
-        end
-        interest_link(state: -1) do
-          interest_icon(:small, "ignore", :interest_ignore_help)
-        end
-      end
+      link_li(1, "watch", :interest_watch_help)
+      link_li(-1, "ignore", :interest_ignore_help)
+    end
+
+    def icon_li(size, kind, alt_key)
+      li { interest_icon(size, kind, alt_key) }
+    end
+
+    def link_li(state, kind, alt_key)
+      li { interest_link(state:) { interest_icon(:small, kind, alt_key) } }
     end
 
     def interest_link(state:, &block)

@@ -64,6 +64,11 @@ module Views::Controllers::InatImports
       checkbox_field(:all,
                      label: :inat_import_all.l,
                      wrap_class: "mt-3")
+      div(class: "mt-3") do
+        text_field(:inat_url,
+                   label: "#{:inat_url_label.l}: ")
+        p(class: "help-block") { plain(:inat_url_hint.l) }
+      end
     end
 
     def render_details_panel

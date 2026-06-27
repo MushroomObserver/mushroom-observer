@@ -42,6 +42,7 @@ module Views::Controllers::InatImports
                  name: :inat_import_tracker_results.l,
                  target: results_observations_path
                ))
+        whitespace
         render(::Components::Button.new(
                  type: :put,
                  name: :CANCEL.l,

@@ -27,18 +27,21 @@ module Views::Controllers::Account::APIKeys
       html = render_form_with_cancel
 
       assert_html(html, ".input-group")
-      assert_includes(html, :CANCEL.l)
       assert_html(html, ".input-group-btn")
       assert_html(html, "#api_key_notes")
-      assert_html(html, "button[data-toggle='collapse']")
+      assert_html(html, "a[data-toggle='collapse']")
+      assert_html(html, "a span.glyphicon")
+      assert_html(html, "a span.sr-only", text: :CANCEL.l.as_displayed)
     end
 
     def test_cancel_button_has_correct_data_attributes
       html = render_form_with_cancel
 
-      assert_html(html, "button[data-target='#test_target']")
-      assert_html(html, "button[data-parent='#test_parent']")
-      assert_html(html, "button[aria-controls='test_target']")
+      assert_html(html,
+                  "a[href='#test_target']" \
+                  "[aria-controls='test_target']" \
+                  "[aria-expanded='true']")
+      assert_html(html, "a[data-parent='#test_parent']")
     end
 
     def test_cancel_button_not_rendered_when_nil
@@ -124,9 +127,10 @@ module Views::Controllers::Account::APIKeys
       # Cancel button (button, not submit) with the per-row collapse
       # data attributes to swap back to the view pane.
       assert_html(html,
-                  ".input-group button[type='button']" \
-                  "[data-toggle='collapse']" \
-                  "[data-target='#view_notes_#{key.id}_container']" \
+                  ".input-group a[data-toggle='collapse']" \
+                  "[href='#view_notes_#{key.id}_container']" \
+                  "[aria-controls='view_notes_#{key.id}_container']" \
+                  "[aria-expanded='true']" \
                   "[data-parent='#notes_#{key.id}']")
       # Save submit (not Update — that's the standalone-edit layout).
       assert_html(html,

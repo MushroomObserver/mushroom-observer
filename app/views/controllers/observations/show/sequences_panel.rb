@@ -64,7 +64,7 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
       render_show_link(sequence)
       render(Components::Link::InlineMod.new(
                target: sequence, observation: @obs, user: @user,
-               extras: [archive_link(sequence)].compact
+               extras: [archive_link(sequence), copy_link(sequence)].compact
              ))
     end
   end
@@ -87,5 +87,16 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
     # `capture` returns a SafeBuffer in Phlex 2.x — no extra
     # `.html_safe` needed.
     capture { a(href: url_for(path), **opts) { trusted_html(content) } }
+  end
+
+  # Bases aren't displayed in this row (only the truncated locus
+  # is), so the copy button copies straight from the model rather
+  # than from rendered text on the page.
+  def copy_link(sequence)
+    return nil if sequence.bases.blank?
+
+    Components::Button::Clipboard.new(
+      text: sequence.bases, name: :COPY_THIS_SEQUENCE.l
+    )
   end
 end

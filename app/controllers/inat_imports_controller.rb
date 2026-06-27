@@ -59,6 +59,7 @@
 class InatImportsController < ApplicationController
   include Validators
   include Estimators
+  include FormBuilders
   include Inat::Constants
 
   before_action :login_required
@@ -93,6 +94,7 @@ class InatImportsController < ApplicationController
     return reload_form unless params_valid?
 
     normalize_inat_ids_param!
+    normalize_inat_url_param!
     return confirm_import unless params[:confirmed] == "1"
 
     warn_about_listed_previous_imports
@@ -101,13 +103,12 @@ class InatImportsController < ApplicationController
     request_inat_user_authorization
   end
 
-  # ---------------------------------
-
   private
 
   def confirm_import
     @estimate = fetch_import_estimate
     return inat_unreachable if @estimate.nil?
+    return reload_form if @estimate == false
 
     @unlicensed_obs = if import_others?
                         fetch_unlicensed_others_count
@@ -123,96 +124,9 @@ class InatImportsController < ApplicationController
            ))
   end
 
-  def build_confirm_form
-    FormObject::InatImportConfirm.new(
-      inat_username: params[:inat_username],
-      inat_ids: params[:inat_ids],
-      import_all: params[:all],
-      consent: params[:consent],
-      import_others: (import_others? ? "1" : nil),
-      skip_inat_writeback: params[:skip_inat_writeback]
-    )
-  end
-
   def inat_unreachable
     flash_error(:inat_cannot_communicate.l)
     reload_form
-  end
-
-  # Superform namespaces hidden fields under the model key.
-  # Flatten them to top-level so the rest of the controller works unchanged.
-  def flatten_confirm_params
-    confirm = params[:inat_import_confirm]
-    return unless confirm
-
-    merge_form_param(confirm, :inat_username)
-    merge_form_param(confirm, :inat_ids)
-    merge_form_param(confirm, :consent)
-    merge_form_param(confirm, :import_others)
-    merge_form_param(confirm, :skip_inat_writeback)
-    params[:all] ||= confirm[:import_all]
-  end
-
-  def merge_form_param(form_params, key)
-    params[key] ||= form_params[key]
-  end
-
-  def reload_form
-    render_new_form(submitted: {
-                      username: params[:inat_username],
-                      inat_ids: params[:inat_ids],
-                      all: params[:all],
-                      consent: params[:consent],
-                      import_others: params[:import_others],
-                      skip_writeback: params[:skip_inat_writeback]
-                    })
-  end
-
-  def render_new_form(submitted: {})
-    render(
-      Views::Controllers::InatImports::New.new(
-        form: build_new_form(submitted),
-        super_importer: InatImport.super_importer?(@user),
-        admin: in_admin_mode?
-      )
-    )
-  end
-
-  def build_new_form(submitted)
-    FormObject::InatImport.new(
-      inat_username: submitted.fetch(:username, @user.inat_username),
-      inat_ids: submitted[:inat_ids],
-      all: ("1" if submitted[:all] == "1"),
-      consent: ("1" if submitted[:consent] == "1"),
-      import_others: ("1" if submitted[:import_others] == "1"),
-      skip_inat_writeback: initial_skip_writeback(submitted)
-    )
-  end
-
-  # The fresh form (no :skip_writeback key) pre-checks the box to mirror the
-  # default that will apply if the admin doesn't touch it: skip in
-  # development, write back in production. On reload, honor the submitted
-  # state.
-  def initial_skip_writeback(submitted)
-    return ("1" if Rails.env.development?) unless
-      submitted.key?(:skip_writeback)
-
-    ("1" if submitted[:skip_writeback] == "1")
-  end
-
-  # Superform namespaces fields under the model key.
-  # Flatten them to top-level so the controller works
-  # unchanged.
-  def flatten_new_form_params
-    new_form = params[:inat_import]
-    return unless new_form
-
-    merge_form_param(new_form, :inat_username)
-    merge_form_param(new_form, :inat_ids)
-    merge_form_param(new_form, :consent)
-    merge_form_param(new_form, :import_others)
-    merge_form_param(new_form, :skip_inat_writeback)
-    params[:all] ||= new_form[:all]
   end
 
   # For storage: extract only digit tokens and join with commas.
@@ -229,6 +143,64 @@ class InatImportsController < ApplicationController
     return unless listing_ids?
 
     params[:inat_ids] = normalize_inat_ids(params[:inat_ids])
+  end
+
+  # Normalize params[:inat_url] in-place: convert any observation search URL
+  # to a cleaned query string. Saves the original so Go Back can restore it.
+  def normalize_inat_url_param!
+    return unless listing_url?
+    return unless params[:inat_url].include?("://")
+
+    normalizer = build_url_normalizer_with_warnings
+    params[:original_inat_url] = params[:inat_url]
+    params[:inat_url] = normalizer.normalize.to_s
+  end
+
+  def build_url_normalizer_with_warnings
+    taxon_id_ok = url_taxon_ids_importable?
+    normalizer = url_normalizer(params[:inat_url], keep_taxon_id: taxon_id_ok)
+    warn_about_non_importable_taxon unless taxon_id_ok
+    warn_about_ignored_url_params(normalizer)
+    normalizer
+  end
+
+  def warn_about_ignored_url_params(normalizer)
+    ignored = normalizer.ignored_params
+    return if ignored.blank?
+
+    flash_warning(:inat_url_params_ignored.t(params: ignored.join(", ")))
+  end
+
+  def url_normalizer(url, keep_taxon_id: false)
+    Inat::URLNormalizer.new(
+      url,
+      superimporter: InatImport.super_importer?(@user),
+      import_others: import_others?,
+      keep_taxon_id: keep_taxon_id
+    )
+  end
+
+  # True when every taxon_id value in the URL is a Fungi/Mycetozoa descendant,
+  # or when no taxon_id is present. Result is memoized — the iNat API call
+  # runs at most once per request.
+  def url_taxon_ids_importable?
+    unless instance_variable_defined?(:@url_taxon_ids_importable)
+      ids = taxon_ids_from_url(params[:inat_url].to_s)
+      @url_taxon_ids_importable =
+        ids.empty? || Inat::TaxonValidator.new(ids).all_importable?
+    end
+    @url_taxon_ids_importable
+  end
+
+  def taxon_ids_from_url(url)
+    Rack::Utils.parse_query(URI.parse(url).query.to_s)["taxon_id"].
+      to_s.split(",").map(&:strip).compact_blank
+  rescue URI::InvalidURIError
+    []
+  end
+
+  def warn_about_non_importable_taxon
+    flash_warning(:inat_taxon_id_not_importable.l)
   end
 
   # Were any listed iNat IDs previously imported?
@@ -269,6 +241,7 @@ class InatImportsController < ApplicationController
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
+      inat_url: params[:inat_url].presence,
       import_others: import_others?,
       writeback: writeback_policy,
       response_errors: "",
@@ -280,7 +253,7 @@ class InatImportsController < ApplicationController
   end
 
   def importables_count
-    return nil if importing_all?
+    return nil if importing_all? || listing_url?
 
     inat_id_list.length
   end
@@ -343,7 +316,7 @@ class InatImportsController < ApplicationController
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
     # InatImportJob.perform_now(inat_import) # uncomment to manually test job
-    InatImportJob.perform_later(inat_import) # uncomment for production
+    InatImportJob.perform_later(inat_import)
 
     redirect_to(inat_import_path(inat_import,
                                  params: { tracker_id: tracker.id }))

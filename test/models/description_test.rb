@@ -31,6 +31,24 @@ class DescriptionTest < UnitTestCase
   #  Make sure all the author/editor-related magic is working right.
   # ------------------------------------------------------------------
 
+  # Guards the public-description show-page OOM: show_includes must preload the
+  # permission groups but NOT their users. A public description's `all_users`
+  # reader group has ~90k members on production; preloading them turned the
+  # show page into a multi-second, OOM-prone render.
+  def test_show_includes_does_not_preload_group_users
+    desc = name_descriptions(:peltigera_desc)
+    desc.add_reader(UserGroup.all_users)
+
+    loaded = NameDescription.show_includes.find(desc.id)
+
+    assert(loaded.association(:reader_groups).loaded?,
+           "reader_groups should be preloaded for include?(all_users)")
+    group = loaded.reader_groups.detect { |g| g == UserGroup.all_users }
+    assert_not_nil(group, "expected the all_users reader group")
+    assert_not(group.association(:users).loaded?,
+               "reader group users must NOT be preloaded (loads all_users)")
+  end
+
   def test_authors_and_editors
     [LocationDescription, NameDescription].each do |model|
       case model.name
