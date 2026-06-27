@@ -23,9 +23,11 @@ class API2Controller < ApplicationController
   def index
     @start_time = Time.zone.now
     @api = API2.execute(method: request.method, action: "index")
+    @api.version ||= API2.version
     do_render_bad_request
   rescue StandardError => e
     @api ||= API2.new
+    @api.version ||= API2.version
     @api.errors << API2::RenderFailed.new(e)
     do_render_bad_request
   end
