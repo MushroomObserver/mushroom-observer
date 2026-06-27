@@ -248,7 +248,7 @@ class InatTaxonTest < UnitTestCase
   end
 
   def test_maps_inat_infrageneric_to_mo_misspelled_name
-    correct = Name.create(
+    correct = Name.create!(
       user: rolf, rank: "Subsection",
       text_name: "Leccinum subsect. Scabri",
       search_name: "Leccinum subsect. Scabri",
@@ -256,7 +256,7 @@ class InatTaxonTest < UnitTestCase
       sort_name: "Leccinum  {3subsect.  Scabri",
       author: ""
     )
-    misspelling = Name.create(
+    misspelling = Name.create!(
       user: rolf, rank: "Subsection",
       text_name: "Leccinum subsect. Scabra",
       search_name: "Leccinum subsect. Scabra",
