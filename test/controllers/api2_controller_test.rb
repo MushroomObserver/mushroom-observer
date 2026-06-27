@@ -54,7 +54,16 @@ class API2ControllerTest < FunctionalTestCase
     @request.user_agent = "Googlebot"
     obs = Observation.first
     get(:observations, params: { id: obs.id })
-    assert_equal(200, @response.status)
+    assert_equal(200, @response.status, "Robot GET should succeed")
+  end
+
+  def test_index_returns_bad_request
+    get(:index, params: { action: "images", format: :json })
+    assert_equal(400, @response.status,
+                 "GET /api2 without a resource path should return 400")
+    json = @response.parsed_body
+    assert(json["errors"].any? { |e| e.include?("/api2/") },
+           "Error message should hint at the correct URL format")
   end
 
   def test_basic_collection_number_get_request

@@ -20,6 +20,11 @@ class API2Controller < ApplicationController
   # wrapped parameters break JSON requests in the unit tests.
   wrap_parameters false
 
+  def index
+    render(json: { errors: ["Use /api2/{resource} — e.g. /api2/images"] },
+           status: :bad_request)
+  end
+
   # Standard entry point for REST requests.
   def api_keys
     rest_query(:api_key)
