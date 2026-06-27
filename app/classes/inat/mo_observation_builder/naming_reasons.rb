@@ -17,7 +17,7 @@ class Inat
         elsif suggested?(name)
           suggester_with_date(name)
         else
-          "iNat `Observation Taxon` #{Time.zone.today.strftime("%Y-%m-%d")}"
+          "#{:inat_observation_taxon.l} #{Time.zone.today.strftime("%Y-%m-%d")}"
         end
       end
 

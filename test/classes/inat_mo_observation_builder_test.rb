@@ -22,7 +22,8 @@ class InatMoObservationBuilderTest < UnitTestCase
     attr_reader :sequences, :provisional_name, :name_override
 
     def [](key)
-      { quality_grade: @quality_grade, license_code: "cc-by" }[key]
+      { quality_grade: @quality_grade, license_code: "cc-by",
+        identifications: [] }[key]
     end
   end
 
@@ -71,8 +72,8 @@ class InatMoObservationBuilderTest < UnitTestCase
                  proposed(community: names(:lactarius_alpinus)))
   end
 
-  # A deprecated Observation Taxon is corrected: its preferred synonym leads, the
-  # deprecated name follows at Could Be. (Applies to all imports.)
+  # A deprecated Observation Taxon is corrected: its preferred synonym leads,
+  # the deprecated name follows at Could Be. (Applies to all imports.)
   def test_proposed_namings_deprecated_community_adds_preferred_synonym
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
                   ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
@@ -87,9 +88,10 @@ class InatMoObservationBuilderTest < UnitTestCase
                           provisional: names(:lactarius_alpinus)))
   end
 
-  # The provisional is deprecated in favor of the Observation Taxon (the Leccinum
-  # scenario): the accepted name leads, the deprecated provisional follows,
-  # and the synonym-of-the-provisional dedups with the Observation Taxon.
+  # The provisional is deprecated in favor of the Observation Taxon (the
+  # Leccinum scenario): the accepted name leads, the deprecated provisional
+  # follows, and the synonym-of-the-provisional dedups with the Observation
+  # Taxon.
   def test_proposed_namings_deprecated_provisional_prefers_accepted
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
                   ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
@@ -189,6 +191,18 @@ class InatMoObservationBuilderTest < UnitTestCase
     builder = builder_for(name_override: existing.text_name)
     assert_equal("Following Species Name Override from iNat",
                  builder.send(:used_references_explanation, existing))
+  end
+
+  # The observation taxon explanation uses the inat_observation_taxon
+  # translation string plus today's date.
+  def test_observation_taxon_naming_reason
+    name = names(:peltigera)
+    expected = "#{:inat_observation_taxon.l} " \
+               "#{Time.zone.today.strftime("%Y-%m-%d")}"
+    assert_equal(expected,
+                 builder_for.send(:used_references_explanation, name),
+                 "Observation taxon explanation should use " \
+                 "inat_observation_taxon translation key")
   end
 
   private
