@@ -58,12 +58,24 @@ class API2ControllerTest < FunctionalTestCase
   end
 
   def test_index_returns_bad_request
-    get(:index, params: { action: "images", format: :json })
+    get(:index, params: { format: :json })
     assert_equal(400, @response.status,
                  "GET /api2 without a resource path should return 400")
-    json = @response.parsed_body
-    assert(json["errors"].any? { |e| e.include?("/api2/") },
-           "Error message should hint at the correct URL format")
+    error = @response.parsed_body["errors"].first
+    assert_equal("API2::BadAction", error["code"],
+                 "Error code should identify the bad action")
+    assert_equal("true", error["fatal"],
+                 "Error should be fatal")
+
+    get(:index, params: { format: :xml })
+    assert_equal(400, @response.status,
+                 "XML: GET /api2 without a resource path should return 400")
+    doc = REXML::Document.new(@response.body)
+    xml_error = doc.root.elements["errors/error"]
+    assert_equal("API2::BadAction", xml_error.elements["code"].text,
+                 "XML error code should identify the bad action")
+    assert_equal("true", xml_error.elements["fatal"].text,
+                 "XML error should be fatal")
   end
 
   def test_basic_collection_number_get_request

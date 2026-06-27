@@ -21,8 +21,20 @@ class API2Controller < ApplicationController
   wrap_parameters false
 
   def index
-    render(json: { errors: ["Use /api2/{resource} — e.g. /api2/images"] },
-           status: :bad_request)
+    @start_time = Time.zone.now
+    @api = API2.execute(method: "GET", action: "index")
+    set_cors_headers
+    request.format = "json" if request.format == "html"
+    respond_to do |format|
+      format.xml  do
+        render(layout: false, template: "/api2/results",
+               status: :bad_request)
+      end
+      format.json do
+        render(layout: false, template: "/api2/results",
+               status: :bad_request)
+      end
+    end
   end
 
   # Standard entry point for REST requests.
