@@ -206,21 +206,13 @@ module Observations
       assert_nil(link.url)
     end
 
-    def test_update_relationship_is_admin_only
+    def test_update_relationship
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
-      # site member, not in admin mode -> relationship change is dropped
+      # any editor (mary is a member of the site's project) can set relationship
       login("mary")
       put(:update,
           params: { id: link.id, external_link: { relationship: "mirror" } })
-      assert_not_equal("mirror", link.reload.relationship)
-
-      # admin in admin mode -> relationship changes
-      users(:dick).update(admin: true)
-      login("dick")
-      put(:update,
-          params: { id: link.id, external_link: { relationship: "mirror" } },
-          session: { admin: true })
       assert_equal("mirror", link.reload.relationship)
     end
 

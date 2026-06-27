@@ -89,11 +89,9 @@ module Views::Controllers::Observations::ExternalLinks
       assert_html(html, "form[data-controller*='external-link-form']")
     end
 
-    def test_edit_form_relationship_select_is_admin_only
+    def test_edit_form_renders_relationship_select
       @external_link = external_links(:imported_inat_obs_inat_link)
-      assert_no_html(render_form, "select[name='external_link[relationship]']")
 
-      stub_admin_mode!
       assert_html(render_form, "select[name='external_link[relationship]']")
     end
 

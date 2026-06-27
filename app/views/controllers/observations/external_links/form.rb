@@ -21,7 +21,7 @@ module Views::Controllers::Observations::ExternalLinks
       render_url_field
       render_hidden_fields
       render_site_select
-      render_relationship_field if model.persisted? && in_admin_mode?
+      render_relationship_field if model.persisted?
       submit(submit_text, center: true)
     end
 

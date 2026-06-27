@@ -163,12 +163,10 @@ module Observations
       end
     end
 
-    # Editable on update: url + external_id (mutually exclusive — the model
-    # drops url when external_id is present). relationship is admin-only.
+    # Editable on update by any editor: url + external_id (mutually exclusive —
+    # the model drops url when external_id is present) + relationship.
     def permitted_external_link_params
-      permitted = [:url, :external_id]
-      permitted << :relationship if in_admin_mode?
-      params.require(:external_link).permit(*permitted)
+      params.require(:external_link).permit(:url, :external_id, :relationship)
     end
 
     def remove_external_link
