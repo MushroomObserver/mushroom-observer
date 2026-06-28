@@ -39,6 +39,26 @@ module Views::Controllers::InatImports
                   text: :inat_import_confirm_no_date_caption.l)
     end
 
+    def test_expected_count_links_to_inat_when_url_constructable
+      html = render_form(expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "#expected_count a[href*='without_field']" \
+                        "[target='_blank']")
+    end
+
+    def test_expected_count_plain_when_no_url_constructable
+      html = render_form(model_attrs: { inat_ids: nil, inat_username: nil },
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "#expected_count", text: "5")
+      assert_no_html(html, "#expected_count a",
+                     "No link when URL cannot be constructed")
+    end
+
     def test_ignored_section_already_imported_row_with_link
       # after_taxon(10) - expected(8) = 2 already-imported; total = 2, 1 row
       # inat_ids set → already_imported_url returns a URL → link rendered

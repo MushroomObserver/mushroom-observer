@@ -138,7 +138,30 @@ module Views::Controllers::InatImports
     def count_expected_line
       b { plain(:inat_import_confirm_expected_caption.l) }
       plain(": ")
-      span(id: "expected_count") { plain(expected_count) }
+      span(id: "expected_count") do
+        url = expected_obs_url
+        if url
+          link_to(expected_count, url,
+                  target: "_blank", rel: "noopener noreferrer")
+        else
+          plain(expected_count)
+        end
+      end
+    end
+
+    def expected_obs_url
+      base = requested_obs_url
+      return nil unless base
+
+      uri, query_str = base.split("?", 2)
+      args = Rack::Utils.parse_query(query_str.to_s)
+      args["taxon_id"] ||= ::Inat::Constants::IMPORTABLE_TAXON_IDS_ARG
+      args["without_field"] =
+        ::Inat::Constants::BASE_FILTER_PARAMS[:without_field]
+      if import_others?
+        args["license"] = ::Inat::Constants::LICENSED_FILTER[:license]
+      end
+      "#{uri}?#{args.to_query}"
     end
 
     def expected_count
