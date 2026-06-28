@@ -40,6 +40,19 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_flash_error(:runtime_no_matches.t(type: :article))
   end
 
+  # A scanner probing q[model] with an injection payload used to 500
+  # (NameError: wrong constant name) in Query.create_query. The bad model is
+  # now ignored and the index renders normally.
+  def test_index_ignores_invalid_q_model
+    get(:index, params: { q: { model: %q{Article',).)"(,,,},
+                               order_by: "created_at" } })
+    assert_response(:success)
+
+    # an unknown but syntactically-valid model name is ignored too
+    get(:index, params: { q: { model: "Bogus", order_by: "created_at" } })
+    assert_response(:success)
+  end
+
   def test_index_links_to_create
     login(users(:article_writer).login)
     get(:index)

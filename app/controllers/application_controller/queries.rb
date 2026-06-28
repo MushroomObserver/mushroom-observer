@@ -263,9 +263,19 @@ module ApplicationController::Queries
     return query_from_session if q_param.is_a?(String)
 
     return nil if q_param[:model].blank?
+    # `model` is attacker-reachable and gets constantized in
+    # Query.create_query, so ignore anything that isn't a real Query subclass.
+    # Scanners probe this param with injection payloads, which otherwise raise
+    # `NameError: wrong constant name ...` and 500.
+    return nil unless valid_query_model?(q_param[:model])
 
     Query.lookup(q_param[:model].to_sym,
                  **q_param.except(:model).to_unsafe_hash.symbolize_keys)
+  end
+
+  def valid_query_model?(model)
+    klass = "Query::#{model.to_s.pluralize}".safe_constantize
+    klass.is_a?(Class) && klass < Query
   end
 
   # Add a :q param to a path helper like `names_path`,
