@@ -39,10 +39,7 @@ module Views::Controllers::InatImports
             requested_obs_line
             br
           end
-          render_ignored_not_importable_row
-          render_ignored_already_imported_row
-          render_ignored_no_date_row
-          render_ignored_unlicensed_row if import_others?
+          render_ignored_section
           count_expected_line
           unless import_others?
             br
@@ -52,6 +49,76 @@ module Views::Controllers::InatImports
           time_estimate_line
         end
       end
+    end
+
+    def render_ignored_section
+      rows = ignored_row_data
+      return if rows.empty?
+
+      br
+      render_ignored_total(rows)
+      render_ignored_overlap_note if rows.size > 1
+      div(class: "ml-3") do
+        rows.each do |row|
+          render_ignored_row(row[:key], row[:count], row[:url])
+        end
+      end
+      br
+    end
+
+    def render_ignored_total(rows)
+      b { plain(:inat_import_confirm_ignored_total_caption.l) }
+      plain(": ")
+      span(id: "total_ignored_count") do
+        plain(rows.sum { |r| r[:count] }.to_s)
+      end
+    end
+
+    def render_ignored_overlap_note
+      div { small { plain(:inat_import_confirm_ignored_overlap_note.l) } }
+    end
+
+    def ignored_row_data
+      [not_importable_row, already_imported_row,
+       no_date_row, unlicensed_row].compact
+    end
+
+    def not_importable_row
+      return unless (c = not_importable_count)&.positive?
+
+      { key: :inat_import_confirm_not_importable_caption, count: c, url: nil }
+    end
+
+    def already_imported_row
+      return unless (c = already_imported_count)&.positive?
+
+      { key: :inat_import_confirm_already_imported_caption,
+        count: c, url: already_imported_url }
+    end
+
+    def no_date_row
+      return unless (c = no_date_count)&.positive?
+
+      { key: :inat_import_confirm_no_date_caption, count: c, url: nil }
+    end
+
+    def unlicensed_row
+      return unless import_others? && @unlicensed_obs.to_i.positive?
+
+      { key: :inat_import_confirm_unlicensed_obs_caption,
+        count: @unlicensed_obs.to_i, url: nil }
+    end
+
+    def not_importable_count
+      return unless @requested && @after_taxon
+
+      @requested.to_i - @after_taxon.to_i
+    end
+
+    def no_date_count
+      return unless @expected && @estimate_with_date
+
+      @expected.to_i - @estimate_with_date.to_i
     end
 
     def requested_obs_line
@@ -110,43 +177,6 @@ module Views::Controllers::InatImports
       minutes = (total_seconds % 3600) / 60
       remaining = total_seconds % 60
       Kernel.format("%02d:%02d:%02d", hours, minutes, remaining)
-    end
-
-    def render_ignored_not_importable_row
-      return unless @requested && @after_taxon
-
-      count = @requested.to_i - @after_taxon.to_i
-      return unless count.positive?
-
-      render_ignored_row(:inat_import_confirm_not_importable_caption,
-                         count, nil)
-    end
-
-    def render_ignored_already_imported_row
-      count = already_imported_count
-      return unless count&.positive?
-
-      render_ignored_row(:inat_import_confirm_already_imported_caption,
-                         count, already_imported_url)
-    end
-
-    def render_ignored_no_date_row
-      return unless @expected && @estimate_with_date
-
-      count = @expected.to_i - @estimate_with_date.to_i
-      return unless count.positive?
-
-      render_ignored_row(:inat_import_confirm_no_date_caption, count, nil)
-    end
-
-    def render_ignored_unlicensed_row
-      count = @unlicensed_obs.to_i
-      return unless count.positive?
-
-      div(class: "mb-1") do
-        b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
-        span(id: "ignored_unlicensed_count") { plain(count.to_s) }
-      end
     end
 
     def render_ignored_row(caption_key, count, url)

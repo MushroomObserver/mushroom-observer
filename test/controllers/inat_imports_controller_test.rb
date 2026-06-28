@@ -332,7 +332,7 @@ class InatImportsControllerTest < FunctionalTestCase
       relationship: :import, external_id: inat_id,
       url: "#{site.base_url}#{inat_id}"
     )
-    { total_results: 1 }.to_json
+    expected_response = { total_results: 1 }.to_json
 
     stub_request(
       :get, %r{api\.inaturalist\.org/v1/observations}
@@ -452,7 +452,7 @@ class InatImportsControllerTest < FunctionalTestCase
     user = users(:rolf)
     inat_username = "rolf"
     inat_ids = "123,456"
-    { total_results: 2 }.to_json
+    expected_response = { total_results: 2 }.to_json
 
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: expected_response)
@@ -696,7 +696,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Expected count for import-others should be licensed obs count"
     )
     assert_select(
-      "#ignored_unlicensed_count", "2",
+      "#total_ignored_count", "2",
       "Confirm form should report unlicensed obs that will be skipped"
     )
   end

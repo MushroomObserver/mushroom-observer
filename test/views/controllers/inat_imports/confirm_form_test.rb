@@ -22,30 +22,34 @@ module Views::Controllers::InatImports
                      "No link when URL cannot be constructed")
     end
 
-    # Lines 135-136, 153, 173: not_importable and no_date rows (plain text)
     def test_ignored_section_not_importable_and_no_date_rows
       # requested(10) - after_taxon(8) = 2 not-importable
-      # estimate(8) - estimate_with_date(6) = 2 no-date
+      # expected(8) - estimate_with_date(6) = 2 no-date; total = 4, 2 rows
       html = render_form(expected: 8,
                          breakdown: { requested: 10, after_taxon: 8,
                                       estimate_with_date: 6 })
 
+      assert_html(html, "#total_ignored_count", text: "4")
+      assert_html(html, "small",
+                  text: :inat_import_confirm_ignored_overlap_note.l.
+                        as_displayed)
       assert_html(html, "b",
                   text: :inat_import_confirm_not_importable_caption.l)
       assert_html(html, "b",
                   text: :inat_import_confirm_no_date_caption.l)
     end
 
-    # Lines 143-144, 167-170, 184, 208, 210-211:
-    # already_imported row with a live already_imported_url
     def test_ignored_section_already_imported_row_with_link
-      # after_taxon(10) - estimate(8) = 2 already-imported (own import)
+      # after_taxon(10) - expected(8) = 2 already-imported; total = 2, 1 row
       # inat_ids set → already_imported_url returns a URL → link rendered
       html = render_form(model_attrs: { inat_ids: "1,2,3" },
                          expected: 8,
                          breakdown: { requested: 10, after_taxon: 10,
                                       estimate_with_date: 8 })
 
+      assert_html(html, "#total_ignored_count", text: "2")
+      assert_no_html(html, "small",
+                     "Overlap note absent with only one ignored row")
       assert_html(html, "a[href*='with_field=Mushroom+Observer+URL']")
     end
 
