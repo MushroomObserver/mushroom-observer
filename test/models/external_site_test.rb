@@ -90,4 +90,12 @@ class ExternalSiteTest < UnitTestCase
   def test_inaturalist_finder
     assert_equal(external_sites(:inaturalist), ExternalSite.inaturalist)
   end
+
+  def test_member_with_nil_project
+    # production's iNaturalist site has no project; member? must return
+    # false rather than raise NoMethodError on project.user_group
+    site = external_sites(:inaturalist)
+    site.update!(project: nil)
+    assert_not(site.member?(users(:mary)))
+  end
 end

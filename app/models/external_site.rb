@@ -66,6 +66,8 @@ class ExternalSite < AbstractModel
   end
 
   def member?(user)
+    return false unless project
+
     user.in_group?(project.user_group)
   end
 

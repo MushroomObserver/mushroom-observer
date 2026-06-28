@@ -25,6 +25,21 @@ module Observations
       assert_select("form#observation_external_link_form")
     end
 
+    def test_edit_in_admin_mode_with_nil_project_site
+      # production's iNaturalist site has a nil project; an admin
+      # (non-owner, non-member) editing such a link in admin mode must
+      # not 500 on ExternalSite#member? — the owner path short-circuits
+      # before member?, but the admin path reaches it (#4565)
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      link.external_site.update!(project: nil)
+      make_admin("dick")
+
+      get(:edit, params: { id: link.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("form#observation_external_link_form")
+    end
+
     def setup_create_test
       obs  = observations(:agaricus_campestris_obs) # owned by rolf
       obs2 = observations(:agaricus_campestrus_obs) # owned by rolf
