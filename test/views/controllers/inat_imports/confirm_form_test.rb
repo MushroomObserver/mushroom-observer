@@ -44,7 +44,7 @@ module Views::Controllers::InatImports
                          breakdown: { requested: 5, after_taxon: 5,
                                       estimate_with_date: 5 })
 
-      assert_html(html, "#expected_count a[href*='without_field']" \
+      assert_html(html, "#expected_count a[href*='iconic_taxa']" \
                         "[target='_blank']")
     end
 

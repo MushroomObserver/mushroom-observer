@@ -155,7 +155,9 @@ module Views::Controllers::InatImports
 
       uri, query_str = base.split("?", 2)
       args = Rack::Utils.parse_query(query_str.to_s)
-      args["taxon_id"] ||= ::Inat::Constants::IMPORTABLE_TAXON_IDS_ARG
+      unless args.key?("taxon_id") || args.key?("iconic_taxa")
+        args["iconic_taxa"] = "Fungi,Protozoa"
+      end
       args["without_field"] =
         ::Inat::Constants::BASE_FILTER_PARAMS[:without_field]
       if import_others?
@@ -227,9 +229,23 @@ module Views::Controllers::InatImports
     def requested_obs_url
       query = requested_obs_query
       return nil unless query
-      return query if query.start_with?("http")
+      return normalize_inat_ui_url(query) if query.start_with?("http")
 
-      inat_obs_search_url(query)
+      inat_obs_search_url(translate_api_to_ui_params(query))
+    end
+
+    # iNat UI does not support comma-separated taxon_id values; replace
+    # with iconic_taxa when more than one taxon ID is present.
+    def translate_api_to_ui_params(query_str)
+      args = Rack::Utils.parse_query(query_str.to_s)
+      return args.to_query unless args["taxon_id"]&.include?(",")
+
+      args.except("taxon_id").merge("iconic_taxa" => "Fungi,Protozoa").to_query
+    end
+
+    def normalize_inat_ui_url(url)
+      uri, query_str = url.split("?", 2)
+      "#{uri}?#{translate_api_to_ui_params(query_str.to_s)}"
     end
 
     # Returns a full URL (for original_inat_url) or a query string
