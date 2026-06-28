@@ -21,7 +21,7 @@ class Components::Form::CompassFields < Components::Base
 
   def render_north_row
     div(class: "row vcenter") do
-      div(class: "col-xs-4 col-xs-offset-4 text-center") do
+      div(class: "#{Grid::CENTERED_THIRD} text-center") do
         compass_input(:north)
       end
     end
@@ -29,17 +29,17 @@ class Components::Form::CompassFields < Components::Base
 
   def render_east_west_row
     div(class: "row vcenter mt-3") do
-      div(class: "col-xs-4 text-center") { compass_input(:west) }
-      div(class: "col-xs-4 small text-center p-0") do
+      div(class: "#{Grid::THIRD} text-center") { compass_input(:west) }
+      div(class: "#{Grid::THIRD} small text-center p-0") do
         plain(:form_locations_lat_long_help.l)
       end
-      div(class: "col-xs-4 text-center") { compass_input(:east) }
+      div(class: "#{Grid::THIRD} text-center") { compass_input(:east) }
     end
   end
 
   def render_south_row
     div(class: "row vcenter mt-3") do
-      div(class: "col-xs-4 col-xs-offset-4 text-center") do
+      div(class: "#{Grid::CENTERED_THIRD} text-center") do
         compass_input(:south)
       end
     end

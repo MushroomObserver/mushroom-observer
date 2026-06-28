@@ -12,8 +12,8 @@ module Views::Controllers::Sequences
       add_context_nav(::Tab::Sequence::Form.new(back_object: @observation))
 
       div(class: "row") do
-        div(class: "col-xs-12 col-sm-7") { render_form_column }
-        div(class: "col-xs-12 col-sm-5") { render_matrix_column }
+        div(class: Grid::SM7) { render_form_column }
+        div(class: Grid::SM5) { render_matrix_column }
       end
     end
 
@@ -29,7 +29,7 @@ module Views::Controllers::Sequences
         render(::Components::Matrix::Box.new(
                  user: current_user,
                  object: @observation.rss_log || @observation,
-                 columns: "col-xs-12"
+                 columns: Grid::FULL
                ))
       end
     end
