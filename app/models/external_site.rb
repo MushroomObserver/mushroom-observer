@@ -74,11 +74,12 @@ class ExternalSite < AbstractModel
   def self.sites_user_can_add_links_to_for_obs(user, obs, admin: false)
     return [] unless obs && user
 
-    obs_site_ids = obs.external_links.map(&:external_site_id)
+    # Multiple links per site are allowed (#4565), so don't exclude sites
+    # the obs already links to.
     if (user == obs.user) || admin
-      where.not(id: obs_site_ids)
+      all
     else
-      user_is_site_project_member(user.id).where.not(id: obs_site_ids)
+      user_is_site_project_member(user.id)
     end
   end
 end

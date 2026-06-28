@@ -5,6 +5,12 @@
 # inline page form and as the body of the new/edit modal (via
 # `Components::Modal::TurboForm`, which auto-resolves this class from
 # `controller_path`).
+#
+# A link is identified by external_id OR url. The `external-link-form` Stimulus
+# controller keeps exactly one field active (editable); the other is grayed
+# (readonly) but keeps its value, and on submit only the active field is sent.
+# The url field is seeded with the selected site's prefix and reset on site
+# change.
 module Views::Controllers::Observations::ExternalLinks
   class Form < ::Components::ApplicationForm
     def initialize(model, **kwargs)
@@ -17,7 +23,7 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def view_template
-      render_external_id_field if model.persisted?
+      render_external_id_field
       render_url_field
       render_hidden_fields
       render_site_select
@@ -27,30 +33,34 @@ module Views::Controllers::Observations::ExternalLinks
 
     private
 
-    # A link is identified by external_id OR url. When external_id is present
-    # the url field is disabled client-side (external-link-form Stimulus
-    # controller) and dropped server-side; otherwise url is required.
     def render_external_id_field
       text_field(:external_id,
                  size: 40,
                  label: :EXTERNAL_ID.l,
                  wrap_class: "w-100",
-                 data: { external_link_form_target: "externalId",
-                         action: "input->external-link-form#toggleUrl" })
+                 data: field_data("externalId"))
     end
 
     def render_url_field
-      selected_site = @site || @sites&.first
       text_field(:url,
                  size: 40,
-                 placeholder: selected_site.base_url,
+                 value: url_seed,
                  label: :URL.l,
-                 between: (:required if model.external_id.blank?),
                  wrap_class: "w-100",
-                 data: { placeholder_target: "textField",
-                         external_link_form_target: "url" }) do |f|
+                 data: field_data("url")) do |f|
         f.with_append { :show_observation_add_link_dialog.l }
       end
+    end
+
+    def field_data(target)
+      { external_link_form_target: target,
+        action: "focus->external-link-form#activate" }
+    end
+
+    # Seed: an existing stored url, else the selected site's url prefix (so the
+    # user appends the id). observation_url("") yields the template/base prefix.
+    def url_seed
+      model.url.presence || @site&.observation_url("")
     end
 
     def render_relationship_field
@@ -67,28 +77,13 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def render_site_select
-      selected_site = @site || @sites&.first
-      options = if model.persisted?
-                  [@site.name]
-                else
-                  @sites.sort_by(&:name).map { |site| [site.name, site.id] }
-                end
-
-      select_field(:external_site_id, options,
+      select_field(:external_site_id,
+                   @sites.sort_by(&:name).map { |site| [site.name, site.id] },
                    label: :EXTERNAL_SITE.l,
                    inline: true,
-                   selected: selected_site.id,
-                   data: {
-                     placeholder_target: "select",
-                     action: "placeholder#update",
-                     placeholder_text: selected_site.base_url
-                   })
-    end
-
-    def base_urls
-      @base_urls ||= @sites.to_h do |site|
-        [site.name, site.base_url]
-      end
+                   selected: (@site || @sites.first)&.id,
+                   data: { external_link_form_target: "site",
+                           action: "change->external-link-form#siteChanged" })
     end
 
     def submit_text
@@ -99,34 +94,31 @@ module Views::Controllers::Observations::ExternalLinks
       if model.persisted?
         url_params = { action: :update, id: model.id }
         url_params[:back] = @back if @back.present?
-        url_for(
-          controller: "observations/external_links",
-          **url_params,
-          only_path: true
-        )
+        url_for(controller: "observations/external_links",
+                **url_params, only_path: true)
       else
-        url_for(
-          controller: "observations/external_links",
-          action: :create,
-          id: @observation.id,
-          only_path: true
-        )
+        url_for(controller: "observations/external_links",
+                action: :create, id: @observation.id, only_path: true)
       end
     end
 
-    def around_template
-      # placeholder (site base-url hints) always; external-link-form (url vs
-      # external_id toggle) only on edit, where both fields are present.
-      @attributes[:data] ||= {}
-      @attributes[:data][:controller] = form_controllers
-      @attributes[:data][:placeholders] = base_urls.to_json
-      super
+    # external_id is active by default; an existing url-only link starts on url.
+    def active_field
+      model.url.present? && model.external_id.blank? ? "url" : "external_id"
     end
 
-    def form_controllers
-      controllers = ["placeholder"]
-      controllers << "external-link-form" if model.persisted?
-      controllers.join(" ")
+    # site id => url prefix, so the Stimulus controller can seed/reset the url.
+    def site_prefixes
+      @sites.to_h { |site| [site.id, site.observation_url("")] }
+    end
+
+    def around_template
+      @attributes[:data] ||= {}
+      @attributes[:data][:controller] = "external-link-form"
+      @attributes[:data][:external_link_form_active_value] = active_field
+      @attributes[:data][:external_link_form_prefixes_value] =
+        site_prefixes.to_json
+      super
     end
   end
 end
