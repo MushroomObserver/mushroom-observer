@@ -94,7 +94,8 @@ class InatImportJob < ApplicationJob
     inat_import.update(state: "Importing")
     inat_ids = inat_id_list
     return log("No observations requested") if inat_import[:import_all].
-                                               blank? && inat_ids.blank?
+                                               blank? && inat_ids.blank? &&
+                                               inat_import.inat_url.blank?
 
     # Request a page of iNat observations at a time, until done with all pages
     # (or canceled).
@@ -126,7 +127,10 @@ class InatImportJob < ApplicationJob
 
   def import_parsed_page_of_observations(parsed_page)
     log_new_page(parsed_page)
-    inat_import.update(importables: parsed_page["total_results"])
+    unless @importables_set
+      inat_import.update(importables: parsed_page["total_results"])
+      @importables_set = true
+    end
     observation_importer.import_page(parsed_page)
     log("Finished importing observations on parsed page")
   end

@@ -76,6 +76,11 @@ module Views::Controllers::Sequences
     def render_bases
       p do
         strong { "#{:BASES.l}:" }
+        plain(" ")
+        render(::Components::Button::Clipboard.new(
+                 text: @sequence.bases, name: :COPY_THIS_SEQUENCE.l,
+                 class: "ml-1"
+               ))
       end
       pre(class: "text-monospace",
           style: "white-space: pre-wrap; word-break: break-all") do
@@ -93,12 +98,21 @@ module Views::Controllers::Sequences
       end
     end
 
+    # MycoBLAST has no query param to pre-fill (unlike NCBI), so
+    # it's just a plain link to the tool rather than a per-Sequence
+    # report — shown unconditionally, same as the NCBI button.
     def render_blast_link
-      tab = ::Tab::Sequence::Blast.new(sequence: @sequence)
+      blast_tab = ::Tab::Sequence::Blast.new(sequence: @sequence)
       p do
         render(::Components::Button.new(type: :external,
-                                        name: tab.title,
-                                        url: tab.path))
+                                        name: blast_tab.title,
+                                        url: blast_tab.path))
+        plain(" ")
+        render(::Components::Button.new(
+                 type: :external,
+                 name: :show_observation_mycoblast_link.l,
+                 url: ::Sequence.mycoblast_url
+               ))
       end
     end
 

@@ -323,4 +323,9 @@ class SequenceTest < UnitTestCase
       sequences(:bare_with_numbers_sequence).blast_url
     )
   end
+
+  def test_mycoblast_url
+    # MycoBLAST has no query param to pre-fill — just a static link.
+    assert_equal("https://mycomap.org/mycoblast", Sequence.mycoblast_url)
+  end
 end
