@@ -261,8 +261,17 @@ module ApplicationController::Queries
   def query_from_q_param_hash
     q_param = params[:q]
     return query_from_session if q_param.is_a?(String)
+    # `q` can arrive as an Array (`?q[]=x`) or other non-hash from crafted
+    # requests; only a Parameters hash carries a model + the lookup fields,
+    # and `q_param[:model]` on an Array would raise a TypeError -> 500.
+    return nil unless q_param.is_a?(ActionController::Parameters)
 
     return nil if q_param[:model].blank?
+    # `model` is attacker-reachable and gets constantized in
+    # Query.create_query, so ignore anything that isn't a real Query subclass.
+    # Scanners probe this param with injection payloads, which otherwise raise
+    # `NameError: wrong constant name ...` and 500.
+    return nil unless valid_query_model?(q_param[:model])
 
     Query.lookup(q_param[:model].to_sym,
                  **q_param.except(:model).to_unsafe_hash.symbolize_keys)
@@ -285,6 +294,12 @@ module ApplicationController::Queries
   # helper_method :add_q_param
 
   private
+
+  # Internal to query_from_q_param_hash: true only for a real Query subclass.
+  def valid_query_model?(model)
+    klass = "Query::#{model.to_s.pluralize}".safe_constantize
+    klass.is_a?(Class) && klass < Query
+  end
 
   def append_q_param_to_path(path, q_param)
     return path unless q_param
