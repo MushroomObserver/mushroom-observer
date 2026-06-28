@@ -17,6 +17,13 @@ class InatImportJobTracker < ApplicationRecord
   delegate :imported_count, to: :import
   delegate :avg_import_time, to: :import
   delegate :response_errors, to: :import
+  delegate :ignored_not_importable_count, to: :import
+  delegate :ignored_date_missing_count, to: :import
+  delegate :ignored_already_imported_count, to: :import
+  delegate :ignored_total_count, to: :import
+  delegate :inat_ids, to: :import
+  delegate :inat_url, to: :import
+  delegate :inat_username, to: :import
 
   def status
     import.state

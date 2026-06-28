@@ -696,7 +696,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Estimate for import-others should be licensed obs count"
     )
     assert_select(
-      "#unlicensed_obs_count", "2",
+      "#ignored_unlicensed_count", "2",
       "Confirm form should report unlicensed obs that will be skipped"
     )
   end
@@ -747,8 +747,8 @@ class InatImportsControllerTest < FunctionalTestCase
       "Estimate should still show when only unlicensed-others request fails"
     )
     assert_select(
-      "#unlicensed_obs_count", "",
-      "Unlicensed count should be blank when total-others estimate fails"
+      "#ignored_unlicensed_count", { count: 0 },
+      "Unlicensed count should not appear when total-others estimate fails"
     )
   end
 

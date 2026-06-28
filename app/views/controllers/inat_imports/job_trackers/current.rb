@@ -15,6 +15,7 @@ module Views::Controllers::InatImports::JobTrackers
         render_remaining_line
         render_ended_line
         render_error_line
+        render_ignored_section if show_ignored_section?
         render(::Components::Alert.new(
                  message: @tracker.help, level: :warning, class: "mt-3"
                ))
@@ -85,6 +86,31 @@ module Views::Controllers::InatImports::JobTrackers
         plain(@tracker.response_errors.to_s)
       end
       br
+    end
+
+    def show_ignored_section?
+      @tracker.status == "Done" && @tracker.ignored_total_count.positive?
+    end
+
+    def render_ignored_section
+      div(class: "mt-3") do
+        h5 { plain(:inat_import_tracker_ignored_heading.l) }
+        render_ignored_row(:inat_import_tracker_ignored_not_importable,
+                           @tracker.ignored_not_importable_count)
+        render_ignored_row(:inat_import_tracker_ignored_already_imported,
+                           @tracker.ignored_already_imported_count)
+        render_ignored_row(:inat_import_tracker_ignored_date_missing,
+                           @tracker.ignored_date_missing_count)
+      end
+    end
+
+    def render_ignored_row(caption_key, count)
+      return unless count.positive?
+
+      div(class: "mb-1") do
+        b { plain("#{caption_key.l}: ") }
+        plain(count.to_s)
+      end
     end
 
     def remaining_time_in_hours_minutes_seconds(tracker)

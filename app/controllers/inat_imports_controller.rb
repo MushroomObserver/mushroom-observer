@@ -110,18 +110,27 @@ class InatImportsController < ApplicationController
     return inat_unreachable if @estimate.nil?
     return reload_form if @estimate == false
 
-    @unlicensed_obs = if import_others?
-                        fetch_unlicensed_others_count
-                      else
-                        fetch_unlicensed_obs_count
-                      end
+    fetch_confirm_counts
     warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = build_confirm_form
     render(Views::Controllers::InatImports::Confirm.new(
              confirm_form: @confirm_form, estimate: @estimate,
-             unlicensed_obs: @unlicensed_obs, inat_import: @inat_import
+             unlicensed_obs: @unlicensed_obs, inat_import: @inat_import,
+             requested: @requested, after_taxon: @after_taxon,
+             estimate_with_date: @estimate_with_date
            ))
+  end
+
+  def fetch_confirm_counts
+    @unlicensed_obs = if import_others?
+                        fetch_unlicensed_others_count
+                      else
+                        fetch_unlicensed_obs_count
+                      end
+    @requested = fetch_raw_requested_count
+    @after_taxon = fetch_after_taxon_count
+    @estimate_with_date = fetch_estimate_with_date_count
   end
 
   def inat_unreachable

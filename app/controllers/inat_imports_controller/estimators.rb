@@ -56,6 +56,52 @@ module InatImportsController::Estimators
     nil
   end
 
+  # Count without any MO-added filters — just the user's own scope
+  # (ownership + their IDs/URL). Used to compute "Requested Observations"
+  # and derive the ignored-obs breakdown on the confirmation page.
+  def fetch_raw_requested_count
+    RestClient.get(
+      "#{API_BASE}/observations?#{raw_requested_query_args.to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
+    ).then { |r| JSON.parse(r.body)["total_results"] }
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn(
+      "iNat raw-requested count failed: #{e.class}: #{e.message}"
+    )
+    nil
+  end
+
+  # Count after applying MO's fungi/myxo taxon filter but before
+  # `without_field` (already-imported filter) or license filter.
+  # Together with @estimate and @unlicensed_obs this lets us derive
+  # the already-imported and not-importable sub-counts.
+  def fetch_after_taxon_count
+    RestClient.get(
+      "#{API_BASE}/observations?#{after_taxon_query_args.to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
+    ).then { |r| JSON.parse(r.body)["total_results"] }
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn(
+      "iNat after-taxon count failed: #{e.class}: #{e.message}"
+    )
+    nil
+  end
+
+  # Count of importable observations that HAVE a date (estimate query +
+  # d1=1800-01-01). Diff vs @estimate gives the no-date count.
+  def fetch_estimate_with_date_count
+    RestClient.get(
+      "#{API_BASE}/observations?" \
+      "#{import_estimate_query_args.merge(d1: "1800-01-01").to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
+    ).then { |r| JSON.parse(r.body)["total_results"] }
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn(
+      "iNat date-estimate count failed: #{e.class}: #{e.message}"
+    )
+    nil
+  end
+
   # Total obs count for import-others without a license filter,
   # used to derive how many will be skipped.
   def total_others_estimate_query_args
@@ -89,5 +135,26 @@ module InatImportsController::Estimators
   def url_query_args
     strip = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym)
     Rack::Utils.parse_query(params[:inat_url].to_s).symbolize_keys.except(*strip)
+  end
+
+  # No MO-added filters: just the user's scope (IDs/URL + ownership).
+  # Used for the "Requested Observations" count on the confirm page.
+  def raw_requested_query_args
+    args = listing_url? ? url_query_args : {}
+    args[:only_id] = true
+    args[:id] = params[:inat_ids] if listing_ids?
+    args[:user_login] = params[:inat_username]&.strip unless import_others?
+    args
+  end
+
+  # Taxon filter applied but no `without_field` or license filter.
+  # Used to derive not-importable and already-imported sub-counts.
+  def after_taxon_query_args
+    args = listing_url? ? url_query_args : {}
+    args[:only_id] = true
+    args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
+    args[:id] = params[:inat_ids] if listing_ids?
+    args[:user_login] = params[:inat_username]&.strip unless import_others?
+    args
   end
 end
