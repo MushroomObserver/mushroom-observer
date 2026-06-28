@@ -61,6 +61,17 @@ class CollapseDivTest < ComponentTestCase
                 "div.collapse#geo[data-form-exif-target='collapseFields']")
   end
 
+  def test_attributes_class_and_id_ignored
+    html = render(Components::CollapseDiv.new(
+                    id: "real",
+                    attributes: { id: "override", class: "override",
+                                  data: { foo: "bar" } }
+                  ))
+
+    assert_html(html, "div.collapse#real[data-foo='bar']")
+    assert_no_html(html, "#override")
+  end
+
   def test_yields_content
     html = render(phlex_wrapper do
       render(Components::CollapseDiv.new(id: "foo")) { plain("hello") }

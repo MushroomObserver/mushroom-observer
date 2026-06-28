@@ -40,7 +40,7 @@ class Components::CollapseDiv < Components::Base
   def view_template(&block)
     div(id: @id,
         class: collapse_classes,
-        **@attributes,
+        **@attributes.except(:class, :id),
         &block)
   end
 
