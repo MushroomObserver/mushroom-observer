@@ -78,11 +78,10 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_collection_link
-      a(href: herbarium.mcp_url(@herbarium_record.accession_number),
-        target: "_blank", rel: "noopener") do
-        plain("#{herbarium.code} ")
-        trusted_html(:herbarium_record_collection.t)
-      end
+      render(::Components::Link::External.new(
+               "#{herbarium.code} #{:herbarium_record_collection.t}",
+               herbarium.mcp_url(@herbarium_record.accession_number)
+             ))
       br
     end
 

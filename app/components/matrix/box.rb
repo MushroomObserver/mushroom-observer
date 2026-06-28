@@ -256,8 +256,7 @@ class Components::Matrix::Box < Components::Base
   # An import link's URL always resolves (stored override or derived from the
   # site template via link_url), so the credit always renders as a link.
   def render_external_credit_link(link)
-    a(href: link[:url], target: "_blank",
-      rel: "noopener noreferrer") { link[:text] }
+    render(::Components::Link::External.new(link[:text], link[:url]))
   end
 
   def render_log_footer(panel)
