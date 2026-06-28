@@ -252,8 +252,8 @@ class Vote < AbstractModel
             reviewed: 1
           )
         end
-        "User #{vote.user_id} has reviewed observation #{vote.observation_id} " \
-          "(insert)."
+        "User #{vote.user_id} has reviewed observation " \
+        "#{vote.observation_id} (insert)."
       end
   end
 
