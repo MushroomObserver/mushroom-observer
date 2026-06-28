@@ -156,6 +156,9 @@ module Views::Controllers::InatImports
       uri, query_str = base.split("?", 2)
       args = Rack::Utils.parse_query(query_str.to_s)
       unless args.key?("taxon_id") || args.key?("iconic_taxa")
+        # iNat UI does not support comma-separated taxon_id values;
+        # Instead, use iconic_taxa, which reasonably approximates
+        # IMPORTABLE_TAXON_IDS
         args["iconic_taxa"] = "Fungi,Protozoa"
       end
       args["without_field"] =
