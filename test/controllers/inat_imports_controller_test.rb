@@ -752,6 +752,28 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  # estimators.rb lines 99-102: rescue block of fetch_estimate_with_date_count
+  def test_confirm_renders_gracefully_when_date_estimate_fails
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("d1" => "1800-01-01")).
+      to_return(status: 500, body: "error")
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
+
+    assert_response(
+      :success,
+      "Confirm page should render when date-estimate request fails"
+    )
+    assert_select(
+      "#estimated_count", "3",
+      "Estimate count still shows when date-estimate request fails"
+    )
+  end
+
   def test_create_go_back_with_superform_params
     login(users(:rolf).login)
 
