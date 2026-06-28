@@ -4,7 +4,7 @@
 #
 # Centralises the one Bootstrap 3→4 migration risk: Bootstrap 3 uses the
 # class `"in"` for the initially-open state; Bootstrap 4 uses `"show"`.
-# Change the `open:` branch here when upgrading.
+# Change the `expanded:` branch here when upgrading.
 #
 # @example Basic (initially closed)
 #   render(Components::CollapseDiv.new(id: "my_section")) do
