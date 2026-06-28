@@ -10,8 +10,8 @@ module Views::Controllers::GlossaryTerms
 
       def view_template
         div(class: "row") do
-          div(class: "col-xs-12 col-sm-9") { render_left }
-          div(class: "col-xs-12 col-sm-3") { render_right }
+          div(class: Grid::SM9) { render_left }
+          div(class: Grid::SM3) { render_right }
         end
       end
 

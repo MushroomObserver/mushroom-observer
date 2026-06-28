@@ -26,11 +26,11 @@ module Views::Controllers::Observations::Namings
     def view_template
       add_chrome
       div(class: "row") do
-        div(class: "col-xs-12 col-sm-8") do
+        div(class: Grid::SM8) do
           div(class: "mt-3") { render_observation_details }
           div(class: "mt-3") { render_naming_form }
         end
-        div(class: "col-xs-12 col-sm-4") { render_images }
+        div(class: Grid::SM4) { render_images }
       end
     end
 
