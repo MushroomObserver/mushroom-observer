@@ -25,9 +25,10 @@ class Components::Image::OriginalLink < Components::Base
   def view_template
     id = @image&.id || @image_id
 
-    render(::Components::Link::External.new(
-             :image_show_original.t,
-             "/images/#{id}/original",
+    render(::Components::Link::Get.new(
+             name: :image_show_original.t,
+             target: "/images/#{id}/original",
+             new_tab: true,
              class: @link_class,
              data: {
                controller: "image-loader",
