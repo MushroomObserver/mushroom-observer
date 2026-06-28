@@ -53,9 +53,10 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def sibling_external_links
-    @siblings.flat_map do |sib|
+    pairs = @siblings.flat_map do |sib|
       sib.external_links.map { |el| [el, sib] }
     end
+    pairs.sort_by { |link, _sib| link.relationship_date }
   end
 
   def render_sibling_row(link, sibling)
@@ -77,7 +78,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def own_external_links
-    @obs.external_links.sort_by(&:site_name)
+    @obs.external_links.sort_by(&:relationship_date)
   end
 
   def render_own_row(link)

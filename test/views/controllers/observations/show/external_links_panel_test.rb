@@ -99,6 +99,26 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
                 text: "Imported from iNaturalist (12345)")
   end
 
+  def test_orders_own_links_by_relationship_date
+    obs = observations(:detailed_unknown_obs)
+    obs.external_links.destroy_all
+    inat = external_sites(:inaturalist)
+    older = ExternalLink.create!(
+      user: @user, target: obs, external_site: inat, external_id: "111",
+      relationship: :copy, external_created_on: Date.new(2018, 1, 1)
+    )
+    newer = ExternalLink.create!(
+      user: @user, target: obs, external_site: inat, external_id: "222",
+      relationship: :remote_manual, external_created_on: Date.new(2024, 1, 1)
+    )
+
+    html = render(panel_with(obs.reload))
+
+    assert_operator(html.index("external_link_#{older.id}"), :<,
+                    html.index("external_link_#{newer.id}"),
+                    "own links should render oldest relationship_date first")
+  end
+
   private
 
   def panel_with(obs, user = @user)

@@ -59,7 +59,8 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_html(html, "a[href='#{link.url}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
                 text: "Manual link to iNaturalist (234723)")
-    assert_html(html, "small", text: link.relationship_date.web_date)
+    assert_includes(html, "#{link.relationship_date.web_date}: ")
+    assert_no_html(html, "small")
   end
 
   # Regression: import links store external_id with a nil url (url is derived).
@@ -85,6 +86,7 @@ class Components::Link::ExternalTest < ComponentTestCase
                 "a[href='#{link.url}']" \
                 "[target='_blank'][rel='noopener noreferrer']",
                 text: "Manual link to MycoPortal")
-    assert_html(html, "small", text: link.created_at.web_date)
+    assert_includes(html, "#{link.relationship_date.web_date}: ")
+    assert_no_html(html, "small")
   end
 end
