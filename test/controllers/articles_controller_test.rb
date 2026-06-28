@@ -51,6 +51,10 @@ class ArticlesControllerTest < FunctionalTestCase
     # an unknown but syntactically-valid model name is ignored too
     get(:index, params: { q: { model: "Bogus", order_by: "created_at" } })
     assert_response(:success)
+
+    # a non-hash q (e.g. ?q[]=x) is ignored rather than raising a TypeError
+    get(:index, params: { q: ["x"] })
+    assert_response(:success)
   end
 
   def test_index_links_to_create
