@@ -122,7 +122,7 @@ class Components::Form::Search < Components::ApplicationForm
   def render_form_columns
     div(class: "row") do
       field_columns.each do |panels|
-        div(class: "col-xs-12 col-md-6") do
+        div(class: Grid::MD6) do
           panels.each do |heading, sections|
             render_panel(heading:, sections:)
           end
@@ -206,7 +206,7 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   def column_classes
-    "col-xs-12 col-sm-6 col-md-12 col-lg-6"
+    Grid::FORM_COLS
   end
 
   # Helper to check if a field is a date field

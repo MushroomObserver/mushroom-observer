@@ -16,7 +16,7 @@
 #     user: @user,
 #     object: @observation,
 #     identify: true,
-#     columns: "col-xs-12 col-sm-6"
+#     columns: Grid::FULL
 #   )
 #
 # @example Custom block content
@@ -31,7 +31,7 @@ class Components::Matrix::Box < Components::Base
   prop :user, _Nilable(User), default: nil
   prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
-  prop :columns, String, default: "col-xs-12 col-sm-6 col-md-4 col-lg-3"
+  prop :columns, String, default: Grid::TILE
   prop :extra_class, String, default: ""
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
