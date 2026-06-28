@@ -22,7 +22,7 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "panel panel-default")
     assert_includes(html, "panel-heading")
     assert_includes(html, "Test Heading")
-    assert_includes(html, "panel-collapse collapse")
+    assert_html(html, "div.collapse.panel-collapse")
     assert_includes(html, "Show details")
     assert_includes(html, "panel-body")
     assert_includes(html, "Panel content")

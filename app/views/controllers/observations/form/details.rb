@@ -167,9 +167,11 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_geolocation_fields
-    div(id: "observation_geolocation",
-        class: class_names("collapse", ("in" if @observation.lat)),
-        data: { form_exif_target: "collapseFields" }) do
+    render(::Components::CollapseDiv.new(
+             id: "observation_geolocation",
+             expanded: @observation.lat.present?,
+             attributes: { data: { form_exif_target: "collapseFields" } }
+           )) do
       p { :form_observations_click_point.l }
       render_lat_lng_alt_row
       render_gps_hidden_checkbox

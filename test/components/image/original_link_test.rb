@@ -13,7 +13,7 @@ class ImageOriginalLinkTest < ComponentTestCase
 
     assert_html(html, "a[href='/images/#{@image.id}/original']",
                 text: :image_show_original.l)
-    assert_html(html, "a[target='_blank'][rel='noopener']")
+    assert_html(html, "a[target='_blank'][rel='noopener noreferrer']")
     assert_html(html,
                 "a[data-controller='image-loader']" \
                 "[data-action='click->image-loader#load']" \
