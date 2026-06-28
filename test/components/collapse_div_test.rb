@@ -280,30 +280,4 @@ class CollapseDivTest < ComponentTestCase
       define_method(:view_template, &block)
     end.new
   end
-
-  def render_old_table_accordion(id, view_id, edit_id)
-    id_val = id
-    view_id_val = view_id
-    edit_id_val = edit_id
-    old_klass = Class.new(Components::Base) do
-      include Phlex::Slotable
-
-      slot :view
-      slot :edit
-      define_method(:view_template) do
-        div(class: "panel-group border-none mb-0", id: id_val) do
-          div(class: "panel border-none bg-none") do
-            div(class: "panel-collapse collapse in no-transition",
-                id: view_id_val) { render(view_slot) if view_slot? }
-            div(class: "panel-collapse collapse no-transition",
-                id: edit_id_val) { render(edit_slot) if edit_slot? }
-          end
-        end
-      end
-    end
-    render(old_klass.new) do |a|
-      a.with_view { plain("view") }
-      a.with_edit { plain("edit") }
-    end
-  end
 end
