@@ -39,7 +39,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_help_text
       help_id = "#{field.dom.id}_help"
-      div(class: "collapse", id: help_id) do
+      render(::Components::CollapseDiv.new(id: help_id)) do
         render(::Components::Help::Block.new(well: true)) { render(help_slot) }
       end
     end
