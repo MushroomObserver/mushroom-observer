@@ -80,7 +80,7 @@ class ExternalSiteTest < UnitTestCase
   def test_observation_url_uses_template
     site = external_sites(:mycoportal) # has a {id} url_template
     assert_equal(
-      "https://www.mycoportal.org/portal/collections/individual/" \
+      "https://mycoportal.org/portal/collections/individual/" \
       "index.php?occid=999",
       site.observation_url("999"),
       "substitutes external_id into the url_template {id} placeholder"

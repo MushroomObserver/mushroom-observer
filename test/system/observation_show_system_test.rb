@@ -274,7 +274,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     # Now fix with valid URL and resubmit
     within("#modal_external_link") do
-      fill_in("external_link_url", with: "https://www.mycoportal.org/portal/collections/123")
+      fill_in("external_link_url", with: "https://mycoportal.org/portal/collections/123")
       click_commit
     end
     sleep(1)
@@ -292,11 +292,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     within("#modal_external_link_#{link.id}") do
       assert_field("external_link_url")
-      fill_in("external_link_url", with: "https://www.mycoportal.org/portal/collections/456")
+      fill_in("external_link_url", with: "https://mycoportal.org/portal/collections/456")
       click_commit
     end
     assert_no_selector("#modal_external_link_#{link.id}")
-    assert_equal("https://www.mycoportal.org/portal/collections/456",
+    assert_equal("https://mycoportal.org/portal/collections/456",
                  link.reload.url)
 
     # try remove button (uses turbo_confirm modal)
