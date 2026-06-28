@@ -1643,6 +1643,8 @@
   mark_as_reviewed: Mark as reviewed
   marked_as_reviewed: Marked as reviewed
   filter_by: "Filter by:"
+  filter_caption_expand: Show all active filters
+  filter_caption_collapse: Show fewer active filters
 
   # observations/create_observation
   create_observation_inat_import_link: Import from iNat

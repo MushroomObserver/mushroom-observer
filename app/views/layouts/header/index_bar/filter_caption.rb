@@ -90,14 +90,22 @@ module Views::Layouts
         class: class_names(
           %w[btn btn-default top-right btn-link toggle]
         ),
+        title: if truncate
+                 :filter_caption_expand.l
+               else
+                 :filter_caption_collapse.l
+               end,
         data: { filter_caption_target: action,
-                action: "filter-caption##{action}" }
+                action: "filter-caption##{action}",
+                toggle: "tooltip" }
       ) do
         # `aria-hidden="true"` as a string (not boolean) matches
         # Rails' `tag.span(aria: { hidden: true })` HTML output —
         # Phlex 2 renders a boolean `true` as the empty-string form.
-        span(class: "glyphicon glyphicon-chevron-#{direction}",
-             aria: { hidden: "true" })
+        render(::Components::Icon.new(
+                 type: :"chevron_#{direction}",
+                 attributes: { aria: { hidden: "true" } }
+               ))
       end
     end
 

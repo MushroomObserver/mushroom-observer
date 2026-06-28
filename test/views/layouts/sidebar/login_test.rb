@@ -25,7 +25,7 @@ class Views::Layouts::Sidebar
 
       # Should have heading with icon and "Account:" text
       assert_includes(html, :app_account.t)
-      assert_html(html, "i.glyphicon.glyphicon-user")
+      assert_html(html, "span.glyphicon.glyphicon-user")
 
       # Should include navigation links
       assert_html(html, "#nav_login_link")
@@ -49,7 +49,7 @@ class Views::Layouts::Sidebar
       html = render_component
 
       # Should have icon before text
-      assert_html(html, "div.list-group-item i.glyphicon.glyphicon-user")
+      assert_html(html, "div.list-group-item span.glyphicon.glyphicon-user")
       assert_html(html, "div.list-group-item span")
     end
 
