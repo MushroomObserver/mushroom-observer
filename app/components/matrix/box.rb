@@ -23,9 +23,9 @@
 #   render MatrixBox.new(id: 123, extra_class: "text-center") do
 #     tag.div(class: "panel panel-default") { "Custom content" }
 #   end
-# rubocop:disable Metrics/ClassLength
 class Components::Matrix::Box < Components::Base
   include Components::Matrix::Box::RenderData
+  include Components::Matrix::Box::Footer
 
   # Properties
   prop :user, _Nilable(User), default: nil
@@ -258,85 +258,4 @@ class Components::Matrix::Box < Components::Base
   def render_external_credit_link(link)
     render(::Components::Link::External.new(link[:text], link[:url]))
   end
-
-  def render_log_footer(panel)
-    return unless @data[:detail].present? || @data[:time].present?
-
-    panel.with_footer(classes: "log-footer") do
-      render_footer_detail(@data[:detail])
-      render_footer_time(@data[:time])
-    end
-  end
-
-  def render_footer_detail(detail)
-    return if detail.blank?
-
-    if detail.is_a?(User)
-      render_user_detail(detail)
-    else
-      div(class: "rss-detail small") { detail }
-    end
-  end
-
-  def render_footer_time(time)
-    return unless time
-
-    div(
-      class: "rss-what rss-updated-at small",
-      data: { controller: "local-time", local_time_utc_value: time.utc.iso8601 }
-    ) do
-      # Server-rendered fallback for no-JS clients; replaced by Stimulus
-      time.display_time
-    end
-  end
-
-  def render_user_detail(user)
-    div(class: "rss-detail small") do
-      plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
-      br
-      plain("#{:list_users_contribution.l}: #{user.contribution}")
-      br
-      link_to(
-        :OBSERVATIONS.l,
-        observations_path(by_user: user.id)
-      )
-    end
-  end
-
-  def render_identify_footer(panel)
-    return unless @observation_view
-
-    panel.with_footer(classes: "panel-active text-center position-relative") do
-      render(Components::Image::MarkAsReviewedToggle.new(
-               observation_view: @observation_view,
-               selector: "box_reviewed",
-               label_class: "stretched-link"
-             ))
-    end
-  end
-
-  def render_custom_footer(panel, &block)
-    panel.with_footer(classes: "text-center", &block)
-  end
-
-  def render_project_admin_footer(panel)
-    return unless show_project_exclude_button?
-
-    panel.with_footer(classes: "text-center") do
-      render(Components::Button.new(
-               type: :post,
-               name: :EXCLUDE.t,
-               target: exclude_observation_project_update_path(
-                 project_id: @project.id, id: @data[:what].id
-               ),
-               size: :sm
-             ))
-    end
-  end
-
-  def show_project_exclude_button?
-    @project && @data && @data[:type] == :observation &&
-      @project.is_admin?(@user)
-  end
 end
-# rubocop:enable Metrics/ClassLength
