@@ -106,16 +106,16 @@ class InatImportsController < ApplicationController
   private
 
   def confirm_import
-    @estimate = fetch_import_estimate
-    return inat_unreachable if @estimate.nil?
-    return reload_form if @estimate == false
+    @expected = fetch_expected_count
+    return inat_unreachable if @expected.nil?
+    return reload_form if @expected == false
 
     fetch_confirm_counts
     warn_about_listed_previous_imports
     @inat_import = InatImport.find_or_create_by(user: @user)
     @confirm_form = build_confirm_form
     render(Views::Controllers::InatImports::Confirm.new(
-             confirm_form: @confirm_form, estimate: @estimate,
+             confirm_form: @confirm_form, expected: @expected,
              unlicensed_obs: @unlicensed_obs, inat_import: @inat_import,
              requested: @requested, after_taxon: @after_taxon,
              estimate_with_date: @estimate_with_date

@@ -3262,7 +3262,7 @@
 
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_requested_caption: Requested Observations
-  inat_import_confirm_estimate_caption: Estimated number of imports
+  inat_import_confirm_expected_caption: Expected imports
   inat_import_confirm_unlicensed_obs_caption: Unlicensed observations
   inat_import_confirm_unlicensed_obs_note: "(your default MO license will be applied to images)"
   inat_import_confirm_unlicensed_others_note: "(will not be imported — no iNat license)"

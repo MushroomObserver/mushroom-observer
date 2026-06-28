@@ -5,7 +5,7 @@ module InatImportsController::Estimators
 
   private
 
-  def fetch_import_estimate
+  def fetch_expected_count
     response = RestClient.get(
       "#{API_BASE}/observations?#{import_estimate_query_args.to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
@@ -15,7 +15,9 @@ module InatImportsController::Estimators
     flash_warning(:inat_unknown_param.t(error: inat_error_text(e)))
     false
   rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
+    Rails.logger.warn(
+      "iNat expected count request failed: #{e.class}: #{e.message}"
+    )
     nil
   end
 
@@ -33,25 +35,25 @@ module InatImportsController::Estimators
       "#{API_BASE}/observations?#{licensed_estimate_query_args.to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
-    @estimate - JSON.parse(licensed.body)["total_results"]
+    @expected - JSON.parse(licensed.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn(
-      "iNat licensed estimate request failed: #{e.class}: #{e.message}"
+      "iNat licensed count request failed: #{e.class}: #{e.message}"
     )
     nil
   end
 
   # Counts unlicensed observations that will be skipped for import-others.
-  # @estimate is already licensed-only; total minus @estimate = unlicensed.
+  # @expected is already licensed-only; total minus @expected = unlicensed.
   def fetch_unlicensed_others_count
     total = RestClient.get(
       "#{API_BASE}/observations?#{total_others_estimate_query_args.to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
-    JSON.parse(total.body)["total_results"] - @estimate
+    JSON.parse(total.body)["total_results"] - @expected
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn(
-      "iNat unlicensed-others estimate request failed: #{e.class}: #{e.message}"
+      "iNat unlicensed-others count request failed: #{e.class}: #{e.message}"
     )
     nil
   end
@@ -73,7 +75,7 @@ module InatImportsController::Estimators
 
   # Count after applying MO's fungi/myxo taxon filter but before
   # `without_field` (already-imported filter) or license filter.
-  # Together with @estimate and @unlicensed_obs this lets us derive
+  # Together with @expected and @unlicensed_obs this lets us derive
   # the already-imported and not-importable sub-counts.
   def fetch_after_taxon_count
     RestClient.get(
@@ -88,7 +90,7 @@ module InatImportsController::Estimators
   end
 
   # Count of importable observations that HAVE a date (estimate query +
-  # d1=1800-01-01). Diff vs @estimate gives the no-date count.
+  # d1=1800-01-01). Diff vs @expected gives the no-date count.
   def fetch_estimate_with_date_count
     RestClient.get(
       "#{API_BASE}/observations?" \

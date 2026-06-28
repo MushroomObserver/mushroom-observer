@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module Views::Controllers::InatImports
-  # Confirmation form for iNat import. Shows estimated import count
+  # Confirmation form for iNat import. Shows expected import count
   # and Proceed/Go Back buttons. Hidden fields carry form data
   # through the confirmation step. Rendered by `confirm.rb`.
   class ConfirmForm < ::Components::ApplicationForm
     # breakdown: hash with :inat_import, :requested, :after_taxon,
     # :estimate_with_date — iNat API counts from the confirm step.
-    def initialize(model, estimate: nil, unlicensed_obs: nil,
+    def initialize(model, expected: nil, unlicensed_obs: nil,
                    breakdown: {}, **)
-      @estimate = estimate
+      @expected = expected
       @unlicensed_obs = unlicensed_obs
       @inat_import = breakdown[:inat_import]
       @requested = breakdown[:requested]
@@ -19,7 +19,7 @@ module Views::Controllers::InatImports
     end
 
     def view_template
-      render_estimate
+      render_expected
       render_ignored_section if show_ignored_section?
       render_explanation
       render_prompt
@@ -33,14 +33,14 @@ module Views::Controllers::InatImports
 
     private
 
-    def render_estimate
+    def render_expected
       render(Components::Panel.new) do |panel|
         panel.with_body do
           if @requested
             requested_obs_line
             br
           end
-          count_estimate_line
+          count_expected_line
           unless import_others?
             br
             unlicensed_obs_line
@@ -65,14 +65,14 @@ module Views::Controllers::InatImports
       end
     end
 
-    def count_estimate_line
-      b { plain(:inat_import_confirm_estimate_caption.l) }
+    def count_expected_line
+      b { plain(:inat_import_confirm_expected_caption.l) }
       plain(": ")
-      span(id: "estimated_count") { plain(estimated_count) }
+      span(id: "expected_count") { plain(expected_count) }
     end
 
-    def estimated_count
-      @estimate.to_s
+    def expected_count
+      @expected.to_s
     end
 
     def unlicensed_obs_line
@@ -92,7 +92,7 @@ module Views::Controllers::InatImports
     end
 
     def estimated_time
-      seconds = @estimate * avg_import_seconds
+      seconds = @expected * avg_import_seconds
       format_hms(seconds)
     end
 
@@ -145,9 +145,9 @@ module Views::Controllers::InatImports
     end
 
     def render_ignored_no_date_row
-      return unless @estimate && @estimate_with_date
+      return unless @expected && @estimate_with_date
 
-      count = @estimate.to_i - @estimate_with_date.to_i
+      count = @expected.to_i - @estimate_with_date.to_i
       return unless count.positive?
 
       render_ignored_row(:inat_import_confirm_no_date_caption, count, nil)
@@ -176,12 +176,12 @@ module Views::Controllers::InatImports
     end
 
     def already_imported_count
-      return unless @after_taxon && @estimate
+      return unless @after_taxon && @expected
 
       if import_others?
-        @after_taxon.to_i - @estimate.to_i - @unlicensed_obs.to_i
+        @after_taxon.to_i - @expected.to_i - @unlicensed_obs.to_i
       else
-        @after_taxon.to_i - @estimate.to_i
+        @after_taxon.to_i - @expected.to_i
       end
     end
 
