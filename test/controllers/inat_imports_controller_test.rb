@@ -1508,6 +1508,12 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Form should be reloaded, not the confirm page")
   end
 
+  # URI.parse raises URI::InvalidURIError on a malformed URL (e.g. a space);
+  # taxon_ids_from_url rescues it and returns no ids rather than 500ing.
+  def test_taxon_ids_from_url_handles_malformed_url
+    assert_equal([], @controller.send(:taxon_ids_from_url, "http://foo bar"))
+  end
+
   ########## Utilities
 
   def authorization_denial_callback_params
