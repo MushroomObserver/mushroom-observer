@@ -3267,7 +3267,6 @@
   inat_import_confirm_unlicensed_obs_note: "(your default MO license will be applied to images)"
   inat_import_confirm_unlicensed_others_note: "(will not be imported — no iNat license)"
   inat_import_confirm_time_estimate_caption: Estimated time
-  inat_import_confirm_ignored_heading: Ignored Observations
   inat_import_confirm_not_importable_caption: Not fungi or slime molds
   inat_import_confirm_already_imported_caption: Already imported
   inat_import_confirm_no_date_caption: No observation date

@@ -20,7 +20,6 @@ module Views::Controllers::InatImports
 
     def view_template
       render_expected
-      render_ignored_section if show_ignored_section?
       render_explanation
       render_prompt
       render_hidden_fields
@@ -40,6 +39,10 @@ module Views::Controllers::InatImports
             requested_obs_line
             br
           end
+          render_ignored_not_importable_row
+          render_ignored_already_imported_row
+          render_ignored_no_date_row
+          render_ignored_unlicensed_row if import_others?
           count_expected_line
           unless import_others?
             br
@@ -107,23 +110,6 @@ module Views::Controllers::InatImports
       minutes = (total_seconds % 3600) / 60
       remaining = total_seconds % 60
       Kernel.format("%02d:%02d:%02d", hours, minutes, remaining)
-    end
-
-    def show_ignored_section?
-      @requested && @estimate_with_date &&
-        @requested.to_i > @estimate_with_date.to_i
-    end
-
-    def render_ignored_section
-      render(Components::Panel.new) do |panel|
-        panel.with_body do
-          h5 { plain(:inat_import_confirm_ignored_heading.l) }
-          render_ignored_not_importable_row
-          render_ignored_already_imported_row
-          render_ignored_no_date_row
-          render_ignored_unlicensed_row if import_others?
-        end
-      end
     end
 
     def render_ignored_not_importable_row

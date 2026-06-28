@@ -30,8 +30,6 @@ module Views::Controllers::InatImports
                          breakdown: { requested: 10, after_taxon: 8,
                                       estimate_with_date: 6 })
 
-      assert_html(html, "h5",
-                  text: :inat_import_confirm_ignored_heading.l.as_displayed)
       assert_html(html, "b",
                   text: :inat_import_confirm_not_importable_caption.l)
       assert_html(html, "b",
