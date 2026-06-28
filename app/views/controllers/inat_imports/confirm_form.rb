@@ -263,7 +263,8 @@ module Views::Controllers::InatImports
       base = requested_obs_url
       return nil unless base
 
-      "#{base}&with_field=Mushroom+Observer+URL"
+      # https://forum.inaturalist.org/t/how-to-use-inaturalists-search-urls-wiki-part-2-of-2/18792#heading--obs--field
+      "#{base}&field:Mushroom%20Observer%20URL"
     end
 
     def inat_obs_search_url(query_string)

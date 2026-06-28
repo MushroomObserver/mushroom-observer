@@ -70,7 +70,7 @@ module Views::Controllers::InatImports
       assert_html(html, "#total_ignored_count", text: "2")
       assert_no_html(html, "small",
                      "Overlap note absent with only one ignored row")
-      assert_html(html, "a[href*='with_field=Mushroom+Observer+URL']")
+      assert_html(html, "a[href*='field:Mushroom']")
     end
 
     # Lines 63, 143-144, 184, 208-209, 173:
