@@ -188,6 +188,20 @@ class RedirectsIntegrationTest < IntegrationTestCase
     )
   end
 
+  # Mission Control Jobs engine  ---------------------------------------------
+
+  # Regression: unauthenticated GET /jobs was returning 500 because
+  # AdminController#access_denied called `new_account_login_path`, which is
+  # not in scope inside a mounted engine without the `main_app.` prefix.
+  def test_unauthenticated_get_jobs_redirects_to_login
+    get("/jobs")
+    assert_equal(
+      new_account_login_path,
+      @response.request.fullpath,
+      "Unauthenticated GET /jobs should redirect to login, not raise a 500"
+    )
+  end
+
   # SpecisList/show  ---------------------------------
   def test_show_species_list
     spl = species_lists(:first_species_list)
