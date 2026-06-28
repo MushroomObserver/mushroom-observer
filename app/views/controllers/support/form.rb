@@ -33,7 +33,7 @@ module Views::Controllers::Support
     def render_amount_row
       div(class: "row") do
         PRESET_AMOUNTS.each do |amount|
-          div(class: "col-xs-3") do
+          div(class: Grid::QUARTER) do
             radio_field(:amount, [amount, "$#{amount.to_i}"])
           end
         end

@@ -20,8 +20,8 @@ module Views::Controllers::HerbariumRecords
       )
 
       div(class: "row") do
-        div(class: "col-xs-12 col-sm-7") { render_form }
-        div(class: "col-xs-12 col-sm-5") { render_observation_boxes }
+        div(class: Grid::SM7) { render_form }
+        div(class: Grid::SM5) { render_observation_boxes }
       end
     end
 
@@ -37,7 +37,7 @@ module Views::Controllers::HerbariumRecords
           render(Components::Matrix::Box.new(
                    user: @user,
                    object: obs.rss_log || obs,
-                   columns: "col-xs-12"
+                   columns: Grid::FULL
                  ))
         end
       end

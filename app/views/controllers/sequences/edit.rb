@@ -16,8 +16,8 @@ module Views::Controllers::Sequences
 
       obs = @sequence.observation
       div(class: "row") do
-        div(class: "col-xs-12 col-sm-7") { render_form_column(obs) }
-        div(class: "col-xs-12 col-sm-5") { render_matrix_column(obs) }
+        div(class: Grid::SM7) { render_form_column(obs) }
+        div(class: Grid::SM5) { render_matrix_column(obs) }
       end
     end
 
@@ -41,7 +41,7 @@ module Views::Controllers::Sequences
         render(::Components::Matrix::Box.new(
                  user: current_user,
                  object: obs.rss_log || obs,
-                 columns: "col-xs-12"
+                 columns: Grid::FULL
                ))
       end
     end
