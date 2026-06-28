@@ -9,10 +9,10 @@
 # 2. With a block - renders a simple <li> wrapper for custom content
 #
 # @example Standard object rendering
-#   render MatrixBox.new(user: @user, object: @observation)
+#   render Components::Matrix::Box.new(user: @user, object: @observation)
 #
 # @example With custom options
-#   render MatrixBox.new(
+#   render Components::Matrix::Box.new(
 #     user: @user,
 #     object: @observation,
 #     identify: true,
