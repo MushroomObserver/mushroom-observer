@@ -143,10 +143,10 @@ module Views::Controllers::InatImports
       span(id: "expected_count") do
         url = expected_obs_url
         if url
-          link_to(@expected.to_s, url,
+          link_to((@estimate_with_date || @expected).to_s, url,
                   target: "_blank", rel: "noopener noreferrer")
         else
-          plain(@expected.to_s)
+          plain((@estimate_with_date || @expected).to_s)
         end
       end
     end
@@ -156,18 +156,17 @@ module Views::Controllers::InatImports
       return nil unless base
 
       uri, query_str = base.split("?", 2)
+      "#{uri}?#{expected_obs_args(query_str).to_query}"
+    end
+
+    def expected_obs_args(query_str)
       args = Rack::Utils.parse_query(query_str.to_s)
-      unless args.key?("taxon_id") || args.key?("iconic_taxa")
-        args["iconic_taxa"] = "Fungi,Protozoa"
-      end
-      args["without_field"] =
-        BASE_FILTER_PARAMS[:without_field]
-      if import_others?
-        args.merge!(
-          LICENSED_FILTER.transform_keys(&:to_s).transform_values(&:to_s)
-        )
-      end
-      "#{uri}?#{args.to_query}"
+      args["iconic_taxa"] ||= "Fungi,Protozoa" unless args.key?("taxon_id")
+      args["without_field"] = BASE_FILTER_PARAMS[:without_field]
+      args["d1"] = "1000-01-01"
+      filter = LICENSED_FILTER.stringify_keys.transform_values(&:to_s)
+      args.merge!(filter) if import_others?
+      args
     end
 
     def unlicensed_obs_line
@@ -187,7 +186,7 @@ module Views::Controllers::InatImports
     end
 
     def estimated_time
-      seconds = @expected * avg_import_seconds
+      seconds = (@estimate_with_date || @expected) * avg_import_seconds
       format_hms(seconds)
     end
 
