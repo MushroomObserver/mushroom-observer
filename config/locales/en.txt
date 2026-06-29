@@ -267,9 +267,19 @@
   EXTERNAL_LINK: External Link
   external_link: external link
   EXTERNAL_LINKS: External Links
+  external_links_help: How external links work
   external_links: external links
+  external_link_relationship_import: Imported from [site]
+  external_link_relationship_export: Exported to [site]
+  external_link_relationship_copy: Copied by [site]
+  external_link_relationship_mirror: Mirrored on [site]
+  external_link_relationship_manual: Manual link to [site]
+  external_link_relationship_remote_manual: Linked from [site]
+  external_link_relationship_unknown: Linked to [site]
   EXTERNAL_SITE: External Site
   external_site: external site
+  EXTERNAL_ID: External ID
+  RELATIONSHIP: Relationship
   EXTERNAL_SITES: External Sites
   external_sites: external sites
   FIELD_SLIP: Field Slip
@@ -4676,6 +4686,7 @@
   api_create_failed: "Failed to create [type] \"[name]\": [error]"
   api_destroy_failed: Failed to destroy [type] "[name]".
   api_dubious_location_name: "Location name is invalid: [reasons]"
+  api_external_link_already_exists: There is already an external link to "[url]".
   api_external_link_permission_denied: In order to create an external link, you must either have edit permissions for the observation, or you must be a member of the external site's project.
   api_field_slip_in_use: Field Slip "[code]" is already in use.
   api_file_missing: File "[file]" is missing.
