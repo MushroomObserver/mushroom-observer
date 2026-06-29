@@ -22,8 +22,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def view_template
     div(class: "row") do
-      div(class: "col-xs-12 col-md-6") { render_left_column }
-      div(class: "col-xs-12 col-md-6") { render_map }
+      div(class: Grid::MD6) { render_left_column }
+      div(class: Grid::MD6) { render_map }
     end
   end
 
@@ -167,9 +167,11 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_geolocation_fields
-    div(id: "observation_geolocation",
-        class: class_names("collapse", ("in" if @observation.lat)),
-        data: { form_exif_target: "collapseFields" }) do
+    render(::Components::CollapseDiv.new(
+             id: "observation_geolocation",
+             expanded: @observation.lat.present?,
+             attributes: { data: { form_exif_target: "collapseFields" } }
+           )) do
       p { :form_observations_click_point.l }
       render_lat_lng_alt_row
       render_gps_hidden_checkbox
@@ -185,7 +187,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_coordinate_field(field, abbr_key, full_key, addon)
-    div(class: "col-xs-4") do
+    div(class: Grid::THIRD) do
       label_html = coordinate_label(abbr_key, full_key)
       @form.text_field(
         field,

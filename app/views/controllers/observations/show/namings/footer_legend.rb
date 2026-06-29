@@ -13,10 +13,10 @@ class Views::Controllers::Observations::Show::Namings::FooterLegend < Views::Bas
     div(class: "row") do
       div(class: "col-sm-11") do
         div(class: "row") do
-          div(class: "col-xs-4 col-xs-offset-4") do
+          div(class: Grid::CENTERED_THIRD) do
             render_legend("vote-icon-yours", :show_namings_eye_help.t)
           end
-          div(class: "col-xs-4") do
+          div(class: Grid::THIRD) do
             render_legend("vote-icon-consensus",
                           :show_namings_eyes_help.t)
           end

@@ -10,6 +10,9 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   prop :sites, _Nilable(_Array(::ExternalSite)), default: nil
   prop :siblings, _Array(::Observation), default: -> { [] }
 
+  # Production "External Links" help article (textile).
+  EXTERNAL_LINKS_ARTICLE_ID = 58
+
   def view_template
     div(
       id: "observation_external_links",
@@ -26,7 +29,9 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
 
   def render_header
     div do
-      plain("#{:EXTERNAL_LINKS.l}: ")
+      plain("#{:EXTERNAL_LINKS.l} ")
+      render_help_link
+      plain(": ")
       render_new_link if @sites.present?
     end
   end
@@ -36,6 +41,14 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
              modal_id: "external_link",
              tab: ::Tab::ExternalLink::New.new(observation: @obs)
            ))
+  end
+
+  def render_help_link
+    a(href: article_path(EXTERNAL_LINKS_ARTICLE_ID),
+      title: :external_links_help.l,
+      aria: { label: :external_links_help.l }) do
+      render(Components::Icon.new(type: :question))
+    end
   end
 
   def list_visible?
@@ -53,9 +66,10 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def sibling_external_links
-    @siblings.flat_map do |sib|
+    pairs = @siblings.flat_map do |sib|
       sib.external_links.map { |el| [el, sib] }
     end
+    pairs.sort_by { |link, _sib| link.relationship_date }
   end
 
   def render_sibling_row(link, sibling)
@@ -77,7 +91,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def own_external_links
-    @obs.external_links.sort_by(&:site_name)
+    @obs.external_links.sort_by(&:relationship_date)
   end
 
   def render_own_row(link)

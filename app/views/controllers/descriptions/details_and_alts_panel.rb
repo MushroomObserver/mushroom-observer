@@ -43,8 +43,8 @@ module Views::Controllers::Descriptions
 
     def render_two_columns
       div(class: "row") do
-        div(class: "col-xs-12 col-md-6") { render_details_column }
-        div(class: "col-xs-12 col-md-6") { render_alts_column }
+        div(class: Grid::MD6) { render_details_column }
+        div(class: Grid::MD6) { render_alts_column }
       end
     end
 

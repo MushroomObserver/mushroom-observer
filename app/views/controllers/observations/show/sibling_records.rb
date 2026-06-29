@@ -49,19 +49,19 @@ module Views::Controllers::Observations::Show::SiblingRecords
   def render_mcp_search_link(record)
     br
     span(class: "indent") do
-      a(href: record.herbarium.mcp_url(record.accession_number),
-        target: "_blank", rel: "noopener") do
-        plain(:herbarium_record_collection.t)
-      end
+      render(::Components::Link::External.new(
+               :herbarium_record_collection.t,
+               record.herbarium.mcp_url(record.accession_number)
+             ))
     end
   end
 
   def render_sibling_sequence_archive(sequence)
     plain(" [")
-    a(href: sequence.accession_url,
-      target: "_blank", rel: "noopener") do
-      plain(:show_observation_archive_link.t)
-    end
+    render(::Components::Link::External.new(
+             :show_observation_archive_link.t,
+             sequence.accession_url
+           ))
     plain("]")
   end
 end

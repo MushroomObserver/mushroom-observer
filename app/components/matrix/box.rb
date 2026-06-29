@@ -9,29 +9,29 @@
 # 2. With a block - renders a simple <li> wrapper for custom content
 #
 # @example Standard object rendering
-#   render MatrixBox.new(user: @user, object: @observation)
+#   render Components::Matrix::Box.new(user: @user, object: @observation)
 #
 # @example With custom options
-#   render MatrixBox.new(
+#   render Components::Matrix::Box.new(
 #     user: @user,
 #     object: @observation,
 #     identify: true,
-#     columns: "col-xs-12 col-sm-6"
+#     columns: Grid::FULL
 #   )
 #
 # @example Custom block content
 #   render MatrixBox.new(id: 123, extra_class: "text-center") do
 #     tag.div(class: "panel panel-default") { "Custom content" }
 #   end
-# rubocop:disable Metrics/ClassLength
 class Components::Matrix::Box < Components::Base
   include Components::Matrix::Box::RenderData
+  include Components::Matrix::Box::Footer
 
   # Properties
   prop :user, _Nilable(User), default: nil
   prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
-  prop :columns, String, default: "col-xs-12 col-sm-6 col-md-4 col-lg-3"
+  prop :columns, String, default: Grid::TILE
   prop :extra_class, String, default: ""
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
@@ -256,88 +256,6 @@ class Components::Matrix::Box < Components::Base
   # An import link's URL always resolves (stored override or derived from the
   # site template via link_url), so the credit always renders as a link.
   def render_external_credit_link(link)
-    a(href: link[:url], target: "_blank",
-      rel: "noopener noreferrer") { link[:text] }
-  end
-
-  def render_log_footer(panel)
-    return unless @data[:detail].present? || @data[:time].present?
-
-    panel.with_footer(classes: "log-footer") do
-      render_footer_detail(@data[:detail])
-      render_footer_time(@data[:time])
-    end
-  end
-
-  def render_footer_detail(detail)
-    return if detail.blank?
-
-    if detail.is_a?(User)
-      render_user_detail(detail)
-    else
-      div(class: "rss-detail small") { detail }
-    end
-  end
-
-  def render_footer_time(time)
-    return unless time
-
-    div(
-      class: "rss-what rss-updated-at small",
-      data: { controller: "local-time", local_time_utc_value: time.utc.iso8601 }
-    ) do
-      # Server-rendered fallback for no-JS clients; replaced by Stimulus
-      time.display_time
-    end
-  end
-
-  def render_user_detail(user)
-    div(class: "rss-detail small") do
-      plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
-      br
-      plain("#{:list_users_contribution.l}: #{user.contribution}")
-      br
-      link_to(
-        :OBSERVATIONS.l,
-        observations_path(by_user: user.id)
-      )
-    end
-  end
-
-  def render_identify_footer(panel)
-    return unless @observation_view
-
-    panel.with_footer(classes: "panel-active text-center position-relative") do
-      render(Components::Image::MarkAsReviewedToggle.new(
-               observation_view: @observation_view,
-               selector: "box_reviewed",
-               label_class: "stretched-link"
-             ))
-    end
-  end
-
-  def render_custom_footer(panel, &block)
-    panel.with_footer(classes: "text-center", &block)
-  end
-
-  def render_project_admin_footer(panel)
-    return unless show_project_exclude_button?
-
-    panel.with_footer(classes: "text-center") do
-      render(Components::Button.new(
-               type: :post,
-               name: :EXCLUDE.t,
-               target: exclude_observation_project_update_path(
-                 project_id: @project.id, id: @data[:what].id
-               ),
-               size: :sm
-             ))
-    end
-  end
-
-  def show_project_exclude_button?
-    @project && @data && @data[:type] == :observation &&
-      @project.is_admin?(@user)
+    render(::Components::Link::External.new(link[:text], link[:url]))
   end
 end
-# rubocop:enable Metrics/ClassLength

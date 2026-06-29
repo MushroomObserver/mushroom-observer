@@ -917,8 +917,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # mary is member some sites' project
     do_external_sites_test(mary.external_sites, mary,
                            observations(:agaricus_campestris_obs))
-    # but there is already a link on this obs
-    do_external_sites_test([], mary, observations(:coprinus_comatus_obs))
+    # existing links no longer reduce the set (multiple links allowed)
+    do_external_sites_test(mary.external_sites, mary,
+                           observations(:coprinus_comatus_obs))
   end
 
   def do_external_sites_test(expect, user, obs)

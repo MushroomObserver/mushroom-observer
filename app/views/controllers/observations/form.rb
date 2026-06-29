@@ -223,7 +223,7 @@ module Views::Controllers::Observations
     end
 
     def render_naming_column
-      div(class: "col-xs-12 col-md-6") do
+      div(class: Grid::MD6) do
         render(Views::Controllers::Observations::Namings::Fields.new(
                  form: self,
                  vote: @vote,
@@ -240,7 +240,7 @@ module Views::Controllers::Observations
 
     def render_specimen_column
       code = @field_code_locked ? @field_code : editable_field_code
-      div(class: "col-xs-12 col-md-6") do
+      div(class: Grid::MD6) do
         render(Specimen.new(
                  form: self,
                  observation: model,

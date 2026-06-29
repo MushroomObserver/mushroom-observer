@@ -167,6 +167,6 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
   end
 
   def column_classes
-    "col-xs-12 col-sm-6 col-md-12 col-lg-6"
+    Grid::FORM_COLS
   end
 end

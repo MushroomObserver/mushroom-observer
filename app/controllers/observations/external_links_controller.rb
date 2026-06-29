@@ -25,7 +25,6 @@ module Observations
 
     def create
       set_ivars_for_new
-      @url = params.dig(:external_link, :url).to_s
       @site = ExternalSite.find(params.dig(:external_link, :external_site_id))
       unless check_external_link_permission!(obs: @observation, site: @site)
         return
@@ -46,7 +45,6 @@ module Observations
 
     def update
       set_ivars_for_edit
-      @url = params.dig(:external_link, :url).to_s
       return unless check_external_link_permission!(link: @external_link)
 
       update_external_link
@@ -66,9 +64,6 @@ module Observations
       @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
-      @base_urls = {} # used as placeholders in the url field
-      @sites.each { |site| @base_urls[site.name] = site.base_url }
-
       @site = @sites&.first
       @back_object = @observation
     end
@@ -81,8 +76,10 @@ module Observations
                      includes(Observation.matrix_box_includes).
                      find(@external_link.observation.id)
       @site = @external_link.external_site
-      @sites = [@site]
-      @base_urls = { @site.name => @site.base_url }
+      @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
+        @user, @observation, admin: in_admin_mode?
+      ).to_a
+      @sites |= [@site] # the link's current site must stay selectable
       @back_object = @observation
     end
 
@@ -107,10 +104,9 @@ module Observations
 
     def create_external_link
       @external_link = ExternalLink.create(
-        user: @user,
-        observation: @observation,
-        external_site: @site,
-        url: @url
+        permitted_external_link_params.merge(
+          user: @user, observation: @observation, external_site: @site
+        )
       )
 
       if @external_link.errors.any?
@@ -155,13 +151,19 @@ module Observations
     end
 
     def update_external_link
-      @external_link.update(url: @url)
+      @external_link.update(permitted_external_link_params)
 
       if @external_link.errors.any?
         flash_error_and_reload
       else
         flash_success_and_return
       end
+    end
+
+    # Editable on update by any editor: url + external_id (mutually exclusive —
+    # the model drops url when external_id is present) + relationship.
+    def permitted_external_link_params
+      params.require(:external_link).permit(:url, :external_id, :relationship)
     end
 
     def remove_external_link
