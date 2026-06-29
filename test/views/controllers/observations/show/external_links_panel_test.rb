@@ -119,6 +119,14 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
                     "own links should render oldest relationship_date first")
   end
 
+  def test_renders_help_link
+    html = render(panel_with(@obs))
+
+    assert_html(html,
+                "a[href*='/articles/58'] " \
+                "span.glyphicon-question-sign")
+  end
+
   private
 
   def panel_with(obs, user = @user)

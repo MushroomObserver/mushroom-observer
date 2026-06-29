@@ -267,6 +267,7 @@
   EXTERNAL_LINK: External Link
   external_link: external link
   EXTERNAL_LINKS: External Links
+  external_links_help: How external links work
   external_links: external links
   external_link_relationship_import: Imported from [site]
   external_link_relationship_export: Exported to [site]
