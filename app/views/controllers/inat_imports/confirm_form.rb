@@ -34,6 +34,7 @@ module Views::Controllers::InatImports
     def render_expected
       render(Components::Panel.new) do |panel|
         panel.with_body do
+          render_timestamp_note
           if @requested
             requested_obs_line
             br
@@ -112,9 +113,7 @@ module Views::Controllers::InatImports
     end
 
     def not_importable_count
-      return unless @requested && @after_taxon
-
-      @requested.to_i - @after_taxon.to_i
+      @requested.to_i - @after_taxon.to_i if @requested && @after_taxon
     end
 
     def no_date_count
@@ -149,17 +148,45 @@ module Views::Controllers::InatImports
           plain((@estimate_with_date || @expected).to_s)
         end
       end
-      render_expected_count_note
     end
 
-    def render_expected_count_note
+    def render_timestamp_note
       return unless @expected
 
       t = @estimated_at.strftime("%Y-%m-%d %H:%M:%S %Z")
-      plain(" ")
-      small { plain(:inat_import_confirm_expected_as_of.t(time: t)) }
-      br
-      small { plain(:inat_import_confirm_expected_staleness.l) }
+      p(id: "as_of") { plain(:inat_import_confirm_expected_as_of.t(time: t)) }
+      return unless show_staleness_note?
+
+      stale = :inat_import_confirm_expected_staleness.l
+      p(class: "staleness-note") { plain(stale) }
+    end
+
+    def show_staleness_note? = !stable_result_set?
+
+    def stable_result_set?
+      return true if model.inat_ids.present?
+      return false unless (query = requested_obs_query)
+
+      qs = query.start_with?("http") ? query.split("?", 2)[1].to_s : query
+      args = Rack::Utils.parse_query(qs)
+      args["id"].present? || date_filtered_before_estimated_at?(args)
+    end
+
+    def date_filtered_before_estimated_at?(args)
+      date = d2_date(args) || year_end_date(args)
+      date && date < @estimated_at.to_date
+    rescue ArgumentError
+      false
+    end
+
+    def d2_date(args)
+      Date.parse(args["d2"]) if args["d2"].present?
+    end
+
+    def year_end_date(args)
+      return unless (year = args["year"]&.to_i)
+
+      Date.new(year, args["month"]&.to_i || 12, args["day"]&.to_i || -1)
     end
 
     def expected_obs_url
@@ -206,33 +233,23 @@ module Views::Controllers::InatImports
     end
 
     def format_hms(seconds)
-      total_seconds = seconds.to_i
-      hours = total_seconds / 3600
-      minutes = (total_seconds % 3600) / 60
-      remaining = total_seconds % 60
-      Kernel.format("%02d:%02d:%02d", hours, minutes, remaining)
+      s = seconds.to_i
+      Kernel.format("%02d:%02d:%02d", s / 3600, s % 3600 / 60, s % 60)
     end
 
     def render_ignored_row(caption_key, count, url)
+      link_opts = { target: "_blank", rel: "noopener noreferrer" }
       div(class: "mb-1") do
         b { plain("#{caption_key.l}: ") }
-        if url
-          link_to(count.to_s, url,
-                  target: "_blank", rel: "noopener noreferrer")
-        else
-          plain(count.to_s)
-        end
+        url ? link_to(count.to_s, url, **link_opts) : plain(count.to_s)
       end
     end
 
     def already_imported_count
       return unless @after_taxon && @expected
 
-      if import_others?
-        @after_taxon.to_i - @expected.to_i - @unlicensed_obs.to_i
-      else
-        @after_taxon.to_i - @expected.to_i
-      end
+      diff = @after_taxon.to_i - @expected.to_i
+      import_others? ? diff - @unlicensed_obs.to_i : diff
     end
 
     def requested_obs_url
@@ -284,13 +301,9 @@ module Views::Controllers::InatImports
       "#{SITE}/observations?#{query_string}"
     end
 
-    def render_explanation
-      p { plain(:inat_import_confirm_explanation.l) }
-    end
+    def render_explanation = p { plain(:inat_import_confirm_explanation.l) }
 
-    def render_prompt
-      p { plain(:inat_import_confirm_prompt.l) }
-    end
+    def render_prompt = p { plain(:inat_import_confirm_prompt.l) }
 
     def render_hidden_fields
       [:inat_username, :inat_ids, :import_all, :consent, :import_others,
@@ -301,20 +314,12 @@ module Views::Controllers::InatImports
 
     def render_buttons
       div(class: "mt-3") do
-        proceed_button
+        submit(:inat_import_confirm_proceed.l, as: :button,
+                                               name: "confirmed", value: "1")
         whitespace
-        go_back_button
+        submit(:inat_import_confirm_go_back.l, as: :button,
+                                               name: "go_back", value: "1")
       end
-    end
-
-    def proceed_button
-      submit(:inat_import_confirm_proceed.l, as: :button,
-                                             name: "confirmed", value: "1")
-    end
-
-    def go_back_button
-      submit(:inat_import_confirm_go_back.l, as: :button,
-                                             name: "go_back", value: "1")
     end
 
     def import_others? = model.import_others == "1"

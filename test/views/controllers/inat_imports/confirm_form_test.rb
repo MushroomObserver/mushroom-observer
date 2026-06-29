@@ -77,8 +77,10 @@ module Views::Controllers::InatImports
                          breakdown: { requested: 5, after_taxon: 5,
                                       estimate_with_date: 5 })
 
-      assert_html(html, "small",
-                  text: :inat_import_confirm_expected_staleness.l)
+      assert_html(html, "#as_of")
+      assert_html(html, ".staleness-note",
+                  text: :inat_import_confirm_expected_staleness.l.
+                        as_displayed)
     end
 
     def test_expected_count_omits_note_when_no_expected
@@ -86,8 +88,52 @@ module Views::Controllers::InatImports
                          breakdown: { requested: 5, after_taxon: 5,
                                       estimate_with_date: 5 })
 
-      assert_no_html(html, "small",
+      assert_no_html(html, "#as_of",
                      "Timestamp note absent when expected count is nil")
+    end
+
+    def test_staleness_note_suppressed_when_importing_inat_ids
+      html = render_form(model_attrs: { inat_ids: "1,2,3" },
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "#as_of")
+      assert_no_html(html, ".staleness-note",
+                     "Staleness note absent when importing specific iNat IDs")
+    end
+
+    def test_staleness_note_suppressed_when_url_has_id_param
+      url = "#{Inat::Constants::SITE}/observations?id=12345"
+      html = render_form(model_attrs: { inat_ids: nil, inat_url: url },
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_no_html(html, ".staleness-note",
+                     "Staleness note absent when URL has id param")
+    end
+
+    def test_staleness_note_suppressed_when_url_has_past_d2
+      url = "#{Inat::Constants::SITE}/observations?user_id=joe&d2=2020-01-01"
+      html = render_form(model_attrs: { inat_ids: nil, inat_url: url },
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_no_html(html, ".staleness-note",
+                     "Staleness note absent when URL has past d2")
+    end
+
+    def test_staleness_note_suppressed_when_url_has_past_year
+      url = "#{Inat::Constants::SITE}/observations?user_id=joe&year=2020"
+      html = render_form(model_attrs: { inat_ids: nil, inat_url: url },
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_no_html(html, ".staleness-note",
+                     "Staleness note absent when URL filtered to past year")
     end
 
     def test_expected_count_plain_when_no_url_constructable
