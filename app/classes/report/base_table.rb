@@ -26,6 +26,7 @@ module Report
     NAME_SELECTS = {
       name_id: :id,
       name_text_name: :text_name,
+      name_search_name: :search_name,
       name_author: :author,
       name_rank: :rank
     }.freeze
@@ -68,8 +69,11 @@ module Report
       end
       rows = sort_before(rows)
       extend_data!(rows)
+      rows.select! { |row| include_row?(row) }
       sort_after(rows.map { |row| format_row(row) })
     end
+
+    def include_row?(_row) = true
 
     def all_rows
       rows_with_location + rows_without_location

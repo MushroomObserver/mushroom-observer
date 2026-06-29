@@ -24,6 +24,7 @@ module Views::Controllers::Observations::Downloads
       h3(class: "mt-5") { :species_list_download_header.l }
 
       render_format_section
+      render_since_section if in_admin_mode?
       render_encoding_section
       render_submit_buttons
       render_print_labels_section
@@ -39,6 +40,13 @@ module Views::Controllers::Observations::Downloads
       p { "#{:download_observations_format.l}:" }
       div(class: "form-group") do
         radio_field(:format, *format_options)
+      end
+    end
+
+    def render_since_section
+      p { :download_observations_mycoportal_since.l }
+      div(class: "form-group") do
+        text_field(:since)
       end
     end
 
