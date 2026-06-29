@@ -45,10 +45,25 @@ class API2
       raise(MissingParameter.new(:observation))   unless params[:observation]
       raise(MissingParameter.new(:external_site)) unless params[:external_site]
       raise(MissingParameter.new(:url))           if params[:url].blank?
-      return if params[:observation].can_edit?(@user)
-      return if @user.external_sites.include?(params[:external_site])
+      unless params[:observation].can_edit?(@user) ||
+             @user.external_sites.include?(params[:external_site])
+        raise(ExternalLinkPermissionDenied.new)
+      end
+      # The model now allows multiple links per (obs, site), but a user adding
+      # an exact duplicate is an error, not a new correspondence (#4565).
+      raise(ExternalLinkAlreadyExists.new(params[:url])) if duplicate?(params)
+    end
 
-      raise(ExternalLinkPermissionDenied.new)
+    # Compare against the model-normalized url (scheme/www are rewritten before
+    # save), so an equivalent-but-unformatted url can't slip past as "new".
+    def duplicate?(params)
+      candidate = ExternalLink.new(observation: params[:observation],
+                                   external_site: params[:external_site],
+                                   url: params[:url])
+      candidate.valid? # runs the before_validation url normalization
+      params[:observation].external_links.exists?(
+        external_site: params[:external_site], url: candidate.url
+      )
     end
   end
 end

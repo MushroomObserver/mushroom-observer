@@ -85,14 +85,14 @@ module Views::Controllers::Locations
 
       def render_east_west
         div(class: "row") do
-          div(class: "col-xs-6") do
+          div(class: Grid::HALF) do
             span(class: "pull-left") do
               b { "#{:WEST.l}:" }
               plain(" ")
               plain("#{@location.west}°")
             end
           end
-          div(class: "col-xs-6") do
+          div(class: Grid::HALF) do
             span(class: "pull-right") do
               b { "#{:EAST.l}:" }
               plain(" ")
