@@ -28,29 +28,28 @@ module InatImportsController::Estimators
   end
 
   # Counts unlicensed observations for the own-observations case.
-  # Total minus licensed gives the unlicensed count via two fast
-  # only_id queries.
   def fetch_unlicensed_obs_count
-    licensed = RestClient.get(
-      "#{API_BASE}/observations?#{licensed_estimate_query_args.to_query}",
+    response = RestClient.get(
+      "#{API_BASE}/observations?" \
+      "#{import_estimate_query_args.merge(licensed: false).to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
-    @expected - JSON.parse(licensed.body)["total_results"]
+    JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn(
-      "iNat licensed count request failed: #{e.class}: #{e.message}"
+      "iNat unlicensed count request failed: #{e.class}: #{e.message}"
     )
     nil
   end
 
   # Counts unlicensed observations that will be skipped for import-others.
-  # @expected is already licensed-only; total minus @expected = unlicensed.
   def fetch_unlicensed_others_count
-    total = RestClient.get(
-      "#{API_BASE}/observations?#{total_others_estimate_query_args.to_query}",
+    response = RestClient.get(
+      "#{API_BASE}/observations?" \
+      "#{total_others_estimate_query_args.merge(licensed: false).to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
-    JSON.parse(total.body)["total_results"] - @expected
+    JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn(
       "iNat unlicensed-others count request failed: #{e.class}: #{e.message}"
@@ -89,12 +88,14 @@ module InatImportsController::Estimators
     nil
   end
 
-  # Count of importable observations that HAVE a date (estimate query +
-  # d1=1800-01-01). Diff vs @expected gives the no-date count.
+  # Count of importable observations that HAVE a date
+  # Diff vs @expected gives the no-date count.
   def fetch_estimate_with_date_count
     RestClient.get(
+      # iNat API does not support a without_observation_date filter,
+      # so use an arbitrarily early date to get a workable estimate.
       "#{API_BASE}/observations?" \
-      "#{import_estimate_query_args.merge(d1: "1800-01-01").to_query}",
+      "#{import_estimate_query_args.merge(d1: "1000-01-01").to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     ).then { |r| JSON.parse(r.body)["total_results"] }
   rescue RestClient::Exception, JSON::ParserError => e
@@ -125,10 +126,6 @@ module InatImportsController::Estimators
     end
     args[:id] = params[:inat_ids] if listing_ids?
     args
-  end
-
-  def licensed_estimate_query_args
-    import_estimate_query_args.merge(LICENSED_FILTER)
   end
 
   # Strip MO-controlled params so estimates match actual import behavior.

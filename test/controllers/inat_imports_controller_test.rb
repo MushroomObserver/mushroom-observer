@@ -646,13 +646,13 @@ class InatImportsControllerTest < FunctionalTestCase
     user = users(:rolf)
     inat_ids = "12345"
 
-    # Total query (no licensed filter) returns 1 (the unlicensed obs)
+    # General query returns 1 (expected count, which includes unlicensed obs)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
-    # Licensed query returns 0 (unlicensed obs excluded)
+    # licensed=false query returns 1 directly — registered last, matched first
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
-      to_return(status: 200, body: { total_results: 0 }.to_json)
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 1 }.to_json)
 
     login(user.login)
     post(:create,
@@ -667,7 +667,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_select(
       "#unlicensed_obs_count", "1",
-      "Confirm form should report unlicensed obs count (total - licensed)"
+      "Unlicensed obs count comes directly from licensed=false query"
     )
   end
 
@@ -676,13 +676,13 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
 
-    # Total (no license filter) returns 5: 2 unlicensed will be skipped
+    # General query returns 3 for expected count and other requests
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      to_return(status: 200, body: { total_results: 5 }.to_json)
-    # Licensed query (the estimate) returns 3 — registered last, matched first
-    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 3 }.to_json)
+    # licensed=false returns 2 unlicensed obs — registered last, matched first
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 2 }.to_json)
 
     login(user.login)
     post(:create,
@@ -701,11 +701,11 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
-  def test_confirm_renders_gracefully_when_licensed_estimate_fails
+  def test_confirm_renders_gracefully_when_unlicensed_estimate_fails
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
+      with(query: hash_including("licensed" => "false")).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)
@@ -716,7 +716,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("#expected_count")
     assert_select(
       "#unlicensed_obs_count", "",
-      "Unlicensed count should be blank when licensed estimate fails"
+      "Unlicensed count should be blank when licensed=false request fails"
     )
   end
 
@@ -725,16 +725,14 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
 
-    # Total-others request (no license filter) returns 200 with invalid JSON,
-    # triggers JSON::ParserError and the rescue in fetch_unlicensed_others_count
+    # General query returns 3 for expected count and other requests
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      to_return(status: 200, body: "not json")
-    # Licensed estimate returns valid JSON — registered last, matched first.
-    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including(
-        "license" => Inat::Constants::LICENSED_FILTER[:license]
-      )).
       to_return(status: 200, body: { total_results: 3 }.to_json)
+    # licensed=false returns invalid JSON — triggers rescue in
+    # fetch_unlicensed_others_count; registered last, matched first
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: "not json")
 
     login(user.login)
     post(:create,
@@ -747,8 +745,8 @@ class InatImportsControllerTest < FunctionalTestCase
       "Expected count should still show when unlicensed-others request fails"
     )
     assert_select(
-      "#ignored_unlicensed_count", { count: 0 },
-      "Unlicensed count should not appear when total-others estimate fails"
+      "#total_ignored_count", { count: 0 },
+      "Unlicensed count should not appear when unlicensed-others estimate fails"
     )
   end
 

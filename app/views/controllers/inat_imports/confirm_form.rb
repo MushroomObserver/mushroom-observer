@@ -5,6 +5,8 @@ module Views::Controllers::InatImports
   # and Proceed/Go Back buttons. Hidden fields carry form data
   # through the confirmation step. Rendered by `confirm.rb`.
   class ConfirmForm < ::Components::ApplicationForm
+    include ::Inat::Constants
+
     # breakdown: hash with :inat_import, :requested, :after_taxon,
     # :estimate_with_date — iNat API counts from the confirm step.
     def initialize(model, expected: nil, unlicensed_obs: nil,
@@ -106,7 +108,7 @@ module Views::Controllers::InatImports
       return unless import_others? && @unlicensed_obs.to_i.positive?
 
       { key: :inat_import_confirm_unlicensed_obs_caption,
-        count: @unlicensed_obs.to_i, url: nil }
+        count: @unlicensed_obs.to_i, url: unlicensed_obs_url }
     end
 
     def not_importable_count
@@ -141,10 +143,10 @@ module Views::Controllers::InatImports
       span(id: "expected_count") do
         url = expected_obs_url
         if url
-          link_to(expected_count, url,
+          link_to(@expected.to_s, url,
                   target: "_blank", rel: "noopener noreferrer")
         else
-          plain(expected_count)
+          plain(@expected.to_s)
         end
       end
     end
@@ -156,21 +158,16 @@ module Views::Controllers::InatImports
       uri, query_str = base.split("?", 2)
       args = Rack::Utils.parse_query(query_str.to_s)
       unless args.key?("taxon_id") || args.key?("iconic_taxa")
-        # iNat UI does not support comma-separated taxon_id values;
-        # Instead, use iconic_taxa, which reasonably approximates
-        # IMPORTABLE_TAXON_IDS
         args["iconic_taxa"] = "Fungi,Protozoa"
       end
       args["without_field"] =
-        ::Inat::Constants::BASE_FILTER_PARAMS[:without_field]
+        BASE_FILTER_PARAMS[:without_field]
       if import_others?
-        args["license"] = ::Inat::Constants::LICENSED_FILTER[:license]
+        args.merge!(
+          LICENSED_FILTER.transform_keys(&:to_s).transform_values(&:to_s)
+        )
       end
       "#{uri}?#{args.to_query}"
-    end
-
-    def expected_count
-      @expected.to_s
     end
 
     def unlicensed_obs_line
@@ -270,8 +267,12 @@ module Views::Controllers::InatImports
       "#{base}&field:Mushroom%20Observer%20URL"
     end
 
+    def unlicensed_obs_url
+      requested_obs_url&.then { |u| "#{u}&licensed=false" }
+    end
+
     def inat_obs_search_url(query_string)
-      "#{::Inat::Constants::SITE}/observations?#{query_string}"
+      "#{SITE}/observations?#{query_string}"
     end
 
     def render_explanation

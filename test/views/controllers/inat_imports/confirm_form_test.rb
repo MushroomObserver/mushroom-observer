@@ -73,6 +73,18 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href*='field:Mushroom']")
     end
 
+    def test_ignored_section_unlicensed_row_links_to_inat
+      # import_others: "1" + inat_ids set → unlicensed_obs_url returns a URL
+      html = render_form(model_attrs: { inat_ids: "1,2,3",
+                                        import_others: "1" },
+                         unlicensed_obs: 2,
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "a[href*='licensed=false']")
+    end
+
     # Lines 63, 143-144, 184, 208-209, 173:
     # already_imported row without URL (already_imported_url → nil)
     def test_ignored_section_already_imported_row_no_link_when_no_url

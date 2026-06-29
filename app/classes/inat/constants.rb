@@ -67,14 +67,7 @@ class Inat
     # Added when importing others' observations (superimporter, not own).
     # Own-observation imports accept unlicensed obs and apply the user's
     # default MO license to any unlicensed images.
-    #
-    # The iNat API `licensed` param returns true if the observation
-    # license_code is null. So we have to use this filter to get the count of
-    # observations that are licensed, and subtract from total to get the
-    # unlicensed count.
-    LICENSED_FILTER =
-      { license: "cc0,cc-by,cc-by-nc,cc-by-nd,cc-by-nc-nd," \
-                 "cc-by-sa,cc-by-nc-sa" }.freeze
+    LICENSED_FILTER = { licensed: true }.freeze
 
     # Kept for backwards compatibility; some callers may still reference this.
     IMPORT_FILTER_PARAMS = BASE_FILTER_PARAMS.merge(LICENSED_FILTER).freeze
