@@ -750,12 +750,72 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
-  # estimators.rb lines 99-102: rescue block of fetch_estimate_with_date_count
+  def test_confirm_renders_gracefully_when_raw_requested_count_fails
+    # raw_requested_query_args has no taxon_id; general stub catches it
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: "not json")
+    # Requests with taxon_id (all other count queries) succeed
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including(
+        "taxon_id" => Inat::Constants::IMPORTABLE_TAXON_IDS_ARG
+      )).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
+
+    assert_response(
+      :success,
+      "Confirm page should render when raw-requested count fails"
+    )
+    assert_select(
+      "#requested_count", { count: 0 },
+      "Requested count should not appear when raw-requested count fails"
+    )
+    assert_select(
+      "#expected_count", "3",
+      "Expected count should still show when raw-requested count fails"
+    )
+  end
+
+  def test_confirm_renders_gracefully_when_after_taxon_count_fails
+    taxon_ids = Inat::Constants::IMPORTABLE_TAXON_IDS_ARG
+    without_field = Inat::Constants::BASE_FILTER_PARAMS[:without_field]
+
+    # General stub succeeds for requests without taxon_id (raw_requested)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    # after_taxon has taxon_id but not without_field — matches this failure stub
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => taxon_ids)).
+      to_return(status: 200, body: "not json")
+    # expected/unlicensed/date-estimate have both — matched first (LIFO)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => taxon_ids,
+                                 "without_field" => without_field)).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
+
+    assert_response(
+      :success,
+      "Confirm page should render when after-taxon count fails"
+    )
+    assert_select(
+      "#expected_count", "3",
+      "Expected count should still show when after-taxon count fails"
+    )
+  end
+
+  # estimators.rb rescue block of fetch_estimate_with_date_count
   def test_confirm_renders_gracefully_when_date_estimate_fails
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("d1" => "1800-01-01")).
+      with(query: hash_including("d1" => "1000-01-01")).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)

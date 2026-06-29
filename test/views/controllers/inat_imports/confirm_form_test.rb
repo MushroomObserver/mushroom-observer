@@ -73,6 +73,18 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href*='field:Mushroom']")
     end
 
+    def test_requested_count_translates_multi_taxon_id_to_iconic_taxa
+      url = "https://www.inaturalist.org/observations?taxon_id=47170,47685"
+      html = render_form(model_attrs: { inat_ids: nil, inat_url: url },
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "#requested_count a[href*='iconic_taxa']")
+      assert_no_html(html, "#requested_count a[href*='taxon_id']",
+                     "Multi-value taxon_id replaced with iconic_taxa in link")
+    end
+
     def test_ignored_section_unlicensed_row_links_to_inat
       # import_others: "1" + inat_ids set → unlicensed_obs_url returns a URL
       html = render_form(model_attrs: { inat_ids: "1,2,3",
