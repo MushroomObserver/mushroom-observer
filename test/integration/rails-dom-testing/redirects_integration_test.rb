@@ -202,7 +202,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
     )
   end
 
-  # SpecisList/show  ---------------------------------
+  # SpeciesList/show  ---------------------------------
   def test_show_species_list
     spl = species_lists(:first_species_list)
     login
