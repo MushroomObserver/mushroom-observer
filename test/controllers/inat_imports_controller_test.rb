@@ -1511,7 +1511,12 @@ class InatImportsControllerTest < FunctionalTestCase
   # URI.parse raises URI::InvalidURIError on a malformed URL (e.g. a space);
   # taxon_ids_from_url rescues it and returns no ids rather than 500ing.
   def test_taxon_ids_from_url_handles_malformed_url
-    assert_equal([], @controller.send(:taxon_ids_from_url, "http://foo bar"))
+    malformed = "http://foo bar"
+    # Guard: confirm the input really triggers the rescue, so this test
+    # keeps covering the rescue branch (not the empty-query happy path,
+    # which also returns []) across Ruby/URI changes.
+    assert_raises(URI::InvalidURIError) { URI.parse(malformed) }
+    assert_equal([], @controller.send(:taxon_ids_from_url, malformed))
   end
 
   ########## Utilities
