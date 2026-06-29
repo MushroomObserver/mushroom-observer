@@ -91,11 +91,12 @@ module InatImportsController::Estimators
   # Count of importable observations that HAVE a date
   # Diff vs @expected gives the no-date count.
   def fetch_estimate_with_date_count
+    # iNat has no "without date" filter; EARLIEST_DATE_FILTER approximates it.
+    # Preserve a user-supplied d1 — it already excludes undated obs.
+    args = import_estimate_query_args
+    args[:d1] ||= EARLIEST_DATE_FILTER
     RestClient.get(
-      # iNat API does not support a without_observation_date filter,
-      # so use an arbitrarily early date to get a workable estimate.
-      "#{API_BASE}/observations?" \
-      "#{import_estimate_query_args.merge(d1: "1000-01-01").to_query}",
+      "#{API_BASE}/observations?#{args.to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     ).then { |r| JSON.parse(r.body)["total_results"] }
   rescue RestClient::Exception, JSON::ParserError => e

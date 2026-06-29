@@ -23,14 +23,13 @@ module Views::Controllers::InatImports
     end
 
     def test_ignored_section_not_importable_and_no_date_rows
-      # requested(10) - after_taxon(8) = 2 not-importable
-      # expected(8) - estimate_with_date(6) = 2 no-date; total = 4, 2 rows
+      # requested(10) - estimate_with_date(6) = 4 total ignored; 2 rows → note
       html = render_form(expected: 8,
                          breakdown: { requested: 10, after_taxon: 8,
                                       estimate_with_date: 6 })
 
       assert_html(html, "#total_ignored_count", text: "4")
-      assert_html(html, "small",
+      assert_html(html, "small.overlap-note",
                   text: :inat_import_confirm_ignored_overlap_note.l.
                         as_displayed)
       assert_html(html, "b",
@@ -46,6 +45,49 @@ module Views::Controllers::InatImports
 
       assert_html(html, "#expected_count a[href*='iconic_taxa']" \
                         "[target='_blank']")
+    end
+
+    def test_expected_obs_url_adds_date_filter_when_none_present
+      html = render_form(expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "#expected_count " \
+                        "a[href*='d1=#{Inat::Constants::EARLIEST_DATE_FILTER}']")
+    end
+
+    def test_expected_obs_url_preserves_user_supplied_date
+      url = "#{Inat::Constants::SITE}/observations?user_id=joe&d1=2020-01-01"
+      html = render_form(model_attrs: { inat_ids: nil, inat_url: url },
+                         expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "#expected_count a[href*='d1=2020-01-01']")
+      assert_no_html(
+        html,
+        "#expected_count " \
+        "a[href*='d1=#{Inat::Constants::EARLIEST_DATE_FILTER}']",
+        "User-supplied d1 should not be replaced with the default"
+      )
+    end
+
+    def test_expected_count_shows_timestamp_note
+      html = render_form(expected: 5,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_html(html, "small",
+                  text: :inat_import_confirm_expected_staleness.l)
+    end
+
+    def test_expected_count_omits_note_when_no_expected
+      html = render_form(expected: nil,
+                         breakdown: { requested: 5, after_taxon: 5,
+                                      estimate_with_date: 5 })
+
+      assert_no_html(html, "small",
+                     "Timestamp note absent when expected count is nil")
     end
 
     def test_expected_count_plain_when_no_url_constructable
@@ -68,7 +110,7 @@ module Views::Controllers::InatImports
                                       estimate_with_date: 8 })
 
       assert_html(html, "#total_ignored_count", text: "2")
-      assert_no_html(html, "small",
+      assert_no_html(html, "small.overlap-note",
                      "Overlap note absent with only one ignored row")
       assert_html(html, "a[href*='field:Mushroom']")
     end

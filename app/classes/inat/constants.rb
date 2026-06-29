@@ -64,6 +64,10 @@ class Inat
       without_field: "Mushroom Observer URL"
     }.freeze
 
+    # A work-around because iNat has no "has a date" filter;
+    # an arbitrarily early d1 approximates it.
+    EARLIEST_DATE_FILTER = "1000-01-01"
+
     # Added when importing others' observations (superimporter, not own).
     # Own-observation imports accept unlicensed obs and apply the user's
     # default MO license to any unlicensed images.

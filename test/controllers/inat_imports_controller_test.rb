@@ -676,8 +676,15 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
 
-    # General query returns 3 for expected count and other requests
+    licensed_filter =
+      Inat::Constants::LICENSED_FILTER.transform_keys(&:to_s).
+      transform_values(&:to_s)
+    # General stub returns 5 for unfiltered counts (raw_requested, after_taxon)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+    # licensed=true returns 3 (expected + date-estimate counts)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including(licensed_filter)).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     # licensed=false returns 2 unlicensed obs — registered last, matched first
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
@@ -697,7 +704,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_select(
       "#total_ignored_count", "2",
-      "Confirm form should report unlicensed obs that will be skipped"
+      "Total ignored = requested(5) - expected(3)"
     )
   end
 
@@ -815,7 +822,7 @@ class InatImportsControllerTest < FunctionalTestCase
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("d1" => "1000-01-01")).
+      with(query: hash_including("d1" => Inat::Constants::EARLIEST_DATE_FILTER)).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)

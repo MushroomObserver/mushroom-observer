@@ -7,8 +7,6 @@ module Views::Controllers::InatImports
   class ConfirmForm < ::Components::ApplicationForm
     include ::Inat::Constants
 
-    # breakdown: hash with :inat_import, :requested, :after_taxon,
-    # :estimate_with_date — iNat API counts from the confirm step.
     def initialize(model, expected: nil, unlicensed_obs: nil,
                    breakdown: {}, **)
       @expected = expected
@@ -17,6 +15,7 @@ module Views::Controllers::InatImports
       @requested = breakdown[:requested]
       @after_taxon = breakdown[:after_taxon]
       @estimate_with_date = breakdown[:estimate_with_date]
+      @estimated_at = Time.current
       super(model, **)
     end
 
@@ -28,9 +27,7 @@ module Views::Controllers::InatImports
       render_buttons
     end
 
-    def form_action
-      inat_imports_path
-    end
+    def form_action = inat_imports_path
 
     private
 
@@ -58,7 +55,7 @@ module Views::Controllers::InatImports
       return if rows.empty?
 
       br
-      render_ignored_total(rows)
+      render_ignored_total
       render_ignored_overlap_note if rows.size > 1
       div(class: "ml-3") do
         rows.each do |row|
@@ -68,17 +65,20 @@ module Views::Controllers::InatImports
       br
     end
 
-    def render_ignored_total(rows)
+    def render_ignored_total
+      return unless @requested && (@estimate_with_date || @expected)
+
+      total = @requested.to_i - (@estimate_with_date || @expected).to_i
       b { plain(:inat_import_confirm_ignored_total_caption.l) }
       plain(": ")
-      span(id: "total_ignored_count") do
-        plain(rows.sum { |r| r[:count] }.to_s)
-      end
+      span(id: "total_ignored_count") { plain(total.to_s) }
     end
 
     def render_ignored_overlap_note
-      div { small { plain(:inat_import_confirm_ignored_overlap_note.l) } }
+      div { small(class: "overlap-note") { plain(overlap_note) } }
     end
+
+    def overlap_note = :inat_import_confirm_ignored_overlap_note.l
 
     def ignored_row_data
       [not_importable_row, already_imported_row,
@@ -149,6 +149,17 @@ module Views::Controllers::InatImports
           plain((@estimate_with_date || @expected).to_s)
         end
       end
+      render_expected_count_note
+    end
+
+    def render_expected_count_note
+      return unless @expected
+
+      t = @estimated_at.strftime("%Y-%m-%d %H:%M:%S %Z")
+      plain(" ")
+      small { plain(:inat_import_confirm_expected_as_of.t(time: t)) }
+      br
+      small { plain(:inat_import_confirm_expected_staleness.l) }
     end
 
     def expected_obs_url
@@ -163,7 +174,7 @@ module Views::Controllers::InatImports
       args = Rack::Utils.parse_query(query_str.to_s)
       args["iconic_taxa"] ||= "Fungi,Protozoa" unless args.key?("taxon_id")
       args["without_field"] = BASE_FILTER_PARAMS[:without_field]
-      args["d1"] = "1000-01-01"
+      args["d1"] ||= EARLIEST_DATE_FILTER
       filter = LICENSED_FILTER.stringify_keys.transform_values(&:to_s)
       args.merge!(filter) if import_others?
       args
@@ -186,8 +197,7 @@ module Views::Controllers::InatImports
     end
 
     def estimated_time
-      seconds = (@estimate_with_date || @expected) * avg_import_seconds
-      format_hms(seconds)
+      format_hms((@estimate_with_date || @expected) * avg_import_seconds)
     end
 
     def avg_import_seconds
@@ -283,14 +293,10 @@ module Views::Controllers::InatImports
     end
 
     def render_hidden_fields
-      hidden_field(:inat_username)
-      hidden_field(:inat_ids)
-      hidden_field(:import_all)
-      hidden_field(:consent)
-      hidden_field(:import_others)
-      hidden_field(:inat_url)
-      hidden_field(:original_inat_url)
-      hidden_field(:skip_inat_writeback)
+      [:inat_username, :inat_ids, :import_all, :consent, :import_others,
+       :inat_url, :original_inat_url, :skip_inat_writeback].each do |f|
+        hidden_field(f)
+      end
     end
 
     def render_buttons
@@ -311,8 +317,6 @@ module Views::Controllers::InatImports
                                              name: "go_back", value: "1")
     end
 
-    def import_others?
-      model.import_others == "1"
-    end
+    def import_others? = model.import_others == "1"
   end
 end
