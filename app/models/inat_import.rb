@@ -181,6 +181,10 @@ class InatImport < ApplicationRecord
     response_errors.blank? ? "" : "#{:ERRORS.t}: "
   end
 
+  def help
+    Done? ? :inat_import_tracker_done.l : :inat_import_tracker_leave_page.l
+  end
+
   #########
 
   private

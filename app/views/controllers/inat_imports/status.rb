@@ -9,7 +9,7 @@ module Views::Controllers::InatImports
     prop :inat_import, ::InatImport
 
     def view_template
-      div(
+      render(::Components::ContentPadded.new(
         id: "inat_import_#{@inat_import.id}",
         data: { controller: "inat-import",
                 inat_import_status_value: @inat_import.state,
@@ -17,23 +17,17 @@ module Views::Controllers::InatImports
                 inat_import_remaining_value:
                   @inat_import.estimated_remaining_time.to_i }
       ) do
-        render_content
-        render_alert
-      end
-    end
-
-    private
-
-    def render_content
-      render(::Components::ContentPadded.new do
         render_summary_paragraph
         render_started_line
         render_elapsed_line
         render_remaining_line
         render_ended_line
-        render_errors
+        render_error_line
+        render_alert
       end)
     end
+
+    private
 
     def render_summary_paragraph
       p do
@@ -94,40 +88,22 @@ module Views::Controllers::InatImports
       br
     end
 
-    def render_errors
+    def render_error_line
       span(class: "font-weight-bold") do
         plain(@inat_import.error_caption.to_s)
       end
-      errors = @inat_import.response_errors.to_s.split("\n")
-      return unless errors
-
-      render_error_alert(errors)
-    end
-
-    def render_error_alert(errors)
-      render(::Components::Alert.new(level: :warning) do
-        errors.each_with_index do |error, i|
-          br if i.positive?
-          plain(error)
-        end
-      end)
+      span(class: "violation-highlight") do
+        plain(@inat_import.response_errors.to_s)
+      end
+      br
     end
 
     def render_alert
       render(::Components::Alert.new(
-               message: alert_message,
-               level: :info,
+               message: @inat_import.help,
+               level: :warning,
                class: "mt-3"
              ))
-    end
-
-    def alert_message
-      return :inat_import_tracker_leave_page.l unless @inat_import.Done?
-      if @inat_import.imported_count.zero?
-        return :inat_import_nothing_imported.l
-      end
-
-      :inat_import_tracker_done.l
     end
 
     def remaining_time
