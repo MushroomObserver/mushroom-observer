@@ -18,6 +18,7 @@ module Views::Controllers::InatImports
                   @inat_import.estimated_remaining_time.to_i }
       ) do
         render_content
+        render_error_alert
         render_alert
       end
     end
@@ -31,7 +32,7 @@ module Views::Controllers::InatImports
         render_elapsed_line
         render_remaining_line
         render_ended_line
-        render_errors
+        render_error_line
       end)
     end
 
@@ -51,6 +52,10 @@ module Views::Controllers::InatImports
     def render_imported_line
       span(class: "font-weight-bold") { "#{:inat_import_imported.l}: " }
       span { plain(@inat_import.imported_count.to_s) }
+      render_importables_count if @inat_import.importables.to_i.positive?
+    end
+
+    def render_importables_count
       span(class: "mr-2") { plain(" #{:of.t}") }
       span { plain(@inat_import.importables.to_s) }
       span { plain(" #{:observations.t}") }
@@ -94,17 +99,16 @@ module Views::Controllers::InatImports
       br
     end
 
-    def render_errors
+    def render_error_line
       span(class: "font-weight-bold") do
         plain(@inat_import.error_caption.to_s)
       end
-      errors = @inat_import.response_errors.to_s.split("\n")
-      return unless errors
-
-      render_error_alert(errors)
     end
 
-    def render_error_alert(errors)
+    def render_error_alert
+      errors = @inat_import.response_errors.to_s.split("\n")
+      return unless errors.any?
+
       render(::Components::Alert.new(level: :warning) do
         errors.each_with_index do |error, i|
           br if i.positive?
