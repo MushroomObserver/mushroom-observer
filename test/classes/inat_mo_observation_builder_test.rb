@@ -11,6 +11,8 @@ require("test_helper")
 class InatMoObservationBuilderTest < UnitTestCase
   # Minimal stand-in for an ::Inat::Obs, exposing only what naming_vote reads.
   class FakeInatObs
+    FAKE_INAT_ID = 12_345_678
+
     def initialize(sequences:, provisional_name:, quality_grade:,
                    name_override: nil, obs_taxon_name: nil)
       @sequences = sequences
@@ -28,7 +30,7 @@ class InatMoObservationBuilderTest < UnitTestCase
 
     def [](key)
       { quality_grade: @quality_grade, license_code: "cc-by",
-        identifications: [] }[key]
+        identifications: [], id: FAKE_INAT_ID }[key]
     end
   end
 
@@ -93,7 +95,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                           provisional: names(:lactarius_alpinus)))
   end
 
-  # The provisional is deprecated in favor of the Observation Taxon (the
+  # The provisional is deprecated in favor of the leading ID (the
   # Leccinum scenario): the accepted name leads, the deprecated provisional
   # follows, and the synonym-of-the-provisional dedups with the Observation
   # Taxon.
@@ -110,7 +112,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                  proposed(community: names(:pluteus_petasatus_deprecated)))
   end
 
-  # Provisional equal to the Observation Taxon collapses to a single naming.
+  # Provisional equal to the leading ID collapses to a single naming.
   def test_proposed_namings_provisional_equals_community
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
                  proposed(community: names(:lactarius_alpinus),
@@ -119,7 +121,7 @@ class InatMoObservationBuilderTest < UnitTestCase
 
   # --- Species Name Override (#4533) ---
 
-  # The override leads ahead of the Observation Taxon.
+  # The override leads ahead of the leading ID.
   def test_proposed_namings_override_leads_over_community
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
                   ["Peltigera", Vote::MIN_POS_VOTE]],
@@ -127,7 +129,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                           override: names(:lactarius_alpinus)))
   end
 
-  # The override outranks BOTH the provisional name and the Observation Taxon;
+  # The override outranks BOTH the provisional name and the leading ID;
   # the other two follow at Could Be.
   def test_proposed_namings_override_outranks_provisional_and_community
     assert_equal([["Coprinus comatus", Vote::MAXIMUM_VOTE],
@@ -198,17 +200,20 @@ class InatMoObservationBuilderTest < UnitTestCase
                  builder.send(:used_references_explanation, existing))
   end
 
-  # The observation taxon explanation uses the inat_observation_taxon
-  # translation string plus today's date.
+  # The leading ID explanation links to the iNat observation and
+  # uses the inat_leading_id translation string plus today's date.
   def test_observation_taxon_naming_reason
     name = names(:peltigera)
-    expected = "#{:inat_observation_taxon.l} " \
+    id = FakeInatObs::FAKE_INAT_ID
+    inat_link = "<a href=\"#{Inat::Constants::SITE}/observations/#{id}\">" \
+                "iNat #{id}</a>"
+    expected = "#{inat_link}, #{:inat_leading_id.l} " \
                "#{Time.zone.today.strftime("%Y-%m-%d")}"
     assert_equal(expected,
                  builder_for(obs_taxon_name: name).
                    send(:used_references_explanation, name),
-                 "Observation taxon explanation should use " \
-                 "inat_observation_taxon translation key")
+                 "Observation taxon explanation should link to iNat " \
+                 "observation and include date")
   end
 
   # When the obs taxon is a misspelling and the proposed name is its correct
@@ -218,7 +223,10 @@ class InatMoObservationBuilderTest < UnitTestCase
     misspelling = names(:petigera)
     correct = misspelling.correct_spelling
     assert(correct, "Test requires a name fixture with correct_spelling set")
-    expected = "#{:inat_observation_taxon.l} " \
+    id = FakeInatObs::FAKE_INAT_ID
+    inat_link = "<a href=\"#{Inat::Constants::SITE}/observations/#{id}\">" \
+                "iNat #{id}</a>"
+    expected = "#{inat_link}, #{:inat_leading_id.l} " \
                "#{Time.zone.today.strftime("%Y-%m-%d")} " \
                "#{:inat_corrected_spelling.l}"
     assert_equal(expected,
