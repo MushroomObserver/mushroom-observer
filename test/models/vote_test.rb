@@ -86,6 +86,30 @@ class VoteTest < UnitTestCase
     end
   end
 
+  def test_add_missing_views_populates_observation_id
+    assert_equal(0, ObservationView.count,
+                 "Expected no ObservationView records at start")
+
+    msgs = Vote.add_missing_views_corresponding_to_votes
+
+    assert_operator(ObservationView.count, :>, 0,
+                    "Should have created ObservationView records")
+    ObservationView.find_each do |ov|
+      assert_not_nil(ov.observation_id,
+                     "nil observation_id for user #{ov.user_id}")
+      assert(
+        Vote.exists?(observation_id: ov.observation_id,
+                     user_id: ov.user_id),
+        "ObservationView (obs #{ov.observation_id}, " \
+        "user #{ov.user_id}) should match a Vote"
+      )
+    end
+    msgs.each do |msg|
+      assert_match(/reviewed observation \d+/, msg,
+                   "Message missing numeric observation_id: #{msg.inspect}")
+    end
+  end
+
   def test_confidence_returns_no_opinion_for_zero
     # Bug: Vote.confidence(0) was returning "Doubtful" instead of "No Opinion"
     assert_equal("No Opinion", Vote.confidence(0))
