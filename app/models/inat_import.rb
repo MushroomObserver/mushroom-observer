@@ -140,7 +140,7 @@ class InatImport < ApplicationRecord
   # If user has no import history, use system-wide average import time.
   # If no system-wide history, use BASE_AVG_IMPORT_SECONDS.
   def total_expected_time
-    importables * initial_avg_import_seconds
+    total_importables.to_i * initial_avg_import_seconds
   end
 
   def initial_avg_import_seconds
