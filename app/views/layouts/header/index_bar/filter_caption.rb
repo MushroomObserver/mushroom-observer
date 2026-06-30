@@ -75,33 +75,23 @@ module Views::Layouts
       end
     end
 
-    # Mirrors `js_button(class: …) { tag.span(…) }` from the helper:
-    # `js_button` is `<button type="button" class="btn btn-default …">`,
-    # with classes merged. Emit directly for clarity.
     def render_toggle_button(truncate:)
       action = truncate ? "showFull" : "showTruncated"
       direction = truncate ? "down" : "up"
-      # `name="button"` matches Rails' `button_tag` default that
-      # `js_button` inherits — preserves byte-equivalent HTML for the
-      # parity test.
-      button(
-        type: "button",
-        name: "button",
-        class: class_names(
-          %w[btn btn-default top-right btn-link toggle]
-        ),
-        title: if truncate
-                 :filter_caption_expand.l
-               else
-                 :filter_caption_collapse.l
-               end,
-        data: { filter_caption_target: action,
-                action: "filter-caption##{action}",
-                toggle: "tooltip" }
-      ) do
-        # `aria-hidden="true"` as a string (not boolean) matches
-        # Rails' `tag.span(aria: { hidden: true })` HTML output —
-        # Phlex 2 renders a boolean `true` as the empty-string form.
+      render(::Components::Button.new(
+               variant: :btn_link,
+               class: "top-right toggle",
+               title: if truncate
+                        :filter_caption_expand.l
+                      else
+                        :filter_caption_collapse.l
+                      end,
+               data: { filter_caption_target: action,
+                       action: "filter-caption##{action}",
+                       toggle: "tooltip" }
+             )) do
+        # aria-hidden as a string — Phlex 2 renders boolean `true`
+        # as an empty-string attr, not "true".
         render(::Components::Icon.new(
                  type: :"chevron_#{direction}",
                  attributes: { aria: { hidden: "true" } }

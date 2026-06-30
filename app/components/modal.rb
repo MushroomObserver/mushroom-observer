@@ -173,9 +173,12 @@ class Components::Modal < Components::Base
   end
 
   def close_button
-    button(type: :button, class: "close",
-           data: { dismiss: "modal" },
-           aria: { label: :CLOSE.l }) do
+    render(::Components::Button.new(
+             variant: :strip,
+             class: "close",
+             data: { dismiss: "modal" },
+             aria: { label: :CLOSE.l }
+           )) do
       span(aria: { hidden: "true" }) { "×" }
     end
   end
