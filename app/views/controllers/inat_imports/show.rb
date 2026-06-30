@@ -9,7 +9,7 @@ module Views::Controllers::InatImports
     prop :user, ::User
 
     def view_template
-      container_class(:wide)
+      container_class(:text)
       add_page_title(:inat_import_tracker.t)
       turbo_stream_from([@inat_import.user, :inat_import])
       render(Status.new(inat_import: @inat_import))
@@ -22,7 +22,7 @@ module Views::Controllers::InatImports
       div(class: "mt-3") do
         render(Components::Button.new(
                  type: :get,
-                 name: :inat_import_tracker_results.l,
+                 name: :results.l,
                  target: results_observations_path
                ))
         whitespace
