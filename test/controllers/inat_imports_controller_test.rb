@@ -20,11 +20,10 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_show
     import = inat_imports(:rolf_inat_import)
-    tracker = InatImportJobTracker.create(inat_import: import.id)
 
     login
 
-    get(:show, params: { id: import.id, tracker_id: tracker.id })
+    get(:show, params: { id: import.id })
 
     assert_response(:success)
   end
@@ -48,7 +47,6 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_new_inat_import_already_importing
     user = users(:katrina)
     import = inat_imports(:katrina_inat_import)
-    tracker = inat_import_job_trackers(:katrina_tracker)
 
     login(user.login)
     get(:new)
@@ -56,9 +54,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_warning(
       "Should flash warning if user starts iNat import while another is running"
     )
-    assert_redirected_to(
-      inat_import_path(import, params: { tracker_id: tracker.id })
-    )
+    assert_redirected_to(inat_import_path(import))
   end
 
   def test_new_inat_import_inat_username_prefilled
@@ -977,10 +973,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "When job starts, elapsed time for 1st import should be <= 0.5 seconds"
     )
 
-    tracker = InatImportJobTracker.where(inat_import: inat_import.id).last
-    assert_redirected_to(
-      inat_import_path(inat_import, params: { tracker_id: tracker.id })
-    )
+    assert_redirected_to(inat_import_path(inat_import))
   end
 
   def test_inat_username_unchanged_if_authorization_denied
@@ -1010,10 +1003,9 @@ class InatImportsControllerTest < FunctionalTestCase
            "Test needs a Import fixture with a uncancelled, pending Job")
 
     login
-    get(:cancel, params: { id: import.id })
+    put(:cancel, params: { id: import.id })
 
-    assert_response(:success)
-    assert_select("[data-controller='inat-import-job']")
+    assert_redirected_to(inat_import_path(import))
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
   end
