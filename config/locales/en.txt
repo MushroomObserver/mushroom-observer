@@ -261,8 +261,6 @@
   draft: draft
   DRAFTS: Drafts
   drafts: drafts
-  ENDED: Ended
-  ended: ended
   error: error
   ERRORS: Errors
   errors: errors
@@ -575,8 +573,6 @@
   ID_BY: ID By
   inaturalist: iNaturalist
   inat: iNat
-  IMPORTED: Imported
-  imported: imported
   INDEX: Index
   index: index
   INDEXES: Indexes
@@ -752,8 +748,6 @@
   # attach an observation to a project
   ATTACH: Attach
   attach: attach
-  CALCULATING: "Calculating ..."
-  calculating: "Calculating ..."
   CANCEL: Cancel
   cancel: cancel
   # clear a search form
@@ -863,8 +857,6 @@
   optional: optional
   REQUIRED: Required
   required: required
-  RESULTS: Results
-  results: results
   TRACKING: Tracking
   tracking: tracking
   UPDATED: Updated
@@ -3305,9 +3297,12 @@
   inat_import_tracker_started: Started
   inat_import_tracker_elapsed_time: Elapsed Time
   inat_import_tracker_estimated_remaining_time: Estimated Remaining Time
-  inat_import_tracker_done: "Click [:results] to see imported Observations."
-  inat_import_tracker_done_with_errors: "Import finished with errors — see details above."
+  inat_import_tracker_calculating_time: "Calculating ..."
+  inat_import_tracker_ended: Ended
+  inat_import_imported: Imported
+  inat_import_tracker_done: "Click [:inat_import_tracker_results] to see imported Observations."
   inat_import_nothing_imported: Nothing was imported.
+  inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
   inat_import_tracker_leave_page: You may continue working in MO by opening another tab, or by leaving this page. To return to this page, you can (a) go back in your browser, or (b) click Create Observation, iNat Import; if the import is in progress, this page will be redisplayed.
