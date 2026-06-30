@@ -53,9 +53,13 @@ module Views::Controllers::Users
 
       def render_table
         @total = 0
-        table(class: "table table-condensed bg-none mb-0") do
-          @rows.each { |row| render_row(row) }
-          render_total_rows if @total.positive?
+        render(Components::Table.new(variant: :condensed,
+                                     class: "bg-none mb-0",
+                                     show_headers: false)) do |t|
+          t.body do
+            @rows.each { |row| render_row(row) }
+            render_total_rows if @total.positive?
+          end
         end
       end
 

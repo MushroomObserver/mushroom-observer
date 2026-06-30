@@ -83,7 +83,8 @@ class Components::Icon < Components::Base
     info: "question-sign",
     fullscreen: "fullscreen",
     matrix: "th-large",
-    info_circle: "info-sign"
+    info_circle: "info-sign",
+    user: "user"
   }.freeze
 
   prop :type, _Nilable(Symbol), default: nil

@@ -14,17 +14,25 @@
 #   app/components/list_group/**
 #   app/components/modal.rb and app/components/modal/**
 #   app/components/alert.rb
+#   app/components/alert/link.rb (owns alert-link class)
 #   app/components/icon.rb
 #   app/components/table.rb
 #   app/components/panel.rb and app/components/panel/**
 #   app/components/dropdown.rb
 #   app/components/link/external.rb (owns target="_blank")
 #   app/components/link/collapse_toggle.rb (owns data-toggle="collapse")
+#   app/components/form/checkbox_collapse.rb (owns checkbox-driven collapse)
 #   app/components/form/location_map.rb (Button::CollapseToggle via type: kwarg)
-#   app/views/controllers/observations/namings/reasons_fields.rb (checkbox-driven)
-#   app/views/controllers/observations/form/details.rb (checkbox-driven)
+#   app/components/application_form/input_group_addon.rb (owns input-group-btn)
+#   app/components/form/table_accordion.rb (owns panel-group accordion structure)
+#   app/views/controllers/observations/namings/reasons_fields.rb (Superform NS — no checkbox_field)
 #   app/components/carousel/controls.rb (owns chevron interpolation)
 set -euo pipefail
+
+# During a merge commit all changed files are staged, including files
+# from main that have pre-existing violations we don't own. Skip
+# the commit-mode check; the hook still fires on Edit/Write saves.
+[ -f .git/MERGE_HEAD ] && exit 0
 
 INPUT="$(cat)"
 TOOL="$(printf '%s' "$INPUT" | jq -r '.tool_name // ""')"
@@ -54,6 +62,7 @@ is_exempt_file() {
     app/components/modal.rb|\
     app/components/modal/*|\
     app/components/alert.rb|\
+    app/components/alert/link.rb|\
     app/components/icon.rb|\
     app/components/table.rb|\
     app/components/panel.rb|\
@@ -61,10 +70,12 @@ is_exempt_file() {
     app/components/dropdown.rb|\
     app/components/link/external.rb|\
     app/components/link/collapse_toggle.rb|\
+    app/components/form/checkbox_collapse.rb|\
     app/components/form/location_map.rb|\
+    app/components/form/table_accordion.rb|\
+    app/components/application_form/input_group_addon.rb|\
     app/components/carousel/controls.rb|\
-    app/views/controllers/observations/namings/reasons_fields.rb|\
-    app/views/controllers/observations/form/details.rb) return 0 ;;
+    app/views/controllers/observations/namings/reasons_fields.rb) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -99,6 +110,7 @@ case "$TOOL" in
       ':(exclude)app/components/modal.rb' \
       ':(exclude)app/components/modal/**' \
       ':(exclude)app/components/alert.rb' \
+      ':(exclude)app/components/alert/link.rb' \
       ':(exclude)app/components/icon.rb' \
       ':(exclude)app/components/table.rb' \
       ':(exclude)app/components/panel.rb' \
@@ -106,10 +118,12 @@ case "$TOOL" in
       ':(exclude)app/components/dropdown.rb' \
       ':(exclude)app/components/link/external.rb' \
       ':(exclude)app/components/link/collapse_toggle.rb' \
+      ':(exclude)app/components/form/checkbox_collapse.rb' \
       ':(exclude)app/components/form/location_map.rb' \
+      ':(exclude)app/components/form/table_accordion.rb' \
+      ':(exclude)app/components/application_form/input_group_addon.rb' \
       ':(exclude)app/components/carousel/controls.rb' \
       ':(exclude)app/views/controllers/observations/namings/reasons_fields.rb' \
-      ':(exclude)app/views/controllers/observations/form/details.rb' \
       | grep '^+[^+]' \
       | sed 's/^+//' \
       | grep -v '^[[:space:]]*#' \
@@ -168,12 +182,14 @@ $(printf '%s\n' "$matches" | sed 's/^/    /')
 "
 }
 
-# btn classes (original scope)
+# btn classes — exclude:
+#   [a-zA-Z]-btn  custom CSS selector classes ending in -btn (find-btn, keep-btn, etc.)
+#   btn-group     Bootstrap layout wrapper div (no component equivalent)
 check \
   'raw btn class' \
   'Components::Button subclass (Edit/Delete/Post/Patch/Put/Get/Download/ModalToggle/Submit)' \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\bbtn\b' \
-  ''
+  '([a-zA-Z]-btn\b|\bbtn-group\b)'
 
 # help-note / help-block
 check \
@@ -182,12 +198,12 @@ check \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\b(help-note|help-block)\b' \
   ''
 
-# list-group / list-group-item
+# list-group / list-group-item — exclude _class: kwargs (panel_class: etc.)
 check \
   'raw list-group class' \
   'Components::ListGroup::Base.new or Components::ListGroup::Item.new' \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\blist-group\b' \
-  ''
+  '_class:'
 
 # modal wrapper (not modal-body/footer/header/title — those are form-internal)
 check \
@@ -196,12 +212,15 @@ check \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\bmodal\b' \
   'modal-(body|footer|header|title|sm|lg|xl|open)'
 
-# alert
+# alert — any "alert" or "alert-*" class signals a raw Bootstrap alert.
+# alert-link is the one modifier that looks like an exception but isn't —
+# use Components::Alert::Link instead (it delegates to Link::Get with the
+# class mixed in). alert-dismissible is part of the component itself.
 check \
   'raw alert class' \
-  'Components::Alert.new(level: :info/:warning/:danger/:success)' \
+  'Components::Alert.new(level: :info/:warning/:danger/:success); alert-link → Components::Alert::Link.new(text, path)' \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\balert\b' \
-  ''
+  'alert-dismissible'
 
 # link-icon (glyphicon hand-rolled without Icon component)
 check \
@@ -218,25 +237,30 @@ check \
   ''
 
 # table — raw table() calls or class: "table …"
+# The second alternative uses \btable[^-] (table followed by non-dash) to
+# catch standalone "table" base class (real violation) but NOT modifier-only
+# class strings like "table-striped table-condensed" (false positives when
+# passed as class: kwarg to an existing Components::Table call).
 check \
   'raw Bootstrap table class' \
   'Components::Table.new(collection) do |t| … end' \
-  '(^[[:space:]]*table\(class:|class:[[:space:]]*["'"'"'][^"'"'"']*\btable\b)' \
-  'table_class:|Components::Table|# '
+  '(^[[:space:]]*table\(class:|class:[[:space:]]*["'"'"'][^"'"'"']*\btable[^-])' \
+  'table_class:|Components::Table|Table\(|_class:'
 
-# panel
+# panel — exclude _class: kwargs and custom *-panel CSS class names
 check \
   'raw Bootstrap panel class' \
   'Components::Panel.new (with panel_class: for variant overrides)' \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\bpanel\b' \
-  'panel_class:|panel-(body|heading|footer|title|group|collapse)'
+  'panel_class:|panel-(body|heading|footer|title|group|collapse)|_class:|[a-zA-Z]-panel\b'
 
 # target="_blank" / target: "_blank" — use Link::External instead
+# exclude button_target: which is a Phlex component prop, not raw HTML
 check \
   'raw target="_blank" on a link' \
   'Components::Link::External.new("text", url)' \
   'target:[[:space:]]*["\x27]_blank["\x27]' \
-  ''
+  'button_target:'
 
 # data-toggle="collapse" — use Link::CollapseToggle instead
 # (exempt: collapse_toggle.rb itself; location_map.rb uses Button::CollapseToggle
@@ -272,6 +296,7 @@ Quick reference:
   list-group-item  → Components::ListGroup::Item.new (or list.item in Base)
   modal            → Components::Modal.new
   alert            → Components::Alert.new(level: :info)
+  alert-link       → Components::Alert::Link.new(text, path)
   glyphicon        → Components::Icon.new(type: :symbol)
   table            → Components::Table.new(collection) do |t| … end
   panel            → Components::Panel.new

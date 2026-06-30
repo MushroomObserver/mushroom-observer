@@ -56,23 +56,11 @@ module Views::Controllers::Policy
     private
 
     def render_definitions_table
-      table(class: "table table-striped") do
-        render_definitions_header
-        DEFINITIONS.each { |s, m| render_definitions_row(s, m) }
-      end
-    end
-
-    def render_definitions_header
-      tr do
-        th(width: "33%") { trusted_html(:privacy_when_we_say.t) }
-        th { b { trusted_html(:privacy_we_mean.t) } }
-      end
-    end
-
-    def render_definitions_row(say_key, mean_key)
-      tr do
-        td { trusted_html(say_key.t) }
-        td { trusted_html(mean_key.t) }
+      render(Components::Table.new(DEFINITIONS, variant: :striped)) do |t|
+        t.column(:privacy_when_we_say.l, width: "33%") do |row|
+          trusted_html(row[0].t)
+        end
+        t.column(:privacy_we_mean.l) { |row| trusted_html(row[1].t) }
       end
     end
   end

@@ -251,6 +251,15 @@ class TableTest < ComponentTestCase
     # Body still renders.
     assert_includes(html, "<td>Alice</td>")
   end
+
+  def test_multiple_body_calls_emit_multiple_tbodies
+    html = render(MultibodyTestHost.new)
+
+    assert_html(html, "table tbody", count: 3)
+    assert_html(html, "table tbody:first-child tr td", text: "A")
+    assert_html(html, "table tbody#collapse-1.collapse tr td", text: "B")
+    assert_html(html, "table tbody#collapse-2.collapse tr td", text: "C")
+  end
 end
 
 # Test host for body mode: renders Table inside a real Phlex view so
@@ -292,6 +301,16 @@ class RowModeTestHost < Components::Base
           td { plain(row.name.upcase) }
         end
       end
+    end
+  end
+end
+
+class MultibodyTestHost < Components::Base
+  def view_template
+    render(Components::Table.new(show_headers: false)) do |t|
+      t.body { tr { td { plain("A") } } }
+      t.body(id: "collapse-1", class: "collapse") { tr { td { plain("B") } } }
+      t.body(id: "collapse-2", class: "collapse") { tr { td { plain("C") } } }
     end
   end
 end

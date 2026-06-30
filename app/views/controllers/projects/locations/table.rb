@@ -4,11 +4,6 @@
 # collapsible sub-locations, and aliases. Rendered from the
 # locations index and the target_locations turbo_stream re-render.
 #
-# NOTE: Does NOT use `Components::Table` — the table has multiple
-# `<tbody>` elements (one per location group + a separate
-# `<tbody class="collapse">` per group holding the sub-locations
-# the Bootstrap accordion toggle expands), which Components::Table's
-# single-tbody model can't express. Hand-rolled here.
 module Views::Controllers::Projects::Locations
   class Table < Views::Base
     def initialize(project:, grouped_data:,
@@ -50,7 +45,7 @@ module Views::Controllers::Projects::Locations
 
       div(class: "my-3") do
         plain(
-          :project_target_locations_summary.l(
+          :project_target_locations_summary.t(
             total: total, with_obs: with_obs, without_obs: without_obs
           )
         )
@@ -73,33 +68,30 @@ module Views::Controllers::Projects::Locations
     # --- Target location groups (collapsible) ---
 
     def render_target_groups
-      table(class: "table table-striped " \
-                   "table-project-members mt-3") do
-        thead { render_header }
-        @grouped_data.each do |group|
-          render_target_group(group)
-        end
+      render_locations_table do |t|
+        @grouped_data.each { |group| add_group_bodies(t, group) }
       end
     end
 
-    def render_target_group(group)
+    def add_group_bodies(tab, group)
       target = group[:target]
       subs = group[:sub_locations]
       collapse_id = "target_subs_#{target.id}"
       count = target_obs_count(target, subs)
+      tab.body { render_target_row(target, collapse_id, count, subs) }
+      return if subs.empty?
 
-      render_target_row(target, collapse_id, count, subs)
-      render_sub_location_rows(subs, collapse_id)
+      tab.body(id: collapse_id, class: "collapse") do
+        subs.each { |loc| render_sub_row(loc) }
+      end
     end
 
     def render_target_row(target, collapse_id, count, subs)
-      tbody do
-        tr do
-          render_target_name_cell(target, collapse_id, subs)
-          td(class: "align-middle") { plain(count.to_s) }
-          render_aliases_cell(target)
-          render_target_column(target) if admin?
-        end
+      tr do
+        render_target_name_cell(target, collapse_id, subs)
+        td(class: "align-middle") { plain(count.to_s) }
+        render_aliases_cell(target)
+        render_target_column(target) if admin?
       end
     end
 
@@ -113,14 +105,6 @@ module Views::Controllers::Projects::Locations
                          location_id: target.id,
                          sub_locations: 1)
         )
-      end
-    end
-
-    def render_sub_location_rows(subs, collapse_id)
-      return if subs.empty?
-
-      tbody(id: collapse_id, class: "collapse") do
-        subs.each { |loc| render_sub_row(loc) }
       end
     end
 
@@ -151,19 +135,25 @@ module Views::Controllers::Projects::Locations
     # --- Ungrouped locations (flat table) ---
 
     def render_ungrouped
-      table(class: "table table-striped " \
-                   "table-project-members mt-3") do
-        thead { render_header }
-        tbody do
-          @ungrouped_locations.each do |loc|
-            render_ungrouped_row(loc)
-          end
-        end
+      render_locations_table(@ungrouped_locations) do |t|
+        t.row { |loc| render_location_row(loc) }
       end
     end
 
-    def render_ungrouped_row(loc)
-      render_location_row(loc)
+    def render_locations_table(rows = nil, &block)
+      render(Components::Table.new(rows,
+                                   variant: :striped,
+                                   identifier: "project-members",
+                                   class: "mt-3")) do |t|
+        t.column(:LOCATION.l)
+        t.column(:OBSERVATIONS.l)
+        t.column(:PROJECT_ALIASES.l)
+        if admin?
+          t.column(:project_target_locations_title.l,
+                   class: "text-center")
+        end
+        yield(t)
+      end
     end
 
     # --- Shared ---
@@ -194,19 +184,6 @@ module Views::Controllers::Projects::Locations
         render(Views::Controllers::Projects::Aliases::Widget.new(
                  project: @project, target: loc
                ))
-      end
-    end
-
-    def render_header
-      tr do
-        th { :LOCATION.t }
-        th { :OBSERVATIONS.t }
-        th { :PROJECT_ALIASES.t }
-        if admin?
-          th(class: "text-center") do
-            :project_target_locations_title.t
-          end
-        end
       end
     end
 

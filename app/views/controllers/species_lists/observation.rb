@@ -17,11 +17,9 @@ module Views::Controllers::SpeciesLists
     end
 
     def view_template
-      div(class: "list-group-item") do
-        div(class: "row") do
-          render_image_column if @image
-          div(class: details_column_classes) { render_details_row }
-        end
+      div(class: "row") do
+        render_image_column if @image
+        div(class: details_column_classes) { render_details_row }
       end
     end
 

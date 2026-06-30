@@ -29,13 +29,15 @@
 # args.
 #
 # @example Column mode (uniform rows)
-#   render(Components::Table.new(@users)) do |t|
+#   render(Components::Table.new(@users, variant: :striped)) do |t|
 #     t.column("Name") { |user| user.name }
 #     t.column("Email") { |user| user.email }
 #   end
 #
-# @example Column mode with per-column attrs
-#   render(Components::Table.new(@users)) do |t|
+# @example Column mode with per-column attrs and identifier
+#   render(Components::Table.new(@users,
+#                                variant: :striped,
+#                                identifier: "user-list")) do |t|
 #     t.column("Name", width: "33%") { |user| user.name }
 #     t.column("Actions", class: "text-right") { |u| destroy_button(u) }
 #   end
@@ -63,20 +65,27 @@
 class Components::Table < Components::Base
   # @param rows [Enumerable, nil] rows passed to each column/row
   #   block (unused in body mode)
-  # @param class [String] CSS classes appended to the default "table"
+  # @param class [String] extra CSS classes appended after the
+  #   component-managed classes
   # @param id [String] `id=` for the `<table>` element
   # @param show_headers [Boolean] render the `<thead>` (default true)
   # @param tbody_id [String] `id=` for the `<tbody>` element (use to
   #   make the tbody a Turbo Stream target)
   # @param attributes [Hash] arbitrary HTML attrs forwarded to the
   #   `<table>` element (`data:`, `cols:`, ARIA attrs, etc.)
+  # @param variant [Symbol, Array<Symbol>] Bootstrap table modifier(s)
+  #   (:striped, :condensed, :hover, :bordered) → adds "table-striped"
+  #   etc. to the class list
+  # @param identifier [String] stable identifier slug → adds
+  #   "table-{identifier}" class for test/JS targeting
+  #   (e.g. `identifier: "location-help"` → `class="… table-location-help"`)
   def initialize(rows = nil, class: nil, id: nil, show_headers: true, # rubocop:disable Metrics/ParameterLists
-                 tbody_id: nil, attributes: {})
+                 tbody_id: nil, attributes: {}, variant: nil, identifier: nil)
     super()
     @rows = rows
     @columns = []
     @row_block = nil
-    @body_block = nil
+    @body_blocks = []
     @heading_block = nil
     @heading_attrs = {}
     @show_headers = show_headers
@@ -84,6 +93,8 @@ class Components::Table < Components::Base
     @html_class = grab(class:)
     @html_id = id
     @attributes = attributes
+    @variant = variant
+    @identifier = identifier
   end
 
   def view_template(&block)
@@ -142,8 +153,8 @@ class Components::Table < Components::Base
   #
   # @yield block that renders the tbody children
   # @return [nil]
-  def body(&block)
-    @body_block = block
+  def body(**attrs, &block)
+    @body_blocks << { attrs: attrs, block: block }
     nil
   end
 
@@ -173,9 +184,18 @@ class Components::Table < Components::Base
 
   def table_attributes
     attrs = @attributes.dup
-    attrs[:class] = class_names("table", @html_class)
+    attrs[:class] = class_names("table", variant_classes, identifier_class,
+                                @html_class)
     attrs[:id] = @html_id if @html_id
     attrs
+  end
+
+  def variant_classes
+    Array(@variant).map { |v| "table-#{v}" }
+  end
+
+  def identifier_class
+    "table-#{@identifier}" if @identifier
   end
 
   def render_thead
@@ -203,14 +223,14 @@ class Components::Table < Components::Base
   end
 
   def render_tbody
-    tbody(id: @tbody_id) do
-      if @body_block
-        @body_block.call
-      elsif @row_block
+    if @body_blocks.any?
+      @body_blocks.each { |b| tbody(**b[:attrs]) { b[:block].call } }
+    elsif @row_block
+      tbody(id: @tbody_id) do
         @rows.each.with_index { |row, idx| @row_block.call(row, idx) }
-      else
-        @rows.each { |row| render_default_row(row) }
       end
+    else
+      tbody(id: @tbody_id) { @rows.each { |row| render_default_row(row) } }
     end
   end
 

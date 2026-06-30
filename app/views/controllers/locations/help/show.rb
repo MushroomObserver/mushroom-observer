@@ -110,26 +110,14 @@ module Views::Controllers::Locations
       end
 
       def render_examples_table
-        table(class: "table table-striped table-location-help") do
-          thead { render_examples_header }
-          tbody { EXAMPLES.each { |row| render_examples_row(row) } }
-        end
-      end
-
-      def render_examples_header
-        tr do
-          th { :location_help_bad.l }
-          th { :location_help_good.l }
-          th { :location_help_explanation.l }
-        end
-      end
-
-      def render_examples_row(row)
-        bad, good, explanation = row
-        tr do
-          td { plain(bad) }
-          td { plain(good) }
-          td { render_explanation(explanation) }
+        render(Components::Table.new(EXAMPLES,
+                                     variant: :striped,
+                                     identifier: "location-help")) do |t|
+          t.column(:location_help_bad.l) { |row| plain(row[0]) }
+          t.column(:location_help_good.l) { |row| plain(row[1]) }
+          t.column(:location_help_explanation.l) do |row|
+            render_explanation(row[2])
+          end
         end
       end
 

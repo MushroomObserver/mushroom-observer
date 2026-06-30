@@ -28,28 +28,20 @@ module Views::Controllers::Users
     def render_admin_table
       style { ".permissions td { padding: 3px 5px 3px 5px }" }
       render(::Components::PaginatedResults.new) do
-        table(align: "center",
-              class: "table table-striped permissions",
-              cellspacing: "2") do
-          thead { render_admin_header }
-          tbody { render_admin_rows }
+        render(Components::Table.new(
+                 @users,
+                 variant: :striped,
+                 identifier: "permissions",
+                 attributes: { align: "center", cellspacing: "2" }
+               )) do |t|
+          [:users_by_name_verified, :users_by_name_groups,
+           :users_by_name_last_login, :users_by_name_id,
+           :users_by_name_login, :users_by_name_name,
+           :users_by_name_theme].each { |key| t.column(key.t) }
+          t.column("#{:users_by_name_created_at.l} (#{@users.length})")
+          t.row { |usr| render_admin_row(usr) }
         end
       end
-    end
-
-    def render_admin_header
-      tr do
-        [:users_by_name_verified, :users_by_name_groups,
-         :users_by_name_last_login, :users_by_name_id,
-         :users_by_name_login, :users_by_name_name,
-         :users_by_name_theme].each { |key| th { trusted_html(key.t) } }
-        th { "#{:users_by_name_created_at.l} (#{@users.length})" }
-      end
-    end
-
-    def render_admin_rows
-      tr(height: "2")
-      @users.each { |usr| render_admin_row(usr) }
     end
 
     def render_admin_row(usr)

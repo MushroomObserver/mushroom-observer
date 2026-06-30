@@ -12,8 +12,12 @@ module Views::Controllers::Support
                       ))
 
       div(class: "text-center") do
-        table(class: "table-striped table-donors mt-3 mb-3") do
-          @donor_names.each { |name| tr { td { plain(name) } } }
+        render(Components::Table.new(@donor_names,
+                                     variant: :striped,
+                                     identifier: "donors",
+                                     class: "mt-3 mb-3",
+                                     show_headers: false)) do |t|
+          t.column(nil) { |name| plain(name) }
         end
       end
       trusted_html(:donors_order.tp)

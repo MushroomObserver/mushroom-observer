@@ -45,7 +45,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   # Pre-Phlex this was sorted with the thumbnail first; the
   # caller now does the sort (or supplies `images_sorted`).
   def render_image_row(image)
-    div(class: "list-group-item") do
+    render(Components::ListGroup::Item.new) do
       render(Components::Image::Interactive.new(
                user: @user,
                image: image,

@@ -27,7 +27,7 @@ class Views::Layouts::Sidebar
 
     def render_heading
       div(class: class_names(@classes[:heading], @classes[:mobile_only])) do
-        i(class: "glyphicon glyphicon-user")
+        render(::Components::Icon.new(type: :user))
         span(class: "ml-2") { plain(@user.login) }
       end
     end

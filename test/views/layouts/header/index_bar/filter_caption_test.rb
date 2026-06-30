@@ -294,6 +294,19 @@ module Views::Layouts
                   "[data-action='filter-caption#showTruncated']")
     end
 
+    def test_toggle_buttons_have_accessible_titles
+      query = Query.lookup_and_save(:Observation, pattern: "Foo")
+
+      html = render_for(query)
+
+      assert_html(html,
+                  "#caption-truncated button" \
+                  "[title='#{:filter_caption_expand.l}']")
+      assert_html(html,
+                  "#caption-full button" \
+                  "[title='#{:filter_caption_collapse.l}']")
+    end
+
     private
 
     def render_for(query)

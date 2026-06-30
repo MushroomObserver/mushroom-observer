@@ -50,10 +50,14 @@ module Views::Layouts::App
     end
 
     def render_alert_contents(banner)
-      button(type: :button, class: "close", id: "dismiss-banner",
-             data: { banner_target: "dismissButton",
-                     version: banner.version },
-             aria: { label: :CLOSE.l }) do
+      render(::Components::Button.new(
+               variant: :strip,
+               id: "dismiss-banner",
+               class: "close",
+               data: { banner_target: "dismissButton",
+                       version: banner.version },
+               aria: { label: :CLOSE.l }
+             )) do
         render(::Components::Icon.new(type: :chevron_up,
                                       title: :CLOSE.l))
       end
