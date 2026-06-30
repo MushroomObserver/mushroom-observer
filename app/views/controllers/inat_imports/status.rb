@@ -15,9 +15,7 @@ module Views::Controllers::InatImports
                 inat_import_status_value: @inat_import.state,
                 inat_import_elapsed_value: @inat_import.elapsed_time.to_i,
                 inat_import_remaining_value:
-                  @inat_import.estimated_remaining_time.to_i,
-                inat_import_status_url_value:
-                  inat_import_path(@inat_import) }
+                  @inat_import.estimated_remaining_time.to_i }
       ) do
         render_content
         render_error_alert
