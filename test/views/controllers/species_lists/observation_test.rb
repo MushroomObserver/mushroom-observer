@@ -17,7 +17,7 @@ module Views::Controllers::SpeciesLists
     def test_renders_list_group_item_with_observation_link
       html = render_row
 
-      assert_html(html, ".list-group-item .row")
+      assert_html(html, ".row")
       obs_path = routes.observation_path(id: @observation.id)
       assert_html(html, "a[href='#{obs_path}']")
       # Always renders the who+when line.

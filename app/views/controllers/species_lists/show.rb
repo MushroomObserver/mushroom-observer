@@ -124,11 +124,11 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_observations
-      render(Components::ListGroup::Base.new) do
+      render(Components::ListGroup::Base.new) do |list|
         if @objects.any?
-          @objects.each { |obs| render_observation_row(obs) }
+          @objects.each { |obs| list.item { render_observation_row(obs) } }
         else
-          div { trusted_html(:species_list_show_no_members.tp) }
+          list.empty { trusted_html(:species_list_show_no_members.tp) }
         end
       end
     end
