@@ -429,7 +429,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")
 
-    # iNat Community ID + the provisional name (lead) -> two namings.
+    # iNat Observation Taxon + the provisional name (lead) -> two namings.
     standard_assertions(obs: obs, name: name, naming_count: 2)
 
     proposed_name = obs.namings.first
@@ -532,7 +532,7 @@ class InatImportJobTest < ActiveJob::TestCase
       "It should create only 3 names: provisional, its genus, suggested ID"
     )
 
-    # iNat Community ID + the provisional name (lead) -> two namings.
+    # iNat Observation Taxon + the provisional name (lead) -> two namings.
     standard_assertions(obs: obs, name: expected_consensus, naming_count: 2)
 
     assert(obs.sequences.one?, "Obs should have one sequence")

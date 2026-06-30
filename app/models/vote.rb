@@ -240,18 +240,21 @@ class Vote < AbstractModel
     # (user 0 is used for anonymous votes, ignore those)
     Vote.where.not(user_id: 0).joins(join).
       where(observation_views: { id: nil }).
-      select(:observation_id, :user_id, :updated_at).map do |vote|
-      unless dry_run
-        ObservationView.create!(
-          observation_id: vote.observation_id,
-          user_id: vote.user_id,
-          last_view: vote.updated_at,
-          reviewed: 1
-        )
+      select(arel_table[:observation_id],
+             arel_table[:user_id],
+             arel_table[:updated_at]).
+      map do |vote|
+        unless dry_run
+          ObservationView.create!(
+            observation_id: vote.observation_id,
+            user_id: vote.user_id,
+            last_view: vote.updated_at,
+            reviewed: 1
+          )
+        end
+        "User #{vote.user_id} has reviewed observation " \
+        "#{vote.observation_id} (insert)."
       end
-      "User #{vote.user_id} has reviewed observation #{vote.observation_id} " \
-        "(insert)."
-    end
   end
 
   def self.votes_views_join_condition

@@ -98,8 +98,7 @@ class Inat
         # parse it to get MO's text_name rank abbreviation
         # E.g. "sect." instead of "section"
         text_name: ::Name.parse_name(full_name_string).text_name,
-        rank: @taxon[:rank].titleize,
-        correct_spelling_id: nil
+        rank: @taxon[:rank].titleize
       ).
         # iNat lacks taxa "sensu xxx", so ignore MO Names sensu xxx
         where.not(::Name[:author] =~ /^sensu /).

@@ -12,17 +12,23 @@ class InatMoObservationBuilderTest < UnitTestCase
   # Minimal stand-in for an ::Inat::Obs, exposing only what naming_vote reads.
   class FakeInatObs
     def initialize(sequences:, provisional_name:, quality_grade:,
-                   name_override: nil)
+                   name_override: nil, obs_taxon_name: nil)
       @sequences = sequences
       @provisional_name = provisional_name
       @quality_grade = quality_grade
       @name_override = name_override
+      @obs_taxon_name = obs_taxon_name
     end
 
     attr_reader :sequences, :provisional_name, :name_override
 
+    def name
+      @obs_taxon_name
+    end
+
     def [](key)
-      { quality_grade: @quality_grade, license_code: "cc-by" }[key]
+      { quality_grade: @quality_grade, license_code: "cc-by",
+        identifications: [] }[key]
     end
   end
 
@@ -65,21 +71,21 @@ class InatMoObservationBuilderTest < UnitTestCase
   # Pluteus petasatus (deprecated) has no approved synonym; Peltigera is a
   # second approved name. (See test_best_preferred_synonym in name_test.rb.)
 
-  # An accepted Community ID with no provisional name: a single naming.
+  # An accepted Observation Taxon with no provisional name: a single naming.
   def test_proposed_namings_single_accepted
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
                  proposed(community: names(:lactarius_alpinus)))
   end
 
-  # A deprecated Community ID is corrected: its preferred synonym leads, the
-  # deprecated name follows at Could Be. (Applies to all imports.)
+  # A deprecated Observation Taxon is corrected: its preferred synonym leads,
+  # the deprecated name follows at Could Be. (Applies to all imports.)
   def test_proposed_namings_deprecated_community_adds_preferred_synonym
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
                   ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
                  proposed(community: names(:lactarius_alpigenes)))
   end
 
-  # A provisional name (not deprecated) leads; the Community ID follows.
+  # A provisional name (not deprecated) leads; the Observation Taxon follows.
   def test_proposed_namings_provisional_leads
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
                   ["Peltigera", Vote::MIN_POS_VOTE]],
@@ -87,9 +93,10 @@ class InatMoObservationBuilderTest < UnitTestCase
                           provisional: names(:lactarius_alpinus)))
   end
 
-  # The provisional is deprecated in favor of the Community ID (the Leccinum
-  # scenario): the accepted name leads, the deprecated provisional follows,
-  # and the synonym-of-the-provisional dedups with the Community ID.
+  # The provisional is deprecated in favor of the Observation Taxon (the
+  # Leccinum scenario): the accepted name leads, the deprecated provisional
+  # follows, and the synonym-of-the-provisional dedups with the Observation
+  # Taxon.
   def test_proposed_namings_deprecated_provisional_prefers_accepted
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
                   ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
@@ -103,7 +110,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                  proposed(community: names(:pluteus_petasatus_deprecated)))
   end
 
-  # Provisional equal to the Community ID collapses to a single naming.
+  # Provisional equal to the Observation Taxon collapses to a single naming.
   def test_proposed_namings_provisional_equals_community
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
                  proposed(community: names(:lactarius_alpinus),
@@ -112,7 +119,7 @@ class InatMoObservationBuilderTest < UnitTestCase
 
   # --- Species Name Override (#4533) ---
 
-  # The override leads ahead of the Community ID.
+  # The override leads ahead of the Observation Taxon.
   def test_proposed_namings_override_leads_over_community
     assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
                   ["Peltigera", Vote::MIN_POS_VOTE]],
@@ -120,7 +127,7 @@ class InatMoObservationBuilderTest < UnitTestCase
                           override: names(:lactarius_alpinus)))
   end
 
-  # The override outranks BOTH the provisional name and the Community ID;
+  # The override outranks BOTH the provisional name and the Observation Taxon;
   # the other two follow at Could Be.
   def test_proposed_namings_override_outranks_provisional_and_community
     assert_equal([["Coprinus comatus", Vote::MAXIMUM_VOTE],
@@ -191,12 +198,44 @@ class InatMoObservationBuilderTest < UnitTestCase
                  builder.send(:used_references_explanation, existing))
   end
 
+  # The observation taxon explanation uses the inat_observation_taxon
+  # translation string plus today's date.
+  def test_observation_taxon_naming_reason
+    name = names(:peltigera)
+    expected = "#{:inat_observation_taxon.l} " \
+               "#{Time.zone.today.strftime("%Y-%m-%d")}"
+    assert_equal(expected,
+                 builder_for(obs_taxon_name: name).
+                   send(:used_references_explanation, name),
+                 "Observation taxon explanation should use " \
+                 "inat_observation_taxon translation key")
+  end
+
+  # When the obs taxon is a misspelling and the proposed name is its correct
+  # spelling, the observation taxon explanation appends the corrected spelling
+  # note.
+  def test_observation_taxon_naming_reason_corrected_spelling
+    misspelling = names(:petigera)
+    correct = misspelling.correct_spelling
+    assert(correct, "Test requires a name fixture with correct_spelling set")
+    expected = "#{:inat_observation_taxon.l} " \
+               "#{Time.zone.today.strftime("%Y-%m-%d")} " \
+               "#{:inat_corrected_spelling.l}"
+    assert_equal(expected,
+                 builder_for(obs_taxon_name: misspelling).
+                   send(:used_references_explanation, correct),
+                 "Observation taxon explanation should append corrected " \
+                 "spelling note when proposed name corrects the obs taxon")
+  end
+
   private
 
-  def builder_for(provisional_name: nil, name_override: nil)
+  def builder_for(provisional_name: nil, name_override: nil,
+                  obs_taxon_name: nil)
     fake = FakeInatObs.new(sequences: [], quality_grade: "needs_id",
                            provisional_name: provisional_name,
-                           name_override: name_override)
+                           name_override: name_override,
+                           obs_taxon_name: obs_taxon_name)
     Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
                                    external_site: :stub)
   end
