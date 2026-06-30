@@ -25,9 +25,15 @@ module Views::Controllers::Names::Lifeforms::Propagate
         plain(:propagate_lifeform_add.l)
       end
 
-      table(class: "table table-lifeform table-striped") do
-        lifeforms_on_name.each do |word|
-          render_lifeform_row("add_#{word}", word)
+      render(Components::Table.new(lifeforms_on_name,
+                                   variant: :striped,
+                                   identifier: "lifeform",
+                                   show_headers: false)) do |t|
+        t.column(nil) do |word|
+          checkbox_field(:"add_#{word}", label: :"lifeform_#{word}".l)
+        end
+        t.column(nil, class: "container-text") do |word|
+          plain(:"lifeform_help_#{word}".t)
         end
       end
     end
@@ -39,17 +45,16 @@ module Views::Controllers::Names::Lifeforms::Propagate
         plain(:propagate_lifeform_remove.l)
       end
 
-      table(class: "table table-lifeform table-striped") do
-        lifeforms_not_on_name.each do |word|
-          render_lifeform_row("remove_#{word}", word)
+      render(Components::Table.new(lifeforms_not_on_name,
+                                   variant: :striped,
+                                   identifier: "lifeform",
+                                   show_headers: false)) do |t|
+        t.column(nil) do |word|
+          checkbox_field(:"remove_#{word}", label: :"lifeform_#{word}".l)
         end
-      end
-    end
-
-    def render_lifeform_row(field_name, word)
-      tr do
-        td { checkbox_field(field_name.to_sym, label: :"lifeform_#{word}".l) }
-        td(class: "container-text") { :"lifeform_help_#{word}".t }
+        t.column(nil, class: "container-text") do |word|
+          plain(:"lifeform_help_#{word}".t)
+        end
       end
     end
 

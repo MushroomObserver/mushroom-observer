@@ -40,15 +40,17 @@ module Views::Controllers::Info
     end
 
     def render_stats_table
-      table(class: "table") do
-        ::SiteData::SITE_WIDE_FIELDS.each do |field|
-          label = :"site_stats_#{field}".l
-          count = @site_data[field]
-          next unless count && label.present?
+      render(Components::Table.new(show_headers: false)) do |t|
+        t.body do
+          ::SiteData::SITE_WIDE_FIELDS.each do |field|
+            label = :"site_stats_#{field}".l
+            count = @site_data[field]
+            next unless count && label.present?
 
-          tr do
-            td { plain(label) }
-            td(class: "text-right") { plain(count.to_s) }
+            tr do
+              td { plain(label) }
+              td(class: "text-right") { plain(count.to_s) }
+            end
           end
         end
       end

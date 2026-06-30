@@ -17,7 +17,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def view_template
-      div(class: "list-group-item") do
+      render(Components::ListGroup::Item.new) do
         div(class: "row") do
           render_image_column if @image
           div(class: details_column_classes) { render_details_row }

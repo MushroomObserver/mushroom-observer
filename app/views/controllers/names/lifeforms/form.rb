@@ -12,21 +12,22 @@ module Views::Controllers::Names::Lifeforms
     def view_template
       p { :edit_lifeform_help.t }
 
-      table(class: "table table-lifeform table-striped") do
-        Name.all_lifeforms.each { |word| render_lifeform_row(word) }
+      render(Components::Table.new(Name.all_lifeforms,
+                                   variant: :striped,
+                                   identifier: "lifeform",
+                                   show_headers: false)) do |t|
+        t.column(nil) do |word|
+          checkbox_field(word.to_sym, label: :"lifeform_#{word}".l)
+        end
+        t.column(nil, class: "container-text") do |word|
+          plain(:"lifeform_help_#{word}".t)
+        end
       end
 
       submit(:SAVE.t, center: true)
     end
 
     private
-
-    def render_lifeform_row(word)
-      tr do
-        td { checkbox_field(word.to_sym, label: :"lifeform_#{word}".l) }
-        td(class: "container-text") { :"lifeform_help_#{word}".t }
-      end
-    end
 
     def form_action
       lifeform_of_name_path(@name.id, q: q_param)
