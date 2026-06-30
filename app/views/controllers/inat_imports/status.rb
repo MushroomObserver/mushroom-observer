@@ -52,7 +52,7 @@ module Views::Controllers::InatImports
     end
 
     def render_imported_line
-      span(class: "font-weight-bold") { "#{:inat_import_imported.l}: " }
+      span(class: "font-weight-bold") { "#{:imported.l}: " }
       span { plain(@inat_import.imported_count.to_s) }
       render_importables_count if @inat_import.total_importables.to_i.positive?
     end
@@ -100,7 +100,7 @@ module Views::Controllers::InatImports
       return unless (ended = @inat_import.ended_at)
 
       span(class: "font-weight-bold") do
-        "#{:inat_import_tracker_ended.l}: "
+        "#{:ended.l}: "
       end
       span { plain(ended.to_s) }
       br
@@ -127,7 +127,7 @@ module Views::Controllers::InatImports
     def render_alert
       render(::Components::Alert.new(
                message: alert_message,
-               level: :info,
+               level: alert_level,
                class: "mt-3"
              ))
     end
@@ -137,8 +137,21 @@ module Views::Controllers::InatImports
       if @inat_import.imported_count.zero?
         return :inat_import_nothing_imported.l
       end
+      return :inat_import_tracker_done_with_errors.l if errors?
 
       :inat_import_tracker_done.l
+    end
+
+    def alert_level
+      return :info unless @inat_import.Done?
+      return :warning if errors?
+      return :success if @inat_import.imported_count.positive?
+
+      :info
+    end
+
+    def errors?
+      @inat_import.response_errors.present?
     end
 
     def remaining_time
@@ -146,7 +159,7 @@ module Views::Controllers::InatImports
     end
 
     def format_seconds(seconds)
-      return :inat_import_tracker_calculating_time.l if seconds.nil?
+      return :calculating.l if seconds.nil?
 
       hours = seconds / 3600
       minutes = (seconds % 3600) / 60
