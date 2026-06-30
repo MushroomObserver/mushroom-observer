@@ -34,9 +34,24 @@ class InatImportsController < ApplicationController
 
   def show
     @inat_import = InatImport.find(params[:id])
-    render(Views::Controllers::InatImports::Show.new(
-             inat_import: @inat_import, user: @user
-           ))
+    respond_to do |format|
+      format.html do
+        render(Views::Controllers::InatImports::Show.new(
+                 inat_import: @inat_import, user: @user
+               ))
+      end
+      format.turbo_stream do
+        html = render_to_string(
+          Views::Controllers::InatImports::Status.new(
+            inat_import: @inat_import
+          ),
+          layout: false
+        )
+        render(turbo_stream: turbo_stream.replace(
+          "inat_import_#{@inat_import.id}", html: html
+        ))
+      end
+    end
   end
 
   def new
