@@ -177,6 +177,10 @@ class InatImport < ApplicationRecord
     [total_expected_time - elapsed_time, 0].max
   end
 
+  def error_caption
+    response_errors.blank? ? "" : "#{:ERRORS.t}: "
+  end
+
   #########
 
   private
