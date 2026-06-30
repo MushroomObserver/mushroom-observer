@@ -3301,6 +3301,7 @@
   inat_import_tracker_ended: Ended
   inat_import_imported: Imported
   inat_import_tracker_done: "Click [:inat_import_tracker_results] to see imported Observations."
+  inat_import_nothing_imported: Nothing was imported.
   inat_import_tracker_results: Results
   inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: Number Imported
