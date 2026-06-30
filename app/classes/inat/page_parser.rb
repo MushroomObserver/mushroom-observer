@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Inat
-  # Get one page of observations results (up to 200) from the iNat API,
+  # Get one page of observations results from the iNat API,
   # https://api.inaturalist.org/v1/docs/#!/Observations/get_observations
   # returning a parsed JSON object.
   class PageParser
@@ -12,8 +12,9 @@ class Inat
     delegate :inat_ids, to: :@import
     delegate :user, to: :@import
 
-    def initialize(import)
+    def initialize(import, per_page: 200)
       @import = import
+      @per_page = per_page
       @last_import_id = 0
       return if import.adequate_constraints?
 
@@ -98,14 +99,14 @@ class Inat
       args.except!(*strip_keys)
       args.merge!(BASE_FILTER_PARAMS)
       args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
-      args.merge!(id_above: effective_id_above, per_page: 200,
+      args.merge!(id_above: effective_id_above, per_page: @per_page,
                   order: "asc", order_by: "id")
       args
     end
 
     def base_query_args
       {
-        id: nil, id_above: nil, only_id: false, per_page: 200,
+        id: nil, id_above: nil, only_id: false, per_page: @per_page,
         order: "asc", order_by: "id",
         taxon_id: IMPORTABLE_TAXON_IDS_ARG
       }.merge(BASE_FILTER_PARAMS)

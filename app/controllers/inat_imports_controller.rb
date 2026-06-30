@@ -6,55 +6,21 @@
 # new (get)
 # create (post)
 # authorization_response (get)
-# cancel (post):: cancels the InatImportJob
+# cancel (put)
 #
 # Work flow:
-# 1. User calls `new`, fills out form
-#    Adds a InatImport instance if user lacks one
-# 2. create
-#    saves some user data in a InatImport instance
-#      attributes include: user, inat_ids, token, state
-#    passes things off (redirects) to iNat at the INAT_AUTHORIZATION_URL
-# 3. iNat
-#    checks if MO is authorized to access iNat user's confidential data
-#      if not, asks iNat user for authorization
-#    iNat calls the MO redirect_url (authorization_response) with a code param
-# 4. MO continues in the authorization_response action
-#    Reads the saved InatImport instance
-#    Updates the InatImport instance with the code received from iNat
-#    Instantiates an InatImportJobTracker, passing in the InatImport instance
-#    Enqueues an InatImportJob, passing in the InatImport instance
-#    Redirects to InatImport.show (for that InatImport instance)
-#    ---------------------------------
-#    InatImport.show view: (app/views/controllers/inat_imports/show.html.erb)
-#      Includes a `#status` element which:
-#        Instantiates a Stimulus controller (inat-import-job_controller)
-#        with an endpoint of InatImportJobTracker.show
-#        is updated by a TurboStream response from the endpoint
-#    ---------------------------------
-#    Stimulus controller (inat-import-job_controller):
-#      Makes a request every second to the InatImportJobTracker.show endpoint
-#    ---------------------------------
-#    The endpoint (app/controllers/inat_imports/job_trackers_controller.rb):
-#      renders the InatImport as a TurboStream response
-#    ---------------------------------
-# 5. The InatImportJob:
-#      Uses the `code` to obtain an oauth access_token
-#      Trades the oauth token for a JWT api_token
-#      Checks if the MO user is trying to import someone else's observations
-#      Makes an authenticated iNat API request for the desired observations
-#      For each iNat obs in the results,
-#         creates an Inat::Obs
-#         adds an MO Observation, mapping Inat::Obs details to the MO Obs
-#         adds the iNat id to the MO observation inat_id_field
-#         adds a Snapshot of the iNat observation to the MO Observation notes
-#         adds Inat photos to the MO Observation via the MO API
-#         maps iNat sequences to MO Sequences
-#         updates the iNat obs with a Mushroom Observer URL Observation Field
-#         updates the iNat obs Notes
-#      updates the InatImport instance attributes:
-#         state, importables, imported_count, total_imported_count,
-#         total_seconds, avg_import_time,response_errors
+# 1. User calls `new`, fills out form; creates an InatImport record
+# 2. create: saves inat_ids/inat_url/username, redirects to iNat OAuth
+# 3. iNat: checks authorization, calls back to authorization_response
+# 4. authorization_response:
+#      Updates state to Authenticating, enqueues InatImportJob,
+#      redirects to show. The show page subscribes to a Turbo Stream
+#      channel ([user, :inat_import]) that broadcasts status updates
+#      whenever the InatImport record changes.
+# 5. InatImportJob:
+#      Authenticates, imports observations, updates InatImport state.
+#      Each update triggers an after_update_commit broadcast that
+#      replaces the status panel on the show page via Turbo Stream.
 #
 class InatImportsController < ApplicationController
   include Validators
@@ -67,10 +33,9 @@ class InatImportsController < ApplicationController
   before_action :flatten_new_form_params, only: :create
 
   def show
-    @tracker = InatImportJobTracker.find(params[:tracker_id])
     @inat_import = InatImport.find(params[:id])
     render(Views::Controllers::InatImports::Show.new(
-             tracker: @tracker, inat_import: @inat_import, user: @user
+             inat_import: @inat_import, user: @user
            ))
   end
 
@@ -78,15 +43,8 @@ class InatImportsController < ApplicationController
     @inat_import = InatImport.find_or_create_by(user: @user)
     return render_new_form unless @inat_import.job_pending?
 
-    tracker = InatImportJobTracker.where(
-      inat_import: @inat_import
-    ).order(:created_at).last
     flash_warning(:inat_import_tracker_pending.l)
-    redirect_to(
-      inat_import_path(
-        @inat_import, params: { tracker_id: tracker.id }
-      )
-    )
+    redirect_to(inat_import_path(@inat_import))
   end
 
   def create
@@ -310,16 +268,13 @@ class InatImportsController < ApplicationController
 
     inat_import = inat_import_authenticating(auth_code)
     inat_import.reset_last_obs_start
-    tracker = fresh_tracker(inat_import)
 
     Rails.logger.info(
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
-    # InatImportJob.perform_now(inat_import) # uncomment to manually test job
     InatImportJob.perform_later(inat_import)
 
-    redirect_to(inat_import_path(inat_import,
-                                 params: { tracker_id: tracker.id }))
+    redirect_to(inat_import_path(inat_import))
   end
 
   # ---------------------------------
@@ -337,21 +292,11 @@ class InatImportsController < ApplicationController
     inat_import
   end
 
-  def fresh_tracker(inat_import)
-    # clean out this user's old tracker(s)
-    InatImportJobTracker.where(inat_import: inat_import.id).destroy_all
-    InatImportJobTracker.create(inat_import: inat_import.id)
-  end
-
   public
 
   def cancel
     @inat_import = InatImport.find(params[:id])
     @inat_import.update(cancel: true)
-    @tracker = InatImportJobTracker.where(inat_import: @inat_import).
-               order(:created_at).last
-    render(Views::Controllers::InatImports::Show.new(
-             tracker: @tracker, inat_import: @inat_import, user: @user
-           ))
+    redirect_to(inat_import_path(@inat_import))
   end
 end
