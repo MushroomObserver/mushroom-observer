@@ -75,8 +75,7 @@ is_exempt_file() {
     app/components/form/table_accordion.rb|\
     app/components/application_form/input_group_addon.rb|\
     app/components/carousel/controls.rb|\
-    app/views/controllers/observations/namings/reasons_fields.rb|\
-    app/views/controllers/descriptions/permissions/form.rb) return 0 ;;
+    app/views/controllers/observations/namings/reasons_fields.rb) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -125,7 +124,6 @@ case "$TOOL" in
       ':(exclude)app/components/application_form/input_group_addon.rb' \
       ':(exclude)app/components/carousel/controls.rb' \
       ':(exclude)app/views/controllers/observations/namings/reasons_fields.rb' \
-      ':(exclude)app/views/controllers/descriptions/permissions/form.rb' \
       | grep '^+[^+]' \
       | sed 's/^+//' \
       | grep -v '^[[:space:]]*#' \
