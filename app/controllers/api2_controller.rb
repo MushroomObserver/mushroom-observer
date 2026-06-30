@@ -20,6 +20,18 @@ class API2Controller < ApplicationController
   # wrapped parameters break JSON requests in the unit tests.
   wrap_parameters false
 
+  def index
+    @start_time = Time.zone.now
+    @api = API2.execute(method: request.method, action: "index")
+    @api.version ||= API2.version
+    do_render_bad_request
+  rescue StandardError => e
+    @api ||= API2.new
+    @api.version ||= API2.version
+    @api.errors << API2::RenderFailed.new(e)
+    do_render_bad_request
+  end
+
   # Standard entry point for REST requests.
   def api_keys
     rest_query(:api_key)
@@ -179,6 +191,21 @@ class API2Controller < ApplicationController
 
   def do_render_json
     render(layout: false, template: "/api2/results")
+  end
+
+  def do_render_bad_request
+    set_cors_headers
+    request.format = "json" unless request.format.json? || request.format.xml?
+    respond_to do |format|
+      format.xml  do
+        render(layout: false, template: "/api2/results",
+               status: :bad_request)
+      end
+      format.json do
+        render(layout: false, template: "/api2/results",
+               status: :bad_request)
+      end
+    end
   end
 
   def set_cors_headers
