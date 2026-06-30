@@ -97,17 +97,19 @@ module Views::Controllers::InatImports
     end
 
     def render_ended_line
+      return unless (ended = @inat_import.ended_at)
+
       span(class: "font-weight-bold") do
         "#{:inat_import_tracker_ended.l}: "
       end
-      span { plain(@inat_import.ended_at.to_s) }
+      span { plain(ended.to_s) }
       br
     end
 
     def render_error_line
-      span(class: "font-weight-bold") do
-        plain(@inat_import.error_caption.to_s)
-      end
+      return if @inat_import.response_errors.blank?
+
+      span(class: "font-weight-bold") { plain("#{:ERRORS.l}: ") }
     end
 
     def render_error_alert
