@@ -146,6 +146,8 @@ class Components::Dropdown < Components::Base
     if args[:button].present? && kwargs[:class].present?
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
     end
+    # TODO: strip tooltip data attrs (data[:toggle]="tooltip", data[:title],
+    # data[:placement]) — tooltips are distracting in a dropdown context.
     kwargs
   end
 
