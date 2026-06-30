@@ -60,19 +60,10 @@ class InatImport < ApplicationRecord
   }, prefix: true
 
   belongs_to :user
+  has_many :inat_import_job_trackers, dependent: :delete_all
 
   serialize :log, type: Array, coder: YAML
 
-  after_update_commit lambda { |inat_import|
-    html = ApplicationController.renderer.render(
-      Views::Controllers::InatImports::Status.new(inat_import: inat_import)
-    )
-    Turbo::StreamsChannel.broadcast_replace_to(
-      [inat_import.user, :inat_import],
-      target: "inat_import_#{inat_import.id}",
-      html: html
-    )
-  }
   after_initialize :ensure_response_errors_initialized
 
   # Expected average import time if no user has ever imported anything
@@ -161,28 +152,6 @@ class InatImport < ApplicationRecord
     return 0 unless last_obs_start
 
     Time.now.utc - last_obs_start
-  end
-
-  def elapsed_time
-    return 0 unless started_at
-
-    end_time = Done? ? ended_at : Time.zone.now
-    (end_time - started_at).to_i
-  end
-
-  def estimated_remaining_time
-    return 0 if Done?
-    return nil unless importables.to_i.positive? && started_at
-
-    [total_expected_time - elapsed_time, 0].max
-  end
-
-  def error_caption
-    response_errors.blank? ? "" : "#{:ERRORS.t}: "
-  end
-
-  def help
-    Done? ? :inat_import_tracker_done.l : :inat_import_tracker_leave_page.l
   end
 
   #########
