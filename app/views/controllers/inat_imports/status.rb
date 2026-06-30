@@ -54,16 +54,13 @@ module Views::Controllers::InatImports
     def render_imported_line
       span(class: "font-weight-bold") { "#{:inat_import_imported.l}: " }
       span { plain(@inat_import.imported_count.to_s) }
-      render_importables_count if @inat_import.total_importables.to_i.positive?
+      render_importables_count if @inat_import.importables.to_i.positive?
     end
 
     def render_importables_count
-      whitespace
-      plain(:of.l)
-      whitespace
-      plain(@inat_import.total_importables.to_s)
-      whitespace
-      plain(:observations.l)
+      span(class: "mr-2") { plain(" #{:of.t}") }
+      span { plain(@inat_import.importables.to_s) }
+      span { plain(" #{:observations.t}") }
     end
 
     def render_started_line

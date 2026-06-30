@@ -210,7 +210,6 @@ class InatImportsController < ApplicationController
       state: "Authorizing",
       import_all: params[:all],
       importables: importables_count,
-      total_importables: importables_count,
       imported_count: 0,
       avg_import_time: @inat_import.initial_avg_import_seconds,
       inat_username: params[:inat_username]&.strip,
