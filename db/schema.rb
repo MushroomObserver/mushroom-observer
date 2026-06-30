@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_30_182155) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_30_220000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -233,6 +233,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_30_182155) do
     t.integer "writeback", default: 0, null: false
     t.text "inat_url"
     t.datetime "started_at"
+    t.integer "total_importables"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
