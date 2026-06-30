@@ -19,12 +19,12 @@ module Views::Controllers::Observations::ExternalLinks
 
     def test_renders_form_with_url_field
       assert_html(@html, "input[name='external_link[url]']")
-      assert_html(@html, "input[data-placeholder-target='textField']")
+      assert_html(@html, "input[data-external-link-form-target='url']")
     end
 
     def test_renders_form_with_site_select
       assert_html(@html, "select[name='external_link[external_site_id]']")
-      assert_html(@html, "select[data-placeholder-target='select']")
+      assert_html(@html, "select[data-external-link-form-target='site']")
     end
 
     def test_renders_hidden_user_id_field
@@ -70,6 +70,47 @@ module Views::Controllers::Observations::ExternalLinks
 
       assert_html(html,
                   "form[action*='/external_links/#{@external_link.id}']")
+    end
+
+    def test_new_form_shows_external_id_and_hides_relationship
+      # @html (from setup) is a new, unpersisted link
+      assert_html(@html, "input[name='external_link[external_id]']")
+      assert_no_html(@html, "select[name='external_link[relationship]']")
+    end
+
+    def test_site_select_offers_all_manageable_sites
+      @sites.each do |site|
+        assert_html(@html,
+                    "select[name='external_link[external_site_id]'] " \
+                    "option[value='#{site.id}']")
+      end
+    end
+
+    def test_url_field_seeded_with_site_prefix
+      assert_includes(@html, @site.observation_url(""))
+    end
+
+    def test_passes_active_field_and_prefixes_to_stimulus
+      assert_html(@html,
+                  "form[data-external-link-form-active-value='external_id']")
+      assert_html(@html, "form[data-external-link-form-prefixes-value]")
+    end
+
+    def test_edit_form_renders_external_id_and_url_toggle
+      @external_link = external_links(:imported_inat_obs_inat_link)
+      html = render_form
+
+      assert_html(html, "input[name='external_link[external_id]']" \
+                        "[data-external-link-form-target='externalId']")
+      assert_html(html, "input[name='external_link[url]']" \
+                        "[data-external-link-form-target='url']")
+      assert_html(html, "form[data-controller*='external-link-form']")
+    end
+
+    def test_edit_form_renders_relationship_select
+      @external_link = external_links(:imported_inat_obs_inat_link)
+
+      assert_html(render_form, "select[name='external_link[relationship]']")
     end
 
     private

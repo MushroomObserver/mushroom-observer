@@ -12,7 +12,7 @@ class AdminController < ApplicationController
     if session[:user_id]
       redirect_to("/")
     else
-      redirect_to(new_account_login_path)
+      redirect_to(main_app.new_account_login_path)
     end
   end
 

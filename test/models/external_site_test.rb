@@ -80,7 +80,7 @@ class ExternalSiteTest < UnitTestCase
   def test_observation_url_uses_template
     site = external_sites(:mycoportal) # has a {id} url_template
     assert_equal(
-      "https://www.mycoportal.org/portal/collections/individual/" \
+      "https://mycoportal.org/portal/collections/individual/" \
       "index.php?occid=999",
       site.observation_url("999"),
       "substitutes external_id into the url_template {id} placeholder"
@@ -89,5 +89,13 @@ class ExternalSiteTest < UnitTestCase
 
   def test_inaturalist_finder
     assert_equal(external_sites(:inaturalist), ExternalSite.inaturalist)
+  end
+
+  def test_member_with_nil_project
+    # production's iNaturalist site has no project; member? must return
+    # false rather than raise NoMethodError on project.user_group
+    site = external_sites(:inaturalist)
+    site.update!(project: nil)
+    assert_not(site.member?(users(:mary)))
   end
 end

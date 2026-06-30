@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_20_175348) do
+ActiveRecord::Schema[7.2].define(version: 2026_06_29_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -89,7 +89,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_20_175348) do
     t.string "external_id", limit: 64
     t.integer "relationship", default: 0, null: false
     t.datetime "last_synced_at"
-    t.virtual "import_target", type: :string, as: "(case when (`relationship` = 1) then concat(`target_type`,_utf8mb4':',`target_id`) end)", stored: true
+    t.virtual "import_target", type: :string, as: "(case when (`relationship` = 1) then concat(`target_type`,_utf8mb3':',`target_id`) end)", stored: true
+    t.date "external_created_on"
     t.index ["external_site_id", "relationship", "target_type", "external_id"], name: "index_external_links_on_site_rel_target_extid"
     t.index ["import_target"], name: "index_external_links_on_import_target", unique: true
     t.index ["target_type", "target_id"], name: "index_external_links_on_target"
@@ -235,8 +236,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_20_175348) do
     t.datetime "last_obs_start"
     t.boolean "cancel"
     t.boolean "import_others", default: false, null: false
-    t.text "inat_url"
     t.integer "writeback", default: 0, null: false
+    t.text "inat_url"
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|

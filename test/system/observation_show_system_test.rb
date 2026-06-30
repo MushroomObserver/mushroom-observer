@@ -244,67 +244,50 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
   end
 
   def test_add_and_edit_external_links
-    mary = users("mary")
-    login!(mary)
+    login!(users("mary"))
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
-    # new external link
     site = external_sites(:mycoportal)
     within("#observation_external_links") do
       assert_link(text: :ADD.l)
       find_link(:ADD.l).trigger("click")
     end
 
-    # Test validation - submit with invalid URL
+    # external_id is active by default; the url field is grayed (readonly)
     assert_selector("#modal_external_link")
     within("#modal_external_link") do
-      assert_field("external_link_url")
+      assert_field("external_link_external_id", readonly: false)
+      assert_field("external_link_url", readonly: true)
       select(site.name, from: "external_link_external_site_id")
-      fill_in("external_link_url", with: "not-a-valid-url")
+      fill_in("external_link_external_id", with: "12212326")
       click_commit
     end
     sleep(1)
-
-    # Modal should stay open with validation error
-    assert_selector("#modal_external_link")
-    within("#modal_external_link") do
-      assert_text(/invalid/i)
-    end
-
-    # Now fix with valid URL and resubmit
-    within("#modal_external_link") do
-      fill_in("external_link_url", with: "https://www.mycoportal.org/portal/collections/123")
-      click_commit
-    end
-    sleep(1)
-
-    # Modal should close after successful submission
     assert_no_selector("#modal_external_link")
 
-    # edit external link
     link = ExternalLink.last
+    assert_equal("12212326", link.external_id)
+    assert_nil(link.url, "an external_id link stores no url")
+
     within("#observation_external_links") do
       assert_link(text: /MycoPortal/)
-      assert_link(text: :EDIT.l)
       find_link(:EDIT.l).trigger("click")
     end
 
+    # edit: change the external_id
     within("#modal_external_link_#{link.id}") do
-      assert_field("external_link_url")
-      fill_in("external_link_url", with: "https://www.mycoportal.org/portal/collections/456")
+      fill_in("external_link_external_id", with: "13629347")
       click_commit
     end
     assert_no_selector("#modal_external_link_#{link.id}")
-    assert_equal("https://www.mycoportal.org/portal/collections/456",
-                 link.reload.url)
+    assert_equal("13629347", link.reload.external_id)
 
-    # try remove button (uses turbo_confirm modal)
+    # remove (turbo_confirm modal)
     within("#observation_external_links") do
       assert_button(text: :destroy_object.t(type: :external_link))
       find(:css, ".destroy_external_link_link_#{link.id}").click
     end
-    # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
     within("#mo_confirm") do
       click_button(class: "btn-danger")

@@ -10,8 +10,10 @@
 #
 # ExternalLink AR record form (observation external-links panel):
 #   render(Components::Link::External.new(link: external_link))
-#   # iNaturalist records render as "iNat <id>"; others as
-#   # "On <site>" with a trailing <small> date.
+#   # The link text leads with the relationship date, then the relationship:
+#   # "<date>: <relationship> (<id>)" for iNaturalist (e.g.
+#   # "2025-05-04: Imported from iNaturalist (12345)"), "<date>: <relationship>"
+#   # for other sites. The whole string is the link.
 #
 # Via context-nav dispatcher:
 #   # Tab sets html_options: { external: true }; dispatcher routes here.
@@ -44,27 +46,28 @@ class Components::Link::External < Components::Base
             **@opts) do
       plain(@content)
     end
-    render_date if @link && !inaturalist?
   end
 
   private
 
-  # Import links store external_id with a nil url (the url is derived), while
-  # manual links store the url. link_url resolves both, so strip the base_url
-  # off it to get the bare iNat id either way.
+  # For an ExternalLink the text leads with the relationship date, then the
+  # relationship — "<date>: <relationship> (<id>)" — so rows read and sort by
+  # date. The whole string is the link.
   def link_content
-    if inaturalist?
-      "iNat #{@link.link_url.delete_prefix(@link.external_site.base_url)}"
-    else
-      :on_site.t(site: @link.external_site.name)
-    end
+    date = @link.relationship_date
+    date ? "#{date.web_date}: #{relationship_label}" : relationship_label
+  end
+
+  # link_url resolves both import links (external_id, derived url) and manual
+  # links (stored url), so strip the base_url off it to get the bare iNat id.
+  def relationship_label
+    return @link.relationship_description unless inaturalist?
+
+    id = @link.link_url.delete_prefix(@link.external_site.base_url)
+    "#{@link.relationship_description} (#{id})"
   end
 
   def inaturalist?
     @link.external_site.name == "iNaturalist"
-  end
-
-  def render_date
-    small { plain(" #{@link.created_at.web_date}") }
   end
 end
