@@ -28,6 +28,18 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_show_turbo_stream
+    import = inat_imports(:rolf_inat_import)
+
+    login
+
+    get(:show, params: { id: import.id }, format: :turbo_stream)
+
+    assert_response(:success)
+    assert_select("turbo-stream[action='replace']" \
+                  "[target='inat_import_#{import.id}']")
+  end
+
   def test_new_inat_import
     login(users(:rolf).login)
     get(:new)

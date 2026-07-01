@@ -494,6 +494,31 @@ class InatImportJobTest < ActiveJob::TestCase
     API2.singleton_class.define_method(:execute, original_execute)
   end
 
+  def test_import_job_image_upload_failure_logs_error
+    # evernia has 1 photo — exercises the upload_inat_image error path
+    create_ivars_from_filename("evernia")
+    stub_inat_interactions
+
+    original_execute = API2.method(:execute)
+    API2.singleton_class.define_method(:execute) do |params|
+      if params[:action] == :image && params[:method] == :post
+        api = API2.new(params)
+        api.errors << API2::MissingParameter.new(:upload)
+        api
+      else
+        original_execute.call(params)
+      end
+    end
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_match(/Image upload failed/,
+                 @inat_import.reload.response_errors,
+                 "Image upload failure should be logged in response_errors")
+  ensure
+    API2.singleton_class.define_method(:execute, original_execute)
+  end
+
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
     # NOTE: This observation has no iNat license (all rights reserved).
