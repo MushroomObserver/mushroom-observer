@@ -18,6 +18,44 @@ class InatImportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
   include Inat::Constants
 
+  def test_index_user_sees_own_imports
+    import = inat_imports(:rolf_inat_import)
+
+    login(users(:rolf).login)
+    get(:index)
+
+    assert_response(:success)
+    assert_select("td", text: import.state.to_s)
+  end
+
+  def test_index_user_does_not_see_others_imports
+    other_import = inat_imports(:katrina_inat_import)
+
+    login(users(:rolf).login)
+    get(:index)
+
+    assert_select("td", text: other_import.state.to_s, count: 0)
+  end
+
+  def test_index_admin_sees_all_imports
+    make_admin
+
+    get(:index)
+
+    assert_response(:success)
+    assert_select("th", text: :USER.t)
+  end
+
+  def test_results_redirects_to_observations_with_query
+    import = inat_imports(:lone_wolf_import)
+    import.update!(imported_count: 2)
+
+    login(users(:lone_wolf).login)
+    get(:results, params: { id: import.id })
+
+    assert_redirected_to(/#{observations_path}/)
+  end
+
   def test_show
     import = inat_imports(:rolf_inat_import)
 

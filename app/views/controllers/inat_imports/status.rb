@@ -40,7 +40,7 @@ module Views::Controllers::InatImports
         render(Components::Button.new(
                  type: :get,
                  name: :results.l,
-                 target: results_observations_path,
+                 target: results_path,
                  **results_disabled_attrs
                ))
         unless @inat_import.Done?
@@ -64,11 +64,8 @@ module Views::Controllers::InatImports
       @inat_import.Done? && @inat_import.imported_count.to_i.positive?
     end
 
-    def results_observations_path
-      observations_path(
-        pattern: "user:#{@inat_import.user.id} created:" \
-                 "#{Time.zone.today}-#{Time.zone.tomorrow}"
-      )
+    def results_path
+      results_inat_import_path(@inat_import)
     end
 
     def render_timing_details

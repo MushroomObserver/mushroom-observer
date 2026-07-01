@@ -33,10 +33,11 @@ class InatImportsController < ApplicationController
   before_action :flatten_new_form_params, only: :create
 
   def index
-    imports = in_admin_mode? ? InatImport.all : InatImport.where(user: @user)
+    admin = in_admin_mode? == true
+    imports = admin ? InatImport.all : InatImport.where(user: @user)
     render(Views::Controllers::InatImports::Index.new(
-             imports: imports.order(created_at: :desc),
-             admin: in_admin_mode?
+             imports: imports.order(created_at: :desc).to_a,
+             admin: admin
            ))
   end
 

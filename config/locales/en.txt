@@ -3323,6 +3323,7 @@
   # /inat_import_job_tracker
   INAT_IMPORTS: iNat Imports
   INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
+  inat_imports_index_title: iNat Imports
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_started: Started
   inat_import_tracker_elapsed_time: Elapsed Time

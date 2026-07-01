@@ -1574,6 +1574,16 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  def test_scope_inat_import
+    import = inat_imports(:rolf_inat_import)
+    obs = Observation.first
+    obs.update!(inat_import: import)
+
+    result = Observation.inat_import(import)
+    assert_includes(result, obs)
+    assert_not_includes(result, Observation.where.not(id: obs.id).first)
+  end
+
   def test_scope_has_geolocation
     geoloc = Observation.where.not(lat: nil).first
     no_geoloc = Observation.where(lat: nil).first

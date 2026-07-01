@@ -4,7 +4,7 @@ module Views::Controllers::InatImports
   # Table of iNat imports. Admins see all imports; regular users see their own.
   class Index < Views::FullPageBase
     prop :imports, _Array(::InatImport)
-    prop :admin, :boolean, default: false
+    prop :admin, _Boolean, default: false
 
     def view_template
       add_page_title(:inat_imports_index_title.l)
@@ -14,7 +14,11 @@ module Views::Controllers::InatImports
     end
 
     def render_columns(tbl)
-      tbl.column(:USER.t) { |imp| user_link(imp.user) } if @admin
+      if @admin
+        tbl.column(:USER.t) do |imp|
+          render(Components::Link::User.new(user: imp.user))
+        end
+      end
       render_count_columns(tbl)
       tbl.column(:results.l) { |imp| results_link(imp) }
     end

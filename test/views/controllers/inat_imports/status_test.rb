@@ -72,7 +72,8 @@ module Views::Controllers::InatImports
       # katrina_inat_import is in Importing state
       html = render_status
 
-      assert_html(html, "a[aria-disabled='true'][href*='/observations']")
+      path = routes.results_inat_import_path(@import)
+      assert_html(html, "a[aria-disabled='true'][href='#{path}']")
     end
 
     def test_results_button_enabled_when_done_with_imports
@@ -83,7 +84,8 @@ module Views::Controllers::InatImports
       )
       html = render_status
 
-      assert_html(html, "a[href*='/observations'][href*='pattern=']")
+      path = routes.results_inat_import_path(@import)
+      assert_html(html, "a[href='#{path}']")
       assert_no_html(html, "a[aria-disabled='true']")
     end
 

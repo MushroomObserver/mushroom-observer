@@ -145,6 +145,24 @@ class InatImportTest < ActiveSupport::TestCase
     assert_not(import.stuck?, "Done import should not be stuck")
   end
 
+  def test_ignored_total_count
+    import = inat_imports(:rolf_inat_import)
+    import.update!(
+      ignored_not_importable_count: 3,
+      ignored_date_missing_count: 2,
+      ignored_already_imported_count: 1
+    )
+
+    assert_equal(6, import.ignored_total_count)
+  end
+
+  def test_ignored_total_count_with_nils
+    import = inat_imports(:rolf_inat_import)
+
+    assert_equal(0, import.ignored_total_count,
+                 "nil counts should sum as 0")
+  end
+
   def test_add_response_error_without_prior_errors
     import = InatImport.new(user: users(:rolf))
     import.save!
