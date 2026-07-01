@@ -110,6 +110,18 @@ module Views::Controllers::InatImports
                   text: :inat_import_confirm_nothing_to_import.l)
     end
 
+    def test_proceed_button_disabled_when_expected_zero
+      html = render_form(expected: 0)
+
+      assert_html(html, "button[name='confirmed'][disabled]")
+    end
+
+    def test_proceed_button_enabled_when_expected_positive
+      html = render_form(expected: 5)
+
+      assert_no_html(html, "button[name='confirmed'][disabled]")
+    end
+
     def test_unlicensed_obs_count_rendered_as_link_when_url_available
       html = render_form(unlicensed_obs: 3)
 

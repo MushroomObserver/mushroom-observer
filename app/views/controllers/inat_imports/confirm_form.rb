@@ -237,12 +237,15 @@ module Views::Controllers::InatImports
     def render_buttons
       div(class: "mt-3") do
         submit(:inat_import_confirm_proceed.l, as: :button,
-                                               name: "confirmed", value: "1")
+                                               name: "confirmed", value: "1",
+                                               disabled: nothing_to_import?)
         whitespace
         submit(:inat_import_confirm_go_back.l, as: :button,
                                                name: "go_back", value: "1")
       end
     end
+
+    def nothing_to_import? = (@estimate_with_date || @expected).to_i.zero?
 
     def import_others? = model.import_others == "1"
 
