@@ -10,7 +10,6 @@ class Components::Base < Phlex::HTML
   include Phlex::Rails::Helpers::ButtonTo
   include Phlex::Rails::Helpers::ClassNames
   include Phlex::Rails::Helpers::TurboFrameTag
-  include Phlex::Rails::Helpers::TurboStreamFrom
   # Rails text helpers used by Phlex views (article-list teasers,
   # other future preview/excerpt sites). Same stable-wrapper bucket
   # as `LinkTo` / `ButtonTo` above.

@@ -176,8 +176,7 @@ module Views::Controllers::Names
           type: :name,
           value: @correct_spelling,
           label: "#{:form_names_misspelling_it_should_be.l}:",
-          help: :form_names_misspelling_note.l,
-          help_collapse: true
+          help: :form_names_misspelling_note.l
         )
       end
     end
@@ -186,8 +185,7 @@ module Views::Controllers::Names
       textarea_field(:notes,
                      label: "#{:form_names_taxonomic_notes.l}:",
                      rows: 6,
-                     help: :shared_textile_help.l,
-                     help_collapse: true) do |f|
+                     help: :shared_textile_help.l) do |f|
         f.with_between do
           div(class: "mark") { :form_names_taxonomic_notes_warning.l }
         end

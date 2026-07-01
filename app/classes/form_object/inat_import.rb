@@ -10,5 +10,4 @@ class FormObject::InatImport < FormObject::Base
   attribute :import_others, :string
   attribute :inat_url, :string
   attribute :skip_inat_writeback, :string
-  attribute :choose_method, :string
 end

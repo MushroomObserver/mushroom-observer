@@ -40,18 +40,18 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   private
 
   def render_specimen_checkbox
-    render(Components::Form::CheckboxCollapse.new(
-             form: @form,
-             field: :specimen,
-             target_id: "specimen_fields",
-             label: :form_observations_specimen_available.l,
-             expanded: @observation.specimen,
-             attributes: {
-               wrap_class: "mt-0",
-               help: :form_observations_specimen_available_help.t,
-               help_collapse: true
-             }
-           ))
+    @form.checkbox_field(
+      :specimen,
+      label: :form_observations_specimen_available.l,
+      wrap_class: "mt-0",
+      help: :form_observations_specimen_available_help.t,
+      data: specimen_toggle_data,
+      aria: { controls: "specimen_fields", expanded: @observation.specimen }
+    )
+  end
+
+  def specimen_toggle_data
+    { toggle: "collapse", target: "#specimen_fields" }
   end
 
   def render_edit_help
@@ -81,7 +81,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
     help = :form_observations_collection_number_help.t
     render(cn_ns.field(:name).text(
              wrapper_options: { label: "#{:collection_number_name.l}:",
-                                help: help, help_collapse: true },
+                                help: help },
              value: @collectors_name
            ))
   end
@@ -109,8 +109,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
     help = :form_observations_herbarium_record_help.t
     render(hr_ns.field(:herbarium_name).autocompleter(
              type: :herbarium,
-             wrapper_options: { label: label, help: help,
-                                help_collapse: true },
+             wrapper_options: { label: label, help: help },
              value: @herbarium_name,
              hidden_value: @herbarium_id,
              create_text: :create_herbarium.l,
