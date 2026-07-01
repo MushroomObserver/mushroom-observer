@@ -54,6 +54,7 @@ class Query::Observations < Query
   # query_attr(:search_where, :string) # advanced search
   # query_attr(:search_user, :string) # advanced search
   # query_attr(:search_content, :string) # advanced search
+  query_attr(:inat_import, InatImport)
   query_attr(:image_query, { subquery: :Image })
   query_attr(:location_query, { subquery: :Location })
   query_attr(:name_query, { subquery: :Name })

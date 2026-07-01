@@ -96,7 +96,8 @@ class Inat
       builder = Inat::MoObservationBuilder.new(
         inat_obs: @inat_obs, user: @user,
         import_others: @inat_import.import_others,
-        external_site: inat_site
+        external_site: inat_site,
+        inat_import: @inat_import
       )
       @observation = builder.mo_observation
       builder

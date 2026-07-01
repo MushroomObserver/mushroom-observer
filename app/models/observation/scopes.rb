@@ -573,6 +573,10 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
         where(species_list_observations: { species_list: spl_ids }).distinct
     }
 
+    scope :inat_import, lambda { |inat_import|
+      where(inat_import_id: inat_import)
+    }
+
     scope :image_query, lambda { |hash|
       joins(:images).subquery(:Image, hash)
     }

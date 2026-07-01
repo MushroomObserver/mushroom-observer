@@ -60,6 +60,7 @@ class InatImport < ApplicationRecord
   }, prefix: true
 
   belongs_to :user
+  has_many :observations, dependent: :nullify
 
   serialize :log, type: Array, coder: YAML
 

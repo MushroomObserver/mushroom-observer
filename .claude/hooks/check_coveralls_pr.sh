@@ -172,6 +172,18 @@ ${TOUCHED_REPORT}
 
 Per the project's testing rules: every Ruby file in a PR must be at
 100% line coverage before declaring done. Fix gaps in the same PR.
+
+⚠️  To find the specific uncovered lines:
+  The Coveralls source_files API returns SUMMARY COUNTS ONLY
+  (missed_line_count, covered_line_count, covered_percent) — no
+  line-by-line coverage arrays. Do NOT keep fetching the API looking
+  for line data; it does not exist in the public response.
+
+  Correct workflow:
+    1. Run: git diff origin/main -- <file.rb>  (see which lines changed)
+    2. Read the source file to identify branches not hit by tests
+       (rescue blocks, format.turbo_stream branches, guard clauses, etc.)
+    3. Add a test that exercises the uncovered path
 EOF
 else
   echo "" >&2

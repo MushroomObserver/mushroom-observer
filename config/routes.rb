@@ -456,7 +456,9 @@ MushroomObserver::Application.routes.draw do
       as: "inat_import_authorization_response")
   put("inat_imports/cancel/:id", to: "inat_imports#cancel",
                                  as: "inat_import_cancel")
-  resources :inat_imports, only: [:show, :new, :create]
+  resources :inat_imports, only: [:index, :show, :new, :create] do
+    member { get :results }
+  end
 
   # ----- Info: no resources, just forms and pages ----------------------------
   get("/info/how_to_help", to: "info#how_to_help")
