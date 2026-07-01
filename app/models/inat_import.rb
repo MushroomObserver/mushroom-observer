@@ -104,6 +104,20 @@ class InatImport < ApplicationRecord
     Importing? && ended_at.nil? && updated_at < STUCK_THRESHOLD.ago
   end
 
+  def add_ignored_obs(reason)
+    case reason
+    when :not_importable then increment!(:ignored_not_importable_count)
+    when :date_missing   then increment!(:ignored_date_missing_count)
+    when :already_imported then increment!(:ignored_already_imported_count)
+    end
+  end
+
+  def ignored_total_count
+    ignored_not_importable_count.to_i +
+      ignored_date_missing_count.to_i +
+      ignored_already_imported_count.to_i
+  end
+
   def add_response_error(error)
     msg = if error.is_a?(::RestClient::Response)
             error.body

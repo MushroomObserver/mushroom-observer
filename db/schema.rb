@@ -238,6 +238,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_29_000000) do
     t.boolean "import_others", default: false, null: false
     t.integer "writeback", default: 0, null: false
     t.text "inat_url"
+    t.integer "ignored_not_importable_count", default: 0, null: false
+    t.integer "ignored_date_missing_count", default: 0, null: false
+    t.integer "ignored_already_imported_count", default: 0, null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|

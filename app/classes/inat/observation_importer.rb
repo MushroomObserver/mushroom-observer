@@ -46,6 +46,7 @@ class Inat
       return false if @inat_obs.taxon_importable?
 
       log_with_response_error("Skipped #{@inat_obs[:id]} not importable")
+      inat_import.add_ignored_obs(:not_importable)
       true
     end
 
@@ -55,6 +56,7 @@ class Inat
       log_with_response_error(
         "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
       )
+      inat_import.add_ignored_obs(:date_missing)
       true
     end
 
@@ -74,6 +76,7 @@ class Inat
       )
 
       log("Skipped #{@inat_obs[:id]} already imported")
+      inat_import.add_ignored_obs(:already_imported)
       true
     end
 

@@ -332,11 +332,11 @@ class InatImportsControllerTest < FunctionalTestCase
       relationship: :import, external_id: inat_id,
       url: "#{site.base_url}#{inat_id}"
     )
-    estimate_response = { total_results: 1 }.to_json
+    expected_response = { total_results: 1 }.to_json
 
     stub_request(
       :get, %r{api\.inaturalist\.org/v1/observations}
-    ).to_return(status: 200, body: estimate_response)
+    ).to_return(status: 200, body: expected_response)
     login(user.login)
 
     post(:create,
@@ -448,14 +448,14 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Failed to save InatImport.inat_username")
   end
 
-  def test_create_shows_confirmation_with_estimate
+  def test_create_shows_confirmation_with_expected_count
     user = users(:rolf)
     inat_username = "rolf"
     inat_ids = "123,456"
-    estimate_response = { total_results: 2 }.to_json
+    expected_response = { total_results: 2 }.to_json
 
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      to_return(status: 200, body: estimate_response)
+      to_return(status: 200, body: expected_response)
     login(user.login)
 
     post(:create,
@@ -463,15 +463,15 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     body = @response.body
-    assert_match(:inat_import_confirm_estimate_caption.l, body)
-    assert_select("#estimated_count", "2")
+    assert_match(:inat_import_confirm_expected_caption.l, body)
+    assert_select("#expected_count", "2")
     assert_match(:inat_import_confirm_time_estimate_caption.l, body)
     assert_select("#estimated_time", "00:00:24")
   end
 
-  def test_superimporter_import_listed_observations_estimate_excludes_user_login
+  def test_superimporter_import_listed_observations_expected_excludes_user_login
     user = users(:dick) # Dick is a super_importer
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
@@ -479,7 +479,7 @@ class InatImportsControllerTest < FunctionalTestCase
     inat_ids = "339315928"
     assert_nil(Observation.find_by(inat_id: inat_ids.to_i))
 
-    # Make the request for estimated # of imports return one result
+    # Make the request for expected count return one result
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
 
@@ -495,10 +495,10 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "1",
-      "Estimate should not filter by user_login if a super_importer " \
+      "#expected_count", "1",
+      "Expected count should not filter by user_login if a super_importer " \
       "imports listed observations"
     )
   end
@@ -611,7 +611,7 @@ class InatImportsControllerTest < FunctionalTestCase
                  "importer applies its environment default")
   end
 
-  def test_superimporter_own_import_all_estimate_filters_by_user
+  def test_superimporter_own_import_all_expected_filters_by_user
     user = users(:dick) # Dick is a super_importer with inat_username "dick"
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
@@ -634,10 +634,10 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "1",
-      "Estimate for a super_importer's own import-all should filter " \
+      "#expected_count", "1",
+      "Expected count for a super_importer's own import-all should filter " \
       "by user_login, not return a global count"
     )
   end
@@ -646,13 +646,13 @@ class InatImportsControllerTest < FunctionalTestCase
     user = users(:rolf)
     inat_ids = "12345"
 
-    # Total query (no licensed filter) returns 1 (the unlicensed obs)
+    # General query returns 1 (expected count, which includes unlicensed obs)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
-    # Licensed query returns 0 (unlicensed obs excluded)
+    # licensed=false query returns 1 directly — registered last, matched first
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
-      to_return(status: 200, body: { total_results: 0 }.to_json)
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 1 }.to_json)
 
     login(user.login)
     post(:create,
@@ -660,14 +660,14 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "1",
-      "Estimate should include unlicensed own observations"
+      "#expected_count", "1",
+      "Expected count should include unlicensed own observations"
     )
     assert_select(
       "#unlicensed_obs_count", "1",
-      "Confirm form should report unlicensed obs count (total - licensed)"
+      "Unlicensed obs count comes directly from licensed=false query"
     )
   end
 
@@ -676,13 +676,20 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
 
-    # Total (no license filter) returns 5: 2 unlicensed will be skipped
+    licensed_filter =
+      Inat::Constants::LICENSED_FILTER.transform_keys(&:to_s).
+      transform_values(&:to_s)
+    # General stub returns 5 for unfiltered counts (raw_requested, after_taxon)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 5 }.to_json)
-    # Licensed query (the estimate) returns 3 — registered last, matched first
+    # licensed=true returns 3 (expected + date-estimate counts)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
+      with(query: hash_including(licensed_filter)).
       to_return(status: 200, body: { total_results: 3 }.to_json)
+    # licensed=false returns 2 unlicensed obs — registered last, matched first
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 2 }.to_json)
 
     login(user.login)
     post(:create,
@@ -690,22 +697,22 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "3",
-      "Estimate for import-others should be licensed obs count"
+      "#expected_count", "3",
+      "Expected count for import-others should be licensed obs count"
     )
     assert_select(
-      "#unlicensed_obs_count", "2",
-      "Confirm form should report unlicensed obs that will be skipped"
+      "#total_ignored_count", "2",
+      "Total ignored = requested(5) - expected(3)"
     )
   end
 
-  def test_confirm_renders_gracefully_when_licensed_estimate_fails
+  def test_confirm_renders_gracefully_when_unlicensed_estimate_fails
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
+      with(query: hash_including("licensed" => "false")).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)
@@ -713,10 +720,10 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
       "#unlicensed_obs_count", "",
-      "Unlicensed count should be blank when licensed estimate fails"
+      "Unlicensed count should be blank when licensed=false request fails"
     )
   end
 
@@ -725,16 +732,14 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(InatImport.super_importer?(user),
            "Test requires user to be a super_importer")
 
-    # Total-others request (no license filter) returns 200 with invalid JSON,
-    # triggers JSON::ParserError and the rescue in fetch_unlicensed_others_count
+    # General query returns 3 for expected count and other requests
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      to_return(status: 200, body: "not json")
-    # Licensed estimate returns valid JSON — registered last, matched first.
-    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including(
-        "license" => Inat::Constants::LICENSED_FILTER[:license]
-      )).
       to_return(status: 200, body: { total_results: 3 }.to_json)
+    # licensed=false returns invalid JSON — triggers rescue in
+    # fetch_unlicensed_others_count; registered last, matched first
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: "not json")
 
     login(user.login)
     post(:create,
@@ -743,12 +748,94 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select(
-      "#estimated_count", "3",
-      "Estimate should still show when only unlicensed-others request fails"
+      "#expected_count", "3",
+      "Expected count should still show when unlicensed-others request fails"
     )
     assert_select(
-      "#unlicensed_obs_count", "",
-      "Unlicensed count should be blank when total-others estimate fails"
+      "#total_ignored_count", { count: 0 },
+      "Unlicensed count should not appear when unlicensed-others estimate fails"
+    )
+  end
+
+  def test_confirm_renders_gracefully_when_raw_requested_count_fails
+    # raw_requested_query_args has no taxon_id; general stub catches it
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: "not json")
+    # Requests with taxon_id (all other count queries) succeed
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including(
+        "taxon_id" => Inat::Constants::IMPORTABLE_TAXON_IDS_ARG
+      )).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
+
+    assert_response(
+      :success,
+      "Confirm page should render when raw-requested count fails"
+    )
+    assert_select(
+      "#requested_count", { count: 0 },
+      "Requested count should not appear when raw-requested count fails"
+    )
+    assert_select(
+      "#expected_count", "3",
+      "Expected count should still show when raw-requested count fails"
+    )
+  end
+
+  def test_confirm_renders_gracefully_when_after_taxon_count_fails
+    taxon_ids = Inat::Constants::IMPORTABLE_TAXON_IDS_ARG
+    without_field = Inat::Constants::BASE_FILTER_PARAMS[:without_field]
+
+    # General stub succeeds for requests without taxon_id (raw_requested)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    # after_taxon has taxon_id but not without_field — matches this failure stub
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => taxon_ids)).
+      to_return(status: 200, body: "not json")
+    # expected/unlicensed/date-estimate have both — matched first (LIFO)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("taxon_id" => taxon_ids,
+                                 "without_field" => without_field)).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
+
+    assert_response(
+      :success,
+      "Confirm page should render when after-taxon count fails"
+    )
+    assert_select(
+      "#expected_count", "3",
+      "Expected count should still show when after-taxon count fails"
+    )
+  end
+
+  # estimators.rb rescue block of fetch_estimate_with_date_count
+  def test_confirm_renders_gracefully_when_date_estimate_fails
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("d1" => Inat::Constants::EARLIEST_DATE_FILTER)).
+      to_return(status: 500, body: "error")
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
+
+    assert_response(
+      :success,
+      "Confirm page should render when date-estimate request fails"
+    )
+    assert_select(
+      "#expected_count", "3",
+      "Expected count still shows when date-estimate request fails"
     )
   end
 
@@ -829,7 +916,7 @@ class InatImportsControllerTest < FunctionalTestCase
                  "normalized query string")
   end
 
-  def test_create_confirmation_estimate_unavailable
+  def test_create_confirmation_expected_unavailable
     user = users(:rolf)
     inat_username = "rolf"
     inat_ids = "123"
@@ -907,7 +994,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, all: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
   end
 
   def test_superimporter_not_own_import_all_without_username_blocked
@@ -1046,8 +1133,8 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: inat_username, consent: 1 })
 
     assert_response(:success, "Valid URL should proceed to confirmation")
-    assert_select("#estimated_count", "5",
-                  "Confirmation should show estimate from URL query")
+    assert_select("#expected_count", "5",
+                  "Confirmation should show expected count from URL query")
   end
 
   def test_importable_taxon_id_preserved_in_normalized_url
@@ -1262,7 +1349,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Confirm page must show the ignored-params warning for user_login " \
       "stripped from the URL for a non-superimporter"
     )
-    assert_select("#estimated_count", "3",
+    assert_select("#expected_count", "3",
                   "Confirm page should render with the estimate")
   end
 
@@ -1330,11 +1417,11 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, import_others: "1", consent: 1 })
 
-    assert_select("#estimated_count", true,
+    assert_select("#expected_count", true,
                   "Superimporter URL import without username should confirm")
   end
 
-  def test_url_mode_estimate_merges_url_params
+  def test_url_mode_expected_merges_url_params
     user = users(:rolf)
     url = "#{INAT_SITE_OBS_URL}?project_id=291058"
 
@@ -1351,11 +1438,11 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "7",
-                  "Estimate should include project_id from user URL")
+    assert_select("#expected_count", "7",
+                  "Expected count should include project_id from user URL")
   end
 
-  def test_url_mode_estimate_mo_params_win_over_url_params
+  def test_url_mode_expected_mo_params_win_over_url_params
     user = users(:rolf)
     # URL supplies conflicting taxon_id and only_id; MO's values must win.
     # taxon_id=9999 is non-importable so it is stripped; MO's IMPORTABLE_IDS
@@ -1380,11 +1467,11 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "5",
+    assert_select("#expected_count", "5",
                   "MO taxon_id and only_id must override user-supplied values")
   end
 
-  def test_url_mode_estimate_uses_user_supplied_importable_taxon_id
+  def test_url_mode_expected_uses_user_supplied_importable_taxon_id
     user = users(:rolf)
     # taxon_id=54134 is a Fungi child — importable. The estimate must send
     # taxon_id=54134, not MO's IMPORTABLE_TAXON_IDS_ARG (47170,47685).
@@ -1408,12 +1495,13 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "3",
+    assert_select("#expected_count", "3",
                   "Importable user-supplied taxon_id should be used " \
-                  "in the estimate, not replaced by IMPORTABLE_TAXON_IDS_ARG")
+                  "in the expected count, not replaced " \
+                  "by IMPORTABLE_TAXON_IDS_ARG")
   end
 
-  def test_url_mode_estimate_excludes_id_param
+  def test_url_mode_expected_excludes_id_param
     user = users(:rolf)
     # URL supplies id=12345; PageParser drops it in URL mode, estimate must too.
     url = "#{INAT_API_OBS_URL}?project_id=291058&id=12345"
@@ -1431,11 +1519,11 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "9",
-                  "id param from URL must be excluded from the estimate")
+    assert_select("#expected_count", "9",
+                  "id param from URL must be excluded from the expected count")
   end
 
-  def test_non_superuser_url_with_foreign_user_id_strips_user_id_from_estimate
+  def test_non_superuser_url_with_foreign_user_id_strips_user_id_from_expected
     user = users(:rolf)
     # user_id is stripped for non-superimporters — iNat ORs user_id and
     # user_login, so a user-supplied user_id alongside the injected user_login
@@ -1456,8 +1544,8 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "5",
-                  "user_id must be stripped from the estimate request")
+    assert_select("#expected_count", "5",
+                  "user_id must be stripped from the expected count request")
   end
 
   def test_url_params_preserved_through_confirm_round_trip
@@ -1484,7 +1572,7 @@ class InatImportsControllerTest < FunctionalTestCase
                  "inat_url should be saved from superform hidden field")
   end
 
-  def test_estimate_422_surfaces_inat_error_message
+  def test_expected_422_surfaces_inat_error_message
     user = users(:rolf)
     url = "#{INAT_API_OBS_URL}?place_id=678910"
     inat_error = "Unknown place_id 678910"

@@ -5,7 +5,7 @@ module InatImportsController::Estimators
 
   private
 
-  def fetch_import_estimate
+  def fetch_expected_count
     response = RestClient.get(
       "#{API_BASE}/observations?#{import_estimate_query_args.to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
@@ -15,7 +15,9 @@ module InatImportsController::Estimators
     flash_warning(:inat_unknown_param.t(error: inat_error_text(e)))
     false
   rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
+    Rails.logger.warn(
+      "iNat expected count request failed: #{e.class}: #{e.message}"
+    )
     nil
   end
 
@@ -26,32 +28,80 @@ module InatImportsController::Estimators
   end
 
   # Counts unlicensed observations for the own-observations case.
-  # Total minus licensed gives the unlicensed count via two fast
-  # only_id queries.
   def fetch_unlicensed_obs_count
-    licensed = RestClient.get(
-      "#{API_BASE}/observations?#{licensed_estimate_query_args.to_query}",
+    response = RestClient.get(
+      "#{API_BASE}/observations?" \
+      "#{import_estimate_query_args.merge(licensed: false).to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
-    @estimate - JSON.parse(licensed.body)["total_results"]
+    JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn(
-      "iNat licensed estimate request failed: #{e.class}: #{e.message}"
+      "iNat unlicensed count request failed: #{e.class}: #{e.message}"
     )
     nil
   end
 
   # Counts unlicensed observations that will be skipped for import-others.
-  # @estimate is already licensed-only; total minus @estimate = unlicensed.
   def fetch_unlicensed_others_count
-    total = RestClient.get(
-      "#{API_BASE}/observations?#{total_others_estimate_query_args.to_query}",
+    response = RestClient.get(
+      "#{API_BASE}/observations?" \
+      "#{total_others_estimate_query_args.merge(licensed: false).to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
-    JSON.parse(total.body)["total_results"] - @estimate
+    JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
     Rails.logger.warn(
-      "iNat unlicensed-others estimate request failed: #{e.class}: #{e.message}"
+      "iNat unlicensed-others count request failed: #{e.class}: #{e.message}"
+    )
+    nil
+  end
+
+  # Count without any MO-added filters — just the user's own scope
+  # (ownership + their IDs/URL). Used to compute "Requested Observations"
+  # and derive the ignored-obs breakdown on the confirmation page.
+  def fetch_raw_requested_count
+    RestClient.get(
+      "#{API_BASE}/observations?#{raw_requested_query_args.to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
+    ).then { |r| JSON.parse(r.body)["total_results"] }
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn(
+      "iNat raw-requested count failed: #{e.class}: #{e.message}"
+    )
+    nil
+  end
+
+  # Count after applying MO's fungi/myxo taxon filter but before
+  # `without_field` (already-imported filter) or license filter.
+  # Together with @expected and @unlicensed_obs this lets us derive
+  # the already-imported and not-importable sub-counts.
+  def fetch_after_taxon_count
+    RestClient.get(
+      "#{API_BASE}/observations?#{after_taxon_query_args.to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
+    ).then { |r| JSON.parse(r.body)["total_results"] }
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn(
+      "iNat after-taxon count failed: #{e.class}: #{e.message}"
+    )
+    nil
+  end
+
+  # Count of importable observations that HAVE a date
+  # Diff vs @expected gives the no-date count.
+  def fetch_estimate_with_date_count
+    # iNat has no "without date" filter; EARLIEST_DATE_FILTER approximates it.
+    # Preserve a user-supplied d1 — it already excludes undated obs.
+    args = import_estimate_query_args
+    args[:d1] ||= EARLIEST_DATE_FILTER
+    RestClient.get(
+      "#{API_BASE}/observations?#{args.to_query}",
+      { accept: :json, open_timeout: 5, timeout: 10 }
+    ).then { |r| JSON.parse(r.body)["total_results"] }
+  rescue RestClient::Exception, JSON::ParserError => e
+    Rails.logger.warn(
+      "iNat date-estimate count failed: #{e.class}: #{e.message}"
     )
     nil
   end
@@ -79,15 +129,32 @@ module InatImportsController::Estimators
     args
   end
 
-  def licensed_estimate_query_args
-    import_estimate_query_args.merge(LICENSED_FILTER)
-  end
-
   # Strip MO-controlled params so estimates match actual import behavior.
   # Normal URL submissions are cleaned by normalize_inat_url_param! first;
   # this guards against raw query strings (no "://") that bypass it.
   def url_query_args
     strip = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym)
     Rack::Utils.parse_query(params[:inat_url].to_s).symbolize_keys.except(*strip)
+  end
+
+  # No MO-added filters: just the user's scope (IDs/URL + ownership).
+  # Used for the "Requested Observations" count on the confirm page.
+  def raw_requested_query_args
+    args = listing_url? ? url_query_args : {}
+    args[:only_id] = true
+    args[:id] = params[:inat_ids] if listing_ids?
+    args[:user_login] = params[:inat_username]&.strip unless import_others?
+    args
+  end
+
+  # Taxon filter applied but no `without_field` or license filter.
+  # Used to derive not-importable and already-imported sub-counts.
+  def after_taxon_query_args
+    args = listing_url? ? url_query_args : {}
+    args[:only_id] = true
+    args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
+    args[:id] = params[:inat_ids] if listing_ids?
+    args[:user_login] = params[:inat_username]&.strip unless import_others?
+    args
   end
 end
