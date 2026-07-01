@@ -205,12 +205,16 @@ class Inat
       # iNat "complex" rank needs special treatment because
       # The equivalent MO rank is a one-off, requiring special handling
       complex = taxon[:rank] == "complex"
-      rank_str = complex ? "Group" : taxon[:rank].titleize
       name_str = if complex
                    # append "complex" to prevent parsing it as a Species
                    "#{taxon.full_name_string} complex"
                  else
                    taxon.full_name_string
+                 end
+      rank_str = if complex
+                   "Group"
+                 else
+                   preferred_rank(taxon.full_name_string, taxon[:rank])
                  end
 
       # There's no author or ICN ID because iNat taxa lack those.
@@ -219,6 +223,21 @@ class Inat
 
     def add_provisional_name(parsed_prov_name)
       post_name(name: parsed_prov_name.search_name, rank: parsed_prov_name.rank)
+    end
+
+    # iNat uses NCBI taxonomy, which doesn't always follow ICN suffix
+    # conventions. For uninomial names (single word, no rank abbreviation
+    # embedded), the ICN suffix is authoritative — trust MO's detection over
+    # iNat's rank assignment. Multi-word names (infrageneric strings like
+    # "Amanita section Validae", infraspecific strings like "Inonotus obliquus
+    # form sterilis") have the rank spelled out in full; guess_rank sees the
+    # space and falls through to "Species", so we skip the override and keep
+    # iNat's rank for those.
+    def preferred_rank(name_str, inat_rank)
+      return inat_rank.titleize if name_str.include?(" ")
+
+      guessed = Name.guess_rank(name_str)
+      guessed == "Genus" ? inat_rank.titleize : guessed
     end
 
     def post_name(name:, rank:)
