@@ -33,7 +33,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "#{panel}[data-type-switch-type='location']")
 
       # User panel hidden by default, location panel visible
-      assert_html(html, "[data-type-switch-type='user'].d-none")
+      assert_no_html(html, "[data-type-switch-type='user'].in")
     end
 
     def test_edit_form_with_user_target
@@ -45,7 +45,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "input[name='project_alias[name]'][value='RS']")
 
       # Location panel hidden when editing user target
-      assert_html(html, "[data-type-switch-type='location'].d-none")
+      assert_no_html(html, "[data-type-switch-type='location'].in")
     end
 
     def test_edit_form_with_location_target
@@ -57,7 +57,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "input[name='project_alias[name]'][value='Walk 1']")
 
       # User panel hidden when editing location target
-      assert_html(html, "[data-type-switch-type='user'].d-none")
+      assert_no_html(html, "[data-type-switch-type='user'].in")
     end
 
     def test_form_with_errors
@@ -68,7 +68,8 @@ module Views::Controllers::Projects::Aliases
 
       # Error display
       assert_html(html, "#error_explanation")
-      assert_includes(html, "error")
+      assert_html(html, "#error_explanation h2", text: "error")
+      assert_html(html, "#error_explanation ul li")
     end
 
     private

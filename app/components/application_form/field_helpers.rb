@@ -11,12 +11,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Components::Button::Styling
 
     # Wrapper option keys that should not be passed to the field itself
-    WRAPPER_OPTIONS = [:label, :help, :prefs, :inline, :wrap_class,
-                       :wrap_data, :between, :button, :button_data,
-                       :button_text, :button_href, :button_variant,
-                       :button_size, :button_target, :button_rel,
-                       :button_title, :button_icon, :addon, :monospace,
-                       :label_class, :label_data, :label_aria,
+    WRAPPER_OPTIONS = [:label, :help, :help_collapse, :prefs, :inline,
+                       :wrap_class, :wrap_data, :between, :button,
+                       :button_data, :button_text, :button_href,
+                       :button_variant, :button_size, :button_target,
+                       :button_rel, :button_title, :button_icon, :addon,
+                       :monospace, :label_class, :label_data, :label_aria,
                        :label_position, :width, :label_sr_only].freeze
 
     # Text field with label and Bootstrap form-group wrapper
