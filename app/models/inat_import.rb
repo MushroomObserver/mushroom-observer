@@ -16,7 +16,15 @@
 #                          Appended to iNat API query in order to generally
 #                          an MO user from importing someone else's iNat obss
 #  import_all:             whether to import all of user's relevant iNat obss
-#  importables::           number of importable observations in job
+#  importables::           observations queued for the *current* job run; reset
+#                          by the job from the iNat API total_results on start.
+#                          Used by estimated_remaining_time.
+#  total_importables::     estimated count recorded at confirm time; stable
+#                          across re-runs (job only sets it as a fallback if
+#                          blank). Used by total_expected_time for the ETA.
+#                          Differs from importables when the API count diverges
+#                          from the confirm-step estimate (result set changed
+#                          between confirm and import).
 #  imported_count::        running count of iNat obss imported in associated job
 #  response_errors::       string of newline-separated error messages
 #  total_imported_count::  historical count of iNat obss imported by this user
