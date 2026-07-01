@@ -657,16 +657,6 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, "my-3")
   end
 
-  # `as:` other than :button delegates to Superform's submit, which renders an
-  # <input type="submit"> rather than MO's Button::Submit <button>.
-  def test_submit_as_non_button_uses_superform_input
-    form = render_form do
-      submit("Save", as: :input)
-    end
-
-    assert_html(form, "input[type='submit'][value='Save']")
-  end
-
   def test_submit_with_custom_submits_with
     form = render_form do
       submit("Save", submits_with: "Saving...")

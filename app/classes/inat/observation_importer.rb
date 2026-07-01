@@ -130,13 +130,18 @@ class Inat
       nil
     end
 
-    # Stamp the MO observation's URL onto the source iNat observation. Only
-    # called when writing back: `finalize_import` gates this on
-    # `skip_inat_writeback?` (skipped by default in development so a local
-    # import never annotates a real iNat observation; production writes back,
-    # and the test suite is isolated from iNat by WebMock). Admins can override
-    # per import via a checkbox on the import form (InatImport#writeback).
+    # Stamp the MO observation's URL onto the source iNat observation. Skipped
+    # by default in development, so a local import never annotates a real iNat
+    # observation; production writes back (the test suite is isolated from
+    # iNat by WebMock). Admins can override this per import via a checkbox on
+    # the import form (InatImport#writeback); when they haven't, the policy is
+    # `default` and the environment decides.
     def update_inat_observation
+      if skip_inat_writeback?
+        log("Skipped iNat write-back for #{@inat_obs[:id]}")
+        return
+      end
+
       update_mushroom_observer_url_field
       sleep(1) # Avoid hitting iNat API rate limits
     end
