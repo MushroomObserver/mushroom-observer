@@ -11,6 +11,7 @@ module Views::Controllers::InatImports
     def view_template
       container_class(:text)
       add_page_title(:inat_import_tracker.t)
+      add_context_nav(Tab::InatImport::Index.new)
       turbo_stream_from([@inat_import.user, :inat_import])
       render(Status.new(inat_import: @inat_import))
     end

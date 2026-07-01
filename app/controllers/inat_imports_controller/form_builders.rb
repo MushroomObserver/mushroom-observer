@@ -47,7 +47,8 @@ module InatImportsController::FormBuilders
       Views::Controllers::InatImports::New.new(
         form: build_new_form(submitted),
         super_importer: InatImport.super_importer?(@user),
-        admin: in_admin_mode?
+        admin: in_admin_mode?,
+        has_prior_imports: InatImport.exists?(user: @user)
       )
     )
   end

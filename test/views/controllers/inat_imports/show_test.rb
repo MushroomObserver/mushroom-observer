@@ -17,6 +17,12 @@ module Views::Controllers::InatImports
       assert_html(html, "#inat_import_#{@import.id}")
     end
 
+    def test_context_nav_includes_index_link
+      html = render_show
+
+      assert_html(html, "a[href='#{routes.inat_imports_path}']")
+    end
+
     private
 
     def render_show
