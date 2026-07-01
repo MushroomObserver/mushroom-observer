@@ -137,11 +137,6 @@ class Inat
     # the import form (InatImport#writeback); when they haven't, the policy is
     # `default` and the environment decides.
     def update_inat_observation
-      if skip_inat_writeback?
-        log("Skipped iNat write-back for #{@inat_obs[:id]}")
-        return
-      end
-
       update_mushroom_observer_url_field
       sleep(1) # Avoid hitting iNat API rate limits
     end

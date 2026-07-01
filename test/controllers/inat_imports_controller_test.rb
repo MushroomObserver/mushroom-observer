@@ -1242,6 +1242,24 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  # taxon_ids_from_url rescues URI::InvalidURIError and returns [],
+  # so an unparseable URL is treated as having no taxon filter and
+  # is rejected as an invalid URL rather than crashing the request.
+  def test_invalid_uri_in_url_param_rejected_gracefully
+    login
+    url = "https://www.inaturalist.org/observations|invalid"
+
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      :inat_invalid_url.l,
+      "An unparseable iNat URL should flash the invalid-URL message, " \
+      "not raise an exception"
+    )
+  end
+
   def test_confirm_page_shows_ignored_url_params_warning
     # When a URL has ignored params alongside surviving ones, the user
     # reaches the Confirm page and must see the ignored-params warning
