@@ -9,10 +9,10 @@ require("test_helper")
 # so every branch is pinned — including "provisional name without a sequence",
 # which no real iNat fixture can produce (a prov name implies a sequence).
 class InatMoObservationBuilderTest < UnitTestCase
-  # Minimal stand-in for an ::Inat::Obs, exposing only what naming_vote reads.
+  # Minimal stand-in for an ::Inat::Obs, exposing only the fields/methods
+  # MoObservationBuilder reads in these unit tests.
   class FakeInatObs
     FAKE_INAT_ID = 12_345_678
-
     def initialize(sequences:, provisional_name:, quality_grade:,
                    name_override: nil, obs_taxon_name: nil)
       @sequences = sequences
