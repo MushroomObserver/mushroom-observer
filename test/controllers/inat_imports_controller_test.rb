@@ -871,9 +871,10 @@ class InatImportsControllerTest < FunctionalTestCase
          })
 
     assert_response(:success)
-    url_field = css_select("input#inat_import_inat_url").first
+    url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field, "inat_url input field not found in response")
-    assert_equal(original_url, url_field["value"],
+    value = url_field["value"].presence || url_field.text.strip
+    assert_equal(original_url, value,
                  "Go Back must restore the original URL, not the " \
                  "normalized query string")
   end
@@ -1073,8 +1074,8 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_select(
-      "input[name='inat_import[inat_url]']", true,
-      "Form should include an inat_url text field"
+      "[name='inat_import[inat_url]']", true,
+      "Form should include an inat_url field"
     )
   end
 
@@ -1255,10 +1256,11 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: "someone", consent: 1 })
 
-    url_field = css_select("input#inat_import_inat_url").first
+    url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field,
                    "inat_url field must be present in reloaded form")
-    assert_equal(url, url_field["value"],
+    value = url_field["value"].presence || url_field.text.strip
+    assert_equal(url, value,
                  "Form must be pre-populated with the original URL after " \
                  "validation failure, not blank or normalized")
   end
@@ -1549,7 +1551,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Flash should surface iNat's error text instead of the generic " \
       "'Cannot communicate' message"
     )
-    assert_select("input#inat_import_inat_url", true,
+    assert_select("#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
   end
 

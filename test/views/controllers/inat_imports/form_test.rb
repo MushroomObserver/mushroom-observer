@@ -70,10 +70,10 @@ module Views::Controllers::InatImports
     def test_url_field_name_and_help
       html = render_form(choose_method: "url")
 
-      assert_html(html, "input[name='inat_import[inat_url]']")
+      assert_html(html, "[name='inat_import[inat_url]']")
       assert_html(html, "[data-type-switch-type='url'] .help-block")
       assert_html(html,
-                  "input[name='inat_import[inat_url]']" \
+                  "[name='inat_import[inat_url]']" \
                   "[placeholder*='inaturalist.org']")
     end
 
