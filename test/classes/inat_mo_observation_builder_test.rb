@@ -228,6 +228,39 @@ class InatMoObservationBuilderTest < UnitTestCase
                  "spelling note when proposed name corrects the obs taxon")
   end
 
+  # --- preferred_rank: ICN suffix overrides iNat rank for above-genus names --
+
+  def test_preferred_rank_suffix_wins_over_inat_rank
+    # Leucocoprineae ends in -ineae (Suborder per ICN). iNat assigns "tribe";
+    # MO should create it as Suborder, which is what the suffix mandates.
+    assert_equal("Suborder",
+                 builder_for.send(:preferred_rank, "Leucocoprineae", "tribe"))
+  end
+
+  def test_preferred_rank_falls_back_for_unsuffixed_name
+    # A plain single-word name has no disambiguating suffix; keep iNat's rank.
+    assert_equal("Genus",
+                 builder_for.send(:preferred_rank, "Boletus", "genus"))
+  end
+
+  def test_preferred_rank_no_change_when_inat_and_suffix_agree
+    assert_equal("Order",
+                 builder_for.send(:preferred_rank, "Agaricales", "order"))
+    assert_equal("Family",
+                 builder_for.send(:preferred_rank, "Agaricaceae", "family"))
+  end
+
+  def test_preferred_rank_defers_to_inat_for_multiword_names
+    # Multi-word names (infrageneric/infraspecific) have the rank spelled out
+    # in the string; skip suffix guessing and keep iNat's rank.
+    assert_equal("Section",
+                 builder_for.send(:preferred_rank,
+                                  "Amanita section Validae", "section"))
+    assert_equal("Form",
+                 builder_for.send(:preferred_rank,
+                                  "Inonotus obliquus form sterilis", "form"))
+  end
+
   private
 
   def builder_for(provisional_name: nil, name_override: nil,
