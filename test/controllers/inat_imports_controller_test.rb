@@ -115,9 +115,8 @@ class InatImportsControllerTest < FunctionalTestCase
       "Consent checkbox should remain checked on reload"
     )
     assert_select(
-      "input[type=checkbox]" \
-      "[id=inat_import_all][checked]", true,
-      "Import All checkbox should remain checked on reload"
+      "input[type=radio][value=all][checked]", true,
+      "Import All radio should remain selected on reload"
     )
   end
 

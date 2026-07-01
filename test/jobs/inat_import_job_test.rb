@@ -1404,7 +1404,7 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_check_username_match(@inat_import.inat_username)
 
     job = InatImportJob.new
-    job.define_singleton_method(:import_requested_observations) do
+    job.define_singleton_method(:import_requested_observations) do |**|
       raise(Exception.new("unexpected bare exception")) # rubocop:disable Lint/RaiseException
     end
 
