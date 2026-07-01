@@ -46,7 +46,7 @@ module Views::Controllers::Sequences
       obs = @sequence.observation
       p do
         strong { "#{:OBSERVATION.l}:" }
-        plain(" ")
+        whitespace
         link_to(obs.show_link_args) do
           trusted_html(obs.name.display_name.t)
         end
@@ -57,7 +57,7 @@ module Views::Controllers::Sequences
     def render_field(label_key, value)
       p do
         strong { "#{label_key.l}:" }
-        plain(" ")
+        whitespace
         value.is_a?(::Proc) ? value.call : plain(value.to_s)
       end
     end
@@ -68,7 +68,7 @@ module Views::Controllers::Sequences
     def render_locus
       div(class: "mb-3") do
         strong { "#{:LOCUS.l}:" }
-        plain(" ")
+        whitespace
         pre(class: "d-inline text-monospace") { plain(@sequence.locus) }
       end
     end
@@ -76,7 +76,7 @@ module Views::Controllers::Sequences
     def render_bases
       p do
         strong { "#{:BASES.l}:" }
-        plain(" ")
+        whitespace
         render(::Components::Button::Clipboard.new(
                  text: @sequence.bases, name: :COPY_THIS_SEQUENCE.l,
                  class: "ml-1"
@@ -91,7 +91,7 @@ module Views::Controllers::Sequences
     def render_deposit
       p do
         strong { "#{:DEPOSIT.l}:" }
-        plain(" ")
+        whitespace
         render_archive_link
         plain(": ")
         render_accession_link
@@ -107,7 +107,7 @@ module Views::Controllers::Sequences
         render(::Components::Button.new(type: :external,
                                         name: blast_tab.title,
                                         url: blast_tab.path))
-        plain(" ")
+        whitespace
         render(::Components::Button.new(
                  type: :external,
                  name: :show_observation_mycoblast_link.l,

@@ -70,7 +70,7 @@ module Views::Controllers::Locations
       def render_north
         div(class: "text-center my-4") do
           b { "#{:NORTH.l}:" }
-          plain(" ")
+          whitespace
           plain("#{@location.north}°")
         end
       end
@@ -78,7 +78,7 @@ module Views::Controllers::Locations
       def render_south
         div(class: "text-center my-4") do
           b { "#{:SOUTH.l}:" }
-          plain(" ")
+          whitespace
           plain("#{@location.south}°")
         end
       end
@@ -88,14 +88,14 @@ module Views::Controllers::Locations
           div(class: Grid::HALF) do
             span(class: "pull-left") do
               b { "#{:WEST.l}:" }
-              plain(" ")
+              whitespace
               plain("#{@location.west}°")
             end
           end
           div(class: Grid::HALF) do
             span(class: "pull-right") do
               b { "#{:EAST.l}:" }
-              plain(" ")
+              whitespace
               plain("#{@location.east}°")
             end
           end

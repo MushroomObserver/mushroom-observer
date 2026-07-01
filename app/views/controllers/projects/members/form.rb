@@ -46,7 +46,7 @@ module Views::Controllers::Projects::Members
     def render_status_button(key)
       div(class: "form-group mt-3") do
         submit(key.l, center: true)
-        plain(" ")
+        whitespace
         trusted_html(:"#{key}_help".t)
       end
     end

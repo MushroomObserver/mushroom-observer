@@ -75,7 +75,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   def render_sibling_row(link, sibling)
     li do
       render(Components::Link::External.new(link: link))
-      plain(" ")
+      whitespace
       sibling_attribution(sibling)
     end
   end
