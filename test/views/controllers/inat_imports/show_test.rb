@@ -11,19 +11,10 @@ module Views::Controllers::InatImports
       @import = inat_imports(:katrina_inat_import)
     end
 
-    def test_results_link_navigates_to_observations
+    def test_renders_status_component
       html = render_show
 
-      # GET link — rendered as <a> by Button::Get
-      assert_html(html, "a[href*='/observations'][href*='pattern=']")
-    end
-
-    def test_cancel_button_submits_put_to_cancel_path
-      html = render_show
-
-      cancel_path = routes.inat_import_cancel_path(id: @import.id)
-      assert_html(html, "form[action='#{cancel_path}']")
-      assert_html(html, "input[name='_method'][value='put']")
+      assert_html(html, "#inat_import_#{@import.id}")
     end
 
     private

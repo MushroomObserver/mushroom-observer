@@ -68,6 +68,45 @@ module Views::Controllers::InatImports
       assert_includes(html, :ERRORS.t)
     end
 
+    def test_results_button_disabled_when_not_done
+      # katrina_inat_import is in Importing state
+      html = render_status
+
+      assert_html(html, "a[aria-disabled='true'][href*='/observations']")
+    end
+
+    def test_results_button_enabled_when_done_with_imports
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        imported_count: 5,
+        ended_at: Time.zone.now
+      )
+      html = render_status
+
+      assert_html(html, "a[href*='/observations'][href*='pattern=']")
+      assert_no_html(html, "a[aria-disabled='true']")
+    end
+
+    def test_cancel_button_present_when_importing
+      # katrina_inat_import is in Importing state
+      html = render_status
+
+      cancel_path = routes.inat_import_cancel_path(id: @import.id)
+      assert_html(html, "form[action='#{cancel_path}']")
+      assert_html(html, "input[name='_method'][value='put']")
+    end
+
+    def test_cancel_button_absent_when_done
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now
+      )
+      html = render_status
+
+      cancel_path = routes.inat_import_cancel_path(id: @import.id)
+      assert_no_html(html, "form[action='#{cancel_path}']")
+    end
+
     private
 
     def render_status

@@ -30,12 +30,53 @@ module Views::Controllers::InatImports
     def render_content
       render(::Components::ContentPadded.new do
         render_summary_paragraph
-        render_started_line
-        render_elapsed_line
-        render_remaining_line
-        render_ended_line
-        render_error_line
+        render_actions
+        render_timing_details
       end)
+    end
+
+    def render_actions
+      div(class: "mt-2 mb-2") do
+        render(Components::Button.new(
+                 type: :get,
+                 name: :results.l,
+                 target: results_observations_path,
+                 **results_disabled_attrs
+               ))
+        unless @inat_import.Done?
+          whitespace
+          render(::Components::Button.new(
+                   type: :put,
+                   name: :CANCEL.l,
+                   target: inat_import_cancel_path(id: @inat_import)
+                 ))
+        end
+      end
+    end
+
+    def results_disabled_attrs
+      return {} if results_enabled?
+
+      { class: "disabled", aria: { disabled: "true" }, tabindex: "-1" }
+    end
+
+    def results_enabled?
+      @inat_import.Done? && @inat_import.imported_count.to_i.positive?
+    end
+
+    def results_observations_path
+      observations_path(
+        pattern: "user:#{@inat_import.user.id} created:" \
+                 "#{Time.zone.today}-#{Time.zone.tomorrow}"
+      )
+    end
+
+    def render_timing_details
+      render_started_line
+      render_elapsed_line
+      render_remaining_line
+      render_ended_line
+      render_error_line
     end
 
     def render_summary_paragraph
