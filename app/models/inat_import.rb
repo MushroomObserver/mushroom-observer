@@ -166,7 +166,7 @@ class InatImport < ApplicationRecord
   def elapsed_time
     return 0 unless started_at
 
-    end_time = Done? ? ended_at : Time.zone.now
+    end_time = Done? && ended_at ? ended_at : Time.zone.now
     (end_time - started_at).to_i
   end
 

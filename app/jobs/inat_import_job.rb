@@ -111,7 +111,8 @@ class InatImportJob < ApplicationJob
     parser = build_parser(id_above)
     more_pages = import_batch(parser)
     log_unlicensed_summary
-    enqueue_continuation(parser.last_import_id) if more_pages && !canceled?
+    enqueue_continuation(parser.last_import_id) if more_pages &&
+                                                   !inat_import.reload.canceled?
   end
 
   def build_parser(id_above)

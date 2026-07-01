@@ -29,7 +29,7 @@ export default class extends Controller {
 
   connect() {
     this._elapsed = this.elapsedValue
-    this._remaining = this.remainingValue
+    this._remaining = this.hasRemainingValue ? this.remainingValue : null
     this._intervalId = null
     this._syncTimerId = null
     if (this.statusValue !== "Done") {
@@ -79,11 +79,11 @@ export default class extends Controller {
 
   _tick() {
     this._elapsed += 1
-    if (this._remaining > 0) this._remaining -= 1
+    if (this._remaining !== null && this._remaining > 0) this._remaining -= 1
 
     if (this.hasElapsedTarget)
       this.elapsedTarget.textContent = this._formatSeconds(this._elapsed)
-    if (this.hasRemainingTarget)
+    if (this.hasRemainingTarget && this._remaining !== null)
       this.remainingTarget.textContent = this._formatSeconds(this._remaining)
   }
 
