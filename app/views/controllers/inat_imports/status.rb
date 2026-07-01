@@ -77,6 +77,7 @@ module Views::Controllers::InatImports
       render_remaining_line
       render_ended_line
       render_error_line
+      render_ignored_section if show_ignored_section?
     end
 
     def render_summary_paragraph
@@ -151,6 +152,31 @@ module Views::Controllers::InatImports
       return if @inat_import.response_errors.blank?
 
       span(class: "font-weight-bold") { plain("#{:ERRORS.l}: ") }
+    end
+
+    def show_ignored_section?
+      @inat_import.Done? && @inat_import.ignored_total_count.positive?
+    end
+
+    def render_ignored_section
+      render(::Components::Alert.new(level: :info, class: "mt-3")) do
+        h5 { plain(:inat_import_tracker_ignored_heading.l) }
+        render_ignored_row(:inat_import_tracker_ignored_not_importable,
+                           @inat_import.ignored_not_importable_count)
+        render_ignored_row(:inat_import_tracker_ignored_already_imported,
+                           @inat_import.ignored_already_imported_count)
+        render_ignored_row(:inat_import_tracker_ignored_date_missing,
+                           @inat_import.ignored_date_missing_count)
+      end
+    end
+
+    def render_ignored_row(caption_key, count)
+      return unless count.to_i.positive?
+
+      div(class: "mb-1") do
+        b { plain("#{caption_key.l}: ") }
+        plain(count.to_s)
+      end
     end
 
     def render_error_alert

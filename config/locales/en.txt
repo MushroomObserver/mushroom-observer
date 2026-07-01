@@ -3285,11 +3285,19 @@
   inat_not_imported: Not Imported
 
   inat_import_confirm_title: Confirm iNat Import
-  inat_import_confirm_estimate_caption: Estimated number of imports
+  inat_import_confirm_requested_caption: Requested Observations
+  inat_import_confirm_expected_caption: Expected imports
   inat_import_confirm_unlicensed_obs_caption: Unlicensed observations
   inat_import_confirm_unlicensed_obs_note: "(your default MO license will be applied to images)"
   inat_import_confirm_unlicensed_others_note: "(will not be imported — no iNat license)"
   inat_import_confirm_time_estimate_caption: Estimated time
+  inat_import_confirm_ignored_total_caption: Total Ignored Observations
+  inat_import_confirm_ignored_overlap_note: "(following categories may overlap)"
+  inat_import_confirm_not_importable_caption: Not fungi or slime molds
+  inat_import_confirm_already_imported_caption: Already imported
+  inat_import_confirm_no_date_caption: No observation date
+  inat_import_confirm_expected_as_of: "As of [time]"
+  inat_import_confirm_expected_staleness: Actual counts may change after that time.
   inat_import_confirm_explanation: "MO will import your iNat observations that are identified as a fungus or slime mold and that were neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script. Unlicensed images will be imported with your default MO license. You can work on other things while the import is proceeding."
   inat_import_confirm_prompt: Would you like to proceed with the import?
   inat_import_confirm_proceed: Proceed
@@ -3319,6 +3327,10 @@
   inat_import_tracker_imported_count: Number Imported
   inat_import_tracker_leave_page: You may continue working in MO by opening another tab, or by leaving this page. To return to this page, you can (a) go back in your browser, or (b) click Create Observation, iNat Import; if the import is in progress, this page will be redisplayed.
   inat_import_tracker_pending: Please wait until your pending iNat Import is Done before starting a new one.
+  inat_import_tracker_ignored_heading: Ignored Observations
+  inat_import_tracker_ignored_not_importable: Not importable (not fungi or slime molds)
+  inat_import_tracker_ignored_already_imported: Already imported
+  inat_import_tracker_ignored_date_missing: No observation date
   inat_importables_explanation: "An ??importable?? observation is an iNat observation which: you created, whose iNat identity is a fungus or slime mold, and which was neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script."
 
   # observer/list_notifications
