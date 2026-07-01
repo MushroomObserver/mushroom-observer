@@ -187,7 +187,7 @@ module Views::Controllers::Projects::Violations
       # passing the event, so no preventDefault — the link's new
       # tab opens *and* the modal closes.
       capture do
-        plain(" ")
+        whitespace
         render(::Components::Button.new(
                  type: :get,
                  name: :form_violations_modal_target_location_create.l,

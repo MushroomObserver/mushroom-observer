@@ -257,7 +257,7 @@ module Views::Controllers::Occurrences
       br
       a(href: occurrence_path(obs.occurrence_id)) do
         render(::Components::Icon.new(type: :matrix))
-        plain(" ")
+        whitespace
         plain(:in_existing_occurrence.l)
       end
     end

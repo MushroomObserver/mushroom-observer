@@ -81,7 +81,7 @@ class Views::Layouts::Sidebar
             class: "lang-flag",
             alt: lang.locale
           )
-          plain(" ")
+          whitespace
           plain(lang.name)
         end
       end

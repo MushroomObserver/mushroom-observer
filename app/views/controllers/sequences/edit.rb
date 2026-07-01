@@ -28,7 +28,7 @@ module Views::Controllers::Sequences
       render(Form.new(@sequence, back: @back))
       div(class: "small") do
         span(class: "font-weight-bold") { "#{:CREATED_BY.l}:" }
-        plain(" ")
+        whitespace
         render(::Components::Link::User.new(user: @sequence.user))
       end
       render(::Views::Layouts::ObjectFooter.new(

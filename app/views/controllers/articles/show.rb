@@ -24,7 +24,7 @@ module Views::Controllers::Articles
     def render_byline
       render(::Components::ContentPadded.new) do
         plain(:BY.t)
-        plain(" ")
+        whitespace
         render(::Components::Link::User.new(user: @article.user))
         plain(", ")
         small { plain(@article.created_at.display_time) }

@@ -68,7 +68,7 @@ module Views::Controllers::Descriptions
         # trusted_html (NOT interpolated — that yields a plain String and
         # trusted_html would escape it) so entities in the source name
         # (e.g. "&" in a project title) aren't double-escaped (#4491).
-        plain(" ")
+        whitespace
         trusted_html(@description.source_name.t)
       else
         text_field(:source_name, class: "form-control")

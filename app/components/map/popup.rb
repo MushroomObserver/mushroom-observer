@@ -180,7 +180,7 @@ class Components::Map::Popup < Components::Base
 
     path_helper = :"#{type.to_s.pluralize}_path"
     render_mapset_link(:show_all, send(path_helper), bbox_query)
-    plain(" ")
+    whitespace
     render_mapset_link(:map_all, send(:"map_#{path_helper}"), bbox_query)
   end
 

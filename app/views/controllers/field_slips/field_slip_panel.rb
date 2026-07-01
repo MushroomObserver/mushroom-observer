@@ -36,7 +36,7 @@ module Views::Controllers::FieldSlips
 
     def render_project_line
       strong { plain("#{:PROJECT.t}:") }
-      plain(" ")
+      whitespace
       if @field_slip.project
         render(Components::Link::Object.new(object: @field_slip.project))
       else
@@ -103,7 +103,7 @@ module Views::Controllers::FieldSlips
     def render_creator_line
       usr = @field_slip.user
       strong { plain("#{:field_slip_creator.t}:") }
-      plain(" ")
+      whitespace
       render(Components::Link::User.new(user: usr,
                                         name: usr.legal_name))
       br
@@ -119,7 +119,7 @@ module Views::Controllers::FieldSlips
       if all_obs.any?
         render_observations_matrix(all_obs)
       else
-        plain(" ")
+        whitespace
         plain(:field_slip_no_observation.t)
       end
     end

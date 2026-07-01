@@ -67,7 +67,7 @@ module Views::Controllers::Users
       def render_primary_location
         p do
           strong { "#{:show_user_primary_location.l}:" }
-          plain(" ")
+          whitespace
           render(::Components::Link::Location.new(
                    location: @show_user.location
                  ))
@@ -84,7 +84,7 @@ module Views::Controllers::Users
       def render_personal_herbarium
         p do
           strong { "#{:show_user_personal_herbarium.l}:" }
-          plain(" ")
+          whitespace
           link_to(@show_user.personal_herbarium.show_link_args) do
             trusted_html(@show_user.personal_herbarium.name.t)
           end

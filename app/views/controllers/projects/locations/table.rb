@@ -98,7 +98,7 @@ module Views::Controllers::Projects::Locations
     def render_target_name_cell(target, collapse_id, subs)
       td(class: "align-middle") do
         render_chevron(collapse_id) if subs.any?
-        plain(" ") if subs.any?
+        whitespace if subs.any?
         link_to(
           target.display_name,
           checklist_path(project_id: @project.id,
