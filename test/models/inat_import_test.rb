@@ -8,7 +8,7 @@ class InatImportTest < ActiveSupport::TestCase
     import = inat_imports(:rolf_inat_import)
 
     assert_equal(
-      import.importables * InatImport::BASE_AVG_IMPORT_SECONDS,
+      import.total_importables * InatImport::BASE_AVG_IMPORT_SECONDS,
       import.total_expected_time,
       "If nobody has imported anhy iNat obss, " \
       "total expected time for the 1st import should be the system default"
@@ -26,7 +26,7 @@ class InatImportTest < ActiveSupport::TestCase
     import = inat_imports(:rolf_inat_import)
 
     assert_equal(
-      import.importables *
+      import.total_importables *
         InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
       import.total_expected_time
     )
@@ -35,7 +35,7 @@ class InatImportTest < ActiveSupport::TestCase
   def test_total_expected_time_user_with_prior_imports
     import = inat_imports(:roy_inat_import)
 
-    assert_equal(import.importables * import.initial_avg_import_seconds,
+    assert_equal(import.total_importables * import.initial_avg_import_seconds,
                  import.total_expected_time)
   end
 
