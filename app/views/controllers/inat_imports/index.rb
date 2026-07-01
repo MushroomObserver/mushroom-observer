@@ -20,7 +20,7 @@ module Views::Controllers::InatImports
         end
       end
       render_count_columns(tbl)
-      tbl.column(:results.l) { |imp| results_link(imp) }
+      tbl.column(:RESULTS.l) { |imp| results_link(imp) }
     end
 
     def render_count_columns(tbl)
@@ -38,7 +38,7 @@ module Views::Controllers::InatImports
     def results_link(import)
       return unless import.Done? && import.imported_count.to_i.positive?
 
-      link_to(:results.l, results_inat_import_path(import))
+      link_to(:RESULTS.l, results_inat_import_path(import))
     end
   end
 end

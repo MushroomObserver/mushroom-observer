@@ -39,7 +39,7 @@ module Views::Controllers::InatImports
       div(class: "mt-2 mb-2") do
         render(Components::Button.new(
                  type: :get,
-                 name: :results.l,
+                 name: :RESULTS.l,
                  target: results_path,
                  **results_disabled_attrs
                ))
