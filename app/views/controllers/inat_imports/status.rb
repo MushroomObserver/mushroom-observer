@@ -134,7 +134,7 @@ module Views::Controllers::InatImports
 
     def alert_message
       return :inat_import_tracker_leave_page.l unless @inat_import.Done?
-      if @inat_import.imported_count.to_i.zero?
+      if @inat_import.imported_count.zero?
         return :inat_import_nothing_imported.l
       end
       return :inat_import_tracker_done_with_errors.l if errors?
@@ -145,7 +145,7 @@ module Views::Controllers::InatImports
     def alert_level
       return :info unless @inat_import.Done?
       return :warning if errors?
-      return :success if @inat_import.imported_count.to_i.positive?
+      return :success if @inat_import.imported_count.positive?
 
       :info
     end
