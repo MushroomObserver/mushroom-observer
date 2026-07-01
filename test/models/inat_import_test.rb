@@ -172,4 +172,97 @@ class InatImportTest < ActiveSupport::TestCase
     assert_match(/Test error message/, import.response_errors,
                  "Error message should be added to response_errors")
   end
+
+  def test_new_instance_initializes_id_arrays
+    import = InatImport.new(user: users(:rolf))
+
+    assert_equal([], import.date_missing_inat_ids)
+    assert_equal([], import.license_added_inat_ids)
+  end
+
+  def test_add_ignored_obs_date_missing_increments_count_and_appends_id
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_ignored_obs(:date_missing, inat_id: 42)
+    import.reload
+
+    assert_equal(1, import.ignored_date_missing_count)
+    assert_equal([42], import.date_missing_inat_ids)
+  end
+
+  def test_add_ignored_obs_date_missing_nil_id_still_increments
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_ignored_obs(:date_missing, inat_id: nil)
+    import.reload
+
+    assert_equal(1, import.ignored_date_missing_count)
+    assert_equal([], import.date_missing_inat_ids)
+  end
+
+  def test_add_ignored_obs_date_missing_accumulates_multiple_ids
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_ignored_obs(:date_missing, inat_id: 10)
+    import.add_ignored_obs(:date_missing, inat_id: 20)
+    import.reload
+
+    assert_equal(2, import.ignored_date_missing_count)
+    assert_equal([10, 20], import.date_missing_inat_ids)
+  end
+
+  def test_add_ignored_obs_unknown_reason_raises
+    import = inat_imports(:rolf_inat_import)
+
+    assert_raises(ArgumentError) do
+      import.add_ignored_obs(:bogus_reason)
+    end
+  end
+
+  def test_add_license_added_obs_appends_id
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_license_added_obs(inat_id: 99)
+    import.reload
+
+    assert_equal([99], import.license_added_inat_ids)
+  end
+
+  def test_add_license_added_obs_accumulates_multiple_ids
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_license_added_obs(inat_id: 11)
+    import.add_license_added_obs(inat_id: 22)
+    import.reload
+
+    assert_equal([11, 22], import.license_added_inat_ids)
+  end
+
+  def test_reached_import_cap_false_below_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE - 1)
+
+    assert_not(import.reached_import_cap?)
+  end
+
+  def test_reached_import_cap_true_at_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE)
+
+    assert(import.reached_import_cap?)
+  end
+
+  def test_reached_import_cap_true_above_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE + 1)
+
+    assert(import.reached_import_cap?)
+  end
+
+  def test_reached_import_cap_false_when_nil
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: nil)
+
+    assert_not(import.reached_import_cap?)
+  end
 end

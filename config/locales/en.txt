@@ -3332,6 +3332,10 @@
   inat_import_tracker_ignored_not_importable: Not importable (not fungi or slime molds)
   inat_import_tracker_ignored_already_imported: Already imported
   inat_import_tracker_ignored_date_missing: No observation date
+  inat_import_tracker_date_missing_reimport: "Re-import [count] observation(s) after adding dates on iNat"
+  inat_import_tracker_license_added_heading: Observations Imported with MO Default License
+  inat_import_tracker_license_added_note: "[count] observation(s) had no iNat license; your default MO license was applied."
+  inat_import_tracker_license_added_reimport: "Re-import [count] observation(s) after adding a license on iNat"
   inat_importables_explanation: "An ??importable?? observation is an iNat observation which: you created, whose iNat identity is a fungus or slime mold, and which was neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script."
 
   # observer/list_notifications

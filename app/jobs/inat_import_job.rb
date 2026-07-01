@@ -165,7 +165,8 @@ class InatImportJob < ApplicationJob
   def parsing_should_stop?(parsed_page)
     parsed_page.nil? ||
       parsed_page["total_results"].zero? ||
-      inat_import.reload.canceled?
+      inat_import.reload.canceled? ||
+      inat_import.reached_import_cap?
   end
 
   def import_parsed_page_of_observations(parsed_page)

@@ -56,7 +56,7 @@ class Inat
       log_with_response_error(
         "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
       )
-      inat_import.add_ignored_obs(:date_missing)
+      inat_import.add_ignored_obs(:date_missing, inat_id: @inat_obs[:id])
       true
     end
 
@@ -119,6 +119,9 @@ class Inat
     def accumulate_counts(builder)
       @unlicensed_obs_count += builder.unlicensed_obs
       @skipped_images_count += builder.skipped_images
+      return unless builder.unlicensed_obs == 1
+
+      inat_import.add_license_added_obs(inat_id: @inat_obs[:id])
     end
 
     def finalize_import

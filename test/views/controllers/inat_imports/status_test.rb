@@ -109,6 +109,63 @@ module Views::Controllers::InatImports
       assert_no_html(html, "form[action='#{cancel_path}']")
     end
 
+    def test_date_missing_row_absent_when_no_date_missing_skips
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        ignored_not_importable_count: 1
+      )
+      html = render_status
+
+      assert_no_html(
+        html,
+        "*",
+        text: :inat_import_tracker_ignored_date_missing.l.as_displayed
+      )
+    end
+
+    def test_date_missing_row_shown_with_count_and_reimport_link
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        ignored_date_missing_count: 2
+      )
+      @import.update!(date_missing_inat_ids: [101, 202])
+      html = render_status
+
+      reimport_path = routes.new_inat_import_path(inat_ids: "101,202")
+      assert_html(html, "a[href='#{reimport_path}']")
+    end
+
+    def test_license_added_section_absent_when_no_license_added_obs
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: 3
+      )
+      html = render_status
+
+      assert_no_html(
+        html,
+        "*",
+        text: :inat_import_tracker_license_added_heading.l.as_displayed
+      )
+    end
+
+    def test_license_added_section_shown_with_reimport_link
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: 2,
+        ignored_not_importable_count: 1
+      )
+      @import.update!(license_added_inat_ids: [55, 66])
+      html = render_status
+
+      reimport_path = routes.new_inat_import_path(inat_ids: "55,66")
+      assert_html(html, "a[href='#{reimport_path}']")
+    end
+
     private
 
     def render_status

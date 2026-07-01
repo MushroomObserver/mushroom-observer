@@ -63,6 +63,8 @@ class InatImport < ApplicationRecord
   has_many :observations, dependent: :nullify
 
   serialize :log, type: Array, coder: YAML
+  serialize :date_missing_inat_ids, coder: JSON
+  serialize :license_added_inat_ids, coder: JSON
 
   after_update_commit lambda { |inat_import|
     html = ApplicationController.renderer.render(
@@ -79,6 +81,9 @@ class InatImport < ApplicationRecord
   # Expected average import time if no user has ever imported anything
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
+
+  # Hard cap on observations imported per InatImport run.
+  MAX_IMPORTABLE = 2_500
 
   # An import stuck in Importing state longer than this is assumed to have
   # crashed. Must match the schedule in config/recurring.yml.
@@ -114,13 +119,22 @@ class InatImport < ApplicationRecord
     Importing? && ended_at.nil? && updated_at < STUCK_THRESHOLD.ago
   end
 
-  def add_ignored_obs(reason)
+  def add_ignored_obs(reason, inat_id: nil)
     case reason
-    when :not_importable    then increment!(:ignored_not_importable_count)
-    when :date_missing      then increment!(:ignored_date_missing_count)
-    when :already_imported  then increment!(:ignored_already_imported_count)
+    when :not_importable   then increment!(:ignored_not_importable_count)
+    when :date_missing     then append_date_missing(inat_id)
+    when :already_imported then increment!(:ignored_already_imported_count)
     else raise(ArgumentError.new("Unknown ignored reason: #{reason.inspect}"))
     end
+  end
+
+  def add_license_added_obs(inat_id:)
+    reload
+    update!(license_added_inat_ids: license_added_inat_ids + [inat_id])
+  end
+
+  def reached_import_cap?
+    imported_count.to_i >= MAX_IMPORTABLE
   end
 
   def ignored_total_count
@@ -215,5 +229,14 @@ class InatImport < ApplicationRecord
 
   def ensure_response_errors_initialized
     self.response_errors ||= ""
+    self.date_missing_inat_ids ||= []
+    self.license_added_inat_ids ||= []
+  end
+
+  def append_date_missing(inat_id)
+    reload
+    self.ignored_date_missing_count = ignored_date_missing_count.to_i + 1
+    self.date_missing_inat_ids = date_missing_inat_ids + [inat_id].compact
+    save!
   end
 end
