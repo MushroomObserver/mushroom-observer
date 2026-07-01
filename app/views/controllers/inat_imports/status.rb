@@ -65,6 +65,8 @@ module Views::Controllers::InatImports
     end
 
     def results_observations_path
+      return "#" unless @inat_import.user
+
       observations_path(
         pattern: "user:#{@inat_import.user.id} created:" \
                  "#{Time.zone.today}-#{Time.zone.tomorrow}"
