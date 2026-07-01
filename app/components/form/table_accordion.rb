@@ -35,17 +35,15 @@ class Components::Form::TableAccordion < Components::Base
   slot :edit
 
   def view_template
-    div(class: "panel-group border-none mb-0", id: @id) do
-      div(class: "panel border-none bg-none") do
-        render(::Components::CollapseDiv.new(
-                 id: @view_id, expanded: true, panel: true,
-                 html_class: "no-transition"
-               )) { render(view_slot) if view_slot? }
-        render(::Components::CollapseDiv.new(
-                 id: @edit_id, panel: true,
-                 html_class: "no-transition"
-               )) { render(edit_slot) if edit_slot? }
-      end
+    div(class: "mb-0", id: @id) do
+      render(::Components::CollapseDiv.new(
+               id: @view_id, expanded: true, panel: true,
+               html_class: "no-transition"
+             )) { render(view_slot) if view_slot? }
+      render(::Components::CollapseDiv.new(
+               id: @edit_id, panel: true,
+               html_class: "no-transition"
+             )) { render(edit_slot) if edit_slot? }
     end
   end
 end
