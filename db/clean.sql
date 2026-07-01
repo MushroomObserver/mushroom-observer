@@ -1,6 +1,6 @@
 use mo_development;
 
-update api_keys set `key` = SUBSTR(SHA2(CONCAT(id, UUID()), 256), 1, 32);
+update api_keys set `key` = 'cahja4s81achfojjlqzgkt16qgkl2hira';
 
 update donations set email = 'webmaster@mushroomobserver.org';
 update donations set who = 'anonymous' where anonymous = true;

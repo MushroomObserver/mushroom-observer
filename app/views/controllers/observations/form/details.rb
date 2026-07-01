@@ -57,8 +57,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              wrapper_options: {
                label: "#{:COLLECTOR.l}:",
                wrap_class: "mb-3",
-               help: :form_observations_collector_help.t,
-               help_collapse: true
+               help: :form_observations_collector_help.t
              },
              value: @observation.collector,
              hidden_name: :collector_user_id,
@@ -139,8 +138,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
       :is_collection_location,
       label: :form_observations_is_collection_location.l,
       wrap_class: "ml-5 mb-5",
-      help: :form_observations_is_collection_location_help.t,
-      help_collapse: true
+      help: :form_observations_is_collection_location_help.t
     )
   end
 
@@ -150,18 +148,22 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_geolocation_toggle
-    render(Components::Form::CheckboxCollapse.new(
-             form: @form,
-             field: :has_geolocation,
-             target_id: "observation_geolocation",
-             label: "#{:GEOLOCATION.l}:",
-             expanded: @observation.lat.present?,
-             attributes: {
-               help: :form_observations_lat_long_help.t,
-               help_collapse: true,
-               data: { form_exif_target: "collapseCheck" }
-             }
-           ))
+    @form.checkbox_field(
+      :has_geolocation,
+      label: "#{:GEOLOCATION.l}:",
+      help: :form_observations_lat_long_help.t,
+      data: geolocation_toggle_data,
+      aria: { controls: "observation_geolocation",
+              expanded: @observation.lat.present? }
+    )
+  end
+
+  def geolocation_toggle_data
+    {
+      toggle: "collapse",
+      target: "#observation_geolocation",
+      form_exif_target: "collapseCheck"
+    }
   end
 
   def render_geolocation_fields

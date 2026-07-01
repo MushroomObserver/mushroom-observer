@@ -38,12 +38,7 @@ class Inat
       end
 
       def upload_inat_image(params)
-        api = API2.execute(params)
-        if api.errors.any?
-          raise("Image upload failed: #{api.errors.join(", ")}")
-        end
-
-        api.results.first
+        API2.execute(params).results.first
       end
 
       # Recorded directly on the image so it survives regardless of the

@@ -74,7 +74,6 @@ is_exempt_file() {
     app/components/form/location_map.rb|\
     app/components/form/table_accordion.rb|\
     app/components/application_form/input_group_addon.rb|\
-    app/components/application_form/radio_field.rb|\
     app/components/carousel/controls.rb|\
     app/views/controllers/observations/namings/reasons_fields.rb) return 0 ;;
     *) return 1 ;;
@@ -123,7 +122,6 @@ case "$TOOL" in
       ':(exclude)app/components/form/location_map.rb' \
       ':(exclude)app/components/form/table_accordion.rb' \
       ':(exclude)app/components/application_form/input_group_addon.rb' \
-      ':(exclude)app/components/application_form/radio_field.rb' \
       ':(exclude)app/components/carousel/controls.rb' \
       ':(exclude)app/views/controllers/observations/namings/reasons_fields.rb' \
       | grep '^+[^+]' \
@@ -264,13 +262,6 @@ check \
   'target:[[:space:]]*["\x27]_blank["\x27]' \
   'button_target:'
 
-# radio wrapper div — use radio_field helper instead of hand-rolling div.radio
-check \
-  'raw Bootstrap radio wrapper class' \
-  'radio_field(:field, [value, label], ...)' \
-  'class:[[:space:]]*["'"'"'][^"'"'"']*\bradio\b' \
-  ''
-
 # data-toggle="collapse" — use Link::CollapseToggle instead
 # (exempt: collapse_toggle.rb itself; location_map.rb uses Button::CollapseToggle
 #  via type: kwarg; reasons_fields.rb and form/details.rb checkbox-driven)
@@ -310,7 +301,6 @@ Quick reference:
   table            → Components::Table.new(collection) do |t| … end
   panel            → Components::Panel.new
   target="_blank"  → Components::Link::External.new("text", url)
-  radio (div)      → radio_field(:field, [value, label], ...)
 FOOTER
 
 exit 2

@@ -9,6 +9,7 @@ module Views::Controllers::InatImports
       @user = users(:katrina)
       controller.instance_variable_set(:@user, @user)
       @import = inat_imports(:katrina_inat_import)
+      @tracker = inat_import_job_trackers(:katrina_tracker)
     end
 
     def test_results_link_navigates_to_observations
@@ -29,7 +30,11 @@ module Views::Controllers::InatImports
     private
 
     def render_show
-      render(Show.new(inat_import: @import, user: @user))
+      render(Show.new(
+               tracker: @tracker,
+               inat_import: @import,
+               user: @user
+             ))
     end
   end
 end

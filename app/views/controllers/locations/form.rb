@@ -77,7 +77,6 @@ module Views::Controllers::Locations
       text_field(:display_name, value: @display_name, label: "#{:WHERE.t}:",
                                 data: display_name_data,
                                 help: :form_locations_help.t,
-                                help_collapse: true,
                                 button: :form_locations_find_on_map.l,
                                 button_data: { map_target: "showBoxBtn",
                                                action: "map#showBox" })
@@ -112,15 +111,13 @@ module Views::Controllers::Locations
         p { :form_locations_notes_help.t }
         p { trusted_html(:shared_textile_help.l) }
       end
-      textarea_field(:notes, label: "#{:NOTES.t}:", help: notes_help,
-                             help_collapse: true)
+      textarea_field(:notes, label: "#{:NOTES.t}:", help: notes_help)
     end
 
     def render_hidden_checkbox
       checkbox_field(:hidden, label: :form_locations_hidden.t,
                               wrap_class: "mt-3 mr-3",
-                              help: :form_locations_hidden_doc.t,
-                              help_collapse: true)
+                              help: :form_locations_hidden_doc.t)
     end
 
     def render_map

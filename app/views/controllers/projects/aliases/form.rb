@@ -111,7 +111,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def panel_class(type)
-      current_type == type ? "collapse in" : "collapse"
+      current_type == type ? "" : "d-none"
     end
 
     def current_type

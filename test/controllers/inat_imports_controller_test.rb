@@ -20,10 +20,11 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_show
     import = inat_imports(:rolf_inat_import)
+    tracker = InatImportJobTracker.create(inat_import: import.id)
 
     login
 
-    get(:show, params: { id: import.id })
+    get(:show, params: { id: import.id, tracker_id: tracker.id })
 
     assert_response(:success)
   end
@@ -47,6 +48,7 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_new_inat_import_already_importing
     user = users(:katrina)
     import = inat_imports(:katrina_inat_import)
+    tracker = inat_import_job_trackers(:katrina_tracker)
 
     login(user.login)
     get(:new)
@@ -54,7 +56,9 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_warning(
       "Should flash warning if user starts iNat import while another is running"
     )
-    assert_redirected_to(inat_import_path(import))
+    assert_redirected_to(
+      inat_import_path(import, params: { tracker_id: tracker.id })
+    )
   end
 
   def test_new_inat_import_inat_username_prefilled
@@ -973,7 +977,10 @@ class InatImportsControllerTest < FunctionalTestCase
       "When job starts, elapsed time for 1st import should be <= 0.5 seconds"
     )
 
-    assert_redirected_to(inat_import_path(inat_import))
+    tracker = InatImportJobTracker.where(inat_import: inat_import.id).last
+    assert_redirected_to(
+      inat_import_path(inat_import, params: { tracker_id: tracker.id })
+    )
   end
 
   def test_inat_username_unchanged_if_authorization_denied
@@ -1003,9 +1010,10 @@ class InatImportsControllerTest < FunctionalTestCase
            "Test needs a Import fixture with a uncancelled, pending Job")
 
     login
-    put(:cancel, params: { id: import.id })
+    get(:cancel, params: { id: import.id })
 
-    assert_redirected_to(inat_import_path(import))
+    assert_response(:success)
+    assert_select("[data-controller='inat-import-job']")
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
   end
@@ -1498,6 +1506,17 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_select("input#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
+  end
+
+  # URI.parse raises URI::InvalidURIError on a malformed URL (e.g. a space);
+  # taxon_ids_from_url rescues it and returns no ids rather than 500ing.
+  def test_taxon_ids_from_url_handles_malformed_url
+    malformed = "http://foo bar"
+    # Guard: confirm the input really triggers the rescue, so this test
+    # keeps covering the rescue branch (not the empty-query happy path,
+    # which also returns []) across Ruby/URI changes.
+    assert_raises(URI::InvalidURIError) { URI.parse(malformed) }
+    assert_equal([], @controller.send(:taxon_ids_from_url, malformed))
   end
 
   ########## Utilities
