@@ -28,6 +28,11 @@
             "type": "command",
             "command": "test -x .claude/hooks/block_raw_component_classes.sh && exec .claude/hooks/block_raw_component_classes.sh || exit 0",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_index_active_params.sh && exec .claude/hooks/block_index_active_params.sh || exit 0",
+            "timeout": 10
           }
         ]
       },
@@ -53,6 +58,11 @@
             "type": "command",
             "command": "test -x .claude/hooks/block_raw_component_classes.sh && exec .claude/hooks/block_raw_component_classes.sh || exit 0",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_index_active_params.sh && exec .claude/hooks/block_index_active_params.sh || exit 0",
+            "timeout": 10
           }
         ]
       }
