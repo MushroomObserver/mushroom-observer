@@ -1553,6 +1553,25 @@ class InatImportsControllerTest < FunctionalTestCase
                   "Form should be reloaded, not the confirm page")
   end
 
+  def test_estimate_422_with_non_json_body_falls_back_to_exception_message
+    user = users(:rolf)
+    url = "#{INAT_API_OBS_URL}?place_id=678910"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 422,
+                body: "Internal Server Error",
+                headers: { "Content-Type" => "text/plain" })
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    # inat_error_text rescues the JSON::ParserError and falls back to
+    # exception.message ("422 Unprocessable Entity").
+    assert_flash_text(/422 Unprocessable Entity/)
+  end
+
   # URI.parse raises URI::InvalidURIError on a malformed URL (e.g. a space);
   # taxon_ids_from_url rescues it and returns no ids rather than 500ing.
   def test_taxon_ids_from_url_handles_malformed_url
