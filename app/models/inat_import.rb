@@ -118,6 +118,7 @@ class InatImport < ApplicationRecord
     when :not_importable    then increment!(:ignored_not_importable_count)
     when :date_missing      then increment!(:ignored_date_missing_count)
     when :already_imported  then increment!(:ignored_already_imported_count)
+    else raise(ArgumentError.new("Unknown ignored reason: #{reason.inspect}"))
     end
   end
 

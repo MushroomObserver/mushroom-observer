@@ -104,7 +104,10 @@ class InatImportJob < ApplicationJob
 
   def import_requested_observations(id_above:, continuation:)
     unless continuation
-      inat_import.update(state: "Importing", started_at: Time.zone.now)
+      inat_import.update(state: "Importing", started_at: Time.zone.now,
+                         ignored_not_importable_count: 0,
+                         ignored_date_missing_count: 0,
+                         ignored_already_imported_count: 0)
       return log("No observations requested") unless observations_requested?
     end
 

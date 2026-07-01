@@ -59,7 +59,6 @@ class Inat::ConfirmURLBuilder
     args = Rack::Utils.parse_query(query_str.to_s)
     args["iconic_taxa"] ||= "Fungi,Protozoa" unless args.key?("taxon_id")
     args["without_field"] = BASE_FILTER_PARAMS[:without_field]
-    args["d1"] ||= EARLIEST_DATE_FILTER
     filter = LICENSED_FILTER.stringify_keys.transform_values(&:to_s)
     args.merge!(filter) if import_others?
     args

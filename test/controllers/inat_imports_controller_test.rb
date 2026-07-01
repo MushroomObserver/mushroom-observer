@@ -653,13 +653,13 @@ class InatImportsControllerTest < FunctionalTestCase
     user = users(:rolf)
     inat_ids = "12345"
 
-    # Total query (no licensed filter) returns 1 (the unlicensed obs)
+    # All queries return 1 (1 obs in scope, which is unlicensed)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
-    # Licensed query returns 0 (unlicensed obs excluded)
+    # Unlicensed query (own import uses licensed=false) also returns 1
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
-      to_return(status: 200, body: { total_results: 0 }.to_json)
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 1 }.to_json)
 
     login(user.login)
     post(:create,

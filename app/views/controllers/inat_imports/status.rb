@@ -77,7 +77,7 @@ module Views::Controllers::InatImports
       render_remaining_line
       render_ended_line
       render_error_line
-      render_ignored_section if show_ignored_section?
+      render_ignored_section
     end
 
     def render_summary_paragraph
@@ -159,7 +159,9 @@ module Views::Controllers::InatImports
     end
 
     def render_ignored_section
-      render(::Components::Alert.new(level: :info, class: "mt-3")) do
+      return unless show_ignored_section?
+
+      Alert(level: :info, class: "mt-3") do
         h5 { plain(:inat_import_tracker_ignored_heading.l) }
         render_ignored_row(:inat_import_tracker_ignored_not_importable,
                            @inat_import.ignored_not_importable_count)
@@ -183,20 +185,16 @@ module Views::Controllers::InatImports
       errors = @inat_import.response_errors.to_s.split("\n")
       return unless errors.any?
 
-      render(::Components::Alert.new(level: :warning) do
+      Alert(level: :warning) do
         errors.each_with_index do |error, i|
           br if i.positive?
           plain(error)
         end
-      end)
+      end
     end
 
     def render_alert
-      render(::Components::Alert.new(
-               message: alert_message,
-               level: alert_level,
-               class: "mt-3"
-             ))
+      Alert(message: alert_message, level: alert_level, class: "mt-3")
     end
 
     def alert_message
