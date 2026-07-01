@@ -85,11 +85,12 @@ module Views::Controllers::InatImports
             type_switch_target: "panel",
             type_switch_type: "url"
           }) do
-        text_field(:inat_url, label: false,
-                              wrap_class: "ml-4",
-                              help: :inat_url_hint.l,
-                              placeholder: "https://www.inaturalist.org" \
-                                           "/observations?taxon_id=12345")
+        textarea_field(:inat_url, label: false,
+                                  wrap_class: "ml-4",
+                                  rows: 2,
+                                  help: :inat_url_hint.l,
+                                  placeholder: "https://www.inaturalist.org" \
+                                              "/observations?taxon_id=12345")
       end
     end
 

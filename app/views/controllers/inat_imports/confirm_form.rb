@@ -14,7 +14,7 @@ module Views::Controllers::InatImports
       @after_taxon = breakdown[:after_taxon]
       @estimate_with_date = breakdown[:estimate_with_date]
       @estimated_at = Time.current
-      @urls = ::Inat::ConfirmURLBuilder.new(model, estimated_at: @estimated_at)
+      @urls = ::Inat::ConfirmURLBuilder.new(model)
       super(model, **)
     end
 

@@ -7,7 +7,6 @@ class Inat
     SITE_URL = "https://www.inaturalist.org/observations"
 
     def setup
-      @estimated_at = Time.zone.now
       @username_model = FormObject::InatImportConfirm.new(
         inat_username: "testuser"
       )
@@ -47,22 +46,52 @@ class Inat
       assert_no_match(/taxon_id=47170/, url)
     end
 
-    # Covers the rescue ArgumentError branch in
-    # date_filtered_before_estimated_at? (lines 83–84): an unparseable date
-    # string returns false without raising.
-    def test_stable_result_set_returns_false_for_invalid_date_in_url
+    # Regression: a URL with leading/trailing whitespace must not be
+    # re-encoded as a query param value (producing "?+++https%3A%2F%2F...").
+    def test_requested_obs_url_strips_leading_whitespace_from_url
       model = FormObject::InatImportConfirm.new(
-        inat_url: "#{SITE_URL}?user_id=testuser&d2=not-a-date"
+        original_inat_url: "   #{SITE_URL}?user_id=testuser"
+      )
+      builder = build(model)
+
+      url = builder.requested_obs_url
+      assert_match(%r{\Ahttps://www\.inaturalist\.org/observations\?}, url)
+      assert_match(/user_id=testuser/, url)
+    end
+
+    # A URL with no `id=` param is not stable — even a past date range can
+    # gain new observations or reidentifications.
+    def test_stable_result_set_returns_false_for_date_filtered_url
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?user_id=testuser&d1=2026-05-01&d2=2026-05-31"
       )
       builder = build(model)
 
       assert_not(builder.stable_result_set?)
     end
 
+    def test_stable_result_set_returns_false_for_username_url
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?user_id=testuser"
+      )
+      builder = build(model)
+
+      assert_not(builder.stable_result_set?)
+    end
+
+    def test_stable_result_set_returns_true_for_id_url
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?id=123,456"
+      )
+      builder = build(model)
+
+      assert(builder.stable_result_set?)
+    end
+
     private
 
     def build(model)
-      Inat::ConfirmURLBuilder.new(model, estimated_at: @estimated_at)
+      Inat::ConfirmURLBuilder.new(model)
     end
   end
 end

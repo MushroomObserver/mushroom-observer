@@ -3,9 +3,8 @@
 class Inat::ConfirmURLBuilder
   include Inat::Constants
 
-  def initialize(model, estimated_at:)
+  def initialize(model)
     @model = model
-    @estimated_at = estimated_at
   end
 
   def requested_obs_url
@@ -40,8 +39,7 @@ class Inat::ConfirmURLBuilder
     return false unless (query = requested_obs_query)
 
     qs = query.start_with?("http") ? query.split("?", 2)[1].to_s : query
-    args = Rack::Utils.parse_query(qs)
-    args["id"].present? || date_filtered_before_estimated_at?(args)
+    Rack::Utils.parse_query(qs)["id"].present?
   end
 
   private
@@ -49,8 +47,8 @@ class Inat::ConfirmURLBuilder
   def requested_obs_query
     m = @model
     return "id=#{m.inat_ids}" if m.inat_ids.present?
-    return m.original_inat_url if m.original_inat_url.present?
-    return m.inat_url if m.inat_url.present?
+    return m.original_inat_url.strip if m.original_inat_url.present?
+    return m.inat_url.strip if m.inat_url.present?
 
     "user_id=#{m.inat_username}" if m.inat_username.present?
   end
@@ -74,23 +72,6 @@ class Inat::ConfirmURLBuilder
   def normalize_inat_ui_url(url)
     uri, query_str = url.split("?", 2)
     "#{uri}?#{translate_api_to_ui_params(query_str.to_s)}"
-  end
-
-  def date_filtered_before_estimated_at?(args)
-    date = d2_date(args) || year_end_date(args)
-    date && date < @estimated_at.to_date
-  rescue ArgumentError
-    false
-  end
-
-  def d2_date(args)
-    Date.parse(args["d2"]) if args["d2"].present?
-  end
-
-  def year_end_date(args)
-    return unless (year = args["year"]&.to_i)
-
-    Date.new(year, args["month"]&.to_i || 12, args["day"]&.to_i || -1)
   end
 
   def import_others?

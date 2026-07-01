@@ -49,6 +49,16 @@ module Views::Controllers::InatImports
       assert_html(html, ".staleness-note")
     end
 
+    def test_staleness_note_present_for_date_filtered_url
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "https://www.inaturalist.org/observations" \
+                  "?user_id=jdcohenesq&d1=2026-05-01&d2=2026-05-31"
+      )
+      html = render_form(form_model: model)
+
+      assert_html(html, ".staleness-note")
+    end
+
     def test_requested_count_absent_when_not_provided
       html = render_form
 
