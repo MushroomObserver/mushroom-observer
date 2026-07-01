@@ -3243,11 +3243,13 @@
   list_merge_options_title: Location Matches for [where]
 
   # observation/inat_imports
-  inat_import_create_title: Import from iNat
+  inat_import_create_title: Import observations from iNaturalist
+  inat_what_to_import: What to import
   inat_choose_observations: "Inat Observations to Import:"
-  inat_import_list: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
-  inat_import_all: Import all my iNat observations instead of a list
-  inat_import_others: Import other users' observations
+  inat_import_list: A list of observations
+  inat_import_list_help: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
+  inat_import_all: All my iNat observations
+  inat_import_others: "Admin: This is another user's iNat username"
   inat_skip_writeback: "Skip writing the MO link back to iNaturalist (admin)"
   inat_import_consent: "(Required) I consent to importing my iNaturalist observations into Mushroom Observer, including any unlicensed observations and images, with my default MO license applied to any unlicensed images."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
@@ -3256,8 +3258,8 @@
   inat_missing_username: Missing your iNat Username
   inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
-  inat_url_label: "iNat observations URL"
-  inat_url_hint: "Paste an iNat filtered observation search URL or API URL to limit which observations to import (e.g. by taxon or place). Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
+  inat_url_label: Observations from an iNat search URL
+  inat_url_hint: "On iNat, filter observations by taxon, place, date, quality grade, etc., then copy the URL from your browser and paste it here. Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
   inat_invalid_url: "URL must be a filtered iNat observations URL or iNat API observation search URL"
   inat_url_no_valid_filter_params: "URL has no valid filter parameters — please add at least one (e.g. place_id, quality_grade)"
   inat_url_params_ignored: "MO ignores these parameters; they either interfere with those used internally by MO or have no effect: [params]"
@@ -3294,7 +3296,12 @@
   inat_import_confirm_go_back: Go Back
 
   inat_details_heading: Details/Caveats
-  inat_details_list: "* Excludes observations previously imported from/exported to iNat.\n* Includes all your observations (any unlicensed images will use your default MO license).\n* Includes only observations identified as fungi or mycetozoa.\n* MO lists most iNat data and/or maps it to analogous MO fields.\n* MO hides coordinates from the public if iNat obscured them.\n* The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
+  inat_details_excludes: Excludes observations previously imported from/exported to iNat.
+  inat_details_includes_all: "Includes all your observations (any unlicensed images will use your default MO license)."
+  inat_details_fungi_only: Includes only observations identified as fungi or mycetozoa.
+  inat_details_data_fields: MO lists most iNat data and/or maps it to analogous MO fields.
+  inat_details_coordinates: MO hides coordinates from the public if iNat obscured them.
+  inat_details_location_name: "The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
   inat_unlicensed_obs_summary: "[count] observation(s) had no iNat license; images were imported with your default MO license."
   inat_skipped_images_summary: "[count] image(s) skipped: no iNat license."
 

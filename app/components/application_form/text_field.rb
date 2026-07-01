@@ -24,8 +24,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
-      # Hidden fields and label:false don't get wrappers
-      if attributes[:type] == "hidden" || wrapper_options[:label] == false
+      if bare_input?
         input(**attributes, class: class_names(attributes[:class],
                                                "form-control"))
       else
@@ -45,6 +44,11 @@ class Components::ApplicationForm < Superform::Rails::Form
         render_help_after_field
         render(append_slot) if append_slot
       end
+    end
+
+    def bare_input?
+      attributes[:type] == "hidden" ||
+        (wrapper_options[:label] == false && !help_slot)
     end
 
     def show_label?
