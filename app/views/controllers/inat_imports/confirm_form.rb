@@ -40,6 +40,7 @@ module Views::Controllers::InatImports
           end
           render_ignored_section
           count_expected_line
+          render_nothing_to_import_notice
           br
           unlicensed_obs_line
           br
@@ -157,6 +158,12 @@ module Views::Controllers::InatImports
       end
     end
 
+    def render_nothing_to_import_notice
+      return unless @expected&.zero?
+
+      p { plain(:inat_import_confirm_nothing_to_import.l) }
+    end
+
     def render_timestamp_note
       return unless @expected
 
@@ -172,16 +179,28 @@ module Views::Controllers::InatImports
     def unlicensed_obs_line
       b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
       plain(": ")
-      span(id: "unlicensed_obs_count") { plain(@unlicensed_obs.to_s) }
+      span(id: "unlicensed_obs_count") { render_unlicensed_count }
       return unless @unlicensed_obs.to_i.positive?
 
-      plain(" ")
-      note = if import_others?
-               :inat_import_confirm_unlicensed_others_note
-             else
-               :inat_import_confirm_unlicensed_obs_note
-             end
-      plain(note.l)
+      whitespace
+      plain(unlicensed_note_key.l)
+    end
+
+    def render_unlicensed_count
+      url = unlicensed_obs_url
+      if url
+        render(Components::Link::External.new(@unlicensed_obs.to_s, url))
+      else
+        plain(@unlicensed_obs.to_s)
+      end
+    end
+
+    def unlicensed_note_key
+      if import_others?
+        :inat_import_confirm_unlicensed_others_note
+      else
+        :inat_import_confirm_unlicensed_obs_note
+      end
     end
 
     def time_estimate_line

@@ -3289,6 +3289,7 @@
   inat_import_confirm_expected_caption: Expected imports
   inat_import_confirm_expected_as_of: "As of [time]"
   inat_import_confirm_expected_staleness: Actual counts may change after that time.
+  inat_import_confirm_nothing_to_import: No new observations are available to import.
   inat_import_confirm_ignored_total_caption: Total Ignored Observations
   inat_import_confirm_ignored_overlap_note: "(following categories may overlap)"
   inat_import_confirm_not_importable_caption: Not fungi or slime molds

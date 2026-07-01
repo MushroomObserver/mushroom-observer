@@ -78,21 +78,23 @@ export default class extends Controller {
   }
 
   disablePanelInputs(panel) {
-    panel.querySelectorAll("input[type='text'], input[type='hidden']")
-      .forEach(input => {
-        if (input.name && input.name.includes("[")) {
-          input.disabled = true
-          input.value = ""
-        }
-      })
+    panel.querySelectorAll(
+      "input[type='text'], input[type='hidden'], textarea, select"
+    ).forEach(input => {
+      if (input.name && input.name.includes("[")) {
+        input.disabled = true
+        input.value = ""
+      }
+    })
   }
 
   enablePanelInputs(panel) {
-    panel.querySelectorAll("input[type='text'], input[type='hidden']")
-      .forEach(input => {
-        if (input.name && input.name.includes("[")) {
-          input.disabled = false
-        }
-      })
+    panel.querySelectorAll(
+      "input[type='text'], input[type='hidden'], textarea, select"
+    ).forEach(input => {
+      if (input.name && input.name.includes("[")) {
+        input.disabled = false
+      }
+    })
   }
 }

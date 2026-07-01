@@ -97,8 +97,28 @@ module Views::Controllers::InatImports
       assert_html(html, ".overlap-note")
     end
 
-    def test_unlicensed_obs_note_present_when_positive
+    def test_nothing_to_import_notice_absent_when_expected_positive
+      html = render_form(expected: 5)
+
+      assert_no_html(html, "#inat_import_confirm_nothing_to_import")
+    end
+
+    def test_nothing_to_import_notice_shown_when_expected_zero
+      html = render_form(expected: 0)
+
+      assert_html(html, "p",
+                  text: :inat_import_confirm_nothing_to_import.l)
+    end
+
+    def test_unlicensed_obs_count_rendered_as_link_when_url_available
       html = render_form(unlicensed_obs: 3)
+
+      assert_html(html, "#unlicensed_obs_count a[href]")
+    end
+
+    def test_unlicensed_obs_count_rendered_as_plain_text_without_url
+      model = FormObject::InatImportConfirm.new(inat_username: "")
+      html = render_form(form_model: model, unlicensed_obs: 3)
 
       assert_html(html, "#unlicensed_obs_count")
     end
