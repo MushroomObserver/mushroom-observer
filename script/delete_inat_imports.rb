@@ -24,6 +24,8 @@ raise "Usage: script/delete_inat_imports.rb <login_or_id>" if ARGV.empty?
 
 require File.expand_path("../config/environment", __dir__)
 
+abort("REFUSED: do not run this script on production.") if Rails.env.production?
+
 arg = ARGV.first
 user = arg.match?(/\A\d+\z/) ? User.find_by(id: arg) : User.find_by(login: arg)
 abort("User not found: #{arg}") unless user
