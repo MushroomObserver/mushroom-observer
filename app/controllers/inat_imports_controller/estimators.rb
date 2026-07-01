@@ -27,9 +27,9 @@ module InatImportsController::Estimators
   end
 
   def fetch_estimate_with_date_count
-    inat_get_count(
-      import_estimate_query_args.merge(d1: EARLIEST_DATE_FILTER)
-    )
+    args = import_estimate_query_args
+    args[:d1] ||= EARLIEST_DATE_FILTER
+    inat_get_count(args)
   end
 
   # Own-imports: count of obs in scope that carry no license.
