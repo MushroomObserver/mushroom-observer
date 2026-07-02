@@ -69,25 +69,6 @@ module Admin
       end
     end
 
-    def switch_to_user(new_user)
-      # This happens if an admin switches to another user from themselves.
-      if session[:real_user_id].blank?
-        session[:real_user_id] = User.current_id
-        session[:admin] = nil
-      # This happens if an admin in "switch user mode" logs out or explicitly.
-      # switches back to themselves.
-      elsif session[:real_user_id] == new_user.id
-        session[:real_user_id] = nil
-        session[:admin] = true
-      end
-      # This happens if an admin already in "switch user mode" switches to yet
-      # another user.
-      # Update both @user and User.current so views show the correct user.
-      @user = new_user
-      User.current = new_user
-      session_user_set(new_user)
-    end
-
     def find_user_by_id_login_or_email(str)
       if str.blank?
         nil

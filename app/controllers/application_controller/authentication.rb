@@ -238,6 +238,28 @@ module ApplicationController::Authentication
   #  "Private" methods.
   # ----------------------------
 
+  # Switch the apparent logged-in user in the session. Used by both
+  # LogoutController (to restore an admin's real account after sudo) and
+  # Admin::SessionController (to switch into another user).
+  def switch_to_user(new_user)
+    update_sudo_session(new_user)
+    @user = new_user
+    User.current = new_user
+    session_user_set(new_user)
+  end
+
+  private
+
+  def update_sudo_session(new_user)
+    if session[:real_user_id].blank?
+      session[:real_user_id] = User.current_id
+      session[:admin] = nil
+    elsif session[:real_user_id] == new_user.id
+      session[:real_user_id] = nil
+      session[:admin] = true
+    end
+  end
+
   # Create/update the auto-login cookie.
   def autologin_cookie_set(user)
     cookies["mo_user"] = {

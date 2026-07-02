@@ -132,25 +132,6 @@ module Account
              "Expected flash_object_errors(@new_user) on save failure")
     end
 
-    # `switch_to_user` is private; the legacy code path covers the
-    # `session[:real_user_id].blank?` branch (lines 136-137) when an
-    # admin switches into another user from themselves. The logout
-    # action is the only public caller and pre-guards
-    # `real_user_id.present?`, so call the private method directly
-    # to exercise the otherwise-dead branch.
-    def test_switch_to_user_with_blank_real_user_id_sets_session
-      ctrl = @controller
-      session.clear
-      User.current = users(:rolf)
-      target = users(:mary)
-
-      ctrl.send(:switch_to_user, target)
-
-      assert_equal(users(:rolf).id, session[:real_user_id])
-      assert_nil(session[:admin])
-      assert_equal(target, User.current)
-    end
-
     def test_email_new_password
       get(:email_new_password)
       assert_no_flash

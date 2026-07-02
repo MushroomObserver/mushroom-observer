@@ -47,9 +47,9 @@
   border-left-width: 0px;
   padding: 0px;
 
-  a:not(.clear-button, .btn),
-  a:visited:not(.clear-button, .btn),
-  .btn-link {
+  a:not(.clear-button, .btn, .dropdown-item),
+  a:visited:not(.clear-button, .btn, .dropdown-item),
+  .btn-link:not(.dropdown-item) {
     color: $navbar-default-color;
     background-color: $navbar-default-link-active-bg;
 

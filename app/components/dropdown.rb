@@ -143,6 +143,7 @@ class Components::Dropdown < Components::Base
     kwargs = merge_context_nav_link_args(args, {})
     kwargs = mix(kwargs, class: "active") if active
     kwargs[:disabled] = true if active
+    kwargs = mix(kwargs, class: "dropdown-item")
     if args[:button].present? && kwargs[:class].present?
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
     end
