@@ -22,7 +22,7 @@ class Inat
         if photo.license_code.blank?
           handle_unlicensed_image(photo)
         else
-          upload_inat_image(post_photo_params(photo))
+          upload_inat_image(post_photo_params(photo), photo.external_id)
         end
       end
 
@@ -33,12 +33,23 @@ class Inat
           @skipped_images += 1
           nil
         else
-          upload_inat_image(post_photo_params(photo, license: @user.license_id))
+          upload_inat_image(
+            post_photo_params(photo, license: @user.license_id),
+            photo.external_id
+          )
         end
       end
 
-      def upload_inat_image(params)
-        API2.execute(params).results.first
+      # external_id identifies which iNat photo failed, since an
+      # observation can have several.
+      def upload_inat_image(params, external_id)
+        api = API2.execute(params)
+        if api.errors.any?
+          raise("Failed to import image #{external_id}: " \
+                "#{api.errors.join(", ")}")
+        end
+
+        api.results.first
       end
 
       # Recorded directly on the image so it survives regardless of the
@@ -55,10 +66,18 @@ class Inat
           api_key: user_api_key,
           upload_url: photo.url,
           notes: photo.notes,
-          copyright_holder: photo.copyright_holder,
+          copyright_holder: cleaned_copyright_holder(photo),
           license: license,
           observations: @observation.id
         }
+      end
+
+      # Imported images all get a Creative Commons license, so strip
+      # the contradictory "all rights reserved"
+      # The copyright_holder column is implicitly capped at 255 chars,
+      # so truncate it here
+      def cleaned_copyright_holder(photo)
+        photo.copyright_holder.sub("all rights reserved", "").truncate(255)
       end
     end
   end
