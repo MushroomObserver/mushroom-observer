@@ -23,6 +23,12 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href='#{routes.inat_imports_path}']")
     end
 
+    def test_context_nav_includes_new_link
+      html = render_show
+
+      assert_html(html, "a[href='#{routes.new_inat_import_path}']")
+    end
+
     private
 
     def render_show

@@ -61,6 +61,12 @@ module Views::Controllers::InatImports
       assert_no_html(html, "a[href='#{path}']")
     end
 
+    def test_context_nav_includes_new_link
+      html = render_index(imports: InatImport.where(user: @user).to_a)
+
+      assert_html(html, "a[href='#{routes.new_inat_import_path}']")
+    end
+
     private
 
     def render_index(imports:, admin: false)
