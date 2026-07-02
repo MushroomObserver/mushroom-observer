@@ -2,23 +2,23 @@
 
 require("test_helper")
 
-# Tests for Components::Form::TableAccordion — the two-peer-collapse
-# container used inside (or below) a table row to swap between a
-# read-only view pane and an inline edit form.
-class TableFormAccordionTest < ComponentTestCase
+# Tests for Components::Accordion — the Bootstrap 3 two-peer-collapse
+# component where exactly one pane is visible at a time.
+class AccordionTest < ComponentTestCase
   def test_renders_accordion_shell_with_both_panes
     html = render_accordion do |a|
       a.with_view { "VIEW_CONTENT" }
       a.with_edit { "EDIT_CONTENT" }
     end
 
-    assert_html(html, "div.mb-0#notes_42")
+    assert_html(html, "div.border-none.mb-0#notes_42")
+    assert_html(html, "#notes_42 div.panel.border-none.bg-none")
     # View pane is shown by default (`in`); edit pane is hidden.
     assert_html(html,
-                "#view_notes_42_container.panel-collapse.collapse.in",
+                "#view_notes_42_container.collapse.in",
                 text: "VIEW_CONTENT")
     assert_html(html,
-                "#edit_notes_42_container.panel-collapse.collapse",
+                "#edit_notes_42_container.collapse",
                 text: "EDIT_CONTENT")
     assert_no_html(html, "#edit_notes_42_container.in")
   end
@@ -33,10 +33,16 @@ class TableFormAccordionTest < ComponentTestCase
     assert_no_html(html, "#edit_notes_42_container *")
   end
 
+  def test_no_background_so_striped_rows_show_through
+    html = render_accordion { |a| a.with_view { "x" } }
+
+    assert_html(html, "div.panel.bg-none")
+  end
+
   private
 
   def render_accordion(&block)
-    render(Components::Form::TableAccordion.new(
+    render(Components::Accordion.new(
              id: "notes_42",
              view_id: "view_notes_42_container",
              edit_id: "edit_notes_42_container"

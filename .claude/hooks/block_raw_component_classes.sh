@@ -72,7 +72,7 @@ is_exempt_file() {
     app/components/link/collapse_toggle.rb|\
     app/components/form/checkbox_collapse.rb|\
     app/components/form/location_map.rb|\
-    app/components/form/table_accordion.rb|\
+    app/components/accordion.rb|\
     app/components/application_form/input_group_addon.rb|\
     app/components/carousel/controls.rb|\
     app/views/controllers/observations/namings/reasons_fields.rb) return 0 ;;
@@ -120,7 +120,7 @@ case "$TOOL" in
       ':(exclude)app/components/link/collapse_toggle.rb' \
       ':(exclude)app/components/form/checkbox_collapse.rb' \
       ':(exclude)app/components/form/location_map.rb' \
-      ':(exclude)app/components/form/table_accordion.rb' \
+      ':(exclude)app/components/accordion.rb' \
       ':(exclude)app/components/application_form/input_group_addon.rb' \
       ':(exclude)app/components/carousel/controls.rb' \
       ':(exclude)app/views/controllers/observations/namings/reasons_fields.rb' \

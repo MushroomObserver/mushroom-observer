@@ -14,7 +14,7 @@ module Views::Controllers::Account::APIKeys
       container_class(:full)
 
       div(class: "container-text") do
-        trusted_html(:account_api_keys_help.tp)
+        ContentPadded { trusted_html(:account_api_keys_help.tp) }
       end
 
       render(Table.new(user: @user))
