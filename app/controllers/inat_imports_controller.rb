@@ -82,11 +82,13 @@ class InatImportsController < ApplicationController
   end
 
   def new
-    @inat_import = InatImport.find_or_create_by(user: @user)
-    return render_new_form unless @inat_import.job_pending?
+    pending = InatImport.where(user: @user).
+              where(state: %w[Authenticating Importing]).
+              order(:updated_at).last
+    return render_new_form unless pending
 
     flash_warning(:inat_import_tracker_pending.l)
-    redirect_to(inat_import_path(@inat_import))
+    redirect_to(inat_import_path(pending))
   end
 
   def create
@@ -115,7 +117,7 @@ class InatImportsController < ApplicationController
                       else
                         fetch_unlicensed_obs_count
                       end
-    @inat_import = InatImport.find_or_create_by(user: @user)
+    @inat_import = InatImport.new(user: @user)
     warn_about_listed_previous_imports
     @confirm_form = build_confirm_form
     render(Views::Controllers::InatImports::Confirm.new(
@@ -242,15 +244,18 @@ class InatImportsController < ApplicationController
     key.verify! if key.verified.nil?
   end
 
+  # A new persistent record per import, so each import's results are kept.
+  # avg_import_time derives from the user's prior records (a throwaway
+  # instance computes it since the new one isn't saved yet).
   def init_ivars
-    @inat_import = InatImport.find_or_create_by(user: @user)
-    @inat_import.update(
+    @inat_import = InatImport.create!(
+      user: @user,
       state: "Authorizing",
       import_all: params[:all],
       importables: importables_count,
       total_importables: importables_count,
       imported_count: 0,
-      avg_import_time: @inat_import.initial_avg_import_seconds,
+      avg_import_time: InatImport.new(user: @user).initial_avg_import_seconds,
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
       inat_url: params[:inat_url].presence,
@@ -307,8 +312,11 @@ class InatImportsController < ApplicationController
     remaining_ids.join(",")
   end
 
+  # Pass the new record's id through the OAuth `state` param; iNat echoes it
+  # back to authorization_response so we know which import to resume.
   def request_inat_user_authorization
-    redirect_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+    redirect_to("#{INAT_AUTHORIZATION_URL}&state=#{@inat_import.id}",
+                allow_other_host: true)
   end
 
   # ---------------------------------
@@ -321,6 +329,8 @@ class InatImportsController < ApplicationController
     return not_authorized if auth_code.blank?
 
     inat_import = inat_import_authenticating(auth_code)
+    return not_authorized unless inat_import
+
     inat_import.reset_last_obs_start
 
     Rails.logger.info(
@@ -340,8 +350,12 @@ class InatImportsController < ApplicationController
     redirect_to(observations_path)
   end
 
+  # Load the specific import from the OAuth `state` param, scoped to the
+  # logged-in user so a forged state can't touch another user's import.
   def inat_import_authenticating(auth_code)
-    inat_import = InatImport.find_or_create_by(user: @user)
+    inat_import = InatImport.find_by(id: params[:state], user: @user)
+    return nil unless inat_import
+
     inat_import.update(token: auth_code, state: "Authenticating")
     inat_import
   end

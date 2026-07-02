@@ -163,7 +163,7 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_not(import.reload.canceled?,
+    assert_not(created_import(user).canceled?,
                "`cancel` should be false when starting an import")
   end
 
@@ -309,7 +309,7 @@ class InatImportsControllerTest < FunctionalTestCase
     end
 
     assert_response(:redirect)
-    assert_equal(id_list, inat_import.reload.inat_ids,
+    assert_equal(id_list, created_import(user).inat_ids,
                  "Failed to save inat_ids at maximum length")
   end
 
@@ -342,12 +342,13 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: "rolf",
                    consent: 1, confirmed: 1 })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL,
+    import = created_import(user)
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}",
                          "Newline-delimited IDs should pass validation")
-    assert_equal(expected_ids, inat_import.reload.inat_ids,
+    assert_equal(expected_ids, import.inat_ids,
                  "Newline-delimited IDs should be normalized to " \
                  "comma-separated")
-    assert_equal(3, inat_import.reload.importables,
+    assert_equal(3, import.importables,
                  "importables_count should reflect the number of IDs")
   end
 
@@ -365,12 +366,13 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: "rolf",
                    consent: 1, confirmed: 1 })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL,
+    import = created_import(user)
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}",
                          "Input with a header row should pass validation")
-    assert_equal(expected_ids, inat_import.reload.inat_ids,
+    assert_equal(expected_ids, import.inat_ids,
                  "Non-digit header token should be stripped from " \
                  "stored inat_ids")
-    assert_equal(3, inat_import.reload.importables,
+    assert_equal(3, import.importables,
                  "importables_count should not include the header row token")
   end
 
@@ -452,7 +454,9 @@ class InatImportsControllerTest < FunctionalTestCase
     # It should continue even if some ids were previously imported
     # The job will exclude previous imports via the iNat API
     # `without_field: "Mushroom Observer URL"` param.
-    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_redirected_to(
+      "#{INAT_AUTHORIZATION_URL}&state=#{created_import(user).id}"
+    )
   end
 
   def test_create_strip_inat_username
@@ -482,7 +486,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_response(:redirect)
     assert_equal(
-      user.name, inat_import.reload.inat_username,
+      user.name, created_import(user).inat_username,
       "It should strip leading/trailing whitespace from inat_username"
     )
   end
@@ -508,16 +512,17 @@ class InatImportsControllerTest < FunctionalTestCase
                      consent: 1, confirmed: 1 })
     end
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL)
-    assert_equal(inat_ids.split(",").length, inat_import.reload.importables,
+    import = created_import(user)
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}")
+    assert_equal(inat_ids.split(",").length, import.importables,
                  "Failed to save InatImport.importables")
-    assert_equal("Authorizing", inat_import.reload.state,
+    assert_equal("Authorizing", import.state,
                  "MO should be awaiting authorization from iNat")
     assert_equal(
       InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
-      inat_import.avg_import_time
+      import.avg_import_time
     )
-    assert_equal(inat_username, inat_import.inat_username,
+    assert_equal(inat_username, import.inat_username,
                  "Failed to save InatImport.inat_username")
   end
 
@@ -578,7 +583,6 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_confirmed_with_superform_params
     user = users(:rolf)
-    inat_import = inat_imports(:rolf_inat_import)
     inat_username = "rolf"
     inat_ids = "123,456"
 
@@ -595,8 +599,9 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL)
-    assert_equal(inat_username, inat_import.reload.inat_username,
+    import = created_import(user)
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}")
+    assert_equal(inat_username, import.inat_username,
                  "Should flatten inat_username from namespaced params")
   end
 
@@ -630,7 +635,6 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   def test_admin_checked_skip_writeback_persists_as_skip
-    inat_import = inat_imports(:rolf_inat_import)
     make_admin
 
     post(:create,
@@ -642,13 +646,13 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL)
-    assert_equal("skip", inat_import.reload.writeback,
+    import = created_import(users(:rolf))
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}")
+    assert_equal("skip", import.writeback,
                  "Admin's checked skip-writeback box should persist as :skip")
   end
 
   def test_admin_unchecked_skip_writeback_persists_as_force
-    inat_import = inat_imports(:rolf_inat_import)
     make_admin
 
     post(:create,
@@ -659,14 +663,14 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL)
-    assert_equal("force", inat_import.reload.writeback,
+    import = created_import(users(:rolf))
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}")
+    assert_equal("force", import.writeback,
                  "Admin's unchecked skip box should persist as :force")
   end
 
   def test_non_admin_leaves_writeback_default
     user = users(:rolf)
-    inat_import = inat_imports(:rolf_inat_import)
     login(user.login)
 
     post(:create,
@@ -678,8 +682,9 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL)
-    assert_equal("default", inat_import.reload.writeback,
+    import = created_import(user)
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}")
+    assert_equal("default", import.writeback,
                  "Non-admin import should leave writeback :default so the " \
                  "importer applies its environment default")
   end
@@ -942,7 +947,10 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+    assert_redirected_to(
+      "#{INAT_AUTHORIZATION_URL}&state=#{created_import(user).id}",
+      allow_other_host: true
+    )
   end
 
   def test_allow_first_time_import_all
@@ -953,7 +961,10 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+    assert_redirected_to(
+      "#{INAT_AUTHORIZATION_URL}&state=#{created_import(user).id}",
+      allow_other_host: true
+    )
   end
 
   def test_import_all_anothers_observations_not_allowed
@@ -1012,7 +1023,10 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL, allow_other_host: true)
+    assert_redirected_to(
+      "#{INAT_AUTHORIZATION_URL}&state=#{created_import(user).id}",
+      allow_other_host: true
+    )
   end
 
   def test_super_importer_can_import_specific_ids_from_another_user
@@ -1025,7 +1039,9 @@ class InatImportsControllerTest < FunctionalTestCase
     login(user.login)
     post(:create, params: params)
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL)
+    assert_redirected_to(
+      "#{INAT_AUTHORIZATION_URL}&state=#{created_import(user).id}"
+    )
   end
 
   def test_import_authorized
@@ -1037,7 +1053,8 @@ class InatImportsControllerTest < FunctionalTestCase
     # empty id_list to prevent importing any observations in this test
     inat_import.inat_ids = ""
     inat_import.save
-    inat_authorization_callback_params = { code: "MockCode" }
+    inat_authorization_callback_params = { code: "MockCode",
+                                           state: inat_import.id }
 
     login(user.login)
 
@@ -1363,7 +1380,6 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_create_confirmed_with_url_saves_inat_url
     user = users(:rolf)
-    inat_import = inat_imports(:rolf_inat_import)
     url = "#{INAT_SITE_OBS_URL}?project_id=291058"
     normalized = "project_id=291058"
 
@@ -1372,15 +1388,15 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1, confirmed: 1 })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL,
+    import = created_import(user)
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}",
                          "Confirmed URL import should redirect to iNat auth")
-    assert_equal(normalized, inat_import.reload.inat_url,
+    assert_equal(normalized, import.inat_url,
                  "Normalized URL query string should be saved on InatImport")
   end
 
   def test_url_mode_importables_is_nil
     user = users(:rolf)
-    inat_import = inat_imports(:rolf_inat_import)
     url = "#{INAT_SITE_OBS_URL}?project_id=291058"
 
     login(user.login)
@@ -1388,7 +1404,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1, confirmed: 1 })
 
-    assert_nil(inat_import.reload.importables,
+    assert_nil(created_import(user).importables,
                "URL mode should save nil importables (unknown until job runs)")
   end
 
@@ -1537,7 +1553,6 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_url_params_preserved_through_confirm_round_trip
     user = users(:rolf)
-    inat_import = inat_imports(:rolf_inat_import)
     normalized = "project_id=291058"
 
     login(user.login)
@@ -1553,9 +1568,10 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_redirected_to(INAT_AUTHORIZATION_URL,
+    import = created_import(user)
+    assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}",
                          "Confirmed URL via superform params should auth")
-    assert_equal(normalized, inat_import.reload.inat_url,
+    assert_equal(normalized, import.inat_url,
                  "inat_url should be saved from superform hidden field")
   end
 
@@ -1614,6 +1630,12 @@ class InatImportsControllerTest < FunctionalTestCase
   end
 
   ########## Utilities
+
+  # Each import now creates a brand-new persistent InatImport record; the
+  # freshly created one is the last by created_at for the logged-in user.
+  def created_import(user)
+    InatImport.where(user: user).order(:created_at).last
+  end
 
   def authorization_denial_callback_params
     { error: "access_denied",
