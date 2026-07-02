@@ -160,6 +160,23 @@ class InatImportTest < ActiveSupport::TestCase
     assert_not(import.stuck?, "Done import should not be stuck")
   end
 
+  def test_abandoned_scope
+    stale = inat_imports(:rolf_inat_import)
+    stale.update!(state: "Authorizing")
+    stale.update_column(:updated_at,
+                        InatImport::ABANDONED_THRESHOLD.ago - 1.second)
+    recent = inat_imports(:mary_inat_import)
+    recent.update!(state: "Authenticating")
+
+    abandoned = InatImport.abandoned
+    assert_includes(abandoned, stale,
+                    "Stale Authorizing import should be abandoned")
+    assert_not_includes(abandoned, recent,
+                        "Recent Authenticating import should not be abandoned")
+    assert_not_includes(abandoned, inat_imports(:katrina_inat_import),
+                        "Importing import is stuck, not abandoned")
+  end
+
   def test_ignored_total_count
     import = inat_imports(:rolf_inat_import)
     import.update!(
