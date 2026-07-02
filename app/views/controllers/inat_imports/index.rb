@@ -5,8 +5,12 @@ module Views::Controllers::InatImports
   class Index < Views::FullPageBase
     prop :imports, _Array(::InatImport)
     prop :admin, _Boolean, default: false
+    # Ids of imports that have linked observations; only these get a
+    # Results link (historic imports predate the link — see the controller).
+    prop :result_import_ids, _Array(::Integer), default: -> { [] }
 
     def view_template
+      container_class(:wide)
       add_page_title(:inat_imports_index_title.l)
       add_context_nav(Tab::InatImport::Actions.new(include_index: false))
       render(Components::Table.new(@imports, class: "table-striped")) do |t|
@@ -15,7 +19,9 @@ module Views::Controllers::InatImports
     end
 
     def render_columns(tbl)
-      tbl.column(:WHEN.l) { |imp| plain(when_text(imp)) }
+      tbl.column(:inat_imports_index_when_utc.l) do |imp|
+        plain(when_text(imp))
+      end
       if @admin
         tbl.column(:USER.t) do |imp|
           render(Components::Link::User.new(user: imp.user))
@@ -31,7 +37,7 @@ module Views::Controllers::InatImports
       tbl.column(:inat_import_tracker_imported_count.l) do |imp|
         plain(imp.imported_count.to_s)
       end
-      tbl.column(:inat_import_confirm_ignored_total_caption.l) do |imp|
+      tbl.column(:inat_imports_index_skipped.l) do |imp|
         plain(imp.ignored_total_count.to_s)
       end
     end
@@ -39,9 +45,13 @@ module Views::Controllers::InatImports
     private
 
     def results_link(import)
-      return unless import.Done? && import.imported_count.to_i.positive?
+      return unless result_ids.include?(import.id)
 
       link_to(:RESULTS.l, results_inat_import_path(import))
+    end
+
+    def result_ids
+      @result_ids ||= @result_import_ids.to_set
     end
 
     def report_link(import)
@@ -49,7 +59,10 @@ module Views::Controllers::InatImports
     end
 
     def when_text(import)
-      import.ended_at&.strftime("%Y-%m-%d %H:%M:%S %z").to_s
+      # updated_at rather than ended_at: it's populated for in-progress
+      # imports too, and matches ended_at (within seconds) once finished.
+      # Shown in UTC without a timezone offset (see the "When (UTC)" header).
+      import.updated_at.utc.strftime("%Y-%m-%d %H:%M:%S")
     end
   end
 end

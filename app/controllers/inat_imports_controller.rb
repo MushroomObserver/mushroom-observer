@@ -34,12 +34,24 @@ class InatImportsController < ApplicationController
 
   def index
     admin = in_admin_mode? == true
-    imports = admin ? InatImport.all : InatImport.where(user: @user)
+    scope = admin ? InatImport.all : InatImport.where(user: @user)
+    imports = scope.order(updated_at: :desc).to_a
     render(Views::Controllers::InatImports::Index.new(
-             imports: imports.order(created_at: :desc).to_a,
-             admin: admin
+             imports: imports,
+             admin: admin,
+             result_import_ids: import_ids_with_results(imports)
            ))
   end
+
+  # Ids of the imports that actually have linked observations. Historic
+  # imports predate the observations.inat_import_id link, so their Results
+  # link would lead nowhere; the index hides it for them. One query, to
+  # avoid an N+1 across the (unpaginated) admin list.
+  def import_ids_with_results(imports)
+    Observation.where(inat_import_id: imports.map(&:id)).
+      distinct.pluck(:inat_import_id)
+  end
+  private :import_ids_with_results
 
   def results
     @inat_import = InatImport.find(params[:id])

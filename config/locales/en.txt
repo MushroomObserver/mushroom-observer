@@ -3322,6 +3322,8 @@
   INAT_IMPORTS: iNat Imports
   INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
   inat_imports_index_title: iNat Imports
+  inat_imports_index_when_utc: When (UTC)
+  inat_imports_index_skipped: "# Skipped"
   inat_import_tracker: iNat Import Tracker
   inat_import_tracker_started: Started
   inat_import_tracker_elapsed_time: Elapsed Time
@@ -3330,7 +3332,7 @@
   inat_import_tracker_done_with_errors: "Import finished with errors — see details above."
   inat_import_nothing_imported: Nothing was imported.
   inat_import_tracker_importable_count: Number of Importable Observations
-  inat_import_tracker_imported_count: Number Imported
+  inat_import_tracker_imported_count: "# Imported"
   inat_import_tracker_leave_page: You may continue working in MO by opening another tab, or by leaving this page. To return to this page, you can (a) go back in your browser, or (b) click Create Observation, iNat Import; if the import is in progress, this page will be redisplayed.
   inat_import_tracker_pending: Please wait until your pending iNat Import is Done before starting a new one.
   inat_import_tracker_ignored_heading: Ignored Observations
@@ -4960,6 +4962,7 @@
   query_field_slips: "[:field_slips]"
   query_herbaria: "[:herbaria]"
   query_herbarium_records: "[:herbarium_records]"
+  query_inat_import: iNat Import
   query_locations: "[:locations]"
   query_within_locations: "[:within_locations]"
   query_observations: "[:observations]"

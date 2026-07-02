@@ -46,6 +46,34 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("th", text: :USER.t)
   end
 
+  def test_index_results_link_only_for_imports_with_linked_observations
+    make_admin
+    linked = inat_imports(:rolf_inat_import)
+    unlinked = inat_imports(:katrina_inat_import)
+    observations(:minimal_unknown_obs).update!(inat_import: linked)
+
+    get(:index)
+
+    assert_select("a[href='#{results_inat_import_path(linked)}']", count: 1)
+    assert_select("a[href='#{results_inat_import_path(unlinked)}']", count: 0)
+  end
+
+  def test_index_orders_by_updated_at_most_recent_first
+    make_admin
+    newest = inat_imports(:katrina_inat_import)
+    newest.update_column(:updated_at, 1.minute.from_now)
+
+    get(:index)
+
+    assert_response(:success)
+    first_row = css_select("tbody tr").first
+    assert_not_nil(first_row, "expected import rows")
+    assert_not_empty(
+      css_select(first_row, "a[href='#{inat_import_path(newest)}']"),
+      "most-recently-updated import should be the first row"
+    )
+  end
+
   def test_results_redirects_to_observations_with_query
     import = inat_imports(:lone_wolf_import)
     import.update!(imported_count: 2)

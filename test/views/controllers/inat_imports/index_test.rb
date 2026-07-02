@@ -30,30 +30,17 @@ module Views::Controllers::InatImports
       assert_html(html, "th", text: :USER.t)
     end
 
-    def test_results_link_shown_for_done_import_with_obs
+    def test_results_link_shown_when_import_has_results
       import = inat_imports(:lone_wolf_import)
-      import.update!(imported_count: 3)
 
-      html = render_index(imports: [import])
+      html = render_index(imports: [import], result_import_ids: [import.id])
 
       path = routes.results_inat_import_path(import)
       assert_html(html, "a[href='#{path}']")
     end
 
-    def test_results_link_hidden_when_imported_count_zero
+    def test_results_link_hidden_when_import_has_no_results
       import = inat_imports(:lone_wolf_import)
-      import.update!(imported_count: 0)
-
-      html = render_index(imports: [import])
-
-      path = routes.results_inat_import_path(import)
-      assert_no_html(html, "a[href='#{path}']")
-    end
-
-    def test_results_link_hidden_for_non_done_import
-      import = inat_imports(:katrina_inat_import)
-      assert_not(import.Done?,
-                 "Test needs an import fixture that is not Done")
 
       html = render_index(imports: [import])
 
@@ -67,14 +54,14 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href='#{routes.new_inat_import_path}']")
     end
 
-    def test_when_column_is_first_and_shows_ended_at
-      @import.update!(ended_at: Time.zone.parse("2026-01-02 03:04:05"))
+    def test_when_column_is_first_and_shows_updated_at
+      @import.update_column(:updated_at, Time.zone.parse("2026-01-02 03:04:05"))
 
       html = render_index(imports: [@import])
 
-      assert_html(html, "th:first-child", text: :WHEN.l)
+      assert_html(html, "th:first-child", text: :inat_imports_index_when_utc.l)
       assert_html(html, "td",
-                  text: @import.ended_at.strftime("%Y-%m-%d %H:%M:%S %z"))
+                  text: @import.updated_at.utc.strftime("%Y-%m-%d %H:%M:%S"))
     end
 
     def test_report_column_links_to_show_page
@@ -87,8 +74,9 @@ module Views::Controllers::InatImports
 
     private
 
-    def render_index(imports:, admin: false)
-      render(Index.new(imports: imports, admin: admin))
+    def render_index(imports:, admin: false, result_import_ids: [])
+      render(Index.new(imports: imports, admin: admin,
+                       result_import_ids: result_import_ids))
     end
   end
 end
