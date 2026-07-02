@@ -10,7 +10,7 @@ class AdminModeSystemTest < ApplicationSystemTestCase
     login!(rolf)
   end
 
-  def test_admin_mode_toggle_dom_and_css
+  def test_admin_mode_toggle_dom_and_css_from_info_page
     visit("/info/how_to_help")
     assert_admin_toggle_works
   end
@@ -23,6 +23,28 @@ class AdminModeSystemTest < ApplicationSystemTestCase
   end
 
   private
+
+  def assert_admin_toggle_works
+    assert_no_selector("#admin_banner")
+    assert_not(admin_stylesheet_present?,
+               "Admin stylesheet should not be present in normal mode")
+
+    click_on(id: "user_nav_toggle")
+    click_on(id: "user_nav_admin_mode_link")
+
+    assert_selector("#admin_banner",
+                    text: "DANGER: You are in administrator mode")
+    assert(admin_stylesheet_present?,
+           "Admin stylesheet should be present after enabling admin mode")
+
+    click_on(id: "user_nav_toggle")
+    click_on(id: "user_nav_admin_mode_link")
+
+    assert_no_selector("#admin_banner")
+    assert_not(admin_stylesheet_present?,
+               "Admin stylesheet should not be present after disabling " \
+               "admin mode (Turbo head-append regression)")
+  end
 
   def admin_stylesheet_present?
     page.evaluate_script(
