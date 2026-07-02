@@ -260,6 +260,26 @@ class InatMoObservationBuilderTest < UnitTestCase
                  "copyright_holder should be truncated to 255 chars")
   end
 
+  # --- upload_inat_image: surface API2 errors instead of masking them ---
+
+  FakeAPI2Response = Struct.new(:errors, :results)
+
+  def test_upload_inat_image_raises_descriptive_error_on_api_failure
+    error = API2::MissingParameter.new(:upload_url)
+    fake_api = FakeAPI2Response.new([error], nil)
+    builder = builder_for
+
+    API2.stub(:execute, fake_api) do
+      err = assert_raises(RuntimeError) do
+        builder.send(:upload_inat_image, {}, "377332865")
+      end
+      assert_match(/Failed to import image 377332865/, err.message,
+                   "Error should identify the failing iNat photo")
+      assert_match(/#{Regexp.escape(error.to_s)}/, err.message,
+                   "Error should include the underlying API2 error")
+    end
+  end
+
   private
 
   def builder_for(provisional_name: nil, name_override: nil,
