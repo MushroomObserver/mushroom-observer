@@ -94,7 +94,8 @@ module Views::Controllers::SpeciesLists
       textarea_field(
         :notes, rows: 12,
                 label: "#{:form_species_lists_list_notes.l}:",
-                help: :shared_textile_help.l
+                help: :shared_textile_help.l,
+                help_collapse: true
       )
       date_field(:when, inline: true, label: "#{:WHEN.l}:")
       render(Components::Form::LocationFeedback.new(

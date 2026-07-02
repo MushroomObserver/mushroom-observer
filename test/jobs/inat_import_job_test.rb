@@ -92,7 +92,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(@inat_import.total_seconds.to_i.positive?,
            "Failed to update user's inat_import total_seconds")
     assert_equal(
-      0, @tracker.reload.estimated_remaining_time,
+      0, @inat_import.reload.estimated_remaining_time,
       "Estimated remaining time should be 0 when InatImportJob is Done"
     )
   end
@@ -113,7 +113,6 @@ class InatImportJobTest < ActiveJob::TestCase
     @mock_inat_response = JSON.generate(parsed_response)
     @parsed_results = parsed_response[:results]
     @inat_import = create_inat_import
-    InatImportJobTracker.create(inat_import: @inat_import.id)
 
     # Add objects which are not included in fixtures
     Location.create(user: user,
@@ -429,7 +428,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(name.rss_log_id.present?,
            "Failed to log creation of provisional name")
 
-    # iNat Observation Taxon + the provisional name (lead) -> two namings.
+    # iNat Community ID + the provisional name (lead) -> two namings.
     standard_assertions(obs: obs, name: name, naming_count: 2)
 
     proposed_name = obs.namings.first
@@ -495,6 +494,31 @@ class InatImportJobTest < ActiveJob::TestCase
     API2.singleton_class.define_method(:execute, original_execute)
   end
 
+  def test_import_job_image_upload_failure_logs_error
+    # evernia has 1 photo — exercises the upload_inat_image error path
+    create_ivars_from_filename("evernia")
+    stub_inat_interactions
+
+    original_execute = API2.method(:execute)
+    API2.singleton_class.define_method(:execute) do |params|
+      if params[:action] == :image && params[:method] == :post
+        api = API2.new(params)
+        api.errors << API2::MissingParameter.new(:upload)
+        api
+      else
+        original_execute.call(params)
+      end
+    end
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_match(/Image upload failed/,
+                 @inat_import.reload.response_errors,
+                 "Image upload failure should be logged in response_errors")
+  ensure
+    API2.singleton_class.define_method(:execute, original_execute)
+  end
+
   # Inat Provisional Species Name "Donadina PNW01" (no: quotes, sp. dash)
   def test_import_job_prov_name_pnw_style
     # NOTE: This observation has no iNat license (all rights reserved).
@@ -532,7 +556,7 @@ class InatImportJobTest < ActiveJob::TestCase
       "It should create only 3 names: provisional, its genus, suggested ID"
     )
 
-    # iNat Observation Taxon + the provisional name (lead) -> two namings.
+    # iNat Community ID + the provisional name (lead) -> two namings.
     standard_assertions(obs: obs, name: expected_consensus, naming_count: 2)
 
     assert(obs.sequences.one?, "Obs should have one sequence")
@@ -671,7 +695,6 @@ class InatImportJobTest < ActiveJob::TestCase
     @mock_inat_response = JSON.generate(parsed_response)
     @parsed_results = parsed_response[:results]
     @inat_import = create_inat_import
-    InatImportJobTracker.create(inat_import: @inat_import.id)
 
     stub_inat_interactions
 
@@ -810,7 +833,6 @@ class InatImportJobTest < ActiveJob::TestCase
                                      token: "MockCode",
                                      inat_username: "anything")
     # update the tracker's inat_import accordingly
-    InatImportJobTracker.update(inat_import: @inat_import.id)
     stub_inat_interactions
 
     assert_difference("Observation.count", 2,
@@ -841,7 +863,6 @@ class InatImportJobTest < ActiveJob::TestCase
     @inat_import = create_inat_import(inat_ids: "#{first_id},#{last_id}",
                                       inat_username: "anything")
     # update the tracker's inat_import accordingly
-    InatImportJobTracker.update(inat_import: @inat_import.id)
 
     stub_inat_interactions
     # Claude's suggestion for stubbing a method to raise an error during the
@@ -894,7 +915,6 @@ class InatImportJobTest < ActiveJob::TestCase
                                      import_all: true,
                                      token: "MockCode",
                                      inat_username: "anything")
-    InatImportJobTracker.create(inat_import: @inat_import.id)
     # limit it to one page to avoid complications of stubbing multiple
     # inat api requests with multiple files
     @mock_inat_response = limited_to_first_page(mock_inat_response)
@@ -928,7 +948,6 @@ class InatImportJobTest < ActiveJob::TestCase
       user: @user, inat_ids: "", import_all: true,
       token: "MockCode", inat_username: "anything", imported_count: 0
     )
-    InatImportJobTracker.create(inat_import: @inat_import.id)
 
     stub_token_requests
     stub_check_username_match(@inat_import.inat_username)
@@ -939,7 +958,7 @@ class InatImportJobTest < ActiveJob::TestCase
       taxon_id: IMPORTABLE_TAXON_IDS_ARG,
       id: @inat_import.inat_ids,
       id_above: last_first_page_id,
-      per_page: 200,
+      per_page: InatImportJob::BATCH_SIZE,
       only_id: false,
       order: "asc",
       order_by: "id",
@@ -1011,7 +1030,6 @@ class InatImportJobTest < ActiveJob::TestCase
                                      import_all: true,
                                      token: "MockCode",
                                      inat_username: @user.inat_username)
-    InatImportJobTracker.create(inat_import: @inat_import.id)
     # limit it to one page to avoid complications of stubbing multiple
     # inat api requests with multiple files
     @mock_inat_response = limited_to_first_page(mock_inat_response)
@@ -1052,7 +1070,6 @@ class InatImportJobTest < ActiveJob::TestCase
       last_obs_start: Time.now.utc,
       ended_at: nil
     )
-    InatImportJobTracker.create(inat_import: inat_import.id)
 
     stub_token_requests
     stub_check_username_match(@user.inat_username)
@@ -1074,7 +1091,6 @@ class InatImportJobTest < ActiveJob::TestCase
                                      token: "MockCode",
                                      inat_username: "anything")
     # update the tracker's inat_import accordingly
-    InatImportJobTracker.update(inat_import: @inat_import.id)
     @inat_import.update(canceled: true) # simulate cancellation
     stub_inat_interactions
 
@@ -1151,7 +1167,7 @@ class InatImportJobTest < ActiveJob::TestCase
       taxon_id: IMPORTABLE_TAXON_IDS_ARG,
       id: @inat_import.inat_ids,
       id_above: 0,
-      per_page: 200,
+      per_page: InatImportJob::BATCH_SIZE,
       only_id: false,
       order: "asc",
       order_by: "id",
@@ -1275,7 +1291,6 @@ class InatImportJobTest < ActiveJob::TestCase
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
 
     @inat_import = create_inat_import(**attrs)
-    @tracker = InatImportJobTracker.create(inat_import: @inat_import.id)
   end
 
   # On the app side, the Job is created by InatImportsController#create,
@@ -1414,7 +1429,7 @@ class InatImportJobTest < ActiveJob::TestCase
     stub_check_username_match(@inat_import.inat_username)
 
     job = InatImportJob.new
-    job.define_singleton_method(:import_requested_observations) do
+    job.define_singleton_method(:import_requested_observations) do |**|
       raise(Exception.new("unexpected bare exception")) # rubocop:disable Lint/RaiseException
     end
 
@@ -1489,6 +1504,90 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(swallowed,
            "safe_done should swallow done's exception when an error " \
            "is already in flight")
+  end
+
+  # -------- Batch job tests
+  # Continuation jobs skip authenticate and ensure_not_importing_others.
+  # token: "MockJWT" represents the state after the first job already ran
+  # authenticate (OAuth code → JWT). The JWT is what continuation jobs use.
+  # Auth stubs (OAuth exchange, JWT request, users/me) are NOT registered here;
+  # WebMock raises on any unregistered request, proving no auth occurs.
+  # Continuation jobs skip authenticate and ensure_not_importing_others.
+  # WebMock raises UnregisteredRequestError if any auth endpoint is reached.
+  def test_continuation_job_skips_authentication
+    create_ivars_from_filename("calostoma_lutescens", token: "MockJWT")
+    @user.update(inat_username: @inat_import.inat_username)
+    stub_inat_observation_request
+    stub_inat_photo_requests
+    stub_modify_inat_observations
+
+    assert_difference("Observation.count", 1,
+                      "Continuation job should still import observations") do
+      InatImportJob.perform_now(@inat_import, id_above: 0, continuation: true)
+    end
+  end
+
+  # Continuation jobs forward the id_above cursor to PageParser so iNat
+  # returns obs AFTER the last one imported in the previous batch.
+  # token: "MockJWT" — same as above: continuation jobs start with the JWT
+  # the first job already obtained; they never re-authenticate.
+  # The observation stub is registered only for specific_id_above.
+  # A request with id_above: 0 (the default) would hit an unregistered
+  # WebMock stub and raise, proving the cursor is forwarded correctly.
+  # returns obs AFTER the last one imported in the previous batch.
+  # WebMock is set up only for the specific id_above, so any request
+  # with id_above: 0 would raise, proving the cursor is forwarded.
+  def test_continuation_job_resumes_from_id_above
+    create_ivars_from_filename("calostoma_lutescens", token: "MockJWT")
+    @user.update(inat_username: @inat_import.inat_username)
+    specific_id_above = 999_999
+    stub_inat_observation_request(id_above: specific_id_above)
+    stub_inat_photo_requests
+    stub_modify_inat_observations
+
+    assert_difference("Observation.count", 1) do
+      InatImportJob.perform_now(@inat_import,
+                                id_above: specific_id_above,
+                                continuation: true)
+    end
+  end
+
+  # When a batch fills (obs count >= BATCH_SIZE), the job enqueues a
+  # continuation and leaves the import in Importing state (not Done).
+  # Uses import_all.txt (2 obs, total_results=5, per_page=2) with
+  # BATCH_SIZE temporarily lowered to 2.
+  def test_batch_full_enqueues_continuation
+    raw = File.read("test/inat/import_all.txt")
+    @mock_inat_response = raw
+    @parsed_results =
+      JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
+    @inat_import = InatImport.create(user: @user, inat_ids: "",
+                                     import_all: true,
+                                     token: "MockCode",
+                                     inat_username: "anything")
+
+    saved_batch_size = InatImportJob.const_get(:BATCH_SIZE)
+    InatImportJob.send(:remove_const, :BATCH_SIZE)
+    InatImportJob.const_set(:BATCH_SIZE, 2)
+
+    begin
+      stub_inat_interactions
+      last_id = @parsed_results.last[:id]
+
+      assert_enqueued_with(
+        job: InatImportJob,
+        args: [@inat_import, { id_above: last_id, continuation: true }]
+      ) do
+        InatImportJob.perform_now(@inat_import)
+      end
+      assert_equal(
+        "Importing", @inat_import.reload.state,
+        "State must stay Importing while continuation job is pending"
+      )
+    ensure
+      InatImportJob.send(:remove_const, :BATCH_SIZE)
+      InatImportJob.const_set(:BATCH_SIZE, saved_batch_size)
+    end
   end
 
   # -------- Other Utilities

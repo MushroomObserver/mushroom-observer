@@ -5,18 +5,45 @@ module InatImportsController::Estimators
 
   private
 
-  def fetch_import_estimate
-    response = RestClient.get(
-      "#{API_BASE}/observations?#{import_estimate_query_args.to_query}",
-      { accept: :json, open_timeout: 5, timeout: 10 }
-    )
+  def fetch_expected_count
+    response = inat_get(import_estimate_query_args)
     JSON.parse(response.body)["total_results"]
   rescue RestClient::UnprocessableEntity => e
     flash_warning(:inat_unknown_param.t(error: inat_error_text(e)))
     false
   rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn("iNat estimate request failed: #{e.class}: #{e.message}")
+    Rails.logger.warn(
+      "iNat estimate request failed: #{e.class}: #{e.message}"
+    )
     nil
+  end
+
+  def fetch_raw_requested_count
+    inat_get_count(raw_requested_query_args)
+  end
+
+  def fetch_after_taxon_count
+    inat_get_count(after_taxon_query_args)
+  end
+
+  def fetch_estimate_with_date_count
+    args = import_estimate_query_args
+    args[:d1] ||= EARLIEST_DATE_FILTER
+    inat_get_count(args)
+  end
+
+  # Own-imports: count of obs in scope that carry no license.
+  # Informational only — own obs are imported regardless of license.
+  def fetch_unlicensed_obs_count
+    inat_get_count(import_estimate_query_args.merge(licensed: false))
+  end
+
+  # Import-others: count of obs that are importable-taxa but not licensed.
+  # These will be skipped entirely.
+  def fetch_unlicensed_others_count
+    args = import_estimate_query_args.except(:licensed).
+           merge(licensed: false)
+    inat_get_count(args)
   end
 
   def inat_error_text(exception)
@@ -25,47 +52,42 @@ module InatImportsController::Estimators
     exception.message
   end
 
-  # Counts unlicensed observations for the own-observations case.
-  # Total minus licensed gives the unlicensed count via two fast
-  # only_id queries.
-  def fetch_unlicensed_obs_count
-    licensed = RestClient.get(
-      "#{API_BASE}/observations?#{licensed_estimate_query_args.to_query}",
+  def inat_get(args)
+    RestClient.get(
+      "#{API_BASE}/observations?#{args.to_query}",
       { accept: :json, open_timeout: 5, timeout: 10 }
     )
-    @estimate - JSON.parse(licensed.body)["total_results"]
+  end
+
+  def inat_get_count(args)
+    response = inat_get(args)
+    JSON.parse(response.body)["total_results"]
   rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn(
-      "iNat licensed estimate request failed: #{e.class}: #{e.message}"
-    )
+    Rails.logger.warn("iNat count request failed: #{e.class}: #{e.message}")
     nil
   end
 
-  # Counts unlicensed observations that will be skipped for import-others.
-  # @estimate is already licensed-only; total minus @estimate = unlicensed.
-  def fetch_unlicensed_others_count
-    total = RestClient.get(
-      "#{API_BASE}/observations?#{total_others_estimate_query_args.to_query}",
-      { accept: :json, open_timeout: 5, timeout: 10 }
-    )
-    JSON.parse(total.body)["total_results"] - @estimate
-  rescue RestClient::Exception, JSON::ParserError => e
-    Rails.logger.warn(
-      "iNat unlicensed-others estimate request failed: #{e.class}: #{e.message}"
-    )
-    nil
-  end
-
-  # Total obs count for import-others without a license filter,
-  # used to derive how many will be skipped.
-  def total_others_estimate_query_args
+  # All obs in user scope — no taxon, without_field, or license filter.
+  def raw_requested_query_args
     args = listing_url? ? url_query_args : {}
-    args.merge!(BASE_FILTER_PARAMS, only_id: true)
-    args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
+    args[:only_id] = true
     args[:id] = params[:inat_ids] if listing_ids?
+    args[:user_login] = params[:inat_username]&.strip unless import_others?
     args
   end
 
+  # Obs in importable taxa — no without_field or license filter.
+  def after_taxon_query_args
+    args = listing_url? ? url_query_args : {}
+    args[:only_id] = true
+    args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
+    args[:id] = params[:inat_ids] if listing_ids?
+    args[:user_login] = params[:inat_username]&.strip unless import_others?
+    args
+  end
+
+  # Obs that will actually be imported: taxon + without_field
+  # + licensed (for import-others) + user scope.
   def import_estimate_query_args
     args = listing_url? ? url_query_args : {}
     args.merge!(BASE_FILTER_PARAMS, only_id: true)
@@ -79,15 +101,12 @@ module InatImportsController::Estimators
     args
   end
 
-  def licensed_estimate_query_args
-    import_estimate_query_args.merge(LICENSED_FILTER)
-  end
-
   # Strip MO-controlled params so estimates match actual import behavior.
   # Normal URL submissions are cleaned by normalize_inat_url_param! first;
   # this guards against raw query strings (no "://") that bypass it.
   def url_query_args
     strip = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym)
-    Rack::Utils.parse_query(params[:inat_url].to_s).symbolize_keys.except(*strip)
+    Rack::Utils.parse_query(params[:inat_url].to_s).
+      symbolize_keys.except(*strip)
   end
 end

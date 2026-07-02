@@ -1,36 +1,46 @@
 # frozen_string_literal: true
 
 module Views::Controllers::InatImports
-  # Confirmation form for iNat import. Shows estimated import count
+  # Confirmation form for iNat import. Shows expected import count
   # and Proceed/Go Back buttons. Hidden fields carry form data
   # through the confirmation step. Rendered by `confirm.rb`.
   class ConfirmForm < ::Components::ApplicationForm
-    def initialize(model, estimate: nil, unlicensed_obs: nil,
-                   inat_import: nil, **)
-      @estimate = estimate
+    def initialize(model, expected: nil, unlicensed_obs: nil,
+                   breakdown: {}, **)
+      @expected = expected
       @unlicensed_obs = unlicensed_obs
-      @inat_import = inat_import
+      @inat_import = breakdown[:inat_import]
+      @requested = breakdown[:requested]
+      @after_taxon = breakdown[:after_taxon]
+      @estimate_with_date = breakdown[:estimate_with_date]
+      @estimated_at = Time.current
+      @urls = ::Inat::ConfirmURLBuilder.new(model)
       super(model, **)
     end
 
     def view_template
-      render_estimate
+      render_expected
       render_explanation
       render_prompt
       render_hidden_fields
       render_buttons
     end
 
-    def form_action
-      inat_imports_path
-    end
+    def form_action = inat_imports_path
 
     private
 
-    def render_estimate
+    def render_expected
       render(Components::Panel.new) do |panel|
         panel.with_body do
-          count_estimate_line
+          render_timestamp_note
+          if @requested
+            requested_obs_line
+            br
+          end
+          render_ignored_section
+          count_expected_line
+          render_nothing_to_import_notice
           br
           unlicensed_obs_line
           br
@@ -39,31 +49,157 @@ module Views::Controllers::InatImports
       end
     end
 
-    def count_estimate_line
-      b { plain(:inat_import_confirm_estimate_caption.l) }
-      plain(": ")
-      span(id: "estimated_count") { plain(estimated_count) }
+    def render_ignored_section
+      rows = ignored_row_data
+      return if rows.empty?
+
+      br
+      render_ignored_total
+      render_ignored_overlap_note if rows.size > 1
+      div(class: "ml-3") do
+        rows.each do |row|
+          render_ignored_row(row[:key], row[:count], row[:url])
+        end
+      end
+      br
     end
 
-    def estimated_count
-      @estimate.to_s
+    def render_ignored_total
+      return unless @requested && (@estimate_with_date || @expected)
+
+      total = @requested.to_i - (@estimate_with_date || @expected).to_i
+      b { plain(:inat_import_confirm_ignored_total_caption.l) }
+      plain(": ")
+      span(id: "total_ignored_count") { plain(total.to_s) }
+    end
+
+    def render_ignored_overlap_note
+      div do
+        small(class: "overlap-note") do
+          plain(:inat_import_confirm_ignored_overlap_note.l)
+        end
+      end
+    end
+
+    def ignored_row_data
+      [not_importable_row, already_imported_row, no_date_row].compact
+    end
+
+    def not_importable_row
+      return unless (c = not_importable_count)&.positive?
+
+      { key: :inat_import_confirm_not_importable_caption, count: c, url: nil }
+    end
+
+    def already_imported_row
+      return unless (c = already_imported_count)&.positive?
+
+      { key: :inat_import_confirm_already_imported_caption,
+        count: c, url: already_imported_url }
+    end
+
+    def no_date_row
+      return unless (c = no_date_count)&.positive?
+
+      { key: :inat_import_confirm_no_date_caption, count: c, url: nil }
+    end
+
+    def not_importable_count
+      @requested.to_i - @after_taxon.to_i if @requested && @after_taxon
+    end
+
+    def no_date_count
+      return unless @expected && @estimate_with_date
+
+      @expected.to_i - @estimate_with_date.to_i
+    end
+
+    def already_imported_count
+      return unless @after_taxon && @expected
+
+      @after_taxon.to_i - @expected.to_i
+    end
+
+    def requested_obs_line
+      b { plain(:inat_import_confirm_requested_caption.l) }
+      plain(": ")
+      span(id: "requested_count") do
+        url = requested_obs_url
+        if url
+          render(Components::Link::External.new(@requested.to_s, url))
+        else
+          plain(@requested.to_s)
+        end
+      end
+    end
+
+    def count_expected_line
+      b { plain(:inat_import_confirm_expected_caption.l) }
+      plain(": ")
+      span(id: "expected_count") do
+        url = expected_obs_url
+        count = (@estimate_with_date || @expected).to_s
+        if url
+          render(Components::Link::External.new(count, url))
+        else
+          plain(count)
+        end
+      end
+    end
+
+    def render_ignored_row(caption_key, count, url)
+      div(class: "mb-1") do
+        b { plain("#{caption_key.l}: ") }
+        if url
+          render(Components::Link::External.new(count.to_s, url))
+        else
+          plain(count.to_s)
+        end
+      end
+    end
+
+    def render_nothing_to_import_notice
+      return unless @expected&.zero?
+
+      p { plain(:inat_import_confirm_nothing_to_import.l) }
+    end
+
+    def render_timestamp_note
+      return unless @expected
+
+      t = @estimated_at.strftime("%Y-%m-%d %H:%M:%S %Z")
+      p(id: "as_of") { plain(:inat_import_confirm_expected_as_of.t(time: t)) }
+      return if stable_result_set?
+
+      p(class: "staleness-note") do
+        plain(:inat_import_confirm_expected_staleness.l)
+      end
     end
 
     def unlicensed_obs_line
       b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
       plain(": ")
-      span(id: "unlicensed_obs_count") { plain(@unlicensed_obs.to_s) }
+      span(id: "unlicensed_obs_count") { render_unlicensed_count }
       return unless @unlicensed_obs.to_i.positive?
 
-      plain(" ")
-      plain(unlicensed_obs_note)
+      whitespace
+      plain(unlicensed_note_key.l)
     end
 
-    def unlicensed_obs_note
-      if import_others?
-        :inat_import_confirm_unlicensed_others_note.l
+    def render_unlicensed_count
+      url = unlicensed_obs_url
+      if url
+        render(Components::Link::External.new(@unlicensed_obs.to_s, url))
       else
-        :inat_import_confirm_unlicensed_obs_note.l
+        plain(@unlicensed_obs.to_s)
+      end
+    end
+
+    def unlicensed_note_key
+      if import_others?
+        :inat_import_confirm_unlicensed_others_note
+      else
+        :inat_import_confirm_unlicensed_obs_note
       end
     end
 
@@ -74,8 +210,7 @@ module Views::Controllers::InatImports
     end
 
     def estimated_time
-      seconds = @estimate * avg_import_seconds
-      format_hms(seconds)
+      format_hms((@estimate_with_date || @expected) * avg_import_seconds)
     end
 
     def avg_import_seconds
@@ -84,52 +219,40 @@ module Views::Controllers::InatImports
     end
 
     def format_hms(seconds)
-      total_seconds = seconds.to_i
-      hours = total_seconds / 3600
-      minutes = (total_seconds % 3600) / 60
-      remaining = total_seconds % 60
-      Kernel.format("%02d:%02d:%02d", hours, minutes, remaining)
+      s = seconds.to_i
+      Kernel.format("%02d:%02d:%02d", s / 3600, s % 3600 / 60, s % 60)
     end
 
-    def render_explanation
-      p { plain(:inat_import_confirm_explanation.l) }
-    end
+    def render_explanation = p { plain(:inat_import_confirm_explanation.l) }
 
-    def render_prompt
-      p { plain(:inat_import_confirm_prompt.l) }
-    end
+    def render_prompt = p { plain(:inat_import_confirm_prompt.l) }
 
     def render_hidden_fields
-      hidden_field(:inat_username)
-      hidden_field(:inat_ids)
-      hidden_field(:import_all)
-      hidden_field(:consent)
-      hidden_field(:import_others)
-      hidden_field(:inat_url)
-      hidden_field(:original_inat_url)
-      hidden_field(:skip_inat_writeback)
+      [:inat_username, :inat_ids, :import_all, :consent, :import_others,
+       :inat_url, :original_inat_url, :skip_inat_writeback].each do |f|
+        hidden_field(f)
+      end
     end
 
     def render_buttons
       div(class: "mt-3") do
-        proceed_button
+        submit(:inat_import_confirm_proceed.l, as: :button,
+                                               name: "confirmed", value: "1",
+                                               disabled: nothing_to_import?)
         whitespace
-        go_back_button
+        submit(:inat_import_confirm_go_back.l, as: :button,
+                                               name: "go_back", value: "1")
       end
     end
 
-    def proceed_button
-      submit(:inat_import_confirm_proceed.l, as: :button,
-                                             name: "confirmed", value: "1")
-    end
+    def nothing_to_import? = (@estimate_with_date || @expected).to_i.zero?
 
-    def go_back_button
-      submit(:inat_import_confirm_go_back.l, as: :button,
-                                             name: "go_back", value: "1")
-    end
+    def import_others? = model.import_others == "1"
 
-    def import_others?
-      model.import_others == "1"
-    end
+    def requested_obs_url = @urls.requested_obs_url
+    def expected_obs_url = @urls.expected_obs_url
+    def already_imported_url = @urls.already_imported_url
+    def unlicensed_obs_url = @urls.unlicensed_obs_url
+    def stable_result_set? = @urls.stable_result_set?
   end
 end

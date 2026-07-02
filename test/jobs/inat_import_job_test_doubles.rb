@@ -75,7 +75,7 @@ module InatImportJobTestDoubles
       taxon_id: IMPORTABLE_TAXON_IDS_ARG,
       id: @inat_import.inat_ids,
       id_above: id_above,
-      per_page: 200,
+      per_page: InatImportJob::BATCH_SIZE,
       only_id: false,
       order: "asc",
       order_by: "id",

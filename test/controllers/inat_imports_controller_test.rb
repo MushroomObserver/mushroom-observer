@@ -18,15 +18,92 @@ class InatImportsControllerTest < FunctionalTestCase
   include ActiveJob::TestHelper
   include Inat::Constants
 
+  def test_index_user_sees_own_imports
+    import = inat_imports(:rolf_inat_import)
+
+    login(users(:rolf).login)
+    get(:index)
+
+    assert_response(:success)
+    assert_select("td", text: import.state.to_s)
+  end
+
+  def test_index_user_does_not_see_others_imports
+    other_import = inat_imports(:katrina_inat_import)
+
+    login(users(:rolf).login)
+    get(:index)
+
+    assert_select("td", text: other_import.state.to_s, count: 0)
+  end
+
+  def test_index_admin_sees_all_imports
+    make_admin
+
+    get(:index)
+
+    assert_response(:success)
+    assert_select("th", text: :USER.t)
+  end
+
+  def test_index_results_link_only_for_imports_with_linked_observations
+    make_admin
+    linked = inat_imports(:rolf_inat_import)
+    unlinked = inat_imports(:katrina_inat_import)
+    observations(:minimal_unknown_obs).update!(inat_import: linked)
+
+    get(:index)
+
+    assert_select("a[href='#{results_inat_import_path(linked)}']", count: 1)
+    assert_select("a[href='#{results_inat_import_path(unlinked)}']", count: 0)
+  end
+
+  def test_index_orders_by_updated_at_most_recent_first
+    make_admin
+    newest = inat_imports(:katrina_inat_import)
+    newest.update_column(:updated_at, 1.minute.from_now)
+
+    get(:index)
+
+    assert_response(:success)
+    first_row = css_select("tbody tr").first
+    assert_not_nil(first_row, "expected import rows")
+    assert_not_empty(
+      css_select(first_row, "a[href='#{inat_import_path(newest)}']"),
+      "most-recently-updated import should be the first row"
+    )
+  end
+
+  def test_results_redirects_to_observations_with_query
+    import = inat_imports(:lone_wolf_import)
+    import.update!(imported_count: 2)
+
+    login(users(:lone_wolf).login)
+    get(:results, params: { id: import.id })
+
+    assert_redirected_to(/#{observations_path}/)
+  end
+
   def test_show
     import = inat_imports(:rolf_inat_import)
-    tracker = InatImportJobTracker.create(inat_import: import.id)
 
     login
 
-    get(:show, params: { id: import.id, tracker_id: tracker.id })
+    get(:show, params: { id: import.id })
 
     assert_response(:success)
+  end
+
+  def test_show_turbo_stream
+    import = inat_imports(:rolf_inat_import)
+
+    login
+
+    get(:show, params: { id: import.id }, format: :turbo_stream)
+
+    assert_response(:success)
+    assert_select("turbo-stream[action='replace']" \
+                  "[target='inat_import_#{import.id}']")
   end
 
   def test_new_inat_import
@@ -48,7 +125,6 @@ class InatImportsControllerTest < FunctionalTestCase
   def test_new_inat_import_already_importing
     user = users(:katrina)
     import = inat_imports(:katrina_inat_import)
-    tracker = inat_import_job_trackers(:katrina_tracker)
 
     login(user.login)
     get(:new)
@@ -56,9 +132,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_flash_warning(
       "Should flash warning if user starts iNat import while another is running"
     )
-    assert_redirected_to(
-      inat_import_path(import, params: { tracker_id: tracker.id })
-    )
+    assert_redirected_to(inat_import_path(import))
   end
 
   def test_new_inat_import_inat_username_prefilled
@@ -119,9 +193,8 @@ class InatImportsControllerTest < FunctionalTestCase
       "Consent checkbox should remain checked on reload"
     )
     assert_select(
-      "input[type=checkbox]" \
-      "[id=inat_import_all][checked]", true,
-      "Import All checkbox should remain checked on reload"
+      "input[type=radio][value=all][checked]", true,
+      "Import All radio should remain selected on reload"
     )
   end
 
@@ -463,10 +536,10 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     body = @response.body
-    assert_match(:inat_import_confirm_estimate_caption.l, body)
-    assert_select("#estimated_count", "2")
+    assert_match(:inat_import_confirm_expected_caption.l, body)
+    assert_select("#expected_count", "2")
     assert_match(:inat_import_confirm_time_estimate_caption.l, body)
     assert_select("#estimated_time", "00:00:24")
   end
@@ -495,9 +568,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "1",
+      "#expected_count", "1",
       "Estimate should not filter by user_login if a super_importer " \
       "imports listed observations"
     )
@@ -634,9 +707,9 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "1",
+      "#expected_count", "1",
       "Estimate for a super_importer's own import-all should filter " \
       "by user_login, not return a global count"
     )
@@ -646,13 +719,13 @@ class InatImportsControllerTest < FunctionalTestCase
     user = users(:rolf)
     inat_ids = "12345"
 
-    # Total query (no licensed filter) returns 1 (the unlicensed obs)
+    # All queries return 1 (1 obs in scope, which is unlicensed)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
-    # Licensed query returns 0 (unlicensed obs excluded)
+    # Unlicensed query (own import uses licensed=false) also returns 1
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
-      to_return(status: 200, body: { total_results: 0 }.to_json)
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 1 }.to_json)
 
     login(user.login)
     post(:create,
@@ -660,9 +733,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "1",
+      "#expected_count", "1",
       "Estimate should include unlicensed own observations"
     )
     assert_select(
@@ -681,8 +754,12 @@ class InatImportsControllerTest < FunctionalTestCase
       to_return(status: 200, body: { total_results: 5 }.to_json)
     # Licensed query (the estimate) returns 3 — registered last, matched first
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
+      with(query: hash_including("licensed" => "true")).
       to_return(status: 200, body: { total_results: 3 }.to_json)
+    # Unlicensed query returns 2 (obs that will be skipped)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 2 }.to_json)
 
     login(user.login)
     post(:create,
@@ -690,9 +767,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
-      "#estimated_count", "3",
+      "#expected_count", "3",
       "Estimate for import-others should be licensed obs count"
     )
     assert_select(
@@ -705,7 +782,7 @@ class InatImportsControllerTest < FunctionalTestCase
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("license" => Inat::Constants::LICENSED_FILTER[:license])).
+      with(query: hash_including("licensed" => "false")).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)
@@ -713,7 +790,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
     assert_select(
       "#unlicensed_obs_count", "",
       "Unlicensed count should be blank when licensed estimate fails"
@@ -732,7 +809,7 @@ class InatImportsControllerTest < FunctionalTestCase
     # Licensed estimate returns valid JSON — registered last, matched first.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       with(query: hash_including(
-        "license" => Inat::Constants::LICENSED_FILTER[:license]
+        "licensed" => "true"
       )).
       to_return(status: 200, body: { total_results: 3 }.to_json)
 
@@ -743,7 +820,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select(
-      "#estimated_count", "3",
+      "#expected_count", "3",
       "Estimate should still show when only unlicensed-others request fails"
     )
     assert_select(
@@ -822,9 +899,10 @@ class InatImportsControllerTest < FunctionalTestCase
          })
 
     assert_response(:success)
-    url_field = css_select("input#inat_import_inat_url").first
+    url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field, "inat_url input field not found in response")
-    assert_equal(original_url, url_field["value"],
+    value = url_field["value"].presence || url_field.text.strip
+    assert_equal(original_url, value,
                  "Go Back must restore the original URL, not the " \
                  "normalized query string")
   end
@@ -907,7 +985,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1, all: 1, import_others: "1" })
 
     assert_response(:success)
-    assert_select("#estimated_count")
+    assert_select("#expected_count")
   end
 
   def test_superimporter_not_own_import_all_without_username_blocked
@@ -977,10 +1055,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "When job starts, elapsed time for 1st import should be <= 0.5 seconds"
     )
 
-    tracker = InatImportJobTracker.where(inat_import: inat_import.id).last
-    assert_redirected_to(
-      inat_import_path(inat_import, params: { tracker_id: tracker.id })
-    )
+    assert_redirected_to(inat_import_path(inat_import))
   end
 
   def test_inat_username_unchanged_if_authorization_denied
@@ -1010,10 +1085,9 @@ class InatImportsControllerTest < FunctionalTestCase
            "Test needs a Import fixture with a uncancelled, pending Job")
 
     login
-    get(:cancel, params: { id: import.id })
+    put(:cancel, params: { id: import.id })
 
-    assert_response(:success)
-    assert_select("[data-controller='inat-import-job']")
+    assert_redirected_to(inat_import_path(import))
     assert(import.reload.canceled?,
            "Clicking cancel button should make InatImport.canceled? == true")
   end
@@ -1028,8 +1102,8 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:new)
 
     assert_select(
-      "input[name='inat_import[inat_url]']", true,
-      "Form should include an inat_url text field"
+      "[name='inat_import[inat_url]']", true,
+      "Form should include an inat_url field"
     )
   end
 
@@ -1046,7 +1120,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: inat_username, consent: 1 })
 
     assert_response(:success, "Valid URL should proceed to confirmation")
-    assert_select("#estimated_count", "5",
+    assert_select("#expected_count", "5",
                   "Confirmation should show estimate from URL query")
   end
 
@@ -1210,10 +1284,11 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: "someone", consent: 1 })
 
-    url_field = css_select("input#inat_import_inat_url").first
+    url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field,
                    "inat_url field must be present in reloaded form")
-    assert_equal(url, url_field["value"],
+    value = url_field["value"].presence || url_field.text.strip
+    assert_equal(url, value,
                  "Form must be pre-populated with the original URL after " \
                  "validation failure, not blank or normalized")
   end
@@ -1262,7 +1337,7 @@ class InatImportsControllerTest < FunctionalTestCase
       "Confirm page must show the ignored-params warning for user_login " \
       "stripped from the URL for a non-superimporter"
     )
-    assert_select("#estimated_count", "3",
+    assert_select("#expected_count", "3",
                   "Confirm page should render with the estimate")
   end
 
@@ -1330,7 +1405,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, import_others: "1", consent: 1 })
 
-    assert_select("#estimated_count", true,
+    assert_select("#expected_count", true,
                   "Superimporter URL import without username should confirm")
   end
 
@@ -1351,7 +1426,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "7",
+    assert_select("#expected_count", "7",
                   "Estimate should include project_id from user URL")
   end
 
@@ -1380,7 +1455,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "5",
+    assert_select("#expected_count", "5",
                   "MO taxon_id and only_id must override user-supplied values")
   end
 
@@ -1408,7 +1483,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "3",
+    assert_select("#expected_count", "3",
                   "Importable user-supplied taxon_id should be used " \
                   "in the estimate, not replaced by IMPORTABLE_TAXON_IDS_ARG")
   end
@@ -1431,7 +1506,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "9",
+    assert_select("#expected_count", "9",
                   "id param from URL must be excluded from the estimate")
   end
 
@@ -1456,7 +1531,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_url: url, inat_username: "rolf_inat_user",
                    consent: 1 })
 
-    assert_select("#estimated_count", "5",
+    assert_select("#expected_count", "5",
                   "user_id must be stripped from the estimate request")
   end
 
@@ -1504,8 +1579,27 @@ class InatImportsControllerTest < FunctionalTestCase
       "Flash should surface iNat's error text instead of the generic " \
       "'Cannot communicate' message"
     )
-    assert_select("input#inat_import_inat_url", true,
+    assert_select("#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
+  end
+
+  def test_estimate_422_with_non_json_body_falls_back_to_exception_message
+    user = users(:rolf)
+    url = "#{INAT_API_OBS_URL}?place_id=678910"
+
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 422,
+                body: "Internal Server Error",
+                headers: { "Content-Type" => "text/plain" })
+
+    login(user.login)
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    # inat_error_text rescues the JSON::ParserError and falls back to
+    # exception.message ("422 Unprocessable Entity").
+    assert_flash_text(/422 Unprocessable Entity/)
   end
 
   # URI.parse raises URI::InvalidURIError on a malformed URL (e.g. a space);

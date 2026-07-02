@@ -16,7 +16,15 @@
 #                          Appended to iNat API query in order to generally
 #                          an MO user from importing someone else's iNat obss
 #  import_all:             whether to import all of user's relevant iNat obss
-#  importables::           number of importable observations in job
+#  importables::           observations queued for the *current* job run; reset
+#                          by the job from the iNat API total_results on start.
+#                          Used by estimated_remaining_time.
+#  total_importables::     estimated count recorded at confirm time; stable
+#                          across re-runs (job only sets it as a fallback if
+#                          blank). Used by total_expected_time for the ETA.
+#                          Differs from importables when the API count diverges
+#                          from the confirm-step estimate (result set changed
+#                          between confirm and import).
 #  imported_count::        running count of iNat obss imported in associated job
 #  response_errors::       string of newline-separated error messages
 #  total_imported_count::  historical count of iNat obss imported by this user
@@ -60,15 +68,30 @@ class InatImport < ApplicationRecord
   }, prefix: true
 
   belongs_to :user
-  has_many :inat_import_job_trackers, dependent: :delete_all
+  has_many :observations, dependent: :nullify
 
   serialize :log, type: Array, coder: YAML
+  serialize :date_missing_inat_ids, coder: JSON
+  serialize :license_added_inat_ids, coder: JSON
 
+  after_update_commit lambda { |inat_import|
+    html = ApplicationController.renderer.render(
+      Views::Controllers::InatImports::Status.new(inat_import: inat_import)
+    )
+    Turbo::StreamsChannel.broadcast_replace_to(
+      [inat_import.user, :inat_import],
+      target: "inat_import_#{inat_import.id}",
+      html: html
+    )
+  }
   after_initialize :ensure_response_errors_initialized
 
   # Expected average import time if no user has ever imported anything
   # (Only gets used once.)
   BASE_AVG_IMPORT_SECONDS = 15
+
+  # Hard cap on observations imported per InatImport run.
+  MAX_IMPORTABLE = 2_500
 
   # An import stuck in Importing state longer than this is assumed to have
   # crashed. Must match the schedule in config/recurring.yml.
@@ -104,6 +127,30 @@ class InatImport < ApplicationRecord
     Importing? && ended_at.nil? && updated_at < STUCK_THRESHOLD.ago
   end
 
+  def add_ignored_obs(reason, inat_id: nil)
+    case reason
+    when :not_importable   then increment!(:ignored_not_importable_count)
+    when :date_missing     then append_date_missing(inat_id)
+    when :already_imported then increment!(:ignored_already_imported_count)
+    else raise(ArgumentError.new("Unknown ignored reason: #{reason.inspect}"))
+    end
+  end
+
+  def add_license_added_obs(inat_id:)
+    reload
+    update!(license_added_inat_ids: license_added_inat_ids + [inat_id])
+  end
+
+  def reached_import_cap?
+    imported_count.to_i >= MAX_IMPORTABLE
+  end
+
+  def ignored_total_count
+    ignored_not_importable_count.to_i +
+      ignored_date_missing_count.to_i +
+      ignored_already_imported_count.to_i
+  end
+
   def add_response_error(error)
     msg = if error.is_a?(::RestClient::Response)
             error.body
@@ -131,7 +178,7 @@ class InatImport < ApplicationRecord
   # If user has no import history, use system-wide average import time.
   # If no system-wide history, use BASE_AVG_IMPORT_SECONDS.
   def total_expected_time
-    importables * initial_avg_import_seconds
+    total_importables.to_i * initial_avg_import_seconds
   end
 
   def initial_avg_import_seconds
@@ -152,6 +199,20 @@ class InatImport < ApplicationRecord
     return 0 unless last_obs_start
 
     Time.now.utc - last_obs_start
+  end
+
+  def elapsed_time
+    return 0 unless started_at
+
+    end_time = Done? && ended_at ? ended_at : Time.zone.now
+    (end_time - started_at).to_i
+  end
+
+  def estimated_remaining_time
+    return 0 if Done?
+    return nil unless importables.to_i.positive? && started_at
+
+    [total_expected_time - elapsed_time, 0].max
   end
 
   #########
@@ -176,5 +237,14 @@ class InatImport < ApplicationRecord
 
   def ensure_response_errors_initialized
     self.response_errors ||= ""
+    self.date_missing_inat_ids ||= []
+    self.license_added_inat_ids ||= []
+  end
+
+  def append_date_missing(inat_id)
+    reload
+    self.ignored_date_missing_count = ignored_date_missing_count.to_i + 1
+    self.date_missing_inat_ids = date_missing_inat_ids + [inat_id].compact
+    save!
   end
 end

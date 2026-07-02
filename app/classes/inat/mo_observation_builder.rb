@@ -10,11 +10,13 @@ class Inat
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
-    def initialize(inat_obs:, user:, import_others: false, external_site: nil)
+    def initialize(inat_obs:, user:, import_others: false,
+                   external_site: nil, inat_import: nil)
       @inat_obs = inat_obs
       @user = user
       @import_others = import_others
       @external_site = external_site || ExternalSite.inaturalist
+      @inat_import = inat_import
       @skipped_images = 0
       @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
     end
@@ -56,7 +58,8 @@ class Inat
         name_id: lead_name.id,
         specimen: inat_obs.specimen?,
         text_name: lead_name.text_name,
-        notes: inat_obs.notes }.merge(collector_attrs)
+        notes: inat_obs.notes,
+        inat_import_id: @inat_import&.id }.merge(collector_attrs)
     end
 
     # Link the collector to an MO user when the iNat collector (a custom

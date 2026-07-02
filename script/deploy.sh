@@ -37,31 +37,29 @@ if [ "$EXPECTED_RUBY" != "$CURRENT_RUBY" ]; then
     exit 1
 fi
 
-echo Checking for running background jobs...
-RUNNING_JOBS_OUTPUT=$(bundle exec rails runner script/check_running_jobs.rb 2>&1)
-RUNNING_JOBS_STATUS=$?
-
-if [ $RUNNING_JOBS_STATUS -eq 2 ]; then
+# Pause all queues so no NEW jobs start, then wait (up to the drain timeout)
+# for in-flight jobs to finish. This runs BEFORE anything is stopped, so a
+# timeout aborts the deploy with the site still up and the queues left paused
+# (resume manually once the stuck job is dealt with).
+# See script/pause_and_drain_jobs.rb.
+echo Pausing queues and draining in-flight jobs...
+bundle exec rails runner script/pause_and_drain_jobs.rb "${DRAIN_TIMEOUT:-300}"
+if [ $? -ne 0 ]; then
     echo ""
-    echo "Deploy aborted: background jobs are currently running."
-    echo ""
-    echo "$RUNNING_JOBS_OUTPUT"
-    echo ""
-    echo "Wait for jobs to finish before deploying."
-    exit 1
-elif [ $RUNNING_JOBS_STATUS -ne 0 ]; then
-    echo ""
-    echo "Deploy aborted: failed to check for running background jobs."
-    echo ""
-    echo "$RUNNING_JOBS_OUTPUT"
-    echo ""
+    echo "Deploy aborted: in-flight jobs did not finish within the timeout."
+    echo "The site is still up and queues remain paused (no new jobs start)."
+    echo "Deal with the stuck job(s), then resume with:"
+    echo "  bundle exec rails runner script/resume_jobs.rb"
     exit 1
 fi
 
+# Queues are drained and paused; the pause persists across the restart, so no
+# job runs until we resume at the very end.
 echo Stopping solidqueue to prevent new jobs during deploy...
 sudo service solidqueue stop
 if [ $? -ne 0 ]; then
     echo Failed to stop solidqueue.
+    echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
     exit 1
 fi
 
@@ -89,6 +87,7 @@ if [ $? -ne 0 ]; then
     echo git stash failed.
     echo Restarting puma... && sudo service puma start
     echo Restarting solidqueue... && sudo service solidqueue start
+    echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
     exit 1
 fi
 
@@ -104,6 +103,7 @@ if [ $? -ne 0 ]; then
     echo git pull failed.
     echo Restarting puma... && sudo service puma start
     echo Restarting solidqueue... && sudo service solidqueue start
+    echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
     exit 1
 fi
 
@@ -113,6 +113,7 @@ if [ "$STASH_RESULT" != 'No local changes to save' ]; then
 	echo Applying the stashed changes failed.
         echo Restarting puma... && sudo service puma start
 	echo Restarting solidqueue... && sudo service solidqueue start
+	echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
 	exit 1
     fi
 fi
@@ -129,6 +130,7 @@ echo Updating translations... && rake lang:update && \
 echo Precompiling assets... && rake assets:precompile && \
 echo Starting puma... && sudo service puma start && \
 echo Starting solidqueue... && sudo service solidqueue start && \
+echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb && \
 echo Taking down maintenance page... && rm -f public/maintenance.html && \
 echo Tagging repo with $tag... && git tag $tag && \
 echo Pushing new tag... && git push --tags && \
@@ -139,5 +141,6 @@ if [ $? -ne 0 ]; then
     echo "Deploy failed. Restarting puma and solidqueue with existing code..."
     sudo service puma start
     sudo service solidqueue start
+    echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb
     exit 1
 fi
