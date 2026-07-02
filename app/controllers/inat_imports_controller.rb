@@ -328,15 +328,15 @@ class InatImportsController < ApplicationController
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
 
-    inat_import = inat_import_authenticating(auth_code)
+    inat_import = InatImport.find_by(id: params[:state], user: @user)
     return not_authorized unless inat_import
 
-    inat_import.reset_last_obs_start
-
-    Rails.logger.info(
-      "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
-    )
-    InatImportJob.perform_later(inat_import)
+    # Guard against a repeated (browser refresh) or late callback: only a
+    # record still awaiting authorization gets authenticated and enqueued,
+    # so we never start a duplicate job or regress a running/done import.
+    if inat_import.Authorizing?
+      start_authenticated_import(inat_import, auth_code)
+    end
 
     redirect_to(inat_import_path(inat_import))
   end
@@ -350,14 +350,15 @@ class InatImportsController < ApplicationController
     redirect_to(observations_path)
   end
 
-  # Load the specific import from the OAuth `state` param, scoped to the
-  # logged-in user so a forged state can't touch another user's import.
-  def inat_import_authenticating(auth_code)
-    inat_import = InatImport.find_by(id: params[:state], user: @user)
-    return nil unless inat_import
-
+  # Authenticate the loaded import and kick off its job. Called only for a
+  # record still in the Authorizing state (see authorization_response).
+  def start_authenticated_import(inat_import, auth_code)
     inat_import.update(token: auth_code, state: "Authenticating")
-    inat_import
+    inat_import.reset_last_obs_start
+    Rails.logger.info(
+      "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
+    )
+    InatImportJob.perform_later(inat_import)
   end
 
   public

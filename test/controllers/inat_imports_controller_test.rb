@@ -1050,9 +1050,10 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Test needs user fixture without an iNat username")
     inat_import = inat_imports(:rolf_inat_import)
 
-    # empty id_list to prevent importing any observations in this test
-    inat_import.inat_ids = ""
-    inat_import.save
+    # Empty id_list prevents importing observations. Authorizing is the
+    # state init_ivars leaves the record in before the iNat redirect, and
+    # the only state the callback resumes.
+    inat_import.update!(inat_ids: "", state: "Authorizing")
     inat_authorization_callback_params = { code: "MockCode",
                                            state: inat_import.id }
 
@@ -1072,6 +1073,27 @@ class InatImportsControllerTest < FunctionalTestCase
       "When job starts, elapsed time for 1st import should be <= 0.5 seconds"
     )
 
+    assert_redirected_to(inat_import_path(inat_import))
+  end
+
+  def test_authorization_response_ignores_repeated_callback
+    user = users(:rolf)
+    inat_import = inat_imports(:rolf_inat_import)
+    # An import that has already progressed past authorization.
+    inat_import.update!(state: "Importing", token: "existing")
+
+    login(user.login)
+
+    assert_no_difference(
+      "enqueued_jobs.size",
+      "A repeated or late callback must not enqueue another job"
+    ) do
+      get(:authorization_response,
+          params: { code: "MockCode", state: inat_import.id })
+    end
+
+    assert_equal("Importing", inat_import.reload.state,
+                 "Callback must not regress a running import")
     assert_redirected_to(inat_import_path(inat_import))
   end
 
@@ -1632,9 +1654,10 @@ class InatImportsControllerTest < FunctionalTestCase
   ########## Utilities
 
   # Each import now creates a brand-new persistent InatImport record; the
-  # freshly created one is the last by created_at for the logged-in user.
+  # freshly created one is the last by id (deterministic insertion order,
+  # unlike created_at which can tie under coarse/frozen timestamps).
   def created_import(user)
-    InatImport.where(user: user).order(:created_at).last
+    InatImport.where(user: user).order(:id).last
   end
 
   def authorization_denial_callback_params
