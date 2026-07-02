@@ -4,7 +4,7 @@ require("test_helper")
 
 class ActiveLinkTest < ComponentTestCase
   def test_renders_link_with_nav_active_stimulus_data_attrs
-    html = render(Components::Link::Active.new("Home", "/"))
+    html = render(Components::Link::Active.new(content: "Home", path: "/"))
 
     assert_html(html, "a[href='/']" \
                       "[data-nav-active-target='link']" \
@@ -14,7 +14,7 @@ class ActiveLinkTest < ComponentTestCase
 
   def test_caller_data_attrs_deep_merge_with_stimulus_attrs
     html = render(Components::Link::Active.new(
-                    "Home", "/", data: { my_attr: "v" }
+                    content: "Home", path: "/", data: { my_attr: "v" }
                   ))
 
     # Stimulus wiring + caller's custom data both on the anchor.
@@ -24,7 +24,7 @@ class ActiveLinkTest < ComponentTestCase
 
   def test_caller_class_passes_through
     html = render(Components::Link::Active.new(
-                    "Home", "/", class: "list-group-item"
+                    content: "Home", path: "/", class: "list-group-item"
                   ))
 
     assert_html(html, "a.list-group-item[href='/']")
@@ -32,7 +32,7 @@ class ActiveLinkTest < ComponentTestCase
 
   def test_html_safe_content_not_escaped
     safe_text = "<b>bold</b>".html_safe
-    html = render(Components::Link::Active.new(safe_text, "/"))
+    html = render(Components::Link::Active.new(content: safe_text, path: "/"))
 
     assert_html(html, "a b", text: "bold")
   end

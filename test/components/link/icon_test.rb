@@ -5,7 +5,7 @@ require("test_helper")
 class IconLinkTest < ComponentTestCase
   def test_plain_icon_link
     html = render(Components::Link::Icon.new(
-                    "Edit", "/foo", icon: :edit
+                    content: "Edit", path: "/foo", icon: :edit
                   ))
 
     # Outer anchor: href, tooltip title, icon-link class, and the
@@ -19,13 +19,14 @@ class IconLinkTest < ComponentTestCase
 
   def test_blank_text_renders_nothing
     # Matches legacy `icon_link_to` — silent no-op when text is nil.
-    html = render(Components::Link::Icon.new(nil, "/x", icon: :edit))
+    html = render(Components::Link::Icon.new(content: nil, path: "/x",
+                                             icon: :edit))
 
     assert_equal("", html)
   end
 
   def test_no_icon_falls_back_to_plain_link
-    html = render(Components::Link::Icon.new("Label", "/x"))
+    html = render(Components::Link::Icon.new(content: "Label", path: "/x"))
 
     # Without an `:icon`, render as a plain link with the text.
     assert_html(html, "a[href='/x']", text: "Label")
@@ -35,7 +36,8 @@ class IconLinkTest < ComponentTestCase
 
   def test_show_text_replaces_sr_only_with_visible_label
     html = render(Components::Link::Icon.new(
-                    "Delete", "/d", icon: :delete, show_text: true
+                    content: "Delete", path: "/d",
+                    icon: :delete, show_text: true
                   ))
 
     assert_no_html(html, "a span.sr-only")
@@ -44,7 +46,7 @@ class IconLinkTest < ComponentTestCase
 
   def test_stateful_renders_active_icon_and_label
     html = render(Components::Link::Icon.new(
-                    "Subscribe", "/s",
+                    content: "Subscribe", path: "/s",
                     icon: :tracking,
                     active_icon: :check, active_content: "Subscribed"
                   ))
@@ -62,7 +64,8 @@ class IconLinkTest < ComponentTestCase
 
   def test_button_to_mode
     html = render(Components::Link::Icon.new(
-                    "Delete", "/d", icon: :delete, button_to: true
+                    content: "Delete", path: "/d",
+                    icon: :delete, button_to: true
                   ))
 
     # button_to wraps a button in a form; `role='button'` is added so
@@ -73,7 +76,8 @@ class IconLinkTest < ComponentTestCase
 
   def test_extra_class_appends_to_icon_link
     html = render(Components::Link::Icon.new(
-                    "Edit", "/x", icon: :edit, class: "extra-thing"
+                    content: "Edit", path: "/x",
+                    icon: :edit, class: "extra-thing"
                   ))
 
     # Caller's `:class` deep-merges with the default `icon-link` class.
@@ -82,7 +86,7 @@ class IconLinkTest < ComponentTestCase
 
   def test_arbitrary_data_attrs_deep_merge_onto_link
     html = render(Components::Link::Icon.new(
-                    "X", "/x",
+                    content: "X", path: "/x",
                     icon: :edit, data: { my_attr: "v" }
                   ))
 
