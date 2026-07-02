@@ -41,7 +41,7 @@ module Views::Controllers::Observations::Show::SiblingRecords
     a(href: herbarium_record_path(record.id)) do
       trusted_html(record.accession_at_herbarium.t)
     end
-    plain(" ")
+    whitespace
     sibling_attribution(sibling)
     render_mcp_search_link(record) if record.herbarium.web_searchable?
   end

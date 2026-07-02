@@ -22,7 +22,7 @@ module Views::Controllers::Info
       li do
         link_to(lang.name, reload_with_args(user_locale: lang.locale))
         if lang.beta
-          plain(" ")
+          whitespace
           span { "(beta)" }
         end
       end

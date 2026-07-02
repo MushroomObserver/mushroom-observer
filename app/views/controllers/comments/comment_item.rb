@@ -123,7 +123,7 @@ module Views::Controllers::Comments
         else
           plain(@comment.user.unique_text_name)
         end
-        plain(" ")
+        whitespace
       end
     end
 

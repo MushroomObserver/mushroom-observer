@@ -83,7 +83,7 @@ module Views::Controllers::Publications
 
       capture do
         link_to(:EDIT.l, edit_publication_path(pub))
-        plain(" ")
+        whitespace
         link_to(:DESTROY.l, { action: :destroy, id: pub.id },
                 data: { confirm: :are_you_sure.t })
       end

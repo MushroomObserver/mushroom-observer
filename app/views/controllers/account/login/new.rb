@@ -56,7 +56,7 @@ module Views::Controllers::Account::Login
         end
         div do
           trusted_html(:login_images_without_login.tp)
-          plain(" ")
+          whitespace
           trusted_html(:login_data_without_login.tp)
         end
       end
