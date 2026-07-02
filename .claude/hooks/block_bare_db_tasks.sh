@@ -18,6 +18,13 @@ set -euo pipefail
 INPUT="$(cat)"
 COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')"
 
+# Only fire when the command actually invokes rails/rake — not when the
+# db: tokens appear in heredoc prose or a PR body being written to a file.
+case "$COMMAND" in
+  *"bin/rails"*|*"bin/rake"*|*"bundle exec rake"*) ;;
+  *) exit 0 ;;
+esac
+
 # Count how many db: task words appear in the command.
 # Two or more of (db:drop, db:create, db:schema:load) in one command = blocked.
 DB_TASK_COUNT=$(printf '%s' "$COMMAND" | grep -oE 'db:(drop|create|schema:load)' | wc -l | tr -d ' ')
