@@ -6,8 +6,10 @@
 # `data-parent="#accordion_id"`) anywhere on the page — inside a
 # pane or elsewhere.
 #
-# Add as many `with_pane` slots as needed. Pass `expanded: true` on
-# the one that starts visible; the rest start collapsed.
+# Add as many `with_pane` slots as needed. `id:` is required on each
+# pane — callers' `data-target` / `href` must point at it. Pass
+# `expanded: true` on the one that starts visible; the rest start
+# collapsed.
 #
 # @example Inline notes editor in a table row
 #   Accordion(id: "notes_#{key.id}") do |accordion|
@@ -24,7 +26,7 @@ class Components::Accordion < Components::Base
 
   prop :id, String
 
-  slot :pane, lambda { |id: nil, expanded: false, &content|
+  slot :pane, lambda { |id:, expanded: false, &content|
     render(::Components::CollapseDiv.new(
              id: id, expanded: expanded, html_class: "no-transition"
            )) { content&.call }
