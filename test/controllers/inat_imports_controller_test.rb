@@ -106,6 +106,39 @@ class InatImportsControllerTest < FunctionalTestCase
                   "[target='inat_import_#{import.id}']")
   end
 
+  def test_show_denies_another_users_import
+    login(users(:rolf).login)
+
+    assert_raises(ActiveRecord::RecordNotFound,
+                  "Must not expose another user's import") do
+      get(:show, params: { id: inat_imports(:katrina_inat_import).id })
+    end
+  end
+
+  def test_results_denies_another_users_import
+    login(users(:rolf).login)
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      get(:results, params: { id: inat_imports(:katrina_inat_import).id })
+    end
+  end
+
+  def test_cancel_denies_another_users_import
+    login(users(:rolf).login)
+
+    assert_raises(ActiveRecord::RecordNotFound) do
+      put(:cancel, params: { id: inat_imports(:katrina_inat_import).id })
+    end
+  end
+
+  def test_admin_can_show_another_users_import
+    make_admin
+
+    get(:show, params: { id: inat_imports(:katrina_inat_import).id })
+
+    assert_response(:success)
+  end
+
   def test_new_inat_import
     login(users(:rolf).login)
     get(:new)
@@ -1123,7 +1156,7 @@ class InatImportsControllerTest < FunctionalTestCase
     assert(import.job_pending? && !import.canceled?,
            "Test needs a Import fixture with a uncancelled, pending Job")
 
-    login
+    login(users(:katrina).login)
     put(:cancel, params: { id: import.id })
 
     assert_redirected_to(inat_import_path(import))
