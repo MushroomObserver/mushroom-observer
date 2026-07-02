@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_06_29_000000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_02_000000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -197,7 +197,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_06_29_000000) do
     t.integer "user_id"
     t.date "when"
     t.text "notes"
-    t.string "copyright_holder", limit: 100
+    t.string "copyright_holder"
     t.integer "license_id", default: 10, null: false
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil

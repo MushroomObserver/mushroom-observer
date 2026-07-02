@@ -55,10 +55,18 @@ class Inat
           api_key: user_api_key,
           upload_url: photo.url,
           notes: photo.notes,
-          copyright_holder: photo.copyright_holder,
+          copyright_holder: cleaned_copyright_holder(photo),
           license: license,
           observations: @observation.id
         }
+      end
+
+      # Imported images all get a Creative Commons license,
+      # so the contradictory "all rights reserved"
+      # The copyright_holder column is implicitly capped at 255 chars,
+      # so truncate it here
+      def cleaned_copyright_holder(photo)
+        photo.copyright_holder.sub("all rights reserved", "").truncate(255)
       end
     end
   end
