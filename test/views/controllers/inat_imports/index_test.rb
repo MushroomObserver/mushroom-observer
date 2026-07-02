@@ -67,6 +67,24 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href='#{routes.new_inat_import_path}']")
     end
 
+    def test_when_column_is_first_and_shows_ended_at
+      @import.update!(ended_at: Time.zone.parse("2026-01-02 03:04:05"))
+
+      html = render_index(imports: [@import])
+
+      assert_html(html, "th:first-child", text: :WHEN.l)
+      assert_html(html, "td",
+                  text: @import.ended_at.strftime("%Y-%m-%d %H:%M:%S %z"))
+    end
+
+    def test_report_column_links_to_show_page
+      html = render_index(imports: [@import])
+
+      assert_html(html, "th", text: :REPORTS.l)
+      assert_html(html, "a[href='#{routes.inat_import_path(@import)}']",
+                  text: :REPORT.l)
+    end
+
     private
 
     def render_index(imports:, admin: false)

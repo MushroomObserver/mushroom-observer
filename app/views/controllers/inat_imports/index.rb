@@ -15,6 +15,7 @@ module Views::Controllers::InatImports
     end
 
     def render_columns(tbl)
+      tbl.column(:WHEN.l) { |imp| plain(when_text(imp)) }
       if @admin
         tbl.column(:USER.t) do |imp|
           render(Components::Link::User.new(user: imp.user))
@@ -22,6 +23,7 @@ module Views::Controllers::InatImports
       end
       render_count_columns(tbl)
       tbl.column(:RESULTS.l) { |imp| results_link(imp) }
+      tbl.column(:REPORTS.l) { |imp| report_link(imp) }
     end
 
     def render_count_columns(tbl)
@@ -40,6 +42,14 @@ module Views::Controllers::InatImports
       return unless import.Done? && import.imported_count.to_i.positive?
 
       link_to(:RESULTS.l, results_inat_import_path(import))
+    end
+
+    def report_link(import)
+      link_to(:REPORT.l, inat_import_path(import))
+    end
+
+    def when_text(import)
+      import.ended_at&.strftime("%Y-%m-%d %H:%M:%S %z").to_s
     end
   end
 end

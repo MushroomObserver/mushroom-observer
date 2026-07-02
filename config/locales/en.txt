@@ -861,6 +861,10 @@
   new: new
   OPTIONAL: Optional
   optional: optional
+  REPORT: Report
+  report: report
+  REPORTS: Reports
+  reports: reports
   REQUIRED: Required
   required: required
   RESULTS: Results
