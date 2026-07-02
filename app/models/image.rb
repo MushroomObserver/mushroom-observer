@@ -1245,8 +1245,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       self.content_type = content_type.to_s.truncate(100)
     end
 
-    return if copyright_holder.to_s.size <= 100
+    return if copyright_holder.to_s.size <= 255
 
-    self.copyright_holder = copyright_holder.to_s.truncate(100)
+    self.copyright_holder = copyright_holder.to_s.truncate(255)
   end
 end

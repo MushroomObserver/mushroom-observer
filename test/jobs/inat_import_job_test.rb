@@ -494,27 +494,38 @@ class InatImportJobTest < ActiveJob::TestCase
     API2.singleton_class.define_method(:execute, original_execute)
   end
 
-  def test_import_job_image_upload_failure_logs_error
-    # evernia has 1 photo — exercises the upload_inat_image error path
-    create_ivars_from_filename("evernia")
+  # Prove that an image upload API failure skips the observation and logs a
+  # message identifying both the iNat observation and the failing image
+  # (rather than the "undefined method 'paginate' for nil" message that
+  # leaked out before this fix, from an unguarded `api.results.first`).
+  def test_import_job_image_upload_failure_skips_observation
+    create_ivars_from_filename("donadinia_PNW01")
     stub_inat_interactions
 
+    # Simulate API2.execute returning errors when uploading an image.
     original_execute = API2.method(:execute)
     API2.singleton_class.define_method(:execute) do |params|
       if params[:action] == :image && params[:method] == :post
         api = API2.new(params)
-        api.errors << API2::MissingParameter.new(:upload)
+        api.errors << API2::MissingParameter.new(:upload_url)
         api
       else
         original_execute.call(params)
       end
     end
 
-    InatImportJob.perform_now(@inat_import)
+    assert_no_difference("Observation.count",
+                         "Should skip observation when image upload fails") do
+      InatImportJob.perform_now(@inat_import)
+    end
 
-    assert_match(/Image upload failed/,
-                 @inat_import.reload.response_errors,
-                 "Image upload failure should be logged in response_errors")
+    @inat_import.reload
+    assert_match(/Failed to import iNat \d+/,
+                 @inat_import.response_errors,
+                 "Should log which iNat observation failed to import")
+    assert_match(/Failed to import image \d+/,
+                 @inat_import.response_errors,
+                 "Should log which iNat image failed to upload")
   ensure
     API2.singleton_class.define_method(:execute, original_execute)
   end
