@@ -122,7 +122,7 @@ module Views::Controllers::Descriptions
       content, path, opts = ::Tab::Description::Create.new(
         parent: object
       ).to_a
-      Components::Link::Icon.new(content, path, **(opts || {}))
+      Components::Link::Icon.new(content: content, path: path, **(opts || {}))
     end
 
     def alts_empty_text(type)

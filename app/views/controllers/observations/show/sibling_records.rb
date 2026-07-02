@@ -50,8 +50,8 @@ module Views::Controllers::Observations::Show::SiblingRecords
     br
     span(class: "indent") do
       render(::Components::Link::External.new(
-               :herbarium_record_collection.t,
-               record.herbarium.mcp_url(record.accession_number)
+               content: :herbarium_record_collection.t,
+               path: record.herbarium.mcp_url(record.accession_number)
              ))
     end
   end
@@ -59,8 +59,8 @@ module Views::Controllers::Observations::Show::SiblingRecords
   def render_sibling_sequence_archive(sequence)
     plain(" [")
     render(::Components::Link::External.new(
-             :show_observation_archive_link.t,
-             sequence.accession_url
+             content: :show_observation_archive_link.t,
+             path: sequence.accession_url
            ))
     plain("]")
   end

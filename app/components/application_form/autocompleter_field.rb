@@ -226,7 +226,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless find_text
 
       render(::Components::Link::Icon.new(
-               find_text, "#",
+               content: find_text, path: "#",
                icon: :find_on_map, show_text: false,
                icon_class: "text-primary",
                name: "find_#{autocompleter_type}",
@@ -240,7 +240,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless keep_text
 
       render(::Components::Link::Icon.new(
-               keep_text, "#",
+               content: keep_text, path: "#",
                icon: :apply, show_text: false,
                icon_class: "text-primary",
                name: "keep_#{autocompleter_type}",
@@ -256,7 +256,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless keep_text
 
       render(::Components::Link::Icon.new(
-               edit_text, "#",
+               content: edit_text, path: "#",
                icon: :edit, show_text: false,
                icon_class: "text-primary",
                name: "edit_#{autocompleter_type}",
@@ -272,7 +272,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return if !create_text || create.present?
 
       render(::Components::Link::Icon.new(
-               create_text, "#",
+               content: create_text, path: "#",
                id: "create_#{autocompleter_type}_btn",
                class: "ml-3 create-button",
                icon: :plus, show_text: true,

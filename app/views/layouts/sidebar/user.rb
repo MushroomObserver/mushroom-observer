@@ -59,7 +59,9 @@ class Views::Layouts::Sidebar
         html_options[:class]
       )
 
-      render(::Components::Link::Active.new(title, url, **html_options))
+      render(::Components::Link::Active.new(
+               content: title, path: url, **html_options
+             ))
     end
 
     def render_admin_button

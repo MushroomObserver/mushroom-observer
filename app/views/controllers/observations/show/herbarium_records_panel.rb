@@ -70,8 +70,8 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
     br
     span(class: "indent") do
       render(::Components::Link::External.new(
-               :herbarium_record_collection.t,
-               record.herbarium.mcp_url(record.accession_number)
+               content: :herbarium_record_collection.t,
+               path: record.herbarium.mcp_url(record.accession_number)
              ))
     end
   end
@@ -91,9 +91,9 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
       if record.herbarium.web_searchable?
         br
         render(::Components::Link::External.new(
-                 "#{record.herbarium.code} " \
-                 "#{:herbarium_record_collection.t}",
-                 record.herbarium.mcp_url(record.accession_number)
+                 content: "#{record.herbarium.code} " \
+                          "#{:herbarium_record_collection.t}",
+                 path: record.herbarium.mcp_url(record.accession_number)
                ))
       end
     end

@@ -11,12 +11,14 @@
 # Stimulus target/action attrs.
 #
 # @example
-#   render(Components::Link::Active.new("Latest", observations_path))
-#   render(Components::Link::Active.new(nil, observations_path) { "Latest" })
+#   render(Components::Link::Active.new(content: "Latest",
+#                                       path: observations_path))
+#   render(Components::Link::Active.new(content: nil,
+#                                       path: observations_path) { "Latest" })
 class Components::Link::Active < Components::Base
   attr_reader :content, :path, :args
 
-  def initialize(content, path, **args)
+  def initialize(content:, path:, **args)
     super()
     @content = content
     @path = path

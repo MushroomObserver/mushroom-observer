@@ -3,7 +3,7 @@
 # Anchor that opens in a new tab with `rel="noopener noreferrer"` baked in.
 #
 # Generic form (context-nav tabs, one-off external links):
-#   render(Components::Link::External.new("GBIF", gbif_url))
+#   render(Components::Link::External.new(content: "GBIF", path: gbif_url))
 #
 # Tab PORO form (extracts title/path/html_options from the tab):
 #   render(Components::Link::External.new(tab: some_tab))
@@ -21,7 +21,7 @@ class Components::Link::External < Components::Base
   # Keys from Tab::Base::ALLOWED_HTML_OPTION_KEYS that must not reach link_to.
   NON_HTML_OPTS = [:external, :button, :back, :icon, :help].freeze
 
-  def initialize(content = nil, path = nil, tab: nil, link: nil, **opts)
+  def initialize(content: nil, path: nil, tab: nil, link: nil, **opts)
     super()
     @link = link
     if tab

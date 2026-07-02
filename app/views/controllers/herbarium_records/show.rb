@@ -79,8 +79,8 @@ module Views::Controllers::HerbariumRecords
 
     def render_collection_link
       render(::Components::Link::External.new(
-               "#{herbarium.code} #{:herbarium_record_collection.t}",
-               herbarium.mcp_url(@herbarium_record.accession_number)
+               content: "#{herbarium.code} #{:herbarium_record_collection.t}",
+               path: herbarium.mcp_url(@herbarium_record.accession_number)
              ))
       br
     end

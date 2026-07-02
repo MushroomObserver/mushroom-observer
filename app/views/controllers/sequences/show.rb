@@ -124,9 +124,9 @@ module Views::Controllers::Sequences
 
     def render_accession_link
       render(::Components::Link::External.new(
-               truncate(@sequence.accession,
-                        length: @sequence.locus_width / 2).t,
-               @sequence.accession_url
+               content: truncate(@sequence.accession,
+                                 length: @sequence.locus_width / 2).t,
+               path: @sequence.accession_url
              ))
     end
   end

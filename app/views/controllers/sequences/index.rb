@@ -51,13 +51,16 @@ module Views::Controllers::Sequences
 
     def render_archive_link(seq)
       url = ::WebSequenceArchive.archive_home(seq.archive)
-      render(::Components::Link::External.new(seq.archive.t, url))
+      render(::Components::Link::External.new(
+               content: seq.archive.t, path: url
+             ))
     end
 
     def render_accession_link(seq)
       render(::Components::Link::External.new(
-               truncate(seq.accession, length: seq.locus_width / 2).t,
-               seq.accession_url
+               content: truncate(seq.accession,
+                                 length: seq.locus_width / 2).t,
+               path: seq.accession_url
              ))
     end
   end

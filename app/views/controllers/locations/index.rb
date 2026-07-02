@@ -105,8 +105,10 @@ module Views::Controllers::Locations
                  where: location_name, count: count
                ))
         render(::Components::Link::Icon.new(
-                 :list_place_names_merge.l,
-                 matching_locations_for_observations_path(where: location_name),
+                 content: :list_place_names_merge.l,
+                 path: matching_locations_for_observations_path(
+                   where: location_name
+                 ),
                  icon: :merge, show_text: false
                ))
       end
