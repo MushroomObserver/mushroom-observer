@@ -54,6 +54,31 @@ class InatImportTest < ActiveSupport::TestCase
     assert_equal(12, import.initial_avg_import_seconds)
   end
 
+  def test_estimated_remaining_time_extrapolates_from_progress
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 5, started_at: 10.seconds.ago,
+                   ended_at: nil)
+
+    # ~5 obs in ~10s ≈ 2 s/obs; 15 remaining ≈ 30s.
+    assert_in_delta(30, import.estimated_remaining_time, 4,
+                    "ETA should extrapolate from the observed rate")
+  end
+
+  def test_estimated_remaining_time_before_any_imported
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 10,
+                   imported_count: 0, started_at: Time.zone.now,
+                   ended_at: nil)
+
+    assert_equal(import.total_expected_time, import.estimated_remaining_time,
+                 "Before any obs imported, fall back to the up-front estimate")
+  end
+
+  def test_estimated_remaining_time_zero_when_done
+    assert_equal(0, inat_imports(:lone_wolf_import).estimated_remaining_time)
+  end
+
   def test_adequate_constraints
     assert(
       inat_imports(:rolf_inat_import).adequate_constraints?,

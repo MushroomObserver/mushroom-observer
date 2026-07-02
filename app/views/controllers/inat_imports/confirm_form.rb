@@ -159,7 +159,9 @@ module Views::Controllers::InatImports
     end
 
     def render_nothing_to_import_notice
-      return unless @expected&.zero?
+      # Match the count that drives the display and the Proceed button, so
+      # the notice shows whenever that count is 0 (e.g. all obs undated).
+      return unless (@estimate_with_date || @expected)&.zero?
 
       p { plain(:inat_import_confirm_nothing_to_import.l) }
     end

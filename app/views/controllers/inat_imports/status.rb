@@ -211,8 +211,8 @@ module Views::Controllers::InatImports
     end
 
     def render_error_alert
-      errors = @inat_import.response_errors.to_s.split("\n")
-      return unless errors.any?
+      errors = @inat_import.response_errors.to_s.split("\n").compact_blank
+      return if errors.empty?
 
       Alert(level: :warning) do
         errors.each_with_index do |error, i|

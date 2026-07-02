@@ -220,9 +220,17 @@ class InatImport < ApplicationRecord
 
   def estimated_remaining_time
     return 0 if Done?
-    return nil unless importables.to_i.positive? && started_at
+    return nil unless total_importables.to_i.positive? && started_at
+    return total_expected_time if imported_count.to_i.zero?
 
-    [total_expected_time - elapsed_time, 0].max
+    [extrapolated_remaining_time, 0].max
+  end
+
+  # Observed rate (elapsed per imported obs) times obs still to import, so
+  # the estimate tracks real progress instead of a fixed up-front guess.
+  def extrapolated_remaining_time
+    remaining = total_importables.to_i - imported_count.to_i
+    (remaining * elapsed_time.to_f / imported_count).round
   end
 
   #########

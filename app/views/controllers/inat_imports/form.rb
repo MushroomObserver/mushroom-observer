@@ -87,7 +87,7 @@ module Views::Controllers::InatImports
           }) do
         textarea_field(:inat_url, label: false,
                                   wrap_class: "ml-4",
-                                  rows: 2,
+                                  rows: 4,
                                   help: :inat_url_hint.l,
                                   placeholder: "https://www.inaturalist.org" \
                                               "/observations?taxon_id=12345")

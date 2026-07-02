@@ -1,10 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Per-page guard: one sync per (element-id + status) combination so a
-// Turbo Stream replacement that carries the same status doesn't re-trigger
-// an infinite fetch loop. Cleared implicitly when the user navigates away
-// (full Turbo navigation resets module state in the new page context).
+// Guard: one sync per (element-id + status) combination so a Turbo Stream
+// replacement that carries the same status doesn't re-trigger an infinite
+// fetch loop. The module persists across Turbo Drive visits (Turbo does not
+// reload JS), so clear it on `turbo:before-visit`: leaving and returning to
+// an in-progress import then re-runs the one-shot catch-up fetch. A Turbo
+// Stream replace is not a visit, so the loop guard stays intact within a page.
 const synced = new Set()
+document.addEventListener("turbo:before-visit", () => synced.clear())
 
 // Client-side stopwatch for the iNat import status panel.
 // Seeded from data-inat-import-elapsed-value / data-inat-import-remaining-value
