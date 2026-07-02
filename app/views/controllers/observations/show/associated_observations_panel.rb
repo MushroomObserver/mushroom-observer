@@ -30,13 +30,13 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
     if siblings?
       a(href: occurrence_path(@occurrence)) do
         render(::Components::Icon.new(type: :matrix))
-        plain(" ")
+        whitespace
         plain(:show_observation_matching_observations.l)
       end
     else
       a(href: new_occurrence_path(observation_id: @obs.id)) do
         render(::Components::Icon.new(type: :matrix))
-        plain(" ")
+        whitespace
         plain(:show_observation_add_matching_observations.l)
       end
     end

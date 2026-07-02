@@ -72,7 +72,7 @@ module Views::Controllers::FieldSlips
       div(class: "alert alert-info mt-3",
           id: "field_slip_no_prefix_nudge") do
         plain(:show_project_field_slip_no_prefix.t)
-        plain(" ")
+        whitespace
         link_to(:show_project_field_slip_set_prefix.t,
                 project_admin_path(project_id: @project.id),
                 class: "alert-link")

@@ -28,7 +28,7 @@ module Views::Controllers::Observations
       render(panel) do |panel|
         panel.with_body do
           render_credit(link)
-          plain(" ")
+          whitespace
           render_help_link
         end
       end

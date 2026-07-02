@@ -83,7 +83,7 @@ module Views::Controllers::Translations
                 data: { tag: ttag, role: "show_tag", turbo_stream: true }) do
           span(class: "tag") { "#{ttag}:" }
         end
-        plain(" ")
+        whitespace
         span(class: tag_str_class(ttag), id: "str_#{ttag}") { plain(str) }
       end
     end
