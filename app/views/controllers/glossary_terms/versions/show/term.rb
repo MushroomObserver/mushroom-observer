@@ -11,7 +11,7 @@ module Views::Controllers::GlossaryTerms
         def view_template
           p(class: "mt-3") do
             b { trusted_html("#{:glossary_term_name.t}:") }
-            plain(" ")
+            whitespace
             trusted_html(@glossary_term.name.t)
           end
 

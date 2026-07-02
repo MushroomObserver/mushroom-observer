@@ -48,7 +48,7 @@ module Views::Controllers::Locations
       div(class: css) do
         plain(label_key.l)
         if @default_orders
-          plain(" ")
+          whitespace
           plain(order_key.l)
         end
       end

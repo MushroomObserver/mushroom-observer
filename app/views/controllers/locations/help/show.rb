@@ -104,7 +104,7 @@ module Views::Controllers::Locations
       def render_footnote
         p(class: "mt-3") do
           sup { "(*)" }
-          plain(" ")
+          whitespace
           plain(:location_help_example_help.l)
         end
       end

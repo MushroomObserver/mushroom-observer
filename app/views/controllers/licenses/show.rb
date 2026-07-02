@@ -35,7 +35,7 @@ module Views::Controllers::Licenses
     def show_title
       capture do
         plain(@license.display_name)
-        plain(" ")
+        whitespace
         span(class: "smaller") { span { "#(#{@license.id || "?"}):" } }
       end
     end

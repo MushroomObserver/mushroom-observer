@@ -163,7 +163,7 @@ class Components::Matrix::Box < Components::Base
     div(class: "small mt-3") do
       a(href: occurrence_path(occ), class: "occurrence-link") do
         render(::Components::Icon.new(type: :matrix))
-        plain(" ")
+        whitespace
         plain(:matrix_box_occurrence.l)
       end
     end

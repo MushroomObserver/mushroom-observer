@@ -276,7 +276,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       a(href: collection_number_path(cn.id)) do
         trusted_html(cn.format_name)
       end
-      plain(" ")
+      whitespace
       sibling_attribution(sib)
     end
   end
@@ -299,7 +299,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     render_sibling_records(:sequences) do |seq, sib|
       a(href: sequence_path(seq.id)) { trusted_html(seq.format_name) }
       render_sibling_sequence_archive(seq) if seq.deposit?
-      plain(" ")
+      whitespace
       sibling_attribution(sib)
     end
   end
