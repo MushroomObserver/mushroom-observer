@@ -220,11 +220,12 @@ class InatImport < ApplicationRecord
   private
 
   def user_import_history?
-    total_imported_count.to_i.positive?
+    InatImport.where(user: user).sum(:total_imported_count).to_i.positive?
   end
 
   def personal_initial_avg_import_seconds
-    total_seconds / total_imported_count
+    scope = InatImport.where(user: user)
+    scope.sum(:total_seconds) / scope.sum(:total_imported_count)
   end
 
   def system_import_history?
