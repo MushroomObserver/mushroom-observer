@@ -228,6 +228,58 @@ class InatMoObservationBuilderTest < UnitTestCase
                  "spelling note when proposed name corrects the obs taxon")
   end
 
+  # --- cleaned_copyright_holder: strip "all rights reserved", cap length ---
+
+  FakePhoto = Struct.new(:copyright_holder)
+
+  def test_cleaned_copyright_holder_strips_all_rights_reserved
+    photo = FakePhoto.new("(c) cactusdan, all rights reserved")
+    assert_equal("(c) cactusdan, ",
+                 builder_for.send(:cleaned_copyright_holder, photo))
+  end
+
+  def test_cleaned_copyright_holder_strips_all_rights_reserved_mid_string
+    photo = FakePhoto.new(
+      "(c) jo_bone, all rights reserved, uploaded by jo_bone"
+    )
+    assert_equal("(c) jo_bone, , uploaded by jo_bone",
+                 builder_for.send(:cleaned_copyright_holder, photo))
+  end
+
+  def test_cleaned_copyright_holder_leaves_licensed_attribution_untouched
+    attribution = "(c) Tim C., some rights reserved (CC BY-NC)"
+    photo = FakePhoto.new(attribution)
+    assert_equal(attribution,
+                 builder_for.send(:cleaned_copyright_holder, photo))
+  end
+
+  def test_cleaned_copyright_holder_truncates_to_255_chars
+    photo = FakePhoto.new("x" * 300)
+    result = builder_for.send(:cleaned_copyright_holder, photo)
+    assert_equal(255, result.length,
+                 "copyright_holder should be truncated to 255 chars")
+  end
+
+  # --- upload_inat_image: surface API2 errors instead of masking them ---
+
+  FakeAPI2Response = Struct.new(:errors, :results)
+
+  def test_upload_inat_image_raises_descriptive_error_on_api_failure
+    error = API2::MissingParameter.new(:upload_url)
+    fake_api = FakeAPI2Response.new([error], nil)
+    builder = builder_for
+
+    API2.stub(:execute, fake_api) do
+      err = assert_raises(RuntimeError) do
+        builder.send(:upload_inat_image, {}, "377332865")
+      end
+      assert_match(/Failed to import image 377332865/, err.message,
+                   "Error should identify the failing iNat photo")
+      assert_match(/#{Regexp.escape(error.to_s)}/, err.message,
+                   "Error should include the underlying API2 error")
+    end
+  end
+
   private
 
   def builder_for(provisional_name: nil, name_override: nil,

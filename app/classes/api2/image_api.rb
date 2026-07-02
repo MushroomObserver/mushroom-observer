@@ -59,7 +59,7 @@ class API2
       {
         when: parse(:date, :date, help: :when_taken) || @default_date,
         notes: parse(:string, :notes, default: ""),
-        copyright_holder: parse(:string, :copyright_holder, limit: 100) ||
+        copyright_holder: parse(:string, :copyright_holder, limit: 255) ||
                           user.legal_name,
         license: parse(:license, :license) || user.license,
         original_name: parse_original_name(:original_name),
@@ -74,7 +74,7 @@ class API2
       {
         when: parse(:date, :set_date, help: :when_taken),
         notes: parse(:string, :set_notes),
-        copyright_holder: parse(:string, :set_copyright_holder, limit: 100),
+        copyright_holder: parse(:string, :set_copyright_holder, limit: 255),
         license: parse(:license, :set_license),
         original_name: parse_original_name(:set_original_name)
       }
