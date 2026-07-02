@@ -72,8 +72,8 @@ class Inat
         }
       end
 
-      # Imported images all get a Creative Commons license,
-      # so the contradictory "all rights reserved"
+      # Imported images all get a Creative Commons license, so strip
+      # the contradictory "all rights reserved"
       # The copyright_holder column is implicitly capped at 255 chars,
       # so truncate it here
       def cleaned_copyright_holder(photo)
