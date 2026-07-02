@@ -98,11 +98,12 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_notes_accordion(key)
-      Accordion(id: "notes_#{key.id}",
-                view_id: "view_notes_#{key.id}_container",
-                edit_id: "edit_notes_#{key.id}_container") do |accordion|
-        accordion.with_view { render_view_notes(key) }
-        accordion.with_edit { render_edit_notes_form(key) }
+      Accordion(id: "notes_#{key.id}") do |accordion|
+        accordion.with_pane(id: "view_notes_#{key.id}_container",
+                            expanded: true) { render_view_notes(key) }
+        accordion.with_pane(id: "edit_notes_#{key.id}_container") do
+          render_edit_notes_form(key)
+        end
       end
     end
 
@@ -138,11 +139,12 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_new_form_panel
-      Accordion(id: "new_key_row",
-                view_id: "new_key_button_container",
-                edit_id: "new_key_form_container") do |accordion|
-        accordion.with_view { render_new_button }
-        accordion.with_edit { render_new_form }
+      Accordion(id: "new_key_row") do |accordion|
+        accordion.with_pane(id: "new_key_button_container",
+                            expanded: true) { render_new_button }
+        accordion.with_pane(id: "new_key_form_container") do
+          render_new_form
+        end
       end
     end
 
