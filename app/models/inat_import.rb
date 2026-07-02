@@ -102,6 +102,16 @@ class InatImport < ApplicationRecord
       where(updated_at: ...STUCK_THRESHOLD.ago)
   }
 
+  # An import that never completed the OAuth authorization handshake is
+  # assumed abandoned after this long. Generous on purpose — a user won't
+  # take an hour to authorize on iNat, but might take a couple of minutes.
+  ABANDONED_THRESHOLD = 1.hour
+
+  scope :abandoned, lambda {
+    where(state: %w[Authorizing Authenticating]).
+      where(updated_at: ...ABANDONED_THRESHOLD.ago)
+  }
+
   # Are there enough constraints on which observations to import?
   # See also InatImportsController::Validators#adequately_constrained?
   # Need to make sure that the iNat API query has enough constrains so
@@ -220,11 +230,12 @@ class InatImport < ApplicationRecord
   private
 
   def user_import_history?
-    total_imported_count.to_i.positive?
+    InatImport.where(user: user).sum(:total_imported_count).to_i.positive?
   end
 
   def personal_initial_avg_import_seconds
-    total_seconds / total_imported_count
+    scope = InatImport.where(user: user)
+    scope.sum(:total_seconds) / scope.sum(:total_imported_count)
   end
 
   def system_import_history?

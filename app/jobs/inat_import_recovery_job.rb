@@ -7,18 +7,26 @@
 class InatImportRecoveryJob < ApplicationJob
   queue_as :default
 
+  STUCK_MSG = "Import did not complete — the import may have crashed. " \
+              "You can restart the import."
+  ABANDONED_MSG = "Authorization was not completed — this import never ran. " \
+                  "You can start a new import."
+
   def perform
-    InatImport.stuck.find_each do |import|
-      crashed_msg = "Import did not complete — the import may have crashed. " \
-                    "You can restart the import."
-      import.update!(
-        state: "Done",
-        ended_at: Time.zone.now,
-        response_errors: "#{import.response_errors}#{crashed_msg}\n"
-      )
-      Rails.logger.warn(
-        "InatImportRecoveryJob: marked stuck import #{import.id} as Done"
-      )
-    end
+    InatImport.stuck.find_each { |import| finalize(import, STUCK_MSG) }
+    InatImport.abandoned.find_each { |import| finalize(import, ABANDONED_MSG) }
+  end
+
+  private
+
+  def finalize(import, message)
+    import.update!(
+      state: "Done",
+      ended_at: Time.zone.now,
+      response_errors: "#{import.response_errors}#{message}\n"
+    )
+    Rails.logger.warn(
+      "InatImportRecoveryJob: finalized import #{import.id} as Done"
+    )
   end
 end

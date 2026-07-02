@@ -39,6 +39,21 @@ class InatImportTest < ActiveSupport::TestCase
                  import.total_expected_time)
   end
 
+  # A user's import history is summed across ALL their import records, not
+  # read off a single one, so it survives the move to one record per import.
+  def test_personal_avg_sums_across_a_users_imports
+    user = users(:rolf)
+    InatImport.where(user: user).
+      update_all(total_imported_count: nil, total_seconds: nil)
+    InatImport.create!(user: user, total_imported_count: 2, total_seconds: 20)
+    InatImport.create!(user: user, total_imported_count: 3, total_seconds: 40)
+
+    import = InatImport.new(user: user)
+
+    # (20 + 40) seconds / (2 + 3) observations = 12 seconds per observation
+    assert_equal(12, import.initial_avg_import_seconds)
+  end
+
   def test_adequate_constraints
     assert(
       inat_imports(:rolf_inat_import).adequate_constraints?,
@@ -143,6 +158,23 @@ class InatImportTest < ActiveSupport::TestCase
     import = inat_imports(:lone_wolf_import)
 
     assert_not(import.stuck?, "Done import should not be stuck")
+  end
+
+  def test_abandoned_scope
+    stale = inat_imports(:rolf_inat_import)
+    stale.update!(state: "Authorizing")
+    stale.update_column(:updated_at,
+                        InatImport::ABANDONED_THRESHOLD.ago - 1.second)
+    recent = inat_imports(:mary_inat_import)
+    recent.update!(state: "Authenticating")
+
+    abandoned = InatImport.abandoned
+    assert_includes(abandoned, stale,
+                    "Stale Authorizing import should be abandoned")
+    assert_not_includes(abandoned, recent,
+                        "Recent Authenticating import should not be abandoned")
+    assert_not_includes(abandoned, inat_imports(:katrina_inat_import),
+                        "Importing import is stuck, not abandoned")
   end
 
   def test_ignored_total_count
