@@ -147,7 +147,19 @@ class Components::Dropdown < Components::Base
     if args[:button].present? && kwargs[:class].present?
       kwargs[:class] = kwargs[:class].gsub("d-block", "").strip
     end
-    kwargs
+    strip_tooltip_data(kwargs)
+  end
+
+  # Tooltip data attrs are meaningful on icon links in the top-nav
+  # but are redundant and noisy inside a dropdown menu — the item
+  # label is already visible, and Bootstrap's tooltip JS can
+  # interfere with dropdown click handling.
+  def strip_tooltip_data(kwargs)
+    data = kwargs[:data]
+    return kwargs unless data.is_a?(Hash) && data[:toggle] == "tooltip"
+
+    stripped = data.except(:toggle, :title, :placement)
+    stripped.empty? ? kwargs.except(:data) : kwargs.merge(data: stripped)
   end
 
   def normalize_section(section)
