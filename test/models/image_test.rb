@@ -108,7 +108,7 @@ class ImageTest < UnitTestCase
     img.user = rolf
     assert_true(img.valid?)
     do_truncate_test(img, :content_type, 100)
-    do_truncate_test(img, :copyright_holder, 100)
+    do_truncate_test(img, :copyright_holder, 255)
   end
 
   def do_truncate_test(img, var, len)
