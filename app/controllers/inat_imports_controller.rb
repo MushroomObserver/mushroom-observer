@@ -43,16 +43,6 @@ class InatImportsController < ApplicationController
            ))
   end
 
-  # Ids of the imports that actually have linked observations. Historic
-  # imports predate the observations.inat_import_id link, so their Results
-  # link would lead nowhere; the index hides it for them. One query, to
-  # avoid an N+1 across the (unpaginated) admin list.
-  def import_ids_with_results(imports)
-    Observation.where(inat_import_id: imports.map(&:id)).
-      distinct.pluck(:inat_import_id)
-  end
-  private :import_ids_with_results
-
   def results
     @inat_import = InatImport.find(params[:id])
     query = Query.lookup(:Observation, inat_import: @inat_import)
@@ -116,7 +106,36 @@ class InatImportsController < ApplicationController
     redirect_to(inat_import_path(@inat_import))
   end
 
+  # iNat redirects here after user completes iNat authorization
+  def authorization_response
+    auth_code = params[:code]
+    return not_authorized if auth_code.blank?
+
+    inat_import = InatImport.find_by(id: params[:state], user: @user)
+    return not_authorized unless inat_import
+
+    # Guard against a repeated (browser refresh) or late callback: only a
+    # record still awaiting authorization gets authenticated and enqueued,
+    # so we never start a duplicate job or regress a running/done import.
+    if inat_import.Authorizing?
+      start_authenticated_import(inat_import, auth_code)
+    end
+
+    redirect_to(inat_import_path(inat_import))
+  end
+
+  # ---------------------------------
+
   private
+
+  # Ids of the imports that actually have linked observations. Historic
+  # imports predate the observations.inat_import_id link, so their Results
+  # link would lead nowhere; the index hides it for them. One query, to
+  # avoid an N+1 across the (unpaginated) admin list.
+  def import_ids_with_results(imports)
+    Observation.where(inat_import_id: imports.map(&:id)).
+      distinct.pluck(:inat_import_id)
+  end
 
   def confirm_import
     @expected = fetch_expected_count
@@ -331,30 +350,6 @@ class InatImportsController < ApplicationController
   end
 
   # ---------------------------------
-
-  public
-
-  # iNat redirects here after user completes iNat authorization
-  def authorization_response
-    auth_code = params[:code]
-    return not_authorized if auth_code.blank?
-
-    inat_import = InatImport.find_by(id: params[:state], user: @user)
-    return not_authorized unless inat_import
-
-    # Guard against a repeated (browser refresh) or late callback: only a
-    # record still awaiting authorization gets authenticated and enqueued,
-    # so we never start a duplicate job or regress a running/done import.
-    if inat_import.Authorizing?
-      start_authenticated_import(inat_import, auth_code)
-    end
-
-    redirect_to(inat_import_path(inat_import))
-  end
-
-  # ---------------------------------
-
-  private
 
   def not_authorized
     flash_error(:inat_no_authorization.l)
