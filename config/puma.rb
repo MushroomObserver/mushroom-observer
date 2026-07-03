@@ -29,7 +29,12 @@ state_path  "#{app_path}/tmp/pids/puma.state"
 # and manage it. With this you don't have to `bin/rails solid_queue:start`,
 # but there's a lot of queue chatter in the console, even when debugging.
 # https://github.com/rails/solid_queue?tab=readme-ov-file#puma-plugin
-plugin :solid_queue
+#
+# Not in production: there the dedicated solidqueue.service is the sole
+# supervisor. Running the plugin there too would start a second supervisor
+# that also claims jobs, doubling the worker footprint and complicating
+# the deploy lifecycle (see issue #4639).
+plugin :solid_queue unless rails_env == "production"
 
 activate_control_app
 
