@@ -20,7 +20,9 @@ module Views::Controllers::Observations::Namings::Votes
     prop :title, String
 
     def view_template
-      Modal(id: @modal_id, user: @user) do |modal|
+      render(Components::Modal.new(
+               id: @modal_id, user: @user
+             )) do |modal|
         modal.with_title_content do
           trusted_html(@title)
           trusted_html(@naming.display_name_brief_authors.t.small_author)

@@ -15,9 +15,11 @@ module Views::Controllers::Images
       prop :error_text, _Nilable(::String), default: nil
 
       def view_template
-        Modal(id: "modal_image_exif_#{@image.id}",
-              title: :exif_data_for_image.t(image: @image.id),
-              user: current_user) do |m|
+        render(::Components::Modal.new(
+                 id: "modal_image_exif_#{@image.id}",
+                 title: :exif_data_for_image.t(image: @image.id),
+                 user: current_user
+               )) do |m|
           m.with_body do
             if @success
               render(DataTable.new(data: @data))
