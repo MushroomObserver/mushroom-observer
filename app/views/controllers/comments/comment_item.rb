@@ -119,7 +119,7 @@ module Views::Controllers::Comments
       span(class: "comment-author text-nowrap") do
         plain("#{:BY.t}: ")
         if @editable
-          render(Components::Link::User.new(user: @comment.user))
+          Link(type: :user, user: @comment.user)
         else
           plain(@comment.user.unique_text_name)
         end
@@ -142,10 +142,9 @@ module Views::Controllers::Comments
     def render_mod_links_span
       span(class: "text-nowrap",
            data: { user_specific: @comment.user.id }) do
-        render(Components::Link::InlineMod.new(
-                 target: @comment,
-                 user: @user || @comment.user, indent: false
-               ))
+        Link(type: :inline_mod,
+             target: @comment,
+             user: @user || @comment.user, indent: false)
       end
     end
 

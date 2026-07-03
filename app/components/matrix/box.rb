@@ -207,9 +207,9 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "rss-where") do
       small do
-        render(Components::Link::Location.new(
-                 where: @data[:where], location: @data[:location]
-               ))
+        Link(type: :location,
+             where: @data[:where],
+             location: @data[:location])
       end
     end
   end
@@ -221,10 +221,9 @@ class Components::Matrix::Box < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        render(Components::Link::User.new(
-                 user: @data[:who],
-                 attributes: { class: "rss-who" }
-               ))
+        Link(type: :user,
+             user: @data[:who],
+             attributes: { class: "rss-who" })
       end
     end
   end
@@ -256,8 +255,6 @@ class Components::Matrix::Box < Components::Base
   # An import link's URL always resolves (stored override or derived from the
   # site template via link_url), so the credit always renders as a link.
   def render_external_credit_link(link)
-    render(::Components::Link::External.new(
-             content: link[:text], path: link[:url]
-           ))
+    Link(type: :external, content: link[:text], path: link[:url])
   end
 end

@@ -10,11 +10,10 @@ class Components::Alert::Link < Components::Base
   end
 
   def view_template
-    render(Components::Link::Get.new(
-             name: @text,
-             target: @href,
-             class: class_names("alert-link", @html_class),
-             **@attrs
-           ))
+    Link(type: :get,
+         name: @text,
+         target: @href,
+         class: class_names("alert-link", @html_class),
+         **@attrs)
   end
 end

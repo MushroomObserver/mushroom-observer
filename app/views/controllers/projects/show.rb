@@ -69,7 +69,7 @@ module Views::Controllers::Projects
             trusted_html(draft.name&.display_name&.t)
           end
           plain(" (")
-          render(Components::Link::User.new(user: draft.user))
+          Link(type: :user, user: draft.user)
           plain(")")
           br
         end

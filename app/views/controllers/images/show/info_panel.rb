@@ -39,14 +39,14 @@ module Views::Controllers::Images
       def owner_row
         div do
           plain("#{:OWNER.t}: ")
-          render(::Components::Link::User.new(user: @image.user))
+          Link(type: :user, user: @image.user)
         end
       end
 
       def project_row(proj)
         div do
           plain("#{:PROJECT.t}: ")
-          render(::Components::Link::Object.new(object: proj))
+          Link(type: :object, object: proj)
         end
       end
 

@@ -42,7 +42,7 @@ module Views::Controllers::Projects
       div do
         small { plain("#{@project.created_at.web_time}:") }
         whitespace
-        render(Components::Link::User.new(user: @project.user))
+        Link(type: :user, user: @project.user)
       end
     end
   end

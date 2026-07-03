@@ -120,9 +120,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_mod_links(naming)
     div(class: "text-nowrap") do
-      render(Components::Link::InlineMod.new(
-               target: naming, user: @user, indent: false
-             ))
+      Link(type: :inline_mod,
+           target: naming, user: @user, indent: false)
     end
   end
 
@@ -159,12 +158,11 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_single_proposer_link
     proposer = @naming.user
-    render(Components::Link::User.new(
-             user: proposer,
-             name: proposer.login,
-             button: :btn_link,
-             attributes: { class: "text-wrap text-left px-0" }
-           ))
+    Link(type: :user,
+         user: proposer,
+         name: proposer.login,
+         button: :btn_link,
+         attributes: { class: "text-wrap text-left px-0" })
   end
 
   # ---- vote tally cell ------------------------------------------

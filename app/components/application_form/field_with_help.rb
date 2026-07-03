@@ -31,8 +31,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_help_icon
       help_id = "#{field.dom.id}_help"
       span(class: between_class) do
-        render(::Components::Link::CollapseToggle.new(
-                 target_id: help_id, class: "info-collapse-trigger"
+        render(::Components::Link.new(
+                 type: :collapse_toggle,
+                 target_id: help_id,
+                 class: "info-collapse-trigger"
                )) { render(::Components::Icon.new(type: :question)) }
       end
     end

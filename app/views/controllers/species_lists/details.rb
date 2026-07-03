@@ -35,7 +35,7 @@ module Views::Controllers::SpeciesLists
     def render_header_row
       div(class: "d-flex justify-content-between align-items-center") do
         div do
-          strong { plain("#{:WHEN.t}:") }
+          strong { plain("#{:WHEN.l}:") }
           whitespace
           plain(@species_list.when.web_date)
         end
@@ -57,7 +57,7 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_count
       div do
-        b { plain("#{:OBSERVATIONS.t}:") }
+        b { plain("#{:OBSERVATIONS.l}:") }
         whitespace
         plain(@query.num_results.to_s)
       end
@@ -67,13 +67,12 @@ module Views::Controllers::SpeciesLists
     # back to a plain `:UNKNOWN.t` label in that case.
     def render_where
       div do
-        b { plain("#{:WHERE.t}:") }
+        b { plain("#{:WHERE.l}:") }
         whitespace
         begin
-          render(Components::Link::Location.new(
-                   where: @species_list.where,
-                   location: @species_list.location, click: true
-                 ))
+          Link(type: :location,
+               where: @species_list.where,
+               location: @species_list.location, click: true)
         rescue StandardError
           plain(:UNKNOWN.t)
         end
@@ -82,19 +81,19 @@ module Views::Controllers::SpeciesLists
 
     def render_who
       div do
-        b { plain("#{:WHO.t}:") }
+        b { plain("#{:WHO.l}:") }
         whitespace
-        render(Components::Link::User.new(user: @species_list.user))
+        Link(type: :user, user: @species_list.user)
       end
     end
 
     def render_projects
       div do
-        b { plain("#{:PROJECTS.t}:") }
+        b { plain("#{:PROJECTS.l}:") }
         whitespace
         @species_list.projects.each_with_index do |project, idx|
           plain(" | ") if idx.positive?
-          render(Components::Link::Object.new(object: project))
+          Link(type: :object, object: project)
         end
       end
     end
@@ -103,7 +102,7 @@ module Views::Controllers::SpeciesLists
     # render through `trusted_html` because `.tpl` returns already-safe markup.
     def render_notes
       div do
-        trusted_html("*#{:NOTES.t}:* #{@species_list.notes}".tpl)
+        trusted_html("*#{:NOTES.l}:* #{@species_list.notes}".tpl)
       end
     end
   end

@@ -99,7 +99,9 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def icon_from_tab(tab)
-    return Components::Link::Icon.new(tab: tab) unless tab.html_options[:button]
+    unless tab.html_options[:button]
+      return Components::Link.new(type: :icon, tab: tab)
+    end
 
     method = tab.html_options[:button]
     opts = tab.html_options

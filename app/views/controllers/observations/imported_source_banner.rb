@@ -37,10 +37,9 @@ module Views::Controllers::Observations
     private
 
     def render_credit(link)
-      render(::Components::Link::External.new(
-               content: credit_text(link),
-               path: link[:url]
-             ))
+      Link(type: :external,
+           content: credit_text(link),
+           path: link[:url])
     end
 
     def credit_text(link)

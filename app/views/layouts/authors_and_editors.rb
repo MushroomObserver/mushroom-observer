@@ -110,7 +110,7 @@ module Views::Layouts
 
     # Wrap user name in link to show_user.
     def render_user_link(user, name = nil)
-      render(Components::Link::User.new(user: user, name: name))
+      Link(type: :user, user: user, name: name)
     end
   end
 end

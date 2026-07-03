@@ -39,9 +39,7 @@ module Components::LinkRendering
   # go through BUTTON_DISPATCH; plain `link_to` is the default.
   def render_crud_button_or_link(str, url, args, kwargs)
     if args[:external]
-      return render(
-        Components::Link::External.new(content: str, path: url, **kwargs)
-      )
+      return Link(type: :external, content: str, path: url, **kwargs)
     end
 
     klass, extra = BUTTON_DISPATCH[args[:button]]

@@ -37,10 +37,9 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
   end
 
   def render_new_link
-    render(Components::Link::InlineAdd.new(
-             modal_id: "external_link",
-             tab: ::Tab::ExternalLink::New.new(observation: @obs)
-           ))
+    Link(type: :inline_add,
+         modal_id: "external_link",
+         tab: ::Tab::ExternalLink::New.new(observation: @obs))
   end
 
   def render_help_link
@@ -74,7 +73,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
 
   def render_sibling_row(link, sibling)
     li do
-      render(Components::Link::External.new(link: link))
+      Link(type: :external, link: link)
       whitespace
       sibling_attribution(sibling)
     end
@@ -98,14 +97,13 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
     li(id: "external_link_#{link.id}") do
       render_external_link(link)
       if link.can_edit?(@user) || in_admin_mode?
-        render(Components::Link::InlineMod.new(
-                 target: link, observation: @obs, user: @user
-               ))
+        Link(type: :inline_mod,
+             target: link, observation: @obs, user: @user)
       end
     end
   end
 
   def render_external_link(link)
-    render(Components::Link::External.new(link: link))
+    Link(type: :external, link: link)
   end
 end

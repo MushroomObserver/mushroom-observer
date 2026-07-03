@@ -14,10 +14,9 @@ class Components::Help::CollapseInfoTrigger < Components::Base
   prop :extra_class, String, default: ""
 
   def view_template
-    render(::Components::Link::CollapseToggle.new(
-             target_id: @target_id,
-             class: class_names("info-collapse-trigger", @extra_class)
-           )) do
+    Link(type: :collapse_toggle,
+         target_id: @target_id,
+         class: class_names("info-collapse-trigger", @extra_class)) do
       render(::Components::Icon.new(type: :question))
     end
   end

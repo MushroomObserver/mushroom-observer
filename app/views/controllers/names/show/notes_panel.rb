@@ -18,8 +18,6 @@ class Views::Controllers::Names::Show::NotesPanel < Views::Base
   private
 
   def render_edit_link
-    render(Components::Link::Icon.new(
-             tab: Tab::Name::Edit.new(name: @name)
-           ))
+    Link(type: :icon, tab: Tab::Name::Edit.new(name: @name))
   end
 end

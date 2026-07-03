@@ -28,7 +28,7 @@ module Views::Controllers::Projects::Violations
     def view_template
       h4 do
         trusted_html("#{:PROJECT.l}: ")
-        render(Components::Link::Object.new(object: @project))
+        Link(type: :object, object: @project)
       end
 
       if @violations.empty?
@@ -69,8 +69,7 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_obs_link(obs)
-      render(Components::Link::Object.new(object: obs,
-                                          name: obs.text_name))
+      Link(type: :object, object: obs, name: obs.text_name)
       plain(" (#{obs.id})")
     end
 

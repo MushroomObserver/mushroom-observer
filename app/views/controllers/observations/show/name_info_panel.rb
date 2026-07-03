@@ -73,7 +73,7 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
   def render_tab_link(tab)
     div do
       if tab.html_options[:external]
-        render(::Components::Link::External.new(tab: tab))
+        Link(type: :external, tab: tab)
       else
         content, path, opts = tab.to_a
         a(href: url_for(path),

@@ -134,9 +134,7 @@ module Views::Controllers::Herbaria
       return if nonpersonal? || herbarium.personal_user.blank?
 
       span(title: herbarium.personal_user.unique_text_name) do
-        render(::Components::Link::User.new(
-                 user: herbarium.personal_user
-               ))
+        Link(type: :user, user: herbarium.personal_user)
       end
     end
   end

@@ -89,11 +89,10 @@ module Views::Controllers::Info
       strong { plain("#{:sandbox_more_help.l}:") }
       div(class: "pl-3") do
         # Translation not needed as document title is static
-        render(::Components::Link::External.new(
-                 content: "MO Flavored Textile",
-                 path: "https://docs.google.com/document/d/" \
-                       "10NiaPDKoK_k3bRIoU1smGXSycDczf_jdkmW-xt-Wf20"
-               ))
+        Link(type: :external,
+             content: "MO Flavored Textile",
+             path: "https://docs.google.com/document/d/" \
+                   "10NiaPDKoK_k3bRIoU1smGXSycDczf_jdkmW-xt-Wf20")
         br
       end
     end
@@ -101,20 +100,17 @@ module Views::Controllers::Info
     def render_web_reference_links
       strong { plain("#{:sandbox_web_refs.l}:") }
       div(class: "pl-3") do
-        render(::Components::Link::External.new(
-                 content: :sandbox_link_hobix_textile_reference.l,
-                 path: "https://hobix.com/textile"
-               ))
+        Link(type: :external,
+             content: :sandbox_link_hobix_textile_reference.l,
+             path: "https://hobix.com/textile")
         br
-        render(::Components::Link::External.new(
-                 content: :sandbox_link_hobix_textile_cheatsheet.l,
-                 path: "https://hobix.com/quick"
-               ))
+        Link(type: :external,
+             content: :sandbox_link_hobix_textile_cheatsheet.l,
+             path: "https://hobix.com/quick")
         br
-        render(::Components::Link::External.new(
-                 content: :sandbox_link_textile_language_website.l,
-                 path: "https://textile-lang.com/"
-               ))
+        Link(type: :external,
+             content: :sandbox_link_textile_language_website.l,
+             path: "https://textile-lang.com/")
         br
       end
     end

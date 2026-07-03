@@ -52,9 +52,8 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   def render_editable_row(record)
     li(id: "herbarium_record_#{record.id}") do
       render_show_link(record)
-      render(Components::Link::InlineMod.new(
-               target: record, observation: @obs, user: @user
-             ))
+      Link(type: :inline_mod,
+           target: record, observation: @obs, user: @user)
       render_mcp_search_link(record) if record.herbarium.web_searchable?
     end
   end
@@ -69,10 +68,9 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   def render_mcp_search_link(record)
     br
     span(class: "indent") do
-      render(::Components::Link::External.new(
-               content: :herbarium_record_collection.t,
-               path: record.herbarium.mcp_url(record.accession_number)
-             ))
+      Link(type: :external,
+           content: :herbarium_record_collection.t,
+           path: record.herbarium.mcp_url(record.accession_number))
     end
   end
 
@@ -90,11 +88,10 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
       render_show_link(record)
       if record.herbarium.web_searchable?
         br
-        render(::Components::Link::External.new(
-                 content: "#{record.herbarium.code} " \
-                          "#{:herbarium_record_collection.t}",
-                 path: record.herbarium.mcp_url(record.accession_number)
-               ))
+        Link(type: :external,
+             content: "#{record.herbarium.code} " \
+                      "#{:herbarium_record_collection.t}",
+             path: record.herbarium.mcp_url(record.accession_number))
       end
     end
   end
@@ -110,9 +107,8 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   end
 
   def render_new_link
-    render(Components::Link::InlineAdd.new(
-             modal_id: "herbarium_record",
-             tab: ::Tab::HerbariumRecord::New.new(observation: @obs)
-           ))
+    Link(type: :inline_add,
+         modal_id: "herbarium_record",
+         tab: ::Tab::HerbariumRecord::New.new(observation: @obs))
   end
 end
