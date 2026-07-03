@@ -96,7 +96,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_list
-      render(::Components::PaginatedResults.new) do
+      PaginatedResults do
         render(Components::ListGroup::Base.new) do |list|
           @objects.each do |fs|
             list.item do

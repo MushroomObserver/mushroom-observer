@@ -18,7 +18,7 @@ module Views::Controllers::Herbaria
 
       render_merge_alert if @merge
 
-      render(::Components::PaginatedResults.new) do
+      PaginatedResults do
         render_table if @objects.any?
       end
     end
@@ -30,9 +30,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_merge_alert
-      render(::Components::Alert.new(
-               level: :warning, class: "container-text mt-3"
-             )) do
+      Alert(level: :warning, class: "container-text mt-3") do
         trusted_html(
           :herbarium_index_merge_help.tp(
             name: @merge.format_name,

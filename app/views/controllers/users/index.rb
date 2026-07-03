@@ -17,7 +17,7 @@ module Views::Controllers::Users
       if in_admin_mode?
         render_admin_table
       else
-        render(::Components::PaginatedResults.new) do
+        PaginatedResults do
           render(::Components::Matrix::Table.new(objects: @users))
         end
       end
@@ -27,7 +27,7 @@ module Views::Controllers::Users
 
     def render_admin_table
       style { ".permissions td { padding: 3px 5px 3px 5px }" }
-      render(::Components::PaginatedResults.new) do
+      PaginatedResults do
         render(Components::Table.new(
                  @users,
                  variant: :striped,
