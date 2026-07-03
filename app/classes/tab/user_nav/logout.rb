@@ -14,7 +14,6 @@ class Tab::UserNav::Logout < Tab::Base
   # Drive's head-merging on the redirected page can corrupt
   # stylesheets. Opt this button out of Turbo entirely.
   def html_options
-    { id: "user_nav_logout_link", button: :post,
-      data: { turbo: false } }
+    { button: :post, data: { turbo: false } }
   end
 end

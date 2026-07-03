@@ -10,8 +10,4 @@ class Tab::Sidebar::Info::SendAComment < Tab::Base
   def path
     new_admin_emails_webmaster_questions_path
   end
-
-  def html_options
-    { id: "nav_ask_webmaster_link" }
-  end
 end

@@ -9,8 +9,4 @@ class Tab::Sidebar::Latest::Changes < Tab::Base
   def path
     activity_logs_path
   end
-
-  def html_options
-    { id: "nav_activity_logs_link" }
-  end
 end

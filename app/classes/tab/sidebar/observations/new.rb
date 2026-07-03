@@ -9,8 +9,4 @@ class Tab::Sidebar::Observations::New < Tab::Base
   def path
     new_observation_path
   end
-
-  def html_options
-    { id: "nav_new_observation_link" }
-  end
 end

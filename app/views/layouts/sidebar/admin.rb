@@ -11,8 +11,6 @@ class Views::Layouts::Sidebar
   #     classes: Views::Layouts::Sidebar::CSS_CLASSES
   #   ))
   class Admin < Section
-    include Rails.application.routes.url_helpers
-
     def view_template
       div(class: @classes[:heading]) do
         plain("#{@heading_key.t}:")
@@ -22,17 +20,26 @@ class Views::Layouts::Sidebar
         render_nav_link(link, link_class: @classes[:admin])
       end
 
-      # Toggling admin mode changes the session's theme/asset state,
-      # so Turbo Drive's head-merging on the redirected page can
-      # corrupt stylesheets. Opt this button out of Turbo entirely.
+      render_admin_mode_toggle
+    end
+
+    private
+
+    # Toggling admin mode changes the session's theme/asset state,
+    # so Turbo Drive's head-merging on the redirected page can
+    # corrupt stylesheets. `Tab::UserNav::AdminMode` already opts out
+    # of Turbo for this reason — source everything from it instead of
+    # re-typing the title/path/opt-out (this is also what the desktop
+    # user-nav dropdown renders).
+    def render_admin_mode_toggle
+      tab = Tab::UserNav::AdminMode.new(in_admin_mode: true)
       Button(
         type: :post,
-        name: :app_turn_admin_off.t,
-        target: admin_mode_path(turn_off: true),
+        name: tab.title,
+        target: tab.path,
         variant: :btn_link,
-        id: "nav_admin_off_link",
-        class: @classes[:admin],
-        data: { turbo: false }
+        class: class_names(@classes[:admin], tab.html_options[:class]),
+        data: tab.html_options[:data]
       )
     end
   end

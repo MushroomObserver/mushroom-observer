@@ -9,8 +9,4 @@ class Tab::Sidebar::Indexes::Glossary < Tab::Base
   def path
     glossary_terms_path
   end
-
-  def html_options
-    { id: "nav_articles_link" }
-  end
 end

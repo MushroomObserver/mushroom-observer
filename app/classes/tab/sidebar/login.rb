@@ -9,8 +9,4 @@ class Tab::Sidebar::Login < Tab::Base
   def path
     new_account_login_path
   end
-
-  def html_options
-    { id: "nav_login_link" }
-  end
 end

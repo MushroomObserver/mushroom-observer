@@ -9,8 +9,4 @@ class Tab::Sidebar::Indexes::Locations < Tab::Base
   def path
     locations_path
   end
-
-  def html_options
-    { id: "nav_locations_link" }
-  end
 end

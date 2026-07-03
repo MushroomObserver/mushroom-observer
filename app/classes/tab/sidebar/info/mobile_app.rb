@@ -9,8 +9,4 @@ class Tab::Sidebar::Info::MobileApp < Tab::Base
   def path
     article_path(34)
   end
-
-  def html_options
-    { id: "nav_mobile_app_link" }
-  end
 end

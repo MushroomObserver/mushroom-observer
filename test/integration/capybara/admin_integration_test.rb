@@ -17,10 +17,14 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     refute_selector(id: "nav_admin_on_link")
 
     put_user_in_admin_mode(rolf)
-    assert_selector(id: "nav_admin_off_link")
+    # AdminMode's toggle uses one stable class regardless of on/off
+    # state (mirrors the dropdown) — distinguish state via the
+    # button's text, and scope to #sidebar since the same class also
+    # exists (CSS-hidden) in the desktop dropdown.
+    assert_selector("#sidebar .admin_mode_link", text: :app_turn_admin_off.t)
 
-    click_on(id: "nav_admin_off_link")
-    assert_selector(id: "nav_mobile_admin_link")
+    within("#sidebar") { click_on(class: "admin_mode_link") }
+    assert_selector("#sidebar .admin_mode_link", text: :app_turn_admin_on.t)
   end
 
   # This test is not much more than a stub.
@@ -42,10 +46,10 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
   end
 
   def test_switch_users
-    refute_selector(id: "nav_admin_switch_users_link")
+    refute_selector(class: "switch_users_link")
 
     put_user_in_admin_mode(rolf)
-    click_on(id: "nav_admin_switch_users_link")
+    click_on(class: "switch_users_link")
 
     within("#admin_switch_users_form") do
       fill_in("admin_session_user", with: "something unlikely and bogus")
@@ -67,7 +71,7 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     assert_selector("#admin_banner",
                     text: /DANGER: You are currently logged in as mary/)
 
-    click_on(id: "user_nav_logout_link")
+    within("#user_drop_down") { click_on(class: "logout_link") }
     assert_equal(rolf.id, User.current_id)
     assert_selector("#admin_banner",
                     text: /DANGER: You are in administrator mode/)
@@ -77,10 +81,10 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
   # (the controller action does not, however).
   #
   # def test_edit_banner
-  #   refute_selector(id: "nav_admin_edit_banner_link")
+  #   refute_selector(class: "change_site_banner_link")
 
   #   put_user_in_admin_mode(rolf)
-  #   click_on(id: "nav_admin_edit_banner_link")
+  #   click_on(class: "change_site_banner_link")
 
   #   within("#admin_banner_form") do
   #     fill_in("val", with: "An **important** new banner")
@@ -94,10 +98,10 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
   # end
 
   def test_blocked_ips
-    refute_selector(id: "nav_admin_blocked_ips_link")
+    refute_selector(class: "blocked_ips_link")
 
     put_user_in_admin_mode(rolf)
-    click_on(id: "nav_admin_blocked_ips_link")
+    click_on(class: "blocked_ips_link")
 
     assert_selector("#okay_ips_manager_form")
     assert_selector("#blocked_ips_manager_form")

@@ -185,6 +185,11 @@ class AccountControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_head_title(:email_welcome.l(user: users(:rolf).legal_name))
+    # Logging out changes the session's theme/asset state, so this
+    # button must opt out of Turbo (regression: this call site used
+    # to hardcode its own button, missing the opt-out entirely).
+    assert_select("form button.logout_link[data-turbo='false']",
+                  text: :app_logout.t)
   end
 
   def test_block_known_evil_signups

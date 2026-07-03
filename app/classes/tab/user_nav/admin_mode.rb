@@ -16,12 +16,18 @@ class Tab::UserNav::AdminMode < Tab::Base
     admin_mode_path(**args)
   end
 
+  # Stable selector class regardless of on/off toggle state — title
+  # (and therefore the auto-derived class) flips between "Turn Admin
+  # Mode On"/"Off", but callers need one consistent class to target.
+  def alt_title
+    "admin_mode"
+  end
+
   # Toggling admin mode changes the session's theme/asset state, so
   # Turbo Drive's head-merging on the redirected page can corrupt
   # stylesheets. Opt this button out of Turbo entirely.
   def html_options
-    { id: "user_nav_admin_mode_link", button: :post,
-      data: { turbo: false } }
+    { button: :post, data: { turbo: false } }
   end
 
   private

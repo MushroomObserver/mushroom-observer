@@ -30,7 +30,7 @@ class AdminModeSystemTest < ApplicationSystemTestCase
                "Admin stylesheet should not be present in normal mode")
 
     click_on(id: "user_nav_toggle")
-    click_on(id: "user_nav_admin_mode_link")
+    within("#user_drop_down") { click_on(class: "admin_mode_link") }
 
     assert_selector("#admin_banner",
                     text: "DANGER: You are in administrator mode")
@@ -38,7 +38,7 @@ class AdminModeSystemTest < ApplicationSystemTestCase
            "Admin stylesheet should be present after enabling admin mode")
 
     click_on(id: "user_nav_toggle")
-    click_on(id: "user_nav_admin_mode_link")
+    within("#user_drop_down") { click_on(class: "admin_mode_link") }
 
     assert_no_selector("#admin_banner")
     assert_not(admin_stylesheet_present?,

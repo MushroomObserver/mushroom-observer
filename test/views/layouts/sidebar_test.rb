@@ -34,8 +34,8 @@ module Views::Layouts
 
       # Should have login section
       assert_includes(html, :app_account.t)
-      assert_includes(html, "nav_login_link")
-      assert_includes(html, "nav_signup_link")
+      assert_html(html, ".login_link")
+      assert_html(html, ".create_account_link")
 
       # Should NOT have admin section
       assert_not_includes(html, :app_admin.t)
@@ -47,10 +47,10 @@ module Views::Layouts
 
       # Should have admin section
       assert_includes(html, :app_admin.t)
-      assert_includes(html, "nav_admin_off_link")
+      assert_html(html, ".admin_mode_link")
 
       # Should NOT have login section
-      assert_not_includes(html, "nav_login_link")
+      assert_no_html(html, ".login_link")
     end
 
     def test_renders_user_sections_for_logged_in_user
@@ -58,7 +58,7 @@ module Views::Layouts
 
       # Should have user section (mobile only)
       assert_includes(html, @user.login)
-      assert_includes(html, "nav_user_logout_link")
+      assert_html(html, ".logout_link")
 
       # Should have observations section
       assert_includes(html, :app_observations_left.t)

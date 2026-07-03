@@ -78,7 +78,12 @@ module CapybaraSessionExtensions
     user.save!
     login!(user, session: session)
 
-    session.click_on(id: "user_nav_admin_mode_link")
+    # `.admin_mode_link` also exists (CSS-hidden) in the mobile
+    # sidebar, which rack_test can't tell is hidden — scope to the
+    # desktop dropdown to avoid an ambiguous match.
+    session.within("#user_drop_down") do
+      session.click_on(class: "admin_mode_link")
+    end
     session.assert_text("DANGER: You are in administrator mode")
   end
 

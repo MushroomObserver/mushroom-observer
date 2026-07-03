@@ -28,8 +28,8 @@ class Views::Layouts::Sidebar
       assert_html(html, "span.glyphicon.glyphicon-user")
 
       # Should include navigation links
-      assert_html(html, "#nav_login_link")
-      assert_html(html, "#nav_signup_link")
+      assert_html(html, ".login_link")
+      assert_html(html, ".create_account_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
