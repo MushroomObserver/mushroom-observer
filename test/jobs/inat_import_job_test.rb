@@ -151,6 +151,37 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(1, @inat_import.reload.ignored_already_imported_count)
   end
 
+  # When the self-heal link fails validation, the obs is still skipped
+  # (it IS cross-referenced to a live MO obs) but the job log must report
+  # the failure instead of claiming the link was recorded.
+  def test_import_crosslink_creation_failure_logged_and_still_skipped
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    mo_obs = observations(:minimal_unknown_obs)
+    inject_mo_url_field("https://mushroomobserver.org/#{mo_obs.id}")
+
+    stub_inat_interactions
+    raiser = ->(*) { raise(ActiveRecord::RecordInvalid.new(ExternalLink.new)) }
+    ExternalLink.stub(:create!, raiser) do
+      assert_no_difference(
+        "Observation.count",
+        "A cross-referenced iNat obs is skipped even when the " \
+        "self-heal link fails"
+      ) do
+        InatImportJob.perform_now(@inat_import)
+      end
+    end
+
+    assert_nil(
+      ExternalLink.find_by(external_id: @parsed_results.first[:id].to_s,
+                           relationship: :remote_manual),
+      "No link should exist after the stubbed validation failure"
+    )
+    assert_equal(1, @inat_import.reload.ignored_already_imported_count)
+    assert_match(/failed to record the link/, job_log_file.read,
+                 "Job log must report the link-creation failure")
+  end
+
   # Self-heal (#4565): an iNat obs whose MO URL field points at a LIVE MO
   # obs that has no link yet gets the missing remote_manual link
   # materialized, and is skipped rather than imported as a duplicate.
