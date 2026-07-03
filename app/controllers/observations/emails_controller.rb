@@ -18,7 +18,8 @@ module Observations
                  ))
         end
         format.turbo_stream do
-          render(Components::Modal::TurboForm.new(
+          render(Components::Modal.new(
+                   type: :turbo_form,
                    identifier: "observation_email",
                    title: :ask_observation_question_title.t(
                      name: @observation.unique_format_name

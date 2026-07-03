@@ -27,14 +27,12 @@ module Views::Controllers::Projects::Violations
     end
 
     def view_template
-      render(Components::Modal.new(
-               id: Views::Controllers::Projects::Violations::TargetLocationForm.modal_id_for(@obs),
-               title: :form_violations_modal_target_location_title.l,
-               user: @user
-             )) do |m|
-        if Views::Controllers::Projects::Violations::TargetLocationForm.applicable?(@obs)
+      Modal(id: TargetLocationForm.modal_id_for(@obs),
+            title: :form_violations_modal_target_location_title.l,
+            user: @user) do |m|
+        if TargetLocationForm.applicable?(@obs)
           m.with_form_content do
-            render(Views::Controllers::Projects::Violations::TargetLocationForm.new(
+            render(TargetLocationForm.new(
                      obs: @obs, project: @project,
                      existing_locations: @existing_locations
                    ))

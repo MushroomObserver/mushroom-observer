@@ -22,12 +22,14 @@ module Admin
                    ))
           end
           format.turbo_stream do
-            render(Components::Modal::TurboForm.new(
+            render(Components::Modal.new(
+                     type: :turbo_form,
                      identifier: "merge_request_email",
                      title: :email_merge_request_title.t(type: @model.type_tag),
                      user: @user,
                      model: FormObject::EmailRequest.new,
-                     form_class: Views::Controllers::Admin::Emails::MergeRequests::Form,
+                     form_class:
+                       Views::Controllers::Admin::Emails::MergeRequests::Form,
                      form_locals: { old_obj: @old_obj, new_obj: @new_obj,
                                     model_class: @model }
                    ), layout: false)

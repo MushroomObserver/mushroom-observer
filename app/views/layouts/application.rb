@@ -132,8 +132,8 @@ module Views::Layouts
     end
 
     def render_bottom_singletons
-      render(Components::Modal::ProgressSpinner.new)
-      render(Components::Modal::Confirm.new)
+      Modal(type: :progress_spinner)
+      Modal(type: :confirm)
       render(Views::Layouts::App::MediaQueryTests.new)
       render(Views::Layouts::App::GtmFooter.new)
     end
