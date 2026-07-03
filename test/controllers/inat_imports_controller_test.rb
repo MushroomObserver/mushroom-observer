@@ -645,6 +645,37 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Should flatten inat_username from namespaced params")
   end
 
+  def test_create_recheck_all_persists
+    user = users(:rolf)
+    login(user.login)
+
+    post(:create,
+         params: { all: "1", inat_username: "rolf",
+                   consent: 1, confirmed: 1, recheck_all: "1" })
+
+    import = created_import(user)
+    assert(import.recheck_all,
+           "Failed to save InatImport.recheck_all from the form checkbox")
+  end
+
+  def test_create_recheck_all_survives_confirm_round_trip
+    user = users(:rolf)
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123,456",
+             import_all: "", consent: "1", recheck_all: "1"
+           }
+         })
+
+    import = created_import(user)
+    assert(import.recheck_all,
+           "recheck_all should flatten from namespaced confirm params")
+  end
+
   def test_skip_writeback_checkbox_admin_only
     login(users(:rolf).login)
     get(:new)

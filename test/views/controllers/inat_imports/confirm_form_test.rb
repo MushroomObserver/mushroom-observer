@@ -34,6 +34,14 @@ module Views::Controllers::InatImports
                   "[name='inat_import_confirm[inat_username]']")
     end
 
+    def test_carries_recheck_all_through_hidden_field
+      html = render_form
+
+      assert_html(html,
+                  "input[type='hidden']" \
+                  "[name='inat_import_confirm[recheck_all]']")
+    end
+
     def test_staleness_note_absent_when_result_set_is_stable
       stable_model = FormObject::InatImportConfirm.new(
         inat_username: "rolf_inat_username", inat_ids: "123,456"

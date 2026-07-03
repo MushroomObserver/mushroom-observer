@@ -129,6 +129,76 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(@user.unique_text_name, obs.collector)
   end
 
+  # The duplicate gate is any-relationship (#4565): an iNat obs already
+  # linked to an MO obs via a non-import link (mirror/copy/etc.) must be
+  # skipped, not re-imported as a duplicate.
+  def test_import_skips_inat_obs_with_non_import_link
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    ExternalLink.create!(
+      user: @user, target: observations(:minimal_unknown_obs),
+      external_site: ExternalSite.inaturalist,
+      external_id: @parsed_results.first[:id].to_s, relationship: :mirror
+    )
+
+    stub_inat_interactions
+    assert_no_difference(
+      "Observation.count",
+      "A mirror-linked iNat obs must not be re-imported"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+    assert_equal(1, @inat_import.reload.ignored_already_imported_count)
+  end
+
+  # Self-heal (#4565): an iNat obs whose MO URL field points at a LIVE MO
+  # obs that has no link yet gets the missing remote_manual link
+  # materialized, and is skipped rather than imported as a duplicate.
+  def test_import_materializes_crosslink_to_live_mo_obs
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    mo_obs = observations(:minimal_unknown_obs)
+    inject_mo_url_field("https://mushroomobserver.org/#{mo_obs.id}")
+
+    stub_inat_interactions
+    assert_no_difference(
+      "Observation.count",
+      "An iNat obs cross-referenced to a live MO obs must not be imported"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    link = ExternalLink.find_by(
+      external_id: @parsed_results.first[:id].to_s, relationship: :remote_manual
+    )
+    assert_not_nil(link, "Cannot find the self-healed remote_manual link")
+    assert_equal(mo_obs, link.target)
+    assert_equal(1, @inat_import.reload.ignored_already_imported_count)
+  end
+
+  # A dead MO URL field value (the MO obs was deleted) blocks nothing:
+  # the obs is importable again (#4565 orphan reimport). Pins the
+  # "DEAD LINK:" annotation form used by the iNat-side cleanup sweep.
+  def test_import_imports_inat_obs_with_dead_mo_url_field
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    dead_id = Observation.maximum(:id).to_i + 1_000_000
+    inject_mo_url_field("DEAD LINK: https://mushroomobserver.org/#{dead_id}")
+
+    Location.create(user: @user,
+                    name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions
+    assert_difference(
+      "Observation.count", 1,
+      "An iNat obs whose MO URL points at a deleted MO obs is importable"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+  end
+
   # Prove (inter alia) that the MO Naming.user differs from the importing user
   # when the iNat user who made the 1st iNat id is another MO user
   def test_import_job_inat_id_suggested_by_another_by_mo_user
@@ -809,7 +879,7 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(@inat_import)
     end
 
-    assert_match(/Skipped #{inat_id} already imported/, job_log_file.read,
+    assert_match(/Skipped #{inat_id} already linked/, job_log_file.read,
                  "Should log a skip message when the obs is already imported")
   end
 
@@ -1217,7 +1287,7 @@ class InatImportJobTest < ActiveJob::TestCase
       only_id: false,
       order: "asc",
       order_by: "id",
-      **BASE_FILTER_PARAMS,
+      # no without_field: id-list imports always re-check (#4565)
       user_login: @inat_import.inat_username
     }
     error = "Unauthorized"
@@ -1337,6 +1407,19 @@ class InatImportJobTest < ActiveJob::TestCase
       JSON.parse(@mock_inat_response, symbolize_names: true)[:results]
 
     @inat_import = create_inat_import(**attrs)
+  end
+
+  # Add a "Mushroom Observer URL" observation field (5005) to the mocked
+  # iNat response. Call after create_ivars_from_filename, before stubbing.
+  def inject_mo_url_field(value)
+    parsed = JSON.parse(@mock_inat_response, symbolize_names: true)
+    parsed[:results].first[:ofvs] << {
+      field_id: MO_URL_OBSERVATION_FIELD_ID,
+      name: "Mushroom Observer URL",
+      value: value
+    }
+    @mock_inat_response = JSON.generate(parsed)
+    @parsed_results = parsed[:results]
   end
 
   # On the app side, the Job is created by InatImportsController#create,

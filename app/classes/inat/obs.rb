@@ -81,6 +81,14 @@ class Inat
       inat_obs_fields.find { |field| field[:name] == name }
     end
 
+    # Value of the "Mushroom Observer URL" observation field, or nil.
+    # Looked up by field id — the display name is localizable on iNat.
+    def mo_url_field_value
+      inat_obs_fields&.find do |field|
+        field[:field_id] == MO_URL_OBSERVATION_FIELD_ID
+      end&.dig(:value)
+    end
+
     # NOTE: Fixes ABC count of `snapshot` because
     # inat_taxon_name is one fewer Branch than self[:taxon][:name]
     def inat_taxon_name = @obs_taxon[:name]

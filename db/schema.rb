@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_02_000000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_03_204051) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -239,6 +239,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_02_000000) do
     t.integer "ignored_already_imported_count", default: 0, null: false
     t.text "date_missing_inat_ids"
     t.text "license_added_inat_ids"
+    t.boolean "recheck_all", default: false, null: false
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
