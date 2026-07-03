@@ -9,8 +9,4 @@ class Tab::Sidebar::Admin::SwitchUsers < Tab::Base
   def path
     edit_admin_mode_path
   end
-
-  def html_options
-    { id: "nav_admin_switch_users_link" }
-  end
 end

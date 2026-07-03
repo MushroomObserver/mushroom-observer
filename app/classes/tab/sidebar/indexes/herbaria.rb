@@ -9,8 +9,4 @@ class Tab::Sidebar::Indexes::Herbaria < Tab::Base
   def path
     herbaria_path
   end
-
-  def html_options
-    { id: "nav_herbaria_link" }
-  end
 end

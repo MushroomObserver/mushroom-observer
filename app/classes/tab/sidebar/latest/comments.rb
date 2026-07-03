@@ -9,8 +9,4 @@ class Tab::Sidebar::Latest::Comments < Tab::Base
   def path
     comments_path
   end
-
-  def html_options
-    { id: "nav_comments_link" }
-  end
 end

@@ -9,8 +9,4 @@ class Tab::Sidebar::Admin::Banners < Tab::Base
   def path
     admin_banners_path
   end
-
-  def html_options
-    { id: "nav_admin_edit_banner_link" }
-  end
 end

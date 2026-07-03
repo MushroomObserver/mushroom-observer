@@ -9,8 +9,4 @@ class Tab::Sidebar::Info::Publications < Tab::Base
   def path
     publications_path
   end
-
-  def html_options
-    { id: "nav_publications_link" }
-  end
 end

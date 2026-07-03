@@ -27,10 +27,10 @@ class Views::Layouts::Sidebar
       assert_includes(html, :app_observations_left.t)
 
       # Should include navigation links
-      assert_html(html, "#nav_observations_link")
-      assert_html(html, "#nav_new_observation_link")
-      assert_html(html, "#nav_your_observations_link")
-      assert_html(html, "#nav_identify_observations_link")
+      assert_html(html, ".latest_link")
+      assert_html(html, ".create_observation_link")
+      assert_html(html, ".your_observations_link")
+      assert_html(html, ".help_identify_link")
 
       # Should have indent class on links
       assert_html(html, ".list-group-item.indent")
@@ -53,12 +53,12 @@ class Views::Layouts::Sidebar
       assert_includes(html, :app_observations_left.t)
 
       # Should have latest observations link (available to all)
-      assert_html(html, "#nav_observations_link")
+      assert_html(html, ".latest_link")
 
       # Should NOT have user-only links
-      assert_no_html(html, "#nav_new_observation_link")
-      assert_no_html(html, "#nav_your_observations_link")
-      assert_no_html(html, "#nav_identify_observations_link")
+      assert_no_html(html, ".create_observation_link")
+      assert_no_html(html, ".your_observations_link")
+      assert_no_html(html, ".help_identify_link")
     end
 
     private

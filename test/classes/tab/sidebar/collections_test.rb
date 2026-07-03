@@ -120,5 +120,17 @@ module Tab::Sidebar
         tabs.map(&:class)
       )
     end
+
+    # Regression: both used to hardcode the literal id
+    # "nav_articles_link" — an actual duplicate-id-in-DOM bug for any
+    # logged-in user, since Latest and Indexes render on the same
+    # page. Their auto-derived classes (from each one's own title)
+    # must be distinct.
+    def test_news_and_glossary_have_distinct_classes
+      news = Tab::Sidebar::Latest::News.new
+      glossary = Tab::Sidebar::Indexes::Glossary.new
+
+      assert_not_equal(news.html_options[:class], glossary.html_options[:class])
+    end
   end
 end

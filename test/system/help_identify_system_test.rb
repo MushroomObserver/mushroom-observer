@@ -58,8 +58,8 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     within("#navigation") do
-      assert_link(id: "nav_identify_observations_link")
-      click_link(id: "nav_identify_observations_link")
+      assert_link(class: "help_identify_link")
+      click_link(class: "help_identify_link")
     end
     assert_selector("body.identify__index")
 
@@ -89,7 +89,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     login!(rolf)
 
     within("#navigation") do
-      click_link(id: "nav_identify_observations_link")
+      click_link(class: "help_identify_link")
     end
     assert_selector("body.identify__index")
 

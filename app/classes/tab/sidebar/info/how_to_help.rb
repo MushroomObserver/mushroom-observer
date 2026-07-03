@@ -9,8 +9,4 @@ class Tab::Sidebar::Info::HowToHelp < Tab::Base
   def path
     info_how_to_help_path
   end
-
-  def html_options
-    { id: "nav_how_to_help_link" }
-  end
 end

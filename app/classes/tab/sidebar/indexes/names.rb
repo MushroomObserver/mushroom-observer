@@ -10,8 +10,4 @@ class Tab::Sidebar::Indexes::Names < Tab::Base
   def path
     names_path(has_observations: true)
   end
-
-  def html_options
-    { id: "nav_name_observations_link" }
-  end
 end

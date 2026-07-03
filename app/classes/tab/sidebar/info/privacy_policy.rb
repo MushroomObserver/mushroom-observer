@@ -9,8 +9,4 @@ class Tab::Sidebar::Info::PrivacyPolicy < Tab::Base
   def path
     policy_privacy_path
   end
-
-  def html_options
-    { id: "nav_privacy_policy_link" }
-  end
 end

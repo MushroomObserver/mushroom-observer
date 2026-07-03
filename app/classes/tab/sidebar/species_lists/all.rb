@@ -9,8 +9,4 @@ class Tab::Sidebar::SpeciesLists::All < Tab::Base
   def path
     species_lists_path
   end
-
-  def html_options
-    { id: "nav_species_lists_link" }
-  end
 end

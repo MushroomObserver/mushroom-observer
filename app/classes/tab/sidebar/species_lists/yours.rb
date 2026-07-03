@@ -14,8 +14,4 @@ class Tab::Sidebar::SpeciesLists::Yours < Tab::Base
   def path
     species_lists_path(by_user: @user.id)
   end
-
-  def html_options
-    { id: "nav_your_species_lists_link" }
-  end
 end

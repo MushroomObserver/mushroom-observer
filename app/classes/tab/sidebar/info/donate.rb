@@ -9,8 +9,4 @@ class Tab::Sidebar::Info::Donate < Tab::Base
   def path
     support_donate_path
   end
-
-  def html_options
-    { id: "nav_donate_link" }
-  end
 end
