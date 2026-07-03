@@ -30,10 +30,15 @@ jobs:
       - name: Install additional tools
         run: sudo apt-get install exiftool
 
-      # 2025-05-12 JDC Skip this step for now because it hangs intermittently
-      # and is needed only for system tests, which are currently not run in CI.
-      # - name: Install Chrome/Chromium
-      #   run: sudo apt-get install chromium-browser
+      # `apt-get install chromium-browser` used to hang intermittently in CI
+      # (Ubuntu's package is a snap wrapper, and snapd is flaky in CI
+      # containers). browser-actions/setup-chrome downloads a Chromium
+      # binary directly and puts it on PATH — no snap involved — which
+      # Cuprite/Ferrum auto-detects.
+      - name: Install Chromium
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chromium: true
 
       # MySQL is installed but does not run by default
       # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#mysql
@@ -89,6 +94,11 @@ jobs:
         env:
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
         run: bundle exec rails test
+
+      - name: Run system tests
+        env:
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+        run: bundle exec rails test:system
 
       # https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls GitHub Action
