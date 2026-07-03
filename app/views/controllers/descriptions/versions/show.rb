@@ -32,7 +32,7 @@ module Views::Controllers::Descriptions::Versions
       add_context_nav(version_actions)
       pre_render_setup
 
-      render(Views::Controllers::Versions::Table.new(
+      render(Views::Controllers::Versions::Previous.new(
                obj: @description, versions: @versions
              ))
       render(Views::Controllers::Descriptions::DetailsAndAltsPanel.new(

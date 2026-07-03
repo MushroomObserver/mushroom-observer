@@ -25,10 +25,9 @@ module Views::Controllers::Names::Lifeforms::Propagate
         plain(:propagate_lifeform_add.l)
       end
 
-      render(Components::Table.new(lifeforms_on_name,
-                                   variant: :striped,
-                                   identifier: "lifeform",
-                                   show_headers: false)) do |t|
+      Table(lifeforms_on_name,
+            variant: :striped, identifier: "lifeform",
+            show_headers: false) do |t|
         t.column(nil) do |word|
           checkbox_field(:"add_#{word}", label: :"lifeform_#{word}".l)
         end
@@ -45,10 +44,9 @@ module Views::Controllers::Names::Lifeforms::Propagate
         plain(:propagate_lifeform_remove.l)
       end
 
-      render(Components::Table.new(lifeforms_not_on_name,
-                                   variant: :striped,
-                                   identifier: "lifeform",
-                                   show_headers: false)) do |t|
+      Table(lifeforms_not_on_name,
+            variant: :striped, identifier: "lifeform",
+            show_headers: false) do |t|
         t.column(nil) do |word|
           checkbox_field(:"remove_#{word}", label: :"lifeform_#{word}".l)
         end

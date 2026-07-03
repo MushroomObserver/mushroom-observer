@@ -2,12 +2,12 @@
 
 require "test_helper"
 
-class Views::Controllers::Versions::TableTest < ComponentTestCase
+class Views::Controllers::Versions::PreviousTest < ComponentTestCase
   def test_renders_panel_with_type_tagged_id
     name = names(:peltigera)
 
     html = render(
-      Views::Controllers::Versions::Table.new(
+      Views::Controllers::Versions::Previous.new(
         obj: name, versions: name.versions.to_a
       )
     )
@@ -20,7 +20,7 @@ class Views::Controllers::Versions::TableTest < ComponentTestCase
     name = names(:peltigera)
 
     html = render(
-      Views::Controllers::Versions::Table.new(
+      Views::Controllers::Versions::Previous.new(
         obj: name, versions: name.versions.to_a
       )
     )
@@ -38,7 +38,7 @@ class Views::Controllers::Versions::TableTest < ComponentTestCase
     versions = name.versions.to_a
 
     html = render(
-      Views::Controllers::Versions::Table.new(
+      Views::Controllers::Versions::Previous.new(
         obj: name, versions: versions,
         args: { bold: ->(_v) { true } }
       )

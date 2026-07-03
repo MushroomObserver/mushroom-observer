@@ -5,7 +5,7 @@
 # locations index and the target_locations turbo_stream re-render.
 #
 module Views::Controllers::Projects::Locations
-  class Table < Views::Base
+  class Tables < Views::Base
     def initialize(project:, grouped_data:,
                    ungrouped_locations:, obs_counts:,
                    user: nil)
@@ -140,10 +140,9 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_locations_table(rows = nil, &block)
-      render(Components::Table.new(rows,
-                                   variant: :striped,
-                                   identifier: "project-members",
-                                   class: "mt-3")) do |t|
+      Table(rows,
+            variant: :striped, identifier: "project-members",
+            class: "mt-3") do |t|
         t.column(:LOCATION.l)
         t.column(:OBSERVATIONS.l)
         t.column(:PROJECT_ALIASES.l)

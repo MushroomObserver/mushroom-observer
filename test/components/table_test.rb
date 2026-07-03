@@ -52,11 +52,42 @@ class TableTest < ComponentTestCase
     rows = [TestRow.new(name: "Test")]
 
     html = render(Components::Table.new(rows,
-                                        class: "table-sm table-striped")) do |t|
+                                        class: "table-sm w-100")) do |t|
       t.column("Name", &:name)
     end
 
-    assert_html(html, "table.table.table-sm.table-striped")
+    assert_html(html, "table.table.table-sm.w-100")
+  end
+
+  def test_variant_kwarg_adds_bootstrap_modifier_class
+    rows = [TestRow.new(name: "Test")]
+
+    html = render(Components::Table.new(rows, variant: :striped)) do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_html(html, "table.table.table-striped")
+  end
+
+  def test_variant_kwarg_accepts_array_for_multiple_modifiers
+    rows = [TestRow.new(name: "Test")]
+
+    html = render(Components::Table.new(rows,
+                                        variant: [:striped, :hover])) do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_html(html, "table.table.table-striped.table-hover")
+  end
+
+  def test_identifier_kwarg_adds_table_identifier_class
+    rows = [TestRow.new(name: "Test")]
+
+    html = render(Components::Table.new(rows, identifier: "my-widget")) do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_html(html, "table.table.table-my-widget")
   end
 
   def test_accepts_custom_id

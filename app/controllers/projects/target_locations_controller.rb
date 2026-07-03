@@ -102,7 +102,7 @@ module Projects
                ),
                turbo_stream.replace(
                  "locations_table",
-                 Views::Controllers::Projects::Locations::Table.new(
+                 Views::Controllers::Projects::Locations::Tables.new(
                    project: @project, grouped_data: grouped,
                    ungrouped_locations: ungrouped, obs_counts: counts,
                    user: @user

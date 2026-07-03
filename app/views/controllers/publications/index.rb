@@ -49,8 +49,9 @@ module Views::Controllers::Publications
     end
 
     def render_publications_table
-      render(::Components::Table.new(@publications,
-                                     class: table_classes)) do |tbl|
+      Table(@publications,
+            variant: :striped, identifier: "publications",
+            class: "mb-3 mt-3") do |tbl|
         add_full_link_column(tbl)
         tbl.column(:publication_link.l) { |pub| link_cell(pub) }
         tbl.column("(#{peer_count})") { |pub| pub.peer_reviewed ? "P" : "" }
@@ -63,10 +64,6 @@ module Views::Controllers::Publications
       tbl.column("#{:publication_full.l} (#{full_count})") do |pub|
         link_to(pub) { trusted_html(pub.full.t.strip_links) }
       end
-    end
-
-    def table_classes
-      "table-striped table-publications mb-3 mt-3"
     end
 
     def link_cell(pub)

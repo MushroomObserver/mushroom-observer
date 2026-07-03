@@ -10,7 +10,7 @@
 # `initial_version_link_text`). With that chain gone, the helper
 # file is empty and is deleted in the same commit.
 module Views::Controllers::Versions
-  class Table < Views::Base
+  class Previous < Views::Base
     prop :obj, ::AbstractModel
     prop :versions, _Array(_Interface(:user_id))
     # Optional `args[:bold]` callable — only the name-version page
@@ -30,10 +30,10 @@ module Views::Controllers::Versions
     private
 
     def render_table
-      render(Components::Table.new(
+      render(::Components::Table.new(
                @versions.reverse,
-               show_headers: false,
-               class: "table-hover mb-0"
+               variant: :hover, identifier: "versions",
+               show_headers: false, class: "mb-0"
              )) do |t|
         t.column("") { |ver| render_date_cell(ver) }
         t.column("") { |ver| render_user_cell(ver) }
