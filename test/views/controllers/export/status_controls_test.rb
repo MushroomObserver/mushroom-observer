@@ -45,10 +45,18 @@ module Views::Controllers::Export
       image = images(:in_situ_image)
       image.update_attribute(:diagnostic, true)
       html = render(StatusControls.new(object: image, flag: :diagnostic))
+      dom_id = ActionView::RecordIdentifier.dom_id(image, :diagnostic)
 
       assert_html(html, "b", text: :review_diagnostic.t)
       assert_html(html, "form button[type='submit']",
                   text: :review_non_diagnostic.t)
+      # Wrapped in its own flag-specific dom_id, distinct from the
+      # ok_for_export toggle rendered alongside it on images/show, so
+      # ExportController can turbo_stream.replace just this pair.
+      assert_html(html, "div##{dom_id}")
+      # Same CRUDBase quirk as ok_for_export: data-turbo lands on the
+      # <button>, not the <form> — see test_flip_button_opts_into_turbo.
+      assert_html(html, "button[data-turbo='true']")
     end
 
     def test_wraps_in_dom_id_for_turbo_replace
