@@ -16,8 +16,12 @@ class Tab::UserNav::AdminMode < Tab::Base
     admin_mode_path(**args)
   end
 
+  # Toggling admin mode changes the session's theme/asset state, so
+  # Turbo Drive's head-merging on the redirected page can corrupt
+  # stylesheets. Opt this button out of Turbo entirely.
   def html_options
-    { id: "user_nav_admin_mode_link", button: :post }
+    { id: "user_nav_admin_mode_link", button: :post,
+      data: { turbo: false } }
   end
 
   private

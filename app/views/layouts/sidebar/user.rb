@@ -32,6 +32,9 @@ class Views::Layouts::Sidebar
       end
     end
 
+    # Logging out changes the session's theme/asset state, so Turbo
+    # Drive's head-merging on the redirected page can corrupt
+    # stylesheets. Opt this button out of Turbo entirely.
     def render_logout_button
       Button(
         type: :post,
@@ -39,7 +42,8 @@ class Views::Layouts::Sidebar
         target: account_logout_path,
         variant: :btn_link,
         id: "nav_user_logout_link",
-        class: class_names(@classes[:indent], @classes[:mobile_only])
+        class: class_names(@classes[:indent], @classes[:mobile_only]),
+        data: { turbo: false }
       )
     end
 
@@ -63,6 +67,9 @@ class Views::Layouts::Sidebar
            content: title, path: url, **html_options)
     end
 
+    # Toggling admin mode changes the session's theme/asset state, so
+    # Turbo Drive's head-merging on the redirected page can corrupt
+    # stylesheets. Opt this button out of Turbo entirely.
     def render_admin_button
       Button(
         type: :post,
@@ -70,7 +77,8 @@ class Views::Layouts::Sidebar
         target: admin_mode_path(turn_on: true),
         variant: :btn_link,
         id: "nav_mobile_admin_link",
-        class: class_names(@classes[:indent], @classes[:mobile_only])
+        class: class_names(@classes[:indent], @classes[:mobile_only]),
+        data: { turbo: false }
       )
     end
 
