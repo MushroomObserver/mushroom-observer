@@ -191,15 +191,15 @@ class Components::Matrix::Box < Components::Base
   end
 
   def render_propose_naming_modal(obs)
-    render(Components::Button.new(
-             type: :modal,
-             name: :create_naming.t,
-             target: new_observation_naming_path(
-               observation_id: obs.id, context: "matrix_box"
-             ),
-             modal_id: "obs_#{obs.id}_naming",
-             class: "d-inline-block mb-3 propose-naming-link"
-           ))
+    Button(
+      type: :modal,
+      name: :create_naming.t,
+      target: new_observation_naming_path(
+        observation_id: obs.id, context: "matrix_box"
+      ),
+      modal_id: "obs_#{obs.id}_naming",
+      class: "d-inline-block mb-3 propose-naming-link"
+    )
   end
 
   def render_where_section

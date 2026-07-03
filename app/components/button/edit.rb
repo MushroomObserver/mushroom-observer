@@ -5,15 +5,15 @@
 # Pass `variant:` to override (e.g. `variant: :outline`, `variant: :strip`).
 #
 # @example default (btn-default frame with edit icon)
-#   render(Components::Button.new(type: :edit, target: @herbarium))
+#   Button(type: :edit, target: @herbarium)
 #
 # @example outline button (common CRUD row usage)
-#   render(Components::Button.new(type: :edit, target: @herbarium,
-#                                 variant: :outline))
+#   Button(type: :edit, target: @herbarium,
+#                                 variant: :outline)
 #
 # @example bare icon, no btn frame
-#   render(Components::Button.new(type: :edit, target: @herbarium,
-#                                 variant: :strip))
+#   Button(type: :edit, target: @herbarium,
+#                                 variant: :strip)
 class Components::Button::Edit < Components::Link::Edit
   def initialize(target:, name: nil, icon: :edit, variant: nil, **)
     super(target: target, name: name, icon: icon, button: variant, **)

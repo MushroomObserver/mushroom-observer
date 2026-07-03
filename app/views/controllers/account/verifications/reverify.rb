@@ -15,15 +15,15 @@ module Views::Controllers::Account::Verifications
         :reverify_note.tp(user: @unverified_user.login) +
           :email_spam_notice.tp
       )
-      render(Components::Button.new(
-               type: :post,
-               name: :reverify_link.t,
-               target: account_resend_verification_email_path(
-                 id: @unverified_user.id
-               ),
-               variant: :primary,
-               id: "account_reverify_link"
-             ))
+      Button(
+        type: :post,
+        name: :reverify_link.t,
+        target: account_resend_verification_email_path(
+          id: @unverified_user.id
+        ),
+        variant: :primary,
+        id: "account_reverify_link"
+      )
     end
   end
 end

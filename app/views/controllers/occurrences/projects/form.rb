@@ -132,12 +132,12 @@ module Views::Controllers::Occurrences::Projects
     end
 
     def render_buttons
-      render(Components::Button.new(
-               type: :get,
-               target: cancel_path,
-               name: :CANCEL.l,
-               data: { dismiss: "modal" }
-             ))
+      Button(
+        type: :get,
+        target: cancel_path,
+        name: :CANCEL.l,
+        data: { dismiss: "modal" }
+      )
       whitespace
       # Skip = proceed without backfilling projects. Both controllers
       # (`OccurrencesController#create` and

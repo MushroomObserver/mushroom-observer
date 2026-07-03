@@ -39,15 +39,15 @@ module Views::Controllers::Projects::Members
     end
 
     def render_add_button(user)
-      render(Components::Button.new(
-               type: :post,
-               variant: :strip,
-               name: :ADD.l,
-               target: project_members_path(
-                 project_id: @project.id,
-                 candidate: user.id
-               )
-             ))
+      Button(
+        type: :post,
+        variant: :strip,
+        name: :ADD.l,
+        target: project_members_path(
+          project_id: @project.id,
+          candidate: user.id
+        )
+      )
     end
   end
 end

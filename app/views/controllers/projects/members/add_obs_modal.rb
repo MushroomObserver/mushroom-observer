@@ -37,26 +37,26 @@ module Views::Controllers::Projects::Members
     end
 
     def render_footer_buttons
-      render(::Components::Button.new(
-               name: :CANCEL.l,
-               data: { dismiss: "modal" }
-             ))
+      Button(
+        name: :CANCEL.l,
+        data: { dismiss: "modal" }
+      )
       whitespace
       render_submit_button if @count.positive?
     end
 
     def render_submit_button
-      render(Components::Button.new(
-               type: :put,
-               name: submit_label,
-               target: project_member_path(
-                 project_id: @project.id,
-                 candidate: @candidate.id,
-                 commit: :change_member_add_obs.l,
-                 target: :project_index
-               ),
-               variant: :primary
-             ))
+      Button(
+        type: :put,
+        name: submit_label,
+        target: project_member_path(
+          project_id: @project.id,
+          candidate: @candidate.id,
+          commit: :change_member_add_obs.l,
+          target: :project_index
+        ),
+        variant: :primary
+      )
     end
 
     def submit_label

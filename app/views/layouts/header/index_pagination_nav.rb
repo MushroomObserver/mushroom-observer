@@ -157,11 +157,11 @@ module Views::Layouts
 
     def render_goto_button
       span(class: "input-group-btn") do
-        render(::Components::Button.new(
-                 type: :submit,
-                 variant: :outline,
-                 class: "px-2"
-               )) { render(::Components::Icon.new(type: :goto, title: :GOTO.l)) }
+        Button(
+          type: :submit,
+          variant: :outline,
+          class: "px-2"
+        ) { render(::Components::Icon.new(type: :goto, title: :GOTO.l)) }
       end
     end
 

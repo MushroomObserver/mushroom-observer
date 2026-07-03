@@ -53,8 +53,8 @@ class Components::IndexFilter < Components::Base
          class: form_class, id: @form_id) do
       div(class: "d-flex gap-2 align-items-end") do
         yield if block
-        render(::Components::Button.new(type: :submit, name: @submit_text,
-                                        html_name: "commit"))
+        Button(type: :submit, name: @submit_text,
+               html_name: "commit")
       end
     end
   end

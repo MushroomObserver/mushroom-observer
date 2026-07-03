@@ -42,13 +42,13 @@ module Views::Controllers::Account::Profile
       render(Components::Image::Interactive.new(
                user: @user, image: @user.image, votes: false
              ))
-      render(Components::Button.new(
-               type: :put,
-               variant: :strip,
-               name: :profile_image_remove.t,
-               target: account_profile_remove_image_path,
-               confirm: :are_you_sure.l
-             ))
+      Button(
+        type: :put,
+        variant: :strip,
+        name: :profile_image_remove.t,
+        target: account_profile_remove_image_path,
+        confirm: :are_you_sure.l
+      )
     end
   end
 end

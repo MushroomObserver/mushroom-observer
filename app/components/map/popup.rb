@@ -184,14 +184,14 @@ class Components::Map::Popup < Components::Base
   end
 
   def render_mapset_link(label_sym, path, query)
-    render(::Components::Button.new(
-             type: :get,
-             name: label_sym.t,
-             target: add_q_param(path, query),
-             size: :xs,
-             class: "map-popup-btn",
-             data: query.params
-           ))
+    Button(
+      type: :get,
+      name: label_sym.t,
+      target: add_q_param(path, query),
+      size: :xs,
+      class: "map-popup-btn",
+      data: query.params
+    )
   end
 
   # ----------------------------------------------------------------

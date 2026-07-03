@@ -184,14 +184,14 @@ module Views::Controllers::Descriptions
         span { plain(" | ") }
         %w[unvetted vetted inaccurate].each_with_index do |w, idx|
           span { plain(" | ") } if idx.positive?
-          render(Components::Button.new(
-                   type: :put,
-                   variant: :strip,
-                   target: review_status_name_description_path(
-                     @description.id, value: w
-                   ),
-                   name: :"review_#{w}".l
-                 ))
+          Button(
+            type: :put,
+            variant: :strip,
+            target: review_status_name_description_path(
+              @description.id, value: w
+            ),
+            name: :"review_#{w}".l
+          )
         end
       end
     end

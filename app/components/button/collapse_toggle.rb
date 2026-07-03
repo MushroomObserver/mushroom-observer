@@ -8,7 +8,7 @@
 # Dispatched via `Components::Button.new(type: :collapse_toggle, ...)`.
 #
 # @example Map expand/collapse toggle
-#   render(Components::Button.new(
+#   Button(
 #     type: :collapse_toggle,
 #     target_id: "herbarium_form_map",
 #     open_text: :form_observations_hide_map.l,
@@ -19,7 +19,7 @@
 #     data: { map_target: "toggleMapBtn",
 #             action: "map#toggleMap" },
 #     aria: { expanded: "false", controls: "herbarium_form_map" }
-#   ))
+#   )
 class Components::Button::CollapseToggle < Components::Button
   include Components::Button::CollapseContent
 

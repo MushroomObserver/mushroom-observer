@@ -4,21 +4,21 @@
 # the top-nav when no user is logged in.
 class Views::Layouts::TopNav::Login < Views::Base
   def view_template
-    render(::Components::Button.new(
-             type: :get,
-             name: :app_login.t,
-             target: new_account_login_path,
-             variant: :outline, size: :sm,
-             class: "ml-3",
-             id: "user_nav_login_link"
-           ))
-    render(::Components::Button.new(
-             type: :get,
-             name: :app_create_account.t,
-             target: account_signup_path,
-             variant: :outline, size: :sm,
-             class: "ml-3",
-             id: "user_nav_signup_link"
-           ))
+    Button(
+      type: :get,
+      name: :app_login.t,
+      target: new_account_login_path,
+      variant: :outline, size: :sm,
+      class: "ml-3",
+      id: "user_nav_login_link"
+    )
+    Button(
+      type: :get,
+      name: :app_create_account.t,
+      target: account_signup_path,
+      variant: :outline, size: :sm,
+      class: "ml-3",
+      id: "user_nav_signup_link"
+    )
   end
 end

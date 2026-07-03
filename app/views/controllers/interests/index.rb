@@ -28,10 +28,10 @@ module Views::Controllers::Interests
 
     def render_type_filter
       div(class: "btn-group pb-1 hidden-xs text-nowrap mt-5") do
-        render(Components::Button.new(
-                 name: :rss_show.l, tag: :span, size: :sm,
-                 class: "disabled"
-               ))
+        Button(
+          name: :rss_show.l, tag: :span, size: :sm,
+          class: "disabled"
+        )
         render_filter_pill(nil, :rss_all.l, interests_path)
         @types.each do |type|
           label = type.underscore.pluralize.upcase.to_sym.l
@@ -42,9 +42,9 @@ module Views::Controllers::Interests
 
     def render_filter_pill(type, label, url)
       active = (type.to_s == @selected_type.to_s)
-      render(Components::Button.new(
-               tag: :span, size: :sm, class: ("active" if active)
-             )) do
+      Button(
+        tag: :span, size: :sm, class: ("active" if active)
+      ) do
         if active
           plain(label)
         else

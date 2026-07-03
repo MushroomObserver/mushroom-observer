@@ -7,19 +7,19 @@
 # outline style.
 #
 # @example default (standard btn-default frame with danger icon)
-#   render(Components::Button.new(type: :delete, target: @api_key))
+#   Button(type: :delete, target: @api_key)
 #
 # @example outline button (common CRUD row usage)
-#   render(Components::Button.new(type: :delete, target: @api_key,
-#                                 variant: :outline))
+#   Button(type: :delete, target: @api_key,
+#                                 variant: :outline)
 #
 # @example with overrides
-#   render(Components::Button.new(type: :delete, target: @api_key,
-#                                 name: :REMOVE.l, icon: :remove))
+#   Button(type: :delete, target: @api_key,
+#                                 name: :REMOVE.l, icon: :remove)
 #
 # @example bare icon, no btn frame
-#   render(Components::Button.new(type: :delete, target: @term,
-#                                 variant: :strip))
+#   Button(type: :delete, target: @term,
+#                                 variant: :strip)
 class Components::Button::Delete < Components::Button::CRUDBase
   def initialize(target:, name: nil, icon: :delete, **html_attrs)
     confirm = html_attrs.delete(:confirm) || :are_you_sure.l

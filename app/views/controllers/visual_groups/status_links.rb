@@ -50,17 +50,17 @@ module Views::Controllers::VisualGroups
     end
 
     def render_status_patch_button(link, link_text)
-      render(Components::Button.new(
-               type: :patch,
-               variant: :strip,
-               name: link_text,
-               target: visual_group_image_path(
-                 id: @image_id, visual_group_id: @visual_group.id,
-                 status: link
-               ),
-               title: link_text,
-               data: { turbo: true }
-             ))
+      Button(
+        type: :patch,
+        variant: :strip,
+        name: link_text,
+        target: visual_group_image_path(
+          id: @image_id, visual_group_id: @visual_group.id,
+          status: link
+        ),
+        title: link_text,
+        data: { turbo: true }
+      )
     end
 
     def render_image_id_line

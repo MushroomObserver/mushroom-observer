@@ -98,12 +98,12 @@ module Views::Controllers::Account::APIKeys
         submit(:UPDATE.l)
         # A plain link (not a submit button) — Cancel should navigate
         # back without submitting the form.
-        render(::Components::Button.new(
-                 type: :get,
-                 name: :CANCEL.l,
-                 target: account_api_keys_path,
-                 class: "ml-3"
-               ))
+        Button(
+          type: :get,
+          name: :CANCEL.l,
+          target: account_api_keys_path,
+          class: "ml-3"
+        )
       end
     end
 

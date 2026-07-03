@@ -36,16 +36,16 @@ module Views::Controllers::Observations::Locations
 
     def render_match(list, location)
       list.item do
-        render(::Components::Button.new(
-                 type: :patch,
-                 variant: :strip,
-                 name: location.display_name.t,
-                 target: assign_location_to_observations_path(
-                   where: @where, location: location
-                 ),
-                 class: "text-left",
-                 data: { turbo_confirm: :list_merge_are_you_sure.l }
-               ))
+        Button(
+          type: :patch,
+          variant: :strip,
+          name: location.display_name.t,
+          target: assign_location_to_observations_path(
+            where: @where, location: location
+          ),
+          class: "text-left",
+          data: { turbo_confirm: :list_merge_are_you_sure.l }
+        )
       end
     end
   end

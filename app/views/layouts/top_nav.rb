@@ -129,14 +129,14 @@ class Views::Layouts::TopNav < Views::Base
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
     div(class: "visible-xs visible-sm pr-3 pr-sm-4") do
-      render(::Components::Button.new(
-               variant: :outline,
-               class: "rounded-circle overflow-hidden p-0",
-               id: "left_nav_toggle",
-               data: { toggle: "offcanvas", nav_target: "toggle",
-                       action: "nav#toggleOffcanvas" },
-               aria: { expanded: "false", controls: "search_nav" }
-             )) do
+      Button(
+        variant: :outline,
+        class: "rounded-circle overflow-hidden p-0",
+        id: "left_nav_toggle",
+        data: { toggle: "offcanvas", nav_target: "toggle",
+                action: "nav#toggleOffcanvas" },
+        aria: { expanded: "false", controls: "search_nav" }
+      ) do
         img(src: asset_path("mo_icon_bg.svg"),
             width: "30px", alt: :MENU.t, title: :MENU.t)
       end
@@ -147,12 +147,12 @@ class Views::Layouts::TopNav < Views::Base
   # row below the top nav.
   def render_search_nav_toggle
     div(class: "navbar-form px-2 px-sm-3") do
-      render(::Components::Button.new(
-               variant: :outline, size: :sm,
-               class: "top_nav_button",
-               data: { toggle: "collapse", target: "#search_nav" },
-               aria: { expanded: "false", controls: "search_nav" }
-             )) { render(::Components::Icon.new(type: :search, title: :SEARCH.l)) }
+      Button(
+        variant: :outline, size: :sm,
+        class: "top_nav_button",
+        data: { toggle: "collapse", target: "#search_nav" },
+        aria: { expanded: "false", controls: "search_nav" }
+      ) { render(::Components::Icon.new(type: :search, title: :SEARCH.l)) }
     end
   end
 
@@ -215,7 +215,7 @@ class Views::Layouts::TopNav < Views::Base
   def render_nav_create
     return unless nav_create_visible?
 
-    render(::Components::Button.new(**nav_create_button_options))
+    Button(**nav_create_button_options)
   end
 
   def nav_create_visible?
@@ -249,13 +249,13 @@ class Views::Layouts::TopNav < Views::Base
       controller.controller_name
     )
 
-    render(::Components::Button.new(
-             type: :get,
-             name: :app_qrcode.l,
-             icon: :qrcode,
-             target: field_slips_qr_reader_new_path,
-             variant: :outline, size: :sm,
-             class: "mx-0 mx-sm-2 top_nav_button"
-           ))
+    Button(
+      type: :get,
+      name: :app_qrcode.l,
+      icon: :qrcode,
+      target: field_slips_qr_reader_new_path,
+      variant: :outline, size: :sm,
+      class: "mx-0 mx-sm-2 top_nav_button"
+    )
   end
 end

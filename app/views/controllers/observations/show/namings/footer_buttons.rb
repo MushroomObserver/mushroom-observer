@@ -35,17 +35,17 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # Text-button variant of the propose-naming link (icon-only
   # variant lives in the panel `Header` for mobile).
   def render_propose_button
-    render(Components::Button.new(
-             type: :modal,
-             name: :show_namings_propose_new_name.t,
-             target: new_observation_naming_path(
-               observation_id: @obs.id,
-               context: "namings_table"
-             ),
-             modal_id: "obs_#{@obs.id}_naming",
-             size: :sm,
-             class: "d-none d-sm-inline-block propose-naming-link"
-           ))
+    Button(
+      type: :modal,
+      name: :show_namings_propose_new_name.t,
+      target: new_observation_naming_path(
+        observation_id: @obs.id,
+        context: "namings_table"
+      ),
+      modal_id: "obs_#{@obs.id}_naming",
+      size: :sm,
+      class: "d-none d-sm-inline-block propose-naming-link"
+    )
   end
 
   # Gating: a thumb image must exist (so
@@ -61,12 +61,12 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   # Stimulus `suggestions#suggestTaxa` action that fetches via
   # `data-results-url` and replaces page content.
   def render_suggest_button
-    render(Components::Button.new(
-             name: :show_namings_suggest_names.l,
-             size: :sm,
-             class: "mt-2",
-             data: suggest_button_data
-           ))
+    Button(
+      name: :show_namings_suggest_names.l,
+      size: :sm,
+      class: "mt-2",
+      data: suggest_button_data
+    )
   end
 
   def suggest_button_data
