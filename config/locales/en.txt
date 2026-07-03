@@ -3253,7 +3253,7 @@
   inat_import_list: A list of observations
   inat_import_list_help: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
   inat_import_all: All my iNat observations
-  inat_recheck_all: "Re-check observations already marked as imported"
+  inat_recheck_all: "Re-check observations already linked to Mushroom Observer"
   inat_recheck_all_help: "\"All\" and URL imports normally skip iNat observations that already have a \"Mushroom Observer URL\" field. Check this to re-examine them — for example, to re-import observations whose MO observation was deleted. Slower for large accounts. Observations listed by ID are always re-checked."
   inat_import_others: "Import other users' observations"
   inat_skip_writeback: "Skip writing the MO link back to iNaturalist (admin)"

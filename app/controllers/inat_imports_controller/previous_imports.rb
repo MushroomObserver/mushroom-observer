@@ -30,15 +30,18 @@ module InatImportsController::PreviousImports
   def clean_inat_ids
     inat_ids = normalize_inat_ids(params[:inat_ids])
     previous_imports = previously_imported_links
-    return inat_ids if previous_imports.none?
-
-    remove_previously_imported_ids(inat_ids, previous_imports)
+    unless previous_imports.none?
+      inat_ids = remove_previously_imported_ids(inat_ids, previous_imports)
+    end
+    # Write the cleaned list back so downstream readers in the same request
+    # (importables_count via inat_id_list) count what will actually import.
+    params[:inat_ids] = inat_ids
   end
 
   # Remove previously imported ids in case the iNat user deleted the
   # Mushroom_Observer_URL field.
-  # NOTE: Also useful in manual testing when writes of iNat obss are
-  # commented out temporarily. jdc 2026-01-15
+  # NOTE: Also useful in manual testing when writes of iNat observations
+  # are commented out temporarily. jdc 2026-01-15
   def remove_previously_imported_ids(inat_ids, previous_imports)
     previous_ids = previous_imports.pluck(:external_id)
     remaining_ids =

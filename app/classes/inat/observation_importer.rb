@@ -92,9 +92,10 @@ class Inat
       mo_obs = live_crosslinked_mo_obs
       return false unless mo_obs
 
-      create_crosslink(mo_obs)
+      link = create_crosslink(mo_obs)
+      outcome = link ? "recorded the link" : "failed to record the link"
       log("Skipped #{@inat_obs[:id]} cross-referenced on iNat " \
-          "to MO #{mo_obs.id}; recorded the link")
+          "to MO #{mo_obs.id}; #{outcome}")
       inat_import.add_ignored_obs(:already_imported)
       true
     end
@@ -109,6 +110,7 @@ class Inat
       Observation.find_by(id: mo_obs_id)
     end
 
+    # Returns the created link, or nil when validation failed.
     def create_crosslink(mo_obs)
       ExternalLink.create!(
         user: @user, target: mo_obs, external_site: inat_site,
@@ -119,6 +121,7 @@ class Inat
         "InatImport: failed to create remote_manual ExternalLink for " \
         "Observation #{mo_obs.id} (iNat #{@inat_obs[:id]}): #{e.message}"
       )
+      nil
     end
 
     # Cached iNaturalist ExternalSite for this importer instance — avoids

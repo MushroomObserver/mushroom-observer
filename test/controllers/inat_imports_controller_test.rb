@@ -482,7 +482,9 @@ class InatImportsControllerTest < FunctionalTestCase
       url: "#{site.base_url}#{inat_id}"
     )
 
-    params = { inat_username: "anything", inat_ids: inat_id,
+    fresh_id = "1123457"
+    params = { inat_username: "anything",
+               inat_ids: "#{inat_id},#{fresh_id}",
                consent: 1, confirmed: 1 }
     login
     assert_no_difference("Observation.count",
@@ -491,11 +493,16 @@ class InatImportsControllerTest < FunctionalTestCase
     end
 
     assert_flash_text(/#{Regexp.escape(:inat_previous_import.l(count: 1))}/)
-    # It should continue even if some ids were previously imported
-    # The job will exclude previous imports via the iNat API
-    # `without_field: "Mushroom Observer URL"` param.
+    # It should continue even if some ids were previously imported: the
+    # previously imported id is dropped from the list, and the counts
+    # reflect the cleaned list.
+    import = created_import(user)
+    assert_equal(fresh_id, import.inat_ids,
+                 "Previously imported id should be dropped from inat_ids")
+    assert_equal(1, import.total_importables,
+                 "total_importables should count only the cleaned id list")
     assert_redirected_to(
-      "#{INAT_AUTHORIZATION_URL}&state=#{created_import(user).id}"
+      "#{INAT_AUTHORIZATION_URL}&state=#{import.id}"
     )
   end
 
