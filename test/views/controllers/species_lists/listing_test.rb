@@ -68,6 +68,17 @@ module Views::Controllers::SpeciesLists
       assert_html(html, "form button", text: :ADD.t)
     end
 
+    # `place` rescues StandardError from `place_name.t` and falls back
+    # to `:UNKNOWN.l`. Stub `place_name` to raise so the rescue fires.
+    def test_place_falls_back_to_unknown_when_place_name_raises
+      @species_list.define_singleton_method(:place_name) do
+        raise(StandardError.new("bad place"))
+      end
+      html = render_listing
+
+      assert_html(html, "span", text: :UNKNOWN.l.as_displayed)
+    end
+
     # `remove` wins when both flags set — defensive guard.
     def test_remove_wins_when_both_remove_and_add_set
       html = render_listing(observation: @observation,

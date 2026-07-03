@@ -43,5 +43,19 @@ module Account
       assert_nil(session[:admin])
       assert_equal(target, User.current)
     end
+
+    # Covers the `elsif session[:real_user_id] == new_user.id` branch in
+    # `update_sudo_session` — when the admin returns to their real account,
+    # real_user_id is cleared and admin mode is restored.
+    def test_switch_to_user_clears_real_user_id_when_returning_to_real_account
+      ctrl = @controller
+      rolf = users(:rolf)
+      session[:real_user_id] = rolf.id
+
+      ctrl.send(:switch_to_user, rolf)
+
+      assert_nil(session[:real_user_id])
+      assert(session[:admin])
+    end
   end
 end
