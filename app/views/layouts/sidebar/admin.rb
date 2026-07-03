@@ -22,13 +22,17 @@ class Views::Layouts::Sidebar
         render_nav_link(link, link_class: @classes[:admin])
       end
 
+      # Toggling admin mode changes the session's theme/asset state,
+      # so Turbo Drive's head-merging on the redirected page can
+      # corrupt stylesheets. Opt this button out of Turbo entirely.
       Button(
         type: :post,
         name: :app_turn_admin_off.t,
         target: admin_mode_path(turn_off: true),
         variant: :btn_link,
         id: "nav_admin_off_link",
-        class: @classes[:admin]
+        class: @classes[:admin],
+        data: { turbo: false }
       )
     end
   end

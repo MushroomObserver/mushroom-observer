@@ -56,7 +56,7 @@ class Components::Button::CRUDBase < Components::Button
   end
 
   def button_html_options
-    form_data = {}
+    form_data = { turbo: true }
     form_data[:turbo_confirm] = @confirm if @confirm
 
     button_data = { toggle: "tooltip", placement: "top", title: @name }

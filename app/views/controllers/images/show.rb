@@ -56,9 +56,13 @@ module Views::Controllers::Images
 
     def render_reviewer_export_controls
       div(class: "mb-5 text-center") do
-        p { render(::Components::Image::ExportStatusControls.new(object: @image)) }
         p do
-          render(::Components::Image::ExportStatusControls.new(
+          render(::Views::Controllers::Export::StatusControls.new(
+                   object: @image
+                 ))
+        end
+        p do
+          render(::Views::Controllers::Export::StatusControls.new(
                    object: @image, flag: :diagnostic
                  ))
         end

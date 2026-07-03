@@ -15,8 +15,8 @@ class AdminModeSystemTest < ApplicationSystemTestCase
     assert_admin_toggle_works
   end
 
-  # iNat import pages use a Turbo Frame — regression reported by Nathan
-  # where the admin mode button failed to apply on those pages.
+  # The iNat import show page subscribes to a Turbo Stream — regression
+  # reported by Nathan where the admin mode button failed to apply there.
   def test_admin_mode_toggle_from_inat_import_page
     visit(inat_import_path(inat_imports(:rolf_inat_import)))
     assert_admin_toggle_works
