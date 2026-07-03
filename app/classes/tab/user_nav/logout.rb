@@ -10,7 +10,11 @@ class Tab::UserNav::Logout < Tab::Base
     account_logout_path
   end
 
+  # Logging out changes the session's theme/asset state, so Turbo
+  # Drive's head-merging on the redirected page can corrupt
+  # stylesheets. Opt this button out of Turbo entirely.
   def html_options
-    { id: "user_nav_logout_link", button: :post }
+    { id: "user_nav_logout_link", button: :post,
+      data: { turbo: false } }
   end
 end

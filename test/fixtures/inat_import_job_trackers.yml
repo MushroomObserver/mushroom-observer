@@ -8,3 +8,6 @@ lone_wolf_tracker:
 
 ollie_tracker:
   inat_import: <%= ActiveRecord::FixtureSet.identify(:ollie_inat_import) %>
+
+rolf_tracker:
+  inat_import: <%= ActiveRecord::FixtureSet.identify(:rolf_inat_import) %>

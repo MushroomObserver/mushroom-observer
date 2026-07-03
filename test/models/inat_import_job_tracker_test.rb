@@ -5,7 +5,12 @@ require "test_helper"
 class InatImportJobTrackerTest < ActiveSupport::TestCase
   def test_elapsed_time
     import = inat_imports(:rolf_inat_import)
-    tracker = InatImportJobTracker.find_or_create_by(inat_import: import.id)
+    # NOT find_or_create_by: the rolf_tracker fixture already has an
+    # InatImportJobTracker for this import, whose created_at is frozen
+    # at fixture-load time (real wall-clock, once per worker process)
+    # rather than "just now" — asserting elapsed_time ~0 against it is
+    # flaky. create! always gets a fresh row with a real created_at.
+    tracker = InatImportJobTracker.create!(inat_import: import.id)
 
     assert_in_delta(0, tracker.elapsed_time, 1,
                     "elapsed_time should be ~0 at creation")
