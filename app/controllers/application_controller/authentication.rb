@@ -238,6 +238,8 @@ module ApplicationController::Authentication
   #  "Private" methods.
   # ----------------------------
 
+  private
+
   # Switch the apparent logged-in user in the session. Used by both
   # LogoutController (to restore an admin's real account after sudo) and
   # Admin::SessionController (to switch into another user).
@@ -247,8 +249,6 @@ module ApplicationController::Authentication
     User.current = new_user
     session_user_set(new_user)
   end
-
-  private
 
   def update_sudo_session(new_user)
     if session[:real_user_id].blank?
