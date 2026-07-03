@@ -360,12 +360,12 @@ MushroomObserver::Application.routes.draw do
   end
 
   # ----- Export: no resources ------------------------------------
-  get("/export/set_export_status(/:id)",
-      to: "export#set_export_status",
-      id: /\d+/, as: "export_set_export_status")
-  get("/export/set_ml_status(/:id)",
-      to: "export#set_ml_status",
-      id: /\d+/, as: "export_set_ml_status")
+  match("/export/set_export_status(/:id)",
+        to: "export#set_export_status", via: [:put, :patch],
+        id: /\d+/, as: "export_set_export_status")
+  match("/export/set_ml_status(/:id)",
+        to: "export#set_ml_status", via: [:put, :patch],
+        id: /\d+/, as: "export_set_ml_status")
 
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
@@ -436,7 +436,6 @@ MushroomObserver::Application.routes.draw do
     member do
       put("transform", to: "images/transformations#update", as: "transform")
       get("exif", to: "images/exif#show", as: "exif")
-      put("export", to: "images/exports#update", as: "export")
       get("emails/new", to: "images/emails#new",
                         as: "new_commercial_inquiry_for")
       post("emails", to: "images/emails#create",

@@ -28,6 +28,15 @@ class ExportController < ApplicationController
     return unless obj
 
     update_obj(obj, status_type)
+    respond_to do |format|
+      format.turbo_stream do
+        render(turbo_stream: status_stream(obj, status_type))
+      end
+      format.html { redirect_after_update(obj) }
+    end
+  end
+
+  def redirect_after_update(obj)
     if params[:return]
       redirect_back_or_default("/")
     else
@@ -36,6 +45,18 @@ class ExportController < ApplicationController
       redirect_with_query(controller: controller,
                           action: action, id: @id)
     end
+  end
+
+  # Turbo response: replace just the reviewer toggle pair for the
+  # object/flag whose state flipped. The same Phlex view renders both
+  # on the object's show page and here, so the replacement is
+  # identical to what the next full page-load would emit.
+  def status_stream(obj, status_type)
+    flag = status_type == :ml ? :diagnostic : :ok_for_export
+    turbo_stream.replace(
+      ActionView::RecordIdentifier.dom_id(obj, flag),
+      Views::Controllers::Export::StatusControls.new(object: obj, flag: flag)
+    )
   end
 
   def update_obj(obj, status_type)
