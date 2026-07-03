@@ -148,7 +148,8 @@ class UserStats < ApplicationRecord
       User.find(user_id).increment!(:contribution, impact)
       return unless (user_stat = UserStats.find_by(user_id: user_id))
 
-      user_stat.increment!(field, num)
+      # Sign the per-field delta like `impact`: a delete must decrement.
+      user_stat.increment!(field, mode == :del ? -num : num)
     end
 
     # impact can be positive or negative

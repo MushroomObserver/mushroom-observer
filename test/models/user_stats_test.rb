@@ -80,6 +80,37 @@ class UserStatsTest < UnitTestCase
     assert_equal(mary.votes.size, mary_stats.votes)
   end
 
+  # Regression test for the sign bug where a :del incremented the
+  # per-field user_stats counter instead of decrementing it (issue #4638).
+  # users.contribution was correctly signed all along; both must move
+  # together.
+  def test_update_contribution_add_and_del_sign
+    stats = user_stats(:rolf)
+    contribution = rolf.contribution
+    weight = UserStats::ALL_FIELDS[:observations][:weight]
+
+    UserStats.update_contribution(:add, :observations, rolf.id)
+    assert_equal(1, stats.reload.observations)
+    assert_equal(contribution + weight, rolf.reload.contribution)
+
+    UserStats.update_contribution(:del, :observations, rolf.id)
+    assert_equal(0, stats.reload.observations)
+    assert_equal(contribution, rolf.reload.contribution)
+  end
+
+  # Same bug via the real path: the generic before_destroy callback in
+  # AbstractModel calls update_contribution(:del, self).
+  def test_destroying_counted_object_decrements_field_counter
+    comment = comments(:minimal_unknown_obs_comment_1)
+    stats = UserStats.find_by(user_id: comment.user_id)
+    assert_not_nil(stats, "Comment owner needs a user_stats fixture")
+    count_before = stats.comments
+
+    comment.destroy
+
+    assert_equal(count_before - 1, stats.reload.comments)
+  end
+
   def test_refresh_all_user_stats_dry_run
     old_rolf_stats = user_stats(:rolf)
     assert_equal(0, old_rolf_stats.comments)
