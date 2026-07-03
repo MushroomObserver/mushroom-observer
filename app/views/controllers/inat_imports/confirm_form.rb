@@ -126,7 +126,8 @@ module Views::Controllers::InatImports
       span(id: "requested_count") do
         url = requested_obs_url
         if url
-          render(Components::Link::External.new(@requested.to_s, url))
+          render(Components::Link::External.new(content: @requested.to_s,
+                                                path: url))
         else
           plain(@requested.to_s)
         end
@@ -140,7 +141,7 @@ module Views::Controllers::InatImports
         url = expected_obs_url
         count = (@estimate_with_date || @expected).to_s
         if url
-          render(Components::Link::External.new(count, url))
+          render(Components::Link::External.new(content: count, path: url))
         else
           plain(count)
         end
@@ -151,7 +152,8 @@ module Views::Controllers::InatImports
       div(class: "mb-1") do
         b { plain("#{caption_key.l}: ") }
         if url
-          render(Components::Link::External.new(count.to_s, url))
+          render(Components::Link::External.new(content: count.to_s,
+                                                path: url))
         else
           plain(count.to_s)
         end
@@ -191,7 +193,8 @@ module Views::Controllers::InatImports
     def render_unlicensed_count
       url = unlicensed_obs_url
       if url
-        render(Components::Link::External.new(@unlicensed_obs.to_s, url))
+        render(Components::Link::External.new(content: @unlicensed_obs.to_s,
+                                              path: url))
       else
         plain(@unlicensed_obs.to_s)
       end

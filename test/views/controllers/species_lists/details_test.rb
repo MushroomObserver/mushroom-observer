@@ -61,6 +61,19 @@ module Views::Controllers::SpeciesLists
                   "a[href='#{routes.project_path(project.id)}']")
     end
 
+    # With two projects, `render_projects` emits ` | ` between them.
+    # This covers the `plain(" | ") if idx.positive?` branch.
+    def test_renders_separator_between_multiple_projects
+      p1 = projects(:eol_project)
+      p2 = projects(:bolete_project)
+      @species_list.projects = [p1, p2]
+      html = render_details(species_list: @species_list.reload)
+
+      assert_html(html, "a[href='#{routes.project_path(p1.id)}']")
+      assert_html(html, "a[href='#{routes.project_path(p2.id)}']")
+      assert_includes(html, " | ")
+    end
+
     def test_does_not_render_projects_when_empty
       @species_list.projects.clear
       html = render_details(species_list: @species_list.reload)

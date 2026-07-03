@@ -5,10 +5,10 @@
 # Pass `variant:` to override.
 #
 # @example
-#   render(Components::Button.new(type: :download,
+#   Button(type: :download,
 #     name: :DOWNLOAD.t,
 #     target: new_download_species_list_path(id: @sl.id)
-#   ))
+#   )
 class Components::Button::Download < Components::Link::Download
   def initialize(target:, name: nil, icon: :download, variant: nil, **)
     super(target: target, name: name, icon: icon, button: variant, **)

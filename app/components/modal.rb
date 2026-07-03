@@ -1,19 +1,23 @@
 # frozen_string_literal: true
 
-# General Bootstrap 3 modal wrapper. Encapsulates the
+# Base modal wrapper and single entry-point dispatcher for all
+# `Components::Modal::*` components. Pass `type:` to route to a
+# subclass; omit for a plain modal with slots.
+#
+#   # Phlex views — Kit syntax:
+#   Modal(type: :confirm)
+#   Modal(type: :progress_spinner)
+#   Modal(type: :turbo_form, identifier: "…", title: "…",
+#         user: @user, model: @record)
+#
+#   # Controllers — full class path (Kit not available):
+#   Components::Modal.new(type: :turbo_form, identifier: "…",
+#                         title: "…", user: @user, model: @record)
+#
+# Encapsulates the Bootstrap 3
 # `modal > modal-dialog > modal-content > header / body / footer`
 # nesting and the close-button / title boilerplate so callers can
 # focus on the modal's content.
-#
-# Use this directly when you have a modal whose body is arbitrary
-# content (forms, text, lists). For controller-rendered turbo-stream
-# form modals with section-update auto-close, prefer
-# `Components::Modal::TurboForm`, which composes this and adds the
-# turbo-modal lifecycle wiring.
-#
-# Other modal-like components (`AddObsModal`, `ModalConfirm`,
-# `ModalProgressSpinner`) predate this and inline their own modal
-# markup; converting them is left as a follow-up.
 #
 # @example simple modal with body + footer
 #   render(Components::Modal.new(
@@ -111,6 +115,29 @@ class Components::Modal < Components::Base
 
   public :title_content_slot, :body_slot, :footer_slot, :form_content_slot
 
+  DISPATCH = {
+    confirm: :Confirm,
+    progress_spinner: :ProgressSpinner,
+    turbo_form: :TurboForm
+  }.freeze
+
+  def self.new(**kwargs, &block)
+    type_sym = kwargs[:type]&.to_sym
+    if (klass_name = DISPATCH[type_sym])
+      kwargs.delete(:type)
+      return const_get(klass_name).new(**kwargs, &block)
+    end
+
+    if kwargs.key?(:type)
+      raise(ArgumentError.new(
+              "Unknown Modal type: #{kwargs[:type].inspect}. " \
+              "Valid types: #{DISPATCH.keys.join(", ")}."
+            ))
+    end
+
+    super
+  end
+
   def view_template(&block)
     yield(self) if block
     render_backdrop if @auto_open
@@ -173,12 +200,12 @@ class Components::Modal < Components::Base
   end
 
   def close_button
-    render(::Components::Button.new(
-             variant: :strip,
-             class: "close",
-             data: { dismiss: "modal" },
-             aria: { label: :CLOSE.l }
-           )) do
+    Button(
+      variant: :strip,
+      class: "close",
+      data: { dismiss: "modal" },
+      aria: { label: :CLOSE.l }
+    ) do
       span(aria: { hidden: "true" }) { "×" }
     end
   end

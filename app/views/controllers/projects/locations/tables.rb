@@ -5,7 +5,7 @@
 # locations index and the target_locations turbo_stream re-render.
 #
 module Views::Controllers::Projects::Locations
-  class Table < Views::Base
+  class Tables < Views::Base
     def initialize(project:, grouped_data:,
                    ungrouped_locations:, obs_counts:,
                    user: nil)
@@ -113,11 +113,10 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_chevron(collapse_id)
-      render(::Components::Link::CollapseToggle.new(
-               target_id: collapse_id,
-               collapsed: true,
-               class: "panel-collapse-trigger"
-             )) do
+      Link(type: :collapse_toggle,
+           target_id: collapse_id,
+           collapsed: true,
+           class: "panel-collapse-trigger") do
         render(Components::Icon.new(
                  type: :chevron_down, title: :OPEN.l,
                  html_class: "active-icon"
@@ -141,10 +140,9 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_locations_table(rows = nil, &block)
-      render(Components::Table.new(rows,
-                                   variant: :striped,
-                                   identifier: "project-members",
-                                   class: "mt-3")) do |t|
+      Table(rows,
+            variant: :striped, identifier: "project-members",
+            class: "mt-3") do |t|
         t.column(:LOCATION.l)
         t.column(:OBSERVATIONS.l)
         t.column(:PROJECT_ALIASES.l)
@@ -198,19 +196,19 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_remove_button(loc)
-      render(Components::Button.new(
-               type: :delete,
-               name: :REMOVE.l,
-               target: project_target_location_path(
-                 project_id: @project.id, id: loc.id
-               ),
-               confirm: :project_target_location_confirm_remove.t(
-                 name: loc.display_name
-               ),
-               icon: :x,
-               variant: :btn_link,
-               class: "p-0"
-             ))
+      Button(
+        type: :delete,
+        name: :REMOVE.l,
+        target: project_target_location_path(
+          project_id: @project.id, id: loc.id
+        ),
+        confirm: :project_target_location_confirm_remove.t(
+          name: loc.display_name
+        ),
+        icon: :x,
+        variant: :btn_link,
+        class: "p-0"
+      )
     end
   end
 end

@@ -36,7 +36,7 @@ module Views::Controllers::Account::APIKeys
       render(Components::Table.new(
                sorted_keys,
                id: "account_api_keys_table",
-               class: "table-striped table-layout-fixed"
+               class: "table-striped"
              )) do |t|
         register_table_columns(t)
       end
@@ -75,12 +75,10 @@ module Views::Controllers::Account::APIKeys
         if key.verified
           render_verified_check_box(key)
         else
-          render(Components::Button.new(
-                   type: :patch,
-                   name: :ACTIVATE.l,
-                   target: account_activate_api_key_path(key.id),
-                   id: "activate_api_key_#{key.id}"
-                 ))
+          Button(type: :patch,
+                 name: :ACTIVATE.l,
+                 target: account_activate_api_key_path(key.id),
+                 id: "activate_api_key_#{key.id}")
         end
       end
     end
@@ -100,25 +98,23 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_notes_accordion(key)
-      render(Components::Form::TableAccordion.new(
-               id: "notes_#{key.id}",
-               view_id: "view_notes_#{key.id}_container",
-               edit_id: "edit_notes_#{key.id}_container"
-             )) do |accordion|
-        accordion.with_view { render_view_notes(key) }
-        accordion.with_edit { render_edit_notes_form(key) }
+      Accordion(id: "notes_#{key.id}") do |accordion|
+        accordion.with_pane(id: "view_notes_#{key.id}_container",
+                            expanded: true) { render_view_notes(key) }
+        accordion.with_pane(id: "edit_notes_#{key.id}_container") do
+          render_edit_notes_form(key)
+        end
       end
     end
 
     def render_view_notes(key)
       span(class: "current_notes mr-4") { trusted_html(key.notes.t) }
-      render(::Components::Link::CollapseToggle.new(
-               target_id: "edit_notes_#{key.id}_container",
-               icon: :edit,
-               closed_text: " #{:EDIT.l}",
-               button: :default,
-               data: { role: "edit_api_key", parent: "#notes_#{key.id}" }
-             ))
+      Link(type: :collapse_toggle,
+           target_id: "edit_notes_#{key.id}_container",
+           icon: :edit,
+           closed_text: " #{:EDIT.l}",
+           button: :default,
+           data: { role: "edit_api_key", parent: "#notes_#{key.id}" })
     end
 
     def render_edit_notes_form(key)
@@ -133,24 +129,21 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_remove_button(key)
-      render(Components::Button.new(
-               type: :delete,
-               target: account_api_key_path(key.id),
-               name: :REMOVE.l,
-               variant: :outline,
-               icon: :remove,
-               id: "remove_api_key_#{key.id}"
-             ))
+      Button(type: :delete,
+             target: account_api_key_path(key.id),
+             name: :REMOVE.l,
+             variant: :outline,
+             icon: :remove,
+             id: "remove_api_key_#{key.id}")
     end
 
     def render_new_form_panel
-      render(Components::Form::TableAccordion.new(
-               id: "new_key_row",
-               view_id: "new_key_button_container",
-               edit_id: "new_key_form_container"
-             )) do |accordion|
-        accordion.with_view { render_new_button }
-        accordion.with_edit { render_new_form }
+      Accordion(id: "new_key_row") do |accordion|
+        accordion.with_pane(id: "new_key_button_container",
+                            expanded: true) { render_new_button }
+        accordion.with_pane(id: "new_key_form_container") do
+          render_new_form
+        end
       end
     end
 
@@ -160,14 +153,13 @@ module Views::Controllers::Account::APIKeys
     # click via `data-toggle="collapse"` and prevents the
     # default navigation.
     def render_new_button
-      render(::Components::Link::CollapseToggle.new(
-               target_id: "new_key_form_container",
-               fallback_href: new_account_api_key_path,
-               closed_text: :account_api_keys_create_button.l,
-               button: :default,
-               id: "new_key_button",
-               data: { parent: "#new_key_row" }
-             ))
+      Link(type: :collapse_toggle,
+           target_id: "new_key_form_container",
+           fallback_href: new_account_api_key_path,
+           closed_text: :account_api_keys_create_button.l,
+           button: :default,
+           id: "new_key_button",
+           data: { parent: "#new_key_row" })
     end
 
     def render_new_form

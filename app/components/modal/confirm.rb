@@ -54,16 +54,16 @@ class Components::Modal::Confirm < Components::Base
   end
 
   def render_buttons
-    render(Components::Button.new(
-             name: :CANCEL.l,
-             data: { action: "confirm-modal#cancel" }
-           ))
+    Button(
+      name: :CANCEL.l,
+      data: { action: "confirm-modal#cancel" }
+    )
     whitespace
-    render(Components::Button.new(
-             name: :OK.l,
-             variant: :danger,
-             data: { action: "confirm-modal#confirm",
-                     confirm_modal_target: "confirmButton" }
-           ))
+    Button(
+      name: :OK.l,
+      variant: :danger,
+      data: { action: "confirm-modal#confirm",
+              confirm_modal_target: "confirmButton" }
+    )
   end
 end

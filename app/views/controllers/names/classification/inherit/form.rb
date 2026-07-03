@@ -26,7 +26,7 @@ module Views::Controllers::Names::Classification::Inherit
     private
 
     def render_candidates_alert
-      render(Components::Alert.new(level: :warning)) do
+      Alert(level: :warning) do
         trusted_html(@message.tp)
         options = @candidates.map { |opt| [opt.id, opt.display_name.t] }
         radio_field(:candidates, *options)

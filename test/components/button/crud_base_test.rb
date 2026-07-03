@@ -10,7 +10,7 @@ class ButtonCRUDBaseTest < ComponentTestCase
                     method: :post
                   ))
 
-    assert_html(html, "form[action='/some/path'][data-turbo='true']")
+    assert_html(html, "form[action='/some/path']")
     assert_html(html, "button", text: "Submit")
     assert_no_html(html, "[data-turbo-confirm]")
   end
@@ -401,7 +401,7 @@ class ButtonSubclassesTest < ComponentTestCase
       Components::Button::Post.new(name: "Create", target: "/items")
     )
 
-    assert_html(html, "form[action='/items'][data-turbo='true']")
+    assert_html(html, "form[action='/items']")
     assert_no_html(html, "input[name='_method']")
     assert_no_html(html, "[data-turbo-confirm]")
     assert_html(html, "button", text: "Create")

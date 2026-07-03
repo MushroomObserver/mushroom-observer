@@ -92,7 +92,7 @@ module Views::Controllers::Observations::Images
         cb.option(project.id,
                   checked: project_checked?(project.id)) do
           whitespace
-          render(Components::Link::Object.new(object: project))
+          Link(type: :object, object: project)
         end
       end
     end
@@ -100,12 +100,12 @@ module Views::Controllers::Observations::Images
     def render_footer_buttons
       div(class: "text-center mt-3 mb-5") do
         submit(:SAVE_EDITS.l)
-        render(Components::Button.new(
-                 type: :get,
-                 name: :cancel_and_show.t(type: :image),
-                 target: image_path(model.id),
-                 class: "ml-2"
-               ))
+        Button(
+          type: :get,
+          name: :cancel_and_show.t(type: :image),
+          target: image_path(model.id),
+          class: "ml-2"
+        )
       end
     end
 

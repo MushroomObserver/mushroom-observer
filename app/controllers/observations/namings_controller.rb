@@ -132,7 +132,8 @@ module Observations
     end
 
     def render_modal_naming_form
-      render(Components::Modal::TurboForm.new(
+      render(Components::Modal.new(
+               type: :turbo_form,
                identifier: modal_identifier,
                title: modal_title,
                user: @user,

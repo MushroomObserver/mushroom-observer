@@ -73,15 +73,14 @@ module Views::Controllers::HerbariumRecords
     def render_user_field
       trusted_html(:herbarium_record_user.t)
       plain(": ")
-      render(Components::Link::User.new(user: @herbarium_record.user))
+      Link(type: :user, user: @herbarium_record.user)
       br
     end
 
     def render_collection_link
-      render(::Components::Link::External.new(
-               "#{herbarium.code} #{:herbarium_record_collection.t}",
-               herbarium.mcp_url(@herbarium_record.accession_number)
-             ))
+      Link(type: :external,
+           content: "#{herbarium.code} #{:herbarium_record_collection.t}",
+           path: herbarium.mcp_url(@herbarium_record.accession_number))
       br
     end
 

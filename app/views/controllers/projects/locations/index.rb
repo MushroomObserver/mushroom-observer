@@ -37,7 +37,7 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_table
-      render(Views::Controllers::Projects::Locations::Table.new(
+      render(Views::Controllers::Projects::Locations::Tables.new(
                project: @project,
                grouped_data: @grouped_data,
                ungrouped_locations: @ungrouped_locations,

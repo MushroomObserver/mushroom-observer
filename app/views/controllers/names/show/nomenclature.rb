@@ -27,9 +27,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   private
 
   def render_edit_link
-    render(Components::Link::Icon.new(
-             tab: Tab::Name::Edit.new(name: @name)
-           ))
+    Link(type: :icon, tab: Tab::Name::Edit.new(name: @name))
   end
 
   def render_body
@@ -120,23 +118,22 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     return nil unless unlocked? && @name.deprecated &&
                       @name.correct_spelling_id.nil?
 
-    Components::Link::Icon.new(
-      tab: Tab::Name::Approve.new(name: @name)
-    )
+    Components::Link.new(type: :icon,
+                         tab: Tab::Name::Approve.new(name: @name))
   end
 
   def deprecate_link
     return nil unless unlocked? && !@name.deprecated
 
-    Components::Link::Icon.new(
-      tab: Tab::Name::Deprecate.new(name: @name)
-    )
+    Components::Link.new(type: :icon,
+                         tab: Tab::Name::Deprecate.new(name: @name))
   end
 
   def synonyms_link
     return nil unless unlocked?
 
-    Components::Link::Icon.new(
+    Components::Link.new(
+      type: :icon,
       tab: Tab::Name::EditSynonym.new(name: @name)
     )
   end
@@ -247,6 +244,6 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Helper ------------------------------------------------------
 
   def render_tab_link(tab)
-    render(Components::Link::External.new(tab: tab))
+    Link(type: :external, tab: tab)
   end
 end

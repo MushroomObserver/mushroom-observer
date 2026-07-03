@@ -5,7 +5,6 @@ module Account
     before_action :login_required, except: [
       :new,
       :create,
-      :logout,
       :email_new_password,
       :new_password_request
     ]
@@ -34,23 +33,6 @@ module Account
       end
 
       user.verified ? login_success(user) : login_unverified(user)
-    end
-
-    def logout
-      # Safeguard: reset admin's session to their real_user_id
-      if session[:real_user_id].present? &&
-         (new_user = User.safe_find(session[:real_user_id])) &&
-         new_user.admin
-        switch_to_user(new_user)
-        redirect_back_or_to("/")
-      else
-        @user = nil
-        User.current = nil
-        session_user_set(nil)
-        session[:admin] = false
-        clear_autologin_cookie
-        render(Views::Controllers::Account::Login::Logout.new)
-      end
     end
 
     def email_new_password
@@ -129,20 +111,6 @@ module Account
       else
         flash_object_errors(@new_user)
       end
-    end
-
-    def switch_to_user(new_user)
-      if session[:real_user_id].blank?
-        session[:real_user_id] = User.current_id
-        session[:admin] = nil
-      elsif session[:real_user_id] == new_user.id
-        session[:real_user_id] = nil
-        session[:admin] = true
-      end
-      # Update both @user and User.current so views show the correct user.
-      @user = new_user
-      User.current = new_user
-      session_user_set(new_user)
     end
   end
 end

@@ -58,9 +58,8 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
   def render_editable_row(number)
     li(id: "collection_number_#{number.id}") do
       render_show_link(number)
-      render(Components::Link::InlineMod.new(
-               target: number, observation: @obs, user: @user
-             ))
+      Link(type: :inline_mod,
+           target: number, observation: @obs, user: @user)
     end
   end
 
@@ -93,9 +92,8 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
   end
 
   def render_new_link
-    render(Components::Link::InlineAdd.new(
-             modal_id: "collection_number",
-             tab: ::Tab::CollectionNumber::New.new(observation: @obs)
-           ))
+    Link(type: :inline_add,
+         modal_id: "collection_number",
+         tab: ::Tab::CollectionNumber::New.new(observation: @obs))
   end
 end

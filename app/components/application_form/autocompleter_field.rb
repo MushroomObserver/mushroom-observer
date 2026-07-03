@@ -225,77 +225,72 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_find_button
       return unless find_text
 
-      render(::Components::Link::Icon.new(
-               find_text, "#",
-               icon: :find_on_map, show_text: false,
-               icon_class: "text-primary",
-               name: "find_#{autocompleter_type}",
-               class: "ml-3 find-btn d-none",
-               data: { map_target: "showBoxBtn",
-                       action: "map#showBox:prevent" }
-             ))
+      Link(type: :icon,
+           content: find_text, path: "#",
+           icon: :find_on_map, show_text: false,
+           icon_class: "text-primary",
+           name: "find_#{autocompleter_type}",
+           class: "ml-3 find-btn d-none",
+           data: { map_target: "showBoxBtn",
+                   action: "map#showBox:prevent" })
     end
 
     def render_keep_box_button
       return unless keep_text
 
-      render(::Components::Link::Icon.new(
-               keep_text, "#",
-               icon: :apply, show_text: false,
-               icon_class: "text-primary",
-               name: "keep_#{autocompleter_type}",
-               class: "ml-3 keep-btn d-none",
-               data: { target_attr_key => "keepBtn",
-                       map_target: "lockBoxBtn",
-                       action: "map#toggleBoxLock:prevent " \
-                               "form-exif#showFields" }
-             ))
+      Link(type: :icon,
+           content: keep_text, path: "#",
+           icon: :apply, show_text: false,
+           icon_class: "text-primary",
+           name: "keep_#{autocompleter_type}",
+           class: "ml-3 keep-btn d-none",
+           data: { target_attr_key => "keepBtn",
+                   map_target: "lockBoxBtn",
+                   action: "map#toggleBoxLock:prevent " \
+                           "form-exif#showFields" })
     end
 
     def render_edit_box_button
       return unless keep_text
 
-      render(::Components::Link::Icon.new(
-               edit_text, "#",
-               icon: :edit, show_text: false,
-               icon_class: "text-primary",
-               name: "edit_#{autocompleter_type}",
-               class: "ml-3 edit-btn d-none",
-               data: { target_attr_key => "editBtn",
-                       map_target: "editBoxBtn",
-                       action: "map#toggleBoxLock:prevent " \
-                               "form-exif#showFields" }
-             ))
+      Link(type: :icon,
+           content: edit_text, path: "#",
+           icon: :edit, show_text: false,
+           icon_class: "text-primary",
+           name: "edit_#{autocompleter_type}",
+           class: "ml-3 edit-btn d-none",
+           data: { target_attr_key => "editBtn",
+                   map_target: "editBoxBtn",
+                   action: "map#toggleBoxLock:prevent " \
+                           "form-exif#showFields" })
     end
 
     def render_create_button
       return if !create_text || create.present?
 
-      render(::Components::Link::Icon.new(
-               create_text, "#",
-               id: "create_#{autocompleter_type}_btn",
-               class: "ml-3 create-button",
-               icon: :plus, show_text: true,
-               icon_class: "text-primary",
-               name: "create_#{autocompleter_type}",
-               data: { target_attr_key => "createBtn",
-                       action: "#{stimulus_controller_name}" \
-                               "#swapCreate:prevent" }
-             ))
+      Link(type: :icon,
+           content: create_text, path: "#",
+           id: "create_#{autocompleter_type}_btn",
+           class: "ml-3 create-button",
+           icon: :plus, show_text: true,
+           icon_class: "text-primary",
+           name: "create_#{autocompleter_type}",
+           data: { target_attr_key => "createBtn",
+                   action: "#{stimulus_controller_name}" \
+                           "#swapCreate:prevent" })
     end
 
     def render_modal_create_link
       return unless create_text && create.present? && create_path.present?
 
-      render(Components::Link::Modal.new(
-               modal_id: create,
-               name: create_text,
-               target: create_path,
-               icon: :plus, show_text: true,
-               icon_class: "text-primary",
-               class: "ml-3 create-link",
-               data: { target_attr_key => "createBtn" }
-             ))
+      Link(type: :modal,
+           modal_id: create,
+           name: create_text,
+           target: create_path,
+           icon: :plus, show_text: true,
+           icon_class: "text-primary",
+           class: "ml-3 create-link",
+           data: { target_attr_key => "createBtn" })
     end
 
     def render_dropdown

@@ -12,10 +12,9 @@ module Views::Controllers::Names::Lifeforms
     def view_template
       p { :edit_lifeform_help.t }
 
-      render(Components::Table.new(Name.all_lifeforms,
-                                   variant: :striped,
-                                   identifier: "lifeform",
-                                   show_headers: false)) do |t|
+      Table(Name.all_lifeforms,
+            variant: :striped, identifier: "lifeform",
+            show_headers: false) do |t|
         t.column(nil) do |word|
           checkbox_field(word.to_sym, label: :"lifeform_#{word}".l)
         end

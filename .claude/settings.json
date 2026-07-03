@@ -33,6 +33,11 @@
             "type": "command",
             "command": "test -x .claude/hooks/block_index_active_params.sh && exec .claude/hooks/block_index_active_params.sh || exit 0",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/block_bare_db_tasks.sh && exec .claude/hooks/block_bare_db_tasks.sh || exit 0",
+            "timeout": 10
           }
         ]
       },
@@ -79,6 +84,11 @@
           {
             "type": "command",
             "command": "test -x .claude/hooks/post_rebase_lang_db.sh && exec .claude/hooks/post_rebase_lang_db.sh || exit 0",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "test -x .claude/hooks/post_checkout_lang_db.sh && exec .claude/hooks/post_checkout_lang_db.sh || exit 0",
             "timeout": 120
           }
         ]

@@ -11,8 +11,9 @@ module Views::Controllers::Images
 
       def view_template
         div(id: "exif_data_table") do
-          render(::Components::Table.new(@data, class: "table-striped mb-0",
-                                                show_headers: false)) do |t|
+          Table(@data,
+                variant: :striped, identifier: "image-exif",
+                class: "mb-0", show_headers: false) do |t|
             t.column("key") { |row| row.first.to_s }
             t.column("value") { |row| row.last.to_s }
           end

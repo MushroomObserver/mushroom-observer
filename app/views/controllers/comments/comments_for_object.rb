@@ -66,15 +66,15 @@ module Views::Controllers::Comments
     # ---- header "+ Add comment" link ------------------------------
 
     def render_add_comment_link
-      render(Components::Button.new(
-               type: :modal,
-               name: :show_comments_add_comment.l,
-               target: new_comment_path(
-                 target: @object.id, type: @object.class.name
-               ),
-               modal_id: "comment",
-               variant: :strip, icon: :add
-             ))
+      Button(
+        type: :modal,
+        name: :show_comments_add_comment.l,
+        target: new_comment_path(
+          target: @object.id, type: @object.class.name
+        ),
+        modal_id: "comment",
+        variant: :strip, icon: :add
+      )
     end
 
     # ---- footer "and N more →" link -------------------------------

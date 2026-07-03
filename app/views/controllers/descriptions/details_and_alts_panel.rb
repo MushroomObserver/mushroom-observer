@@ -122,7 +122,8 @@ module Views::Controllers::Descriptions
       content, path, opts = ::Tab::Description::Create.new(
         parent: object
       ).to_a
-      Components::Link::Icon.new(content, path, **(opts || {}))
+      Components::Link.new(type: :icon, content: content, path: path,
+                           **(opts || {}))
     end
 
     def alts_empty_text(type)
@@ -183,14 +184,14 @@ module Views::Controllers::Descriptions
         span { plain(" | ") }
         %w[unvetted vetted inaccurate].each_with_index do |w, idx|
           span { plain(" | ") } if idx.positive?
-          render(Components::Button.new(
-                   type: :put,
-                   variant: :strip,
-                   target: review_status_name_description_path(
-                     @description.id, value: w
-                   ),
-                   name: :"review_#{w}".l
-                 ))
+          Button(
+            type: :put,
+            variant: :strip,
+            target: review_status_name_description_path(
+              @description.id, value: w
+            ),
+            name: :"review_#{w}".l
+          )
         end
       end
     end
@@ -213,8 +214,7 @@ module Views::Controllers::Descriptions
     def reviewer_link
       reviewer = @description.reviewer
       capture do
-        render(Components::Link::User.new(user: reviewer,
-                                          name: reviewer.login))
+        Link(type: :user, user: reviewer, name: reviewer.login)
       end
     end
 

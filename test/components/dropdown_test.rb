@@ -69,6 +69,28 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
+  # Tooltip data attrs (`data-toggle="tooltip"`, `data-title`,
+  # `data-placement`) are stripped from dropdown items. They're
+  # redundant inside a menu (the label is already visible) and
+  # Bootstrap's tooltip JS can interfere with dropdown click handling.
+  def test_tooltip_data_stripped_from_link
+    html = render(Components::Dropdown.new(
+                    id: "tip_toggle",
+                    menu_id: "tip_menu",
+                    label: "Menu"
+                  )) do |menu|
+      menu.section([["Edit", "/edit",
+                     { data: { toggle: "tooltip",
+                               title: "Edit this",
+                               placement: "top" } }]])
+    end
+
+    assert_html(html, "li a[href='/edit']")
+    assert_no_html(html, "[data-toggle='tooltip']")
+    assert_no_html(html, "[data-title]")
+    assert_no_html(html, "[data-placement]")
+  end
+
   # Sections that are `nil` (or any unrecognized type) normalize to
   # `[]` and get filtered out by `reject(&:empty?)`. With nothing
   # left to render, the entire dropdown wrapper is suppressed.

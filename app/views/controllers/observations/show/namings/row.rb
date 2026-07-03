@@ -120,9 +120,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_mod_links(naming)
     div(class: "text-nowrap") do
-      render(Components::Link::InlineMod.new(
-               target: naming, user: @user, indent: false
-             ))
+      Link(type: :inline_mod,
+           target: naming, user: @user, indent: false)
     end
   end
 
@@ -148,23 +147,22 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_matching_observations_link
-    render(Components::Button.new(
-             type: :get,
-             target: url_for(occurrence_path(@naming.observation.occurrence)),
-             name: :show_observation_matching_observations.l,
-             variant: :btn_link,
-             class: "text-wrap text-left px-0"
-           ))
+    Button(
+      type: :get,
+      target: url_for(occurrence_path(@naming.observation.occurrence)),
+      name: :show_observation_matching_observations.l,
+      variant: :btn_link,
+      class: "text-wrap text-left px-0"
+    )
   end
 
   def render_single_proposer_link
     proposer = @naming.user
-    render(Components::Link::User.new(
-             user: proposer,
-             name: proposer.login,
-             button: :btn_link,
-             attributes: { class: "text-wrap text-left px-0" }
-           ))
+    Link(type: :user,
+         user: proposer,
+         name: proposer.login,
+         button: :btn_link,
+         attributes: { class: "text-wrap text-left px-0" })
   end
 
   # ---- vote tally cell ------------------------------------------
@@ -197,13 +195,13 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_vote_percent_link
-    render(Components::Button.new(
-             type: :modal,
-             name: "#{@naming.vote_percent.round}%",
-             target: vote_percent_modal_path,
-             modal_id: "naming_votes_#{primary.id}",
-             variant: :btn_link, class: "vote-percent px-0"
-           ))
+    Button(
+      type: :modal,
+      name: "#{@naming.vote_percent.round}%",
+      target: vote_percent_modal_path,
+      modal_id: "naming_votes_#{primary.id}",
+      variant: :btn_link, class: "vote-percent px-0"
+    )
   end
 
   def vote_percent_modal_path

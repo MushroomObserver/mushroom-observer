@@ -28,10 +28,9 @@ module Views::Controllers::Projects::Members
     private
 
     def render_table
-      render(Components::Table.new(
-               @users.sort_by(&:login),
-               class: "table-striped table-project-members mt-3"
-             )) do |table|
+      Table(@users.sort_by(&:login),
+            variant: :striped, identifier: "project-members",
+            class: "mt-3") do |table|
         define_columns(table)
       end
     end
@@ -56,7 +55,7 @@ module Views::Controllers::Projects::Members
 
     def render_avatar(user)
       render_user_image(user) if user.image
-      render(Components::Link::User.new(user: user, name: user.login))
+      Link(type: :user, user: user, name: user.login)
     end
 
     def render_user_image(user)

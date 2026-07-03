@@ -51,11 +51,10 @@ module Views::Controllers::Sequences
                    :span,
                    "(#{:form_sequence_bases_or_deposit_required.t})"
                  ))
-          render(::Components::Link::External.new(
-                   "(#{:form_sequence_bases_format.t})",
-                   WebSequenceArchive.blast_format_help,
-                   class: "d-inline-block float-right"
-                 ))
+          Link(type: :external,
+               content: "(#{:form_sequence_bases_format.t})",
+               path: WebSequenceArchive.blast_format_help,
+               class: "d-inline-block float-right")
         end
       end
     end

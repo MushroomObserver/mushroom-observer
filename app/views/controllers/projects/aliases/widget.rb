@@ -32,44 +32,44 @@ module Views::Controllers::Projects::Aliases
       alias_data.each do |name, id|
         render_edit_link(name, id)
         span(class: "mx-2")
-        render(Components::Button.new(
-                 type: :delete,
-                 target: project_alias_path(
-                   project_id: @project.id, id: id
-                 ),
-                 variant: :strip
-               ))
+        Button(
+          type: :delete,
+          target: project_alias_path(
+            project_id: @project.id, id: id
+          ),
+          variant: :strip
+        )
         br
       end
     end
 
     def render_edit_link(name, id)
       span(id: "project_alias_#{id}") do
-        render(Components::Button.new(
-                 type: :modal,
-                 name: name,
-                 target: edit_project_alias_path(
-                   project_id: @project.id, id: id
-                 ),
-                 modal_id: "project_alias_#{id}",
-                 variant: :strip
-               ))
+        Button(
+          type: :modal,
+          name: name,
+          target: edit_project_alias_path(
+            project_id: @project.id, id: id
+          ),
+          modal_id: "project_alias_#{id}",
+          variant: :strip
+        )
       end
     end
 
     def render_new_link
       span(id: "project_alias") do
-        render(Components::Button.new(
-                 type: :modal,
-                 name: :ADD.t,
-                 target: new_project_alias_path(
-                   project_id: @project.id,
-                   target_id: @target.id,
-                   target_type: @target.class
-                 ),
-                 modal_id: "project_alias",
-                 variant: :strip
-               ))
+        Button(
+          type: :modal,
+          name: :ADD.t,
+          target: new_project_alias_path(
+            project_id: @project.id,
+            target_id: @target.id,
+            target_type: @target.class
+          ),
+          modal_id: "project_alias",
+          variant: :strip
+        )
       end
     end
   end

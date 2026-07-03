@@ -43,12 +43,11 @@ module Views::Controllers::Contributors
       end
 
       def render_toggle_button
-        render(::Components::Link::CollapseToggle.new(
-                 target_id: "contribution_legend",
-                 icon: :info_circle,
-                 button: :btn_link,
-                 size: :xs
-               ))
+        Link(type: :collapse_toggle,
+             target_id: "contribution_legend",
+             icon: :info_circle,
+             button: :btn_link,
+             size: :xs)
       end
 
       def render_body

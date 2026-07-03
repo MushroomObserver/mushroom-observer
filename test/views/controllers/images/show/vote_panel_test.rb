@@ -22,7 +22,7 @@ module Views::Controllers::Images
         html = render(VotePanel.new(image: @image))
 
         assert_html(html, "#image_vote_content")
-        assert_html(html, "#show_votes_table")
+        assert_html(html, "table.table-show-votes")
         assert_no_html(html, "a[data-role='image_vote']")
       end
 
@@ -32,7 +32,7 @@ module Views::Controllers::Images
         html = render(VotePanel.new(image: @image))
 
         assert_html(html, "a[data-role='image_vote']")
-        assert_html(html, "#show_votes_table")
+        assert_html(html, "table.table-show-votes")
       end
 
       def test_anonymous_vote_row_hides_user
@@ -42,10 +42,11 @@ module Views::Controllers::Images
         html = render(VotePanel.new(image: @image))
 
         doc = Nokogiri::HTML.fragment(html)
-        assert_includes(doc.css("#show_votes_table td").map(&:text),
+        assert_includes(doc.css("table.table-show-votes td").map(&:text),
                         :anonymous.t)
         assert_no_html(html,
-                       "#show_votes_table a[href*='#{users(:mary).id}']")
+                       "table.table-show-votes " \
+                       "a[href*='#{users(:mary).id}']")
       end
     end
   end

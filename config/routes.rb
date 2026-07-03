@@ -284,7 +284,7 @@ MushroomObserver::Application.routes.draw do
     resource :login, only: [:new, :create], controller: "login"
     unresourced_login_gets = %w[email_new_password test_autologin].freeze
     unresourced_login_gets.each { |action| get(action, controller: "login") }
-    post("logout", controller: "login")
+    resource :logout, only: [:show, :create], controller: "logout"
     post("new_password_request", controller: "login")
 
     resource :preferences, only: [:edit, :update]

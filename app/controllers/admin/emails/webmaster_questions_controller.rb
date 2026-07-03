@@ -12,14 +12,16 @@ module Admin
         respond_to do |format|
           format.html { render_new_page }
           format.turbo_stream do
-            render(Components::Modal::TurboForm.new(
+            render(Components::Modal.new(
+                     type: :turbo_form,
                      identifier: "webmaster_question_email",
                      title: :ask_webmaster_title.l,
                      user: @user,
                      model: FormObject::EmailRequest.new(
                        reply_to: @email, message: @message
                      ),
-                     form_class: Views::Controllers::Admin::Emails::WebmasterQuestions::Form,
+                     form_class:
+                       Views::Controllers::Admin::Emails::WebmasterQuestions::Form,
                      form_locals: { email_error: false }
                    ), layout: false)
           end

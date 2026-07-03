@@ -49,7 +49,8 @@ module Views::Controllers::Licenses
 
     def link_to_url
       capture do
-        render(::Components::Link::External.new(@license.url, @license.url))
+        Link(type: :external, content: @license.url,
+             path: @license.url)
       end
     end
 

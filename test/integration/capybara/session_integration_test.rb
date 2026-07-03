@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class RandomIntegrationTest < CapybaraIntegrationTestCase
+class SessionIntegrationTest < CapybaraIntegrationTestCase
   def test_the_homepage
     login(users(:zero_user))
     visit("/")
@@ -25,7 +25,7 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
     assert_link(href: "/users/#{rolf.id}")
 
     first(:button, text: :app_logout.l).click
-    assert_selector("body.login__logout")
+    assert_selector("body.logout__show")
     assert_link(href: "/account/login/new")
     assert_no_button(:app_logout.l)
     assert_no_link(:app_logout.l)
@@ -37,6 +37,26 @@ class RandomIntegrationTest < CapybaraIntegrationTestCase
     assert_no_button(:app_logout.l)
     assert_no_link(:app_logout.l)
     assert_no_link(href: "/users/#{rolf.id}")
+  end
+
+  def test_admin_mode_toggle
+    rolf.admin = true
+    rolf.save!
+    login!(rolf)
+    visit("/info/how_to_help")
+
+    # Initial state: turn-on button present, no admin banner.
+    assert_button(:app_turn_admin_on.t)
+    assert_no_selector("#admin_banner")
+
+    # Enable admin mode via the user-nav dropdown button.
+    click_on(id: "user_nav_admin_mode_link")
+
+    # Banner and flipped toggle both confirm admin mode is active.
+    assert_selector("#admin_banner",
+                    text: "DANGER: You are in administrator mode")
+    assert_button(:app_turn_admin_off.t)
+    assert_no_button(:app_turn_admin_on.t)
   end
 
   def test_sessions

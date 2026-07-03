@@ -104,30 +104,28 @@ module Views::Controllers::Sequences
     def render_blast_link
       blast_tab = ::Tab::Sequence::Blast.new(sequence: @sequence)
       p do
-        render(::Components::Button.new(type: :external,
-                                        name: blast_tab.title,
-                                        url: blast_tab.path))
+        Button(type: :external,
+               name: blast_tab.title,
+               url: blast_tab.path)
         whitespace
-        render(::Components::Button.new(
-                 type: :external,
-                 name: :show_observation_mycoblast_link.l,
-                 url: ::Sequence.mycoblast_url
-               ))
+        Button(
+          type: :external,
+          name: :show_observation_mycoblast_link.l,
+          url: ::Sequence.mycoblast_url
+        )
       end
     end
 
     def render_archive_link
-      render(::Components::Link::External.new(
-               tab: ::Tab::Sequence::Archive.new(sequence: @sequence)
-             ))
+      Link(type: :external,
+           tab: ::Tab::Sequence::Archive.new(sequence: @sequence))
     end
 
     def render_accession_link
-      render(::Components::Link::External.new(
-               truncate(@sequence.accession,
-                        length: @sequence.locus_width / 2).t,
-               @sequence.accession_url
-             ))
+      Link(type: :external,
+           content: truncate(@sequence.accession,
+                             length: @sequence.locus_width / 2).t,
+           path: @sequence.accession_url)
     end
   end
 end

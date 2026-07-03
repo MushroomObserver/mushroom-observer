@@ -11,11 +11,11 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
 
   def test_renders_panel_title_in_h4
     # The leftmost label-column carries the panel's actual title
-    # (`<h4 class="panel-title">`) since on `xs` it's the only
-    # piece of the heading row that's visible.
+    # in an h4 — on `xs` it's the only piece of the heading row
+    # that's visible.
     html = render_header
 
-    assert_html(html, "h4.panel-title",
+    assert_html(html, "h4",
                 text: :show_namings_proposed_names.t)
   end
 

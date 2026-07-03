@@ -23,7 +23,9 @@ class Components::Link::Modal < Components::Link
 
   def view_template
     if @icon
-      render(Components::Link::Icon.new(@name, @path, **icon_link_args))
+      render(Components::Link::Icon.new(
+               content: @name, path: @path, **icon_link_args
+             ))
     else
       link_to(@name, @path, **plain_link_args)
     end

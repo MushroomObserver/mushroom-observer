@@ -76,7 +76,7 @@ module Views::Layouts
     def render_user_dated_line(key, user:, date:)
       trusted_html(key.t(
                      user: capture do
-                       render(Components::Link::User.new(user:))
+                       Link(type: :user, user:)
                      end,
                      date: date.web_time
                    ))

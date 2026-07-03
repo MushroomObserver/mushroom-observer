@@ -137,7 +137,7 @@ module Views::Controllers::Projects::Locations
       def render_table(user:, grouped: nil, ungrouped: [],
                        obs_counts: {})
         grouped ||= default_grouped_data
-        render(Table.new(
+        render(Tables.new(
                  project: project,
                  grouped_data: grouped,
                  ungrouped_locations: ungrouped,

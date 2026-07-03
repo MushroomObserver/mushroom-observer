@@ -31,9 +31,8 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   private
 
   def render_edit_link
-    render(Components::Link::Icon.new(
-             tab: Tab::Name::EditClassification.new(name: @name)
-           ))
+    Link(type: :icon,
+         tab: Tab::Name::EditClassification.new(name: @name))
   end
 
   def render_body
@@ -103,9 +102,9 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
     li do
       text, url, opts = tab.to_a
       if opts[:button] == :put
-        render(Components::Button.new(
-                 type: :put, variant: :strip, name: text, target: url
-               ))
+        Button(
+          type: :put, variant: :strip, name: text, target: url
+        )
       else
         a(href: url, **opts.slice(:class, :data, :target, :rel)) do
           plain(text)

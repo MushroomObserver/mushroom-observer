@@ -133,13 +133,12 @@ class Components::Panel < Components::Base
   end
 
   def render_collapse_icons
-    render(::Components::Link::CollapseToggle.new(
-             target_id: @collapse_id || "",
-             collapsed: !@expanded,
-             class: "panel-collapse-trigger ml-3",
-             data: collapse_toggle_data,
-             aria: collapse_aria
-           )) do
+    Link(type: :collapse_toggle,
+         target_id: @collapse_id || "",
+         collapsed: !@expanded,
+         class: "panel-collapse-trigger ml-3",
+         data: collapse_toggle_data,
+         aria: collapse_aria) do
       render_collapse_message
 
       render(Components::Icon.new(

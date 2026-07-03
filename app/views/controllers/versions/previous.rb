@@ -10,7 +10,7 @@
 # `initial_version_link_text`). With that chain gone, the helper
 # file is empty and is deleted in the same commit.
 module Views::Controllers::Versions
-  class Table < Views::Base
+  class Previous < Views::Base
     prop :obj, ::AbstractModel
     prop :versions, _Array(_Interface(:user_id))
     # Optional `args[:bold]` callable — only the name-version page
@@ -30,10 +30,10 @@ module Views::Controllers::Versions
     private
 
     def render_table
-      render(Components::Table.new(
+      render(::Components::Table.new(
                @versions.reverse,
-               show_headers: false,
-               class: "table-hover mb-0"
+               variant: :hover, identifier: "versions",
+               show_headers: false, class: "mb-0"
              )) do |t|
         t.column("") { |ver| render_date_cell(ver) }
         t.column("") { |ver| render_user_cell(ver) }
@@ -44,14 +44,14 @@ module Views::Controllers::Versions
     def render_date_cell(ver)
       plain(ver.updated_at.web_date)
     rescue StandardError
-      plain(:unknown.t)
+      plain(:unknown.l)
     end
 
     def render_user_cell(ver)
       user = ::User.safe_find(ver.user_id)
-      return plain(:unknown.t) unless user
+      return plain(:unknown.l) unless user
 
-      render(::Components::Link::User.new(user: user, name: user.login))
+      Link(type: :user, user: user, name: user.login)
     end
 
     def render_link_cell(ver)
@@ -71,7 +71,7 @@ module Views::Controllers::Versions
     end
 
     def emit_version_link_text(ver)
-      label = "#{:VERSION.t} #{ver.version}"
+      label = "#{:VERSION.l} #{ver.version}"
       if @args[:bold]&.call(ver)
         strong { plain(label) }
       else

@@ -78,18 +78,18 @@ module Views::Layouts
     def render_toggle_button(truncate:)
       action = truncate ? "showFull" : "showTruncated"
       direction = truncate ? "down" : "up"
-      render(::Components::Button.new(
-               variant: :btn_link,
-               class: "top-right toggle",
-               title: if truncate
-                        :filter_caption_expand.l
-                      else
-                        :filter_caption_collapse.l
-                      end,
-               data: { filter_caption_target: action,
-                       action: "filter-caption##{action}",
-                       toggle: "tooltip" }
-             )) do
+      Button(
+        variant: :btn_link,
+        class: "top-right toggle",
+        title: if truncate
+                 :filter_caption_expand.l
+               else
+                 :filter_caption_collapse.l
+               end,
+        data: { filter_caption_target: action,
+                action: "filter-caption##{action}",
+                toggle: "tooltip" }
+      ) do
         # aria-hidden as a string — Phlex 2 renders boolean `true`
         # as an empty-string attr, not "true".
         render(::Components::Icon.new(

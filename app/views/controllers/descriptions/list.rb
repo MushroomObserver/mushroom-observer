@@ -75,7 +75,7 @@ module Views::Controllers::Descriptions
         trusted_html(description_title(desc))
       else
         render_link(desc)
-        render(Components::Link::InlineMod.new(target: desc, user: @user))
+        Link(type: :inline_mod, target: desc, user: @user)
       end
     end
 

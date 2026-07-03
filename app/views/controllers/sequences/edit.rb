@@ -29,7 +29,7 @@ module Views::Controllers::Sequences
       div(class: "small") do
         span(class: "font-weight-bold") { "#{:CREATED_BY.l}:" }
         whitespace
-        render(::Components::Link::User.new(user: @sequence.user))
+        Link(type: :user, user: @sequence.user)
       end
       render(::Views::Layouts::ObjectFooter.new(
                user: current_user, obj: @sequence

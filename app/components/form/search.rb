@@ -106,15 +106,14 @@ class Components::Form::Search < Components::ApplicationForm
   # Bootstrap collapse-trigger button that hides the search-bar elements row
   # in the top nav.
   def render_search_bar_toggle
-    render(::Components::Link::CollapseToggle.new(
-             target_id: "search_bar_elements",
-             collapsed: false,
-             icon: :minus,
-             icon_title: :search_bar_fewer_options.l,
-             button: :btn_link,
-             class: "navbar-link px-2",
-             data: { search_type_target: "barToggle" }
-           ))
+    Link(type: :collapse_toggle,
+         target_id: "search_bar_elements",
+         collapsed: false,
+         icon: :minus,
+         icon_title: :search_bar_fewer_options.l,
+         button: :btn_link,
+         class: "navbar-link px-2",
+         data: { search_type_target: "barToggle" })
   end
 
   # Form layout
@@ -465,13 +464,13 @@ class Components::Form::Search < Components::ApplicationForm
 
   def render_clear_button
     data_attrs = @local ? {} : turbo_stream_data
-    render(Components::Button.new(
-             type: :get,
-             name: :CLEAR.l,
-             target: clear_url,
-             class: "d-inline-block mx-3 clear-button",
-             data: data_attrs
-           ))
+    Button(
+      type: :get,
+      name: :CLEAR.l,
+      target: clear_url,
+      class: "d-inline-block mx-3 clear-button",
+      data: data_attrs
+    )
   end
 
   def clear_url

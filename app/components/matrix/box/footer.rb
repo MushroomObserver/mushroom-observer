@@ -68,14 +68,14 @@ class Components::Matrix::Box
       return unless show_project_exclude_button?
 
       panel.with_footer(classes: "text-center") do
-        render(Components::Button.new(
-                 type: :post,
-                 name: :EXCLUDE.t,
-                 target: exclude_observation_project_update_path(
-                   project_id: @project.id, id: @data[:what].id
-                 ),
-                 size: :sm
-               ))
+        Button(
+          type: :post,
+          name: :EXCLUDE.t,
+          target: exclude_observation_project_update_path(
+            project_id: @project.id, id: @data[:what].id
+          ),
+          size: :sm
+        )
       end
     end
 

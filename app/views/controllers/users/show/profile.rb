@@ -35,15 +35,15 @@ module Views::Controllers::Users
         return if @show_user == @user || @show_user.no_emails
         return unless @show_user.email_general_question
 
-        render(::Components::Button.new(
-                 type: :modal,
-                 name: :show_user_email_to.t(
-                   name: @show_user.unique_text_name
-                 ),
-                 target: new_question_for_user_path(@show_user.id),
-                 modal_id: "user_question_email",
-                 variant: :strip, icon: :email
-               ))
+        Button(
+          type: :modal,
+          name: :show_user_email_to.t(
+            name: @show_user.unique_text_name
+          ),
+          target: new_question_for_user_path(@show_user.id),
+          modal_id: "user_question_email",
+          variant: :strip, icon: :email
+        )
       end
 
       def render_body
@@ -68,9 +68,7 @@ module Views::Controllers::Users
         p do
           strong { "#{:show_user_primary_location.l}:" }
           whitespace
-          render(::Components::Link::Location.new(
-                   location: @show_user.location
-                 ))
+          Link(type: :location, location: @show_user.location)
         end
       end
 

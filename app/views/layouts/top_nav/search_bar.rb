@@ -38,8 +38,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   def render_collapse_bar
     div(class: "collapse in w-100", id: "search_bar_elements",
         data: { search_type_target: "bar",
-                action:
-                  "$shown.bs.collapse->search-type#closeForm" }) do
+                action: "$shown.bs.collapse->search-type#closeForm" }) do
       div(class: "navbar-flex w-100 gap-2") do
         render_help_toggle
         render(Components::Form::PatternSearch.new(pattern_search_model))
@@ -66,26 +65,24 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # (`#search_bar_help`). Starts hidden via `d-none` when the
   # current search-type has no help content.
   def render_help_toggle
-    render(::Components::Link::CollapseToggle.new(
-             target_id: "search_bar_help",
-             icon: :info,
-             icon_title: :search_bar_help.t,
-             class: bar_toggle_class(visible: help_visible?),
-             data: { search_type_target: "helpToggle" }
-           ))
+    Link(type: :collapse_toggle,
+         target_id: "search_bar_help",
+         icon: :info,
+         icon_title: :search_bar_help.l,
+         class: bar_toggle_class(visible: help_visible?),
+         data: { search_type_target: "helpToggle" })
   end
 
   # Bootstrap collapse-trigger for the advanced-search form
   # expander (`#search_nav_form`). Starts hidden via `d-none`
   # when the current search-type has no advanced form.
   def render_form_toggle
-    render(::Components::Link::CollapseToggle.new(
-             target_id: "search_nav_form",
-             icon: :plus,
-             icon_title: :search_bar_more_options.l,
-             class: bar_toggle_class(visible: form_visible?),
-             data: { search_type_target: "formToggle" }
-           ))
+    Link(type: :collapse_toggle,
+         target_id: "search_nav_form",
+         icon: :plus,
+         icon_title: :search_bar_more_options.l,
+         class: bar_toggle_class(visible: form_visible?),
+         data: { search_type_target: "formToggle" })
   end
 
   def bar_toggle_class(visible:)

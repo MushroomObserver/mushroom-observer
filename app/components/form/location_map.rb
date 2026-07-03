@@ -52,27 +52,27 @@ class Components::Form::LocationMap < Components::Base
   end
 
   def render_toggle_button
-    render(Components::Button.new(
-             type: :collapse_toggle,
-             target_id: @id,
-             open_text: :form_observations_hide_map.l,
-             closed_text: :form_observations_open_map.l,
-             icon: :globe,
-             class: "map-toggle",
-             data: { map_target: "toggleMapBtn",
-                     action: "map#toggleMap form-exif#showFields" },
-             aria: { expanded: "false", controls: @id }
-           ))
+    Button(
+      type: :collapse_toggle,
+      target_id: @id,
+      open_text: :form_observations_hide_map.l,
+      closed_text: :form_observations_open_map.l,
+      icon: :globe,
+      class: "map-toggle",
+      data: { map_target: "toggleMapBtn",
+              action: "map#toggleMap form-exif#showFields" },
+      aria: { expanded: "false", controls: @id }
+    )
   end
 
   def render_clear_button
-    render(Components::Button.new(
-             name: :form_observations_clear_map.l,
-             class: "map-clear",
-             data: {
-               map_target: "mapClearBtn",
-               action: "map#clearMap form-exif#reenableButtons"
-             }
-           ))
+    Button(
+      name: :form_observations_clear_map.l,
+      class: "map-clear",
+      data: {
+        map_target: "mapClearBtn",
+        action: "map#clearMap form-exif#reenableButtons"
+      }
+    )
   end
 end

@@ -30,7 +30,7 @@ module Views::Controllers::Sequences
       render_deposit_line(seq) if seq.deposit?
       small { plain(seq.created_at.web_time) }
       plain(": ")
-      render(::Components::Link::User.new(user: seq.user))
+      Link(type: :user, user: seq.user)
     end
 
     def render_top_links(seq)
@@ -51,14 +51,14 @@ module Views::Controllers::Sequences
 
     def render_archive_link(seq)
       url = ::WebSequenceArchive.archive_home(seq.archive)
-      render(::Components::Link::External.new(seq.archive.t, url))
+      Link(type: :external, content: seq.archive.t, path: url)
     end
 
     def render_accession_link(seq)
-      render(::Components::Link::External.new(
-               truncate(seq.accession, length: seq.locus_width / 2).t,
-               seq.accession_url
-             ))
+      Link(type: :external,
+           content: truncate(seq.accession,
+                             length: seq.locus_width / 2).t,
+           path: seq.accession_url)
     end
   end
 end

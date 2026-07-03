@@ -76,10 +76,9 @@ class Components::Map::Popup < Components::Base
     url = observation_path(id: obs.id, params: query_path_params)
     div(class: "media-left") do
       label = obs.text_name.presence || "Observation ##{obs.id}"
-      render(::Components::Link::Get.new(
-               name: label, target: url, new_tab: true,
-               aria: { label: label }
-             )) do
+      Link(type: :get,
+           name: label, target: url, new_tab: true,
+           aria: { label: label }) do
         img(src: ::Image.url(:small, obs.thumb_image_id),
             class: "media-object map-popup-thumb",
             loading: "lazy", alt: "")
@@ -185,14 +184,14 @@ class Components::Map::Popup < Components::Base
   end
 
   def render_mapset_link(label_sym, path, query)
-    render(::Components::Button.new(
-             type: :get,
-             name: label_sym.t,
-             target: add_q_param(path, query),
-             size: :xs,
-             class: "map-popup-btn",
-             data: query.params
-           ))
+    Button(
+      type: :get,
+      name: label_sym.t,
+      target: add_q_param(path, query),
+      size: :xs,
+      class: "map-popup-btn",
+      data: query.params
+    )
   end
 
   # ----------------------------------------------------------------
@@ -200,12 +199,11 @@ class Components::Map::Popup < Components::Base
   # ----------------------------------------------------------------
 
   def render_observation_link(obs)
-    render(::Components::Link::Get.new(
-             name: obs.text_name.presence || "Observation ##{obs.id}",
-             target: observation_path(id: obs.id,
-                                      params: query_path_params),
-             new_tab: true
-           )) { render_observation_label(obs) }
+    Link(type: :get,
+         name: obs.text_name.presence || "Observation ##{obs.id}",
+         target: observation_path(id: obs.id,
+                                  params: query_path_params),
+         new_tab: true) { render_observation_label(obs) }
   end
 
   # Emits the label inside the observation-popup link. Preferred order:
@@ -235,7 +233,7 @@ class Components::Map::Popup < Components::Base
   end
 
   def render_location_link(loc)
-    render(::Components::Link::Location.new(location: loc, query: @query))
+    Link(type: :location, location: loc, query: @query)
   end
 
   def mapset_observation_date(obs)

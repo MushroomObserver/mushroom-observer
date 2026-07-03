@@ -31,13 +31,13 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     name = :download_observations_print_labels.l
     query = ::Query.lookup(::Observation, id_in_set: [@obs.id])
     path = add_q_param(observations_downloads_path(commit: name), query)
-    render(Components::Button.new(
-             type: :post,
-             variant: :strip,
-             name: name, target: path, icon: :print,
-             class: "print_label_observation_#{@obs.id}",
-             form: { data: { turbo: false } }
-           ))
+    Button(
+      type: :post,
+      variant: :strip,
+      name: name, target: path, icon: :print,
+      class: "print_label_observation_#{@obs.id}",
+      form: { data: { turbo: false } }
+    )
   end
 
   def render_body
@@ -83,9 +83,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_where_link
     if @user
-      render(Components::Link::Location.new(
-               where: @obs.where, location: @obs.location, click: true
-             ))
+      Link(type: :location,
+           where: @obs.where, location: @obs.location, click: true)
     else
       plain(@obs.where)
     end
@@ -170,7 +169,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_user_link(target)
     if @user
-      render(Components::Link::User.new(user: target))
+      Link(type: :user, user: target)
     else
       plain(target.unique_text_name)
     end
@@ -183,13 +182,13 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_send_question_link
     plain(" [")
-    render(Components::Button.new(
-             type: :modal,
-             name: :show_observation_send_question.l,
-             target: new_question_for_observation_path(@obs.id),
-             modal_id: "observation_email",
-             variant: :strip, icon: :email
-           ))
+    Button(
+      type: :modal,
+      name: :show_observation_send_question.l,
+      target: new_question_for_observation_path(@obs.id),
+      modal_id: "observation_email",
+      variant: :strip, icon: :email
+    )
     plain("]")
   end
 
@@ -245,7 +244,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       br
       @obs.projects.each do |project|
         div(class: "indent") do
-          render(Components::Link::Object.new(object: project))
+          Link(type: :object, object: project)
         end
       end
     end
@@ -254,7 +253,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { plain("#{:FIELD_SLIP.t}: ") }
-      render(Components::Link::Object.new(object: @obs.field_slip))
+      Link(type: :object, object: @obs.field_slip)
     end
   end
 

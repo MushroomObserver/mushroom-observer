@@ -17,7 +17,7 @@ class Views::Controllers::Observations::Show::NameSuggestionsAlert < Views::Base
   prop :names, _Array(_Tuple(::Name, Integer))
 
   def view_template
-    render(Components::Alert.new(level: :warning)) do
+    Alert(level: :warning) do
       p { plain("#{:list_observations_suggestions.t}:") }
       @names.each { |name, count| render_row(name, count) }
     end

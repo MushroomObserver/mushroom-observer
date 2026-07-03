@@ -34,16 +34,16 @@ module Views::Controllers::Descriptions::Authors
     end
 
     def render_author_row(user, type)
-      render(Components::Link::User.new(user: user))
+      Link(type: :user, user: user)
       plain(" | ")
-      render(Components::Button.new(
-               type: :delete,
-               name: :review_authors_remove_author.t,
-               target: description_authors_path(
-                 id: @object.id, type: type, remove: user.id
-               ),
-               variant: :strip
-             ))
+      Button(
+        type: :delete,
+        name: :review_authors_remove_author.t,
+        target: description_authors_path(
+          id: @object.id, type: type, remove: user.id
+        ),
+        variant: :strip
+      )
       br
     end
 

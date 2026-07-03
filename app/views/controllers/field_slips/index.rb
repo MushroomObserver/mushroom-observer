@@ -33,7 +33,7 @@ module Views::Controllers::FieldSlips
     def render_notice
       return unless @notice
 
-      render(Components::Alert.new(message: @notice, level: :success))
+      Alert(message: @notice, level: :success)
     end
 
     def render_project_or_filter_section
@@ -57,13 +57,13 @@ module Views::Controllers::FieldSlips
         b { plain("#{:show_project_field_slip_prefix.t}:") }
         plain(" #{@project.field_slip_prefix} ")
         if @project.member?(current_user)
-          render(Components::Button.new(
-                   type: :get,
-                   name: :show_project_field_slip_create.t,
-                   target: new_project_field_slip_path(
-                     project_id: @project.id
-                   )
-                 ))
+          Button(
+            type: :get,
+            name: :show_project_field_slip_create.t,
+            target: new_project_field_slip_path(
+              project_id: @project.id
+            )
+          )
         end
       end
     end

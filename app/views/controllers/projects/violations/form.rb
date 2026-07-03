@@ -28,7 +28,7 @@ module Views::Controllers::Projects::Violations
     def view_template
       h4 do
         trusted_html("#{:PROJECT.l}: ")
-        render(Components::Link::Object.new(object: @project))
+        Link(type: :object, object: @project)
       end
 
       if @violations.empty?
@@ -55,9 +55,9 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_violations_table
-      render(Components::Table.new(@violations,
-                                   class: "table-striped " \
-                                          "project-violations")) do |t|
+      Table(@violations,
+            variant: :striped, identifier: "violations",
+            class: "project-violations") do |t|
         t.column(:form_violations_th_name.l) { |v| render_obs_link(v.obs) }
         t.column(:form_violations_th_details.l) do |v|
           render_details(v.obs, v.kinds)
@@ -69,8 +69,7 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_obs_link(obs)
-      render(Components::Link::Object.new(object: obs,
-                                          name: obs.text_name))
+      Link(type: :object, object: obs, name: obs.text_name)
       plain(" (#{obs.id})")
     end
 
@@ -123,33 +122,33 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_exclude_button(obs)
-      render(::Components::Button.new(
-               type: :put,
-               name: :form_violations_action_exclude.l,
-               target: violations_path,
-               params: { project: { do: "exclude", obs_id: obs.id } },
-               size: :xs
-             ))
+      Button(
+        type: :put,
+        name: :form_violations_action_exclude.l,
+        target: violations_path,
+        params: { project: { do: "exclude", obs_id: obs.id } },
+        size: :xs
+      )
     end
 
     def render_extend_button(obs)
-      render(::Components::Button.new(
-               type: :put,
-               name: :form_violations_action_extend.l,
-               target: violations_path,
-               params: { project: { do: "extend", obs_id: obs.id } },
-               size: :xs
-             ))
+      Button(
+        type: :put,
+        name: :form_violations_action_extend.l,
+        target: violations_path,
+        params: { project: { do: "extend", obs_id: obs.id } },
+        size: :xs
+      )
     end
 
     def render_add_target_name_button(obs)
-      render(::Components::Button.new(
-               type: :put,
-               name: :form_violations_action_add_target_name.l,
-               target: violations_path,
-               params: { project: { do: "add_target_name", obs_id: obs.id } },
-               size: :xs
-             ))
+      Button(
+        type: :put,
+        name: :form_violations_action_add_target_name.l,
+        target: violations_path,
+        params: { project: { do: "add_target_name", obs_id: obs.id } },
+        size: :xs
+      )
     end
 
     # The modal markup itself is no longer rendered eagerly — each
@@ -162,21 +161,21 @@ module Views::Controllers::Projects::Violations
     # first so DB state from the other tab (a newly-created suffix
     # Location) is picked up on reopen (#4304).
     def render_add_target_location_trigger(obs)
-      render(::Components::Button.new(
-               type: :get,
-               name: :form_violations_action_add_target_location.l,
-               target: target_location_modal_project_violations_path(
-                 project_id: @project.id, obs_id: obs.id
-               ),
-               size: :xs,
-               data: {
-                 modal: Views::Controllers::Projects::Violations::
-                          TargetLocationForm.modal_id_for(obs),
-                 controller: "modal-toggle",
-                 action: "modal-toggle#showModal:prevent",
-                 modal_toggle_always_fresh_value: true
-               }
-             ))
+      Button(
+        type: :get,
+        name: :form_violations_action_add_target_location.l,
+        target: target_location_modal_project_violations_path(
+          project_id: @project.id, obs_id: obs.id
+        ),
+        size: :xs,
+        data: {
+          modal: Views::Controllers::Projects::Violations::
+                   TargetLocationForm.modal_id_for(obs),
+          controller: "modal-toggle",
+          action: "modal-toggle#showModal:prevent",
+          modal_toggle_always_fresh_value: true
+        }
+      )
     end
   end
 end

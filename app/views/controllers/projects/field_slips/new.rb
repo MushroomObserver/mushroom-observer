@@ -26,9 +26,9 @@ module Views::Controllers::Projects::FieldSlips
 
     def page_title
       [
-        :field_slips_for_project_title.t,
+        :field_slips_for_project_title.l,
         capture do
-          render(Components::Link::Object.new(object: @project))
+          Link(type: :object, object: @project)
         end,
         :PROJECT.t
       ].safe_join(" ")
@@ -73,10 +73,9 @@ module Views::Controllers::Projects::FieldSlips
     # defines just the `<th>` chrome; `row { |tracker| … }` renders
     # the entire `<tr>` per tracker via `TrackerRow`.
     def render_tracker_table
-      render(Components::Table.new(
-               @trackers,
-               class: "mt-3", tbody_id: "field_slip_job_trackers"
-             )) do |table|
+      Table(@trackers,
+            identifier: "field-slip-trackers",
+            class: "mt-3", tbody_id: "field_slip_job_trackers") do |table|
         define_tracker_columns(table)
         table.row do |tracker|
           render(TrackerRow.new(tracker: tracker, user: @user))
@@ -85,11 +84,11 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def define_tracker_columns(table)
-      table.column(:FILENAME.t, scope: "col")
-      table.column(:USER.t, scope: "col", class: "text-center")
-      table.column(:SECONDS.t, scope: "col", class: "text-center")
-      table.column(:PAGES.t, scope: "col", class: "text-center")
-      table.column(:STATUS.t, scope: "col", class: "text-right")
+      table.column(:FILENAME.l, scope: "col")
+      table.column(:USER.l, scope: "col", class: "text-center")
+      table.column(:SECONDS.l, scope: "col", class: "text-center")
+      table.column(:PAGES.l, scope: "col", class: "text-center")
+      table.column(:STATUS.l, scope: "col", class: "text-right")
     end
   end
 end

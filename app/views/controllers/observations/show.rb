@@ -86,11 +86,10 @@ module Views::Controllers::Observations
       return "" unless permission?(@observation)
 
       capture do
-        render(Components::Link::Icon.new(
-                 tab: ::Tab::Observation::ReuseImages.new(
-                   observation: @observation
-                 )
-               ))
+        Link(type: :icon,
+             tab: ::Tab::Observation::ReuseImages.new(
+               observation: @observation
+             ))
       end
     end
 

@@ -33,7 +33,7 @@ module Views::Controllers::Projects::Members
     end
 
     def render_user_row(user, show_edit)
-      render(Components::Link::User.new(user: user))
+      Link(type: :user, user: user)
       if show_edit
         plain(" | ")
         a(

@@ -43,9 +43,9 @@ module Views::Controllers::Herbaria
     end
 
     def render_table
-      render(::Components::Table.new(
-               @objects, class: "table-striped table-herbarium w-100 mt-3"
-             )) { |t| build_table_columns(t) }
+      Table(@objects,
+            variant: :striped, identifier: "herbarium",
+            class: "w-100 mt-3") { |t| build_table_columns(t) }
     end
 
     def build_table_columns(table)
@@ -85,15 +85,15 @@ module Views::Controllers::Herbaria
 
     # Cannot POST from a link without js; use a button instead.
     def render_merge_target_button(herbarium)
-      render(::Components::Button.new(
-               type: :post,
-               variant: :strip,
-               name: herbarium.name.t,
-               target: herbaria_merges_path(src: @merge.id,
-                                            dest: herbarium.id),
-               class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
-               confirm: :are_you_sure.l
-             ))
+      Button(
+        type: :post,
+        variant: :strip,
+        name: herbarium.name.t,
+        target: herbaria_merges_path(src: @merge.id,
+                                     dest: herbarium.id),
+        class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
+        confirm: :are_you_sure.l
+      )
     end
 
     def render_self_merge_marker(herbarium)
@@ -110,21 +110,21 @@ module Views::Controllers::Herbaria
 
     def render_admin_actions(herbarium)
       plain(" [")
-      render(::Components::Button.new(
-               type: :edit,
-               target: herbarium,
-               name: :EDIT.l,
-               icon: nil, variant: :strip,
-               class: "edit_herbarium_link_#{herbarium.id}"
-             ))
+      Button(
+        type: :edit,
+        target: herbarium,
+        name: :EDIT.l,
+        icon: nil, variant: :strip,
+        class: "edit_herbarium_link_#{herbarium.id}"
+      )
       plain(" | ")
-      render(::Components::Button.new(
-               type: :get,
-               name: :MERGE.l,
-               target: herbaria_path(merge: herbarium.id),
-               icon: nil, variant: :strip,
-               class: "merge_herbarium_link_#{herbarium.id}"
-             ))
+      Button(
+        type: :get,
+        name: :MERGE.l,
+        target: herbaria_path(merge: herbarium.id),
+        icon: nil, variant: :strip,
+        class: "merge_herbarium_link_#{herbarium.id}"
+      )
       plain("]")
     end
 
@@ -134,9 +134,7 @@ module Views::Controllers::Herbaria
       return if nonpersonal? || herbarium.personal_user.blank?
 
       span(title: herbarium.personal_user.unique_text_name) do
-        render(::Components::Link::User.new(
-                 user: herbarium.personal_user
-               ))
+        Link(type: :user, user: herbarium.personal_user)
       end
     end
   end

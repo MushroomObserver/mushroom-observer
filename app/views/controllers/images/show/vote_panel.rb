@@ -124,10 +124,9 @@ module Views::Controllers::Images
       end
 
       def render_vote_table
-        render(::Components::Table.new(
-                 sorted_votes, id: "show_votes_table",
-                               class: "table-striped mt-3 mb-0"
-               )) do |t|
+        Table(sorted_votes,
+              variant: :striped, identifier: "show-votes",
+              class: "mt-3 mb-0") do |t|
           t.column(:USER.t) { |vote| render_vote_user_cell(vote) }
           t.column(:VOTE.t) { |vote| short_vote_label(vote) }
         end
@@ -137,7 +136,7 @@ module Views::Controllers::Images
         if vote.anonymous
           plain(:anonymous.t)
         else
-          render(::Components::Link::User.new(user: vote.user))
+          Link(type: :user, user: vote.user)
         end
       end
 

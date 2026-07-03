@@ -69,7 +69,7 @@ module Views::Controllers::Projects
             trusted_html(draft.name&.display_name&.t)
           end
           plain(" (")
-          render(Components::Link::User.new(user: draft.user))
+          Link(type: :user, user: draft.user)
           plain(")")
           br
         end
@@ -96,12 +96,12 @@ module Views::Controllers::Projects
     def render_administer_button
       return unless @user&.admin && !@project.is_admin?(@user)
 
-      render(Components::Button.new(
-               type: :post,
-               name: :show_project_administer.l,
-               target: project_administration_path(project_id: @project.id),
-               size: :lg, class: "my-2 mr-2"
-             ))
+      Button(
+        type: :post,
+        name: :show_project_administer.l,
+        target: project_administration_path(project_id: @project.id),
+        size: :lg, class: "my-2 mr-2"
+      )
     end
 
     def render_membership_buttons
@@ -113,16 +113,16 @@ module Views::Controllers::Projects
     end
 
     def render_join_button
-      render(Components::Button.new(
-               type: :post,
-               name: :show_project_join.l,
-               target: project_members_path(
-                 project_id: @project.id,
-                 candidate: @user.id,
-                 target: :project_index
-               ),
-               size: :lg, class: "my-2 mr-2"
-             ))
+      Button(
+        type: :post,
+        name: :show_project_join.l,
+        target: project_members_path(
+          project_id: @project.id,
+          candidate: @user.id,
+          target: :project_index
+        ),
+        size: :lg, class: "my-2 mr-2"
+      )
     end
 
     def render_member_buttons
@@ -132,53 +132,53 @@ module Views::Controllers::Projects
     end
 
     def render_trust_settings_button
-      render(Components::Button.new(
-               type: :modal,
-               name: :show_project_trust_settings.l,
-               target: trust_modal_project_member_path(
-                 project_id: @project.id, candidate: @user.id
-               ),
-               modal_id: "trust_settings",
-               size: :lg, class: "my-2 mr-2"
-             ))
+      Button(
+        type: :modal,
+        name: :show_project_trust_settings.l,
+        target: trust_modal_project_member_path(
+          project_id: @project.id, candidate: @user.id
+        ),
+        modal_id: "trust_settings",
+        size: :lg, class: "my-2 mr-2"
+      )
     end
 
     def render_leave_button
-      render(Components::Button.new(
-               type: :put,
-               name: :show_project_leave.t,
-               target: project_member_path(
-                 project_id: @project.id,
-                 candidate: @user.id,
-                 target: :project_index
-               ),
-               size: :lg, class: "my-2 mr-2"
-             ))
+      Button(
+        type: :put,
+        name: :show_project_leave.t,
+        target: project_member_path(
+          project_id: @project.id,
+          candidate: @user.id,
+          target: :project_index
+        ),
+        size: :lg, class: "my-2 mr-2"
+      )
     end
 
     def render_add_obs_button
-      render(Components::Button.new(
-               type: :modal,
-               name: :change_member_add_obs.t,
-               target: add_obs_modal_project_member_path(
-                 project_id: @project.id, candidate: @user.id
-               ),
-               modal_id: "add_obs",
-               size: :lg, class: "my-2 mr-2"
-             ))
+      Button(
+        type: :modal,
+        name: :change_member_add_obs.t,
+        target: add_obs_modal_project_member_path(
+          project_id: @project.id, candidate: @user.id
+        ),
+        modal_id: "add_obs",
+        size: :lg, class: "my-2 mr-2"
+      )
     end
 
     def render_admin_links
       return if permission?(@project)
 
-      render(Components::Button.new(
-               type: :get,
-               name: :show_project_admin_request.l,
-               target: new_project_admin_request_path(
-                 project_id: @project.id
-               ),
-               size: :lg, class: "my-2 mr-2"
-             ))
+      Button(
+        type: :get,
+        name: :show_project_admin_request.l,
+        target: new_project_admin_request_path(
+          project_id: @project.id
+        ),
+        size: :lg, class: "my-2 mr-2"
+      )
     end
 
     # Explicit String target because the violations route uses
@@ -189,14 +189,14 @@ module Views::Controllers::Projects
       return unless @project.constraints?
 
       count = @project.count_violations
-      render(Components::Button.new(
-               type: :get,
-               name: "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
-               target: project_violations_path(project_id: @project.id),
-               variant: count.positive? ? :warning : nil,
-               size: :lg,
-               class: "my-2 mr-2"
-             ))
+      Button(
+        type: :get,
+        name: "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
+        target: project_violations_path(project_id: @project.id),
+        variant: count.positive? ? :warning : nil,
+        size: :lg,
+        class: "my-2 mr-2"
+      )
     end
 
     def render_comments
