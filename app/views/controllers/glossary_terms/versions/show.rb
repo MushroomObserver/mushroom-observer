@@ -3,7 +3,7 @@
 module Views::Controllers::GlossaryTerms
   module Versions
     # Past-version display for a glossary term. Two-column layout:
-    # the version's `Term` summary on the left, `Versions::Table` on
+    # the version's `Term` summary on the left, `Versions::Previous` on
     # the right, then a shared `ObjectFooter`.
     class Show < Views::FullPageBase
       prop :glossary_term, ::GlossaryTerm
@@ -37,7 +37,7 @@ module Views::Controllers::GlossaryTerms
             render(Term.new(glossary_term: @glossary_term))
           end
           div(class: content_for(:right_columns)) do
-            render(::Views::Controllers::Versions::Table.new(
+            render(::Views::Controllers::Versions::Previous.new(
                      obj: @glossary_term, versions: @versions.to_a
                    ))
           end

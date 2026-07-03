@@ -10,7 +10,7 @@
 # `initial_version_link_text`). With that chain gone, the helper
 # file is empty and is deleted in the same commit.
 module Views::Controllers::Versions
-  class Table < Views::Base
+  class Previous < Views::Base
     prop :obj, ::AbstractModel
     prop :versions, _Array(_Interface(:user_id))
     # Optional `args[:bold]` callable — only the name-version page

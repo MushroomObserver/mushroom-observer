@@ -130,7 +130,7 @@ module Views::Controllers::Names::Versions
 
     def render_right_column
       div(class: content_for(:right_columns).to_s) do
-        render(Views::Controllers::Versions::Table.new(
+        render(Views::Controllers::Versions::Previous.new(
                  obj: @name, versions: @versions.to_a,
                  args: { bold: ->(v) { !v.deprecated } }
                ))
