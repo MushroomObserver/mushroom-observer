@@ -120,7 +120,7 @@ module Views::Controllers::Names::Synonyms
     end
 
     def render_new_names_alert
-      render(Components::Alert.new(level: :danger)) do
+      Alert(level: :danger) do
         div { :form_synonyms_missing_names.l }
         div(class: "pl-3") do
           @new_names.each { |n| div { n } }

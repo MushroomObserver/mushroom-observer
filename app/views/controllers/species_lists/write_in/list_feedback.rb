@@ -26,8 +26,7 @@ module Views::Controllers::SpeciesLists::WriteIn
     private
 
     def render_missing_names
-      render(Components::Alert.new(level: :danger,
-                                   id: "missing_names")) do
+      Alert(level: :danger, id: "missing_names") do
         div(class: "font-weight-bold") do
           :form_list_feedback_missing_names.t
         end
@@ -45,8 +44,7 @@ module Views::Controllers::SpeciesLists::WriteIn
     end
 
     def render_deprecated_names
-      render(Components::Alert.new(level: :warning,
-                                   id: "deprecated_names")) do
+      Alert(level: :warning, id: "deprecated_names") do
         div(class: "font-weight-bold") do
           :form_species_lists_deprecated.t
         end
@@ -74,8 +72,7 @@ module Views::Controllers::SpeciesLists::WriteIn
     end
 
     def render_multiple_names
-      render(Components::Alert.new(level: :warning,
-                                   id: "ambiguous_names")) do
+      Alert(level: :warning, id: "ambiguous_names") do
         div(class: "font-weight-bold") do
           :form_species_lists_multiple_names.t
         end

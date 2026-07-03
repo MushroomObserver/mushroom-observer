@@ -27,10 +27,10 @@ module Views::Controllers::Occurrences
     def render_location_warning
       return unless locations_differ?
 
-      render(Components::Alert.new(
-               message: :show_occurrence_location_differs.t,
-               level: :warning
-             ))
+      Alert(
+        message: :show_occurrence_location_differs.t,
+        level: :warning
+      )
     end
 
     def locations_differ?
