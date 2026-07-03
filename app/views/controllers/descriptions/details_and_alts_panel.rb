@@ -155,7 +155,7 @@ module Views::Controllers::Descriptions
       # the only kind exposed to the reviewer export/review flow.
       div do
         if @description.is_a?(::NameDescription)
-          render(Components::Image::ExportStatusControls.new(
+          render(Views::Controllers::Export::StatusControls.new(
                    object: @description
                  ))
         end
