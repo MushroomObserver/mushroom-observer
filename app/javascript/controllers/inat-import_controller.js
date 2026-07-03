@@ -44,7 +44,10 @@ export default class extends Controller {
   }
 
   statusValueChanged(value) {
-    if (value === "Done") this._stopTimer()
+    if (value !== "Done") return
+
+    this._stopTimer()
+    this._stopSyncPolling()
   }
 
   _startSyncPolling() {

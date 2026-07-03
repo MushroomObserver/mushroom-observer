@@ -78,8 +78,11 @@ class InatImportTrackerSystemTest < ApplicationSystemTestCase
 
   # Overrides the observation-search stub registered by
   # stub_inat_interactions with a slow one (WebMock uses the most recently
-  # registered stub that matches). Guarantees the job is still mid-import
-  # at the 2-second mark, regardless of machine speed.
+  # registered stub that matches). Keeps the job running for a few seconds
+  # after the page — already showing "Importing" — is on screen, so the
+  # test can exercise the poll actually recovering a Done that arrives with
+  # no broadcast, rather than the job racing to finish before the page
+  # even renders.
   def delay_observation_response(seconds:)
     stub_request(:get, %r{#{Regexp.escape(API_BASE)}/observations}o).
       with(headers: { "Authorization" => "Bearer MockJWT" }).
