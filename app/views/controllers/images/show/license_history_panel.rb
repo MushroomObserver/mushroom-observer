@@ -22,10 +22,9 @@ module Views::Controllers::Images
       private
 
       def render_table
-        render(::Components::Table.new(
-                 history_rows,
-                 class: "table-responsive table-striped small"
-               )) do |t|
+        Table(history_rows,
+              variant: :striped, identifier: "license-history",
+              class: "table-responsive small") do |t|
           t.column(:DATES.t) { |row| row[:dates] }
           t.column(:LICENSE.t) { |row| trusted_html(row[:license_link]) }
           t.column(:COPYRIGHT_HOLDER.t) { |row| trusted_html(row[:holder]) }

@@ -27,9 +27,9 @@ module Views::Controllers::Projects::Members
     private
 
     def render_users_table
-      render(Components::Table.new(@users.sort_by(&:login),
-                                   class: "table-striped " \
-                                          "table-project-members mt-3")) do |t|
+      Table(@users.sort_by(&:login),
+            variant: :striped, identifier: "project-members",
+            class: "mt-3") do |t|
         t.column(:Login_name.l) do |u|
           Link(type: :user, user: u, name: u.login)
         end

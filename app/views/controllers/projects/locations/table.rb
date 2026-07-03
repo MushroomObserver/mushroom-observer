@@ -140,10 +140,9 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_locations_table(rows = nil, &block)
-      render(Components::Table.new(rows,
-                                   variant: :striped,
-                                   identifier: "project-members",
-                                   class: "mt-3")) do |t|
+      Table(rows,
+            variant: :striped, identifier: "project-members",
+            class: "mt-3") do |t|
         t.column(:LOCATION.l)
         t.column(:OBSERVATIONS.l)
         t.column(:PROJECT_ALIASES.l)

@@ -55,9 +55,9 @@ module Views::Controllers::Projects::Violations
     end
 
     def render_violations_table
-      render(Components::Table.new(@violations,
-                                   class: "table-striped " \
-                                          "project-violations")) do |t|
+      Table(@violations,
+            variant: :striped, identifier: "violations",
+            class: "project-violations") do |t|
         t.column(:form_violations_th_name.l) { |v| render_obs_link(v.obs) }
         t.column(:form_violations_th_details.l) do |v|
           render_details(v.obs, v.kinds)

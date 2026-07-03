@@ -73,10 +73,9 @@ module Views::Controllers::Projects::FieldSlips
     # defines just the `<th>` chrome; `row { |tracker| … }` renders
     # the entire `<tr>` per tracker via `TrackerRow`.
     def render_tracker_table
-      render(Components::Table.new(
-               @trackers,
-               class: "mt-3", tbody_id: "field_slip_job_trackers"
-             )) do |table|
+      Table(@trackers,
+            identifier: "field-slip-trackers",
+            class: "mt-3", tbody_id: "field_slip_job_trackers") do |table|
         define_tracker_columns(table)
         table.row do |tracker|
           render(TrackerRow.new(tracker: tracker, user: @user))

@@ -30,9 +30,8 @@ module Views::Controllers::Images::Licenses
     private
 
     def render_table
-      render(Components::Table.new(model.rows,
-                                   class: "table-striped " \
-                                          "table-license-updater")) do |t|
+      Table(model.rows,
+            variant: :striped, identifier: "license-updater") do |t|
         t.column(:image_updater_count.t)
         t.column(:image_updater_holder.t)
         t.column(:image_updater_license.t)

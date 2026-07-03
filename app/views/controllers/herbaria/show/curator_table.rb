@@ -10,9 +10,8 @@ module Views::Controllers::Herbaria
       prop :herbarium, ::Herbarium
 
       def view_template
-        render(::Components::Table.new(
-                 @herbarium.curators, class: "table-striped table-curators"
-               )) do |t|
+        Table(@herbarium.curators,
+              variant: :striped, identifier: "curators") do |t|
           t.heading { plain("#{heading_label}:") }
           t.column("delete") { |user| render_delete_cell(user) } if can_delete?
           t.column("user") { |user| render_user_cell(user) }

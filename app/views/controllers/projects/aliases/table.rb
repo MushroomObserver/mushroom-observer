@@ -21,11 +21,9 @@ module Views::Controllers::Projects::Aliases
     end
 
     def view_template
-      render(Components::Table.new(
-               @project_aliases,
-               class: "table-striped table-project-members mt-3",
-               id: TABLE_ID
-             )) do |t|
+      Table(@project_aliases,
+            variant: :striped, identifier: "project-members",
+            class: "mt-3", id: TABLE_ID) do |t|
         t.column(:NAME.t) { |a| plain(a.name) }
         t.column(:TARGET_TYPE.t) { |a| plain(a.target_type) }
         t.column(:TARGET.t) { |a| render_target_cell(a) }

@@ -28,9 +28,9 @@ module Views::Controllers::Names::Descriptions
     end
 
     def render_table
-      render(::Components::Table.new(@descriptions,
-                                     class: "table-striped",
-                                     show_headers: false)) do |tbl|
+      Table(@descriptions,
+            variant: :striped, identifier: "name-descriptions",
+            show_headers: false) do |tbl|
         tbl.column("") do |desc|
           link_to(name_description_path(desc.id)) do
             trusted_html(desc.format_name.t)
