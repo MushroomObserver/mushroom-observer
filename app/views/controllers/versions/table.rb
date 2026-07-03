@@ -30,9 +30,11 @@ module Views::Controllers::Versions
     private
 
     def render_table
-      Table(@versions.reverse,
-            variant: :hover, identifier: "versions",
-            show_headers: false, class: "mb-0") do |t|
+      render(::Components::Table.new(
+               @versions.reverse,
+               variant: :hover, identifier: "versions",
+               show_headers: false, class: "mb-0"
+             )) do |t|
         t.column("") { |ver| render_date_cell(ver) }
         t.column("") { |ver| render_user_cell(ver) }
         t.column("") { |ver| render_link_cell(ver) }

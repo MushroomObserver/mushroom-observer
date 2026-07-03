@@ -5,7 +5,7 @@
 # locations index and the target_locations turbo_stream re-render.
 #
 module Views::Controllers::Projects::Locations
-  class Table < Views::Base
+  class Tables < Views::Base
     def initialize(project:, grouped_data:,
                    ungrouped_locations:, obs_counts:,
                    user: nil)
