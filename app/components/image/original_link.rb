@@ -25,19 +25,18 @@ class Components::Image::OriginalLink < Components::Base
   def view_template
     id = @image&.id || @image_id
 
-    render(::Components::Link::Get.new(
-             name: :image_show_original.t,
-             target: "/images/#{id}/original",
-             new_tab: true,
-             class: @link_class,
-             data: {
-               controller: "image-loader",
-               action: "click->image-loader#load",
-               "image-loader-target": "link",
-               "loading-text": :image_show_original_loading.t,
-               "maxed-out-text": :image_show_original_maxed_out.t,
-               "error-text": :image_show_original_error.t
-             }
-           ))
+    Link(type: :get,
+         name: :image_show_original.l,
+         target: "/images/#{id}/original",
+         new_tab: true,
+         class: @link_class,
+         data: {
+           controller: "image-loader",
+           action: "click->image-loader#load",
+           "image-loader-target": "link",
+           "loading-text": :image_show_original_loading.l,
+           "maxed-out-text": :image_show_original_maxed_out.l,
+           "error-text": :image_show_original_error.l
+         })
   end
 end

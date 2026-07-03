@@ -44,7 +44,7 @@ module Views::Controllers::CollectionNumbers
     def render_user_field
       trusted_html(:collection_number_user.t)
       plain(": ")
-      render(Components::Link::User.new(user: @collection_number.user))
+      Link(type: :user, user: @collection_number.user)
       br
     end
 

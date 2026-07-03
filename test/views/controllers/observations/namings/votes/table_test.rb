@@ -49,5 +49,21 @@ module Views::Controllers::Observations::Namings::Votes
 
       assert_html(html, "table.table-naming-votes a[href*='/users/']")
     end
+
+    # `render_visible_voters` caps at 3 names and emits "..." for the
+    # 4th+ voter. Create 4 votes at the same value to force the cap.
+    def test_renders_ellipsis_when_more_than_three_visible_voters
+      obs = @naming.observation
+      val = Vote.next_best_vote
+      @naming.votes.destroy_all
+      [users(:rolf), users(:mary), users(:katrina), users(:dick)].each do |u|
+        Vote.create!(naming: @naming, observation: obs,
+                     user: u, value: val, favorite: false)
+      end
+
+      html = render(Table.new(naming: @naming.reload))
+
+      assert_html(html, "td small", text: "...")
+    end
   end
 end

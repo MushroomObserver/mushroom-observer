@@ -137,7 +137,7 @@ module Views::Controllers::Images
         if vote.anonymous
           plain(:anonymous.t)
         else
-          render(::Components::Link::User.new(user: vote.user))
+          Link(type: :user, user: vote.user)
         end
       end
 

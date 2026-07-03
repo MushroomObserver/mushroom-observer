@@ -27,11 +27,10 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   end
 
   def manage_link
-    render(Components::Link::Icon.new(
-             tab: ::Tab::Observation::ManageLists.new(
-               observation: @obs, q_param: q_param
-             )
-           ))
+    Link(type: :icon,
+         tab: ::Tab::Observation::ManageLists.new(
+           observation: @obs, q_param: q_param
+         ))
   end
 
   def render_list

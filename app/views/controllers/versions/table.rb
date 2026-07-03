@@ -44,14 +44,14 @@ module Views::Controllers::Versions
     def render_date_cell(ver)
       plain(ver.updated_at.web_date)
     rescue StandardError
-      plain(:unknown.t)
+      plain(:unknown.l)
     end
 
     def render_user_cell(ver)
       user = ::User.safe_find(ver.user_id)
-      return plain(:unknown.t) unless user
+      return plain(:unknown.l) unless user
 
-      render(::Components::Link::User.new(user: user, name: user.login))
+      Link(type: :user, user: user, name: user.login)
     end
 
     def render_link_cell(ver)
@@ -71,7 +71,7 @@ module Views::Controllers::Versions
     end
 
     def emit_version_link_text(ver)
-      label = "#{:VERSION.t} #{ver.version}"
+      label = "#{:VERSION.l} #{ver.version}"
       if @args[:bold]&.call(ver)
         strong { plain(label) }
       else

@@ -58,7 +58,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Log out and try again.
     first(:button, text: :app_logout.l).click
-    assert_selector("body.login__logout")
+    assert_selector("body.logout__show")
     assert_no_link(text: "Preferences")
     visit("/account/preferences/edit")
     assert_selector("body.login__new")

@@ -69,7 +69,8 @@ module CapybaraSessionExtensions
   end
 
   def logout(session: self)
-    session.visit("/account/logout")
+    session.visit("/info/how_to_help")
+    session.first(:button, text: :app_logout.l).click
   end
 
   def put_user_in_admin_mode(user = :zero_user, session: self)

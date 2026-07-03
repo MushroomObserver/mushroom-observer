@@ -34,7 +34,7 @@ module Views::Controllers::Descriptions::Authors
     end
 
     def render_author_row(user, type)
-      render(Components::Link::User.new(user: user))
+      Link(type: :user, user: user)
       plain(" | ")
       render(Components::Button.new(
                type: :delete,

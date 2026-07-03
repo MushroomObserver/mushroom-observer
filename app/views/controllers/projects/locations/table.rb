@@ -113,11 +113,10 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_chevron(collapse_id)
-      render(::Components::Link::CollapseToggle.new(
-               target_id: collapse_id,
-               collapsed: true,
-               class: "panel-collapse-trigger"
-             )) do
+      Link(type: :collapse_toggle,
+           target_id: collapse_id,
+           collapsed: true,
+           class: "panel-collapse-trigger") do
         render(Components::Icon.new(
                  type: :chevron_down, title: :OPEN.l,
                  html_class: "active-icon"

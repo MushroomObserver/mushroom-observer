@@ -109,13 +109,12 @@ module Views::Controllers::Account::APIKeys
 
     def render_view_notes(key)
       span(class: "current_notes mr-4") { trusted_html(key.notes.t) }
-      render(::Components::Link::CollapseToggle.new(
-               target_id: "edit_notes_#{key.id}_container",
-               icon: :edit,
-               closed_text: " #{:EDIT.l}",
-               button: :default,
-               data: { role: "edit_api_key", parent: "#notes_#{key.id}" }
-             ))
+      Link(type: :collapse_toggle,
+           target_id: "edit_notes_#{key.id}_container",
+           icon: :edit,
+           closed_text: " #{:EDIT.l}",
+           button: :default,
+           data: { role: "edit_api_key", parent: "#notes_#{key.id}" })
     end
 
     def render_edit_notes_form(key)
@@ -154,14 +153,13 @@ module Views::Controllers::Account::APIKeys
     # click via `data-toggle="collapse"` and prevents the
     # default navigation.
     def render_new_button
-      render(::Components::Link::CollapseToggle.new(
-               target_id: "new_key_form_container",
-               fallback_href: new_account_api_key_path,
-               closed_text: :account_api_keys_create_button.l,
-               button: :default,
-               id: "new_key_button",
-               data: { parent: "#new_key_row" }
-             ))
+      Link(type: :collapse_toggle,
+           target_id: "new_key_form_container",
+           fallback_href: new_account_api_key_path,
+           closed_text: :account_api_keys_create_button.l,
+           button: :default,
+           id: "new_key_button",
+           data: { parent: "#new_key_row" })
     end
 
     def render_new_form

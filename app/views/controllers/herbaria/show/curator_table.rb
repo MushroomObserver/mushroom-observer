@@ -44,8 +44,7 @@ module Views::Controllers::Herbaria
       end
 
       def render_user_cell(user)
-        render(::Components::Link::User.new(user: user,
-                                            name: user.legal_name))
+        Link(type: :user, user: user, name: user.legal_name)
       end
     end
   end

@@ -12,7 +12,9 @@ class Components::Link::ExternalTest < ComponentTestCase
   # ---- Generic (content, path) form ----
 
   def test_renders_link_with_target_blank_and_noopener
-    html = render(Components::Link::External.new("GBIF", "https://gbif.org"))
+    html = render(Components::Link::External.new(
+                    content: "GBIF", path: "https://gbif.org"
+                  ))
 
     assert_html(html, "a[href='https://gbif.org']" \
                       "[target='_blank']" \
@@ -22,8 +24,9 @@ class Components::Link::ExternalTest < ComponentTestCase
 
   def test_passes_extra_opts_through
     html = render(
-      Components::Link::External.new("GBIF", "https://gbif.org",
-                                     id: "gbif_link")
+      Components::Link::External.new(
+        content: "GBIF", path: "https://gbif.org", id: "gbif_link"
+      )
     )
 
     assert_html(html, "a[id='gbif_link'][target='_blank']")
@@ -31,8 +34,9 @@ class Components::Link::ExternalTest < ComponentTestCase
 
   def test_does_not_override_caller_class
     html = render(
-      Components::Link::External.new("EOL", "https://eol.org",
-                                     class: "my-class")
+      Components::Link::External.new(
+        content: "EOL", path: "https://eol.org", class: "my-class"
+      )
     )
 
     assert_html(html, "a.my-class[target='_blank']")

@@ -89,7 +89,7 @@ module Views::Controllers::Observations::Images
         cb.option(project.id,
                   checked: project_checked?(project.id)) do
           whitespace
-          render(Components::Link::Object.new(object: project))
+          Link(type: :object, object: project)
         end
       end
     end

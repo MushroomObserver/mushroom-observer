@@ -136,9 +136,8 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_obs_location
     if @user
-      render(Components::Link::Location.new(
-               where: @obs.where, location: @obs.location, click: true
-             ))
+      Link(type: :location, where: @obs.where,
+           location: @obs.location, click: true)
     else
       plain(@obs.where)
     end
@@ -186,7 +185,7 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_obs_user(obs_user)
     if @user
-      render(Components::Link::User.new(user: obs_user))
+      Link(type: :user, user: obs_user)
     else
       plain(obs_user.unique_text_name)
     end

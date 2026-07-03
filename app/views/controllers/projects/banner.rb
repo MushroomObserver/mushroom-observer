@@ -81,7 +81,7 @@ module Views::Controllers::Projects
         div(class: "d-flex align-items-center") do
           render(Components::IdBadge.new(object: @project))
           whitespace
-          render(Components::Link::Object.new(object: @project))
+          Link(type: :object, object: @project)
         end
       end
     end

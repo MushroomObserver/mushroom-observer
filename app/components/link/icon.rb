@@ -7,23 +7,25 @@
 # bookmark-style toggles where the same target switches appearance.
 #
 # @example Plain icon link
-#   render(Components::Link::Icon.new("Edit", edit_path(@obj),
-#                                   icon: :edit))
+#   render(Components::Link::Icon.new(content: "Edit",
+#                                     path: edit_path(@obj),
+#                                     icon: :edit))
 #
 # @example Show the text alongside the icon
-#   render(Components::Link::Icon.new("Delete", path,
-#                                   icon: :delete, show_text: true))
+#   render(Components::Link::Icon.new(content: "Delete", path: path,
+#                                     icon: :delete, show_text: true))
 #
 # @example State-swap (active icon + label)
-#   render(Components::Link::Icon.new("Subscribe", subscribe_path,
-#                                   icon: :bullhorn,
-#                                   active_icon: :check,
-#                                   active_content: "Subscribed"))
+#   render(Components::Link::Icon.new(content: "Subscribe",
+#                                     path: subscribe_path,
+#                                     icon: :bullhorn,
+#                                     active_icon: :check,
+#                                     active_content: "Subscribed"))
 #
 # @example Render as button_to (POSTs instead of GETs)
-#   render(Components::Link::Icon.new("Delete", path,
-#                                   icon: :delete, button_to: true,
-#                                   data: { method: :delete }))
+#   render(Components::Link::Icon.new(content: "Delete", path: path,
+#                                     icon: :delete, button_to: true,
+#                                     data: { method: :delete }))
 #
 # @example From a Tab PORO (shortcut)
 #   render(Components::Link::Icon.new(tab: Tab::Name::Edit.new(name: @name)))
@@ -35,7 +37,7 @@ class Components::Link::Icon < Components::Base
 
   attr_reader :content, :path, :opts
 
-  def initialize(content = nil, path = nil, tab: nil, **opts)
+  def initialize(content: nil, path: nil, tab: nil, **opts)
     super()
     if tab
       @content = tab.title

@@ -47,10 +47,9 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
   end
 
   def render_new_link
-    render(Components::Link::InlineAdd.new(
-             modal_id: "sequence",
-             tab: ::Tab::Sequence::New.new(observation: @obs)
-           ))
+    Link(type: :inline_add,
+         modal_id: "sequence",
+         tab: ::Tab::Sequence::New.new(observation: @obs))
   end
 
   def render_list
@@ -62,10 +61,9 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
   def render_row(sequence)
     li(id: "sequence_#{sequence.id}") do
       render_show_link(sequence)
-      render(Components::Link::InlineMod.new(
-               target: sequence, observation: @obs, user: @user,
-               extras: [archive_link(sequence), copy_link(sequence)].compact
-             ))
+      Link(type: :inline_mod,
+           target: sequence, observation: @obs, user: @user,
+           extras: [archive_link(sequence), copy_link(sequence)].compact)
     end
   end
 

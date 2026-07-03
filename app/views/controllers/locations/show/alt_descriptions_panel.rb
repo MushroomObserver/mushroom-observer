@@ -28,9 +28,8 @@ module Views::Controllers::Locations
       private
 
       def heading_links
-        render(Components::Link::Icon.new(
-                 tab: Tab::Description::Create.new(parent: @object)
-               ))
+        Link(type: :icon,
+             tab: Tab::Description::Create.new(parent: @object))
       end
 
       def render_body

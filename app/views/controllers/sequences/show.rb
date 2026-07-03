@@ -117,17 +117,15 @@ module Views::Controllers::Sequences
     end
 
     def render_archive_link
-      render(::Components::Link::External.new(
-               tab: ::Tab::Sequence::Archive.new(sequence: @sequence)
-             ))
+      Link(type: :external,
+           tab: ::Tab::Sequence::Archive.new(sequence: @sequence))
     end
 
     def render_accession_link
-      render(::Components::Link::External.new(
-               truncate(@sequence.accession,
-                        length: @sequence.locus_width / 2).t,
-               @sequence.accession_url
-             ))
+      Link(type: :external,
+           content: truncate(@sequence.accession,
+                             length: @sequence.locus_width / 2).t,
+           path: @sequence.accession_url)
     end
   end
 end

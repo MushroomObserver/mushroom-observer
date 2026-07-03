@@ -3,8 +3,7 @@
 module Views::Controllers::Projects::Members
   # Phlex view for the add members page.
   class New < Views::FullPageBase
-    def initialize(project:, users:, project_member:,
-                   user:)
+    def initialize(project:, users:, project_member:, user:)
       super()
       @project = project
       @users = users
@@ -31,10 +30,10 @@ module Views::Controllers::Projects::Members
       render(Components::Table.new(@users.sort_by(&:login),
                                    class: "table-striped " \
                                           "table-project-members mt-3")) do |t|
-        t.column(:Login_name.t) do |u|
-          render(Components::Link::User.new(user: u, name: u.login))
+        t.column(:Login_name.l) do |u|
+          Link(type: :user, user: u, name: u.login)
         end
-        t.column(:Full_name.t) { |u| plain(u.name) }
+        t.column(:Full_name.l) { |u| plain(u.name) }
         t.column(nil) { |u| render_add_button(u) }
       end
     end
@@ -43,7 +42,7 @@ module Views::Controllers::Projects::Members
       render(Components::Button.new(
                type: :post,
                variant: :strip,
-               name: :ADD.t,
+               name: :ADD.l,
                target: project_members_path(
                  project_id: @project.id,
                  candidate: user.id

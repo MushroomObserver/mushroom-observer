@@ -106,8 +106,8 @@ module Account
       assert_flash_warning
     end
 
-    def test_anon_user_resend_email
-      get(:resend_email)
+    def test_resend_email_missing_user_redirects_to_index
+      post(:resend_email)
 
       assert_redirected_to(users_path)
     end
@@ -134,6 +134,7 @@ module Account
         end
       end
       assert_flash_success
+      assert_redirected_to(account_welcome_path)
     end
 
     def test_resend_hotmail
@@ -143,6 +144,7 @@ module Account
       )
       post(:resend_email, params: { id: user.id })
       assert_flash_success
+      assert_redirected_to(account_welcome_path)
     end
   end
 end
