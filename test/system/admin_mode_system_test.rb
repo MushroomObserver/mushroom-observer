@@ -18,7 +18,9 @@ class AdminModeSystemTest < ApplicationSystemTestCase
   # iNat import pages use a Turbo Frame — regression reported by Nathan
   # where the admin mode button failed to apply on those pages.
   def test_admin_mode_toggle_from_inat_import_page
-    visit(inat_import_path(inat_imports(:rolf_inat_import)))
+    tracker = inat_import_job_trackers(:rolf_tracker)
+    visit(inat_import_path(inat_imports(:rolf_inat_import),
+                           params: { tracker_id: tracker.id }))
     assert_admin_toggle_works
   end
 

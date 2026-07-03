@@ -115,7 +115,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_selector("body.search__new")
 
     # Expand the Location panel to reveal the region field
-    find("[data-target='#observations_location']").click
+    find("[aria-controls='observations_location']").click
     assert_selector("#observations_location.in", wait: 3)
 
     # Region autocompleter should show matches as user types
