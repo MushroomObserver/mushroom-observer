@@ -1,14 +1,23 @@
 # frozen_string_literal: true
 
 class Components::ApplicationForm < Superform::Rails::Form
-  # Shared module for rendering collapsible help blocks on form fields
+  # Shared module for rendering help blocks on form fields.
+  # Default: plain always-visible block below the field.
+  # Pass `help_collapse: true` to render a collapsible well with a
+  # question-mark trigger icon next to the label instead.
   module FieldWithHelp
     def render_help_in_label_row
-      render_help_icon if help_slot
+      render_help_icon if help_slot && wrapper_options[:help_collapse]
     end
 
     def render_help_after_field
-      render_help_text if help_slot
+      return unless help_slot
+
+      if wrapper_options[:help_collapse]
+        render_collapsed_help_text
+      else
+        render_plain_help_text
+      end
     end
 
     # Renders the between slot with appropriate margin class
@@ -39,11 +48,15 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    def render_help_text
+    def render_collapsed_help_text
       help_id = "#{field.dom.id}_help"
       render(::Components::CollapseDiv.new(id: help_id)) do
         render(::Components::Help::Block.new(well: true)) { render(help_slot) }
       end
+    end
+
+    def render_plain_help_text
+      render(::Components::Help::Block.new) { render(help_slot) }
     end
   end
 end

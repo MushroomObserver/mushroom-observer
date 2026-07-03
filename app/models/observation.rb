@@ -177,6 +177,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Distinct from `user` (who entered the record). Null for imports until
   # the identity is claimed (#4217) and for legacy native obs. See #4211.
   belongs_to :collector_user, class_name: "User", optional: true
+  belongs_to :inat_import, optional: true
 
   # Has to go before "has many interests" or interests will be destroyed
   # before it has a chance to notify the interested users of the destruction.

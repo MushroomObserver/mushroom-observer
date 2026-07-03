@@ -104,7 +104,8 @@ module Views::Controllers::Herbaria
       checkbox_field(
         :personal,
         label: :create_herbarium_personal.l,
-        help: personal_checkbox_help
+        help: personal_checkbox_help,
+        help_collapse: true
       )
     end
 

@@ -46,6 +46,7 @@ class Inat
       return false if @inat_obs.taxon_importable?
 
       log_with_response_error("Skipped #{@inat_obs[:id]} not importable")
+      inat_import.add_ignored_obs(:not_importable)
       true
     end
 
@@ -55,6 +56,7 @@ class Inat
       log_with_response_error(
         "Skipped #{@inat_obs[:id]} #{:inat_observed_missing_date.l}"
       )
+      inat_import.add_ignored_obs(:date_missing, inat_id: @inat_obs[:id])
       true
     end
 
@@ -74,6 +76,7 @@ class Inat
       )
 
       log("Skipped #{@inat_obs[:id]} already imported")
+      inat_import.add_ignored_obs(:already_imported)
       true
     end
 
@@ -93,7 +96,8 @@ class Inat
       builder = Inat::MoObservationBuilder.new(
         inat_obs: @inat_obs, user: @user,
         import_others: @inat_import.import_others,
-        external_site: inat_site
+        external_site: inat_site,
+        inat_import: @inat_import
       )
       @observation = builder.mo_observation
       builder
@@ -115,6 +119,9 @@ class Inat
     def accumulate_counts(builder)
       @unlicensed_obs_count += builder.unlicensed_obs
       @skipped_images_count += builder.skipped_images
+      return unless builder.unlicensed_obs == 1
+
+      inat_import.add_license_added_obs(inat_id: @inat_obs[:id])
     end
 
     def finalize_import

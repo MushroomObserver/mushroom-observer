@@ -9,32 +9,30 @@ module Views::Controllers::InatImports
       @user = users(:katrina)
       controller.instance_variable_set(:@user, @user)
       @import = inat_imports(:katrina_inat_import)
-      @tracker = inat_import_job_trackers(:katrina_tracker)
     end
 
-    def test_results_link_navigates_to_observations
+    def test_renders_status_component
       html = render_show
 
-      # GET link — rendered as <a> by Button::Get
-      assert_html(html, "a[href*='/observations'][href*='pattern=']")
+      assert_html(html, "#inat_import_#{@import.id}")
     end
 
-    def test_cancel_button_submits_put_to_cancel_path
+    def test_context_nav_includes_index_link
       html = render_show
 
-      cancel_path = routes.inat_import_cancel_path(id: @import.id)
-      assert_html(html, "form[action='#{cancel_path}']")
-      assert_html(html, "input[name='_method'][value='put']")
+      assert_html(html, "a[href='#{routes.inat_imports_path}']")
+    end
+
+    def test_context_nav_includes_new_link
+      html = render_show
+
+      assert_html(html, "a[href='#{routes.new_inat_import_path}']")
     end
 
     private
 
     def render_show
-      render(Show.new(
-               tracker: @tracker,
-               inat_import: @import,
-               user: @user
-             ))
+      render(Show.new(inat_import: @import, user: @user))
     end
   end
 end

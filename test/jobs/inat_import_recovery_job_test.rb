@@ -40,4 +40,30 @@ class InatImportRecoveryJobTest < ActiveJob::TestCase
     assert_equal(original_errors, import.response_errors,
                  "Done import should not be modified")
   end
+
+  def test_marks_abandoned_authorizing_import_as_done
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Authorizing")
+    import.update_column(:updated_at,
+                         InatImport::ABANDONED_THRESHOLD.ago - 1.second)
+
+    InatImportRecoveryJob.perform_now
+
+    import.reload
+    assert_equal("Done", import.state,
+                 "Abandoned import should be marked Done")
+    assert_not_nil(import.ended_at, "Abandoned import should have ended_at set")
+    assert_match(/Authorization was not completed/, import.response_errors,
+                 "Abandoned import should note the incomplete authorization")
+  end
+
+  def test_does_not_touch_recent_authorizing_import
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Authorizing")
+
+    InatImportRecoveryJob.perform_now
+
+    assert_equal("Authorizing", import.reload.state,
+                 "Recently started authorizing import should not be touched")
+  end
 end

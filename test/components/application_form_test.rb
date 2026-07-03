@@ -696,7 +696,8 @@ class ApplicationFormTest < ComponentTestCase
   # inline rows pick "mr-3"; block rows pick "form-between".
   def test_between_class_block_field_with_help
     form = render_form do
-      text_field(:name, label: "Name:", help: "Help text")
+      text_field(:name, label: "Name:", help: "Help text",
+                        help_collapse: true)
     end
 
     assert_html(form, "span.form-between")
@@ -705,7 +706,8 @@ class ApplicationFormTest < ComponentTestCase
 
   def test_between_class_inline_field_with_help
     form = render_form do
-      text_field(:name, inline: true, label: "Name:", help: "Help text")
+      text_field(:name, inline: true, label: "Name:", help: "Help text",
+                        help_collapse: true)
     end
 
     assert_html(form, "span.mr-3")

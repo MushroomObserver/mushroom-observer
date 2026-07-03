@@ -8,7 +8,7 @@ class InatImportTest < ActiveSupport::TestCase
     import = inat_imports(:rolf_inat_import)
 
     assert_equal(
-      import.importables * InatImport::BASE_AVG_IMPORT_SECONDS,
+      import.total_importables * InatImport::BASE_AVG_IMPORT_SECONDS,
       import.total_expected_time,
       "If nobody has imported anhy iNat obss, " \
       "total expected time for the 1st import should be the system default"
@@ -26,7 +26,7 @@ class InatImportTest < ActiveSupport::TestCase
     import = inat_imports(:rolf_inat_import)
 
     assert_equal(
-      import.importables *
+      import.total_importables *
         InatImport.sum(:total_seconds) / InatImport.sum(:total_imported_count),
       import.total_expected_time
     )
@@ -35,8 +35,48 @@ class InatImportTest < ActiveSupport::TestCase
   def test_total_expected_time_user_with_prior_imports
     import = inat_imports(:roy_inat_import)
 
-    assert_equal(import.importables * import.initial_avg_import_seconds,
+    assert_equal(import.total_importables * import.initial_avg_import_seconds,
                  import.total_expected_time)
+  end
+
+  # A user's import history is summed across ALL their import records, not
+  # read off a single one, so it survives the move to one record per import.
+  def test_personal_avg_sums_across_a_users_imports
+    user = users(:rolf)
+    InatImport.where(user: user).
+      update_all(total_imported_count: nil, total_seconds: nil)
+    InatImport.create!(user: user, total_imported_count: 2, total_seconds: 20)
+    InatImport.create!(user: user, total_imported_count: 3, total_seconds: 40)
+
+    import = InatImport.new(user: user)
+
+    # (20 + 40) seconds / (2 + 3) observations = 12 seconds per observation
+    assert_equal(12, import.initial_avg_import_seconds)
+  end
+
+  def test_estimated_remaining_time_extrapolates_from_progress
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 20,
+                   imported_count: 5, started_at: 10.seconds.ago,
+                   ended_at: nil)
+
+    # ~5 obs in ~10s ≈ 2 s/obs; 15 remaining ≈ 30s.
+    assert_in_delta(30, import.estimated_remaining_time, 4,
+                    "ETA should extrapolate from the observed rate")
+  end
+
+  def test_estimated_remaining_time_before_any_imported
+    import = inat_imports(:rolf_inat_import)
+    import.update!(state: "Importing", total_importables: 10,
+                   imported_count: 0, started_at: Time.zone.now,
+                   ended_at: nil)
+
+    assert_equal(import.total_expected_time, import.estimated_remaining_time,
+                 "Before any obs imported, fall back to the up-front estimate")
+  end
+
+  def test_estimated_remaining_time_zero_when_done
+    assert_equal(0, inat_imports(:lone_wolf_import).estimated_remaining_time)
   end
 
   def test_adequate_constraints
@@ -145,6 +185,41 @@ class InatImportTest < ActiveSupport::TestCase
     assert_not(import.stuck?, "Done import should not be stuck")
   end
 
+  def test_abandoned_scope
+    stale = inat_imports(:rolf_inat_import)
+    stale.update!(state: "Authorizing")
+    stale.update_column(:updated_at,
+                        InatImport::ABANDONED_THRESHOLD.ago - 1.second)
+    recent = inat_imports(:mary_inat_import)
+    recent.update!(state: "Authenticating")
+
+    abandoned = InatImport.abandoned
+    assert_includes(abandoned, stale,
+                    "Stale Authorizing import should be abandoned")
+    assert_not_includes(abandoned, recent,
+                        "Recent Authenticating import should not be abandoned")
+    assert_not_includes(abandoned, inat_imports(:katrina_inat_import),
+                        "Importing import is stuck, not abandoned")
+  end
+
+  def test_ignored_total_count
+    import = inat_imports(:rolf_inat_import)
+    import.update!(
+      ignored_not_importable_count: 3,
+      ignored_date_missing_count: 2,
+      ignored_already_imported_count: 1
+    )
+
+    assert_equal(6, import.ignored_total_count)
+  end
+
+  def test_ignored_total_count_with_nils
+    import = inat_imports(:rolf_inat_import)
+
+    assert_equal(0, import.ignored_total_count,
+                 "nil counts should sum as 0")
+  end
+
   def test_add_response_error_without_prior_errors
     import = InatImport.new(user: users(:rolf))
     import.save!
@@ -153,5 +228,98 @@ class InatImportTest < ActiveSupport::TestCase
 
     assert_match(/Test error message/, import.response_errors,
                  "Error message should be added to response_errors")
+  end
+
+  def test_new_instance_initializes_id_arrays
+    import = InatImport.new(user: users(:rolf))
+
+    assert_equal([], import.date_missing_inat_ids)
+    assert_equal([], import.license_added_inat_ids)
+  end
+
+  def test_add_ignored_obs_date_missing_increments_count_and_appends_id
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_ignored_obs(:date_missing, inat_id: 42)
+    import.reload
+
+    assert_equal(1, import.ignored_date_missing_count)
+    assert_equal([42], import.date_missing_inat_ids)
+  end
+
+  def test_add_ignored_obs_date_missing_nil_id_still_increments
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_ignored_obs(:date_missing, inat_id: nil)
+    import.reload
+
+    assert_equal(1, import.ignored_date_missing_count)
+    assert_equal([], import.date_missing_inat_ids)
+  end
+
+  def test_add_ignored_obs_date_missing_accumulates_multiple_ids
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_ignored_obs(:date_missing, inat_id: 10)
+    import.add_ignored_obs(:date_missing, inat_id: 20)
+    import.reload
+
+    assert_equal(2, import.ignored_date_missing_count)
+    assert_equal([10, 20], import.date_missing_inat_ids)
+  end
+
+  def test_add_ignored_obs_unknown_reason_raises
+    import = inat_imports(:rolf_inat_import)
+
+    assert_raises(ArgumentError) do
+      import.add_ignored_obs(:bogus_reason)
+    end
+  end
+
+  def test_add_license_added_obs_appends_id
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_license_added_obs(inat_id: 99)
+    import.reload
+
+    assert_equal([99], import.license_added_inat_ids)
+  end
+
+  def test_add_license_added_obs_accumulates_multiple_ids
+    import = inat_imports(:rolf_inat_import)
+
+    import.add_license_added_obs(inat_id: 11)
+    import.add_license_added_obs(inat_id: 22)
+    import.reload
+
+    assert_equal([11, 22], import.license_added_inat_ids)
+  end
+
+  def test_reached_import_cap_false_below_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE - 1)
+
+    assert_not(import.reached_import_cap?)
+  end
+
+  def test_reached_import_cap_true_at_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE)
+
+    assert(import.reached_import_cap?)
+  end
+
+  def test_reached_import_cap_true_above_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE + 1)
+
+    assert(import.reached_import_cap?)
+  end
+
+  def test_reached_import_cap_false_when_nil
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: nil)
+
+    assert_not(import.reached_import_cap?)
   end
 end

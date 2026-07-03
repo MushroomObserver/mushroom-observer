@@ -9,6 +9,11 @@ class InatImportJob < ApplicationJob
 
   queue_as :default
 
+  # Maximum observations imported per job. Keeps individual jobs short
+  # (~1 min at ~0.6s/obs) so SolidQueue stays responsive. When a batch
+  # fills, a continuation job is enqueued automatically.
+  BATCH_SIZE = 10
+
   delegate :canceled?, to: :inat_import
   delegate :imported_count, to: :inat_import
   delegate :inat_username, to: :inat_import
@@ -16,11 +21,17 @@ class InatImportJob < ApplicationJob
   delegate :token, to: :inat_import
   delegate :user, to: :inat_import
 
-  def perform(inat_import)
+  # id_above: iNat observation ID cursor — 0 for the first job,
+  #   last_import_id of the previous batch for continuations.
+  # continuation: true skips auth + state init (already done by first job).
+  def perform(inat_import, id_above: 0, continuation: false)
     create_ivars(inat_import)
-    authenticate
-    ensure_not_importing_others
-    import_requested_observations
+    unless continuation
+      authenticate
+      ensure_not_importing_others
+    end
+    import_requested_observations(id_above: id_above,
+                                  continuation: continuation)
   rescue StandardError => e
     log("Error occurred: #{e.message}")
     inat_import.add_response_error(e)
@@ -38,7 +49,8 @@ class InatImportJob < ApplicationJob
     # Skip safe_done on shutdown signals: leave the record in Importing state
     # so SolidQueue can requeue the job. The recovery job will finalize it
     # if the worker is killed before the job can be retried.
-    safe_done unless non_rescuable?($ERROR_INFO)
+    # Also skip when a continuation job was enqueued — that job calls done.
+    safe_done unless non_rescuable?($ERROR_INFO) || @continuation_enqueued
   end
 
   private
@@ -90,18 +102,49 @@ class InatImportJob < ApplicationJob
                              inat_logged_in_user: inat_logged_in_user))
   end
 
-  def import_requested_observations
-    inat_import.update(state: "Importing")
-    inat_ids = inat_id_list
-    return log("No observations requested") if inat_import[:import_all].
-                                               blank? && inat_ids.blank? &&
-                                               inat_import.inat_url.blank?
+  def import_requested_observations(id_above:, continuation:)
+    unless continuation
+      inat_import.update(state: "Importing", started_at: Time.zone.now,
+                         ignored_not_importable_count: 0,
+                         ignored_date_missing_count: 0,
+                         ignored_already_imported_count: 0)
+      return log("No observations requested") unless observations_requested?
+    end
 
-    # Request a page of iNat observations at a time, until done with all pages
-    # (or canceled).
-    parser = Inat::PageParser.new(inat_import)
-    while parsing?(parser); end
+    parser = build_parser(id_above)
+    more_pages = import_batch(parser)
     log_unlicensed_summary
+    enqueue_continuation(parser.last_import_id) if more_pages &&
+                                                   !inat_import.reload.canceled?
+  end
+
+  def build_parser(id_above)
+    parser = Inat::PageParser.new(inat_import, per_page: BATCH_SIZE)
+    parser.last_import_id = id_above
+    parser
+  end
+
+  def import_batch(parser)
+    @obs_this_job = 0
+    while (more_pages = parsing?(parser))
+      break if @obs_this_job >= BATCH_SIZE
+    end
+    more_pages
+  end
+
+  def enqueue_continuation(id_above)
+    @continuation_enqueued = true
+    log("Batch of #{@obs_this_job} obs complete. " \
+        "Enqueueing continuation from id_above #{id_above}.")
+    InatImportJob.perform_later(inat_import,
+                                id_above: id_above,
+                                continuation: true)
+  end
+
+  def observations_requested?
+    inat_import[:import_all].present? ||
+      inat_id_list.present? ||
+      inat_import.inat_url.present?
   end
 
   def inat_id_list
@@ -122,16 +165,22 @@ class InatImportJob < ApplicationJob
   def parsing_should_stop?(parsed_page)
     parsed_page.nil? ||
       parsed_page["total_results"].zero? ||
-      inat_import.reload.canceled?
+      inat_import.reload.canceled? ||
+      inat_import.reached_import_cap?
   end
 
   def import_parsed_page_of_observations(parsed_page)
     log_new_page(parsed_page)
     unless @importables_set
-      inat_import.update(importables: parsed_page["total_results"])
+      updates = { importables: parsed_page["total_results"] }
+      unless inat_import.total_importables.to_i.positive?
+        updates[:total_importables] = parsed_page["total_results"]
+      end
+      inat_import.update(updates)
       @importables_set = true
     end
     observation_importer.import_page(parsed_page)
+    @obs_this_job += parsed_page["results"].size
     log("Finished importing observations on parsed page")
   end
 
