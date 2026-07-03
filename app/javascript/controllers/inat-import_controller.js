@@ -1,26 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Guard: one sync per (element-id + status) combination so a Turbo Stream
-// replacement that carries the same status doesn't re-trigger an infinite
-// fetch loop. The module persists across Turbo Drive visits (Turbo does not
-// reload JS), so clear it on `turbo:before-visit`: leaving and returning to
-// an in-progress import then re-runs the one-shot catch-up fetch. A Turbo
-// Stream replace is not a visit, so the loop guard stays intact within a page.
-const synced = new Set()
-document.addEventListener("turbo:before-visit", () => synced.clear())
-
 // Client-side stopwatch for the iNat import status panel.
 // Seeded from data-inat-import-elapsed-value / data-inat-import-remaining-value
 // on connect so the display is immediately accurate. Ticks every second until
 // the import is Done. Auto-restarts when Turbo replaces the element (the
 // broadcast update carries fresh elapsed/remaining values from the server).
 //
-// Catch-up fetch: if the job finishes before the Turbo Stream WebSocket
-// connects, broadcasts are missed. On connect (when not Done), we schedule a
-// one-shot fetch of the show URL with Accept: turbo-stream after 2 seconds.
-// The response is a turbo-stream replace that brings the panel up to date.
-// The `synced` Set ensures each (element + status) pair is fetched at most
-// once, preventing a replace → connect → fetch → replace loop.
+// Catch-up poll: Turbo Stream broadcasts can be missed entirely — e.g. a
+// fast job finishes before the WebSocket subscription is confirmed, or any
+// single broadcast is dropped (Action Cable/Solid Cable delivery is
+// best-effort with no replay to a client that wasn't subscribed yet). Rather
+// than assume at least one broadcast per status will arrive, poll the show
+// URL (Accept: turbo-stream) on a recurring timer whenever not Done. Each
+// response is a turbo-stream replace of this element, so once the server
+// reports Done, the replacement's own connect() sees status Done and never
+// restarts the poll — no explicit stop condition needed here. The 5s
+// interval bounds worst-case staleness to one interval even if every
+// broadcast for a given import is missed, without polling so tightly that a
+// self-triggered replace → connect → poll cycle becomes a tight loop.
 export default class extends Controller {
   static targets = ["elapsed", "remaining"]
   static values = {
@@ -34,28 +31,32 @@ export default class extends Controller {
     this._elapsed = this.elapsedValue
     this._remaining = this.hasRemainingValue ? this.remainingValue : null
     this._intervalId = null
-    this._syncTimerId = null
+    this._syncIntervalId = null
     if (this.statusValue !== "Done") {
       this._startTimer()
-      this._scheduleSyncIfNeeded()
+      this._startSyncPolling()
     }
   }
 
   disconnect() {
     this._stopTimer()
-    if (this._syncTimerId !== null) clearTimeout(this._syncTimerId)
+    this._stopSyncPolling()
   }
 
   statusValueChanged(value) {
     if (value === "Done") this._stopTimer()
   }
 
-  _scheduleSyncIfNeeded() {
+  _startSyncPolling() {
     if (!this.hasStatusUrlValue) return
-    const key = `${this.element.id}:${this.statusValue}`
-    if (synced.has(key)) return
-    synced.add(key)
-    this._syncTimerId = setTimeout(() => this._syncCurrentState(), 2000)
+    this._syncIntervalId = setInterval(() => this._syncCurrentState(), 5000)
+  }
+
+  _stopSyncPolling() {
+    if (this._syncIntervalId !== null) {
+      clearInterval(this._syncIntervalId)
+      this._syncIntervalId = null
+    }
   }
 
   _syncCurrentState() {
