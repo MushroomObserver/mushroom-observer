@@ -95,7 +95,7 @@ module Views::Controllers::FieldSlips
 
     def render_errors
       count = pluralize(model.errors.count, :error.t, plural: :errors.t)
-      render(Components::Alert.new(level: :danger)) do
+      Alert(level: :danger) do
         ul do
           model.errors.each { |error| li { error.full_message } }
         end

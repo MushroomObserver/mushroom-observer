@@ -33,7 +33,7 @@ module Views::Controllers::FieldSlips
     def render_notice
       return unless @notice
 
-      render(Components::Alert.new(message: @notice, level: :success))
+      Alert(message: @notice, level: :success)
     end
 
     def render_project_or_filter_section

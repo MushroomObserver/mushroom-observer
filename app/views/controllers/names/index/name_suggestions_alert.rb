@@ -9,7 +9,7 @@ class Views::Controllers::Names::Index::NameSuggestionsAlert < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Alert.new(level: :warning)) do
+    Alert(level: :warning) do
       div { plain(:list_observations_alternate_spellings.t) }
       ul(type: "none") do
         @names.sort_by(&:sort_name).each do |name|

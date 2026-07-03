@@ -35,7 +35,7 @@ class Components::Form::NameFeedback < Components::Base
   # ----- Warning alerts -----
 
   def render_warning_alert
-    render(Components::Alert.new(level: :warning, id: "name_messages")) do
+    Alert(level: :warning, id: "name_messages") do
       div { warning_message }
       render_warning_help
       render_valid_name_choices if @valid_names&.any?
@@ -82,7 +82,7 @@ class Components::Form::NameFeedback < Components::Base
   # ----- Error alerts -----
 
   def render_not_recognized_error
-    render(Components::Alert.new(level: :danger, id: "name_messages")) do
+    Alert(level: :danger, id: "name_messages") do
       div { :form_naming_not_recognized.t(name: @given_name) }
       render(::Components::Help::Note.new(:div)) do
         plain(:form_naming_not_recognized_help.t(button: @button_name))
@@ -91,7 +91,7 @@ class Components::Form::NameFeedback < Components::Base
   end
 
   def render_multiple_names_error
-    render(Components::Alert.new(level: :danger, id: "name_messages")) do
+    Alert(level: :danger, id: "name_messages") do
       div { [:form_naming_multiple_names.t(name: @given_name), ":"].safe_join }
       render_name_radio_buttons_with_counts(@names)
       render(::Components::Help::Note.new(:div)) do

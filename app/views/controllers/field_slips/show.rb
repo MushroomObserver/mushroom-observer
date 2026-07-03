@@ -14,9 +14,7 @@ module Views::Controllers::FieldSlips
       add_edit_icons(@field_slip, current_user)
       container_class(:full)
 
-      if @notice
-        render(Components::Alert.new(message: @notice, level: :success))
-      end
+      Alert(message: @notice, level: :success) if @notice
 
       render(Components::ContentPadded.new) do
         render(FieldSlipPanel.new(field_slip: @field_slip))

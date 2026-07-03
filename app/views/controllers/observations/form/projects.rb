@@ -96,7 +96,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   end
 
   def render_constraint_alert(level, projects, help_text)
-    render(Components::Alert.new(level: level)) do
+    Alert(level: level) do
       div { plain("#{:form_observations_projects_out_of_range.t}:") }
       ul do
         projects.each do |proj|
