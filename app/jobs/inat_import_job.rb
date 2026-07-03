@@ -15,9 +15,7 @@ class InatImportJob < ApplicationJob
   BATCH_SIZE = 10
 
   delegate :canceled?, to: :inat_import
-  delegate :imported_count, to: :inat_import
   delegate :inat_username, to: :inat_import
-  delegate :response_errors, to: :inat_import
   delegate :token, to: :inat_import
   delegate :user, to: :inat_import
 
@@ -26,10 +24,7 @@ class InatImportJob < ApplicationJob
   # continuation: true skips auth + state init (already done by first job).
   def perform(inat_import, id_above: 0, continuation: false)
     create_ivars(inat_import)
-    unless continuation
-      authenticate
-      ensure_not_importing_others
-    end
+    prepare_first_job unless continuation
     import_requested_observations(id_above: id_above,
                                   continuation: continuation)
   rescue StandardError => e
@@ -60,6 +55,14 @@ class InatImportJob < ApplicationJob
     log(
       "InatImportJob #{inat_import.id} started, user: #{user.id}"
     )
+  end
+
+  # Auth, own-obs verification, and username persist — first job only;
+  # continuations inherit all three from the job that enqueued them.
+  def prepare_first_job
+    authenticate
+    ensure_not_importing_others
+    update_user_inat_username
   end
 
   def authenticate
@@ -248,27 +251,20 @@ class InatImportJob < ApplicationJob
   def done
     log("Updating inat_import state to Done")
     inat_import.update(state: "Done", ended_at: Time.zone.now)
-    update_user_inat_username
   end
 
-  # A convenience to let a user to create/update their iNat username
-  # simply by entering it in the import form.
+  # A convenience to let a user create/update their iNat username simply
+  # by entering it in the import form. Runs after ensure_not_importing_others
+  # has proven the logged-in iNat account matches the entered username, and
+  # BEFORE any observations are built, so collector resolution (match_inat)
+  # can link the importing user's own obs during their first import.
   def update_user_inat_username
-    return unless inat_username_updateable?
+    # Don't update a SuperImporter's inat_username because
+    # InatImport.inat_username could be someone else's inat_username
+    # (they also skip the own-obs verification above).
+    return if super_importer?
 
     user.update(inat_username: inat_username)
     log("Updated user inat_username")
-  end
-
-  def inat_username_updateable?
-    # Don't update a SuperImporter's inat_username because
-    # InatImport.inat_username could be someone else's inat_username.
-    return false if InatImport.super_importer?(user)
-
-    # Prevent changing inat_username to a non-existent iNat login
-    # No errors or any imports means that iNat accepted the inat_username,
-    # so it's real inat_username.
-    response_errors.empty? ||
-      imported_count.to_i.positive?
   end
 end
