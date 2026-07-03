@@ -106,37 +106,44 @@ class InatImportsControllerTest < FunctionalTestCase
                   "[target='inat_import_#{import.id}']")
   end
 
-  def test_show_denies_another_users_import
+  def test_show_allows_another_users_import
     login(users(:rolf).login)
 
-    assert_raises(ActiveRecord::RecordNotFound,
-                  "Must not expose another user's import") do
-      get(:show, params: { id: inat_imports(:katrina_inat_import).id })
-    end
+    get(:show, params: { id: inat_imports(:katrina_inat_import).id })
+
+    assert_response(:success,
+                    "iNat import pages are public — any user may view them")
   end
 
-  def test_results_denies_another_users_import
+  def test_results_allows_another_users_import
     login(users(:rolf).login)
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      get(:results, params: { id: inat_imports(:katrina_inat_import).id })
-    end
+    get(:results, params: { id: inat_imports(:katrina_inat_import).id })
+
+    assert_response(:redirect,
+                    "Any user may view the observations from any import")
   end
 
   def test_cancel_denies_another_users_import
     login(users(:rolf).login)
 
-    assert_raises(ActiveRecord::RecordNotFound) do
+    assert_raises(ActiveRecord::RecordNotFound,
+                  "cancel halts a running import; only the owner or an " \
+                  "admin may cancel one") do
       put(:cancel, params: { id: inat_imports(:katrina_inat_import).id })
     end
   end
 
-  def test_admin_can_show_another_users_import
+  def test_admin_can_cancel_another_users_import
     make_admin
 
-    get(:show, params: { id: inat_imports(:katrina_inat_import).id })
+    put(:cancel, params: { id: inat_imports(:katrina_inat_import).id })
 
-    assert_response(:success)
+    assert_redirected_to(
+      inat_import_path(inat_imports(:katrina_inat_import))
+    )
+    assert(inat_imports(:katrina_inat_import).reload.cancel,
+           "Admin may cancel any user's import")
   end
 
   def test_new_inat_import

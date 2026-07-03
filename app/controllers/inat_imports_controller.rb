@@ -54,13 +54,13 @@ class InatImportsController < ApplicationController
   private :import_ids_with_results
 
   def results
-    @inat_import = owned_inat_import
+    @inat_import = InatImport.find(params[:id])
     query = Query.lookup(:Observation, inat_import: @inat_import)
     redirect_with_query(observations_path, query)
   end
 
   def show
-    @inat_import = owned_inat_import
+    @inat_import = InatImport.find(params[:id])
     respond_to do |format|
       format.html do
         render(Views::Controllers::InatImports::Show.new(
@@ -103,6 +103,17 @@ class InatImportsController < ApplicationController
     assure_user_has_inat_import_api_key
     init_ivars
     request_inat_user_authorization
+  end
+
+  # cancel is a write that halts a running import, so scope the lookup to the
+  # owner (or any import in admin mode): nobody can cancel another user's
+  # import by guessing its id. show/results stay open — the observations they
+  # link to are public and meant to be seen.
+  def cancel
+    scope = in_admin_mode? ? InatImport.all : InatImport.where(user: @user)
+    @inat_import = scope.find(params[:id])
+    @inat_import.update(cancel: true)
+    redirect_to(inat_import_path(@inat_import))
   end
 
   private
@@ -359,24 +370,5 @@ class InatImportsController < ApplicationController
       "Enqueueing InatImportJob for InatImport id: #{inat_import.id}"
     )
     InatImportJob.perform_later(inat_import)
-  end
-
-  public
-
-  def cancel
-    @inat_import = owned_inat_import
-    @inat_import.update(cancel: true)
-    redirect_to(inat_import_path(@inat_import))
-  end
-
-  private
-
-  # Load an import the current user may access — their own, or any import
-  # in admin mode. Scoping the lookup (rather than a raw find) stops a user
-  # from viewing or canceling another user's import by guessing its id, and
-  # from subscribing to another user's Turbo status stream.
-  def owned_inat_import
-    scope = in_admin_mode? ? InatImport.all : InatImport.where(user: @user)
-    scope.find(params[:id])
   end
 end
