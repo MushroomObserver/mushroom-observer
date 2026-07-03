@@ -1,52 +1,9 @@
 ---
-paths: app/components/**/*.rb, app/views/**/*.rb, app/views/**/*.erb
+paths: app/components/**/*.rb, app/views/**/*.rb
 ---
 
-# Phlex Conversions
+# Phlex Views & Components
 
-## The scope is the ERB **and** its helpers — every time
-
-Every Phlex conversion PR has two halves, and both are in scope. The
-loud half is the ERB file you're replacing. The quiet half is the
-helper code that ERB calls — `app/helpers/<thing>_helper.rb` methods,
-private partial-builders, hash/array-shape "data" methods, anything
-the ERB pulls in to render itself. **Inline every helper you can on
-the same PR.**
-
-Why this is non-negotiable:
-
-- The point of moving to Phlex is to put *all* of a page's rendering
-  logic in one Ruby class — methods, conditionals, helpers, the lot.
-  If you leave the helper behind, you've moved the markup but
-  scattered the logic across two files. Reviewers and future readers
-  still have to chase the same render across the same two places.
-- ERB-era helpers were the workaround for ERB being a bad place to
-  write Ruby. In a Phlex view, you have private methods, normal
-  control flow, and `register_*_helper` for the cases where you
-  really do need the Rails helper context. Most helpers stop earning
-  their keep the moment the view becomes Phlex.
-- Helpers accumulate quietly. A "just the markup" conversion that
-  defers the helper to a later PR almost always leaves the helper
-  there permanently — there's no natural next trigger to come back
-  to it. Touch it now, finish it.
-
-Apply the move-vs-register heuristic in "Moving a helper into a Phlex
-view" below to every helper the ERB calls:
-
-- Self-contained body (`:symbol.t` lookups, model attribute reads,
-  plain Ruby, calls only to itself) → **inline as a private method
-  on the new Phlex view** (or extract a sibling Phlex class if the
-  helper is doing something a class deserves to own — e.g. row
-  construction for a table → an `Aliases::Table` view).
-- Body composes other helpers (tab builders, etc.) → leave registered
-  for now (`register_value_helper`), with a comment.
-
-By the end of the PR, the helper file should be measurably smaller —
-ideally empty and deleted. PR descriptions should call out the
-helper-side cleanup explicitly so reviewers can see both halves of
-the work. If you find yourself opening a follow-up PR purely to
-inline helpers from a conversion you just shipped, the conversion
-was incomplete.
 
 ## `register_value_helper` is a code smell — ask before you reach for it
 
@@ -134,148 +91,66 @@ through different `case`-branches). If you find yourself
 reaching for `_Any` to silence a typecheck error, the answer is
 almost always to figure out the right concrete type instead.
 
-## ALWAYS convert `assert_template` to a CSS-identifier assertion
-
-`assert_template("foo/show/_bar")` only works for ERB partials —
-Phlex components / views are rendered directly via `render(...)`,
-not through ActionView's template-lookup machinery, so the
-assertion will *always* fail after the conversion. **Do not
-delete or comment out** the assertion when this happens — that
-silently drops the coverage. Instead, replace it with an
-`assert_select` (controller tests) or `assert_html` (component
-tests) against a CSS selector that proves the same content
-rendered:
-
-```ruby
-# Before — partial-template assertion
-assert_template("observations/show/_thumbnail_map")
-
-# After — assert the panel's stable ID rendered
-assert_select("#observation_thumbnail_map")
-```
-
-Prefer a stable ID (`id="observation_thumbnail_map"`) when the
-panel has one; otherwise an identifier class
-(`.show_images`, `.observation_collection_numbers`); as a last
-resort, an unambiguous descendant selector. The goal is to pin
-the rendered DOM identity — the same thing the template
-assertion was implicitly checking when ActionView resolved the
-partial.
-
-This rule was added after the obs-show partials sweep dropped a
-batch of `assert_template` calls without replacing them — the
-tests passed but no longer verified the panel rendered at all.
-Re-deriving the coverage from the rendered HTML is the contract;
-the partial path was an implementation detail.
-
-**Do the assert_template swap BEFORE running the controller tests
-on the converted action.** When you Phlexify an action template,
-the moment the corresponding `.html.erb` leaves the disk every
-`assert_template("controller/action")` against that view starts
-returning a confusing "expecting <…> but rendering with
-<[layout partials]>" failure. Grep the test directory for matching
-`assert_template` calls in the same commit that deletes the ERB,
-swap each to its CSS-identifier equivalent, then run the suite.
-You'll save yourself a churn-y red CI pass.
-
-For full-action-template swaps, the layout's body class
-(`<body class="<controller_name>__<action_name>">`) gives a
-stable per-action identifier — `body.names__new`,
-`body.observations__index`, etc. Use that when the rendered
-view doesn't have a stronger page-specific id / class to pin
-against. Same shape as the integration-test `assert_selector(
-"body.observations__show")` calls already used elsewhere.
 
 ## Decide first: reusable or single-use?
 
-The first decision when converting an ERB helper / partial / template to
-Phlex is **where the new Phlex class lives**. Make this decision before
-writing any code — it determines the namespace, the file path, the test
-location, and how reviewers reason about reuse.
+The first decision when writing a new Phlex class is **where it lives**.
+Make this decision before writing any code — it determines the namespace,
+the file path, the test location, and how reviewers reason about reuse.
 
-**Default placement when converting an ERB view to Phlex.** ERB files
-living under `app/views/` get converted to Phlex classes under
-`app/views/controllers/<controller>/<name>.rb`. This applies to
-*everything* in the views tree — forms, tables, panels, sidebars, navs,
-modals, headers, page wrappers, footers, list rows, partials of any
-kind. The default is the views tree, not `app/components/`.
+**Default placement: single-use views go in `app/views/controllers/`.**
+Page-specific classes — forms, tables, panels, sidebars, navs, modals,
+headers, page wrappers, footers, list rows — belong under
+`app/views/controllers/<controller>/<name>.rb`. The default is the views
+tree, not `app/components/`.
 
-**Exception: true UI primitives.** If while converting you extract a
-chunk that's a genuine, reusable UI building block — a button group, a
-badge, an alert, a generic widget that you'd recognize as a
-"component" regardless of where it happens to be rendered today —
-that piece can live in `app/components/` even if only one caller
-currently exists. The "speculated future caller" carve-out applies
-*only* to recognizably-generic UI primitives. It does NOT apply to
-page-specific fragments wearing component clothing (e.g. a
-`Components::WhateverShowDetails` that only ever renders one
-controller's show page — that's a view, put it in
-`app/views/controllers/`).
+**Exception: true UI primitives.** A genuine, reusable UI building block
+— a button group, a badge, an alert, a generic widget recognizable as a
+"component" regardless of where it's rendered — can live in
+`app/components/` even if only one caller currently exists. The
+"speculated future caller" carve-out applies *only* to
+recognizably-generic UI primitives, not to page-specific fragments
+wearing component clothing (e.g. a `Components::WhateverShowDetails`
+that only ever renders one controller's show page — that's a view).
 
 **Reusable Bootstrap components are a Phlex goal in this codebase.**
-One of the reasons we moved to Phlex is to grow a library of
-reusable Bootstrap building blocks — `Components::Table`,
-`Components::Panel`, `Components::CrudButton::*`, `Components::Modal`,
-`Components::NavTabs`, etc. — so that the next view doesn't reach
-for raw `<ul class="nav nav-tabs">` / `<table>` / `<div class="panel">`
-markup. If a view uses a recognizable Bootstrap pattern (nav-tabs,
-panel, button group, modal, table, alert, breadcrumb, badge,
-progress bar, pagination strip — basically anything from
-[the Bootstrap component docs](https://getbootstrap.com/docs/3.4/components/))
-and there's no component for it yet, **extract one** as part of the
-conversion, even if there's only one caller right now. The next
-view that needs the same pattern shouldn't have to copy markup; it
-should reach for `render(Components::TheThing.new(...))` and have
-the Bootstrap classes / structure already baked in.
+We're growing a library of reusable Bootstrap building blocks —
+`Components::Table`, `Components::Panel`, `Components::CrudButton::*`,
+`Components::Modal`, `Components::NavTabs`, etc. — so the next view
+doesn't reach for raw `<ul class="nav nav-tabs">` / `<table>` /
+`<div class="panel">` markup. If a view uses a recognizable Bootstrap
+pattern (nav-tabs, panel, button group, modal, table, alert, breadcrumb,
+badge, progress bar, pagination strip) and there's no component for it
+yet, **extract one**, even if only one caller exists right now.
 
-Conversely, if a component already exists for the Bootstrap
-pattern you're rendering (`Components::Table`, `Components::Panel`,
-`Components::CrudButton::*`, etc.), use it rather than hand-rolling
-the markup — see the Tables / Tabs / etc. sections below for the
-specific guidance and component APIs.
+Conversely, if a component already exists for the Bootstrap pattern
+you're rendering, use it rather than hand-rolling the markup.
 
-Heuristic: would a reader who doesn't know this codebase look at the
-class name and the file's contents and say "yes, that's a component"?
-If yes, `app/components/`. If they'd say "that's the
-`whatever_controller`'s `show` page", `app/views/controllers/`.
+Heuristic: would a reader unfamiliar with this codebase look at the
+class name and say "yes, that's a component"? If yes, `app/components/`.
+If they'd say "that's the `whatever_controller`'s `show` page",
+`app/views/controllers/`.
 
-- **Single-use view file (default for ERB conversions)** →
+- **Single-use view** →
   `app/views/controllers/<controller>/<name>.rb`, class
-  `Views::Controllers::<Controller>::<Name>` (deep namespace mirroring
-  the controller tree), tests in `test/views/controllers/...`. Use this
-  when the class only renders for one controller's pages, including
-  the case where the only "second caller" is a turbo_stream response
-  in that same controller.
+  `Views::Controllers::<Controller>::<Name>`, tests in
+  `test/views/controllers/...`. Use this when the class only renders
+  for one controller's pages, including when the only second caller is
+  a turbo_stream response in that same controller.
 
-- **Reusable component (UI primitives or genuinely multi-caller)** →
-  `app/components/<name>.rb`, class `Components::<Name>` (flat
-  namespace), tests in `test/components/`. Use this for true UI
-  building blocks (button groups, badges, alerts, etc.) regardless of
-  current caller count, OR for non-primitive classes that already have
-  a concrete second caller.
+- **Reusable component** →
+  `app/components/<name>.rb`, class `Components::<Name>`,
+  tests in `test/components/`. Use this for true UI building blocks
+  regardless of current caller count, OR for non-primitive classes
+  that already have a concrete second caller.
 
 Both inherit from `Phlex::HTML` via `Components::Base` (`Views::Base` is
 a thin subclass). The split is for organization and intent, not
 capability — they can do the same things.
 
-Why this matters:
-
-- **`app/views/` stays organized like the ERB tree it replaces.** A
-  Phlex single-use view sits next to the action templates it serves —
-  the same place a partial used to live. Reviewers find it where they
-  expect.
-- **`app/components/` stays small and meaningful.** It contains real
-  building blocks, not page-specific fragments. Putting a page-specific
-  fragment there implies "reuse me elsewhere" — an invitation that
-  rarely turns out well.
-- **Eventually action templates themselves migrate to Phlex.** When
-  `index.html.erb` becomes `index.rb`, it joins the same
-  `app/views/controllers/<controller>/` directory as the partial-
-  equivalents already there. The structure scales.
-
 If a single-use class becomes reusable later, move it: rename file,
-flatten namespace, update callers. Cheap refactor. Don't speculatively
-put a single-use class in `app/components/` "just in case."
+flatten namespace, update callers. Don't speculatively put a single-use
+class in `app/components/` "just in case."
 
 Example of the single-use pattern: see
 `app/views/controllers/account/api_keys/table.rb`
@@ -283,24 +158,21 @@ Example of the single-use pattern: see
 table chunk, rendered by both the index page and the post-CUD
 turbo_stream response, both within the api_keys controller.
 
-## Action-template + sub-partial organization
+## Action-template + sub-view organization
 
-An action template (`show.html.erb`, `new.html.erb`,
-`edit.html.erb`, …) usually has several sub-partials it composes
-(`_some_panel.erb`, `_some_row.erb`, …). When Phlexifying:
+An action view (`Show`, `New`, `Edit`, …) often composes several
+sub-views (`SomePanel`, `SomeRow`, …). Structure them like this:
 
-- **Action template becomes a class** at `app/views/controllers/
+- **Action view is a class** at `app/views/controllers/
   <controller>/<action>.rb`, named `Views::Controllers::<C>::<A>`.
   That's the class the controller renders.
-- **Sub-partials become sibling classes under the same action
-  namespace**, file-wise nested in `app/views/controllers/
-  <controller>/<action>/<name>.rb`, class-wise
-  `Views::Controllers::<C>::<A>::<Name>`.
+- **Sub-views are sibling classes under the same action namespace**,
+  file-wise nested in `app/views/controllers/<controller>/<action>/
+  <name>.rb`, class-wise `Views::Controllers::<C>::<A>::<Name>`.
 
-The action class and its sub-partial classes live in the **same
-constant** (the action is both a class AND a namespace — Ruby
-allows nested constants under a class just as under a module).
-File layout:
+The action class and its sub-views live in the **same constant**
+(the action is both a class AND a namespace — Ruby allows nested
+constants under a class just as under a module). File layout:
 
 ```
 app/views/controllers/observations/
@@ -314,14 +186,13 @@ app/views/controllers/observations/
 ```
 
 Zeitwerk handles this fine: when the action class is referenced,
-it autoloads `show.rb`; when a sub-partial constant is
-referenced (`Show::FooPanel`), it autoloads the file under
-`show/`. The action class doesn't need to declare any of the
-sub-partials — they're discovered by the autoloader on demand.
+it autoloads `show.rb`; when a sub-view constant is referenced
+(`Show::FooPanel`), it autoloads the file under `show/`. The action
+class doesn't need to declare any of the sub-views — they're
+discovered by the autoloader on demand.
 
-When the action class renders a sub-partial, qualify the
-constant from the namespace root the first time it's referenced
-inside another sub-partial:
+When an action class renders a sub-view, qualify the constant from
+the namespace root when referencing it inside another sub-view:
 
 ```ruby
 # In Show::ObservationDetailsPanel:
@@ -336,13 +207,11 @@ preferring the qualified form keeps things robust.
 
 Reference: `Views::Controllers::SpeciesLists::Show` and its
 siblings (`SpeciesLists::Details`, `SpeciesLists::Listing`,
-`SpeciesLists::Observation`) are the older pattern where
-sub-classes are flat siblings of the action class rather than
-nested under it; that's also valid, but for **action-specific**
-sub-partials (the obs-show case), nesting under the action
-class keeps the directory structure mirroring the ERB partial
-layout and makes the "which page does this belong to?" question
-trivial from the constant name alone.
+`SpeciesLists::Observation`) use the older flat-sibling pattern
+where sub-views sit alongside the action class rather than nested
+under it; that's also valid, but nesting under the action class
+makes the "which page does this belong to?" question trivial from
+the constant name alone.
 
 ## Collapse deep namespaces in `Views::Controllers::*`
 
@@ -432,83 +301,6 @@ The registration is a no-op duplicate.
 If your view needs a helper that isn't in any of those buckets, it
 falls into the move-vs-register decision below.
 
-## Moving a helper into a Phlex view
-
-When converting an action template to Phlex, you'll often find page
-logic spread between the ERB and `app/helpers/...` modules. The
-helpers either need to move into the Phlex view class (cleaner) or
-stay registered as helpers (looser coupling). Choosing wrong leads
-to nasty failures, so:
-
-**Move a helper method into the Phlex view when** its body is
-self-contained — symbol/translation lookups, model attribute reads,
-plain Ruby. No calls to *other* helper methods.
-
-Example — `checklist_show_title` (used by
-`Views::Controllers::Checklists::Show`) is pure `:foo.t` lookups.
-Moves cleanly as a private method on the view class.
-
-```ruby
-# Before — in app/helpers/tabs/checklists_helper.rb
-def checklist_show_title(user:, list:)
-  if user      then :checklist_for_user_title.t(user: user.legal_name)
-  elsif list   then :checklist_for_species_list_title.t(list: list.title)
-  else              :checklist_for_site_title.t
-  end
-end
-
-# After — inline in Views::Controllers::Checklists::Show
-private def checklist_show_title
-  user, list = @context.show_user, @context.species_list
-  if user      then :checklist_for_user_title.t(user: user.legal_name)
-  elsif list   then :checklist_for_species_list_title.t(list: list.title)
-  else              :checklist_for_site_title.t
-  end
-end
-```
-
-**Keep it registered (do NOT move) when** the body calls other
-helper methods — e.g. tab builders that compose
-`user_profile_tab`, `show_object_tab`, `email_user_question_tab`,
-etc. across multiple `Tabs::*Helper` modules.
-
-```ruby
-# Stays in app/helpers/tabs/checklists_helper.rb — calls helpers
-# in Users / Info / SpeciesLists / etc. modules
-def checklist_show_tabs(user:, list:)
-  if user    then checklist_for_user_tabs(user)
-  ...
-end
-
-# In the Phlex view class:
-register_value_helper :checklist_show_tabs
-```
-
-**Why "moving multi-helper methods" doesn't work yet.** Inside a
-Phlex view, `helpers.foo(...)` only resolves to *registered*
-helpers; everything else surfaces as
-`NoMethodError: private method 'foo' called for an instance of ...`.
-So if you move `checklist_show_tabs` into the view but its body
-still calls `user_profile_tab(user)` etc., you'd have to:
-
-- register each transitively-used helper (cascading; one move
-  drags in 5–10 registrations), or
-- `include Tabs::UsersHelper`, `include Tabs::InfoHelper`, … —
-  multiple module includes per view to restore helper-chain
-  transparency.
-
-Neither is paying for itself today. **Eventually** we want a
-mechanism that exposes the full tab-helper namespace to Phlex
-views without explicit `helpers.*` or per-method registration; until
-then, leave multi-helper methods registered.
-
-Heuristic to apply during a conversion:
-
-- Body is `:symbol.t(...)`, model attribute reads, plain Ruby? →
-  **move into the view** as a private method.
-- Body calls *any* method that isn't on `self` or a Ruby standard
-  library? → **leave in the helper module**, `register_value_helper`
-  on the view.
 
 ## Phlex Form Conversions
 
@@ -631,9 +423,9 @@ After writing the component:
 5. Self-review the component diff for any literal `input(`, `select(`,
    `textarea(`, or `option(` calls. If present, replace each with the
    helper or FieldProxy pattern before opening the PR.
-6. **If the component replaces an ERB modal or form, run an HTML-parity
-   diff against the pre-refactor markup before opening the PR.** Use the
-   diff harness pattern from `.claude/rules/testing.md`
+6. **When refactoring an existing Phlex component or template, run an
+   HTML-parity diff against the pre-refactor output before opening the
+   PR.** Use the diff harness pattern from `.claude/rules/testing.md`
    ("Debugging Phlex Component Conversions / The HTML Diff Technique"):
    keep a renamed `_Old` copy of the original component on the branch,
    write a one-off test that renders both with identical inputs and
@@ -655,71 +447,22 @@ After writing the component:
      consistency, dropping an unused id). Reviewers shouldn't have to
      spot drift in a diff that calls itself "no functional change".
 
-   **This is mandatory for every ERB → Phlex conversion** — modals,
-   forms, partials, action templates, all of them. Selector-based
-   component tests pass with either markup; only a literal HTML diff
-   catches whitespace/attribute/wrapper drift that bites users in the
-   browser. No skimping.
+   Selector-based component tests pass with either markup; only a
+   literal HTML diff catches whitespace/attribute/wrapper drift that
+   bites users in the browser.
 
-   **Ordering**: write and pass the parity test BEFORE deleting the
-   ERB. The harness has to render the ERB partial via
-   `controller.view_context.render(partial: "foo/bar")`, which
-   needs the file on disk. Convert → parity test → confirm green
-   → delete ERB. Never delete first.
+### Parity-harness patterns
 
-   For the diff harness in this codebase: the test controller used by
-   `ComponentTestCase` doesn't inherit `ApplicationController`'s
-   `append_view_path Rails.root.join("app/views/controllers")`, so a
-   parity test that renders an ERB partial via `view_context.render(
-   partial: "foo/bar")` needs to add that path itself, e.g. in
-   `setup` (or use `view_paths.unshift(...)`). Without it,
-   `ActionView::MissingTemplate` fires for paths under
-   `app/views/controllers/`.
+The canonical parity test for a Phlex refactor is a one-off
+`ComponentTestCase` subclass that renders both the old and new
+versions with identical inputs and calls
+`assert_html_element_equivalent`. Keep a renamed `_Old` copy of
+the original component on the branch for the duration of the
+test, then delete it once the refactor is confirmed green.
 
-### Parity-harness recipes
+**1. The controller has no `session` store:**
 
-The canonical parity test for an ERB → Phlex conversion is a
-one-off `ComponentTestCase` subclass that renders BOTH paths
-with identical inputs and calls `assert_html_element_equivalent`.
-Patterns that emerged across the field_slips, top_nav, account,
-and search-bar conversions:
-
-**1. Minimal skeleton (action template):**
-
-```ruby
-class Views::Controllers::Foo::BarParityTest < ComponentTestCase
-  def setup
-    super
-    controller.append_view_path(
-      Rails.root.join("app/views/controllers")
-    )
-    @user = users(:rolf)
-    controller.instance_variable_set(:@user, @user)
-    viewer = @user
-    controller.define_singleton_method(:current_user) { viewer }
-  end
-
-  def test_bar_parity
-    controller.instance_variable_set(:@thing, things(:one))
-    erb_html = view_context.render(template: "foo/bar")
-    phlex_html = render(Views::Controllers::Foo::Bar.new(thing: @thing))
-    assert_html_element_equivalent(
-      erb_html, phlex_html,
-      selector: "#some-stable-root",
-      label: "foo_bar"
-    )
-  end
-end
-```
-
-**2. ERB partial (not a full action template):**
-
-Use `view_context.render(partial: "foo/bar", locals: { … })`
-instead of `template:`. The view_path setup is the same.
-
-**3. The controller has no `session` store:**
-
-`ComponentTestCase` disables sessions, but some ERB helpers read
+`ComponentTestCase` disables sessions, but some helpers read
 `controller.session`. Stub it on the controller:
 
 ```ruby
@@ -727,13 +470,12 @@ session = { search_type: "observations", pattern: "Boletus" }
 controller.define_singleton_method(:session) { session }
 ```
 
-**4. The ERB calls page-chrome helpers that crash in the test
-environment (`add_index_title`, `add_project_banner`, etc.):**
+**2. Page-chrome helpers that crash in the test environment
+(`add_index_title`, `add_project_banner`, etc.):**
 
 Those helpers only side-effect `content_for` buffers — they
-contribute nothing to the body fragment the parity test is
-comparing. Prepend a no-op stub onto the helper modules at
-load time:
+contribute nothing to the fragment the parity test is comparing.
+Prepend a no-op stub onto the helper modules at load time:
 
 ```ruby
 module ChromeStubsForFooParity
@@ -759,11 +501,11 @@ end
 included-module chain and a singleton-method or
 `prepend(ActionView::Base)` doesn't reliably win.)
 
-**5. The whole page including a `<form>`:**
+**3. Comparing output that includes a `<form>`:**
 
 Superform's `form-group` / `<label>` auto-wraps and its always-
-emitted `authenticity_token` / `_method` hidden inputs differ
-from `form_with`'s shape — comparing them strictly will fail.
+emitted `authenticity_token` / `_method` hidden inputs can differ
+between implementations — comparing them strictly will fail.
 Two options:
 
 - **Skip the form**: strip the `<form>` element from both
@@ -776,11 +518,11 @@ Two options:
     frag.to_html
   end
 
-  erb_html = strip_form(view_context.render(template: "..."))
-  phlex_html = strip_form(render(...))
+  old_html = strip_form(render(FooOld.new(...)))
+  new_html = strip_form(render(Foo.new(...)))
   assert_html_element_equivalent(
-    "<div id='parity'>#{erb_html}</div>",
-    "<div id='parity'>#{phlex_html}</div>",
+    "<div id='parity'>#{old_html}</div>",
+    "<div id='parity'>#{new_html}</div>",
     selector: "#parity",
     label: "page_minus_form"
   )
@@ -794,22 +536,15 @@ Two options:
   (the helper does this automatically when `strip_csrf: true`,
   the default).
 
-**6. Whitespace differences in body text:**
-
-ERB preserves template indentation between tags as text nodes;
-Phlex emits no inter-tag whitespace.
-`ComponentTestCase#html_text_diff` already collapses runs of
-whitespace before comparing — no change needed in the test.
-
-**7. Wrapping a body fragment for comparison:**
+**4. Wrapping a body fragment for comparison:**
 
 When the parity surface is "the whole rendered output," wrap
 both sides in a `<div id="parity">` shell and pin that:
 
 ```ruby
 assert_html_element_equivalent(
-  "<div id='parity'>#{erb_html}</div>",
-  "<div id='parity'>#{phlex_html}</div>",
+  "<div id='parity'>#{old_html}</div>",
+  "<div id='parity'>#{new_html}</div>",
   selector: "#parity",
   label: "whole_page"
 )
@@ -818,12 +553,10 @@ assert_html_element_equivalent(
 The helper anchors on the first `#parity` element in each
 fragment and walks the entire subtree.
 
-**8. Delete the parity test once the ERB is gone.**
+**5. Delete the `_Old` copy and the parity test together.**
 
-The test references the ERB path via `view_context.render(
-template: …)` / `(partial: …)` — once the ERB file is
-deleted, the test errors with `ActionView::MissingTemplate`.
-Remove it as part of the same commit that deletes the ERB.
+Once the refactor is confirmed green, remove both the `_Old`
+class file and the parity test in the same commit.
 
 ## Tables in Phlex views: try `Components::Table` first
 
@@ -870,29 +603,3 @@ If you find yourself wanting a feature Components::Table doesn't have, prefer ad
 
 `Components::Table` is at `app/components/table.rb`; tests in `test/components/table_test.rb`.
 
-## Addendum: No Phlex view resolver
-
-When converting an action template (ERB → `Views::Controllers::<Foo>::<Action>`),
-the controller's implicit `render(:new)` must be changed to an explicit
-`render(Views::Controllers::<Foo>::New.new(...))`. There is no
-"resolver" wired into MO that lets `render(:new)` find a Phlex class
-automatically — you have to point at the class and pass props.
-
-The `phlex-rails` gem at version 2.4.0 (MO's installed version)
-ships no `Phlex::Rails::Resolver` — zero references to "Resolver" in
-either `phlex` or `phlex-rails`. The auto-ivar-copying pattern some
-older Phlex 1.x guides describe was never part of the 2.x gem.
-Hand-rolling one is possible (custom `ActionView::Resolver` reading
-`controller.view_assigns`), but the ivar-push mechanism conflicts
-with MO's `prop :foo, Literal::…` convention — bare ivars arrive
-without prop declarations, lose type validation, and break the
-explicit-prop test ergonomics every existing Phlex view in MO
-depends on. The per-conversion cost of "explicit `render(…)`" is
-one or two lines in the controller; net win is small and would
-fragment the codebase across two render styles.
-
-**Convention**: every action-template conversion changes the
-controller to `render(Views::Controllers::<Foo>::<Action>.new(
-attr: @ivar, …))`, lifting the ERB-era ivars into explicit props on
-the new class. See any existing `app/views/controllers/**/<action>.rb`
-for examples.
