@@ -35,7 +35,7 @@ module Views::Controllers::Locations
       def render_columns
         div(class: content_for(:left_columns)) do
           div(class: "mb-5") do
-            render(::Components::Map.new(objects: [@location]))
+            Map(objects: [@location])
           end
         end
         div(class: content_for(:right_columns)) do

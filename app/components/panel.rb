@@ -206,12 +206,12 @@ class Components::Panel < Components::Base
   end
 
   def render_collapse_body(classes:, id:, wrapper:, &content)
-    render(::Components::CollapseDiv.new(
-             id: @collapse_id,
-             expanded: @expanded,
-             panel: true,
-             html_class: @collapse_class
-           )) { render_plain_body(classes:, id:, wrapper:, &content) }
+    CollapseDiv(
+      id: @collapse_id,
+      expanded: @expanded,
+      panel: true,
+      html_class: @collapse_class
+    ) { render_plain_body(classes:, id:, wrapper:, &content) }
   end
 
   def render_footer(classes:)

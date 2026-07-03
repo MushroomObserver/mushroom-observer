@@ -33,7 +33,7 @@ module Views::Controllers::Publications
 
       div(class: "container-text") { render_intro }
       render_publications_table
-      render(::Components::ContentPadded.new) do
+      ContentPadded do
         trusted_html(:publication_legend.tp)
       end
     end
@@ -41,7 +41,7 @@ module Views::Controllers::Publications
     private
 
     def render_intro
-      render(::Components::ContentPadded.new) do
+      ContentPadded do
         trusted_html(:publication_index_intro.tp)
         trusted_html(:publication_citation.tp)
         a(href: INTRO_CITATION_URL) { plain(INTRO_CITATION_TEXT) }

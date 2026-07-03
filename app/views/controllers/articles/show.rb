@@ -22,7 +22,7 @@ module Views::Controllers::Articles
     private
 
     def render_byline
-      render(::Components::ContentPadded.new) do
+      ContentPadded do
         plain(:BY.t)
         whitespace
         Link(type: :user, user: @article.user)

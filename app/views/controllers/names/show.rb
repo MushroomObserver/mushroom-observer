@@ -96,13 +96,13 @@ module Views::Controllers::Names
     end
 
     def render_best_images_carousel
-      render(Components::ImageGallery.new(
-               object: @name,
-               images: @best_images,
-               title: :show_name_most_confident.l,
-               links: "",
-               panel_id: "name_confident_observations"
-             ))
+      ImageGallery(
+        object: @name,
+        images: @best_images,
+        title: :show_name_most_confident.l,
+        links: "",
+        panel_id: "name_confident_observations"
+      )
     end
 
     # --- Right column -------------------------------------------------

@@ -97,7 +97,7 @@ module Views::Controllers::Names::Synonyms
         end
       end
       badge = capture do
-        render(Components::IdBadge.new(object: name_obj, extra_class: ""))
+        IdBadge(object: name_obj, extra_class: "")
       end
       [link, badge].safe_join(" ")
     end

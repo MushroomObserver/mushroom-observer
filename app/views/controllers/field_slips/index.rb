@@ -83,9 +83,9 @@ module Views::Controllers::FieldSlips
       project_field = Components::ApplicationForm::FieldProxy.new(
         nil, :project_name, project_title
       )
-      render(Components::IndexFilter.new(
-               to: field_slips_path, submit_text: "Filter"
-             )) do
+      IndexFilter(
+        to: field_slips_path, submit_text: "Filter"
+      ) do
         render(Components::ApplicationForm::AutocompleterField.new(
                  project_field,
                  type: :project, hidden_name: :project, inline: true,

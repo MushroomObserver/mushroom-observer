@@ -9,7 +9,7 @@ module Views::Controllers::Sequences
 
     def view_template
       register_chrome
-      render(::Components::ContentPadded.new(class: "container-text")) do
+      ContentPadded(class: "container-text") do
         render_fields
       end
       render(::Views::Layouts::ObjectFooter.new(

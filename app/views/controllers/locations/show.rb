@@ -44,7 +44,7 @@ module Views::Controllers::Locations
 
     def render_left_column
       div(class: "mb-5") do
-        render(::Components::Map.new(objects: [@location]))
+        Map(objects: [@location])
       end
       render(Show::GeneralDescriptionPanel.new(
                location: @location, description: @description

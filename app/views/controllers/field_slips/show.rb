@@ -16,7 +16,7 @@ module Views::Controllers::FieldSlips
 
       Alert(message: @notice, level: :success) if @notice
 
-      render(Components::ContentPadded.new) do
+      ContentPadded do
         render(FieldSlipPanel.new(field_slip: @field_slip))
       end
 

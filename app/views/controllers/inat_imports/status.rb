@@ -28,11 +28,11 @@ module Views::Controllers::InatImports
     private
 
     def render_content
-      render(::Components::ContentPadded.new do
+      ContentPadded do
         render_summary_paragraph
         render_actions
         render_timing_details
-      end)
+      end
     end
 
     def render_actions

@@ -28,7 +28,7 @@ module Views::Controllers::CollectionNumbers
     private
 
     def render_details
-      render(Components::ContentPadded.new) do
+      ContentPadded do
         render_field(:collection_number_name.t, @collection_number.name)
         render_field(:collection_number_number.t, @collection_number.number)
         render_user_field

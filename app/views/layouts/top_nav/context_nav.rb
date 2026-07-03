@@ -20,11 +20,11 @@ class Views::Layouts::TopNav::ContextNav < Views::Base
   prop :links, _Union(Array, ::Tab::Base, ::Tab::Collection)
 
   def view_template
-    render(Components::Dropdown.new(
-             id: "context_nav_toggle",
-             menu_id: "context_nav",
-             label: :app_context_actions.l
-           )) do |menu|
+    Dropdown(
+      id: "context_nav_toggle",
+      menu_id: "context_nav",
+      label: :app_context_actions.l
+    ) do |menu|
       menu.section(@links)
     end
   end

@@ -29,12 +29,12 @@ module Views::Controllers::Projects
 
       div(class: "row") do
         div(class: Grid::FULL, id: "project_tabs") do
-          render(Components::NavTabs.new(
-                   current: @current_tab, link_class: "mt-3",
-                   tabs: ::Tab::Project::Banner.new(
-                     project: @project, user: @user
-                   )
-                 ))
+          NavTabs(
+            current: @current_tab, link_class: "mt-3",
+            tabs: ::Tab::Project::Banner.new(
+              project: @project, user: @user
+            )
+          )
         end
       end
     end
@@ -79,7 +79,7 @@ module Views::Controllers::Projects
 
       h1(class: title_classes, id: "title") do
         div(class: "d-flex align-items-center") do
-          render(Components::IdBadge.new(object: @project))
+          IdBadge(object: @project)
           whitespace
           Link(type: :object, object: @project)
         end
