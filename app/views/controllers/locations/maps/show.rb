@@ -18,11 +18,11 @@ module Views::Controllers::Locations::Maps
         )
       )
 
-      render(::Components::Map.new(
-               objects: @locations,
-               zoom: 2,
-               map_type: "location"
-             ))
+      Map(
+        objects: @locations,
+        zoom: 2,
+        map_type: "location"
+      )
     end
   end
 end

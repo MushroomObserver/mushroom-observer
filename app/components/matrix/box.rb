@@ -147,7 +147,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_id_badge(obj)
     whitespace
-    render(Components::IdBadge.new(object: obj, extra_class: "rss-id"))
+    IdBadge(object: obj, extra_class: "rss-id")
   end
 
   def render_occurrence_link

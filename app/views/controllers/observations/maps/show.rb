@@ -17,11 +17,11 @@ module Views::Controllers::Observations::Maps
         )
       )
 
-      render(::Components::Map.new(
-               objects: @observations,
-               zoom: 2,
-               map_type: "observation"
-             ))
+      Map(
+        objects: @observations,
+        zoom: 2,
+        map_type: "observation"
+      )
     end
   end
 end

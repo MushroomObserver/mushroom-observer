@@ -45,9 +45,7 @@ module Views::Controllers::SpeciesLists
     def render_info
       div(class: "list_info d-flex align-items-start") do
         div(class: "text-larger") do
-          render(Components::IdBadge.new(
-                   object: @species_list, extra_class: "rss-id mr-4"
-                 ))
+          IdBadge(object: @species_list, extra_class: "rss-id mr-4")
         end
         div do
           render_title_row
