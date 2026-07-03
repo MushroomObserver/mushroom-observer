@@ -27,9 +27,9 @@ module Views::Layouts
       severity = severity_for(flash_notice_level)
       flash_clear
 
-      render(::Components::Alert.new(
-               level: severity, id: "flash_notices", class: "mt-3"
-             )) { trusted_html(notices) }
+      Alert(level: severity, id: "flash_notices", class: "mt-3") do
+        trusted_html(notices)
+      end
     end
 
     private

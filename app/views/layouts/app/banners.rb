@@ -40,11 +40,11 @@ module Views::Layouts::App
 
     def render_site_banner(banner)
       div(data: { controller: "banner" }) do
-        render(::Components::Alert.new(
-                 level: :success,
-                 class: "message-banner",
-                 data: { banner_target: "banner" }
-               )) { render_alert_contents(banner) }
+        Alert(
+          level: :success,
+          class: "message-banner",
+          data: { banner_target: "banner" }
+        ) { render_alert_contents(banner) }
         render_show_button_row
       end
     end

@@ -13,7 +13,7 @@ module Views::Controllers::VisualGroups
     prop :pagination_data, _Nilable(PaginationData)
 
     def view_template
-      render(::Components::PaginatedResults.new) do
+      PaginatedResults do
         render(Components::Matrix::Table.new) do
           @subset.each { |row| render_matrix_box(row) }
         end

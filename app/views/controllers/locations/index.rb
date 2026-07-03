@@ -63,7 +63,7 @@ module Views::Controllers::Locations
       ContentPadded do
         small { plain(:list_place_names_parenthetical.l) }
       end
-      render(::Components::PaginatedResults.new) { render_known_list(counts) }
+      PaginatedResults { render_known_list(counts) }
     end
 
     def render_known_list(counts)

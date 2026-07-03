@@ -20,7 +20,7 @@ module Views::Controllers::Comments
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
-      render(::Components::PaginatedResults.new) { render_list }
+      PaginatedResults { render_list }
     end
 
     private

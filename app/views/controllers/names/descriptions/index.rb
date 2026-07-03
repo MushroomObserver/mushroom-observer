@@ -11,7 +11,7 @@ module Views::Controllers::Names::Descriptions
     def view_template
       register_chrome
 
-      render(::Components::PaginatedResults.new) do
+      PaginatedResults do
         render_table if @descriptions.any?
       end
     end

@@ -60,7 +60,7 @@ module Views::Controllers::SpeciesLists
              ))
       render_project_buttons
       render_list_search
-      render(::Components::PaginatedResults.new) { render_observations }
+      PaginatedResults { render_observations }
       render_comments
       render(Views::Layouts::ObjectFooter.new(
                user: @user, obj: @species_list
