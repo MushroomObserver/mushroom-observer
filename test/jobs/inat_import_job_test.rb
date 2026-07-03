@@ -97,6 +97,38 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  # Regression: a first-time importer has no persisted inat_username when
+  # the job starts. The job must persist it BEFORE building observations —
+  # collector resolution (match_inat) matches User#inat_username, so a
+  # too-late persist left every obs of a first import with an unlinked
+  # free-text collector.
+  def test_import_first_import_links_collector
+    create_ivars_from_filename("calostoma_lutescens")
+    assert_nil(@user.inat_username,
+               "Test needs a user without a persisted inat_username")
+
+    Location.create(user: @user,
+                    name: "Sevier Co., Tennessee, USA",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+
+    stub_inat_interactions
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_equal(@inat_import.inat_username, @user.reload.inat_username,
+                 "Username should be persisted during the import")
+    link = ExternalLink.find_by(external_id: @parsed_results.first[:id],
+                                relationship: "import")
+    assert_not_nil(link, "Cannot find import ExternalLink for the new obs")
+    obs = link.target
+    assert_equal(@user.id, obs.collector_user_id,
+                 "A first import should link the collector to the importer")
+    assert_equal(@user.unique_text_name, obs.collector)
+  end
+
   # Prove (inter alia) that the MO Naming.user differs from the importing user
   # when the iNat user who made the 1st iNat id is another MO user
   def test_import_job_inat_id_suggested_by_another_by_mo_user
@@ -1008,6 +1040,9 @@ class InatImportJobTest < ActiveJob::TestCase
       @inat_import.response_errors, expect,
       "It should warn if a user tries to import another's iNat obs"
     )
+    assert_nil(@user.reload.inat_username,
+               "A username that failed the own-obs verification " \
+               "must not be persisted")
   end
 
   def test_super_importer_anothers_observation
