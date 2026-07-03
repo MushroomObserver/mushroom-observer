@@ -34,13 +34,11 @@ module Views::Controllers::FieldSlips
     private
 
     def render_unresolved_projects_modal
-      render(Components::Modal.new(
-               id: "modal_resolve_projects",
-               title: :occurrence_resolve_projects_title.l,
-               dialog_class: "modal-dialog modal-lg",
-               auto_open: true,
-               user: current_user
-             )) do |m|
+      Modal(id: "modal_resolve_projects",
+            title: :occurrence_resolve_projects_title.l,
+            dialog_class: "modal-dialog modal-lg",
+            auto_open: true,
+            user: current_user) do |m|
         m.with_form_content do
           render(Views::Controllers::Occurrences::Projects::Form.new(
                    gaps: @field_slip_project_gaps,

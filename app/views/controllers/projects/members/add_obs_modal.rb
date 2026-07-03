@@ -17,10 +17,8 @@ module Views::Controllers::Projects::Members
     end
 
     def view_template
-      render(Components::Modal.new(
-               id: "modal_add_obs",
-               title: :change_member_add_obs.l
-             )) do |m|
+      Modal(id: "modal_add_obs",
+            title: :change_member_add_obs.l) do |m|
         m.with_body { p { plain(body_text) } }
         m.with_footer { render_footer_buttons }
       end

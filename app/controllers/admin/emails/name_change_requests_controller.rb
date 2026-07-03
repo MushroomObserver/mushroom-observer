@@ -8,15 +8,8 @@ module Admin
       before_action :login_required
 
       def new
-        unless check_both_names!
-          redirect_back_or_default("/")
-          return
-        end
-
-        unless check_different_icn_ids
-          redirect_back_or_default("/")
-          return
-        end
+        return redirect_back_or_default("/") unless check_both_names!
+        return redirect_back_or_default("/") unless check_different_icn_ids
 
         respond_to do |format|
           format.html do
@@ -27,12 +20,14 @@ module Admin
             )
           end
           format.turbo_stream do
-            render(Components::Modal::TurboForm.new(
+            render(Components::Modal.new(
+                     type: :turbo_form,
                      identifier: "name_change_request_email",
                      title: :email_name_change_request_title.l,
                      user: @user,
                      model: FormObject::EmailRequest.new,
-                     form_class: Views::Controllers::Admin::Emails::NameChangeRequests::Form,
+                     form_class:
+                       Views::Controllers::Admin::Emails::NameChangeRequests::Form,
                      form_locals: {
                        name: @name,
                        new_name_with_icn_id: @new_name_with_icn_id

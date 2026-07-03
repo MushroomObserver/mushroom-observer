@@ -96,9 +96,7 @@ module Projects
 
     # Per-click cap on "Add My Observations". Method (not constant) so
     # tests can stub it via Minitest stub. See issue #4129.
-    def self.add_obs_batch_limit
-      100
-    end
+    def self.add_obs_batch_limit = 100
 
     # Turbo-stream modal showing how many of the candidate's observations
     # match current project constraints and aren't already in the project.
@@ -134,14 +132,15 @@ module Projects
 
       respond_to do |format|
         format.turbo_stream do
-          render(Components::Modal::TurboForm.new(
-                   identifier: "trust_settings",
+          render(Components::Modal.new(
+                   type: :turbo_form, identifier: "trust_settings",
                    title: :show_project_trust_settings_title.l(
                      project: @project.title
                    ),
                    user: @user,
                    model: @project_member.user,
-                   form_class: Views::Controllers::Projects::Members::TrustSettings,
+                   form_class:
+                     Views::Controllers::Projects::Members::TrustSettings,
                    form_locals: {
                      project: @project,
                      current_trust_level:

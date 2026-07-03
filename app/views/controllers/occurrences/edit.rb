@@ -33,13 +33,11 @@ module Views::Controllers::Occurrences
     private
 
     def render_project_modal
-      render(Components::Modal.new(
-               id: "modal_resolve_projects",
-               title: :occurrence_resolve_projects_title.l,
-               dialog_class: "modal-dialog modal-lg",
-               auto_open: true,
-               user: @user
-             )) do |m|
+      Modal(id: "modal_resolve_projects",
+            title: :occurrence_resolve_projects_title.l,
+            dialog_class: "modal-dialog modal-lg",
+            auto_open: true,
+            user: @user) do |m|
         m.with_form_content do
           render(Projects::Form.new(
                    gaps: @project_gaps,
