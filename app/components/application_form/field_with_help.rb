@@ -37,8 +37,11 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
+    def help_id
+      "#{field.dom.id}_help"
+    end
+
     def render_help_icon
-      help_id = "#{field.dom.id}_help"
       span(class: between_class) do
         render(::Components::Link.new(
                  type: :collapse_toggle,
@@ -49,14 +52,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_collapsed_help_text
-      help_id = "#{field.dom.id}_help"
       render(::Components::CollapseDiv.new(id: help_id)) do
         render(::Components::Help::Block.new(well: true)) { render(help_slot) }
       end
     end
 
     def render_plain_help_text
-      render(::Components::Help::Block.new) { render(help_slot) }
+      render(::Components::Help::Block.new(id: help_id)) { render(help_slot) }
     end
   end
 end
