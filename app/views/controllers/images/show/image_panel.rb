@@ -41,13 +41,13 @@ module Views::Controllers::Images
       end
 
       def render_transform_button(operation, label_key)
-        render(::Components::Button.new(
-                 type: :put,
-                 name: label_key.t,
-                 target: transform_image_path(id: @image.id,
-                                              op: operation, size: @size),
-                 variant: :strip, icon: nil
-               ))
+        Button(
+          type: :put,
+          name: label_key.t,
+          target: transform_image_path(id: @image.id,
+                                       op: operation, size: @size),
+          variant: :strip, icon: nil
+        )
       end
 
       # --- Body: interactive image + vote + original filename ------

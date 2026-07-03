@@ -48,11 +48,11 @@ module Views::Controllers::SpeciesLists
     # so build the path explicitly and pass it to `Button::Download`
     # as a String target.
     def render_download_button
-      render(Components::Button.new(
-               type: :download,
-               target: new_download_species_list_path(id: @species_list.id),
-               variant: :strip
-             ))
+      Button(
+        type: :download,
+        target: new_download_species_list_path(id: @species_list.id),
+        variant: :strip
+      )
     end
 
     def render_observation_count

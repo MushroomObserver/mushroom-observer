@@ -72,15 +72,15 @@ module Views::Controllers::Projects::Updates
     end
 
     def render_add_all_button
-      render(Components::Button.new(
-               type: :post,
-               name: :project_updates_add_all.t,
-               target: add_all_project_updates_path(
-                 project_id: @project.id,
-                 show_excluded: @show_excluded
-               ),
-               confirm: :project_updates_confirm_add_all.t
-             ))
+      Button(
+        type: :post,
+        name: :project_updates_add_all.t,
+        target: add_all_project_updates_path(
+          project_id: @project.id,
+          show_excluded: @show_excluded
+        ),
+        confirm: :project_updates_confirm_add_all.t
+      )
     end
 
     def render_pagination

@@ -26,11 +26,11 @@ module Views::Controllers::VisualModels
     private
 
     def render_destroy_link(visual_model)
-      render(Components::Button.new(
-               type: :delete,
-               target: visual_model_path(visual_model),
-               variant: :outline
-             ))
+      Button(
+        type: :delete,
+        target: visual_model_path(visual_model),
+        variant: :outline
+      )
     end
   end
 end

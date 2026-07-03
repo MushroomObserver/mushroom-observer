@@ -11,26 +11,26 @@
 # `Components::Button::Styling` concern.
 #
 # @example Stimulus action button
-#   render(Components::Button.new(
+#   Button(
 #     name: :CANCEL.l,
 #     data: { action: "confirm-modal#cancel" }
-#   ))
+#   )
 #
 # @example Danger variant
-#   render(Components::Button.new(
+#   Button(
 #     name: :OK.l,
 #     variant: :danger,
 #     data: { action: "confirm-modal#confirm",
 #             confirm_modal_target: "confirmButton" }
-#   ))
+#   )
 #
 # @example Icon-only (sr-only label)
-#   render(Components::Button.new(name: :REMOVE.l, icon: :x, variant: :strip))
+#   Button(name: :REMOVE.l, icon: :x, variant: :strip)
 #
 # @example Rich content via block (name: optional)
-#   render(Components::Button.new(
+#   Button(
 #     data: { action: "form-exif#transfer:prevent" }
-#   )) do
+#   ) do
 #     span(class: "when-enabled") { :ENABLED.l }
 #     span(class: "when-disabled") { :DISABLED.l }
 #   end

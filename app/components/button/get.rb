@@ -5,14 +5,14 @@
 # Pass `variant:` to override (e.g. `variant: :outline`, `variant: :strip`).
 #
 # @example via dispatcher
-#   render(Components::Button.new(type: :get,
+#   Button(type: :get,
 #     name: "View", target: @herbarium
-#   ))
+#   )
 #
 # @example btn-link variant (no btn frame, underlined)
-#   render(Components::Button.new(type: :get,
+#   Button(type: :get,
 #     name: user.login, target: user, variant: :btn_link
-#   ))
+#   )
 class Components::Button::Get < Components::Link::Get
   def initialize(name:, target:, variant: nil, **)
     super(name: name, target: target, button: variant, **)

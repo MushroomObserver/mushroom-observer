@@ -132,11 +132,11 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
              action: "form-images##{action}:prevent" }
     data[:image_id] = image_id if image_id
 
-    render(Components::Button.new(
-             size: :sm,
-             class: "remove_image_button fade in",
-             data: data
-           )) do
+    Button(
+      size: :sm,
+      class: "remove_image_button fade in",
+      data: data
+    ) do
       span { :image_remove_remove.l }
       render(Components::Icon.new(
                type: :remove, html_class: "text-danger ml-3"

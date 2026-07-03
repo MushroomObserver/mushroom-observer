@@ -9,11 +9,11 @@
 # instance target cannot express.
 #
 # @example outline "New" button
-#   render(Components::Button.new(type: :new,
+#   Button(type: :new,
 #     target: new_name_description_path(@name.id),
 #     name: :show_name_create_description.t,
 #     variant: :outline
-#   ))
+#   )
 class Components::Button::New < Components::Link::New
   def initialize(target:, name: nil, icon: :add, variant: nil, **)
     super(target: target, name: name, icon: icon, button: variant, **)

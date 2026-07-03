@@ -50,10 +50,10 @@ module Views::Controllers::Projects::Violations
         p { :form_violations_modal_target_location_no_suffixes.l }
       end
       modal.with_footer do
-        render(::Components::Button.new(
-                 name: :CANCEL.l,
-                 data: { dismiss: "modal" }
-               ))
+        Button(
+          name: :CANCEL.l,
+          data: { dismiss: "modal" }
+        )
       end
     end
   end

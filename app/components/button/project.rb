@@ -13,12 +13,12 @@ class Components::Button::Project < Components::Base
   prop :target, _Union(String, Hash, ::AbstractModel)
 
   def view_template
-    render(Components::Button.new(
-             type: :get,
-             name: @name,
-             target: @target,
-             size: :lg,
-             class: "my-3 mr-3"
-           ))
+    Button(
+      type: :get,
+      name: @name,
+      target: @target,
+      size: :lg,
+      class: "my-3 mr-3"
+    )
   end
 end

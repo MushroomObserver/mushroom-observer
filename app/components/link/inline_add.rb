@@ -23,14 +23,14 @@ class Components::Link::InlineAdd < Components::Base
 
   def view_template
     plain("[")
-    render(Components::Button.new(
-             type: :modal,
-             name: @tab.title,
-             target: @tab.path,
-             modal_id: @modal_id,
-             variant: :strip,
-             **@tab.html_options
-           ))
+    Button(
+      type: :modal,
+      name: @tab.title,
+      target: @tab.path,
+      modal_id: @modal_id,
+      variant: :strip,
+      **@tab.html_options
+    )
     plain("]")
   end
 end

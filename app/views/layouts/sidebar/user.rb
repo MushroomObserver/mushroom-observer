@@ -33,14 +33,14 @@ class Views::Layouts::Sidebar
     end
 
     def render_logout_button
-      render(::Components::Button.new(
-               type: :post,
-               name: :app_logout.t,
-               target: account_logout_path,
-               variant: :btn_link,
-               id: "nav_user_logout_link",
-               class: class_names(@classes[:indent], @classes[:mobile_only])
-             ))
+      Button(
+        type: :post,
+        name: :app_logout.t,
+        target: account_logout_path,
+        variant: :btn_link,
+        id: "nav_user_logout_link",
+        class: class_names(@classes[:indent], @classes[:mobile_only])
+      )
     end
 
     def render_tabs
@@ -64,14 +64,14 @@ class Views::Layouts::Sidebar
     end
 
     def render_admin_button
-      render(::Components::Button.new(
-               type: :post,
-               name: :app_turn_admin_on.t,
-               target: admin_mode_path(turn_on: true),
-               variant: :btn_link,
-               id: "nav_mobile_admin_link",
-               class: class_names(@classes[:indent], @classes[:mobile_only])
-             ))
+      Button(
+        type: :post,
+        name: :app_turn_admin_on.t,
+        target: admin_mode_path(turn_on: true),
+        variant: :btn_link,
+        id: "nav_mobile_admin_link",
+        class: class_names(@classes[:indent], @classes[:mobile_only])
+      )
     end
 
     def show_admin_button?

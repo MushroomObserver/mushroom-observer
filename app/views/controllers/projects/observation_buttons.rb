@@ -47,7 +47,7 @@ module Views::Controllers::Projects
     end
 
     def project_button(name, target)
-      render(Components::Button.new(type: :project, name: name, target: target))
+      Button(type: :project, name: name, target: target)
     end
 
     def related_observation_images_url

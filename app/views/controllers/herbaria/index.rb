@@ -85,15 +85,15 @@ module Views::Controllers::Herbaria
 
     # Cannot POST from a link without js; use a button instead.
     def render_merge_target_button(herbarium)
-      render(::Components::Button.new(
-               type: :post,
-               variant: :strip,
-               name: herbarium.name.t,
-               target: herbaria_merges_path(src: @merge.id,
-                                            dest: herbarium.id),
-               class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
-               confirm: :are_you_sure.l
-             ))
+      Button(
+        type: :post,
+        variant: :strip,
+        name: herbarium.name.t,
+        target: herbaria_merges_path(src: @merge.id,
+                                     dest: herbarium.id),
+        class: "herbaria_merges_link_#{@merge.id}_#{herbarium.id}",
+        confirm: :are_you_sure.l
+      )
     end
 
     def render_self_merge_marker(herbarium)
@@ -110,21 +110,21 @@ module Views::Controllers::Herbaria
 
     def render_admin_actions(herbarium)
       plain(" [")
-      render(::Components::Button.new(
-               type: :edit,
-               target: herbarium,
-               name: :EDIT.l,
-               icon: nil, variant: :strip,
-               class: "edit_herbarium_link_#{herbarium.id}"
-             ))
+      Button(
+        type: :edit,
+        target: herbarium,
+        name: :EDIT.l,
+        icon: nil, variant: :strip,
+        class: "edit_herbarium_link_#{herbarium.id}"
+      )
       plain(" | ")
-      render(::Components::Button.new(
-               type: :get,
-               name: :MERGE.l,
-               target: herbaria_path(merge: herbarium.id),
-               icon: nil, variant: :strip,
-               class: "merge_herbarium_link_#{herbarium.id}"
-             ))
+      Button(
+        type: :get,
+        name: :MERGE.l,
+        target: herbaria_path(merge: herbarium.id),
+        icon: nil, variant: :strip,
+        class: "merge_herbarium_link_#{herbarium.id}"
+      )
       plain("]")
     end
 

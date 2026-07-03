@@ -96,11 +96,11 @@ module Views::Controllers::Herbaria
                    type: :user, label: false
                  ))
           label(for: "add_curator") do
-            render(::Components::Button.new(
-                     type: :submit,
-                     name: :show_herbarium_add_curator.t,
-                     html_name: "commit"
-                   ))
+            Button(
+              type: :submit,
+              name: :show_herbarium_add_curator.t,
+              html_name: "commit"
+            )
           end
         end
       end

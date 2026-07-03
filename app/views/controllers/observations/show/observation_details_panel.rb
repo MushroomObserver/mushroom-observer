@@ -31,13 +31,13 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     name = :download_observations_print_labels.l
     query = ::Query.lookup(::Observation, id_in_set: [@obs.id])
     path = add_q_param(observations_downloads_path(commit: name), query)
-    render(Components::Button.new(
-             type: :post,
-             variant: :strip,
-             name: name, target: path, icon: :print,
-             class: "print_label_observation_#{@obs.id}",
-             form: { data: { turbo: false } }
-           ))
+    Button(
+      type: :post,
+      variant: :strip,
+      name: name, target: path, icon: :print,
+      class: "print_label_observation_#{@obs.id}",
+      form: { data: { turbo: false } }
+    )
   end
 
   def render_body
@@ -182,13 +182,13 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_send_question_link
     plain(" [")
-    render(Components::Button.new(
-             type: :modal,
-             name: :show_observation_send_question.l,
-             target: new_question_for_observation_path(@obs.id),
-             modal_id: "observation_email",
-             variant: :strip, icon: :email
-           ))
+    Button(
+      type: :modal,
+      name: :show_observation_send_question.l,
+      target: new_question_for_observation_path(@obs.id),
+      modal_id: "observation_email",
+      variant: :strip, icon: :email
+    )
     plain("]")
   end
 

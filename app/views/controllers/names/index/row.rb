@@ -57,14 +57,14 @@ class Views::Controllers::Names::Index::Row < Views::Base
   end
 
   def render_copy_button
-    render(::Components::Button.new(
-             variant: :btn_link,
-             class: "py-0 link-normal opacity-75",
-             role: "button",
-             data: { toggle: "tooltip", placement: "bottom",
-                     title: :COPY_THIS_NAME.l,
-                     action: "clipboard#copy" }
-           )) { render(Components::Icon.new(type: :copy)) }
+    Button(
+      variant: :btn_link,
+      class: "py-0 link-normal opacity-75",
+      role: "button",
+      data: { toggle: "tooltip", placement: "bottom",
+              title: :COPY_THIS_NAME.l,
+              action: "clipboard#copy" }
+    ) { render(Components::Icon.new(type: :copy)) }
   end
 
   def render_count_badge

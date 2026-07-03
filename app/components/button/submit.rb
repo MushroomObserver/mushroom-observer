@@ -8,12 +8,12 @@
 # `disable_with:` defaults to `name:` when set.
 #
 # @example Plain text
-#   render(Components::Button.new(type: :submit, name: :SAVE.l))
+#   Button(type: :submit, name: :SAVE.l)
 #
 # @example Rich content (block form)
-#   render(Components::Button.new(type: :submit,
+#   Button(type: :submit,
 #     variant: :outline, class: "px-2"
-#   )) do
+#   ) do
 #     span(class: "d-sm-none") { render(Components::Icon.new(type: :search)) }
 #     span(class: "hidden-xs") { plain(:SEARCH.l) }
 #   end

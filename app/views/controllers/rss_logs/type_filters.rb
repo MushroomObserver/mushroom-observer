@@ -53,12 +53,12 @@ module Views::Controllers::RssLogs
     end
 
     def render_everything_button
-      render(::Components::Button.new(
-               tag: :span,
-               variant: :outline,
-               size: :sm,
-               class: ("active" if @types == ["all"])
-             )) { filter_for_everything }
+      Button(
+        tag: :span,
+        variant: :outline,
+        size: :sm,
+        class: ("active" if @types == ["all"])
+      ) { filter_for_everything }
     end
 
     def render_type_buttons
@@ -73,7 +73,7 @@ module Views::Controllers::RssLogs
     # style); the Apply button uses the solid `.btn-default` so it
     # stands out as the commit action.
     def render_submit_button
-      render(::Components::Button.new(type: :submit, name: :APPLY.t, size: :sm))
+      Button(type: :submit, name: :APPLY.t, size: :sm)
     end
 
     # Individual type checkbox styled as a Bootstrap button. Routes

@@ -104,15 +104,15 @@ module Views::Controllers::Sequences
     def render_blast_link
       blast_tab = ::Tab::Sequence::Blast.new(sequence: @sequence)
       p do
-        render(::Components::Button.new(type: :external,
-                                        name: blast_tab.title,
-                                        url: blast_tab.path))
+        Button(type: :external,
+               name: blast_tab.title,
+               url: blast_tab.path)
         whitespace
-        render(::Components::Button.new(
-                 type: :external,
-                 name: :show_observation_mycoblast_link.l,
-                 url: ::Sequence.mycoblast_url
-               ))
+        Button(
+          type: :external,
+          name: :show_observation_mycoblast_link.l,
+          url: ::Sequence.mycoblast_url
+        )
       end
     end
 
