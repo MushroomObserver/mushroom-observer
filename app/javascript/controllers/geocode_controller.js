@@ -76,8 +76,7 @@ export default class extends Controller {
         this.respondToGeocode(results)
       })
       .catch((e) => {
-        console.log("Geocode was not successful: " + e)
-        // alert("Geocode was not successful for the following reason: " + e)
+        this.showGoogleMapsError("Geocoding failed", e)
       });
   }
 
@@ -108,9 +107,36 @@ export default class extends Controller {
         this.respondToGeocode(results)
       })
       .catch((e) => {
-        console.log("Geocode was not successful: " + e)
-        // alert("Geocode was not successful for the following reason: " + e)
+        this.showGoogleMapsError("Geocoding failed", e)
       });
+  }
+
+  // Surface a Google Maps API failure to the user. Without this the
+  // various `.catch` blocks below were silent `console.log` calls —
+  // issue #4535: clicking "Find on Map" appeared to do nothing because
+  // the Geocoding API on MO's Google Cloud key was disabled and every
+  // request returned `REQUEST_DENIED`. The injected `.alert-danger`
+  // lives in `#gmaps_flash`, a div the location form renders above
+  // the place input.
+  //
+  // Used for failures from: Geocoding API (geocodeLatLng /
+  // geolocatePlaceName below), Elevation API (getElevations),
+  // and the Maps JavaScript API loader itself (map_controller).
+  showGoogleMapsError(label, error) {
+    console.log(`${label}: ${error}`)
+    const flash = document.getElementById("gmaps_flash")
+    if (!flash) return
+
+    const detail = error?.message || error
+    flash.innerHTML = `
+      <div class="alert alert-danger" role="alert">
+        <button type="button" class="close" data-dismiss="alert"
+                aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        ${label}: ${detail}.
+        The map service may be misconfigured — please report this to
+        a site administrator.
+      </div>
+    `
   }
 
   // Remove certain types of results from the geocoder response:
@@ -278,6 +304,8 @@ export default class extends Controller {
           } else {
             console.log({ status })
           }
+        } else {
+          this.showGoogleMapsError("Elevation lookup failed", status)
         }
       })
   }
