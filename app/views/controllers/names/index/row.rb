@@ -19,7 +19,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
   prop :has_descriptions, _Boolean, default: false
 
   # Row contents only — the surrounding `<div class="list-group-item">`
-  # is emitted by `Components::ListGroup::Base` in the Index view.
+  # is emitted by `Components::ListGroup` in the Index view.
   def view_template
     render_id_badge
     render_clipboard_wrapper

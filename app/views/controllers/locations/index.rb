@@ -67,7 +67,7 @@ module Views::Controllers::Locations
     end
 
     def render_known_list(counts)
-      render(::Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         @locations.each { |loc| render_known_item(list, loc, counts) }
       end
     end
@@ -89,7 +89,7 @@ module Views::Controllers::Locations
     end
 
     def render_undefined_list
-      render(::Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         @undef_data.each do |obs, count|
           render_undefined_item(list, obs, count)
         end

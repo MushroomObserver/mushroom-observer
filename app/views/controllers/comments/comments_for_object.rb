@@ -6,7 +6,7 @@
 # `comments/new` / `comments/edit` pages (via `_object.rb`).
 #
 # Renders a `Components::Panel` whose body is a flush
-# `Components::ListGroup::Base` of `CommentItem`s — wired to an Action
+# `Components::ListGroup` of `CommentItem`s — wired to an Action
 # Cable Turbo Stream from `[object, :comments]` so the
 # `Comment` model's broadcast callbacks can prepend new rows,
 # replace edited rows, and remove deleted rows in place.
@@ -51,8 +51,7 @@ module Views::Controllers::Comments
     # `#comments` is the Action Cable broadcast target — the model
     # callbacks broadcast `[object, :comments]` with `target: "comments"`.
     def render_comments_list
-      render(Components::ListGroup::Base.new(id: "comments", flush: true,
-                                             class: "comments")) do |list|
+      ListGroup(id: "comments", flush: true, class: "comments") do |list|
         visible_comments.each do |comment|
           list.item(class: "comment", id: dom_id(comment)) do
             render(CommentItem.new(comment: comment, user: @user,

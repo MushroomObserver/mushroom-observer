@@ -124,7 +124,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_observations
-      render(Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         if @objects.any?
           @objects.each { |obs| list.item { render_observation_row(obs) } }
         else
