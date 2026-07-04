@@ -52,7 +52,7 @@ class GoogleMapsApiSmokeTest < ApplicationSystemTestCase
   # failure message names the API surface so a developer running the
   # test locally knows which Google Cloud product needs enabling.
   def assert_no_gmaps_flash(api_label)
-    flash = find("#gmaps_flash", visible: :all)
+    flash = find_by_id("gmaps_flash", visible: :all)
     text = flash.text.strip
     assert_equal(
       "", text,
