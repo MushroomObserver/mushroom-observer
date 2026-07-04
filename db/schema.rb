@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_03_210852) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_04_120003) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -210,6 +210,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_03_210852) do
     t.boolean "transferred", default: false, null: false
     t.boolean "gps_stripped", default: false, null: false
     t.boolean "diagnostic", default: true, null: false
+    t.bigint "dhash", unsigned: true
+    t.index ["dhash"], name: "index_images_on_dhash"
   end
 
   create_table "inat_imports", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -241,6 +243,38 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_03_210852) do
     t.text "date_missing_inat_ids"
     t.text "license_added_inat_ids"
     t.boolean "recheck_all", default: false, null: false
+  end
+
+  create_table "inat_obs_extracts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "inat_id", null: false
+    t.string "inat_login"
+    t.date "observed_on"
+    t.decimal "lat", precision: 15, scale: 10
+    t.decimal "lng", precision: 15, scale: 10
+    t.float "public_accuracy"
+    t.boolean "obscured", default: false, null: false
+    t.string "taxon_name"
+    t.string "taxon_rank"
+    t.string "place_guess", limit: 1024
+    t.text "description"
+    t.json "photos"
+    t.json "ofvs"
+    t.datetime "inat_updated_at"
+    t.datetime "fetched_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["inat_id"], name: "index_inat_obs_extracts_on_inat_id", unique: true
+    t.index ["inat_login"], name: "index_inat_obs_extracts_on_inat_login"
+  end
+
+  create_table "inat_photo_hashes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "inat_photo_id", null: false
+    t.bigint "dhash", null: false, unsigned: true
+    t.datetime "fetched_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dhash"], name: "index_inat_photo_hashes_on_dhash"
+    t.index ["inat_photo_id"], name: "index_inat_photo_hashes_on_inat_photo_id", unique: true
   end
 
   create_table "interests", id: :integer, charset: "utf8mb3", force: :cascade do |t|
@@ -578,12 +612,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_03_210852) do
     t.string "collector", limit: 1024
     t.integer "collector_user_id"
     t.integer "inat_import_id"
+    t.datetime "reflected_at"
     t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
     t.index ["inat_import_id"], name: "index_observations_on_inat_import_id"
     t.index ["location_id"], name: "index_observations_on_location_id"
     t.index ["name_id"], name: "index_observations_on_name_id"
     t.index ["needs_naming"], name: "needs_naming_index"
     t.index ["occurrence_id"], name: "index_observations_on_occurrence_id"
+    t.index ["reflected_at"], name: "index_observations_on_reflected_at"
   end
 
   create_table "occurrences", id: :integer, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

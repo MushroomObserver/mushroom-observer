@@ -776,6 +776,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
       if move_original
+        ImageDhashJob.perform_later(id)
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
               gsub("<ext>", ext).
@@ -831,7 +832,31 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       raise("Invalid transform operator: #{operator.inspect}")
     end
-    system("script/rotate_image #{id} #{operator}&") unless Rails.env.test?
+    result = system("script/rotate_image #{id} #{operator}&") unless
+      Rails.env.test?
+    # Rotation invalidates the perceptual hash; rotate_image runs in the
+    # background, so give it a head start before rehashing.
+    ImageDhashJob.set(wait: 5.minutes).perform_later(id) if persisted?
+    result
+  end
+
+  # Compute and store the perceptual hash (Image::Dhash) for this image
+  # (#4585/#4673). Derived data, hence update_column — recomputing a hash
+  # is not an edit. Prefers a local file (fresh uploads: the original; the
+  # web server after cleanup: the small rendition); falls back to fetching
+  # the transferred medium rendition. dHash is resolution-invariant, so
+  # any rendition serves.
+  def compute_dhash!
+    source = [:original, :medium, :small].
+             map { |size| full_filepath(size) }.
+             find { |path| File.exist?(path) }
+    value = if source
+              Image::Dhash.from_file(source)
+            else
+              Image::Dhash.from_url(medium_url)
+            end
+    update_column(:dhash, value)
+    value
   end
 
   # Attempt to strip GPS data from original image. Returns error message as
