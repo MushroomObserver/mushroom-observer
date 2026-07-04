@@ -5,7 +5,7 @@
 # scoped to a single project: when `@project` is set, shows the
 # project's field-slip prefix (or a nudge for admins when none is
 # set); otherwise renders an inline filter form scoped to project.
-# Body is a `Components::ListGroup::Base` of `FieldSlipPanel`-rendered
+# Body is a `Components::ListGroup` of `FieldSlipPanel`-rendered
 # entries, one per `@object`, each with a per-row code-link heading
 # fed in via the panel's `:prepend` slot.
 module Views::Controllers::FieldSlips
@@ -97,7 +97,7 @@ module Views::Controllers::FieldSlips
 
     def render_list
       PaginatedResults do
-        render(Components::ListGroup::Base.new) do |list|
+        ListGroup do |list|
           @objects.each do |fs|
             list.item do
               render(FieldSlipPanel.new(

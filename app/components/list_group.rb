@@ -38,9 +38,7 @@
 # handled elsewhere.
 #
 # @example Plain iteration with empty placeholder
-#   render(Components::ListGroup::Base.new(
-#            id: "comments", flush: true
-#          )) do |list|
+#   ListGroup(id: "comments", flush: true) do |list|
 #     @comments.each do |c|
 #       list.item(id: dom_id(c)) { render(Comment.new(comment: c)) }
 #     end
@@ -50,12 +48,12 @@
 # @example Flush variant inside a panel
 #   render(Components::Panel.new) do |panel|
 #     panel.with_body(wrapper: false) do
-#       render(Components::ListGroup::Base.new(flush: true)) do |list|
+#       ListGroup(flush: true) do |list|
 #         @items.each { |i| list.item { plain(i) } }
 #       end
 #     end
 #   end
-class Components::ListGroup::Base < Components::Base
+class Components::ListGroup < Components::Base
   # @param id [String] `id=` for the container element. Use to make
   #   the container a Turbo Stream target.
   # @param flush [Boolean] add `list-group-flush` for borderless

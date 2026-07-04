@@ -71,9 +71,7 @@ module Views::Controllers::Names
       return unless @objects.any?
 
       counts = Name.count_observations(@objects)
-      render(Components::ListGroup::Base.new(
-               class: "name-index mb-3"
-             )) do |list|
+      ListGroup(class: "name-index mb-3") do |list|
         @objects.each do |name|
           list.item do
             render(Row.new(

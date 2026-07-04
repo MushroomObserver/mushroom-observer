@@ -20,7 +20,7 @@ module Views::Controllers::Sequences
     private
 
     def render_list
-      render(::Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         @sequences.each { |seq| list.item { render_row(seq) } }
       end
     end

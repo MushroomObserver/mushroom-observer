@@ -13,7 +13,7 @@ module Views::Controllers::SpeciesLists
     end
 
     # Listing renders contents only — the `list-group-item` wrapper
-    # comes from `Components::ListGroup::Base#item` in the Index view, so
+    # comes from `Components::ListGroup#item` in the Index view, so
     # standalone-render output should NOT have it.
     def test_renders_basic_row
       html = render_listing

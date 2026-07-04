@@ -31,7 +31,7 @@ module Views::Controllers::Locations
       end
 
       def render_list
-        render(::Components::ListGroup::Base.new) do |list|
+        ListGroup do |list|
           @descriptions.each do |desc|
             list.item do
               link_to(desc.show_link_args) { trusted_html(desc.format_name.t) }
