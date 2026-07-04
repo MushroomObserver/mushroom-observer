@@ -1,18 +1,19 @@
 # frozen_string_literal: true
 
 module InatImportsController::FormBuilders
+  # Params carried verbatim from the new form through the confirm page.
+  PASSTHROUGH_PARAM_KEYS = [
+    :inat_username, :inat_ids, :inat_url, :original_inat_url, :consent,
+    :recheck_all, :skip_inat_writeback
+  ].freeze
+
   private
 
   def build_confirm_form
     FormObject::InatImportConfirm.new(
-      inat_username: params[:inat_username],
-      inat_ids: params[:inat_ids],
-      inat_url: params[:inat_url],
-      original_inat_url: params[:original_inat_url],
+      **PASSTHROUGH_PARAM_KEYS.index_with { |key| params[key] },
       import_all: params[:all],
-      consent: params[:consent],
-      import_others: (import_others? ? "1" : nil),
-      skip_inat_writeback: params[:skip_inat_writeback]
+      import_others: (import_others? ? "1" : nil)
     )
   end
 
@@ -29,6 +30,7 @@ module InatImportsController::FormBuilders
       username: params[:inat_username],
       consent: params[:consent],
       import_others: params[:import_others],
+      recheck_all: params[:recheck_all],
       skip_writeback: params[:skip_inat_writeback]
     }
   end
@@ -63,6 +65,7 @@ module InatImportsController::FormBuilders
                      derive_choose_method(submitted),
       consent: ("1" if submitted[:consent] == "1"),
       import_others: ("1" if submitted[:import_others] == "1"),
+      recheck_all: ("1" if submitted[:recheck_all] == "1"),
       skip_inat_writeback: initial_skip_writeback(submitted)
     )
   end
@@ -92,13 +95,9 @@ module InatImportsController::FormBuilders
     confirm = params[:inat_import_confirm]
     return unless confirm
 
-    merge_form_param(confirm, :inat_username)
-    merge_form_param(confirm, :inat_ids)
-    merge_form_param(confirm, :inat_url)
-    merge_form_param(confirm, :original_inat_url)
-    merge_form_param(confirm, :consent)
-    merge_form_param(confirm, :import_others)
-    merge_form_param(confirm, :skip_inat_writeback)
+    (PASSTHROUGH_PARAM_KEYS + [:import_others]).each do |key|
+      merge_form_param(confirm, key)
+    end
     params[:all] ||= confirm[:import_all]
   end
 
@@ -112,13 +111,9 @@ module InatImportsController::FormBuilders
     new_form = params[:inat_import]
     return unless new_form
 
-    merge_form_param(new_form, :inat_username)
-    merge_form_param(new_form, :inat_ids)
-    merge_form_param(new_form, :inat_url)
-    merge_form_param(new_form, :consent)
-    merge_form_param(new_form, :import_others)
-    merge_form_param(new_form, :skip_inat_writeback)
-    merge_form_param(new_form, :choose_method)
+    keys = PASSTHROUGH_PARAM_KEYS - [:original_inat_url] +
+           [:import_others, :choose_method]
+    keys.each { |key| merge_form_param(new_form, key) }
     params[:all] = "1" if params[:choose_method] == "all"
     params[:all] ||= new_form[:all]
   end

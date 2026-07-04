@@ -90,15 +90,28 @@ module InatImportsController::Estimators
   # + licensed (for import-others) + user scope.
   def import_estimate_query_args
     args = listing_url? ? url_query_args : {}
-    args.merge!(BASE_FILTER_PARAMS, only_id: true)
+    args.merge!(estimate_without_field_filter, ownership_filter_args,
+                only_id: true)
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
-    if import_others?
-      args.merge!(LICENSED_FILTER)
-    else
-      args[:user_login] = params[:inat_username]&.strip
-    end
     args[:id] = params[:inat_ids] if listing_ids?
     args
+  end
+
+  # Id lists always re-check obs already carrying the MO URL field, and
+  # query modes re-check when the user opted in — the estimate must
+  # match actual import behavior (#4565).
+  def estimate_without_field_filter
+    return {} if listing_ids? || recheck_all?
+
+    BASE_FILTER_PARAMS
+  end
+
+  def ownership_filter_args
+    if import_others?
+      LICENSED_FILTER
+    else
+      { user_login: params[:inat_username]&.strip }
+    end
   end
 
   # Strip MO-controlled params so estimates match actual import behavior.

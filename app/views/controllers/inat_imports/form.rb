@@ -56,6 +56,7 @@ module Views::Controllers::InatImports
             render_ids_panel
             render_method_radio("url", :inat_url_label.l)
             render_url_panel
+            render_recheck_all_field
           end
         end
       end
@@ -104,6 +105,14 @@ module Views::Controllers::InatImports
 
     def current_method
       model.choose_method.presence || "all"
+    end
+
+    # Applies to "all" and URL imports; id lists always re-check (#4565).
+    def render_recheck_all_field
+      checkbox_field(:recheck_all,
+                     label: :inat_recheck_all.l,
+                     help: :inat_recheck_all_help.l,
+                     wrap_class: "mt-4")
     end
 
     def render_consent_checkbox

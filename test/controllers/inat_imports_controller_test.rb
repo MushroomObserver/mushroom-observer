@@ -482,7 +482,9 @@ class InatImportsControllerTest < FunctionalTestCase
       url: "#{site.base_url}#{inat_id}"
     )
 
-    params = { inat_username: "anything", inat_ids: inat_id,
+    fresh_id = "1123457"
+    params = { inat_username: "anything",
+               inat_ids: "#{inat_id},#{fresh_id}",
                consent: 1, confirmed: 1 }
     login
     assert_no_difference("Observation.count",
@@ -491,11 +493,16 @@ class InatImportsControllerTest < FunctionalTestCase
     end
 
     assert_flash_text(/#{Regexp.escape(:inat_previous_import.l(count: 1))}/)
-    # It should continue even if some ids were previously imported
-    # The job will exclude previous imports via the iNat API
-    # `without_field: "Mushroom Observer URL"` param.
+    # It should continue even if some ids were previously imported: the
+    # previously imported id is dropped from the list, and the counts
+    # reflect the cleaned list.
+    import = created_import(user)
+    assert_equal(fresh_id, import.inat_ids,
+                 "Previously imported id should be dropped from inat_ids")
+    assert_equal(1, import.total_importables,
+                 "total_importables should count only the cleaned id list")
     assert_redirected_to(
-      "#{INAT_AUTHORIZATION_URL}&state=#{created_import(user).id}"
+      "#{INAT_AUTHORIZATION_URL}&state=#{import.id}"
     )
   end
 
@@ -643,6 +650,37 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_redirected_to("#{INAT_AUTHORIZATION_URL}&state=#{import.id}")
     assert_equal(inat_username, import.inat_username,
                  "Should flatten inat_username from namespaced params")
+  end
+
+  def test_create_recheck_all_persists
+    user = users(:rolf)
+    login(user.login)
+
+    post(:create,
+         params: { all: "1", inat_username: "rolf",
+                   consent: 1, confirmed: 1, recheck_all: "1" })
+
+    import = created_import(user)
+    assert(import.recheck_all,
+           "Failed to save InatImport.recheck_all from the form checkbox")
+  end
+
+  def test_create_recheck_all_survives_confirm_round_trip
+    user = users(:rolf)
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "rolf", inat_ids: "123,456",
+             import_all: "", consent: "1", recheck_all: "1"
+           }
+         })
+
+    import = created_import(user)
+    assert(import.recheck_all,
+           "recheck_all should flatten from namespaced confirm params")
   end
 
   def test_skip_writeback_checkbox_admin_only
