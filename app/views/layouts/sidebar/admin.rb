@@ -12,7 +12,7 @@ class Views::Layouts::Sidebar
   #   ))
   class Admin < Section
     def view_template
-      div(class: @classes[:heading]) do
+      render(Components::ListGroup::Item.new(class: @classes[:heading])) do
         plain("#{@heading_key.t}:")
       end
 
@@ -33,14 +33,18 @@ class Views::Layouts::Sidebar
     # user-nav dropdown renders).
     def render_admin_mode_toggle
       tab = Tab::UserNav::AdminMode.new(in_admin_mode: true)
-      Button(
-        type: :post,
-        name: tab.title,
-        target: tab.path,
-        variant: :btn_link,
-        class: class_names(@classes[:admin], tab.html_options[:class]),
-        data: tab.html_options[:data]
-      )
+      render(
+        Components::ListGroup::LinkItem.new(class: @classes[:admin])
+      ) do |css_class|
+        Button(
+          type: :post,
+          name: tab.title,
+          target: tab.path,
+          variant: :btn_link,
+          class: class_names(css_class, tab.html_options[:class]),
+          data: tab.html_options[:data]
+        )
+      end
     end
   end
 end

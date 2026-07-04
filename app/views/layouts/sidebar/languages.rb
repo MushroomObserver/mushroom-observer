@@ -23,7 +23,9 @@ class Views::Layouts::Sidebar
     attr_reader :request
 
     def view_template
-      div(class: "list-group-item pl-3 overflow-visible") do
+      render(
+        Components::ListGroup::Item.new(class: "pl-3 overflow-visible")
+      ) do
         div(class: "dropdown") do
           render_dropdown_label
           render_dropdown_toggle

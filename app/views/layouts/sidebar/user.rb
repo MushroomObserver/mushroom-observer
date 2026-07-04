@@ -24,7 +24,8 @@ class Views::Layouts::Sidebar
     private
 
     def render_heading
-      div(class: class_names(@classes[:heading], @classes[:mobile_only])) do
+      modifier = class_names(@classes[:heading], @classes[:mobile_only])
+      render(Components::ListGroup::Item.new(class: modifier)) do
         Icon(type: :user)
         span(class: "ml-2") { plain(@user.login) }
       end
@@ -38,15 +39,18 @@ class Views::Layouts::Sidebar
     # user-nav dropdown renders).
     def render_logout_button
       tab = Tab::UserNav::Logout.new
-      Button(
-        type: :post,
-        name: tab.title,
-        target: tab.path,
-        variant: :btn_link,
-        class: class_names(@classes[:indent], @classes[:mobile_only],
-                           tab.html_options[:class]),
-        data: tab.html_options[:data]
-      )
+      modifier = class_names(@classes[:indent], @classes[:mobile_only])
+      render(Components::ListGroup::LinkItem.new(class: modifier)) do
+        |css_class|
+        Button(
+          type: :post,
+          name: tab.title,
+          target: tab.path,
+          variant: :btn_link,
+          class: class_names(css_class, tab.html_options[:class]),
+          data: tab.html_options[:data]
+        )
+      end
     end
 
     def render_tabs
@@ -59,14 +63,14 @@ class Views::Layouts::Sidebar
     def render_nav_link(link)
       title, url, html_options = link
       html_options ||= {}
-      html_options[:class] = class_names(
-        @classes[:indent],
-        @classes[:mobile_only],
-        html_options[:class]
-      )
+      extra_class = html_options.delete(:class)
+      modifier = class_names(@classes[:indent], @classes[:mobile_only])
 
-      Link(type: :active,
-           content: title, path: url, **html_options)
+      render(Components::ListGroup::LinkItem.new(class: modifier)) do
+        |css_class|
+        Link(type: :active, content: title, path: url,
+             class: class_names(css_class, extra_class), **html_options)
+      end
     end
 
     # Toggling admin mode changes the session's theme/asset state, so
@@ -77,15 +81,18 @@ class Views::Layouts::Sidebar
     # user-nav dropdown renders).
     def render_admin_button
       tab = Tab::UserNav::AdminMode.new(in_admin_mode: false)
-      Button(
-        type: :post,
-        name: tab.title,
-        target: tab.path,
-        variant: :btn_link,
-        class: class_names(@classes[:indent], @classes[:mobile_only],
-                           tab.html_options[:class]),
-        data: tab.html_options[:data]
-      )
+      modifier = class_names(@classes[:indent], @classes[:mobile_only])
+      render(Components::ListGroup::LinkItem.new(class: modifier)) do
+        |css_class|
+        Button(
+          type: :post,
+          name: tab.title,
+          target: tab.path,
+          variant: :btn_link,
+          class: class_names(css_class, tab.html_options[:class]),
+          data: tab.html_options[:data]
+        )
+      end
     end
 
     def show_admin_button?

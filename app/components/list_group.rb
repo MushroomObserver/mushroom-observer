@@ -4,6 +4,22 @@
 #
 # Iteration-friendly builder pattern: the block yields a `list`
 # builder; call `list.item(...) { ... }` once per row, in order.
+# For rows whose interactive element itself (an `<a>` from
+# `Link(...)`, a `<button>` from `Button(...)`) should carry
+# `list-group-item` rather than sit inside a wrapper, use
+# `list.link_item(...) { |css_class| ... }` instead — see its own
+# docs below for why the wrapper doesn't work for that case. Both
+# registrations share one ordered sequence, so `item` and
+# `link_item` calls can be freely interleaved.
+#
+# `list.link_item` defers rendering (via Phlex's `vanish`) until
+# after the whole builder block finishes — fine for a plain
+# iteration, but it silently breaks Phlex fragment caching
+# (`cache(...) do ... end`) wrapped around the block, since a cache
+# hit skips the block — and the registration inside it — entirely.
+# For a linked row that needs to sit inside a cached fragment,
+# render `Components::ListGroup::LinkItem` standalone instead (see
+# its own docs); it's a normal nested render with no deferral.
 #
 # Three Bootstrap patterns covered:
 #
@@ -97,11 +113,45 @@ class Components::ListGroup < Components::Base
   # @return [nil] so the call doesn't accidentally emit anything
   def item(class: nil, id: nil, **attrs, &block)
     @items << {
+      wrap: true,
       class: grab(class:),
       id: id,
       attrs: attrs,
       block: block
     }
+    nil
+  end
+
+  # Register a "linked" item — for rows where the interactive
+  # element itself (an `<a>` from `Link(...)`, a `<button>` from
+  # `Button(...)`) should carry `list-group-item`, rather than
+  # being wrapped in a separate item container. Renders via
+  # `Components::ListGroup::Item`'s sibling `LinkItem` — see that
+  # class for why the wrapper doesn't work for linked rows.
+  #
+  # The block is called with the composed class string
+  # (`"list-group-item <extra>"`) and must apply it to whatever it
+  # renders — there's no wrapper to apply it for you.
+  #
+  # Only use this inside an iterated `ListGroup(...) do |list| ... end`
+  # block where linked and wrapped items are mixed in one ordered
+  # sequence. If the row isn't part of such an iteration (e.g. it
+  # sits inside a `cache(...) do ... end` fragment), render
+  # `Components::ListGroup::LinkItem` standalone instead — this
+  # builder method defers rendering via Phlex's `vanish` until after
+  # the whole block finishes, which silently breaks fragment caching
+  # wrapped around it (a cache hit would skip the registration
+  # entirely). `Views::Layouts::Sidebar` does exactly that for its
+  # cached sections.
+  #
+  # @example
+  #   list.link_item(class: "indent") do |css_class|
+  #     Link(type: :active, content: title, path: url, class: css_class)
+  #   end
+  #
+  # @return [nil] so the call doesn't accidentally emit anything
+  def link_item(class: nil, &block)
+    @items << { wrap: false, class: grab(class:), block: block }
     nil
   end
 
@@ -130,15 +180,17 @@ class Components::ListGroup < Components::Base
   end
 
   def render_item(item)
-    render(Components::ListGroup::Item.new(
-             element: item_element, class: item[:class],
-             id: item[:id], attributes: item[:attrs]
-           ), &item[:block])
+    if item[:wrap]
+      render(Item.new(
+               element: item_element, class: item[:class],
+               id: item[:id], attributes: item[:attrs]
+             ), &item[:block])
+    else
+      render(LinkItem.new(class: item[:class]), &item[:block])
+    end
   end
 
   def render_empty
-    render(Components::ListGroup::Item.new(
-             element: item_element, class: "none-yet"
-           ), &@empty_block)
+    render(Item.new(element: item_element, class: "none-yet"), &@empty_block)
   end
 end

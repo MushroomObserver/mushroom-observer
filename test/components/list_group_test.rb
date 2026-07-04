@@ -3,6 +3,57 @@
 require("test_helper")
 
 class ListGroupTest < ComponentTestCase
+  class OrderStubView < Components::Base
+    def view_template
+      ListGroup do |list|
+        list.item { plain("plain row") }
+        list.link_item(class: "indent") do |css_class|
+          a(href: "/x", class: css_class) { plain("link row") }
+        end
+      end
+    end
+  end
+
+  class LabelStubView < Components::Base
+    def initialize(label:)
+      super()
+      @label = label
+    end
+
+    def view_template
+      ListGroup(class: "sidebar-nav") do |list|
+        list.link_item(class: "indent") do |css_class|
+          a(href: "/x", class: css_class) { plain(@label) }
+        end
+      end
+    end
+  end
+
+  def test_link_item_renders_no_wrapper_with_composed_class_in_order
+    html = render(OrderStubView.new)
+
+    # No extra wrapper div around the link_item's <a> — the anchor
+    # itself carries list-group-item, composed with the extra class.
+    assert_html(html, "div.list-group > a.list-group-item.indent",
+                text: "link row")
+    assert_no_html(html, "div.list-group-item > a")
+    # Order preserved: item registered first still renders first.
+    fragment = Nokogiri::HTML5.fragment(html)
+    children = fragment.at_css("div.list-group").children.
+               reject { |n| n.text? && n.text.strip.empty? }
+    assert_equal(%w[div a], children.map(&:name))
+  end
+
+  # Proves the deferred link_item block keeps the ORIGINAL calling
+  # view's `self` / instance variables — not the ListGroup instance's
+  # — since sidebar rows reference their own view's ivars (@classes,
+  # @user, etc.) inside the block.
+  def test_link_item_block_preserves_caller_instance_variables
+    html = render(LabelStubView.new(label: "from caller"))
+
+    assert_html(html, "a.list-group-item.indent", text: "from caller")
+  end
+
   def test_renders_plain_list_group_with_items
     html = render(Components::ListGroup.new) do |list|
       list.item { "one" }
