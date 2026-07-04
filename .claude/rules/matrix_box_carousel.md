@@ -171,7 +171,7 @@ designing the Phlex version:
 ## Class / id checklist (for parity tests)
 
 When the Phlex rewrite arrives, the parity test against the old ERB
-markup (per `.claude/rules/phlex_conversions.md`) should pin these:
+markup (per `.claude/rules/phlex_reference.md`) should pin these:
 
 - `div.carousel.slide[id="{type}_{id}_carousel"][data-ride="false"][data-interval="false"]`
 - `div.carousel-inner.bg-light[role="listbox"]`

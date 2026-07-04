@@ -12,7 +12,7 @@
 class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationForm
   # Optional positional model arg is accepted for ModalForm
   # compatibility (ignored) — see Pattern B in
-  # .claude/phlex_style_guide.md.
+  # .claude/rules/phlex_reference.md.
   def initialize(_model = nil, project:, **)
     @project = project
     super(form_object, id: dom_id, local: false, **)
