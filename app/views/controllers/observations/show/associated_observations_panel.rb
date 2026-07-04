@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
-# "Matching observations" panel on the observation show page.
-# Heading links to the occurrence (when one exists with siblings)
-# or to "create a new occurrence from this observation" (when none
-# exists yet). Body lists sibling observations as a tight ul.
+# "Matching observations" panel on the observation show page. When
+# the observation's occurrence has siblings, the heading is the bare
+# "Occurrences" title with an icon-only link to the occurrence
+# flush right, and the body lists the sibling observations as a
+# tight ul. When there's no occurrence yet, the whole heading is an
+# icon+text "Add Matching Observations" link (no body).
 #
 class Views::Controllers::Observations::Show::AssociatedObservationsPanel < Views::Base
   prop :obs, ::Observation
@@ -15,8 +17,13 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
              panel_id: "associated_observations",
              panel_class: "name-section"
            )) do |panel|
-      panel.with_heading { render_heading_link }
-      panel.with_body { render_body } if siblings?
+      if siblings?
+        panel.with_heading { plain(:OCCURRENCES.t) }
+        panel.with_heading_links { matching_observations_link }
+        panel.with_body { render_body }
+      else
+        panel.with_heading { add_matching_observations_link }
+      end
     end
   end
 
@@ -26,20 +33,17 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
     @occurrence && @siblings.any?
   end
 
-  def render_heading_link
-    if siblings?
-      a(href: occurrence_path(@occurrence)) do
-        render(::Components::Icon.new(type: :matrix))
-        whitespace
-        plain(:show_observation_matching_observations.l)
-      end
-    else
-      a(href: new_occurrence_path(observation_id: @obs.id)) do
-        render(::Components::Icon.new(type: :matrix))
-        whitespace
-        plain(:show_observation_add_matching_observations.l)
-      end
-    end
+  def matching_observations_link
+    Link(type: :icon,
+         tab: ::Tab::Observation::MatchingObservations.new(
+           occurrence: @occurrence
+         ))
+  end
+
+  def add_matching_observations_link
+    Link(type: :icon,
+         tab: ::Tab::Observation::AddMatchingObservations.new(obs: @obs),
+         show_text: true)
   end
 
   def render_body

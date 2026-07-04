@@ -245,8 +245,7 @@ module Views::Controllers::Occurrences
     end
 
     def render_field_slip_link(field_slip)
-      br
-      small do
+      small(class: "d-block") do
         a(href: field_slip_path(field_slip)) do
           plain("Field Slip: #{field_slip.code}")
         end
@@ -254,12 +253,8 @@ module Views::Controllers::Occurrences
     end
 
     def render_occurrence_link(obs)
-      br
-      a(href: occurrence_path(obs.occurrence_id)) do
-        render(::Components::Icon.new(type: :matrix))
-        whitespace
-        plain(:in_existing_occurrence.l)
-      end
+      Link(type: :icon, tab: Tab::Occurrence::Existing.new(obs: obs),
+           show_text: true)
     end
   end
 end

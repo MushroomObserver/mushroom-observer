@@ -2477,6 +2477,7 @@
   show_observation_add_images: "[:add_objects(type=:image)]"
   show_observation_species_lists: "[:SPECIES_LISTS]"
   show_observation_manage_species_lists: Manage Observation Lists
+  show_observation_add_to_species_list: Add to an Observation List
   show_observation_send_question: Send Observer a Question
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.

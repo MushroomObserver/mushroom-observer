@@ -104,11 +104,11 @@ module Views::Layouts
       )
       url = pagination_link_url(page)
       a(href: url, class: classes) do
-        render(::Components::Icon.new(
-                 type: direction,
-                 title: direction.to_s.upcase.to_sym.t,
-                 html_class: "px-2"
-               ))
+        Icon(
+          type: direction,
+          title: direction.to_s.upcase.to_sym.t,
+          html_class: "px-2"
+        )
       end
     end
 
@@ -161,7 +161,7 @@ module Views::Layouts
           type: :submit,
           variant: :outline,
           class: "px-2"
-        ) { render(::Components::Icon.new(type: :goto, title: :GOTO.l)) }
+        ) { Icon(type: :goto, title: :GOTO.l) }
       end
     end
 

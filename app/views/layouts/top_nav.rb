@@ -152,7 +152,7 @@ class Views::Layouts::TopNav < Views::Base
         class: "top_nav_button",
         data: { toggle: "collapse", target: "#search_nav" },
         aria: { expanded: "false", controls: "search_nav" }
-      ) { render(::Components::Icon.new(type: :search, title: :SEARCH.l)) }
+      ) { Icon(type: :search, title: :SEARCH.l) }
     end
   end
 

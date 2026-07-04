@@ -13,7 +13,7 @@ class Views::Layouts::Sidebar
   class Login < Section
     def view_template
       div(class: @classes[:heading]) do
-        render(::Components::Icon.new(type: :user))
+        Icon(type: :user)
         span { plain("#{@heading_key.t}:") }
       end
 
