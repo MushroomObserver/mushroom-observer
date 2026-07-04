@@ -56,10 +56,19 @@ class Inat::ConfirmURLBuilder
   def expected_obs_args(query_str)
     args = Rack::Utils.parse_query(query_str.to_s)
     args["iconic_taxa"] ||= "Fungi,Protozoa" unless args.key?("taxon_id")
-    args["without_field"] = BASE_FILTER_PARAMS[:without_field]
+    unless skip_without_field?
+      args["without_field"] = BASE_FILTER_PARAMS[:without_field]
+    end
     filter = LICENSED_FILTER.stringify_keys.transform_values(&:to_s)
     args.merge!(filter) if import_others?
     args
+  end
+
+  # Id lists always re-check obs already carrying the MO URL field, and
+  # query modes re-check when the user opted in — so the expected-obs link
+  # must not filter them out (#4565).
+  def skip_without_field?
+    @model.inat_ids.present? || @model.recheck_all == "1"
   end
 
   def translate_api_to_ui_params(query_str)

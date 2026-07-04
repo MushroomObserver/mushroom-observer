@@ -167,6 +167,60 @@ class Inat
                    "order_by should be id for pagination")
     end
 
+    def test_base_query_args_import_all_includes_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_username = "some_user"
+        i.inat_ids = ""
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:base_query_args)
+
+      assert_equal("Mushroom Observer URL", args[:without_field],
+                   "Import-all should filter by without_field by default")
+    end
+
+    def test_base_query_args_import_all_recheck_drops_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_username = "some_user"
+        i.inat_ids = ""
+        i.recheck_all = true
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:base_query_args)
+
+      assert_nil(args[:without_field],
+                 "recheck_all import-all must not filter by without_field")
+    end
+
+    def test_base_query_args_ids_mode_drops_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_username = "some_user"
+        i.inat_ids = "123,456"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:base_query_args)
+
+      assert_nil(args[:without_field],
+                 "Explicit id lists always re-check: no without_field filter")
+    end
+
+    def test_url_request_query_args_recheck_drops_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&without_field=foo"
+        i.recheck_all = true
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_nil(args[:without_field],
+                 "recheck_all URL mode must not filter by without_field, " \
+                 "and the user's own without_field is still stripped")
+    end
+
     def test_next_page_url_mode_returns_parsed_json
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058"

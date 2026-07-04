@@ -55,6 +55,13 @@ class Inat
     # id of iNat's "Mushroom Observer URL" observation field
     MO_URL_OBSERVATION_FIELD_ID = 5005
 
+    # Extracts the MO observation id from a "Mushroom Observer URL" field
+    # value, tolerating the URL variants that appear in the wild (current,
+    # /obs/, legacy /observer/show_observation/) and prefixes like
+    # "DEAD LINK: " (#4565).
+    MO_URL_FIELD_VALUE_ID_RE = %r{mushroomobserver\.org/
+      (?:observations/|obs/|observer/show_observation/)?(\d+)}x
+
     # Filter params added to every iNat observation API request
     # to restrict results to observations eligible for import:
     BASE_FILTER_PARAMS = {

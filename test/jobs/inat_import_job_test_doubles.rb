@@ -78,9 +78,13 @@ module InatImportJobTestDoubles
       per_page: InatImportJob::BATCH_SIZE,
       only_id: false,
       order: "asc",
-      order_by: "id",
-      **BASE_FILTER_PARAMS
+      order_by: "id"
     }
+    # Mirrors PageParser#without_field_filter: id lists always re-check,
+    # query modes filter unless recheck_all (#4565).
+    unless @inat_import.inat_ids.present? || @inat_import.recheck_all?
+      query_args.merge!(BASE_FILTER_PARAMS)
+    end
     if @inat_import.import_others
       query_args.merge!(LICENSED_FILTER)
     else

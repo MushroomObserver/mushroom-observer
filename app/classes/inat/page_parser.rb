@@ -97,7 +97,7 @@ class Inat
       # field, bypassing URLNormalizer. Strip MO-controlled keys defensively.
       strip_keys = Inat::URLNormalizer::STRIP_PARAMS.map(&:to_sym) + [:id]
       args.except!(*strip_keys)
-      args.merge!(BASE_FILTER_PARAMS)
+      args.merge!(without_field_filter(ids_mode: false))
       args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
       args.merge!(id_above: effective_id_above, per_page: @per_page,
                   order: "asc", order_by: "id")
@@ -109,7 +109,18 @@ class Inat
         id: nil, id_above: nil, only_id: false, per_page: @per_page,
         order: "asc", order_by: "id",
         taxon_id: IMPORTABLE_TAXON_IDS_ARG
-      }.merge(BASE_FILTER_PARAMS)
+      }.merge(without_field_filter(ids_mode: inat_ids.present?))
+    end
+
+    # without_field excludes obs already carrying iNat's "Mushroom Observer
+    # URL" field. Explicit id lists always re-check (the user pointed at
+    # specific obs, and the importer's ExternalLink gate decides); query
+    # modes re-check only when the user opted in via the recheck_all
+    # checkbox (#4565 orphan reimport).
+    def without_field_filter(ids_mode:)
+      return {} if ids_mode || @import.recheck_all?
+
+      BASE_FILTER_PARAMS
     end
 
     # When importing own observations: scope by user_login, no licensed filter.

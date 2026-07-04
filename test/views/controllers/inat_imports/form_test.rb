@@ -91,6 +91,14 @@ module Views::Controllers::InatImports
                   "[name='inat_import[consent]']")
     end
 
+    def test_recheck_all_checkbox
+      html = render_form
+
+      assert_html(html,
+                  "input[type='checkbox'][name='inat_import[recheck_all]']")
+      assert_includes(html, :inat_recheck_all.l)
+    end
+
     def test_super_importer_field_hidden_by_default
       html = render_form(super_importer: false)
 

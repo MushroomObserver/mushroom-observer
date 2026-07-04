@@ -234,7 +234,8 @@ module Views::Controllers::InatImports
 
     def render_hidden_fields
       [:inat_username, :inat_ids, :import_all, :consent, :import_others,
-       :inat_url, :original_inat_url, :skip_inat_writeback].each do |f|
+       :inat_url, :original_inat_url, :recheck_all,
+       :skip_inat_writeback].each do |f|
         hidden_field(f)
       end
     end
