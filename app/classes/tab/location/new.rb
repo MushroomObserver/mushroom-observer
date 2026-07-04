@@ -9,6 +9,10 @@ class Tab::Location::New < Tab::Base
     new_location_path
   end
 
+  def html_options
+    { icon: :add }
+  end
+
   def model
     Location
   end

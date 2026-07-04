@@ -64,7 +64,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
       data: { toggle: "tooltip", placement: "bottom",
               title: :COPY_THIS_NAME.l,
               action: "clipboard#copy" }
-    ) { render(Components::Icon.new(type: :copy)) }
+    ) { Icon(type: :copy) }
   end
 
   def render_count_badge

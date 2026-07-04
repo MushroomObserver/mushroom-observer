@@ -60,7 +60,7 @@ module Views::Controllers::Projects::Locations
 
     def render_target_remove_footnote
       p(class: "mt-3") do
-        render(::Components::Icon.new(type: :x, html_class: "text-danger"))
+        Icon(type: :x, html_class: "text-danger")
         plain(" #{:project_target_locations_remove_footnote.l}")
       end
     end
@@ -117,11 +117,8 @@ module Views::Controllers::Projects::Locations
            target_id: collapse_id,
            collapsed: true,
            class: "panel-collapse-trigger") do
-        render(Components::Icon.new(
-                 type: :chevron_down, title: :OPEN.l,
-                 html_class: "active-icon"
-               ))
-        render(Components::Icon.new(type: :chevron_up, title: :CLOSE.l))
+        Icon(type: :chevron_down, title: :OPEN.l, html_class: "active-icon")
+        Icon(type: :chevron_up, title: :CLOSE.l)
       end
     end
 

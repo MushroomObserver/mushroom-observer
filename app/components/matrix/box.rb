@@ -161,11 +161,9 @@ class Components::Matrix::Box < Components::Base
     return unless obs_count > 1
 
     div(class: "small mt-3") do
-      a(href: occurrence_path(occ), class: "occurrence-link") do
-        render(::Components::Icon.new(type: :matrix))
-        whitespace
-        plain(:matrix_box_occurrence.l)
-      end
+      Link(type: :get, target: occurrence_path(occ),
+           name: :matrix_box_occurrence.l, icon: :matrix, label: true,
+           class: "occurrence-link")
     end
   end
 

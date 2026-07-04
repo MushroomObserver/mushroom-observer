@@ -31,6 +31,33 @@ module Tab::Observation
                    tab.path)
     end
 
+    def test_add_to_species_list
+      tab = Tab::Observation::AddToSpeciesList.new(observation: @obs)
+
+      assert_equal(:show_observation_add_to_species_list.l, tab.title)
+      assert_equal(routes.edit_observation_species_lists_path(@obs.id),
+                   tab.path)
+      assert_equal(:add, tab.html_options[:icon])
+    end
+
+    def test_matching_observations
+      occurrence = occurrences(:occ_field_slip_one)
+      tab = Tab::Observation::MatchingObservations.new(occurrence: occurrence)
+
+      assert_equal(:show_observation_matching_observations.l, tab.title)
+      assert_equal(routes.occurrence_path(occurrence.id), tab.path)
+      assert_equal(:matrix, tab.html_options[:icon])
+    end
+
+    def test_add_matching_observations
+      tab = Tab::Observation::AddMatchingObservations.new(obs: @obs)
+
+      assert_equal(:show_observation_add_matching_observations.l, tab.title)
+      assert_equal(routes.new_occurrence_path(observation_id: @obs.id),
+                   tab.path)
+      assert_equal(:matrix, tab.html_options[:icon])
+    end
+
     def test_of_name
       tab = Tab::Observation::OfName.new(name: @name)
 

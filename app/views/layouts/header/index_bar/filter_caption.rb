@@ -92,10 +92,10 @@ module Views::Layouts
       ) do
         # aria-hidden as a string — Phlex 2 renders boolean `true`
         # as an empty-string attr, not "true".
-        render(::Components::Icon.new(
-                 type: :"chevron_#{direction}",
-                 attributes: { aria: { hidden: "true" } }
-               ))
+        Icon(
+          type: :"chevron_#{direction}",
+          attributes: { aria: { hidden: "true" } }
+        )
       end
     end
 

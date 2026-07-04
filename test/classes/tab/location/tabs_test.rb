@@ -17,7 +17,7 @@ module Tab::Location
 
       assert_equal(:show_location_create.t, tab.title)
       assert_equal(routes.new_location_path, tab.path)
-      assert_nil(tab.html_options[:icon])
+      assert_equal(:add, tab.html_options[:icon])
       assert_equal(Location, tab.model)
     end
 

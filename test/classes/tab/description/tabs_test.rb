@@ -23,7 +23,7 @@ module Tab::Description
       assert_equal(:show_name_create_description.t, tab.title)
       assert_equal(routes.new_name_description_path(name_id: @name.id),
                    tab.path)
-      assert_nil(tab.html_options[:icon])
+      assert_equal(:add, tab.html_options[:icon])
       assert_equal(NameDescription, tab.model)
     end
 
