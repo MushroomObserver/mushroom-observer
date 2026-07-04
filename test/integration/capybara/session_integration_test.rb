@@ -49,8 +49,11 @@ class SessionIntegrationTest < CapybaraIntegrationTestCase
     assert_button(:app_turn_admin_on.t)
     assert_no_selector("#admin_banner")
 
-    # Enable admin mode via the user-nav dropdown button.
-    click_on(id: "user_nav_admin_mode_link")
+    # Enable admin mode via the user-nav dropdown button. Scope to
+    # the dropdown — the same .admin_mode_link class also exists
+    # (CSS-hidden) in the mobile sidebar, which rack_test can't tell
+    # is hidden.
+    within("#user_drop_down") { click_on(class: "admin_mode_link") }
 
     # Banner and flipped toggle both confirm admin mode is active.
     assert_selector("#admin_banner",

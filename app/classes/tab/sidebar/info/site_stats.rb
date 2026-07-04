@@ -9,8 +9,4 @@ class Tab::Sidebar::Info::SiteStats < Tab::Base
   def path
     info_site_stats_path
   end
-
-  def html_options
-    { id: "nav_site_stats_link" }
-  end
 end

@@ -27,16 +27,16 @@ module Views::Controllers::Observations::Maps
       # built from the obs's .location, so the locations are already
       # implicitly represented. Unioning @locations in addition produced
       # duplicate box overlays on top of obs points (#4131 follow-up).
-      render(::Components::Map.new(
-               objects: @observations,
-               clustering: true,
-               capped: @observations_capped,
-               observations_loaded_count: @observations_loaded_count,
-               observations_total_count: @observations_total_count,
-               cluster_query_string: @cluster_query_string,
-               zoom: 2,
-               map_type: "info"
-             ))
+      Map(
+        objects: @observations,
+        clustering: true,
+        capped: @observations_capped,
+        observations_loaded_count: @observations_loaded_count,
+        observations_total_count: @observations_total_count,
+        cluster_query_string: @cluster_query_string,
+        zoom: 2,
+        map_type: "info"
+      )
     end
   end
 end

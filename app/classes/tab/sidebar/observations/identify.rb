@@ -9,8 +9,4 @@ class Tab::Sidebar::Observations::Identify < Tab::Base
   def path
     identify_observations_path
   end
-
-  def html_options
-    { id: "nav_identify_observations_link" }
-  end
 end

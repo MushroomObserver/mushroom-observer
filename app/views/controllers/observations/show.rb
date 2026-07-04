@@ -75,11 +75,11 @@ module Views::Controllers::Observations
     end
 
     def render_carousel
-      render(Components::ImageGallery.new(
-               object: @observation, images: @images,
-               carousel_id: "observation_images", user: @user,
-               title: :IMAGES.t, links: carousel_links
-             ))
+      ImageGallery(
+        object: @observation, images: @images,
+        carousel_id: "observation_images", user: @user,
+        title: :IMAGES.t, links: carousel_links
+      )
     end
 
     def carousel_links

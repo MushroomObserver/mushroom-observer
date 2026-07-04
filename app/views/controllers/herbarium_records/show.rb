@@ -31,7 +31,7 @@ module Views::Controllers::HerbariumRecords
     private
 
     def render_details
-      render(Components::ContentPadded.new(id: "herbarium_record_details")) do
+      ContentPadded(id: "herbarium_record_details") do
         p do
           render_field_lines
           render_collection_link if herbarium&.web_searchable?

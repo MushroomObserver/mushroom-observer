@@ -14,11 +14,11 @@ class Views::Layouts::TopNav::UserNav < Views::Base
   prop :user, ::User
 
   def view_template
-    render(Components::Dropdown.new(
-             id: "user_nav_toggle",
-             menu_id: "user_drop_down",
-             label: @user.login
-           )) do |menu|
+    Dropdown(
+      id: "user_nav_toggle",
+      menu_id: "user_drop_down",
+      label: @user.login
+    ) do |menu|
       menu.section(::Tab::UserNav::LoggedIn.new(user: @user))
       menu.section(::Tab::UserNav::LogOut.new(
                      user: @user, in_admin_mode: in_admin_mode?

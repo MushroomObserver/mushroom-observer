@@ -255,7 +255,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       assert_not_nil(wizard.auth_code, "Auth code should be generated")
 
       # Actually happens: User tries to sign in immediately, without verifying
-      click_link(id: "nav_login_link")
+      click_link(class: "login_link")
       assert_selector("body.login__new")
 
       within("#account_login_form") do
@@ -291,8 +291,10 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       # They should be logged in now.
       assert_button(:app_logout.t)
-      # Log out. (must use id, there are multiple links)
-      click_button(id: "nav_user_logout_link")
+      # Log out via the desktop dropdown specifically — the same
+      # .logout_link class also exists (CSS-hidden) in the mobile
+      # sidebar, which rack_test can't tell is hidden.
+      within("#user_drop_down") { click_button(class: "logout_link") }
       assert_no_link(:app_logout.t)
 
       # Try to use that verification code again. No can do

@@ -60,10 +60,10 @@ module Views::Controllers::Locations
       render_section_heading(:list_place_names_known,
                              :list_place_names_known_order,
                              css: "h4 px-3 mb-0")
-      render(::Components::ContentPadded.new) do
+      ContentPadded do
         small { plain(:list_place_names_parenthetical.l) }
       end
-      render(::Components::PaginatedResults.new) { render_known_list(counts) }
+      PaginatedResults { render_known_list(counts) }
     end
 
     def render_known_list(counts)

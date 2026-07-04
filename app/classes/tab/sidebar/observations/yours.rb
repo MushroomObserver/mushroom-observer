@@ -14,8 +14,4 @@ class Tab::Sidebar::Observations::Yours < Tab::Base
   def path
     observations_path(by_user: @user.id)
   end
-
-  def html_options
-    { id: "nav_your_observations_link" }
-  end
 end

@@ -9,8 +9,4 @@ class Tab::Sidebar::Signup < Tab::Base
   def path
     account_signup_path
   end
-
-  def html_options
-    { id: "nav_signup_link" }
-  end
 end

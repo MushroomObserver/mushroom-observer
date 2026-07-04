@@ -11,8 +11,6 @@ class Views::Layouts::Sidebar
   #     in_admin_mode: in_admin_mode?
   #   ))
   class User < ::Components::Base
-    include Rails.application.routes.url_helpers
-
     prop :user, ::User
     prop :classes, _Hash(Symbol, String)
 
@@ -34,16 +32,20 @@ class Views::Layouts::Sidebar
 
     # Logging out changes the session's theme/asset state, so Turbo
     # Drive's head-merging on the redirected page can corrupt
-    # stylesheets. Opt this button out of Turbo entirely.
+    # stylesheets. `Tab::UserNav::Logout` already opts out of Turbo
+    # for this reason — source everything from it instead of
+    # re-typing the title/path/opt-out (this is also what the desktop
+    # user-nav dropdown renders).
     def render_logout_button
+      tab = Tab::UserNav::Logout.new
       Button(
         type: :post,
-        name: :app_logout.t,
-        target: account_logout_path,
+        name: tab.title,
+        target: tab.path,
         variant: :btn_link,
-        id: "nav_user_logout_link",
-        class: class_names(@classes[:indent], @classes[:mobile_only]),
-        data: { turbo: false }
+        class: class_names(@classes[:indent], @classes[:mobile_only],
+                           tab.html_options[:class]),
+        data: tab.html_options[:data]
       )
     end
 
@@ -69,16 +71,20 @@ class Views::Layouts::Sidebar
 
     # Toggling admin mode changes the session's theme/asset state, so
     # Turbo Drive's head-merging on the redirected page can corrupt
-    # stylesheets. Opt this button out of Turbo entirely.
+    # stylesheets. `Tab::UserNav::AdminMode` already opts out of
+    # Turbo for this reason — source everything from it instead of
+    # re-typing the title/path/opt-out (this is also what the desktop
+    # user-nav dropdown renders).
     def render_admin_button
+      tab = Tab::UserNav::AdminMode.new(in_admin_mode: false)
       Button(
         type: :post,
-        name: :app_turn_admin_on.t,
-        target: admin_mode_path(turn_on: true),
+        name: tab.title,
+        target: tab.path,
         variant: :btn_link,
-        id: "nav_mobile_admin_link",
-        class: class_names(@classes[:indent], @classes[:mobile_only]),
-        data: { turbo: false }
+        class: class_names(@classes[:indent], @classes[:mobile_only],
+                           tab.html_options[:class]),
+        data: tab.html_options[:data]
       )
     end
 

@@ -9,8 +9,4 @@ class Tab::Sidebar::Admin::Jobs < Tab::Base
   def path
     "/jobs"
   end
-
-  def html_options
-    { id: "nav_admin_jobs_link" }
-  end
 end

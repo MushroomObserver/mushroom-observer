@@ -42,12 +42,12 @@ module Views::Controllers::Users
     def render_right_column
       return unless @best_images.length.positive?
 
-      render(::Components::ImageGallery.new(
-               object: @show_user,
-               images: @best_images,
-               title: :show_user_observations_by.t(name: @show_user.login),
-               panel_id: "user_best_images"
-             ))
+      ImageGallery(
+        object: @show_user,
+        images: @best_images,
+        title: :show_user_observations_by.t(name: @show_user.login),
+        panel_id: "user_best_images"
+      )
     end
   end
 end

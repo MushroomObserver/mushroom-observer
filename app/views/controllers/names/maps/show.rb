@@ -22,16 +22,16 @@ class Views::Controllers::Names::Maps::Show < Views::FullPageBase
       )
     )
 
-    render(::Components::Map.new(
-             objects: @observations.to_a,
-             clustering: true,
-             capped: @observations_capped,
-             observations_loaded_count: @observations_loaded_count,
-             observations_total_count: @observations_total_count,
-             cluster_query_string: @cluster_query_string,
-             zoom: 2,
-             map_type: "info",
-             nothing_to_map: :name_map_no_maps.tp(name: @name.display_name)
-           ))
+    Map(
+      objects: @observations.to_a,
+      clustering: true,
+      capped: @observations_capped,
+      observations_loaded_count: @observations_loaded_count,
+      observations_total_count: @observations_total_count,
+      cluster_query_string: @cluster_query_string,
+      zoom: 2,
+      map_type: "info",
+      nothing_to_map: :name_map_no_maps.tp(name: @name.display_name)
+    )
   end
 end

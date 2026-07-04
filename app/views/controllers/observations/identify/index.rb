@@ -28,7 +28,7 @@ module Views::Controllers::Observations::Identify
         p { trusted_html(:obs_needing_id_intro.tp) }
       end
 
-      render(::Components::PaginatedResults.new) { render_matrix }
+      PaginatedResults { render_matrix }
     end
 
     private

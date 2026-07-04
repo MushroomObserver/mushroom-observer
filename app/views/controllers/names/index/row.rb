@@ -31,9 +31,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
 
   def render_id_badge
     span do
-      render(Components::IdBadge.new(
-               object: @name, extra_class: "rss-id mr-4"
-             ))
+      IdBadge(object: @name, extra_class: "rss-id mr-4")
     end
   end
 

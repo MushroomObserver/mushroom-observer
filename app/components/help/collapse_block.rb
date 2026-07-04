@@ -18,7 +18,7 @@ class Components::Help::CollapseBlock < Components::Base
     div_class = "well well-sm mb-3 help-block position-relative"
     div_class += " mt-3" if @direction == "up"
 
-    render(::Components::CollapseDiv.new(id: @target_id)) do
+    CollapseDiv(id: @target_id) do
       div(class: div_class) do
         yield if block
         if @direction

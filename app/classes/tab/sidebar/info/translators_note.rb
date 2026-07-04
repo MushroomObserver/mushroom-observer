@@ -9,8 +9,4 @@ class Tab::Sidebar::Info::TranslatorsNote < Tab::Base
   def path
     info_translators_note_path
   end
-
-  def html_options
-    { id: "nav_translators_note_link" }
-  end
 end

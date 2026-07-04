@@ -27,9 +27,9 @@ class Components::Accordion < Components::Base
   prop :id, String
 
   slot :pane, lambda { |id:, expanded: false, &content|
-    render(::Components::CollapseDiv.new(
-             id: id, expanded: expanded, html_class: "no-transition"
-           )) { content&.call }
+    CollapseDiv(
+      id: id, expanded: expanded, html_class: "no-transition"
+    ) { content&.call }
   }, collection: true
 
   def view_template

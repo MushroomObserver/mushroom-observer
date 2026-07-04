@@ -9,8 +9,4 @@ class Tab::Sidebar::Admin::Users < Tab::Base
   def path
     users_path(by: "name")
   end
-
-  def html_options
-    { id: "nav_admin_user_index_link" }
-  end
 end

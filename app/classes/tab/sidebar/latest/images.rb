@@ -9,8 +9,4 @@ class Tab::Sidebar::Latest::Images < Tab::Base
   def path
     images_path
   end
-
-  def html_options
-    { id: "nav_images_link" }
-  end
 end

@@ -35,7 +35,7 @@ module Views::Controllers::Shared
     private
 
     def render_image_matrix
-      render(::Components::PaginatedResults.new) do
+      PaginatedResults do
         render(::Components::Matrix::Table.new) do
           @objects.each { |image| render_image_card(image) }
         end

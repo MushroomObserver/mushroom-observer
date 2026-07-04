@@ -37,9 +37,9 @@ module Views::Layouts
 
       num_versions = @versions.length
 
-      render(::Components::ContentPadded.new(
-               class: "small footer-view-stats"
-             )) do
+      ContentPadded(
+        class: "small footer-view-stats"
+      ) do
         if num_versions.positive? && @obj.version < num_versions
           render_old_version_metadata(num_versions)
         else
@@ -57,7 +57,7 @@ module Views::Layouts
     # of the optional chunks. Renders for `herbarium_records/show`
     # and `collection_numbers/show`.
     def render_minimal
-      render(::Components::ContentPadded.new(class: "small")) do
+      ContentPadded(class: "small") do
         p do
           plain("#{:CREATED_AT.l}: #{@obj.created_at.web_date}")
           br

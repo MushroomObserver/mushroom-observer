@@ -113,6 +113,21 @@ export default class extends GeocodeController {
     // button before the Google Maps API finishes loading throws an
     // uncaught `google is not defined` from `new google.maps.Map(...)`
     // and leaves the controller permanently broken (no retry).
+    // Google calls `window.gm_authFailure()` on any Maps JavaScript API
+    // auth failure (bad key, wrong referer, billing disabled, etc.).
+    // Hook it once per page load so the failure surfaces alongside the
+    // Geocoding / Elevation failures (#4535).
+    if (!window._mo_gmauth_installed) {
+      window.gm_authFailure = () => {
+        this.showGoogleMapsError(
+          "Google Maps authentication failed",
+          "the API key is missing, restricted, or doesn't have the " +
+          "required services enabled"
+        )
+      }
+      window._mo_gmauth_installed = true
+    }
+
     this.googleMapsReady = loader
       .load()
       .then((google) => {
@@ -138,7 +153,7 @@ export default class extends GeocodeController {
         return google
       })
       .catch((e) => {
-        console.error("error loading gmaps: " + e)
+        this.showGoogleMapsError("Google Maps failed to load", e)
       })
   }
 

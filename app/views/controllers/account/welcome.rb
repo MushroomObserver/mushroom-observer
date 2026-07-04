@@ -11,12 +11,7 @@ module Views::Controllers::Account
       add_page_title(welcome_title)
       if current_user
         trusted_html(:welcome_note.tp)
-        Button(
-          type: :post,
-          name: :app_logout.t,
-          target: account_logout_path,
-          id: "nav_user_logout_link"
-        )
+        render_logout_button
       else
         trusted_html(:welcome_no_user_note.tp)
       end
@@ -28,6 +23,23 @@ module Views::Controllers::Account
       return :welcome_no_user_title.t unless current_user
 
       :email_welcome.t(user: current_user.legal_name)
+    end
+
+    # Logging out changes the session's theme/asset state, so Turbo
+    # Drive's head-merging on the redirected page can corrupt
+    # stylesheets. Source everything from `Tab::UserNav::Logout`
+    # (which already opts out of Turbo for this reason) instead of
+    # re-typing the title/path/opt-out — this call site was
+    # previously missing the Turbo opt-out entirely.
+    def render_logout_button
+      tab = Tab::UserNav::Logout.new
+      Button(
+        type: :post,
+        name: tab.title,
+        target: tab.path,
+        class: tab.html_options[:class],
+        data: tab.html_options[:data]
+      )
     end
   end
 end

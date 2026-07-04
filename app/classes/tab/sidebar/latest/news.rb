@@ -9,8 +9,4 @@ class Tab::Sidebar::Latest::News < Tab::Base
   def path
     articles_path
   end
-
-  def html_options
-    { id: "nav_articles_link" }
-  end
 end

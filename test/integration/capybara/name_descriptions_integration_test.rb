@@ -61,7 +61,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
   def create_draft(name, gen_desc, project, session:)
     assert_nil(NameDescription.find_by(gen_desc: gen_desc))
     session.visit("/")
-    session.click_link(id: "nav_name_observations_link")
+    session.click_link(class: "names_link")
     session.click_link(text: name.text_name)
     url = name_path(name.id)
     session.assert_text("There are no descriptions")
@@ -287,7 +287,12 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     user.save
     sess = open_session
     login!(user, session: sess)
-    sess.first(:button, id: "user_nav_admin_mode_link").click
+    # Scope to the dropdown — the same .admin_mode_link class also
+    # exists (CSS-hidden) in the mobile sidebar, which rack_test
+    # can't tell is hidden.
+    sess.within("#user_drop_down") do
+      sess.first(:button, class: "admin_mode_link").click
+    end
     teach_about_name_descriptions(sess)
     sess.user = user # can't assign props to session with capybara?
     sess
@@ -627,8 +632,10 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     login!(users(:admin))
     visit("/names/descriptions/#{desc.id}")
 
-    # Enter admin mode
-    first(:button, id: "user_nav_admin_mode_link").click
+    # Enter admin mode. Scope to the dropdown — the same
+    # .admin_mode_link class also exists (CSS-hidden) in the mobile
+    # sidebar, which rack_test can't tell is hidden.
+    within("#user_drop_down") { first(:button, class: "admin_mode_link").click }
 
     # Should be able to see the "Adjust permissions" link in admin mode
     # Try different possible link texts

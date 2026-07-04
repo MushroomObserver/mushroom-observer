@@ -21,7 +21,7 @@ module Views::Controllers::SpeciesLists
       add_pagination(@pagination_data)
       container_class(:wide)
 
-      render(::Components::PaginatedResults.new) { render_list }
+      PaginatedResults { render_list }
     end
 
     private

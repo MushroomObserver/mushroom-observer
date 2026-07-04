@@ -9,8 +9,4 @@ class Tab::Sidebar::Admin::BlockedIps < Tab::Base
   def path
     edit_admin_blocked_ips_path
   end
-
-  def html_options
-    { id: "nav_admin_blocked_ips_link" }
-  end
 end

@@ -116,11 +116,11 @@ class Components::Form::RegionWithBoxFields < Components::Base
   end
 
   def render_editable_map
-    render(::Components::Map.new(
-             objects: [build_minimal_location],
-             editable: true, map_type: "location",
-             map_open: true, controller: nil
-           ))
+    Map(
+      objects: [build_minimal_location],
+      editable: true, map_type: "location",
+      map_open: true, controller: nil
+    )
   end
 
   def build_minimal_location
