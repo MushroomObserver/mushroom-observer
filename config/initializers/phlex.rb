@@ -1,12 +1,23 @@
 # frozen_string_literal: true
 
 # Views and Components namespaces bootstrapped together in this initializer.
-# Both extend Phlex::Kit so callers can render via `render Views::Foo` and
-# `render Components::Bar` shorthand (no `.new(...)`) inside a Phlex render
-# context.
-module Views
-  extend Phlex::Kit
-end
+#
+# Only `Components` extends `Phlex::Kit` — deliberately not `Views`.
+# `Phlex::Kit` generates a bare, callable method for every class
+# directly under the extending namespace (`Components::Icon` →
+# `Icon(...)`), replacing BOTH the `render(...)` call AND the `.new(...)`
+# call in one shot — a caller writes `Icon(type: :edit)`, never
+# `render(Components::Icon.new(type: :edit))`. `Views` classes never
+# benefit from this: every real view lives 2+ levels deep
+# (`Views::Controllers::<Controller>::<Action>`, see the "Action-
+# template + sub-view organization" convention in
+# `.claude/rules/phlex_reference.md`), and Kit sugar only fires for classes
+# exactly one level under the extending namespace. Extending `Views`
+# would just add a dead `extend` with no real caller ever able to use
+# it — the only classes directly under `Views` are abstract bases
+# (`Views::Base`, `Views::FullPageBase`) that are never rendered
+# directly.
+module Views; end
 
 module Components # rubocop:disable Style/OneClassPerFile
   extend Phlex::Kit

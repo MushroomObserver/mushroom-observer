@@ -587,7 +587,7 @@ When a form renders correctly but doesn't submit in the browser:
    parsing, so they won't reproduce browser-only issues.
 2. **Check for nested forms** — inspect rendered HTML for `<form>`
    inside `<form>`. This is the #1 cause. See "Nested `<form>` Elements"
-   in `.claude/phlex_style_guide.md`.
+   in `.claude/rules/phlex_reference.md`.
 3. **Check Turbo interference** — MO uses `Turbo.config.forms.mode =
    "optin"`. Forms without `data-turbo="true"` should submit normally.
    Forms with `data-turbo="true"` need a Turbo-compatible server
