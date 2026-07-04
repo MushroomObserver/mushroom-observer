@@ -47,12 +47,6 @@ class Inat
     IMPORTABLE_TAXON_IDS = [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].freeze
     IMPORTABLE_TAXON_IDS_ARG = IMPORTABLE_TAXON_IDS.join(",").freeze
 
-    # base url for iNat CC-licensed and public domain photos
-    LICENSED_PHOTO_BASE =
-      "https://inaturalist-open-data.s3.amazonaws.com/photos"
-    # base url for iNat unlicensed photos
-    UNLICENSED_PHOTO_BASE = "https://static.inaturalist.org/photos"
-    # id of iNat's "Mushroom Observer URL" observation field
     MO_URL_OBSERVATION_FIELD_ID = 5005
 
     # Filter params added to every iNat observation API request
