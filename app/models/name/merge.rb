@@ -28,16 +28,34 @@ class Name
     def merge(user, old_name)
       return if old_name == self
 
-      move_observations(old_name)
-      move_namings(old_name)
-      move_mispellings(old_name)
-      move_followings(old_name) # move Interest and Tracking
-      move_descriptions(user, old_name)
-      move_versions(old_name)
-      move_nomenclature_attributes(old_name)
-      move_taxonomy_attributes(user, old_name)
+      Name.transaction do
+        move_observations(old_name)
+        move_namings(old_name)
+        move_mispellings(old_name)
+        move_followings(old_name) # move Interest and Tracking
+        move_descriptions(user, old_name)
+        move_versions(old_name)
+        move_nomenclature_attributes(old_name)
+        move_taxonomy_attributes(user, old_name)
 
-      old_name.destroy
+        # Re-snapshot right before destroying: a concurrent request
+        # could have pointed a different Name's correct_spelling at
+        # old_name after move_mispellings' query ran above. A plain
+        # `Name.where` bypasses old_name's own association reader
+        # entirely, so it neither triggers a StrictLoadingViolationError
+        # (old_name.misspellings may already be eager-loaded via
+        # Name.merge_includes) nor requires old_name.reload (which
+        # would also wipe out move_descriptions' in-memory
+        # `rss_log = nil`, un-orphaning it and causing do_log_destroy
+        # to log a duplicate destroy entry). Catches anything that
+        # slipped in during the merge, keeping correct_spelling_id
+        # from ever dangling once old_name is gone.
+        move_mispellings(old_name,
+                         misspellings: Name.where(correct_spelling_id:
+                                                     old_name.id))
+
+        old_name.destroy
+      end
     end
 
     #######################
@@ -58,8 +76,8 @@ class Name
       end
     end
 
-    def move_mispellings(old_name)
-      old_name.misspellings.each do |name|
+    def move_mispellings(old_name, misspellings: old_name.misspellings)
+      misspellings.each do |name|
         name.correct_spelling = (name == self ? nil : self)
         name.save
       end
