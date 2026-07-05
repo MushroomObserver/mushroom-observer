@@ -16,9 +16,12 @@ module Views::Mailers::CommentMailer
     prop :target, _Interface(:type_tag, :show_controller, :unique_format_name)
     prop :comment, ::Comment
     # "owner" / "response" / "all" — which of the three notification
-    # reasons applies to this receiver. Computed by CommentMailer#build
-    # (needs an extra Comment query beyond "is this the object's
-    # owner?"), not here — views shouldn't be querying the database.
+    # reasons applies to this receiver. Computed by
+    # Comment::Callbacks#comment_email_type (reuses the comments
+    # already fetched once per notify_users run, rather than a fresh
+    # per-recipient query) and threaded through unchanged by
+    # CommentMailer#build — not here, views shouldn't query the
+    # database.
     prop :email_type, ::String
 
     INTRO_KEYS = {

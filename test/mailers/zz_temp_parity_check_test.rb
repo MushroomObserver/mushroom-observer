@@ -68,7 +68,8 @@ class ZzTempParityCheckTest < UnitTestCase
     comment = comments(:minimal_unknown_obs_comment_1)
 
     html_body, text_body = both_bodies(mary) do
-      CommentMailer.build(sender: rolf, receiver: mary, target:, comment:)
+      CommentMailer.build(sender: rolf, receiver: mary, target:, comment:,
+                          email_type: "owner")
     end
 
     compare("comment", "comment", html_body, text_body)
@@ -81,7 +82,8 @@ class ZzTempParityCheckTest < UnitTestCase
     comment = comments(:minimal_unknown_obs_comment_2)
 
     html_body, text_body = both_bodies(rolf) do
-      CommentMailer.build(sender: dick, receiver: rolf, target:, comment:)
+      CommentMailer.build(sender: dick, receiver: rolf, target:, comment:,
+                          email_type: "response")
     end
 
     compare("comment_response", "comment_response", html_body, text_body)
@@ -145,5 +147,20 @@ class ZzTempParityCheckTest < UnitTestCase
     end
 
     compare("commercial_inquiry", "commercial_inquiry", html_body, text_body)
+  end
+
+  def test_admin_request_parity
+    rolf = users(:rolf)
+    katrina = users(:katrina)
+    project = projects(:eol_project)
+
+    html_body, text_body = both_bodies(rolf) do
+      ProjectAdminRequestMailer.build(
+        sender: katrina, receiver: rolf, project:,
+        subject: "Please do something or other", message: "and this is why..."
+      )
+    end
+
+    compare("admin_request", "admin_request", html_body, text_body)
   end
 end

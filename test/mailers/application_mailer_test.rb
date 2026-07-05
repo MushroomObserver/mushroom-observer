@@ -77,17 +77,9 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_admin_email
-    project = projects(:eol_project)
-    subject = "Please do something or other"
-    message = "and this is why..."
-
-    run_mail_test("admin_request", rolf) do
-      ProjectAdminRequestMailer.build(
-        sender: katrina, receiver: rolf, project:, subject:, message:
-      ).deliver_now
-    end
-  end
+  # ProjectAdminRequestMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses admin_request
+  # fixtures).
 
   def test_approval_email
     subject = "test subject"
