@@ -156,8 +156,8 @@ app/
   controllers/     # Rails controllers
   components/      # Phlex components
   jobs/            # ActiveJobs
-  views/           # Phlex views (ERB migration complete; Action Mailer
-                   # templates under views/mailers/ still use ERB)
+  views/           # Phlex views (ERB migration complete, including
+                   # Action Mailer templates under views/mailers/)
   javascript/      # Stimulus controllers, Turbo, importmap
   helpers/         # View helpers (being migrated to components)
 test/              # MiniTest suite

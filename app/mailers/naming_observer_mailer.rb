@@ -9,11 +9,11 @@ class NamingObserverMailer < ApplicationMailer
 
     sender = name_tracker.user
     setup_user(receiver)
-    @title = :email_subject_naming_for_observer.l
-    @naming = naming
-    @name_tracker = name_tracker
+    subject = :email_subject_naming_for_observer.l
     debug_log(:naming_for_observer, sender, @user,
               naming:, name_tracker:)
-    mo_mail(@title, to: receiver, reply_to: sender)
+    mo_mail(subject, to: receiver, reply_to: sender,
+                     view_params: { subject:, receiver:, naming:,
+                                    name_tracker: })
   end
 end

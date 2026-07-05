@@ -6,12 +6,12 @@ class ObserverQuestionMailer < ApplicationMailer
 
   def build(sender:, observation:, message:)
     setup_user(observation.user)
-    name = observation.unique_text_name
-    @title = :email_subject_observation_question.l(name:)
-    @sender = sender
-    @observation = observation
-    @message = message || ""
+    subject = :email_subject_observation_question.l(
+      name: observation.unique_text_name
+    )
     debug_log(:observation_question, sender, @user, observation:)
-    mo_mail(@title, to: @user, reply_to: sender)
+    mo_mail(subject, to: @user, reply_to: sender,
+                     view_params: { subject:, sender:, receiver: @user,
+                                    observation:, message: message || "" })
   end
 end
