@@ -5,7 +5,12 @@
 # defaults (config/environments/test.rb sets the former; the latter
 # is Rails' own default) — nothing to force in setup here, just the
 # html/text body assertions every mailer test needs.
-class MailerTestCase < UnitTestCase
+#
+# Extends ComponentTestCase (not UnitTestCase directly) so a mailer
+# test can drop to rendering a `Views::Mailers::*` class directly
+# (via `render`) when a code path is easier to reach with a
+# fabricated ObjectChange than through the full versioning pipeline.
+class MailerTestCase < ComponentTestCase
   def assert_html_mail(mail)
     assert_match(/<html>/, mail.body.to_s)
   end

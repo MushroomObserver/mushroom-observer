@@ -56,4 +56,57 @@ class NameChangeMailerTest < MailerTestCase
     assert_includes(body, "was created")
     assert_includes(body, "https://mushroomobserver.org/names/#{name.id}")
   end
+
+  # Name version unchanged, only the description changed — hits the
+  # `elsif (new_desc = desc_change.new_clone)` branch of
+  # name_email_type, distinct from test_build_change_*'s "name
+  # itself changed" branch. rolf is peltigera_desc's reviewer and
+  # has email_names_reviewer on, so this also confirms
+  # permission_reason resolves to "reviewer".
+  def test_build_desc_only_change
+    name = names(:peltigera)
+    desc = name.description
+    rolf.update!(email_html: false)
+
+    mail = NameChangeMailer.build(
+      sender: dick, receiver: rolf, name:,
+      old_name_ver: name.version, new_name_ver: name.version,
+      description: desc, old_desc_ver: desc.version - 1,
+      new_desc_ver: desc.version, review_status: "no_change"
+    ).message
+
+    assert_text_mail(mail)
+    assert_includes(mail.body.to_s, "type=names_reviewer")
+  end
+
+  # correct_spelling_liner's "no correct spelling" ("--") fallback —
+  # easier to reach by rendering the Text view directly against a
+  # fabricated name_change (two in-memory copies of the same fixture
+  # differing only in correct_spelling_id) than by hunting for real
+  # version history where a name's correct_spelling was cleared.
+  def test_correct_spelling_removed_renders_dash
+    old_name = Name.find(names(:peltigera).id)
+    old_name.correct_spelling_id = names(:coprinus_comatus).id
+    new_name = Name.find(names(:peltigera).id)
+    new_name.correct_spelling_id = nil
+
+    html = render(Views::Mailers::NameChangeMailer::Text.new(
+                    subject: "test", receiver: rolf, sender: dick,
+                    time: Time.zone.now,
+                    name_change: fake_change(old_name, new_name),
+                    desc_change: fake_change(nil, nil),
+                    watching: false, email_type: nil
+                  ))
+
+    assert_includes(html, "--")
+  end
+
+  private
+
+  def fake_change(old_clone, new_clone)
+    change = ObjectChange.allocate
+    change.instance_variable_set(:@old_clone, old_clone)
+    change.instance_variable_set(:@new_clone, new_clone)
+    change
+  end
 end

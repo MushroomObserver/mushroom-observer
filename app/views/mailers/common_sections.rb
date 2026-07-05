@@ -87,17 +87,15 @@ module Views::Mailers::CommonSections
     end
   end
 
+  # Every caller only invokes this from an html?==true context (each
+  # mailer's text-mode rendering has its own separate, non-boxed
+  # logic) — no text-mode branch needed here.
   def render_message_box(&block)
-    if html?
-      div(style: "margin-left:20px; margin-right:20px; " \
-                  "padding-left:20px; padding-right:20px; " \
-                  "padding-top:10px; padding-bottom:10px; " \
-                  "border:1px dotted; background:#E0E0E0; " \
-                  "color:#000000;", &block)
-    else
-      yield
-      newline
-    end
+    div(style: "margin-left:20px; margin-right:20px; " \
+                "padding-left:20px; padding-right:20px; " \
+                "padding-top:10px; padding-bottom:10px; " \
+                "border:1px dotted; background:#E0E0E0; " \
+                "color:#000000;", &block)
   end
 
   def report_abuse
