@@ -37,6 +37,14 @@ module Views::Mailers::CommonSections
     plain("\n")
   end
 
+  # Just the "--------------------------------------------------"
+  # line itself, no surrounding blank lines — for callers whose
+  # spacing around it isn't the fixed symmetric shape `divider`
+  # assumes (see LocationChangeMailer's per-field dashes).
+  def dashes_line
+    plain("#{"-" * 50}\n")
+  end
+
   # The 50-dash horizontal rule separating quoted content from the
   # footer in a text-mode body, blank-line-padded on both sides —
   # matches the old ERB templates' literal

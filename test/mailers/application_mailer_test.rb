@@ -97,17 +97,9 @@ class ApplicationMailerTest < UnitTestCase
   # test/mailers/zz_temp_parity_check_test.rb (reuses consensus_change
   # fixtures).
 
-  def test_location_change_email
-    loc = locations(:albion)
-    desc = loc.description
-    run_mail_test("location_change", mary) do
-      LocationChangeMailer.build(
-        sender: dick, receiver: mary, location: loc,
-        old_loc_ver: 1, new_loc_ver: 2,
-        description: desc, old_desc_ver: 1, new_desc_ver: 2
-      ).deliver_now
-    end
-  end
+  # LocationChangeMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses location_change
+  # fixtures).
 
   def test_name_change_email
     name = names(:peltigera)

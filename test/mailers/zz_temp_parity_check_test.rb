@@ -321,4 +321,21 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("naming_for_tracker", "naming_for_tracker", html_body, text_body)
   end
+
+  def test_location_change_parity
+    mary = users(:mary)
+    dick = users(:dick)
+    loc = locations(:albion)
+    desc = loc.description
+
+    html_body, text_body = both_bodies(mary) do
+      LocationChangeMailer.build(
+        sender: dick, receiver: mary, location: loc,
+        old_loc_ver: 1, new_loc_ver: 2,
+        description: desc, old_desc_ver: 1, new_desc_ver: 2
+      )
+    end
+
+    compare("location_change", "location_change", html_body, text_body)
+  end
 end
