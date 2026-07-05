@@ -10,10 +10,10 @@ module Views::Controllers::Translations
     prop :index, _Array(::TranslationsController::TranslationsUIString)
     prop :strings, _Hash(::String, ::String), default: -> { {} }
     prop :edit_tags, _Array(::String), default: -> { [] }
-    prop :official_records,
-         _Hash(::String, ::TranslationString), default: -> { {} }
-    prop :translated_records,
-         _Hash(::String, ::TranslationString), default: -> { {} }
+    # No `default:` — every real caller (`TranslationsController#index`,
+    # this view's own test) always supplies both explicitly.
+    prop :official_records, _Hash(::String, ::TranslationString)
+    prop :translated_records, _Hash(::String, ::TranslationString)
 
     def view_template
       container_class(:wide)
@@ -29,7 +29,7 @@ module Views::Controllers::Translations
 
     def render_help_block
       div(class: "container-text") do
-        render(::Components::Help::Block.new(:p, :edit_translations_help.t))
+        Help(element: :p, content: :edit_translations_help.t)
       end
     end
 

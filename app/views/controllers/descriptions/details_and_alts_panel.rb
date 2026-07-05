@@ -197,7 +197,7 @@ module Views::Controllers::Descriptions
     end
 
     def render_latest_review_row
-      render(::Components::Help::Note.new) do
+      Help(element: :span) do
         span(class: "ml-3") { nbsp }
         plain("(")
         trusted_html(:show_name_latest_review.t(

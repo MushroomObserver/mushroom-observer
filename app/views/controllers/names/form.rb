@@ -51,7 +51,7 @@ module Views::Controllers::Names
     end
 
     def render_editable_fields
-      render(::Components::Help::Block.new(:form_names_detailed_help.l))
+      Help(content: :form_names_detailed_help.l)
 
       render_icn_id_field
       render_rank_and_status_fields
@@ -66,8 +66,7 @@ module Views::Controllers::Names
                    inline: true,
                    size: 8) do |f|
           f.with_append do
-            render(::Components::Help::Block.new(:p,
-                                                 :form_names_identifier_help.l))
+            Help(element: :p, content: :form_names_identifier_help.l)
           end
         end
       end
@@ -93,8 +92,7 @@ module Views::Controllers::Names
                      rows: 1,
                      data: { autofocus: true }) do |f|
         f.with_append do
-          render(::Components::Help::Block.new(:p,
-                                               :form_names_text_name_help.l))
+          Help(element: :p, content: :form_names_text_name_help.l)
         end
       end
     end
@@ -104,7 +102,7 @@ module Views::Controllers::Names
                      label: "#{:Authority.l}:",
                      rows: 2) do |f|
         f.with_append do
-          render(::Components::Help::Block.new(:p, :form_names_author_help.l))
+          Help(element: :p, content: :form_names_author_help.l)
         end
       end
     end
@@ -115,7 +113,7 @@ module Views::Controllers::Names
         render_locked_status_field
         render_locked_text_name_field
         render_locked_author_field
-        render(::Components::Help::Block.new(:show_name_locked.tp))
+        Help(content: :show_name_locked.tp)
       end
     end
 
@@ -157,10 +155,9 @@ module Views::Controllers::Names
                      label: "#{:Citation.l}:",
                      rows: 3) do |f|
         f.with_append do
-          render(::Components::Help::Block.new(:p)) do
-            trusted_html(:form_names_citation_help.l)
-            trusted_html(:form_names_citation_textilize_note.l)
-          end
+          Help(element: :p,
+               content: [:form_names_citation_help.l,
+                         :form_names_citation_textilize_note.l].safe_join)
         end
       end
     end

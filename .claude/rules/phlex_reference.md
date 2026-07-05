@@ -117,19 +117,54 @@ class Components::Widget < Components::Base
 end
 ```
 
-`Link` and `Button` treat a missing `type:` as their own plain variant
-(falls through to `super`, real instance of the dispatcher class itself).
-`Help` has no such "plain" case, so it defaults the missing `type:` to
-its most common subclass (`:block`) instead of falling through — decide
-per-dispatcher whether "no type" should mean "the base class renders
-itself" or "assume the most common subtype."
+`Link`, `Button`, and `Help` all treat a missing `type:` as their own
+plain variant (falls through to `super`, a real instance of the
+dispatcher class itself) — `Help` with no `type:` is the plain
+`help-block` shape; only genuinely distinct DOM shapes (`:tooltip`,
+`:collapse_block`, `:collapse_info_trigger`) get routed to a subclass.
 
-If any subclass has a legacy positional-arg signature (e.g.
-`Components::Help::Block.new(element = :div, string = nil, **kwargs)`),
-the dispatcher needs `*args` passthrough too:
-`def self.new(*args, **kwargs, &block)` /
-`const_get(klass_name).new(*args, **kwargs, &block)`. `Link` and `Button`
-don't need this because every one of their subclasses is pure-kwargs.
+Keep every dispatched subclass pure-kwargs (no positional-arg
+shorthand) so `self.new(**kwargs, &block)` needs no `*args`
+passthrough. `Components::Help::Block` / `Help::Note` (now merged into
+`Components::Help`) used to accept a legacy `(element, string)`
+positional pair — an ERB-helper holdover — which forced the dispatcher
+to forward `*args` too. Dropping the positional form when the merge
+happened let the dispatcher shrink back to the plain `Link`/`Button`
+shape.
+
+### Kit sugar doesn't reach `app/components/application_form/*`
+
+Every class under `app/components/application_form/` — `DateField`,
+`TextField`, `CheckboxField`, `SelectField`, etc. — extends `Phlex::HTML`
+directly rather than existing as its own `Components::<Name>` constant.
+Calling Kit sugar (`Help(...)`, `Icon(...)`, etc.) from inside one of
+these classes (or a module mixed into them, like `FieldWithHelp`) raises
+`NoMethodError: undefined method 'Help' for an instance of
+Components::ApplicationForm::DateField` — not a typo, a structural gap.
+
+**Why**: Phlex::Kit's sugar is wired up by a `const_added` hook that
+fires on `Components` itself. When a class is assigned directly as
+`Components::Foo`, the hook mixes a shared module (call it `Components`
+again — it's the same namespace module) into `Foo`, and separately
+defines an instance method named `Foo` *on that shared module* for
+every other Kit-registered sibling to call. `const_added` only
+re-fires on *nested modules* (`when Module; constant.extend(Phlex::Kit)`
+in the gem source) — never on nested *classes*. `Components::ApplicationForm`
+is a class (`class Components::ApplicationForm < Superform::Rails::Form`),
+so defining `DateField` inside it never triggers the hook, regardless of
+what `DateField` itself inherits from.
+
+**Fix**: `include ::Components` into a module that's already mixed into
+every field class that needs it. `FieldWithHelp` is included by every
+concrete field class (`DateField`, `TextField`, `CheckboxField`,
+`ReadOnlyField`, `SelectField`, `StaticTextField`, `TextareaField`), so
+adding `include ::Components` there — see `app/components/application_form/
+field_with_help.rb` — restores Kit sugar transitively for all of them:
+Ruby's module inclusion carries `Components`'s accumulated instance
+methods (and its `Phlex::Kit::LazyLoader` `method_missing` fallback)
+along the whole include chain. Without a shared mixin to hang it on,
+fall back to the full `render(Components::Help.new(...))` form instead
+— it works everywhere, unconditionally.
 
 ## Decide first: reusable or single-use?
 

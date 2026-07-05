@@ -19,7 +19,8 @@ module Views::Controllers::Descriptions::Moves
 
     def view_template
       h4 { "#{:merge_descriptions_move_header.t}:" }
-      render(::Components::Help::Note.new(:p, :merge_descriptions_move_help.t))
+      Help(element: :p,
+           content: :merge_descriptions_move_help.t)
 
       return unless moves.any?
 
