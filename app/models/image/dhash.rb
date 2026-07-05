@@ -19,7 +19,10 @@ class Image
     USER_AGENT = "MushroomObserver (+https://mushroomobserver.org)"
 
     # Raised when ImageMagick fails or produces unexpected output.
-    class Error < ::StandardError; end
+    # (Multi-line, not `class Error < ...; end` on one line, so the
+    # localization_files_test class/end nesting scanner stays balanced.)
+    class Error < ::StandardError
+    end
 
     class << self
       def from_file(path)
@@ -59,6 +62,14 @@ class Image
       # "[0]" selects the first frame/page of animated GIFs and multi-page
       # TIFFs; -auto-orient bakes in EXIF rotation so originals and
       # (already-rotated) renditions hash alike.
+      #
+      # Open3.capture3 is called in argv (list) form, so no shell is
+      # spawned and each argument reaches convert verbatim — the
+      # interpolations cannot be interpreted as shell syntax. `path` is
+      # never user input either: it is an internally built absolute path
+      # (Image#full_filepath, or a Tempfile) so it can't begin with "-"
+      # and be mistaken for an option. (Brakeman command-injection warning
+      # ignored on this basis in config/brakeman.ignore.)
       def grayscale_pixels(path)
         out, err, status = Open3.capture3(
           "convert", "#{path}[0]", "-auto-orient", "-colorspace", "Gray",
