@@ -3837,7 +3837,7 @@ class NameTest < UnitTestCase
 
     assert(Name.exists?(old_name.id),
            "old_name should still exist - merge should have rolled back")
-    assert_equal(old_obs_ids, old_name.reload.observations.map(&:id),
+    assert_equal(old_obs_ids.sort, old_name.reload.observations.map(&:id).sort,
                  "old_name's observations should not have been moved")
   end
 
