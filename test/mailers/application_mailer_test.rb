@@ -68,14 +68,9 @@ class ApplicationMailerTest < UnitTestCase
 
   ##############################################################################
 
-  def test_add_herbarium_record_email
-    herbarium_record = herbarium_records(:interesting_unknown)
-    run_mail_test("add_herbarium_record_not_curator", rolf) do
-      AddHerbariumRecordMailer.build(
-        sender: mary, receiver: rolf, herbarium_record:
-      ).deliver_now
-    end
-  end
+  # AddHerbariumRecordMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses
+  # add_herbarium_record_not_curator fixtures).
 
   # ProjectAdminRequestMailer converted to Phlex (issue #4676) — see
   # test/mailers/zz_temp_parity_check_test.rb (reuses admin_request

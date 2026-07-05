@@ -266,4 +266,18 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("observation_destroy", "observation_destroy", html_body, text_body)
   end
+
+  def test_add_herbarium_record_parity
+    rolf = users(:rolf)
+    mary = users(:mary)
+    herbarium_record = herbarium_records(:interesting_unknown)
+
+    html_body, text_body = both_bodies(rolf) do
+      AddHerbariumRecordMailer.build(sender: mary, receiver: rolf,
+                                     herbarium_record:)
+    end
+
+    compare("add_herbarium_record_not_curator",
+            "add_herbarium_record_not_curator", html_body, text_body)
+  end
 end
