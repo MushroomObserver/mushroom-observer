@@ -23,7 +23,7 @@ class ProjectsControllerTest < FunctionalTestCase
         dates_any: dates_any,
         upload: {
           license_id: licenses(:ccnc25).id,
-          copyright_holder: User.current&.name || "Someone Else",
+          copyright_holder: "Someone Else",
           copyright_year: 2023
         }
       }

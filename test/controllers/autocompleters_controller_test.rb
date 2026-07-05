@@ -243,4 +243,15 @@ class AutocompletersControllerTest < FunctionalTestCase
     login("rolf")
     bad_autocompleter_request(type: :bogus, string: "bogus")
   end
+
+  # `set_user_from_session` applies the same verified/blocked check
+  # `autologin` does, so an unverified user's session resolves to a
+  # nil @user here too - autocompleting still works (no login_required
+  # on this controller), just without a personalized location_format.
+  def test_autocomplete_unverified_user_session_yields_nil_user
+    login(users(:unverified).login)
+    good_autocompleter_request(type: :location, string: "Modesto")
+
+    assert_nil(assigns(:user))
+  end
 end

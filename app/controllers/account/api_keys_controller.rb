@@ -114,8 +114,7 @@ module Account
     end
 
     def verify_user_owns_key
-      @user = User.current = session_user || raise("Must be logged in.")
-      @key  = APIKey.find(params[:id])
+      @key = APIKey.find(params[:id])
       raise("Permission denied") and return false if @key.user != @user
 
       true
