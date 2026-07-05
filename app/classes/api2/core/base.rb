@@ -32,7 +32,8 @@
 #    params           Validated hash of parameters you passed in.
 #    expected_params  Hash of parameters API tried to parse.  This is a full
 #                     set of available parameters for that method / action.
-#                     Values are API2::ParameterDeclaration instances.
+#                     Values are API2::Parameters::ParameterDeclaration
+#                     instances.
 #
 #    errors           Array of errors which occur while updating or destroying
 #                     records.  (See section on exception handling below.)
