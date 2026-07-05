@@ -280,4 +280,12 @@ class ZzTempParityCheckTest < UnitTestCase
     compare("add_herbarium_record_not_curator",
             "add_herbarium_record_not_curator", html_body, text_body)
   end
+
+  def test_approval_parity
+    mail = ApprovalMailer.build(receiver: katrina, subject: "test subject",
+                                message: "test content").message
+    fixture_text = body_only(interpolated_fixture("approval.text"))
+    assert_equal(normalize_text(fixture_text), normalize_text(mail.body.to_s),
+                 "approval TEXT parity mismatch")
+  end
 end

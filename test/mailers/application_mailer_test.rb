@@ -76,14 +76,9 @@ class ApplicationMailerTest < UnitTestCase
   # test/mailers/zz_temp_parity_check_test.rb (reuses admin_request
   # fixtures).
 
-  def test_approval_email
-    subject = "test subject"
-    message = "test content"
-
-    run_mail_test("approval", rolf) do
-      ApprovalMailer.build(receiver: katrina, subject:, message:).deliver_now
-    end
-  end
+  # ApprovalMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses approval
+  # fixtures).
 
   # AuthorMailer converted to Phlex (issue #4676) — see
   # test/mailers/zz_temp_parity_check_test.rb (reuses author_request
