@@ -1,18 +1,21 @@
 # frozen_string_literal: true
 
-module Inat::ImportAudit
+class Inat
   # Batched, public, rate-limited fetch of current iNat observations by id,
   # with retry/backoff and a descriptive User-Agent. `fetch_batch` returns
   # [results_by_id, failed?]; failed? is true when the batch exhausted its
   # retries, so callers can distinguish a transient fetch failure from an
   # observation genuinely absent/deleted on iNat.
-  class Fetcher
+  #
+  # Shared bulk-fetch infrastructure: the import audit (#4213) and the
+  # reflection-resolution extract builder (#4585) both consume it.
+  class ObsFetcher
     PAGE_SIZE = 200          # iNat's maximum per_page
     INTER_PAGE_SLEEP = 1     # ~1 req/sec; within iNat's ~60/min guidance
     MAX_RETRIES = 3          # per batch, on 429/5xx/timeout
     RETRY_BASE_SLEEP = 2     # seconds; doubles each retry (2, 4, 8)
     USER_AGENT =
-      "MushroomObserver-import-audit (+https://mushroomobserver.org)"
+      "MushroomObserver bulk fetch (+https://mushroomobserver.org)"
 
     # Transient errors worth retrying with backoff before giving up.
     RETRYABLE_ERRORS = [

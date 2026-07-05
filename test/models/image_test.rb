@@ -142,6 +142,45 @@ class ImageTest < UnitTestCase
     assert_raises(RuntimeError) { img.transform(:edible) }
   end
 
+  # Outside the test env the guard clause is skipped and transform shells
+  # out to script/rotate_image with the mapped operator.
+  def test_transform_shells_out_when_not_in_test_env
+    img = images(:in_situ_image)
+    commands = []
+    img.stub(:system, ->(cmd) { commands << cmd }) do
+      Rails.env.stub(:test?, false) do
+        img.transform(:rotate_left)
+      end
+    end
+    assert_equal(["script/rotate_image #{img.id} -90&"], commands)
+  end
+
+  # With no local rendition on disk, compute_dhash! fetches the remote
+  # medium image (the transferred-image path the backfill relies on).
+  def test_compute_dhash_fetches_remote_when_no_local_file
+    img = images(:in_situ_image)
+    img.stub(:full_filepath, "/no/such/file.jpg") do
+      Image::Dhash.stub(:from_url, 123) do
+        assert_equal(123, img.compute_dhash!)
+      end
+    end
+    assert_equal(123, img.reload.dhash)
+  end
+
+  def test_validate_vote_rescues_non_numeric
+    assert_nil(Image.validate_vote(Object.new))
+  end
+
+  def test_num_votes_at_a_given_level
+    img = images(:in_situ_image)
+    assert_equal(0, img.num_votes(2))
+
+    img.change_vote(mary, 2)
+
+    assert_equal(1, img.num_votes(2))
+    assert_equal(0, img.num_votes(4))
+  end
+
   def test_move_original_system_fail
     img = Image.new
     File.stub(:rename, false) do

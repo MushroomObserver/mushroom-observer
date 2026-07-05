@@ -90,6 +90,52 @@
         22
       ],
       "note": "False positive: This is not rendering a dynamic template path based on user input. The render() call is rendering a Phlex component instance (Components::TextileSandboxForm), which is a fixed component class. The user parameters (params[:code], params[:commit]) only populate the data inside the component (textarea content and submit button type), not the component class itself. There is no risk of users controlling which view/template gets rendered."
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "1c4dceb31ac90677da674e42525855dd50e3b289599e177ed7be5a7c174125cf",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/image/dhash.rb",
+      "line": 75,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Open3.capture3(\"convert\", \"#{path}[0]\", \"-auto-orient\", \"-colorspace\", \"Gray\", \"-resize\", \"#{9}x#{8}!\", \"-depth\", \"8\", \"gray:-\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Dhash",
+        "method": "self.grayscale_pixels"
+      },
+      "user_input": "path",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": "False positive: Open3.capture3 is called in argv (list) form, so no shell is spawned and each interpolated argument reaches ImageMagick verbatim and cannot be parsed as shell syntax. `path` is not user input: it is an internally constructed absolute path (Image#full_filepath or a Tempfile), so it also cannot begin with '-' and be misread as a convert option."
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "590d3cd50f65173eac040a0c06e53a81af605cd1c821ad07ae8e88ccf49d467b",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/image.rb",
+      "line": 850,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "system(\"script/rotate_image #{id} #{((\"-90\" or \"+90\") or \"-h\")}&\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Image",
+        "method": "transform"
+      },
+      "user_input": "id",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": "False positive: `id` is this Image record's integer primary key (never a user-supplied string) and the operator is one of three string literals set by the case statement immediately above (unknown operators raise before this line). Neither interpolated value can carry shell metacharacters. The shell-string form is kept because the trailing '&' backgrounds the rotate script."
     }
   ],
   "brakeman_version": "7.1.1"
