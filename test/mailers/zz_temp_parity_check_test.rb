@@ -298,4 +298,16 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("verify", "verify", html_body, text_body)
   end
+
+  def test_verify_api_key_parity
+    rolf = users(:rolf)
+    dick = users(:dick)
+    api_key = api_keys(:rolfs_api_key)
+
+    html_body, text_body = both_bodies(rolf) do
+      VerifyAPIKeyMailer.build(receiver: rolf, app_user: dick, api_key:)
+    end
+
+    compare("verify_api_key", "verify_api_key", html_body, text_body)
+  end
 end
