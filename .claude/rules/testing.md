@@ -189,7 +189,9 @@ What to do, after the coveralls bot comments on the PR:
    multiple pages, and **Phlex views (`app/views/**/*.rb`) consistently
    land on page 2**. A single-page fetch will report them as
    `<not instrumented>` — a false negative. Fetch every page first,
-   then look up:
+   then look up. Use `ruby -rjson -e` for the JSON munging, not
+   Python — the project's `.claude/settings.local.json` allowlists
+   the former as a wildcard, so it runs without a permission prompt:
 
     ```bash
     BUILD_ID=$(gh pr view <PR> --json comments \
@@ -199,17 +201,16 @@ What to do, after the coveralls bot comments on the PR:
 
     # Paginate. per_page=2000 covers MO's current build in two pages;
     # the loop walks until a page returns 0 source_files, so it scales.
-    rm -f /tmp/cov_files.json
+    rm -f /tmp/cov_page_*.json
     page=1
     while : ; do
       curl -s "https://coveralls.io/builds/${BUILD_ID}/source_files.json?per_page=2000&page=${page}" \
         > "/tmp/cov_page_${page}.json"
-      count=$(python3 -c "
-import json
-with open('/tmp/cov_page_${page}.json') as f: d = json.load(f)
-src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
-print(len(src))
-")
+      count=$(ruby -rjson -e "
+        d = JSON.parse(File.read('/tmp/cov_page_${page}.json'))
+        src = d['source_files'].is_a?(String) ? JSON.parse(d['source_files']) : d['source_files']
+        puts src.length
+      ")
       [ "$count" = "0" ] && break
       page=$((page + 1))
       [ "$page" -gt 10 ] && break  # safety
@@ -219,26 +220,26 @@ print(len(src))
       --jq '.files[] | select(.changeType!="DELETED") | .path' |
       grep -E '\.rb$' > /tmp/touched_files.txt
 
-    python3 <<'PY'
-import json, glob, os
-files = []
-for path in sorted(glob.glob('/tmp/cov_page_*.json')):
-    with open(path) as f: d = json.load(f)
-    src = json.loads(d['source_files']) if isinstance(d['source_files'], str) else d['source_files']
-    files.extend(src)
-by_name = {x['name']: x for x in files}
-with open('/tmp/touched_files.txt') as f:
-    paths = [p.strip() for p in f if p.strip()]
-for p in paths:
-    f = by_name.get(p)
-    if f:
-        cov, rel, miss = f['covered_line_count'], f['relevant_line_count'], f['missed_line_count']
-        pct = 100.0 * cov / rel if rel else 0
-        flag = '' if miss == 0 else f'  MISSED {miss}'
-        print(f"{p}: {cov}/{rel} ({pct:.1f}%){flag}")
-    else:
-        print(f"{p}: <not instrumented>")
-PY
+    ruby -rjson -e '
+      files = []
+      Dir.glob("/tmp/cov_page_*.json").sort.each do |path|
+        d = JSON.parse(File.read(path))
+        src = d["source_files"].is_a?(String) ? JSON.parse(d["source_files"]) : d["source_files"]
+        files.concat(src)
+      end
+      by_name = files.each_with_object({}) { |f, h| h[f["name"]] = f }
+      File.readlines("/tmp/touched_files.txt").map(&:strip).reject(&:empty?).each do |p|
+        f = by_name[p]
+        if f
+          cov, rel, miss = f["covered_line_count"], f["relevant_line_count"], f["missed_line_count"]
+          pct = rel.to_i.zero? ? 100.0 : (100.0 * cov / rel)
+          flag = miss.to_i.zero? ? "" : "  MISSED #{miss}"
+          puts format("%s: %d/%d (%.1f%%)%s", p, cov, rel, pct, flag)
+        else
+          puts "#{p}: <not instrumented>"
+        end
+      end
+    '
     ```
 
 2. **Every Ruby file in the PR should report 100% coverage.** ERB,
@@ -247,7 +248,32 @@ PY
    tracked elsewhere (a Phlex view, a model) shows `<not instrumented>`,
    suspect pagination — re-check that every page got fetched.
 
-3. **Every PR should lever coverage upward.** If a touched file is
+3. **Once a file is known to be below 100%, find the exact missing
+   line numbers straight from Coveralls** — don't reach for a local
+   SimpleCov run to pin them down. A local run of just the file's own
+   test(s) is a *lower bound*: many lines only get covered by other
+   tests elsewhere in the suite (controller/integration tests that
+   render the same view through a real request, for instance), so a
+   narrow local run reports far more "missed" lines than are actually
+   missing, and chasing that down wastes cycles on a false picture.
+   Coveralls exposes a per-file endpoint with one entry per source
+   line — `null` for non-coverable lines, a hit count otherwise:
+
+    ```bash
+    curl -s "https://coveralls.io/builds/${BUILD_ID}/source.json?filename=<path/to/file.rb>"
+    ```
+
+    ```ruby
+    # Map the array back onto the source so 0-hit lines are obvious:
+    arr = JSON.parse(<paste the curl output>)
+    source = File.readlines("<path/to/file.rb>")
+    arr.each_with_index do |hits, idx|
+      next if hits.nil?
+      puts format("%4d %-8s %s", idx + 1, hits.zero? ? "MISSED" : "hit=#{hits}", source[idx]&.chomp)
+    end
+    ```
+
+4. **Every PR should lever coverage upward.** If a touched file is
    below 100%, fix the gap in the same PR — even if the uncovered
    lines were already missed on `main` before your edit. Either add
    tests that exercise the uncovered branches, or remove the dead
