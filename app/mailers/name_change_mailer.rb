@@ -5,9 +5,9 @@ class NameChangeMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
   PERMISSION_REASONS = [
+    ["admin", :email_names_admin, :is_admin?],
     ["editor", :email_names_editor, :editor?],
     ["author", :email_names_author, :author?],
-    ["admin", :email_names_admin, :is_admin?],
     ["reviewer", :email_names_reviewer, :reviewer?]
   ].freeze
 
@@ -48,17 +48,20 @@ class NameChangeMailer < ApplicationMailer
       user_real_search_name(receiver)
   end
 
-  # "interest" / "editor" / "author" / "admin" / "reviewer" / nil —
+  # "interest" / "admin" / "editor" / "author" / "reviewer" / nil —
   # why this receiver is being notified. Computed here (not in the
   # view; views shouldn't query the database) since editor?/author?/
   # is_admin?/reviewer? all query permission join tables (or the
   # reviewer association, for reviewer?). If notifiable for multiple
   # reasons, PERMISSION_REASONS' order decides which one wins:
-  # interest first, then editor, author, admin, and lastly reviewer
-  # (this matches the pre-Phlex ERB template's precedence exactly —
-  # not revisited here since changing which reason gets reported
-  # would change the "stop sending" link a multi-reason recipient
-  # sees, a real behavior change outside this conversion's scope).
+  # interest first, then admin (the broadest role — if a receiver is
+  # both admin and editor/author, reporting "admin" means opting out
+  # via the "stop sending" link actually stops these notifications,
+  # since they'd otherwise still qualify via the narrower role),
+  # then editor, author, and lastly reviewer. The pre-Phlex ERB
+  # template checked editor/author before admin — a longstanding bug
+  # never caught because ERB mailers had no real test coverage for
+  # this branch; fixed here now that it's testable.
   def name_email_type(receiver, name_change, desc_change)
     new_name = name_change.new_clone
     old_name = name_change.old_clone

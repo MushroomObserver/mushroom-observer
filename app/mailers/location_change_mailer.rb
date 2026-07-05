@@ -5,9 +5,9 @@ class LocationChangeMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
   PERMISSION_REASONS = [
+    ["admin", :email_locations_admin, :is_admin?],
     ["editor", :email_locations_editor, :editor?],
-    ["author", :email_locations_author, :author?],
-    ["admin", :email_locations_admin, :is_admin?]
+    ["author", :email_locations_author, :author?]
   ].freeze
 
   # Refactored to accept serializable arguments for deliver_later compatibility.
@@ -35,16 +35,19 @@ class LocationChangeMailer < ApplicationMailer
 
   private
 
-  # "interest" / "editor" / "author" / "admin" / nil — why this
+  # "interest" / "admin" / "editor" / "author" / nil — why this
   # receiver is being notified. Computed here (not in the view; views
   # shouldn't query the database) since editor?/author?/is_admin? all
   # query permission join tables. If notifiable for multiple reasons,
   # PERMISSION_REASONS' order decides which one wins: interest first,
-  # then editor, author, and lastly admin (this matches the pre-Phlex
-  # ERB template's precedence exactly — not revisited here since
-  # changing which reason gets reported would change the "stop
-  # sending" link a multi-reason recipient sees, a real behavior
-  # change outside this conversion's scope).
+  # then admin (the broadest role — if a receiver is both admin and
+  # editor/author, reporting "admin" means opting out via the "stop
+  # sending" link actually stops these notifications, since they'd
+  # otherwise still qualify via the narrower role), then editor, and
+  # lastly author. The pre-Phlex ERB template checked editor/author
+  # before admin — a longstanding bug never caught because ERB
+  # mailers had no real test coverage for this branch; fixed here
+  # now that it's testable.
   def location_email_type(receiver, loc_change, desc_change)
     new_loc = loc_change.new_clone
     old_loc = loc_change.old_clone

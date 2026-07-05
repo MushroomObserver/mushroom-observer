@@ -81,6 +81,29 @@ class LocationChangeMailerTest < MailerTestCase
     assert_includes(html, :show_location_lowest.l)
   end
 
+  # PERMISSION_REASONS checks admin before editor/author — a receiver
+  # qualifying for multiple reasons should be reported as "admin" so
+  # the "stop sending" link they see actually stops the notification,
+  # rather than leaving them still subscribed via the narrower role.
+  def test_build_desc_only_change_admin_wins_over_editor
+    loc = locations(:albion)
+    desc = loc.description
+    desc.admin_groups << UserGroup.one_user(dick)
+    desc.add_editor(dick)
+    dick.update!(email_locations_admin: true, email_locations_editor: true,
+                 email_html: false)
+
+    mail = LocationChangeMailer.build(
+      sender: rolf, receiver: dick, location: loc,
+      old_loc_ver: loc.version, new_loc_ver: loc.version,
+      description: desc, old_desc_ver: desc.version - 1,
+      new_desc_ver: desc.version
+    ).message
+
+    assert_text_mail(mail)
+    assert_includes(mail.body.to_s, "type=locations_admin")
+  end
+
   private
 
   def fake_change(old_clone, new_clone)
