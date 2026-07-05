@@ -28,7 +28,10 @@ jobs:
           bundler-cache: true # runs bundle install, caches gems
 
       - name: Install additional tools
-        run: sudo apt-get install exiftool
+        # imagemagick provides `convert`, used by Image::Dhash (#4585); its
+        # tests skip themselves when it is absent, so without this they
+        # would silently not run in CI.
+        run: sudo apt-get install exiftool imagemagick
 
       # 2025-05-12 JDC Skip this step for now because it hangs intermittently
       # and is needed only for system tests, which are currently not run in CI.
