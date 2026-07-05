@@ -15,7 +15,9 @@ class NamingTrackerMailerTest < MailerTestCase
     assert_includes(
       body, "https://mushroomobserver.org/#{naming.observation_id}"
     )
-    assert_includes(body, "https://mushroomobserver.org/names/#{naming.name_id}")
+    assert_includes(
+      body, "https://mushroomobserver.org/names/#{naming.name_id}"
+    )
   end
 
   def test_build_text

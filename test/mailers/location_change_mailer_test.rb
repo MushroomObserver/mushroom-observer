@@ -58,4 +58,35 @@ class LocationChangeMailerTest < MailerTestCase
     assert_text_mail(mail)
     assert_includes(mail.body.to_s, "type=locations_author")
   end
+
+  # ONE_LINER_FIELDS previously mislabeled the low-elevation line with
+  # the :show_location_highest key (copy-paste from the high-elevation
+  # row above it) — rendered directly against a fabricated loc_change
+  # since it's simpler than hunting for real version history where
+  # only `low` differs.
+  def test_low_elevation_change_uses_lowest_label
+    old_loc = Location.find(locations(:albion).id)
+    old_loc.low = 0.0
+    new_loc = Location.find(locations(:albion).id)
+    new_loc.low = 50.0
+
+    html = render(Views::Mailers::LocationChangeMailer::Text.new(
+                    subject: "test", receiver: rolf, sender: dick,
+                    time: Time.zone.now,
+                    loc_change: fake_change(old_loc, new_loc),
+                    desc_change: fake_change(nil, nil),
+                    watching: false, email_type: nil
+                  ))
+
+    assert_includes(html, :show_location_lowest.l)
+  end
+
+  private
+
+  def fake_change(old_clone, new_clone)
+    change = ObjectChange.allocate
+    change.instance_variable_set(:@old_clone, old_clone)
+    change.instance_variable_set(:@new_clone, new_clone)
+    change
+  end
 end

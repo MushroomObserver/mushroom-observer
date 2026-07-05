@@ -39,8 +39,12 @@ class LocationChangeMailer < ApplicationMailer
   # receiver is being notified. Computed here (not in the view; views
   # shouldn't query the database) since editor?/author?/is_admin? all
   # query permission join tables. If notifiable for multiple reasons,
-  # the least restrictive wins: "all" (interest) first, then admin,
-  # editor, and lastly author.
+  # PERMISSION_REASONS' order decides which one wins: interest first,
+  # then editor, author, and lastly admin (this matches the pre-Phlex
+  # ERB template's precedence exactly — not revisited here since
+  # changing which reason gets reported would change the "stop
+  # sending" link a multi-reason recipient sees, a real behavior
+  # change outside this conversion's scope).
   def location_email_type(receiver, loc_change, desc_change)
     new_loc = loc_change.new_clone
     old_loc = loc_change.old_clone

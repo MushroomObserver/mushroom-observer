@@ -55,4 +55,17 @@ class OccurrenceChangeMailerTest < MailerTestCase
     assert_includes(mail.body.to_s,
                     "https://mushroomobserver.org/occurrences/#{occurrence.id}")
   end
+
+  # `sender` is nil for automated changes (e.g. `User.current` unset
+  # in a background job) — intro must fall back instead of calling
+  # `.legal_name` on nil.
+  def test_build_with_nil_sender
+    obs = observations(:detailed_unknown_obs)
+
+    mail = OccurrenceChangeMailer.build(
+      sender: nil, receiver: mary, observation: obs, action: :added
+    ).message
+
+    assert_includes(mail.body.to_s, :app_title.t)
+  end
 end

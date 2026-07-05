@@ -31,7 +31,9 @@ class Views::Mailers::CommentMailer < Views::Mailers::Base
 
   class Html < self
     def view_template
-      render(Views::Layouts::Mailer::Html.new(subject: @subject)) { render_body }
+      render(Views::Layouts::Mailer::Html.new(subject: @subject)) do
+        render_body
+      end
     end
 
     private

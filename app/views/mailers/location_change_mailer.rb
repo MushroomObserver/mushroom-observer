@@ -23,7 +23,7 @@ class Views::Mailers::LocationChangeMailer < Views::Mailers::Base
     [:email_field_east, :east, :east],
     [:email_field_west, :west, :west],
     [:show_location_highest, :high, :high],
-    [:show_location_highest, :low, :low]
+    [:show_location_lowest, :low, :low]
   ].freeze
 
   class Html < self

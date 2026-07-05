@@ -52,9 +52,13 @@ class NameChangeMailer < ApplicationMailer
   # why this receiver is being notified. Computed here (not in the
   # view; views shouldn't query the database) since editor?/author?/
   # is_admin?/reviewer? all query permission join tables (or the
-  # reviewer association, for reviewer?). If notifiable for
-  # multiple reasons, the least restrictive wins: interest first,
-  # then admin, editor, author, and lastly reviewer.
+  # reviewer association, for reviewer?). If notifiable for multiple
+  # reasons, PERMISSION_REASONS' order decides which one wins:
+  # interest first, then editor, author, admin, and lastly reviewer
+  # (this matches the pre-Phlex ERB template's precedence exactly —
+  # not revisited here since changing which reason gets reported
+  # would change the "stop sending" link a multi-reason recipient
+  # sees, a real behavior change outside this conversion's scope).
   def name_email_type(receiver, name_change, desc_change)
     new_name = name_change.new_clone
     old_name = name_change.old_clone
