@@ -346,7 +346,8 @@ class NamesController < ApplicationController
     update_name
   rescue RankWarning => e
     reload_name_form_with_rank_warning(e)
-  rescue RuntimeError => e
+  rescue RuntimeError,
+         ActiveRecord::RecordInvalid, ActiveRecord::RecordNotDestroyed => e
     reload_name_form_on_error(e)
   end
 
