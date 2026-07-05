@@ -7,7 +7,9 @@ module RuboCop
       # components — including the `::User.current` cbase-qualified
       # form. No exemptions: controllers should use `@user` (set by
       # ApplicationController); views/components should receive
-      # `user:` as a prop instead of reaching for the global.
+      # `user:` as a prop, or call the registered `current_user`
+      # value helper (`Components::Base`, request-scoped, falls back
+      # to the controller's `@user`) — either way, not the global.
       #
       # Authentication code that *sets* `User.current` (the mechanism
       # models rely on outside request context) isn't flagged, because
@@ -27,13 +29,17 @@ module RuboCop
       #   User.current_location_format
       #   ::User.current_location_format
       #
-      #   # good (in component/view - add user prop)
+      #   # good (in component/view - add a user prop ...)
       #   @user.location_format
+      #
+      #   # ... or use the registered current_user value helper
+      #   current_user&.location_format
       #
       class NoUserCurrentInViews < Base
         MSG = "Avoid `User.current`. In controllers, use `@user` " \
-              "(set by ApplicationController). In components, pass " \
-              "`user:` as a prop."
+              "(set by ApplicationController). In views/components, " \
+              "pass `user:` as a prop or call the registered " \
+              "`current_user` value helper."
 
         # Match calls like User.current, User.current_id,
         # User.current_location_format, ::User.current (cbase-qualified).
