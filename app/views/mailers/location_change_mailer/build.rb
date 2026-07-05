@@ -49,10 +49,24 @@ module Views::Mailers::LocationChangeMailer
     end
 
     def one_liners
-      text = ONE_LINER_FIELDS.filter_map do |key, attr, cmp|
+      simple_one_liners + license_liner
+    end
+
+    # Joins already-built lines with "\n", adding exactly one trailing
+    # newline when there's content — keeps the separator a join
+    # concern instead of baking it into every line string, and lets
+    # an empty `lines` collapse to "" (no orphan blank line) instead
+    # of always emitting a trailing newline regardless of content.
+    def terminate_lines(lines)
+      return "" if lines.empty?
+
+      "#{lines.join("\n")}\n"
+    end
+
+    def simple_one_liners
+      terminate_lines(ONE_LINER_FIELDS.filter_map do |key, attr, cmp|
         one_liner(key, attr, cmp)
-      end.join
-      text + license_liner
+      end)
     end
 
     def one_liner(key, attr, compare_attr)
@@ -60,7 +74,7 @@ module Views::Mailers::LocationChangeMailer
         return nil
       end
 
-      "*#{key.l} #{now_label}:* #{new_loc.public_send(attr)}\n"
+      "*#{key.l} #{now_label}:* #{new_loc.public_send(attr)}"
     end
 
     def license_liner
