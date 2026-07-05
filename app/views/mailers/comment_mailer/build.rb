@@ -13,7 +13,7 @@ module Views::Mailers::CommentMailer
     # mail Subject header, reused verbatim for <title> below.
     prop :receiver, ::User
     prop :sender, ::User
-    prop :target, _Interface(:type_tag, :show_controller, :unique_format_name)
+    prop :target, ::AbstractModel
     prop :comment, ::Comment
     # "owner" / "response" / "all" — which of the three notification
     # reasons applies to this receiver. Computed by
