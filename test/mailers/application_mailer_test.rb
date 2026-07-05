@@ -103,17 +103,9 @@ class ApplicationMailerTest < UnitTestCase
   # test/mailers/zz_temp_parity_check_test.rb (reuses
   # commercial_inquiry fixtures).
 
-  def test_consensus_change_email
-    observation = observations(:coprinus_comatus_obs)
-    old_name = names(:agaricus_campestris)
-    new_name = observation.name
-
-    run_mail_test("consensus_change", mary) do
-      ConsensusChangeMailer.build(
-        sender: dick, receiver: mary, observation:, old_name:, new_name:
-      ).deliver_now
-    end
-  end
+  # ConsensusChangeMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses consensus_change
+  # fixtures).
 
   def test_location_change_email
     loc = locations(:albion)

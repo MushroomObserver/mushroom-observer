@@ -57,16 +57,29 @@ class ZzTempParityCheckTest < UnitTestCase
     [html_body, text_body]
   end
 
+  # Some fixtures use a literal "IGNORE ... IGNORE" line as a
+  # placeholder for non-deterministic content (e.g. a rendered
+  # timestamp) — same convention as the old assert_string_equal_file
+  # harness's match_ignoring_some_bits. Substitute any actual line
+  # matching an IGNORE-patterned fixture line back to that literal
+  # line before comparing.
+  def mask_ignored_lines(actual, template)
+    return actual unless template.include?("IGNORE")
+
+    pattern = Regexp.escape(template).gsub("IGNORE", ".*?")
+    actual.sub(/\A#{pattern}\z/m, template)
+  end
+
   def compare(label, fixture_base, mail_html, mail_text)
     fixture_html = body_only(interpolated_fixture("#{fixture_base}.html"))
     fixture_text = body_only(interpolated_fixture("#{fixture_base}.text"))
 
     a = normalize_html(fixture_html)
-    b = normalize_html(mail_html)
+    b = mask_ignored_lines(normalize_html(mail_html), a)
     assert_equal(a, b, "#{label} HTML parity mismatch")
 
     ta = normalize_text(fixture_text)
-    tb = normalize_text(mail_text)
+    tb = mask_ignored_lines(normalize_text(mail_text), ta)
     assert_equal(ta, tb, "#{label} TEXT parity mismatch")
   end
 
@@ -193,5 +206,20 @@ class ZzTempParityCheckTest < UnitTestCase
     end
 
     compare("new_password", "new_password", html_body, text_body)
+  end
+
+  def test_consensus_change_parity
+    mary = users(:mary)
+    dick = users(:dick)
+    observation = observations(:coprinus_comatus_obs)
+    old_name = names(:agaricus_campestris)
+    new_name = observation.name
+
+    html_body, text_body = both_bodies(mary) do
+      ConsensusChangeMailer.build(sender: dick, receiver: mary, observation:,
+                                  old_name:, new_name:)
+    end
+
+    compare("consensus_change", "consensus_change", html_body, text_body)
   end
 end
