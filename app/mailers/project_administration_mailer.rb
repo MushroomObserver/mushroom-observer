@@ -7,11 +7,11 @@ class ProjectAdministrationMailer < ApplicationMailer
 
   def build(site_admin:, project:, receiver:)
     setup_user(receiver)
-    @site_admin = site_admin
-    @project = project
-    @title = :email_subject_project_administered.l(project: project.title)
+    subject = :email_subject_project_administered.l(project: project.title)
     debug_log(:project_administration, site_admin, receiver,
               project: project)
-    mo_mail(@title, to: receiver, reply_to: site_admin)
+    mo_mail(subject, to: receiver, reply_to: site_admin,
+                     view_params: { subject:, receiver:, site_admin:,
+                                    project: })
   end
 end

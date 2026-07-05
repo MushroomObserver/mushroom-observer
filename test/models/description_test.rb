@@ -166,6 +166,15 @@ class DescriptionTest < UnitTestCase
                "Katrina should be an editor of #{desc.text_name}")
   end
 
+  def test_reviewer
+    desc = name_descriptions(:peltigera_desc)
+
+    assert(desc.reviewer?(rolf),
+           "Rolf should be the reviewer of #{desc.text_name}")
+    assert_not(desc.reviewer?(mary),
+               "Mary should not be the reviewer of #{desc.text_name}")
+  end
+
   def test_parent_setters
     albion = locations(:albion)
     obj = LocationDescription.new(location_id: albion.id,
