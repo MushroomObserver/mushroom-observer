@@ -40,7 +40,7 @@ module Name::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
-  # Shared by `edit_includes` and `show_includes` below — the
+  # Shared by `merge_includes` and `show_includes` below — the
   # only difference between the two is whether `.observations` (the
   # expensive one for a name with many thousands of them, e.g. a
   # genus) is included. A method, not a constant: `Comment.
@@ -351,20 +351,18 @@ module Name::Scopes
       scope.joins(:observations).distinct.subquery(:Observation, hash)
     }
 
-    # Used by NamesController#edit/#update (including the merge flow —
-    # `Name::Merge#move_observations`/`#move_namings` touch
-    # `.observations`/`.namings` directly — and
-    # `#email_name_change_content`, which touches `.observations`) and
-    # `Names::Synonyms::ApproveController` (its `save_with_log`/
-    # `notify_users` chain). NOT used by plain #show or a
-    # past-version display: neither reads
-    # `@name.observations`/`@name.namings` directly (both render
-    # curated `Query`/`Name::Observations` results instead), so for a
-    # name with many thousands of observations (a genus, say) this
-    # scope would eager-load all of them for no benefit. See
-    # `show_includes` below for the lighter scope those actions use
-    # instead.
-    scope :edit_includes, lambda {
+    # Used only by `NamesController#perform_merge_names`, right
+    # before `Name::Merge#merge` — `#move_observations`/`#move_namings`
+    # rewrite every associated row's `name_id` during an actual merge,
+    # so both need to be loaded. NOT used by #show, the common (non-
+    # merge) #edit/#update path, or `Names::Synonyms::ApproveController`
+    # (confirmed empirically — none of them read
+    # `@name.observations`/`@name.namings` directly), so for a name
+    # with many thousands of observations (a genus, say) this scope
+    # would eager-load all of them for no benefit anywhere but the
+    # merge path. See `show_includes` below for the lighter scope
+    # everything else uses.
+    scope :merge_includes, lambda {
       strict_loading.includes(
         *Name::Scopes.show_includes_base,
         { namings: Naming.index_includes_tree },
@@ -372,12 +370,12 @@ module Name::Scopes
       )
     }
 
-    # #show / past-version-display variant of `edit_includes` —
-    # everything the same except `.namings`/`.observations`, neither
-    # of which those pages read directly (see `edit_includes` above).
-    # For a name with many thousands of observations (e.g. a genus),
-    # eager-loading all of them turns a sub-second page load into
-    # several seconds for no benefit.
+    # The default variant of `merge_includes` — everything the same
+    # except `.namings`/`.observations`, which only the merge path
+    # reads directly (see `merge_includes` above). For a name with
+    # many thousands of observations (e.g. a genus), eager-loading
+    # all of them turns a sub-second page load into several seconds
+    # for no benefit.
     scope :show_includes, lambda {
       strict_loading.includes(*Name::Scopes.show_includes_base)
     }

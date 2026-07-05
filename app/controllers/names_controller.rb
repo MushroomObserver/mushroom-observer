@@ -693,7 +693,7 @@ class NamesController < ApplicationController
 
   # `.count` (not `.length`) deliberately: this only needs the
   # totals, not the actual rows, so it doesn't need `@name` fetched
-  # via `Name.edit_includes`'s `.namings`/`.observations` preload
+  # via `Name.merge_includes`'s `.namings`/`.observations` preload
   # (unlike `merge_names` below) — a plain COUNT query per number.
   def email_name_change_content
     :email_name_change.l(
@@ -736,11 +736,11 @@ class NamesController < ApplicationController
     # too keeps both sides consistent). `Name::Merge#merge` needs
     # both preloaded on whichever side ends up as `old_name` below
     # (the reverse-merger swap means that isn't necessarily the
-    # original `@name`) — re-fetch both with the full `edit_includes`
+    # original `@name`) — re-fetch both with the full `merge_includes`
     # up front, before any of the mutations below, rather than paying
     # for it on every #update regardless of whether a merge happens.
-    @name = Name.edit_includes.find(@name.id)
-    survivor = Name.edit_includes.find(survivor.id)
+    @name = Name.merge_includes.find(@name.id)
+    survivor = Name.merge_includes.find(survivor.id)
 
     # Name to displayed in the log "Name Destroyed" entry
     logged_destroyed_name = display_name_without_user_filter(@name)
