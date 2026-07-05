@@ -38,6 +38,18 @@ module Views::Controllers::Translations
       assert_html(html, "p.tag_field")
     end
 
+    # Defensive branch guarding against a future item type being added
+    # without updating `render_item` to handle it.
+    def test_render_item_raises_for_unrecognized_type
+      error = assert_raises(RuntimeError) do
+        render(Index.new(
+                 lang: @lang, index: [Object.new],
+                 official_records: {}, translated_records: {}
+               ))
+      end
+      assert_match(/Unexpected form item type: Object/, error.message)
+    end
+
     private
 
     def build_records(lang, tag, text)
