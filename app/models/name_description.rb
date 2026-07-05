@@ -246,6 +246,11 @@ class NameDescription < Description
     end
   end
 
+  # Is the given User the one who reviewed this description?
+  def reviewer?(user)
+    reviewer == user
+  end
+
   # Update the review status.  Saves the changes if there are no substantive
   # changes pending.  (Don't want to inadvertantly create multiple past_name
   # versions.)  Raises a RuntimeError if it fails to save for some reason.

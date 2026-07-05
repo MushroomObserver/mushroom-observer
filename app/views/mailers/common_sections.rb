@@ -51,8 +51,8 @@ module Views::Mailers::CommonSections
   # "--------------------------------------------------" line.
   def divider
     gap
-    plain("-" * 50)
-    gap
+    dashes_line
+    newline
   end
 
   # Outputs an already `.tp`-textilized string in the current mode.

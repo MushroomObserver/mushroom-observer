@@ -338,4 +338,41 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("location_change", "location_change", html_body, text_body)
   end
+
+  def test_name_change_parity
+    mary = users(:mary)
+    dick = users(:dick)
+    name = names(:peltigera)
+    desc = name.description
+
+    html_body, text_body = both_bodies(mary) do
+      NameChangeMailer.build(
+        sender: dick, receiver: mary, name: name,
+        old_name_ver: name.version - 1, new_name_ver: name.version,
+        description: desc, old_desc_ver: desc.version - 1,
+        new_desc_ver: desc.version, review_status: desc.review_status.to_s
+      )
+    end
+
+    compare("name_change", "name_change", html_body, text_body)
+  end
+
+  def test_name_change2_parity
+    mary = users(:mary)
+    dick = users(:dick)
+    name = names(:peltigera)
+    desc = name.description
+
+    mary.update!(email_html: false)
+    mail = NameChangeMailer.build(
+      sender: dick, receiver: mary, name: name,
+      old_name_ver: 0, new_name_ver: 1,
+      description: desc, old_desc_ver: 0, new_desc_ver: 1,
+      review_status: "no_change"
+    ).message
+    fixture_text = body_only(interpolated_fixture("name_change2.text"))
+    expected = normalize_text(fixture_text)
+    actual = mask_ignored_lines(normalize_text(mail.body.to_s), expected)
+    assert_equal(expected, actual, "name_change2 TEXT parity mismatch")
+  end
 end

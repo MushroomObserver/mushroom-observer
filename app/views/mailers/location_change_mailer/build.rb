@@ -158,7 +158,7 @@ module Views::Mailers::LocationChangeMailer
 
     def render_many_liners
       many_liners.each_with_index do |(label, value), index|
-        gap if index.positive?
+        newline if index.positive?
         render_many_liner(label, value)
       end
     end

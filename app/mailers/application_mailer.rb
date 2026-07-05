@@ -2,9 +2,6 @@
 
 #  Base class for mailers for each type of email
 class ApplicationMailer < ActionMailer::Base
-  # Allow folder organization in the app/views folder
-  append_view_path Rails.root.join("app/views/mailers")
-
   # Use native Ruby URI::MailTo class
   def self.valid_email_address?(address)
     address.to_s.match?(URI::MailTo::EMAIL_REGEXP)
@@ -47,12 +44,7 @@ class ApplicationMailer < ActionMailer::Base
 
     content_style = calc_content_style(headers)
     mail_args = mo_mail_args(title, to, headers, content_style)
-
-    if (view_namespace = mailer_view_namespace)
-      deliver_phlex_mail(mail_args, headers, content_style, view_namespace)
-    else
-      mail(**mail_args)
-    end
+    deliver_phlex_mail(mail_args, headers, content_style, mailer_view_namespace)
     I18n.locale = @old_locale if I18n.locale != @old_locale
   end
 
@@ -75,15 +67,13 @@ class ApplicationMailer < ActionMailer::Base
     end
   end
 
-  # Phlex conversion (issue #4676): every converted mailer's Phlex
-  # view lives at the mechanical `Views::Mailers::<MailerClassName>`
-  # namespace (matching the `app/views/mailers/<same_name>/build.rb`
+  # Phlex conversion (issue #4676): every mailer's Phlex view lives at
+  # the mechanical `Views::Mailers::<MailerClassName>` namespace
+  # (matching the `app/views/mailers/<same_name>/build.rb`
   # directory-naming convention every conversion follows) — no
-  # per-mailer wiring needed. `safe_constantize` returns nil for a
-  # not-yet-converted mailer, falling back to the old implicit ERB
-  # template lookup in `mo_mail` above.
+  # per-mailer wiring needed.
   def mailer_view_namespace
-    "Views::Mailers::#{self.class.name}".safe_constantize
+    "Views::Mailers::#{self.class.name}".constantize
   end
 
   # `view_namespace` is a mailer's `Views::Mailers::<Name>` module.
