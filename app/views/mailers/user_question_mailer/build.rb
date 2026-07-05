@@ -33,12 +33,10 @@ module Views::Mailers::UserQuestionMailer
   end
 
   class Html < Build
-    include Views::Mailers::HtmlMode
     include Views::Mailers::StandardMessageBody
   end
 
   class Text < Build
-    include Views::Mailers::TextMode
     include Views::Mailers::StandardMessageBody
   end
 end

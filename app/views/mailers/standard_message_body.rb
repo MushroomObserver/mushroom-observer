@@ -8,11 +8,12 @@
 # UserQuestion, CommercialInquiry, ProjectAdminRequest,
 # NamingObserver, ...).
 #
-# Include alongside `Views::Mailers::CommonSections` in both the
-# `Html` and `Text` subclasses of a mailer's `Build` class. The
-# including class must define `html?`, `intro`, `handy_links`, and
-# `links` (see `Views::Mailers::AuthorMailer::Html` for the reference
-# shape). `message` defaults to `@message` (the common case, matching
+# Include into both the `Html` and `Text` subclasses of a mailer's
+# `Build` class (named exactly that — `Views::Mailers::Base#html?`
+# derives its answer from the class name). The including class must
+# define `intro`, `handy_links`, and `links` (see
+# `Views::Mailers::AuthorMailer::Html` for the reference shape).
+# `message` defaults to `@message` (the common case, matching
 # the standardized `prop :message` name every converted mailer uses
 # for its quoted-content prop) — override it when the message needs
 # computing (see `Views::Mailers::NamingObserverMailer::Build`). A

@@ -7,13 +7,14 @@
 # `Views::Mailers::StandardMessageBody`). Confirmed identical shape in
 # ConsensusChangeMailer and NameProposalMailer.
 #
-# Include alongside `Views::Mailers::CommonSections`. The including
-# class must define `html?`, `intro`, `fields`, `handy_links`, and
-# `links`. Don't force-fit a mailer whose blank-line spacing differs
-# from this exact sequence (e.g. OccurrenceChangeMailer has no blank
-# line between fields and handy_links in text mode) — write its own
-# view_template instead; verify against its fixture via the parity
-# test either way.
+# Include into a mailer's `Html`/`Text` classes (named exactly that —
+# `Views::Mailers::Base#html?` derives its answer from the class
+# name). The including class must define `intro`, `fields`,
+# `handy_links`, and `links`. Don't force-fit a mailer whose
+# blank-line spacing differs from this exact sequence (e.g.
+# OccurrenceChangeMailer has no blank line between fields and
+# handy_links in text mode) — write its own view_template instead;
+# verify against its fixture via the parity test either way.
 module Views::Mailers::FieldsOnlyBody
   def view_template
     return render_content unless html?

@@ -65,12 +65,10 @@ module Views::Mailers::ConsensusChangeMailer
   end
 
   class Html < Build
-    include Views::Mailers::HtmlMode
     include Views::Mailers::FieldsOnlyBody
   end
 
   class Text < Build
-    include Views::Mailers::TextMode
     include Views::Mailers::FieldsOnlyBody
   end
 end
