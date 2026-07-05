@@ -197,8 +197,12 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def render_misspelling_correct_link
     p do
       plain("#{:show_name_misspelling_correct.l}: ")
-      a(href: name_path(@name.correct_spelling_id)) do
-        trusted_html(@name.correct_spelling.user_display_name(@user).t)
+      if @name.correct_spelling
+        a(href: name_path(@name.correct_spelling_id)) do
+          trusted_html(@name.correct_spelling.user_display_name(@user).t)
+        end
+      else
+        plain(@name.correct_spelling_id.to_s)
       end
     end
   end
