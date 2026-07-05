@@ -61,10 +61,25 @@ module Views::Mailers::NameChangeMailer
     def one_liners
       return "" unless old_name
 
-      (real_text_name_liner + SIMPLE_ONE_LINERS.filter_map do |key, attr, cmp|
+      real_text_name_liner + simple_one_liners + license_liner +
+        review_status_liner + status_liners + correct_spelling_liner
+    end
+
+    # Joins already-built lines with "\n", adding exactly one trailing
+    # newline when there's content — keeps the separator a join
+    # concern instead of baking it into every line string, and lets
+    # an empty `lines` collapse to "" (no orphan blank line) instead
+    # of always emitting a trailing newline regardless of content.
+    def terminate_lines(lines)
+      return "" if lines.empty?
+
+      "#{lines.join("\n")}\n"
+    end
+
+    def simple_one_liners
+      terminate_lines(SIMPLE_ONE_LINERS.filter_map do |key, attr, cmp|
         one_liner(key, attr, cmp)
-      end.join + license_liner + review_status_liner + status_liners +
-       correct_spelling_liner)
+      end)
     end
 
     def real_text_name_liner
@@ -78,7 +93,7 @@ module Views::Mailers::NameChangeMailer
       return nil if new_name.public_send(compare_attr) ==
                     old_name.public_send(compare_attr)
 
-      "*#{key.l} #{now_label}:* #{new_name.public_send(attr)}\n"
+      "*#{key.l} #{now_label}:* #{new_name.public_send(attr)}"
     end
 
     def license_liner
@@ -94,11 +109,11 @@ module Views::Mailers::NameChangeMailer
     end
 
     def status_liners
-      STATUS_LINERS.filter_map do |predicate, key, value|
+      terminate_lines(STATUS_LINERS.filter_map do |predicate, key, value|
         next unless send(predicate)
 
-        "*#{key.l} #{now_label}:* #{value.l}\n"
-      end.join
+        "*#{key.l} #{now_label}:* #{value.l}"
+      end)
     end
 
     def deprecated_change? = new_name.deprecated && !old_name.deprecated
