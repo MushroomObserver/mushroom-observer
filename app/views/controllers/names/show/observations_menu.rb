@@ -55,7 +55,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def render_observations_column
-    div(class: "col-sm-6 name-section") do
+    div(class: "#{Grid::SM6} name-section") do
       p { plain(:show_observations_of.t) }
       ul(class: "list-unstyled pl-3") { render_obs_link_rows }
       div(class: "py-3") do
@@ -90,17 +90,14 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
     title, url, opts = tab.to_a
     label, count = split_title_and_count(title)
     a(href: url, **link_attrs(opts)) { plain(label) }
-    plain(" #{count}") if count
+    plain(" #{count}")
   end
 
-  # Tab#title is `"label (N)"`; split into the link text + the
-  # trailing "(N)" plain-text suffix.
+  # `Tab::Name::ObsLink#title` is always `"label (N)"` — split into
+  # the link text + the trailing "(N)" plain-text suffix.
   def split_title_and_count(title)
-    if title =~ /\A(.+?) (\(\d+\))\z/
-      [Regexp.last_match(1), Regexp.last_match(2)]
-    else
-      [title, nil]
-    end
+    match = title.match(/\A(.+?) (\(\d+\))\z/)
+    [match[1], match[2]]
   end
 
   def link_attrs(opts)
@@ -108,7 +105,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def render_research_links_column
-    div(class: "col-sm-6 name-section") do
+    div(class: "#{Grid::SM6} name-section") do
       p { plain("#{:research_links.l}:") }
       ul(class: "list-unstyled pl-3") { render_research_links }
     end

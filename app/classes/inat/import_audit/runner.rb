@@ -8,7 +8,7 @@ module Inat::ImportAudit
   # rows, append to the CSV, log progress - so memory stays bounded, the CSV
   # survives a crash, and a live rate/ETA is visible. No writes to MO or iNat.
   class Runner
-    PAGE = Fetcher::PAGE_SIZE
+    PAGE = Inat::ObsFetcher::PAGE_SIZE
 
     # Summary flags counted by truthiness/presence (booleans + delta strings).
     TALLY_FLAGS = [:has_delta, :delta_note_keys, :collector_differs,
@@ -64,7 +64,7 @@ module Inat::ImportAudit
     def stream(scope, csv)
       @headers = nil
       each_batch(scope) do |batch, idx, batches|
-        sleep(Fetcher::INTER_PAGE_SLEEP) if idx.positive?
+        sleep(Inat::ObsFetcher::INTER_PAGE_SLEEP) if idx.positive?
         write_batch(csv, batch)
         csv.flush
         log_progress(idx + 1, batches)
@@ -86,7 +86,7 @@ module Inat::ImportAudit
 
     # Memoized so tests can inject a stub via a singleton override.
     def fetcher
-      @fetcher ||= Fetcher.new
+      @fetcher ||= Inat::ObsFetcher.new
     end
 
     def write_batch(csv, batch)

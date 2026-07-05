@@ -31,7 +31,7 @@ module Views::Controllers::Locations
       end
 
       def render_column(key)
-        div(class: "col-xs-4") do
+        div(class: Grid::THIRD) do
           h4 do
             plain(column_label(key))
             plain(" (#{column_data(key).length})")

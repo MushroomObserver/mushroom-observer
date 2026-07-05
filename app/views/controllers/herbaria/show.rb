@@ -129,7 +129,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_right_column
-      div(class: "col-xs-12 col-sm-4 mt-3", style: "max-width:320px") do
+      div(class: "#{Grid::SM4} mt-3", style: "max-width:320px") do
         div(class: "mb-3") do
           Map(objects: [@herbarium.location])
         end
