@@ -32,7 +32,7 @@ class ContributorsController < ApplicationController
   private
 
   # Phlex action template — no ERB resolver in phlex-rails 2.x, so the
-  # render is explicit. See `.claude/rules/phlex_conversions.md`.
+  # render is explicit. See `.claude/rules/phlex_reference.md`.
   def render_index_view
     render(Views::Controllers::Contributors::Index.new(
              query: @query, pagination_data: @pagination_data,
