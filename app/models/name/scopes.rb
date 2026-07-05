@@ -40,10 +40,10 @@ module Name::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
-  # Shared by `merge_includes` and `show_includes` below — the
-  # only difference between the two is whether `.observations` (the
-  # expensive one for a name with many thousands of them, e.g. a
-  # genus) is included. A method, not a constant: `Comment.
+  # Shared by `merge_includes` and `show_includes` below — the only
+  # difference between the two is whether `.namings` / `.observations`
+  # (expensive for a name with many thousands of them, e.g. a genus)
+  # are included. A method, not a constant: `Comment.
   # index_includes_tree` must stay lazily evaluated (only called once
   # the scope actually runs) — evaluating it eagerly at module-load
   # time hits Comment before Zeitwerk has it fully defined yet, given
