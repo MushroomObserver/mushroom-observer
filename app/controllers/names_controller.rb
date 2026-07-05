@@ -161,8 +161,9 @@ class NamesController < ApplicationController
       redirect_to_next_object(:prev, Name, params[:id].to_s) and return
     end
 
-    # Load Name and NameDescription along with a bunch of associated objects.
-    return unless find_name!
+    # Load Name and NameDescription along with a bunch of associated
+    # objects — NOT `.observations` (see `find_name_for_show!`).
+    return unless find_name_for_show!
 
     update_view_stats(@name)
 
@@ -198,6 +199,19 @@ class NamesController < ApplicationController
 
   def find_name!
     @name = Name.show_includes.safe_find(params[:id]) ||
+            flash_error_and_goto_index(Name, params[:id])
+  end
+
+  # #show doesn't need `.namings`/`.observations` eager-loaded (it
+  # renders curated `Query`/`Name::Observations` results instead,
+  # never `@name.namings`/`@name.observations` directly) — for a name
+  # with many thousands of observations (e.g. a genus), `find_name!`'s
+  # full `show_includes` turns a sub-second page load into several
+  # seconds for no benefit. #edit/#update keep `find_name!` since the
+  # merge flow (`Name::Merge#move_namings`/`#move_observations`) and
+  # `#email_name_change_content` genuinely read them.
+  def find_name_for_show!
+    @name = Name.show_page_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
   end
 

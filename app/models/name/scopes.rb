@@ -40,6 +40,31 @@ module Name::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
+  # Shared by `show_includes` and `show_page_includes` below — the
+  # only difference between the two is whether `.observations` (the
+  # expensive one for a name with many thousands of them, e.g. a
+  # genus) is included. A method, not a constant: `Comment.
+  # index_includes_tree` must stay lazily evaluated (only called once
+  # the scope actually runs) — evaluating it eagerly at module-load
+  # time hits Comment before Zeitwerk has it fully defined yet, given
+  # the Name <-> Comment load-order cycle.
+  def self.show_includes_base
+    [
+      { comments: Comment.index_includes_tree },
+      :correct_spelling,
+      { description: [:authors, :reviewer, :interests] },
+      { descriptions: [:authors, :editors, :reviewer, :user,
+                       :writer_groups, :interests] },
+      { interests: :user },
+      :misspellings,
+      { name_trackers: [:user, :name] },
+      :rss_log,
+      { synonym: :names },
+      :user,
+      { versions: :user }
+    ]
+  end
+
   # NOTE: To improve Coveralls display, avoid one-line stabby lambda scopes.
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
@@ -326,25 +351,33 @@ module Name::Scopes
       scope.joins(:observations).distinct.subquery(:Observation, hash)
     }
 
+    # Used by NamesController#edit/#update (including the merge flow —
+    # `Name::Merge#move_observations`/`#move_namings` touch
+    # `.observations`/`.namings` directly — and
+    # `#email_name_change_content`, which touches `.observations`).
+    # NOT used by plain #show or a past-version display: neither
+    # reads `@name.observations`/`@name.namings` directly (both
+    # render curated `Query`/`Name::Observations` results instead),
+    # so for a name with many thousands of observations (a genus,
+    # say) this scope would eager-load all of them for no benefit.
+    # See `show_page_includes` below for the lighter scope those
+    # actions use instead.
     scope :show_includes, lambda {
       strict_loading.includes(
-        { comments: Comment.index_includes_tree },
-        :correct_spelling,
-        { description: [:authors, :reviewer, :interests] },
-        { descriptions: [:authors, :editors, :reviewer, :user,
-                         :writer_groups, :interests] },
-        { interests: :user },
-        :misspellings,
-        { name_trackers: [:user, :name] },
-        # Reuse Naming's subtree so each naming's `observation`
-        # carries user/interests/rss_log for callbacks in merge flows.
+        *Name::Scopes.show_includes_base,
         { namings: Naming.index_includes_tree },
-        { observations: [:location, :thumb_image, :user] },
-        :rss_log,
-        { synonym: :names },
-        :user,
-        { versions: :user }
+        { observations: [:location, :thumb_image, :user] }
       )
+    }
+
+    # #show / past-version-display variant of `show_includes` —
+    # everything the same except `.namings`/`.observations`, neither
+    # of which those pages read directly (see `show_includes` above).
+    # For a name with many thousands of observations (e.g. a genus),
+    # eager-loading all of them turns a sub-second page load into
+    # several seconds for no benefit.
+    scope :show_page_includes, lambda {
+      strict_loading.includes(*Name::Scopes.show_includes_base)
     }
   end
 
