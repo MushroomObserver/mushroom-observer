@@ -288,4 +288,14 @@ class ZzTempParityCheckTest < UnitTestCase
     assert_equal(normalize_text(fixture_text), normalize_text(mail.body.to_s),
                  "approval TEXT parity mismatch")
   end
+
+  def test_verify_account_parity
+    mary = users(:mary)
+
+    html_body, text_body = both_bodies(mary) do
+      VerifyAccountMailer.build(receiver: mary)
+    end
+
+    compare("verify", "verify", html_body, text_body)
+  end
 end

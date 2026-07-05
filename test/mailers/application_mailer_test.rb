@@ -163,11 +163,9 @@ class ApplicationMailerTest < UnitTestCase
   # (issue #4676) — see test/mailers/zz_temp_parity_check_test.rb
   # (reuses observation_question and user_question fixtures).
 
-  def test_verify_email
-    run_mail_test("verify", mary) do
-      VerifyAccountMailer.build(receiver: mary).deliver_now
-    end
-  end
+  # VerifyAccountMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses verify
+  # fixtures).
 
   # WebmasterMailer converted to Phlex (issue #4676) — see
   # test/mailers/zz_temp_parity_check_test.rb (reuses
