@@ -7,6 +7,8 @@ module Views::Mailers::ObservationChangeMailer
   # reachable when there IS an observation and its notes changed), so
   # this writes its own view_template.
   class Build < Views::Mailers::Base
+    include Views::Mailers::ObservationLinks
+
     prop :subject, ::String
     prop :receiver, ::User
     prop :sender, _Nilable(::User), default: nil
@@ -100,14 +102,9 @@ module Views::Mailers::ObservationChangeMailer
     def observation_links
       return [] unless @observation
 
-      [[:email_links_show_object.t(type: :observation),
-        "#{MO.http_domain}/#{@observation.id}"],
-       [:email_links_post_comment.t,
-        "#{MO.http_domain}/comments/new?target=#{@observation.id}" \
-        "&type=Observation"],
-       [:email_links_not_interested.t(type: :observation),
-        "#{MO.http_domain}/interests/set_interest?id=#{@observation.id}" \
-        "&type=Observation&user=#{@receiver.id}&state=-1"]]
+      [[:email_links_show_object.t(type: :observation), show_object_url],
+       [:email_links_post_comment.t, post_comment_url],
+       [:email_links_not_interested.t(type: :observation), not_interested_url]]
     end
   end
 

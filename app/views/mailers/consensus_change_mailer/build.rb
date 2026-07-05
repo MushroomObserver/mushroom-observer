@@ -3,6 +3,8 @@
 module Views::Mailers::ConsensusChangeMailer
   # Notify user of name change of their obs.
   class Build < Views::Mailers::Base
+    include Views::Mailers::ObservationLinks
+
     prop :subject, ::String
     prop :receiver, ::User
     prop :sender, _Nilable(::User), default: nil
@@ -53,32 +55,12 @@ module Views::Mailers::ConsensusChangeMailer
        [:email_links_not_interested.t(type: :observation), not_interested_url]]
     end
 
-    def stop_sending_link
-      return [] if @receiver.watching?(@observation)
-
-      [[:email_links_stop_sending.t,
-        "#{MO.http_domain}/account/no_email/#{@receiver.id}" \
-        "?type=observations_consensus"]]
-    end
+    def stop_sending_type = "observations_consensus"
 
     def footer_links
       [[:email_links_change_prefs.t,
         "#{MO.http_domain}/account/preferences/edit"],
        [:email_links_latest_changes.t, MO.http_domain]]
-    end
-
-    def show_object_url
-      "#{MO.http_domain}/#{@observation.id}"
-    end
-
-    def post_comment_url
-      "#{MO.http_domain}/comments/new?target=#{@observation.id}" \
-        "&type=Observation"
-    end
-
-    def not_interested_url
-      "#{MO.http_domain}/interests/set_interest?id=#{@observation.id}" \
-        "&type=Observation&user=#{@receiver.id}&state=-1"
     end
   end
 
