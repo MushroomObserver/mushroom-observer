@@ -90,17 +90,14 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
     title, url, opts = tab.to_a
     label, count = split_title_and_count(title)
     a(href: url, **link_attrs(opts)) { plain(label) }
-    plain(" #{count}") if count
+    plain(" #{count}")
   end
 
-  # Tab#title is `"label (N)"`; split into the link text + the
-  # trailing "(N)" plain-text suffix.
+  # `Tab::Name::ObsLink#title` is always `"label (N)"` — split into
+  # the link text + the trailing "(N)" plain-text suffix.
   def split_title_and_count(title)
-    if title =~ /\A(.+?) (\(\d+\))\z/
-      [Regexp.last_match(1), Regexp.last_match(2)]
-    else
-      [title, nil]
-    end
+    match = title.match(/\A(.+?) (\(\d+\))\z/)
+    [match[1], match[2]]
   end
 
   def link_attrs(opts)
