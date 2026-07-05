@@ -4,6 +4,6 @@
 # the search-help block — the result list lives elsewhere.
 class Views::Controllers::Names::Search::Show < Views::FullPageBase
   def view_template
-    render(Help.new)
+    render(Views::Controllers::Names::Search::Help.new)
   end
 end

@@ -5,7 +5,7 @@ require("test_helper")
 # Guards against the `helpers.foo(...)` / `view_context.foo(...)`
 # antipatterns inside Phlex views / components.
 #
-# Per `.claude/rules/phlex_conversions.md`:
+# Per `.claude/rules/phlex_reference.md`:
 #
 # > Never call `helpers.foo` from inside a Phlex view. It's not a
 # > substitute for registering — it's worse (silent runtime

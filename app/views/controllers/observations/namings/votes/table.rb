@@ -17,7 +17,7 @@
 # styling with `cellpadding="0" cellspacing="5"` rather than the
 # `.table` family Components::Table emits. Matches the
 # "Mixed-shape rows that don't share an iteration source" carve-out
-# in `.claude/rules/phlex_conversions.md`.
+# in `.claude/rules/phlex_reference.md`.
 #
 module Views::Controllers::Observations::Namings::Votes
   class Table < Views::Base
