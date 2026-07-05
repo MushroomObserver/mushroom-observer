@@ -2324,6 +2324,7 @@ class NameTest < UnitTestCase
       }
     ) do
       name.citation = "Rolf added this."
+      name.current_user = rolf
       name.save
     end
     assert_equal(name_version + 1, name.version)
@@ -2358,13 +2359,14 @@ class NameTest < UnitTestCase
     Interest.create!(user: dick, target: name, state: false)
 
     # Katrina makes a change - should notify mary and rolf, but NOT dick
-    User.current = katrina
     name.reload
 
     # Should enqueue 2 emails (mary and rolf), not 3 (dick was removed
-    # because of Interest with state=false)
+    # because of Interest with state=false, and Katrina is excluded
+    # from her own notification as `current_user`/sender)
     assert_enqueued_jobs(2) do
       name.citation = "Katrina added citation."
+      name.current_user = katrina
       name.save
     end
 

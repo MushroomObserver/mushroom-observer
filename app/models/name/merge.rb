@@ -30,7 +30,7 @@ class Name
 
       move_observations(old_name)
       move_namings(old_name)
-      move_mispellings(old_name)
+      move_mispellings(user, old_name)
       move_followings(old_name) # move Interest and Tracking
       move_descriptions(user, old_name)
       move_versions(old_name)
@@ -58,9 +58,15 @@ class Name
       end
     end
 
-    def move_mispellings(old_name)
+    def move_mispellings(user, old_name)
       old_name.misspellings.each do |name|
         name.correct_spelling = (name == self ? nil : self)
+        # `name` (a misspelling of old_name) is a different record from
+        # `self`/old_name, so it never gets a `current_user` from
+        # anywhere else in `merge` - without this, Name::Notify#notify_users
+        # would attribute the resulting change-notification email to
+        # no one instead of the user performing the merge.
+        name.current_user = user
         name.save
       end
     end

@@ -36,8 +36,7 @@ module Name::Notify
     # column that changed.
     return if classification_only_change?
 
-    # debugger unless @current_user
-    sender = @current_user || User.current
+    sender = @current_user
     recipients = []
 
     notify_admins(recipients)
