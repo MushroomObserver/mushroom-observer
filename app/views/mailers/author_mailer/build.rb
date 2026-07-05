@@ -5,7 +5,7 @@ module Views::Mailers::AuthorMailer
   class Build < Views::Mailers::Base
     prop :subject, ::String
     prop :sender, ::User
-    prop :object, _Interface(:type_tag, :parent, :id)
+    prop :object, ::Description
     prop :message, ::String
 
     private

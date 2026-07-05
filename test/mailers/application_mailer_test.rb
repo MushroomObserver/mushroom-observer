@@ -165,15 +165,9 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_naming_observer_email
-    naming = namings(:agaricus_campestris_naming)
-    notification = name_trackers(:agaricus_campestris_name_tracker_with_note)
-    run_mail_test("naming_for_observer", rolf) do
-      NamingObserverMailer.build(
-        receiver: rolf, naming:, name_tracker: notification
-      ).deliver_now
-    end
-  end
+  # NamingObserverMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses
+  # naming_for_observer fixtures).
 
   def test_naming_tracker_email
     naming = namings(:agaricus_campestris_naming)

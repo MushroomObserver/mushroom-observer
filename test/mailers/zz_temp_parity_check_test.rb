@@ -163,4 +163,16 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("admin_request", "admin_request", html_body, text_body)
   end
+
+  def test_naming_observer_parity
+    rolf = users(:rolf)
+    naming = namings(:agaricus_campestris_naming)
+    name_tracker = name_trackers(:agaricus_campestris_name_tracker_with_note)
+
+    html_body, text_body = both_bodies(rolf) do
+      NamingObserverMailer.build(receiver: rolf, naming:, name_tracker:)
+    end
+
+    compare("naming_for_observer", "naming_for_observer", html_body, text_body)
+  end
 end

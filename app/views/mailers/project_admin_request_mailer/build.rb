@@ -5,7 +5,7 @@ module Views::Mailers::ProjectAdminRequestMailer
   class Build < Views::Mailers::Base
     prop :subject, ::String
     prop :sender, ::User
-    prop :project, _Interface(:id, :title)
+    prop :project, ::Project
     prop :message, ::String
 
     private
