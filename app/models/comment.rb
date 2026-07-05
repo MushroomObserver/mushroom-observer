@@ -251,6 +251,23 @@ class Comment < AbstractModel
 
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
+  # `show`/`edit`/`update`/`destroy` all reach a single Comment via
+  # this same tree (`find_or_goto_index`). Deliberately as shallow as
+  # index_includes_tree: `target` is polymorphic and what it needs
+  # beyond itself differs per action (destroy/update's `log_*` need
+  # `target.rss_log`; show's `register_target_names` needs
+  # `target.namings` for Observations or `target.synonyms` for
+  # Names) - no single eager tree can cover every target type's
+  # branch without raising on the types that lack that association.
+  # Those few call sites opt out of strict_loading individually
+  # instead (see Comment#log_destroy and
+  # Views::Controllers::Comments::Show#register_target_names).
+  def self.show_includes_tree
+    index_includes_tree
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+
   # Returns +summary+ for debugging.
   def text_name
     summary.to_s
@@ -271,6 +288,11 @@ class Comment < AbstractModel
   def log_create(target = self.target)
     return unless target.respond_to?(:log)
 
+    # One-off single-record read, not the N+1 strict_loading guards
+    # against - target came from a strict-loaded Comment#target, but
+    # `log`'s `target.rss_log` isn't in show_includes_tree (see there
+    # for why).
+    target.strict_loading!(false)
     target.log(:log_comment_added, summary: summary, touch: true)
   end
 
@@ -278,6 +300,7 @@ class Comment < AbstractModel
   def log_update(target = self.target)
     return unless target.respond_to?(:log)
 
+    target.strict_loading!(false)
     target.log(:log_comment_updated, summary: summary, touch: false)
   end
 
@@ -285,6 +308,7 @@ class Comment < AbstractModel
   def log_destroy(target = self.target)
     return unless target.respond_to?(:log)
 
+    target.strict_loading!(false)
     target.log(:log_comment_destroyed, summary: summary, touch: false)
   end
 

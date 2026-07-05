@@ -2813,6 +2813,29 @@ class NameTest < UnitTestCase
                  names(:sect_agaricus).display_name_without_authors)
   end
 
+  def test_user_display_name_without_authors
+    # group with author - threads `user` through to `user_display_name`
+    assert_equal(
+      "**__Groupauthored__** group",
+      names(:authored_group).user_display_name_without_authors(mary)
+    )
+
+    # non-group with author
+    assert_equal(
+      "**__Russula__** **__brevipes__**",
+      names(:russula_brevipes_author_notes).
+        user_display_name_without_authors(mary)
+    )
+  end
+
+  def test_unknown_and_known
+    assert(Name.unknown.unknown?)
+    assert_not(Name.unknown.known?)
+
+    assert_not(names(:coprinus_comatus).unknown?)
+    assert(names(:coprinus_comatus).known?)
+  end
+
   def test_format_autonym
     assert_equal("**__Acarospora__**",
                  Name.format_autonym("Acarospora", "", "Genus", false))
@@ -3455,6 +3478,23 @@ class NameTest < UnitTestCase
     name.change_classification(new_classification)
     assert_equal(new_classification, name.reload.classification)
     assert_equal(new_classification, child.reload.classification)
+  end
+
+  # `change_text_name` raises when it can't find-or-create a parent Name
+  # for the parsed name's genus. Force that failure by stubbing
+  # `find_or_create_name_and_parents` to return an array whose last
+  # element is nil, mirroring what `find_or_create_parsed_name` returns
+  # when it can't resolve an ambiguous match.
+  def test_change_text_name_raises_when_parent_creation_fails
+    name = names(:coprinus_comatus)
+    # "Zzyzxomyces" isn't a fixture, so the parent-lookup guard
+    # (`!Name.find_by(text_name: parse.parent_name)`) falls through to
+    # `find_or_create_name_and_parents`.
+    Name.stub(:find_or_create_name_and_parents, [nil]) do
+      assert_raises(RuntimeError) do
+        name.change_text_name(rolf, "Zzyzxomyces weirdii", "Foo", "Species")
+      end
+    end
   end
 
   def test_mark_misspelled
@@ -4168,6 +4208,45 @@ class NameTest < UnitTestCase
     name = Name.new(other_params)
     name.current_user = rolf
     assert(name.valid?, "current_user should satisfy user_presence")
+  end
+
+  def test_name_field_size_limits
+    # text_name_limit(100) + author_limit(100) + 4
+    assert_equal(204, Name.search_name_limit)
+    # text_name_limit(100) + author_limit(100) + 21
+    assert_equal(221, Name.sort_name_limit)
+    # text_name_limit(100) + author_limit(100) + 41
+    assert_equal(241, Name.display_name_limit)
+  end
+
+  def test_text_name_length_validation
+    long_text_name = "X" * (Name.text_name_limit + 1)
+    name = Name.new(
+      user: users(:rolf),
+      text_name: long_text_name, author: "", rank: "Genus",
+      search_name: long_text_name,
+      display_name: "**__#{long_text_name}__**",
+      sort_name: long_text_name
+    )
+    assert(name.invalid?,
+           "Name with text_name over the limit should be invalid")
+    assert(name.errors[:text_name].any?,
+           "Overlong text_name should add a :text_name error")
+  end
+
+  def test_author_length_validation
+    long_author = "X" * (Name.author_limit + 1)
+    name = Name.new(
+      user: users(:rolf),
+      text_name: "Paradiscina", author: long_author, rank: "Genus",
+      search_name: "Paradiscina #{long_author}",
+      display_name: "**__Paradiscina__** #{long_author}",
+      sort_name: "Paradiscina  #{long_author}"
+    )
+    assert(name.invalid?,
+           "Name with author over the limit should be invalid")
+    assert(name.errors[:author].any?,
+           "Overlong author should add an :author error")
   end
 
   def test_author_allowed_characters

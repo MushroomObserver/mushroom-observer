@@ -36,12 +36,27 @@ module Views::Controllers::Comments
     def register_target_names
       case @comment.target_type
       when "Observation"
-        @comment.target.namings.each { |n| ::Textile.register_name(n.name) }
-        ::Textile.register_name(@comment.target.name)
+        register_observation_target_names
       when "Name"
-        @comment.target.synonyms.each { |n| ::Textile.register_name(n) }
-        ::Textile.register_name(@comment.target)
+        register_name_target_names
       end
+    end
+
+    # One-off single-record reads - target came from a strict-loaded
+    # Comment#target, but `namings`/`synonyms` aren't in
+    # show_includes_tree (see Comment.show_includes_tree for why:
+    # they're type-specific needs, not something every commentable
+    # target type has).
+    def register_observation_target_names
+      @comment.target.strict_loading!(false)
+      @comment.target.namings.each { |n| ::Textile.register_name(n.name) }
+      ::Textile.register_name(@comment.target.name)
+    end
+
+    def register_name_target_names
+      @comment.target.strict_loading!(false)
+      @comment.target.synonyms.each { |n| ::Textile.register_name(n) }
+      ::Textile.register_name(@comment.target)
     end
 
     def render_created_at

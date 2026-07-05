@@ -26,6 +26,11 @@ class Components::Base < Phlex::HTML
   # `rank_as_string`, `image_vote_as_*_string` — translation-key
   # shortcuts for enum-like model attributes.
   include Components::Localization
+  # `viewer_aware_unique_format_name`, `viewer_aware_location_format`
+  # — shared with ApplicationController (see app/classes/
+  # viewer_aware_format.rb for why this isn't a register_value_helper
+  # instead).
+  include ViewerAwareFormat
 
   # Register custom value helpers (return values)
   register_value_helper :permission?
@@ -116,16 +121,9 @@ class Components::Base < Phlex::HTML
     trusted_html("&nbsp;")
   end
 
-  # `obj` is frequently polymorphic (a Comment/Interest/RssLog target,
-  # etc.) - only some target types (Name, Observation, Naming) have a
-  # viewer-aware user_unique_format_name. Falls back to the plain
-  # unique_format_name for the rest.
-  def viewer_aware_unique_format_name(obj, user = current_user)
-    if obj.respond_to?(:user_unique_format_name)
-      obj.user_unique_format_name(user)
-    else
-      obj.unique_format_name
-    end
+  # ViewerAwareFormat's default `user` arg.
+  def default_viewer
+    current_user
   end
 
   def before_template

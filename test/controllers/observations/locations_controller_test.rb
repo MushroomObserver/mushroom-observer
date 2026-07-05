@@ -73,5 +73,43 @@ module Observations
       assert_not_nil(obs.reload.location)
       assert_equal(albion, obs.location)
     end
+
+    # `update`'s `where = params[:where].strip_squeeze rescue ""`:
+    # when `:where` is absent, `nil.strip_squeeze` raises
+    # `NoMethodError`, rescued to `""`. `where.present?` is then
+    # false, so no merge is attempted and no flash is set.
+    def test_update_missing_where_param
+      albion = locations(:albion)
+
+      put_requires_login(:update, { location: albion.id })
+
+      assert_redirected_to(locations_path)
+      assert_no_flash
+    end
+
+    # `update_observations_by_where`'s `next if o.save` failure
+    # branch: flashes an error (naming the observation via
+    # `viewer_aware_unique_format_name`) and marks the merge
+    # unsuccessful. Stub `Observation.where` to return our own
+    # instance so we can force `#save` to fail on it.
+    def test_update_flash_error_when_save_fails
+      albion = locations(:albion)
+      obs = Observation.create!(
+        user: rolf,
+        when: Time.zone.now,
+        where: "flaky undefined location",
+        notes: "flaky obs"
+      )
+
+      obs.stub(:save, false) do
+        Observation.stub(:where, [obs]) do
+          put_requires_login(:update,
+                             { where: obs.where, location: albion.id })
+        end
+      end
+
+      assert_redirected_to(locations_path)
+      assert_flash_error
+    end
   end
 end

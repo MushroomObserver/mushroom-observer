@@ -35,6 +35,7 @@ class ApplicationController < ActionController::Base
   include Indexes
   include SectionUpdater
   include ModalUpdater
+  include ViewerAwareFormat
 
   # Allow folder organization in the app/views folder
   append_view_path Rails.root.join("app/views/controllers")
@@ -367,15 +368,11 @@ class ApplicationController < ActionController::Base
     nil
   end
 
-  # `obj` is frequently polymorphic (a Comment/Interest/RssLog target,
-  # etc.) - only some target types (Name, Observation) have a
-  # viewer-aware user_unique_format_name. Falls back to the plain
-  # unique_format_name for the rest.
-  def viewer_aware_unique_format_name(obj)
-    if obj.respond_to?(:user_unique_format_name)
-      obj.user_unique_format_name(@user)
-    else
-      obj.unique_format_name
-    end
+  # ViewerAwareFormat's default `user` arg.
+  def default_viewer
+    @user
   end
+
+  private :viewer_aware_unique_format_name, :viewer_aware_location_format,
+          :default_viewer
 end
