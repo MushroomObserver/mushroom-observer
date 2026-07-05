@@ -50,4 +50,12 @@ class Image::DhashTest < UnitTestCase
       Image::Dhash.from_file("no_such_file.jpg")
     end
   end
+
+  def test_from_url_fetches_and_hashes
+    url = "https://images.example.org/photo.jpg"
+    stub_request(:get, url).
+      to_return(status: 200, body: File.binread(FIXTURE))
+
+    assert_equal(Image::Dhash.from_file(FIXTURE), Image::Dhash.from_url(url))
+  end
 end
