@@ -11,7 +11,6 @@ class ObserverQuestionMailer < ApplicationMailer
     )
     debug_log(:observation_question, sender, @user, observation:)
     mo_mail(subject, to: @user, reply_to: sender,
-                     view_namespace: Views::Mailers::ObserverQuestionMailer,
                      view_params: { subject:, sender:, receiver: @user,
                                     observation:, message: message || "" })
   end

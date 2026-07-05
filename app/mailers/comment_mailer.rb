@@ -10,7 +10,6 @@ class CommentMailer < ApplicationMailer
     debug_log(:comment, sender, receiver,
               object: "#{target.type_tag}-#{target.id}")
     mo_mail(title, to: receiver,
-                   view_namespace: Views::Mailers::CommentMailer,
                    view_params: { subject: title, receiver:, sender:,
                                   target:, comment:, email_type: })
   end

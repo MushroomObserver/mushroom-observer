@@ -176,13 +176,9 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_password_email
-    password = "A password"
-
-    run_mail_test("new_password", rolf) do
-      PasswordMailer.build(receiver: rolf, password:).deliver_now
-    end
-  end
+  # PasswordMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses new_password
+  # fixtures).
 
   def test_observation_change_email
     observation = observations(:coprinus_comatus_obs)

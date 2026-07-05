@@ -8,7 +8,6 @@ class UserQuestionMailer < ApplicationMailer
     setup_user(receiver)
     debug_log(:user_question, sender, receiver)
     mo_mail(subject, to: receiver, reply_to: sender,
-                     view_namespace: Views::Mailers::UserQuestionMailer,
                      view_params: { subject:, sender:, receiver:,
                                     message: message || "" })
   end

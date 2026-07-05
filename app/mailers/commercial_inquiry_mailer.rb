@@ -10,7 +10,6 @@ class CommercialInquiryMailer < ApplicationMailer
     subject = :email_subject_commercial_inquiry.l(name: image.unique_text_name)
     debug_log(:commercial_inquiry, sender, @user, image:)
     mo_mail(subject, to: @user, reply_to: sender,
-                     view_namespace: Views::Mailers::CommercialInquiryMailer,
                      view_params: { subject:, sender:, receiver: @user,
                                     image:, message: message || "" })
   end

@@ -13,7 +13,6 @@ class NamingObserverMailer < ApplicationMailer
     debug_log(:naming_for_observer, sender, @user,
               naming:, name_tracker:)
     mo_mail(subject, to: receiver, reply_to: sender,
-                     view_namespace: Views::Mailers::NamingObserverMailer,
                      view_params: { subject:, receiver:, naming:,
                                     name_tracker: })
   end

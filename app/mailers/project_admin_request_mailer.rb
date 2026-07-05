@@ -8,7 +8,6 @@ class ProjectAdminRequestMailer < ApplicationMailer
     setup_user(receiver)
     debug_log(:admin_request, sender, receiver, project:)
     mo_mail(subject, to: receiver, reply_to: sender,
-                     view_namespace: Views::Mailers::ProjectAdminRequestMailer,
                      view_params: { subject:, sender:, project:,
                                     message: message || "" })
   end

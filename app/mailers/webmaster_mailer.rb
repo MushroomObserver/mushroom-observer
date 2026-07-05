@@ -12,7 +12,6 @@ class WebmasterMailer < ApplicationMailer
             from: MO.webmaster_email_address,
             reply_to: sender_email,
             content_style: "plain",
-            view_namespace: Views::Mailers::WebmasterMailer,
             view_params: { question: message })
   end
 end

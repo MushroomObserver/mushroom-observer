@@ -9,7 +9,6 @@ class AuthorMailer < ApplicationMailer
     debug_log(:author_request, sender, receiver,
               object: "#{object.type_tag}-#{object.id}")
     mo_mail(subject, to: receiver, reply_to: sender,
-                     view_namespace: Views::Mailers::AuthorMailer,
                      view_params: { subject:, sender:, object:,
                                     message: message || "" })
   end

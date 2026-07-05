@@ -28,7 +28,16 @@ class ZzTempParityCheckTest < UnitTestCase
 
   def normalize_html(html)
     frag = Nokogiri::HTML5.fragment(html)
-    frag.to_html.gsub(/>\s+</, "><").gsub(/\s+/, " ").strip
+    # Only collapse whitespace-*with-a-newline* touching a tag
+    # boundary — the old ERB templates' literal template-formatting
+    # newlines around some tags (e.g. `<div ...>\n<%= @password %>\n
+    # </div>`) leave an insignificant leading/trailing space in the
+    # text node that Phlex's compact output never produces. A plain
+    # single space (no newline) touching a tag boundary is left
+    # alone — that's meaningful inline spacing (e.g. "Show this
+    # observation: " before a link), not template-formatting noise.
+    frag.to_html.gsub(/>[ \t]*\n[ \t]*/, ">").
+      gsub(/[ \t]*\n[ \t]*</, "<").gsub(/\s+/, " ").strip
   end
 
   def normalize_text(text)
@@ -174,5 +183,15 @@ class ZzTempParityCheckTest < UnitTestCase
     end
 
     compare("naming_for_observer", "naming_for_observer", html_body, text_body)
+  end
+
+  def test_password_parity
+    rolf = users(:rolf)
+
+    html_body, text_body = both_bodies(rolf) do
+      PasswordMailer.build(receiver: rolf, password: "A password")
+    end
+
+    compare("new_password", "new_password", html_body, text_body)
   end
 end
