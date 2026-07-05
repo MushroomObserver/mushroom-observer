@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class OccurrenceChangeMailerTest < UnitTestCase
+class OccurrenceChangeMailerTest < MailerTestCase
   include ActiveJob::TestHelper
 
   def test_build_added

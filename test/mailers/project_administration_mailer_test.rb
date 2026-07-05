@@ -2,13 +2,7 @@
 
 require("test_helper")
 
-class ProjectAdministrationMailerTest < UnitTestCase
-  def setup
-    ActionMailer::Base.delivery_method = :test
-    ActionMailer::Base.perform_deliveries = true
-    super
-  end
-
+class ProjectAdministrationMailerTest < MailerTestCase
   def test_build_html
     project = projects(:eol_project)
     rolf.update!(email_html: true)
@@ -21,8 +15,8 @@ class ProjectAdministrationMailerTest < UnitTestCase
     )}", mail.subject)
     assert_includes(mail.to, rolf.email)
     assert_equal(mary.email, mail.reply_to.first)
+    assert_html_mail(mail)
     body = mail.body.to_s
-    assert_match(/<html>/, body)
     assert_includes(body, project.title)
     assert_includes(body,
                     "https://mushroomobserver.org/projects/#{project.id}")
@@ -35,9 +29,9 @@ class ProjectAdministrationMailerTest < UnitTestCase
 
     mail = ProjectAdministrationMailer.build(site_admin: mary, project:,
                                              receiver: rolf).message
-    body = mail.body.to_s
 
-    assert_no_match(/<html>/, body)
+    assert_text_mail(mail)
+    body = mail.body.to_s
     assert_includes(body, "-" * 50)
     assert_includes(body,
                     "https://mushroomobserver.org/projects/#{project.id}")

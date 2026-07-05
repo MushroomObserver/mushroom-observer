@@ -76,6 +76,7 @@ require("rails/test_help")
   uploaded_string
 
   unit_test_case
+  mailer_test_case
   component_test_case
   functional_test_case
   integration_test_case
