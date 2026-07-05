@@ -419,9 +419,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   # If caching, only uncached objects need to eager_load the includes
   def objects_with_only_needed_eager_loads(query, include)
-    # Not currently caching on user.
-    # user = User.current ? "logged_in" : "no_user"
-    #
     # When MatrixTable will bypass the cache for the whole request
     # (identify mode, project-admin view), every row is going to need
     # the full eager loads anyway — the two-query pre-check shape

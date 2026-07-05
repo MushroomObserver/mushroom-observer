@@ -285,4 +285,18 @@ module ApplicationController::Authentication
   def session_user
     User.safe_find(session[:user_id])
   end
+
+  # For actions that skip the standard `autologin` filter (via
+  # `disable_filters`, to avoid its autologin-cookie-fallback overhead
+  # on lightweight AJAX endpoints) but still need to know who's logged
+  # in. `session[:user_id]` isn't touched by skipping `autologin` -
+  # only the extra steps are skipped - so `session_user` is always
+  # available here. Applies the same `user_verified_and_allowed?`
+  # check `autologin` does, so a blocked/unverified user's session
+  # resolves to nil here too, same as everywhere else on the site.
+  def set_user_from_session
+    user = session_user
+    user = nil unless user_verified_and_allowed?(user)
+    @user = User.current = user
+  end
 end
