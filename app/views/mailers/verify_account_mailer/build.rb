@@ -4,8 +4,7 @@ module Views::Mailers::VerifyAccountMailer
   # Email sent to verify user's email. Its intro is a single
   # translated sentence with an embedded link — a placeholder token
   # ("xxx") is interpolated by `.tp`, then swapped for a real `<a>`
-  # tag via `splice_html`, matching the original ERB's
-  # `intro.gsub!(/xxx/, link_to(url, url))` approach.
+  # tag via `splice_html`.
   class Build < Views::Mailers::Base
     prop :subject, ::String
     prop :receiver, ::User

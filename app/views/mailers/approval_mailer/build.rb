@@ -3,8 +3,7 @@
 module Views::Mailers::ApprovalMailer
   # Admins sending approval of a user's request. Always plain
   # ASCII-ified text regardless of the recipient's email_html
-  # preference (matches the original ERB, which had no format branch
-  # at all) — a single Build class, no Html/Text split.
+  # preference — a single Build class, no Html/Text split.
   class Build < Views::Mailers::Base
     prop :message, ::String
 

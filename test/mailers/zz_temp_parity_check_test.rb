@@ -2,11 +2,9 @@
 
 require("test_helper")
 
-# TEMPORARY — parity check between the golden ERB-era fixtures and
-# the new Phlex mailer output. Not a permanent test; keep it around
-# while converting the remaining mailers (issue #4676), delete once
-# every mailer covered by a fixture has been converted and given its
-# own permanent test.
+# TEMPORARY — parity check between the golden fixtures and the Phlex
+# mailer output. Not a permanent test; keep it around until every
+# mailer covered by a fixture has been given its own permanent test.
 class ZzTempParityCheckTest < UnitTestCase
   FIXTURES_PATH = "#{File.dirname(__FILE__)}/../application_mailer".freeze
 
@@ -29,13 +27,13 @@ class ZzTempParityCheckTest < UnitTestCase
   def normalize_html(html)
     frag = Nokogiri::HTML5.fragment(html)
     # Only collapse whitespace-*with-a-newline* touching a tag
-    # boundary — the old ERB templates' literal template-formatting
-    # newlines around some tags (e.g. `<div ...>\n<%= @password %>\n
-    # </div>`) leave an insignificant leading/trailing space in the
-    # text node that Phlex's compact output never produces. A plain
-    # single space (no newline) touching a tag boundary is left
-    # alone — that's meaningful inline spacing (e.g. "Show this
-    # observation: " before a link), not template-formatting noise.
+    # boundary — the golden fixtures' literal template-formatting
+    # newlines around some tags leave an insignificant leading/
+    # trailing space in the text node that Phlex's compact output
+    # never produces. A plain single space (no newline) touching a
+    # tag boundary is left alone — that's meaningful inline spacing
+    # (e.g. "Show this observation: " before a link), not
+    # template-formatting noise.
     frag.to_html.gsub(/>[ \t]*\n[ \t]*/, ">").
       gsub(/[ \t]*\n[ \t]*</, "<").gsub(/\s+/, " ").strip
   end

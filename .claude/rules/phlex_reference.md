@@ -10,8 +10,7 @@ see `.claude/ruby_style_guide.md`. For test structure and assertion patterns,
 see `.claude/rules/testing.md`.
 
 MO's web views are fully converted to Phlex — there is no ERB left under
-`app/views/`. (Action Mailer templates under `app/views/mailers/` still use
-ERB; that's a separate, unconverted concern this doc doesn't cover.)
+`app/views/`, including Action Mailer templates under `app/views/mailers/`.
 
 ## Kit syntax — what has it, what doesn't
 

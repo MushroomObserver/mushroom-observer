@@ -54,8 +54,7 @@ class NameChangeMailer < ApplicationMailer
   # is_admin?/reviewer? all query permission join tables (or the
   # reviewer association, for reviewer?). If notifiable for
   # multiple reasons, the least restrictive wins: interest first,
-  # then admin, editor, author, and lastly reviewer — matches the
-  # original ERB priority.
+  # then admin, editor, author, and lastly reviewer.
   def name_email_type(receiver, name_change, desc_change)
     new_name = name_change.new_clone
     old_name = name_change.old_clone

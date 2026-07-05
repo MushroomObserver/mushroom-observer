@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-# Shared Observation-specific link-URL builders (issue #4676's ERB ->
-# Phlex conversion), confirmed identical shape across
-# ConsensusChangeMailer, NameProposalMailer, and
+# Shared Observation-specific link-URL builders, confirmed identical
+# shape across ConsensusChangeMailer, NameProposalMailer, and
 # ObservationChangeMailer's `observation_links`. NOT for CommentMailer
 # — its target is polymorphic (any commentable model, not just
 # Observation), so its show_object_url uses `@target.show_controller`

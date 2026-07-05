@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
-# Shared `Html`/`Text` view_template for the "standard" mailer shape
-# (issue #4676's ERB -> Phlex conversion): an intro sentence, an
-# always-shown boxed quoted message, a handy_links sentence, a links
-# list, and a report-abuse footer. This is the single most common
-# shape among the old ERB templates (AuthorMailer, ObserverQuestion,
-# UserQuestion, CommercialInquiry, ProjectAdminRequest,
-# NamingObserver, ...).
+# Shared `Html`/`Text` view_template for the "standard" mailer shape:
+# an intro sentence, an always-shown boxed quoted message, a
+# handy_links sentence, a links list, and a report-abuse footer. This
+# is the single most common shape among MO's mailers (AuthorMailer,
+# ObserverQuestion, UserQuestion, CommercialInquiry,
+# ProjectAdminRequest, NamingObserver, ...).
 #
 # Include into both the `Html` and `Text` subclasses of a mailer's
 # `Build` class (named exactly that — `Views::Mailers::Base#html?`

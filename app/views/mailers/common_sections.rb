@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 # Shared rendering toolkit mixed into every mailer's `Html`/`Text`
-# view (issue #4676's ERB -> Phlex conversion). Extracted from the
-# byte-identical boilerplate duplicated across the old ERB templates:
-# a `links` list of `[label, url]` pairs, a boxed quoted-message div,
-# and the report-abuse footer line. Each including class defines
-# `html?` so these methods know which body they're building; the
-# `intro`/`fields`/`handy_links` composition stays per-mailer since it
-# varies too much to share further.
+# view: a `links` list of `[label, url]` pairs, a boxed
+# quoted-message div, and the report-abuse footer line. Each
+# including class defines `html?` so these methods know which body
+# they're building; the `intro`/`fields`/`handy_links` composition
+# stays per-mailer since it varies too much to share further.
 #
 # `label`s passed in here are expected to already be `.t`/`.tp`'d
 # (i.e. real ActiveSupport::SafeBuffer, per Textile's `_safe`
@@ -24,8 +22,8 @@ module Views::Mailers::CommonSections
 
   # Blank-line separator between sections in text mode; a no-op in
   # HTML mode — block-level tags need nothing but insignificant
-  # whitespace between them (the old ERB templates' literal blank
-  # source lines only matter for the plain-text body).
+  # whitespace between them, and blank-line separators only matter
+  # for the plain-text body's readability.
   def gap
     plain("\n\n") unless html?
   end
@@ -46,9 +44,7 @@ module Views::Mailers::CommonSections
   end
 
   # The 50-dash horizontal rule separating quoted content from the
-  # footer in a text-mode body, blank-line-padded on both sides —
-  # matches the old ERB templates' literal
-  # "--------------------------------------------------" line.
+  # footer in a text-mode body, blank-line-padded on both sides.
   def divider
     gap
     dashes_line

@@ -3,9 +3,9 @@
 module Views::Mailers::PasswordMailer
   # User forgot their password. Deviates from StandardMessageBody:
   # no report_abuse footer, and the boxed content is the raw password
-  # (not `.tp`-textilized, matching the original ERB which never
-  # marked it html_safe either — Phlex's default `plain` escaping is
-  # therefore the faithful equivalent, not `trusted_text`).
+  # (not `.tp`-textilized — it's never marked html_safe, so Phlex's
+  # default `plain` escaping is the correct behavior, not
+  # `trusted_text`).
   class Build < Views::Mailers::Base
     prop :subject, ::String
     prop :receiver, ::User
