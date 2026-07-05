@@ -42,7 +42,7 @@ module Account
 
       assert_equal(users(:rolf).id, session[:real_user_id])
       assert_nil(session[:admin])
-      assert_equal(target, User.current)
+      assert_equal(target, ctrl.instance_variable_get(:@user))
     end
 
     # Covers the `elsif session[:real_user_id] == new_user.id` branch in
