@@ -35,19 +35,30 @@ class ZzTempParityCheckTest < UnitTestCase
     text.strip.gsub(/[ \t]+\n/, "\n")
   end
 
+  # Toggles `user.email_html`, builds the mail via the given block for
+  # both styles, and force-evaluates each body immediately (mailers
+  # are lazy `MessageDelivery` proxies — deferring `.body` access
+  # until after both builds would let the second toggle silently
+  # change the first mail's rendered content_style).
+  def both_bodies(user)
+    user.update!(email_html: true)
+    html_body = yield.message.body.to_s
+    user.update!(email_html: false)
+    text_body = yield.message.body.to_s
+    [html_body, text_body]
+  end
+
   def compare(label, fixture_base, mail_html, mail_text)
     fixture_html = body_only(interpolated_fixture("#{fixture_base}.html"))
     fixture_text = body_only(interpolated_fixture("#{fixture_base}.text"))
 
-    puts("\n#{"=" * 10} #{label} HTML #{"=" * 10}")
     a = normalize_html(fixture_html)
     b = normalize_html(mail_html)
-    puts(a == b ? "MATCH" : "MISMATCH\n--fixture--\n#{a}\n--new--\n#{b}")
+    assert_equal(a, b, "#{label} HTML parity mismatch")
 
-    puts("\n#{"=" * 10} #{label} TEXT #{"=" * 10}")
     ta = normalize_text(fixture_text)
     tb = normalize_text(mail_text)
-    puts(ta == tb ? "MATCH" : "MISMATCH\n--fixture--\n#{ta}\n--new--\n#{tb}")
+    assert_equal(ta, tb, "#{label} TEXT parity mismatch")
   end
 
   def test_comment_parity
@@ -56,24 +67,11 @@ class ZzTempParityCheckTest < UnitTestCase
     target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_1)
 
-    mary.update!(email_html: true)
-    html_body = CommentMailer.build(sender: rolf, receiver: mary, target:,
-                                    comment:).message.body.to_s
-    mary.update!(email_html: false)
-    text_body = CommentMailer.build(sender: rolf, receiver: mary, target:,
-                                    comment:).message.body.to_s
+    html_body, text_body = both_bodies(mary) do
+      CommentMailer.build(sender: rolf, receiver: mary, target:, comment:)
+    end
 
     compare("comment", "comment", html_body, text_body)
-  end
-
-  def test_webmaster_parity
-    mail = WebmasterMailer.build(sender_email: mary.email,
-                                 message: "A question")
-    fixture_text = body_only(interpolated_fixture("webmaster_question.text"))
-    puts("\n#{"=" * 10} webmaster_question TEXT #{"=" * 10}")
-    ta = normalize_text(fixture_text)
-    tb = normalize_text(mail.body.to_s)
-    puts(ta == tb ? "MATCH" : "MISMATCH\n--fixture--\n#{ta}\n--new--\n#{tb}")
   end
 
   def test_comment_response_parity
@@ -82,13 +80,32 @@ class ZzTempParityCheckTest < UnitTestCase
     target = observations(:minimal_unknown_obs)
     comment = comments(:minimal_unknown_obs_comment_2)
 
-    rolf.update!(email_html: true)
-    html_body = CommentMailer.build(sender: dick, receiver: rolf, target:,
-                                    comment:).message.body.to_s
-    rolf.update!(email_html: false)
-    text_body = CommentMailer.build(sender: dick, receiver: rolf, target:,
-                                    comment:).message.body.to_s
+    html_body, text_body = both_bodies(rolf) do
+      CommentMailer.build(sender: dick, receiver: rolf, target:, comment:)
+    end
 
     compare("comment_response", "comment_response", html_body, text_body)
+  end
+
+  def test_webmaster_parity
+    mail = WebmasterMailer.build(sender_email: mary.email,
+                                 message: "A question").message
+    fixture_text = body_only(interpolated_fixture("webmaster_question.text"))
+    assert_equal(normalize_text(fixture_text), normalize_text(mail.body.to_s),
+                 "webmaster_question TEXT parity mismatch")
+  end
+
+  def test_author_request_parity
+    rolf = users(:rolf)
+    katrina = users(:katrina)
+    object = names(:coprinus_comatus).description
+
+    html_body, text_body = both_bodies(rolf) do
+      AuthorMailer.build(sender: katrina, receiver: rolf, object:,
+                         subject: "Please do something or other",
+                         message: "and this is why...")
+    end
+
+    compare("author_request", "author_request", html_body, text_body)
   end
 end

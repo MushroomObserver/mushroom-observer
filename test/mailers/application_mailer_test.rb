@@ -98,17 +98,9 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_author_email
-    object = names(:coprinus_comatus).description
-    subject = "Please do something or other"
-    message = "and this is why..."
-
-    run_mail_test("author_request", rolf) do
-      AuthorMailer.build(
-        sender: katrina, receiver: rolf, object:, subject:, message:
-      ).deliver_now
-    end
-  end
+  # AuthorMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses author_request
+  # fixtures).
 
   # CommentMailer converted to Phlex (issue #4676) — its golden-file
   # byte comparison is superseded by the structural checks in
