@@ -2,9 +2,7 @@
 
 module Views::Mailers::OccurrenceChangeMailer
   # Notify observation owner when their observation is added to or
-  # removed from an occurrence. Deviates from FieldsOnlyBody: no
-  # blank line between fields and handy_links in text mode (just a
-  # single newline), so this writes its own view_template.
+  # removed from an occurrence.
   class Build < Views::Mailers::Base
     prop :subject, ::String
     prop :receiver, ::User
@@ -47,32 +45,10 @@ module Views::Mailers::OccurrenceChangeMailer
   end
 
   class Html < Build
-    def view_template
-      render(Views::Layouts::Mailer::Html.new(subject: @subject)) do
-        render_body
-      end
-    end
-
-    private
-
-    def render_body
-      emit_tp(intro)
-      emit_tp(fields)
-      emit_tp(handy_links)
-      render_links_section(links)
-    end
+    include Views::Mailers::FieldsOnlyBody
   end
 
   class Text < Build
-    def view_template
-      emit_tp(intro)
-      gap
-      emit_tp(fields)
-      newline
-      emit_tp(handy_links)
-      gap
-      render_links_section(links)
-      newline
-    end
+    include Views::Mailers::FieldsOnlyBody
   end
 end

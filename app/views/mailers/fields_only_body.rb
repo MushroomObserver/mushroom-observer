@@ -4,17 +4,15 @@
 # shape (issue #4676's ERB -> Phlex conversion): an intro sentence, a
 # `*Label:* value` fields block, a handy_links sentence, and a links
 # list — no boxed quoted message, no report-abuse footer (unlike
-# `Views::Mailers::StandardMessageBody`). Confirmed identical shape in
-# ConsensusChangeMailer and NameProposalMailer.
+# `Views::Mailers::StandardMessageBody`). Used by ConsensusChangeMailer,
+# NameProposalMailer, and OccurrenceChangeMailer.
 #
 # Include into a mailer's `Html`/`Text` classes (named exactly that —
 # `Views::Mailers::Base#html?` derives its answer from the class
 # name). The including class must define `intro`, `fields`,
-# `handy_links`, and `links`. Don't force-fit a mailer whose
-# blank-line spacing differs from this exact sequence (e.g.
-# OccurrenceChangeMailer has no blank line between fields and
-# handy_links in text mode) — write its own view_template instead;
-# verify against its fixture via the parity test either way.
+# `handy_links`, and `links`. Exact text-mode blank-line placement
+# isn't worth preserving byte-for-byte against the old ERB output —
+# use this module's fixed spacing even where it differs slightly.
 module Views::Mailers::FieldsOnlyBody
   def view_template
     return render_content unless html?
