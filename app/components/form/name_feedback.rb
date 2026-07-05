@@ -65,7 +65,7 @@ class Components::Form::NameFeedback < Components::Base
                   :form_naming_deprecated_help.t(button: @button_name,
                                                  name: @given_name)
                 end
-    render(::Components::Help::Note.new(:div)) { plain(help_text) }
+    Help(content: help_text)
   end
 
   def render_valid_name_choices
@@ -84,9 +84,9 @@ class Components::Form::NameFeedback < Components::Base
   def render_not_recognized_error
     Alert(level: :danger, id: "name_messages") do
       div { :form_naming_not_recognized.t(name: @given_name) }
-      render(::Components::Help::Note.new(:div)) do
-        plain(:form_naming_not_recognized_help.t(button: @button_name))
-      end
+      Help(
+        content: :form_naming_not_recognized_help.t(button: @button_name)
+      )
     end
   end
 
@@ -94,9 +94,9 @@ class Components::Form::NameFeedback < Components::Base
     Alert(level: :danger, id: "name_messages") do
       div { [:form_naming_multiple_names.t(name: @given_name), ":"].safe_join }
       render_name_radio_buttons_with_counts(@names)
-      render(::Components::Help::Note.new(:div)) do
-        plain(:form_naming_multiple_names_help.t)
-      end
+      Help(
+        content: :form_naming_multiple_names_help.t
+      )
     end
   end
 

@@ -27,6 +27,11 @@ class Components::ApplicationForm < Superform::Rails::Form
   #     plain "Observations"
   #   end
   class ButtonStyleCheckbox < Phlex::HTML
+    # Extends `Phlex::HTML` directly (not `Components::Base`), so it
+    # gets no Kit sugar on its own — see `.claude/rules/phlex_reference.md`'s
+    # "Kit sugar doesn't reach app/components/application_form/*" section.
+    include ::Components
+
     # @param name [String] HTML name (shared across checkboxes in a group)
     # @param value [String] value submitted when this checkbox is checked
     # @param id [String] HTML id (matches the label's `for`)
@@ -51,13 +56,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template(&block)
-      render(::Components::Button.new(
-               tag: :label,
-               for: @id,
-               variant: @variant,
-               size: @size,
-               **@label_attrs
-             )) do
+      Button(tag: :label, for: @id, variant: @variant, size: @size,
+             **@label_attrs) do
         input(**input_attributes)
         yield if block
       end

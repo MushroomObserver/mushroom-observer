@@ -14,7 +14,7 @@ module Views::Controllers::Admin::Users
     end
 
     def test_renders_form_with_help_text
-      assert_html(@html, ".help-note")
+      assert_html(@html, ".help-block")
     end
 
     def test_renders_form_with_val_textarea

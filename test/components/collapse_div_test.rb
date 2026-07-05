@@ -134,12 +134,12 @@ class CollapseDivTest < ComponentTestCase
 
     old_html = render(phlex_wrapper do
       div(class: "collapse", id: help_id) do
-        render(::Components::Help::Block.new(well: true)) { plain("help text") }
+        render(::Components::Help.new(well: true)) { plain("help text") }
       end
     end)
     new_html = render(phlex_wrapper do
       render(::Components::CollapseDiv.new(id: help_id)) do
-        render(::Components::Help::Block.new(well: true)) { plain("help text") }
+        render(::Components::Help.new(well: true)) { plain("help text") }
       end
     end)
 

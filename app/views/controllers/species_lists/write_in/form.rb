@@ -114,17 +114,17 @@ module Views::Controllers::SpeciesLists::WriteIn
       render_vote_field
       render_notes_block
       render_coord_fields
-      render(::Components::Help::Note.new(:div)) do
-        trusted_html(:form_observations_lat_long_help.t)
-      end
+      Help(
+        content: :form_observations_lat_long_help.t
+      )
       render_is_collection_location_checkbox
-      render(::Components::Help::Note.new(:div)) do
-        trusted_html(:form_observations_is_collection_location_help.t)
-      end
+      Help(
+        content: :form_observations_is_collection_location_help.t
+      )
       render_specimen_checkbox
-      render(::Components::Help::Note.new(:div)) do
-        trusted_html(:form_observations_specimen_available_help.t)
-      end
+      Help(
+        content: :form_observations_specimen_available_help.t
+      )
     end
 
     def render_vote_field

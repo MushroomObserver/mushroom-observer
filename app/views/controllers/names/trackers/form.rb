@@ -37,9 +37,8 @@ module Views::Controllers::Names::Trackers
                      label: :email_tracking_note.t,
                      wrap_class: "mt-5")
 
-      render(::Components::Help::Note.new(:div, class: "mt-2 mb-5")) do
-        trusted_html(:email_tracking_note_help.t)
-      end
+      Help(class: "mt-2 mb-5",
+           content: :email_tracking_note_help.t)
 
       textarea_field(:note_template,
                      rows: 16,

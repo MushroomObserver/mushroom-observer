@@ -6,7 +6,7 @@
 # any of:
 #
 #   - a bare `_Any` prop declaration (antipattern documented in
-#     `.claude/rules/phlex_conversions.md` and enforced post-hoc by
+#     `.claude/rules/phlex_reference.md` and enforced post-hoc by
 #     `test/style/no_any_phlex_props_test.rb`), or
 #   - `.html_safe` / `raw(...)` (Phlex views should use the
 #     buffer-writing `trusted_html(...)` helper instead — see the
@@ -54,7 +54,14 @@ COMMENT_LINE_RE='^[0-9]*:[[:space:]]*#'
 #    non-word boundary (or end-of-line) after. Covers `, _Any` AND
 #    `,_Any` (no space) AND `(_Any` etc., without matching
 #    identifiers like `_AnyThing` or `Foo_Any`.
-ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])_Any([^[:alnum:]_]|$)' | grep -v "$COMMENT_LINE_RE" || true)"
+#
+#    Exception: `prop :attributes, ..._Any...` — the established,
+#    repeated pattern for an arbitrary-HTML-attributes passthrough
+#    hash (values are genuinely polymorphic: strings, nested hashes
+#    for `data:`, booleans, etc.). Already used this way across many
+#    components before this hook existed; not worth flagging every time.
+ATTRIBUTES_PROP_RE='^[0-9]*:[[:space:]]*prop :attributes,'
+ANY_OFFENDERS="$(printf '%s\n' "$NEW" | grep -nE '(^|[^[:alnum:]_])_Any([^[:alnum:]_]|$)' | grep -v "$COMMENT_LINE_RE" | grep -v "$ATTRIBUTES_PROP_RE" || true)"
 
 # 2. `.html_safe` (chained on any expression) or `raw(...)`. Phlex
 #    views should use `trusted_html(...)`, which writes safely-
@@ -80,7 +87,7 @@ File: $FILE
 Offending lines:
 $ANY_OFFENDERS
 
-Per \`.claude/rules/phlex_conversions.md\`: use a concrete prop
+Per \`.claude/rules/phlex_reference.md\`: use a concrete prop
 type instead of \`_Any\` so caller mistakes fail at construction
 (\`Literal::TypeError\`) rather than later inside \`view_template\`.
 

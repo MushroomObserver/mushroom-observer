@@ -25,7 +25,7 @@ module Views::Controllers::Info
 
     def view_template
       add_page_title(:sandbox_title.t)
-      render(Components::Help::Block.new(:div, :sandbox_header.tp))
+      Help(content: :sandbox_header.tp)
 
       render(Views::Controllers::Info::TextileSandboxForm.new(
                @textile_sandbox,

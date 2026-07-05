@@ -36,15 +36,10 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_addon_element
       if wrapper_options[:button_href]
-        render(::Components::Button.new(
-                 tag: :a,
-                 href: wrapper_options[:button_href],
-                 **addon_button_kwargs
-               )) { render_addon_label }
+        Button(tag: :a, href: wrapper_options[:button_href],
+               **addon_button_kwargs) { render_addon_label }
       else
-        render(::Components::Button.new(**addon_button_kwargs)) do
-          render_addon_label
-        end
+        Button(**addon_button_kwargs) { render_addon_label }
       end
     end
 
@@ -69,7 +64,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return unless wrapper_options[:button_icon]
 
       whitespace
-      render(Components::Icon.new(type: wrapper_options[:button_icon]))
+      Icon(type: wrapper_options[:button_icon])
     end
   end
 end

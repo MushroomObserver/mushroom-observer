@@ -23,7 +23,7 @@ module Views::Controllers::SpeciesLists::NameLists
           submit(:name_lister_submit_csv.l, class: "mx-3")
         end
         hidden_field(:results)
-        render(::Components::Help::Note.new(:div, :name_lister_help.tp))
+        Help(content: :name_lister_help.tp)
       end
     end
 

@@ -76,7 +76,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       between = wrapper_options[:between]
       return unless between
 
-      render(::Components::Help::Note.new) { plain(between_text(between)) }
+      Help(element: :span) { plain(between_text(between)) }
     end
 
     def between_text(between)

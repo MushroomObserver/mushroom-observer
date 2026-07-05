@@ -18,7 +18,7 @@ module Views::Controllers::Names::Synonyms::Approve
       assert_includes(html, :name_approve_comments.l)
 
       # Help text (check that the div is present)
-      assert_html(html, "div.help-note")
+      assert_html(html, "div.help-block")
     end
 
     def test_form_with_approved_names

@@ -37,9 +37,9 @@ module Views::Controllers::Names::Synonyms::Deprecate
                           type: :name,
                           label: "#{:name_deprecate_preferred.l}:",
                           inline: true, data: { autofocus: true })
-      render(Components::Help::Note.new(
-               :div, :name_deprecate_preferred_help.tp
-             ))
+      Help(
+        content: :name_deprecate_preferred_help.tp
+      )
     end
 
     def render_misspelling_field
@@ -49,7 +49,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     def render_comment_field
       textarea_field(:comment, label: "#{:name_deprecate_comments.l}:",
                                cols: 80, rows: 5, inline: true)
-      render(Components::Help::Note.new(:div, deprecate_comments_help))
+      Help(content: deprecate_comments_help)
     end
 
     private
