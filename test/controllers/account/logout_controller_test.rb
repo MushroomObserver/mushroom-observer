@@ -30,11 +30,12 @@ module Account
     # `switch_to_user` lives in ApplicationController::Authentication.
     # The logout `create` action is the primary caller — exercise it here.
     # Covers the `session[:real_user_id].blank?` branch (sets real_user_id
-    # from current user).
+    # from current user). `@user` is set here because in a real request
+    # `autologin`'s before_action always sets it before any action runs.
     def test_switch_to_user_with_blank_real_user_id_sets_session
       ctrl = @controller
       session.clear
-      User.current = users(:rolf)
+      ctrl.instance_variable_set(:@user, users(:rolf))
       target = users(:mary)
 
       ctrl.send(:switch_to_user, target)

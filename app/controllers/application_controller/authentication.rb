@@ -252,7 +252,7 @@ module ApplicationController::Authentication
 
   def update_sudo_session(new_user)
     if session[:real_user_id].blank?
-      session[:real_user_id] = User.current_id
+      session[:real_user_id] = @user&.id
       session[:admin] = nil
     elsif session[:real_user_id] == new_user.id
       session[:real_user_id] = nil

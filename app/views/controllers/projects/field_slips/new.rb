@@ -39,7 +39,7 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def member?
-      @project.member?(User.current)
+      @project.member?(@user)
     end
 
     def render_max_info
