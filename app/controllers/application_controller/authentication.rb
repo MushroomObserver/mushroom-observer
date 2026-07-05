@@ -294,9 +294,14 @@ module ApplicationController::Authentication
   # available here. Applies the same `user_verified_and_allowed?`
   # check `autologin` does, so a blocked/unverified user's session
   # resolves to nil here too, same as everywhere else on the site.
+  #
+  # Only sets `@user` - not `User.current`. Neither caller's request
+  # path (nor the shared around_action logging) reads `User.current`;
+  # a future caller that needs it for a model-layer default (e.g.
+  # `Image.new`'s `user: User.current`) should pass `user:` explicitly
+  # rather than leaning on the global.
   def set_user_from_session
     user = session_user
-    user = nil unless user_verified_and_allowed?(user)
-    @user = User.current = user
+    @user = user if user_verified_and_allowed?(user)
   end
 end

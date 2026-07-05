@@ -171,14 +171,15 @@ module Images
 
     def test_user_maxed_out
       login("rolf")
-      User.current.update(original_image_quota: MO.original_image_user_quota)
+      rolf = users(:rolf)
+      rolf.update(original_image_quota: MO.original_image_user_quota)
       with_stubs do
         get(:show, format: :json, params: { id: @test_image.id })
         json = @response.parsed_body
         assert_equal("maxed_out", json["status"])
         assert_nil(assigns(:job))
 
-        User.current.decrement!(:original_image_quota)
+        rolf.decrement!(:original_image_quota)
         get(:show, format: :json, params: { id: @test_image.id })
         json = @response.parsed_body
         assert_equal("loading", json["status"])
