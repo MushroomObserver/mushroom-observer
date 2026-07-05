@@ -47,9 +47,7 @@ module Views::Mailers::OccurrenceChangeMailer
   end
 
   class Html < Build
-    include Views::Mailers::CommonSections
-
-    def html? = true
+    include Views::Mailers::HtmlMode
 
     def view_template
       render(Views::Layouts::Mailer::Html.new(subject: @subject)) do
@@ -68,9 +66,7 @@ module Views::Mailers::OccurrenceChangeMailer
   end
 
   class Text < Build
-    include Views::Mailers::CommonSections
-
-    def html? = false
+    include Views::Mailers::TextMode
 
     def view_template
       emit_tp(intro)

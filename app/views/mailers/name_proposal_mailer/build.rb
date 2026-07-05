@@ -53,16 +53,12 @@ module Views::Mailers::NameProposalMailer
   end
 
   class Html < Build
-    include Views::Mailers::CommonSections
+    include Views::Mailers::HtmlMode
     include Views::Mailers::FieldsOnlyBody
-
-    def html? = true
   end
 
   class Text < Build
-    include Views::Mailers::CommonSections
+    include Views::Mailers::TextMode
     include Views::Mailers::FieldsOnlyBody
-
-    def html? = false
   end
 end

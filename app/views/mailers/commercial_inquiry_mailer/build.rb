@@ -35,16 +35,12 @@ module Views::Mailers::CommercialInquiryMailer
   end
 
   class Html < Build
-    include Views::Mailers::CommonSections
+    include Views::Mailers::HtmlMode
     include Views::Mailers::StandardMessageBody
-
-    def html? = true
   end
 
   class Text < Build
-    include Views::Mailers::CommonSections
+    include Views::Mailers::TextMode
     include Views::Mailers::StandardMessageBody
-
-    def html? = false
   end
 end
