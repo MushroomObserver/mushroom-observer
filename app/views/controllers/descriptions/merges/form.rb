@@ -20,7 +20,8 @@ module Views::Controllers::Descriptions::Merges
 
     def view_template
       h4 { "#{:merge_descriptions_merge_header.t}:" }
-      render(::Components::Help::Note.new(:p, :merge_descriptions_merge_help.t))
+      Help(element: :p,
+           content: :merge_descriptions_merge_help.t)
 
       div(class: "form-group") { render_merge_options }
 

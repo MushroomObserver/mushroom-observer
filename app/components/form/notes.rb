@@ -73,7 +73,7 @@ class Components::Form::Notes < Components::Base
   end
 
   def render_above_help
-    render(::Components::Help::Block.new) do
+    Help do
       case @above_help
       when Proc then instance_exec(&@above_help)
       else           plain(@above_help)
@@ -84,7 +84,7 @@ class Components::Form::Notes < Components::Base
   # Always-shown textile-formatting help, at the bottom of the body.
   # Same content for both modes.
   def render_textile_help
-    render(::Components::Help::Block.new(:div, :shared_textile_help.l))
+    Help(content: :shared_textile_help.l)
   end
 
   def render_part(notes_ns, part)

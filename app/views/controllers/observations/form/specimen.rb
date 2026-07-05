@@ -55,9 +55,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   end
 
   def render_edit_help
-    render(Components::Help::Block.new(well: true)) do
-      trusted_html(:form_observations_edit_specimens_help.t)
-    end
+    Help(well: true, content: :form_observations_edit_specimens_help.t)
   end
 
   def render_specimen_fields

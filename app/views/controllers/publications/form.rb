@@ -26,7 +26,9 @@ module Views::Controllers::Publications
     def render_full_field
       textarea_field(:full, rows: 10, label: "#{:publication_full.t}:",
                             wrap_class: "mt-3") do |f|
-        f.with_between { render(::Components::Help::Note.new(:publication_full_help.t)) }
+        f.with_between do
+          Help(element: :span, content: :publication_full_help.t)
+        end
       end
     end
 

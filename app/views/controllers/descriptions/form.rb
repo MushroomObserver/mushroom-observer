@@ -76,9 +76,7 @@ module Views::Controllers::Descriptions
     end
 
     def render_source_help
-      render(Components::Help::Block.new(
-               :div, :form_description_source_help.tpl
-             ))
+      Help(content: :form_description_source_help.tpl)
     end
 
     # --- Permissions fields ---
@@ -95,9 +93,7 @@ module Views::Controllers::Descriptions
                        disabled: permissions_disabled?)
         checkbox_field(:public, label: :form_description_public_readable.l,
                                 disabled: permissions_disabled?)
-        render(Components::Help::Block.new(
-                 :p, :form_description_permissions_help.t
-               ))
+        Help(element: :p, content: :form_description_permissions_help.t)
       end
     end
 
@@ -111,9 +107,7 @@ module Views::Controllers::Descriptions
       # `@licenses` is Rails-shape `[[label, id], ...]` from
       # `License.available_names_and_ids`; pass through.
       select_field(:license_id, @licenses, label: "#{:License.l}:") do
-        render(Components::Help::Block.new(
-                 :p, :form_description_license_help.t
-               ))
+        Help(element: :p, content: :form_description_license_help.t)
       end
     end
 
@@ -122,9 +116,7 @@ module Views::Controllers::Descriptions
     def render_description_header
       if name_description?
         p { b { :DESCRIPTION.t } }
-        render(Components::Help::Block.new(
-                 :div, :shared_textile_help.l, id: "textilize_note"
-               ))
+        Help(content: :shared_textile_help.l, id: "textilize_note")
       else
         hr
       end
@@ -133,14 +125,12 @@ module Views::Controllers::Descriptions
     def render_note_fields
       model.class.all_note_fields.each do |field|
         textarea_field(field, label: field_label(field), rows: 10) do
-          render(Components::Help::Block.new(:div, field_help(field)))
+          Help(content: field_help(field))
         end
       end
       return if name_description?
 
-      render(Components::Help::Block.new(
-               :div, :shared_textile_help.t, id: "textilize_note"
-             ))
+      Help(content: :shared_textile_help.t, id: "textilize_note")
     end
 
     def field_label(field)

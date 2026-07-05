@@ -71,9 +71,7 @@ module Views::Controllers::Observations::Images
     def render_project_checkboxes
       div(class: "form-group") do
         p(class: "font-weight-bold") { plain("#{:PROJECTS.t}:") }
-        render(::Components::Help::Note.new(:div)) do
-          trusted_html(:form_images_project_help.t)
-        end
+        Help(content: :form_images_project_help.t)
         div(class: "form-group") do
           # Sentinel: ensures `image[project_ids]` is always present in
           # params even when every checkbox is unchecked (Rack drops

@@ -2,49 +2,19 @@
 
 require("test_helper")
 
-# Parity harness for the help-note / help-block sweep.
+# Parity harness for the help-block sweep.
 # Each LegacyX class mirrors the raw Phlex element calls that existed
 # before conversion; the matching NewX class uses the component.
 # assert_html_element_equivalent confirms the rendered DOM is identical.
+#
+# The original version of this file also covered a "help-note" flavor
+# (`Components::Help::Note`, later merged into `Components::Help`).
+# That flavor was removed entirely once `.help-note` / `.help-block`
+# turned out to be CSS-identical — there was never a real second
+# style to keep parity with, only a class-name difference with no
+# rendered effect. `Help(element: :span, ...)` is the direct
+# replacement; see `Components::Help`'s doc comment.
 class HelpSweepParityTest < ComponentTestCase
-  # ----- Help::Note span (default element) ----
-
-  def test_note_span_with_block_content
-    assert_parity(
-      render(LegacyNoteSpan.new),
-      render(NewNoteSpan.new),
-      label: "note_span"
-    )
-  end
-
-  def test_note_span_string_arg
-    assert_parity(
-      render(LegacyNoteSpanString.new),
-      render(NewNoteSpanString.new),
-      label: "note_span_string"
-    )
-  end
-
-  # ----- Help::Note div (explicit element) ----
-
-  def test_note_div_with_block_content
-    assert_parity(
-      render(LegacyNoteDiv.new),
-      render(NewNoteDiv.new),
-      label: "note_div"
-    )
-  end
-
-  # ----- Help::Note with extra class ----
-
-  def test_note_extra_class
-    assert_parity(
-      render(LegacyNoteExtraClass.new),
-      render(NewNoteExtraClass.new),
-      label: "note_extra_class"
-    )
-  end
-
   # ----- Help::Block div (default element) ----
 
   def test_block_div_with_block_content
@@ -96,30 +66,6 @@ class HelpSweepParityTest < ComponentTestCase
 
   # ---- Legacy (raw element) versions ----
 
-  class LegacyNoteSpan < Components::Base
-    def view_template
-      span(class: "help-note") { plain("Help text") }
-    end
-  end
-
-  class LegacyNoteSpanString < Components::Base
-    def view_template
-      span(class: "help-note") { trusted_html("Help <b>text</b>") }
-    end
-  end
-
-  class LegacyNoteDiv < Components::Base
-    def view_template
-      div(class: "help-note") { plain("Help text") }
-    end
-  end
-
-  class LegacyNoteExtraClass < Components::Base
-    def view_template
-      div(class: "help-note mt-2 mb-5") { plain("Help text") }
-    end
-  end
-
   class LegacyBlockDiv < Components::Base
     def view_template
       div(class: "help-block") { plain("Help text") }
@@ -146,53 +92,27 @@ class HelpSweepParityTest < ComponentTestCase
 
   # ---- New (component) versions ----
 
-  class NewNoteSpan < Components::Base
-    def view_template
-      render(::Components::Help::Note.new) { plain("Help text") }
-    end
-  end
-
-  class NewNoteSpanString < Components::Base
-    def view_template
-      render(::Components::Help::Note.new) { trusted_html("Help <b>text</b>") }
-    end
-  end
-
-  class NewNoteDiv < Components::Base
-    def view_template
-      render(::Components::Help::Note.new(:div)) { plain("Help text") }
-    end
-  end
-
-  class NewNoteExtraClass < Components::Base
-    def view_template
-      render(::Components::Help::Note.new(:div, class: "mt-2 mb-5")) do
-        plain("Help text")
-      end
-    end
-  end
-
   class NewBlockDiv < Components::Base
     def view_template
-      render(::Components::Help::Block.new) { plain("Help text") }
+      render(::Components::Help.new) { plain("Help text") }
     end
   end
 
   class NewBlockDivString < Components::Base
     def view_template
-      render(::Components::Help::Block.new) { trusted_html("Help <b>text</b>") }
+      render(::Components::Help.new) { trusted_html("Help <b>text</b>") }
     end
   end
 
   class NewBlockP < Components::Base
     def view_template
-      render(::Components::Help::Block.new(:p)) { plain("Help text") }
+      render(::Components::Help.new(element: :p)) { plain("Help text") }
     end
   end
 
   class NewBlockExtraClass < Components::Base
     def view_template
-      render(::Components::Help::Block.new(class: "mt-4")) { plain("Help text") }
+      render(::Components::Help.new(class: "mt-4")) { plain("Help text") }
     end
   end
 end

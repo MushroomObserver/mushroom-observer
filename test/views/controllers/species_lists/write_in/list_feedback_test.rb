@@ -18,7 +18,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       assert_html(html, ".alert-danger#missing_names")
       assert_html(html, ".alert-danger .font-weight-bold",
                   text: :form_list_feedback_missing_names.t)
-      assert_html(html, ".help-note")
+      assert_html(html, ".help-block")
       missing_html = Nokogiri::HTML(html).at_css("#missing_names").to_s
       assert_includes(missing_html, "Agaricus foo")
       assert_includes(missing_html, "Boletus bar")
@@ -33,7 +33,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       assert_html(html, ".alert-warning#deprecated_names")
       assert_html(html, ".alert-warning#deprecated_names .font-weight-bold",
                   text: :form_species_lists_deprecated.t)
-      assert_html(html, ".alert-warning#deprecated_names .help-note")
+      assert_html(html, ".alert-warning#deprecated_names .help-block")
       deprecated_html = Nokogiri::HTML(html).at_css("#deprecated_names").to_s
       assert_includes(deprecated_html, "alpigenes")
       assert_html(html,
