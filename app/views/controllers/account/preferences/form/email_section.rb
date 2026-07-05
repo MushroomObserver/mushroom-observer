@@ -32,18 +32,15 @@ module Views::Controllers::Account::Preferences::Form::EmailSection
     EMAIL_GROUPS.each do |(label_key, fields)|
       render_email_group(label_key, fields)
     end
-    render(::Components::Help::Block.new(:prefs_email_note.tp, class: "mt-4"))
+    Help(content: :prefs_email_note.tp, class: "mt-4")
     submit(:SAVE_EDITS.l, center: true)
   end
 
   def render_email_group(label_key, fields)
     div(class: "mt-4") do
       plain("#{label_key.t}: ")
-      render(::Components::Help::Note.new) do
-        plain("(")
-        trusted_html(:prefs_email_please_notify.t)
-        plain(")")
-      end
+      Help(element: :span,
+           content: ["(", :prefs_email_please_notify.t, ")"].safe_join)
     end
     fields.each { |field| checkbox_field(field, prefs: true) }
   end

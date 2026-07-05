@@ -9,7 +9,7 @@ module Views::Controllers::Admin::Users
   class BonusesForm < ::Components::ApplicationForm
     def view_template
       super do
-        render(::Components::Help::Note.new(:div, :change_user_bonuses_help.tp))
+        Help(content: :change_user_bonuses_help.tp)
         textarea_field(:val, value: model.formatted_bonuses, rows: 5,
                              class: "mt-3")
         submit(:SAVE_EDITS.l, center: true)

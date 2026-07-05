@@ -6,6 +6,18 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Pass `help_collapse: true` to render a collapsible well with a
   # question-mark trigger icon next to the label instead.
   module FieldWithHelp
+    # Field classes (`DateField`, `TextField`, etc.) extend `Phlex::HTML`
+    # directly rather than living as a direct `Components::*` constant,
+    # so Phlex::Kit's `const_added` hook never fires for them and they
+    # get no Kit-sugar bare methods (`Help(...)`, `Icon(...)`, etc.) on
+    # their own. `include Components` here restores it transitively —
+    # Ruby's module inclusion carries `Components`'s accumulated Kit
+    # instance methods (and its `Phlex::Kit::LazyLoader` fallback) into
+    # every class that includes this module. See
+    # `.claude/rules/phlex_reference.md`'s Kit-syntax section for the
+    # full mechanism.
+    include ::Components
+
     def render_help_in_label_row
       render_help_icon if help_slot && wrapper_options[:help_collapse]
     end
@@ -43,22 +55,20 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_help_icon
       span(class: between_class) do
-        render(::Components::Link.new(
-                 type: :collapse_toggle,
-                 target_id: help_id,
-                 class: "info-collapse-trigger"
-               )) { render(::Components::Icon.new(type: :question)) }
+        Link(type: :collapse_toggle,
+             target_id: help_id,
+             class: "info-collapse-trigger") { Icon(type: :question) }
       end
     end
 
     def render_collapsed_help_text
-      render(::Components::CollapseDiv.new(id: help_id)) do
-        render(::Components::Help::Block.new(well: true)) { render(help_slot) }
+      CollapseDiv(id: help_id) do
+        Help(well: true) { render(help_slot) }
       end
     end
 
     def render_plain_help_text
-      render(::Components::Help::Block.new(id: help_id)) { render(help_slot) }
+      Help(id: help_id) { render(help_slot) }
     end
   end
 end

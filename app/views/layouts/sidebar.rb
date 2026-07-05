@@ -13,18 +13,20 @@
 #     request: request
 #   )) %>
 class Views::Layouts::Sidebar < Views::Base
-  # The Bootstrap class set the nested partials (`Admin`,
-  # `Login`, `Section`, `User`, etc.) read via the `classes:`
-  # prop. `Sidebar::ContextNav` reuses the same set for its
-  # mobile rendering into the offcanvas sidebar.
+  # The Bootstrap modifier classes the nested partials (`Admin`,
+  # `Login`, `Section`, `User`, etc.) read via the `classes:` prop
+  # and apply on top of `list-group-item` via
+  # `Components::ListGroup::Item` / `LinkItem` — neither key
+  # includes the `list-group-item` prefix itself, since both
+  # components compose it automatically. `Sidebar::ContextNav`
+  # reuses the same set for its mobile rendering into the offcanvas
+  # sidebar.
   CSS_CLASSES = {
-    wrapper: "navbar navbar-inverse sidebar-nav list-group",
-    heading: "list-group-item disabled font-weight-bold",
-    item: "list-group-item",
-    admin: "list-group-item list-group-item-danger indent",
-    indent: "list-group-item indent",
-    mobile_only: "visible-xs",
-    desktop_only: "hidden-xs"
+    wrapper: "navbar navbar-inverse sidebar-nav",
+    heading: "disabled font-weight-bold",
+    admin: "list-group-item-danger indent",
+    indent: "indent",
+    mobile_only: "visible-xs"
   }.freeze
 
   prop :user, _Nilable(::User), default: nil
@@ -45,10 +47,12 @@ class Views::Layouts::Sidebar < Views::Base
       div(id: "navigation") do
         render_logo
         div(class: classes[:wrapper], data_controller: "nav-active") do
-          render_top_section
-          render_context_nav_mobile if @user
-          render_user_sections
-          render_info_sections
+          div(class: "list-group") do
+            render_top_section
+            render_context_nav_mobile if @user
+            render_user_sections
+            render_info_sections
+          end
         end
       end
       comment { "/SIDEBAR LOGO AND NAVIGATION" }

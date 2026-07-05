@@ -39,9 +39,7 @@ class Components::Image::ReuseForm < Components::ApplicationForm
   def view_template
     div(class: "container-text") do
       render_id_field_row
-      render(::Components::Help::Block.new(class: "form-group")) do
-        trusted_html(:image_reuse_id_help.tp)
-      end
+      Help(class: "form-group", content: :image_reuse_id_help.tp)
       render_toggle_link
     end
   end

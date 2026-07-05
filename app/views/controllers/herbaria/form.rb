@@ -48,14 +48,13 @@ module Views::Controllers::Herbaria
     end
 
     def render_name_between
-      render(::Components::Help::Note.new("(#{:required.l})"))
+      Help(element: :span, content: "(#{:required.l})")
       render_personal_help if personal_herbarium?
     end
 
     def render_personal_help
-      render(Components::Help::Block.new(arrow: :down)) do
-        trusted_html(:edit_herbarium_this_is_personal_herbarium.tp)
-      end
+      Help(arrow: :down,
+           content: :edit_herbarium_this_is_personal_herbarium.tp)
     end
 
     def personal_herbarium?

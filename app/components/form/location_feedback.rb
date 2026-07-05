@@ -25,9 +25,8 @@ class Components::Form::LocationFeedback < Components::Base
           trusted_html(reason)
         end
       end
-      render(::Components::Help::Note.new) do
-        trusted_html(:form_observations_dubious_help.t(button: @button))
-      end
+      Help(element: :span,
+           content: :form_observations_dubious_help.t(button: @button))
     end
   end
 end

@@ -17,12 +17,16 @@ set -euo pipefail
 INPUT="$(cat)"
 COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')"
 
-# `\bpython3?\b` — match `python` or `python3` as a whole word so
-# names like `mypython` or `python2-config` don't trip it. Common
-# call shapes: `python3 -c "..."`, `python3 <<EOF`, `python3 script.py`.
-# All of those start with `python` / `python3` as a whole word
-# somewhere in the command.
-if printf '%s' "$COMMAND" | grep -qE '(^|[^A-Za-z0-9_])python3?($|[^A-Za-z0-9_])'; then
+# Match `python`/`python3` only when it's actually the command being
+# invoked — immediately preceded (modulo whitespace) by a command-start
+# boundary: start of string, `;`, `|`, `&`, a backtick, or `$(`. This
+# deliberately does NOT match `python3` appearing inside a quoted
+# argument to some other command (e.g. `grep -n "python3" file.md`,
+# `echo "avoid python3 here"`) — a bare substring match blocked those
+# too, which is a false positive: nothing is actually invoking Python
+# there. Common real call shapes this still catches: `python3 -c "..."`,
+# `python3 <<EOF`, `foo && python3 bar`, `cmd | python3`.
+if printf '%s' "$COMMAND" | grep -qE '(^|[;|&`]|\$\()[[:space:]]*python3?([^A-Za-z0-9_]|$)'; then
   cat >&2 <<'EOF'
 🚫 Write Ruby, not Python.
 

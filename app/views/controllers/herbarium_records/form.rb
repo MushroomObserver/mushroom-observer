@@ -54,9 +54,8 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_accession_help
-      render(Components::Help::Block.new(arrow: :up)) do
-        trusted_html(:create_herbarium_record_accession_number_help.t)
-      end
+      Help(arrow: :up,
+           content: :create_herbarium_record_accession_number_help.t)
     end
 
     def render_notes_field

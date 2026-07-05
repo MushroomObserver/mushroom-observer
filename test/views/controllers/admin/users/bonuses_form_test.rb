@@ -14,7 +14,7 @@ module Views::Controllers::Admin::Users
     end
 
     def test_renders_form_with_help_text
-      assert_html(@html, ".help-note")
+      assert_html(@html, ".help-block")
     end
 
     def test_renders_form_with_val_textarea
@@ -29,12 +29,30 @@ module Views::Controllers::Admin::Users
       assert_html(@html, ".center-block")
     end
 
+    # `form_action` always calls `admin_user_path` (Superform's
+    # `form_tag` evaluates it to build the `<form action=...>`
+    # attribute even when an explicit `action:` override is also
+    # passed) — the `rescue` only exists for environments where that
+    # route helper isn't available. Stub it to raise to exercise the
+    # fallback directly.
+    def test_form_action_falls_back_when_admin_route_raises
+      form = render_form_instance
+      form.define_singleton_method(:admin_user_path) do |*|
+        raise(NoMethodError)
+      end
+
+      assert_equal("/admin/users/#{@user_stats.user_id}", form.form_action)
+    end
+
     private
 
+    def render_form_instance
+      BonusesForm.new(@user_stats, action: "/test_action",
+                                   id: "user_bonuses_form")
+    end
+
     def render_form
-      render(BonusesForm.new(@user_stats,
-                             action: "/test_action",
-                             id: "user_bonuses_form"))
+      render(render_form_instance)
     end
   end
 end

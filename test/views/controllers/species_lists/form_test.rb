@@ -140,7 +140,7 @@ module Views::Controllers::SpeciesLists
     def test_project_section_omitted_when_no_projects
       html = render_form(species_list: SpeciesList.new, projects: [])
 
-      # No "Projects:" label, no project checkboxes, no help-note.
+      # No "Projects:" label, no project checkboxes, no help text.
       assert_no_html(html, "input[name='species_list[project_ids][]']")
     end
 

@@ -141,7 +141,7 @@ module Views::Controllers::Locations
       div(class: "row") do
         div(class: "col-sm-6 col-md-4 col-lg-3") do
           render_locked_fields
-          render(::Components::Help::Block.new(:show_location_locked.l))
+          Help(content: :show_location_locked.l)
         end
         div(class: "col-sm-6 col-md-8 col-lg-9 mb-3 mt-3") do
           Map(objects: [model])
