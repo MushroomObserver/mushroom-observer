@@ -31,41 +31,15 @@ module Views::Mailers::AuthorMailer
 
   class Html < Build
     include Views::Mailers::CommonSections
+    include Views::Mailers::StandardMessageBody
 
     def html? = true
-
-    def view_template
-      render(Views::Layouts::Mailer::Html.new(subject: @subject)) do
-        render_body
-      end
-    end
-
-    private
-
-    def render_body
-      emit_tp(intro)
-      render_message_box { trusted_html(@message.tp) }
-      emit_tp(handy_links)
-      render_links_section(links)
-      emit_tp(report_abuse)
-    end
   end
 
   class Text < Build
     include Views::Mailers::CommonSections
+    include Views::Mailers::StandardMessageBody
 
     def html? = false
-
-    def view_template
-      emit_tp(intro)
-      plain("\n\n")
-      trusted_html(@message.tp.html_to_ascii)
-      plain("\n\n#{"-" * 50}\n\n")
-      emit_tp(handy_links)
-      plain("\n\n")
-      render_links_section(links)
-      plain("\n")
-      emit_tp(report_abuse)
-    end
   end
 end

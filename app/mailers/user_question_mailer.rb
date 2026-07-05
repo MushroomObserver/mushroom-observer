@@ -6,10 +6,10 @@ class UserQuestionMailer < ApplicationMailer
 
   def build(sender:, receiver:, subject:, message:)
     setup_user(receiver)
-    @title = subject
-    @sender = sender
-    @message = message || ""
     debug_log(:user_question, sender, receiver)
-    mo_mail(@title, to: receiver, reply_to: sender)
+    mo_mail(subject, to: receiver, reply_to: sender,
+                     view_namespace: Views::Mailers::UserQuestionMailer,
+                     view_params: { subject:, sender:, receiver:,
+                                    message: message || "" })
   end
 end

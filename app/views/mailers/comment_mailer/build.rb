@@ -11,38 +11,28 @@ module Views::Mailers::CommentMailer
     # method, breaking `<title>` inside `Html#view_template`.
     prop :subject, ::String # same string CommentMailer used for the
     # mail Subject header, reused verbatim for <title> below.
-    prop :user, ::User # the recipient
+    prop :receiver, ::User
     prop :sender, ::User
     prop :target, _Interface(:type_tag, :show_controller, :unique_format_name)
     prop :comment, ::Comment
+    # "owner" / "response" / "all" — which of the three notification
+    # reasons applies to this receiver. Computed by CommentMailer#build
+    # (needs an extra Comment query beyond "is this the object's
+    # owner?"), not here — views shouldn't be querying the database.
+    prop :email_type, ::String
+
+    INTRO_KEYS = {
+      "owner" => :email_comment_intro_to_owner,
+      "response" => :email_comment_intro_response,
+      "all" => :email_comment_intro_other
+    }.freeze
 
     private
 
-    def owner? = @user == @target.user
-
-    def response?
-      return false if owner?
-
-      Comment.where(target_type: @comment.target_type,
-                    target_id: @comment.target_id,
-                    user_id: @user.id).
-        any? { |c| c.created_at < @comment.created_at }
-    end
-
-    def email_type
-      return "response" if response?
-
-      owner? ? "owner" : "all"
-    end
-
-    def intro_key
-      return :email_comment_intro_to_owner if owner?
-
-      response? ? :email_comment_intro_response : :email_comment_intro_other
-    end
-
     def intro
-      intro_key.l(type: @target.type_tag, name: @target.unique_format_name)
+      INTRO_KEYS.fetch(@email_type).l(
+        type: @target.type_tag, name: @target.unique_format_name
+      )
     end
 
     def fields
@@ -73,11 +63,11 @@ module Views::Mailers::CommentMailer
     end
 
     def stop_sending_link
-      return [] if @user.watching?(@target)
+      return [] if @receiver.watching?(@target)
 
       [[:email_links_stop_sending.t,
-        "#{MO.http_domain}/account/no_email/#{@user.id}" \
-        "?type=comments_#{email_type}"]]
+        "#{MO.http_domain}/account/no_email/#{@receiver.id}" \
+        "?type=comments_#{@email_type}"]]
     end
 
     def footer_links
@@ -97,7 +87,7 @@ module Views::Mailers::CommentMailer
 
     def not_interested_url
       "#{MO.http_domain}/interests/set_interest?id=#{@comment.target_id}" \
-        "&type=#{@comment.target_type}&user=#{@user.id}&state=-1"
+        "&type=#{@comment.target_type}&user=#{@receiver.id}&state=-1"
     end
   end
 

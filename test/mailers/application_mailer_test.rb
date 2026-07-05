@@ -107,14 +107,9 @@ class ApplicationMailerTest < UnitTestCase
   # test/mailers/zz_temp_parity_check_test.rb, which reuses these
   # same fixtures (comment.html/.text, comment_response.html/.text).
 
-  def test_commercial_email
-    image = images(:commercial_inquiry_image)
-    message = "Did test_commercial_inquiry work?"
-
-    run_mail_test("commercial_inquiry", image.user) do
-      CommercialInquiryMailer.build(sender: mary, image:, message:).deliver_now
-    end
-  end
+  # CommercialInquiryMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses
+  # commercial_inquiry fixtures).
 
   def test_consensus_change_email
     observation = observations(:coprinus_comatus_obs)
@@ -228,27 +223,9 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_observer_question_email
-    observation = observations(:detailed_unknown_obs)
-    message = "Where did you find it?"
-
-    run_mail_test("observation_question", observation.user) do
-      ObserverQuestionMailer.build(
-        sender: rolf, observation:, message:
-      ).deliver_now
-    end
-  end
-
-  def test_user_email
-    subject = "Interesting idea"
-    message = "Shall we discuss it in email?"
-
-    run_mail_test("user_question", mary) do
-      UserQuestionMailer.build(
-        sender: rolf, receiver: mary, subject:, message:
-      ).deliver_now
-    end
-  end
+  # ObserverQuestionMailer and UserQuestionMailer converted to Phlex
+  # (issue #4676) — see test/mailers/zz_temp_parity_check_test.rb
+  # (reuses observation_question and user_question fixtures).
 
   def test_verify_email
     run_mail_test("verify", mary) do

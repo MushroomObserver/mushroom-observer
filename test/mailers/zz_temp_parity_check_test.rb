@@ -108,4 +108,42 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("author_request", "author_request", html_body, text_body)
   end
+
+  def test_observer_question_parity
+    rolf = users(:rolf)
+    observation = observations(:detailed_unknown_obs)
+
+    html_body, text_body = both_bodies(observation.user) do
+      ObserverQuestionMailer.build(sender: rolf, observation:,
+                                   message: "Where did you find it?")
+    end
+
+    compare("observation_question", "observation_question", html_body,
+            text_body)
+  end
+
+  def test_user_question_parity
+    rolf = users(:rolf)
+    mary = users(:mary)
+
+    html_body, text_body = both_bodies(mary) do
+      UserQuestionMailer.build(sender: rolf, receiver: mary,
+                               subject: "Interesting idea",
+                               message: "Shall we discuss it in email?")
+    end
+
+    compare("user_question", "user_question", html_body, text_body)
+  end
+
+  def test_commercial_inquiry_parity
+    mary = users(:mary)
+    image = images(:commercial_inquiry_image)
+
+    message = "Did test_commercial_inquiry work?"
+    html_body, text_body = both_bodies(image.user) do
+      CommercialInquiryMailer.build(sender: mary, image:, message:)
+    end
+
+    compare("commercial_inquiry", "commercial_inquiry", html_body, text_body)
+  end
 end
