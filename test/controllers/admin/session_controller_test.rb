@@ -32,18 +32,18 @@ module Admin
       get(:edit)
       assert_response(:success)
 
-      assert_users_equal(rolf, User.current)
+      assert_users_equal(rolf, logged_in_user)
       put(:update, params: { id: "unverified" })
-      assert_users_equal(rolf, User.current)
+      assert_users_equal(rolf, logged_in_user)
       assert_flash(/not verified yet/)
       put(:update, params: { id: "Frosted Flake" })
-      assert_users_equal(rolf, User.current)
+      assert_users_equal(rolf, logged_in_user)
       put(:update, params: { id: mary.id })
-      assert_users_equal(mary, User.current)
+      assert_users_equal(mary, logged_in_user)
       put(:update, params: { id: dick.login })
-      assert_users_equal(dick, User.current)
+      assert_users_equal(dick, logged_in_user)
       put(:update, params: { id: mary.email })
-      assert_users_equal(mary, User.current)
+      assert_users_equal(mary, logged_in_user)
     end
 
     # Test form submission with namespaced params (from Phlex form)
@@ -52,10 +52,10 @@ module Admin
       rolf.admin = true
       rolf.save!
 
-      assert_users_equal(rolf, User.current)
+      assert_equal(rolf.id, session[:user_id])
       # Text input field submits as :user
       put(:update, params: { admin_session: { user: mary.login } })
-      assert_users_equal(mary, User.current)
+      assert_users_equal(mary, logged_in_user)
     end
 
     # Test autocompleter submission with user_id hidden field
@@ -64,10 +64,10 @@ module Admin
       rolf.admin = true
       rolf.save!
 
-      assert_users_equal(rolf, User.current)
+      assert_equal(rolf.id, session[:user_id])
       # Autocompleter submits user_id as hidden field
       put(:update, params: { admin_session: { user_id: mary.id } })
-      assert_users_equal(mary, User.current)
+      assert_users_equal(mary, logged_in_user)
       assert_redirected_to(action: :edit)
     end
 
@@ -77,10 +77,10 @@ module Admin
       rolf.admin = true
       rolf.save!
 
-      assert_users_equal(rolf, User.current)
+      assert_equal(rolf.id, session[:user_id])
       # Autocompleter shows "Full Name (login)" in text field
       put(:update, params: { admin_session: { user: mary.unique_text_name } })
-      assert_users_equal(mary, User.current)
+      assert_users_equal(mary, logged_in_user)
     end
 
     # Non-admin without `session[:real_user_id]` hitting `update` with a
@@ -95,7 +95,7 @@ module Admin
 
       assert_response(:redirect)
       # Should NOT have switched users.
-      assert_users_equal(rolf, User.current)
+      assert_users_equal(rolf, logged_in_user)
     end
 
     # Admin in "switch user mode" switching back to themselves: the
@@ -110,12 +110,12 @@ module Admin
       # Switch from rolf (admin) to mary; now session[:real_user_id]
       # holds rolf.id and session[:admin] is nil.
       put(:update, params: { admin_session: { user_id: mary.id } })
-      assert_users_equal(mary, User.current)
+      assert_users_equal(mary, logged_in_user)
 
       # Switch back to rolf — hits the "real_user_id == new_user.id"
       # branch.
       put(:update, params: { admin_session: { user_id: rolf.id } })
-      assert_users_equal(rolf, User.current)
+      assert_users_equal(rolf, logged_in_user)
       assert_equal(true, session[:admin])
       assert_nil(session[:real_user_id])
     end
@@ -133,7 +133,7 @@ module Admin
       # No new_user found; nothing happens. We just need the action
       # to not crash — the blank branch in
       # `find_user_by_id_login_or_email` is what we're covering.
-      assert_users_equal(rolf, User.current)
+      assert_users_equal(rolf, logged_in_user)
     end
 
     # Test that update redirects to edit (PRG pattern) so browser URL is correct
@@ -146,7 +146,13 @@ module Admin
       put(:update, params: { admin_session: { user_id: mary.id } })
       assert_response(:redirect)
       assert_redirected_to(action: :edit)
-      assert_users_equal(mary, User.current)
+      assert_users_equal(mary, logged_in_user)
+    end
+
+    private
+
+    def logged_in_user
+      @controller.send(:current_user)
     end
   end
 end

@@ -210,13 +210,11 @@ class Components::Map < Components::Base
   end
 
   # Location format — caller wins, then the prop'd user's preference,
-  # then the global `::User.current` fallback (the helper-era path),
-  # then the "postal" baseline. The `::User` qualifier matches the
-  # same fallback the deleted `MapHelper#default_map_args` used and
-  # keeps the NoUserCurrentInViews cop quiet on a pre-existing path.
+  # then the request's actual current_user (for callers that render
+  # this component without passing user:), then the "postal" baseline.
   def location_format_value
     @location_format || @user&.location_format ||
-      ::User.current_location_format || "postal"
+      current_user&.location_format || "postal"
   end
 
   # Localization values shipped to the JS controller as a JSON blob on

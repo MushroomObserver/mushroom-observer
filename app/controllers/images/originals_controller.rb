@@ -12,7 +12,7 @@ module Images
       # this directly, in which case we don't really care if errors are handled
       # gracefully.
       @image = Image.safe_find(params[:id]) or raise("image not found")
-      @user = User.current = session_user
+      set_user_from_session
       log_request(@user, @image)
 
       respond_to do |format|

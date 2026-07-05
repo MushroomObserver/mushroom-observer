@@ -412,17 +412,30 @@ Minitest/RefuteFalse:
   Enabled: false
 
 MushroomObserver/NoUserCurrentInViews:
-  # Prevent use of User.current in controllers and components.
-  # Controllers should use @user, components should receive user: prop.
+  # Prevent use of User.current in controllers, views, and components -
+  # plus the test files that exercise them, so a regression there gets
+  # caught the same way. Controllers should use @user, components/views
+  # should receive a user: prop or call current_user; tests should set
+  # up a real @user/current_user (e.g. via login/controller.instance_
+  # variable_set(:@user, ...)) rather than reading the thread-local
+  # global. No exemptions: authentication code that legitimately *sets*
+  # User.current isn't flagged because the cop only matches reads (see
+  # the cop source), so it needs no Exclude entries either - test setup
+  # that does `User.current = some_user` is unaffected for the same
+  # reason.
   Enabled: true
   Include:
     - "app/controllers/**/*.rb"
     - "app/components/**/*.rb"
-  Exclude:
-    # Authentication code legitimately sets User.current
-    - "app/controllers/application_controller.rb"
-    - "app/controllers/account/login_controller.rb"
-    - "app/controllers/admin/session_controller.rb"
+    - "app/views/**/*.rb"
+    - "test/controllers/**/*.rb"
+    - "test/views/**/*.rb"
+    - "test/integration/**/*.rb"
+    - "test/system/**/*.rb"
+    - "test/mailers/**/*.rb"
+    - "test/components/**/*.rb"
+    - "test/*_test_case.rb"
+    - "test/*_extensions.rb"
 
 Capybara/SpecificActions:
   Enabled: true
