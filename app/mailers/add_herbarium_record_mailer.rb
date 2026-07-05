@@ -6,13 +6,13 @@ class AddHerbariumRecordMailer < ApplicationMailer
 
   def build(sender:, receiver:, herbarium_record:)
     setup_user(receiver)
-    @title = :email_subject_add_herbarium_record_not_curator.l(
+    subject = :email_subject_add_herbarium_record_not_curator.l(
       herbarium_name: herbarium_record.herbarium.name
     )
-    @sender = sender
-    @herbarium_record = herbarium_record
     debug_log(:add_herbarium_record_not_curator, sender, receiver,
               herbarium_record:)
-    mo_mail(@title, to: receiver)
+    mo_mail(subject, to: receiver,
+                     view_params: { subject:, receiver:, sender:,
+                                    herbarium_record: })
   end
 end

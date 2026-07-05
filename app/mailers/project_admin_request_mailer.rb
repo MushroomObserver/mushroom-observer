@@ -6,11 +6,9 @@ class ProjectAdminRequestMailer < ApplicationMailer
 
   def build(sender:, receiver:, project:, subject:, message:)
     setup_user(receiver)
-    @title = subject
-    @sender = sender
-    @message = message || ""
-    @project = project
     debug_log(:admin_request, sender, receiver, project:)
-    mo_mail(@title, to: receiver, reply_to: sender)
+    mo_mail(subject, to: receiver, reply_to: sender,
+                     view_params: { subject:, sender:, project:,
+                                    message: message || "" })
   end
 end

@@ -1,0 +1,83 @@
+# frozen_string_literal: true
+
+# Tell observer someone is interested in their obs. Deviates from
+# the StandardMessageBody shape (an extra warning_msg section
+# between links and report_abuse), so this writes its own
+# view_template rather than including that module.
+class Views::Mailers::NamingObserverMailer < Views::Mailers::Base
+  prop :subject, ::String
+  prop :receiver, ::User # the observer
+  prop :naming, ::Naming
+  prop :name_tracker, ::NameTracker
+
+  class Html < self
+    def view_template
+      render(Views::Layouts::Mailer::Html.new(subject: @subject)) do
+        render_body
+      end
+    end
+
+    private
+
+    def render_body
+      emit_tp(intro)
+      render_message_box { trusted_html(message.tp) }
+      emit_tp(handy_links)
+      render_links_section(links)
+      emit_tp(warning_msg)
+      emit_tp(report_abuse)
+    end
+  end
+
+  class Text < self
+    def view_template
+      emit_tp(intro)
+      gap
+      render_quoted_message
+      emit_tp(handy_links)
+      gap
+      render_links_section(links)
+      newline
+      emit_tp(warning_msg)
+      gap
+      emit_tp(report_abuse)
+    end
+
+    private
+
+    def render_quoted_message
+      trusted_html(message.tp.html_to_ascii)
+      divider
+    end
+  end
+
+  private
+
+  def sender = @name_tracker.user
+
+  def observation = @naming.observation
+
+  def intro
+    :email_naming_for_observer_intro.l(
+      user: sender.legal_name, email: sender.email, type: :observation,
+      name: observation.user_unique_format_name(@receiver)
+    )
+  end
+
+  def message
+    @name_tracker.calc_note(user: @receiver, naming: @naming)
+  end
+
+  def handy_links
+    :email_can_respond.l(name: sender.legal_name, email: sender.email).
+      sub(/\n*\z/, "\n#{:email_handy_links.l}")
+  end
+
+  def links
+    [[:email_links_show_object.t(type: :observation),
+      "#{MO.http_domain}/#{observation.id}"],
+     [:email_links_latest_changes.t, MO.http_domain]]
+  end
+
+  def warning_msg = :email_naming_for_observation_warning.l
+end

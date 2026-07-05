@@ -84,18 +84,42 @@ module Comment::Callbacks
     comment = self
     users.each do |receiver|
       CommentMailer.build(
-        sender: user, receiver:, target:, comment:
+        sender: user, receiver:, target:, comment:,
+        email_type: comment_email_type(receiver)
       ).deliver_later
     end
+  end
+
+  # "owner" / "response" / "all" — which of the three notification
+  # reasons applies to this receiver, for CommentMailer's intro
+  # wording. Uses `other_comments` (already fetched once for
+  # `users_with_other_comments` above) instead of a fresh per-receiver
+  # query, since this runs once per recipient.
+  def comment_email_type(receiver)
+    return "owner" if receiver == target.user
+
+    earlier = earliest_comment_time_by_user_id[receiver.id]
+    earlier && earlier < created_at ? "response" : "all"
   end
 
   def owners_and_authors
     target.respond_to?(:authors) ? target.authors || [] : [target.user]
   end
 
+  def other_comments
+    @other_comments ||=
+      Comment.where(target_type: target_type, target_id: target_id).
+      includes(:user)
+  end
+
   def users_with_other_comments
-    Comment.where(target_type: target_type, target_id: target_id).
-      includes(:user).map(&:user).uniq
+    other_comments.map(&:user).uniq
+  end
+
+  def earliest_comment_time_by_user_id
+    @earliest_comment_time_by_user_id ||=
+      other_comments.group_by(&:user_id).
+      transform_values { |cs| cs.map(&:created_at).min }
   end
 
   USER_LINK_PAT = /

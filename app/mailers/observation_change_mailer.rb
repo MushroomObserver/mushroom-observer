@@ -6,13 +6,11 @@ class ObservationChangeMailer < ApplicationMailer
 
   def build(sender:, receiver:, observation:, note:, time:)
     setup_user(receiver)
-    @title = observation_change_title(observation, note, receiver)
-    @sender = sender
-    @observation = observation
-    @note = note
-    @time = time
+    subject = observation_change_title(observation, note, receiver)
     debug_log(:observation_change, sender, receiver, observation:)
-    mo_mail(@title, to: receiver)
+    mo_mail(subject, to: receiver,
+                     view_params: { subject:, receiver:, sender:, observation:,
+                                    note:, time: })
   end
 
   private
