@@ -316,13 +316,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name
-    title = format_name
-    id_format = if title == :image.l
-                  "##{id || "?"}"
-                else
-                  "(#{id || "?"})"
-                end
-    [title, id_format].safe_join(" ")
+    # format_name returns the joined subject titles, or "" when there are
+    # none — never the bare :image.l ("image") string — so the id always
+    # renders in the "(id)" form here.
+    [format_name, "(#{id || "?"})"].safe_join(" ")
   end
 
   # Do the same without the ID, for new page titles that generate an ID UI
