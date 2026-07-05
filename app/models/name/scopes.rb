@@ -40,7 +40,7 @@ module Name::Scopes
   # This is using Concern so we can define the scopes in this included module.
   extend ActiveSupport::Concern
 
-  # Shared by `show_includes` and `show_page_includes` below — the
+  # Shared by `edit_includes` and `show_includes` below — the
   # only difference between the two is whether `.observations` (the
   # expensive one for a name with many thousands of them, e.g. a
   # genus) is included. A method, not a constant: `Comment.
@@ -354,15 +354,17 @@ module Name::Scopes
     # Used by NamesController#edit/#update (including the merge flow —
     # `Name::Merge#move_observations`/`#move_namings` touch
     # `.observations`/`.namings` directly — and
-    # `#email_name_change_content`, which touches `.observations`).
-    # NOT used by plain #show or a past-version display: neither
-    # reads `@name.observations`/`@name.namings` directly (both
-    # render curated `Query`/`Name::Observations` results instead),
-    # so for a name with many thousands of observations (a genus,
-    # say) this scope would eager-load all of them for no benefit.
-    # See `show_page_includes` below for the lighter scope those
-    # actions use instead.
-    scope :show_includes, lambda {
+    # `#email_name_change_content`, which touches `.observations`) and
+    # `Names::Synonyms::ApproveController` (its `save_with_log`/
+    # `notify_users` chain). NOT used by plain #show or a
+    # past-version display: neither reads
+    # `@name.observations`/`@name.namings` directly (both render
+    # curated `Query`/`Name::Observations` results instead), so for a
+    # name with many thousands of observations (a genus, say) this
+    # scope would eager-load all of them for no benefit. See
+    # `show_includes` below for the lighter scope those actions use
+    # instead.
+    scope :edit_includes, lambda {
       strict_loading.includes(
         *Name::Scopes.show_includes_base,
         { namings: Naming.index_includes_tree },
@@ -370,13 +372,13 @@ module Name::Scopes
       )
     }
 
-    # #show / past-version-display variant of `show_includes` —
+    # #show / past-version-display variant of `edit_includes` —
     # everything the same except `.namings`/`.observations`, neither
-    # of which those pages read directly (see `show_includes` above).
+    # of which those pages read directly (see `edit_includes` above).
     # For a name with many thousands of observations (e.g. a genus),
     # eager-loading all of them turns a sub-second page load into
     # several seconds for no benefit.
-    scope :show_page_includes, lambda {
+    scope :show_includes, lambda {
       strict_loading.includes(*Name::Scopes.show_includes_base)
     }
   end

@@ -38,11 +38,11 @@ module Names
 
     # A past-version display page never reads
     # `@name.namings`/`@name.observations` directly —
-    # `show_page_includes` skips those eager-loads (see
+    # `show_includes` skips those eager-loads (see
     # `Name::Scopes` for why it matters for high-observation-count
     # names).
     def find_name!
-      @name = Name.show_page_includes.safe_find(params[:id]) ||
+      @name = Name.show_includes.safe_find(params[:id]) ||
               flash_error_and_goto_index(Name, params[:id])
     end
   end

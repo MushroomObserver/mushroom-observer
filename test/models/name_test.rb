@@ -4301,16 +4301,16 @@ class NameTest < UnitTestCase
                  "not the creator (rolf)")
   end
 
-  # `show_page_includes` (used by NamesController#show and
+  # `show_includes` (used by NamesController#show and
   # Names::VersionsController#show) deliberately omits `.namings`/
   # `.observations` — eager-loading either is expensive for a name
   # with many thousands of them (e.g. a genus), and neither page
-  # reads them directly. `show_includes` (used by #edit/#update,
+  # reads them directly. `edit_includes` (used by #edit/#update,
   # including the merge flow) still needs both. `strict_loading`
   # means a wrong scope fails loudly here rather than silently
   # N+1-ing in production.
-  def test_show_page_includes_omits_namings_and_observations
-    name = Name.show_page_includes.find(names(:coprinus_comatus).id)
+  def test_show_includes_omits_namings_and_observations
+    name = Name.show_includes.find(names(:coprinus_comatus).id)
 
     assert_raises(ActiveRecord::StrictLoadingViolationError) do
       name.namings.to_a
@@ -4320,8 +4320,8 @@ class NameTest < UnitTestCase
     end
   end
 
-  def test_show_includes_preloads_namings_and_observations
-    name = Name.show_includes.find(names(:coprinus_comatus).id)
+  def test_edit_includes_preloads_namings_and_observations
+    name = Name.edit_includes.find(names(:coprinus_comatus).id)
 
     assert_nothing_raised { name.namings.to_a }
     assert_nothing_raised { name.observations.to_a }

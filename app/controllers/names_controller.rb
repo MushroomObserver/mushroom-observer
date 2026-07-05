@@ -162,8 +162,8 @@ class NamesController < ApplicationController
     end
 
     # Load Name and NameDescription along with a bunch of associated
-    # objects — NOT `.observations` (see `find_name_for_show!`).
-    return unless find_name_for_show!
+    # objects — NOT `.namings`/`.observations` (see `find_name!`).
+    return unless find_name!
 
     update_view_stats(@name)
 
@@ -197,21 +197,20 @@ class NamesController < ApplicationController
 
   private
 
+  # Neither #show, #edit, nor the common (non-merge) #update path
+  # reads `@name.namings`/`@name.observations` directly — #show
+  # renders curated `Query`/`Name::Observations` results instead, and
+  # a plain attribute edit touches neither. For a name with many
+  # thousands of observations (e.g. a genus), eager-loading both
+  # turns a sub-second page load into several seconds for no benefit,
+  # so this uses the lighter `show_includes` scope. The two callers
+  # that genuinely need them fetch a fresh, fully-loaded copy right
+  # before doing so instead of paying for it on every request:
+  # `merge_names` (`Name::Merge#move_namings`/`#move_observations`)
+  # and `email_name_change_content` (just needs `.count`, not the
+  # full preload — see there).
   def find_name!
     @name = Name.show_includes.safe_find(params[:id]) ||
-            flash_error_and_goto_index(Name, params[:id])
-  end
-
-  # #show doesn't need `.namings`/`.observations` eager-loaded (it
-  # renders curated `Query`/`Name::Observations` results instead,
-  # never `@name.namings`/`@name.observations` directly) — for a name
-  # with many thousands of observations (e.g. a genus), `find_name!`'s
-  # full `show_includes` turns a sub-second page load into several
-  # seconds for no benefit. #edit/#update keep `find_name!` since the
-  # merge flow (`Name::Merge#move_namings`/`#move_observations`) and
-  # `#email_name_change_content` genuinely read them.
-  def find_name_for_show!
-    @name = Name.show_page_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
   end
 
@@ -692,6 +691,10 @@ class NamesController < ApplicationController
     NamesControllerUpdateTest.report_email(message) if Rails.env.test?
   end
 
+  # `.count` (not `.length`) deliberately: this only needs the
+  # totals, not the actual rows, so it doesn't need `@name` fetched
+  # via `Name.edit_includes`'s `.namings`/`.observations` preload
+  # (unlike `merge_names` below) — a plain COUNT query per number.
   def email_name_change_content
     :email_name_change.l(
       user: @user.login,
@@ -699,8 +702,8 @@ class NamesController < ApplicationController
       new_identifier: params[:name][:icn_id],
       old: @name.user_real_search_name(@user),
       new: @parse.user_real_search_name(@user),
-      observations: @name.observations.length,
-      namings: @name.namings.length,
+      observations: @name.observations.count,
+      namings: @name.namings.count,
       show_url: "#{MO.http_domain}/names/#{@name.id}",
       edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
@@ -726,6 +729,19 @@ class NamesController < ApplicationController
   # The presumptive surviving id is that of the found name,
   # and the presumptive name to be destroyed is the name being edited.
   def perform_merge_names(survivor)
+    # `@name` came from `find_name!`'s lighter `show_includes` (no
+    # `.namings`/`.observations` preload), and `survivor` from a bare
+    # `Name.where` in `check_for_matches` (no strict_loading at all,
+    # so it'd silently lazy-load instead of raising — re-fetching it
+    # too keeps both sides consistent). `Name::Merge#merge` needs
+    # both preloaded on whichever side ends up as `old_name` below
+    # (the reverse-merger swap means that isn't necessarily the
+    # original `@name`) — re-fetch both with the full `edit_includes`
+    # up front, before any of the mutations below, rather than paying
+    # for it on every #update regardless of whether a merge happens.
+    @name = Name.edit_includes.find(@name.id)
+    survivor = Name.edit_includes.find(survivor.id)
+
     # Name to displayed in the log "Name Destroyed" entry
     logged_destroyed_name = display_name_without_user_filter(@name)
     destroyed_real_search_name = @name.user_real_search_name(@user)
