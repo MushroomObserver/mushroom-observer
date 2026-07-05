@@ -46,14 +46,57 @@ class ApplicationMailer < ActionMailer::Base
     return unless (to = to_address(headers[:to]))
 
     content_style = calc_content_style(headers)
-    from = calc_email(headers[:from]) || MO.news_email_address
-    reply_to = calc_email(headers[:reply_to]) || MO.noreply_email_address
-    mail(subject: "[MO] #{title}",
-         to: to,
-         from: from,
-         reply_to: reply_to,
-         content_type: "text/#{content_style}")
+    mail_args = mo_mail_args(title, to, headers, content_style)
+
+    if headers[:view_namespace]
+      deliver_phlex_mail(mail_args, headers, content_style)
+    else
+      mail(**mail_args)
+    end
     I18n.locale = @old_locale if I18n.locale != @old_locale
+  end
+
+  def mo_mail_args(title, to, headers, content_style)
+    { subject: "[MO] #{title}", to: to,
+      from: calc_email(headers[:from]) || MO.news_email_address,
+      reply_to: calc_email(headers[:reply_to]) || MO.noreply_email_address,
+      content_type: "text/#{content_style}" }
+  end
+
+  def deliver_phlex_mail(mail_args, headers, content_style)
+    view = resolve_mailer_view(headers[:view_namespace],
+                               headers.fetch(:view_params, {}), content_style)
+    # ActionMailer's format-block methods are named after the Mime::Type
+    # symbol ("text", "html"), not our "html"/"plain" content_style
+    # vocabulary (used for the "text/#{content_style}" header above).
+    mime_format = content_style == "plain" ? :text : :html
+    mail(**mail_args) do |format|
+      format.public_send(mime_format) { render(view) }
+    end
+  end
+
+  # Phlex conversion (issue #4676): `view_namespace` is a mailer's
+  # `Views::Mailers::<Name>` module. Its `Html`/`Text` siblings (if
+  # defined) pick the one matching this send's content_style; a
+  # mailer with no such split (its body doesn't vary by format) just
+  # has a `Build` class, used for either style. `Html`/`Text` are
+  # defined inline inside `build.rb` (not their own files), so
+  # Zeitwerk only knows to autoload the `Build` constant itself —
+  # referencing it first is what makes `Html`/`Text` exist at all
+  # (as a side effect of loading that file); `const_defined?` alone
+  # never triggers Zeitwerk's autoload.
+  def resolve_mailer_view(view_namespace, view_params, content_style)
+    view_namespace.const_get(:Build)
+    variant = if view_namespace.const_defined?(:Html, false)
+                if content_style == "html"
+                  view_namespace.const_get(:Html)
+                else
+                  view_namespace.const_get(:Text)
+                end
+              else
+                view_namespace.const_get(:Build)
+              end
+    variant.new(**view_params)
   end
 
   def debug_log(template, from, to, objects = {})

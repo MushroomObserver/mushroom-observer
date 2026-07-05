@@ -39,5 +39,19 @@ module Phlex
         plain(content.to_s)
       end
     end
+
+    # Emits `content` verbatim, with no HTML-escaping, regardless of
+    # its safety flag. Only for buffers that are never parsed as
+    # HTML — namely a mailer's plain-text body — where there is no
+    # markup to inject into and a literal `&`/`<` (in a URL, a raw
+    # user message) must reach the reader unchanged. Using
+    # `trusted_html` there would wrongly HTML-escape ordinary
+    # characters, since it treats an un-flagged String as untrusted.
+    #
+    # Do NOT use this for HTML output — it bypasses escaping
+    # unconditionally.
+    def trusted_text(content)
+      raw(content.to_s.html_safe) # rubocop:disable Rails/OutputSafety
+    end
   end
 end

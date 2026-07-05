@@ -110,27 +110,10 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_comment_email
-    target = observations(:minimal_unknown_obs)
-    comment = comments(:minimal_unknown_obs_comment_2)
-
-    run_mail_test("comment_response", rolf) do
-      CommentMailer.build(
-        sender: dick, receiver: rolf, target:, comment:
-      ).deliver_now
-    end
-  end
-
-  def test_comment_email2
-    target = observations(:minimal_unknown_obs)
-    comment = comments(:minimal_unknown_obs_comment_1)
-
-    run_mail_test("comment", mary) do
-      CommentMailer.build(
-        sender: rolf, receiver: mary, target:, comment:
-      ).deliver_now
-    end
-  end
+  # CommentMailer converted to Phlex (issue #4676) — its golden-file
+  # byte comparison is superseded by the structural checks in
+  # test/mailers/zz_temp_parity_check_test.rb, which reuses these
+  # same fixtures (comment.html/.text, comment_response.html/.text).
 
   def test_commercial_email
     image = images(:commercial_inquiry_image)
@@ -281,14 +264,9 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_webmaster_email
-    run_mail_test("webmaster_question") do
-      WebmasterMailer.build(
-        sender_email: mary.email,
-        message: "A question"
-      ).deliver_now
-    end
-  end
+  # WebmasterMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses
+  # webmaster_question.text).
 
   def test_verify_api_key_email
     api_key = api_keys(:rolfs_api_key)

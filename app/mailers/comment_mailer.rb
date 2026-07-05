@@ -6,12 +6,12 @@ class CommentMailer < ApplicationMailer
 
   def build(sender:, receiver:, target:, comment:)
     setup_user(receiver)
-    @title = :email_subject_comment.l(name: target.unique_text_name)
-    @sender = sender
-    @target = target
-    @comment = comment
+    title = :email_subject_comment.l(name: target.unique_text_name)
     debug_log(:comment, sender, receiver,
               object: "#{target.type_tag}-#{target.id}")
-    mo_mail(@title, to: receiver)
+    mo_mail(title, to: receiver,
+                   view_namespace: Views::Mailers::CommentMailer,
+                   view_params: { subject: title, user: receiver, sender:,
+                                  target:, comment: })
   end
 end
