@@ -99,6 +99,33 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
     assert_equal("col-xs-12 col-lg-6", right)
   end
 
+  def test_column_classes_eight_four_writes_split_left_right
+    left, right = captured_slots(:left_columns, :right_columns) do
+      column_classes(:eight_four)
+    end
+
+    assert_equal("col-xs-12 col-md-8 col-lg-7", left)
+    assert_equal("col-xs-12 col-md-4 col-lg-5", right)
+  end
+
+  def test_column_classes_seven_five_writes_split_left_right
+    left, right = captured_slots(:left_columns, :right_columns) do
+      column_classes(:seven_five)
+    end
+
+    assert_equal("col-xs-12 col-md-7", left)
+    assert_equal("col-xs-12 col-md-5", right)
+  end
+
+  def test_column_classes_six_writes_split_left_right
+    left, right = captured_slots(:left_columns, :right_columns) do
+      column_classes(:six)
+    end
+
+    assert_equal("col-xs-12 col-md-6 col-lg-8", left)
+    assert_equal("col-xs-12 col-md-6 col-lg-4", right)
+  end
+
   def test_column_classes_explicit_then_default_does_not_aggregate
     left, right = captured_slots(:left_columns, :right_columns) do
       column_classes(:nine_three)

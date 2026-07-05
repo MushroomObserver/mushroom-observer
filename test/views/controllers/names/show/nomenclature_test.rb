@@ -34,6 +34,39 @@ class Views::Controllers::Names::Show::NomenclatureTest < ComponentTestCase
     assert_no_html(html, "a[href*='SynSpecies']")
   end
 
+  # Normal case: `correct_spelling_id` resolves to a live Name -
+  # renders a link to it.
+  def test_misspelling_correct_link_renders_link_when_resolvable
+    name = names(:petigera) # correct_spelling: peltigera
+
+    html = render_nomenclature(name: name)
+
+    assert_html(html, "a[href='#{routes.name_path(names(:peltigera).id)}']")
+  end
+
+  # Defense-in-depth case: `correct_spelling_id` is set but the
+  # referenced Name is gone (no real FK constraint enforces this -
+  # see Name::Merge#merge's re-snapshot-before-destroy comment for
+  # the narrow race this guards against). Falls back to the bare id
+  # instead of raising.
+  def test_misspelling_correct_link_falls_back_to_id_when_dangling
+    name = Name.new(rank: Name.ranks[:Genus], text_name: "Testia",
+                    search_name: "Testia", sort_name: "Testia",
+                    display_name: "**__Testia__**", user: @user)
+    name.save(validate: false)
+    dangling_id = Name.maximum(:id) + 1_000_000
+    name.update_column(:correct_spelling_id, dangling_id)
+
+    html = render_nomenclature(name: name.reload)
+
+    assert_no_html(html, "a[href='#{routes.name_path(dangling_id)}']")
+    assert_includes(html, dangling_id.to_s)
+  end
+
+  def routes
+    Rails.application.routes.url_helpers
+  end
+
   private
 
   def render_nomenclature(name:, user: nil)

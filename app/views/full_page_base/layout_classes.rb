@@ -68,25 +68,19 @@ module Views::FullPageBase::LayoutClasses
 
   private
 
+  # `Grid::LAYOUT_COLUMNS` is the single source of truth for these
+  # pairs — falls back to the `:twelve` (untouched, no-split) pair
+  # for any unrecognized profile name, matching the old case
+  # statements' `else` branch.
+  def column_pair_for(columns)
+    Grid::LAYOUT_COLUMNS.fetch(columns, Grid::LAYOUT_COLUMNS[:twelve])
+  end
+
   def left_column_class_for(columns)
-    case columns
-    when :nine_three  then class_names("col-xs-12 col-md-9 col-lg-8")
-    when :eight_four  then class_names("col-xs-12 col-md-8 col-lg-7")
-    when :seven_five  then class_names("col-xs-12 col-md-7")
-    when :six         then class_names("col-xs-12 col-md-6 col-lg-8")
-    when :six_even    then class_names("col-xs-12 col-lg-6")
-    else                   class_names("col-xs-12")
-    end
+    class_names(column_pair_for(columns)[0])
   end
 
   def right_column_class_for(columns)
-    case columns
-    when :nine_three  then class_names("col-xs-12 col-md-3 col-lg-4")
-    when :eight_four  then class_names("col-xs-12 col-md-4 col-lg-5")
-    when :seven_five  then class_names("col-xs-12 col-md-5")
-    when :six         then class_names("col-xs-12 col-md-6 col-lg-4")
-    when :six_even    then class_names("col-xs-12 col-lg-6")
-    else                   class_names("col-xs-12")
-    end
+    class_names(column_pair_for(columns)[1])
   end
 end

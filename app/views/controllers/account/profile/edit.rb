@@ -19,8 +19,8 @@ module Views::Controllers::Account::Profile
       add_context_nav(Tab::Account::ProfileEditActions.new)
 
       div(class: "row") do
-        div(class: "col-sm-7") { render_form }
-        div(class: "col-sm-5 text-center") { render_image_column }
+        div(class: Grid::SM7) { render_form }
+        div(class: "#{Grid::SM5} text-center") { render_image_column }
       end
     end
 
