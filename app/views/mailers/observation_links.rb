@@ -7,7 +7,7 @@
 # Observation), so its show_object_url uses `@target.show_controller`
 # and a dynamic type rather than Observation's bare `/#{id}` route.
 #
-# Include into a mailer's `Build` class (shared by both Html/Text,
+# Include into a mailer's own class (shared by both Html/Text,
 # unlike CommonSections — these are plain data methods, no html?
 # branching). Requires `@observation` and `@receiver` ivars.
 # `stop_sending_link` additionally requires the including class to

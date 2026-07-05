@@ -7,16 +7,16 @@
 # ObserverQuestion, UserQuestion, CommercialInquiry,
 # ProjectAdminRequest, NamingObserver, ...).
 #
-# Include into both the `Html` and `Text` subclasses of a mailer's
-# `Build` class (named exactly that — `Views::Mailers::Base#html?`
+# Include into both the `Html` and `Text` nested classes of a
+# mailer's view (named exactly that — `Views::Mailers::Base#html?`
 # derives its answer from the class name). The including class must
 # define `intro`, `handy_links`, and `links` (see
 # `Views::Mailers::AuthorMailer::Html` for the reference shape).
 # `message` defaults to `@message` (the common case, matching
 # the standardized `prop :message` name every converted mailer uses
 # for its quoted-content prop) — override it when the message needs
-# computing (see `Views::Mailers::NamingObserverMailer::Build`). A
-# mailer that deviates from this exact structure (conditional box, no
+# computing (see `Views::Mailers::NamingObserverMailer`). A mailer
+# that deviates from this exact structure (conditional box, no
 # report_abuse, extra fields, ...) should NOT force-fit this module —
 # write its own view_template.
 module Views::Mailers::StandardMessageBody
