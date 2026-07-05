@@ -146,16 +146,9 @@ class ApplicationMailerTest < UnitTestCase
     end
   end
 
-  def test_name_proposal_email
-    naming = namings(:coprinus_comatus_other_naming)
-    observation = observations(:coprinus_comatus_obs)
-
-    run_mail_test("name_proposal", rolf) do
-      NameProposalMailer.build(
-        sender: mary, receiver: rolf, naming:, observation:
-      ).deliver_now
-    end
-  end
+  # NameProposalMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses name_proposal
+  # fixtures).
 
   # NamingObserverMailer converted to Phlex (issue #4676) — see
   # test/mailers/zz_temp_parity_check_test.rb (reuses

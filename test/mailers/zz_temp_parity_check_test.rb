@@ -222,4 +222,18 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("consensus_change", "consensus_change", html_body, text_body)
   end
+
+  def test_name_proposal_parity
+    rolf = users(:rolf)
+    mary = users(:mary)
+    naming = namings(:coprinus_comatus_other_naming)
+    observation = observations(:coprinus_comatus_obs)
+
+    html_body, text_body = both_bodies(rolf) do
+      NameProposalMailer.build(sender: mary, receiver: rolf, naming:,
+                               observation:)
+    end
+
+    compare("name_proposal", "name_proposal", html_body, text_body)
+  end
 end
