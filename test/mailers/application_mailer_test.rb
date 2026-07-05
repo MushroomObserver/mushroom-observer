@@ -144,12 +144,9 @@ class ApplicationMailerTest < UnitTestCase
   # test/mailers/zz_temp_parity_check_test.rb (reuses
   # naming_for_observer fixtures).
 
-  def test_naming_tracker_email
-    naming = namings(:agaricus_campestris_naming)
-    run_mail_test("naming_for_tracker", mary) do
-      NamingTrackerMailer.build(receiver: mary, naming:).deliver_now
-    end
-  end
+  # NamingTrackerMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses
+  # naming_for_tracker fixtures).
 
   # PasswordMailer converted to Phlex (issue #4676) — see
   # test/mailers/zz_temp_parity_check_test.rb (reuses new_password

@@ -310,4 +310,15 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("verify_api_key", "verify_api_key", html_body, text_body)
   end
+
+  def test_naming_tracker_parity
+    mary = users(:mary)
+    naming = namings(:agaricus_campestris_naming)
+
+    html_body, text_body = both_bodies(mary) do
+      NamingTrackerMailer.build(receiver: mary, naming:)
+    end
+
+    compare("naming_for_tracker", "naming_for_tracker", html_body, text_body)
+  end
 end
