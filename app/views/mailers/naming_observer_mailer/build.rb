@@ -72,14 +72,14 @@ module Views::Mailers::NamingObserverMailer
 
     def view_template
       emit_tp(intro)
-      plain("\n\n")
+      gap
       render_quoted_message
       emit_tp(handy_links)
-      plain("\n\n")
+      gap
       render_links_section(links)
-      plain("\n")
+      newline
       emit_tp(warning_msg)
-      plain("\n\n")
+      gap
       emit_tp(report_abuse)
     end
 
@@ -87,7 +87,7 @@ module Views::Mailers::NamingObserverMailer
 
     def render_quoted_message
       trusted_html(message.tp.html_to_ascii)
-      plain("\n\n#{"-" * 50}\n\n")
+      divider
     end
   end
 end

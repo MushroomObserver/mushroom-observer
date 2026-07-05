@@ -236,4 +236,34 @@ class ZzTempParityCheckTest < UnitTestCase
 
     compare("name_proposal", "name_proposal", html_body, text_body)
   end
+
+  def test_observation_change_parity
+    mary = users(:mary)
+    dick = users(:dick)
+    observation = observations(:coprinus_comatus_obs)
+    note = "date,location,specimen,is_collection_location,notes," \
+           "thumb_image_id,added_image,removed_image"
+
+    html_body, text_body = both_bodies(mary) do
+      ObservationChangeMailer.build(sender: dick, receiver: mary, observation:,
+                                    note:, time: observation.created_at)
+    end
+
+    compare("observation_change", "observation_change", html_body, text_body)
+  end
+
+  def test_observation_destroy_parity
+    mary = users(:mary)
+    dick = users(:dick)
+    observation = observations(:coprinus_comatus_obs)
+    note = "**__Coprinus comatus__** L. (123)"
+
+    html_body, text_body = both_bodies(mary) do
+      ObservationChangeMailer.build(sender: dick, receiver: mary,
+                                    observation: nil, note:,
+                                    time: observation.created_at)
+    end
+
+    compare("observation_destroy", "observation_destroy", html_body, text_body)
+  end
 end

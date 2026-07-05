@@ -22,6 +22,31 @@
 module Views::Mailers::CommonSections
   private
 
+  # Blank-line separator between sections in text mode; a no-op in
+  # HTML mode — block-level tags need nothing but insignificant
+  # whitespace between them (the old ERB templates' literal blank
+  # source lines only matter for the plain-text body).
+  def gap
+    plain("\n\n") unless html?
+  end
+
+  # A single newline — shorthand for the common "end this text line"
+  # call, used unconditionally (always inside an already text-mode-
+  # only branch, unlike `gap`).
+  def newline
+    plain("\n")
+  end
+
+  # The 50-dash horizontal rule separating quoted content from the
+  # footer in a text-mode body, blank-line-padded on both sides —
+  # matches the old ERB templates' literal
+  # "--------------------------------------------------" line.
+  def divider
+    gap
+    plain("-" * 50)
+    gap
+  end
+
   # Outputs an already `.tp`-textilized string in the current mode.
   def emit_tp(str)
     if html?
@@ -54,7 +79,7 @@ module Views::Mailers::CommonSections
       trusted_html(label.html_to_ascii)
       plain(": ")
       trusted_text(url)
-      plain("\n")
+      newline
     end
   end
 
@@ -67,7 +92,7 @@ module Views::Mailers::CommonSections
                   "color:#000000;", &block)
     else
       yield
-      plain("\n")
+      newline
     end
   end
 

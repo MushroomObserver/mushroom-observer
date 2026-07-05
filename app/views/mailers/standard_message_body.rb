@@ -44,16 +44,16 @@ module Views::Mailers::StandardMessageBody
     if html?
       render_message_box { trusted_html(message.tp) }
     else
-      plain("\n\n")
+      gap
       trusted_html(message.tp.html_to_ascii)
-      plain("\n\n#{"-" * 50}\n\n")
+      divider
     end
   end
 
   def render_links
     return render_links_section(links) if html?
 
-    plain("\n\n")
+    gap
     render_links_section(links)
     plain("\n")
   end

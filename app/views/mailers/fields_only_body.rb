@@ -34,19 +34,11 @@ module Views::Mailers::FieldsOnlyBody
     render_links
   end
 
-  # HTML mode needs no explicit gap — block-level tags need nothing
-  # but insignificant whitespace between them. Text mode needs an
-  # explicit blank line, matching the ERB templates' blank source
-  # lines between `<%= fields.tp.html_to_ascii %>` and the next tag.
-  def gap
-    plain("\n\n") unless html?
-  end
-
   def render_links
     return render_links_section(links) if html?
 
-    plain("\n\n")
+    gap
     render_links_section(links)
-    plain("\n")
+    newline
   end
 end

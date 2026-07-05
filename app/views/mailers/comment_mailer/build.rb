@@ -128,15 +128,15 @@ module Views::Mailers::CommentMailer
 
     def view_template
       emit_tp(intro)
-      plain("\n\n")
+      gap
       emit_tp(fields)
-      plain("\n\n")
+      gap
       render_quoted_comment
-      plain("#{"-" * 50}\n\n")
+      divider
       emit_tp(handy_links)
-      plain("\n\n")
+      gap
       render_links_section(links)
-      plain("\n")
+      newline
       emit_tp(report_abuse)
     end
 
@@ -146,7 +146,6 @@ module Views::Mailers::CommentMailer
       return unless @comment.comment
 
       trusted_html(@comment.comment.tp.html_to_ascii)
-      plain("\n\n")
     end
   end
 end

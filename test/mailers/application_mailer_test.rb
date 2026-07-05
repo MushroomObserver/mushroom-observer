@@ -165,30 +165,9 @@ class ApplicationMailerTest < UnitTestCase
   # test/mailers/zz_temp_parity_check_test.rb (reuses new_password
   # fixtures).
 
-  def test_observation_change_email
-    observation = observations(:coprinus_comatus_obs)
-    note = "date,location,specimen,is_collection_location,notes," \
-           "thumb_image_id,added_image,removed_image"
-
-    run_mail_test("observation_change", mary) do
-      ObservationChangeMailer.build(
-        sender: dick, receiver: mary, observation:, note:,
-        time: observation.created_at
-      ).deliver_now
-    end
-  end
-
-  def test_observation_destroy_email
-    observation = observations(:coprinus_comatus_obs)
-    note = "**__Coprinus comatus__** L. (123)"
-
-    run_mail_test("observation_destroy", mary) do
-      ObservationChangeMailer.build(
-        sender: dick, receiver: mary, observation: nil, note:,
-        time: observation.created_at
-      ).deliver_now
-    end
-  end
+  # ObservationChangeMailer converted to Phlex (issue #4676) — see
+  # test/mailers/zz_temp_parity_check_test.rb (reuses
+  # observation_change and observation_destroy fixtures).
 
   # ObserverQuestionMailer and UserQuestionMailer converted to Phlex
   # (issue #4676) — see test/mailers/zz_temp_parity_check_test.rb
