@@ -10,8 +10,9 @@ class ObservationLabels::Label
 
   attr_reader :observation, :font_family, :pdf
 
-  def initialize(observation, font_family = "DejaVu Sans")
+  def initialize(observation, user = nil, font_family = "DejaVu Sans")
     @observation = observation
+    @user = user
     @font_family = font_family
   end
 
@@ -51,7 +52,7 @@ class ObservationLabels::Label
   end
 
   def prepare_observation_fields
-    observation_fields = ObservationLabels::Fields.new(observation)
+    observation_fields = ObservationLabels::Fields.new(observation, @user)
 
     {
       label_fields: observation_fields.label_fields,

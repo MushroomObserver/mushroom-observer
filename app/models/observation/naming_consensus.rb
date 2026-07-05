@@ -354,13 +354,7 @@ class Observation
       return unless old != best
 
       @consensus_changed = true if obs.id == @observation.id
-      if current_user
-        obs.reload.user_announce_consensus_change(
-          old, best, current_user
-        )
-      else
-        obs.reload.announce_consensus_change(old, best)
-      end
+      obs.reload.announce_consensus_change(old, best, current_user)
     end
 
     def init_vote_table

@@ -73,8 +73,10 @@ module Name::Change
     change_deprecated(true)
     merge_synonyms(target_name)
     target_name.clear_misspelled(user, :save) if target_name.is_misspelling?
-    save_with_log(user, :log_name_deprecated, other: target_name.display_name) \
-      if save
+    if save
+      save_with_log(user, :log_name_deprecated,
+                    other: target_name.user_display_name(user))
+    end
     change_misspelled_consensus_names
   end
 

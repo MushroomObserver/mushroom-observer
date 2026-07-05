@@ -10,7 +10,7 @@ module Views::Controllers::Observations::Emails
     def view_template
       add_page_title(
         :ask_observation_question_title.t(
-          name: @observation.unique_format_name
+          name: viewer_aware_unique_format_name(@observation)
         )
       )
 

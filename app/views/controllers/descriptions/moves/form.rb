@@ -31,8 +31,13 @@ module Views::Controllers::Descriptions::Moves
 
     private
 
+    # `sorted_moves` is only ever populated for NameDescription moves
+    # (`compute_moves` returns [] when the parent doesn't respond to
+    # `synonyms`, which is only Name) - always Name instances.
     def render_move_options
-      options = sorted_moves.map { |name| [name.id, name.display_name.t] }
+      options = sorted_moves.map do |name|
+        [name.id, name.user_display_name(@user).t]
+      end
       radio_field(:target, *options)
     end
 

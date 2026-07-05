@@ -227,9 +227,9 @@ class Components::Map::Popup < Components::Base
       return obs.display_name
     end
     return unless obs.respond_to?(:name) &&
-                  obs.name.respond_to?(:display_name)
+                  obs.name.respond_to?(:user_display_name)
 
-    obs.name.display_name
+    obs.name.user_display_name(current_user)
   end
 
   def render_location_link(loc)

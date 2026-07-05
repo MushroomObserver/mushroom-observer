@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Tab::Name::VersionActions < Tab::Collection
-  def initialize(name:)
+  def initialize(name:, user: nil)
     super()
     @name = name
+    @user = user
   end
 
   private
@@ -11,7 +12,7 @@ class Tab::Name::VersionActions < Tab::Collection
   def tabs
     [Tab::Object::Show.new(
       object: @name,
-      title: :show_name.t(name: @name.display_name)
+      title: :show_name.t(name: @name.user_display_name(@user))
     )]
   end
 end

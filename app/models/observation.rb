@@ -1365,41 +1365,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   #   old_name = obs.name
   #   obs.name = new_name
-  #   obs.announce_consensus_change(old_name, new_name)
+  #   obs.announce_consensus_change(old_name, new_name, current_user)
   #
-  def announce_consensus_change(old_name, new_name)
-    log_consensus_change(old_name, new_name)
-
-    # Change can trigger emails.
-    owner  = user
-    sender = User.current
-    recipients = []
-
-    # Tell owner of observation if they want.
-    recipients.push(owner) if owner&.email_observations_consensus
-
-    # Send to people who have registered interest.
-    # Also remove everyone who has explicitly said they are NOT interested.
-    interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
-
-    # Remove users who have opted out of all emails.
-    recipients.reject!(&:no_emails)
-
-    # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |receiver|
-      ConsensusChangeMailer.build(
-        sender:, receiver:, observation: self, old_name:, new_name:
-      ).deliver_later
-    end
-  end
-
-  def user_announce_consensus_change(old_name, new_name, current_user)
+  # `current_user` may be nil (e.g. an automated consensus recalculation
+  # with no attributable acting user) - `user_log_consensus_change` and
+  # `ConsensusChangeMailer`'s sender both handle that.
+  def announce_consensus_change(old_name, new_name, current_user)
     user_log_consensus_change(old_name, new_name, current_user)
 
     # Change can trigger emails.
@@ -1428,15 +1399,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       ConsensusChangeMailer.build(
         sender:, receiver:, observation: self, old_name:, new_name:
       ).deliver_later
-    end
-  end
-
-  def log_consensus_change(old_name, new_name)
-    if old_name
-      log(:log_consensus_changed, old: old_name.display_name,
-                                  new: new_name.display_name)
-    else
-      log(:log_consensus_created, name: new_name.display_name)
     end
   end
 

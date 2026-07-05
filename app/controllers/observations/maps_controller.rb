@@ -38,7 +38,7 @@ module Observations
         location_id: observation.location_id,
         name_id: observation.name_id,
         text_name: observation.name&.text_name,
-        display_name: observation.name&.display_name,
+        display_name: observation.name&.user_display_name(@user),
         when: observation.when,
         vote_cache: observation.vote_cache,
         thumb_image_id: observation.thumb_image_id
@@ -73,7 +73,7 @@ module Observations
           location_id: @observation.location_id,
           name_id: @observation.name_id,
           text_name: @observation.name&.text_name,
-          display_name: @observation.name&.display_name,
+          display_name: @observation.name&.user_display_name(@user),
           when: @observation.when,
           vote_cache: @observation.vote_cache,
           thumb_image_id: @observation.thumb_image_id

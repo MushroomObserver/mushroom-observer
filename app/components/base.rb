@@ -116,6 +116,18 @@ class Components::Base < Phlex::HTML
     trusted_html("&nbsp;")
   end
 
+  # `obj` is frequently polymorphic (a Comment/Interest/RssLog target,
+  # etc.) - only some target types (Name, Observation, Naming) have a
+  # viewer-aware user_unique_format_name. Falls back to the plain
+  # unique_format_name for the rest.
+  def viewer_aware_unique_format_name(obj, user = current_user)
+    if obj.respond_to?(:user_unique_format_name)
+      obj.user_unique_format_name(user)
+    else
+      obj.unique_format_name
+    end
+  end
+
   def before_template
     comment { "Before #{self.class.name}" } if Rails.env.development?
     super

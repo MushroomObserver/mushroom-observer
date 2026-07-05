@@ -53,7 +53,7 @@ module Views::Controllers::Images
       def observation_row(obs)
         div do
           plain("#{:OBSERVATION.t}: ")
-          link_to(obs.unique_format_name.t, obs.show_link_args)
+          link_to(viewer_aware_unique_format_name(obs).t, obs.show_link_args)
         end
       end
 

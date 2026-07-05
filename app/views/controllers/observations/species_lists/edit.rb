@@ -16,7 +16,7 @@ module Views::Controllers::Observations::SpeciesLists
     def view_template
       add_page_title(
         :species_list_manage_title.t(
-          name: @observation.unique_format_name
+          name: viewer_aware_unique_format_name(@observation)
         )
       )
       # Sort table lives on `SpeciesListsController` (single

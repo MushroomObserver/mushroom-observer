@@ -25,7 +25,7 @@ module Views::Controllers::Observations::Namings::Votes
              )) do |modal|
         modal.with_title_content do
           trusted_html(@title)
-          trusted_html(@naming.display_name_brief_authors.t.small_author)
+          trusted_html(@naming.display_name_brief_authors(@user).t.small_author)
         end
         modal.with_body do
           render(Table.new(naming: @naming))

@@ -366,4 +366,16 @@ class ApplicationController < ActionController::Base
     end
     nil
   end
+
+  # `obj` is frequently polymorphic (a Comment/Interest/RssLog target,
+  # etc.) - only some target types (Name, Observation) have a
+  # viewer-aware user_unique_format_name. Falls back to the plain
+  # unique_format_name for the rest.
+  def viewer_aware_unique_format_name(obj)
+    if obj.respond_to?(:user_unique_format_name)
+      obj.user_unique_format_name(@user)
+    else
+      obj.unique_format_name
+    end
+  end
 end

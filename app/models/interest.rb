@@ -97,7 +97,18 @@ class Interest < AbstractModel
 
     "#{state ? :WATCHING.l : :IGNORING.l} " \
     "#{target_type.underscore.to_sym.l}: " \
-    "#{target ? target.unique_format_name : "--"}"
+    "#{target ? target_format_name : "--"}"
+  end
+
+  # `user` (this Interest's owner) is the only one who ever sees this,
+  # via their own Interests index page. Only some target types (Name,
+  # Observation, Naming) have a viewer-aware user_unique_format_name.
+  def target_format_name
+    if target.respond_to?(:user_unique_format_name)
+      target.user_unique_format_name(user)
+    else
+      target.unique_format_name
+    end
   end
   alias text_name summary
 

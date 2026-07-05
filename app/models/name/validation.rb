@@ -60,7 +60,7 @@ module Name::Validation
 
   def user_presence
     errors.add(:user, :validate_name_user_missing.t) \
-      if !user_id && !User.current
+      if !user_id && !current_user
   end
 
   def text_name_length
@@ -99,7 +99,7 @@ module Name::Validation
       errors.add(
         :search_name,
         "#{:validate_name_equivalent_exists.t}: " \
-        "#{homonym.display_name.t} (#{homonym.id})"
+        "#{homonym.user_display_name(current_user).t} (#{homonym.id})"
       )
     end
   end

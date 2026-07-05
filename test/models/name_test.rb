@@ -2418,40 +2418,43 @@ class NameTest < UnitTestCase
     mary.hide_authors = "none"
 
     name = names(:agaricus_campestris)
-    User.current = mary
-    assert_equal("**__Agaricus__** **__campestris__** L.", name.display_name)
-    User.current = dick
-    assert_equal("**__Agaricus__** **__campestris__** L.", name.display_name)
+    assert_equal("**__Agaricus__** **__campestris__** L.",
+                 name.user_display_name(mary))
+    assert_equal("**__Agaricus__** **__campestris__** L.",
+                 name.user_display_name(dick))
 
     name = names(:macrocybe_titans)
-    User.current = mary
-    assert_equal("**__Macrocybe__** Titans", name.display_name)
-    User.current = dick
-    assert_equal("**__Macrocybe__**", name.display_name)
+    assert_equal("**__Macrocybe__** Titans", name.user_display_name(mary))
+    assert_equal("**__Macrocybe__**", name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ (Author) Author"
-    assert_equal("__Macrocybe__", name.display_name)
+    assert_equal("__Macrocybe__", name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ (van Helsing) Author"
-    assert_equal("__Macrocybe__", name.display_name)
+    assert_equal("__Macrocybe__", name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ sect. __Helsing__ Author"
-    assert_equal("__Macrocybe__ sect. __Helsing__", name.display_name)
+    assert_equal("__Macrocybe__ sect. __Helsing__",
+                 name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ sect. __Helsing__"
-    assert_equal("__Macrocybe__ sect. __Helsing__", name.display_name)
+    assert_equal("__Macrocybe__ sect. __Helsing__",
+                 name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** (van Helsing) Author"
-    assert_equal("**__Macrocybe__**", name.display_name)
+    assert_equal("**__Macrocybe__**", name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** sect. **__Helsing__** Author"
-    assert_equal("**__Macrocybe__** sect. **__Helsing__**", name.display_name)
+    assert_equal("**__Macrocybe__** sect. **__Helsing__**",
+                 name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** sect. **__Helsing__**"
-    assert_equal("**__Macrocybe__** sect. **__Helsing__**", name.display_name)
+    assert_equal("**__Macrocybe__** sect. **__Helsing__**",
+                 name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** subgenus **__Blah__**"
-    assert_equal("**__Macrocybe__** subgenus **__Blah__**", name.display_name)
+    assert_equal("**__Macrocybe__** subgenus **__Blah__**",
+                 name.user_display_name(dick))
   end
 
   def test_changing_author_of_autonym
@@ -4153,6 +4156,18 @@ class NameTest < UnitTestCase
     }
     assert_nil(Name.create(params).id)
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
+
+    # `current_user` (not User.current) also satisfies the validation
+    # when no explicit `user:` is present. Distinct text_name from the
+    # params above to avoid tripping search_name_indistinct instead.
+    other_params = params.merge(
+      text_name: "Whoosia otherii",
+      search_name: "Whoosia otherii Blah & de Blah",
+      display_name: "__Whoosia__ __otherii__ Blah & de Blah"
+    )
+    name = Name.new(other_params)
+    name.current_user = rolf
+    assert(name.valid?, "current_user should satisfy user_presence")
   end
 
   def test_author_allowed_characters

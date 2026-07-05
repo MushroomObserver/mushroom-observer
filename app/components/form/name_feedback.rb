@@ -47,7 +47,7 @@ class Components::Form::NameFeedback < Components::Base
       :form_naming_not_recognized.t(name: @given_name)
     elsif @parent_deprecated
       :form_naming_parent_deprecated.t(
-        parent: @parent_deprecated.display_name,
+        parent: @parent_deprecated.user_display_name(current_user),
         rank: :"rank_#{@parent_deprecated.rank.to_s.downcase}"
       )
     elsif @names.present?
@@ -109,13 +109,13 @@ class Components::Form::NameFeedback < Components::Base
   def render_name_radio_buttons_with_counts(names)
     options = names.map do |n|
       count = n.observations.size
-      [n.id, [n.display_name.t, " (#{count})"].safe_join]
+      [n.id, [n.user_display_name(current_user).t, " (#{count})"].safe_join]
     end
     render(name_radio_field(options, wrap_class: "ml-4 name-radio"))
   end
 
   def name_radio_field(options, wrap_class:)
-    options = options.map { |n| [n.id, n.display_name.t] } if
+    options = options.map { |n| [n.id, n.user_display_name(current_user).t] } if
       options.first.is_a?(Name)
 
     proxy = Components::ApplicationForm::FieldProxy.new(
