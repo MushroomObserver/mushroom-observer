@@ -20,7 +20,7 @@ class Views::Layouts::Sidebar
     prop :tabs, _Nilable(_Array(_Nilable(Array))), default: nil
 
     def view_template
-      div(class: @classes[:heading]) do
+      render(Components::ListGroup::Item.new(class: @classes[:heading])) do
         plain("#{@heading_key.t}:")
       end
 
@@ -34,13 +34,14 @@ class Views::Layouts::Sidebar
     def render_nav_link(link, link_class: @classes[:indent])
       title, url, html_options = link
       html_options ||= {}
-      html_options[:class] = class_names(
-        link_class,
-        html_options[:class]
-      )
+      extra_class = html_options.delete(:class)
 
-      Link(type: :active,
-           content: title, path: url, **html_options)
+      render(
+        Components::ListGroup::LinkItem.new(class: link_class)
+      ) do |css_class|
+        Link(type: :active, content: title, path: url,
+             class: class_names(css_class, extra_class), **html_options)
+      end
     end
   end
 end

@@ -75,3 +75,21 @@
     }
   }
 }
+
+// The language collapse's rows use the plain (light) list-group
+// palette rather than the sidebar's own dark `$navbar-inverse-*`
+// theme colors — reads as a "panel" island against the dark nav,
+// and stays correct across theme switches since these Bootstrap
+// defaults aren't remapped to any of MO's theme variables the way
+// `$navbar-inverse-bg` is. ID selector wins over `.sidebar-nav
+// .list-group-item`'s specificity without needing `!important`.
+#language_dropdown_collapse .list-group-item {
+  color: $panel-default-text;
+  background-color: $list-group-bg;
+
+  &:hover,
+  &:focus {
+    color: $panel-default-text;
+    background-color: $list-group-hover-bg;
+  }
+}

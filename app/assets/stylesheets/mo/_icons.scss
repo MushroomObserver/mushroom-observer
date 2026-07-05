@@ -116,9 +116,22 @@
   border-radius: 0;
 }
 
-.lang-flag {
-  width: 27px;
-  height: 18px;
+// Flag emoji render noticeably smaller than the `.lang-flag` PNGs
+// they replaced (~2/3 the linear size, roughly half the visual
+// area) — bump back up. `line-height: 1` keeps the taller glyph from
+// stretching the `.dropdown-item`'s row height.
+.lang-flag-emoji {
+  font-size: 1.75em;
+  line-height: 1;
+  // Default inline elements sit on the text baseline — at 1.75em the
+  // glyph's ascent/descent hangs low relative to the normal-size text
+  // beside it *and* stretches the line box to fit. `middle` aligns
+  // to the line's midpoint instead, fixing both.
+  vertical-align: middle;
+  // Both flag spans sit inside an `<a>` (`.dropdown-item` /
+  // `.dropdown-toggle`) — without this the emoji glyph picks up the
+  // link's underline on hover/focus, which reads oddly on a symbol.
+  text-decoration: none;
 }
 
 // This is for the stateful icon_link_to helper
