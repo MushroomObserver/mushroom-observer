@@ -775,6 +775,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       set = width.nil? ? "1" : "0"
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
+      # move_original returns true or raises — never false — so there is no
+      # reachable else branch here.
       if move_original
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
@@ -790,8 +792,6 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
           # failed, and could race the resize/strip command writing files.
           ImageDhashJob.perform_later(id)
         end
-      else
-        result = false
       end
     end
     result
