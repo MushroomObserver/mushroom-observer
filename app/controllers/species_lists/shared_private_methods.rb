@@ -77,7 +77,7 @@ module SpeciesLists
       @multiple_names = names_with_other_authors(sorter)
       @deprecated_names = sorter.deprecated_names.uniq.sort_by(&:search_name)
       @list_members = sorter.all_line_strs.join("\r\n")
-      @place_name = spl.place_name
+      @place_name = spl.place_name(@user)
     end
 
     def names_with_other_authors(sorter)

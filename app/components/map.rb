@@ -254,7 +254,7 @@ class Components::Map < Components::Base
   def map_location_strings(objects)
     objects.filter_map do |obj|
       if obj.location?
-        obj.display_name
+        obj.display_name(current_user)
       elsif obj.observation?
         observation_location_string(obj)
       end
@@ -263,7 +263,7 @@ class Components::Map < Components::Base
 
   def observation_location_string(obs)
     if obs.location
-      obs.location.display_name
+      obs.location.display_name(current_user)
     elsif obs.lat
       "#{format_latitude(obs.lat)} #{format_longitude(obs.lng)}"
     end

@@ -51,7 +51,15 @@
 
 class Herbarium < AbstractModel
   # Used by create/edit form.
-  attr_accessor :place_name, :personal, :personal_user_name
+  attr_writer :place_name
+  attr_accessor :personal, :personal_user_name
+
+  # Plain scratch string (not viewer-aware, unlike Location/Observation/
+  # etc's place_name) - accepts and ignores an optional `user` so
+  # Locationable's shared `place_name_exists?` can call it uniformly.
+  def place_name(_user = nil)
+    @place_name
+  end
 
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location

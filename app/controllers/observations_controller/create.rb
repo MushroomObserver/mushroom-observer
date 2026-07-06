@@ -79,11 +79,16 @@ module ObservationsController::Create
   def create_observation_object(args = {})
     args = args&.permit(permitted_observation_args).to_h
     now = Time.zone.now
-    Observation.new(args&.merge({ created_at: now,
-                                  updated_at: now,
-                                  user: @user,
-                                  name: Name.unknown,
-                                  source: "mo_website" }))
+    obs = Observation.new(created_at: now, updated_at: now, user: @user,
+                          name: Name.unknown, source: "mo_website")
+    # `current_user` must be set before `args` is applied: `place_name=`
+    # (see HasPlaceName) reads it to decide postal vs scientific parsing,
+    # and a single `Observation.new(hash)` call can't guarantee that
+    # ordering if `place_name` and `current_user` were merged into one
+    # hash together.
+    obs.current_user = @user
+    obs.assign_attributes(args) if args
+    obs
   end
 
   def rough_cut
@@ -227,7 +232,7 @@ module ObservationsController::Create
 
   def redirect_to_next_page
     if @observation.location_id.nil?
-      redirect_to(new_location_path(where: @observation.place_name,
+      redirect_to(new_location_path(where: @observation.place_name(@user),
                                     set_observation: @observation.id))
     else
       redirect_to(permanent_observation_path(@observation.id))
@@ -270,7 +275,7 @@ module ObservationsController::Create
 
   def init_location_var_for_reload
     # Preserve the user's place_name input for form re-render
-    @default_place_name = @observation.place_name
+    @default_place_name = @observation.place_name(@user)
 
     # keep location_id if it's -1 (new)
     if @location || @observation.location_id.nil? ||

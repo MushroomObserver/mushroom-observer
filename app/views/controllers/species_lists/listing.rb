@@ -36,7 +36,7 @@ module Views::Controllers::SpeciesLists
     # `rescue :UNKNOWN.l` is fallback.
     def place
       @place ||= begin
-                   @species_list.place_name.t
+                   @species_list.place_name(current_user).t
                  rescue StandardError
                    :UNKNOWN.l
                  end

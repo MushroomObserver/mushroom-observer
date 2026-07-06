@@ -89,7 +89,7 @@ class SpeciesListsIntegrationTest < CapybaraIntegrationTestCase
     assert_not_nil(loc, "Cannot find Location")
     assert_equal(newer_location, loc.name)
     assert_equal(dick.id, rack_session[:user_id])
-    assert_equal(newer_location_reverse, loc.display_name)
+    assert_equal(newer_location_reverse, loc.display_name(dick))
     spl.reload
     assert_equal(loc.name, spl.where)
     assert_equal(loc, spl.location)

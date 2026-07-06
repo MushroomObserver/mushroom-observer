@@ -510,14 +510,14 @@ class LocationTest < UnitTestCase
   def test_change_scientific_name
     loc = Location.first
 
-    User.current = rolf
-    assert_equal("postal", User.current_location_format)
+    loc.current_user = rolf
+    assert_equal("postal", rolf.location_format)
     loc.update_attribute(:display_name, "One, Two, Three")
     assert_equal("One, Two, Three", loc.name)
     assert_equal("Three, Two, One", loc.scientific_name)
 
-    User.current = roy
-    assert_equal("scientific", User.current_location_format)
+    loc.current_user = roy
+    assert_equal("scientific", roy.location_format)
     loc.update_attribute(:display_name, "Un, Deux, Trois")
     assert_equal("Trois, Deux, Un", loc.name)
     assert_equal("Un, Deux, Trois", loc.scientific_name)

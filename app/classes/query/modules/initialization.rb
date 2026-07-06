@@ -103,11 +103,19 @@ module Query::Modules::Initialization
       next if (param != :id_in_set && skippable_values.include?(val.to_s)) ||
               (param == :id_in_set && val.nil?) # keep empty array
 
-      @scopes = if val.is_a?(Hash)
-                  @scopes.send(param, **val)
-                else
-                  @scopes.send(param, val)
-                end
+      @scopes = apply_scope_param(param, val)
+    end
+  end
+
+  # `:order_by` gets `viewer:` forwarded - it decides postal/scientific
+  # location-name sort order, see AbstractModel::OrderingScopes.
+  def apply_scope_param(param, val)
+    if param == :order_by
+      @scopes.send(param, val, viewer: viewer)
+    elsif val.is_a?(Hash)
+      @scopes.send(param, **val)
+    else
+      @scopes.send(param, val)
     end
   end
 
@@ -175,7 +183,12 @@ module Query::Modules::Initialization
   def add_default_order_if_none_specified
     return if params[:order_by].present?
 
-    @scopes = @scopes.order_by_default
+    # Bypasses the `order_by_default` scope (used directly, without a
+    # `viewer`, by callers outside the Query system) so the default
+    # sort on an index page is viewer-aware too - same underlying
+    # `order_by` dispatcher, with `self.class.default_order` standing
+    # in for the model's own `order_by_default` scope body.
+    @scopes = @scopes.order_by(self.class.default_order, viewer: viewer)
   end
 
   # array of max of MO.query_max_array unique ids for use with Arel "in"

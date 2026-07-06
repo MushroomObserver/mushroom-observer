@@ -177,13 +177,11 @@ module ActiveSupport
     # between tests running in the same thread.
     setup do
       Thread.current[:mushroom_observer_user] = nil
-      Thread.current[:mushroom_observer_location_format] = nil
     end
 
     # Clean up thread-local storage after each test
     teardown do
       Thread.current[:mushroom_observer_user] = nil
-      Thread.current[:mushroom_observer_location_format] = nil
     end
 
     # Add more helper methods to be used by all tests here...

@@ -102,11 +102,13 @@ module Views::Controllers::SpeciesLists::WriteIn
     end
 
     def render_place_name_field
-      # `:place_name` is a real `SpeciesList` attribute; Symbol path
-      # binds to `model.place_name` (which the controller has already
-      # set to the right value via `validate_place_name`).
+      # `:place_name` is a real `SpeciesList` attribute, but its getter
+      # is viewer-aware (takes an explicit user) - Superform's Symbol
+      # path would call it with no args, so pass `value:` explicitly
+      # to get `current_user`'s postal/scientific preference.
       autocompleter_field(:place_name,
                           type: :location,
+                          value: model.place_name(current_user),
                           label: "#{:WHERE.l}:")
     end
 

@@ -379,21 +379,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # Thread-safe: Stores user in thread-local storage for proper isolation.
   def self.current=(val)
     Thread.current[:mushroom_observer_user] = val
-    Thread.current[:mushroom_observer_location_format] =
-      val ? val.location_format : "postal"
-  end
-
-  # Report current user's preferred location_format
-  #
-  #   location_format = User.current_location_format
-  #
-  def self.current_location_format
-    Thread.current[:mushroom_observer_location_format] || "postal"
-  end
-
-  # Set the location format to use throughout the site.
-  def self.current_location_format=(val)
-    Thread.current[:mushroom_observer_location_format] = val
   end
 
   # Clear cached data structures when reload.

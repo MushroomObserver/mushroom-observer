@@ -53,7 +53,9 @@ module ApplicationController::Queries
     # know when params have been filtered by @user.content_filter vs any
     # other search, which may send the same params.
     query_params[:preference_filter] = true if @preference_filters_applied
-    Query.lookup(model_symbol, query_params)
+    query = Query.lookup(model_symbol, query_params)
+    query.viewer = @user
+    query
   end
 
   # Lookup an appropriate Query or create a default one if necessary. If you
@@ -225,7 +227,9 @@ module ApplicationController::Queries
   # available to templates as an ApplicationController ivar. Something like:
   #
   def current_query
-    @query || query_from_q_param || query_from_session
+    query = @query || query_from_q_param || query_from_session
+    query.viewer = @user if query
+    query
   end
 
   # Opposite is `q_param` below

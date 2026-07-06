@@ -62,7 +62,9 @@ module Locationable
       @location.box_area = @location.calculate_area
       # With a Location instance, we can use the `display_name=` setter method,
       # which figures out scientific/postal format of user input and sets
-      # location `name` and `scientific_name` accordingly.
+      # location `name` and `scientific_name` accordingly. Needs
+      # `current_user` set first - `display_name=` reads it.
+      @location.current_user = @user
       @location.display_name = place_name
     end
 
@@ -88,7 +90,7 @@ module Locationable
     # bail on creating a "new" location, but go ahead with the observation save.
     # rubocop:disable Metrics/CyclomaticComplexity
     def place_name_exists?(object)
-      name = Location.user_format(@user, object.place_name)
+      name = Location.user_format(@user, object.place_name(@user))
       location = Location.find_by(name: name)
       if !object.location_id&.positive? && location ||
          (location && (object.location_id != location&.id))

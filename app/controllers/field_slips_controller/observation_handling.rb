@@ -8,7 +8,7 @@ module FieldSlipsController::ObservationHandling
   def quick_create_observation
     fs_params = params[:field_slip]
     # Must have valid name and location
-    location = Location.place_name_to_location(place_name)
+    location = Location.place_name_to_location(place_name, @user)
     flash_error(:field_slip_quick_no_location.t) unless location
     name = Name.find_by(text_name: fs_params[:field_slip_name])
     notes = field_slip_notes.compact_blank!
