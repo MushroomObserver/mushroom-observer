@@ -35,6 +35,7 @@ class ApplicationController < ActionController::Base
   include Indexes
   include SectionUpdater
   include ModalUpdater
+  include ViewerAwareFormat
 
   # Allow folder organization in the app/views folder
   append_view_path Rails.root.join("app/views/controllers")
@@ -366,4 +367,12 @@ class ApplicationController < ActionController::Base
     end
     nil
   end
+
+  # ViewerAwareFormat's default `user` arg.
+  def default_viewer
+    @user
+  end
+
+  private :viewer_aware_unique_format_name, :viewer_aware_location_format,
+          :default_viewer
 end

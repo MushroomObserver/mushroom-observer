@@ -38,10 +38,10 @@ module Views::Controllers::Names::Versions
     def page_chrome_side_effects
       add_page_title(
         :show_past_name_title.t(
-          num: @name.version, name: @name.display_name
+          num: @name.version, name: @name.user_display_name(@user)
         )
       )
-      add_context_nav(Tab::Name::VersionActions.new(name: @name))
+      add_context_nav(Tab::Name::VersionActions.new(name: @name, user: @user))
       container_class(:full)
       column_classes(:six)
     end

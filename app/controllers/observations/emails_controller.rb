@@ -22,7 +22,7 @@ module Observations
                    type: :turbo_form,
                    identifier: "observation_email",
                    title: :ask_observation_question_title.t(
-                     name: @observation.unique_format_name
+                     name: viewer_aware_unique_format_name(@observation)
                    ),
                    user: @user,
                    model: FormObject::ObserverQuestion.new,

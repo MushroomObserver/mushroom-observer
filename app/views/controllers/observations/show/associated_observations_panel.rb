@@ -51,7 +51,7 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
       @siblings.each do |sibling|
         li do
           a(href: permanent_observation_path(sibling.id)) do
-            trusted_html(sibling.unique_format_name.t)
+            trusted_html(viewer_aware_unique_format_name(sibling).t)
           end
         end
       end

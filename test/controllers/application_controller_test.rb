@@ -7,10 +7,10 @@ require("test_helper")
 # `InfoController` (a low-side-effect controller whose public
 # `intro` action runs the full filter stack).
 #
-# Excludes `kick_out_excessive_traffic` / `kick_out_robots` /
-# `is_cool?` — exercising those branches requires stubbing
-# `IpStats.blocked?` / `browser.bot?` (per-PR instruction to
-# skip those).
+# `kick_out_robots` is covered by `InfoControllerTest` (allowed vs.
+# unauthorized robot user-agents). `kick_out_excessive_traffic` /
+# `is_cool?` are covered below by blocking a worker-specific test IP
+# via `IpStats.add_blocked_ips`/`remove_blocked_ips`.
 class ApplicationControllerTest < FunctionalTestCase
   tests InfoController
 
@@ -122,5 +122,54 @@ class ApplicationControllerTest < FunctionalTestCase
     @controller.default_thumbnail_size_set("small")
 
     assert_equal("small", session[:thumbnail_size])
+  end
+
+  # `kick_out_excessive_traffic` renders 429 when `is_cool?` returns
+  # false: the request IP is blocked and neither allow-list branch
+  # (`account#login`, logged-in session) applies.
+  def test_kick_out_excessive_traffic_blocks_blocked_ip
+    ip = "203.0.113.5"
+    IpStats.add_blocked_ips([ip])
+    IpStats.reset!
+    @request.remote_ip = ip
+
+    get(:intro)
+
+    assert_response(429) # rubocop:disable Rails/HttpStatus
+  ensure
+    IpStats.remove_blocked_ips([ip])
+    IpStats.reset!
+  end
+
+  # `is_cool?` allow-lists `account#login` by name so a blocked IP can
+  # still reach the login page.
+  def test_is_cool_allows_account_login_action_when_blocked
+    ip = "203.0.113.6"
+    IpStats.add_blocked_ips([ip])
+    IpStats.reset!
+    get(:intro)
+    @request.remote_ip = ip
+    @controller.params = { controller: "account", action: "login" }
+
+    assert(@controller.is_cool?)
+  ensure
+    IpStats.remove_blocked_ips([ip])
+    IpStats.reset!
+  end
+
+  # `is_cool?` also allow-lists a blocked IP that already has a
+  # logged-in session (`session[:user_id].present?`).
+  def test_is_cool_allows_blocked_ip_with_logged_in_session
+    ip = "203.0.113.7"
+    IpStats.add_blocked_ips([ip])
+    IpStats.reset!
+    login("rolf")
+    get(:intro)
+    @request.remote_ip = ip
+
+    assert(@controller.is_cool?)
+  ensure
+    IpStats.remove_blocked_ips([ip])
+    IpStats.reset!
   end
 end

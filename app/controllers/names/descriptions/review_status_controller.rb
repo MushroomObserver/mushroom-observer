@@ -9,7 +9,10 @@ module Names::Descriptions
     # from the show_name page.
     def update
       desc = NameDescription.find(params[:id].to_s)
-      desc.update_review_status(params[:value]) if reviewer?
+      if reviewer?
+        desc.current_user = @user
+        desc.update_review_status(params[:value])
+      end
       redirect_to(name_path(desc.name_id))
     end
   end

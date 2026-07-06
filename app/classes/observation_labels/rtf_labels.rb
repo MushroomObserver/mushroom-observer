@@ -13,7 +13,8 @@ class ObservationLabels::RtfLabels
   attr_accessor :query
   attr_accessor :document
 
-  def initialize(query)
+  def initialize(user, query)
+    @user = user
     @query = query
     @document = RTF::Document.new(RTF::Font::SWISS)
   end
@@ -114,7 +115,8 @@ class ObservationLabels::RtfLabels
     label("Name")
     italic = false
     @para.bold do |bold|
-      @obs.name.display_name.gsub("**", "").split("__").each do |part|
+      @obs.name.user_display_name(@user).gsub("**",
+                                              "").split("__").each do |part|
         unless part.empty?
           if italic
             bold.italic { |i| i << part } if part.present?

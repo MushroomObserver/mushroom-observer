@@ -220,6 +220,36 @@ class CommentsControllerTest < FunctionalTestCase
     assert_form_action(action: :create, target: project_id, type: :Project)
   end
 
+  # Project doesn't define `user_unique_format_name`, so the modal
+  # title (built via `viewer_aware_unique_format_name`) falls back to
+  # plain `unique_format_name`.
+  def test_new_comment_for_project_turbo
+    project = projects(:eol_project)
+    login
+    get(:new, params: { target: project.id, type: :Project },
+              format: :turbo_stream)
+
+    assert_select(
+      "h4.modal-title#modal_comment_header",
+      text: /#{Regexp.escape(project.unique_format_name)}/
+    )
+  end
+
+  # `Location` doesn't define `user_unique_format_name`, so
+  # `CommentsController#modal_title`'s call to
+  # `viewer_aware_unique_format_name(@target)` falls back to plain
+  # `unique_format_name` (the `else` branch in
+  # `ApplicationController#viewer_aware_unique_format_name`).
+  def test_new_comment_for_location_turbo
+    location = locations(:albion)
+    login
+    get(:new, params: { target: location.id, type: :Location },
+              format: :turbo_stream)
+
+    assert_select("form#comment_form")
+    assert_form_action(action: :create, target: location.id, type: :Location)
+  end
+
   def test_new_comment_no_id
     login("dick")
     get(:new)
@@ -282,13 +312,29 @@ class CommentsControllerTest < FunctionalTestCase
     assert_not(obs.comments.member?(comment))
   end
 
-  # NOTE: `destroy`'s `!@comment.destroy` branch (the
-  # `flash_error(:runtime_form_comments_destroy_failed)` line) requires
-  # forcing `Comment#destroy` to return false on the controller-found
-  # instance. MO doesn't pull in Mocha (no `any_instance` stubbing).
-  # Left uncovered intentionally — defensive against AR callback
-  # abort. See `observations/namings_controller_test.rb` for the
-  # same pattern.
+  # `destroy`'s `!@comment.destroy` branch
+  # (`flash_error(:runtime_form_comments_destroy_failed)`). Stub
+  # `Comment#destroy` to return false on the controller-found
+  # instance, matching the pattern in
+  # `projects_controller_test.rb#test_project_destroy_fail` and
+  # `glossary_terms_controller_test.rb#test_destroy_glossary_term_fails`.
+  # `find_or_goto_index` uses `Comment.show_includes.find_by`, and the
+  # destroy path re-fetches nothing further — stub both so the
+  # controller sees our destroy-mocked instance.
+  def test_destroy_comment_fails
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login("rolf")
+
+    comment.stub(:destroy, false) do
+      Comment.stub(:show_includes, Comment) do
+        Comment.stub(:find_by, comment) do
+          delete(:destroy, params: { id: comment.id })
+        end
+      end
+    end
+
+    assert_flash_error
+  end
 
   def test_update_comment_with_no_changes
     # `comment_updated?` `!@comment.changed?` branch: notice + false.

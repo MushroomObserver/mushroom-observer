@@ -31,7 +31,7 @@ class Name
       Name.transaction do
         move_observations(old_name)
         move_namings(old_name)
-        move_mispellings(old_name)
+        move_mispellings(user, old_name)
         move_followings(old_name) # move Interest and Tracking
         move_descriptions(user, old_name)
         move_versions(old_name)
@@ -58,7 +58,7 @@ class Name
         # SET NULL/RESTRICT), not application code. Tracked as a
         # follow-up rather than expanding this PR into a migration.
         stragglers = Name.where(correct_spelling_id: old_name.id)
-        move_mispellings(old_name, misspellings: stragglers)
+        move_mispellings(user, old_name, misspellings: stragglers)
 
         old_name.destroy!
       end
@@ -82,9 +82,15 @@ class Name
       end
     end
 
-    def move_mispellings(old_name, misspellings: old_name.misspellings)
+    def move_mispellings(user, old_name, misspellings: old_name.misspellings)
       misspellings.each do |name|
         name.correct_spelling = (name == self ? nil : self)
+        # `name` (a misspelling of old_name) is a different record from
+        # `self`/old_name, so it never gets a `current_user` from
+        # anywhere else in `merge` - without this, Name::Notify#notify_users
+        # would attribute the resulting change-notification email to
+        # no one instead of the user performing the merge.
+        name.current_user = user
         name.save!
       end
     end

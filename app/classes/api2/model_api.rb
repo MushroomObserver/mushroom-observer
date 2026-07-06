@@ -56,7 +56,7 @@ class API2
       done_parsing_parameters!
       validate_create_params!(params)
       obj = before_create(params) ||
-            model.create(params)
+            model.create(params) { |o| thread_current_user(o) }
       # This generally means a validation error was hit.
       # Check obj.errors
       raise(CreateFailed.new(obj)) if obj.new_record?
@@ -112,9 +112,17 @@ class API2
     def build_setter(params)
       lambda do |obj|
         must_have_edit_permission!(obj)
+        thread_current_user(obj)
         obj.update!(params)
         obj
       end
+    end
+
+    # Thread the API user through as the model's "who's editing this"
+    # accessor, for any model that has one (see app/classes/
+    # versioned_by_current_user.rb) - a no-op for models that don't.
+    def thread_current_user(obj)
+      obj.current_user = @user if obj.respond_to?(:current_user=)
     end
 
     # ----------------------------------------

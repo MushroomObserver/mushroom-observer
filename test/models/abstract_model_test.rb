@@ -161,7 +161,6 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------------------------------
 
   def test_location_rss_log_life_cycle
-    User.current = rolf
     time = 1.minute.ago
 
     loc = Location.new(
@@ -173,6 +172,7 @@ class AbstractModelTest < UnitTestCase
       high: 100,
       low: 0
     )
+    loc.current_user = rolf
 
     assert_nil(loc.rss_log)
     assert_save(loc)

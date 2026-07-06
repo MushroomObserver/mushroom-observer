@@ -3,6 +3,8 @@
 require("test_helper")
 
 class NamingTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   # Propose a naming for an observation.
   def test_create
     obs = observations(:coprinus_comatus_obs)
@@ -159,6 +161,56 @@ class NamingTest < UnitTestCase
     nrs = naming.reasons_array
     assert_equal("Recognized by sight", nrs.first.label.l)
     assert_equal("Based on chemical features", nrs.last.label.l)
+  end
+
+  def test_show_controller_and_url
+    assert_equal("/observations", Naming.show_controller)
+    assert_equal(false, Naming.show_url)
+  end
+
+  def test_unique_names
+    naming = namings(:coprinus_comatus_naming)
+
+    assert_equal("#{naming.text_name} (#{naming.id})",
+                 naming.unique_text_name)
+    assert_equal("#{naming.format_name} (#{naming.id})",
+                 naming.unique_format_name)
+  end
+
+  def test_init_reasons_with_args
+    naming = namings(:coprinus_comatus_naming)
+    args = {
+      "1" => { check: "1", notes: "Recognized by sight" },
+      "3" => { check: "0", notes: "" }
+    }
+
+    result = naming.init_reasons(args)
+
+    assert_equal("Recognized by sight", result[1].notes)
+    assert_nil(result[2].notes)
+    assert_nil(result[3].notes)
+    assert_nil(result[4].notes)
+  end
+
+  def test_create_emails_notifies_name_watchers
+    NameTracker.all.map(&:destroy)
+    obs = observations(:coprinus_comatus_obs)
+    name = names(:agaricus_campestris)
+    Interest.create(target: name, user: katrina, state: true)
+
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      Naming.create(
+        observation: obs,
+        name: name,
+        vote_cache: 0,
+        user: mary
+      )
+    end
+  end
+
+  def test_reason_default
+    assert(Naming::Reason.new({}, 1).default?)
+    assert_not(Naming::Reason.new({}, 2).default?)
   end
 
   def test_other_reason_methods

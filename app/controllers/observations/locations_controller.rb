@@ -123,7 +123,9 @@ module Observations
         next if o.save
 
         flash_error(
-          :runtime_location_merge_failed.t(name: o.unique_format_name)
+          :runtime_location_merge_failed.t(
+            name: viewer_aware_unique_format_name(o)
+          )
         )
         success = false
       end

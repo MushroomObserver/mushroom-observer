@@ -7,7 +7,6 @@ class NameTest < UnitTestCase
   include ActiveJob::TestHelper
 
   def create_test_name(string, force_rank = nil)
-    User.current = rolf
     parse = Name.parse_name(string)
     assert(parse, "Expected this to parse: #{string}")
     params = parse.params
@@ -2096,7 +2095,6 @@ class NameTest < UnitTestCase
     katrina.save
 
     # Start with no reviewers, editors or authors.
-    User.current = nil
     desc.gen_desc = ""
     desc.review_status = :unreviewed
     desc.reviewer = nil
@@ -2120,8 +2118,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
     # Rolf erases notes: no emails (no authors yet), Rolf becomes editor.
-    User.current = rolf
     desc.reload
+    desc.current_user = rolf
     desc.gen_desc = ""
     desc.diag_desc = ""
     desc.distribution = ""
@@ -2144,8 +2142,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
-    User.current = mary
     desc.reload
+    desc.current_user = mary
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2183,8 +2181,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
     # Dick changes uses: notify Mary (author); Dick becomes editor.
-    User.current = dick
     desc.reload
+    desc.current_user = dick
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2223,8 +2221,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
-    User.current = rolf
     desc.reload
+    desc.current_user = rolf
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2261,8 +2259,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
-    User.current = dick
     desc.reload
+    desc.current_user = dick
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2305,7 +2303,6 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
     # Rolf changes citation (on Name, not desc): notify Mary (interest).
-    User.current = rolf
     name.reload
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
@@ -2324,6 +2321,7 @@ class NameTest < UnitTestCase
       }
     ) do
       name.citation = "Rolf added this."
+      name.current_user = rolf
       name.save
     end
     assert_equal(name_version + 1, name.version)
@@ -2341,7 +2339,6 @@ class NameTest < UnitTestCase
     desc = name_descriptions(:peltigera_desc)
 
     # Mary is author, rolf is editor - both would normally be notified
-    User.current = nil
     Name.without_revision do
       desc.authors.clear
       desc.editors.clear
@@ -2358,13 +2355,14 @@ class NameTest < UnitTestCase
     Interest.create!(user: dick, target: name, state: false)
 
     # Katrina makes a change - should notify mary and rolf, but NOT dick
-    User.current = katrina
     name.reload
 
     # Should enqueue 2 emails (mary and rolf), not 3 (dick was removed
-    # because of Interest with state=false)
+    # because of Interest with state=false, and Katrina is excluded
+    # from her own notification as `current_user`/sender)
     assert_enqueued_jobs(2) do
       name.citation = "Katrina added citation."
+      name.current_user = katrina
       name.save
     end
 
@@ -2372,8 +2370,6 @@ class NameTest < UnitTestCase
   end
 
   def test_misspelling
-    User.current = rolf
-
     # Make sure deprecating a name doesn't clear misspelling stuff.
     names(:petigera).change_deprecated(true)
     assert(names(:petigera).is_misspelling?)
@@ -2416,40 +2412,43 @@ class NameTest < UnitTestCase
     mary.hide_authors = "none"
 
     name = names(:agaricus_campestris)
-    User.current = mary
-    assert_equal("**__Agaricus__** **__campestris__** L.", name.display_name)
-    User.current = dick
-    assert_equal("**__Agaricus__** **__campestris__** L.", name.display_name)
+    assert_equal("**__Agaricus__** **__campestris__** L.",
+                 name.user_display_name(mary))
+    assert_equal("**__Agaricus__** **__campestris__** L.",
+                 name.user_display_name(dick))
 
     name = names(:macrocybe_titans)
-    User.current = mary
-    assert_equal("**__Macrocybe__** Titans", name.display_name)
-    User.current = dick
-    assert_equal("**__Macrocybe__**", name.display_name)
+    assert_equal("**__Macrocybe__** Titans", name.user_display_name(mary))
+    assert_equal("**__Macrocybe__**", name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ (Author) Author"
-    assert_equal("__Macrocybe__", name.display_name)
+    assert_equal("__Macrocybe__", name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ (van Helsing) Author"
-    assert_equal("__Macrocybe__", name.display_name)
+    assert_equal("__Macrocybe__", name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ sect. __Helsing__ Author"
-    assert_equal("__Macrocybe__ sect. __Helsing__", name.display_name)
+    assert_equal("__Macrocybe__ sect. __Helsing__",
+                 name.user_display_name(dick))
 
     name.display_name = "__Macrocybe__ sect. __Helsing__"
-    assert_equal("__Macrocybe__ sect. __Helsing__", name.display_name)
+    assert_equal("__Macrocybe__ sect. __Helsing__",
+                 name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** (van Helsing) Author"
-    assert_equal("**__Macrocybe__**", name.display_name)
+    assert_equal("**__Macrocybe__**", name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** sect. **__Helsing__** Author"
-    assert_equal("**__Macrocybe__** sect. **__Helsing__**", name.display_name)
+    assert_equal("**__Macrocybe__** sect. **__Helsing__**",
+                 name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** sect. **__Helsing__**"
-    assert_equal("**__Macrocybe__** sect. **__Helsing__**", name.display_name)
+    assert_equal("**__Macrocybe__** sect. **__Helsing__**",
+                 name.user_display_name(dick))
 
     name.display_name = "**__Macrocybe__** subgenus **__Blah__**"
-    assert_equal("**__Macrocybe__** subgenus **__Blah__**", name.display_name)
+    assert_equal("**__Macrocybe__** subgenus **__Blah__**",
+                 name.user_display_name(dick))
   end
 
   def test_changing_author_of_autonym
@@ -2808,6 +2807,29 @@ class NameTest < UnitTestCase
                  names(:sect_agaricus).display_name_without_authors)
   end
 
+  def test_user_display_name_without_authors
+    # group with author - threads `user` through to `user_display_name`
+    assert_equal(
+      "**__Groupauthored__** group",
+      names(:authored_group).user_display_name_without_authors(mary)
+    )
+
+    # non-group with author
+    assert_equal(
+      "**__Russula__** **__brevipes__**",
+      names(:russula_brevipes_author_notes).
+        user_display_name_without_authors(mary)
+    )
+  end
+
+  def test_unknown_and_known
+    assert(Name.unknown.unknown?)
+    assert_not(Name.unknown.known?)
+
+    assert_not(names(:coprinus_comatus).unknown?)
+    assert(names(:coprinus_comatus).known?)
+  end
+
   def test_format_autonym
     assert_equal("**__Acarospora__**",
                  Name.format_autonym("Acarospora", "", "Genus", false))
@@ -2959,7 +2981,6 @@ class NameTest < UnitTestCase
   end
 
   def test_skip_notify
-    User.current = users(:roy)
     name = names(:coprinus_comatus)
     name.skip_notify = true
     assert_no_enqueued_jobs do
@@ -2982,7 +3003,6 @@ class NameTest < UnitTestCase
   # classification is versioned on Name (#4163), guard so that a save
   # touching only classification still doesn't notify.
   def test_classification_only_save_does_not_notify
-    User.current = users(:roy)
     name = names(:coprinus_comatus)
     new_cls = "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\n" \
               "Phylum: _TestPhylum_\r\n"
@@ -2995,7 +3015,6 @@ class NameTest < UnitTestCase
 
   def test_notify_webmaster
     # Test notify_webmaster sends email via deliver_later
-    User.current = rolf
     name = Name.new(
       text_name: "Testname webmaster",
       display_name: "**__Testname webmaster__**",
@@ -3009,7 +3028,6 @@ class NameTest < UnitTestCase
 
   def test_notify_webmaster_skip_notify
     # Test that skip_notify prevents notify_webmaster
-    User.current = rolf
     name = Name.new(
       text_name: "Testname skip",
       display_name: "**__Testname skip__**",
@@ -3106,7 +3124,6 @@ class NameTest < UnitTestCase
   # --------------------------------------
 
   def test_parent_if_parent_deprecated
-    User.current = rolf
     lepiota = names(:lepiota)
     lepiota.change_deprecated(true)
     lepiota.save
@@ -3134,7 +3151,6 @@ class NameTest < UnitTestCase
   end
 
   def test_names_from_synonymous_genera
-    User.current = rolf
     a = create_test_name("Agaricus")
     a1 = create_test_name("Agaricus testus")
     a3 = create_test_name("Agaricus testii")
@@ -3452,6 +3468,23 @@ class NameTest < UnitTestCase
     assert_equal(new_classification, child.reload.classification)
   end
 
+  # `change_text_name` raises when it can't find-or-create a parent Name
+  # for the parsed name's genus. Force that failure by stubbing
+  # `find_or_create_name_and_parents` to return an array whose last
+  # element is nil, mirroring what `find_or_create_parsed_name` returns
+  # when it can't resolve an ambiguous match.
+  def test_change_text_name_raises_when_parent_creation_fails
+    name = names(:coprinus_comatus)
+    # "Zzyzxomyces" isn't a fixture, so the parent-lookup guard
+    # (`!Name.find_by(text_name: parse.parent_name)`) falls through to
+    # `find_or_create_name_and_parents`.
+    Name.stub(:find_or_create_name_and_parents, [nil]) do
+      assert_raises(RuntimeError) do
+        name.change_text_name(rolf, "Zzyzxomyces weirdii", "Foo", "Species")
+      end
+    end
+  end
+
   def test_mark_misspelled
     # Make sure target name has synonyms.
     syn = Synonym.create
@@ -3642,7 +3675,6 @@ class NameTest < UnitTestCase
   #   - else returns no value (page hides the panel)
   def test_classification_at_version_recorded
     name = names(:agaricus_campestras)
-    User.current = rolf
     name.update!(classification: "Phylum: _Basidiomycota_")
     v = name.versions.find_by(classification: "Phylum: _Basidiomycota_")
 
@@ -3654,7 +3686,6 @@ class NameTest < UnitTestCase
   def test_classification_at_version_inherited_from_genus
     genus = names(:agaricus)
     species = names(:agaricus_campestras)
-    User.current = rolf
     # Genus has a classified version row that pre-dates the species's
     # NULL-classification version row — simulating the order of events
     # when propagation silently updated the species without creating
@@ -3678,7 +3709,6 @@ class NameTest < UnitTestCase
     # Above-genus name (no genus to walk up to) with NULL classification
     # on its version row → :none.
     name = names(:basidiomycota)
-    User.current = rolf
     name.update!(classification: "Domain: _Eukarya_")
     v = name.versions.order(:version).last
     v.update_columns(classification: nil)
@@ -4197,6 +4227,57 @@ class NameTest < UnitTestCase
     }
     assert_nil(Name.create(params).id)
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
+
+    # `current_user` (not User.current) also satisfies the validation
+    # when no explicit `user:` is present. Distinct text_name from the
+    # params above to avoid tripping search_name_indistinct instead.
+    other_params = params.merge(
+      text_name: "Whoosia otherii",
+      search_name: "Whoosia otherii Blah & de Blah",
+      display_name: "__Whoosia__ __otherii__ Blah & de Blah"
+    )
+    name = Name.new(other_params)
+    name.current_user = rolf
+    assert(name.valid?, "current_user should satisfy user_presence")
+  end
+
+  def test_name_field_size_limits
+    # text_name_limit(100) + author_limit(100) + 4
+    assert_equal(204, Name.search_name_limit)
+    # text_name_limit(100) + author_limit(100) + 21
+    assert_equal(221, Name.sort_name_limit)
+    # text_name_limit(100) + author_limit(100) + 41
+    assert_equal(241, Name.display_name_limit)
+  end
+
+  def test_text_name_length_validation
+    long_text_name = "X" * (Name.text_name_limit + 1)
+    name = Name.new(
+      user: users(:rolf),
+      text_name: long_text_name, author: "", rank: "Genus",
+      search_name: long_text_name,
+      display_name: "**__#{long_text_name}__**",
+      sort_name: long_text_name
+    )
+    assert(name.invalid?,
+           "Name with text_name over the limit should be invalid")
+    assert(name.errors[:text_name].any?,
+           "Overlong text_name should add a :text_name error")
+  end
+
+  def test_author_length_validation
+    long_author = "X" * (Name.author_limit + 1)
+    name = Name.new(
+      user: users(:rolf),
+      text_name: "Paradiscina", author: long_author, rank: "Genus",
+      search_name: "Paradiscina #{long_author}",
+      display_name: "**__Paradiscina__** #{long_author}",
+      sort_name: "Paradiscina  #{long_author}"
+    )
+    assert(name.invalid?,
+           "Name with author over the limit should be invalid")
+    assert(name.errors[:author].any?,
+           "Overlong author should add an :author error")
   end
 
   def test_author_allowed_characters

@@ -460,6 +460,7 @@ class LocationsController < ApplicationController
 
   def create_location_ivar_and_save(done)
     @location = Location.new(permitted_location_params)
+    @location.current_user = @user
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
@@ -510,6 +511,7 @@ class LocationsController < ApplicationController
       old_name = @location.display_name
       new_name = merge.display_name
       merge.merge(@user, @location)
+      merge.current_user = @user
       merge.save if merge.changed?
       @location = merge
       flash_notice(:runtime_location_merge_success.t(this: old_name,
@@ -550,6 +552,8 @@ class LocationsController < ApplicationController
   end
 
   def save_flash_and_redirect_or_render!
+    @location.current_user = @user
+
     if !@location.changed?
       flash_warning(:runtime_edit_location_no_change.t)
       redirect_to(location_path(@location.id))

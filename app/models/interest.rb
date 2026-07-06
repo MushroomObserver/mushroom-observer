@@ -53,6 +53,12 @@ class Interest < AbstractModel
   belongs_to :user
   belongs_to :target, polymorphic: true
 
+  # Per-instance "who's editing this" - set explicitly by callers
+  # before save, not a thread-local global. In practice every real
+  # caller already sets `user:`/`.user =` explicitly, so this is only
+  # a fallback for check_requirements below.
+  attr_accessor :current_user
+
   # Maintain this Array of all models (targets) which take interests.
   ALL_TYPES = [
     Location, LocationDescription, Name, NameDescription, NameTracker,
@@ -97,7 +103,18 @@ class Interest < AbstractModel
 
     "#{state ? :WATCHING.l : :IGNORING.l} " \
     "#{target_type.underscore.to_sym.l}: " \
-    "#{target ? target.unique_format_name : "--"}"
+    "#{target ? target_format_name : "--"}"
+  end
+
+  # `user` (this Interest's owner) is the only one who ever sees this,
+  # via their own Interests index page. Only some target types (Name,
+  # Observation, Naming) have a viewer-aware user_unique_format_name.
+  def target_format_name
+    if target.respond_to?(:user_unique_format_name)
+      target.user_unique_format_name(user)
+    else
+      target.unique_format_name
+    end
   end
   alias text_name summary
 
@@ -107,7 +124,7 @@ class Interest < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    if !user && !User.current
+    if !user && !current_user
       errors.add(:user, :validate_interest_user_missing.t)
     end
 

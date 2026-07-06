@@ -325,9 +325,9 @@ class CommentsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :comment_add_title.t(name: @target.unique_format_name)
+      :comment_add_title.t(name: viewer_aware_unique_format_name(@target))
     when "edit", "update"
-      :comment_edit_title.t(name: @target.unique_format_name)
+      :comment_edit_title.t(name: viewer_aware_unique_format_name(@target))
     end
   end
 

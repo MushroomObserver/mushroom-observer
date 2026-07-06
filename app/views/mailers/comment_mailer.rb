@@ -82,7 +82,8 @@ class Views::Mailers::CommentMailer < Views::Mailers::Base
 
   def intro
     INTRO_KEYS.fetch(@email_type).l(
-      type: @target.type_tag, name: @target.unique_format_name
+      type: @target.type_tag,
+      name: viewer_aware_unique_format_name(@target, @receiver)
     )
   end
 

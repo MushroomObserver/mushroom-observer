@@ -14,7 +14,7 @@ module Views::Controllers::Observations::Namings::Votes
 
     def view_template
       add_page_title(:show_votes_title.t(
-                       name: @naming.unique_format_name
+                       name: viewer_aware_unique_format_name(@naming)
                      ))
       # Table derives its own consensus from `naming.observation`
       # when not explicitly passed, so the controller doesn't need

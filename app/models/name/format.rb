@@ -18,14 +18,12 @@ module Name::Format
     str
   end
 
+  # Raw stored value, no viewer-specific hide_authors transform. Callers
+  # that need the transform must use `user_display_name(user)` (or a
+  # `user_*` sibling below) and pass the actual viewer explicitly -
+  # this method never reaches for an ambient "current user".
   def display_name
-    str = self[:display_name]
-    if User.current &&
-       User.current.hide_authors == "above_species" &&
-       Name.ranks_above_species.include?(rank)
-      str = str.sub(/^(\**__.*__\**).*/, '\\1')
-    end
-    str
+    self[:display_name]
   end
 
   # Alias for +display_name+ to be consistent with other objects.
@@ -63,18 +61,10 @@ module Name::Format
 
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
-  def display_name_brief_authors(current_user = User.current)
-    if rank == "Group"
-      # Xxx yyy group author
-      user_display_name(current_user).sub(/ #{Regexp.quote(author)}$/,
-                                          " #{brief_author}")
-    else
-      # Xxx yyy author, Xxx sect. yyy author, Xxx author sect. yyy
-      # Relies on display_name having markup around name proper
-      # Otherwise, it might delete author if that were part of the name proper
-      user_display_name(current_user).sub(/(\*+|_+) #{Regexp.quote(author)}/,
-                                          "\\1 #{brief_author}")
-    end
+  # No-viewer default (nil) - no hide_authors transform, same as
+  # bare display_name. Pass the viewer explicitly to get that.
+  def display_name_brief_authors(user = nil)
+    user_display_name_brief_authors(user)
   end
 
   def user_display_name_brief_authors(user)
@@ -138,9 +128,8 @@ module Name::Format
   end
 
   # Page heading (rendered HTML — textile applied + author wrapping).
-  # `user` arg lets us respect hide_authors prefs without falling
-  # through `display_name`'s `User.current` (deprecated). When nil
-  # we use the raw display_name (no user-specific transforms).
+  # `user` arg lets us respect hide_authors prefs. When nil we use the
+  # raw display_name (no user-specific transforms).
   def page_title(user = nil)
     user_display_name(user).t.small_author
   end

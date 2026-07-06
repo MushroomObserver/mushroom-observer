@@ -8,11 +8,12 @@ module Views::Controllers::Names::Synonyms
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, synonym_members: nil, deprecate_all: true,
                    current_synonyms: [], proposed_synonyms: [],
-                   new_names: [], **)
+                   new_names: [], user: nil, **)
       @name = name
       @current_synonyms = current_synonyms
       @proposed_synonyms = proposed_synonyms
       @new_names = new_names
+      @user = user
 
       form_object = FormObject::EditSynonym.new(
         synonym_members: synonym_members,
@@ -89,7 +90,7 @@ module Views::Controllers::Names::Synonyms
     def synonym_checkbox_label(name_obj)
       link = capture do
         a(href: name_path(name_obj.id)) do
-          trusted_html(name_obj.display_name.t)
+          trusted_html(name_obj.user_display_name(@user).t)
         end
       end
       badge = capture do
@@ -124,7 +125,7 @@ module Views::Controllers::Names::Synonyms
     end
 
     def members_help
-      :form_synonyms_names_help.t(name: @name.display_name)
+      :form_synonyms_names_help.t(name: @name.user_display_name(@user))
     end
 
     def form_action

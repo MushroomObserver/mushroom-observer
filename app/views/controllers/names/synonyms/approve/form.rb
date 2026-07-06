@@ -4,9 +4,10 @@
 # `Names::Synonyms::ApproveController#new`.
 module Views::Controllers::Names::Synonyms::Approve
   class Form < ::Components::ApplicationForm
-    def initialize(model, name:, approved_names: nil, **)
+    def initialize(model, name:, approved_names: nil, user: nil, **)
       @name = name
       @approved_names = approved_names
+      @user = user
       super(model, **)
     end
 
@@ -21,7 +22,9 @@ module Views::Controllers::Names::Synonyms::Approve
                                cols: 80, rows: 5, inline: true,
                                data: { autofocus: true })
       Help(
-        content: :name_approve_comments_help.tp(name: @name.display_name)
+        content: :name_approve_comments_help.tp(
+          name: @name.user_display_name(@user)
+        )
       )
     end
 
@@ -31,7 +34,7 @@ module Views::Controllers::Names::Synonyms::Approve
       checkbox_field(:deprecate_others, label: :name_approve_deprecate.l)
       p do
         @approved_names.each do |n|
-          trusted_html(n.display_name.t)
+          trusted_html(n.user_display_name(@user).t)
           br
         end
       end

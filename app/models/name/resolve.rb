@@ -11,23 +11,29 @@ module Name::Resolve
 
     log ||= :log_name_updated
     args = { touch: altered? }.merge(args)
+    first_version_for_user = new_version_for_user?(user.id)
     @current_user = user
     return false unless save
 
-    update_name_version(user.id)
+    award_version_contribution(user.id) if first_version_for_user
     user_log(user, log, args)
     true
   end
 
-  def update_name_version(user_id)
+  # True if `user_id` has no existing version row for this Name yet -
+  # used to decide whether to award a "first time editing this name"
+  # contribution point. Must run BEFORE save: VersionedByCurrentUser's
+  # after_save hook writes the new version's user_id immediately, so
+  # checking this after save would always self-match and return false.
+  def new_version_for_user?(user_id)
+    Name::Version.where(name_id: id, user_id: user_id).none?
+  end
+
+  def award_version_contribution(user_id)
     ver = Name::Version.where(name_id: id).last
-    ver.user_id = user_id || 0
-    if (ver.version != 1) &&
-       Name::Version.where(name_id: ver.name_id,
-                           user_id: ver.user_id).none?
-      UserStats.update_contribution(:add, :name_versions, user_id)
-    end
-    ver.save
+    return if ver.version == 1
+
+    UserStats.update_contribution(:add, :name_versions, user_id)
   end
 
   module ClassMethods

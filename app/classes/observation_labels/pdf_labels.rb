@@ -7,7 +7,8 @@ require "prawn/measurement_extensions"
 class ObservationLabels::PdfLabels
   attr_reader :query, :page_width, :page_height
 
-  def initialize(query)
+  def initialize(user, query)
+    @user = user
     @query = query
     if query.results.one?
       @page_width = 5.in
@@ -77,7 +78,7 @@ class ObservationLabels::PdfLabels
     label_position = index % labels_per_page
     x, y = calculate_label_position(label_position)
 
-    label = ObservationLabels::Label.new(observation, @font_family)
+    label = ObservationLabels::Label.new(observation, @user, @font_family)
     label.draw_border(pdf, x, y) if draw_borders
     label.render(pdf, x, y)
   end

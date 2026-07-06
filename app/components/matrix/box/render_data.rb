@@ -87,10 +87,23 @@ class Components::Matrix::Box
       if @object.target_type == :image
         target.unique_format_name.t
       elsif target
-        target.format_name.t.break_name.small_author
+        rss_log_format_name(target)
       else
-        @object.format_name.t.break_name.small_author
+        rss_log_format_name(@object)
       end
+    end
+
+    # Name and Observation have a viewer-aware user_format_name(user);
+    # other RssLog target types (Location, Project, ...) just have
+    # format_name - fall back to that when the viewer-aware method
+    # isn't there.
+    def rss_log_format_name(obj)
+      name = if obj.respond_to?(:user_format_name)
+               obj.user_format_name(@user)
+             else
+               obj.format_name
+             end
+      name.t.break_name.small_author
     end
 
     def add_rss_log_location_data(data, target)

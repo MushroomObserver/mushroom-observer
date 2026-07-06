@@ -13,7 +13,9 @@ module Views::Controllers::Observations::Images
 
     def view_template
       add_page_title(
-        :image_reuse_title.t(name: @observation.unique_format_name)
+        :image_reuse_title.t(
+          name: viewer_aware_unique_format_name(@observation, @user)
+        )
       )
       add_context_nav(
         ::Tab::Observation::ImagesReuse.new(observation: @observation)

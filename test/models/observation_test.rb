@@ -2284,23 +2284,13 @@ class ObservationTest < UnitTestCase
     Interest.create!(target: obs, user: dick,    state: false)
     Interest.create!(target: obs, user: katrina, state: true)
 
-    User.current = rolf
     old_name = obs.name
     new_name = names(:agaricus_campestris)
     assert_enqueued_jobs(2) do
-      obs.announce_consensus_change(old_name, new_name)
+      obs.announce_consensus_change(old_name, new_name, rolf)
     end
     # Mary (state=true) and Katrina (state=true) get notified;
     # Dick (state=false) does not. Sender (rolf) is excluded.
-  end
-
-  # log_consensus_change emits :log_consensus_created when there
-  # was no prior consensus name (line 1241).
-  def test_log_consensus_change_with_nil_old_name_logs_created
-    obs = observations(:minimal_unknown_obs)
-    new_name = names(:agaricus_campestris)
-    obs.log_consensus_change(nil, new_name)
-    assert_match(/log_consensus_created/, obs.rss_log.notes)
   end
 
   # user_log_consensus_change emits :log_consensus_created when
