@@ -335,7 +335,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # never auto-claimed as collector. The caller assigns the resolved
   # field-slip collector to the column afterward; a blank one stays blank
   # (suppressed on the show page). See #4211.
-  def self.build_observation(location, name, notes, date, user = nil)
+  def self.build_observation(location, name, notes, date, user)
     return nil unless location
 
     name ||= Name.find_by(text_name: "Fungi")

@@ -257,6 +257,13 @@ class Observation
     # Returns true if something was changed.
     # Called from outside.
     def change_vote(naming, value, user = naming.current_user)
+      if user.nil?
+        raise(ArgumentError.new(
+                "change_vote needs a user - either pass one explicitly, " \
+                "or set naming.current_user first."
+              ))
+      end
+
       result = false
       vote = users_vote(naming, user)
       value = value.to_f

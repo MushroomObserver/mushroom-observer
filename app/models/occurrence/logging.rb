@@ -72,6 +72,10 @@ module Occurrence::Logging
       occ&.field_slip&.code
     end
 
+    # `user` may be nil (e.g. dissolve! has no caller-supplied actor
+    # today) - OccurrenceChangeMailer's view already handles a nil
+    # `sender` deliberately, attributing the change to the site itself
+    # rather than a person (see Views::Mailers::OccurrenceChangeMailer#intro).
     def notify_observation_owner(obs, action, user)
       owner = obs.user
       return if owner == user || owner.no_emails
