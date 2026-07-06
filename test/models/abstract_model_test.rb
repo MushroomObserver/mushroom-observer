@@ -101,8 +101,6 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_update_view_stats
-    User.current = rolf
-
     obs       = observations(:detailed_unknown_obs)
     image     = obs.images.first
     comment   = obs.comments.first
@@ -142,7 +140,7 @@ class AbstractModelTest < UnitTestCase
       [naming_attrs,   naming],
       [user_attrs,     user]
     ].each do |attrs, obj|
-      obj.update_view_stats
+      obj.update_view_stats(rolf)
       assert_same_but_view_stats(attrs, obj.reload.attributes,
                                  "#{obj.class}#update_view_stats screwed up: ")
     end

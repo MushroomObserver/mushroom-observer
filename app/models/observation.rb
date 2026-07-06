@@ -469,7 +469,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     notes[:Collector].to_s.include?("_user #{user.login}_")
   end
 
-  def project_admin?(user = User.current)
+  def project_admin?(user)
     Project.admin_power?(self, user)
   end
 
@@ -581,7 +581,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  def update_view_stats(current_user = User.current)
+  def update_view_stats(current_user = nil)
     super
     return if current_user.blank?
 

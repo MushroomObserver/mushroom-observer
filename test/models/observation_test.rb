@@ -1311,8 +1311,7 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.last_viewed_by(dick))
     assert_nil(obs.old_last_viewed_by(dick))
 
-    User.current = dick
-    obs.update_view_stats
+    obs.update_view_stats(dick)
     assert_operator(obs.last_view, :>=, 2.seconds.ago)
     assert_equal(1, obs.num_views)
     assert_nil(obs.old_last_view)
@@ -1326,7 +1325,7 @@ class ObservationTest < UnitTestCase
     # Make sure this is a totally fresh instance.
     obs = Observation.find(obs.id)
 
-    obs.update_view_stats
+    obs.update_view_stats(dick)
     assert_operator(obs.last_view, :>=, 2.seconds.ago)
     assert_equal(2, obs.num_views)
     assert_operator(obs.old_last_view, :>=, time - 2.seconds)
