@@ -89,13 +89,12 @@ module LanguageExporter
   end
 
   # Import changes from export file.
-  def import_from_file
-    any_changes = false
-    unless (old_user = User.current)
-      raise("Must specify a user to import translation file!") unless official
+  def import_from_file(user = User.current)
+    raise("Must specify a user to import translation file!") if
+      user.nil? && !official
 
-      User.current = User.admin
-    end
+    user ||= User.admin
+    any_changes = false
     old_data = localization_strings
     new_data = read_export_file
     good_tags = Language.official.read_export_file
@@ -108,13 +107,12 @@ module LanguageExporter
       next unless old_data[tag].nil? || (old_val != new_val)
 
       if (str = tag_lookup[tag])
-        update_string(str, new_val, old_val)
+        update_string(str, new_val, old_val, user)
       else
-        create_string(tag, new_val, old_val)
+        create_string(tag, new_val, old_val, user)
       end
       any_changes = true
     end
-    User.current = old_user
     any_changes
   end
 
@@ -218,24 +216,24 @@ module LanguageExporter
     data
   end
 
-  def create_string(tag, new_val, _old_val)
+  def create_string(tag, new_val, _old_val, user)
     # verbose("  adding :#{tag}")
     # verbose("    was #{old_val.inspect}")
     # verbose("    now #{new_val.inspect}")
     return if safe_mode
 
-    translation_strings.create(
-      tag: tag,
-      text: new_val
-    )
+    str = translation_strings.new(tag: tag, text: new_val)
+    str.current_user = user
+    str.save
   end
 
-  def update_string(str, new_val, _old_val)
+  def update_string(str, new_val, _old_val, user)
     # verbose("  updating :#{str.tag}")
     # verbose("    was #{old_val.inspect}")
     # verbose("    now #{new_val.inspect}")
     return if safe_mode
 
+    str.current_user = user
     str.update(
       text: new_val
     )

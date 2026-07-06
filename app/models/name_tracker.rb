@@ -96,7 +96,7 @@ class NameTracker < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    return unless !user && !User.current
+    return if user
 
     errors.add(:user, :validate_notification_user_missing.t)
   end

@@ -6,6 +6,7 @@
 # glossary_term_images.  This table includes the thumbnail!!!!
 class GlossaryTerm < AbstractModel
   require("acts_as_versioned")
+  include VersionedByCurrentUser
 
   belongs_to(:thumb_image,
              class_name: "Image",
@@ -41,8 +42,6 @@ class GlossaryTerm < AbstractModel
     "rss_log_id",
     "locked"
   )
-  versioned_class.before_save { |x| x.user_id = User.current_id }
-
   scope :order_by_default,
         -> { order_by(::Query::GlossaryTerms.default_order) }
 
@@ -79,9 +78,6 @@ class GlossaryTerm < AbstractModel
 
   # Automatically log standard events.
   self.autolog_events = [:created!, :updated!, :destroyed!]
-
-  # Probably should add a user_id and a log
-  # versioned_class.before_save {|x| x.user_id = User.current_id}
 
   def text_name
     name

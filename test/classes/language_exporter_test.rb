@@ -287,8 +287,7 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_create_string
-    User.current = dick
-    @official.send_private(:create_string, "number", "uno", "one")
+    @official.send_private(:create_string, "number", "uno", "one", dick)
 
     str = TranslationString.find_by(tag: "number", language: @official)
     assert_not_nil(str, "Cannot find TranslationString")
@@ -309,11 +308,10 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_update_string
-    User.current = katrina
     greek = languages(:greek)
     str = translation_strings(:greek_one)
     assert_equal(2, str.version)
-    greek.send_private(:update_string, str, "eins", "ένα")
+    greek.send_private(:update_string, str, "eins", "ένα", katrina)
     str.reload
 
     assert_equal(3, str.version)
@@ -360,15 +358,11 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_import_official
-    # Automatically (temporarily) logs in the admin.
-    # assert_raises(RuntimeError) { @official.import_from_file }
-
-    User.current = dick
     use_test_locales do
       hash = @official.localization_strings
       assert(hash.length >= 9) # Make sure we got something
       @official.write_hash(hash)
-      assert_false(@official.import_from_file,
+      assert_false(@official.import_from_file(dick),
                    "Shouldn't have been any import changes.")
       assert_false(@official.strip, "Shouldn't have been any strip changes.")
       assert_equal(hash, @official.localization_strings)
@@ -382,7 +376,7 @@ class LanguageExporterTest < UnitTestCase
       final_hash.delete("TWOS")
 
       @official.write_hash(final_hash)
-      assert_true(@official.import_from_file,
+      assert_true(@official.import_from_file(dick),
                   "Should have been two import changes.")
       assert_equal(hash,
                    @official.localization_strings) # Should still have deletes
@@ -398,13 +392,11 @@ class LanguageExporterTest < UnitTestCase
 
   def test_import_unofficial
     use_test_locales do
-      # User.current = nil
       greek = languages(:greek)
 
-      # Must be logged in to do this!
+      # Must specify a user to import an unofficial locale!
       assert_raises(RuntimeError) { greek.import_from_file }
 
-      User.current = katrina
       hash = greek.localization_strings
 
       # This is just the template.
@@ -421,7 +413,7 @@ class LanguageExporterTest < UnitTestCase
       greek.write_export_file_lines([
                                       "  five: ignore me\n"
                                     ])
-      assert_false(greek.import_from_file,
+      assert_false(greek.import_from_file(katrina),
                    "Shouldn't have been any import changes.")
       assert_false(greek.strip, "Shouldn't have been any strip changes.")
       assert_equal(hash, greek.localization_strings)
@@ -434,7 +426,7 @@ class LanguageExporterTest < UnitTestCase
         "  four: τέσσερα\n"  # this is correct, it had better take this!
       ]
       greek.write_export_file_lines(data)
-      assert_true(greek.import_from_file,
+      assert_true(greek.import_from_file(katrina),
                   "Should have been some import changes.")
       assert_false(greek.strip, "Shouldn't have been any strip changes.")
       hash["one"] = "one"
