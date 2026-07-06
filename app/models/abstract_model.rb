@@ -68,6 +68,13 @@ class AbstractModel < ApplicationRecord
 
   self.abstract_class = true
 
+  # The acting/viewing user for this instance - who's doing this
+  # (attribution) or looking at this (viewer-aware formatting),
+  # set explicitly by the controller/caller before save/render. No
+  # ambient global fallback (no User.current) - every model gets
+  # this accessor for free so callers never need to add their own.
+  attr_accessor :current_user
+
   def self.acts_like_model?
     true
   end
@@ -195,13 +202,7 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    if respond_to?(:user_id=)
-      self.user_id ||= if respond_to?(:current_user)
-                         current_user&.id
-                       else
-                         User.current_id
-                       end
-    end
+    self.user_id ||= current_user&.id if respond_to?(:user_id=)
     autolog_created if has_rss_log?
   end
 
