@@ -448,8 +448,8 @@ class UserStats < ApplicationRecord
   # Do a query to get the number of records in a given category for a User.
   # This is cached in @user_data.
   #
-  #   # Get number of images for current user.
-  #   refresh_field_counts(:images, User.current.id)
+  #   # Get number of images for a user.
+  #   refresh_field_counts(:images, user.id)
   #   num_images = @user_data[:images]
   #
   def refresh_field_count(field, user_id = nil)
