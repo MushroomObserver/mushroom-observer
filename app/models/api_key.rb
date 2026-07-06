@@ -24,13 +24,10 @@ class APIKey < AbstractModel
     self.verified ||= nil
     self.last_used ||= nil
     self.num_uses ||= 0
-    self.user_id ||= current_user_id
+    # user_id is already set by AbstractModel#set_user_and_autolog
+    # (a before_create callback that runs before this one).
     self.key ||= self.class.new_key
     self.notes ||= ""
-  end
-
-  def current_user_id
-    current_user&.id
   end
 
   def touch!

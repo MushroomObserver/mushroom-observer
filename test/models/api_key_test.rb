@@ -24,4 +24,21 @@ class APIKeyTest < UnitTestCase
     assert(key.last_used > 1.minute.ago)
     assert_equal(1, key.num_uses)
   end
+
+  def test_show_controller_and_index_action
+    assert_equal("/account", APIKey.show_controller)
+    assert_equal(:api_keys, APIKey.index_action)
+  end
+
+  def test_check_key_rejects_duplicate_key
+    original = APIKey.create!(notes: "original", current_user: dick,
+                              key: "duplicate_test_key")
+    dupe = APIKey.new(notes: "dupe", current_user: rolf,
+                      key: "duplicate_test_key")
+
+    assert_not(dupe.valid?)
+    assert_includes(dupe.errors[:key], "api keys must be unique")
+
+    original.destroy
+  end
 end
