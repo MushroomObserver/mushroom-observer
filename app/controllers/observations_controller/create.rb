@@ -61,7 +61,7 @@ module ObservationsController::Create
     save_collection_number
     save_herbarium_record
     strip_images! if @observation.gps_hidden
-    attach_new_field_slip
+    update_field_slip
     flash_notice(:runtime_observation_success.t(id: @observation.id))
     redirect_to_next_page
   end
@@ -259,11 +259,7 @@ module ObservationsController::Create
            location: new_observation_path)
   end
 
-  # NOTE: named distinctly from EditAndUpdate#update_field_slip - both
-  # modules are included into ObservationsController, and a same-named
-  # method here would be silently shadowed by EditAndUpdate's version
-  # (included after Create), never actually running.
-  def attach_new_field_slip
+  def update_field_slip
     field_code = params[:field_code]
     return if field_code.blank?
 
