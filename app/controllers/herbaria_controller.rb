@@ -412,7 +412,9 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   end
 
   def cant_make_this_personal_herbarium!
-    return false if @herbarium.new_record? || @herbarium.can_make_personal?
+    if @herbarium.new_record? || @herbarium.can_make_personal?(@user)
+      return false
+    end
 
     flash_error(:edit_herbarium_cant_make_personal.t)
     true

@@ -18,9 +18,9 @@ module Names::Synonyms
     # Post a comment after approval or deprecation if the user entered one.
     def post_comment(action, name, message)
       summary = :"name_#{action}_comment_summary".l
-      Comment.create!(target: name,
-                      summary: summary,
-                      comment: message)
+      comment = Comment.new(target: name, summary: summary, comment: message)
+      comment.current_user = @user
+      comment.save!
     end
   end
 end
