@@ -21,8 +21,9 @@ module ObservationsController::Destroy
     if !permission!(@observation)
       flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
       redirect_to({ action: :show, id: obs_id })
-    # Refetch fresh (non-strict_loading) for the destroy cascade.
-    elsif !Observation.find(@observation.id).destroy
+    # Refetch fresh (non-strict_loading) for the destroy cascade. current_user
+    # doesn't carry over from @observation above - it's a different instance.
+    elsif !refetch_for_destroy(@observation.id).destroy
       flash_error(:runtime_destroy_observation_failed.t(id: obs_id))
       redirect_to({ action: :show, id: obs_id })
     else
@@ -32,6 +33,12 @@ module ObservationsController::Destroy
   end
 
   private
+
+  def refetch_for_destroy(id)
+    obs = Observation.find(id)
+    obs.current_user = @user
+    obs
+  end
 
   def redirect_after_destroy(query, next_id)
     if query && next_id

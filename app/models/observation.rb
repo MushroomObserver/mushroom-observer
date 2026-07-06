@@ -1332,7 +1332,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def send_observation_destroyed_emails
     sender = user
     recipients = interested_users - [sender]
-    note = user_unique_format_name(User.current)
+    note = user_unique_format_name(current_user)
 
     recipients.each do |receiver|
       next if receiver.no_emails
