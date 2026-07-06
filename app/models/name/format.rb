@@ -18,17 +18,15 @@ module Name::Format
     str
   end
 
-  # Raw stored value, no viewer-specific hide_authors transform. Callers
-  # that need the transform must use `user_display_name(user)` (or a
-  # `user_*` sibling below) and pass the actual viewer explicitly -
-  # this method never reaches for an ambient "current user".
-  def display_name
-    self[:display_name]
+  # No-viewer default (nil) - no hide_authors transform, same as
+  # user_display_name(nil). Pass the viewer explicitly to get that.
+  def display_name(user = nil)
+    user_display_name(user)
   end
 
   # Alias for +display_name+ to be consistent with other objects.
-  def format_name
-    display_name
+  def format_name(user = nil)
+    display_name(user)
   end
 
   def user_format_name(user)
@@ -51,8 +49,8 @@ module Name::Format
   # (This gives us the ability to format names slightly differently when
   # applied to observations.  For example, we might tack on "sp." to some
   # higher-ranked taxa here.)
-  def observation_name
-    display_name
+  def observation_name(user = nil)
+    display_name(user)
   end
 
   def user_observation_name(user)
