@@ -308,6 +308,52 @@ class UserTest < UnitTestCase
     end
   end
 
+  def test_admin_id
+    assert_equal(User.first.id, User.admin_id)
+  end
+
+  def test_ignoring
+    user = users(:mary)
+    obj = observations(:minimal_unknown_obs)
+    assert_false(user.ignoring?(obj))
+
+    Interest.create!(user: user, target: obj, state: false)
+    assert_true(user.ignoring?(obj))
+  end
+
+  def test_percent_complete
+    user = User.new
+    assert_equal(0, user.percent_complete)
+
+    user.notes = "Some notes"
+    assert_equal(33, user.percent_complete)
+
+    user.location_id = locations(:albion).id
+    assert_equal(66, user.percent_complete)
+
+    user.image_id = images(:in_situ_image).id
+    assert_equal(100, user.percent_complete)
+  end
+
+  def test_old_auth_code
+    assert_equal(
+      Digest::SHA1.hexdigest("SdFgJwLeRsecretWeRtWeRkTj"),
+      User.old_auth_code("secret")
+    )
+  end
+
+  def test_email_too_long
+    user = User.new(
+      login: "nonexistingbob",
+      email: "#{"a" * 80}@example.com",
+      password: "bobs_secure_password",
+      password_confirmation: "bobs_secure_password"
+    )
+
+    assert_not(user.valid?)
+    assert_equal(:validate_user_email_too_long.t, user.errors[:email].first)
+  end
+
   def test_successful_contributor?
     assert(rolf.successful_contributor?)
   end
