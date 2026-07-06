@@ -74,7 +74,9 @@ module Observations
     def update
       init_ivars
       @observation = Observation.show_includes.find(params[:observation_id])
+      @observation.current_user = @user
       @naming = naming_from_params
+      @naming.current_user = @user
       # N+1: What is this doing? Watch out for permission!
       return redirect_to_obs(@observation) unless permission!(@naming)
 
@@ -92,7 +94,9 @@ module Observations
 
     def destroy
       naming = Naming.show_includes.find(params[:id].to_s)
+      naming.current_user = @user
       @observation = Observation.naming_includes.find(params[:observation_id])
+      @observation.current_user = @user
       @consensus = Observation::NamingConsensus.new(@observation)
       if destroy_if_we_can(naming) # needs to know consensus before deleting
         flash_notice(:runtime_destroy_naming_success.t(id: params[:id].to_s))
@@ -114,6 +118,11 @@ module Observations
       fill_in_reference_for_suggestions if params[:naming].present?
 
       @observation = Observation.show_includes.find(params[:observation_id])
+      # `Naming.construct`/`Vote.construct` read this off the observation
+      # for attribution - set here since `@observation` is an existing,
+      # already-saved record, not one built fresh with `current_user`
+      # already populated.
+      @observation.current_user = @user
     end
 
     # `params[:id]` is guaranteed by the `:edit`/`:update`/`:destroy`
