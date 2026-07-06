@@ -253,13 +253,12 @@ module API2::Base
   end
 
   def handle_version
+    version_str = params[:version].to_s
     self.version = parse(:float, :version)
     if version.blank?
       self.version = self.class.version
-    elsif !version.match(/^\d+\.\d+$/)
-      raise(API2::BadVersion.new(version))
-    else
-      self.version = version.to_f
+    elsif !version_str.match(/^\d+\.\d+$/)
+      raise(API2::BadVersion.new(version_str))
     end
   end
 
