@@ -89,7 +89,7 @@ class ObservationTest < UnitTestCase
   end
 
   # Only use this for one-off's. Re-use the consensus in a repeated test
-  def change_vote(obs, naming, vote, user = User.current)
+  def change_vote(obs, naming, vote, user)
     consensus = ::Observation::NamingConsensus.new(obs)
     consensus.change_vote(naming, vote, user)
   end
@@ -290,7 +290,6 @@ class ObservationTest < UnitTestCase
 
     # Observation owner is not notified if naming added by themselves.
     # NameProposal now uses deliver_later.
-    User.current = rolf
     new_naming = Naming.create(
       observation: obs,
       name: names(:agaricus_campestris),
@@ -301,8 +300,7 @@ class ObservationTest < UnitTestCase
 
     # Observation owner is not notified if consensus changed by themselves.
     # ConsensusChange now uses deliver_later.
-    User.current = rolf
-    change_vote(obs, new_naming, 3)
+    change_vote(obs, new_naming, 3, rolf)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
 
     # Make Rolf opt out of all emails.
@@ -325,7 +323,6 @@ class ObservationTest < UnitTestCase
 
     # NameProposal now uses deliver_later.
     # But Rolf opted out, so no email is sent.
-    User.current = dick
     new_naming = Naming.create(
       observation: obs,
       name: names(:peltigera),
@@ -340,8 +337,7 @@ class ObservationTest < UnitTestCase
 
     # ConsensusChange now uses deliver_later.
     # But Rolf opted out, so no email is sent.
-    User.current = dick
-    change_vote(obs, new_naming, 3)
+    change_vote(obs, new_naming, 3, dick)
     assert_equal(names(:peltigera), obs.reload.name)
   end
 
@@ -377,7 +373,6 @@ class ObservationTest < UnitTestCase
     rolf.email_comments_owner = false
     rolf.email_observations_naming = true
     assert_save(rolf)
-    User.current = mary
     new_naming = nil
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       new_naming = Naming.create(
@@ -461,7 +456,6 @@ class ObservationTest < UnitTestCase
 
     # Watcher is notified if naming added.
     # NameProposal now uses deliver_later.
-    User.current = mary
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Naming.create(
         observation: observations(:coprinus_comatus_obs),
@@ -473,7 +467,6 @@ class ObservationTest < UnitTestCase
 
     # Watcher is notified if consensus changed.
     # ConsensusChange now uses deliver_later.
-    User.current = rolf
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       change_vote(obs, namings(:coprinus_comatus_other_naming), 3, rolf)
     end
@@ -482,7 +475,6 @@ class ObservationTest < UnitTestCase
     assert_save(votes(:coprinus_comatus_other_naming_rolf_vote))
 
     # Now have Rolf make a bunch of changes...
-    User.current = rolf
 
     # Watcher is also notified of changes in the observation.
     # ObservationChange now uses deliver_later, so we test enqueued emails.
