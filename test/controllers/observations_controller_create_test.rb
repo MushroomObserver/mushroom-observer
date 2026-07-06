@@ -223,6 +223,20 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert(obs.field_slip.present?)
   end
 
+  # ObservationsController includes both Create and EditAndUpdate, and
+  # (before this was fixed) both defined a private update_field_slip
+  # method. Ruby's module resolution meant EditAndUpdate's version
+  # always won - Create's own field-slip logic never ran, though tests
+  # exercising it still passed because EditAndUpdate's logic happened
+  # to produce an equivalent result. Pin the method's owner directly so
+  # a future name collision fails loudly instead of silently.
+  def test_attach_new_field_slip_is_not_shadowed
+    assert_equal(
+      ObservationsController::Create,
+      ObservationsController.instance_method(:attach_new_field_slip).owner
+    )
+  end
+
   def test_create_observation_with_collection_number
     generic_construct_observation(
       { observation: { specimen: "1" },
