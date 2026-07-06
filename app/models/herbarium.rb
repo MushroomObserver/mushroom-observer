@@ -175,15 +175,15 @@ class Herbarium < AbstractModel
     code.blank? ? name : "#{code} - #{name}"
   end
 
-  def owns_all_records?(user = User.current)
+  def owns_all_records?(user = nil)
     herbarium_records.all? { |r| r.user_id == user.id }
   end
 
-  def can_make_personal?(user = User.current)
+  def can_make_personal?(user = nil)
     user && !user.personal_herbarium && owns_all_records?(user)
   end
 
-  def can_merge_into?(other, user = User.current)
+  def can_merge_into?(other, user = nil)
     return false if self == other
     # Target must be user's personal herbarium.
     return false if !user || !other || other.personal_user_id != user.id
