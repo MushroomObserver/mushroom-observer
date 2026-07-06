@@ -75,14 +75,6 @@ class AbstractModel < ApplicationRecord
   # this accessor for free so callers never need to add their own.
   attr_accessor :current_user
 
-  def self.acts_like_model?
-    true
-  end
-
-  def acts_like_model?
-    true
-  end
-
   # Language tag for name, e.g. :observation, :rss_log, etc.
   def self.type_tag
     name.underscore.to_sym
@@ -346,12 +338,6 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
-  # After all controllers are normalized, consider deleting the
-  # normalized/unnormalized conditionals in this method, and delete the
-  # sub-methods "controller_normalized?" and "class_defined?".
-  # I don't think there will be relevant special cases,
-  # i.e., searchable models with singular controller names. JDC 2020-08-02
-  #
   # Return the name of the controller (as a string! see below)
   # that handles the "show_<object>" for this object.
   #
@@ -376,19 +362,6 @@ class AbstractModel < ApplicationRecord
   end
 
   delegate :show_controller, to: :class
-
-  # Has controller been normalized to Rails 6.0 standards:
-  #  plural controller name, CRUD action names standardized if they exist
-  def self.controller_normalized?
-    class_defined?("#{name.pluralize}Controller")
-  end
-
-  # stackoverflow.com/questions/45436514/ruby-check-if-controller-defined
-  def self.class_defined?(klass)
-    Object.const_get(klass)
-  rescue StandardError
-    false
-  end
 
   # Return the name of the "index_<object>" action (as a symbol)
   # that displays search index for this object.
@@ -522,7 +495,7 @@ class AbstractModel < ApplicationRecord
   #   name.edit_url     => "https://mushroomobserver.org/names/12/edit"
   #
   def self.edit_url(id)
-    "#{MO.http_domain}/#{edit_controller}/#{id}/#{edit_action}"
+    "#{MO.http_domain}#{edit_controller}/#{id}/#{edit_action}"
   end
 
   def edit_url
@@ -575,7 +548,7 @@ class AbstractModel < ApplicationRecord
   #   name.destroy_url     => "https://mushroomobserver.org/names/12"
   #
   def self.destroy_url(id)
-    "#{MO.http_domain}/#{destroy_controller}/#{id}"
+    "#{MO.http_domain}#{destroy_controller}/#{id}"
   end
 
   def destroy_url

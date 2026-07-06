@@ -424,6 +424,58 @@ class AbstractModelTest < UnitTestCase
     assert_equal(:index, Phony.index_action)
   end
 
+  def test_edit_controller
+    assert_equal("/articles", Article.edit_controller)
+    assert_equal("/articles", Article.first.edit_controller)
+    assert_equal("/phonies", Phony.edit_controller)
+  end
+
+  def test_edit_action
+    assert_equal(:edit, Article.edit_action)
+  end
+
+  def test_edit_url
+    article = Article.first
+    assert_equal("#{MO.http_domain}/articles/#{article.id}/edit",
+                 article.edit_url)
+  end
+
+  def test_edit_link_args
+    article = Article.first
+    assert_equal({ controller: "/articles", action: :edit, id: article.id },
+                 article.edit_link_args)
+  end
+
+  def test_destroy_controller
+    assert_equal("/articles", Article.destroy_controller)
+    assert_equal("/articles", Article.first.destroy_controller)
+  end
+
+  def test_destroy_action
+    assert_equal(:destroy, Article.destroy_action)
+  end
+
+  def test_destroy_url
+    article = Article.first
+    assert_equal("#{MO.http_domain}/articles/#{article.id}",
+                 article.destroy_url)
+  end
+
+  def test_destroy_link_args
+    article = Article.first
+    assert_equal({ controller: "/articles", action: :destroy, id: article.id },
+                 article.destroy_link_args)
+  end
+
+  def test_count_by_sql_wrapping_select_query
+    assert_equal(
+      Observation.count,
+      Observation.count_by_sql_wrapping_select_query(
+        "select id from observations"
+      )
+    )
+  end
+
   # fixture for above tests
   class ::Phony < AbstractModel
   end
