@@ -47,6 +47,12 @@ class Inat
     IMPORTABLE_TAXON_IDS = [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].freeze
     IMPORTABLE_TAXON_IDS_ARG = IMPORTABLE_TAXON_IDS.join(",").freeze
 
+    # iNat UI "iconic_taxa" values corresponding to IMPORTABLE_TAXON_IDS.
+    # Used for the confirm form's UI-facing links, since iNat's
+    # observations search UI has no taxon_id param.
+    IMPORTABLE_ICONIC_TAXA = %w[Fungi Protozoa].freeze
+    IMPORTABLE_ICONIC_TAXA_ARG = IMPORTABLE_ICONIC_TAXA.join(",").freeze
+
     # base url for iNat CC-licensed and public domain photos
     LICENSED_PHOTO_BASE =
       "https://inaturalist-open-data.s3.amazonaws.com/photos"

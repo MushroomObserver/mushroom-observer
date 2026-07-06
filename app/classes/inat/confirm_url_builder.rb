@@ -20,7 +20,10 @@ class Inat::ConfirmURLBuilder
     return nil unless base
 
     uri, query_str = base.split("?", 2)
-    "#{uri}?#{expected_obs_args(query_str).to_query}"
+    args = expected_obs_args(query_str)
+    return nil unless args
+
+    "#{uri}?#{args.to_query}"
   end
 
   def already_imported_url
@@ -53,15 +56,33 @@ class Inat::ConfirmURLBuilder
     "user_id=#{m.inat_username}" if m.inat_username.present?
   end
 
+  # Returns nil when the user's own iconic_taxa rules out every
+  # importable taxon (#4706) — signals the caller to show a plain count
   def expected_obs_args(query_str)
     args = Rack::Utils.parse_query(query_str.to_s)
-    args["iconic_taxa"] ||= "Fungi,Protozoa" unless args.key?("taxon_id")
+    unless args.key?("taxon_id")
+      iconic_taxa = importable_iconic_taxa(args["iconic_taxa"])
+      return nil unless iconic_taxa
+
+      args["iconic_taxa"] = iconic_taxa
+    end
     unless skip_without_field?
       args["without_field"] = BASE_FILTER_PARAMS[:without_field]
     end
     filter = LICENSED_FILTER.stringify_keys.transform_values(&:to_s)
     args.merge!(filter) if import_others?
     args
+  end
+
+  # Narrows a user-supplied iconic_taxa list to the importable subset,
+  # so the expected-obs link can't include taxa (e.g. Plantae) that
+  # will never import. nil input defaults to the full importable set;
+  # an input with no importable taxa at all returns nil.
+  def importable_iconic_taxa(iconic_taxa)
+    return IMPORTABLE_ICONIC_TAXA_ARG if iconic_taxa.blank?
+
+    importable = iconic_taxa.split(",") & IMPORTABLE_ICONIC_TAXA
+    importable.join(",") if importable.any?
   end
 
   # Id lists always re-check obs already carrying the MO URL field, and
@@ -75,7 +96,8 @@ class Inat::ConfirmURLBuilder
     args = Rack::Utils.parse_query(query_str.to_s)
     return args.to_query unless args["taxon_id"]&.include?(",")
 
-    args.except("taxon_id").merge("iconic_taxa" => "Fungi,Protozoa").to_query
+    args.except("taxon_id").
+      merge("iconic_taxa" => IMPORTABLE_ICONIC_TAXA_ARG).to_query
   end
 
   def normalize_inat_ui_url(url)
