@@ -94,10 +94,8 @@ namespace :cache do
 
   desc "Remove orphaned observation_views with no observation_id"
   task(remove_orphaned_observation_views: :environment) do
-    orphans = ObservationView.where(observation_id: nil)
-    print("Deleting #{orphans.count} orphaned observation_views...\n")
-    orphans.delete_all
-    print("Done.\n")
+    count = ObservationView.where(observation_id: nil).delete_all
+    print("Deleted #{count} orphaned observation_views.\n")
   end
 
   desc "Add reviewers"

@@ -124,11 +124,10 @@ class VoteTest < UnitTestCase
                               observation_id: nil),
       "Should not create an ObservationView for a vote with no observation"
     )
-    assert(
-      msgs.none? { |msg| msg.include?("reviewed observation  ") },
-      "Message list should not contain a blank observation_id: " \
-      "#{msgs.inspect}"
-    )
+    msgs.each do |msg|
+      assert_match(/reviewed observation \d+/, msg,
+                   "Message missing numeric observation_id: #{msg.inspect}")
+    end
   end
 
   def test_confidence_returns_no_opinion_for_zero
