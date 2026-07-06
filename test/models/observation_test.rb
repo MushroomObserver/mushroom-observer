@@ -2197,7 +2197,7 @@ class ObservationTest < UnitTestCase
   end
 
   # unique_format_name swallows StandardError from the name
-  # call and returns "" (line 836).
+  # call and returns "".
   def test_unique_format_name_swallows_errors
     obs = observations(:minimal_unknown_obs)
     obs.stub(:name, nil) do
