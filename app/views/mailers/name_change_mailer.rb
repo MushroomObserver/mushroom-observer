@@ -107,10 +107,10 @@ class Views::Mailers::NameChangeMailer < Views::Mailers::Base
 
   def intro
     if old_name
-      name = "#{old_name.user_display_name(@receiver)} (#{new_name.id})"
+      name = "#{old_name.display_name(@receiver)} (#{new_name.id})"
       :email_object_change_intro.l(type: :name, name:)
     else
-      name = "#{new_name.user_display_name(@receiver)} (#{new_name.id})"
+      name = "#{new_name.display_name(@receiver)} (#{new_name.id})"
       :email_object_new_intro.l(type: :name, name:)
     end
   end
@@ -146,10 +146,10 @@ class Views::Mailers::NameChangeMailer < Views::Mailers::Base
   end
 
   def real_text_name_liner
-    return "" if new_name.user_real_text_name(@receiver) ==
-                 old_name.user_real_text_name(@receiver)
+    return "" if new_name.real_text_name(@receiver) ==
+                 old_name.real_text_name(@receiver)
 
-    "*#{:Name.l} #{now_label}:* #{new_name.user_real_text_name(@receiver)}\n"
+    "*#{:Name.l} #{now_label}:* #{new_name.real_text_name(@receiver)}\n"
   end
 
   def one_liner(key, attr, compare_attr)
@@ -194,7 +194,7 @@ class Views::Mailers::NameChangeMailer < Views::Mailers::Base
     return "" if new_name.correct_spelling_id == old_name.correct_spelling_id
 
     new_spell = if new_name.correct_spelling
-                  new_name.correct_spelling.user_display_name(@receiver)
+                  new_name.correct_spelling.display_name(@receiver)
                 else
                   "--"
                 end

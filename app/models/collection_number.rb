@@ -102,7 +102,7 @@ class CollectionNumber < AbstractModel
   scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
-  def format_name
+  def format_name(_user = nil)
     "#{name} #{number}"
   end
 

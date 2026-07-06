@@ -44,7 +44,7 @@ class Components::Matrix::Box
         type: :observation,
         when: @object.when.web_date,
         who: @object.user,
-        name: @object.user_format_name(@object.user).t.break_name.small_author,
+        name: @object.format_name(@object.user).t.break_name.small_author,
         what: @object,
         where: @object.where,
         location: @object.location,
@@ -93,17 +93,8 @@ class Components::Matrix::Box
       end
     end
 
-    # Name and Observation have a viewer-aware user_format_name(user);
-    # other RssLog target types (Location, Project, ...) just have
-    # format_name - fall back to that when the viewer-aware method
-    # isn't there.
     def rss_log_format_name(obj)
-      name = if obj.respond_to?(:user_format_name)
-               obj.user_format_name(@user)
-             else
-               obj.format_name
-             end
-      name.t.break_name.small_author
+      obj.format_name(@user).t.break_name.small_author
     end
 
     def add_rss_log_location_data(data, target)

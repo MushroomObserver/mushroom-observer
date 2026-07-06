@@ -2413,42 +2413,42 @@ class NameTest < UnitTestCase
 
     name = names(:agaricus_campestris)
     assert_equal("**__Agaricus__** **__campestris__** L.",
-                 name.user_display_name(mary))
+                 name.display_name(mary))
     assert_equal("**__Agaricus__** **__campestris__** L.",
-                 name.user_display_name(dick))
+                 name.display_name(dick))
 
     name = names(:macrocybe_titans)
-    assert_equal("**__Macrocybe__** Titans", name.user_display_name(mary))
-    assert_equal("**__Macrocybe__**", name.user_display_name(dick))
+    assert_equal("**__Macrocybe__** Titans", name.display_name(mary))
+    assert_equal("**__Macrocybe__**", name.display_name(dick))
 
     name.display_name = "__Macrocybe__ (Author) Author"
-    assert_equal("__Macrocybe__", name.user_display_name(dick))
+    assert_equal("__Macrocybe__", name.display_name(dick))
 
     name.display_name = "__Macrocybe__ (van Helsing) Author"
-    assert_equal("__Macrocybe__", name.user_display_name(dick))
+    assert_equal("__Macrocybe__", name.display_name(dick))
 
     name.display_name = "__Macrocybe__ sect. __Helsing__ Author"
     assert_equal("__Macrocybe__ sect. __Helsing__",
-                 name.user_display_name(dick))
+                 name.display_name(dick))
 
     name.display_name = "__Macrocybe__ sect. __Helsing__"
     assert_equal("__Macrocybe__ sect. __Helsing__",
-                 name.user_display_name(dick))
+                 name.display_name(dick))
 
     name.display_name = "**__Macrocybe__** (van Helsing) Author"
-    assert_equal("**__Macrocybe__**", name.user_display_name(dick))
+    assert_equal("**__Macrocybe__**", name.display_name(dick))
 
     name.display_name = "**__Macrocybe__** sect. **__Helsing__** Author"
     assert_equal("**__Macrocybe__** sect. **__Helsing__**",
-                 name.user_display_name(dick))
+                 name.display_name(dick))
 
     name.display_name = "**__Macrocybe__** sect. **__Helsing__**"
     assert_equal("**__Macrocybe__** sect. **__Helsing__**",
-                 name.user_display_name(dick))
+                 name.display_name(dick))
 
     name.display_name = "**__Macrocybe__** subgenus **__Blah__**"
     assert_equal("**__Macrocybe__** subgenus **__Blah__**",
-                 name.user_display_name(dick))
+                 name.display_name(dick))
   end
 
   def test_changing_author_of_autonym
@@ -2807,18 +2807,18 @@ class NameTest < UnitTestCase
                  names(:sect_agaricus).display_name_without_authors)
   end
 
-  def test_user_display_name_without_authors
-    # group with author - threads `user` through to `user_display_name`
+  def test_display_name_without_authors_with_user
+    # group with author - threads `user` through to `display_name`
     assert_equal(
       "**__Groupauthored__** group",
-      names(:authored_group).user_display_name_without_authors(mary)
+      names(:authored_group).display_name_without_authors(mary)
     )
 
     # non-group with author
     assert_equal(
       "**__Russula__** **__brevipes__**",
       names(:russula_brevipes_author_notes).
-        user_display_name_without_authors(mary)
+        display_name_without_authors(mary)
     )
   end
 

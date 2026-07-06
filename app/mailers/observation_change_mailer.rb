@@ -18,7 +18,7 @@ class ObservationChangeMailer < ApplicationMailer
   # TODO: Translation keys really shouldn't be this long (32).
   def observation_change_title(observation, note, receiver)
     if observation
-      name = observation.user_unique_text_name(receiver)
+      name = observation.unique_text_name(receiver)
       :email_subject_observation_change.l(name:)
     else
       :email_subject_observation_destroy.l(name: note).t.html_to_ascii

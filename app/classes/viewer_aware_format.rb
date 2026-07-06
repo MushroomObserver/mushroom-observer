@@ -13,15 +13,10 @@
 # different mechanisms.
 module ViewerAwareFormat
   # `obj` is frequently polymorphic (a Comment/Interest/RssLog
-  # target, etc.) - only some target types (Name, Observation,
-  # Naming) have a viewer-aware user_unique_format_name. Falls back
-  # to the plain unique_format_name for the rest.
+  # target, etc.) - every such model's unique_format_name accepts an
+  # optional viewer.
   def viewer_aware_unique_format_name(obj, user = default_viewer)
-    if obj.respond_to?(:user_unique_format_name)
-      obj.user_unique_format_name(user)
-    else
-      obj.unique_format_name
-    end
+    obj.unique_format_name(user)
   end
 
   # Location's display name is postal/scientific-order depending on

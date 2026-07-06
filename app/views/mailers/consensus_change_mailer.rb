@@ -43,7 +43,7 @@ class Views::Mailers::ConsensusChangeMailer < Views::Mailers::Base
     return "--" unless name
 
     capture do
-      link_to(name.user_observation_name(@receiver),
+      link_to(name.observation_name(@receiver),
               name_url(name, host: MO.http_domain))
     end
   end

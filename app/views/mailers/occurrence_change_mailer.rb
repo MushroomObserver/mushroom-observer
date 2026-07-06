@@ -23,7 +23,7 @@ class Views::Mailers::OccurrenceChangeMailer < Views::Mailers::Base
   # rather than a logged-in user. Attribute those to the site itself.
   def intro
     :"email_occurrence_#{@action}_intro".l(
-      name: @observation.user_unique_format_name(@receiver),
+      name: @observation.unique_format_name(@receiver),
       user: @sender&.legal_name || :app_title.t
     )
   end

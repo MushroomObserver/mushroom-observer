@@ -48,7 +48,7 @@ module Views::Controllers::Observations
 
       # No `<a>` — just the textile-rendered display name.
       assert_no_html(html, "a")
-      assert_includes(html, obs.name.user_display_name_brief_authors(nil).t)
+      assert_includes(html, obs.name.display_name_brief_authors(nil).t)
     end
 
     # ---- deprecated consensus name --------------------------------
@@ -78,7 +78,7 @@ module Views::Controllers::Observations
       assert_no_html(html, "a")
       assert_html(html, ".obs-site-id-flag",
                   text: :show_observation_site_id.t.as_displayed)
-      assert_includes(html, preferred.user_display_name_without_authors(nil).t)
+      assert_includes(html, preferred.display_name_without_authors(nil).t)
     end
 
     # ---- owner-preferred name ------------------------------------

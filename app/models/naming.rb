@@ -139,27 +139,18 @@ class Naming < AbstractModel
   end
 
   # Return name in plain text.
-  def user_text_name(user)
-    name ? name.user_real_search_name(user) : ""
-  end
-
-  # Return name in plain text.
-  def text_name
-    name ? name.real_search_name : ""
+  def text_name(user = nil)
+    name ? name.real_search_name(user) : ""
   end
 
   # Return name in plain text (with id tacked on to make unique).
-  def unique_text_name
-    string_with_id(text_name)
+  def unique_text_name(user = nil)
+    string_with_id(text_name(user))
   end
 
   # Return name in Textile format.
-  def format_name
-    name ? name.observation_name : ""
-  end
-
-  def user_format_name(user)
-    name ? name.user_observation_name(user) : ""
+  def format_name(user = nil)
+    name ? name.observation_name(user) : ""
   end
 
   def display_name_brief_authors(user = nil)
@@ -167,12 +158,8 @@ class Naming < AbstractModel
   end
 
   # Return name in Textile format (with id tacked on to make unique).
-  def unique_format_name
-    string_with_id(format_name)
-  end
-
-  def user_unique_format_name(user)
-    string_with_id(user_format_name(user))
+  def unique_format_name(user = nil)
+    string_with_id(format_name(user))
   end
 
   ##############################################################################

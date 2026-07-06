@@ -155,7 +155,7 @@ class Name
 
       prepare_notes_for_merger
       self.notes = "#{notes}These notes come from merge with " \
-                   "#{old_name.user_format_name(@user)}:\n\n #{old_name.notes}"
+                   "#{old_name.format_name(@user)}:\n\n #{old_name.notes}"
       log(:log_name_updated, user: user, touch: true)
       @current_user = user
       save!

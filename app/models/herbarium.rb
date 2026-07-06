@@ -147,7 +147,7 @@ class Herbarium < AbstractModel
     curators.delete(user)
   end
 
-  def format_name
+  def format_name(_user = nil)
     code.blank? ? name : "#{name} (#{code})"
   end
 
@@ -163,7 +163,7 @@ class Herbarium < AbstractModel
     format_name
   end
 
-  def unique_format_name
+  def unique_format_name(_user = nil)
     "#{format_name} (#{id})"
   end
 

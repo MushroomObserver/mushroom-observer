@@ -74,13 +74,10 @@ class InterestTest < UnitTestCase
                     :validate_interest_object_type_too_long.t)
   end
 
-  def test_target_format_name_without_viewer_aware_method
-    interest = Interest.new(
-      user: rolf, target: locations(:albion), state: true
-    )
+  def test_target_format_name_threads_interest_user_through
+    spl = species_lists(:first_species_list)
+    interest = Interest.new(user: rolf, target: spl, state: true)
 
-    assert_not(locations(:albion).respond_to?(:user_unique_format_name))
-    assert_equal(locations(:albion).unique_format_name,
-                 interest.target_format_name)
+    assert_equal(spl.unique_format_name(rolf), interest.target_format_name)
   end
 end

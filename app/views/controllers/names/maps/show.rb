@@ -16,7 +16,7 @@ class Views::Controllers::Names::Maps::Show < Views::FullPageBase
   def view_template
     container_class(:full)
     add_page_title(
-      :name_map_title.t(name: @name.user_display_name(current_user))
+      :name_map_title.t(name: @name.display_name(current_user))
     )
     add_context_nav(
       ::Tab::Name::MapActions.new(
@@ -34,7 +34,7 @@ class Views::Controllers::Names::Maps::Show < Views::FullPageBase
       zoom: 2,
       map_type: "info",
       nothing_to_map: :name_map_no_maps.tp(
-        name: @name.user_display_name(current_user)
+        name: @name.display_name(current_user)
       )
     )
   end

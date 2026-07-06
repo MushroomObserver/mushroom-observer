@@ -132,10 +132,9 @@ class BaseTest < ComponentTestCase
     assert_equal("no-query", render(CurrentQueryReader.new))
   end
 
-  # `viewer_aware_unique_format_name` falls back to plain
-  # `unique_format_name` for objects (e.g. Location) that don't
-  # define a viewer-aware `user_unique_format_name`.
-  def test_viewer_aware_unique_format_name_falls_back_for_plain_object
+  # `viewer_aware_unique_format_name` passes the viewer straight
+  # through to `unique_format_name`, for any model.
+  def test_viewer_aware_unique_format_name_works_for_any_model
     location = locations(:albion)
 
     html = render(ViewerAwareFormatNameReader.new(obj: location))

@@ -23,7 +23,7 @@ class Views::Controllers::Names::EolData::Preview::Show < Views::FullPageBase
         # Preserve textile-rendered italics/bold for scientific
         # names — `display_name.t` emits HTML, so trusted_html is
         # required (plain text would double-escape the tags).
-        trusted_html(name.user_display_name(current_user).t)
+        trusted_html(name.display_name(current_user).t)
       end
     end
   end
