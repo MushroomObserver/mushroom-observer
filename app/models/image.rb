@@ -988,7 +988,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Retrieve the given User's vote for this Image.  Returns a Integer from
   # 1 to 4, or nil if the User hasn't voted.
-  def users_vote(user = User.current)
+  def users_vote(user = nil)
     user_id = user.is_a?(User) ? user.id : user.to_i
     vote_hash[user_id]
   end
