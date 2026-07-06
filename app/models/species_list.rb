@@ -420,7 +420,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   #   spl.construct_observation(
   #     name,                   #  **NO DEFAULT **
-  #     :user                   => User.current,
+  #     :user                   => nil, # REQUIRED unless current_user is set
   #     :projects               => spl.projects,
   #     :when                   => spl.when,
   #     :where                  => spl.where,
@@ -438,7 +438,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   def construct_observation(name, args = {})
     raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
-    args[:user] ||= User.current
+    args[:user] ||= current_user
     args[:when] ||= self.when
     args[:vote] ||= Vote.maximum_vote
     args[:notes] ||= {}
@@ -555,7 +555,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
       errors.add(:place_name, :validate_species_list_where_too_long.t)
     end
 
-    return unless !user && !User.current
+    return if user || current_user
 
     errors.add(:user, :validate_species_list_user_missing.t)
   end

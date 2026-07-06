@@ -54,7 +54,7 @@ class SpeciesListTest < UnitTestCase
     proj = projects(:lone_wolf_project)
     proj.add_species_list(spl)
     assert_obj_arrays_equal([lone_wolf], proj.user_group.users)
-    User.current = lone_wolf
+    spl.current_user = lone_wolf
     name = Name.reorder(id: :asc).first
 
     # Test defaults first.
