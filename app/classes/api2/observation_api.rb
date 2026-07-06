@@ -109,7 +109,7 @@ class API2
     end
 
     def after_create(obs)
-      obs.user_log(user, :log_observation_created) if @log
+      obs.log(:log_observation_created, user: user) if @log
       create_specimen_records(obs) if obs.specimen
       create_naming(obs)
       add_field_slip_code(obs)
@@ -128,7 +128,7 @@ class API2
         update_images(obs)
         update_projects(obs)
         update_species_lists(obs)
-        obs.log(:log_observation_updated) if @log
+        obs.log(:log_observation_updated, user: user) if @log
         obs
       end
     end
@@ -302,13 +302,6 @@ class API2
       else
         { Observation.other_notes_key => notes.to_s.strip }
       end
-    end
-
-    def parse_notes_field_parameter!(str)
-      keys = User.parse_notes_template(str)
-      return keys.first.to_sym if keys.length == 1
-
-      raise(BadNotesFieldParameter.new(str))
     end
 
     def parse_naming_reasons!

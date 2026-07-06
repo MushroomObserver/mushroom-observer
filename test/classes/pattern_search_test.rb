@@ -292,7 +292,7 @@ class PatternSearchTest < UnitTestCase
     x.vals = ["me"]
     assert_raises(PatternSearch::UserMeNotLoggedInError) \
       { x.parse_list_of_users }
-    User.current = mary
+    x = PatternSearch::Term.new(:xxx, mary)
     x.vals = ["me"]
     assert_equal([mary.id], x.parse_list_of_users)
   end

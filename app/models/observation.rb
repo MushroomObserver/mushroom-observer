@@ -158,13 +158,6 @@
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   include HasPlaceName
 
-  # The acting/editing user - who's *doing* this (attribution), not who's
-  # looking (see place_name's `user` args). HasPlaceName's `included do`
-  # already declares this same accessor for its own purpose; declared
-  # again here explicitly so attribution doesn't depend on that
-  # unrelated concern staying included.
-  attr_accessor :current_user
-
   # Transient flag: when set, the before_create default that copies the
   # entering user into `collector` is skipped. Field-slip-originated
   # observations set this so a foray recorder is never auto-claimed as
@@ -347,7 +340,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     obs.current_user = user
 
-    obs.user_log(user, :log_observation_created)
+    obs.log(:log_observation_created, user: user)
     naming = Naming.user_construct({ name: }, obs, user)
     naming.save!
     naming.votes.create!(
@@ -1193,7 +1186,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def notify_species_lists
     # Tell all the species_lists it belonged to.
     species_lists.each do |spl|
-      spl.log(:log_observation_destroyed2, name: unique_format_name,
+      spl.log(:log_observation_destroyed2, user: current_user,
+                                           name: unique_format_name,
                                            touch: false)
     end
 
@@ -1377,12 +1371,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def user_log_consensus_change(old_name, new_name, current_user)
     if old_name
-      user_log(current_user, :log_consensus_changed,
-               { old: old_name.display_name(current_user),
-                 new: new_name.display_name(current_user) })
+      log(:log_consensus_changed, user: current_user,
+                                  old: old_name.display_name(current_user),
+                                  new: new_name.display_name(current_user))
     else
-      user_log(current_user, :log_consensus_created,
-               { name: new_name.display_name(current_user) })
+      log(:log_consensus_created, user: current_user,
+                                  name: new_name.display_name(current_user))
     end
   end
 

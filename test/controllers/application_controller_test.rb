@@ -157,6 +157,28 @@ class ApplicationControllerTest < FunctionalTestCase
     IpStats.reset!
   end
 
+  # `try_user_autologin`'s MRTG branch sets `@user` unconditionally
+  # (no `user_verified_and_allowed?` check), so a blocked MRTG "user"
+  # is the one way `block_suspended_users` ever sees a blocked
+  # `@user` - every other login path (session, autologin cookie)
+  # rejects blocked users before `@user` gets assigned.
+  def test_mrtg_autologin_blocked_renders_deleted_message
+    mrtg_user = User.create!(
+      id: 164_054, login: "mrtg", email: "mrtg@example.com",
+      password: "blah!", password_confirmation: "blah!",
+      blocked: true
+    )
+
+    Rails.env.stub(:production?, true) do
+      @request.remote_ip = "127.0.0.1"
+      get(:intro)
+    end
+
+    assert_equal("Your account has been deleted.", @response.body)
+  ensure
+    mrtg_user&.destroy
+  end
+
   # `is_cool?` also allow-lists a blocked IP that already has a
   # logged-in session (`session[:user_id].present?`).
   def test_is_cool_allows_blocked_ip_with_logged_in_session

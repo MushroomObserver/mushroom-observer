@@ -7,7 +7,6 @@ class Views::Controllers::Account::Preferences::FormTest <
   def setup
     super
     @user = users(:rolf)
-    User.current = @user
   end
 
   # ---- Form scaffolding ----

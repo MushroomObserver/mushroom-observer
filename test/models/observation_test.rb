@@ -94,6 +94,17 @@ class ObservationTest < UnitTestCase
     consensus.change_vote(naming, vote, user)
   end
 
+  def test_change_vote_requires_a_user
+    obs = observations(:coprinus_comatus_obs)
+    naming = obs.namings.first
+    consensus = ::Observation::NamingConsensus.new(obs)
+
+    error = assert_raises(ArgumentError) do
+      consensus.change_vote(naming, Vote.next_best_vote)
+    end
+    assert_includes(error.message, "change_vote needs a user")
+  end
+
   # Test Observer's Prefered ID
   def test_observer_preferred_id
     # obs = observations(:owner_only_favorite_ne_consensus)

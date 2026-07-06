@@ -176,6 +176,7 @@ class CollectionNumbersController < ApplicationController
   def create_collection_number
     @collection_number =
       CollectionNumber.new(permitted_collection_number_params)
+    @collection_number.current_user = @user
     normalize_parameters
     return if form_has_errors?
 

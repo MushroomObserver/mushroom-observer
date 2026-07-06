@@ -4228,9 +4228,9 @@ class NameTest < UnitTestCase
     assert_nil(Name.create(params).id)
     assert_not_nil(Name.create(params.merge(user: rolf)).id)
 
-    # `current_user` (not User.current) also satisfies the validation
-    # when no explicit `user:` is present. Distinct text_name from the
-    # params above to avoid tripping search_name_indistinct instead.
+    # `current_user` also satisfies the validation when no explicit
+    # `user:` is present. Distinct text_name from the params above to
+    # avoid tripping search_name_indistinct instead.
     other_params = params.merge(
       text_name: "Whoosia otherii",
       search_name: "Whoosia otherii Blah & de Blah",

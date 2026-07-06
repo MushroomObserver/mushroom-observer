@@ -22,8 +22,7 @@ module Views::Controllers::Observations::Namings::Votes
     #   menu-shape branch — the naming's proposer (or an admin)
     #   defaults to the confidence menu when they already have a
     #   non-zero vote; everyone else stays on the wider opinion
-    #   menu. Pass `@user` from the consuming view; don't fall
-    #   back to `User.current` here.
+    #   menu. Pass `@user` from the consuming view.
     # @param vote [::Vote, nil] the current user's existing vote, if
     #   any; nil means this is a fresh vote → POST instead of PATCH
     # @param context [String] arbitrary marker submitted alongside
@@ -116,8 +115,8 @@ module Views::Controllers::Observations::Namings::Votes
     end
 
     # True when the viewer owns this naming (or is admin). Written out
-    # explicitly so the form is self-contained — no `User.current`
-    # or controller-side ivar dependency.
+    # explicitly so the form is self-contained — no controller-side
+    # ivar dependency.
     def proposer_view?
       return false unless @user
 

@@ -53,7 +53,6 @@ module Views::Controllers::Projects::FieldSlips
     private
 
     def render_form(field_slips: 6)
-      User.current = @user
       model = FormObject::ProjectFieldSlip.new(
         field_slips: field_slips
       )

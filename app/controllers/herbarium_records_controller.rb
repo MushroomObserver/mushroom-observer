@@ -202,6 +202,7 @@ class HerbariumRecordsController < ApplicationController
   def create_herbarium_record
     @herbarium_record =
       HerbariumRecord.new(permitted_herbarium_record_params)
+    @herbarium_record.current_user = @user
     normalize_parameters
     return if form_has_errors?
 

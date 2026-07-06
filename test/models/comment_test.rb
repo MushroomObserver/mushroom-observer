@@ -230,4 +230,41 @@ class CommentTest < UnitTestCase
     assert_equal(obs2.id, Comment.target(obs2.id).first.target_id)
     assert_equal(obs2.id, Comment.target(obs2).first.target_id)
   end
+
+  def test_text_name
+    comment = comments(:minimal_unknown_obs_comment_1)
+    assert_equal(comment.summary.to_s, comment.text_name)
+  end
+
+  def test_target_type_localized_rescues_blank_target_type
+    comment = Comment.new
+    assert_equal("", comment.target_type_localized)
+  end
+
+  def test_validate_requires_user
+    comment = Comment.new(target: observations(:minimal_unknown_obs),
+                          summary: "no user")
+    assert_not(comment.valid?)
+    assert_includes(comment.errors[:user], :validate_comment_user_missing.t)
+  end
+
+  def test_validate_summary_too_long
+    comment = Comment.new(target: observations(:minimal_unknown_obs),
+                          current_user: rolf, summary: "x" * 101)
+    assert_not(comment.valid?)
+    assert_includes(comment.errors[:summary],
+                    :validate_comment_summary_too_long.t)
+  end
+
+  def test_validate_target_type_too_long
+    # Isolate check_target directly - setting target_type to a bogus
+    # value on a real instance also invalidates the cached `target`
+    # association, which no_recent_duplicate (run by a full #valid?)
+    # would then fail trying to re-resolve.
+    comment = Comment.new(current_user: rolf, summary: "valid")
+    comment.target_type = "A" * 31
+    comment.send(:check_target)
+    assert_includes(comment.errors[:target_type],
+                    :validate_comment_object_type_too_long.t)
+  end
 end

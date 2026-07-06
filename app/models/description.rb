@@ -86,12 +86,6 @@ class Description < AbstractModel
   before_save :add_author_or_editor
   before_destroy :update_users_and_parent
 
-  # Per-instance "who's editing this" - set explicitly by controllers
-  # before save, not a thread-local global. Declared here (not on each
-  # subclass) since add_author_or_editor below is shared by every
-  # Description subclass (NameDescription, LocationDescription).
-  attr_accessor :current_user
-
   # Aliases for location / name.
   def parent
     send(parent_type)

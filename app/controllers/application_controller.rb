@@ -62,7 +62,6 @@ class ApplicationController < ActionController::Base
     skip_before_action(:autologin)
     skip_before_action(:set_timezone)
     skip_before_action(:track_translations)
-    before_action { User.current = nil }
   end
 
   # Disables Bullet tester for one action. Use this in your controller:

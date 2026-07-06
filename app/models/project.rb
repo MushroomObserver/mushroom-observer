@@ -831,7 +831,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def do_log(tag, touch, user = nil)
     args = { touch: touch }
     args[:name] = user.login if user
-    tag == :log_project_destroyed ? orphan_log(tag, args) : log(tag, args)
+    if tag == :log_project_destroyed
+      orphan_log(tag, args)
+    else
+      log(tag, user: current_user, **args)
+    end
   end
 
   ##############################################################################

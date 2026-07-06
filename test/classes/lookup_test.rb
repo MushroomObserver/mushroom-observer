@@ -70,8 +70,6 @@ class LookupTest < UnitTestCase
   # tests of Lookup::Names
   #
   def test_lookup_names_by_name
-    User.current = rolf
-
     name1 = names(:macrolepiota)
     name2 = names(:macrolepiota_rachodes)
     name3 = names(:macrolepiota_rhacodes)
@@ -119,8 +117,6 @@ class LookupTest < UnitTestCase
   end
 
   def test_lookup_names_by_id
-    User.current = rolf
-
     name1 = names(:coprinus_comatus)
     name2 = names(:coprinus_sensu_lato)
     assert_lookup_names([name1, name2],
@@ -128,8 +124,6 @@ class LookupTest < UnitTestCase
   end
 
   def test_lookup_names_by_name_classifications
-    User.current = rolf
-
     name1 = names(:peltigeraceae)
     name2 = names(:peltigera)
     name3 = names(:petigera)
@@ -170,8 +164,6 @@ class LookupTest < UnitTestCase
   end
 
   def test_lookup_names_by_name_invalid_classification
-    User.current = rolf
-
     name1 = names(:lactarius)
     name2 = create_test_name("Lactarius \"fakename\"")
     name2.update(classification: name1.classification)

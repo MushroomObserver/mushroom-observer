@@ -57,4 +57,12 @@ class TranslationStringTest < UnitTestCase
       "Double space found in translation string :#{matches.first(&:tag)}."
     )
   end
+
+  def test_update_localization_raises_when_locale_not_loaded
+    str = translation_strings(:english_one)
+    TranslationString.stub(:translations, nil) do
+      error = assert_raises(RuntimeError) { str.update_localization }
+      assert_includes(error.message, "hasn't been loaded yet")
+    end
+  end
 end

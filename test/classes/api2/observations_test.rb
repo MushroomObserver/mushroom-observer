@@ -411,6 +411,30 @@ class API2::ObservationsTest < UnitTestCase
     )
   end
 
+  # `thumbnail` not already present in `images` gets unshifted onto the
+  # front of the list, so it's saved as one of the observation's images
+  # (not just as thumb_image).
+  def test_post_observation_with_thumbnail_not_in_images
+    img1 = images(:in_situ_image)
+    img2 = images(:turned_over_image)
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      location: "Anywhere",
+      thumbnail: img2.id,
+      images: img1.id.to_s
+    }
+
+    api = API2.execute(params)
+
+    assert_no_errors(api, "Errors while posting observation")
+    obs = Observation.last
+    assert_equal(img2, obs.thumb_image)
+    assert_includes(obs.images, img2)
+    assert_includes(obs.images, img1)
+  end
+
   def test_post_observation_with_no_log
     params = {
       method: :post,

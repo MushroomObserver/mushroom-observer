@@ -86,7 +86,6 @@ module Views::Controllers::Locations
     end
 
     def test_renders_locked_checkbox_in_admin_mode
-      User.current = users(:zero_user)
       stub_admin_mode!
       html = render_form
 
@@ -110,7 +109,6 @@ module Views::Controllers::Locations
     def test_renders_locked_display_for_locked_location
       location = locations(:burbank)
       location.update!(locked: true)
-      User.current = users(:rolf) # non-admin
 
       html = render(Form.new(
                       location,

@@ -107,14 +107,12 @@ module Account
     def redirect_already_used_verification(_user)
       flash_warning(:runtime_reverify_already_verified.t)
       @user = nil
-      User.current = nil
       session_user_set(nil)
       redirect_to(new_account_login_path)
     end
 
     def mark_user_verified_and_login(user)
       @user = user
-      User.current = user
       session_user_set(user)
       @user.verify
     end

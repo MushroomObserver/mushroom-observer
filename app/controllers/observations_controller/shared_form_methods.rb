@@ -268,10 +268,11 @@ module ObservationsController::SharedFormMethods
     return unless @good_images
 
     @good_images.each do |image|
-      unless @observation.image_ids.include?(image.id)
-        @observation.add_image(image)
-        image.log_create_for(@observation)
-      end
+      next if @observation.image_ids.include?(image.id)
+
+      @observation.add_image(image)
+      image.current_user = @user
+      image.log_create_for(@observation)
     end
   end
 

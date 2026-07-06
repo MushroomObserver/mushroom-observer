@@ -213,22 +213,24 @@ class Sequence < AbstractModel
   protected
 
   def log_add_sequence
-    observation.user_log(user, :log_sequence_added, name: log_name, touch: true)
+    observation.log(:log_sequence_added, user: user, name: log_name,
+                                         touch: true)
   end
 
   def log_update_sequence
     user = observation.current_user
     if accession_added?
-      observation.user_log(user, :log_sequence_accessioned, name: log_name,
-                                                            touch: true)
+      observation.log(:log_sequence_accessioned, user: user, name: log_name,
+                                                 touch: true)
     else
-      observation.user_log(user, :log_sequence_updated, name: log_name,
-                                                        touch: false)
+      observation.log(:log_sequence_updated, user: user, name: log_name,
+                                             touch: false)
     end
   end
 
   def log_destroy_sequence
-    observation.log(:log_sequence_destroyed, name: log_name, touch: true)
+    observation.log(:log_sequence_destroyed, user: observation.current_user,
+                                             name: log_name, touch: true)
   end
 
   private

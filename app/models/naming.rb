@@ -44,8 +44,6 @@
 #
 ################################################################################
 class Naming < AbstractModel
-  attr_accessor :current_user
-
   belongs_to :observation
   belongs_to :name
   belongs_to :user
@@ -113,8 +111,8 @@ class Naming < AbstractModel
   def update_object(new_name, log)
     self.name = new_name
     save
-    observation.log(:log_naming_updated,
-                    name: format_name, touch: log)
+    observation.log(:log_naming_updated, user: current_user,
+                                         name: format_name, touch: log)
     true
   end
 
@@ -260,7 +258,7 @@ class Naming < AbstractModel
   # each deleted naming, and send a bunch of bogus emails.)
   def log_destruction
     if current_user && (obs = observation)
-      obs.log(:log_naming_destroyed, name: format_name)
+      obs.log(:log_naming_destroyed, user: current_user, name: format_name)
       obs = Observation.naming_includes.find(obs.id) # get a fresh eager-load
       consensus = Observation::NamingConsensus.new(obs)
       consensus.calc_consensus(current_user)

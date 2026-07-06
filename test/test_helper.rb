@@ -178,24 +178,11 @@ module ActiveSupport
     # in integration tests -- they do not yet inherit this setting
     fixtures :all
 
-    # Clean up thread-local storage before each test to ensure isolation
-    # in parallel test execution. This prevents User.current from leaking
-    # between tests running in the same thread.
-    setup do
-      Thread.current[:mushroom_observer_user] = nil
-    end
-
-    # Clean up thread-local storage after each test
-    teardown do
-      Thread.current[:mushroom_observer_user] = nil
-    end
-
     # Add more helper methods to be used by all tests here...
 
     # Standard setup to run before every test. Sets the locale,
-    # timezone, makes sure User doesn't think a user is logged in,
-    # and clears Symbol.missing_tags so the teardown assertion only
-    # sees tags raised by the test that just ran.
+    # timezone, and clears Symbol.missing_tags so the teardown
+    # assertion only sees tags raised by the test that just ran.
     #
     # Registered as a `setup do` callback rather than `def setup`
     # so it runs unconditionally — many test classes override
@@ -210,7 +197,6 @@ module ActiveSupport
       # rubocop:disable Rails/TimeZoneAssignment
       Time.zone = "America/New_York"
       # rubocop:enable Rails/TimeZoneAssignment
-      User.current = nil
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
     end

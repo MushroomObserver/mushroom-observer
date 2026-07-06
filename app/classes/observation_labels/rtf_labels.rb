@@ -193,9 +193,9 @@ class ObservationLabels::RtfLabels
   end
 
   def coordinates_visible?
-    @obs.user_id == User.current_id ||
+    @obs.user_id == @user&.id ||
       !@obs.gps_hidden ||
-      Project.admin_power?(@obs, User.current)
+      Project.admin_power?(@obs, @user)
   end
 
   # --------------------
