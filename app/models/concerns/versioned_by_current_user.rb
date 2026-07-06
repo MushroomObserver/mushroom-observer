@@ -4,9 +4,7 @@
 # `user_id` column, to attribute each version to whoever's editing —
 # via an explicit per-instance accessor, not the deprecated
 # `User.current` thread-local. Used by Name, NameDescription, Location,
-# and LocationDescription; a candidate for a future sweep is
-# GlossaryTerm, the one other model still reading `User.current` in
-# its own `versioned_class.before_save`.
+# LocationDescription, and GlossaryTerm.
 #
 # A host that needs extra bookkeeping alongside plain attribution
 # (e.g. Name's UserStats "first version by this user" contribution

@@ -83,6 +83,7 @@ class GlossaryTermsController < ApplicationController
       name: params[:glossary_term][:name],
       description: params[:glossary_term][:description]
     )
+    @glossary_term.current_user = @user
     return reload_form("new") unless image_and_term_saves_smooth?
 
     redirect_to(glossary_term_path(@glossary_term.id))
@@ -94,6 +95,7 @@ class GlossaryTermsController < ApplicationController
     @glossary_term.attributes = params[:glossary_term].
                                 permit(:name, :description)
     @glossary_term.locked = params[:glossary_term][:locked] if in_admin_mode?
+    @glossary_term.current_user = @user
 
     return reload_form("edit") unless @glossary_term.save
 
