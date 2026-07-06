@@ -52,6 +52,11 @@ class Vote < AbstractModel
   belongs_to :naming
   belongs_to :observation
 
+  # The acting/editing user - see Naming#current_user for the same
+  # pattern (Vote follows Naming's lead, reading current_user off its
+  # naming instead of taking a separate param).
+  attr_accessor :current_user
+
   # scope :not_by_user, lambda { |user|
   #   user_id = user.is_a?(Integer) ? user : user&.id
   #   where.not(user_id: user_id)
@@ -74,7 +79,8 @@ class Vote < AbstractModel
     vote.assign_attributes(args.permit(:favorite, :value)) if args
     vote.created_at = now
     vote.updated_at = now
-    vote.user = User.current
+    vote.current_user = naming.current_user
+    vote.user = vote.current_user
     vote.naming = naming
     vote.observation = naming.observation
     vote
@@ -283,7 +289,7 @@ class Vote < AbstractModel
   validate :check_requirements
   def check_requirements # :nodoc:
     errors.add(:naming, :validate_vote_naming_missing.t) unless naming
-    errors.add(:user, :validate_vote_user_missing.t) if !user && !User.current
+    errors.add(:user, :validate_vote_user_missing.t) if !user && !current_user
 
     if value.nil?
       errors.add(:value, :validate_vote_value_missing.t)
