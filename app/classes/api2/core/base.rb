@@ -278,7 +278,7 @@ module API2::Base
   end
 
   def clear_user
-    User.current = self.user = nil
+    self.user = nil
   end
 
   # Location/place-name formatting is postal-only throughout the API -
@@ -288,7 +288,7 @@ module API2::Base
   # responses consistent for apps regardless of the user's own
   # location_format preference.
   def login_user(key)
-    User.current = self.user = key.user
+    self.user = key.user
     key.touch!
     self.api_key = key
   end

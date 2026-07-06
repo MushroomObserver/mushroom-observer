@@ -85,14 +85,12 @@ module ControllerExtensions
     assert(user, "Failed to authenticate user <#{user}> " \
                  "with password <#{password}>.")
     @request.session[:user_id] = user.id
-    User.current = user
   end
 
   # Log a user out (affects session only).
   def logout
     @request.session[:user_id] = nil
     @request.session[:admin] = nil
-    User.current = nil
   end
 
   # Make the logged-in user admin and turn on admin mode.
