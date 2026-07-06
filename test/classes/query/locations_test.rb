@@ -224,9 +224,9 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_descriptions_by_editor
-    User.current = mary
     desc = location_descriptions(:albion_desc)
     desc.notes = "blah blah blah"
+    desc.current_user = mary
     desc.save
     assert_query([], :Location, description_query: { by_editor: rolf })
 

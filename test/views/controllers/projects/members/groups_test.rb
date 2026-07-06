@@ -10,7 +10,6 @@ module Views::Controllers::Projects::Members
     end
 
     def test_renders_member_and_admin_groups
-      User.current = @user
       project = projects(:eol_project)
       html = render(Groups.new(
                       project: project, user: @user
@@ -23,7 +22,6 @@ module Views::Controllers::Projects::Members
     end
 
     def test_admin_sees_edit_links
-      User.current = @user
       project = projects(:eol_project)
       # rolf is the project owner/admin
       html = render(Groups.new(

@@ -211,7 +211,6 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_name_rss_log_life_cycle
-    User.current = rolf
     time = 1.minute.ago
 
     name = Name.new(
