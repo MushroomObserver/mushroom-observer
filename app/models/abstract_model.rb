@@ -71,7 +71,7 @@ class AbstractModel < ApplicationRecord
   # The acting/viewing user for this instance - who's doing this
   # (attribution) or looking at this (viewer-aware formatting),
   # set explicitly by the controller/caller before save/render. No
-  # ambient global fallback (no User.current) - every model gets
+  # ambient global fallback (no Current.user) - every model gets
   # this accessor for free so callers never need to add their own.
   attr_accessor :current_user
 
