@@ -176,6 +176,8 @@ class Herbarium < AbstractModel
   end
 
   def owns_all_records?(user = nil)
+    return false unless user
+
     herbarium_records.all? { |r| r.user_id == user.id }
   end
 
