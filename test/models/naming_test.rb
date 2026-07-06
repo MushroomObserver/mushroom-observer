@@ -198,7 +198,6 @@ class NamingTest < UnitTestCase
     name = names(:agaricus_campestris)
     Interest.create(target: name, user: katrina, state: true)
 
-    User.current = mary
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Naming.create(
         observation: obs,

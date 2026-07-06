@@ -40,8 +40,8 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_by_editor
     assert_query([], :Location, by_editor: rolf)
-    User.current = mary
     loc = Location.where.not(user: mary).order_by_default.first
+    loc.current_user = mary
     loc.display_name = "new name"
     loc.save
     assert_query_scope([loc], Location.by_editor(mary),
