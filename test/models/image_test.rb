@@ -323,7 +323,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(thumb)
     assert_empty(other_images)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_nil(term.reload.thumb_image,
@@ -342,7 +341,6 @@ class ImageTest < UnitTestCase
     thumb_id = thumb.id
     other_image_ids = other_images.map(&:id)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_false(term.reload.image_ids.include?(thumb_id),
@@ -358,7 +356,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(thumb)
     assert_empty(other_images)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_nil(obs.reload.thumb_image,
@@ -377,7 +374,6 @@ class ImageTest < UnitTestCase
     thumb_id = thumb.id
     other_image_ids = other_images.map(&:id)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_false(obs.reload.image_ids.include?(thumb_id),
@@ -389,7 +385,6 @@ class ImageTest < UnitTestCase
   def test_delete_user_profile_image
     assert_not_nil(rolf.image)
 
-    User.current = rolf.image.user
     rolf.image.destroy!
 
     assert_nil(rolf.reload.image_id,
@@ -402,7 +397,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(image)
     image_id = image.id
 
-    User.current = image.user
     image.destroy!
 
     assert_false(project.reload.image_ids.include?(image_id),
@@ -415,7 +409,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(image)
     image_id = image.id
 
-    User.current = image.user
     image.destroy!
 
     assert_false(group.reload.image_ids.include?(image_id),
@@ -427,7 +420,6 @@ class ImageTest < UnitTestCase
     image_id = image.id
     assert_not_empty(ImageVote.where(image_id: image_id))
 
-    User.current = image.user
     image.destroy!
 
     assert_empty(ImageVote.where(image_id: image_id),
