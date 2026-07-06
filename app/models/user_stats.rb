@@ -134,10 +134,9 @@ class UserStats < ApplicationRecord
         field = get_applicable_field(obj)
         user_id ||= obj&.user_id
       else
-        return unless user_id || User.current_id
+        return unless user_id
 
         field = obj
-        user_id ||= User.current_id
       end
       weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
       return unless weight&.positive? && user_id&.positive?
