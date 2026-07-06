@@ -52,7 +52,8 @@
 # The vote table is the slowest table in the db, so it was extremely slow.
 #
 
-# Disable Metrics/ClassLength temporarily while getting rid of User.current
+# Disable Metrics/ClassLength - genuinely a lot of vote/consensus
+# bookkeeping in one place; hasn't been split up yet.
 # rubocop:disable Metrics/ClassLength
 class Observation
   class NamingConsensus
