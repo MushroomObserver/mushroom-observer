@@ -183,7 +183,7 @@ module FieldSlipsController::ObservationHandling
 
       occ.reassign_thumbnails_from(obs)
       obs.update!(occurrence: nil)
-      Occurrence.log_field_slip_removed(obs, occ)
+      Occurrence.log_field_slip_removed(obs, occ, @user)
       Observation::NamingConsensus.new(obs).calc_consensus
     end
   end
@@ -197,7 +197,7 @@ module FieldSlipsController::ObservationHandling
       obs.update!(occurrence: occ)
       added << obs
     end
-    Occurrence.log_field_slip_added(added) if added.any?
+    Occurrence.log_field_slip_added(added, @user) if added.any?
   end
 
   def update_occurrence_primary(occ)
@@ -224,7 +224,7 @@ module FieldSlipsController::ObservationHandling
       selected.each { |obs| obs.update!(occurrence: occ) }
       newly_added = selected
     end
-    Occurrence.log_field_slip_added(newly_added) if newly_added&.any?
+    Occurrence.log_field_slip_added(newly_added, @user) if newly_added&.any?
     occ.recompute_has_specimen!
     occ.recalculate_consensus!
     check_field_slip_project_gaps(occ)

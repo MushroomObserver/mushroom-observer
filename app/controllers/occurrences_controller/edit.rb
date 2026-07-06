@@ -76,7 +76,7 @@ module OccurrencesController::Edit
 
       @occurrence.reassign_thumbnails_from(obs)
       obs.update!(occurrence: nil)
-      Occurrence.log_observation_removed(obs, @occurrence)
+      Occurrence.log_observation_removed(obs, @occurrence, @user)
       recalculate_standalone_consensus(obs)
     end
     @occurrence.reload
@@ -102,10 +102,10 @@ module OccurrencesController::Edit
 
   def add_single_observation(obs)
     if obs.occurrence && obs.occurrence != @occurrence
-      Occurrence.merge!(@occurrence, obs.occurrence)
+      Occurrence.merge!(@occurrence, obs.occurrence, @user)
     else
       obs.update!(occurrence: @occurrence)
-      Occurrence.log_observation_added([obs])
+      Occurrence.log_observation_added([obs], @user)
     end
   end
 
