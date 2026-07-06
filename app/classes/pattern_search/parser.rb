@@ -2,7 +2,7 @@
 
 module PatternSearch
   class Parser
-    attr_accessor :incoming_string, :terms
+    attr_accessor :incoming_string, :terms, :user
 
     VAL_REGEX = /
       "([^\\"]+|\\.)*" | '([^\\']+|\\.)*' | ([^\s\\,]+|\\.)+
@@ -11,8 +11,9 @@ module PatternSearch
       ^(\S+:)? ( #{VAL_REGEX} (, #{VAL_REGEX})* ) (\s+|$)
     /x
 
-    def initialize(string)
+    def initialize(string, user = nil)
       self.incoming_string = string.gsub(/[“”]/, '"')
+      self.user = user
       self.terms = parse_incoming_string
     end
 
@@ -27,7 +28,7 @@ module PatternSearch
       last_var = nil
       until str.blank?
         (var, vals) = parse_next_term!(str, last_var)
-        term = hash[var] ||= Term.new(var)
+        term = hash[var] ||= Term.new(var, user)
         vals.each { |val| term << val }
         last_var = var
       end

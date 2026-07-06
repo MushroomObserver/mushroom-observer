@@ -8,11 +8,12 @@ module PatternSearch
   class Term
     include Dates
 
-    attr_accessor :var, :vals
+    attr_accessor :var, :vals, :user
 
-    def initialize(var)
+    def initialize(var, user = nil)
       self.var = var
       self.vals = []
+      self.user = user
     end
 
     CONTAINS_QUOTES =
@@ -152,7 +153,7 @@ module PatternSearch
     def parse_one_user(val)
       case val
       when "me" || :search_value_me.l
-        User.current ||
+        user ||
           raise(UserMeNotLoggedInError.new)
       when /^\d+$/
         User.safe_find(val) ||
