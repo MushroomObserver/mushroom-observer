@@ -367,9 +367,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Viewer-aware: `user` is who's *looking at* this name (nil => postal
   # default). Not the same viewer/actor concept as `current_user` below
-  # (that's who's *editing* - see `display_name=`).
+  # (that's who's *editing* - see `display_name=`). Reads the persisted
+  # `scientific_name` column directly rather than computing
+  # `Location.user_format(user, name)` - `scientific_name` isn't
+  # guaranteed to be an exact `reverse_name(name)` round-trip (legacy
+  # data), and `order_locations_by_name` sorts by the real column, so
+  # display and sort order need to agree.
   def display_name(user = nil)
-    Location.user_format(user, name)
+    user&.location_format == "scientific" ? scientific_name : name
   end
 
   # `current_user` (the acting/editing user - see VersionedByCurrentUser,
