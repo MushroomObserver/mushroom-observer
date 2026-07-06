@@ -27,6 +27,18 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects, :Location, order_by: :name)
   end
 
+  def test_location_order_by_name_viewer_aware
+    query = Query.lookup(:Location, order_by: :name)
+    query.viewer = roy
+    assert_obj_arrays_equal(Location.order_by(:name, viewer: roy).to_a,
+                            query.results)
+
+    query = Query.lookup(:Location, order_by: :name)
+    query.viewer = rolf
+    assert_obj_arrays_equal(Location.order_by(:name, viewer: rolf).to_a,
+                            query.results)
+  end
+
   def test_location_order_by_num_views
     expects = Location.order_by(:num_views)
     assert_query(expects, :Location, order_by: :num_views)

@@ -36,7 +36,15 @@ module Views::Controllers::Projects::Aliases
     private
 
     def render_target_cell(alias_)
-      link_to(alias_.target.try(:format_name), alias_.target)
+      target = alias_.target
+      # Target is either a User or a Location (see ProjectAlias) - only
+      # Location's format_name is viewer-aware (postal/scientific).
+      name = if target.is_a?(::Location)
+               target.format_name(current_user)
+             else
+               target.try(:format_name)
+             end
+      link_to(name, target)
     end
 
     def render_actions_cell(alias_)

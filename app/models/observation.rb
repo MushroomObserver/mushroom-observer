@@ -156,7 +156,7 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
-  attr_accessor :current_user
+  include HasPlaceName
 
   # Transient flag: when set, the before_create default that copies the
   # entering user into `collector` is skipped. Field-slip-originated
@@ -603,44 +603,22 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  # Abstraction over +where+ and +location.display_name+.  Returns Location
-  # name as a string, preferring +location+ over +where+ wherever both exist.
-  # Also applies the location_format of the current user (defaults to "postal").
-  def place_name
-    # Use the eager-loaded `:location` when its id still matches
-    # `location_id` (the show/index render path). Fall back to an FK
-    # fetch when callers reach `place_name` after a `location_id =`
-    # assignment invalidated the cached target, so we don't lazy-load
-    # against strict_loading.
+  private
+
+  # Use the eager-loaded `:location` when its id still matches
+  # `location_id` (the show/index render path). Fall back to an FK
+  # fetch when callers reach `place_name` after a `location_id =`
+  # assignment invalidated the cached target, so we don't lazy-load
+  # against strict_loading. (Overrides HasPlaceName's default, which
+  # just calls the `location` association directly.)
+  def location_for_place_name
     cached = association(:location).target if association(:location).loaded?
-    loc = if cached && cached.id == location_id
-            cached
-          elsif location_id
-            Location.find_by(id: location_id)
-          end
-    if loc
-      loc.display_name
-    elsif User.current_location_format == "scientific"
-      Location.reverse_name(where)
-    else
-      where
-    end
+    return cached if cached && cached.id == location_id
+
+    Location.find_by(id: location_id) if location_id
   end
 
-  # Set +where+ or +location+, depending on whether a Location is defined with
-  # the given +display_name+.  (Fills the other in with +nil+.)
-  # Adjusts for the current user's location_format as well.
-  def place_name=(place_name)
-    where = Location.normalize_place_name(place_name)
-    loc = Location.find_by_name(where)
-    if loc
-      self.where = loc.name
-      self.location = loc
-    else
-      self.where = where
-      self.location = nil
-    end
-  end
+  public
 
   # Useful for forms in which date is entered in YYYYMMDD format: When form tag
   # helper creates input field, it reads obs.when_str and gets date in
@@ -709,13 +687,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       will_save_change_to_attribute?(:location_id)
   end
 
-  def place_name_and_coordinates
+  def place_name_and_coordinates(user = nil)
     if lat.present? && lng.present?
       lat_string = format_coordinate(lat, "N", "S")
       lng_string = format_coordinate(lng, "E", "W")
-      "#{place_name} (#{lat_string} #{lng_string})"
+      "#{place_name(user)} (#{lat_string} #{lng_string})"
     else
-      place_name
+      place_name(user)
     end
   end
 

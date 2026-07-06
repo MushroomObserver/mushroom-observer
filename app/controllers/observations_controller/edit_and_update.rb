@@ -298,7 +298,7 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
-      redirect_to(new_location_path(where: @observation.place_name,
+      redirect_to(new_location_path(where: @observation.place_name(@user),
                                     set_observation: @observation.id))
     else
       redirect_to(permanent_observation_path(@observation.id))

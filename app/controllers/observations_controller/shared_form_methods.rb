@@ -38,6 +38,10 @@ module ObservationsController::SharedFormMethods
   end
 
   def update_permitted_observation_attributes
+    # Must be set before `attributes=` below: `place_name=` (see
+    # HasPlaceName) reads `current_user` to decide postal vs
+    # scientific parsing.
+    @observation.current_user = @user
     @observation.attributes = permitted_observation_params || {}
   end
 

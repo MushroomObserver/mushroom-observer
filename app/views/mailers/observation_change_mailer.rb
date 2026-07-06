@@ -121,7 +121,7 @@ class Views::Mailers::ObservationChangeMailer < Views::Mailers::Base
     when "date"
       "*#{:Date.l} #{now_label}:* #{@observation.when.email_date}\n"
     when "location"
-      "*#{:Location.l} #{now_label}:* #{@observation.place_name}\n"
+      "*#{:Location.l} #{now_label}:* #{@observation.place_name(@receiver)}\n"
     when "specimen" then specimen_line
     when "is_collection_location" then collection_location_line
     else simple_change_line(field)

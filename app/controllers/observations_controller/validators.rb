@@ -91,7 +91,7 @@ module ObservationsController::Validators
   # check if we already have a location by this name. If so, find the existing
   # location and use that for the obs.
   def validate_place_name
-    place_name = @observation.place_name
+    place_name = @observation.place_name(@user)
     lat = @observation.lat
     lng = @observation.lng
     if !lat && !lng && place_name.blank?
@@ -108,7 +108,7 @@ module ObservationsController::Validators
     end
 
     @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @observation.place_name
+      user: @user, place_name: @observation.place_name(@user)
     )
     return true if @dubious_where_reasons.empty?
 

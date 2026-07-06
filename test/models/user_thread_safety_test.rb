@@ -55,47 +55,4 @@ class UserThreadSafetyTest < UnitTestCase
     assert_equal(results[:thread2_expected_id], results[:thread2_user_id],
                  "Thread 2 should see bob, but sees #{thread2_login}")
   end
-
-  def test_user_current_location_format_maintains_isolation_between_threads
-    alice = users(:rolf)
-    bob = users(:mary)
-
-    # Set different location formats
-    alice.location_format = "postal"
-    bob.location_format = "scientific"
-
-    results = Concurrent::Hash.new
-
-    # Use CountDownLatch for deterministic synchronization
-    setup_latch = Concurrent::CountDownLatch.new(2)
-    check_latch = Concurrent::CountDownLatch.new(2)
-
-    threads = [
-      Thread.new do
-        User.current = alice
-        setup_latch.count_down
-        setup_latch.wait # Wait for both threads to set their User.current
-        check_latch.count_down
-        check_latch.wait # Ensure both threads check at the same time
-        results[:thread1_format] = User.current_location_format
-        results[:thread1_expected] = "postal"
-      end,
-      Thread.new do
-        User.current = bob
-        setup_latch.count_down
-        setup_latch.wait # Wait for both threads to set their User.current
-        check_latch.count_down
-        check_latch.wait # Ensure both threads check at the same time
-        results[:thread2_format] = User.current_location_format
-        results[:thread2_expected] = "scientific"
-      end
-    ]
-
-    threads.each(&:join)
-
-    assert_equal(results[:thread1_expected], results[:thread1_format],
-                 "Thread 1 should see 'postal' format")
-    assert_equal(results[:thread2_expected], results[:thread2_format],
-                 "Thread 2 should see 'scientific' format")
-  end
 end

@@ -25,10 +25,16 @@ module AbstractModel::OrderingScopes
     # which is basically just a scope. If no method by that name exists,
     # this will only add `order(id: :desc)` (:asc if reverse).
     #
+    # `viewer:` is only forwarded to the dispatched method when its own
+    # signature accepts it (currently just `order_by_name`/
+    # `order_by_location`, which need it to resolve postal/scientific
+    # location-name sort order) - every other `order_by_*` method's
+    # signature is untouched.
+    #
     # IMPORTANT: USE THIS SCOPE whenever possible in the app and tests.
     # The private methods called by it do not include the last step that
     # resolves order within grouped results consistently.
-    scope :order_by, lambda { |method|
+    scope :order_by, lambda { |method, viewer: nil|
       return all if method.to_sym == :none
 
       method ||= :default # :order_by_default must be defined for each model
@@ -39,7 +45,7 @@ module AbstractModel::OrderingScopes
 
       # Call `scoping` with `model.send(:method)` here, because the private
       # class methods below are otherwise inaccessible to a `scope` proc.
-      scope = scoping { model.send(scope) }
+      scope = scoping { model.send(:send_ordering_scope, scope, viewer) }
       scope = scope.reverse_order if reverse
       # Order grouped results from other scopes by adding order(id: :desc). If
       # this `:desc` is contrary to a previous order_by(:id) it will be ignored.
@@ -57,6 +63,19 @@ module AbstractModel::OrderingScopes
   # class methods here, `self` included
   module ClassMethods
     private
+
+    # Calls the dispatched `order_by_*` method, forwarding `viewer:`
+    # only when its signature accepts it - lets `order_by_name`/
+    # `order_by_location` (the only two that need it) take it without
+    # requiring every other `order_by_*` method to accept-and-ignore
+    # an unused kwarg.
+    def send_ordering_scope(scope_name, viewer)
+      accepts_viewer = method(scope_name).parameters.
+                       any? { |type, name| type == :key && name == :viewer }
+      return send(scope_name, viewer: viewer) if accepts_viewer
+
+      send(scope_name)
+    end
 
     # NOTE: For predictable results, DO NOT CALL THESE METHODS DIRECTLY
     # unless for some reason you need scopes without the ambiguity-resolving
@@ -169,10 +188,10 @@ module AbstractModel::OrderingScopes
       order(User[:last_login].desc)
     end
 
-    def order_by_location
+    def order_by_location(viewer: nil)
       return all unless column_names.include?("location_id")
 
-      scope = order_locations_by_name
+      scope = order_locations_by_name(viewer: viewer)
       # Join Users with null locations, else join records with locations
       if self == User
         scope.left_outer_joins(:location).distinct
@@ -191,10 +210,10 @@ module AbstractModel::OrderingScopes
     # NOTE: scope `order_by_location` calls `order_locations_by_name` above,
     # so the latter should stay here. To avoid method duplication, we could
     # just have scope `Location.order_by_name` call `order_locations_by_name`.
-    def order_by_name
+    def order_by_name(viewer: nil)
       order_by_name_method = :"order_#{name.underscore.pluralize}_by_name"
       if private_methods(false).include?(order_by_name_method)
-        send(order_by_name_method)
+        send_ordering_scope(order_by_name_method, viewer)
       else
         order_other_models_by_name
       end
@@ -320,8 +339,8 @@ module AbstractModel::OrderingScopes
         order(Location[:name].asc, LocationDescription[:created_at].asc)
     end
 
-    def order_locations_by_name
-      if User.current_location_format == "scientific"
+    def order_locations_by_name(viewer: nil)
+      if viewer&.location_format == "scientific"
         order(Location[:scientific_name].asc)
       else
         order(Location[:name].asc)

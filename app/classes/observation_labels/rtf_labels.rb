@@ -134,7 +134,7 @@ class ObservationLabels::RtfLabels
 
   def add_location
     label("Location")
-    @para << @obs.place_name
+    @para << @obs.place_name(@user)
     @para.line_break
   end
 

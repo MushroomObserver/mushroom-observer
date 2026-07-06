@@ -263,7 +263,10 @@ module API2::Base
   end
 
   def authenticate_user
-    clear_user && return unless (key_str = parse(:string, :api_key))
+    unless (key_str = parse(:string, :api_key))
+      clear_user
+      return
+    end
 
     key = APIKey.find_by(key: key_str)
     raise(API2::BadAPIKey.new(key_str))        unless key
@@ -275,13 +278,16 @@ module API2::Base
 
   def clear_user
     User.current = self.user = nil
-    User.current_location_format = "postal"
   end
 
+  # Location/place-name formatting is postal-only throughout the API -
+  # nothing here ever threads a `user`/`viewer` through the
+  # viewer-aware display methods (Location#display_name, HasPlaceName,
+  # etc.), so they all default to postal automatically. Makes API
+  # responses consistent for apps regardless of the user's own
+  # location_format preference.
   def login_user(key)
     User.current = self.user = key.user
-    User.current_location_format = "postal"
-    # (that overrides user pref in order to make it more consistent for apps)
     key.touch!
     self.api_key = key
   end

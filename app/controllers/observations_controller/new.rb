@@ -38,6 +38,7 @@ module ObservationsController::New
     if params[:notes]
       @observation.notes = params[:notes].to_unsafe_h.symbolize_keys
     end
+    @observation.current_user = @user
     @observation.place_name = params[:place_name]
     # Prefill the editable collector: the field-slip collector when one
     # came through (the redirect carries it), else the entering user, who
@@ -186,10 +187,10 @@ module ObservationsController::New
     if params[:place_name]
       # Cannot use @place_name since that's being used for approved_where
       @default_place_name = params[:place_name]
-      loc = Location.place_name_to_location(@default_place_name)
+      loc = Location.place_name_to_location(@default_place_name, @user)
       @location = loc if loc
     else
-      @default_place_name = @observation.place_name
+      @default_place_name = @observation.place_name(@user)
     end
   end
 end

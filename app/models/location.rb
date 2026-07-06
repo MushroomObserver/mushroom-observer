@@ -365,12 +365,25 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     name.split(", ").first
   end
 
-  def display_name
-    User.current_location_format == "scientific" ? scientific_name : name
+  # Viewer-aware: `user` is who's *looking at* this name (nil => postal
+  # default). Not the same viewer/actor concept as `current_user` below
+  # (that's who's *editing* - see `display_name=`). Reads the persisted
+  # `scientific_name` column directly rather than computing
+  # `Location.user_format(user, name)` - `scientific_name` isn't
+  # guaranteed to be an exact `reverse_name(name)` round-trip (legacy
+  # data), and `order_locations_by_name` sorts by the real column, so
+  # display and sort order need to agree.
+  def display_name(user = nil)
+    user&.location_format == "scientific" ? scientific_name : name
   end
 
+  # `current_user` (the acting/editing user - see VersionedByCurrentUser,
+  # set by the caller before assignment, same as attribution) decides
+  # which raw column the incoming string represents. Can't take an
+  # explicit second argument through plain `=` syntax the way the
+  # getter does.
   def display_name=(val)
-    if User.current_location_format == "scientific"
+    if current_user&.location_format == "scientific"
       self.name = Location.reverse_name(val)
       self.scientific_name = val
     else
@@ -380,13 +393,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Plain text version of +display_name+.
-  def text_name
-    display_name.t.html_to_ascii
+  def text_name(user = nil)
+    display_name(user).t.html_to_ascii
   end
 
   # Alias for +display_name+ for compatibility with Name and other models.
-  def format_name
-    display_name
+  def format_name(user = nil)
+    display_name(user)
   end
 
   # Page heading + browser tab title. `display_name` is plain text
@@ -395,18 +408,18 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   alias page_title display_name
   alias document_title text_name
 
-  def textile_name
-    display_name
+  def textile_name(user = nil)
+    display_name(user)
   end
 
   # Same as +text_name+ but with id tacked on.
-  def unique_text_name
-    string_with_id(text_name)
+  def unique_text_name(user = nil)
+    string_with_id(text_name(user))
   end
 
   # Same as +format_name+ but with id tacked on.
-  def unique_format_name
-    string_with_id(format_name)
+  def unique_format_name(user = nil)
+    string_with_id(format_name(user))
   end
 
   # Info to include about each location in merge requests.
@@ -436,11 +449,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     str.strip_squeeze.downcase
   end
 
-  # Cleans up a place_name (per Observation) and
-  # applies the current user's current_location_format
-  def self.normalize_place_name(place_name)
+  # Cleans up a place_name (per Observation) and applies `user`'s
+  # location_format (nil => postal default).
+  def self.normalize_place_name(place_name, user = nil)
     place_name = place_name&.strip_squeeze
-    if User.current_location_format == "scientific"
+    if user&.location_format == "scientific"
       reverse_name(place_name)
     else
       place_name
@@ -448,8 +461,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Returns any existing location that matches place_name
-  def self.place_name_to_location(place_name)
-    find_by_name(normalize_place_name(place_name))
+  def self.place_name_to_location(place_name, user = nil)
+    find_by_name(normalize_place_name(place_name, user))
   end
 
   # Takes a location string splits on commas, reverses the order,

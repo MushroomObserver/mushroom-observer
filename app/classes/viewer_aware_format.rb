@@ -25,12 +25,12 @@ module ViewerAwareFormat
   end
 
   # Location's display name is postal/scientific-order depending on
-  # the viewer's preference. `Location.user_format` already takes an
+  # the viewer's preference. `Location#display_name` already takes an
   # explicit user - this just supplies the default when the caller
   # doesn't have one handy.
   def viewer_aware_location_format(location, user = default_viewer)
     return nil unless location
 
-    Location.user_format(user, location.name)
+    location.display_name(user)
   end
 end

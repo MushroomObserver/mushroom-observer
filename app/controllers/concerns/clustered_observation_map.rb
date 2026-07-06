@@ -64,7 +64,7 @@ module ClusteredObservationMap
   def map_refetch_payload
     {
       collection: ::Mappable::ClusteredCollection.new(
-        @observations, query_param: q_param(@query)
+        @observations, query_param: q_param(@query), user: @user
       ),
       capped: @observations_capped,
       loaded: @observations_loaded_count,

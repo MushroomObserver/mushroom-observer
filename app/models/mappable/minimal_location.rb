@@ -8,12 +8,8 @@ module Mappable
     validates :id, presence: true
     validates :name, presence: true
 
-    def display_name
-      if ::User.current_location_format == "scientific"
-        ::Location.reverse_name(name)
-      else
-        name
-      end
+    def display_name(user = nil)
+      ::Location.user_format(user, name)
     end
   end
 end

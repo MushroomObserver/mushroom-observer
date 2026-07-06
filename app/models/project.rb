@@ -99,6 +99,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
+  include HasPlaceName
+
   before_destroy :orphan_drafts
   # Adding/changing a prefix retroactively claims previously-orphaned
   # field slips whose code matches — but only member-owned ones. See
@@ -863,19 +865,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     location ? location.name : ""
   end
 
-  def place_name
-    location ? location.display_name : ""
-  end
-
+  # place_name/place_name= come from HasPlaceName. Project has no
+  # free-text `where` storage (just the derived getter above), so
+  # `place_name=` overrides the concern's default to skip the
+  # where-fallback and only ever assign (or clear) +location+.
   def place_name=(place_name)
-    place_name = place_name.strip_squeeze
-    where = if User.current_location_format == "scientific"
-              Location.reverse_name(place_name)
-            else
-              place_name
-            end
-    loc = Location.find_by_name(where)
-    self.location = (loc)
+    self.location = Location.place_name_to_location(place_name, current_user)
   end
 
   def name_count

@@ -102,7 +102,7 @@ module Views::Controllers::Projects
       div(class: location_classes) do
         b do
           a(href: location_path(@project.location.id)) do
-            @project.place_name
+            @project.place_name(current_user)
           end
         end
       end

@@ -99,6 +99,8 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
   attr_accessor :data
 
+  include HasPlaceName
+
   scope :order_by_default,
         -> { order_by(::Query::SpeciesLists.default_order) }
 
@@ -256,36 +258,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  # Abstraction over +where+ and +location.display_name+.  Returns Location
-  # name as a string, preferring +location+ over +where+ wherever both exist.
-  # Also applies the location_format of the current user (defaults to "postal").
-  def place_name
-    if location
-      location.display_name
-    elsif User.current_location_format == "scientific"
-      Location.reverse_name(where)
-    else
-      where
-    end
-  end
-
-  # Set +where+ or +location+, depending on whether a Location is defined with
-  # the given +display_name+.  (Fills the other in with +nil+.)
-  # Adjusts for the current user's location_format as well.
-  def place_name=(place_name)
-    where = if User.current_location_format == "scientific"
-              Location.reverse_name(place_name)
-            else
-              place_name
-            end
-    if (loc = Location.find_by_name(where))
-      self.where = loc.name
-      self.location = loc
-    else
-      self.where = where
-      self.location = nil
-    end
-  end
+  # place_name/place_name= come from HasPlaceName.
 
   # Return title in plain text for debugging.
   def text_name

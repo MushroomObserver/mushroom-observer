@@ -170,17 +170,16 @@ class ProjectTest < UnitTestCase
   def test_place_name
     proj = projects(:eol_project)
     loc = locations(:albion)
-    proj.place_name = loc.display_name
+    proj.place_name = loc.display_name(rolf)
     assert_equal(proj.location, loc)
   end
 
   def test_scientific_place_name
-    User.current_location_format = "scientific"
     proj = projects(:eol_project)
+    proj.current_user = roy
     loc = locations(:albion)
-    proj.place_name = loc.display_name
+    proj.place_name = loc.display_name(roy)
     assert_equal(proj.location, loc)
-    User.current_location_format = "postal"
   end
 
   def test_location_violations

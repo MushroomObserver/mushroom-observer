@@ -26,14 +26,14 @@ module RuboCop
       #   @user.id
       #
       #   # bad (in component/view)
-      #   User.current_location_format
-      #   ::User.current_location_format
+      #   User.current
+      #   ::User.current
       #
       #   # good (in component/view - add a user prop ...)
-      #   @user.location_format
+      #   @user
       #
       #   # ... or use the registered current_user value helper
-      #   current_user&.location_format
+      #   current_user
       #
       class NoUserCurrentInViews < Base
         MSG = "Avoid `User.current`. In controllers, use `@user` " \
