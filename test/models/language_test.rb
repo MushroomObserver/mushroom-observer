@@ -54,7 +54,8 @@ class LanguageTest < UnitTestCase
     end
   end
 
-  def set_text(str, new_string)
+  def set_text(str, new_string, user: str.user)
+    str.current_user = user
     str.text = new_string
     str.save
     str.reload
@@ -65,7 +66,6 @@ class LanguageTest < UnitTestCase
     yesterday = Time.zone.now.yesterday
     assert(str.updated_at < yesterday)
     expected_version = str.version + 1
-    User.current = str.user
     set_text(str, "Gandalf the Gray")
     assert(str.updated_at > yesterday)
     assert_equal(expected_version, str.version)
@@ -75,12 +75,10 @@ class LanguageTest < UnitTestCase
 
   def test_versioning_someone_else
     str = translation_strings(:version_wizard)
-    User.current = str.user
     set_text(str, "Gandalf the Gray")
     expected_version = str.version + 1
-    User.current = katrina
-    assert_not_equal(str.user_id, User.current_id)
-    set_text(str, "Mithrandir")
+    assert_not_equal(str.user_id, katrina.id)
+    set_text(str, "Mithrandir", user: katrina)
     assert_equal(expected_version, str.version)
   end
 

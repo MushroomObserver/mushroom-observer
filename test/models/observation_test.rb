@@ -280,11 +280,11 @@ class ObservationTest < UnitTestCase
     # (Rolf owns coprinus_comatus_obs, one naming, two votes, conf. around 1.5.)
     # (But Mary will get a comment-response email because she has a naming.)
     # CommentAdd now uses deliver_later.
-    User.current = rolf
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Comment.create(
         summary: "This is Rolf...",
-        target: obs
+        target: obs,
+        current_user: rolf
       )
     end
 
@@ -313,11 +313,11 @@ class ObservationTest < UnitTestCase
     # Rolf should not be notified of anything here, either...
     # But Mary still will get something for having the naming.
     # CommentAdd now uses deliver_later.
-    User.current = dick
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Comment.create(
         summary: "This is Dick...",
-        target: obs.reload
+        target: obs.reload,
+        current_user: dick
       )
     end
 
@@ -360,11 +360,11 @@ class ObservationTest < UnitTestCase
     # one naming, two votes, conf. around 1.5.)
     rolf.email_comments_owner = true
     assert_save(rolf)
-    User.current = mary
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Comment.create(
         summary: "This is Mary...",
-        target: obs
+        target: obs,
+        current_user: mary
       )
     end
 
@@ -400,11 +400,11 @@ class ObservationTest < UnitTestCase
     # CommentAdd now uses deliver_later.
     mary.email_comments_response = true
     assert_save(mary)
-    User.current = rolf
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Comment.create(
         summary: "This is Rolf...",
-        target: observations(:coprinus_comatus_obs)
+        target: observations(:coprinus_comatus_obs),
+        current_user: rolf
       )
     end
   end
@@ -446,11 +446,11 @@ class ObservationTest < UnitTestCase
     # CommentAdd now uses deliver_later.
     # (Rolf owns observations(:coprinus_comatus_obs),
     # one naming, two votes, conf. around 1.5.)
-    User.current = mary
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Comment.create(
         summary: "This is Mary...",
-        target: observations(:coprinus_comatus_obs)
+        target: observations(:coprinus_comatus_obs),
+        current_user: mary
       )
     end
 
