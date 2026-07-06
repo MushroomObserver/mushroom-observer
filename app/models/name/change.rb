@@ -22,7 +22,14 @@ module Name::Change
         raise(:runtime_unable_to_create_name.t(name: parse.parent_name))
       end
 
-      parents.each { |n| n.save if n&.new_record? } if save_parents
+      if save_parents
+        parents.each do |n|
+          next unless n&.new_record?
+
+          n.current_user = user
+          n.save
+        end
+      end
     end
     self.attributes = parse.params
   end

@@ -197,7 +197,7 @@ class AbstractModel < ApplicationRecord
   def set_user_and_autolog
     if respond_to?(:user_id=)
       self.user_id ||= if respond_to?(:current_user)
-                         current_user
+                         current_user&.id
                        else
                          User.current_id
                        end

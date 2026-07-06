@@ -54,10 +54,12 @@ module Name::Create
   def set_author(user, names, author, fill_in_authors)
     return unless author.present? && fill_in_authors && names.length == 1
 
-    names.first.change_author(author)
-    names.first.current_user = user
-    names.first.save
-    names.first.update_name_version(user.id)
+    name = names.first
+    name.change_author(author)
+    first_version_for_user = name.new_version_for_user?(user.id)
+    name.current_user = user
+    name.save
+    name.award_version_contribution(user.id) if first_version_for_user
   end
 
   # Parses a String, creates a Name for it and all its ancestors (if any don't

@@ -369,6 +369,7 @@ class Name < AbstractModel
     "description_id",
     "locked"
   )
+  include VersionedByCurrentUser
 
   before_validation :normalize_author_characters!
 
@@ -399,9 +400,6 @@ class Name < AbstractModel
 
   before_update :update_observation_cache
   after_update :notify_users
-
-  # Used by notify_users and notify_webmaster
-  attr_accessor :current_user
 
   # Used by name/_form_name.rhtml
   attr_accessor :misspelling

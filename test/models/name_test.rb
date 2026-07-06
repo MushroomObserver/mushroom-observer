@@ -7,7 +7,6 @@ class NameTest < UnitTestCase
   include ActiveJob::TestHelper
 
   def create_test_name(string, force_rank = nil)
-    User.current = rolf
     parse = Name.parse_name(string)
     assert(parse, "Expected this to parse: #{string}")
     params = parse.params
@@ -2096,7 +2095,6 @@ class NameTest < UnitTestCase
     katrina.save
 
     # Start with no reviewers, editors or authors.
-    User.current = nil
     desc.gen_desc = ""
     desc.review_status = :unreviewed
     desc.reviewer = nil
@@ -2120,8 +2118,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: --        editors: --         reviewer: -- (unreviewed)
     # Rolf erases notes: no emails (no authors yet), Rolf becomes editor.
-    User.current = rolf
     desc.reload
+    desc.current_user = rolf
     desc.gen_desc = ""
     desc.diag_desc = ""
     desc.distribution = ""
@@ -2144,8 +2142,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: --        editors: Rolf       reviewer: -- (unreviewed)
     # Mary writes gen_desc: notify Rolf (editor), Mary becomes author.
-    User.current = mary
     desc.reload
+    desc.current_user = mary
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2183,8 +2181,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: Mary      editors: Rolf       reviewer: -- (unreviewed)
     # Dick changes uses: notify Mary (author); Dick becomes editor.
-    User.current = dick
     desc.reload
+    desc.current_user = dick
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2223,8 +2221,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       .
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: -- (unreviewed)
     # Rolf reviews name: notify Katrina (author), Rolf becomes reviewer.
-    User.current = rolf
     desc.reload
+    desc.current_user = rolf
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2261,8 +2259,8 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (inaccurate)
     # Dick changes look-alikes: notify Rolf (reviewer), clear review status
-    User.current = dick
     desc.reload
+    desc.current_user = dick
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -2305,7 +2303,6 @@ class NameTest < UnitTestCase
     # 4 Katrina:    x       x       x       no
     # Authors: Mary,Katrina   editors: Rolf,Dick   reviewer: Rolf (unreviewed)
     # Rolf changes citation (on Name, not desc): notify Mary (interest).
-    User.current = rolf
     name.reload
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
@@ -2342,7 +2339,6 @@ class NameTest < UnitTestCase
     desc = name_descriptions(:peltigera_desc)
 
     # Mary is author, rolf is editor - both would normally be notified
-    User.current = nil
     Name.without_revision do
       desc.authors.clear
       desc.editors.clear
@@ -2374,8 +2370,6 @@ class NameTest < UnitTestCase
   end
 
   def test_misspelling
-    User.current = rolf
-
     # Make sure deprecating a name doesn't clear misspelling stuff.
     names(:petigera).change_deprecated(true)
     assert(names(:petigera).is_misspelling?)
@@ -2987,7 +2981,6 @@ class NameTest < UnitTestCase
   end
 
   def test_skip_notify
-    User.current = users(:roy)
     name = names(:coprinus_comatus)
     name.skip_notify = true
     assert_no_enqueued_jobs do
@@ -3010,7 +3003,6 @@ class NameTest < UnitTestCase
   # classification is versioned on Name (#4163), guard so that a save
   # touching only classification still doesn't notify.
   def test_classification_only_save_does_not_notify
-    User.current = users(:roy)
     name = names(:coprinus_comatus)
     new_cls = "Domain: _Eukarya_\r\nKingdom: _Fungi_\r\n" \
               "Phylum: _TestPhylum_\r\n"
@@ -3023,7 +3015,6 @@ class NameTest < UnitTestCase
 
   def test_notify_webmaster
     # Test notify_webmaster sends email via deliver_later
-    User.current = rolf
     name = Name.new(
       text_name: "Testname webmaster",
       display_name: "**__Testname webmaster__**",
@@ -3037,7 +3028,6 @@ class NameTest < UnitTestCase
 
   def test_notify_webmaster_skip_notify
     # Test that skip_notify prevents notify_webmaster
-    User.current = rolf
     name = Name.new(
       text_name: "Testname skip",
       display_name: "**__Testname skip__**",
@@ -3134,7 +3124,6 @@ class NameTest < UnitTestCase
   # --------------------------------------
 
   def test_parent_if_parent_deprecated
-    User.current = rolf
     lepiota = names(:lepiota)
     lepiota.change_deprecated(true)
     lepiota.save
@@ -3162,7 +3151,6 @@ class NameTest < UnitTestCase
   end
 
   def test_names_from_synonymous_genera
-    User.current = rolf
     a = create_test_name("Agaricus")
     a1 = create_test_name("Agaricus testus")
     a3 = create_test_name("Agaricus testii")
@@ -3687,7 +3675,6 @@ class NameTest < UnitTestCase
   #   - else returns no value (page hides the panel)
   def test_classification_at_version_recorded
     name = names(:agaricus_campestras)
-    User.current = rolf
     name.update!(classification: "Phylum: _Basidiomycota_")
     v = name.versions.find_by(classification: "Phylum: _Basidiomycota_")
 
@@ -3699,7 +3686,6 @@ class NameTest < UnitTestCase
   def test_classification_at_version_inherited_from_genus
     genus = names(:agaricus)
     species = names(:agaricus_campestras)
-    User.current = rolf
     # Genus has a classified version row that pre-dates the species's
     # NULL-classification version row — simulating the order of events
     # when propagation silently updated the species without creating
@@ -3723,7 +3709,6 @@ class NameTest < UnitTestCase
     # Above-genus name (no genus to walk up to) with NULL classification
     # on its version row → :none.
     name = names(:basidiomycota)
-    User.current = rolf
     name.update!(classification: "Domain: _Eukarya_")
     v = name.versions.order(:version).last
     v.update_columns(classification: nil)

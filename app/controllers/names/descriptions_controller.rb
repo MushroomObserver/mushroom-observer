@@ -199,6 +199,7 @@ module Names
 
     # called by :create
     def save_new_description_flash_and_redirect
+      @description.current_user = @user
       initialize_description_permissions
       @description.save
 
@@ -257,6 +258,7 @@ module Names
     def update_review_status_if_changes_substantial
       return unless @description.save_version?
 
+      @description.current_user = @user
       @description.update_review_status(@description.review_status)
     end
 
@@ -270,6 +272,7 @@ module Names
         return render_edit
       end
 
+      @description.current_user = @user
       @description.save
       flash_notice(
         :runtime_edit_name_description_success.t(id: @description.id)
