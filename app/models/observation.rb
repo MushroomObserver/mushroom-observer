@@ -967,7 +967,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Textile-marked-up name, never nil. `user` is who's *looking* (nil
   # => no viewer-specific formatting).
   def format_name(user = nil)
-    name.user_observation_name(user)
+    user_format_name(user)
   end
 
   def user_format_name(user)
