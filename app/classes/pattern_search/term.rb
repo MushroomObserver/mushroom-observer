@@ -152,7 +152,7 @@ module PatternSearch
 
     def parse_one_user(val)
       case val
-      when "me" || :search_value_me.l
+      when "me", :search_value_me.l
         user ||
           raise(UserMeNotLoggedInError.new)
       when /^\d+$/
