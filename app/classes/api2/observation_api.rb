@@ -304,13 +304,6 @@ class API2
       end
     end
 
-    def parse_notes_field_parameter!(str)
-      keys = User.parse_notes_template(str)
-      return keys.first.to_sym if keys.length == 1
-
-      raise(BadNotesFieldParameter.new(str))
-    end
-
     def parse_naming_reasons!
       Naming::Reason.all_reasons.each_with_object({}) do |num, reasons|
         val = parse(:string, :"reason_#{num}")
