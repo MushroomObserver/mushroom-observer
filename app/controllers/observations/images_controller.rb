@@ -35,6 +35,7 @@ module Observations
       @licenses = current_license_names_and_ids
       return unless check_image_permission?
 
+      @image.current_user = @user
       @image.attributes = permitted_image_params
 
       if image_or_projects_updated

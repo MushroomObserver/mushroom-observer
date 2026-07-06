@@ -219,6 +219,7 @@ module ObservationsController::SharedFormMethods
       args = params.dig(:observation, :good_image, image.id.to_s)
       next unless args
 
+      image.current_user = @user
       image.attributes = args.permit(permitted_image_args)
       next unless image.when_changed? ||
                   image.notes_changed? ||

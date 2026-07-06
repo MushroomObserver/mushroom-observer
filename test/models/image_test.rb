@@ -37,8 +37,6 @@ class ImageTest < UnitTestCase
   end
 
   def test_copyright_logging
-    User.current = mary
-
     license_one = licenses(:ccnc25)
     license_two = licenses(:ccwiki30)
     name_one = "Bobby Singer"
@@ -52,6 +50,7 @@ class ImageTest < UnitTestCase
       license: license_one,
       copyright_holder: name_one
     )
+    img.current_user = mary
     assert_equal(date_one.year, img.when.year)
     assert_equal(license_one, img.license)
     assert_equal(name_one, img.copyright_holder)

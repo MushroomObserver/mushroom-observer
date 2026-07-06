@@ -250,6 +250,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :profile_users, class_name: "User"
 
+  # The acting/editing user - attribution for track_copyright_changes'
+  # CopyrightChange record, set by the caller before save.
+  attr_accessor :current_user
+
   belongs_to :user
   belongs_to :license
 
@@ -1133,7 +1137,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
                          license_id
                        end
       CopyrightChange.create!(
-        user: User.current,
+        user: current_user,
         updated_at: updated_at,
         target: self,
         year: old_year,
@@ -1267,7 +1271,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     validate_upload if upload_handle && new_record?
 
     # I guess this is kind of serious -- uploading with no one logged in??!
-    errors.add(:user, :validate_image_user_missing.t) if !user && !User.current
+    errors.add(:user, :validate_image_user_missing.t) if !user && !current_user
 
     # Try everything in our power to make uploads succeed.  Let the user worry
     # about correcting the date later if need be.
