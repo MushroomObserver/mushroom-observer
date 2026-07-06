@@ -24,7 +24,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     slip = field_slips(:field_slip_no_obs)
     get(:new, params: { field_code: slip.code })
 
-    User.current.project_members.each do |membership|
+    katrina.project_members.each do |membership|
       proj = membership.project
       if proj == slip.project || (proj.current? && proj.field_slip_prefix.nil?)
         assert_project_checks(proj.id => :checked)

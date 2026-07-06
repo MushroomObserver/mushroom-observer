@@ -13,6 +13,7 @@
 #  login::   Log user in to current session.
 #  login!::  Same thing, but raise an error if it is unsuccessful.
 #  logout
+#  rack_session
 #  put_user_in_admin_mode
 #  current_fullpath
 #  current_path_id
@@ -71,6 +72,18 @@ module CapybaraSessionExtensions
   def logout(session: self)
     session.visit("/info/how_to_help")
     session.first(:button, text: :app_logout.l).click
+  end
+
+  # The server-side session hash for the last completed request — the
+  # same `session[:user_id]` `switch_to_user`/`session_user_set` write
+  # to (app/controllers/application_controller/authentication.rb).
+  # Only valid for the :rack_test driver, which runs in-process so the
+  # test thread can read it directly. NOT valid for Cuprite/system
+  # tests: those drive a real Puma thread, so the test thread and the
+  # request thread don't share memory — assert against rendered page
+  # content instead (see `login!` above for that pattern).
+  def rack_session(session: page)
+    session.driver.browser.last_request.session
   end
 
   def put_user_in_admin_mode(user = :zero_user, session: self)

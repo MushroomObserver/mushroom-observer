@@ -181,6 +181,121 @@ class ImageTest < UnitTestCase
     assert_equal(0, img.num_votes(4))
   end
 
+  def test_other_subjects
+    img = images(:in_situ_image)
+
+    assert_not_empty(img.all_subjects)
+    # An unrelated object leaves the image's own subjects in place.
+    assert(img.other_subjects?(Object.new))
+  end
+
+  def test_original_extension_by_content_type
+    {
+      "image/jpeg" => "jpg", "image/gif" => "gif", "image/png" => "png",
+      "image/tiff" => "tiff", "image/bmp" => "bmp",
+      "image/x-ms-bmp" => "bmp", "application/octet-stream" => "raw"
+    }.each do |content_type, ext|
+      assert_equal(ext, Image.new(content_type: content_type).
+                        original_extension)
+    end
+  end
+
+  def test_image_dir_defaults_and_override
+    img = Image.new
+
+    assert_equal(MO.local_image_files, img.image_dir)
+
+    img.image_dir = "/custom/dir"
+
+    assert_equal("/custom/dir", img.image_dir)
+  end
+
+  def test_image_setter_rejects_unknown_type
+    assert_raises(RuntimeError) { Image.new.image = 42 }
+  end
+
+  def test_init_image_from_local_file_blank_path
+    file = Struct.new(:path).new("")
+
+    assert_raises(RuntimeError) do
+      Image.new.init_image_from_local_file(file)
+    end
+  end
+
+  def test_init_image_from_stream_content_length
+    img = Image.new
+    stream = Object.new
+    stream.define_singleton_method(:content_length) { "42\n" }
+
+    img.init_image_from_stream(stream)
+
+    assert_equal("42", img.upload_length)
+  end
+
+  def test_upload_from_url
+    img = Image.new
+    upload = Struct.new(:content, :content_length, :content_type,
+                        :content_md5).
+             new(StringIO.new("data"), 4, "image/jpeg", "abc123")
+    upload.define_singleton_method(:clean_up) { nil }
+
+    API2::UploadFromURL.stub(:new, ->(_url) { upload }) do
+      img.upload_from_url("https://example.org/x.jpg")
+    end
+
+    assert_equal(4, img.upload_length)
+    assert_equal("image/jpeg", img.upload_type)
+    assert_equal("abc123", img.upload_md5sum)
+    assert_respond_to(img.clean_up_proc, :call)
+  end
+
+  def test_validate_image_length_too_big
+    img = Image.new
+    img.upload_length = MO.image_upload_max_size + 1
+
+    assert_not(img.validate_image_length)
+    assert(img.errors[:image].any?)
+  end
+
+  def test_save_to_temp_file_rescues_copy_error
+    img = Image.new
+    img.upload_handle = StringIO.new("data")
+
+    Tempfile.stub(:new, ->(*) { raise("boom") }) do
+      assert_not(img.save_to_temp_file)
+    end
+    assert(img.errors[:image].any?)
+  end
+
+  def test_save_to_temp_file_rejects_invalid_upload_handle
+    img = Image.new
+    img.upload_handle = Object.new # not an IO/StringIO/TeeInput
+
+    assert_not(img.save_to_temp_file)
+    assert(img.errors[:image].any?)
+  end
+
+  def test_process_image_before_save
+    img = Image.new
+
+    assert_not(img.process_image)
+    assert(img.errors[:image].any?)
+  end
+
+  def test_process_image_command_failure
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+
+    img.stub(:move_original, true) do
+      img.stub(:system, false) do
+        Rails.env.stub(:test?, false) do
+          assert_not(img.process_image)
+        end
+      end
+    end
+    assert(img.errors[:image].any?)
+  end
+
   def test_move_original_system_fail
     img = Image.new
     File.stub(:rename, false) do

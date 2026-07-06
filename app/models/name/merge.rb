@@ -28,16 +28,40 @@ class Name
     def merge(user, old_name)
       return if old_name == self
 
-      move_observations(old_name)
-      move_namings(old_name)
-      move_mispellings(user, old_name)
-      move_followings(old_name) # move Interest and Tracking
-      move_descriptions(user, old_name)
-      move_versions(old_name)
-      move_nomenclature_attributes(old_name)
-      move_taxonomy_attributes(user, old_name)
+      Name.transaction do
+        move_observations(old_name)
+        move_namings(old_name)
+        move_mispellings(user, old_name)
+        move_followings(old_name) # move Interest and Tracking
+        move_descriptions(user, old_name)
+        move_versions(old_name)
+        move_nomenclature_attributes(old_name)
+        move_taxonomy_attributes(user, old_name)
 
-      old_name.destroy
+        # Re-snapshot right before destroying: a concurrent request
+        # could have pointed a different Name's correct_spelling at
+        # old_name after move_mispellings' query ran above. A plain
+        # `Name.where` bypasses old_name's own association reader
+        # entirely, so it neither triggers a StrictLoadingViolationError
+        # (old_name.misspellings may already be eager-loaded via
+        # Name.merge_includes) nor requires old_name.reload (which
+        # would also wipe out move_descriptions' in-memory
+        # `rss_log = nil`, un-orphaning it and causing do_log_destroy
+        # to log a duplicate destroy entry). Catches anything that
+        # slipped in during the merge, keeping correct_spelling_id
+        # from ever dangling once old_name is gone.
+        #
+        # This still isn't watertight: nothing stops another
+        # transaction from pointing correct_spelling_id at old_name
+        # after this re-snapshot but before this transaction commits -
+        # that needs a DB-level constraint (FK with ON DELETE
+        # SET NULL/RESTRICT), not application code. Tracked as a
+        # follow-up rather than expanding this PR into a migration.
+        stragglers = Name.where(correct_spelling_id: old_name.id)
+        move_mispellings(user, old_name, misspellings: stragglers)
+
+        old_name.destroy!
+      end
     end
 
     #######################
@@ -47,19 +71,19 @@ class Name
     def move_observations(old_name)
       old_name.observations.each do |obs|
         obs.name = self
-        obs.save
+        obs.save!
       end
     end
 
     def move_namings(old_name)
       old_name.namings.each do |name|
         name.name = self
-        name.save
+        name.save!
       end
     end
 
-    def move_mispellings(user, old_name)
-      old_name.misspellings.each do |name|
+    def move_mispellings(user, old_name, misspellings: old_name.misspellings)
+      misspellings.each do |name|
         name.correct_spelling = (name == self ? nil : self)
         # `name` (a misspelling of old_name) is a different record from
         # `self`/old_name, so it never gets a `current_user` from
@@ -67,7 +91,7 @@ class Name
         # would attribute the resulting change-notification email to
         # no one instead of the user performing the merge.
         name.current_user = user
-        name.save
+        name.save!
       end
     end
 
@@ -77,7 +101,7 @@ class Name
         target_type: "Name", target_id: old_name.id
       ).find_each do |int|
         int.target = self
-        int.save
+        int.save!
       end
 
       # Move over any notifications on the old name.
@@ -116,7 +140,7 @@ class Name
         UserStats.update_contribution(:del, :name_versions, user_id)
       end
 
-      old_name.versions.each(&:destroy)
+      old_name.versions.each(&:destroy!)
     end
 
     def move_nomenclature_attributes(old_name)
@@ -134,7 +158,7 @@ class Name
                    "#{old_name.user_format_name(@user)}:\n\n #{old_name.notes}"
       user_log(user, :log_name_updated, touch: true)
       @current_user = user
-      save
+      save!
     end
 
     def prepare_notes_for_merger

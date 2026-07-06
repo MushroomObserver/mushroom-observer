@@ -3,16 +3,18 @@
 module RuboCop
   module Cop
     module MushroomObserver
-      # Flags use of `User.current` in controllers and components.
+      # Flags reads of `User.current` in controllers, views, and
+      # components — including the `::User.current` cbase-qualified
+      # form. No exemptions: controllers should use `@user` (set by
+      # ApplicationController); views/components should receive
+      # `user:` as a prop, or call the registered `current_user`
+      # value helper (`Components::Base`, request-scoped, falls back
+      # to the controller's `@user`) — either way, not the global.
       #
-      # Controllers should use `@user` instead, which is set by
-      # ApplicationController. Components should receive `user` as a prop.
-      #
-      # The only exceptions are in authentication-related code where
-      # `User.current` is being *set* (not read).
-      #
-      # NOTE: This cop only runs on .rb files. For ERB views, manually
-      # ensure `@user` is used instead of `User.current`.
+      # Authentication code that *sets* `User.current` (the mechanism
+      # models rely on outside request context) isn't flagged, because
+      # the pattern only matches no-arg reads - an assignment send
+      # carries the RHS as a 3rd child and never matches.
       #
       # @example
       #   # bad (in controller)
@@ -23,29 +25,36 @@ module RuboCop
       #   @user
       #   @user.id
       #
-      #   # bad (in component)
+      #   # bad (in component/view)
       #   User.current_location_format
+      #   ::User.current_location_format
       #
-      #   # good (in component - add user prop)
+      #   # good (in component/view - add a user prop ...)
       #   @user.location_format
+      #
+      #   # ... or use the registered current_user value helper
+      #   current_user&.location_format
       #
       class NoUserCurrentInViews < Base
         MSG = "Avoid `User.current`. In controllers, use `@user` " \
-              "(set by ApplicationController). In components, pass " \
-              "`user:` as a prop."
+              "(set by ApplicationController). In views/components, " \
+              "pass `user:` as a prop or call the registered " \
+              "`current_user` value helper."
 
         # Match calls like User.current, User.current_id,
-        # User.current_location_format
-        # but NOT User.current = ... (assignment)
+        # User.current_location_format, ::User.current (cbase-qualified).
+        # The fixed 2-child shape (receiver + selector, no args) already
+        # excludes `User.current = ...` on its own: an assignment send
+        # carries the RHS as a 3rd child, so it never matches here -
+        # no separate "is this an assignment" guard needed (a previous
+        # version tried to guard via `parent.method_name.end_with?("=")`,
+        # which also misfired on `==`/`>=`/`<=`/`!=` comparisons).
         def_node_matcher :user_current_read?, <<~PATTERN
-          (send (const nil? :User) /^current/)
+          (send (const {nil? (cbase)} :User) /^current/)
         PATTERN
 
         def on_send(node)
           return unless user_current_read?(node)
-          # Don't flag if this is an assignment (User.current = ...)
-          return if node.parent&.type == :send &&
-                    node.parent.method_name.to_s.end_with?("=")
 
           add_offense(node)
         end

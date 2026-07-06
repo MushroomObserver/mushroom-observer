@@ -71,7 +71,7 @@ class RssLogsControllerTest < FunctionalTestCase
       css_select(".rss-what").text
     )
 
-    comments_for_path = comments_path(for_user: User.current_id)
+    comments_for_path = comments_path(for_user: rolf.id)
     assert_select(
       "a[href='#{comments_for_path}']",
       true, "LH NavBar 'Commments for` link broken"

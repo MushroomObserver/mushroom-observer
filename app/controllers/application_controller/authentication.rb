@@ -252,7 +252,7 @@ module ApplicationController::Authentication
 
   def update_sudo_session(new_user)
     if session[:real_user_id].blank?
-      session[:real_user_id] = User.current_id
+      session[:real_user_id] = @user&.id
       session[:admin] = nil
     elsif session[:real_user_id] == new_user.id
       session[:real_user_id] = nil
@@ -284,5 +284,24 @@ module ApplicationController::Authentication
   # (Does not check verified status or anything.)
   def session_user
     User.safe_find(session[:user_id])
+  end
+
+  # For actions that skip the standard `autologin` filter (via
+  # `disable_filters`, to avoid its autologin-cookie-fallback overhead
+  # on lightweight AJAX endpoints) but still need to know who's logged
+  # in. `session[:user_id]` isn't touched by skipping `autologin` -
+  # only the extra steps are skipped - so `session_user` is always
+  # available here. Applies the same `user_verified_and_allowed?`
+  # check `autologin` does, so a blocked/unverified user's session
+  # resolves to nil here too, same as everywhere else on the site.
+  #
+  # Only sets `@user` - not `User.current`. Neither caller's request
+  # path (nor the shared around_action logging) reads `User.current`;
+  # a future caller that needs it for a model-layer default (e.g.
+  # `Image.new`'s `user: User.current`) should pass `user:` explicitly
+  # rather than leaning on the global.
+  def set_user_from_session
+    user = session_user
+    @user = user if user_verified_and_allowed?(user)
   end
 end

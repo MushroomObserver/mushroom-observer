@@ -67,12 +67,12 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
       fill_in("admin_session_user", with: "mary")
       click_commit
     end
-    assert_equal(mary.id, User.current_id)
+    assert_equal(mary.id, rack_session[:user_id])
     assert_selector("#admin_banner",
                     text: /DANGER: You are currently logged in as mary/)
 
     within("#user_drop_down") { click_on(class: "logout_link") }
-    assert_equal(rolf.id, User.current_id)
+    assert_equal(rolf.id, rack_session[:user_id])
     assert_selector("#admin_banner",
                     text: /DANGER: You are in administrator mode/)
   end

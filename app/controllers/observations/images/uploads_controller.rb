@@ -22,7 +22,6 @@ module Observations::Images
     # there's no primitive context there.)
     # was multi_image_template
     def new
-      @user = User.current = session_user # || raise("Must be logged in.")
       @licenses = License.available_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now,
                          copyright_holder: @user.legal_name)
@@ -36,7 +35,6 @@ module Observations::Images
     # was create_image_object
     # Because this is a POST, requires auth token
     def create
-      @user = User.current = session_user
       args = params[:image]
       image = create_and_upload_image(args)
       render_image(image, args)

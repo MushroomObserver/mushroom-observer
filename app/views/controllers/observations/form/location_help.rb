@@ -29,7 +29,7 @@ module Views::Controllers::Observations
     end
 
     def scientific?
-      ::User.current_location_format == "scientific"
+      current_user&.location_format == "scientific"
     end
   end
 end
