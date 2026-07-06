@@ -2196,12 +2196,12 @@ class ObservationTest < UnitTestCase
     assert_nothing_raised { fresh.other_notes = "Hello" }
   end
 
-  # user_unique_format_name swallows StandardError from the name
-  # call and returns "" (line 836).
-  def test_user_unique_format_name_swallows_errors
+  # unique_format_name swallows StandardError from the name
+  # call and returns "".
+  def test_unique_format_name_swallows_errors
     obs = observations(:minimal_unknown_obs)
     obs.stub(:name, nil) do
-      assert_equal("", obs.user_unique_format_name(users(:rolf)),
+      assert_equal("", obs.unique_format_name(users(:rolf)),
                    "Should swallow NoMethodError on nil name")
     end
   end

@@ -115,8 +115,8 @@ class ObservationLabels::RtfLabels
     label("Name")
     italic = false
     @para.bold do |bold|
-      @obs.name.user_display_name(@user).gsub("**",
-                                              "").split("__").each do |part|
+      @obs.name.display_name(@user).gsub("**",
+                                         "").split("__").each do |part|
         unless part.empty?
           if italic
             bold.italic { |i| i << part } if part.present?

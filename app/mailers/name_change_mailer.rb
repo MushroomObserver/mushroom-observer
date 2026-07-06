@@ -45,7 +45,7 @@ class NameChangeMailer < ApplicationMailer
 
   def calc_search_name(name_change, receiver)
     (name_change.old_clone || name_change.new_clone).
-      user_real_search_name(receiver)
+      real_search_name(receiver)
   end
 
   # "interest" / "admin" / "editor" / "author" / "reviewer" / nil —

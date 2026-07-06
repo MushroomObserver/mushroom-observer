@@ -147,7 +147,7 @@ class Description < AbstractModel
   end
 
   # Descriptive title including parent name, in Textile-formatted text.
-  def format_name
+  def format_name(_user = nil)
     put_together_name(:full)
   end
 
@@ -158,7 +158,7 @@ class Description < AbstractModel
   alias document_title text_name
 
   # Same as +format_name+ but with id tacked on.
-  def unique_format_name
+  def unique_format_name(_user = nil)
     string_with_id(format_name)
   end
 

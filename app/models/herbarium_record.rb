@@ -120,7 +120,7 @@ class HerbariumRecord < AbstractModel
     end
   end
 
-  def format_name
+  def format_name(_user = nil)
     herbarium_label
   end
 

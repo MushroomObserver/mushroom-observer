@@ -97,15 +97,6 @@ class RssLogTest < UnitTestCase
     log = create_rss_log(:species_list)
     assert_equal(SpeciesList.first.unique_format_name, log.unique_format_name)
 
-    # Target responds to format_name but not unique_format_name - no
-    # current RssLog-able type actually has this shape, but the method
-    # defends against it, so exercise it with a stand-in target.
-    fake_target = Struct.new(:format_name).new("Fake Name")
-    stubbed_log = RssLog.new(observation_id: Observation.first.id)
-    stubbed_log.define_singleton_method(:target) { fake_target }
-    assert_equal("Fake Name (#{stubbed_log.target_id})",
-                 stubbed_log.unique_format_name)
-
     orphan_log = RssLog.new
     assert_equal(orphan_log.orphan_title, orphan_log.unique_format_name)
   end

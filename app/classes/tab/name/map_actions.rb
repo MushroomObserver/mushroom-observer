@@ -18,7 +18,7 @@ class Tab::Name::MapActions < Tab::Collection
     [
       Tab::Object::Show.new(object: @name,
                             title: :name_map_about.t(
-                              name: @name.user_display_name(@user)
+                              name: @name.display_name(@user)
                             )),
       Tab::RelatedQuery.for(model: Location, filter: :Observation,
                             current_query: @query,

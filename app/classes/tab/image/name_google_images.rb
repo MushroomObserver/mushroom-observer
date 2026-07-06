@@ -2,7 +2,7 @@
 
 # "Google Images" external-site link used on the image show page —
 # searches by `name.search_name` (not user-aware), distinct from
-# `Tab::Name::UserGoogleImages` (which uses `name.user_real_text_name`).
+# `Tab::Name::UserGoogleImages` (which uses `name.real_text_name(user)`).
 class Tab::Image::NameGoogleImages < Tab::Base
   def initialize(name:)
     super()

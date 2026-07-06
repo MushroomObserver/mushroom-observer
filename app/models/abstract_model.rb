@@ -626,12 +626,7 @@ class AbstractModel < ApplicationRecord
   #
   def orphan_log(*)
     rss_log = init_rss_log(orphan: true)
-    name_str = if respond_to?(:user_format_name)
-                 user_format_name(@current_user)
-               else
-                 format_name
-               end
-    rss_log.orphan(@current_user, name_str, *)
+    rss_log.orphan(@current_user, format_name(@current_user), *)
   end
 
   # Callback that logs creation.

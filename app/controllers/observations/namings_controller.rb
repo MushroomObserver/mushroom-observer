@@ -208,7 +208,7 @@ module Observations
                  "box_title_#{obs_id}",
                  Components::Matrix::Box::Title.new(
                    id: obs_id,
-                   name: @observation.user_format_name(@user).
+                   name: @observation.format_name(@user).
                          t.break_name.small_author,
                    type: :observation
                  )

@@ -47,7 +47,7 @@ class Article < AbstractModel
   end
 
   # used by MatrixBoxPresenter to show orphaned obects
-  def format_name
+  def format_name(_user = nil)
     title
   end
 
@@ -68,7 +68,7 @@ class Article < AbstractModel
   end
 
   # used by MatrixBoxPresenter to show unorphaned obects
-  def unique_format_name
+  def unique_format_name(_user = nil)
     string_with_id(title)
   end
 

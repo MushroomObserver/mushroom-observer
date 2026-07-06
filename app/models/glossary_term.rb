@@ -83,7 +83,7 @@ class GlossaryTerm < AbstractModel
     name
   end
 
-  def format_name
+  def format_name(_user = nil)
     name
   end
 
@@ -97,7 +97,7 @@ class GlossaryTerm < AbstractModel
     name
   end
 
-  def unique_format_name
+  def unique_format_name(_user = nil)
     unique_text_name
   end
 

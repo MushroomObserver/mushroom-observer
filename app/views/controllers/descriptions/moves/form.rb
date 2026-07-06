@@ -36,7 +36,7 @@ module Views::Controllers::Descriptions::Moves
     # `synonyms`, which is only Name) - always Name instances.
     def render_move_options
       options = sorted_moves.map do |name|
-        [name.id, name.user_display_name(@user).t]
+        [name.id, name.display_name(@user).t]
       end
       radio_field(:target, *options)
     end

@@ -60,7 +60,7 @@ class Views::Mailers::NamingObserverMailer < Views::Mailers::Base
   def intro
     :email_naming_for_observer_intro.l(
       user: sender.legal_name, email: sender.email, type: :observation,
-      name: observation.user_unique_format_name(@receiver)
+      name: observation.unique_format_name(@receiver)
     )
   end
 

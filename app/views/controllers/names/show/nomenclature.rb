@@ -89,7 +89,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def render_name_paragraph
     p do
       plain("#{:NAME.l}: ")
-      plain(@name.user_real_text_name(@user))
+      plain(@name.real_text_name(@user))
       span(class: "text-nowrap ml-3") { render(synonyms_link) } if synonyms_link
     end
   end
@@ -199,7 +199,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
       plain("#{:show_name_misspelling_correct.l}: ")
       if @name.correct_spelling
         a(href: name_path(@name.correct_spelling_id)) do
-          trusted_html(@name.correct_spelling.user_display_name(@user).t)
+          trusted_html(@name.correct_spelling.display_name(@user).t)
         end
       else
         plain(@name.correct_spelling_id.to_s)
@@ -234,7 +234,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
       plain("#{label}: ")
       names.each_with_index do |n, idx|
         a(href: name_path(n.id)) do
-          trusted_html(n.user_display_name(@user).t)
+          trusted_html(n.display_name(@user).t)
         end
         plain(", ") if idx < names.length - 1
       end

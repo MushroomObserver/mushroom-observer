@@ -120,7 +120,7 @@ class Sequence < AbstractModel
   ##############################################################################
 
   # used in views and by MatrixBoxPresenter to show orphaned obects
-  def format_name
+  def format_name(_user = nil)
     locus.truncate(locus_width, separator: " ")
   end
 
@@ -133,7 +133,7 @@ class Sequence < AbstractModel
   alias document_title page_title
 
   # used in views and by MatrixBoxPresenter to show unorphaned obects
-  def unique_format_name
+  def unique_format_name(_user = nil)
     format_name + " (Sequence #{id || "?"})"
   end
 

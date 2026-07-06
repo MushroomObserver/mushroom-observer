@@ -56,7 +56,7 @@ class Views::Mailers::NamingTrackerMailer < Views::Mailers::Base
     )
     splice_html(
       spliced, /yyy/,
-      capture { link_to(@naming.user_format_name(@receiver).t, name_url) }
+      capture { link_to(@naming.format_name(@receiver).t, name_url) }
     )
   end
 

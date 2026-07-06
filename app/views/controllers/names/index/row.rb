@@ -49,7 +49,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
     a(href: name_path(@name.id)) do
       span(class: "display-name",
            data: { clipboard_target: "source" }) do
-        trusted_html(@name.user_display_name(@user).t)
+        trusted_html(@name.display_name(@user).t)
       end
     end
   end
