@@ -270,6 +270,17 @@ class SequenceTest < UnitTestCase
                  sequence.accession_url)
   end
 
+  def test_blastable
+    # Blastable via accession (archive + blastable accession format).
+    assert(sequences(:deposited_sequence).blastable?)
+    # Not blastable by accession (no archive), but has bases.
+    assert(sequences(:local_sequence).blastable?)
+  end
+
+  def test_index_includes_tree
+    assert_equal([:user, { observation: :name }], Sequence.index_includes_tree)
+  end
+
   def test_blast_url
     assert_equal(
       %(#{Sequence.blast_url_prefix}&QUERY=ACGT),

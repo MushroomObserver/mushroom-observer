@@ -1,5 +1,19 @@
 # frozen_string_literal: true
 
+# Resolved once by the :login/:login_admin tasks, read by the :import
+# action below - a plain rake-process-scoped value, not a model-layer
+# global; nothing outside this file reads it. attr_reader/attr_writer
+# don't work at top-level scope (no Module context), so plain def.
+# rubocop:disable Style/TrivialAccessors
+def login_user
+  @login_user
+end
+
+def login_user=(user)
+  @login_user = user
+end
+# rubocop:enable Style/TrivialAccessors
+
 # This has to be done without access to Language because it is used
 # to declare tasks before the MO environment has been loaded.
 def all_locales
@@ -11,19 +25,30 @@ def all_locales
   locales
 end
 
+# import_from_file is the one action that needs an explicit user
+# (resolved by :login/:login_admin above); every other action takes
+# no arguments.
+def perform_action(lang, action)
+  if action == :import_from_file
+    lang.send(action, login_user)
+  else
+    lang.send(action)
+  end
+end
+
 def define_tasks(action, verbose, verbose_method, description)
   desc(description.gsub("XXX", "official").gsub("(S)", ""))
   task(official: :setup) do
     lang = Language.official
     lang.verbose("#{verbose} #{lang.send(verbose_method)}")
-    lang.send(action)
+    perform_action(lang, action)
   end
 
   desc(description.gsub("XXX", "unofficial").gsub("(S)", "s"))
   task(unofficial: :setup) do
     Language.unofficial.find_each do |lang|
       lang.verbose("#{verbose} #{lang.send(verbose_method)}")
-      lang.send(action)
+      perform_action(lang, action)
     end
   end
 
@@ -31,7 +56,7 @@ def define_tasks(action, verbose, verbose_method, description)
   task(all: :setup) do
     Language.find_each do |lang|
       lang.verbose("#{verbose} #{lang.send(verbose_method)}")
-      lang.send(action)
+      perform_action(lang, action)
     end
   end
 
@@ -40,7 +65,7 @@ def define_tasks(action, verbose, verbose_method, description)
     task(locale => :setup) do |task|
       lang = Language.find_by(locale: task.name.sub(/.*:/, ""))
       lang.verbose("#{verbose} #{lang.send(verbose_method)}")
-      lang.send(action)
+      perform_action(lang, action)
     end
   end
 end
@@ -82,16 +107,16 @@ namespace :lang do
   # rubocop:disable Rails/RakeEnvironment
   desc "Log in user for import tasks."
   task(:login) do
-    User.current = if ENV.include?("user_name")
-                     User.find_by(login: ENV["user_name"])
-                   elsif ENV.include?("user_id")
-                     User.find(ENV["user_id"])
-                   end
+    self.login_user = if ENV.include?("user_name")
+                        User.find_by(login: ENV["user_name"])
+                      elsif ENV.include?("user_id")
+                        User.find(ENV["user_id"])
+                      end
   end
 
   desc "Log in admin for import tasks."
   task(:login_admin) do
-    User.current = User.find(0)
+    self.login_user = User.find(0)
   end
 
   desc 'Turn off verbosity if include "silent=yes".'

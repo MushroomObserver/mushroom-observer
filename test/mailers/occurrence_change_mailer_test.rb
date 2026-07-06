@@ -56,7 +56,7 @@ class OccurrenceChangeMailerTest < MailerTestCase
                     "https://mushroomobserver.org/occurrences/#{occurrence.id}")
   end
 
-  # `sender` is nil for automated changes (e.g. `User.current` unset
+  # `sender` is nil for automated changes (e.g. sender unset
   # in a background job) — intro must fall back instead of calling
   # `.legal_name` on nil.
   def test_build_with_nil_sender

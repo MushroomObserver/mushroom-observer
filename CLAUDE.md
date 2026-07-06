@@ -173,7 +173,6 @@ test/              # MiniTest suite
 importmap, GitHub Actions CI (4 parallel workers)
 
 **Key patterns**:
-- `User.current` for current user tracking when @user is not available
 - `observation_views` table for view stats
 - Custom i18n system: `en.txt` -> `en.yml` translation files.
   **NEVER edit `config/locales/en.yml` directly.** Edit `en.txt` then

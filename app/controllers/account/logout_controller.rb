@@ -23,7 +23,6 @@ module Account
 
     def clear_session_and_logout
       @user = nil
-      User.current = nil
       session_user_set(nil)
       session[:admin] = false
       session[:real_user_id] = nil

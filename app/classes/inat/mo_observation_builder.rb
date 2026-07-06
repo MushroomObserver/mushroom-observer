@@ -44,7 +44,7 @@ class Inat
         each do |name, value|
           add_naming_with_vote(name: name, namer: namer_for(name), value: value)
         end
-      @observation.log(:log_observation_created)
+      @observation.log(:log_observation_created, user: user)
     end
 
     def new_obs_params # rubocop:disable Metrics/AbcSize

@@ -85,7 +85,6 @@ module Account
       @user.last_login = now = Time.zone.now
       @user.updated_at = now
       @user.save
-      User.current = @user
       session_user_set(@user)
       @remember ? autologin_cookie_set(@user) : clear_autologin_cookie
       redirect_back_or_default(observations_path)

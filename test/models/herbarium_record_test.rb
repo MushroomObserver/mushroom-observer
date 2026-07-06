@@ -12,6 +12,12 @@ class HerbariumRecordTest < UnitTestCase
     assert(herbarium_records(:interesting_unknown).notes)
   end
 
+  def test_herbarium_label_with_blank_initial_det
+    record = herbarium_records(:interesting_unknown)
+    record.initial_det = ""
+    assert_equal(record.accession_number, record.herbarium_label)
+  end
+
   def test_personal_herbarium_name_and_languages
     # Ensure the translations are initialized
     assert_equal("fungarium", :herbarium.t)

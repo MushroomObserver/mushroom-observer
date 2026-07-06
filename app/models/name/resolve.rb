@@ -6,17 +6,17 @@ module Name::Resolve
     base.extend(ClassMethods)
   end
 
-  def save_with_log(user, log = nil, args = {})
+  def save_with_log(user, log_tag = nil, args = {})
     return false unless changed?
 
-    log ||= :log_name_updated
+    log_tag ||= :log_name_updated
     args = { touch: altered? }.merge(args)
     first_version_for_user = new_version_for_user?(user.id)
     @current_user = user
     return false unless save
 
     award_version_contribution(user.id) if first_version_for_user
-    user_log(user, log, args)
+    log(log_tag, user: user, **args)
     true
   end
 

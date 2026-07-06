@@ -9,10 +9,6 @@ require("test_helper")
 # missing en.txt key surfaces via the missing-translation teardown).
 # Enumerating subclasses keeps the coverage complete as errors are added.
 class PatternSearch::ErrorTest < UnitTestCase
-  def setup
-    User.current = users(:rolf)
-  end
-
   def test_all_errors_render
     error_classes.each do |klass|
       error = klass.new(universal_args)

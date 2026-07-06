@@ -471,6 +471,28 @@ class API2Test < UnitTestCase
   end
 
   # ---------------------------
+  #  :section: Version
+  # ---------------------------
+
+  def test_handle_version_defaults_when_absent
+    api = API2.execute(method: :get, action: :name)
+    assert_no_errors(api)
+    assert_equal(API2.version, api.version)
+  end
+
+  def test_handle_version_accepts_valid_format
+    api = API2.execute(method: :get, action: :name, version: "2.0")
+    assert_no_errors(api)
+    assert_in_delta(2.0, api.version)
+  end
+
+  def test_handle_version_rejects_non_x_dot_y_format
+    api = API2.execute(method: :get, action: :name, version: "2")
+    assert_equal(1, api.errors.length)
+    assert_kind_of(API2::BadVersion, api.errors.first)
+  end
+
+  # ---------------------------
   #  :section: Authentication
   # ---------------------------
 

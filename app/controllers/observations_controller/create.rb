@@ -52,7 +52,7 @@ module ObservationsController::Create
     try_to_save_new_observation
     return reload_new_form(naming_params_dig(:reasons)) if @any_errors
 
-    @observation.log(:log_observation_created)
+    @observation.log(:log_observation_created, user: @user)
 
     update_naming(naming_params_dig(:reasons))
     attach_good_images
@@ -129,7 +129,9 @@ module ObservationsController::Create
       flash_warning(:edit_collection_number_already_used.t) if
         col_num.observations.any?
     else
-      col_num = CollectionNumber.create(name: name, number: number)
+      col_num = CollectionNumber.new(name: name, number: number)
+      col_num.current_user = @user
+      col_num.save
     end
     col_num.add_observation(@observation)
   end
@@ -211,12 +213,15 @@ module ObservationsController::Create
 
   def create_herbarium_record(herbarium, initial_det, accession_number,
                               herbarium_record_notes)
-    HerbariumRecord.create(
+    record = HerbariumRecord.new(
       herbarium: herbarium,
       initial_det: initial_det,
       accession_number: accession_number,
       notes: herbarium_record_notes
     )
+    record.current_user = @user
+    record.save
+    record
   end
 
   def not_creating_record?(herbarium, accession_number)

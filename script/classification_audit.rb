@@ -232,7 +232,9 @@ def phase_1_propagate_from_genera
   genera = genera_with_classification
   log("  #{genera.count} genera to process")
 
-  User.current = User.find(WEBMASTER_ID)
+  # Name#propagate_classification uses update_all (bypasses
+  # acts_as_versioned/callbacks entirely - see file header), so there's
+  # no attribution to set up here.
   totals = { touched: 0, in_sync: 0 }
   # `each` (not `find_each`) so the `order(:text_name)` from
   # `genera_with_classification` is honored — `find_each` walks by
@@ -316,9 +318,11 @@ end
 # data), so the slower per-row path is fine. Description and
 # observation cache writes went away with the column itself in #4165.
 def sync_synonym_classification(name_ids, classification)
+  webmaster = User.find(WEBMASTER_ID)
   Name.transaction do
     Name.where(id: name_ids).find_each do |name|
       name.classification = classification
+      name.current_user = webmaster
       name.save!(validate: false)
     end
   end

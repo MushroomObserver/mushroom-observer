@@ -73,7 +73,6 @@ class ChecklistTest < UnitTestCase
     assert_equal([], genera(rolfs_species) - data.genera)
     assert_equal(rolfs_species, just_names(data.species))
 
-    User.current = dick
     before_data = Checklist::ForUser.new(dick)
     before_num_species = before_data.num_species
     before_num_genera = before_data.num_genera

@@ -2,9 +2,8 @@
 
 # Mix into any `acts_as_versioned` model whose version table has a
 # `user_id` column, to attribute each version to whoever's editing —
-# via an explicit per-instance accessor, not the deprecated
-# `User.current` thread-local. Used by Name, NameDescription, Location,
-# LocationDescription, and GlossaryTerm.
+# via an explicit per-instance accessor. Used by Name, NameDescription,
+# Location, LocationDescription, and GlossaryTerm.
 #
 # A host that needs extra bookkeeping alongside plain attribution
 # (e.g. Name's UserStats "first version by this user" contribution
@@ -22,8 +21,6 @@ module VersionedByCurrentUser
   extend ActiveSupport::Concern
 
   included do
-    attr_accessor :current_user
-
     after_save :set_version_current_user
   end
 

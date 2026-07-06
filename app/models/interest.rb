@@ -53,12 +53,6 @@ class Interest < AbstractModel
   belongs_to :user
   belongs_to :target, polymorphic: true
 
-  # Per-instance "who's editing this" - set explicitly by callers
-  # before save, not a thread-local global. In practice every real
-  # caller already sets `user:`/`.user =` explicitly, so this is only
-  # a fallback for check_requirements below.
-  attr_accessor :current_user
-
   # Maintain this Array of all models (targets) which take interests.
   ALL_TYPES = [
     Location, LocationDescription, Name, NameDescription, NameTracker,
@@ -123,6 +117,8 @@ class Interest < AbstractModel
   protected
 
   validate :check_requirements
+  # In practice every real caller already sets `user:`/`.user =`
+  # explicitly; current_user is only a fallback for this check.
   def check_requirements # :nodoc:
     if !user && !current_user
       errors.add(:user, :validate_interest_user_missing.t)

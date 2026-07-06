@@ -66,6 +66,7 @@ module GlossaryTerms
       if image &&
          @object.add_image(image) &&
          @object.save
+        image.current_user = @user
         image.log_reuse_for(@object)
         redirect_to(glossary_term_path(@object.id))
       else
@@ -122,6 +123,7 @@ module GlossaryTerms
         next unless (image = Image.safe_find(image_id))
 
         @object.remove_image(image)
+        image.current_user = @user
         image.log_remove_from(@object)
         flash_notice(:runtime_image_remove_success.t(id: image_id))
       end

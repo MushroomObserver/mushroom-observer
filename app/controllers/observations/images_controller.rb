@@ -263,6 +263,7 @@ module Observations
     # Attach an image to observation.
     def attach_image_to_observation(image)
       @observation.add_image(image)
+      image.current_user = @user
       image.log_reuse_for(@observation)
       if @observation.gps_hidden
         error = image.strip_gps!
