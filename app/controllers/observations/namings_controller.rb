@@ -408,7 +408,7 @@ module Observations
         @consensus.change_vote(@naming, new_val)
       else
         @consensus.reload_namings_and_votes!
-        @consensus.calc_consensus
+        @consensus.calc_consensus(@user)
       end
     end
 

@@ -220,7 +220,7 @@ class ImagesController < ApplicationController
                   (val == "0" || (val = Image.validate_vote(val)))
 
     val = nil if val == "0"
-    cur = @image.users_vote
+    cur = @image.users_vote(@user)
     if cur != val
       anon = @user.votes_anonymous == :yes
       @image.change_vote(@user, val, anon: anon)

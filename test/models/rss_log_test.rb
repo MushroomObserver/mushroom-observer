@@ -37,7 +37,6 @@ class RssLogTest < UnitTestCase
   end
 
   def test_detail_for_destroyed_object
-    # User.current = users(:dick)
     obs = observations(:detailed_unknown_obs)
     obs.current_user = users(:dick)
     log = obs.rss_log
@@ -50,7 +49,6 @@ class RssLogTest < UnitTestCase
   end
 
   def test_detail_for_merged_location
-    User.current = users(:mary)
     loc1 = locations(:albion)
     loc2 = locations(:mitrula_marsh)
     log = loc1.rss_log

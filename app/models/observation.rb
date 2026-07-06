@@ -356,7 +356,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       value: Vote.maximum_vote,
       favorite: true
     )
-    Observation::NamingConsensus.new(obs).user_calc_consensus(user)
+    Observation::NamingConsensus.new(obs).calc_consensus(user)
     obs
   end
 
@@ -469,7 +469,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     notes[:Collector].to_s.include?("_user #{user.login}_")
   end
 
-  def project_admin?(user = User.current)
+  def project_admin?(user)
     Project.admin_power?(self, user)
   end
 
@@ -581,7 +581,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  def update_view_stats(current_user = User.current)
+  def update_view_stats(current_user = nil)
     super
     return if current_user.blank?
 
@@ -964,9 +964,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     string_with_id(name.user_real_search_name(user))
   end
 
-  # Textile-marked-up name, never nil.
-  def format_name
-    name.user_observation_name(User.current)
+  # Textile-marked-up name, never nil. `user` is who's *looking* (nil
+  # => no viewer-specific formatting).
+  def format_name(user = nil)
+    user_format_name(user)
   end
 
   def user_format_name(user)
@@ -1331,7 +1332,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def send_observation_destroyed_emails
     sender = user
     recipients = interested_users - [sender]
-    note = user_unique_format_name(User.current)
+    note = user_unique_format_name(current_user)
 
     recipients.each do |receiver|
       next if receiver.no_emails

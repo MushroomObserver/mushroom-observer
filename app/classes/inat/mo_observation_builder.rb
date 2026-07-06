@@ -243,7 +243,7 @@ class Inat
     end
 
     def update_names_and_proposals
-      Observation::NamingConsensus.new(@observation).calc_consensus
+      Observation::NamingConsensus.new(@observation).calc_consensus(user)
     end
 
     def add_naming_with_vote(name:, namer:, value:)
