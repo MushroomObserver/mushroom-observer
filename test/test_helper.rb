@@ -33,6 +33,12 @@ end
 SimpleCov.start("rails") do
   # An always empty file which is always reported as a coverage decrease
   add_filter("/channels/application_cable/channel.rb")
+
+  # Custom RuboCop cops are lint-time tooling — loaded and exercised by
+  # RuboCop, never by the Rails test suite. The "rails" profile's
+  # track_files("{app,lib}/**/*.rb") otherwise pulls them into the report
+  # as a permanent ~0% coverage drag.
+  add_filter("/lib/rubocop/")
 end
 
 # Allow test results to be reported back to runner IDEs.
