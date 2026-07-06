@@ -92,7 +92,7 @@ module FieldSlipsController::ObservationHandling
     Vote.create!(favorite: true, value: Vote.maximum_vote,
                  naming:, user: @user)
     Observation::NamingConsensus.new(@field_slip.observation).
-      user_calc_consensus(@user)
+      calc_consensus(@user)
   end
 
   # Link an observation to a field slip via an occurrence.
@@ -172,7 +172,7 @@ module FieldSlipsController::ObservationHandling
     occ.reload
     update_occurrence_primary(occ)
     occ.recompute_has_specimen!
-    occ.recalculate_consensus! unless occ.destroyed?
+    occ.recalculate_consensus!(@user) unless occ.destroyed?
     check_field_slip_project_gaps(occ) unless occ.destroyed?
   end
 
@@ -184,7 +184,7 @@ module FieldSlipsController::ObservationHandling
       occ.reassign_thumbnails_from(obs)
       obs.update!(occurrence: nil)
       Occurrence.log_field_slip_removed(obs, occ, @user)
-      Observation::NamingConsensus.new(obs).calc_consensus
+      Observation::NamingConsensus.new(obs).calc_consensus(@user)
     end
   end
 
@@ -226,7 +226,7 @@ module FieldSlipsController::ObservationHandling
     end
     Occurrence.log_field_slip_added(newly_added, @user) if newly_added&.any?
     occ.recompute_has_specimen!
-    occ.recalculate_consensus!
+    occ.recalculate_consensus!(@user)
     check_field_slip_project_gaps(occ)
   rescue ActiveRecord::RecordInvalid => e
     flash_error(e.message)

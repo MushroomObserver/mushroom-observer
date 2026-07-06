@@ -356,7 +356,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       value: Vote.maximum_vote,
       favorite: true
     )
-    Observation::NamingConsensus.new(obs).user_calc_consensus(user)
+    Observation::NamingConsensus.new(obs).calc_consensus(user)
     obs
   end
 

@@ -104,7 +104,7 @@ class OccurrencesController < ApplicationController
 
   def commit_occurrence(primary_obs, selected, gaps)
     occ = Occurrence.create_manual(primary_obs, selected, @user)
-    occ.recalculate_consensus!
+    occ.recalculate_consensus!(@user)
     apply_project_resolution(occ, gaps)
     warn_if_locations_differ(selected)
     flash_notice(:occurrence_created.t(id: occ.id))

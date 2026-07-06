@@ -37,9 +37,8 @@ class NamingTest < UnitTestCase
     assert(ncc.save)
 
     assert(ncc.errors.full_messages.join("; "))
-    User.current = rolf
     consensus = Observation::NamingConsensus.new(obs)
-    consensus.calc_consensus
+    consensus.calc_consensus(rolf)
     assert_equal(names(:agaricus_campestris), ncc.reload.name)
     assert_equal(names(:agaricus_campestris), obs.reload.name)
   end
@@ -60,11 +59,10 @@ class NamingTest < UnitTestCase
     obs = observations(:coprinus_comatus_obs)
     assert_equal(names(:coprinus_comatus), obs.name)
     id = namings(:coprinus_comatus_naming).id
-    User.current = rolf
     namings(:coprinus_comatus_naming).destroy
     obs.reload
     consensus = Observation::NamingConsensus.new(obs)
-    consensus.calc_consensus
+    consensus.calc_consensus(rolf)
     assert_raise(ActiveRecord::RecordNotFound) { Naming.find(id) }
     assert_equal(names(:agaricus_campestris), obs.name)
   end

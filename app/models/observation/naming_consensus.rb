@@ -279,7 +279,7 @@ class Observation
       end
 
       # Update consensus if anything changed.
-      user_calc_consensus(user) if result
+      calc_consensus(user) if result
       result
     end
 
@@ -292,19 +292,14 @@ class Observation
     # Recalculates consensus_naming and saves the observation accordingly.
     # Resets the `needs_naming` column based on current naming specificity
     # and confidence. Also initiates the email blast to interested parties.
-    def calc_consensus
+    # `user` attributes the resulting observation/naming updates and is
+    # excluded from consensus-change notification recipients - nil means
+    # no acting user (e.g. a system-triggered recalculation).
+    def calc_consensus(user = nil)
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
-      best, best_val = calculator.calc(User.current)
-      update_all_observations_consensus(best, best_val)
-    end
-
-    def user_calc_consensus(current_user)
-      reload_namings_and_votes!
-      calculator = ::Observation::ConsensusCalculator.new(@namings)
-      best, best_val = calculator.calc(current_user)
-      update_all_observations_consensus(best, best_val,
-                                        current_user: current_user)
+      best, best_val = calculator.calc(user)
+      update_all_observations_consensus(best, best_val, current_user: user)
     end
 
     # We interpret any naming vote to mean the user has reviewed the obs.

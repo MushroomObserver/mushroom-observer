@@ -67,11 +67,11 @@ class Occurrence < AbstractModel
   end
 
   # Recalculate shared consensus across all observations.
-  def recalculate_consensus!
+  def recalculate_consensus!(user = nil)
     obs = observations.naming_includes.first
     return unless obs
 
-    Observation::NamingConsensus.new(obs).calc_consensus
+    Observation::NamingConsensus.new(obs).calc_consensus(user)
   end
 
   # Auto-destroy if reduced to fewer than 2 observations,
@@ -256,7 +256,7 @@ class Occurrence < AbstractModel
     detached += [primary_observation] if field_slip_id.blank?
     detached.each do |obs|
       Occurrence.log_observation_removed(obs, nil, user)
-      Observation::NamingConsensus.new(obs).calc_consensus
+      Observation::NamingConsensus.new(obs).calc_consensus(user)
     end
   end
 end

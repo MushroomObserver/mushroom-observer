@@ -276,7 +276,7 @@ class Naming < AbstractModel
       obs.log(:log_naming_destroyed, name: format_name)
       obs = Observation.naming_includes.find(obs.id) # get a fresh eager-load
       consensus = Observation::NamingConsensus.new(obs)
-      consensus.calc_consensus
+      consensus.calc_consensus(current_user)
     end
   end
 
