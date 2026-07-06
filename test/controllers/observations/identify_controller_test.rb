@@ -99,7 +99,7 @@ module Observations
       end
       vote_on_obs = not_confident[with_naming]
       consensus = ::Observation::NamingConsensus.new(vote_on_obs)
-      consensus.change_vote(vote_on_obs.namings.first, 1)
+      consensus.change_vote(vote_on_obs.namings.first, 1, mary)
 
       # q = @controller.q_param(QueryRecord.last.query)
       # get(:index, params: { q: })

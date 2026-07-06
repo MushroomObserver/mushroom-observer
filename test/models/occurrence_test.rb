@@ -14,7 +14,6 @@ class OccurrenceTest < UnitTestCase
     [@obs1, @obs2, @obs3, @obs4].each do |obs|
       obs.update_column(:occurrence_id, nil)
     end
-    User.current = rolf
   end
 
   def test_create_occurrence
@@ -488,7 +487,6 @@ class OccurrenceTest < UnitTestCase
   # == Phase 10: Logging and Notifications ==
 
   def test_create_manual_logs_observations
-    User.current = rolf
     all_obs = [@obs1, @obs2]
     occ = Occurrence.create_manual(@obs1, all_obs, rolf)
 
@@ -502,7 +500,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_create_manual_notifies_other_owner
-    User.current = rolf
     # obs3 is owned by mary, not rolf
     all_obs = [@obs1, @obs3]
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
@@ -511,7 +508,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_log_observation_removed
-    User.current = rolf
     create_occurrence(@obs1, @obs2, @obs3)
     Occurrence.log_observation_removed(@obs3)
     @obs3.reload
@@ -522,7 +518,6 @@ class OccurrenceTest < UnitTestCase
   # == Coverage: dissolve! ==
 
   def test_dissolve_with_field_slip_keeps_occurrence
-    User.current = rolf
     fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2, @obs3)
     occ.update!(field_slip: fs)
@@ -540,7 +535,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_dissolve_without_field_slip_destroys
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2, @obs3)
 
     occ.dissolve!
@@ -553,7 +547,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_dissolve_logs_removed_observations
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2)
 
     occ.dissolve!
@@ -567,7 +560,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_dissolve_with_field_slip_logs_only_non_primary
-    User.current = rolf
     fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2)
     occ.update!(field_slip: fs)
@@ -587,7 +579,6 @@ class OccurrenceTest < UnitTestCase
   # == Coverage: refresh_has_specimen_cache ==
 
   def test_refresh_has_specimen_cache_dry_run
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2)
     @obs1.update!(specimen: true)
     # Force incorrect cached value
@@ -603,7 +594,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_refresh_has_specimen_cache_fixes_mismatch
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2)
     @obs1.update!(specimen: true)
     occ.update_column(:has_specimen, false)
@@ -616,7 +606,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_refresh_has_specimen_cache_no_change_needed
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2)
     @obs1.update!(specimen: false)
     @obs2.update!(specimen: false)
@@ -633,7 +622,6 @@ class OccurrenceTest < UnitTestCase
   # == Coverage: check_multiple_occurrences! ==
 
   def test_check_multiple_occurrences_passes_with_one
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2)
     # Should not raise
     Occurrence.check_multiple_occurrences!([occ])
@@ -644,7 +632,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_check_multiple_occurrences_raises_with_two
-    User.current = rolf
     occ1 = create_occurrence(@obs1, @obs2)
     occ2 = create_occurrence(@obs3, @obs4)
 
@@ -657,7 +644,6 @@ class OccurrenceTest < UnitTestCase
   # == Coverage: merge_into_manual ==
 
   def test_merge_into_manual_with_additional_obs
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2)
     all = [@obs1, @obs2, @obs3, @obs4]
     result = Occurrence.create_manual(@obs3, all, rolf)
@@ -672,7 +658,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_merge_into_manual_two_existing_occurrences
-    User.current = rolf
     occ1 = create_occurrence(@obs1, @obs2)
     occ2 = create_occurrence(@obs3, @obs4)
     all = [@obs1, @obs2, @obs3, @obs4]
@@ -1010,7 +995,6 @@ class OccurrenceTest < UnitTestCase
   # == Coverage: observation_count_within_limits (289-290) ==
 
   def test_observation_count_within_limits_validation
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2)
     # Attach more observations to exceed limit
     extras = Observation.where.not(
@@ -1027,7 +1011,6 @@ class OccurrenceTest < UnitTestCase
   # == Coverage: dissolve_transaction field_slip branch ==
 
   def test_dissolve_field_slip_reloads_and_keeps_occ
-    User.current = rolf
     fs = field_slips(:field_slip_no_obs)
     occ = create_occurrence(@obs1, @obs2, @obs3)
     occ.update!(field_slip: fs)
@@ -1044,7 +1027,6 @@ class OccurrenceTest < UnitTestCase
   # == Coverage: dissolve_log_and_recalculate (306-310) ==
 
   def test_dissolve_recalculates_consensus_for_detached
-    User.current = rolf
     # Create occurrence first, then add a naming
     occ = create_occurrence(@obs1, @obs2)
     name = names(:agaricus_campestris)
@@ -1070,7 +1052,6 @@ class OccurrenceTest < UnitTestCase
   end
 
   def test_dissolve_without_field_slip_logs_all
-    User.current = rolf
     occ = create_occurrence(@obs1, @obs2, @obs3)
     clear_logs(@obs1, @obs2, @obs3)
 

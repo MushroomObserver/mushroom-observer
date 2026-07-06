@@ -7,24 +7,24 @@ module Occurrence::Logging
 
   class_methods do
     # Log and notify when observations are added to an occurrence.
-    def log_observation_added(obs_list, user = User.current)
+    def log_observation_added(obs_list, user = nil)
       log_obs_event(obs_list, :log_occurrence_added, user)
     end
 
     # Field slip variant — includes field slip code in log entry.
-    def log_field_slip_added(obs_list, user = User.current)
+    def log_field_slip_added(obs_list, user = nil)
       code = field_slip_code_for(obs_list)
       log_obs_event(obs_list, :log_field_slip_added, user,
                     touch_tag: :log_field_slip_updated, name: code)
     end
 
     # Log and notify when an observation is removed.
-    def log_observation_removed(obs, occ = nil, user = User.current)
+    def log_observation_removed(obs, occ = nil, user = nil)
       log_obs_removal(obs, occ, :log_occurrence_removed, user)
     end
 
     # Field slip variant.
-    def log_field_slip_removed(obs, occ = nil, user = User.current)
+    def log_field_slip_removed(obs, occ = nil, user = nil)
       resolved = occ || obs.occurrence
       code = resolved&.field_slip&.code
       log_obs_removal(obs, occ, :log_field_slip_removed, user,
@@ -72,6 +72,10 @@ module Occurrence::Logging
       occ&.field_slip&.code
     end
 
+    # `user` may be nil (e.g. dissolve! has no caller-supplied actor
+    # today) - OccurrenceChangeMailer's view already handles a nil
+    # `sender` deliberately, attributing the change to the site itself
+    # rather than a person (see Views::Mailers::OccurrenceChangeMailer#intro).
     def notify_observation_owner(obs, action, user)
       owner = obs.user
       return if owner == user || owner.no_emails

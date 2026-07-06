@@ -56,7 +56,6 @@ class ObservationTest < UnitTestCase
 
   def test_destroy
     create_new_objects
-    User.current = rolf
     assert_save(@cc_obs)
     assert_save(@cc_nam)
     @cc_obs.destroy
@@ -532,7 +531,6 @@ class ObservationTest < UnitTestCase
     marys_interest.state = true
     assert_save(marys_interest)
 
-    User.current = rolf
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       observations(:coprinus_comatus_obs).
         notes = "I have new information on this observation."
@@ -544,7 +542,6 @@ class ObservationTest < UnitTestCase
     assert_save(marys_interest)
     dicks_interest.state = true
     assert_save(dicks_interest)
-    User.current = rolf
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.reload.add_image(images(:disconnected_coprinus_comatus_image))
     end
@@ -555,7 +552,6 @@ class ObservationTest < UnitTestCase
     katrinas_interest.state = true
     assert_save(katrinas_interest)
 
-    User.current = rolf
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.reload.destroy
     end
@@ -567,7 +563,6 @@ class ObservationTest < UnitTestCase
     obs = observations(:coprinus_comatus_obs)
     Interest.create(target: obs, user: mary, state: true)
 
-    User.current = rolf
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       obs.update(is_collection_location: !obs.is_collection_location)
     end
@@ -579,7 +574,6 @@ class ObservationTest < UnitTestCase
     @name2 = names(:coprinus_comatus)
     @name3 = names(:conocybe_filaris)
 
-    User.current = rolf
     obs = Observation.create!(
       when: Time.zone.today,
       where: "anywhere",
@@ -588,21 +582,18 @@ class ObservationTest < UnitTestCase
       user: rolf
     )
 
-    User.current = rolf
     namg1 = Naming.create!(
       observation_id: obs.id,
       name_id: @name1.id,
       user: rolf
     )
 
-    User.current = mary
     namg2 = Naming.create!(
       observation_id: obs.id,
       name_id: @name2.id,
       user: mary
     )
 
-    User.current = dick
     namg3 = Naming.create!(
       observation_id: obs.id,
       name_id: @name3.id,
@@ -642,7 +633,6 @@ class ObservationTest < UnitTestCase
     assert_nil(dov)
 
     # Play with Rolf's vote for his naming (first naming).
-    User.current = rolf # necessary for ov creation in naming_consensus
     consensus.change_vote(namg1, 2, rolf)
     namg1.reload
     obs.reload
@@ -720,7 +710,6 @@ class ObservationTest < UnitTestCase
     assert_equal(namg3, consensus.consensus_naming)
 
     # Play with Mary's vote. Make votes:
-    User.current = mary # necessary for ov creation in naming_consensus
     # namg1 Agaricus campestris L.: rolf=1.0, mary=1.0
     # namg2 Coprinus comatus (O.F. Müll.) Pers.: rolf=1.0, mary=2.0(*)
     # namg3 Conocybe filaris: rolf=2.0(*), mary=-1.0
@@ -780,7 +769,6 @@ class ObservationTest < UnitTestCase
   # Test that a "Promising" vote boosts consensus when it's
   # the user's highest vote (no "I'd Call It That" elsewhere).
   def test_consensus_boost_promising_increases_consensus
-    User.current = rolf
     obs = Observation.create!(
       when: Time.zone.today, where: "anywhere",
       name_id: names(:fungi).id, needs_naming: true, user: rolf
@@ -798,7 +786,6 @@ class ObservationTest < UnitTestCase
     cache_with_one_vote = namg.vote_cache
 
     # Mary votes "Promising" (2.0) - should boost, not penalize
-    User.current = mary
     consensus.change_vote(namg, 2, mary)
     obs.reload
     namg.reload
@@ -813,7 +800,6 @@ class ObservationTest < UnitTestCase
   # Test that boost does NOT apply when user has a higher vote
   # on another naming (regular algorithm should penalize).
   def test_consensus_no_boost_when_higher_vote_elsewhere
-    User.current = rolf
     obs = Observation.create!(
       when: Time.zone.today, where: "anywhere",
       name_id: names(:fungi).id, needs_naming: true, user: rolf
@@ -837,7 +823,6 @@ class ObservationTest < UnitTestCase
     # Mary votes "I'd Call It That" on namg2, then
     # "Promising" on namg1. Since her max is 3.0,
     # her "Promising" on namg1 should use regular algorithm.
-    User.current = mary
     consensus.change_vote(namg2, 3, mary)
     consensus.change_vote(namg1, 2, mary)
     obs.reload
@@ -852,7 +837,6 @@ class ObservationTest < UnitTestCase
 
   # Test that "Could Be" also boosts when it's the user's max.
   def test_consensus_boost_could_be
-    User.current = rolf
     obs = Observation.create!(
       when: Time.zone.today, where: "anywhere",
       name_id: names(:fungi).id, needs_naming: true, user: rolf
@@ -870,7 +854,6 @@ class ObservationTest < UnitTestCase
     cache_before = namg.vote_cache
 
     # Mary votes "Could Be" (1.0) as her only vote
-    User.current = mary
     consensus.change_vote(namg, 1, mary)
     obs.reload
     namg.reload
@@ -885,7 +868,6 @@ class ObservationTest < UnitTestCase
   # vote "Could Be" on another name, only "Promising" gets
   # the boost - "Could Be" uses regular algorithm.
   def test_consensus_boost_only_applies_to_max_vote
-    User.current = rolf
     obs = Observation.create!(
       when: Time.zone.today, where: "anywhere",
       name_id: names(:fungi).id, needs_naming: true, user: rolf
@@ -909,7 +891,6 @@ class ObservationTest < UnitTestCase
 
     # Mary votes "Promising" on namg1 (boosted), and
     # "Could Be" on namg2 (regular - not her max).
-    User.current = mary
     consensus.change_vote(namg1, 2, mary)
     consensus.change_vote(namg2, 1, mary)
     obs.reload
@@ -927,7 +908,6 @@ class ObservationTest < UnitTestCase
   # Test that a single "Promising" vote with no higher vote
   # on the naming uses the regular algorithm (no boost).
   def test_consensus_no_boost_without_higher_vote_on_naming
-    User.current = mary
     obs = Observation.create!(
       when: Time.zone.today, where: "anywhere",
       name_id: names(:fungi).id, needs_naming: true, user: mary
@@ -954,7 +934,6 @@ class ObservationTest < UnitTestCase
 
   # Test that negative-only voters use regular algorithm.
   def test_consensus_no_boost_for_negative_only_voter
-    User.current = rolf
     obs = Observation.create!(
       when: Time.zone.today, where: "anywhere",
       name_id: names(:fungi).id, needs_naming: true, user: rolf
@@ -972,7 +951,6 @@ class ObservationTest < UnitTestCase
     cache_before = namg.vote_cache
 
     # Mary votes "Doubtful" (-1.0) - negative vote, no boost
-    User.current = mary
     consensus.change_vote(namg, -1, mary)
     obs.reload
     namg.reload
@@ -1160,7 +1138,6 @@ class ObservationTest < UnitTestCase
 
   # nil notes were seen in the wild
   def test_notes_nil
-    User.current = mary
     obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05",
                               notes: nil, user: mary)
 
@@ -1175,7 +1152,6 @@ class ObservationTest < UnitTestCase
 
   # empty string notes were seen in the wild
   def test_notes_empty_string
-    User.current = mary
     obs = Observation.create!(name_id: names(:fungi).id,
                               when_str: "2020-07-05", notes: "",
                               user: mary)
@@ -1239,7 +1215,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_future_date
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when: Time.zone.today + 2.days,
@@ -1249,7 +1224,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_future_time
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       # Note that 'when' gets automagically converted to Date
@@ -1260,7 +1234,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_invalid_year
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when: Date.new(1499, 1, 1),
@@ -1270,7 +1243,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_where_too_long
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, where: "X" * 1025,
@@ -1280,7 +1252,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_where_no_latitude
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, lng: 90.0, user: mary)
@@ -1289,7 +1260,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_where_no_longitude
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, lat: 90.0, user: mary)
@@ -1298,7 +1268,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_where_bad_altitude
-    User.current = mary
     fungi = names(:fungi)
     # Currently all strings are parsable as altitude
     assert_nothing_raised do
@@ -1308,7 +1277,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_with_valid_when_str
-    User.current = mary
     fungi = names(:fungi)
     assert_nothing_raised do
       Observation.create!(name_id: fungi.id, when_str: "2020-07-05",
@@ -1317,7 +1285,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_with_invalid_when_str_date
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when_str: "0000-00-00",
@@ -1327,7 +1294,6 @@ class ObservationTest < UnitTestCase
   end
 
   def test_check_requirements_with_invalid_when_str
-    User.current = mary
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, when_str: "This is not a date",

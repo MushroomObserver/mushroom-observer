@@ -104,7 +104,7 @@ class Naming < AbstractModel
     naming.created_at = now
     naming.updated_at = now
     naming.current_user = observation.current_user
-    naming.user = naming.current_user || User.current
+    naming.user = naming.current_user
     naming.observation = observation
     naming
   end
@@ -272,8 +272,7 @@ class Naming < AbstractModel
   # clear naming.observation -- otherwise it will recalculate the consensus for
   # each deleted naming, and send a bunch of bogus emails.)
   def log_destruction
-    if (@current_user || User.current) &&
-       (obs = observation)
+    if current_user && (obs = observation)
       obs.log(:log_naming_destroyed, name: format_name)
       obs = Observation.naming_includes.find(obs.id) # get a fresh eager-load
       consensus = Observation::NamingConsensus.new(obs)

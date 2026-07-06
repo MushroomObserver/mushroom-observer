@@ -256,7 +256,14 @@ class Observation
     # consensus for the Observation in question if anything is changed.
     # Returns true if something was changed.
     # Called from outside.
-    def change_vote(naming, value, user = User.current)
+    def change_vote(naming, value, user = naming.current_user)
+      if user.nil?
+        raise(ArgumentError.new(
+                "change_vote needs a user - either pass one explicitly, " \
+                "or set naming.current_user first."
+              ))
+      end
+
       result = false
       vote = users_vote(naming, user)
       value = value.to_f
@@ -459,6 +466,7 @@ class Observation
     def delete_vote(naming, vote, user)
       return false unless vote
 
+      vote.current_user = user
       naming.votes.delete(vote)
       reload_namings_and_votes!
       find_new_favorite(user) if vote.favorite
@@ -492,12 +500,14 @@ class Observation
         vote.favorite = favorite
         vote.save
       else
-        naming.votes.create!(
+        new_vote = naming.votes.build(
           user: user,
           observation: @observation,
           value: value,
           favorite: favorite
         )
+        new_vote.current_user = user
+        new_vote.save!
       end
     end
 

@@ -158,6 +158,13 @@
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   include HasPlaceName
 
+  # The acting/editing user - who's *doing* this (attribution), not who's
+  # looking (see place_name's `user` args). HasPlaceName's `included do`
+  # already declares this same accessor for its own purpose; declared
+  # again here explicitly so attribution doesn't depend on that
+  # unrelated concern staying included.
+  attr_accessor :current_user
+
   # Transient flag: when set, the before_create default that copies the
   # entering user into `collector` is skipped. Field-slip-originated
   # observations set this so a foray recorder is never auto-claimed as
@@ -228,7 +235,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     old_occ = occurrence
     occ = slip.occurrence
     occ ||= Occurrence.create!(
-      user: user || User.current,
+      user: user || current_user,
       primary_observation: self,
       field_slip: slip
     )
@@ -328,16 +335,17 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # never auto-claimed as collector. The caller assigns the resolved
   # field-slip collector to the column afterward; a blank one stays blank
   # (suppressed on the show page). See #4211.
-  def self.build_observation(location, name, notes, date, current_user = nil)
+  def self.build_observation(location, name, notes, date, user)
     return nil unless location
 
     name ||= Name.find_by(text_name: "Fungi")
     now = Time.zone.now
-    user = current_user || User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
                 when: date, user:, location:, name:, notes:,
                 skip_collector_default: true })
     return nil unless obs
+
+    obs.current_user = user
 
     obs.user_log(user, :log_observation_created)
     naming = Naming.user_construct({ name: }, obs, user)
