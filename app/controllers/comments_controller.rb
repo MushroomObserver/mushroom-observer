@@ -197,6 +197,7 @@ class CommentsController < ApplicationController
                   allowed_to_see!(@target)
 
     @comment = Comment.new(target: @target)
+    @comment.current_user = @user
     @comment.attributes = permitted_comment_params if params[:comment]
 
     unless @comment.save

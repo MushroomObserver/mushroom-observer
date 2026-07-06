@@ -107,6 +107,12 @@ class Comment < AbstractModel
   belongs_to :user
   belongs_to :target, polymorphic: true
 
+  # The acting user - who's posting this comment (attribution), set
+  # explicitly by the controller before save. Validations run before
+  # before_create sets user_id, so check_user/no_recent_duplicate read
+  # this instead of the user_id column.
+  attr_accessor :current_user
+
   # Maintain this Array of all models (Classes) which take comments.
   ALL_TYPES = [
     Location, LocationDescription, Name, NameDescription,
@@ -332,7 +338,7 @@ class Comment < AbstractModel
   end
 
   def check_user # :nodoc:
-    return if user || User.current
+    return if user || current_user
 
     errors.add(:user, :validate_comment_user_missing.t)
   end
@@ -353,9 +359,9 @@ class Comment < AbstractModel
 
   def no_recent_duplicate
     # Validations run before before_create sets user_id in the standard
-    # controller flow, so fall back to User.current to match the same
+    # controller flow, so fall back to current_user to match the same
     # identity that will be assigned at save time.
-    effective_user = user || User.current
+    effective_user = user || current_user
     return unless effective_user && target
     return unless recent_identical_comment?(effective_user)
 

@@ -189,34 +189,28 @@ class CommentTest < UnitTestCase
   def test_no_recent_duplicate_comment
     obs = observations(:minimal_unknown_obs)
     # Mirror the controller flow: no explicit user on the Comment;
-    # validations must consult User.current because user_id is only set
+    # validations must consult current_user because user_id is only set
     # in before_create (after validation).
     attrs = { target: obs, summary: "Dup test", comment: "Same body" }
-    old_user = User.current
-    User.current = rolf
 
-    Comment.create!(attrs)
+    Comment.create!(attrs.merge(current_user: rolf))
 
     dup = Comment.new(attrs)
+    dup.current_user = rolf
     assert_not(dup.valid?, "Identical comment should be invalid")
     assert(dup.errors[:base].any?, "Should have base error")
-  ensure
-    User.current = old_user
   end
 
   def test_no_recent_duplicate_comment_with_blank_body
     obs = observations(:minimal_unknown_obs)
     attrs = { target: obs, summary: "Summary only", comment: "" }
-    old_user = User.current
-    User.current = rolf
 
-    Comment.create!(attrs)
+    Comment.create!(attrs.merge(current_user: rolf))
 
     dup = Comment.new(attrs)
+    dup.current_user = rolf
     assert_not(dup.valid?, "Identical summary-only comment should be invalid")
     assert(dup.errors[:base].any?, "Should have base error")
-  ensure
-    User.current = old_user
   end
 
   def test_polymorphic_joins
