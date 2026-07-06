@@ -94,11 +94,29 @@ class LanguageExporterTest < UnitTestCase
     assert_check_fail(0, 0, "abc: [def]\n")
     assert_check_pass(0, 0, "abc: '[def]'\n")
     assert_check_fail(0, 0, "abc: abc: d\n")
+    assert_check_fail(0, 0, "'abc: value\n")
     assert_check_pass(0, 1, "TAG: >\n")
     assert_check_pass(1, 1, "  blah\n")
     assert_check_pass(1, 1, "  any : thing[:goes]\n")
+    assert_check_fail(1, 1, "no_indent\n")
     assert_check_fail(1, 0, "abc: abc\n")
     assert_check_pass(1, 0, "\n")
+  end
+
+  def test_check_export_tag_def_line_invalid_tag
+    @official.init_check_export_line(true, false)
+    @official.send_private(:check_export_tag_def_line,
+                           "bad tag", "bad tag", +" value")
+    pass, = @official.get_check_export_line_status
+    assert_false(pass, "Expected invalid tag to fail")
+  end
+
+  def test_verbose_puts_message_when_language_verbose
+    real_verbose = LanguageExporter.instance_method(:verbose)
+    Language.stub(:verbose, true) do
+      out, = capture_io { real_verbose.bind_call(@official, "hello") }
+      assert_equal("hello\n", out)
+    end
   end
 
   def assert_check_pass(*)

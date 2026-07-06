@@ -171,12 +171,6 @@ module LanguageExporter
       sub(/\s+\Z/, "")
   end
 
-  def read_localization_file
-    File.open(localization_file, "r:utf-8") do |fh|
-      YAML.safe_load(fh)[locale][MO.locale_namespace]
-    end
-  end
-
   def write_localization_file(data)
     temp_file = "#{localization_file}.#{Process.pid}"
     File.open(temp_file, "w:utf-8") do |fh|
