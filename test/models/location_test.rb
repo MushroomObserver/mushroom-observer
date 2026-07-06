@@ -122,14 +122,13 @@ class LocationTest < UnitTestCase
   end
 
   def test_versioning
-    User.current = mary
     loc = Location.create!(
       name: "Anywhere",
       north: 60,
       south: 50,
       east: 40,
       west: 30
-    )
+    ) { |l| l.current_user = mary }
     assert_equal(mary.id, loc.user_id)
     assert_equal(mary.id, loc.versions.last.user_id)
     # Make sure the box_area was calculated correctly
@@ -139,7 +138,7 @@ class LocationTest < UnitTestCase
     assert_equal(loc.center_lat, center_lat)
     assert_equal(loc.center_lng, center_lng)
 
-    User.current = rolf
+    loc.current_user = rolf
     loc.display_name = "Anywhere, USA"
     loc.save
     assert_equal(mary.id, loc.user_id)
@@ -391,8 +390,8 @@ class LocationTest < UnitTestCase
     # 2 Mary:       .       x       yes
     # 3 Dick:       x       x       yes
     # Authors: Mary   editors: Rolf, Dick
-    User.current = dick
     loc.reload
+    loc.current_user = dick
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|
@@ -869,7 +868,6 @@ class LocationTest < UnitTestCase
   end
 
   def test_hidden
-    User.current = mary
     high = 60.234
     low = 60.123
     loc = Location.create!(
@@ -879,7 +877,7 @@ class LocationTest < UnitTestCase
       south: low,
       east: high,
       west: low
-    )
+    ) { |l| l.current_user = mary }
     assert_equal(loc.north, high.ceil(1))
     assert_equal(loc.south, low.floor(1))
     assert_equal(loc.east, high.ceil(1))

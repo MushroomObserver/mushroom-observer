@@ -9,6 +9,7 @@ module Locations
     def update
       if (loc = Location.safe_find(params[:id].to_s))
         loc.name, loc.scientific_name = loc.scientific_name, loc.name
+        loc.current_user = @user
         loc.save
       end
       redirect_to(location_path(params[:id].to_s))

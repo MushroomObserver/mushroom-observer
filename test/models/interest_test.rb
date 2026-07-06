@@ -51,7 +51,6 @@ class InterestTest < UnitTestCase
   end
 
   def test_validate_missing_user
-    User.current = nil
     interest = Interest.new(
       target: observations(:minimal_unknown_obs),
       state: true

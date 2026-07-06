@@ -136,6 +136,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   )
 
   before_save :calculate_box_area_and_center
+  before_save :remember_first_version_for_current_user
   before_update :update_observation_cache
   after_update :notify_users
 
@@ -147,15 +148,29 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # as a merge and orphan the log.
   self.autolog_events = [:created!, :updated!, :destroyed]
 
-  # Callback whenever new version is created.
-  versioned_class.before_save do |ver|
-    ver.user_id = User.current_id || User.admin_id
-    if (ver.version != 1) &&
-       Location::Version.where(
-         location_id: ver.location_id, user_id: ver.user_id
-       ).none?
-      UserStats.update_contribution(:add, :location_versions)
-    end
+  include VersionedByCurrentUser
+
+  after_save :award_version_contribution
+
+  # Deliberately NOT overriding `current_user` itself to fall back to
+  # User.admin - AbstractModel's generic contribution/logging hooks
+  # (update_contribution, do_log_update, do_log_destroy) all check
+  # `respond_to?(:current_user)` and prefer it over the record's own
+  # `user_id` when present. A blanket fallback here would misattribute
+  # those (e.g. the destroy step of a merge re-fetches a fresh
+  # instance with no current_user set, so the fallback would credit/
+  # debit the admin instead of falling through to the real owner via
+  # `user_id`, as those generic hooks expect when current_user is nil).
+  # The version-attribution fallback (this model's own long-standing
+  # behavior for scripts/background jobs with no real session) is
+  # applied narrowly in set_version_current_user below instead.
+  def set_version_current_user
+    return unless saved_version_changes?
+
+    ver = self.class.versioned_class.where(
+      self.class.versioned_foreign_key => id
+    ).last
+    ver&.update_column(:user_id, (current_user || User.admin)&.id)
   end
 
   # On save, calculate bounding box area for the `box_area` column, plus the
@@ -770,9 +785,28 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def notify_users
     return unless saved_version_changes?
 
-    sender = User.current
+    sender = current_user
     recipients = notification_recipients
     send_location_change_emails(sender, recipients)
+  end
+
+  # Must run before save: once VersionedByCurrentUser's after_save hook
+  # writes the new version's user_id, this same query would self-match
+  # and always return false. Mirrors Name::Resolve#new_version_for_user?.
+  def remember_first_version_for_current_user
+    @first_version_for_current_user = Location::Version.where(
+      location_id: id, user_id: (current_user || User.admin)&.id
+    ).none?
+  end
+
+  def award_version_contribution
+    return unless saved_version_changes? && @first_version_for_current_user
+
+    ver = Location::Version.where(location_id: id).last
+    return if ver.version == 1
+
+    UserStats.update_contribution(:add, :location_versions,
+                                  (current_user || User.admin)&.id)
   end
 
   private
@@ -971,7 +1005,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def validate_user
-    return if user || User.current
+    return if user || current_user
 
     errors.add(:user, :validate_location_user_missing.t)
   end
