@@ -77,14 +77,14 @@ class API2
       parse = make_sure_name_parses!
       make_sure_name_doesnt_exist!(parse)
       name = create_name(parse, params)
-      name.user_log(@user, :log_name_created) if @log
+      name.log(:log_name_created, user: @user) if @log
       save_parents(parse)
       after_create(name)
       name
     end
 
     def after_create(name)
-      name.user_log(user, :log_name_created) if @log
+      name.log(:log_name_created, user: user) if @log
     end
 
     def build_setter(params)
@@ -205,7 +205,7 @@ class API2
 
         n.current_user = @user
         n.save || raise(CreateFailed.new(n))
-        n.user_log(@user, :log_name_created) if @log
+        n.log(:log_name_created, user: @user) if @log
       end
     end
 

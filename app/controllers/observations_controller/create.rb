@@ -52,7 +52,7 @@ module ObservationsController::Create
     try_to_save_new_observation
     return reload_new_form(naming_params_dig(:reasons)) if @any_errors
 
-    @observation.log(:log_observation_created)
+    @observation.log(:log_observation_created, user: @user)
 
     update_naming(naming_params_dig(:reasons))
     attach_good_images

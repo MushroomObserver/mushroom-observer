@@ -41,7 +41,7 @@ module Occurrence::Logging
       return unless primary
       return if exclude.any? { |obs| obs.id == primary.id }
 
-      primary.user_log(user, tag, touch: true, name: name)
+      primary.log(tag, user: user, touch: true, name: name)
     end
 
     private
@@ -50,7 +50,7 @@ module Occurrence::Logging
                       touch_tag: :log_occurrence_updated, name: nil)
       occ = nil
       obs_list.each do |obs|
-        obs.user_log(user, tag, touch: true, name: name)
+        obs.log(tag, user: user, touch: true, name: name)
         notify_observation_owner(obs, :added, user)
         occ ||= obs.occurrence
       end
@@ -60,7 +60,7 @@ module Occurrence::Logging
 
     def log_obs_removal(obs, occ, tag, user, **opts)
       occ ||= obs.occurrence
-      obs.user_log(user, tag, touch: true, name: opts[:name])
+      obs.log(tag, user: user, touch: true, name: opts[:name])
       notify_observation_owner(obs, :removed, user)
       touch_primary(occ, user: user,
                          tag: opts[:touch_tag] || :log_occurrence_updated,

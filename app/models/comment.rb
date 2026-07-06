@@ -107,12 +107,6 @@ class Comment < AbstractModel
   belongs_to :user
   belongs_to :target, polymorphic: true
 
-  # The acting user - who's posting this comment (attribution), set
-  # explicitly by the controller before save. Validations run before
-  # before_create sets user_id, so check_user/no_recent_duplicate read
-  # this instead of the user_id column.
-  attr_accessor :current_user
-
   # Maintain this Array of all models (Classes) which take comments.
   ALL_TYPES = [
     Location, LocationDescription, Name, NameDescription,
@@ -299,7 +293,8 @@ class Comment < AbstractModel
     # `log`'s `target.rss_log` isn't in show_includes_tree (see there
     # for why).
     target.strict_loading!(false)
-    target.log(:log_comment_added, summary: summary, touch: true)
+    target.log(:log_comment_added, user: current_user,
+                                   summary: summary, touch: true)
   end
 
   # Log update of comment on object's RSS log if it can.
@@ -307,7 +302,8 @@ class Comment < AbstractModel
     return unless target.respond_to?(:log)
 
     target.strict_loading!(false)
-    target.log(:log_comment_updated, summary: summary, touch: false)
+    target.log(:log_comment_updated, user: current_user,
+                                     summary: summary, touch: false)
   end
 
   # Log destruction of comment on object's RSS log if it can.
@@ -315,7 +311,8 @@ class Comment < AbstractModel
     return unless target.respond_to?(:log)
 
     target.strict_loading!(false)
-    target.log(:log_comment_destroyed, summary: summary, touch: false)
+    target.log(:log_comment_destroyed, user: current_user,
+                                       summary: summary, touch: false)
   end
 
   # Return model if params[:type] is the name of a commentable model

@@ -833,7 +833,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     assert_nil(edited_name.icn_id, "Test needs fixtures without icn_id")
     assert_nil(survivor.icn_id, "Test needs fixtures without icn_id")
 
-    edited_name.user_log(nil, "create edited_name log")
+    edited_name.log("create edited_name log", user: nil)
 
     destroyed_real_search_name = edited_name.user_real_search_name
     destroyed_display_name = edited_name.user_display_name

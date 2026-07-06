@@ -17,10 +17,6 @@
 module HasPlaceName
   extend ActiveSupport::Concern
 
-  included do
-    attr_accessor :current_user
-  end
-
   def place_name(user = nil)
     if (loc = location_for_place_name)
       loc.display_name(user)

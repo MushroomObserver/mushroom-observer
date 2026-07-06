@@ -4,10 +4,6 @@ class APIKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 
-  # The acting user - who's creating this key, set explicitly by the
-  # controller before save.
-  attr_accessor :current_user
-
   scope :order_by_default,
         -> { order_by(::Query::APIKeys.default_order) }
   scope :notes_has,

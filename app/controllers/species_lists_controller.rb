@@ -348,10 +348,10 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   def log_and_flash_notices(create_or_update)
     id = @species_list.id
     if create_or_update == :create
-      @species_list.log(:log_species_list_created)
+      @species_list.log(:log_species_list_created, user: @user)
       flash_notice(:runtime_species_list_create_success.t(id: id))
     else
-      @species_list.log(:log_species_list_updated)
+      @species_list.log(:log_species_list_updated, user: @user)
       flash_notice(:runtime_species_list_edit_success.t(id: id))
     end
   end

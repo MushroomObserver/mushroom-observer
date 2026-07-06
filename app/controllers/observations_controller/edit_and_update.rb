@@ -194,7 +194,7 @@ module ObservationsController::EditAndUpdate
       id = @observation.id
       flash_notice(:runtime_edit_observation_success.t(id: id))
       touch = params[:log_change] == "1"
-      @observation.log(:log_observation_updated, touch: touch)
+      @observation.log(:log_observation_updated, user: @user, touch: touch)
     else
       @any_errors = true
     end

@@ -624,24 +624,18 @@ class AbstractModel < ApplicationRecord
     !!self.class.reflect_on_association(:rss_log)
   end
 
-  # Add message to RssLog, creating one if necessary.
+  # Add message to RssLog, creating one if necessary. `user:` defaults
+  # to current_user, but callers with a user already in scope should
+  # pass it explicitly rather than relying on current_user having been
+  # set on this instance.
   #
-  #    # Log that it was changed by @user, and "touch" the log so it appears
-  #    # at the top of the RSS feed.
-  #    obj.log(:log_observation_updated)
+  #    obj.log(:log_observation_updated, user: current_user)
   #
-  def log(tag, args = {})
+  def log(tag, user: current_user, **args)
     init_rss_log unless rss_log
     touch_when_logging unless new_record? ||
                               args[:touch] == false
-    rss_log.add_with_date(tag, args)
-  end
-
-  def user_log(user, tag, args = {})
-    init_rss_log unless rss_log
-    touch_when_logging unless new_record? ||
-                              args[:touch] == false
-    rss_log.user_add_with_date(user, tag, args)
+    rss_log.add_with_date(tag, user: user, **args)
   end
 
   # This allows a model to override touch in this context only, e.g.,

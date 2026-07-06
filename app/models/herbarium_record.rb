@@ -186,9 +186,9 @@ class HerbariumRecord < AbstractModel
 
     observations.push(obs)
     obs.update(specimen: true) unless obs.specimen
-    obs.user_log(sender_user, :log_herbarium_record_added,
-                 name: accession_at_herbarium,
-                 touch: true)
+    obs.log(:log_herbarium_record_added, user: sender_user,
+                                         name: accession_at_herbarium,
+                                         touch: true)
   end
 
   # Use the loaded `:user` if it's available (edit / show paths
@@ -206,31 +206,31 @@ class HerbariumRecord < AbstractModel
 
     observations.delete(obs)
     obs.turn_off_specimen_if_no_more_records
-    obs.log(:log_herbarium_record_removed,
-            name: accession_at_herbarium,
-            touch: true)
+    obs.log(:log_herbarium_record_removed, user: sender_user,
+                                           name: accession_at_herbarium,
+                                           touch: true)
     destroy if observations.empty?
   end
 
   def log_update
     observations.each do |obs|
       if herbarium_id_was == herbarium_id
-        obs.log(:log_herbarium_record_updated,
-                name: accession_at_herbarium,
-                touch: true)
+        obs.log(:log_herbarium_record_updated, user: sender_user,
+                                               name: accession_at_herbarium,
+                                               touch: true)
       else
-        obs.log(:log_herbarium_record_moved,
-                to: accession_at_herbarium,
-                touch: true)
+        obs.log(:log_herbarium_record_moved, user: sender_user,
+                                             to: accession_at_herbarium,
+                                             touch: true)
       end
     end
   end
 
   def log_destroy
     observations.each do |obs|
-      obs.log(:log_herbarium_record_removed,
-              name: accession_at_herbarium,
-              touch: true)
+      obs.log(:log_herbarium_record_removed, user: sender_user,
+                                             name: accession_at_herbarium,
+                                             touch: true)
     end
   end
 end

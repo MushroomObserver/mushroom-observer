@@ -22,8 +22,6 @@ module VersionedByCurrentUser
   extend ActiveSupport::Concern
 
   included do
-    attr_accessor :current_user
-
     after_save :set_version_current_user
   end
 
