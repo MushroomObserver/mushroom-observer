@@ -1085,30 +1085,35 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Log update in associated observations, glossary terms, etc.
   def log_update
     (glossary_terms + observations).each do |object|
-      object.log(:log_image_updated, user: user, name: log_name, touch: false)
+      object.log(:log_image_updated, user: current_user, name: log_name,
+                                     touch: false)
     end
   end
 
   # Log destruction in associated observations, glossary terms, etc.
   def log_destroy
     (glossary_terms + observations).each do |object|
-      object.log(:log_image_destroyed, user: user, name: log_name, touch: true)
+      object.log(:log_image_destroyed, user: current_user, name: log_name,
+                                       touch: true)
     end
   end
 
   # Log adding new image to an associated observation, glossary term, etc.
   def log_create_for(object)
-    object.log(:log_image_created, user: user, name: log_name, touch: true)
+    object.log(:log_image_created, user: current_user, name: log_name,
+                                   touch: true)
   end
 
   # Log adding existing image to an associated observation, glossary term, etc.
   def log_reuse_for(object)
-    object.log(:log_image_reused, user: user, name: log_name, touch: true)
+    object.log(:log_image_reused, user: current_user, name: log_name,
+                                  touch: true)
   end
 
   # Log removing an image from an associated observation, glossary term, etc.
   def log_remove_from(object)
-    object.log(:log_image_removed, user: user, name: log_name, touch: false)
+    object.log(:log_image_removed, user: current_user, name: log_name,
+                                   touch: false)
   end
 
   # Create CopyrightChange entry whenever year, name or license changes.

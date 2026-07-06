@@ -264,6 +264,7 @@ class ImagesController < ApplicationController
     return redirect_to(action: :show, id: @image.id) unless
       permission!(@image)
 
+    @image.current_user = @user
     @image.log_destroy
     @image.destroy
     flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))

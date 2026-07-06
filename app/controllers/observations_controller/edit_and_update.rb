@@ -136,6 +136,7 @@ module ObservationsController::EditAndUpdate
       next if new_ids.include?(img.id.to_s)
 
       @observation.remove_image(img)
+      img.current_user = @user
       img.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: img.id))
     end
