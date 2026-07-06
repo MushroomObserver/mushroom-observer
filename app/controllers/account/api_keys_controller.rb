@@ -104,7 +104,8 @@ module Account
     end
 
     def create_api_key
-      @key = APIKey.new(params.require(:api_key).permit(:user_id, :notes))
+      @key = APIKey.new(params.require(:api_key).permit(:notes))
+      @key.current_user = @user
       @key.verified = Time.zone.now
       @key.save!
       # render update blanks out form if they want to create another key

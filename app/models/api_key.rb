@@ -4,6 +4,10 @@ class APIKey < AbstractModel
   belongs_to :user
   before_create :provide_defaults
 
+  # The acting user - who's creating this key, set explicitly by the
+  # controller before save.
+  attr_accessor :current_user
+
   scope :order_by_default,
         -> { order_by(::Query::APIKeys.default_order) }
   scope :notes_has,
@@ -24,9 +28,13 @@ class APIKey < AbstractModel
     self.verified ||= nil
     self.last_used ||= nil
     self.num_uses ||= 0
-    self.user_id ||= User.current_id
+    self.user_id ||= current_user_id
     self.key ||= self.class.new_key
     self.notes ||= ""
+  end
+
+  def current_user_id
+    current_user&.id
   end
 
   def touch!

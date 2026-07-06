@@ -6,11 +6,10 @@ class APIKeyTest < UnitTestCase
   def test_create
     count = APIKey.count
 
-    User.current = dick
     APIKey.create
     assert_equal(count, APIKey.count)
 
-    APIKey.create(notes: "app name")
+    APIKey.create(notes: "app name", current_user: dick)
     key = APIKey.find_by(notes: "app name", user: dick)
     assert_not_nil(key, "Cannot find APIKey")
     assert(key.created_at > 1.minute.ago)

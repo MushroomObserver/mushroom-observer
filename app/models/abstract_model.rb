@@ -267,16 +267,6 @@ class AbstractModel < ApplicationRecord
   # Return id from before destroy.
   attr_reader :id_was
 
-  # Handy callback a model may choose to use that updates 'user_id' whenever a
-  # versioned record changes non-trivially.
-  #
-  #   acts_as_versioned ...
-  #   before_save :update_user_if_save_version
-  #
-  def update_user_if_save_version
-    self.user = User.current if save_version?
-  end
-
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
