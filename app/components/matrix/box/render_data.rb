@@ -93,9 +93,10 @@ class Components::Matrix::Box
       end
     end
 
-    # Only Name has a viewer-aware user_format_name; other RssLog
-    # target types (Location, Observation, Project, ...) just have
-    # format_name.
+    # Name and Observation have a viewer-aware user_format_name(user);
+    # other RssLog target types (Location, Project, ...) just have
+    # format_name - fall back to that when the viewer-aware method
+    # isn't there.
     def rss_log_format_name(obj)
       name = if obj.respond_to?(:user_format_name)
                obj.user_format_name(@user)

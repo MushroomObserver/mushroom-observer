@@ -3,10 +3,10 @@
 # Mix into any `acts_as_versioned` model whose version table has a
 # `user_id` column, to attribute each version to whoever's editing —
 # via an explicit per-instance accessor, not the deprecated
-# `User.current` thread-local. Used by Name and NameDescription;
-# candidates for a future sweep are the other models still reading
-# `User.current` in their own `versioned_class.before_save` (Location,
-# LocationDescription, GlossaryTerm).
+# `User.current` thread-local. Used by Name, NameDescription, Location,
+# and LocationDescription; a candidate for a future sweep is
+# GlossaryTerm, the one other model still reading `User.current` in
+# its own `versioned_class.before_save`.
 #
 # A host that needs extra bookkeeping alongside plain attribution
 # (e.g. Name's UserStats "first version by this user" contribution
