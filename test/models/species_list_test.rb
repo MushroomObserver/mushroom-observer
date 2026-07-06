@@ -228,4 +228,87 @@ class SpeciesListTest < UnitTestCase
 
     assert_empty(changes)
   end
+
+  def test_unique_format_name_blank_title
+    spl = species_lists(:first_species_list)
+    spl.title = ""
+    assert_equal("#{:SPECIES_LIST.l} ##{spl.id}", spl.unique_format_name)
+  end
+
+  def test_file_assignment_rejects_unrecognized_content_type
+    spl = SpeciesList.new
+    file = Struct.new(:content_type) do
+      def read
+        "data"
+      end
+    end.new("application/pdf")
+
+    assert_raises(RuntimeError) { spl.file = file }
+  end
+
+  def test_file_assignment_rejects_unrecognized_file_field_class
+    spl = SpeciesList.new
+    assert_raises(RuntimeError) { spl.file = "not a file" }
+  end
+
+  def test_process_file_data_name_list_format
+    spl = SpeciesList.new
+    spl.data = "[Name|Agaricus campestris\rDate|2019-08-01\rTime|12:00\r]\r"
+    sorter = NameSorter.new
+
+    spl.process_file_data(rolf, sorter)
+
+    assert_not_empty(sorter.all_names)
+    assert_includes(sorter.all_names.map(&:text_name), "Agaricus campestris")
+  end
+
+  def test_process_file_data_name_list_format_bad_key_value_pair
+    spl = SpeciesList.new
+    spl.data = "[BadEntryNoPipe\r]\r"
+
+    assert_raises(RuntimeError) do
+      spl.process_file_data(rolf, NameSorter.new)
+    end
+  end
+
+  def test_process_file_data_name_list_format_unrecognized_key
+    spl = SpeciesList.new
+    spl.data = "[Foo|bar\r]\r"
+
+    assert_raises(RuntimeError) do
+      spl.process_file_data(rolf, NameSorter.new)
+    end
+  end
+
+  def test_validate_title_too_long
+    spl = SpeciesList.new(title: "x" * 101, where: "Some Place", user: rolf)
+
+    assert_not(spl.valid?)
+    assert_equal(:validate_species_list_title_too_long.t,
+                 spl.errors[:title].first)
+  end
+
+  def test_validate_place_name_missing
+    spl = SpeciesList.new(title: "Title", user: rolf)
+
+    assert_not(spl.valid?)
+    assert_equal(:validate_species_list_where_missing.t,
+                 spl.errors[:place_name].first)
+  end
+
+  def test_validate_place_name_too_long
+    spl = SpeciesList.new(title: "Title", where: "x" * 1025, user: rolf)
+
+    assert_not(spl.valid?)
+    assert_equal(:validate_species_list_where_too_long.t,
+                 spl.errors[:place_name].first)
+  end
+
+  def test_validate_user_missing
+    spl = SpeciesList.new(title: "Title", where: "Some Place")
+
+    assert_not(spl.valid?)
+    assert_equal(:validate_species_list_user_missing.t,
+                 spl.errors[:user].first)
+  end
 end
