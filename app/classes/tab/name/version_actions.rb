@@ -12,7 +12,7 @@ class Tab::Name::VersionActions < Tab::Collection
   def tabs
     [Tab::Object::Show.new(
       object: @name,
-      title: :show_name.t(name: @name.user_display_name(@user))
+      title: :show_name.t(name: @name.display_name(@user))
     )]
   end
 end

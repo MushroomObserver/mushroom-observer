@@ -48,7 +48,7 @@ module Views::Controllers::Sequences
         strong { "#{:OBSERVATION.l}:" }
         whitespace
         link_to(obs.show_link_args) do
-          trusted_html(obs.name.user_display_name(current_user).t)
+          trusted_html(obs.name.display_name(current_user).t)
         end
         plain(" (#{obs.id})")
       end

@@ -20,7 +20,7 @@ module Views::Controllers::Observations
 
     def view_template
       link_to(name_path(id: @name.id), **@attributes) do
-        trusted_html(@name.user_display_name_brief_authors(@user).
+        trusted_html(@name.display_name_brief_authors(@user).
                      t.small_author)
       end
     end

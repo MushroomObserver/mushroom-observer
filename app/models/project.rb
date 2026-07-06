@@ -229,8 +229,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Need these to be compatible with Comment.
-  alias format_name text_name
-  alias unique_format_name unique_text_name
+  def format_name(_user = nil)
+    text_name
+  end
+
+  def unique_format_name(_user = nil)
+    unique_text_name
+  end
 
   # Page heading + browser tab title — both plain `title`. (Can't
   # `alias` to `title` — the AR column accessor isn't defined yet

@@ -956,22 +956,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Name in plain text with id to make it unique, never nil.
-  def unique_text_name
-    string_with_id(name.real_search_name)
-  end
-
-  def user_unique_text_name(user)
-    string_with_id(name.user_real_search_name(user))
+  def unique_text_name(user = nil)
+    string_with_id(name.real_search_name(user))
   end
 
   # Textile-marked-up name, never nil. `user` is who's *looking* (nil
   # => no viewer-specific formatting).
   def format_name(user = nil)
-    user_format_name(user)
-  end
-
-  def user_format_name(user)
-    name.user_observation_name(user)
+    name.observation_name(user)
   end
 
   # Plain-text title for the browser tab `<title>`. `text_name` is
@@ -989,12 +981,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name(user = nil)
     string_with_id(name.observation_name(user))
-  rescue StandardError
-    ""
-  end
-
-  def user_unique_format_name(user)
-    string_with_id(name.user_observation_name(user))
   rescue StandardError
     ""
   end
@@ -1332,7 +1318,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def send_observation_destroyed_emails
     sender = user
     recipients = interested_users - [sender]
-    note = user_unique_format_name(current_user)
+    note = unique_format_name(current_user)
 
     recipients.each do |receiver|
       next if receiver.no_emails
@@ -1392,11 +1378,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def user_log_consensus_change(old_name, new_name, current_user)
     if old_name
       user_log(current_user, :log_consensus_changed,
-               { old: old_name.user_display_name(current_user),
-                 new: new_name.user_display_name(current_user) })
+               { old: old_name.display_name(current_user),
+                 new: new_name.display_name(current_user) })
     else
       user_log(current_user, :log_consensus_created,
-               { name: new_name.user_display_name(current_user) })
+               { name: new_name.display_name(current_user) })
     end
   end
 

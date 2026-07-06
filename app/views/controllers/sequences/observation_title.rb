@@ -10,7 +10,7 @@ module Views::Controllers::Sequences
       div(class: "mt-3") do
         strong { "#{:OBSERVATION.l}:" }
         whitespace
-        trusted_html(@observation.name.user_display_name(current_user).t)
+        trusted_html(@observation.name.display_name(current_user).t)
         plain(" (#{@observation.id})")
       end
     end

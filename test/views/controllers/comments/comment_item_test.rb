@@ -93,7 +93,7 @@ module Views::Controllers::Comments
       # index. Stub the target to raise on the access path the
       # heading uses.
       raising_target = ::Object.new
-      def raising_target.user_unique_format_name(*)
+      def raising_target.unique_format_name(*)
         raise(StandardError.new("target gone"))
       end
 

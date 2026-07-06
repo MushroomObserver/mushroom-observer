@@ -66,14 +66,14 @@ class NameTracker < AbstractModel
       gsub(":observation", "#{MO.http_domain}/#{naming.observation_id}").
       gsub(":mailing_address", tracker.mailing_address || "").
       gsub(":location", naming.observation.place_name(tracker)).
-      gsub(":name", naming.user_format_name(tracker))
+      gsub(":name", naming.format_name(tracker))
   end
 
   # Return a string summarizing what this NameTracker is about.
   # `user` (the tracker's owner) is the only one who ever sees this,
   # via their own Interests index page.
   def summary
-    "#{:TRACKING.l} #{:name.l}: #{name ? name.user_display_name(user) : "?"}"
+    "#{:TRACKING.l} #{:name.l}: #{name ? name.display_name(user) : "?"}"
   end
   alias text_name summary
   alias unique_text_name summary

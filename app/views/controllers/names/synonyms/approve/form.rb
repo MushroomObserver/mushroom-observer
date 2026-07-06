@@ -23,7 +23,7 @@ module Views::Controllers::Names::Synonyms::Approve
                                data: { autofocus: true })
       Help(
         content: :name_approve_comments_help.tp(
-          name: @name.user_display_name(@user)
+          name: @name.display_name(@user)
         )
       )
     end
@@ -34,7 +34,7 @@ module Views::Controllers::Names::Synonyms::Approve
       checkbox_field(:deprecate_others, label: :name_approve_deprecate.l)
       p do
         @approved_names.each do |n|
-          trusted_html(n.user_display_name(@user).t)
+          trusted_html(n.display_name(@user).t)
           br
         end
       end

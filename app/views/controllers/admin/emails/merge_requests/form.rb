@@ -36,15 +36,9 @@ module Views::Controllers::Admin::Emails::MergeRequests
     end
 
     # `Components::ApplicationForm` doesn't include the shared
-    # `viewer_aware_unique_format_name` helper (Components::Base) -
-    # only Name has a viewer-aware user_unique_format_name among
-    # Herbarium/Location/Name.
+    # `viewer_aware_unique_format_name` helper (Components::Base).
     def viewer_aware_format_name(obj)
-      if obj.respond_to?(:user_unique_format_name)
-        obj.user_unique_format_name(@user).t
-      else
-        obj.unique_format_name.t
-      end
+      obj.unique_format_name(@user).t
     end
 
     def render_message_field

@@ -13,19 +13,19 @@ class ViewerAwareFormatTest < UnitTestCase
     end
   end
 
-  def test_viewer_aware_unique_format_name_uses_viewer_aware_method
+  def test_viewer_aware_unique_format_name_passes_viewer_through
     stub = Stub.new(default_viewer: mary)
     name = names(:coprinus_comatus)
 
-    assert_equal(name.user_unique_format_name(mary),
+    assert_equal(name.unique_format_name(mary),
                  stub.viewer_aware_unique_format_name(name))
   end
 
-  def test_viewer_aware_unique_format_name_falls_back_for_plain_object
+  def test_viewer_aware_unique_format_name_works_for_any_model
     stub = Stub.new
     location = locations(:albion)
 
-    assert_equal(location.unique_format_name,
+    assert_equal(location.unique_format_name(nil),
                  stub.viewer_aware_unique_format_name(location))
   end
 
@@ -33,7 +33,7 @@ class ViewerAwareFormatTest < UnitTestCase
     stub = Stub.new(default_viewer: rolf)
     name = names(:coprinus_comatus)
 
-    assert_equal(name.user_unique_format_name(mary),
+    assert_equal(name.unique_format_name(mary),
                  stub.viewer_aware_unique_format_name(name, mary))
   end
 

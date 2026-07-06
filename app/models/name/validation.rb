@@ -99,7 +99,7 @@ module Name::Validation
       errors.add(
         :search_name,
         "#{:validate_name_equivalent_exists.t}: " \
-        "#{homonym.user_display_name(current_user).t} (#{homonym.id})"
+        "#{homonym.display_name(current_user).t} (#{homonym.id})"
       )
     end
   end
@@ -128,7 +128,7 @@ module Name::Validation
     return if icn_id.blank? || registrable?
 
     errors.add(:base, :name_error_unregistrable.t(
-                        rank: rank.to_s, name: user_real_search_name(nil)
+                        rank: rank.to_s, name: real_search_name(nil)
                       ))
   end
 
@@ -141,7 +141,7 @@ module Name::Validation
 
     errors.add(:base, :name_error_icn_id_in_use.t(
                         number: icn_id,
-                        name: conflicting_name.user_real_search_name(nil)
+                        name: conflicting_name.real_search_name(nil)
                       ))
   end
 

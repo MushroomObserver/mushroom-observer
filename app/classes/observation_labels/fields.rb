@@ -85,7 +85,7 @@ class ObservationLabels::Fields
   end
 
   def name_value
-    observation.name.user_display_name_brief_authors(@user)
+    observation.name.display_name_brief_authors(@user)
   end
 
   def id_value

@@ -584,7 +584,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.one?, "Obs should have one sequence")
 
     expected_subject =
-      "#{@user.login} created #{name.user_real_text_name(@user)}"
+      "#{@user.login} created #{name.real_text_name(@user)}"
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
       args: lambda { |args|

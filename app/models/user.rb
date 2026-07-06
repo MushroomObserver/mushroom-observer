@@ -436,7 +436,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     :show_user_about.t(user: unique_text_name)
   end
 
-  def format_name
+  def format_name(_user = nil)
     unique_text_name
   end
 

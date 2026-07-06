@@ -8,7 +8,10 @@ module Name::Format
   end
 
   ##### Display of names ######################################################
-  def user_display_name(user = nil)
+
+  # `user` lets us respect the viewer's hide_authors pref (nil => no
+  # viewer-specific transform, raw stored value).
+  def display_name(user = nil)
     str = self[:display_name]
     if user &&
        user.hide_authors == "above_species" &&
@@ -18,28 +21,14 @@ module Name::Format
     str
   end
 
-  # No-viewer default (nil) - no hide_authors transform, same as
-  # user_display_name(nil). Pass the viewer explicitly to get that.
-  def display_name(user = nil)
-    user_display_name(user)
-  end
-
   # Alias for +display_name+ to be consistent with other objects.
   def format_name(user = nil)
     display_name(user)
   end
 
-  def user_format_name(user)
-    user_display_name(user)
-  end
-
   # Tack id on to end of +format_name+.
   def unique_format_name(user = nil)
     string_with_id(display_name(user))
-  end
-
-  def user_unique_format_name(user)
-    string_with_id(user_display_name(user))
   end
 
   def unique_search_name
@@ -53,83 +42,54 @@ module Name::Format
     display_name(user)
   end
 
-  def user_observation_name(user)
-    user_display_name(user)
-  end
-
   # Marked up Name, authors shortened per ICN Recommendation 46C.2,
   #  e.g.: **__"Xxx yyy__ author1 et al.**
-  # No-viewer default (nil) - no hide_authors transform, same as
-  # bare display_name. Pass the viewer explicitly to get that.
   def display_name_brief_authors(user = nil)
-    user_display_name_brief_authors(user)
-  end
-
-  def user_display_name_brief_authors(user)
     if rank == "Group"
       # Xxx yyy group author
-      user_display_name(user).sub(/ #{Regexp.quote(author)}$/,
-                                  " #{brief_author}")
+      display_name(user).sub(/ #{Regexp.quote(author)}$/,
+                             " #{brief_author}")
     else
       # Xxx yyy author, Xxx sect. yyy author, Xxx author sect. yyy
       # Relies on display_name having markup around name proper
       # Otherwise, it might delete author if that were part of the name proper
-      user_display_name(user).sub(/(\*+|_+) #{Regexp.quote(author)}/,
-                                  "\\1 #{brief_author}")
+      display_name(user).sub(/(\*+|_+) #{Regexp.quote(author)}/,
+                             "\\1 #{brief_author}")
     end
   end
 
   # display_name less author
   # This depends on display_name having markup around name proper
   # Otherwise, it might delete author if that were part of the name proper
-  def display_name_without_authors
+  def display_name_without_authors(user = nil)
     if rank == "Group"
       # Remove author and preceding space at end
-      display_name.sub(/ #{Regexp.quote(author)}$/, "")
+      display_name(user).sub(/ #{Regexp.quote(author)}$/, "")
     else
       # Remove author and preceding space after markup
-      display_name.sub(/(\*+|_+) #{Regexp.quote(author)}/, "\\1 ").
-        strip_squeeze
-    end
-  end
-
-  def user_display_name_without_authors(user)
-    if rank == "Group"
-      # Remove author and preceding space at end
-      user_display_name(user).sub(/ #{Regexp.quote(author)}$/, "")
-    else
-      # Remove author and preceding space after markup
-      user_display_name(user).sub(/(\*+|_+) #{Regexp.quote(author)}/, "\\1 ").
+      display_name(user).sub(/(\*+|_+) #{Regexp.quote(author)}/, "\\1 ").
         strip_squeeze
     end
   end
 
   # Tack id on to end of +text_name+.
-  def unique_text_name
-    string_with_id(real_text_name)
+  def unique_text_name(user = nil)
+    string_with_id(real_text_name(user))
   end
 
-  def user_real_text_name(user)
-    Name.user_display_to_real_text(user, self)
+  def real_text_name(user = nil)
+    Name.display_to_real_text(self, user)
   end
 
-  def real_text_name
-    Name.display_to_real_text(self)
-  end
-
-  def user_real_search_name(user = nil)
-    Name.user_display_to_real_search(user, self)
-  end
-
-  def real_search_name
-    Name.display_to_real_search(self)
+  def real_search_name(user = nil)
+    Name.display_to_real_search(self, user)
   end
 
   # Page heading (rendered HTML — textile applied + author wrapping).
   # `user` arg lets us respect hide_authors prefs. When nil we use the
   # raw display_name (no user-specific transforms).
   def page_title(user = nil)
-    user_display_name(user).t.small_author
+    display_name(user).t.small_author
   end
 
   # Plain-text title for the browser tab `<title>`. Helper prepends
@@ -196,37 +156,21 @@ module Name::Format
   end
 
   module ClassMethods
-    def display_to_real_text(name)
-      name.display_name.gsub(/(_\*?\*?)[^_*]*$/, '\1'). # Remove trailing author
+    def display_to_real_text(name, user = nil)
+      name.display_name(user).
+        gsub(/(_\*?\*?)[^_*]*$/, '\1'). # Remove trailing author
         gsub(/__\*?\*? [^_*]* \s (#{Name::Parse::ANY_NAME_ABBR}) \s \*?\*?__/ox,
              ' \1 '). # Remove internal author
         gsub(/\*?\*?__\*?\*?/, ""). # Remove textile ornamentation
-        concat(group_suffix(name)) # Readd group suffix
+        concat(group_suffix(name, user)) # Readd group suffix
     end
 
-    def user_display_to_real_text(user, name)
-      # Remove trailing author
-      name.user_display_name(user).gsub(/(_\*?\*?)[^_*]*$/, '\1').
-        gsub(/__\*?\*? [^_*]* \s (#{Name::Parse::ANY_NAME_ABBR}) \s \*?\*?__/ox,
-             ' \1 '). # Remove internal author
-        gsub(/\*?\*?__\*?\*?/, ""). # Remove textile ornamentation
-        concat(user_group_suffix(user, name)) # Readd group suffix
+    def display_to_real_search(name, user = nil)
+      name.display_name(user).gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
     end
 
-    def user_display_to_real_search(user, name)
-      name.user_display_name(user).gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
-    end
-
-    def display_to_real_search(name)
-      name.display_name.gsub(/\*?\*?__([^_]+)__\*?\*?/, '\1')
-    end
-
-    def group_suffix(name)
-      Name::Parse::GROUP_CHUNK.match(name.display_name).to_s
-    end
-
-    def user_group_suffix(user, name)
-      Name::Parse::GROUP_CHUNK.match(name.user_display_name(user)).to_s
+    def group_suffix(name, user = nil)
+      Name::Parse::GROUP_CHUNK.match(name.display_name(user)).to_s
     end
 
     # Make sure display names are in boldface for accepted names, and not in

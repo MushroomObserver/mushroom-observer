@@ -220,9 +220,8 @@ class CommentsControllerTest < FunctionalTestCase
     assert_form_action(action: :create, target: project_id, type: :Project)
   end
 
-  # Project doesn't define `user_unique_format_name`, so the modal
-  # title (built via `viewer_aware_unique_format_name`) falls back to
-  # plain `unique_format_name`.
+  # The modal title (built via `viewer_aware_unique_format_name`)
+  # passes the viewer straight through to `unique_format_name`.
   def test_new_comment_for_project_turbo
     project = projects(:eol_project)
     login
@@ -235,11 +234,9 @@ class CommentsControllerTest < FunctionalTestCase
     )
   end
 
-  # `Location` doesn't define `user_unique_format_name`, so
   # `CommentsController#modal_title`'s call to
-  # `viewer_aware_unique_format_name(@target)` falls back to plain
-  # `unique_format_name` (the `else` branch in
-  # `ApplicationController#viewer_aware_unique_format_name`).
+  # `viewer_aware_unique_format_name(@target)` passes the viewer
+  # straight through to `unique_format_name`.
   def test_new_comment_for_location_turbo
     location = locations(:albion)
     login

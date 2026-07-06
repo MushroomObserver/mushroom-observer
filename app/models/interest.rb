@@ -107,14 +107,9 @@ class Interest < AbstractModel
   end
 
   # `user` (this Interest's owner) is the only one who ever sees this,
-  # via their own Interests index page. Only some target types (Name,
-  # Observation, Naming) have a viewer-aware user_unique_format_name.
+  # via their own Interests index page.
   def target_format_name
-    if target.respond_to?(:user_unique_format_name)
-      target.user_unique_format_name(user)
-    else
-      target.unique_format_name
-    end
+    target.unique_format_name(user)
   end
   alias text_name summary
 

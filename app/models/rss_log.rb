@@ -257,22 +257,18 @@ class RssLog < AbstractModel
   end
 
   # Returns formatted title of the associated object.
-  def format_name
+  def format_name(user = nil)
     if target
-      target.format_name
+      target.format_name(user)
     else
       orphan_title.sub(/ (\d+)$/, "")
     end
   end
 
   # Returns formatted title of the associated object, with id tacked on.
-  def unique_format_name
+  def unique_format_name(user = nil)
     if target
-      if target.respond_to?(:unique_format_name)
-        target.unique_format_name
-      else
-        target.format_name + " (#{target_id || "?"})"
-      end
+      target.unique_format_name(user)
     else
       orphan_title
     end

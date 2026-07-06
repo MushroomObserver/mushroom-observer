@@ -6,7 +6,7 @@ class NamingTrackerMailer < ApplicationMailer
 
   def build(receiver:, naming:)
     setup_user(receiver)
-    search_name = naming.name.user_real_search_name(receiver)
+    search_name = naming.name.real_search_name(receiver)
     name = "#{naming.observation_id}: #{search_name}"
     subject = :email_subject_naming_for_tracker.l(name:)
     observation = naming.observation

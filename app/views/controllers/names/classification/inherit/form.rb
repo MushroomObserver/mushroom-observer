@@ -33,7 +33,7 @@ module Views::Controllers::Names::Classification::Inherit
       Alert(level: :warning) do
         trusted_html(@message.tp)
         options = @candidates.map do |opt|
-          [opt.id, opt.user_display_name(@user).t]
+          [opt.id, opt.display_name(@user).t]
         end
         radio_field(:candidates, *options)
       end

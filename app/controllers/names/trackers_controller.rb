@@ -109,7 +109,7 @@ module Names
                                       approved: false)
       @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
       flash_notice(
-        :email_tracking_now_tracking.t(name: @name.user_display_name(@user))
+        :email_tracking_now_tracking.t(name: @name.display_name(@user))
       )
     end
 
@@ -126,7 +126,7 @@ module Names
       @interest.destroy
       flash_notice(
         :email_tracking_no_longer_tracking.t(
-          name: @name.user_display_name(@user)
+          name: @name.display_name(@user)
         )
       )
     end

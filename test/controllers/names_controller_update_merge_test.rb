@@ -835,8 +835,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
     edited_name.user_log(nil, "create edited_name log")
 
-    destroyed_real_search_name = edited_name.user_real_search_name
-    destroyed_display_name = edited_name.user_display_name
+    destroyed_real_search_name = edited_name.real_search_name
+    destroyed_display_name = edited_name.display_name
 
     params = {
       id: edited_name.id,
@@ -858,7 +858,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     assert_redirected_to(name_path(survivor.id))
 
     expect = "Successfully merged name #{destroyed_real_search_name} " \
-             "into #{survivor.user_real_search_name(user)}"
+             "into #{survivor.real_search_name(user)}"
     assert_flash_text(/#{expect}/, "Merger success flash is incorrect")
 
     assert_no_emails
@@ -870,7 +870,7 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     assert_equal({ title: destroyed_display_name }, log[0][1])
     assert_equal(:log_name_merged, log[1][0])
     assert_equal({ this: destroyed_display_name,
-                   that: survivor.user_display_name,
+                   that: survivor.display_name,
                    user: "rolf" }, log[1][1])
   end
 

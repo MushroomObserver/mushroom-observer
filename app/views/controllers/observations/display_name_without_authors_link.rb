@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Sibling of `DisplayNameBriefAuthorsLink` — same pattern but
-# without authority abbreviations (`user_display_name_without_authors`).
+# without authority abbreviations (`display_name_without_authors`).
 # Used for the preferred-synonym slot in the obs-title chain.
 module Views::Controllers::Observations
   class DisplayNameWithoutAuthorsLink < Views::Base
@@ -18,7 +18,7 @@ module Views::Controllers::Observations
 
     def view_template
       link_to(name_path(id: @name.id), **@attributes) do
-        trusted_html(@name.user_display_name_without_authors(@user).t)
+        trusted_html(@name.display_name_without_authors(@user).t)
       end
     end
   end
