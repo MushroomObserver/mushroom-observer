@@ -156,8 +156,8 @@ class Naming < AbstractModel
   end
 
   # Return name in Textile format.
-  def format_name
-    name ? name.observation_name : ""
+  def format_name(user = nil)
+    name ? name.observation_name(user) : ""
   end
 
   def user_format_name(user)
@@ -169,8 +169,8 @@ class Naming < AbstractModel
   end
 
   # Return name in Textile format (with id tacked on to make unique).
-  def unique_format_name
-    string_with_id(format_name)
+  def unique_format_name(user = nil)
+    string_with_id(format_name(user))
   end
 
   def user_unique_format_name(user)

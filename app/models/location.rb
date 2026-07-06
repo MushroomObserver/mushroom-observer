@@ -402,6 +402,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name(user)
   end
 
+  # Named to match Name/Naming/Observation's user_format_name - lets
+  # generic dispatch (`respond_to?(:user_format_name)`, e.g.
+  # AbstractModel#orphan_log, Components::MatrixBox::RenderData)
+  # recognize Location as viewer-aware too.
+  def user_format_name(user)
+    format_name(user)
+  end
+
   # Page heading + browser tab title. `display_name` is plain text
   # for the visible heading (place name; no textile); `text_name` is
   # the ASCII form for the doc title.
@@ -420,6 +428,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Same as +format_name+ but with id tacked on.
   def unique_format_name(user = nil)
     string_with_id(format_name(user))
+  end
+
+  # See user_format_name - same reasoning, for the
+  # respond_to?(:user_unique_format_name) dispatch used by
+  # ViewerAwareFormat, Interest, and the admin merge-request form.
+  def user_unique_format_name(user)
+    unique_format_name(user)
   end
 
   # Info to include about each location in merge requests.

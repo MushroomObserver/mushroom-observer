@@ -34,8 +34,8 @@ module Name::Format
   end
 
   # Tack id on to end of +format_name+.
-  def unique_format_name
-    string_with_id(display_name)
+  def unique_format_name(user = nil)
+    string_with_id(display_name(user))
   end
 
   def user_unique_format_name(user)

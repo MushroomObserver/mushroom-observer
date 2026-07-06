@@ -987,8 +987,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
-  def unique_format_name
-    string_with_id(name.observation_name)
+  def unique_format_name(user = nil)
+    string_with_id(name.observation_name(user))
   rescue StandardError
     ""
   end
