@@ -264,7 +264,10 @@ module ObservationsController::Create
 
     existed = FieldSlip.exists?(code: field_code.strip.upcase)
     field_slip = FieldSlip.find_or_create_by_code(field_code, @user)
-    return unless field_slip
+    unless field_slip
+      flash_error(:edit_observation_field_slip_invalid.t(code: field_code))
+      return
+    end
 
     flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
 

@@ -223,6 +223,23 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert(obs.field_slip.present?)
   end
 
+  # A purely numeric code fails FieldSlip's format validation, so
+  # find_or_create_by_code returns nil - make sure the observation
+  # still gets created but the user sees why the field slip was
+  # ignored, instead of it silently vanishing.
+  def test_create_observation_with_invalid_field_code
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: "12345",
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert_nil(obs.field_slip)
+    assert_flash_error
+  end
+
   # ObservationsController includes both Create and EditAndUpdate, and
   # (before this was fixed) both defined a private update_field_slip
   # method. Ruby's module resolution meant EditAndUpdate's version
@@ -231,8 +248,12 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   # to produce an equivalent result. Pin the method's owner directly so
   # a future name collision fails loudly instead of silently.
   def test_attach_new_field_slip_is_not_shadowed
-    assert_equal(
-      ObservationsController::Create,
+    # Either Create itself, or a later refactor that moves the method
+    # straight onto ObservationsController, is fine - what this guards
+    # against is a *different* module (re)introducing a same-named
+    # method that silently wins the module-resolution race again.
+    assert_includes(
+      [ObservationsController::Create, ObservationsController],
       ObservationsController.instance_method(:attach_new_field_slip).owner
     )
   end
