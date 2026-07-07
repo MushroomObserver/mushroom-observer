@@ -1847,6 +1847,7 @@
   form_observations_field_code: for field slip
   form_observations_field_slip_code: Field Slip Code
   edit_observation_field_slip_invalid: 'Invalid field slip code "[code]".'
+  create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
