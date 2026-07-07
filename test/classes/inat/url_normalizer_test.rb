@@ -236,7 +236,7 @@ class Inat
       assert_equal(
         "licensed=false&project_id=291058", result,
         "`licensed` param should be preserved when importing others' " \
-        "observations — the real import always force-overrides it anyway"
+        "observations — downstream import behavior may still modify it"
       )
     end
 
