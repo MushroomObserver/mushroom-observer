@@ -61,7 +61,7 @@ module ObservationsController::Create
     save_collection_number
     save_herbarium_record
     strip_images! if @observation.gps_hidden
-    update_field_slip
+    update_field_slip_or_warn
     flash_notice(:runtime_observation_success.t(id: @observation.id))
     redirect_to_next_page
   end
@@ -259,23 +259,12 @@ module ObservationsController::Create
            location: new_observation_path)
   end
 
-  def update_field_slip
-    field_code = params[:field_code]
-    return if field_code.blank?
+  # The observation is already saved by the time the field slip is applied,
+  # so an invalid code can't abort creation — warn and keep the observation.
+  def update_field_slip_or_warn
+    return unless update_field_slip == :invalid
 
-    existed = FieldSlip.exists?(code: field_code.strip.upcase)
-    field_slip = FieldSlip.find_or_create_by_code(field_code, @user)
-    return unless field_slip
-
-    flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
-
-    occ = field_slip.occurrence
-    occ ||= Occurrence.create!(
-      user: @user, primary_observation: @observation,
-      field_slip: field_slip
-    )
-    @observation.update!(occurrence: occ)
-    field_slip.adopt_user_from(@observation)
+    flash_warning(:create_observation_field_slip_invalid.t(code: field_code))
   end
 
   def init_location_var_for_reload

@@ -44,11 +44,14 @@ class FieldSlipsController < ApplicationController
 
   # POST /field_slips or /field_slips.json
   def create
+    @field_slip = FieldSlip.new(field_slip_params)
+    @field_slip.current_user = @user
+    @field_slip.update_project
+    check_project_membership
+
+    return create_deferred_for_add_images if adding_images?
+
     respond_to do |format|
-      @field_slip = FieldSlip.new(field_slip_params)
-      @field_slip.current_user = @user
-      @field_slip.update_project
-      check_project_membership
       if check_last_obs && @field_slip.save
         format.html do
           html_create
@@ -92,6 +95,29 @@ class FieldSlipsController < ApplicationController
   end
 
   private
+
+  def adding_images?
+    params[:commit] == :field_slip_add_images.t
+  end
+
+  # "Add images" defers field-slip creation: redirect to the observation
+  # form carrying the code, and stop. observations#create creates the slip —
+  # with its project (from the code prefix) and its occurrence — only when
+  # the observation is saved, so abandoning the form leaves no orphan slip.
+  # An invalid code is rejected here rather than after the whole obs form.
+  def create_deferred_for_add_images
+    return render_new_phlex(status: :unprocessable_content) unless
+      @field_slip.valid?
+
+    redirect_to(new_observation_url(
+                  field_code: @field_slip.code,
+                  place_name: place_name,
+                  date: extract_date,
+                  notes: field_slip_notes.compact_blank!,
+                  species_list: params[:species_list],
+                  collector: field_slip_collector_string
+                ))
+  end
 
   def render_new_phlex(**render_opts)
     # The `:new` action populates these; the `:create` validation-
@@ -181,15 +207,6 @@ class FieldSlipsController < ApplicationController
   def html_create
     if params[:commit] == :field_slip_quick_create_obs.t
       quick_create_observation
-    elsif params[:commit] == :field_slip_add_images.t
-      redirect_to(new_observation_url(
-                    field_code: @field_slip.code,
-                    place_name: place_name,
-                    date: extract_date,
-                    notes: field_slip_notes.compact_blank!,
-                    species_list: params[:species_list],
-                    collector: field_slip_collector_string
-                  ))
     else
       attach_selected_observations
       update_observation_fields
