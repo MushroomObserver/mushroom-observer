@@ -1575,4 +1575,44 @@ class Name::ParseTest < UnitTestCase
       )
     )
   end
+
+  def test_guess_rank
+    assert_equal("Group", Name.guess_rank("Pleurotus djamor group"))
+    assert_equal("Group", Name.guess_rank("Pleurotus djamor var. djamor group"))
+    assert_equal("Form",
+                 Name.guess_rank("Pleurotus djamor var. djamor f. alba"))
+    assert_equal("Variety", Name.guess_rank("Pleurotus djamor var. djamor"))
+    assert_equal("Subspecies",
+                 Name.guess_rank("Pleurotus djamor subsp. djamor"))
+    assert_equal("Species", Name.guess_rank("Pleurotus djamor"))
+    assert_equal("Species", Name.guess_rank("Pleurotus djamor-foo"))
+    assert_equal("Species", Name.guess_rank("Phellinus robineae"))
+    assert_equal("Genus", Name.guess_rank("Pleurotus"))
+    assert_equal("Stirps", Name.guess_rank("Amanita stirps Grossa"))
+    assert_equal("Stirps",
+                 Name.guess_rank("Amanita sect. Amanita stirps Grossa"))
+    assert_equal("Subsection", Name.guess_rank("Amanita subsect. Amanita"))
+    assert_equal("Section", Name.guess_rank("Amanita sect. Amanita"))
+    assert_equal("Section", Name.guess_rank("Hygrocybe sect. Coccineae"))
+    assert_equal("Subgenus", Name.guess_rank("Amanita subg. Amanita"))
+    assert_equal("Family", Name.guess_rank("Amanitaceae"))
+    assert_equal("Tribe", Name.guess_rank("Agariceae"),
+                 "Names ending in -eae should guess Tribe, not Family or Genus")
+    assert_equal("Suborder", Name.guess_rank("Peltigerineae"),
+                 "Names ending in -ineae should guess Suborder")
+    assert_equal("Order", Name.guess_rank("Peltigerales"))
+    assert_equal("Subclass", Name.guess_rank("Lecanoromycetidae"),
+                 "Names ending in -mycetidae should guess Subclass")
+    assert_equal("Class", Name.guess_rank("Lecanoromycetes"))
+    assert_equal("Subphylum", Name.guess_rank("Agaricomycotina"),
+                 "Names ending in -mycotina should guess Subphylum")
+    assert_equal("Phylum", Name.guess_rank("Agaricomycota"))
+    assert_equal("Genus", Name.guess_rank("Animalia"))
+    assert_equal("Genus", Name.guess_rank("Plantae"))
+    assert_equal("Phylum", Name.guess_rank("Fossil-Fungi"))
+    assert_equal("Phylum", Name.guess_rank("Fossil-Ascomycota"))
+    assert_equal("Class", Name.guess_rank("Fossil-Ascomycetes"))
+    assert_equal("Order", Name.guess_rank("Fossil-Agaricales"))
+    assert_equal("Phylum", Name.guess_rank("Fossil-Anythingelse"))
+  end
 end

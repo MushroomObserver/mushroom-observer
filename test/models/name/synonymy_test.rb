@@ -203,4 +203,14 @@ class Name::SynonymyTest < UnitTestCase
       "less recently proposed, approved Name with same number of observations"
     )
   end
+
+  def test_multiple_synonyms
+    name1 = names(:chlorophyllum_rachodes)
+    name2 = names(:macrolepiota_rachodes)
+    assert_not_equal(name1.synonym, name2.synonym)
+    name1.merge_synonyms(name2)
+    name1.reload
+    name2.reload
+    assert_equal(name1.synonym, name2.synonym)
+  end
 end
