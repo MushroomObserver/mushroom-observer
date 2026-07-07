@@ -250,7 +250,10 @@ class FieldSlipsControllerTest < FunctionalTestCase
   def test_should_create_field_slip_and_redirect_to_create_obs
     login(@field_slip.user.login)
     code = "Z#{@field_slip.code}"
-    assert_difference("FieldSlip.count") do
+    # "Add images" defers creation — the field slip is not persisted here;
+    # it is created when the observation is saved, so an abandoned form
+    # leaves no orphan. It still redirects to the observation form.
+    assert_difference("FieldSlip.count", 0) do
       post(:create,
            params: {
              commit: :field_slip_add_images.t,

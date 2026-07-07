@@ -223,6 +223,29 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert(obs.field_slip.present?)
   end
 
+  # A brand-new field code (no slip yet) is created lazily when the
+  # observation is saved — with its project (from the code prefix) and an
+  # occurrence. This is what lets the field-slip "add images" flow defer
+  # slip creation until the observation exists, avoiding orphans.
+  def test_create_observation_creates_new_field_slip_with_project
+    code = "OPEN-77777"
+    assert_nil(FieldSlip.find_by(code: code))
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: code,
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0
+    )
+    obs = assigns(:observation)
+    slip = FieldSlip.find_by(code: code)
+
+    assert_not_nil(slip, "field slip created on observation save")
+    assert_equal(projects(:open_membership_project), slip.project)
+    assert_not_nil(obs.occurrence)
+    assert_equal(slip, obs.field_slip)
+  end
+
   def test_create_observation_with_collection_number
     generic_construct_observation(
       { observation: { specimen: "1" },
