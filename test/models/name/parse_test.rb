@@ -1520,4 +1520,59 @@ class Name::ParseTest < UnitTestCase
       deprecated: true
     )
   end
+
+  def test_format_autonym
+    assert_equal("**__Acarospora__**",
+                 Name.format_autonym("Acarospora", "", "Genus", false))
+    assert_equal("**__Acarospora__** L.",
+                 Name.format_autonym("Acarospora", "L.", "Genus", false))
+    assert_equal(
+      "**__Acarospora__** **__nodulosa__** L.",
+      Name.format_autonym("Acarospora nodulosa", "L.", "Species", false)
+    )
+    assert_equal(
+      "__Acarospora__ __nodulosa__ var. __reagens__ L.",
+      Name.format_autonym(
+        "Acarospora nodulosa var. reagens", "L.", "Variety", true
+      )
+    )
+    assert_equal(
+      "__Acarospora__ __nodulosa__ L. var. __nodulosa__",
+      Name.format_autonym(
+        "Acarospora nodulosa var. nodulosa", "L.", "Variety", true
+      )
+    )
+    assert_equal(
+      "__Acarospora__ __nodulosa__ L. ssp. __nodulosa__",
+      Name.format_autonym(
+        "Acarospora nodulosa ssp. nodulosa", "L.", "Subspecies", true
+      )
+    )
+    assert_equal(
+      "__Acarospora__ __nodulosa__ L. f. __nodulosa__",
+      Name.format_autonym(
+        "Acarospora nodulosa f. nodulosa", "L.", "Form", true
+      )
+    )
+    assert_equal(
+      "__Acarospora__ __nodulosa__ ssp. __reagens__ L. var. __reagens__",
+      Name.format_autonym(
+        "Acarospora nodulosa ssp. reagens var. reagens", "L.", "Variety", true
+      )
+    )
+    assert_equal(
+      "__Acarospora__ __nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__",
+      Name.format_autonym(
+        "Acarospora nodulosa ssp. nodulosa var. nodulosa", "L.", "Variety", true
+      )
+    )
+    assert_equal(
+      "__Acarospora__ __nodulosa__ L. ssp. __nodulosa__ var. __nodulosa__ " \
+      "f. __nodulosa__",
+      Name.format_autonym(
+        "Acarospora nodulosa ssp. nodulosa var. nodulosa f. nodulosa", "L.",
+        "Form", true
+      )
+    )
+  end
 end
