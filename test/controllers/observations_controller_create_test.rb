@@ -223,6 +223,22 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert(obs.field_slip.present?)
   end
 
+  # An invalid field-slip code cannot abort creation (the observation is
+  # already saved); it warns and keeps the observation without a field slip.
+  def test_create_observation_with_invalid_field_slip
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: "12345", # digits-only fails FieldSlip validation
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0
+    )
+    obs = assigns(:observation)
+
+    assert_nil(obs.field_slip, "Invalid code must not attach a field slip")
+    assert_nil(obs.occurrence, "Invalid code must not create an occurrence")
+    assert_flash_warning
+  end
+
   def test_create_observation_with_collection_number
     generic_construct_observation(
       { observation: { specimen: "1" },
