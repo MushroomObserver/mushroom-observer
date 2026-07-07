@@ -580,11 +580,16 @@ class Name::TaxonomyTest < UnitTestCase
     misspelt_genus = names(:suilus)
     species_of_missplet_genus = Name.create(
       text_name: "#{misspelt_genus.text_name} lakei",
+      search_name: "#{misspelt_genus.text_name} lakei",
+      sort_name: "#{misspelt_genus.text_name} lakei",
       display_name: "__#{misspelt_genus.text_name} lakei__",
       rank: "Species",
       user: dick,
       correct_spelling: names(:boletus_edulis) # anything will do
     )
+    assert(species_of_missplet_genus.valid?,
+           "Test needs a valid Name: " \
+           "#{species_of_missplet_genus.errors.full_messages}")
     Naming.create(user: mary,
                   name: species_of_missplet_genus,
                   observation: observations(:minimal_unknown_obs))
@@ -697,7 +702,7 @@ class Name::TaxonomyTest < UnitTestCase
 
     name = names(:boletus_edulis_group)
     assert(name.searchable_in_registry?,
-           "Fungal `groups` can be searchable in registy")
+           "Fungal `groups` can be searchable in registry")
 
     name = Name.new(text_name: 'Cortinarus "quoted"', rank: "Species")
     assert(name.searchable_in_registry?,

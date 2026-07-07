@@ -71,10 +71,6 @@ class Name::ScopesTest < UnitTestCase
       "`subtaxa_of` a genus should include subgenera"
     )
     assert_includes(
-      subtaxa_of_amanita, names(:amanita_subgenus_lepidella),
-      "`subtaxa_of` a genus should include subgenera"
-    )
-    assert_includes(
       subtaxa_of_amanita, names(:amanita_boudieri),
       "`subtaxa_of` a genus should include species"
     )

@@ -146,7 +146,7 @@ class Name::ValidationTest < UnitTestCase
     assert(Name.new(valid_params.merge({ author: "Benedix." })).valid?,
            "Period at end of author should be allowable")
 
-    # Some actually occuring cases of bad endings
+    # Some actually occurring cases of bad endings
     # Emulate user pasting certain IF lines into the Name form
     assert(
       Name.new(valid_params.merge({ author: "Benedix," })).
