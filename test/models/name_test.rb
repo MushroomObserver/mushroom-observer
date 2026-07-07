@@ -12,6 +12,7 @@ require_relative("name/format_test")
 require_relative("name/synonymy_test")
 require_relative("name/notify_test")
 require_relative("name/spelling_test")
+require_relative("name/change_test")
 
 # Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase
@@ -107,55 +108,11 @@ class NameTest < UnitTestCase
   #  Test email notification heuristics.
   # --------------------------------------
 
-  def test_misspelling
-    # Make sure deprecating a name doesn't clear misspelling stuff.
-    names(:petigera).change_deprecated(true)
-    assert(names(:petigera).is_misspelling?)
-    assert_equal(names(:peltigera), names(:petigera).correct_spelling)
-
-    # Make sure approving a name clears misspelling stuff.
-    names(:petigera).change_deprecated(false)
-    assert_not(names(:petigera).is_misspelling?)
-    assert_nil(names(:petigera).correct_spelling)
-  end
-
   def test_lichen
     assert(names(:tremella_mesenterica).is_lichen?)
     assert(names(:tremella).is_lichen?)
     assert(names(:tremella_justpublished).is_lichen?)
     assert_not(names(:agaricus_campestris).is_lichen?)
-  end
-
-  def test_changing_author_of_autonym
-    name = create_test_name("Acarospora nodulosa var. nodulosa")
-    assert_equal("Acarospora nodulosa var. nodulosa", name.text_name)
-    assert_equal("Acarospora nodulosa var. nodulosa", name.search_name)
-    assert_equal("Acarospora nodulosa  {6var.  !nodulosa", name.sort_name)
-    assert_equal("**__Acarospora__** **__nodulosa__** var. **__nodulosa__**",
-                 name.display_name)
-    assert_equal("", name.author)
-
-    name.change_author("(Dufour) Hue")
-    assert_equal("Acarospora nodulosa var. nodulosa", name.text_name)
-    assert_equal("Acarospora nodulosa var. nodulosa (Dufour) Hue",
-                 name.search_name)
-    assert_equal("Acarospora nodulosa  {6var.  !nodulosa  (Dufour) Hue",
-                 name.sort_name)
-    assert_equal(
-      "**__Acarospora__** **__nodulosa__** (Dufour) Hue var. **__nodulosa__**",
-      name.display_name
-    )
-    assert_equal("(Dufour) Hue", name.author)
-
-    name.change_author("Ach.")
-    assert_equal("Acarospora nodulosa var. nodulosa", name.text_name)
-    assert_equal("Acarospora nodulosa var. nodulosa Ach.", name.search_name)
-    assert_equal("Acarospora nodulosa  {6var.  !nodulosa  Ach.", name.sort_name)
-    assert_equal(
-      "**__Acarospora__** **__nodulosa__** Ach. var. **__nodulosa__**",
-      name.display_name
-    )
-    assert_equal("Ach.", name.author)
   end
 
   # Verify mysql collates accented authors in the expected Unicode order.
@@ -297,63 +254,6 @@ class NameTest < UnitTestCase
     expect = [names(:unauthored_with_naming), names(:authored_with_naming)]
     assert_equal(expect,
                  Name.matching_desired_new_parsed_name(parsed).order(:author))
-  end
-
-  def test_change_text_name_raises_when_parent_creation_fails
-    name = names(:coprinus_comatus)
-    # "Zzyzxomyces" isn't a fixture, so the parent-lookup guard
-    # (`!Name.find_by(text_name: parse.parent_name)`) falls through to
-    # `find_or_create_name_and_parents`.
-    Name.stub(:find_or_create_name_and_parents, [nil]) do
-      assert_raises(RuntimeError) do
-        name.change_text_name(rolf, "Zzyzxomyces weirdii", "Foo", "Species")
-      end
-    end
-  end
-
-  def test_mark_misspelled
-    # Make sure target name has synonyms.
-    syn = Synonym.create
-    Name.where(Name[:text_name].matches("Agaricus camp%")).
-      update_all(synonym_id: syn.id)
-
-    good = names(:agaricus_campestris)
-    bad  = names(:coprinus_comatus)
-    old_obs = Observation.where(name: bad)
-    old_synonym_count = good.synonyms.count
-
-    bad.mark_misspelled(nil, good, :save)
-    good.reload
-    bad.reload
-
-    assert_true(bad.deprecated)
-    assert_false(good.deprecated)
-    assert(bad.display_name.starts_with?("__"))
-    assert(good.display_name.starts_with?("**__"))
-    assert_names_equal(good, bad.correct_spelling)
-    assert_nil(good.correct_spelling)
-    assert_objs_equal(syn, bad.synonym)
-    assert_equal(old_synonym_count + 1, bad.synonyms.count)
-    old_obs.each do |obs|
-      assert_names_equal(good, obs.name)
-    end
-  end
-
-  def test_clear_misspelled
-    good = names(:peltigera)
-    bad  = names(:petigera)
-    bad.clear_misspelled(rolf, :save)
-    good.reload
-    bad.reload
-
-    assert_true(bad.deprecated)
-    assert_false(good.deprecated)
-    assert_equal("__#{bad.text_name}__", bad.display_name)
-    assert_equal("**__#{good.text_name}__** #{good.author}", good.display_name)
-    assert_nil(bad.correct_spelling)
-    assert_nil(good.correct_spelling)
-    assert_not_nil(good.synonym_id)
-    assert_objs_equal(good.synonym, bad.synonym)
   end
 
   def test_merge_editors

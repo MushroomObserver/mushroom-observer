@@ -640,11 +640,6 @@ class Name::TaxonomyTest < UnitTestCase
     assert_equal(new_classification, child.reload.classification)
   end
 
-  # `change_text_name` raises when it can't find-or-create a parent Name
-  # for the parsed name's genus. Force that failure by stubbing
-  # `find_or_create_name_and_parents` to return an array whose last
-  # element is nil, mirroring what `find_or_create_parsed_name` returns
-  # when it can't resolve an ambiguous match.
   def test_registability
     name = names(:boletus_edulis_group)
     assert(name.unregistrable?, "Groups should be unregistrable")
