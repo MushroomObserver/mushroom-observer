@@ -479,4 +479,23 @@ class Name::TaxonomyTest < UnitTestCase
     assert_name_arrays_equal([frm], var.all_children, :sort)
     assert_name_arrays_equal([], frm.all_children, :sort)
   end
+
+  def test_has_eol_data
+    assert(names(:peltigera).has_eol_data?,
+           "peltigera should have EoL data via qualifying observation image")
+    assert_not(names(:lactarius_alpigenes).has_eol_data?,
+               "lactarius_alpigenes is deprecated so has no EoL data")
+  end
+
+  def test_has_eol_data_true_via_vetted_description
+    name = names(:peltigera)
+    # peltigera returns true via observations normally; disqualify them
+    # so the descriptions loop is exercised instead
+    name.observations.update_all(vote_cache: 0)
+    assert(
+      name.has_eol_data?,
+      "`eol_data?` should be true via vetted description " \
+      "when no observation qualifies"
+    )
+  end
 end
