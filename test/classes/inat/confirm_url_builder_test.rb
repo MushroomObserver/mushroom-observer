@@ -103,6 +103,20 @@ class Inat
                    "Expected link should drop non-importable iconic taxa")
     end
 
+    # Regression: a space after the comma (e.g. from "Plantae, Fungi")
+    # must not defeat the importable-taxon match.
+    def test_expected_obs_url_strips_whitespace_in_iconic_taxa
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?user_id=testuser&iconic_taxa=Plantae,+Fungi"
+      )
+      builder = build(model)
+
+      url = builder.expected_obs_url
+      args = Rack::Utils.parse_query(url.split("?", 2).last)
+      assert_equal("Fungi", args["iconic_taxa"],
+                   "Expected link should match Fungi despite whitespace")
+    end
+
     # No iconic_taxa supplied: falls back to the full importable default.
     def test_expected_obs_url_defaults_iconic_taxa_when_absent
       model = FormObject::InatImportConfirm.new(
@@ -117,8 +131,9 @@ class Inat
                    "Expected link should default to the importable taxa")
     end
 
-    # User's iconic_taxa has zero overlap with the importable set
-    # Since no matches, a plain, unlinked count — #4706).
+    # User's iconic_taxa has zero overlap with the importable set: no
+    # link can lead anywhere useful, so a plain, unlinked count shows
+    # instead (#4706).
     def test_expected_obs_url_returns_nil_when_no_importable_overlap
       model = FormObject::InatImportConfirm.new(
         inat_url: "#{SITE_URL}?user_id=testuser&iconic_taxa=Plantae"

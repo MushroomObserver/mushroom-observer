@@ -81,7 +81,7 @@ class Inat::ConfirmURLBuilder
   def importable_iconic_taxa(iconic_taxa)
     return IMPORTABLE_ICONIC_TAXA_ARG if iconic_taxa.blank?
 
-    importable = iconic_taxa.split(",") & IMPORTABLE_ICONIC_TAXA
+    importable = iconic_taxa.split(",").map(&:strip) & IMPORTABLE_ICONIC_TAXA
     importable.join(",") if importable.any?
   end
 
