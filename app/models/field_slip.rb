@@ -36,12 +36,12 @@ class FieldSlip < AbstractModel
 
     slip = new
     slip.current_user = user
+    # `code=` derives the project from the code prefix (e.g. "RINHS-00108"
+    # -> the RINHS project); current_user is set first so that lookup can
+    # check membership. This is what makes a lazily-created slip — one built
+    # when an observation with a field_code is saved, rather than up front
+    # in the field-slip form — still land in its project.
     slip.code = code
-    # Derive the project from the code prefix (e.g. "RINHS-00108" ->
-    # the RINHS project). This is what FieldSlipsController#create does
-    # before saving, and matters when a slip is created lazily here — when
-    # an observation with a field_code is saved — rather than up front.
-    slip.update_project
     slip.save ? slip : nil
   end
 
