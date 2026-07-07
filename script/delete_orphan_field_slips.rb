@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 #  USAGE::
@@ -40,7 +41,10 @@ class DeleteOrphanFieldSlips
     slips = orphans
     puts("#{@apply ? "APPLY" : "DRY RUN"}: #{slips.count} orphan field " \
          "slips#{age_note}")
-    slips.find_each { |slip| handle(slip) }
+    # each (not find_each) so the created_at ordering is honored — find_each
+    # batches by primary key and overrides any scope order. Orphans are a
+    # small set, so loading them at once is fine.
+    slips.each { |slip| handle(slip) }
     summarize
   end
 
@@ -86,6 +90,10 @@ options = {}
 OptionParser.new do |opts|
   opts.on("--min-age-hours N", Integer,
           "Only delete orphans older than N hours") do |n|
+    # A negative value would make the cutoff a future time, sweeping in
+    # even seconds-old slips — dangerous when APPLY=1.
+    abort("--min-age-hours must be >= 0") if n.negative?
+
     options[:min_age_hours] = n
   end
 end.parse!
