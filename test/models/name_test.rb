@@ -16,6 +16,8 @@ require_relative("name/change_test")
 require_relative("name/merge_test")
 require_relative("name/propagate_generic_classifications_test")
 require_relative("name/scopes_test")
+require_relative("name/create_test")
+require_relative("name/lifeform_test")
 
 # Tests for methods in models/name.rb and models/name/xxx.rb
 class NameTest < UnitTestCase
@@ -42,80 +44,6 @@ class NameTest < UnitTestCase
              "Error saving name \"#{string}\": [#{name.dump_errors}]")
       name
     end
-  end
-
-  ##############################################################################
-
-  # ----------------------------------------------
-  #  Test find_or_create_name_and_parents (Name::Create).
-  # ----------------------------------------------
-
-  def test_find_or_create_name_and_parents
-    # Coprinus comatus already has an author.
-    # Create new subspecies Coprinus comatus v. bogus and make sure it doesn't
-    # create a duplicate species if one already exists.
-    # Saw this bug 20080114 -JPH
-    result = Name.find_or_create_name_and_parents(
-      rolf, "Coprinus comatus v. bogus (With) Author"
-    )
-    assert_equal(3, result.length)
-    assert_equal(names(:coprinus).id, result[0].id)
-    assert_equal(names(:coprinus_comatus).id, result[1].id)
-    assert_nil(result[2].id)
-    assert_equal("Coprinus", result[0].text_name)
-    assert_equal("Coprinus comatus", result[1].text_name)
-    assert_equal("Coprinus comatus var. bogus", result[2].text_name)
-    assert_equal(names(:coprinus).author, result[0].author)
-    assert_equal("(O.F. Müll.) Pers.", result[1].author)
-    assert_equal("(With) Author", result[2].author)
-
-    # Conocybe filaris does not have an author.
-    result = Name.find_or_create_name_and_parents(
-      rolf, "Conocybe filaris var bogus (With) Author"
-    )
-    assert_equal(3, result.length)
-    assert_equal(names(:conocybe).id, result[0].id)
-    assert_equal(names(:conocybe_filaris).id, result[1].id)
-    assert_nil(result[2].id)
-    assert_equal("Conocybe", result[0].text_name)
-    assert_equal("Conocybe filaris", result[1].text_name)
-    assert_equal("Conocybe filaris var. bogus", result[2].text_name)
-    assert_equal("", result[0].author)
-    assert_equal("", result[1].author)
-    assert_equal("(With) Author", result[2].author)
-
-    # Agaricus fixture does not have an author.
-    result = Name.find_or_create_name_and_parents(rolf, "Agaricus L.")
-    assert_equal(1, result.length)
-    assert_equal(names(:agaricus).id, result[0].id)
-    assert_equal("Agaricus", result[0].text_name)
-    assert_equal("L.", result[0].author)
-
-    # Agaricus does not have an author.
-    result = Name.find_or_create_name_and_parents(
-      rolf, "Agaricus abra f. cadabra (With) Another Author"
-    )
-    assert_equal(3, result.length)
-    assert_equal(names(:agaricus).id, result[0].id)
-    assert_nil(result[1].id)
-    assert_nil(result[2].id)
-    assert_equal("Agaricus", result[0].text_name)
-    assert_equal("Agaricus abra", result[1].text_name)
-    assert_equal("Agaricus abra f. cadabra", result[2].text_name)
-    assert_equal("", result[0].author)
-    assert_equal("", result[1].author)
-    assert_equal("(With) Another Author", result[2].author)
-  end
-
-  # --------------------------------------
-  #  Test email notification heuristics.
-  # --------------------------------------
-
-  def test_lichen
-    assert(names(:tremella_mesenterica).is_lichen?)
-    assert(names(:tremella).is_lichen?)
-    assert(names(:tremella_justpublished).is_lichen?)
-    assert_not(names(:agaricus_campestris).is_lichen?)
   end
 
   # Verify mysql collates accented authors in the expected Unicode order.
