@@ -207,12 +207,12 @@ module Views::Controllers::InatImports
       plain(unlicensed_note_key.l)
     end
 
-    # Import-others' unlicensed obs are never imported (LICENSED_FILTER
-    # always forces licensed:true at import time), so this renders inside
+    # Import-others' unlicensed obs are never imported, so this renders inside
     # the Total Ignored Observations breakdown rather than as its own
-    # always-visible line. Rendered unconditionally (even when the count is
-    # blank/zero) so a failed estimate is still visible as a blank count,
-    # distinguishable from a genuine zero.
+    # always-visible line. Import execution defaults `licensed` to true unless
+    # the stored URL explicitly sets it (see PageParser#add_ownership_filter).
+    # Rendered unconditionally (even when the count is blank/zero) so a failed
+    # estimate is visible as blank, distinguishable from a genuine zero.
     def unlicensed_ignored_row
       div(class: "mb-1") do
         b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
