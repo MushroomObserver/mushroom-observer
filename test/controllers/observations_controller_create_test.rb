@@ -239,6 +239,18 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_flash_warning
   end
 
+  # update_field_slip lives in the shared FieldSlips concern. It used to be
+  # defined in both Create and EditAndUpdate, where the later include
+  # silently shadowed the other. Pin the owner so a same-named method
+  # (re)introduced in another included module fails loudly here instead of
+  # quietly winning the module-resolution race again.
+  def test_update_field_slip_is_not_shadowed
+    assert_equal(
+      ObservationsController::FieldSlips,
+      ObservationsController.instance_method(:update_field_slip).owner
+    )
+  end
+
   def test_create_observation_with_collection_number
     generic_construct_observation(
       { observation: { specimen: "1" },
