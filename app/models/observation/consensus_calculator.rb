@@ -168,9 +168,9 @@ class Observation
         other.weight.nil? ||
           weighted_value > other.weighted_value ||
           weighted_value == other.weighted_value && (
-          weight > other.weight || weight == other.weight &&
-          age < other.age
-        )
+            weight > other.weight || weight == other.weight &&
+            age < other.age
+          )
       end
     end
 

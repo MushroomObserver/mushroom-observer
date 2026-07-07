@@ -23,7 +23,7 @@ class Components::Form::NameFeedback < Components::Base
   def view_template
     if @valid_names
       render_warning_alert
-    elsif @names&.empty?
+    elsif @names && @names.empty?
       render_not_recognized_error
     elsif @names && @names.length > 1
       render_multiple_names_error
