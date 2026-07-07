@@ -3341,6 +3341,7 @@
   inat_import_tracker_ignored_heading: Ignored Observations
   inat_import_tracker_ignored_not_importable: Not importable (not fungi or slime molds)
   inat_import_tracker_ignored_already_imported: Already imported
+  inat_import_tracker_ignored_unlicensed: Unlicensed (import-others only)
   inat_import_tracker_ignored_date_missing: No observation date
   inat_import_tracker_date_missing_reimport: "Re-import [count] observation(s) after adding dates on iNat"
   inat_import_tracker_license_added_heading: Observations Imported with MO Default License

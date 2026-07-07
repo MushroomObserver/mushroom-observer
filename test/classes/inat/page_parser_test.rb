@@ -221,6 +221,55 @@ class Inat
                  "and the user's own without_field is still stripped")
     end
 
+    def test_add_ownership_filter_defaults_licensed_true_when_absent
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.inat_username = ""
+        i.inat_ids = "123"
+      end
+      parser = PageParser.new(import)
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG }
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_equal(true, query_args[:licensed],
+                   "licensed should default to true when the stored URL " \
+                   "doesn't specify one")
+    end
+
+    def test_add_ownership_filter_preserves_licensed_false
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.inat_username = ""
+        i.inat_ids = "123"
+      end
+      parser = PageParser.new(import)
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG, licensed: false }
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_equal(false, query_args[:licensed],
+                   "licensed:false from the stored URL must not be " \
+                   "overridden — ObservationImporter#unlicensed_other? is " \
+                   "the authoritative safety net, not this fetch filter")
+    end
+
+    def test_add_ownership_filter_sets_user_login_for_own_import
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = false
+        i.inat_username = "some_user"
+      end
+      parser = PageParser.new(import)
+      query_args = {}
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_equal("some_user", query_args[:user_login],
+                   "Own-import should scope by user_login")
+      assert_nil(query_args[:licensed],
+                 "Own-import must not touch the licensed filter")
+    end
+
     def test_next_page_url_mode_returns_parsed_json
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058"
