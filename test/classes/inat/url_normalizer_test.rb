@@ -220,11 +220,11 @@ class Inat
       url = "#{API_URL}?project_id=291058&licensed=false"
       result = URLNormalizer.new(url, superimporter: true).normalize
 
-      # PageParser's add_ownership_filter always force-overrides `licensed`
-      # for import-others regardless of what's stored, so preserving the
-      # user's literal value here is safe for import execution — and it's
-      # what lets the confirm page's estimate counts match the user's
-      # literal request instead of a silently broader query (#4636-adjacent).
+      # PageParser's add_ownership_filter defaults `licensed` to true for
+      # import-others only when the stored URL doesn't specify a value.
+      # Preserving the user's literal value here lets the confirm page's
+      # estimate counts match the literal request instead of a broader query
+      # (#4636-adjacent).
       assert_equal("licensed=false&project_id=291058", result,
                    "licensed should be preserved for superimporters")
     end
