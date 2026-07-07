@@ -66,7 +66,7 @@ module Views::Controllers::Projects
       div(class: "ml-3") do
         @drafts.each do |draft|
           a(href: name_description_path(draft.id)) do
-            trusted_html(draft.name&.user_display_name(current_user)&.t)
+            trusted_html(draft.name&.display_name(current_user)&.t)
           end
           plain(" (")
           Link(type: :user, user: draft.user)

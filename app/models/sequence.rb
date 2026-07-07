@@ -120,7 +120,7 @@ class Sequence < AbstractModel
   ##############################################################################
 
   # used in views and by MatrixBoxPresenter to show orphaned obects
-  def format_name
+  def format_name(_user = nil)
     locus.truncate(locus_width, separator: " ")
   end
 
@@ -133,7 +133,7 @@ class Sequence < AbstractModel
   alias document_title page_title
 
   # used in views and by MatrixBoxPresenter to show unorphaned obects
-  def unique_format_name
+  def unique_format_name(_user = nil)
     format_name + " (Sequence #{id || "?"})"
   end
 
@@ -213,22 +213,24 @@ class Sequence < AbstractModel
   protected
 
   def log_add_sequence
-    observation.user_log(user, :log_sequence_added, name: log_name, touch: true)
+    observation.log(:log_sequence_added, user: user, name: log_name,
+                                         touch: true)
   end
 
   def log_update_sequence
     user = observation.current_user
     if accession_added?
-      observation.user_log(user, :log_sequence_accessioned, name: log_name,
-                                                            touch: true)
+      observation.log(:log_sequence_accessioned, user: user, name: log_name,
+                                                 touch: true)
     else
-      observation.user_log(user, :log_sequence_updated, name: log_name,
-                                                        touch: false)
+      observation.log(:log_sequence_updated, user: user, name: log_name,
+                                             touch: false)
     end
   end
 
   def log_destroy_sequence
-    observation.log(:log_sequence_destroyed, name: log_name, touch: true)
+    observation.log(:log_sequence_destroyed, user: observation.current_user,
+                                             name: log_name, touch: true)
   end
 
   private

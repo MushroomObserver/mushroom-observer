@@ -10,7 +10,7 @@ class Views::Controllers::Names::Trackers::Edit < Views::FullPageBase
 
   def view_template
     add_page_title(
-      :email_tracking_title.t(name: @name.user_display_name(current_user))
+      :email_tracking_title.t(name: @name.display_name(current_user))
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 

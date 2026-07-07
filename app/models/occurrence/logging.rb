@@ -33,7 +33,7 @@ module Occurrence::Logging
 
     # Update the primary observation's log_updated_at so it appears
     # at the top of Activity-sorted indexes and RSS feeds.
-    def touch_primary(occ, exclude: [],
+    def touch_primary(occ, exclude: [], user: nil,
                       tag: :log_occurrence_updated, name: nil)
       return unless occ&.persisted?
 
@@ -41,7 +41,7 @@ module Occurrence::Logging
       return unless primary
       return if exclude.any? { |obs| obs.id == primary.id }
 
-      primary.log(tag, touch: true, name: name)
+      primary.log(tag, user: user, touch: true, name: name)
     end
 
     private
@@ -50,21 +50,21 @@ module Occurrence::Logging
                       touch_tag: :log_occurrence_updated, name: nil)
       occ = nil
       obs_list.each do |obs|
-        obs.log(tag, touch: true, name: name)
+        obs.log(tag, user: user, touch: true, name: name)
         notify_observation_owner(obs, :added, user)
         occ ||= obs.occurrence
       end
-      touch_primary(occ, exclude: obs_list, tag: touch_tag,
+      touch_primary(occ, exclude: obs_list, user: user, tag: touch_tag,
                          name: name)
     end
 
     def log_obs_removal(obs, occ, tag, user, **opts)
       occ ||= obs.occurrence
-      obs.log(tag, touch: true, name: opts[:name])
+      obs.log(tag, user: user, touch: true, name: opts[:name])
       notify_observation_owner(obs, :removed, user)
-      touch_primary(occ,
-                    tag: opts[:touch_tag] || :log_occurrence_updated,
-                    name: opts[:name])
+      touch_primary(occ, user: user,
+                         tag: opts[:touch_tag] || :log_occurrence_updated,
+                         name: opts[:name])
     end
 
     def field_slip_code_for(obs_list)

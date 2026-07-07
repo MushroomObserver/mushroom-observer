@@ -82,7 +82,7 @@ module Name::Change
     target_name.clear_misspelled(user, :save) if target_name.is_misspelling?
     if save
       save_with_log(user, :log_name_deprecated,
-                    other: target_name.user_display_name(user))
+                    other: target_name.display_name(user))
     end
     change_misspelled_consensus_names
   end
@@ -91,7 +91,7 @@ module Name::Change
   def clear_misspelled(user, save = false)
     return unless misspelling || correct_spelling
 
-    was = correct_spelling.user_display_name(user)
+    was = correct_spelling.display_name(user)
     self.misspelling = false
     self.correct_spelling = nil
     save_with_log(user, :log_name_unmisspelled, other: was) if save

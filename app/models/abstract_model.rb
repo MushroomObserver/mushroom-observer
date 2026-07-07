@@ -68,13 +68,12 @@ class AbstractModel < ApplicationRecord
 
   self.abstract_class = true
 
-  def self.acts_like_model?
-    true
-  end
-
-  def acts_like_model?
-    true
-  end
+  # The acting/viewing user for this instance - who's doing this
+  # (attribution) or looking at this (viewer-aware formatting),
+  # set explicitly by the controller/caller before save/render. No
+  # ambient global fallback (no Current.user) - every model gets
+  # this accessor for free so callers never need to add their own.
+  attr_accessor :current_user
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
   def self.type_tag
@@ -195,13 +194,7 @@ class AbstractModel < ApplicationRecord
   #    creation.
   before_create :set_user_and_autolog
   def set_user_and_autolog
-    if respond_to?(:user_id=)
-      self.user_id ||= if respond_to?(:current_user)
-                         current_user&.id
-                       else
-                         User.current_id
-                       end
-    end
+    self.user_id ||= current_user&.id if respond_to?(:user_id=)
     autolog_created if has_rss_log?
   end
 
@@ -266,16 +259,6 @@ class AbstractModel < ApplicationRecord
 
   # Return id from before destroy.
   attr_reader :id_was
-
-  # Handy callback a model may choose to use that updates 'user_id' whenever a
-  # versioned record changes non-trivially.
-  #
-  #   acts_as_versioned ...
-  #   before_save :update_user_if_save_version
-  #
-  def update_user_if_save_version
-    self.user = User.current if save_version?
-  end
 
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
@@ -355,12 +338,6 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
-  # After all controllers are normalized, consider deleting the
-  # normalized/unnormalized conditionals in this method, and delete the
-  # sub-methods "controller_normalized?" and "class_defined?".
-  # I don't think there will be relevant special cases,
-  # i.e., searchable models with singular controller names. JDC 2020-08-02
-  #
   # Return the name of the controller (as a string! see below)
   # that handles the "show_<object>" for this object.
   #
@@ -385,19 +362,6 @@ class AbstractModel < ApplicationRecord
   end
 
   delegate :show_controller, to: :class
-
-  # Has controller been normalized to Rails 6.0 standards:
-  #  plural controller name, CRUD action names standardized if they exist
-  def self.controller_normalized?
-    class_defined?("#{name.pluralize}Controller")
-  end
-
-  # stackoverflow.com/questions/45436514/ruby-check-if-controller-defined
-  def self.class_defined?(klass)
-    Object.const_get(klass)
-  rescue StandardError
-    false
-  end
 
   # Return the name of the "index_<object>" action (as a symbol)
   # that displays search index for this object.
@@ -531,7 +495,7 @@ class AbstractModel < ApplicationRecord
   #   name.edit_url     => "https://mushroomobserver.org/names/12/edit"
   #
   def self.edit_url(id)
-    "#{MO.http_domain}/#{edit_controller}/#{id}/#{edit_action}"
+    "#{MO.http_domain}#{edit_controller}/#{id}/#{edit_action}"
   end
 
   def edit_url
@@ -584,7 +548,7 @@ class AbstractModel < ApplicationRecord
   #   name.destroy_url     => "https://mushroomobserver.org/names/12"
   #
   def self.destroy_url(id)
-    "#{MO.http_domain}/#{destroy_controller}/#{id}"
+    "#{MO.http_domain}#{destroy_controller}/#{id}"
   end
 
   def destroy_url
@@ -633,24 +597,18 @@ class AbstractModel < ApplicationRecord
     !!self.class.reflect_on_association(:rss_log)
   end
 
-  # Add message to RssLog, creating one if necessary.
+  # Add message to RssLog, creating one if necessary. `user:` defaults
+  # to current_user, but callers with a user already in scope should
+  # pass it explicitly rather than relying on current_user having been
+  # set on this instance.
   #
-  #    # Log that it was changed by @user, and "touch" the log so it appears
-  #    # at the top of the RSS feed.
-  #    obj.log(:log_observation_updated)
+  #    obj.log(:log_observation_updated, user: current_user)
   #
-  def log(tag, args = {})
+  def log(tag, user: current_user, **args)
     init_rss_log unless rss_log
     touch_when_logging unless new_record? ||
                               args[:touch] == false
-    rss_log.add_with_date(tag, args)
-  end
-
-  def user_log(user, tag, args = {})
-    init_rss_log unless rss_log
-    touch_when_logging unless new_record? ||
-                              args[:touch] == false
-    rss_log.user_add_with_date(user, tag, args)
+    rss_log.add_with_date(tag, user: user, **args)
   end
 
   # This allows a model to override touch in this context only, e.g.,
@@ -668,12 +626,7 @@ class AbstractModel < ApplicationRecord
   #
   def orphan_log(*)
     rss_log = init_rss_log(orphan: true)
-    name_str = if respond_to?(:user_format_name)
-                 user_format_name(@current_user)
-               else
-                 format_name
-               end
-    rss_log.orphan(@current_user, name_str, *)
+    rss_log.orphan(@current_user, format_name(@current_user), *)
   end
 
   # Callback that logs creation.

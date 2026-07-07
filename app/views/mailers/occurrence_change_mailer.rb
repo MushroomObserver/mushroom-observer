@@ -20,11 +20,10 @@ class Views::Mailers::OccurrenceChangeMailer < Views::Mailers::Base
   private
 
   # `sender` is nil when the change was made by an automated process
-  # rather than a logged-in user (e.g. `User.current` is unset in a
-  # background job) — attribute those to the site itself.
+  # rather than a logged-in user. Attribute those to the site itself.
   def intro
     :"email_occurrence_#{@action}_intro".l(
-      name: @observation.user_unique_format_name(@receiver),
+      name: @observation.unique_format_name(@receiver),
       user: @sender&.legal_name || :app_title.t
     )
   end

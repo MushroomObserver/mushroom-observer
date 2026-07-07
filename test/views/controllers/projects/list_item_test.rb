@@ -10,7 +10,6 @@ module Views::Controllers::Projects
     end
 
     def test_renders_project
-      User.current = @user
       project = projects(:eol_project)
       html = render(ListItem.new(project: project))
 
@@ -26,7 +25,6 @@ module Views::Controllers::Projects
     end
 
     def test_open_membership_badge
-      User.current = @user
       project = projects(:eol_project)
       project.open_membership = true
       html = render(ListItem.new(project: project))
@@ -36,7 +34,6 @@ module Views::Controllers::Projects
     end
 
     def test_closed_membership_no_badge
-      User.current = @user
       project = projects(:eol_project)
       project.open_membership = false
       html = render(ListItem.new(project: project))

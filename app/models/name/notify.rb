@@ -16,7 +16,7 @@ module Name::Notify
                                            "#{MO.http_domain}/names/#{id}")
     WebmasterMailer.build(
       sender_email: user.email,
-      subject: "#{user.login} created #{user_real_text_name(user)}",
+      subject: "#{user.login} created #{real_text_name(user)}",
       message:
     ).deliver_later
   end

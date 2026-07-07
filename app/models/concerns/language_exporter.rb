@@ -88,8 +88,12 @@ module LanguageExporter
     check_export_file_data
   end
 
-  # Import changes from export file.
-  def import_from_file(user = User.current)
+  # Import changes from export file. `user` is required unless
+  # importing the official locale (falls back to User.admin there) -
+  # the rake task's :login/:login_admin tasks resolve it and thread it
+  # through explicitly (see lib/tasks/lang.rake); there's no ambient
+  # default here.
+  def import_from_file(user = nil)
     raise("Must specify a user to import translation file!") if
       user.nil? && !official
 
@@ -165,12 +169,6 @@ module LanguageExporter
       gsub(/\n[ \t]+/, "\n").
       sub(/\A\s+/, "").
       sub(/\s+\Z/, "")
-  end
-
-  def read_localization_file
-    File.open(localization_file, "r:utf-8") do |fh|
-      YAML.safe_load(fh)[locale][MO.locale_namespace]
-    end
   end
 
   def write_localization_file(data)

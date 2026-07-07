@@ -287,7 +287,8 @@ class Observation
     def change_vote_with_log(naming, value)
       reload_namings_and_votes!
       change_vote(naming, value, naming.user)
-      @observation.log(:log_naming_created, name: naming.format_name)
+      @observation.log(:log_naming_created, user: naming.user,
+                                            name: naming.format_name)
     end
 
     # Recalculates consensus_naming and saves the observation accordingly.

@@ -33,7 +33,6 @@ module Observations
     end
 
     def test_add_to_location
-      # User.current = rolf
       albion = locations(:albion)
       obs = Observation.create!(
         user: rolf,

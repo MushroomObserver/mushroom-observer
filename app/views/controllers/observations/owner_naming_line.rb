@@ -35,7 +35,7 @@ module Views::Controllers::Observations
       # at the normal size.
       link_to(name_path(id: owner_name.id),
               class: "obs_owner_naming_link_#{owner_name.id}") do
-        trusted_html(owner_name.user_display_name_brief_authors(@user).t)
+        trusted_html(owner_name.display_name_brief_authors(@user).t)
       end
       whitespace
       plain("(#{:show_observation_owner_id.l})")

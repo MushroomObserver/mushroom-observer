@@ -22,7 +22,7 @@ class Views::Mailers::NameProposalMailer < Views::Mailers::Base
   def intro = :email_name_proposal_intro.l(id: @observation.id)
 
   def fields
-    text = "*#{:Name.l}:* #{@naming.user_format_name(@receiver)}\n"
+    text = "*#{:Name.l}:* #{@naming.format_name(@receiver)}\n"
     text += "*#{:Time.l}:* #{@naming.created_at.email_time}\n"
     if @naming.user
       text += "*#{:By.l}:* #{@naming.user.legal_name} " \

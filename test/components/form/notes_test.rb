@@ -10,7 +10,6 @@ class FormNotesTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
-    User.current = @user
   end
 
   # --- Panel wrap is always present ---

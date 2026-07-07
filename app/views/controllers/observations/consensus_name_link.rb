@@ -76,12 +76,12 @@ module Views::Controllers::Observations
     end
 
     def render_logged_out_deprecated
-      trusted_html(name.user_display_name_brief_authors(@user).
+      trusted_html(name.display_name_brief_authors(@user).
                    t.small_author)
       whitespace
       render_site_id_flag
       whitespace
-      trusted_html(preferred_synonym.user_display_name_without_authors(@user).t)
+      trusted_html(preferred_synonym.display_name_without_authors(@user).t)
     end
 
     # Non-deprecated branch: just the consensus name link, plus a
@@ -93,7 +93,7 @@ module Views::Controllers::Observations
                  class: "obs_consensus_naming_link_#{name.id}"
                ))
       else
-        trusted_html(name.user_display_name_brief_authors(@user).
+        trusted_html(name.display_name_brief_authors(@user).
                      t.small_author)
       end
       return unless show_owner_naming?

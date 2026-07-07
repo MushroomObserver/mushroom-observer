@@ -63,8 +63,9 @@ module CapybaraSessionExtensions
     login(user, *, **kwargs)
     session = kwargs[:session] || self
     user = User.find_by(login: user) if user.is_a?(String)
-    # Check page for user's login name in nav (User.current_id is thread-local
-    # and not accessible from test thread with Cuprite/Puma)
+    # Check page for user's login name in nav - Cuprite/Puma run the app in a
+    # separate thread from the test, so there's no shared in-process state to
+    # check directly; the rendered page is the only observable signal.
     session.assert_selector("#user_nav_toggle", text: user.login,
                                                 wait: 5)
   end

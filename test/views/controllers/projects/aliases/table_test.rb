@@ -11,7 +11,6 @@ module Views::Controllers::Projects::Aliases
     end
 
     def test_renders_index_table_with_alias_rows
-      User.current = @user
       html = render_table
 
       assert_html(html, "table##{Table::TABLE_ID}")
@@ -40,7 +39,6 @@ module Views::Controllers::Projects::Aliases
     end
 
     def test_empty_alias_list_renders_just_headers
-      User.current = @user
       html = render_table(project_aliases: ProjectAlias.none)
 
       assert_html(html, "table##{Table::TABLE_ID}")

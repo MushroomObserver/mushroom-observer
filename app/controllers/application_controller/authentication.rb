@@ -20,10 +20,9 @@ module ApplicationController::Authentication
 
   # Request-scoped accessor for the logged-in User. Lives on the
   # controller so the request/session boundary is the only thing
-  # that can answer "who's looking at this page" — model-level
-  # `User.current` is thread-local global state that ought to die.
-  # `helper_method` exposes it to ERB; `Components::Base`
-  # registers it as a value helper for Phlex views.
+  # that can answer "who's looking at this page" - no model-level
+  # ambient global anywhere. `helper_method` exposes it to ERB;
+  # `Components::Base` registers it as a value helper for Phlex views.
   def current_user
     @user
   end
@@ -37,10 +36,8 @@ module ApplicationController::Authentication
   # Filter that should run before everything else.  Establishes whether a User
   # is logged in or not.
   #
-  # Stores the currently logged-in User in the "globals" <tt>@user</tt> and
-  # <tt>User.current</tt>, as well as the session.  (The first is visible to
-  # all controller instances and views; the second is visible to the entire
-  # website application.)
+  # Stores the currently logged-in User in the "global" <tt>@user</tt> and
+  # in the session.
   #
   # It first checks if the User is already logged in, i.e. is stored in the
   # session.  If not, it checks for an autologin cookie on the User's browser,
@@ -62,7 +59,7 @@ module ApplicationController::Authentication
     # end
 
     try_user_autologin(session_user)
-    make_logged_in_user_available_to_everyone
+    log_login_activity
     track_last_time_user_made_a_request
     block_suspended_users
     clear_admin_mode_for_nonadmins
@@ -72,7 +69,6 @@ module ApplicationController::Authentication
 
   def clear_user_globals
     @user = nil
-    User.current = nil
   end
 
   # Save a lookup of the mrtg stats "user".
@@ -123,8 +119,7 @@ module ApplicationController::Authentication
     session_user_set(nil)
   end
 
-  def make_logged_in_user_available_to_everyone
-    User.current = @user
+  def log_login_activity
     logger.warn("user=#{@user ? @user.id : "0"} " \
                 "robot=#{browser.bot? ? "Y" : "N"} " \
                 "ip=#{request.remote_ip}")
@@ -171,8 +166,8 @@ module ApplicationController::Authentication
     obj.respond_to?(:user_id) && @user&.id == obj.user_id
   end
 
-  # Always send a @user to the model instance method `can_edit?`
-  # so it doesn't have to call User.current.
+  # Always send a @user to the model instance method `can_edit?` -
+  # models never read an ambient global for this.
   def editable_by_user?(obj)
     obj.try(:can_edit?, @user)
   end
@@ -246,7 +241,6 @@ module ApplicationController::Authentication
   def switch_to_user(new_user)
     update_sudo_session(new_user)
     @user = new_user
-    User.current = new_user
     session_user_set(new_user)
   end
 
@@ -295,11 +289,7 @@ module ApplicationController::Authentication
   # check `autologin` does, so a blocked/unverified user's session
   # resolves to nil here too, same as everywhere else on the site.
   #
-  # Only sets `@user` - not `User.current`. Neither caller's request
-  # path (nor the shared around_action logging) reads `User.current`;
-  # a future caller that needs it for a model-layer default (e.g.
-  # `Image.new`'s `user: User.current`) should pass `user:` explicitly
-  # rather than leaning on the global.
+  # Only sets `@user` - there's no ambient global to also set anymore.
   def set_user_from_session
     user = session_user
     @user = user if user_verified_and_allowed?(user)

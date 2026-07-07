@@ -301,6 +301,21 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert(obs.herbarium_records.one?)
   end
 
+  def test_create_observation_with_herbarium_record_owned_by_someone_else
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: herbaria(:fundis_herbarium).autocomplete_name,
+          accession_number: "314159"
+        },
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0, dick
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert_equal(0, obs.herbarium_records.count)
+  end
+
   def test_create_observation_with_herbarium_duplicate_label
     generic_construct_observation(
       { observation: { specimen: "1" },
@@ -1426,6 +1441,17 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   def test_create_observation_fails_validation
     login("rolf")
     stub_valid_false_on(Observation) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  # `Observation#valid?` passes but `#save` itself fails - exercises
+  # try_to_save_new_observation's own false-path, distinct from the
+  # `valid?`-fails case above which never reaches that method's save call.
+  def test_create_observation_save_fails
+    login("rolf")
+    stub_save_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
     assert_response(:success)

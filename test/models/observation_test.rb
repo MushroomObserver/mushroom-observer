@@ -94,6 +94,17 @@ class ObservationTest < UnitTestCase
     consensus.change_vote(naming, vote, user)
   end
 
+  def test_change_vote_requires_a_user
+    obs = observations(:coprinus_comatus_obs)
+    naming = obs.namings.first
+    consensus = ::Observation::NamingConsensus.new(obs)
+
+    error = assert_raises(ArgumentError) do
+      consensus.change_vote(naming, Vote.next_best_vote)
+    end
+    assert_includes(error.message, "change_vote needs a user")
+  end
+
   # Test Observer's Prefered ID
   def test_observer_preferred_id
     # obs = observations(:owner_only_favorite_ne_consensus)
@@ -2185,12 +2196,12 @@ class ObservationTest < UnitTestCase
     assert_nothing_raised { fresh.other_notes = "Hello" }
   end
 
-  # user_unique_format_name swallows StandardError from the name
-  # call and returns "" (line 836).
-  def test_user_unique_format_name_swallows_errors
+  # unique_format_name swallows StandardError from the name
+  # call and returns "".
+  def test_unique_format_name_swallows_errors
     obs = observations(:minimal_unknown_obs)
     obs.stub(:name, nil) do
-      assert_equal("", obs.user_unique_format_name(users(:rolf)),
+      assert_equal("", obs.unique_format_name(users(:rolf)),
                    "Should swallow NoMethodError on nil name")
     end
   end

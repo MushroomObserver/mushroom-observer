@@ -136,6 +136,7 @@ module ObservationsController::EditAndUpdate
       next if new_ids.include?(img.id.to_s)
 
       @observation.remove_image(img)
+      img.current_user = @user
       img.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: img.id))
     end
@@ -194,7 +195,7 @@ module ObservationsController::EditAndUpdate
       id = @observation.id
       flash_notice(:runtime_edit_observation_success.t(id: id))
       touch = params[:log_change] == "1"
-      @observation.log(:log_observation_updated, touch: touch)
+      @observation.log(:log_observation_updated, user: @user, touch: touch)
     else
       @any_errors = true
     end

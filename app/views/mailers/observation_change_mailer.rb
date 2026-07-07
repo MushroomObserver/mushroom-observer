@@ -88,7 +88,7 @@ class Views::Mailers::ObservationChangeMailer < Views::Mailers::Base
     if @observation
       :email_object_change_intro.l(
         type: :observation,
-        name: @observation.user_unique_format_name(@receiver)
+        name: @observation.unique_format_name(@receiver)
       )
     else
       :email_observation_destroyed_intro.l

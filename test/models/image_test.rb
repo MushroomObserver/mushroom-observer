@@ -3,6 +3,35 @@
 require("test_helper")
 
 class ImageTest < UnitTestCase
+  # log_update/log_destroy/log_create_for/log_reuse_for/log_remove_from
+  # attribute to `current_user` (the acting/editing user), not `user`
+  # (the image's owner) - an admin editing/removing someone else's image
+  # should show up in the RSS log as the admin, not the owner.
+  def test_log_destroy_attributes_to_current_user_not_owner
+    image = images(:turned_over_image)
+    obs = image.observations.first
+    assert_not_equal(rolf, image.user)
+
+    image.current_user = rolf
+    image.log_destroy
+
+    new_line = obs.rss_log.notes.lines.first
+    assert_match(/log_image_destroyed/, new_line)
+    assert_match(/rolf/, new_line)
+    assert_no_match(/#{image.user.login}/, new_line)
+  end
+
+  def test_log_create_for_attributes_to_current_user_not_owner
+    image = images(:turned_over_image)
+    obs = observations(:coprinus_comatus_obs)
+    assert_not_equal(rolf, image.user)
+
+    image.current_user = rolf
+    image.log_create_for(obs)
+
+    assert_match(/rolf/, obs.rss_log.notes)
+  end
+
   def test_votes
     img = images(:in_situ_image)
     assert_empty(img.image_votes)

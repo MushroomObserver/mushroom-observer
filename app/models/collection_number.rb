@@ -102,7 +102,7 @@ class CollectionNumber < AbstractModel
   scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
-  def format_name
+  def format_name(_user = nil)
     "#{name} #{number}"
   end
 
@@ -131,7 +131,8 @@ class CollectionNumber < AbstractModel
 
     observations.push(obs)
     obs.update(specimen: true) unless obs.specimen
-    obs.log(:log_collection_number_added, name: format_name, touch: true)
+    obs.log(:log_collection_number_added, user: current_user,
+                                          name: format_name, touch: true)
   end
 
   # Remove this CollectionNumber from an Observation and log the action.
@@ -140,19 +141,22 @@ class CollectionNumber < AbstractModel
 
     observations.delete(obs)
     obs.turn_off_specimen_if_no_more_records
-    obs.log(:log_collection_number_removed, name: format_name, touch: true)
+    obs.log(:log_collection_number_removed, user: current_user,
+                                            name: format_name, touch: true)
     destroy if observations.empty?
   end
 
   def log_update
     observations.each do |obs|
-      obs.log(:log_collection_number_updated, name: format_name, touch: true)
+      obs.log(:log_collection_number_updated, user: current_user,
+                                              name: format_name, touch: true)
     end
   end
 
   def log_destroy
     observations.each do |obs|
-      obs.log(:log_collection_number_removed, name: format_name, touch: true)
+      obs.log(:log_collection_number_removed, user: current_user,
+                                              name: format_name, touch: true)
     end
   end
 

@@ -15,7 +15,7 @@ class Views::Controllers::Names::Index::NameSuggestionsAlert < Views::Base
         @names.sort_by(&:sort_name).each do |name|
           li do
             a(href: name_path(name.id)) do
-              trusted_html(name.user_display_name(@user).t)
+              trusted_html(name.display_name(@user).t)
             end
           end
         end

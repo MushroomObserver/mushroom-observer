@@ -879,6 +879,17 @@ class ProjectTest < UnitTestCase
     assert_not(Project.admin_power?(obs, nil))
   end
 
+  def test_member_status
+    project = projects(:eol_project)
+
+    assert_equal(:OWNER.t, project.member_status(project.user))
+    admin = (project.admin_group.users - [project.user]).first
+    assert_equal(:ADMIN.t, project.member_status(admin))
+    member = (project.user_group.users - project.admin_group.users).first
+    assert_equal(:MEMBER.t, project.member_status(member))
+    assert_nil(project.member_status(users(:zero_user)))
+  end
+
   private
 
   # An observation owned by an eol member (mary), added to eol_project

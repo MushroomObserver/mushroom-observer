@@ -169,7 +169,7 @@ class NamesControllerCreateTest < FunctionalTestCase
 
     assert_response(:success)
     flash_text = :runtime_name_create_already_exists.t(
-      name: name.user_display_name
+      name: name.display_name
     )
     assert_flash_text(flash_text)
     assert_empty(name.reload.author)
@@ -193,7 +193,7 @@ class NamesControllerCreateTest < FunctionalTestCase
 
     assert_response(:success)
     flash_text = :runtime_name_create_already_exists.t(
-      name: name.user_display_name
+      name: name.display_name
     )
     assert_flash_text(flash_text)
     assert_equal(author, name.reload.author)
@@ -475,7 +475,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     assert_equal("Species", name.rank)
     assert_equal("Hygrocybe sp. 'constrictospora-PNW08'", name.search_name)
     assert_equal("**__Hygrocybe__** sp. **__'constrictospora-PNW08'__**",
-                 name.user_display_name)
+                 name.display_name)
     assert_equal("Hygrocybe constrictospora-pnw08", name.sort_name)
   end
 
@@ -504,7 +504,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     assert_equal("Species", name.rank)
     assert_equal("Donadinia sp. 'PNW01'", name.search_name)
     assert_equal("**__Donadinia__** sp. **__'PNW01'__**",
-                 name.user_display_name)
+                 name.display_name)
     assert_equal("Donadinia pnw01", name.sort_name)
   end
 
@@ -535,7 +535,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     assert_equal("Genus", name.rank)
     assert_equal("Gen. 'Hemimycena3'", name.text_name)
     assert_equal("Gen. 'Hemimycena3'", name.search_name)
-    assert_equal("Gen. **__'Hemimycena3'__**", name.user_display_name)
+    assert_equal("Gen. **__'Hemimycena3'__**", name.display_name)
     assert_equal("Hemimycena3", name.sort_name)
   end
 end

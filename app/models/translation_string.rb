@@ -38,10 +38,6 @@ class TranslationString < AbstractModel
   belongs_to :language
   belongs_to :user
 
-  # The acting user - who's importing/editing this string, set
-  # explicitly by LanguageExporter before save.
-  attr_accessor :current_user
-
   acts_as_versioned(
     if: :update_version?
   )

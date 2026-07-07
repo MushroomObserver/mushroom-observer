@@ -351,6 +351,9 @@ class DescriptionTest < UnitTestCase
 
     desc = name_descriptions(:draft_boletus_edulis)
     assert_equal(desc.project, desc.source_object)
+
+    desc = name_descriptions(:peltigera_source_desc)
+    assert_nil(desc.source_object)
   end
 
   def test_groups

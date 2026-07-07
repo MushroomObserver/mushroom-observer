@@ -229,8 +229,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Need these to be compatible with Comment.
-  alias format_name text_name
-  alias unique_format_name unique_text_name
+  def format_name(_user = nil)
+    text_name
+  end
+
+  def unique_format_name(_user = nil)
+    unique_text_name
+  end
 
   # Page heading + browser tab title — both plain `title`. (Can't
   # `alias` to `title` — the AR column accessor isn't defined yet
@@ -826,7 +831,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def do_log(tag, touch, user = nil)
     args = { touch: touch }
     args[:name] = user.login if user
-    tag == :log_project_destroyed ? orphan_log(tag, args) : log(tag, args)
+    if tag == :log_project_destroyed
+      orphan_log(tag, args)
+    else
+      log(tag, user: current_user, **args)
+    end
   end
 
   ##############################################################################

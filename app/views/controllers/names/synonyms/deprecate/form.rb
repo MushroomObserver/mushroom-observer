@@ -70,7 +70,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     def deprecate_comments_help
       [
         :name_deprecate_comments_help.tp(
-          name: @name.user_display_name(@user).chomp(".")
+          name: @name.display_name(@user).chomp(".")
         ),
         :field_textile_link.tp
       ].safe_join

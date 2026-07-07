@@ -250,10 +250,6 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   has_many :profile_users, class_name: "User"
 
-  # The acting/editing user - attribution for track_copyright_changes'
-  # CopyrightChange record, set by the caller before save.
-  attr_accessor :current_user
-
   belongs_to :user
   belongs_to :license
 
@@ -319,7 +315,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "**__Amanita lanei__** (Murr.) Sacc. & Trott. (2)"
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
-  def unique_format_name
+  def unique_format_name(_user = nil)
     # format_name returns the joined subject titles, or "" when there are
     # none — never the bare :image.l ("image") string — so the id always
     # renders in the "(id)" form here.
@@ -327,7 +323,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Do the same without the ID, for new page titles that generate an ID UI
-  def format_name
+  def format_name(_user = nil)
     title_subjects || :image.l
   end
 
@@ -1089,30 +1085,35 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Log update in associated observations, glossary terms, etc.
   def log_update
     (glossary_terms + observations).each do |object|
-      object.log(:log_image_updated, name: log_name, touch: false)
+      object.log(:log_image_updated, user: current_user, name: log_name,
+                                     touch: false)
     end
   end
 
   # Log destruction in associated observations, glossary terms, etc.
   def log_destroy
     (glossary_terms + observations).each do |object|
-      object.log(:log_image_destroyed, name: log_name, touch: true)
+      object.log(:log_image_destroyed, user: current_user, name: log_name,
+                                       touch: true)
     end
   end
 
   # Log adding new image to an associated observation, glossary term, etc.
   def log_create_for(object)
-    object.user_log(user, :log_image_created, name: log_name, touch: true)
+    object.log(:log_image_created, user: current_user, name: log_name,
+                                   touch: true)
   end
 
   # Log adding existing image to an associated observation, glossary term, etc.
   def log_reuse_for(object)
-    object.log(:log_image_reused, name: log_name, touch: true)
+    object.log(:log_image_reused, user: current_user, name: log_name,
+                                  touch: true)
   end
 
   # Log removing an image from an associated observation, glossary term, etc.
   def log_remove_from(object)
-    object.log(:log_image_removed, name: log_name, touch: false)
+    object.log(:log_image_removed, user: current_user, name: log_name,
+                                   touch: false)
   end
 
   # Create CopyrightChange entry whenever year, name or license changes.

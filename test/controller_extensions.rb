@@ -79,20 +79,19 @@ module ControllerExtensions
     post(action, **args)
   end
 
-  # Log a user in (affects session only).
+  # Log a user in (affects session only). Returns the authenticated User.
   def login(user = "rolf", password = "testpassword")
     user = User.authenticate(login: user, password: password)
     assert(user, "Failed to authenticate user <#{user}> " \
                  "with password <#{password}>.")
     @request.session[:user_id] = user.id
-    User.current = user
+    user
   end
 
   # Log a user out (affects session only).
   def logout
     @request.session[:user_id] = nil
     @request.session[:admin] = nil
-    User.current = nil
   end
 
   # Make the logged-in user admin and turn on admin mode.

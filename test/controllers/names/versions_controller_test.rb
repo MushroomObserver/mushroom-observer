@@ -58,7 +58,7 @@ module Names
     def test_show_past_name_classification_inherited_from_genus
       genus = names(:agaricus)
       species = names(:agaricus_campestras)
-      User.current = rolf
+      genus.current_user = rolf
       genus.update!(classification: "Phylum: _Basidiomycota_\r\nFamily: _New_")
       genus.versions.order(:version).last.update_column(
         :updated_at, 3.days.ago

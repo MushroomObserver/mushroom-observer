@@ -257,22 +257,18 @@ class RssLog < AbstractModel
   end
 
   # Returns formatted title of the associated object.
-  def format_name
+  def format_name(user = nil)
     if target
-      target.format_name
+      target.format_name(user)
     else
       orphan_title.sub(/ (\d+)$/, "")
     end
   end
 
   # Returns formatted title of the associated object, with id tacked on.
-  def unique_format_name
+  def unique_format_name(user = nil)
     if target
-      if target.respond_to?(:unique_format_name)
-        target.unique_format_name
-      else
-        target.format_name + " (#{target_id || "?"})"
-      end
+      target.unique_format_name(user)
     else
       orphan_title
     end
@@ -289,28 +285,19 @@ class RssLog < AbstractModel
   # is false.  (Changing +updated_at+ has the effect of pushing it to the front
   # of the RSS feed.)
   #
-  #   name.rss_log.add(:log_name_updated,
-  #     :user => user.login,
+  #   name.rss_log.add_with_date(:log_name_updated, user: user,
   #     :touch => false
   #   )
   #
   # *NOTE*: By default it includes these in args:
   #
-  #   :user  => User.current    # Which user is responsible?
+  #   :user  => user.login      # Which user is responsible?
   #   :touch => true            # Bring to top of RSS feed?
   #   :time  => Time.now        # Timestamp to use.
   #   :save  => true            # Save changes?
   #
-  def add_with_date(tag, args = {})
-    entry = encode(tag, relevant_args(args), args[:time] || Time.zone.now)
-    RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
-    add_entry(entry)
-    save_without_our_callbacks unless args.key?(:save) && !args[:save]
-    RssLog.record_timestamps = true
-  end
-
-  def user_add_with_date(user, tag, args = {})
-    entry = encode(tag, user_relevant_args(args, user),
+  def add_with_date(tag, user: nil, **args)
+    entry = encode(tag, relevant_args(args, user: user),
                    args[:time] || Time.zone.now)
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     add_entry(entry)
@@ -318,14 +305,16 @@ class RssLog < AbstractModel
     RssLog.record_timestamps = true
   end
 
-  def relevant_args(args)
-    { user: (User.current ? User.current.login : :UNKNOWN.l) }.
-      update(args).except(:save, :time, :touch)
+  # `user:` is a User instance, a bare login string (some callers already
+  # have just the login handy), or nil.
+  def relevant_args(args, user: nil)
+    { user: user_login(user) }.update(args).except(:save, :time, :touch)
   end
 
-  def user_relevant_args(args, user)
-    { user: (user ? user.login : :UNKNOWN.l) }.
-      update(args).except(:save, :time, :touch)
+  def user_login(user)
+    return :UNKNOWN.l unless user
+
+    user.is_a?(String) ? user : user.login
   end
 
   # Add line with timestamp and +title+ to notes, clear references to
@@ -337,7 +326,7 @@ class RssLog < AbstractModel
   #
   def orphan(user, title, key, args = {})
     args = args.merge(save: false)
-    user_add_with_date(user, key, args)
+    add_with_date(key, user: user, **args)
     add_entry(escape(title))
     clear_target_id
     save_without_our_callbacks

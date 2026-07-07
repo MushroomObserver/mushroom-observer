@@ -8,7 +8,6 @@ module SpeciesLists
       login
       now = Time.zone.now
 
-      User.current = rolf
       tapinella = Name.create(
         author: "(Batsch) Šutara",
         text_name: "Tapinella atrotomentosa",

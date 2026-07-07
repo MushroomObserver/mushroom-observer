@@ -139,19 +139,11 @@ class Textile < String
 
   # Register one or more names (instances) so that subsequent textile strings
   # can refer to them by abbreviation.
-  def self.register_name(*names)
+  def self.register_name(*names, user: nil)
     names.each do |name|
       next unless name.try(:at_or_below_genus?)
 
-      Textile.private_register_name(name.user_real_text_name(nil), name.rank)
-    end
-  end
-
-  def self.user_register_name(user, *names)
-    names.each do |name|
-      next unless name.try(:at_or_below_genus?)
-
-      Textile.private_register_name(name.user_real_text_name(user), name.rank)
+      Textile.private_register_name(name.real_text_name(user), name.rank)
     end
   end
 

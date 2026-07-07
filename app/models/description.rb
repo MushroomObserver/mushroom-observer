@@ -86,12 +86,6 @@ class Description < AbstractModel
   before_save :add_author_or_editor
   before_destroy :update_users_and_parent
 
-  # Per-instance "who's editing this" - set explicitly by controllers
-  # before save, not a thread-local global. Declared here (not on each
-  # subclass) since add_author_or_editor below is shared by every
-  # Description subclass (NameDescription, LocationDescription).
-  attr_accessor :current_user
-
   # Aliases for location / name.
   def parent
     send(parent_type)
@@ -153,7 +147,7 @@ class Description < AbstractModel
   end
 
   # Descriptive title including parent name, in Textile-formatted text.
-  def format_name
+  def format_name(_user = nil)
     put_together_name(:full)
   end
 
@@ -164,7 +158,7 @@ class Description < AbstractModel
   alias document_title text_name
 
   # Same as +format_name+ but with id tacked on.
-  def unique_format_name
+  def unique_format_name(_user = nil)
     string_with_id(format_name)
   end
 
