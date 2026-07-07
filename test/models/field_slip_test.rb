@@ -11,6 +11,23 @@ class FieldSlipTest < UnitTestCase
     assert_nil(FieldSlip.prefix_for_code(""))
   end
 
+  # find_or_create_by_code derives the project from the code prefix, so a
+  # slip created lazily (when an observation with a field_code is saved,
+  # rather than up front in the field-slip form) still lands in its project.
+  def test_find_or_create_by_code_derives_project_from_prefix
+    # open_membership_project has prefix OPEN and lets anyone join, so
+    # can_add_field_slip? holds for any user.
+    slip = FieldSlip.find_or_create_by_code("OPEN-99999", rolf)
+
+    assert_predicate(slip, :persisted?)
+    assert_equal(projects(:open_membership_project), slip.project)
+  end
+
+  def test_find_or_create_by_code_returns_nil_for_invalid_code
+    assert_nil(FieldSlip.find_or_create_by_code("12345", rolf),
+               "digits-only code fails validation")
+  end
+
   # eol_project: admins rolf + mary; members rolf, mary (editing),
   # katrina (no_trust); dick is not a member. See #4436.
   def test_admin_can_edit_trusting_members_slip
