@@ -357,13 +357,6 @@ Naming/AccessorMethodName:
     - 'test/flash_extensions.rb'
     - 'test/language_extensions.rb'
 
-# Offense count: 1
-# Configuration parameters: ForbiddenDelimiters.
-# ForbiddenDelimiters: (?i-mx:(^|\s)(EO[A-Z]{1}|END)(\s|$))
-Naming/HeredocDelimiterNaming:
-  Exclude:
-    - 'script/refresh_name_lister_cache'
-
 # Offense count: 27
 # Configuration parameters: NamePrefix, ForbiddenPrefixes, AllowedMethods, MethodDefinitionMacros, UseSorbetSigs.
 # NamePrefix: is_, has_, have_, does_

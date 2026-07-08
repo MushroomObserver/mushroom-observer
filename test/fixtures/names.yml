@@ -15,10 +15,11 @@
 #   Lactarius   -- Breaks NameControllerTest#test_edit_name_deprecated
 #   Strobilurus -- Break NameControllerTest#test_edit_name_add_author
 #   Verpa -- See :suggested_by_verpa_authored below.
-# Adding almost any Name will break ScriptTest#test_refresh_name_lister_cache.
+# Adding almost any Name will break
+# RefreshNameListerCacheJobTest#test_perform_writes_cache_file.
 #   Fix this by updating test/reports/name_list_data.js
 #   Suggestion: whenever adding a Name, run:
-#     rails t test/models/script_test.rb -n test_refresh_name_lister_cache
+#     rails t test/jobs/refresh_name_lister_cache_job_test.rb
 #     If that fails, update test/reports/name_list_data.js from the Actual results
 
 DEFAULTS: &DEFAULTS
