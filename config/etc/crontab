@@ -16,6 +16,7 @@ MAILTO=webmaster@mushroomobserver.org
 # This has been superseded by the rsync command above:
 # 13  4 * * * /var/web/mo/bin/run script/verify_images
 43  4 * * * /var/web/mo/bin/run script/refresh_sitemap
+13  5 * * * /var/web/mo/bin/run script/refresh_caches
 43  5 * * * /var/web/mo/bin/run script/backup_database.sh
 13  6 * * * /var/web/mo/bin/run script/update_googlebots.rb
 43  6 * * * /var/web/mo/bin/run script/update_snapshots
