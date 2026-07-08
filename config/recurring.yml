@@ -34,3 +34,6 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at 12:32am
+  check_rss_logs:
+    class: CheckRssLogsJob
+    schedule: every day at 3:53am
