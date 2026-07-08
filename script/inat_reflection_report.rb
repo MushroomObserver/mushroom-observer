@@ -100,20 +100,14 @@ class InatReflectionReport
     obs.images.map { |img| img.dhash || safe_hash { img.compute_dhash! } }
   end
 
+  # Each photo hashes to its four rotation dHashes (downloaded once), so an
+  # MO image that is a rotated copy still matches. The single-column
+  # InatPhotoHash cache can't hold a rotation set, so these are computed
+  # fresh per run (the download — the costly part — happens once either way).
   def inat_hashes(extract)
     Array(extract.photos).map do |photo|
-      record = InatPhotoHash.find_by(inat_photo_id: photo["id"])
-      next record.dhash if record
-
-      safe_hash { hash_inat_photo(photo) }
+      safe_hash { Image::Dhash.rotations_from_url(photo["url"]) }
     end
-  end
-
-  def hash_inat_photo(photo)
-    dhash = Image::Dhash.from_url(photo["url"])
-    InatPhotoHash.create!(inat_photo_id: photo["id"], dhash: dhash,
-                          fetched_at: Time.current)
-    dhash
   end
 
   def safe_hash

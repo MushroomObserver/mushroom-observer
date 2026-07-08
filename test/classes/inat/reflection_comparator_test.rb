@@ -38,6 +38,16 @@ class Inat::ReflectionComparatorTest < UnitTestCase
     assert_equal(:inat_subset_of_mo, result.image_relation)
   end
 
+  def test_matches_rotated_inat_photo
+    # The MO image matches only a rotated version of the iNat photo — the
+    # iNat entry is that photo's set of rotation hashes, and one (NEAR) is
+    # within threshold. Without rotation-awareness this would be disjoint.
+    result = compare([ZERO], [[FAR, FAR2, NEAR, FAR]])
+
+    assert_equal(:identical, result.image_relation)
+    assert_equal(1, result.matched_image_count)
+  end
+
   def test_field_matches
     obs = fake_obs(when: Date.new(2023, 8, 25), lat: 35.2279, lng: -82.5433,
                    text_name: "Aureoboletus betula")

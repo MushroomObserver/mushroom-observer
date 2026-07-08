@@ -92,7 +92,9 @@ class Inat
       used = Array.new(@inat_hashes.size, false)
       @matched_count = @mo_hashes.count do |mo|
         idx = @inat_hashes.each_index.find do |i|
-          !used[i] && Image::Dhash.distance(mo, @inat_hashes[i]) <=
+          # Each iNat entry is a single dHash or its four rotation dHashes;
+          # match against the closest so a rotated copy still counts.
+          !used[i] && Image::Dhash.min_distance(mo, @inat_hashes[i]) <=
             SAME_PHOTO_MAX_DISTANCE
         end
         used[idx] = true if idx
