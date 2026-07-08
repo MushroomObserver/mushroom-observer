@@ -18,33 +18,26 @@ class RefreshNameListerCacheJob < ApplicationJob
   private
 
   def genera_rows
-    Name.connection.select_all(<<~SQL.squish).to_a
-      SELECT text_name AS n, deprecated AS d
-      FROM names
-      WHERE `rank` = #{Name.ranks[:Genus]} AND correct_spelling_id IS NULL
-      ORDER BY sort_name
-    SQL
+    Name.with_rank(:Genus).with_correct_spelling.
+      order(:sort_name).
+      pluck(:text_name, :deprecated)
   end
 
+  # :Form..:Species is contiguous in the rank enum (Form/Variety/
+  # Subspecies/Species, ranks 100-400) so this covers exactly the four
+  # species-ish ranks the original query listed individually.
   def species_rows
-    Name.connection.select_all(<<~SQL.squish).to_a
-      SELECT text_name AS n, author AS a, deprecated AS d, synonym_id AS s
-      FROM names
-      WHERE (`rank` = #{Name.ranks[:Species]} OR
-             `rank` = #{Name.ranks[:Subspecies]} OR
-             `rank` = #{Name.ranks[:Variety]} OR
-             `rank` = #{Name.ranks[:Form]})
-            AND correct_spelling_id IS NULL
-      ORDER BY sort_name
-    SQL
+    Name.rank(:Form, :Species).with_correct_spelling.
+      order(:sort_name).
+      pluck(:text_name, :author, :deprecated, :synonym_id)
   end
 
   # Place "*" after all accepted genera; drop the deprecated spelling of
   # any genus that also has an accepted ("*") form.
   def genus_list(rows)
     seen = {}
-    list = rows.map do |row|
-      val = row["d"].to_i == 1 ? row["n"] : "#{row["n"]}*"
+    list = rows.map do |name, deprecated|
+      val = deprecated ? name : "#{name}*"
       seen[val] = true
       val
     end.uniq
@@ -52,15 +45,14 @@ class RefreshNameListerCacheJob < ApplicationJob
   end
 
   def tally_occurrences(species)
-    species.each_with_object(Hash.new(0)) { |row, occ| occ[row["n"]] += 1 }
+    species.each_with_object(Hash.new(0)) { |(name, *), occ| occ[name] += 1 }
   end
 
   # Map from synonym_id to the list of valid (non-deprecated) names sharing
   # that synonym group, so a deprecated species can list its valid synonyms.
   def build_valid_synonyms(species, occurs)
-    species.each_with_object({}) do |row, valid|
-      n, a, d, s = row.values_at("n", "a", "d", "s")
-      next unless s.to_i.positive? && d.to_i != 1
+    species.each_with_object({}) do |(n, a, deprecated, s), valid|
+      next unless s.to_i.positive? && !deprecated
 
       list = valid[s] ||= []
       name = disambiguated_name(n, a, occurs)
@@ -75,10 +67,10 @@ class RefreshNameListerCacheJob < ApplicationJob
   end
 
   def species_entry(row, occurs, valid)
-    n, a, d, s = row.values_at("n", "a", "d", "s")
+    n, a, deprecated, s = row
     name = disambiguated_name(n, a, occurs)
-    name += "*" if d.to_i != 1
-    return name unless d.to_i == 1 && valid[s]
+    name += "*" unless deprecated
+    return name unless deprecated && valid[s]
 
     [name] + valid[s].map { |x| "= #{x}" }
   end
