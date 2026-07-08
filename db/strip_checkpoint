@@ -8,6 +8,6 @@ username="mo"
 password="mo"
 
 gunzip -c checkpoint.gz | mysql -u $username -p$password $database
-mysql -u $username -p$password $database -e "source db/clean.sql"
+mysql -u $username -p$password $database < db/clean.sql
 # Uncomment this if there's a need to output a stripped checkpoint locally.
 # mysqldump -u $username -p$password $database | gzip > checkpoint_stripped.gz
