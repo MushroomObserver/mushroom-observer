@@ -22,3 +22,6 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at midnight
+  check_for_broken_references:
+    class: CheckForBrokenReferencesJob
+    schedule: every sunday at 7:13am
