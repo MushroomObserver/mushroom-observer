@@ -22,3 +22,6 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at midnight
+  repair_observation_vote_cache:
+    class: RepairObservationVoteCacheJob
+    schedule: every day at 5:28am
