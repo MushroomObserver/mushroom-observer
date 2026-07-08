@@ -146,7 +146,8 @@ class Views::Layouts::TopNav < Views::Base
   # The magnifying-glass that toggles the collapsible search-bar
   # row below the top nav.
   def render_search_nav_toggle
-    div(class: "navbar-form px-2 px-sm-3") do
+    div(class: class_names(Components::Navbar::FORM_CLASS,
+                           "px-2 px-sm-3")) do
       Button(
         variant: :outline, size: :sm,
         class: "top_nav_button",
