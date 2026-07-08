@@ -7,10 +7,20 @@ snapshot into local dev live in `db/`, not `script/`:
   backup from `images.mushroomobserver.org` via `scp` (requires an SSH
   account on that server), saves it as `checkpoint.gz` in the repo
   root, then calls `db/strip_checkpoint`.
-- `db/strip_checkpoint` — imports `checkpoint.gz` into MySQL as
-  `mo_development` and runs `db/clean.sql` against it.
+- `db/strip_checkpoint` — imports the **already-present**
+  `checkpoint.gz` (repo root) into MySQL as `mo_development` and runs
+  `db/clean.sql` against it. Does **not** download anything itself —
+  that's exactly why it's a separate script from `download_checkpoint`:
+  if the scp succeeded but the import/clean step failed (or `clean.sql`
+  itself changes), re-run `db/strip_checkpoint` alone against the
+  already-downloaded file. No need to re-run `download_checkpoint` /
+  re-fetch over SSH unless `checkpoint.gz` itself is missing or stale.
 - `db/clean.sql` — strips passwords, API keys, emails, original
-  filenames, and private GPS data from the imported checkpoint.
+  filenames, and private GPS data from the imported checkpoint. Piped
+  into `mysql`'s stdin (`mysql ... < db/clean.sql`), not passed via
+  `-e "source ..."` — `source` is a client-REPL-only directive, not
+  SQL the server understands, and errors with `ERROR 1064 (42000)` if
+  passed to `-e` (fixed 2026-07, see git blame on `strip_checkpoint`).
 
 Documented for end users in `README_MACOSX_NOTES.md` ("Load a MO
 database backup") as `db/download_checkpoint`.
