@@ -139,7 +139,7 @@ module Views::Layouts
     end
 
     def render_page_input_group(this_page, max_page)
-      div(class: "input-group page-input mx-2") do
+      InputGroup(class: "page-input mx-2") do
         input(**page_input_attrs(this_page, max_page))
         render_goto_button
       end
@@ -156,7 +156,7 @@ module Views::Layouts
     end
 
     def render_goto_button
-      span(class: "input-group-btn") do
+      render(Components::InputGroup::Addon.new) do
         Button(
           type: :submit,
           variant: :outline,
@@ -188,7 +188,7 @@ module Views::Layouts
         data: { controller: "page-input",
                 page_input_letters_value: used_letters }
       ) do
-        div(class: "input-group page-input ml-2") do
+        InputGroup(class: "page-input ml-2") do
           input(
             type: :text, name: :letter, value: this_letter,
             class: "form-control text-right",

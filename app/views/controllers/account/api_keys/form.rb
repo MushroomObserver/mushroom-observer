@@ -40,13 +40,13 @@ module Views::Controllers::Account::APIKeys
     def render_table_layout
       label(for: field(:notes).dom.id) { :account_api_keys_notes_label.t }
 
-      div(class: "input-group") do
+      InputGroup do
         render_cancel_button if @cancel_target
 
         text_field(:notes, label: false, size: 40,
                            class: "form-control border-none")
 
-        span(class: "input-group-btn") do
+        render(Components::InputGroup::Addon.new) do
           submit(:CREATE.l, submits_with: submits_text)
         end
       end
@@ -58,21 +58,21 @@ module Views::Controllers::Account::APIKeys
     # forms on the same page don't collide (Superform's default id is
     # class-based, not record-based).
     def render_inline_edit_layout
-      div(class: "input-group") do
+      InputGroup do
         render_cancel_button
 
         text_field(:notes, label: false,
                            id: "api_key_#{model.id}_notes",
                            class: "form-control border-none")
 
-        span(class: "input-group-btn") do
+        render(Components::InputGroup::Addon.new) do
           submit(:SAVE.l, submits_with: submits_text)
         end
       end
     end
 
     def render_cancel_button
-      span(class: "input-group-btn") do
+      render(Components::InputGroup::Addon.new) do
         Link(type: :collapse_toggle,
              target_id: @cancel_target,
              collapsed: false,

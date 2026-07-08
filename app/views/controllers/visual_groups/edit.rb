@@ -109,7 +109,7 @@ module Views::Controllers::VisualGroups
         strong(class: "mb-0") do
           plain("#{:edit_visual_group_filter_options.t}:")
         end
-        div(class: "btn-group", role: "group") do
+        ButtonGroup do
           STATUSES.each do |(value, label_key)|
             render_status_button(value, label_key.t)
           end

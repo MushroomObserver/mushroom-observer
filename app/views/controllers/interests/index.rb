@@ -27,7 +27,7 @@ module Views::Controllers::Interests
     end
 
     def render_type_filter
-      div(class: "btn-group pb-1 hidden-xs text-nowrap mt-5") do
+      ButtonGroup(class: "pb-1 hidden-xs text-nowrap mt-5") do
         Button(
           name: :rss_show.l, tag: :span, size: :sm,
           class: "disabled"
