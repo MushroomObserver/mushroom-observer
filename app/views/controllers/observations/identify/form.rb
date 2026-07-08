@@ -45,7 +45,8 @@ module Views::Controllers::Observations::Identify
         # Match the top-nav search bar layout: flexbox row with `gap-2`
         # between items, no padding on the form so it sits flush in
         # its `#search_nav` container.
-        class: "navbar-flex flex-grow-1 navbar-form px-0 gap-2",
+        class: class_names("navbar-flex flex-grow-1",
+                           Components::Navbar::FORM_CLASS, "px-0 gap-2"),
         data: { controller: initial_controller,
                 type: selected }
       }

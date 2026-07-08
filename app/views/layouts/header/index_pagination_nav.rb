@@ -46,7 +46,7 @@ module Views::Layouts
       this_letter, letters = letter_pagination_pages
 
       nav(class: "paginate pagination_letters navbar-flex pl-4") do
-        div(class: "navbar-text mx-0") { :by_letter.l }
+        Navbar(class: "mx-0") { :by_letter.l }
         render_letter_input(this_letter, letters)
       end
     end
@@ -77,13 +77,13 @@ module Views::Layouts
     end
 
     def render_page_label
-      div(class: "navbar-text mx-0 hidden-xs") { :PAGE.l }
+      Navbar(class: "mx-0 hidden-xs") { :PAGE.l }
     end
 
     def render_max_page_link(max_page)
       max_url = pagination_link_url(max_page)
-      div(class: "navbar-text ml-0 mr-2 hidden-xs") { :of.l }
-      div(class: "navbar-text mx-0") { a(href: max_url) { max_page.to_s } }
+      Navbar(class: "ml-0 mr-2 hidden-xs") { :of.l }
+      Navbar(class: "mx-0") { a(href: max_url) { max_page.to_s } }
     end
 
     def setup_page_numbers
@@ -99,7 +99,7 @@ module Views::Layouts
     def render_page_link(direction, disabled:)
       page = instance_variable_get(:"@#{direction}_page")
       classes = class_names(
-        "navbar-link btn btn-lg px-0", "#{direction}_page_link",
+        Components::Navbar::LINK_CLASSES, "#{direction}_page_link",
         ("disabled opacity-0" if disabled)
       )
       url = pagination_link_url(page)
@@ -129,7 +129,7 @@ module Views::Layouts
     def render_goto_page_input(this_page, max_page)
       form(
         action: @form_action_url, method: :get,
-        class: "navbar-form px-0 page_input",
+        class: class_names(Components::Navbar::FORM_CLASS, "px-0 page_input"),
         data: { controller: "page-input", page_input_max_value: max_page }
       ) do
         render_page_input_group(this_page, max_page)
@@ -139,7 +139,7 @@ module Views::Layouts
     end
 
     def render_page_input_group(this_page, max_page)
-      div(class: "input-group page-input mx-2") do
+      InputGroup(class: "page-input mx-2") do
         input(**page_input_attrs(this_page, max_page))
         render_goto_button
       end
@@ -156,7 +156,7 @@ module Views::Layouts
     end
 
     def render_goto_button
-      span(class: "input-group-btn") do
+      render(Components::InputGroup::Addon.new) do
         Button(
           type: :submit,
           variant: :outline,
@@ -184,11 +184,11 @@ module Views::Layouts
     def render_letter_input(this_letter, used_letters)
       form(
         action: @form_action_url, method: :get,
-        class: "navbar-form px-0 page_input",
+        class: class_names(Components::Navbar::FORM_CLASS, "px-0 page_input"),
         data: { controller: "page-input",
                 page_input_letters_value: used_letters }
       ) do
-        div(class: "input-group page-input ml-2") do
+        InputGroup(class: "page-input ml-2") do
           input(
             type: :text, name: :letter, value: this_letter,
             class: "form-control text-right",

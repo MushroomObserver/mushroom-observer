@@ -25,14 +25,14 @@ module Views::Layouts
       return unless visible?
 
       ul(class: "list-unstyled navbar-flex pl-3 sorter") do
-        li(class: "navbar-text mx-0 hidden-xs") do
+        Navbar(element: :li, class: "mx-0 hidden-xs") do
           plain("#{:sort_by_header.l}:")
         end
         Dropdown(
           id: "sort_nav_toggle",
           menu_id: "sort_nav_menu",
           label: toggle_title.to_s,
-          wrapper_class: "navbar-form px-2",
+          wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-2"),
           toggle_variant: :outline, toggle_size: :sm,
           toggle_class: "font-weight-normal",
           menu_class: "sorts",

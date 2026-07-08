@@ -19,16 +19,18 @@ class Components::ApplicationForm < Superform::Rails::Form
   #                    rendered after the text via `Components::Icon`
   module InputGroupAddon
     def render_input_group_button(&block)
-      div(class: "input-group") do
+      InputGroup do
         yield
-        span(class: "input-group-btn") { render_addon_element }
+        render(Components::InputGroup::Addon.new) { render_addon_element }
       end
     end
 
     def render_input_group_addon(&block)
-      div(class: "input-group") do
+      InputGroup do
         yield
-        span(class: "input-group-addon") { wrapper_options[:addon] }
+        render(Components::InputGroup::Addon.new(variant: :addon)) do
+          wrapper_options[:addon]
+        end
       end
     end
 
