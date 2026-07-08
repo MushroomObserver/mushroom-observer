@@ -72,26 +72,33 @@ class RepairObservationVoteCacheJob < ApplicationJob
     log("Sent alert email to #{MO.webmaster_email_address}")
   end
 
-  # Find affected obs with everything the email needs in one query. Pick a
-  # single representative Naming per obs (lowest matching id) so duplicates
-  # from `(observation_id, name_id)` having no uniqueness constraint don't
-  # show up multiple times. LEFT JOIN users so we don't hit `User.find_by`
-  # per row when formatting the alert.
+  # Find affected obs with everything the email needs. Eager-load :user and
+  # :namings so building each row doesn't N+1. Picks a single representative
+  # Naming per obs (lowest id among any matching the obs's consensus name_id)
+  # so duplicates from `(observation_id, name_id)` having no uniqueness
+  # constraint don't show up multiple times.
   def stale_observations
-    sql = <<~SQL.squish
-      SELECT obs.id, obs.created_at, obs.updated_at, obs.user_id,
-             obs.source, obs.inat_id, n.id, n.vote_cache, u.login
-      FROM observations obs
-      JOIN namings n ON n.id = (
-        SELECT MIN(n2.id) FROM namings n2
-        WHERE n2.observation_id = obs.id AND n2.name_id = obs.name_id
-      )
-      LEFT JOIN users u ON u.id = obs.user_id
-      WHERE ABS(IFNULL(obs.vote_cache, 0)) < 0.01
-        AND IFNULL(n.vote_cache, 0) > 0.01
-      ORDER BY obs.created_at DESC
-    SQL
-    ActiveRecord::Base.connection.execute(sql).to_a
+    candidate_observations.filter_map { |obs| stale_row(obs) }
+  end
+
+  def candidate_observations
+    Observation.where(vote_cache: nil).
+      or(Observation.where(vote_cache: -0.01..0.01)).
+      includes(:user, :namings).order(created_at: :desc)
+  end
+
+  def stale_row(obs)
+    naming = representative_naming(obs)
+    return nil unless naming && naming.vote_cache.to_f > 0.01
+
+    [obs.id, obs.created_at, obs.updated_at, obs.user_id, obs.source,
+     obs.inat_id, naming.id, naming.vote_cache, obs.user&.login]
+  end
+
+  def representative_naming(obs)
+    return nil if obs.name_id.nil?
+
+    obs.namings.select { |n| n.name_id == obs.name_id }.min_by(&:id)
   end
 
   # nil and 0.0 are equivalent for our purposes (both mean "no useful
@@ -161,17 +168,7 @@ class RepairObservationVoteCacheJob < ApplicationJob
            obs_id, Observation.show_url(obs_id),
            user_id, user_login || "?",
            created_at, updated_at,
-           source_label(source).inspect, inat_id.inspect,
+           source.inspect, inat_id.inspect,
            naming_id, naming_vc.to_f)
-  end
-
-  # `obs.source` is a Rails enum stored as integer (e.g. 5 ->
-  # `mo_inat_import`). Map back to the symbolic key for human-readable
-  # diagnostics.
-  def source_label(source_value)
-    return nil if source_value.nil?
-
-    Observation.sources.key(source_value) ||
-      Observation.sources.key(source_value.to_i)
   end
 end

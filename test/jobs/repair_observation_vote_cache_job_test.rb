@@ -54,4 +54,12 @@ class RepairObservationVoteCacheJobTest < ActiveJob::TestCase
       RepairObservationVoteCacheJob.perform_now
     end
   end
+
+  def test_errors_during_repair_are_caught_and_tallied_not_raised
+    Observation::NamingConsensus.stub(:new, ->(_obs) { raise("boom") }) do
+      assert_no_difference("ActionMailer::Base.deliveries.size") do
+        RepairObservationVoteCacheJob.perform_now
+      end
+    end
+  end
 end
