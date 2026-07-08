@@ -145,10 +145,10 @@ class AbstractModelTest < UnitTestCase
                                  "#{obj.class}#update_view_stats screwed up: ")
     end
 
-    assert_equal(num_past_names + 0, Name.versioned_class.count)
-    assert_equal(num_past_name_descs + 0, NameDescription.versioned_class.count)
-    assert_equal(num_past_locations + 0, Location.versioned_class.count)
-    assert_equal(num_past_loc_descs + 0,
+    assert_equal(num_past_names, Name.versioned_class.count)
+    assert_equal(num_past_name_descs, NameDescription.versioned_class.count)
+    assert_equal(num_past_locations, Location.versioned_class.count)
+    assert_equal(num_past_loc_descs,
                  LocationDescription.versioned_class.count)
   end
 
