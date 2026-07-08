@@ -80,12 +80,12 @@ class InatReflectionReport
   end
 
   def compare_one(obs_id)
-    obs = Observation.includes(:images).find(obs_id)
+    obs = Observation.includes(:images, :location).find(obs_id)
     extract = InatObsExtract.find_by(inat_id: @extract_for[obs_id])
     return nil unless extract
 
     result = Inat::ReflectionComparator.new(
-      mo_obs: obs, extract: extract,
+      mo_obs: obs, extract: extract, mo_box: obs.location,
       mo_hashes: mo_hashes(obs), inat_hashes: inat_hashes(extract)
     ).compare
     tally(result)

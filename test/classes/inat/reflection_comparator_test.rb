@@ -98,7 +98,50 @@ class Inat::ReflectionComparatorTest < UnitTestCase
     assert_equal(:differ, build(obs, extract, [], []).compare.location_status)
   end
 
+  def test_centroid_source_tolerates_the_whole_named_area
+    # No obs point; a large named Location whose centroid is ~70 km from the
+    # iNat point, but the point is well within the box. Without the radius
+    # tolerance this coarse centroid would read as a location edit.
+    obs = fake_obs(location_lat: 34.0, location_lng: -109.5)
+    box = fake_box(north: 34.6, south: 33.4, east: -108.8, west: -110.2)
+    extract = InatObsExtract.new(lat: 33.5, lng: -109.0, obscured: false)
+    result = build(obs, extract, [], [], box: box).compare
+
+    assert_equal(:location, result.mo_coord_source)
+    assert_operator(result.location_meters, :>, 50_000)
+    assert_equal(:match, result.location_status)
+  end
+
+  def test_point_outside_its_own_location_is_gps_suspect
+    # MO point near the South Pole, but the named Location and the iNat
+    # point are both in Pennsylvania: the point is corrupt, not an edit.
+    obs = fake_obs(lat: -79.2372, lng: 113.71,
+                   location_lat: 41.139, location_lng: -77.444)
+    box = fake_box(north: 41.154, south: 41.124, east: -77.414, west: -77.475)
+    extract = InatObsExtract.new(lat: 41.1388, lng: -77.4443, obscured: false)
+
+    result = build(obs, extract, [], [], box: box).compare
+    assert_equal(:mo_gps_suspect, result.location_status)
+  end
+
+  def test_corrupt_point_with_inat_also_elsewhere_is_plain_differ
+    # MO point is outside its box, but iNat's point is nowhere near the
+    # named Location either — no basis to blame the MO point specifically.
+    obs = fake_obs(lat: -79.2372, lng: 113.71,
+                   location_lat: 41.139, location_lng: -77.444)
+    box = fake_box(north: 41.154, south: 41.124, east: -77.414, west: -77.475)
+    extract = InatObsExtract.new(lat: 10.0, lng: 10.0, obscured: false)
+
+    result = build(obs, extract, [], [], box: box).compare
+    assert_equal(:differ, result.location_status)
+  end
+
   private
+
+  def fake_box(north:, south:, east:, west:)
+    Struct.new(:north, :south, :east, :west, keyword_init: true).
+      new(north: north, south: south, east: east, west: west)
+  end
 
   # `when` is a reserved word; the label form (`when:`) is fine as a kwarg
   # key, and Struct members with that name read back via `obj.when`.
@@ -107,10 +150,10 @@ class Inat::ReflectionComparatorTest < UnitTestCase
                keyword_init: true).new(**attrs)
   end
 
-  def build(obs, extract, mo_hashes, inat_hashes)
+  def build(obs, extract, mo_hashes, inat_hashes, box: nil)
     Inat::ReflectionComparator.new(mo_obs: obs, extract: extract,
                                    mo_hashes: mo_hashes,
-                                   inat_hashes: inat_hashes)
+                                   inat_hashes: inat_hashes, mo_box: box)
   end
 
   def relation(mo_hashes, inat_hashes)

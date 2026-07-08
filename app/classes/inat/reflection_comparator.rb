@@ -30,6 +30,11 @@ class Inat
     # location_meters is reported raw so this can be tuned from the data.
     BASE_MATCH_RADIUS = 1_000
 
+    # Degrees-to-radians, and meters per degree of latitude (constant; a
+    # degree of longitude shrinks by cos(lat), applied where used).
+    RAD = Math::PI / 180
+    METERS_PER_DEGREE = 111_320.0
+
     # Field statuses are tri-state (:match / :differ / :na) so "nothing to
     # compare" stays distinct from "compared and differs" in the report.
     Result = Struct.new(
@@ -39,11 +44,15 @@ class Inat
       keyword_init: true
     )
 
-    def initialize(mo_obs:, extract:, mo_hashes:, inat_hashes:)
+    def initialize(mo_obs:, extract:, mo_hashes:, inat_hashes:, mo_box: nil)
       @obs = mo_obs
       @extract = extract
       @mo_hashes = mo_hashes.compact
       @inat_hashes = inat_hashes.compact
+      # The MO named Location's bounding box (responds to
+      # north/south/east/west), or nil. Not denormalized onto the obs, so
+      # the caller supplies it; nil disables box-aware location judgments.
+      @box = mo_box
     end
 
     def compare
@@ -144,23 +153,91 @@ class Inat
         haversine_m(mo_lat, mo_lng, @extract.lat, @extract.lng).round
     end
 
-    # Obscured iNat coords match if the MO point is within the obscuring
-    # radius (not a real edit); otherwise within BASE_MATCH_RADIUS.
+    # :match | :differ | :mo_gps_suspect | :na. An MO point that sits
+    # outside its own named Location is corrupt (e.g. a South-Pole point on
+    # a US observation); iNat's coordinate is authoritative there, so that's
+    # a data error to fix, not a location edit to preserve.
     def location_status
-      meters = location_meters
-      return :na if meters.nil?
+      return :na if location_meters.nil?
+      return :match if location_meters <= tolerance_meters
+      return :mo_gps_suspect if mo_gps_suspect?
 
-      meters <= tolerance_meters ? :match : :differ
+      :differ
     end
 
+    # A centroid (no obs point) is compared against a coarse named area, so
+    # its tolerance is that Location's own radius — a point anywhere in the
+    # box is the same place. A real obs point keeps the tight base radius.
+    # iNat's obscuring displacement is added on top in either case.
     def tolerance_meters
-      return BASE_MATCH_RADIUS unless @extract.obscured
+      base = if centroid_source? && @box
+               location_radius_meters
+             else
+               BASE_MATCH_RADIUS
+             end
+      base + obscuring_slop
+    end
+
+    def centroid_source? = mo_coord_source == :location
+
+    # iNat shifts obscured points randomly by up to public_accuracy meters.
+    def obscuring_slop
+      return 0 unless @extract.obscured
 
       if @extract.public_accuracy&.positive?
         @extract.public_accuracy
       else
         DEFAULT_OBSCURED_RADIUS
       end
+    end
+
+    # Centroid-to-NE-corner: the half-diagonal of the named Location's box.
+    def location_radius_meters
+      haversine_m(@obs.location_lat, @obs.location_lng,
+                  @box.north, @box.east).round
+    end
+
+    # A stored point outside its own named Location can't be trusted; when
+    # iNat's point does fall inside that Location (fuzzily, see
+    # inat_in_mo_box?) the place still agrees and only the point is bad.
+    def mo_gps_suspect?
+      @box && mo_coord_source == :point &&
+        !point_in_box?(@obs.lat, @obs.lng) && inat_in_mo_box?
+    end
+
+    # Fuzzy so iNat's obscuring displacement doesn't push a genuinely-inside
+    # point just outside a small box. A point well inside is unambiguous;
+    # one comfortably outside stays a plain differ.
+    def inat_in_mo_box?
+      point_in_box?(@extract.lat, @extract.lng,
+                    BASE_MATCH_RADIUS + obscuring_slop)
+    end
+
+    # Point within the box, expanded by buffer_m meters on every side. The
+    # longitude buffer widens with latitude (a degree of longitude shrinks
+    # toward the poles); the box's own mid-latitude is the reference.
+    def point_in_box?(lat, lng, buffer_m = 0)
+      return false unless lat && lng
+
+      dlat, dlng = buffer_degrees(buffer_m)
+      lat.to_f.between?(@box.south - dlat, @box.north + dlat) &&
+        lng_in_box?(lng.to_f, dlng)
+    end
+
+    # buffer_m in [lat, lng] degrees; a degree of longitude shrinks by
+    # cos(lat), taken at the box's mid-latitude.
+    def buffer_degrees(buffer_m)
+      ref_lat = (@box.north + @box.south) / 2.0
+      [buffer_m / METERS_PER_DEGREE,
+       buffer_m / (METERS_PER_DEGREE * Math.cos(ref_lat * RAD))]
+    end
+
+    def lng_in_box?(lng, buf = 0)
+      west = @box.west - buf
+      east = @box.east + buf
+      return lng.between?(west, east) if @box.west <= @box.east
+
+      lng >= west || lng <= east # box straddles the antimeridian
     end
 
     def taxon_status
@@ -170,9 +247,8 @@ class Inat
     end
 
     def haversine_m(lat1, lng1, lat2, lng2)
-      rad = Math::PI / 180
-      a = haversine_a((lat2 - lat1) * rad, (lng2 - lng1) * rad,
-                      lat1 * rad, lat2 * rad)
+      a = haversine_a((lat2 - lat1) * RAD, (lng2 - lng1) * RAD,
+                      lat1 * RAD, lat2 * RAD)
       6_371_000 * 2 * Math.asin(Math.sqrt(a))
     end
 
