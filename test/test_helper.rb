@@ -204,7 +204,10 @@ module ActiveSupport
     # Standard teardown to run after every test.  Just makes sure any
     # images that might have been uploaded are cleared out.
     def teardown
-      assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
+      assert_equal([], Symbol.missing_tags,
+                   "Language tag(s) are missing. Run `bin/rails " \
+                   "lang:update` and re-run this test before concluding " \
+                   "this is a pre-existing/unrelated failure.")
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
     end
