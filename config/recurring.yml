@@ -22,3 +22,6 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at midnight
+  check_for_orphaned_thumbnails:
+    class: CheckForOrphanedThumbnailsJob
+    schedule: every hour at minute 1
