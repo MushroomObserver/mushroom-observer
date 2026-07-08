@@ -80,13 +80,15 @@ class InatReflectionReport
   end
 
   def compare_one(obs_id)
-    obs = Observation.includes(:images, :location).find(obs_id)
+    obs = Observation.includes(:images, :location, :user, :collector_user).
+          find(obs_id)
     extract = InatObsExtract.find_by(inat_id: @extract_for[obs_id])
     return nil unless extract
 
     result = Inat::ReflectionComparator.new(
-      mo_obs: obs, extract: extract, mo_box: obs.location,
-      mo_hashes: mo_hashes(obs), inat_hashes: inat_hashes(extract)
+      mo_obs: obs, extract: extract,
+      mo_hashes: mo_hashes(obs), inat_hashes: inat_hashes(extract),
+      mo_context: { box: obs.location, logins: mo_inat_logins(obs) }
     ).compare
     tally(result)
     row(obs_id, extract, result)
@@ -94,6 +96,11 @@ class InatReflectionReport
     @stats[:error] += 1
     warn("  obs #{obs_id}: #{e.class}: #{e.message}")
     nil
+  end
+
+  # The MO side's iNat login(s): the owner's, plus the collector's when set.
+  def mo_inat_logins(obs)
+    [obs.user&.inat_username, obs.collector_user&.inat_username].compact
   end
 
   def mo_hashes(obs)
@@ -120,7 +127,7 @@ class InatReflectionReport
 
   def tally(result)
     @stats[result.image_relation] += 1
-    [:date, :location, :taxon].each do |f|
+    [:date, :location, :taxon, :collector].each do |f|
       @field[:"#{f}_#{result[:"#{f}_status"]}"] += 1
     end
   end
@@ -133,7 +140,8 @@ class InatReflectionReport
       location_status: result.location_status,
       location_meters: result.location_meters,
       mo_coord_source: result.mo_coord_source,
-      taxon_status: result.taxon_status }
+      taxon_status: result.taxon_status,
+      collector_status: result.collector_status }
   end
 
   def write_csv(csv, rows)

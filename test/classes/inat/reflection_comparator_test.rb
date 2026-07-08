@@ -136,6 +136,30 @@ class Inat::ReflectionComparatorTest < UnitTestCase
     assert_equal(:differ, result.location_status)
   end
 
+  def test_collector_matches_inat_login_case_insensitively
+    extract = InatObsExtract.new(inat_login: "FungusFan")
+    result = build(fake_obs, extract, [], [], logins: ["fungusfan"]).compare
+
+    assert_equal(:match, result.collector_status)
+  end
+
+  def test_collector_differs_when_no_mo_login_matches
+    extract = InatObsExtract.new(inat_login: "someone_else")
+    result = build(fake_obs, extract, [], [], logins: ["fungusfan"]).compare
+
+    assert_equal(:differ, result.collector_status)
+  end
+
+  def test_collector_is_na_without_logins_on_either_side
+    with_login = InatObsExtract.new(inat_login: "fungusfan")
+    no_login = InatObsExtract.new
+
+    assert_equal(:na, build(fake_obs, with_login, [], []).compare.
+                        collector_status)
+    assert_equal(:na, build(fake_obs, no_login, [], [], logins: ["x"]).compare.
+                        collector_status)
+  end
+
   private
 
   def fake_box(north:, south:, east:, west:)
@@ -150,10 +174,11 @@ class Inat::ReflectionComparatorTest < UnitTestCase
                keyword_init: true).new(**attrs)
   end
 
-  def build(obs, extract, mo_hashes, inat_hashes, box: nil)
+  def build(obs, extract, mo_hashes, inat_hashes, **context)
     Inat::ReflectionComparator.new(mo_obs: obs, extract: extract,
                                    mo_hashes: mo_hashes,
-                                   inat_hashes: inat_hashes, mo_box: box)
+                                   inat_hashes: inat_hashes,
+                                   mo_context: context)
   end
 
   def relation(mo_hashes, inat_hashes)

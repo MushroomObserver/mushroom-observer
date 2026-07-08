@@ -40,19 +40,25 @@ class Inat
     Result = Struct.new(
       :image_relation, :case_number, :mo_image_count, :inat_photo_count,
       :matched_image_count, :date_status, :location_status, :taxon_status,
-      :location_meters, :mo_coord_source,
+      :collector_status, :location_meters, :mo_coord_source,
       keyword_init: true
     )
 
-    def initialize(mo_obs:, extract:, mo_hashes:, inat_hashes:, mo_box: nil)
+    # mo_context carries pre-resolved MO-side reference data that isn't on
+    # the observation's own columns, so the class stays pure and testable:
+    #   :box    — the named Location's bounding box (responds to
+    #             north/south/east/west); nil disables box-aware location
+    #             judgments.
+    #   :logins — the MO side's iNat login(s): the owner's, plus the
+    #             collector's when set. Compared against the extract's
+    #             inat_login for the collector/observer check.
+    def initialize(mo_obs:, extract:, mo_hashes:, inat_hashes:, mo_context: {})
       @obs = mo_obs
       @extract = extract
       @mo_hashes = mo_hashes.compact
       @inat_hashes = inat_hashes.compact
-      # The MO named Location's bounding box (responds to
-      # north/south/east/west), or nil. Not denormalized onto the obs, so
-      # the caller supplies it; nil disables box-aware location judgments.
-      @box = mo_box
+      @box = mo_context[:box]
+      @mo_logins = Array(mo_context[:logins]).compact
     end
 
     def compare
@@ -66,6 +72,7 @@ class Inat
         date_status: date_status,
         location_status: location_status,
         taxon_status: taxon_status,
+        collector_status: collector_status,
         location_meters: location_meters,
         mo_coord_source: mo_coord_source
       )
@@ -244,6 +251,19 @@ class Inat
       return :na if @extract.taxon_name.blank? || @obs.text_name.blank?
 
       @extract.taxon_name.casecmp?(@obs.text_name) ? :match : :differ
+    end
+
+    # Does the MO observation's owner (or collector) correspond to the iNat
+    # observer? Match on any candidate MO login equal to the extract's
+    # inat_login, case-insensitively.
+    def collector_status
+      return :na if @extract.inat_login.blank? || @mo_logins.empty?
+
+      if @mo_logins.any? { |login| login.casecmp?(@extract.inat_login) }
+        :match
+      else
+        :differ
+      end
     end
 
     def haversine_m(lat1, lng1, lat2, lng2)
