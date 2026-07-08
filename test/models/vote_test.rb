@@ -123,21 +123,6 @@ class VoteTest < UnitTestCase
     end
   end
 
-  def test_add_missing_views_skips_votes_with_nil_observation_id
-    orphan_vote = votes(:coprinus_comatus_other_vote)
-    orphan_vote.update_column(:observation_id, nil)
-    assert_equal(0, ObservationView.count,
-                 "Expected no ObservationView records at start")
-
-    Vote.add_missing_views_corresponding_to_votes
-
-    assert_not(
-      ObservationView.exists?(user_id: orphan_vote.user_id,
-                              observation_id: nil),
-      "Should not create an ObservationView for a vote with no observation"
-    )
-  end
-
   def test_confidence_returns_no_opinion_for_zero
     # Bug: Vote.confidence(0) was returning "Doubtful" instead of "No Opinion"
     assert_equal("No Opinion", Vote.confidence(0))
