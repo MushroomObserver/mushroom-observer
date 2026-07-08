@@ -22,3 +22,6 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at midnight
+  refresh_caches:
+    class: RefreshCachesJob
+    schedule: every day at 5:13am

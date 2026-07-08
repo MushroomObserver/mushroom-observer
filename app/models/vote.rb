@@ -212,7 +212,7 @@ class Vote < AbstractModel
        updated_at <= Time.zone.parse(MO.vote_cutoff))
   end
 
-  # Used by script/refresh_caches
+  # Used by RefreshCachesJob
   # Mark an observation as `reviewed` by a user if they've already voted on it.
   # (The user can also independently "mark as reviewed" in the help-identify
   # UI, so this cronjob should not reset any obs to "not reviewed".)
