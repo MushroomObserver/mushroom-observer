@@ -110,7 +110,7 @@ LOCALES = Language.where(beta: [false, nil]).order(order: :asc).map(&:locale)
 #    See script/update_googlebots.rb
 # - Manually block in Rails an anonymous user via the Admin UI
 # - Limit them via browser gem and #bot? method
-ROBOTS_HEADER = <<~"TXT".freeze
+ROBOTS_HEADER = <<~TXT.freeze
 
   Sitemap: #{SITEMAP_URL.sub("NAME", "index")}
 
