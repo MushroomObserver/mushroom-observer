@@ -72,19 +72,42 @@ class RepairObservationVoteCacheJob < ApplicationJob
     log("Sent alert email to #{MO.webmaster_email_address}")
   end
 
-  # Find affected obs with everything the email needs. Eager-load :user and
-  # :namings so building each row doesn't N+1. Picks a single representative
-  # Naming per obs (lowest id among any matching the obs's consensus name_id)
-  # so duplicates from `(observation_id, name_id)` having no uniqueness
-  # constraint don't show up multiple times.
+  # Find affected obs with everything the email needs. `candidate_observations`
+  # pushes "has a matching naming with a real vote_cache" into a real SQL
+  # join, so this only ever loads observations that are plausibly stale -
+  # not every observation with a nil/near-zero vote_cache (most unreviewed
+  # observations legitimately have one). `stale_row`/`representative_naming`
+  # then apply the exact original semantics (representative = lowest-id
+  # matching naming, regardless of which naming's vote_cache triggered the
+  # join) on that much smaller set. `find_each` keeps memory bounded and
+  # batches by id, so the result isn't ordered - sort by created_at after.
   def stale_observations
-    candidate_observations.filter_map { |obs| stale_row(obs) }
+    rows = []
+    candidate_observations.find_each { |obs| rows << stale_row(obs) }
+    rows.compact.sort_by { |row| row[1] }.reverse
   end
 
   def candidate_observations
-    Observation.where(vote_cache: nil).
-      or(Observation.where(vote_cache: -0.01..0.01)).
-      includes(:user, :namings).order(created_at: :desc)
+    Observation.joins(candidate_naming_join).where(stale_vote_cache).
+      distinct.includes(:user, :namings)
+  end
+
+  # A matching naming (same obs, same consensus name_id) with a real
+  # vote_cache - a coarse SQL-level pre-filter; `representative_naming`
+  # applies the exact original semantics afterward.
+  def candidate_naming_join
+    obs = Observation.arel_table
+    namings = Naming.arel_table
+    condition = namings[:observation_id].eq(obs[:id]).
+                and(namings[:name_id].eq(obs[:name_id])).
+                and(namings[:vote_cache].gt(0.01))
+    obs.join(namings).on(condition).join_sources
+  end
+
+  def stale_vote_cache
+    obs = Observation.arel_table
+    obs[:vote_cache].eq(nil).
+      or(obs[:vote_cache].gteq(-0.01).and(obs[:vote_cache].lteq(0.01)))
   end
 
   def stale_row(obs)

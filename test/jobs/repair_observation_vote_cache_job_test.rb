@@ -4,6 +4,7 @@ require("test_helper")
 
 class RepairObservationVoteCacheJobTest < ActiveJob::TestCase
   def setup
+    ActionMailer::Base.deliveries.clear
     @obs = observations(:coprinus_comatus_obs)
     @naming = namings(:coprinus_comatus_naming)
     @naming.update_column(:vote_cache, 2.5)
@@ -11,7 +12,9 @@ class RepairObservationVoteCacheJobTest < ActiveJob::TestCase
   end
 
   def test_repairs_stale_vote_cache_and_sends_alert
-    RepairObservationVoteCacheJob.perform_now
+    assert_difference("ActionMailer::Base.deliveries.size", 1) do
+      RepairObservationVoteCacheJob.perform_now
+    end
 
     # calc_consensus recomputes from the real underlying Vote records
     # (not from the naming.vote_cache column we forced), so assert the
@@ -24,7 +27,6 @@ class RepairObservationVoteCacheJobTest < ActiveJob::TestCase
                     "Repaired obs.vote_cache should match the " \
                     "consensus naming's recomputed vote_cache")
     mail = ActionMailer::Base.deliveries.last
-    assert_not_nil(mail, "Should have sent an alert email")
     assert_includes(mail.subject, "1 observation(s) repaired")
     assert_includes(mail.body.to_s, "obs #{@obs.id}")
   end
