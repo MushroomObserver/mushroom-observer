@@ -65,7 +65,9 @@ class LocalizationFilesTest < UnitTestCase
     end
     assert_true(missing_tags.empty?,
                 "Found #{missing_tags.length} undefined tag reference(s) " \
-                "in source files:\n #{missing_tags.join}")
+                "in source files (run `bin/rails lang:update` and re-run " \
+                "before concluding this is a pre-existing/unrelated " \
+                "failure):\n #{missing_tags.join}")
     assert_true(
       duplicate_function_defs.empty?,
       "Found #{duplicate_function_defs.length} duplicate method " \
