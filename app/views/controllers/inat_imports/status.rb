@@ -153,6 +153,8 @@ module Views::Controllers::InatImports
                            @inat_import.ignored_not_importable_count)
         render_ignored_row(:inat_import_tracker_ignored_already_imported,
                            @inat_import.ignored_already_imported_count)
+        render_ignored_row(:inat_import_tracker_ignored_unlicensed,
+                           @inat_import.ignored_unlicensed_count)
         render_date_missing_row
       end
       render_license_added_section

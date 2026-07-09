@@ -11,6 +11,7 @@ module Views::Controllers::InatImports
     prop :inat_import, ::InatImport
     prop :requested, _Nilable(::Integer), default: nil
     prop :after_taxon, _Nilable(::Integer), default: nil
+    prop :not_yet_imported, _Nilable(::Integer), default: nil
     prop :estimate_with_date, _Nilable(::Integer), default: nil
 
     def view_template
@@ -25,6 +26,7 @@ module Views::Controllers::InatImports
                  inat_import: @inat_import,
                  requested: @requested,
                  after_taxon: @after_taxon,
+                 not_yet_imported: @not_yet_imported,
                  estimate_with_date: @estimate_with_date
                }
              ))
