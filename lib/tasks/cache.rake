@@ -92,6 +92,12 @@ namespace :cache do
     ActiveRecord::Migration.remove_column(:past_names, :review_status_tmp)
   end
 
+  desc "Remove orphaned observation_views with no observation_id"
+  task(remove_orphaned_observation_views: :environment) do
+    count = ObservationView.where(observation_id: nil).delete_all
+    print("Deleted #{count} orphaned observation_views.\n")
+  end
+
   desc "Add reviewers"
   task(add_reviewers: :environment) do
     group = UserGroup.find_by_name("reviewers")
