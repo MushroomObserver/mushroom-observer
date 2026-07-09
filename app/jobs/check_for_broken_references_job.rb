@@ -109,26 +109,37 @@ class CheckForBrokenReferencesJob < ApplicationJob
     end
   end
 
+  # Logs a count + bounded sample rather than the full id list - :alert
+  # rows should be rare (something's wrong upstream), but an unbounded
+  # `ids.inspect` would blow up log/job.log if that assumption is ever
+  # wrong (e.g. after a bad data migration).
   def alert_broken(model, column, ids)
-    log("ALERT!! #{model.table_name}.#{column} = #{ids.inspect}")
+    log("ALERT!! #{model.table_name}.#{column}: #{ids.size} bad row(s), " \
+        "e.g. #{ids.first(10).inspect}")
   end
 
   def delete_broken(model, column, query, ids)
     query.delete_all unless @dry_run
     log("DELETING #{ids.count} #{model.name.pluralize(ids.count)} " \
-        "whose #{column} doesn't exist")
+        "whose #{column} doesn't exist#{dry_run_note}")
   end
 
   def nullify_broken(model, column, query, ids)
     query.update_all(column => nil) unless @dry_run
-    log("SETTING #{ids.count} nonexistant #{model.table_name}.#{column} " \
-        "TO NIL")
+    log("SETTING #{ids.count} nonexistent #{model.table_name}.#{column} " \
+        "TO NIL#{dry_run_note}")
   end
 
   def zero_broken(model, column, query, ids)
     query.update_all(column => 0) unless @dry_run
-    log("SETTING #{ids.count} nonexistant #{model.table_name}.#{column} " \
-        "TO ZERO")
+    log("SETTING #{ids.count} nonexistent #{model.table_name}.#{column} " \
+        "TO ZERO#{dry_run_note}")
+  end
+
+  # Appended to mutation log lines so a dry run doesn't read as if it
+  # actually deleted/nulled/zeroed anything.
+  def dry_run_note
+    @dry_run ? " (dry run)" : ""
   end
 
   def raise_invalid_action(model, action)
