@@ -60,7 +60,7 @@ class LanguageTrackingTest < UnitTestCase
         Language.ignore_usage
       end
     end
-    threads.each(&:join)
+    threads.each(&:value)
 
     until results.empty?
       tag, observed = results.pop
