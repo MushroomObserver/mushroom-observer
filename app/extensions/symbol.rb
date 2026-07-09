@@ -40,15 +40,17 @@ class Symbol
     Tree.has_node?(self, *)
   end
 
-  # Return a list of missing tags we've encountered.
+  # Return a list of missing tags we've encountered. A class-level
+  # instance variable (not `@@`, which trips Style/ClassVars), holding
+  # a Concurrent::Array so `<<` below is safe across threads - matches
+  # the @raise_errors pattern just above.
   def self.missing_tags
-    @@missing_tags = [] unless defined?(@@missing_tags)
-    @@missing_tags
+    @missing_tags ||= Concurrent::Array.new
   end
 
   # Reset the list of missing tags.
   def self.missing_tags=(tags)
-    @@missing_tags = tags
+    @missing_tags = Concurrent::Array.new(tags)
   end
 
   # Does this tag have a translation?
@@ -136,7 +138,9 @@ class Symbol
                         default: "")) != ""
       result = localize_postprocessing(val, args, level, :captialize)
     else
-      @@missing_tags << self if defined?(@@missing_tags)
+      if Symbol.instance_variable_defined?(:@missing_tags)
+        Symbol.missing_tags << self
+      end
       if args.any?
         pairs = args.map do |k, v|
           "#{k}=#{v.inspect}"
