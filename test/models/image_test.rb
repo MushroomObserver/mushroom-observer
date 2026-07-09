@@ -308,74 +308,33 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
   end
 
-  # A failed GPS strip must stop processing before Image::Processor (and
-  # thus a background dhash job) is ever reached -- an unstripped
-  # original must not propagate into resized/transferred copies or get
-  # hashed. See Image::Processor.strip_original_gps.
-  def test_process_image_strip_failure_skips_dhash_job
+  # GPS stripping runs synchronously (not inside ProcessImageJob) -- if it's
+  # requested and fails, process_image must fail too, and must not enqueue
+  # the background job at all (an unstripped original must never propagate
+  # into resized/transferred copies).
+  def test_process_image_strip_failure_skips_process_image_job
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
 
     img.stub(:move_original, true) do
       Image::Processor.stub(:strip_original_gps, "boom") do
-        assert_no_enqueued_jobs(only: ImageDhashJob) do
-          assert_not(img.process_image(strip: true))
-        end
+        assert_not(img.process_image(strip: true))
       end
     end
     assert(img.errors[:image].any?)
+    assert_no_enqueued_jobs(only: ProcessImageJob)
   end
 
-  def test_process_image_command_failure
+  def test_process_image_enqueues_process_image_job
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
 
-    failing_processor = Object.new
-    def failing_processor.process
-      raise("boom")
-    end
-
     img.stub(:move_original, true) do
-      Image::Processor.stub(:new, failing_processor) do
-        Rails.env.stub(:test?, false) do
-          assert_not(img.process_image)
-        end
+      assert_enqueued_with(job: ProcessImageJob,
+                           args: [img.id, img.original_extension, false]) do
+        assert(img.process_image)
       end
     end
-    assert(img.errors[:image].any?)
-  end
-
-  # Regression test for a Copilot finding on PR #4751: Image::Processor
-  # can record a transfer failure by populating #errors and returning
-  # early WITHOUT raising -- unlike the old `system(script/process_image)`
-  # call, which returned non-zero (a failure #process_image could see) on
-  # the same underlying failure. process_and_enqueue_dhash must treat a
-  # non-empty #errors the same as a raised exception: fail, and don't
-  # enqueue the dhash job for an image whose processing didn't actually
-  # finish. (GPS-strip failures are handled separately and earlier now --
-  # see strip_original_gps? -- so by the time Image::Processor runs at
-  # all, any remaining #errors can only be a transfer failure.)
-  def test_process_image_records_failure_without_raising
-    img = images(:in_situ_image)
-    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
-
-    silently_failing_processor = Object.new
-    def silently_failing_processor.process; end
-
-    def silently_failing_processor.errors
-      ["Failed to transfer thumb/1.jpg to remote1"]
-    end
-
-    img.stub(:move_original, true) do
-      Image::Processor.stub(:new, silently_failing_processor) do
-        Rails.env.stub(:test?, false) do
-          assert_no_enqueued_jobs(only: ImageDhashJob) do
-            assert_not(img.process_image)
-          end
-        end
-      end
-    end
-    assert(img.errors[:image].any?)
   end
 
   def test_move_original_system_fail
@@ -523,6 +482,30 @@ class ImageTest < UnitTestCase
     url = Image::URL.new(args.merge(size: :medium))
     assert_not_equal("/place_holder_thumb.jpg", url.url)
     assert_not_equal("/place_holder_320.jpg", url.url)
+  end
+
+  def test_safe_to_serve_original_no_gps_hiding_ever_requested
+    img = images(:in_situ_image)
+    img.observations.each { |obs| obs.update_attribute(:gps_hidden, false) }
+
+    assert_not(img.gps_stripped)
+    assert(img.safe_to_serve_original?)
+  end
+
+  def test_safe_to_serve_original_strip_succeeded
+    img = images(:in_situ_image)
+    img.observations.first.update_attribute(:gps_hidden, true)
+    img.update_attribute(:gps_stripped, true)
+
+    assert(img.safe_to_serve_original?)
+  end
+
+  def test_safe_to_serve_original_strip_needed_but_not_done
+    img = images(:in_situ_image)
+    img.observations.first.update_attribute(:gps_hidden, true)
+
+    assert_not(img.gps_stripped)
+    assert_not(img.safe_to_serve_original?)
   end
 
   def test_import_link

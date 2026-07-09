@@ -389,7 +389,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: transferred,
-      extension: extension(size)
+      extension: extension(size),
+      original_extension: original_extension,
+      # Lazy: Image::URL only calls this if every other source (including
+      # the original) is otherwise about to fail, so a fully-processed
+      # image never pays for the observations query below.
+      original_fallback_allowed: -> { safe_to_serve_original? }
     )
   end
 
@@ -398,8 +403,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: args.fetch(:transferred, true),
-      extension: args.fetch(:extension, "jpg")
+      extension: args.fetch(:extension, "jpg"),
+      original_extension: args[:original_extension],
+      original_fallback_allowed: args.fetch(:original_fallback_allowed, false)
     )
+  end
+
+  # Safe to show this image's raw original before it's been resized, i.e.
+  # gps_hidden was never requested for it, or the strip already succeeded.
+  # Memoized: Image::URL may ask this once per size (6x per image render).
+  def safe_to_serve_original?
+    return @safe_to_serve_original if defined?(@safe_to_serve_original)
+
+    @safe_to_serve_original =
+      gps_stripped || observations.none?(&:gps_hidden)
   end
 
   def url(size)
@@ -775,16 +792,17 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       # move_original returns true or raises — never false — so there is no
       # reachable else branch here.
       if move_original
-        # GPS stripping runs synchronously, here, before continuing -- the
-        # original must never be exposed (even to the resize/transfer step
-        # below) with real GPS data still in it. Only marks gps_stripped
-        # once the strip has actually succeeded, unlike the old optimistic
+        # GPS stripping runs synchronously, here, before returning -- the
+        # original must never be exposed (even to the background job below)
+        # with real GPS data still in it. Only marks gps_stripped once the
+        # strip has actually succeeded, unlike the old optimistic
         # update_attribute(:gps_stripped, true) that fired regardless.
         result = strip ? strip_original_gps?(ext) : true
-        # Resize/reorient/transfer is skipped only if the GPS strip above
-        # was required and failed: an unstripped original must not
-        # propagate into resized/transferred copies.
-        result = process_and_enqueue_dhash(ext, set_size) if result
+        # Resize/reorient/transfer happens off the request cycle. Skipped
+        # only if the GPS strip above was required and failed: an
+        # unstripped original must not propagate into resized/transferred
+        # copies. ProcessImageJob enqueues ImageDhashJob itself once done.
+        ProcessImageJob.perform_later(id, ext, set_size) if result
       end
     end
     result
@@ -798,40 +816,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     false
   end
 
-  # Runs Image::Processor synchronously (skipped in test, see
-  # test/models/image/processor_test.rb for direct coverage), then enqueues
-  # the perceptual-hash job. Only after processing has succeeded: enqueueing
-  # earlier would hash an image whose upload ultimately failed, and could
-  # race the resize/strip command writing files. GPS stripping already
-  # happened synchronously in #process_image above, before this runs --
-  # see Image::Processor.strip_original_gps for why.
-  def process_and_enqueue_dhash(ext, set_size)
-    unless Rails.env.test?
-      processor = Image::Processor.new(image: self, ext: ext,
-                                       set_size: set_size)
-      processor.process
-      # Image::Processor can still record a transfer failure by populating
-      # #errors without raising -- the old `system(script/process_image)`
-      # call returned non-zero on the same failures, which #process_image
-      # treated as failure. Match that.
-      return fail_image_process if processor.errors.any?
-    end
-    ImageDhashJob.perform_later(id)
-    true
-  rescue StandardError => e
-    Rails.logger.error("Image::Processor failed for image #{id}: #{e}")
-    fail_image_process
-  end
-
-  def fail_image_process # rubocop:disable Naming/PredicateMethod
-    errors.add(:image, :runtime_image_process_failed.t(id: id))
-    false
-  end
-
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
   def move_original
-    original_image = full_filepath(:original)
+    # NOT full_filepath(:original) -- that helper's test-env fallback (for
+    # EXIF-reading tests without a real per-image file) would redirect this
+    # WRITE into a committed test/images/ fixture whenever original_name
+    # happens to match one, since the real destination legitimately doesn't
+    # exist yet at this point (we're about to create it).
+    original_image = image_url(:original).full_filepath(MO.local_image_files)
     unless File.rename(upload_temp_file, original_image)
       raise(SystemCallError.new("Try again."))
     end

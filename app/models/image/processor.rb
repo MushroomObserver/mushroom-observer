@@ -16,7 +16,7 @@ class Image
   #
   # GPS stripping is NOT part of this pipeline -- see self.strip_original_gps,
   # which runs synchronously in the request cycle (Image#process_image),
-  # before this class's `process` is ever called. That ordering is what
+  # before this class's `process` is ever enqueued. That ordering is what
   # guarantees the original is never exposed with real GPS data still in it.
   class Processor
     require "image_processing/mini_magick"
@@ -150,11 +150,10 @@ class Image
     end
 
     # Strips GPS/geotag data from an image's original file synchronously,
-    # before the image is exposed anywhere -- this can't wait on the
-    # deferred resize/transfer pipeline in #process, which may run much
-    # later. Only marks gps_stripped once the strip has actually
-    # succeeded, never optimistically. Returns nil on success, or an
-    # error message string on failure.
+    # before the image is exposed anywhere -- this can't wait on
+    # ProcessImageJob, which may run much later. Only marks gps_stripped
+    # once the strip has actually succeeded, never optimistically. Returns
+    # nil on success, or an error message string on failure.
     def self.strip_original_gps(image, ext:)
       path = "#{local_images_path}/orig/#{image.id}.#{ext}"
       return "original image file is missing" unless File.exist?(path)
