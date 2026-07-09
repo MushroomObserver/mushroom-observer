@@ -8,11 +8,12 @@ module Views::Controllers::Names::Synonyms
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, synonym_members: nil, deprecate_all: true,
                    current_synonyms: [], proposed_synonyms: [],
-                   new_names: [], **)
+                   new_names: [], user: nil, **)
       @name = name
       @current_synonyms = current_synonyms
       @proposed_synonyms = proposed_synonyms
       @new_names = new_names
+      @user = user
 
       form_object = FormObject::EditSynonym.new(
         synonym_members: synonym_members,
@@ -24,11 +25,11 @@ module Views::Controllers::Names::Synonyms
 
     def view_template
       div(class: "row") do
-        div(class: "col-sm-6") do
+        div(class: Grid::SM6) do
           render_existing_synonyms
           render_proposed_synonyms
         end
-        div(class: "col-sm-6") do
+        div(class: Grid::SM6) do
           render_members_section
         end
       end
@@ -46,9 +47,7 @@ module Views::Controllers::Names::Synonyms
           div(class: "font-weight-bold my-3") do
             plain("#{:form_synonyms_current_synonyms.l}:")
           end
-          render(Components::Help::Block.new(
-                   :p, :form_synonyms_current_synonyms_help.t
-                 ))
+          Help(element: :p, content: :form_synonyms_current_synonyms_help.t)
 
           @current_synonyms.each do |n|
             next if n == @name
@@ -68,9 +67,7 @@ module Views::Controllers::Names::Synonyms
           div(class: "font-weight-bold my-3") do
             plain("#{:form_synonyms_proposed_synonyms.l}:")
           end
-          render(Components::Help::Block.new(
-                   :p, :form_synonyms_proposed_synonyms_help.t
-                 ))
+          Help(element: :p, content: :form_synonyms_proposed_synonyms_help.t)
 
           @proposed_synonyms.each do |n|
             next if @current_synonyms.include?(n)
@@ -93,7 +90,7 @@ module Views::Controllers::Names::Synonyms
     def synonym_checkbox_label(name_obj)
       link = capture do
         a(href: name_path(name_obj.id)) do
-          trusted_html(name_obj.display_name.t)
+          trusted_html(name_obj.display_name(@user).t)
         end
       end
       badge = capture do
@@ -106,15 +103,13 @@ module Views::Controllers::Names::Synonyms
       render_new_names_alert if @new_names.present?
 
       checkbox_field(:deprecate_all, label: :form_synonyms_deprecate_synonyms.l)
-      render(Components::Help::Block.new(
-               :p, :form_synonyms_deprecate_synonyms_help.t
-             ))
+      Help(element: :p, content: :form_synonyms_deprecate_synonyms_help.t)
 
       textarea_field(:synonym_members,
                      label: "#{:form_synonyms_names.l}:",
                      data: { autofocus: true }) do |f|
         f.with_between do
-          render(Components::Help::Block.new(:p, members_help))
+          Help(element: :p, content: members_help)
         end
       end
     end
@@ -125,12 +120,12 @@ module Views::Controllers::Names::Synonyms
         div(class: "pl-3") do
           @new_names.each { |n| div { n } }
         end
-        render(::Components::Help::Note.new(:form_synonyms_missing_names_help.t))
+        Help(element: :span, content: :form_synonyms_missing_names_help.t)
       end
     end
 
     def members_help
-      :form_synonyms_names_help.t(name: @name.display_name)
+      :form_synonyms_names_help.t(name: @name.display_name(@user))
     end
 
     def form_action

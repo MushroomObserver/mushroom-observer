@@ -315,18 +315,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "**__Amanita lanei__** (Murr.) Sacc. & Trott. (2)"
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
-  def unique_format_name
-    title = format_name
-    id_format = if title == :image.l
-                  "##{id || "?"}"
-                else
-                  "(#{id || "?"})"
-                end
-    [title, id_format].safe_join(" ")
+  def unique_format_name(_user = nil)
+    # format_name returns the joined subject titles, or "" when there are
+    # none — never the bare :image.l ("image") string — so the id always
+    # renders in the "(id)" form here.
+    [format_name, "(#{id || "?"})"].safe_join(" ")
   end
 
   # Do the same without the ID, for new page titles that generate an ID UI
-  def format_name
+  def format_name(_user = nil)
     title_subjects || :image.l
   end
 
@@ -775,6 +772,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       set = width.nil? ? "1" : "0"
       update_attribute(:gps_stripped, true) if strip
       strip = strip ? "1" : "0"
+      # move_original returns true or raises — never false — so there is no
+      # reachable else branch here.
       if move_original
         cmd = MO.process_image_command.
               gsub("<id>", id.to_s).
@@ -784,9 +783,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
         if !Rails.env.test? && !system(cmd)
           errors.add(:image, :runtime_image_process_failed.t(id: id))
           result = false
+        else
+          # Only after processing has succeeded (or been skipped in test):
+          # enqueueing earlier would hash an image whose upload ultimately
+          # failed, and could race the resize/strip command writing files.
+          ImageDhashJob.perform_later(id)
         end
-      else
-        result = false
       end
     end
     result
@@ -831,7 +833,37 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       raise("Invalid transform operator: #{operator.inspect}")
     end
-    system("script/rotate_image #{id} #{operator}&") unless Rails.env.test?
+    # Rotation invalidates the perceptual hash; rotate_image runs in the
+    # background (fire-and-forget), so schedule the rehash with a delay
+    # rather than chaining it to a completion signal we never receive.
+    ImageDhashJob.set(wait: 5.minutes).perform_later(id) if persisted?
+    return if Rails.env.test?
+
+    # `operator` is one of the three literals set above (never raw input)
+    # and `id` is this record's integer primary key, so neither can carry
+    # shell syntax. The trailing "&" backgrounds the rotate; the shell form
+    # is what enables it. (Brakeman command-injection warning ignored on
+    # this basis in config/brakeman.ignore.)
+    system("script/rotate_image #{id} #{operator}&")
+  end
+
+  # Compute and store the perceptual hash (Image::Dhash) for this image
+  # (#4585/#4673). Derived data, hence update_column — recomputing a hash
+  # is not an edit. Prefers a local file (fresh uploads: the original; the
+  # web server after cleanup: the small rendition); falls back to fetching
+  # the transferred medium rendition. dHash is resolution-invariant, so
+  # any rendition serves.
+  def compute_dhash!
+    source = [:original, :medium, :small].
+             map { |size| full_filepath(size) }.
+             find { |path| File.exist?(path) }
+    value = if source
+              Image::Dhash.from_file(source)
+            else
+              Image::Dhash.from_url(medium_url)
+            end
+    update_column(:dhash, value)
+    value
   end
 
   # Attempt to strip GPS data from original image. Returns error message as
@@ -952,7 +984,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Retrieve the given User's vote for this Image.  Returns a Integer from
   # 1 to 4, or nil if the User hasn't voted.
-  def users_vote(user = User.current)
+  def users_vote(user = nil)
     user_id = user.is_a?(User) ? user.id : user.to_i
     vote_hash[user_id]
   end
@@ -1053,30 +1085,35 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Log update in associated observations, glossary terms, etc.
   def log_update
     (glossary_terms + observations).each do |object|
-      object.log(:log_image_updated, name: log_name, touch: false)
+      object.log(:log_image_updated, user: current_user, name: log_name,
+                                     touch: false)
     end
   end
 
   # Log destruction in associated observations, glossary terms, etc.
   def log_destroy
     (glossary_terms + observations).each do |object|
-      object.log(:log_image_destroyed, name: log_name, touch: true)
+      object.log(:log_image_destroyed, user: current_user, name: log_name,
+                                       touch: true)
     end
   end
 
   # Log adding new image to an associated observation, glossary term, etc.
   def log_create_for(object)
-    object.user_log(user, :log_image_created, name: log_name, touch: true)
+    object.log(:log_image_created, user: current_user, name: log_name,
+                                   touch: true)
   end
 
   # Log adding existing image to an associated observation, glossary term, etc.
   def log_reuse_for(object)
-    object.log(:log_image_reused, name: log_name, touch: true)
+    object.log(:log_image_reused, user: current_user, name: log_name,
+                                  touch: true)
   end
 
   # Log removing an image from an associated observation, glossary term, etc.
   def log_remove_from(object)
-    object.log(:log_image_removed, name: log_name, touch: false)
+    object.log(:log_image_removed, user: current_user, name: log_name,
+                                   touch: false)
   end
 
   # Create CopyrightChange entry whenever year, name or license changes.
@@ -1101,7 +1138,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
                          license_id
                        end
       CopyrightChange.create!(
-        user: User.current,
+        user: current_user,
         updated_at: updated_at,
         target: self,
         year: old_year,
@@ -1235,7 +1272,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     validate_upload if upload_handle && new_record?
 
     # I guess this is kind of serious -- uploading with no one logged in??!
-    errors.add(:user, :validate_image_user_missing.t) if !user && !User.current
+    errors.add(:user, :validate_image_user_missing.t) if !user && !current_user
 
     # Try everything in our power to make uploads succeed.  Let the user worry
     # about correcting the date later if need be.

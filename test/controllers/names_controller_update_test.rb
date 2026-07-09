@@ -101,7 +101,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal(10, rolf.reload.contribution)
     assert_equal("(Fr.) Kühner", name.reload.author)
     assert_equal("**__Conocybe__** **__filaris__** (Fr.) Kühner",
-                 name.user_display_name)
+                 name.display_name)
     assert_equal("Conocybe filaris (Fr.) Kühner", name.search_name)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
@@ -369,7 +369,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     put(:update, params: params)
     assert_flash_success
     assert_true(name.reload.is_misspelling?)
-    assert_equal("__Petigera__", name.user_display_name)
+    assert_equal("__Petigera__", name.display_name)
     assert_names_equal(names(:peltigera), name.correct_spelling)
     assert_true(name.deprecated)
     assert_redirected_to(name_path(name.id))
@@ -504,7 +504,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
     assert_equal("**__Xanthoparmelia__** **__coloradoensis__**",
-                 name.user_display_name)
+                 name.display_name)
 
     get(:edit, params: { id: name.id })
     assert_textarea_value("name_text_name", "Xanthoparmelia coloradoensis")
@@ -529,7 +529,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal("Xanthoparmelia coloradoensis (Gyelnik) Hale",
                  name.search_name)
     assert_equal("**__Xanthoparmelia__** **__coloradoënsis__** (Gyelnik) Hale",
-                 name.user_display_name)
+                 name.display_name)
 
     get(:edit, params: { id: name.id })
     assert_textarea_value("name_text_name", "Xanthoparmelia coloradoënsis")
@@ -545,7 +545,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
     assert_equal("**__Xanthoparmelia__** **__coloradoensis__**",
-                 name.user_display_name)
+                 name.display_name)
   end
 
   def test_edit_name_fixing_variety
@@ -617,7 +617,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     assert_equal("Lepiota echinatae group", name.text_name)
     assert_equal("Lepiota echinatae group", name.search_name)
     assert_equal("**__Lepiota__** **__echinatae__** group",
-                 name.user_display_name)
+                 name.display_name)
     assert_equal("", name.author)
   end
 

@@ -16,6 +16,18 @@ module Names
       assert_select("#nomenclature")
     end
 
+    # The Notes panel only renders when the (reverted-to) Name has
+    # notes present.
+    def test_show_past_name_with_notes
+      name = names(:fungi)
+      assert(name.has_notes?, "Fixture must have notes for this test")
+
+      login
+      get(:show, params: { id: name.id })
+      assert_response(:success)
+      assert_select("#name_notes")
+    end
+
     def test_show_past_name_version_table_panel
       name = names(:coprinus_comatus)
       login
@@ -46,7 +58,7 @@ module Names
     def test_show_past_name_classification_inherited_from_genus
       genus = names(:agaricus)
       species = names(:agaricus_campestras)
-      User.current = rolf
+      genus.current_user = rolf
       genus.update!(classification: "Phylum: _Basidiomycota_\r\nFamily: _New_")
       genus.versions.order(:version).last.update_column(
         :updated_at, 3.days.ago

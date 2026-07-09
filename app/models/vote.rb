@@ -74,7 +74,10 @@ class Vote < AbstractModel
     vote.assign_attributes(args.permit(:favorite, :value)) if args
     vote.created_at = now
     vote.updated_at = now
-    vote.user = User.current
+    # Vote follows Naming's lead, reading current_user off its naming
+    # instead of taking a separate param.
+    vote.current_user = naming.current_user
+    vote.user = vote.current_user
     vote.naming = naming
     vote.observation = naming.observation
     vote
@@ -221,8 +224,7 @@ class Vote < AbstractModel
   # This fixes existing entries in observation_views which correspond to a vote
   # but are not currently marked as "reviewed".
   def self.update_existing_views_corresponding_to_votes(dry_run: false)
-    join = "JOIN `votes` ON #{votes_views_join_condition}"
-    query = ObservationView.where(reviewed: 0).joins(join)
+    query = ObservationView.where(reviewed: 0).joins(votes_join)
     msgs = query.map do |ov|
       "User #{ov.user_id} has reviewed observation #{ov.observation_id} " \
         "(update)"
@@ -235,10 +237,13 @@ class Vote < AbstractModel
   # correspond to an entry in obseration_views yet.
   def self.add_missing_views_corresponding_to_votes(dry_run: false)
     # This is really expensive, but AN and JH can't think of any better way.
-    join = "LEFT OUTER JOIN `observation_views` ON " \
-           "#{votes_views_join_condition}"
-    # (user 0 is used for anonymous votes, ignore those)
-    Vote.where.not(user_id: 0).joins(join).
+    # (user 0 is used for anonymous votes, ignore those; observation_id nil
+    # means the naming was never attached to an observation, so there's
+    # nothing to create an ObservationView for. Without this exclusion these
+    # votes never match the LEFT JOIN - NULL never equals NULL in SQL - so
+    # they'd generate a fresh junk ObservationView every night forever.)
+    Vote.where.not(user_id: 0).where.not(observation_id: nil).
+      joins(missing_views_join).
       where(observation_views: { id: nil }).
       select(arel_table[:observation_id],
              arel_table[:user_id],
@@ -257,9 +262,26 @@ class Vote < AbstractModel
       end
   end
 
-  def self.votes_views_join_condition
-    "`votes`.`observation_id` = `observation_views`.`observation_id` " \
-      "AND `votes`.`user_id` = `observation_views`.`user_id`"
+  # `votes.observation_id = observation_views.observation_id AND
+  #  votes.user_id = observation_views.user_id` - shared by both join
+  # directions below.
+  def self.votes_observation_views_condition(votes, views)
+    votes[:observation_id].eq(views[:observation_id]).
+      and(votes[:user_id].eq(views[:user_id]))
+  end
+
+  def self.votes_join
+    views = ObservationView.arel_table
+    votes = Vote.arel_table
+    views.join(votes).
+      on(votes_observation_views_condition(votes, views)).join_sources
+  end
+
+  def self.missing_views_join
+    votes = Vote.arel_table
+    views = ObservationView.arel_table
+    votes.join(views, Arel::Nodes::OuterJoin).
+      on(votes_observation_views_condition(votes, views)).join_sources
   end
 
   ##############################################################################
@@ -283,7 +305,7 @@ class Vote < AbstractModel
   validate :check_requirements
   def check_requirements # :nodoc:
     errors.add(:naming, :validate_vote_naming_missing.t) unless naming
-    errors.add(:user, :validate_vote_user_missing.t) if !user && !User.current
+    errors.add(:user, :validate_vote_user_missing.t) if !user && !current_user
 
     if value.nil?
       errors.add(:value, :validate_vote_value_missing.t)

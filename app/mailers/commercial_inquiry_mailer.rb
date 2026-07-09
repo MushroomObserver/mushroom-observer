@@ -7,11 +7,10 @@ class CommercialInquiryMailer < ApplicationMailer
   # Note the recipient comes from the Image object, image.user
   def build(sender:, image:, message:)
     setup_user(image.user)
-    @sender = sender
-    @title = :email_subject_commercial_inquiry.l(name: image.unique_text_name)
-    @image = image
-    @message = message || ""
+    subject = :email_subject_commercial_inquiry.l(name: image.unique_text_name)
     debug_log(:commercial_inquiry, sender, @user, image:)
-    mo_mail(@title, to: @user, reply_to: sender)
+    mo_mail(subject, to: @user, reply_to: sender,
+                     view_params: { subject:, sender:, receiver: @user,
+                                    image:, message: message || "" })
   end
 end

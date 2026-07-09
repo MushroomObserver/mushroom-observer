@@ -75,7 +75,7 @@ module Views::Controllers::HerbariumRecords
       rec.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
         a(href: observation_path(obs.id)) do
-          trusted_html(obs.unique_format_name.t)
+          trusted_html(viewer_aware_unique_format_name(obs).t)
         end
       end
     end

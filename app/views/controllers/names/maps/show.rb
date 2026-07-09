@@ -15,10 +15,12 @@ class Views::Controllers::Names::Maps::Show < Views::FullPageBase
 
   def view_template
     container_class(:full)
-    add_page_title(:name_map_title.t(name: @name.display_name))
+    add_page_title(
+      :name_map_title.t(name: @name.display_name(current_user))
+    )
     add_context_nav(
       ::Tab::Name::MapActions.new(
-        name: @name, query: @query, controller: controller
+        name: @name, query: @query, controller: controller, user: current_user
       )
     )
 
@@ -31,7 +33,9 @@ class Views::Controllers::Names::Maps::Show < Views::FullPageBase
       cluster_query_string: @cluster_query_string,
       zoom: 2,
       map_type: "info",
-      nothing_to_map: :name_map_no_maps.tp(name: @name.display_name)
+      nothing_to_map: :name_map_no_maps.tp(
+        name: @name.display_name(current_user)
+      )
     )
   end
 end

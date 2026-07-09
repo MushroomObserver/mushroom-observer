@@ -134,10 +134,9 @@ class UserStats < ApplicationRecord
         field = get_applicable_field(obj)
         user_id ||= obj&.user_id
       else
-        return unless user_id || User.current_id
+        return unless user_id
 
         field = obj
-        user_id ||= User.current_id
       end
       weight = ALL_FIELDS.key?(field) ? ALL_FIELDS[field.to_sym][:weight] : 0
       return unless weight&.positive? && user_id&.positive?
@@ -449,8 +448,8 @@ class UserStats < ApplicationRecord
   # Do a query to get the number of records in a given category for a User.
   # This is cached in @user_data.
   #
-  #   # Get number of images for current user.
-  #   refresh_field_counts(:images, User.current.id)
+  #   # Get number of images for a user.
+  #   refresh_field_counts(:images, user.id)
   #   num_images = @user_data[:images]
   #
   def refresh_field_count(field, user_id = nil)

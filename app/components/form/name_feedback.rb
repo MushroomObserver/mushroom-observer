@@ -23,7 +23,7 @@ class Components::Form::NameFeedback < Components::Base
   def view_template
     if @valid_names
       render_warning_alert
-    elsif @names&.empty?
+    elsif @names && @names.empty?
       render_not_recognized_error
     elsif @names && @names.length > 1
       render_multiple_names_error
@@ -47,7 +47,7 @@ class Components::Form::NameFeedback < Components::Base
       :form_naming_not_recognized.t(name: @given_name)
     elsif @parent_deprecated
       :form_naming_parent_deprecated.t(
-        parent: @parent_deprecated.display_name,
+        parent: @parent_deprecated.display_name(current_user),
         rank: :"rank_#{@parent_deprecated.rank.to_s.downcase}"
       )
     elsif @names.present?
@@ -65,7 +65,7 @@ class Components::Form::NameFeedback < Components::Base
                   :form_naming_deprecated_help.t(button: @button_name,
                                                  name: @given_name)
                 end
-    render(::Components::Help::Note.new(:div)) { plain(help_text) }
+    Help(content: help_text)
   end
 
   def render_valid_name_choices
@@ -84,9 +84,9 @@ class Components::Form::NameFeedback < Components::Base
   def render_not_recognized_error
     Alert(level: :danger, id: "name_messages") do
       div { :form_naming_not_recognized.t(name: @given_name) }
-      render(::Components::Help::Note.new(:div)) do
-        plain(:form_naming_not_recognized_help.t(button: @button_name))
-      end
+      Help(
+        content: :form_naming_not_recognized_help.t(button: @button_name)
+      )
     end
   end
 
@@ -94,9 +94,9 @@ class Components::Form::NameFeedback < Components::Base
     Alert(level: :danger, id: "name_messages") do
       div { [:form_naming_multiple_names.t(name: @given_name), ":"].safe_join }
       render_name_radio_buttons_with_counts(@names)
-      render(::Components::Help::Note.new(:div)) do
-        plain(:form_naming_multiple_names_help.t)
-      end
+      Help(
+        content: :form_naming_multiple_names_help.t
+      )
     end
   end
 
@@ -109,13 +109,13 @@ class Components::Form::NameFeedback < Components::Base
   def render_name_radio_buttons_with_counts(names)
     options = names.map do |n|
       count = n.observations.size
-      [n.id, [n.display_name.t, " (#{count})"].safe_join]
+      [n.id, [n.display_name(current_user).t, " (#{count})"].safe_join]
     end
     render(name_radio_field(options, wrap_class: "ml-4 name-radio"))
   end
 
   def name_radio_field(options, wrap_class:)
-    options = options.map { |n| [n.id, n.display_name.t] } if
+    options = options.map { |n| [n.id, n.display_name(current_user).t] } if
       options.first.is_a?(Name)
 
     proxy = Components::ApplicationForm::FieldProxy.new(

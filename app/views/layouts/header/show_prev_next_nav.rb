@@ -6,7 +6,7 @@
 # either prop is nil — the helper already gates on the same.
 module Views::Layouts
   class Header::ShowPrevNextNav < Views::Base
-    BTN_CLASSES = %w[navbar-link navbar-left btn btn-lg px-0].freeze
+    BTN_CLASSES = (Components::Navbar::LINK_CLASSES + %w[navbar-left]).freeze
 
     prop :object, _Nilable(::AbstractModel), default: nil
     prop :query, _Nilable(::Query), default: nil
@@ -28,26 +28,16 @@ module Views::Layouts
       classes = class_names(BTN_CLASSES, "#{dir}_object_link", hide)
       adjacent_id = @query.send(:"#{dir}_id")
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
-      title = adjacent_title(dir)
 
-      a(href: href, class: class_names("icon-link", classes), title: title,
-        data: { toggle: "tooltip", title: title }) do
-        render(::Components::Icon.new(type: dir, html_class: "px-2"))
-        span(class: "sr-only") { title }
-      end
+      Link(type: :icon, content: adjacent_title(dir), path: href,
+           icon: dir, class: classes)
     end
 
     def render_index_link
       classes = class_names(BTN_CLASSES, %w[mx-1 index_object_link])
-      icon = index_icon
-      href = index_path
-      title = index_title
 
-      a(href: href, class: class_names("icon-link", classes), title: title,
-        data: { toggle: "tooltip", title: title }) do
-        render(::Components::Icon.new(type: icon, html_class: "px-2"))
-        span(class: "sr-only") { title }
-      end
+      Link(type: :icon, content: index_title, path: index_path,
+           icon: index_icon, class: classes)
     end
 
     def no_more?(dir)

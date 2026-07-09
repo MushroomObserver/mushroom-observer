@@ -223,6 +223,57 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert(obs.field_slip.present?)
   end
 
+  # A brand-new field code (no slip yet) is created lazily when the
+  # observation is saved — with its project (from the code prefix) and an
+  # occurrence. This is what lets the field-slip "add images" flow defer
+  # slip creation until the observation exists, avoiding orphans.
+  def test_create_observation_creates_new_field_slip_with_project
+    code = "OPEN-77777"
+    assert_nil(FieldSlip.find_by(code: code))
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: code,
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0
+    )
+    obs = assigns(:observation)
+    slip = FieldSlip.find_by(code: code)
+
+    assert_not_nil(slip, "field slip created on observation save")
+    assert_equal(projects(:open_membership_project), slip.project)
+    assert_not_nil(obs.occurrence)
+    assert_equal(slip, obs.field_slip)
+  end
+
+  # An invalid field-slip code cannot abort creation (the observation is
+  # already saved); it warns and keeps the observation without a field slip.
+  def test_create_observation_with_invalid_field_slip
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: "12345", # digits-only fails FieldSlip validation
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0
+    )
+    obs = assigns(:observation)
+
+    assert_nil(obs.field_slip, "Invalid code must not attach a field slip")
+    assert_nil(obs.occurrence, "Invalid code must not create an occurrence")
+    assert_flash_warning
+  end
+
+  # update_field_slip lives in the shared FieldSlips concern. It used to be
+  # defined in both Create and EditAndUpdate, where the later include
+  # silently shadowed the other. Pin the owner so a same-named method
+  # (re)introduced in another included module fails loudly here instead of
+  # quietly winning the module-resolution race again.
+  def test_update_field_slip_is_not_shadowed
+    assert_equal(
+      ObservationsController::FieldSlips,
+      ObservationsController.instance_method(:update_field_slip).owner
+    )
+  end
+
   def test_create_observation_with_collection_number
     generic_construct_observation(
       { observation: { specimen: "1" },
@@ -299,6 +350,21 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     obs = assigns(:observation)
     assert(obs.specimen)
     assert(obs.herbarium_records.one?)
+  end
+
+  def test_create_observation_with_herbarium_record_owned_by_someone_else
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        herbarium_record: {
+          herbarium_name: herbaria(:fundis_herbarium).autocomplete_name,
+          accession_number: "314159"
+        },
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0, dick
+    )
+    obs = assigns(:observation)
+    assert(obs.specimen)
+    assert_equal(0, obs.herbarium_records.count)
   end
 
   def test_create_observation_with_herbarium_duplicate_label
@@ -1426,6 +1492,17 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   def test_create_observation_fails_validation
     login("rolf")
     stub_valid_false_on(Observation) do
+      post(:create, params: create_params_with_name)
+    end
+    assert_response(:success)
+  end
+
+  # `Observation#valid?` passes but `#save` itself fails - exercises
+  # try_to_save_new_observation's own false-path, distinct from the
+  # `valid?`-fails case above which never reaches that method's save call.
+  def test_create_observation_save_fails
+    login("rolf")
+    stub_save_false_on(Observation) do
       post(:create, params: create_params_with_name)
     end
     assert_response(:success)

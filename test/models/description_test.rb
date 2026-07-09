@@ -71,14 +71,14 @@ class DescriptionTest < UnitTestCase
       assert_contributions(0, 0, 0, 0, msg)
 
       # Have Rolf create minimal object.
-      User.current = rolf
+      obj.current_user = rolf
       assert_save(obj)
       msg = "#{model}: Rolf should not be made author after minimal create."
       assert_authors_and_editors(obj, [], ["rolf"], msg)
       assert_contributions(e, 0, 0, 0, msg)
 
       # Have Rolf make a trivial change.
-      User.current = rolf
+      obj.current_user = rolf
       obj.license_id = 2
       obj.save
       msg = "#{model}: Rolf should still be editor after trivial change."
@@ -87,7 +87,8 @@ class DescriptionTest < UnitTestCase
 
       # Delete editors and author so we can test changes to old object that
       # is grandfathered in without any editors or authors.
-      User.current = nil # (stops AbstractModel from screwing up contributions)
+      # (nil stops AbstractModel from screwing up contributions)
+      obj.current_user = nil
       obj.update_users_and_parent
       obj.authors.clear
       obj.editors.clear
@@ -97,7 +98,7 @@ class DescriptionTest < UnitTestCase
 
       # Now have Mary make a trivial change.  Should have same result as when
       # creating above.
-      User.current = mary
+      obj.current_user = mary
       obj.license_id = 1
       obj.save
       msg = "#{model}: Mary should not be made author " \
@@ -107,7 +108,7 @@ class DescriptionTest < UnitTestCase
 
       # Now have Dick make a non-trivial change.
       obj.send(set_nontrivial, "This is weighty stuff...")
-      User.current = dick
+      obj.current_user = dick
       obj.save
       msg = "#{model}: No authors, so Dick should become author."
       assert_authors_and_editors(obj, ["dick"], ["mary"], msg)
@@ -115,7 +116,7 @@ class DescriptionTest < UnitTestCase
 
       # Now have Katrina make another non-trivial change.
       obj.send(set_nontrivial, "This is even weightier stuff...")
-      User.current = katrina
+      obj.current_user = katrina
       obj.save
       msg = "#{model}: Already authors, so Katrina should become editor."
       assert_authors_and_editors(obj, ["dick"], %w[mary katrina], msg)
@@ -164,6 +165,15 @@ class DescriptionTest < UnitTestCase
            "Rolf should be an editor of #{desc.text_name}")
     assert_not(desc.editor?(katrina),
                "Katrina should be an editor of #{desc.text_name}")
+  end
+
+  def test_reviewer
+    desc = name_descriptions(:peltigera_desc)
+
+    assert(desc.reviewer?(rolf),
+           "Rolf should be the reviewer of #{desc.text_name}")
+    assert_not(desc.reviewer?(mary),
+               "Mary should not be the reviewer of #{desc.text_name}")
   end
 
   def test_parent_setters
@@ -341,6 +351,9 @@ class DescriptionTest < UnitTestCase
 
     desc = name_descriptions(:draft_boletus_edulis)
     assert_equal(desc.project, desc.source_object)
+
+    desc = name_descriptions(:peltigera_source_desc)
+    assert_nil(desc.source_object)
   end
 
   def test_groups

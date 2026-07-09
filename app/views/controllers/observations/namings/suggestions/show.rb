@@ -74,7 +74,7 @@ module Views::Controllers::Observations::Namings::Suggestions
 
     def render_suggestion_name_link(sugg)
       link_to(name_path(id: sugg.name.id)) do
-        trusted_html(sugg.name.display_name_brief_authors.t)
+        trusted_html(sugg.name.display_name_brief_authors(@user).t)
       end
     end
 

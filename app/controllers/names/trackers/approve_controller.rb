@@ -24,12 +24,14 @@ module Names::Trackers
     end
 
     def notify_user_name_tracking_approved(tracker)
+      # Receiver reads the subject/body, so their own hide_authors
+      # preference (not the approving admin's, @user) applies.
       subject = :email_subject_name_tracker_approval.l(
-        name: tracker.name.display_name
+        name: tracker.name.display_name(tracker.user)
       )
       message = :email_name_tracker_body.l(
         user: tracker.user.legal_name,
-        name: tracker.name.display_name,
+        name: tracker.name.display_name(tracker.user),
         link: "#{MO.http_domain}/interests/?type=NameTracker"
       )
       # Migrated from QueuedEmail::Approval to deliver_later.

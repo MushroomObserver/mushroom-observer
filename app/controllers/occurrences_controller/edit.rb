@@ -76,8 +76,8 @@ module OccurrencesController::Edit
 
       @occurrence.reassign_thumbnails_from(obs)
       obs.update!(occurrence: nil)
-      Occurrence.log_observation_removed(obs, @occurrence)
-      recalculate_standalone_consensus(obs)
+      Occurrence.log_observation_removed(obs, @occurrence, @user)
+      recalculate_standalone_consensus(obs, @user)
     end
     @occurrence.reload
     @occurrence.destroy_if_incomplete!
@@ -102,10 +102,10 @@ module OccurrencesController::Edit
 
   def add_single_observation(obs)
     if obs.occurrence && obs.occurrence != @occurrence
-      Occurrence.merge!(@occurrence, obs.occurrence)
+      Occurrence.merge!(@occurrence, obs.occurrence, @user)
     else
       obs.update!(occurrence: @occurrence)
-      Occurrence.log_observation_added([obs])
+      Occurrence.log_observation_added([obs], @user)
     end
   end
 
@@ -198,11 +198,11 @@ module OccurrencesController::Edit
   def recalculate_occurrence_consensus
     return if @occurrence.destroyed?
 
-    @occurrence.recalculate_consensus!
+    @occurrence.recalculate_consensus!(@user)
   end
 
   # Recalculate consensus for an observation removed from an occurrence
-  def recalculate_standalone_consensus(obs)
-    Observation::NamingConsensus.new(obs).calc_consensus
+  def recalculate_standalone_consensus(obs, user = nil)
+    Observation::NamingConsensus.new(obs).calc_consensus(user)
   end
 end

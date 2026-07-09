@@ -2,7 +2,7 @@
 
 module Views::Controllers::GlossaryTerms
   # Paginated glossary terms index. Page chrome +
-  # a `Components::ListGroup::Base` of one `Index::Item` per term.
+  # a `Components::ListGroup` of one `Index::Item` per term.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
@@ -29,7 +29,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_list
-      render(::Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         @objects.each do |term|
           list.item { render(Item.new(glossary_term: term)) }
         end

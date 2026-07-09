@@ -12,7 +12,7 @@
 #            ObjectFooter.
 #
 # Side-effects (page chrome) are issued from `view_template` before
-# emission: `Textile.user_register_name`, `add_show_title`,
+# emission: `Textile.register_name`, `add_show_title`,
 # `add_interest_icons` / `add_pager_for` (logged in only),
 # `container_class(:full)`, `column_classes(:seven_five)`.
 #
@@ -70,7 +70,7 @@ module Views::Controllers::Names
     private
 
     def page_chrome_side_effects
-      ::Textile.user_register_name(@user, @name)
+      ::Textile.register_name(@name, user: @user)
       add_show_title(@name, user: @user)
       if @user
         add_interest_icons(@user, @name)
@@ -132,14 +132,14 @@ module Views::Controllers::Names
 
     def render_classification_and_lifeform_row
       div(class: "row", data: { controller: "name-panels" }) do
-        div(class: "col-sm-6") do
+        div(class: Grid::SM6) do
           render(Show::ClassificationPanel.new(
                    name: @name, user: @user,
                    children_query: @children_query,
                    first_child: @first_child
                  ))
         end
-        div(class: "col-sm-6") do
+        div(class: Grid::SM6) do
           render(Show::LifeformPanel.new(
                    name: @name, user: @user,
                    first_child: @first_child

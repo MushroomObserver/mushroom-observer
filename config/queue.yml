@@ -1,18 +1,33 @@
-# default: &default
-#   dispatchers:
-#     - polling_interval: 1
-#       batch_size: 500
-#   workers:
-#     - queues: "*"
-#       threads: 5
-#       processes: 1
-#       polling_interval: 0.1
-#
-# development:
-#  <<: *default
-#
-# test:
-#  <<: *default
-#
-# production:
-#  <<: *default
+# Two worker pools so periodic maintenance jobs (cache/data-integrity
+# repairs, recurring cleanup) can't starve user-facing jobs
+# (ImageDhashJob, ImageLoaderJob, FieldSlipJob, InatImportJob, and mail
+# delivery via ActionMailer's deliver_later, which defaults to the
+# "mailers" queue) of threads, and vice versa. Both worker processes run
+# under the same single supervisor (see config/puma.rb +
+# config/etc/solidqueue.service — issue #4639 / PR #4657 established
+# that there must be exactly one *supervisor*; this config still starts
+# two worker processes/thread-pools under it, one per queue group, which
+# is the intended way to split capacity - it doesn't add a second
+# supervisor).
+default: &default
+  dispatchers:
+    - polling_interval: 1
+      batch_size: 500
+  workers:
+    - queues: [default, mailers]
+      threads: 4
+      processes: 1
+      polling_interval: 0.1
+    - queues: maintenance
+      threads: 2
+      processes: 1
+      polling_interval: 1
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

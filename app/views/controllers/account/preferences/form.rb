@@ -150,11 +150,7 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_license_note
-    render(::Components::Help::Note.new) do
-      plain("(")
-      trusted_html(:prefs_license_note.t)
-      plain(")")
-    end
+    Help(element: :span, content: ["(", :prefs_license_note.t, ")"].safe_join)
   end
 
   # ====================================================================
@@ -327,8 +323,7 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_notes_help
-    render(::Components::Help::Note.new(:p)) do
-      plain(:prefs_notes_template_explanation.t)
-    end
+    Help(element: :p,
+         content: :prefs_notes_template_explanation.t)
   end
 end

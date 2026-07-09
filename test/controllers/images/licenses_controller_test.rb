@@ -72,6 +72,7 @@ module Images
 
       # This empty string caused it to crash in the wild.
       example_image.reload
+      example_image.current_user = rolf
       example_image.copyright_holder = ""
       example_image.save
       # (note: the above creates a new entry in copyright_changes!!)

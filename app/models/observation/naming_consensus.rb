@@ -52,7 +52,8 @@
 # The vote table is the slowest table in the db, so it was extremely slow.
 #
 
-# Disable Metrics/ClassLength temporarily while getting rid of User.current
+# Disable Metrics/ClassLength - genuinely a lot of vote/consensus
+# bookkeeping in one place; hasn't been split up yet.
 # rubocop:disable Metrics/ClassLength
 class Observation
   class NamingConsensus
@@ -256,7 +257,14 @@ class Observation
     # consensus for the Observation in question if anything is changed.
     # Returns true if something was changed.
     # Called from outside.
-    def change_vote(naming, value, user = User.current)
+    def change_vote(naming, value, user = naming.current_user)
+      if user.nil?
+        raise(ArgumentError.new(
+                "change_vote needs a user - either pass one explicitly, " \
+                "or set naming.current_user first."
+              ))
+      end
+
       result = false
       vote = users_vote(naming, user)
       value = value.to_f
@@ -272,32 +280,28 @@ class Observation
       end
 
       # Update consensus if anything changed.
-      user_calc_consensus(user) if result
+      calc_consensus(user) if result
       result
     end
 
     def change_vote_with_log(naming, value)
       reload_namings_and_votes!
       change_vote(naming, value, naming.user)
-      @observation.log(:log_naming_created, name: naming.format_name)
+      @observation.log(:log_naming_created, user: naming.user,
+                                            name: naming.format_name)
     end
 
     # Recalculates consensus_naming and saves the observation accordingly.
     # Resets the `needs_naming` column based on current naming specificity
     # and confidence. Also initiates the email blast to interested parties.
-    def calc_consensus
+    # `user` attributes the resulting observation/naming updates and is
+    # excluded from consensus-change notification recipients - nil means
+    # no acting user (e.g. a system-triggered recalculation).
+    def calc_consensus(user = nil)
       reload_namings_and_votes!
       calculator = ::Observation::ConsensusCalculator.new(@namings)
-      best, best_val = calculator.calc(User.current)
-      update_all_observations_consensus(best, best_val)
-    end
-
-    def user_calc_consensus(current_user)
-      reload_namings_and_votes!
-      calculator = ::Observation::ConsensusCalculator.new(@namings)
-      best, best_val = calculator.calc(current_user)
-      update_all_observations_consensus(best, best_val,
-                                        current_user: current_user)
+      best, best_val = calculator.calc(user)
+      update_all_observations_consensus(best, best_val, current_user: user)
     end
 
     # We interpret any naming vote to mean the user has reviewed the obs.
@@ -354,13 +358,7 @@ class Observation
       return unless old != best
 
       @consensus_changed = true if obs.id == @observation.id
-      if current_user
-        obs.reload.user_announce_consensus_change(
-          old, best, current_user
-        )
-      else
-        obs.reload.announce_consensus_change(old, best)
-      end
+      obs.reload.announce_consensus_change(old, best, current_user)
     end
 
     def init_vote_table
@@ -465,6 +463,7 @@ class Observation
     def delete_vote(naming, vote, user)
       return false unless vote
 
+      vote.current_user = user
       naming.votes.delete(vote)
       reload_namings_and_votes!
       find_new_favorite(user) if vote.favorite
@@ -498,12 +497,14 @@ class Observation
         vote.favorite = favorite
         vote.save
       else
-        naming.votes.create!(
+        new_vote = naming.votes.build(
           user: user,
           observation: @observation,
           value: value,
           favorite: favorite
         )
+        new_vote.current_user = user
+        new_vote.save!
       end
     end
 

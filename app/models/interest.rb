@@ -97,7 +97,13 @@ class Interest < AbstractModel
 
     "#{state ? :WATCHING.l : :IGNORING.l} " \
     "#{target_type.underscore.to_sym.l}: " \
-    "#{target ? target.unique_format_name : "--"}"
+    "#{target ? target_format_name : "--"}"
+  end
+
+  # `user` (this Interest's owner) is the only one who ever sees this,
+  # via their own Interests index page.
+  def target_format_name
+    target.unique_format_name(user)
   end
   alias text_name summary
 
@@ -106,8 +112,10 @@ class Interest < AbstractModel
   protected
 
   validate :check_requirements
+  # In practice every real caller already sets `user:`/`.user =`
+  # explicitly; current_user is only a fallback for this check.
   def check_requirements # :nodoc:
-    if !user && !User.current
+    if !user && !current_user
       errors.add(:user, :validate_interest_user_missing.t)
     end
 

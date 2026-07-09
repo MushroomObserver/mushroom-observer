@@ -28,7 +28,7 @@ module Views::Controllers::Comments
     def render_list
       return unless @objects.any?
 
-      render(::Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         @objects.each do |comment|
           # Editable on logged-out viewers matches the legacy
           # `controls: @user.nil?` semantics — leaving the

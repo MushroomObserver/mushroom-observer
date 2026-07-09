@@ -74,7 +74,7 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
 
   # Override to use display_name for names (includes formatting)
   def prefill_via_id(val, _type)
-    Name.find(val.to_i).display_name
+    Name.find(val.to_i).display_name(current_user)
   rescue ActiveRecord::RecordNotFound
     val
   end

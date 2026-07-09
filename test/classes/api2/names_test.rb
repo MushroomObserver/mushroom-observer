@@ -18,6 +18,18 @@ class API2::NamesTest < UnitTestCase
     { method: :get, action: :name }.merge(**)
   end
 
+  def params_post(**)
+    { method: :post, action: :name, api_key: @api_key.key }.merge(**)
+  end
+
+  def params_patch(**)
+    { method: :patch, action: :name, api_key: @api_key.key }.merge(**)
+  end
+
+  def params_delete(**)
+    { method: :delete, action: :name, api_key: @api_key.key }.merge(**)
+  end
+
   def test_getting_names
     name = Name.with_correct_spelling.sample
     assert_api_pass(params_get(id: name.id))
@@ -282,14 +294,7 @@ class API2::NamesTest < UnitTestCase
     @classification = ""
     @notes          = ""
     @user           = rolf
-    params = {
-      method: :post,
-      action: :name,
-      api_key: @api_key.key,
-      name: @name,
-      rank: @rank,
-      deprecated: @deprecated
-    }
+    params = params_post(name: @name, rank: @rank, deprecated: @deprecated)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:name))
     assert_api_fail(params.except(:rank))
@@ -307,18 +312,9 @@ class API2::NamesTest < UnitTestCase
     @classification = "Kingdom: _Fungi_\r\nFamily: _Parmeliaceae_"
     @notes          = "neat species!"
     @user           = rolf
-    params = {
-      method: :post,
-      action: :name,
-      api_key: @api_key.key,
-      name: @name,
-      author: @author,
-      rank: @rank,
-      deprecated: @deprecated,
-      citation: @citation,
-      classification: @classification,
-      notes: @notes
-    }
+    params = params_post(name: @name, author: @author, rank: @rank,
+                         deprecated: @deprecated, citation: @citation,
+                         classification: @classification, notes: @notes)
     assert_api_pass(params)
     assert_last_name_correct(Name.where(text_name: @name).first)
     assert_not_empty(Name.where(text_name: "Anzia"))
@@ -327,13 +323,7 @@ class API2::NamesTest < UnitTestCase
   def test_post_name_created_with_logs
     text_name = "Anzia ornata"
     assert_not(Name.exists?(text_name: text_name))
-    params = {
-      method: :post,
-      action: :name,
-      api_key: @api_key.key,
-      name: text_name,
-      rank: "Species"
-    }
+    params = params_post(name: text_name, rank: "Species")
     assert_api_pass(params)
     name = Name.find_by(text_name: text_name)
     assert_not_nil(name, "Name '#{text_name}' was not created")
@@ -348,14 +338,7 @@ class API2::NamesTest < UnitTestCase
   def test_post_name_created_with_no_log
     text_name = "Anzia ornata"
     assert_not(Name.exists?(text_name: text_name))
-    params = {
-      method: :post,
-      action: :name,
-      api_key: @api_key.key,
-      name: text_name,
-      rank: "Species",
-      log: "no"
-    }
+    params = params_post(name: text_name, rank: "Species", log: "no")
     assert_api_pass(params)
     name = Name.find_by(text_name: text_name)
     assert_not_nil(name, "Failed to create Name '#{text_name}'")
@@ -372,15 +355,9 @@ class API2::NamesTest < UnitTestCase
       "Order: Agaricales",
       "Family: Agaricaceae"
     ].join("\n")
-    params = {
-      method: :patch,
-      action: :name,
-      api_key: @api_key.key,
-      id: agaricus.id,
-      set_notes: "new notes",
-      set_citation: "new citation",
-      set_classification: new_classification
-    }
+    params = params_patch(id: agaricus.id, set_notes: "new notes",
+                          set_citation: "new citation",
+                          set_classification: new_classification)
 
     lepiota.update!(user: mary)
 
@@ -441,12 +418,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_changing_names
     agaricus = names(:agaricus)
-    params = {
-      method: :patch,
-      action: :name,
-      api_key: @api_key.key,
-      id: agaricus.id
-    }
+    params = params_patch(id: agaricus.id)
     assert_api_fail(params.merge(set_name: ""))
     assert_api_pass(params.merge(set_name: "Suciraga"))
     assert_equal("Suciraga", agaricus.reload.text_name)
@@ -469,12 +441,7 @@ class API2::NamesTest < UnitTestCase
 
   def test_changing_deprecation
     agaricus = names(:agaricus)
-    params = {
-      method: :patch,
-      action: :name,
-      api_key: @api_key.key,
-      id: agaricus.id
-    }
+    params = params_patch(id: agaricus.id)
     assert_api_pass(params.merge(set_deprecated: "true"))
     assert_true(agaricus.reload.deprecated)
     assert_equal("__Agaricus__", agaricus.display_name)
@@ -487,11 +454,7 @@ class API2::NamesTest < UnitTestCase
     name1 = names(:lactarius_alpigenes)
     name2 = names(:lactarius_subalpinus)
     name3 = names(:macrolepiota_rhacodes)
-    params = {
-      method: :patch,
-      action: :name,
-      api_key: @api_key.key
-    }
+    params = params_patch
     syns = name1.synonyms
     assert(syns.count > 2)
     assert(syns.include?(name2))
@@ -508,11 +471,7 @@ class API2::NamesTest < UnitTestCase
   def test_changing_correct_spelling
     correct  = names(:macrolepiota_rhacodes)
     misspelt = names(:macrolepiota_rachodes)
-    params = {
-      method: :patch,
-      action: :name,
-      api_key: @api_key.key
-    }
+    params = params_patch
     correct.clear_synonym
     assert_api_pass(params.merge(id: misspelt.id,
                                  set_correct_spelling: correct.id))
@@ -523,15 +482,53 @@ class API2::NamesTest < UnitTestCase
                             misspelt.synonyms.sort_by(&:id))
   end
 
+  def test_patching_name_fails_when_no_set_params_given
+    agaricus = names(:agaricus)
+    assert_api_fail(params_patch(id: agaricus.id))
+  end
+
+  def test_patching_name_fails_when_not_only_editor
+    agaricus = names(:agaricus)
+    agaricus.current_user = mary
+    agaricus.update!(notes: "mary's edit")
+
+    assert_api_fail(params_patch(id: agaricus.id, set_notes: "new notes"))
+  end
+
+  def test_patching_name_fails_when_description_owned_by_someone_else
+    agaricus = names(:agaricus)
+    desc = agaricus.descriptions.first
+    desc.update!(user: mary)
+
+    assert_api_fail(params_patch(id: agaricus.id, set_notes: "new notes"))
+  end
+
+  def test_patching_name_fails_when_setting_name_on_multiple_matches
+    name1 = names(:agaricus)
+    name2 = names(:lepiota)
+
+    assert_api_fail(params_patch(id: "#{name1.id},#{name2.id}",
+                                 set_name: "Suciraga"))
+  end
+
+  def test_patching_name_fails_when_synonymy_params_conflict
+    name1 = names(:lactarius_alpigenes)
+    name2 = names(:lactarius_subalpinus)
+
+    assert_api_fail(params_patch(id: name1.id, synonymize_with: name2.id,
+                                 clear_synonyms: "yes"))
+  end
+
+  def test_creating_name_that_exists_with_matching_author
+    existing = names(:stereum_hirsutum)
+    params = params_post(name: existing.text_name, author: existing.author,
+                         rank: "Species")
+    assert_api_fail(params)
+  end
+
   def test_deleting_names
     name = rolf.names.sample
-    params = {
-      method: :delete,
-      action: :name,
-      api_key: @api_key.key,
-      id: name.id
-    }
     # No DELETE requests should be allowed at all.
-    assert_api_fail(params)
+    assert_api_fail(params_delete(id: name.id))
   end
 end

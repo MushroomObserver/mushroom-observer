@@ -104,7 +104,8 @@ module Account
     end
 
     def create_api_key
-      @key = APIKey.new(params.require(:api_key).permit(:user_id, :notes))
+      @key = APIKey.new(params.require(:api_key).permit(:notes))
+      @key.current_user = @user
       @key.verified = Time.zone.now
       @key.save!
       # render update blanks out form if they want to create another key
@@ -114,8 +115,7 @@ module Account
     end
 
     def verify_user_owns_key
-      @user = User.current = session_user || raise("Must be logged in.")
-      @key  = APIKey.find(params[:id])
+      @key = APIKey.find(params[:id])
       raise("Permission denied") and return false if @key.user != @user
 
       true

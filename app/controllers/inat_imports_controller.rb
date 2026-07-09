@@ -26,6 +26,7 @@ class InatImportsController < ApplicationController
   include Validators
   include Estimators
   include FormBuilders
+  include PreviousImports
   include Inat::Constants
 
   before_action :login_required
@@ -163,6 +164,7 @@ class InatImportsController < ApplicationController
     {
       requested: fetch_raw_requested_count,
       after_taxon: fetch_after_taxon_count,
+      not_yet_imported: fetch_not_yet_imported_count,
       estimate_with_date: fetch_estimate_with_date_count
     }
   end
@@ -246,28 +248,6 @@ class InatImportsController < ApplicationController
     flash_warning(:inat_taxon_id_not_importable.l)
   end
 
-  # Were any listed iNat IDs previously imported?
-  def warn_about_listed_previous_imports
-    return if importing_all? || !listing_ids?
-
-    previous_imports = previously_imported_links
-    return if previous_imports.none?
-
-    flash_warning(:inat_previous_import.t(count: previous_imports.count))
-  end
-
-  def previously_imported_links
-    return ExternalLink.none if inat_id_list.blank?
-
-    ExternalLink.import.where(target_type: "Observation",
-                              external_site: inat_site,
-                              external_id: inat_id_list.map(&:to_s))
-  end
-
-  def inat_site
-    @inat_site ||= ExternalSite.inaturalist
-  end
-
   def assure_user_has_inat_import_api_key
     key = APIKey.find_by(user: @user, notes: MO_API_KEY_NOTES)
     key = APIKey.create(user: @user, notes: MO_API_KEY_NOTES) if key.nil?
@@ -275,28 +255,41 @@ class InatImportsController < ApplicationController
   end
 
   # A new persistent record per import, so each import's results are kept.
-  # avg_import_time derives from the user's prior records (a throwaway
-  # instance computes it since the new one isn't saved yet).
   def init_ivars
     @inat_import = InatImport.create!(
+      new_import_scope_attrs.merge(new_import_bookkeeping_attrs)
+    )
+  end
+
+  # What to import, from the submitted form params.
+  def new_import_scope_attrs
+    {
       user: @user,
-      state: "Authorizing",
       import_all: params[:all],
-      importables: importables_count,
-      total_importables: importables_count,
-      imported_count: 0,
-      avg_import_time: InatImport.new(user: @user).initial_avg_import_seconds,
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
       inat_url: params[:inat_url].presence,
       import_others: import_others?,
-      writeback: writeback_policy,
+      recheck_all: recheck_all?,
+      writeback: writeback_policy
+    }
+  end
+
+  # Fresh-run state. avg_import_time derives from the user's prior records
+  # (a throwaway instance computes it since the new one isn't saved yet).
+  def new_import_bookkeeping_attrs
+    {
+      state: "Authorizing",
+      importables: importables_count,
+      total_importables: importables_count,
+      imported_count: 0,
+      avg_import_time: InatImport.new(user: @user).initial_avg_import_seconds,
       response_errors: "",
       token: "",
       log: [],
       ended_at: nil,
       cancel: false
-    )
+    }
   end
 
   def importables_count
@@ -313,6 +306,13 @@ class InatImportsController < ApplicationController
     params[:import_others] == "1"
   end
 
+  # Whether an import-all / URL run should re-check observations already
+  # carrying iNat's "Mushroom Observer URL" field (#4565 orphan reimport).
+  # Explicit id lists always re-check regardless of this flag.
+  def recheck_all?
+    params[:recheck_all] == "1"
+  end
+
   # Admins can toggle the iNat write-back per import via a form checkbox
   # (checked = skip, unchecked = force it on). Everyone else gets `default`
   # so the importer applies its environment default (skip in development,
@@ -321,25 +321,6 @@ class InatImportsController < ApplicationController
     return :default unless in_admin_mode?
 
     params[:skip_inat_writeback] == "1" ? :skip : :force
-  end
-
-  def clean_inat_ids
-    inat_ids = normalize_inat_ids(params[:inat_ids])
-    previous_imports = previously_imported_links
-    return inat_ids if previous_imports.none?
-
-    remove_previously_imported_ids(inat_ids, previous_imports)
-  end
-
-  # Remove previously imported ids in case the iNat user deleted the
-  # Mushroom_Observer_URL field.
-  # NOTE: Also useful in manual testing when writes of iNat obss are
-  # commented out temporarily. jdc 2026-01-15
-  def remove_previously_imported_ids(inat_ids, previous_imports)
-    previous_ids = previous_imports.pluck(:external_id)
-    remaining_ids =
-      inat_ids.split(",").map(&:strip).reject { |id| previous_ids.include?(id) }
-    remaining_ids.join(",")
   end
 
   # Pass the new record's id through the OAuth `state` param; iNat echoes it

@@ -67,11 +67,11 @@ class Occurrence < AbstractModel
   end
 
   # Recalculate shared consensus across all observations.
-  def recalculate_consensus!
+  def recalculate_consensus!(user = nil)
     obs = observations.naming_includes.first
     return unless obs
 
-    Observation::NamingConsensus.new(obs).calc_consensus
+    Observation::NamingConsensus.new(obs).calc_consensus(user)
   end
 
   # Auto-destroy if reduced to fewer than 2 observations,
@@ -87,11 +87,11 @@ class Occurrence < AbstractModel
   # Dissolve the occurrence: detach all non-primary observations.
   # If a field slip is linked, keep the occurrence with just the
   # primary. Otherwise destroy it entirely.
-  def dissolve!
+  def dissolve!(user = nil)
     non_primary = observations.where.not(id: primary_observation_id).to_a
     reset_cross_observation_thumbnails
     dissolve_transaction(non_primary)
-    dissolve_log_and_recalculate(non_primary)
+    dissolve_log_and_recalculate(non_primary, user)
   end
 
   # Reset any thumbnail that points to an image belonging to a
@@ -148,7 +148,7 @@ class Occurrence < AbstractModel
 
   # Merge +absorbed+ occurrence into +keeper+. All observations from
   # +absorbed+ move to +keeper+, then +absorbed+ is destroyed.
-  def self.merge!(keeper, absorbed)
+  def self.merge!(keeper, absorbed, user = nil)
     merged_obs = absorbed.observations.to_a
     transaction do
       merged_obs.each do |obs|
@@ -157,7 +157,7 @@ class Occurrence < AbstractModel
       absorbed.reload.destroy!
       keeper.recompute_has_specimen!
     end
-    log_observation_added(merged_obs)
+    log_observation_added(merged_obs, user)
     keeper
   end
 
@@ -184,9 +184,9 @@ class Occurrence < AbstractModel
   end
 
   # Merge existing occurrences and add remaining observations.
-  def self.merge_into_manual(occurrences, primary_obs, all_obs, _user)
+  def self.merge_into_manual(occurrences, primary_obs, all_obs, user)
     keeper = occurrences.shift
-    occurrences.each { |occ| merge!(keeper, occ) }
+    occurrences.each { |occ| merge!(keeper, occ, user) }
     newly_added = []
     all_obs.each do |obs|
       next if obs.occurrence_id == keeper.id
@@ -194,7 +194,7 @@ class Occurrence < AbstractModel
       obs.update!(occurrence: keeper)
       newly_added << obs
     end
-    log_observation_added(newly_added) if newly_added.any?
+    log_observation_added(newly_added, user) if newly_added.any?
     keeper.update!(primary_observation: primary_obs)
     keeper.recompute_has_specimen!
     keeper
@@ -251,12 +251,12 @@ class Occurrence < AbstractModel
     end
   end
 
-  def dissolve_log_and_recalculate(non_primary)
+  def dissolve_log_and_recalculate(non_primary, user = nil)
     detached = non_primary
     detached += [primary_observation] if field_slip_id.blank?
     detached.each do |obs|
-      Occurrence.log_observation_removed(obs)
-      Observation::NamingConsensus.new(obs).calc_consensus
+      Occurrence.log_observation_removed(obs, nil, user)
+      Observation::NamingConsensus.new(obs).calc_consensus(user)
     end
   end
 end

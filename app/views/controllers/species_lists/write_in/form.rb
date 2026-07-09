@@ -102,11 +102,13 @@ module Views::Controllers::SpeciesLists::WriteIn
     end
 
     def render_place_name_field
-      # `:place_name` is a real `SpeciesList` attribute; Symbol path
-      # binds to `model.place_name` (which the controller has already
-      # set to the right value via `validate_place_name`).
+      # `:place_name` is a real `SpeciesList` attribute, but its getter
+      # is viewer-aware (takes an explicit user) - Superform's Symbol
+      # path would call it with no args, so pass `value:` explicitly
+      # to get `current_user`'s postal/scientific preference.
       autocompleter_field(:place_name,
                           type: :location,
+                          value: model.place_name(current_user),
                           label: "#{:WHERE.l}:")
     end
 
@@ -114,17 +116,17 @@ module Views::Controllers::SpeciesLists::WriteIn
       render_vote_field
       render_notes_block
       render_coord_fields
-      render(::Components::Help::Note.new(:div)) do
-        trusted_html(:form_observations_lat_long_help.t)
-      end
+      Help(
+        content: :form_observations_lat_long_help.t
+      )
       render_is_collection_location_checkbox
-      render(::Components::Help::Note.new(:div)) do
-        trusted_html(:form_observations_is_collection_location_help.t)
-      end
+      Help(
+        content: :form_observations_is_collection_location_help.t
+      )
       render_specimen_checkbox
-      render(::Components::Help::Note.new(:div)) do
-        trusted_html(:form_observations_specimen_available_help.t)
-      end
+      Help(
+        content: :form_observations_specimen_available_help.t
+      )
     end
 
     def render_vote_field

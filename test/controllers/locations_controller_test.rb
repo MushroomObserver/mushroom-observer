@@ -979,7 +979,7 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     loc = locations(:burbank)
     normal_name = loc.name
-    scientific_name = loc.display_name
+    scientific_name = loc.display_name(rolf)
     assert_not_equal(normal_name, scientific_name)
     get(:edit, params: { id: loc.id })
     assert_input_value(:location_display_name, scientific_name)
@@ -996,7 +996,7 @@ class LocationsControllerTest < FunctionalTestCase
     assert_response(:redirect) # means success
     loc.reload
     assert_equal(new_normal_name, loc.name)
-    assert_equal(new_scientific_name, loc.display_name)
+    assert_equal(new_scientific_name, loc.display_name(rolf))
   end
 
   def test_nontrivial_change

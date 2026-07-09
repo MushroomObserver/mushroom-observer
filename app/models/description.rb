@@ -147,7 +147,7 @@ class Description < AbstractModel
   end
 
   # Descriptive title including parent name, in Textile-formatted text.
-  def format_name
+  def format_name(_user = nil)
     put_together_name(:full)
   end
 
@@ -158,7 +158,7 @@ class Description < AbstractModel
   alias document_title text_name
 
   # Same as +format_name+ but with id tacked on.
-  def unique_format_name
+  def unique_format_name(_user = nil)
     string_with_id(format_name)
   end
 
@@ -507,7 +507,7 @@ class Description < AbstractModel
   # get promoted to author by default.  In all cases make sure the user is
   # added on as an editor.
   def add_author_or_editor
-    return unless !@save_without_our_callbacks && (user = User.current)
+    return unless !@save_without_our_callbacks && (user = current_user)
 
     authors.empty? && author_worthy? ? add_author(user) : add_editor(user)
   end

@@ -1847,6 +1847,7 @@
   form_observations_field_code: for field slip
   form_observations_field_slip_code: Field Slip Code
   edit_observation_field_slip_invalid: 'Invalid field slip code "[code]".'
+  create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
@@ -2477,6 +2478,7 @@
   show_observation_add_images: "[:add_objects(type=:image)]"
   show_observation_species_lists: "[:SPECIES_LISTS]"
   show_observation_manage_species_lists: Manage Observation Lists
+  show_observation_add_to_species_list: Add to an Observation List
   show_observation_send_question: Send Observer a Question
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
@@ -3253,6 +3255,8 @@
   inat_import_list: A list of observations
   inat_import_list_help: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
   inat_import_all: All my iNat observations
+  inat_recheck_all: "Re-check observations already linked to Mushroom Observer"
+  inat_recheck_all_help: "\"All\" and URL imports normally skip iNat observations that already have a \"Mushroom Observer URL\" field. Check this to re-examine them — for example, to re-import observations whose MO observation was deleted. Slower for large accounts. Observations listed by ID are always re-checked."
   inat_import_others: "Import other users' observations"
   inat_skip_writeback: "Skip writing the MO link back to iNaturalist (admin)"
   inat_import_consent: "(Required) I consent to importing my iNaturalist observations into Mushroom Observer, including any unlicensed observations and images, with my default MO license applied to any unlicensed images."
@@ -3280,7 +3284,7 @@
   inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
   inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
-  inat_observation_taxon: iNat Observation Taxon
+  inat_leading_id: Leading ID as of
   inat_corrected_spelling: (corrected spelling)
   inat_snapshot_caption: iNat imported data
   inat_dqa_casual: Casual
@@ -3338,6 +3342,7 @@
   inat_import_tracker_ignored_heading: Ignored Observations
   inat_import_tracker_ignored_not_importable: Not importable (not fungi or slime molds)
   inat_import_tracker_ignored_already_imported: Already imported
+  inat_import_tracker_ignored_unlicensed: Unlicensed (import-others only)
   inat_import_tracker_ignored_date_missing: No observation date
   inat_import_tracker_date_missing_reimport: "Re-import [count] observation(s) after adding dates on iNat"
   inat_import_tracker_license_added_heading: Observations Imported with MO Default License

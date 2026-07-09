@@ -4,6 +4,10 @@ require "test_helper"
 
 module Views::Controllers::Translations
   class IndexTest < ComponentTestCase
+    # Stand-in for a future item type `render_item` doesn't handle yet.
+    class UnknownItemType < ::TranslationsController::TranslationsUIString
+    end
+
     def setup
       super
       @user = users(:rolf)
@@ -36,6 +40,23 @@ module Views::Controllers::Translations
       assert_html(html, "p.minor_header")
       assert_html(html, "p.comment")
       assert_html(html, "p.tag_field")
+    end
+
+    # Defensive branch guarding against a future item type being added
+    # without updating `render_item` to handle it. The `index` prop is
+    # typed as `_Array(TranslationsUIString)`, so the stand-in for
+    # "unrecognized type" must itself be a TranslationsUIString
+    # subclass — a bare Object fails Literal's type check at
+    # construction, before `render_item` ever runs.
+    def test_render_item_raises_for_unrecognized_type
+      error = assert_raises(RuntimeError) do
+        render(Index.new(
+                 lang: @lang, index: [UnknownItemType.new("x")],
+                 official_records: {}, translated_records: {}
+               ))
+      end
+      assert_match(/Unexpected form item type: .*UnknownItemType/,
+                   error.message)
     end
 
     private

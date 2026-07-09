@@ -316,6 +316,42 @@ class MapTest < ComponentTestCase
   end
 
   # ------------------------------------------------------------------
+  # location_format fallback chain: location_format: prop, then user:
+  # prop, then the request's current_user, then "postal"
+  # ------------------------------------------------------------------
+
+  def test_location_format_prop_wins_over_user_prop_and_current_user
+    controller.instance_variable_set(:@user, users(:roy)) # scientific
+    html = render(Components::Map.new(objects: [@location],
+                                      user: users(:roy),
+                                      location_format: "postal"))
+
+    assert_html(html, "#map_div[data-location-format='postal']")
+  end
+
+  def test_location_format_falls_back_to_user_prop
+    controller.instance_variable_set(:@user, users(:rolf)) # postal
+    html = render(Components::Map.new(objects: [@location],
+                                      user: users(:roy)))
+
+    assert_html(html, "#map_div[data-location-format='scientific']")
+  end
+
+  def test_location_format_falls_back_to_current_user_without_user_prop
+    controller.instance_variable_set(:@user, users(:roy)) # scientific
+    html = render(Components::Map.new(objects: [@location]))
+
+    assert_html(html, "#map_div[data-location-format='scientific']")
+  end
+
+  def test_location_format_defaults_to_postal_without_any_user
+    controller.instance_variable_set(:@user, nil)
+    html = render(Components::Map.new(objects: [@location]))
+
+    assert_html(html, "#map_div[data-location-format='postal']")
+  end
+
+  # ------------------------------------------------------------------
   # Legend
   # ------------------------------------------------------------------
 

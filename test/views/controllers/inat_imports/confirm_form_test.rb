@@ -34,6 +34,14 @@ module Views::Controllers::InatImports
                   "[name='inat_import_confirm[inat_username]']")
     end
 
+    def test_carries_recheck_all_through_hidden_field
+      html = render_form
+
+      assert_html(html,
+                  "input[type='hidden']" \
+                  "[name='inat_import_confirm[recheck_all]']")
+    end
+
     def test_staleness_note_absent_when_result_set_is_stable
       stable_model = FormObject::InatImportConfirm.new(
         inat_username: "rolf_inat_username", inat_ids: "123,456"
@@ -87,20 +95,24 @@ module Views::Controllers::InatImports
 
     def test_overlap_note_absent_with_single_ignored_row
       # Only not_importable row: requested(12) - after_taxon(10) = 2 > 0
-      # already_imported: after_taxon(10) - expected(10) = 0, not positive
+      # already_imported: after_taxon(10) - not_yet_imported(10) = 0, not
+      # positive
       # no_date: nil (no estimate_with_date provided)
-      html = render_form(breakdown: { requested: 12, after_taxon: 10 })
+      html = render_form(
+        breakdown: { requested: 12, after_taxon: 10, not_yet_imported: 10 }
+      )
 
       assert_no_html(html, ".overlap-note")
     end
 
     def test_overlap_note_present_with_multiple_ignored_rows
       # not_importable (requested - after_taxon = 2) +
-      # already_imported (after_taxon - expected = 3) +
+      # already_imported (after_taxon - not_yet_imported = 3) +
       # no_date (expected - estimate_with_date = 1)
       html = render_form(
         breakdown: {
-          requested: 20, after_taxon: 18, estimate_with_date: 14
+          requested: 20, after_taxon: 18, not_yet_imported: 15,
+          estimate_with_date: 9
         }
       )
 
@@ -173,6 +185,7 @@ module Views::Controllers::InatImports
                  inat_import: inat_import_val,
                  requested: breakdown[:requested],
                  after_taxon: breakdown[:after_taxon],
+                 not_yet_imported: breakdown[:not_yet_imported],
                  estimate_with_date: breakdown[:estimate_with_date]
                }
              ))

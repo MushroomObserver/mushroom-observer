@@ -156,7 +156,7 @@
 #  announce_consensus_change::  After consensus changes: send email.
 #
 class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
-  attr_accessor :current_user
+  include HasPlaceName
 
   # Transient flag: when set, the before_create default that copies the
   # entering user into `collector` is skipped. Field-slip-originated
@@ -228,7 +228,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     old_occ = occurrence
     occ = slip.occurrence
     occ ||= Occurrence.create!(
-      user: user || User.current,
+      user: user || current_user,
       primary_observation: self,
       field_slip: slip
     )
@@ -328,18 +328,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # never auto-claimed as collector. The caller assigns the resolved
   # field-slip collector to the column afterward; a blank one stays blank
   # (suppressed on the show page). See #4211.
-  def self.build_observation(location, name, notes, date, current_user = nil)
+  def self.build_observation(location, name, notes, date, user)
     return nil unless location
 
     name ||= Name.find_by(text_name: "Fungi")
     now = Time.zone.now
-    user = current_user || User.current
     obs = new({ created_at: now, updated_at: now, source: "mo_website",
                 when: date, user:, location:, name:, notes:,
                 skip_collector_default: true })
     return nil unless obs
 
-    obs.user_log(user, :log_observation_created)
+    obs.current_user = user
+
+    obs.log(:log_observation_created, user: user)
     naming = Naming.user_construct({ name: }, obs, user)
     naming.save!
     naming.votes.create!(
@@ -348,7 +349,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       value: Vote.maximum_vote,
       favorite: true
     )
-    Observation::NamingConsensus.new(obs).user_calc_consensus(user)
+    Observation::NamingConsensus.new(obs).calc_consensus(user)
     obs
   end
 
@@ -461,7 +462,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     notes[:Collector].to_s.include?("_user #{user.login}_")
   end
 
-  def project_admin?(user = User.current)
+  def project_admin?(user)
     Project.admin_power?(self, user)
   end
 
@@ -573,7 +574,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     msgs
   end
 
-  def update_view_stats(current_user = User.current)
+  def update_view_stats(current_user = nil)
     super
     return if current_user.blank?
 
@@ -603,44 +604,22 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
-  # Abstraction over +where+ and +location.display_name+.  Returns Location
-  # name as a string, preferring +location+ over +where+ wherever both exist.
-  # Also applies the location_format of the current user (defaults to "postal").
-  def place_name
-    # Use the eager-loaded `:location` when its id still matches
-    # `location_id` (the show/index render path). Fall back to an FK
-    # fetch when callers reach `place_name` after a `location_id =`
-    # assignment invalidated the cached target, so we don't lazy-load
-    # against strict_loading.
+  private
+
+  # Use the eager-loaded `:location` when its id still matches
+  # `location_id` (the show/index render path). Fall back to an FK
+  # fetch when callers reach `place_name` after a `location_id =`
+  # assignment invalidated the cached target, so we don't lazy-load
+  # against strict_loading. (Overrides HasPlaceName's default, which
+  # just calls the `location` association directly.)
+  def location_for_place_name
     cached = association(:location).target if association(:location).loaded?
-    loc = if cached && cached.id == location_id
-            cached
-          elsif location_id
-            Location.find_by(id: location_id)
-          end
-    if loc
-      loc.display_name
-    elsif User.current_location_format == "scientific"
-      Location.reverse_name(where)
-    else
-      where
-    end
+    return cached if cached && cached.id == location_id
+
+    Location.find_by(id: location_id) if location_id
   end
 
-  # Set +where+ or +location+, depending on whether a Location is defined with
-  # the given +display_name+.  (Fills the other in with +nil+.)
-  # Adjusts for the current user's location_format as well.
-  def place_name=(place_name)
-    where = Location.normalize_place_name(place_name)
-    loc = Location.find_by_name(where)
-    if loc
-      self.where = loc.name
-      self.location = loc
-    else
-      self.where = where
-      self.location = nil
-    end
-  end
+  public
 
   # Useful for forms in which date is entered in YYYYMMDD format: When form tag
   # helper creates input field, it reads obs.when_str and gets date in
@@ -709,13 +688,13 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       will_save_change_to_attribute?(:location_id)
   end
 
-  def place_name_and_coordinates
+  def place_name_and_coordinates(user = nil)
     if lat.present? && lng.present?
       lat_string = format_coordinate(lat, "N", "S")
       lng_string = format_coordinate(lng, "E", "W")
-      "#{place_name} (#{lat_string} #{lng_string})"
+      "#{place_name(user)} (#{lat_string} #{lng_string})"
     else
-      place_name
+      place_name(user)
     end
   end
 
@@ -970,21 +949,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   # Name in plain text with id to make it unique, never nil.
-  def unique_text_name
-    string_with_id(name.real_search_name)
+  def unique_text_name(user = nil)
+    string_with_id(name.real_search_name(user))
   end
 
-  def user_unique_text_name(user)
-    string_with_id(name.user_real_search_name(user))
-  end
-
-  # Textile-marked-up name, never nil.
-  def format_name
-    name.user_observation_name(User.current)
-  end
-
-  def user_format_name(user)
-    name.user_observation_name(user)
+  # Textile-marked-up name, never nil. `user` is who's *looking* (nil
+  # => no viewer-specific formatting).
+  def format_name(user = nil)
+    name.observation_name(user)
   end
 
   # Plain-text title for the browser tab `<title>`. `text_name` is
@@ -1000,14 +972,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Textile-marked-up name with id to make it unique, never nil.
-  def unique_format_name
-    string_with_id(name.observation_name)
-  rescue StandardError
-    ""
-  end
-
-  def user_unique_format_name(user)
-    string_with_id(name.user_observation_name(user))
+  def unique_format_name(user = nil)
+    string_with_id(name.observation_name(user))
   rescue StandardError
     ""
   end
@@ -1220,7 +1186,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def notify_species_lists
     # Tell all the species_lists it belonged to.
     species_lists.each do |spl|
-      spl.log(:log_observation_destroyed2, name: unique_format_name,
+      spl.log(:log_observation_destroyed2, user: current_user,
+                                           name: unique_format_name,
                                            touch: false)
     end
 
@@ -1345,7 +1312,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def send_observation_destroyed_emails
     sender = user
     recipients = interested_users - [sender]
-    note = user_unique_format_name(User.current)
+    note = unique_format_name(current_user)
 
     recipients.each do |receiver|
       next if receiver.no_emails
@@ -1365,41 +1332,12 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   #   old_name = obs.name
   #   obs.name = new_name
-  #   obs.announce_consensus_change(old_name, new_name)
+  #   obs.announce_consensus_change(old_name, new_name, current_user)
   #
-  def announce_consensus_change(old_name, new_name)
-    log_consensus_change(old_name, new_name)
-
-    # Change can trigger emails.
-    owner  = user
-    sender = User.current
-    recipients = []
-
-    # Tell owner of observation if they want.
-    recipients.push(owner) if owner&.email_observations_consensus
-
-    # Send to people who have registered interest.
-    # Also remove everyone who has explicitly said they are NOT interested.
-    interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
-
-    # Remove users who have opted out of all emails.
-    recipients.reject!(&:no_emails)
-
-    # Send notification to all except the person who triggered the change.
-    (recipients.uniq - [sender]).each do |receiver|
-      ConsensusChangeMailer.build(
-        sender:, receiver:, observation: self, old_name:, new_name:
-      ).deliver_later
-    end
-  end
-
-  def user_announce_consensus_change(old_name, new_name, current_user)
+  # `current_user` may be nil (e.g. an automated consensus recalculation
+  # with no attributable acting user) - `user_log_consensus_change` and
+  # `ConsensusChangeMailer`'s sender both handle that.
+  def announce_consensus_change(old_name, new_name, current_user)
     user_log_consensus_change(old_name, new_name, current_user)
 
     # Change can trigger emails.
@@ -1431,23 +1369,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  def log_consensus_change(old_name, new_name)
-    if old_name
-      log(:log_consensus_changed, old: old_name.display_name,
-                                  new: new_name.display_name)
-    else
-      log(:log_consensus_created, name: new_name.display_name)
-    end
-  end
-
   def user_log_consensus_change(old_name, new_name, current_user)
     if old_name
-      user_log(current_user, :log_consensus_changed,
-               { old: old_name.user_display_name(current_user),
-                 new: new_name.user_display_name(current_user) })
+      log(:log_consensus_changed, user: current_user,
+                                  old: old_name.display_name(current_user),
+                                  new: new_name.display_name(current_user))
     else
-      user_log(current_user, :log_consensus_created,
-               { name: new_name.user_display_name(current_user) })
+      log(:log_consensus_created, user: current_user,
+                                  name: new_name.display_name(current_user))
     end
   end
 

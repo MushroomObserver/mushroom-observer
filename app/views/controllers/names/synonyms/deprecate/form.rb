@@ -8,12 +8,14 @@ module Views::Controllers::Names::Synonyms::Deprecate
     # rubocop:disable Metrics/ParameterLists
     def initialize(name:, proposed_name: nil, is_misspelling: false,
                    comment: nil, names: [], valid_names: [],
-                   suggest_corrections: false, parent_deprecated: nil, **)
+                   suggest_corrections: false, parent_deprecated: nil,
+                   user: nil, **)
       @name = name
       @names = names
       @valid_names = valid_names
       @suggest_corrections = suggest_corrections
       @parent_deprecated = parent_deprecated
+      @user = user
 
       form_object = FormObject::DeprecateSynonym.new(
         proposed_name: proposed_name,
@@ -37,9 +39,9 @@ module Views::Controllers::Names::Synonyms::Deprecate
                           type: :name,
                           label: "#{:name_deprecate_preferred.l}:",
                           inline: true, data: { autofocus: true })
-      render(Components::Help::Note.new(
-               :div, :name_deprecate_preferred_help.tp
-             ))
+      Help(
+        content: :name_deprecate_preferred_help.tp
+      )
     end
 
     def render_misspelling_field
@@ -49,7 +51,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     def render_comment_field
       textarea_field(:comment, label: "#{:name_deprecate_comments.l}:",
                                cols: 80, rows: 5, inline: true)
-      render(Components::Help::Note.new(:div, deprecate_comments_help))
+      Help(content: deprecate_comments_help)
     end
 
     private
@@ -67,7 +69,9 @@ module Views::Controllers::Names::Synonyms::Deprecate
 
     def deprecate_comments_help
       [
-        :name_deprecate_comments_help.tp(name: @name.display_name.chomp(".")),
+        :name_deprecate_comments_help.tp(
+          name: @name.display_name(@user).chomp(".")
+        ),
         :field_textile_link.tp
       ].safe_join
     end

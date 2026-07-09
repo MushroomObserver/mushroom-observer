@@ -6,8 +6,9 @@ class VerifyAccountMailer < ApplicationMailer
 
   def build(receiver:)
     setup_user(receiver)
-    @title = :email_subject_verify.l
+    subject = :email_subject_verify.l
     debug_log(:user_question, nil, receiver, email: receiver.email)
-    mo_mail(@title, to: receiver, from: MO.accounts_email_address)
+    mo_mail(subject, to: receiver, from: MO.accounts_email_address,
+                     view_params: { subject:, receiver: })
   end
 end

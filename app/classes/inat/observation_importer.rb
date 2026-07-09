@@ -31,7 +31,9 @@ class Inat
       @observation = nil
       return if unimportable?
       return if date_missing?
-      return if already_imported?
+      return if unlicensed_other?
+      return if already_linked?
+      return if crosslinked_to_live_mo_obs?
 
       builder = create_mo_observation
       return unless @observation
@@ -60,24 +62,80 @@ class Inat
       true
     end
 
-    # Last-line-of-defense check against duplicate imports.
-    # Upstream filters (iNat-side `without_field` and the controller's
-    # `clean_inat_ids`) miss observations whose back-link write to iNat
-    # failed silently after a prior import, and the controller filter
-    # is bypassed entirely on import-all runs. The import ExternalLink's
-    # unique index (one import per target) is the actual race-safety
-    # guarantee; this pre-check just keeps benign duplicates from emitting
-    # noisy RecordNotUnique exceptions.
-    def already_imported?
-      return false unless ExternalLink.import.exists?(
+    # Safety net for import-others. This check is what actually stops an
+    # unlicensed observation belonging to another iNat user from being
+    # imported. Own-obs imports are never gated here.
+    def unlicensed_other?
+      return false unless inat_import.import_others
+      return false if @inat_obs[:license_code].present?
+
+      log("Skipped #{@inat_obs[:id]} unlicensed (import-others)")
+      inat_import.add_ignored_obs(:unlicensed)
+      true
+    end
+
+    # The real duplicate check: any typed iNat ExternalLink for this iNat
+    # obs (import / mirror / copy / remote_manual / manual) means it already
+    # corresponds to an MO observation, so importing it would create a
+    # duplicate. With #4565's materialization the link set is complete, so
+    # this MO-side check is what actually stops a duplicate — the iNat-side
+    # `without_field` filter only trims how many observations iNat sends
+    # back (and it's skipped entirely for explicit id lists and recheck_all
+    # runs). The import ExternalLink's unique index (one import per target)
+    # is still what prevents a duplicate if two imports race each other;
+    # this check just keeps that race from surfacing as a noisy
+    # RecordNotUnique exception.
+    def already_linked?
+      return false unless ExternalLink.exists?(
         target_type: "Observation",
         external_site_id: inat_site.id,
         external_id: @inat_obs[:id].to_s
       )
 
-      log("Skipped #{@inat_obs[:id]} already imported")
+      log("Skipped #{@inat_obs[:id]} already linked to an MO observation")
       inat_import.add_ignored_obs(:already_imported)
       true
+    end
+
+    # The iNat obs carries an MO URL (field 5005) with no MO-side link — a
+    # cross-reference hand-set on iNat. When the MO obs is alive,
+    # materialize the missing remote_manual link (#4565) and skip the
+    # import. A blank, dead (MO obs deleted), or unparseable value blocks
+    # nothing: the obs is importable again.
+    def crosslinked_to_live_mo_obs?
+      mo_obs = live_crosslinked_mo_obs
+      return false unless mo_obs
+
+      link = create_crosslink(mo_obs)
+      outcome = link ? "recorded the link" : "failed to record the link"
+      log("Skipped #{@inat_obs[:id]} cross-referenced on iNat " \
+          "to MO #{mo_obs.id}; #{outcome}")
+      inat_import.add_ignored_obs(:already_imported)
+      true
+    end
+
+    def live_crosslinked_mo_obs
+      value = @inat_obs.mo_url_field_value
+      return nil if value.blank?
+
+      mo_obs_id = value[MO_URL_FIELD_VALUE_ID_RE, 1]
+      return nil unless mo_obs_id
+
+      Observation.find_by(id: mo_obs_id)
+    end
+
+    # Returns the created link, or nil when validation failed.
+    def create_crosslink(mo_obs)
+      ExternalLink.create!(
+        user: @user, target: mo_obs, external_site: inat_site,
+        external_id: @inat_obs[:id].to_s, relationship: :remote_manual
+      )
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.warn(
+        "InatImport: failed to create remote_manual ExternalLink for " \
+        "Observation #{mo_obs.id} (iNat #{@inat_obs[:id]}): #{e.message}"
+      )
+      nil
     end
 
     # Cached iNaturalist ExternalSite for this importer instance — avoids

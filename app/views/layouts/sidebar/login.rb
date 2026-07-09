@@ -12,8 +12,8 @@ class Views::Layouts::Sidebar
   #   ))
   class Login < Section
     def view_template
-      div(class: @classes[:heading]) do
-        render(::Components::Icon.new(type: :user))
+      render(Components::ListGroup::Item.new(class: @classes[:heading])) do
+        Icon(type: :user)
         span { plain("#{@heading_key.t}:") }
       end
 

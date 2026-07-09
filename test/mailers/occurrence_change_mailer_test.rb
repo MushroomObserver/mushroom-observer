@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class OccurrenceChangeMailerTest < UnitTestCase
+class OccurrenceChangeMailerTest < MailerTestCase
   include ActiveJob::TestHelper
 
   def test_build_added
@@ -39,5 +39,33 @@ class OccurrenceChangeMailerTest < UnitTestCase
                       "Mail should be deliverable")
     assert_not_nil(mail.from)
     assert_not_nil(mail.body)
+  end
+
+  # occurrence_link only emits a link when the observation actually
+  # has an occurrence_id — the fixture otherwise has none.
+  def test_build_with_occurrence_link
+    obs = observations(:detailed_unknown_obs)
+    occurrence = occurrences(:occ_field_slip_one)
+    obs.update!(occurrence_id: occurrence.id)
+
+    mail = OccurrenceChangeMailer.build(
+      sender: rolf, receiver: mary, observation: obs, action: :added
+    ).message
+
+    assert_includes(mail.body.to_s,
+                    "https://mushroomobserver.org/occurrences/#{occurrence.id}")
+  end
+
+  # `sender` is nil for automated changes (e.g. sender unset
+  # in a background job) — intro must fall back instead of calling
+  # `.legal_name` on nil.
+  def test_build_with_nil_sender
+    obs = observations(:detailed_unknown_obs)
+
+    mail = OccurrenceChangeMailer.build(
+      sender: nil, receiver: mary, observation: obs, action: :added
+    ).message
+
+    assert_includes(mail.body.to_s, :app_title.t)
   end
 end

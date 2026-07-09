@@ -163,7 +163,7 @@ module API2InlineHelper
 
   def json_name(name)
     strip_hash(id: name.id,
-               name: name.user_real_text_name(nil).to_s,
+               name: name.real_text_name(nil).to_s,
                author: name.author.to_s,
                rank: name.rank.to_s.downcase,
                deprecated: name.deprecated ? true : false,
@@ -172,7 +172,7 @@ module API2InlineHelper
   end
 
   def xml_name(xml, name)
-    xml_string(xml, :name, name.user_real_text_name(nil))
+    xml_string(xml, :name, name.real_text_name(nil))
     xml_string(xml, :author, name.author)
     xml_string(xml, :rank, name.rank.to_s.downcase)
     xml_boolean(xml, :deprecated, name.deprecated)

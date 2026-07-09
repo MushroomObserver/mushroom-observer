@@ -135,7 +135,6 @@ module Views::Controllers::Observations
       proj.add_target_name(names(:agaricus))
       proj.add_target_location(locations(:burbank))
       obs = observations(:falmouth_2023_09_obs) # Boletus, Falmouth — neither
-      User.current = user
 
       obs.project_ids = [proj.id]
       html = render_form(
@@ -200,7 +199,6 @@ module Views::Controllers::Observations
     def rolf = users(:rolf)
 
     def render_form(observation:, user:, mode: :create, **extras)
-      User.current = user
       render(Form.new(
                observation,
                mode: mode,

@@ -108,7 +108,9 @@ module Names
                                       note_template: @note_template,
                                       approved: false)
       @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
-      flash_notice(:email_tracking_now_tracking.t(name: @name.display_name))
+      flash_notice(
+        :email_tracking_now_tracking.t(name: @name.display_name(@user))
+      )
     end
 
     def update_name_tracker_interest_and_flash
@@ -123,7 +125,9 @@ module Names
       NameTracker.find(@name_tracker.id).destroy
       @interest.destroy
       flash_notice(
-        :email_tracking_no_longer_tracking.t(name: @name.display_name)
+        :email_tracking_no_longer_tracking.t(
+          name: @name.display_name(@user)
+        )
       )
     end
 

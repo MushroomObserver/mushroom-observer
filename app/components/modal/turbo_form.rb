@@ -47,7 +47,7 @@ class Components::Modal::TurboForm < Components::Base
   # like `projects/members` map to `Views::Controllers::Projects::Members::Form`.
   # Falls back to model-based derivation when no controller_path is
   # given, then to the legacy `Components::<Model>Form`.
-  # See `.claude/rules/phlex_conversions.md` for the move rule.
+  # See `.claude/rules/phlex_reference.md` for the move rule.
   def self.form_component_class_for(model, controller_path: nil)
     if controller_path
       klass = "Views::Controllers::#{controller_path.camelize}::Form".

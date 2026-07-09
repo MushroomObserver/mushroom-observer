@@ -62,7 +62,7 @@ module Inat::ImportAudit
 
     def test_fetcher_defaults_to_a_real_fetcher
       runner = Runner.new(ids: [], io: StringIO.new)
-      assert_instance_of(Fetcher, runner.send(:fetcher))
+      assert_instance_of(Inat::ObsFetcher, runner.send(:fetcher))
     end
 
     private

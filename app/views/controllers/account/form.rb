@@ -64,9 +64,9 @@ module Views::Controllers::Account
     end
 
     def render_email_help
-      render(::Components::Help::Note.new(:div)) do
-        trusted_html([:signup_email_help.tp, :email_spam_notice.tp].safe_join)
-      end
+      Help(
+        content: [:signup_email_help.tp, :email_spam_notice.tp].safe_join
+      )
     end
 
     def render_name_field

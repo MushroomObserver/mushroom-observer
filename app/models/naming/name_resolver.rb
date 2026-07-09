@@ -18,7 +18,6 @@
 #   what           params[:naming][:name]          Text field.
 #   approved_name  params[:approved_name]          Last name user entered.
 #   chosen_name    params[:chosen_name][:name_id]  Name id from radio boxes.
-#   (User.current -- might be used by one or more things)
 #
 # RETURNS:
 #   success       true: okay to use name; false: user needs to approve name.

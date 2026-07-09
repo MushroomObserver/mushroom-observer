@@ -47,7 +47,20 @@ class Inat
     IMPORTABLE_TAXON_IDS = [FUNGI_TAXON_ID, MYCETOZOA_TAXON_ID].freeze
     IMPORTABLE_TAXON_IDS_ARG = IMPORTABLE_TAXON_IDS.join(",").freeze
 
+    # iNat UI "iconic_taxa" values corresponding to IMPORTABLE_TAXON_IDS.
+    # Used for the confirm form's UI-facing links, since iNat's
+    # observations search UI has no taxon_id param.
+    IMPORTABLE_ICONIC_TAXA = %w[Fungi Protozoa].freeze
+    IMPORTABLE_ICONIC_TAXA_ARG = IMPORTABLE_ICONIC_TAXA.join(",").freeze
+
     MO_URL_OBSERVATION_FIELD_ID = 5005
+
+    # Extracts the MO observation id from a "Mushroom Observer URL" field
+    # value, tolerating the URL variants that appear in the wild (current,
+    # /obs/, legacy /observer/show_observation/) and prefixes like
+    # "DEAD LINK: " (#4565).
+    MO_URL_FIELD_VALUE_ID_RE = %r{mushroomobserver\.org/
+      (?:observations/|obs/|observer/show_observation/)?(\d+)}x
 
     # Filter params added to every iNat observation API request
     # to restrict results to observations eligible for import:

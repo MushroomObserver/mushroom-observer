@@ -245,9 +245,9 @@ module Observations
       naming = Naming.last
 
       # Make sure the right number of objects were created.
-      assert_equal(o_count + 0, Observation.count)
+      assert_equal(o_count, Observation.count)
       assert_equal(g_count + 1, Naming.count)
-      assert_equal(n_count + 0, Name.count)
+      assert_equal(n_count, Name.count)
       assert_equal(v_count + 1, Vote.count)
 
       # Make sure everything I need is reloaded.
@@ -647,10 +647,10 @@ module Observations
       assert_equal(10, rolf.reload.contribution) # unchanged
 
       # Make sure the right number of objects were created.
-      assert_equal(o_count + 0, Observation.count)
-      assert_equal(g_count + 0, Naming.count)
-      assert_equal(n_count + 0, Name.count)
-      assert_equal(v_count + 0, Vote.count)
+      assert_equal(o_count, Observation.count)
+      assert_equal(g_count, Naming.count)
+      assert_equal(n_count, Name.count)
+      assert_equal(v_count, Vote.count)
 
       # Make sure observation is unchanged.
       assert_equal(names(:coprinus_comatus).id, obs.reload.name_id)
@@ -704,9 +704,9 @@ module Observations
       assert_equal(12, rolf.reload.contribution)
 
       # Make sure the right number of objects were created.
-      assert_equal(o_count + 0, Observation.count)
+      assert_equal(o_count, Observation.count)
       assert_equal(g_count + 1, Naming.count)
-      assert_equal(n_count + 0, Name.count)
+      assert_equal(n_count, Name.count)
       assert_equal(v_count + 1, Vote.count)
 
       # Get new objects.

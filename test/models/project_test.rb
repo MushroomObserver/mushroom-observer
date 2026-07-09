@@ -170,17 +170,16 @@ class ProjectTest < UnitTestCase
   def test_place_name
     proj = projects(:eol_project)
     loc = locations(:albion)
-    proj.place_name = loc.display_name
+    proj.place_name = loc.display_name(rolf)
     assert_equal(proj.location, loc)
   end
 
   def test_scientific_place_name
-    User.current_location_format = "scientific"
     proj = projects(:eol_project)
+    proj.current_user = roy
     loc = locations(:albion)
-    proj.place_name = loc.display_name
+    proj.place_name = loc.display_name(roy)
     assert_equal(proj.location, loc)
-    User.current_location_format = "postal"
   end
 
   def test_location_violations
@@ -878,6 +877,17 @@ class ProjectTest < UnitTestCase
     obs, = obs_in_eol_owned_by_member
 
     assert_not(Project.admin_power?(obs, nil))
+  end
+
+  def test_member_status
+    project = projects(:eol_project)
+
+    assert_equal(:OWNER.t, project.member_status(project.user))
+    admin = (project.admin_group.users - [project.user]).first
+    assert_equal(:ADMIN.t, project.member_status(admin))
+    member = (project.user_group.users - project.admin_group.users).first
+    assert_equal(:MEMBER.t, project.member_status(member))
+    assert_nil(project.member_status(users(:zero_user)))
   end
 
   private

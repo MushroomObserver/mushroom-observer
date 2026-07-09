@@ -161,7 +161,8 @@ class NamesController < ApplicationController
       redirect_to_next_object(:prev, Name, params[:id].to_s) and return
     end
 
-    # Load Name and NameDescription along with a bunch of associated objects.
+    # Load Name and NameDescription along with a bunch of associated
+    # objects — NOT `.namings`/`.observations` (see `find_name!`).
     return unless find_name!
 
     update_view_stats(@name)
@@ -196,6 +197,18 @@ class NamesController < ApplicationController
 
   private
 
+  # Neither #show, #edit, nor the common (non-merge) #update path
+  # reads `@name.namings`/`@name.observations` directly — #show
+  # renders curated `Query`/`Name::Observations` results instead, and
+  # a plain attribute edit touches neither. For a name with many
+  # thousands of observations (e.g. a genus), eager-loading both
+  # turns a sub-second page load into several seconds for no benefit,
+  # so this uses the lighter `show_includes` scope. The two callers
+  # that genuinely need them fetch a fresh, fully-loaded copy right
+  # before doing so instead of paying for it on every request:
+  # `merge_names` (`Name::Merge#move_namings`/`#move_observations`)
+  # and `email_name_change_content` (just needs `.count`, not the
+  # full preload — see there).
   def find_name!
     @name = Name.show_includes.safe_find(params[:id]) ||
             flash_error_and_goto_index(Name, params[:id])
@@ -333,7 +346,8 @@ class NamesController < ApplicationController
     update_name
   rescue RankWarning => e
     reload_name_form_with_rank_warning(e)
-  rescue RuntimeError => e
+  rescue RuntimeError,
+         ActiveRecord::RecordInvalid, ActiveRecord::RecordNotDestroyed => e
     reload_name_form_on_error(e)
   end
 
@@ -390,12 +404,12 @@ class NamesController < ApplicationController
     else
       @misspelling      = @name.is_misspelling?
       @correct_spelling = if @misspelling
-                            @name.correct_spelling.user_real_search_name(@user)
+                            @name.correct_spelling.real_search_name(@user)
                           else
                             ""
                           end
     end
-    @name_string = @name.user_real_text_name(@user)
+    @name_string = @name.real_text_name(@user)
   end
 
   # ------
@@ -406,10 +420,10 @@ class NamesController < ApplicationController
     matches = Name.matching_desired_new_parsed_name(@parse)
     if matches.one?
       raise(:runtime_name_create_already_exists.
-              t(name: matches.first.user_display_name(@user)))
+              t(name: matches.first.display_name(@user)))
     elsif matches.many?
       raise(:create_name_multiple_names_match.t(
-              str: @parse.user_real_search_name(@user)
+              str: @parse.real_search_name(@user)
             ))
     end
   end
@@ -423,7 +437,7 @@ class NamesController < ApplicationController
     end
 
     flash_notice(:runtime_create_name_success.t(
-                   name: @name.user_real_search_name(@user)
+                   name: @name.real_search_name(@user)
                  ))
     update_ancestors
     redirect_to_show_name
@@ -479,7 +493,7 @@ class NamesController < ApplicationController
     return matches.first unless matches.many?
 
     args = {
-      str: @parse.user_real_search_name(@user),
+      str: @parse.real_search_name(@user),
       matches: matches.map(&:unique_search_name).join(" / ")
     }
     raise(:edit_name_multiple_names_match.t(args))
@@ -540,7 +554,7 @@ class NamesController < ApplicationController
 
   def flash_success
     flash_notice(:runtime_edit_name_success.t(
-                   name: @name.user_real_search_name(@user)
+                   name: @name.real_search_name(@user)
                  ))
   end
 
@@ -630,7 +644,7 @@ class NamesController < ApplicationController
 
   def parsed_text_name
     if params[:name][:text_name].blank? && @name&.text_name.present?
-      @name.user_real_text_name(@user)
+      @name.real_text_name(@user)
     else
       params[:name][:text_name]
     end
@@ -647,8 +661,8 @@ class NamesController < ApplicationController
     return false if icn_id_conflict?(params[:name][:icn_id])
     return true if just_adding_author?
 
-    old_name = @name.user_real_search_name(@user)
-    new_name = @parse.user_real_search_name(@user)
+    old_name = @name.real_search_name(@user)
+    new_name = @parse.real_search_name(@user)
     new_name.percent_match(old_name) > 0.9
   end
 
@@ -678,15 +692,19 @@ class NamesController < ApplicationController
     NamesControllerUpdateTest.report_email(message) if Rails.env.test?
   end
 
+  # `.count` (not `.length`) deliberately: this only needs the
+  # totals, not the actual rows, so it doesn't need `@name` fetched
+  # via `Name.merge_includes`'s `.namings`/`.observations` preload
+  # (unlike `merge_names` below) — a plain COUNT query per number.
   def email_name_change_content
     :email_name_change.l(
       user: @user.login,
       old_identifier: @name.icn_id,
       new_identifier: params[:name][:icn_id],
-      old: @name.user_real_search_name(@user),
-      new: @parse.user_real_search_name(@user),
-      observations: @name.observations.length,
-      namings: @name.namings.length,
+      old: @name.real_search_name(@user),
+      new: @parse.real_search_name(@user),
+      observations: @name.observations.count,
+      namings: @name.namings.count,
       show_url: "#{MO.http_domain}/names/#{@name.id}",
       edit_url: "#{MO.http_domain}/names/#{@name.id}/edit"
     )
@@ -712,9 +730,22 @@ class NamesController < ApplicationController
   # The presumptive surviving id is that of the found name,
   # and the presumptive name to be destroyed is the name being edited.
   def perform_merge_names(survivor)
+    # `@name` came from `find_name!`'s lighter `show_includes` (no
+    # `.namings`/`.observations` preload), and `survivor` from a bare
+    # `Name.where` in `check_for_matches` (no strict_loading at all,
+    # so it'd silently lazy-load instead of raising — re-fetching it
+    # too keeps both sides consistent). `Name::Merge#merge` needs
+    # both preloaded on whichever side ends up as `old_name` below
+    # (the reverse-merger swap means that isn't necessarily the
+    # original `@name`) — re-fetch both with the full `merge_includes`
+    # up front, before any of the mutations below, rather than paying
+    # for it on every #update regardless of whether a merge happens.
+    @name = Name.merge_includes.find(@name.id)
+    survivor = Name.merge_includes.find(survivor.id)
+
     # Name to displayed in the log "Name Destroyed" entry
     logged_destroyed_name = display_name_without_user_filter(@name)
-    destroyed_real_search_name = @name.user_real_search_name(@user)
+    destroyed_real_search_name = @name.real_search_name(@user)
 
     prepare_presumptively_disappearing_name
     deprecation = change_deprecation_iff_user_requested
@@ -761,14 +792,14 @@ class NamesController < ApplicationController
 
   def send_merger_messages(destroyed_real_search_name:, survivor:)
     args = { this: destroyed_real_search_name,
-             that: survivor.user_real_search_name(@user) }
+             that: survivor.real_search_name(@user) }
     flash_notice(:runtime_edit_name_merge_success.t(args))
     email_admin_icn_id_conflict(survivor) if icn_id_conflict?(survivor.icn_id)
   end
 
   def email_admin_icn_id_conflict(survivor)
     message = :email_merger_icn_id_conflict.l(
-      name: survivor.user_real_search_name(@user),
+      name: survivor.real_search_name(@user),
       surviving_icn_id: survivor.icn_id,
       deleted_icn_id: @name.icn_id,
       user: @user.login,

@@ -29,11 +29,14 @@ module Mappable
     # @param query_param [Hash, nil] the current query's q_param —
     #   added as `?q=…` on every per-marker cluster URL so a click
     #   from the popup lands inside the same filtered query context.
-    def initialize(objects, query_param: nil)
+    # @param user [User, nil] the viewer - decides postal/scientific
+    #   location-name formatting (nil => postal default).
+    def initialize(objects, query_param: nil, user: nil)
       @sets = {}
       routes = Rails.application.routes.url_helpers
       objects.each do |obj|
-        @sets[singleton_key_for(obj)] = build_set(obj, query_param, routes)
+        @sets[singleton_key_for(obj)] = build_set(obj, query_param, routes,
+                                                  user)
       end
       @extents = calc_extents
       @representative_points =
@@ -46,17 +49,17 @@ module Mappable
 
     private
 
-    def build_set(obj, query_param, routes)
+    def build_set(obj, query_param, routes, user)
       set = MapSet.new([obj])
       set.color = set.compute_color
       set.glyph = set.compute_glyph
       set.border_style = set.compute_border_style
-      set.title = mapset_title_for(set)
+      set.title = mapset_title_for(set, user)
       # caption is intentionally omitted — the client lazy-loads it
       # from observations/maps#popup on marker click. Rendering N
       # thumbnail-bearing popups at bulk-fetch time dominated refetch
       # cost (#4159).
-      set.cluster_name = cluster_label_for(obj)
+      set.cluster_name = cluster_label_for(obj, user)
       set.cluster_url = cluster_url_for(obj, query_param, routes)
       set.objects = nil
       set
@@ -73,11 +76,11 @@ module Mappable
     # are stripped by using the obs's `text_name` (fall back to the
     # stringified display_name for locations — only ::Observation /
     # ::Mappable::MinimalObservation expose `text_name`).
-    def cluster_label_for(obj)
+    def cluster_label_for(obj, user)
       return obj.text_name if obj.respond_to?(:text_name) &&
                               obj.text_name.present?
 
-      obj.display_name.to_s
+      obj.display_name(user).to_s
     end
 
     # Every object reaching `ClusteredCollection.new` is mappable
@@ -99,17 +102,17 @@ module Mappable
     # location but known lat/lng falls back to formatted coordinates
     # so the tooltip isn't blank (the GPS-only observation case).
     # Two-branch exhaustive: see `cluster_url_for`'s note.
-    def mapset_title_for(set)
+    def mapset_title_for(set, user)
       first = set.objects.first
       if first.observation?
-        observation_title_for(first)
+        observation_title_for(first, user)
       else
-        first.display_name.to_s
+        first.display_name(user).to_s
       end
     end
 
-    def observation_title_for(obs)
-      return obs.location.display_name.to_s if obs.location
+    def observation_title_for(obs, user)
+      return obs.location.display_name(user).to_s if obs.location
 
       return "" unless obs.lat
 

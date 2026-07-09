@@ -7,7 +7,6 @@ module Views::Controllers::Account::Preferences
     def setup
       super
       @user = users(:rolf)
-      User.current = @user
       @licenses = License.available_names_and_ids(@user.license)
     end
 

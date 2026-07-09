@@ -293,6 +293,15 @@ class Query
 
   attr_writer :record
 
+  # The viewer - who's *looking at* these results, not part of the
+  # query spec (deliberately NOT a `query_attr`: doesn't affect which
+  # records match, only viewer-aware display/sort details like
+  # location name format, so it stays out of the serialized
+  # description and the `?q[...]=` URL). Set by
+  # `ApplicationController::Queries` right after building/finding a
+  # query, since Query has no ambient access to the session otherwise.
+  attr_accessor :viewer
+
   # NOTE: Declare query subclass attributes with `query_attr`, a custom MO
   # method defined by monkey-patching `Class` in app/extensions/class.rb.
   # attribute `:order_by` is inherited by all subclasses, necessary for paging.

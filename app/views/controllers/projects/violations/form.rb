@@ -36,7 +36,7 @@ module Views::Controllers::Projects::Violations
         return
       end
 
-      render(Components::Help::Block.new(:div, :form_violations_help.l))
+      Help(content: :form_violations_help.l)
       render_violations_table
     end
 

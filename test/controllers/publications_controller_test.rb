@@ -38,7 +38,7 @@ class PublicationsControllerTest < FunctionalTestCase
 
   def test_should_create_publication
     login
-    user = User.current
+    user = rolf
     ref  = "Author, J.R. 2014. Mushroom Observer Rocks! Some Journal 1(2): 3-4."
     link = "http://some_journal.com/mo_rocks.html"
     help = "it exists"

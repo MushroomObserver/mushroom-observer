@@ -39,5 +39,32 @@ module Phlex
         plain(content.to_s)
       end
     end
+
+    # Emits `content` verbatim, with no HTML-escaping, regardless of
+    # its safety flag. Only for buffers that are never parsed as
+    # HTML — namely a mailer's plain-text body — where there is no
+    # markup to inject into and a literal `&`/`<` (in a URL, a raw
+    # user message) must reach the reader unchanged. Using
+    # `trusted_html` there would wrongly HTML-escape ordinary
+    # characters, since it treats an un-flagged String as untrusted.
+    #
+    # Do NOT use this for HTML output — it bypasses escaping
+    # unconditionally.
+    def trusted_text(content)
+      raw(content.to_s.html_safe) # rubocop:disable Rails/OutputSafety
+    end
+
+    # Splices `replacement` into `safe_string` at `pattern`,
+    # re-marking the result safe. `String#gsub` always downgrades its
+    # result to a plain (unsafe) String, even when both `safe_string`
+    # and `replacement` are already html_safe — Rails can't verify an
+    # arbitrary regex substitution didn't introduce something unsafe,
+    # so it conservatively un-marks it. Use this only when both
+    # operands are already known-trustworthy (e.g. a translated
+    # sentence with an embedded placeholder token being swapped for a
+    # captured link — see VerifyAccountMailer).
+    def splice_html(safe_string, pattern, replacement)
+      safe_string.gsub(pattern, replacement).html_safe # rubocop:disable Rails/OutputSafety
+    end
   end
 end

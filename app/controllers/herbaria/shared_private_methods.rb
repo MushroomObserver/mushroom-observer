@@ -23,7 +23,7 @@ module Herbaria
     # Used by Herbaria#create, Herbaria#edit, HerbariaMerges#create
 
     def perform_or_request_merge(src, dest)
-      if in_admin_mode? || src.can_merge_into?(dest)
+      if in_admin_mode? || src.can_merge_into?(dest, @user)
         perform_merge(src, dest)
       else
         request_merge(src, dest)

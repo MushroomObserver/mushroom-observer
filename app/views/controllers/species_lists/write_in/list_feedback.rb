@@ -30,9 +30,9 @@ module Views::Controllers::SpeciesLists::WriteIn
         div(class: "font-weight-bold") do
           :form_list_feedback_missing_names.t
         end
-        render(::Components::Help::Note.new(
-                 :div, :form_list_feedback_missing_names_help.t
-               ))
+        Help(
+          content: :form_list_feedback_missing_names_help.t
+        )
         p do
           @new_names.each do |name|
             br
@@ -48,9 +48,9 @@ module Views::Controllers::SpeciesLists::WriteIn
         div(class: "font-weight-bold") do
           :form_species_lists_deprecated.t
         end
-        render(::Components::Help::Note.new(
-                 :div, :form_species_lists_deprecated_help.t
-               ))
+        Help(
+          content: :form_species_lists_deprecated_help.t
+        )
         p do
           @deprecated_names.each do |name|
             render_deprecated_name_choice(name)
@@ -61,11 +61,13 @@ module Views::Controllers::SpeciesLists::WriteIn
 
     def render_deprecated_name_choice(name)
       approved_names = name.approved_synonyms
-      div { trusted_html(name.display_name.t) }
+      div { trusted_html(name.display_name(current_user).t) }
 
       return unless approved_names.any?
 
-      options = approved_names.map { |n| [n.id, n.display_name.t] }
+      options = approved_names.map do |n|
+        [n.id, n.display_name(current_user).t]
+      end
       render(name_choice_radio_field(
                "chosen_approved_names", name.id, options
              ))
@@ -76,9 +78,9 @@ module Views::Controllers::SpeciesLists::WriteIn
         div(class: "font-weight-bold") do
           :form_species_lists_multiple_names.t
         end
-        render(::Components::Help::Note.new(
-                 :div, :form_species_lists_multiple_names_help.t
-               ))
+        Help(
+          content: :form_species_lists_multiple_names_help.t
+        )
         p do
           @multiple_names.each do |name, other_authors|
             render_multiple_name_choice(name, other_authors)
@@ -88,10 +90,10 @@ module Views::Controllers::SpeciesLists::WriteIn
     end
 
     def render_multiple_name_choice(name, other_authors)
-      div { trusted_html(name.display_name.t) }
+      div { trusted_html(name.display_name(current_user).t) }
       options = other_authors.map do |n|
         count = n.observations.count
-        [n.id, [n.display_name.t, " (#{count})"].safe_join]
+        [n.id, [n.display_name(current_user).t, " (#{count})"].safe_join]
       end
       render(name_choice_radio_field(
                "chosen_multiple_names", name.id, options

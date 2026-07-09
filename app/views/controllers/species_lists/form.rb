@@ -86,7 +86,7 @@ module Views::Controllers::SpeciesLists
     # model attribute).
     def render_hidden_fields
       hidden_field("clone_id", value: @clone_id) if @clone_id
-      hidden_field(:approved_where, value: model.place_name)
+      hidden_field(:approved_where, value: model.place_name(current_user))
     end
 
     def render_visible_fields
@@ -103,15 +103,16 @@ module Views::Controllers::SpeciesLists
                button: @button
              ))
       autocompleter_field(:place_name, type: :location,
+                                       value: model.place_name(current_user),
                                        label: "#{:WHERE.l}:")
     end
 
     def render_project_checkboxes
       div(class: "form-group") do
         label(for: "project") { plain("#{:PROJECTS.t}:") }
-        render(::Components::Help::Note.new(:div)) do
-          plain(:form_species_lists_project_help.t)
-        end
+        Help(
+          content: :form_species_lists_project_help.t
+        )
         div(class: "form-group") do
           # Sentinel: ensures `species_list[project_ids]` is always
           # present in params even when every checkbox is unchecked

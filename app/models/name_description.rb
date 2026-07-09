@@ -199,7 +199,8 @@ class NameDescription < Description
     "locale"
   )
 
-  versioned_class.before_save { |x| x.user_id = User.current_id }
+  include VersionedByCurrentUser
+
   after_update :notify_users
 
   # Don't add any authors until someone has written something "useful".
@@ -246,6 +247,11 @@ class NameDescription < Description
     end
   end
 
+  # Is the given User the one who reviewed this description?
+  def reviewer?(user)
+    reviewer == user
+  end
+
   # Update the review status.  Saves the changes if there are no substantive
   # changes pending.  (Don't want to inadvertantly create multiple past_name
   # versions.)  Raises a RuntimeError if it fails to save for some reason.
@@ -257,7 +263,7 @@ class NameDescription < Description
   # name_controller if a non-reviewer makes any substantive change to the Name.
   #
   def update_review_status(value)
-    user = User.current
+    user = @current_user
     if user.in_group?("reviewers")
       reviewer_id = user.id
     else
@@ -291,7 +297,7 @@ class NameDescription < Description
     # created, I want to notify authors of that change.
     # (saved_change_to_<attribute>? is a Rails automagical method)
     if saved_version_changes? || saved_change_to_review_status?
-      sender = User.current || User.admin
+      sender = @current_user || User.admin
       recipients = []
 
       # Tell admins of the change.

@@ -5,9 +5,9 @@ module PatternSearch
   class Base
     attr_accessor :errors, :parser, :query_params, :query
 
-    def initialize(string)
+    def initialize(string, user = nil)
       self.errors = []
-      self.parser = PatternSearch::Parser.new(string)
+      self.parser = PatternSearch::Parser.new(string, user)
       build_query
       model_symbol = model.name.to_sym
       if query_params.include?(:pattern) && model_symbol == :Name

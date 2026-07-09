@@ -136,6 +136,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   )
 
   before_save :calculate_box_area_and_center
+  before_save :remember_first_version_for_current_user
   before_update :update_observation_cache
   after_update :notify_users
 
@@ -147,15 +148,29 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # as a merge and orphan the log.
   self.autolog_events = [:created!, :updated!, :destroyed]
 
-  # Callback whenever new version is created.
-  versioned_class.before_save do |ver|
-    ver.user_id = User.current_id || User.admin_id
-    if (ver.version != 1) &&
-       Location::Version.where(
-         location_id: ver.location_id, user_id: ver.user_id
-       ).none?
-      UserStats.update_contribution(:add, :location_versions)
-    end
+  include VersionedByCurrentUser
+
+  after_save :award_version_contribution
+
+  # Deliberately NOT overriding `current_user` itself to fall back to
+  # User.admin - AbstractModel's generic contribution/logging hooks
+  # (update_contribution, do_log_update, do_log_destroy) all check
+  # `respond_to?(:current_user)` and prefer it over the record's own
+  # `user_id` when present. A blanket fallback here would misattribute
+  # those (e.g. the destroy step of a merge re-fetches a fresh
+  # instance with no current_user set, so the fallback would credit/
+  # debit the admin instead of falling through to the real owner via
+  # `user_id`, as those generic hooks expect when current_user is nil).
+  # The version-attribution fallback (this model's own long-standing
+  # behavior for scripts/background jobs with no real session) is
+  # applied narrowly in set_version_current_user below instead.
+  def set_version_current_user
+    return unless saved_version_changes?
+
+    ver = self.class.versioned_class.where(
+      self.class.versioned_foreign_key => id
+    ).last
+    ver&.update_column(:user_id, (current_user || User.admin)&.id)
   end
 
   # On save, calculate bounding box area for the `box_area` column, plus the
@@ -350,12 +365,25 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     name.split(", ").first
   end
 
-  def display_name
-    User.current_location_format == "scientific" ? scientific_name : name
+  # Viewer-aware: `user` is who's *looking at* this name (nil => postal
+  # default). Not the same viewer/actor concept as `current_user` below
+  # (that's who's *editing* - see `display_name=`). Reads the persisted
+  # `scientific_name` column directly rather than computing
+  # `Location.user_format(user, name)` - `scientific_name` isn't
+  # guaranteed to be an exact `reverse_name(name)` round-trip (legacy
+  # data), and `order_locations_by_name` sorts by the real column, so
+  # display and sort order need to agree.
+  def display_name(user = nil)
+    user&.location_format == "scientific" ? scientific_name : name
   end
 
+  # `current_user` (the acting/editing user - see VersionedByCurrentUser,
+  # set by the caller before assignment, same as attribution) decides
+  # which raw column the incoming string represents. Can't take an
+  # explicit second argument through plain `=` syntax the way the
+  # getter does.
   def display_name=(val)
-    if User.current_location_format == "scientific"
+    if current_user&.location_format == "scientific"
       self.name = Location.reverse_name(val)
       self.scientific_name = val
     else
@@ -365,13 +393,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Plain text version of +display_name+.
-  def text_name
-    display_name.t.html_to_ascii
+  def text_name(user = nil)
+    display_name(user).t.html_to_ascii
   end
 
   # Alias for +display_name+ for compatibility with Name and other models.
-  def format_name
-    display_name
+  def format_name(user = nil)
+    display_name(user)
   end
 
   # Page heading + browser tab title. `display_name` is plain text
@@ -380,18 +408,18 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   alias page_title display_name
   alias document_title text_name
 
-  def textile_name
-    display_name
+  def textile_name(user = nil)
+    display_name(user)
   end
 
   # Same as +text_name+ but with id tacked on.
-  def unique_text_name
-    string_with_id(text_name)
+  def unique_text_name(user = nil)
+    string_with_id(text_name(user))
   end
 
   # Same as +format_name+ but with id tacked on.
-  def unique_format_name
-    string_with_id(format_name)
+  def unique_format_name(user = nil)
+    string_with_id(format_name(user))
   end
 
   # Info to include about each location in merge requests.
@@ -421,11 +449,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     str.strip_squeeze.downcase
   end
 
-  # Cleans up a place_name (per Observation) and
-  # applies the current user's current_location_format
-  def self.normalize_place_name(place_name)
+  # Cleans up a place_name (per Observation) and applies `user`'s
+  # location_format (nil => postal default).
+  def self.normalize_place_name(place_name, user = nil)
     place_name = place_name&.strip_squeeze
-    if User.current_location_format == "scientific"
+    if user&.location_format == "scientific"
       reverse_name(place_name)
     else
       place_name
@@ -433,8 +461,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Returns any existing location that matches place_name
-  def self.place_name_to_location(place_name)
-    find_by_name(normalize_place_name(place_name))
+  def self.place_name_to_location(place_name, user = nil)
+    find_by_name(normalize_place_name(place_name, user))
   end
 
   # Takes a location string splits on commas, reverses the order,
@@ -770,9 +798,28 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def notify_users
     return unless saved_version_changes?
 
-    sender = User.current
+    sender = current_user
     recipients = notification_recipients
     send_location_change_emails(sender, recipients)
+  end
+
+  # Must run before save: once VersionedByCurrentUser's after_save hook
+  # writes the new version's user_id, this same query would self-match
+  # and always return false. Mirrors Name::Resolve#new_version_for_user?.
+  def remember_first_version_for_current_user
+    @first_version_for_current_user = Location::Version.where(
+      location_id: id, user_id: (current_user || User.admin)&.id
+    ).none?
+  end
+
+  def award_version_contribution
+    return unless saved_version_changes? && @first_version_for_current_user
+
+    ver = Location::Version.where(location_id: id).last
+    return if ver.version == 1
+
+    UserStats.update_contribution(:add, :location_versions,
+                                  (current_user || User.admin)&.id)
   end
 
   private
@@ -813,8 +860,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     # cascade reads stable associations rather than the stale loaded
     # collections (e.g. project_aliases were reassigned in
     # `move_interests_and_aliases` but the preloaded collection on
-    # `old_loc` still references them).
-    Location.find(old_loc.id).destroy
+    # `old_loc` still references them). current_user doesn't carry
+    # over from `old_loc` - it's a different instance.
+    fresh = Location.find(old_loc.id)
+    fresh.current_user = user
+    fresh.destroy
   end
 
   def remove_old_location_versions(old_loc)
@@ -971,7 +1021,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def validate_user
-    return if user || User.current
+    return if user || current_user
 
     errors.add(:user, :validate_location_user_missing.t)
   end

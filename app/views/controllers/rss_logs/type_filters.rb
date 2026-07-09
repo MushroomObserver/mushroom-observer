@@ -35,7 +35,7 @@ module Views::Controllers::RssLogs
       # rules.
       div(class: "px-3 pb-1 hidden-xs text-nowrap") do
         render_show_label
-        div(class: "btn-group") do
+        ButtonGroup do
           render_everything_button
           render_type_buttons
           render_submit_button

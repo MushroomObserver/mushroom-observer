@@ -44,7 +44,7 @@ class Components::Matrix::Box
         type: :observation,
         when: @object.when.web_date,
         who: @object.user,
-        name: @object.user_format_name(@object.user).t.break_name.small_author,
+        name: @object.format_name(@object.user).t.break_name.small_author,
         what: @object,
         where: @object.where,
         location: @object.location,
@@ -87,10 +87,14 @@ class Components::Matrix::Box
       if @object.target_type == :image
         target.unique_format_name.t
       elsif target
-        target.format_name.t.break_name.small_author
+        rss_log_format_name(target)
       else
-        @object.format_name.t.break_name.small_author
+        rss_log_format_name(@object)
       end
+    end
+
+    def rss_log_format_name(obj)
+      obj.format_name(@user).t.break_name.small_author
     end
 
     def add_rss_log_location_data(data, target)

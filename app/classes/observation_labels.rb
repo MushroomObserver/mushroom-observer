@@ -4,9 +4,9 @@
 class ObservationLabels
   def initialize(user, query)
     @report = if user.label_format == "rtf"
-                ObservationLabels::RtfLabels.new(query)
+                ObservationLabels::RtfLabels.new(user, query)
               else
-                ObservationLabels::PdfLabels.new(query)
+                ObservationLabels::PdfLabels.new(user, query)
               end
   end
 

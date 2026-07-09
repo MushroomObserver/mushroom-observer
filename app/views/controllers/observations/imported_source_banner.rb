@@ -54,7 +54,7 @@ module Views::Controllers::Observations
       a(href: article_path(HELP_ARTICLE_ID),
         title: :source_credit_help_link.l,
         aria: { label: :source_credit_help_link.l }) do
-        render(Components::Icon.new(type: :question))
+        Icon(type: :question)
       end
     end
   end

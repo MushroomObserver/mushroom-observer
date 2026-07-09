@@ -32,7 +32,8 @@
 #    params           Validated hash of parameters you passed in.
 #    expected_params  Hash of parameters API tried to parse.  This is a full
 #                     set of available parameters for that method / action.
-#                     Values are API2::ParameterDeclaration instances.
+#                     Values are API2::Parameters::ParameterDeclaration
+#                     instances.
 #
 #    errors           Array of errors which occur while updating or destroying
 #                     records.  (See section on exception handling below.)
@@ -252,18 +253,20 @@ module API2::Base
   end
 
   def handle_version
+    version_str = params[:version].to_s
     self.version = parse(:float, :version)
     if version.blank?
       self.version = self.class.version
-    elsif !version.match(/^\d+\.\d+$/)
-      raise(API2::BadVersion.new(version))
-    else
-      self.version = version.to_f
+    elsif !version_str.match(/^\d+\.\d+$/)
+      raise(API2::BadVersion.new(version_str))
     end
   end
 
   def authenticate_user
-    clear_user && return unless (key_str = parse(:string, :api_key))
+    unless (key_str = parse(:string, :api_key))
+      clear_user
+      return
+    end
 
     key = APIKey.find_by(key: key_str)
     raise(API2::BadAPIKey.new(key_str))        unless key
@@ -274,14 +277,17 @@ module API2::Base
   end
 
   def clear_user
-    User.current = self.user = nil
-    User.current_location_format = "postal"
+    self.user = nil
   end
 
+  # Location/place-name formatting is postal-only throughout the API -
+  # nothing here ever threads a `user`/`viewer` through the
+  # viewer-aware display methods (Location#display_name, HasPlaceName,
+  # etc.), so they all default to postal automatically. Makes API
+  # responses consistent for apps regardless of the user's own
+  # location_format preference.
   def login_user(key)
-    User.current = self.user = key.user
-    User.current_location_format = "postal"
-    # (that overrides user pref in order to make it more consistent for apps)
+    self.user = key.user
     key.touch!
     self.api_key = key
   end

@@ -5,7 +5,7 @@ module Account
     before_action :login_required
 
     def edit
-      @user.place_name ||= @user.location&.display_name
+      @user.place_name ||= @user.location&.display_name(@user)
       set_image_upload_ivars
       render_edit_phlex
     end
@@ -61,7 +61,7 @@ module Account
           @need_location = true
         elsif @user.location != location
           @user.location = location
-          @place_name = location.display_name
+          @place_name = location.display_name(@user)
         end
       elsif @user.location
         @user.location = nil

@@ -122,16 +122,20 @@ Good examples: `app/components/image_vote_section.rb`,
 
 ## Code Style
 
-- **80 character line limit** in both Ruby and ERB files
-- **Always use parentheses** for method calls with arguments (Ruby and ERB)
-- **Use `tag.element_name`** in ERB templates, never `content_tag`
-- **Use full namespaces** for components: `Components::ClassName`
+- **80 character line limit** in Ruby files
+- **Always use parentheses** for method calls with arguments
+- **Use Kit syntax for top-level components** (`Icon(...)`, `Link(...)`);
+  full namespace + `render()` only when Kit sugar isn't available
+  (nested views, non-dispatched nested components)
 - **Prefer Phlex helpers** over Rails `tag` helpers in components
 - **Double-quoted strings** (enforced by RuboCop)
 
-See `.claude/ruby_style_guide.md` for detailed Ruby and ERB conventions.
-See `.claude/phlex_style_guide.md` for Phlex component conventions.
+See `.claude/ruby_style_guide.md` for detailed Ruby conventions.
+See `.claude/rules/phlex_reference.md` for Phlex coding conventions.
 See `.claude/rules/testing.md` for test structure and component test patterns.
+See `.claude/rules/sweeps.md` for PR-scope guidance on broad sweeps
+("remove X from all models," "convert every Y") — don't self-limit
+scope below what the sweep already declared.
 
 ## Git Workflow
 
@@ -153,9 +157,10 @@ app/
   models/          # ActiveRecord models (MySQL via Trilogy)
   classes/         # Ruby POROs, including FormObject for Phlex forms
   controllers/     # Rails controllers
-  components/      # Phlex components (migration from ERB in progress)
+  components/      # Phlex components
   jobs/            # ActiveJobs
-  views/           # ERB templates (being replaced by components)
+  views/           # Phlex views (ERB migration complete, including
+                   # Action Mailer templates under views/mailers/)
   javascript/      # Stimulus controllers, Turbo, importmap
   helpers/         # View helpers (being migrated to components)
 test/              # MiniTest suite
@@ -168,7 +173,6 @@ test/              # MiniTest suite
 importmap, GitHub Actions CI (4 parallel workers)
 
 **Key patterns**:
-- `User.current` for current user tracking when @user is not available
 - `observation_views` table for view stats
 - Custom i18n system: `en.txt` -> `en.yml` translation files.
   **NEVER edit `config/locales/en.yml` directly.** Edit `en.txt` then

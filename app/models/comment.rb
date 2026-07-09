@@ -251,6 +251,23 @@ class Comment < AbstractModel
 
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
+  # `show`/`edit`/`update`/`destroy` all reach a single Comment via
+  # this same tree (`find_or_goto_index`). Deliberately as shallow as
+  # index_includes_tree: `target` is polymorphic and what it needs
+  # beyond itself differs per action (destroy/update's `log_*` need
+  # `target.rss_log`; show's `register_target_names` needs
+  # `target.namings` for Observations or `target.synonyms` for
+  # Names) - no single eager tree can cover every target type's
+  # branch without raising on the types that lack that association.
+  # Those few call sites opt out of strict_loading individually
+  # instead (see Comment#log_destroy and
+  # Views::Controllers::Comments::Show#register_target_names).
+  def self.show_includes_tree
+    index_includes_tree
+  end
+
+  scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+
   # Returns +summary+ for debugging.
   def text_name
     summary.to_s
@@ -271,21 +288,31 @@ class Comment < AbstractModel
   def log_create(target = self.target)
     return unless target.respond_to?(:log)
 
-    target.log(:log_comment_added, summary: summary, touch: true)
+    # One-off single-record read, not the N+1 strict_loading guards
+    # against - target came from a strict-loaded Comment#target, but
+    # `log`'s `target.rss_log` isn't in show_includes_tree (see there
+    # for why).
+    target.strict_loading!(false)
+    target.log(:log_comment_added, user: current_user,
+                                   summary: summary, touch: true)
   end
 
   # Log update of comment on object's RSS log if it can.
   def log_update(target = self.target)
     return unless target.respond_to?(:log)
 
-    target.log(:log_comment_updated, summary: summary, touch: false)
+    target.strict_loading!(false)
+    target.log(:log_comment_updated, user: current_user,
+                                     summary: summary, touch: false)
   end
 
   # Log destruction of comment on object's RSS log if it can.
   def log_destroy(target = self.target)
     return unless target.respond_to?(:log)
 
-    target.log(:log_comment_destroyed, summary: summary, touch: false)
+    target.strict_loading!(false)
+    target.log(:log_comment_destroyed, user: current_user,
+                                       summary: summary, touch: false)
   end
 
   # Return model if params[:type] is the name of a commentable model
@@ -308,7 +335,7 @@ class Comment < AbstractModel
   end
 
   def check_user # :nodoc:
-    return if user || User.current
+    return if user || current_user
 
     errors.add(:user, :validate_comment_user_missing.t)
   end
@@ -329,9 +356,9 @@ class Comment < AbstractModel
 
   def no_recent_duplicate
     # Validations run before before_create sets user_id in the standard
-    # controller flow, so fall back to User.current to match the same
+    # controller flow, so fall back to current_user to match the same
     # identity that will be assigned at save time.
-    effective_user = user || User.current
+    effective_user = user || current_user
     return unless effective_user && target
     return unless recent_identical_comment?(effective_user)
 

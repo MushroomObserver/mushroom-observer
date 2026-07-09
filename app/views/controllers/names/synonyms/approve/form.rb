@@ -4,9 +4,10 @@
 # `Names::Synonyms::ApproveController#new`.
 module Views::Controllers::Names::Synonyms::Approve
   class Form < ::Components::ApplicationForm
-    def initialize(model, name:, approved_names: nil, **)
+    def initialize(model, name:, approved_names: nil, user: nil, **)
       @name = name
       @approved_names = approved_names
+      @user = user
       super(model, **)
     end
 
@@ -15,15 +16,16 @@ module Views::Controllers::Names::Synonyms::Approve
 
       render_approved_names_section if @approved_names.present?
 
-      render(Components::Help::Note.new(:div, :name_approve_deprecate_help.tp))
+      Help(content: :name_approve_deprecate_help.tp)
 
       textarea_field(:comment, label: "#{:name_approve_comments.l}:",
                                cols: 80, rows: 5, inline: true,
                                data: { autofocus: true })
-      render(Components::Help::Note.new(
-               :div,
-               :name_approve_comments_help.tp(name: @name.display_name)
-             ))
+      Help(
+        content: :name_approve_comments_help.tp(
+          name: @name.display_name(@user)
+        )
+      )
     end
 
     private
@@ -32,7 +34,7 @@ module Views::Controllers::Names::Synonyms::Approve
       checkbox_field(:deprecate_others, label: :name_approve_deprecate.l)
       p do
         @approved_names.each do |n|
-          trusted_html(n.display_name.t)
+          trusted_html(n.display_name(@user).t)
           br
         end
       end

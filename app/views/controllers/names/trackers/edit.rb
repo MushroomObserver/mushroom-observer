@@ -9,7 +9,9 @@ class Views::Controllers::Names::Trackers::Edit < Views::FullPageBase
   prop :note_template, _Nilable(String), default: nil
 
   def view_template
-    add_page_title(:email_tracking_title.t(name: @name.display_name))
+    add_page_title(
+      :email_tracking_title.t(name: @name.display_name(current_user))
+    )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 
     div(class: "mt-5 mb-5") { trusted_html(help_blurb) }

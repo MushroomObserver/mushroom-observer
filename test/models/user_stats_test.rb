@@ -144,14 +144,13 @@ class UserStatsTest < UnitTestCase
   # def test_two_tiered_observation_scoring
   #   score = rolf.contribution
   #
-  #   User.current = rolf
   #   obs = Observation.create!(
-  #     :name => names(:fungi),
-  #     :specimen => true,
-  #     :notes => '1234567890',
-  #     :thumb_image => Image.reorder(created_at: :asc).first
+  #     user: rolf,
+  #     name: names(:fungi),
+  #     specimen: true,
+  #     notes: '1234567890',
+  #     thumb_image: Image.reorder(created_at: :asc).first
   #   )
-  #   User.current = mary
   #   rolf.reload
   #   assert_objs_equal(obs, Observation.last)
   #   assert_users_equal(rolf, obs.user)
@@ -185,11 +184,10 @@ class UserStatsTest < UnitTestCase
   #   rolf.reload
   #   assert_equal(score + 0, rolf.contribution)
   #
-  #   User.current = rolf
   #   obs = Observation.create!(
-  #     :name => names(:fungi)
+  #     user: rolf,
+  #     name: names(:fungi)
   #   )
-  #   User.current = mary
   #   rolf.reload
   #   assert_equal(score + 1, rolf.contribution)
   #

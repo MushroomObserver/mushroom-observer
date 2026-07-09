@@ -11,6 +11,14 @@
 # spacing — the link's icon carries `link-icon px-2` so the
 # brackets sit directly against the icon.
 #
+# The `:add` icon lives here, not on the Tab — this component IS
+# the "add new" affordance, so it owns that presentational detail.
+# The Tab classes it consumes (`Tab::CollectionNumber::New`, etc.)
+# double as context-nav `IndexActions` entries, which strip `icon:`
+# before rendering; baking `icon: :add` into the Tab instead of here
+# previously got "cleaned up" as a redundant override, silently
+# losing the icon-only rendering for this component.
+#
 # @example
 #   render(Components::Link::InlineAdd.new(
 #     modal_id: "collection_number",
@@ -29,7 +37,8 @@ class Components::Link::InlineAdd < Components::Base
       target: @tab.path,
       modal_id: @modal_id,
       variant: :strip,
-      **@tab.html_options
+      **@tab.html_options,
+      icon: :add
     )
     plain("]")
   end

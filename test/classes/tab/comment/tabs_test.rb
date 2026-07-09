@@ -21,7 +21,7 @@ module Tab::Comment
         routes.new_comment_path(target: @target.id, type: @target.class.name),
         tab.path
       )
-      assert_nil(tab.html_options[:icon])
+      assert_equal(:add, tab.html_options[:icon])
       assert_equal(@target, tab.model)
     end
 

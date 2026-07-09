@@ -13,7 +13,8 @@ class ObservationLabels::RtfLabels
   attr_accessor :query
   attr_accessor :document
 
-  def initialize(query)
+  def initialize(user, query)
+    @user = user
     @query = query
     @document = RTF::Document.new(RTF::Font::SWISS)
   end
@@ -114,7 +115,8 @@ class ObservationLabels::RtfLabels
     label("Name")
     italic = false
     @para.bold do |bold|
-      @obs.name.display_name.gsub("**", "").split("__").each do |part|
+      @obs.name.display_name(@user).gsub("**",
+                                         "").split("__").each do |part|
         unless part.empty?
           if italic
             bold.italic { |i| i << part } if part.present?
@@ -132,7 +134,7 @@ class ObservationLabels::RtfLabels
 
   def add_location
     label("Location")
-    @para << @obs.place_name
+    @para << @obs.place_name(@user)
     @para.line_break
   end
 
@@ -191,9 +193,9 @@ class ObservationLabels::RtfLabels
   end
 
   def coordinates_visible?
-    @obs.user_id == User.current_id ||
+    @obs.user_id == @user&.id ||
       !@obs.gps_hidden ||
-      Project.admin_power?(@obs, User.current)
+      Project.admin_power?(@obs, @user)
   end
 
   # --------------------

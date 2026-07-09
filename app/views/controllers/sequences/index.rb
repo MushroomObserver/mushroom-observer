@@ -20,7 +20,7 @@ module Views::Controllers::Sequences
     private
 
     def render_list
-      render(::Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         @sequences.each { |seq| list.item { render_row(seq) } }
       end
     end
@@ -37,7 +37,7 @@ module Views::Controllers::Sequences
       link_to(seq.unique_format_name, seq.show_link_args)
       br
       link_to(seq.observation.show_link_args) do
-        trusted_html(seq.observation.unique_format_name.t)
+        trusted_html(viewer_aware_unique_format_name(seq.observation).t)
       end
       br
     end

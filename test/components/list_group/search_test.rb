@@ -6,7 +6,6 @@ class ListSearchTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
-    User.current = @user
   end
 
   # ---- Project caller ----

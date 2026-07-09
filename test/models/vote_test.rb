@@ -86,6 +86,19 @@ class VoteTest < UnitTestCase
     end
   end
 
+  def test_update_existing_views_corresponding_to_votes
+    vote = votes(:coprinus_comatus_owner_vote)
+    view = ObservationView.create!(
+      observation: vote.observation, user: vote.user, reviewed: 0,
+      last_view: Time.zone.now
+    )
+
+    msgs = Vote.update_existing_views_corresponding_to_votes
+
+    assert_includes(msgs.join, "reviewed observation #{view.observation_id}")
+    assert_equal(true, view.reload.reviewed)
+  end
+
   def test_add_missing_views_populates_observation_id
     assert_equal(0, ObservationView.count,
                  "Expected no ObservationView records at start")
@@ -110,6 +123,26 @@ class VoteTest < UnitTestCase
     end
   end
 
+  def test_add_missing_views_skips_votes_with_nil_observation_id
+    orphan_vote = votes(:coprinus_comatus_other_vote)
+    orphan_vote.update_column(:observation_id, nil)
+
+    assert_equal(0, ObservationView.count,
+                 "Expected no ObservationView records at start")
+
+    msgs = Vote.add_missing_views_corresponding_to_votes
+
+    assert_not(
+      ObservationView.exists?(user_id: orphan_vote.user_id,
+                              observation_id: nil),
+      "Should not create an ObservationView for a vote with no observation"
+    )
+    msgs.each do |msg|
+      assert_match(/reviewed observation \d+/, msg,
+                   "Message missing numeric observation_id: #{msg.inspect}")
+    end
+  end
+
   def test_confidence_returns_no_opinion_for_zero
     # Bug: Vote.confidence(0) was returning "Doubtful" instead of "No Opinion"
     assert_equal("No Opinion", Vote.confidence(0))
@@ -120,5 +153,18 @@ class VoteTest < UnitTestCase
     assert_equal("I'd Call It That", Vote.confidence(3.0))
     assert_equal("Doubtful", Vote.confidence(-1.0))
     assert_equal("As If!", Vote.confidence(-3.0))
+  end
+
+  def test_show_controller
+    assert_equal("/observations", Vote.show_controller)
+  end
+
+  def test_percent
+    vote = votes(:coprinus_comatus_owner_vote)
+    assert_equal(Vote.percent(vote.value), vote.percent)
+  end
+
+  def test_validate_value_rescues_uncoercible_values
+    assert_nil(Vote.validate_value([]))
   end
 end

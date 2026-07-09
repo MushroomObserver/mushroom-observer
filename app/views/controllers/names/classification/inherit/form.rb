@@ -5,14 +5,18 @@
 # FormObject internally from the provided kwargs.
 module Views::Controllers::Names::Classification::Inherit
   class Form < ::Components::ApplicationForm
-    def initialize(name:, parent: nil, candidates: nil, message: nil, **)
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(name:, parent: nil, candidates: nil, message: nil,
+                   user: nil, **)
       @name = name
       @candidates = candidates
       @message = message
+      @user = user
 
       form_object = FormObject::InheritClassification.new(parent: parent)
       super(form_object, **)
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       render_candidates_alert if @candidates
@@ -28,7 +32,9 @@ module Views::Controllers::Names::Classification::Inherit
     def render_candidates_alert
       Alert(level: :warning) do
         trusted_html(@message.tp)
-        options = @candidates.map { |opt| [opt.id, opt.display_name.t] }
+        options = @candidates.map do |opt|
+          [opt.id, opt.display_name(@user).t]
+        end
         radio_field(:candidates, *options)
       end
     end

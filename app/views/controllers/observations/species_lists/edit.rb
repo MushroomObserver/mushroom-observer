@@ -2,7 +2,7 @@
 
 # Action template for `Observations::SpeciesListsController#edit` —
 # the "manage species lists for this observation" page.
-# Renders two `Components::ListGroup::Base`s of
+# Renders two `Components::ListGroup`s of
 # `SpeciesLists::Listing` rows: lists the observation already
 # belongs to (REMOVE button on each) and lists it doesn't (ADD
 # button on each).
@@ -16,7 +16,7 @@ module Views::Controllers::Observations::SpeciesLists
     def view_template
       add_page_title(
         :species_list_manage_title.t(
-          name: @observation.unique_format_name
+          name: viewer_aware_unique_format_name(@observation)
         )
       )
       # Sort table lives on `SpeciesListsController` (single
@@ -59,7 +59,7 @@ module Views::Controllers::Observations::SpeciesLists
       return if lists.empty?
 
       h5(class: "mt-3") { plain("#{heading}:") }
-      render(Components::ListGroup::Base.new) do |list|
+      ListGroup do |list|
         lists.each do |sl|
           list.item(
             class: "d-flex justify-content-between align-items-start"

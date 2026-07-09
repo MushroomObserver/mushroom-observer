@@ -4,8 +4,9 @@
 class ObservationLabels::Fields
   attr_reader :observation
 
-  def initialize(observation)
+  def initialize(observation, user = nil)
     @observation = observation
+    @user = user
   end
 
   # Returns an array of LabelField objects for the observation
@@ -84,7 +85,7 @@ class ObservationLabels::Fields
   end
 
   def name_value
-    observation.name.display_name_brief_authors
+    observation.name.display_name_brief_authors(@user)
   end
 
   def id_value
@@ -142,9 +143,9 @@ class ObservationLabels::Fields
   end
 
   def coordinates_visible?
-    observation.user_id == User.current_id ||
+    observation.user_id == @user&.id ||
       !observation.gps_hidden ||
-      Project.admin_power?(observation, User.current)
+      Project.admin_power?(observation, @user)
   end
 
   def collector_value

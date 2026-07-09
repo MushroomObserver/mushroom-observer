@@ -144,7 +144,8 @@ class LocationDescription < Description
     "locale"
   )
 
-  versioned_class.before_save { |x| x.user_id = User.current_id }
+  include VersionedByCurrentUser
+
   after_update :notify_users
 
   ##############################################################################
@@ -167,7 +168,7 @@ class LocationDescription < Description
   def notify_users
     return unless saved_version_changes?
 
-    sender = User.current
+    sender = @current_user
     recipients = []
 
     # Tell admins of the change.

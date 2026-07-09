@@ -7,24 +7,24 @@ module Occurrence::Logging
 
   class_methods do
     # Log and notify when observations are added to an occurrence.
-    def log_observation_added(obs_list, user = User.current)
+    def log_observation_added(obs_list, user = nil)
       log_obs_event(obs_list, :log_occurrence_added, user)
     end
 
     # Field slip variant — includes field slip code in log entry.
-    def log_field_slip_added(obs_list, user = User.current)
+    def log_field_slip_added(obs_list, user = nil)
       code = field_slip_code_for(obs_list)
       log_obs_event(obs_list, :log_field_slip_added, user,
                     touch_tag: :log_field_slip_updated, name: code)
     end
 
     # Log and notify when an observation is removed.
-    def log_observation_removed(obs, occ = nil, user = User.current)
+    def log_observation_removed(obs, occ = nil, user = nil)
       log_obs_removal(obs, occ, :log_occurrence_removed, user)
     end
 
     # Field slip variant.
-    def log_field_slip_removed(obs, occ = nil, user = User.current)
+    def log_field_slip_removed(obs, occ = nil, user = nil)
       resolved = occ || obs.occurrence
       code = resolved&.field_slip&.code
       log_obs_removal(obs, occ, :log_field_slip_removed, user,
@@ -33,7 +33,7 @@ module Occurrence::Logging
 
     # Update the primary observation's log_updated_at so it appears
     # at the top of Activity-sorted indexes and RSS feeds.
-    def touch_primary(occ, exclude: [],
+    def touch_primary(occ, exclude: [], user: nil,
                       tag: :log_occurrence_updated, name: nil)
       return unless occ&.persisted?
 
@@ -41,7 +41,7 @@ module Occurrence::Logging
       return unless primary
       return if exclude.any? { |obs| obs.id == primary.id }
 
-      primary.log(tag, touch: true, name: name)
+      primary.log(tag, user: user, touch: true, name: name)
     end
 
     private
@@ -50,21 +50,21 @@ module Occurrence::Logging
                       touch_tag: :log_occurrence_updated, name: nil)
       occ = nil
       obs_list.each do |obs|
-        obs.log(tag, touch: true, name: name)
+        obs.log(tag, user: user, touch: true, name: name)
         notify_observation_owner(obs, :added, user)
         occ ||= obs.occurrence
       end
-      touch_primary(occ, exclude: obs_list, tag: touch_tag,
+      touch_primary(occ, exclude: obs_list, user: user, tag: touch_tag,
                          name: name)
     end
 
     def log_obs_removal(obs, occ, tag, user, **opts)
       occ ||= obs.occurrence
-      obs.log(tag, touch: true, name: opts[:name])
+      obs.log(tag, user: user, touch: true, name: opts[:name])
       notify_observation_owner(obs, :removed, user)
-      touch_primary(occ,
-                    tag: opts[:touch_tag] || :log_occurrence_updated,
-                    name: opts[:name])
+      touch_primary(occ, user: user,
+                         tag: opts[:touch_tag] || :log_occurrence_updated,
+                         name: opts[:name])
     end
 
     def field_slip_code_for(obs_list)
@@ -72,6 +72,10 @@ module Occurrence::Logging
       occ&.field_slip&.code
     end
 
+    # `user` may be nil (e.g. dissolve! has no caller-supplied actor
+    # today) - OccurrenceChangeMailer's view already handles a nil
+    # `sender` deliberately, attributing the change to the site itself
+    # rather than a person (see Views::Mailers::OccurrenceChangeMailer#intro).
     def notify_observation_owner(obs, action, user)
       owner = obs.user
       return if owner == user || owner.no_emails

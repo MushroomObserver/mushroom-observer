@@ -27,6 +27,18 @@ class Query::LocationsTest < UnitTestCase
     assert_query(expects, :Location, order_by: :name)
   end
 
+  def test_location_order_by_name_viewer_aware
+    query = Query.lookup(:Location, order_by: :name)
+    query.viewer = roy
+    assert_obj_arrays_equal(Location.order_by(:name, viewer: roy).to_a,
+                            query.results)
+
+    query = Query.lookup(:Location, order_by: :name)
+    query.viewer = rolf
+    assert_obj_arrays_equal(Location.order_by(:name, viewer: rolf).to_a,
+                            query.results)
+  end
+
   def test_location_order_by_num_views
     expects = Location.order_by(:num_views)
     assert_query(expects, :Location, order_by: :num_views)
@@ -40,8 +52,8 @@ class Query::LocationsTest < UnitTestCase
 
   def test_location_by_editor
     assert_query([], :Location, by_editor: rolf)
-    User.current = mary
     loc = Location.where.not(user: mary).order_by_default.first
+    loc.current_user = mary
     loc.display_name = "new name"
     loc.save
     assert_query_scope([loc], Location.by_editor(mary),
@@ -212,9 +224,9 @@ class Query::LocationsTest < UnitTestCase
   end
 
   def test_location_has_descriptions_by_editor
-    User.current = mary
     desc = location_descriptions(:albion_desc)
     desc.notes = "blah blah blah"
+    desc.current_user = mary
     desc.save
     assert_query([], :Location, description_query: { by_editor: rolf })
 

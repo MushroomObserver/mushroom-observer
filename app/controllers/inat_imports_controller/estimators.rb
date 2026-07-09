@@ -6,6 +6,11 @@ module InatImportsController::Estimators
   private
 
   def fetch_expected_count
+    # Short-circuit to 0 rather than issue a query that answers a different
+    # question when user's own request is entirely unlicensed
+    # (import-others never imports unlicensed obs)
+    return 0 if import_others? && licensed_explicitly_false?
+
     response = inat_get(import_estimate_query_args)
     JSON.parse(response.body)["total_results"]
   rescue RestClient::UnprocessableEntity => e
@@ -26,7 +31,20 @@ module InatImportsController::Estimators
     inat_get_count(after_taxon_query_args)
   end
 
+  # Count of after_taxon's own scope (preserving any URL-specified license)
+  # not yet imported
+  # Isolates "already imported" from "unlicensed" (see already_imported_count in
+  # confirm_form.rb). Deliberately does not touch `licensed` at all.
+  def fetch_not_yet_imported_count
+    inat_get_count(not_yet_imported_query_args)
+  end
+
   def fetch_estimate_with_date_count
+    # Short-circuit to 0 rather than issue a query that answers a different
+    # question when user's own request is entirely unlicensed
+    # (import-others never imports unlicensed obs)
+    return 0 if import_others? && licensed_explicitly_false?
+
     args = import_estimate_query_args
     args[:d1] ||= EARLIEST_DATE_FILTER
     inat_get_count(args)
@@ -90,15 +108,42 @@ module InatImportsController::Estimators
   # + licensed (for import-others) + user scope.
   def import_estimate_query_args
     args = listing_url? ? url_query_args : {}
-    args.merge!(BASE_FILTER_PARAMS, only_id: true)
+    args.merge!(estimate_without_field_filter, ownership_filter_args,
+                only_id: true)
     args[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
-    if import_others?
-      args.merge!(LICENSED_FILTER)
-    else
-      args[:user_login] = params[:inat_username]&.strip
-    end
     args[:id] = params[:inat_ids] if listing_ids?
     args
+  end
+
+  # after_taxon's own scope + without_field, without touching `licensed` —
+  # unlike import_estimate_query_args, never forces or defaults a license
+  # value, so it stays comparable to after_taxon_query_args for the
+  # already-imported calculation regardless of what the user's URL says.
+  def not_yet_imported_query_args
+    after_taxon_query_args.merge(estimate_without_field_filter)
+  end
+
+  # True only when the user's own URL explicitly filters to licensed=false —
+  # as opposed to no license filter at all, which still defaults to true.
+  def licensed_explicitly_false?
+    listing_url? && url_query_args[:licensed] == "false"
+  end
+
+  # Id lists always re-check obs already carrying the MO URL field, and
+  # query modes re-check when the user opted in — the estimate must
+  # match actual import behavior (#4565).
+  def estimate_without_field_filter
+    return {} if listing_ids? || recheck_all?
+
+    BASE_FILTER_PARAMS
+  end
+
+  def ownership_filter_args
+    if import_others?
+      LICENSED_FILTER
+    else
+      { user_login: params[:inat_username]&.strip }
+    end
   end
 
   # Strip MO-controlled params so estimates match actual import behavior.

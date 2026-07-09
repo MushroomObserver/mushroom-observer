@@ -52,7 +52,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
   private
 
   def render_image_column
-    div(class: "col-12 col-md-6") do
+    div(class: Grid::MD6) do
       div(class: "image-position") do
         img(
           src: @data[:img_src],
@@ -65,7 +65,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
   end
 
   def render_form_column
-    div(class: "col-12 col-md-6") do
+    div(class: Grid::MD6) do
       div(class: "form-panel") do
         render(Components::Form::UploadGallery::Fields.new(
                  user: @user,
@@ -138,9 +138,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
       data: data
     ) do
       span { :image_remove_remove.l }
-      render(Components::Icon.new(
-               type: :remove, html_class: "text-danger ml-3"
-             ))
+      Icon(type: :remove, html_class: "text-danger ml-3")
     end
   end
 end

@@ -77,11 +77,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_copyright_warning
-      render(::Components::Help::Block.new) do
-        plain("(")
-        plain(:image_copyright_warning.t)
-        plain(")")
-      end
+      Help(content: ["(", :image_copyright_warning.t, ")"].safe_join)
     end
 
     def upload_year_options

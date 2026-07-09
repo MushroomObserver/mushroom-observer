@@ -263,7 +263,8 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
            "Missing an unchecked box for Project which has ended")
     assert_field("observation_location_id",
                  type: :hidden, with: last_location.id)
-    assert_field("observation_place_name", with: last_location.display_name)
+    assert_field("observation_place_name",
+                 with: last_location.display_name(user))
     assert_field("observation_when_1i", with: Time.zone.today.year)
     assert_field("observation_when_2i", with: Time.zone.today.month)
     assert_field("observation_when_3i", with: Time.zone.today.day)

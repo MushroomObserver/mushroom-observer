@@ -44,8 +44,10 @@ module Projects
       get(:index, params: { project_id: project.id })
 
       assert_response(:success)
-      # No collapse elements when there are no targets
-      assert_select(".panel-collapse-trigger", count: 0)
+      # No collapse elements when there are no targets. Scoped to
+      # #locations_table — the sidebar's language toggle is also a
+      # `.panel-collapse-trigger` and renders on every page.
+      assert_select("#locations_table .panel-collapse-trigger", count: 0)
     end
 
     # Exercises grouping logic: assign_to_targets,

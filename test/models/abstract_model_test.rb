@@ -101,8 +101,6 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_update_view_stats
-    User.current = rolf
-
     obs       = observations(:detailed_unknown_obs)
     image     = obs.images.first
     comment   = obs.comments.first
@@ -142,15 +140,15 @@ class AbstractModelTest < UnitTestCase
       [naming_attrs,   naming],
       [user_attrs,     user]
     ].each do |attrs, obj|
-      obj.update_view_stats
+      obj.update_view_stats(rolf)
       assert_same_but_view_stats(attrs, obj.reload.attributes,
                                  "#{obj.class}#update_view_stats screwed up: ")
     end
 
-    assert_equal(num_past_names + 0, Name.versioned_class.count)
-    assert_equal(num_past_name_descs + 0, NameDescription.versioned_class.count)
-    assert_equal(num_past_locations + 0, Location.versioned_class.count)
-    assert_equal(num_past_loc_descs + 0,
+    assert_equal(num_past_names, Name.versioned_class.count)
+    assert_equal(num_past_name_descs, NameDescription.versioned_class.count)
+    assert_equal(num_past_locations, Location.versioned_class.count)
+    assert_equal(num_past_loc_descs,
                  LocationDescription.versioned_class.count)
   end
 
@@ -161,7 +159,6 @@ class AbstractModelTest < UnitTestCase
   # -------------------------------------------------------------------
 
   def test_location_rss_log_life_cycle
-    User.current = rolf
     time = 1.minute.ago
 
     loc = Location.new(
@@ -173,6 +170,7 @@ class AbstractModelTest < UnitTestCase
       high: 100,
       low: 0
     )
+    loc.current_user = rolf
 
     assert_nil(loc.rss_log)
     assert_save(loc)
@@ -213,7 +211,6 @@ class AbstractModelTest < UnitTestCase
   end
 
   def test_name_rss_log_life_cycle
-    User.current = rolf
     time = 1.minute.ago
 
     name = Name.new(
@@ -425,6 +422,58 @@ class AbstractModelTest < UnitTestCase
   def test_index_action
     assert_equal(:index, Article.index_action)
     assert_equal(:index, Phony.index_action)
+  end
+
+  def test_edit_controller
+    assert_equal("/articles", Article.edit_controller)
+    assert_equal("/articles", Article.first.edit_controller)
+    assert_equal("/phonies", Phony.edit_controller)
+  end
+
+  def test_edit_action
+    assert_equal(:edit, Article.edit_action)
+  end
+
+  def test_edit_url
+    article = Article.first
+    assert_equal("#{MO.http_domain}/articles/#{article.id}/edit",
+                 article.edit_url)
+  end
+
+  def test_edit_link_args
+    article = Article.first
+    assert_equal({ controller: "/articles", action: :edit, id: article.id },
+                 article.edit_link_args)
+  end
+
+  def test_destroy_controller
+    assert_equal("/articles", Article.destroy_controller)
+    assert_equal("/articles", Article.first.destroy_controller)
+  end
+
+  def test_destroy_action
+    assert_equal(:destroy, Article.destroy_action)
+  end
+
+  def test_destroy_url
+    article = Article.first
+    assert_equal("#{MO.http_domain}/articles/#{article.id}",
+                 article.destroy_url)
+  end
+
+  def test_destroy_link_args
+    article = Article.first
+    assert_equal({ controller: "/articles", action: :destroy, id: article.id },
+                 article.destroy_link_args)
+  end
+
+  def test_count_by_sql_wrapping_select_query
+    assert_equal(
+      Observation.count,
+      Observation.count_by_sql_wrapping_select_query(
+        "select id from observations"
+      )
+    )
   end
 
   # fixture for above tests

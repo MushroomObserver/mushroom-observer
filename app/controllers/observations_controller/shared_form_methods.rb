@@ -38,6 +38,10 @@ module ObservationsController::SharedFormMethods
   end
 
   def update_permitted_observation_attributes
+    # Must be set before `attributes=` below: `place_name=` (see
+    # HasPlaceName) reads `current_user` to decide postal vs
+    # scientific parsing.
+    @observation.current_user = @user
     @observation.attributes = permitted_observation_params || {}
   end
 
@@ -215,6 +219,7 @@ module ObservationsController::SharedFormMethods
       args = params.dig(:observation, :good_image, image.id.to_s)
       next unless args
 
+      image.current_user = @user
       image.attributes = args.permit(permitted_image_args)
       next unless image.when_changed? ||
                   image.notes_changed? ||
@@ -263,10 +268,11 @@ module ObservationsController::SharedFormMethods
     return unless @good_images
 
     @good_images.each do |image|
-      unless @observation.image_ids.include?(image.id)
-        @observation.add_image(image)
-        image.log_create_for(@observation)
-      end
+      next if @observation.image_ids.include?(image.id)
+
+      @observation.add_image(image)
+      image.current_user = @user
+      image.log_create_for(@observation)
     end
   end
 

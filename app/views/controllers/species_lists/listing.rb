@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # One species_list "listing" row, rendered inside a
-# `Components::ListGroup::Base#item`. Used by:
+# `Components::ListGroup#item`. Used by:
 #   - `Views::Controllers::SpeciesLists::Index#render_list` (the
 #     species_lists index page)
 #   - `observations/species_lists/edit.rb` (the
@@ -24,7 +24,7 @@ module Views::Controllers::SpeciesLists
 
     # Row contents only — the surrounding `<div class="list-group-item
     # d-flex justify-content-between align-items-start">` is emitted by
-    # `Components::ListGroup::Base#item` in the Index view.
+    # `Components::ListGroup#item` in the Index view.
     def view_template
       render_info
       render_manage_section if @remove || @add
@@ -36,7 +36,7 @@ module Views::Controllers::SpeciesLists
     # `rescue :UNKNOWN.l` is fallback.
     def place
       @place ||= begin
-                   @species_list.place_name.t
+                   @species_list.place_name(current_user).t
                  rescue StandardError
                    :UNKNOWN.l
                  end

@@ -153,7 +153,7 @@ class SearchController < ApplicationController
   # catch invalid PatternSearch terms. (We can't just send a raw pattern with
   # keywords to Query as `create_query(model_name, pattern:)`)
   def pattern_search_query_from_pattern(model_name, pattern)
-    search = "PatternSearch::#{model_name}".constantize.new(pattern)
+    search = "PatternSearch::#{model_name}".constantize.new(pattern, @user)
     if search.errors.any?
       flash_pattern_search_errors(search)
       session[:pattern] = nil

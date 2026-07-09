@@ -28,12 +28,12 @@ module Projects
       login("roy")
       location = ProjectAlias.find_by(target_type: "Location",
                                       project: @project).target
-      assert_not_equal(location.name, location.display_name)
+      assert_not_equal(location.name, location.display_name(roy))
       get(:index, params: { project_id: @project.id })
       assert_response(:success)
       assert_not_nil(assigns(:project_aliases))
       assert_select("#index_project_alias_table",
-                    text: /#{Regexp.escape(location.display_name)}/)
+                    text: /#{Regexp.escape(location.display_name(roy))}/)
     end
 
     def test_show_displays_the_requested_project_alias

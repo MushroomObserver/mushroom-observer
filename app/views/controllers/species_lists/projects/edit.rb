@@ -16,8 +16,7 @@ module Views::Controllers::SpeciesLists::Projects
       add_page_title(:species_list_projects_title.t(list: @list.title))
       add_context_nav(::Tab::SpeciesList::FormEditProject.new(list: @list))
 
-      render(::Components::Help::Block.new(:species_list_projects_help.tp,
-                                           class: "mt-3"))
+      Help(content: :species_list_projects_help.tp, class: "mt-3")
 
       # Sibling reference within the namespace.
       render(Form.new(

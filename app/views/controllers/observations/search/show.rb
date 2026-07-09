@@ -7,6 +7,6 @@
 # wrapper for the html path.
 class Views::Controllers::Observations::Search::Show < Views::FullPageBase
   def view_template
-    render(Help.new)
+    render(Views::Controllers::Observations::Search::Help.new)
   end
 end

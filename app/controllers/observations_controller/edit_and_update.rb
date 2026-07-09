@@ -83,7 +83,7 @@ module ObservationsController::EditAndUpdate
     apply_observation_changes
     reload_edit_form and return if @any_errors
 
-    update_field_slip
+    update_field_slip_or_flag_error
     reload_edit_form and return if @any_errors
 
     update_projects
@@ -136,6 +136,7 @@ module ObservationsController::EditAndUpdate
       next if new_ids.include?(img.id.to_s)
 
       @observation.remove_image(img)
+      img.current_user = @user
       img.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: img.id))
     end
@@ -194,56 +195,19 @@ module ObservationsController::EditAndUpdate
       id = @observation.id
       flash_notice(:runtime_edit_observation_success.t(id: id))
       touch = params[:log_change] == "1"
-      @observation.log(:log_observation_updated, touch: touch)
+      @observation.log(:log_observation_updated, user: @user, touch: touch)
     else
       @any_errors = true
     end
   end
 
-  def update_field_slip
-    return unless params.key?(:field_code)
+  # On edit, an invalid field-slip code halts the save and re-renders the
+  # form so the user can correct it.
+  def update_field_slip_or_flag_error
+    return unless update_field_slip == :invalid
 
-    new_code = params[:field_code].to_s.strip.upcase
-    current_code = @observation.field_slip&.code.to_s
-
-    return if new_code == current_code
-
-    if new_code.blank?
-      clear_field_slip
-    else
-      assign_field_slip(new_code)
-    end
-  end
-
-  def clear_field_slip
-    occ = @observation.occurrence
-    return unless occ
-
-    if occ.primary_observation_id == @observation.id
-      @observation.send(:reassign_occurrence_primary, occ)
-    end
-    @observation.update!(occurrence: nil)
-    return unless Occurrence.exists?(occ.id)
-
-    occ.reload
-    occ.destroy_if_incomplete!
-  end
-
-  def assign_field_slip(code)
-    existed = FieldSlip.exists?(code: code)
-    field_slip = FieldSlip.find_or_create_by_code(code, @user)
-    unless field_slip
-      flash_error(
-        :edit_observation_field_slip_invalid.t(code: code)
-      )
-      @any_errors = true
-      return
-    end
-
-    flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
-    @observation.field_slip = field_slip
-    @observation.save!
-    field_slip.adopt_user_from(@observation)
+    flash_error(:edit_observation_field_slip_invalid.t(code: field_code))
+    @any_errors = true
   end
 
   def reload_edit_form
@@ -298,7 +262,7 @@ module ObservationsController::EditAndUpdate
 
   def redirect_to_observation_or_create_location
     if @observation.location_id.nil?
-      redirect_to(new_location_path(where: @observation.place_name,
+      redirect_to(new_location_path(where: @observation.place_name(@user),
                                     set_observation: @observation.id))
     else
       redirect_to(permanent_observation_path(@observation.id))

@@ -41,7 +41,7 @@ class IconLinkTest < ComponentTestCase
                   ))
 
     assert_no_html(html, "a span.sr-only")
-    assert_html(html, "a span.font-weight-bold", text: "Delete")
+    assert_html(html, "a span.pl-2", text: "Delete")
   end
 
   def test_stateful_renders_active_icon_and_label

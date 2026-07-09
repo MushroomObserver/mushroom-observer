@@ -26,6 +26,11 @@ class Components::Base < Phlex::HTML
   # `rank_as_string`, `image_vote_as_*_string` — translation-key
   # shortcuts for enum-like model attributes.
   include Components::Localization
+  # `viewer_aware_unique_format_name`, `viewer_aware_location_format`
+  # — shared with ApplicationController (see app/classes/
+  # viewer_aware_format.rb for why this isn't a register_value_helper
+  # instead).
+  include ViewerAwareFormat
 
   # Register custom value helpers (return values)
   register_value_helper :permission?
@@ -114,6 +119,11 @@ class Components::Base < Phlex::HTML
 
   def nbsp
     trusted_html("&nbsp;")
+  end
+
+  # ViewerAwareFormat's default `user` arg.
+  def default_viewer
+    current_user
   end
 
   def before_template

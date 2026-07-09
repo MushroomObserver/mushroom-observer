@@ -353,49 +353,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     User.first.id
   end
 
-  # Report which User is currently logged in. Returns +nil+ if none.  This is
-  # the same instance as is in the controllers' +@user+ instance variable.
-  #
-  # Thread-safe: Uses Thread.current to store per-thread user state, allowing
-  # parallel test execution and proper isolation in threaded environments.
-  #
-  #   user = User.current
-  #
-  def self.current
-    Thread.current[:mushroom_observer_user]
-  end
-
-  # Report which User is currently logged in. Returns id, or +nil+ if none.
-  #
-  #   user_id = User.current_id
-  #
-  def self.current_id
-    current&.id
-  end
-
-  # Tell User model which User is currently logged in (if any).  This is used
-  # by the +autologin+ filter and API authentication.
-  #
-  # Thread-safe: Stores user in thread-local storage for proper isolation.
-  def self.current=(val)
-    Thread.current[:mushroom_observer_user] = val
-    Thread.current[:mushroom_observer_location_format] =
-      val ? val.location_format : "postal"
-  end
-
-  # Report current user's preferred location_format
-  #
-  #   location_format = User.current_location_format
-  #
-  def self.current_location_format
-    Thread.current[:mushroom_observer_location_format] || "postal"
-  end
-
-  # Set the location format to use throughout the site.
-  def self.current_location_format=(val)
-    Thread.current[:mushroom_observer_location_format] = val
-  end
-
   # Clear cached data structures when reload.
   def reload
     @projects_admin = nil
@@ -451,7 +408,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     :show_user_about.t(user: unique_text_name)
   end
 
-  def format_name
+  def format_name(_user = nil)
     unique_text_name
   end
 

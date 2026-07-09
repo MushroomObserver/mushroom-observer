@@ -34,7 +34,8 @@ module Components::Map::Clustering
   def collection_for_js
     if use_clustering?
       ::Mappable::ClusteredCollection.new(
-        mappable_objects, query_param: effective_query_param
+        mappable_objects, query_param: effective_query_param,
+                          user: current_user
       )
     else
       mappable_collection

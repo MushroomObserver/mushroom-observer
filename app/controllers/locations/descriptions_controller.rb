@@ -233,6 +233,7 @@ module Locations
 
     # called by :create
     def save_new_description_flash_and_redirect
+      @description.current_user = @user
       initialize_description_permissions
       @description.save
 
@@ -245,6 +246,8 @@ module Locations
 
     # called by :update
     def save_if_changes_made_or_flash
+      @description.current_user = @user
+
       # No changes made.
       if !@description.changed?
         flash_warning(:runtime_edit_location_description_no_change.t)

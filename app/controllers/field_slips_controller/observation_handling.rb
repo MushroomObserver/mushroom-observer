@@ -8,7 +8,7 @@ module FieldSlipsController::ObservationHandling
   def quick_create_observation
     fs_params = params[:field_slip]
     # Must have valid name and location
-    location = Location.place_name_to_location(place_name)
+    location = Location.place_name_to_location(place_name, @user)
     flash_error(:field_slip_quick_no_location.t) unless location
     name = Name.find_by(text_name: fs_params[:field_slip_name])
     notes = field_slip_notes.compact_blank!
@@ -92,7 +92,7 @@ module FieldSlipsController::ObservationHandling
     Vote.create!(favorite: true, value: Vote.maximum_vote,
                  naming:, user: @user)
     Observation::NamingConsensus.new(@field_slip.observation).
-      user_calc_consensus(@user)
+      calc_consensus(@user)
   end
 
   # Link an observation to a field slip via an occurrence.
@@ -172,7 +172,7 @@ module FieldSlipsController::ObservationHandling
     occ.reload
     update_occurrence_primary(occ)
     occ.recompute_has_specimen!
-    occ.recalculate_consensus! unless occ.destroyed?
+    occ.recalculate_consensus!(@user) unless occ.destroyed?
     check_field_slip_project_gaps(occ) unless occ.destroyed?
   end
 
@@ -183,8 +183,8 @@ module FieldSlipsController::ObservationHandling
 
       occ.reassign_thumbnails_from(obs)
       obs.update!(occurrence: nil)
-      Occurrence.log_field_slip_removed(obs, occ)
-      Observation::NamingConsensus.new(obs).calc_consensus
+      Occurrence.log_field_slip_removed(obs, occ, @user)
+      Observation::NamingConsensus.new(obs).calc_consensus(@user)
     end
   end
 
@@ -197,7 +197,7 @@ module FieldSlipsController::ObservationHandling
       obs.update!(occurrence: occ)
       added << obs
     end
-    Occurrence.log_field_slip_added(added) if added.any?
+    Occurrence.log_field_slip_added(added, @user) if added.any?
   end
 
   def update_occurrence_primary(occ)
@@ -224,9 +224,9 @@ module FieldSlipsController::ObservationHandling
       selected.each { |obs| obs.update!(occurrence: occ) }
       newly_added = selected
     end
-    Occurrence.log_field_slip_added(newly_added) if newly_added&.any?
+    Occurrence.log_field_slip_added(newly_added, @user) if newly_added&.any?
     occ.recompute_has_specimen!
-    occ.recalculate_consensus!
+    occ.recalculate_consensus!(@user)
     check_field_slip_project_gaps(occ)
   rescue ActiveRecord::RecordInvalid => e
     flash_error(e.message)

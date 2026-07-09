@@ -34,23 +34,18 @@ module Views::Controllers::Sequences
     end
 
     def render_locus_help
-      render(Components::Help::Block.new(
-               arrow: :up, id: "sequence_locus_help"
-             )) do
-        trusted_html(:form_sequence_locus_help.t(
-                       locus_width: Sequence::LOCUS_WIDTH
-                     ))
-      end
+      Help(arrow: :up, id: "sequence_locus_help",
+           content: :form_sequence_locus_help.t(
+             locus_width: Sequence::LOCUS_WIDTH
+           ))
     end
 
     def render_bases_field
       textarea_field(:bases, cols: 80, rows: 5, label: :BASES.l,
                              class: "font-monospace") do |f|
         f.with_between do
-          render(::Components::Help::Note.new(
-                   :span,
-                   "(#{:form_sequence_bases_or_deposit_required.t})"
-                 ))
+          Help(element: :span,
+               content: "(#{:form_sequence_bases_or_deposit_required.t})")
           Link(type: :external,
                content: "(#{:form_sequence_bases_format.t})",
                path: WebSequenceArchive.blast_format_help,
@@ -66,10 +61,7 @@ module Views::Controllers::Sequences
 
     def render_deposit_fields
       label(for: "sequence_deposit", class: "mr-3") { :DEPOSIT.l }
-      render(::Components::Help::Note.new(
-               :span,
-               "(#{:form_sequence_valid_deposit.t})"
-             ))
+      Help(element: :span, content: "(#{:form_sequence_valid_deposit.t})")
       render_archive_select
       render_accession_field
     end
@@ -89,11 +81,8 @@ module Views::Controllers::Sequences
     end
 
     def render_accession_help
-      render(Components::Help::Block.new(
-               arrow: :up, id: "sequence_accession_help"
-             )) do
-        trusted_html(:form_sequence_accession_help.t)
-      end
+      Help(arrow: :up, id: "sequence_accession_help",
+           content: :form_sequence_accession_help.t)
     end
 
     def render_notes_field
@@ -104,9 +93,7 @@ module Views::Controllers::Sequences
     end
 
     def render_notes_help
-      render(Components::Help::Block.new(arrow: :up, id: "textile_help")) do
-        trusted_html(:field_textile_link.t)
-      end
+      Help(arrow: :up, id: "textile_help", content: :field_textile_link.t)
     end
 
     def submit_text

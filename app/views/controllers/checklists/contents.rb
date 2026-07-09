@@ -122,7 +122,7 @@ module Views::Controllers::Checklists
 
     def render_target_remove_footnote
       p do
-        render(::Components::Icon.new(type: :x, html_class: "text-danger"))
+        Icon(type: :x, html_class: "text-danger")
         plain(" #{:checklist_target_remove_footnote.l}")
       end
     end

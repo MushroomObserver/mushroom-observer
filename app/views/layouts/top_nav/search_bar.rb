@@ -20,7 +20,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
     if current_user
       render_logged_in
     else
-      strong(class: "navbar-text mx-2 text-nowrap") do
+      Navbar(element: :strong, class: "mx-2 text-nowrap") do
         plain(:app_login_reminder.t)
       end
     end

@@ -6,13 +6,11 @@ class ObservationChangeMailer < ApplicationMailer
 
   def build(sender:, receiver:, observation:, note:, time:)
     setup_user(receiver)
-    @title = observation_change_title(observation, note, receiver)
-    @sender = sender
-    @observation = observation
-    @note = note
-    @time = time
+    subject = observation_change_title(observation, note, receiver)
     debug_log(:observation_change, sender, receiver, observation:)
-    mo_mail(@title, to: receiver)
+    mo_mail(subject, to: receiver,
+                     view_params: { subject:, receiver:, sender:, observation:,
+                                    note:, time: })
   end
 
   private
@@ -20,7 +18,7 @@ class ObservationChangeMailer < ApplicationMailer
   # TODO: Translation keys really shouldn't be this long (32).
   def observation_change_title(observation, note, receiver)
     if observation
-      name = observation.user_unique_text_name(receiver)
+      name = observation.unique_text_name(receiver)
       :email_subject_observation_change.l(name:)
     else
       :email_subject_observation_destroy.l(name: note).t.html_to_ascii

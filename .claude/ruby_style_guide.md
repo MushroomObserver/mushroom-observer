@@ -1,21 +1,18 @@
 # Mushroom Observer Ruby Style Guide
 
-This document describes general Ruby, ERB, and project-level coding style
-preferences. For Phlex component conventions, see `.claude/phlex_style_guide.md`.
+This document describes general Ruby and project-level coding style
+preferences. For Phlex coding conventions, see `.claude/rules/phlex_reference.md`.
 
 ## General Ruby Style
 
 ### Method Calls with Parentheses
 
-**Always use parentheses for method calls with arguments**, even in ERB templates.
+**Always use parentheses for method calls with arguments.**
 
 **This applies to:**
 - Ruby code
-- ERB templates (`.erb` files)
 - Code examples in comments
 - Documentation in all files
-
-#### Ruby Code
 
 ```ruby
 # Good
@@ -29,110 +26,60 @@ render component
 User.find id
 ```
 
-#### ERB Templates
-
-```erb
-<%# Good %>
-<%= render(Components::MatrixBox.new(user: @user, object: @obs)) %>
-<%= link_to(text, path) %>
-<%= tag.div(class: "container") do %>
-  <%= content %>
-<% end %>
-
-<%# Bad %>
-<%= render Components::MatrixBox.new(user: @user, object: @obs) %>
-<%= link_to text, path %>
-<%= tag.div class: "container" do %>
-  <%= content %>
-<% end %>
-```
-
 #### Comments and Documentation
 
 Even in comments, use parentheses for method calls to maintain consistency:
 
 ```ruby
 # Good
-#  5) Add "show log" link at bottom of model's show page:
-#       <%= render(Components::ObjectFooter.new(user: @user, obj: @object)) %>
+#  5) Render the object's log at the bottom of its show page:
+#       render(Components::ObjectFooter.new(user: @user, obj: @object))
 
 # Bad
-#  5) Add "show log" link at bottom of model's show page:
-#       <%= render Components::ObjectFooter.new(user: @user, obj: @object) %>
+#  5) Render the object's log at the bottom of its show page:
+#       render Components::ObjectFooter.new(user: @user, obj: @object)
 ```
 
-### Component Namespacing
+### Phlex Namespacing
 
-**Always use the full namespace** when referencing Phlex components in ERB or Ruby.
+**Kit syntax is the default for top-level components** —
+`Components::Icon` → `Icon(...)`, `Components::Link` → `Link(...)`,
+`Components::Panel` → `Panel(...)`. Reach for the verbose
+`render(Components::X.new(...))` / `render(Views::...::X.new(...))`
+form only when Kit syntax genuinely isn't available — most commonly,
+a nested **view** (`Views::Controllers::<Controller>::<Action>::
+<SubView>`), which never gets Kit sugar and has no dispatcher to route
+through either way:
 
 ```ruby
-# Good
-render(Components::MatrixBox.new(...))
-render(Components::InteractiveImage.new(...))
+# Good — top-level component, Kit syntax
+Icon(type: :edit)
+Link(type: :active, content: title, path: url)
 
-# Bad
-render(MatrixBox.new(...))
-render(InteractiveImage.new(...))
+# Good — nested view, no Kit sugar exists, no dispatcher; full
+# namespace + render() is the only way to call it
+render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+  obs: @obs, user: @user
+))
+
+# Bad — verbose full-namespace render() for a top-level component
+# that already has Kit sugar
+render(Components::Icon.new(type: :edit))
 ```
 
-**However, when referencing Phlex components from other components, use "kit" syntax**.
+Nested **components** that have a dispatching parent —
+`Components::Link::Get`, `Components::Button::Delete` — should be
+reached through the parent's Kit-sugar dispatch (`Link(type: :get,
+...)`, `Button(type: :delete, ...)`), not called directly, even
+though `render(Components::Link::Get.new(...))` is technically
+possible. Nested components with no dispatching parent at all (e.g.
+`Components::ListGroup::Item`, which isn't a "variant" of anything)
+do need the full `render(Components::ListGroup::Item.new(...))` form.
 
-```ruby
-module Components
-  class Panel
-
-    def render_interactive_image
-      # Good
-      InteractiveImage(...)
-
-      # Too verbose
-      render(Components::InteractiveImage.new(...))
-    end
-  end
-end
-```
-
-## ERB Template Style
-
-### Parentheses in Templates
-
-**Always use parentheses** for method calls in ERB templates, including `render`, `link_to`, `tag` methods, etc.
-
-```erb
-<%# Good %>
-<%= render(Components::MatrixTable.new(objects: @objects)) %>
-<%= link_to(:BACK.l, observations_path) %>
-<%= tag.div(class: "alert") do %>
-  <%= flash_message %>
-<% end %>
-
-<%# Bad %>
-<%= render Components::MatrixTable.new(objects: @objects) %>
-<%= link_to :BACK.l, observations_path %>
-<%= tag.div class: "alert" do %>
-  <%= flash_message %>
-<% end %>
-```
-
-### Component Blocks
-
-**Use parentheses consistently** with component blocks.
-
-```erb
-<%# Good %>
-<%= render(Components::MatrixBox.new(id: image.id) do %>
-  <%= tag.div(class: "content") do %>
-    <%= image.name %>
-  <% end %>
-<% end) %>
-
-<%# Bad %>
-<%= render Components::MatrixBox.new(id: image.id) do %>
-  <%= tag.div class: "content" do %>
-    <%= image.name %>
-  <% end %>
-<% end %>
-```
+See `.claude/rules/phlex_reference.md`'s "Kit syntax" section for the
+full rule, including why nested classes never get Kit sugar and how
+to tell when a component should be flattened to the top level to
+gain it.
 
 ## Testing
 
@@ -321,8 +268,8 @@ end
 ## Summary
 
 The key principles are:
-1. **Always use parentheses** for method calls (Ruby and ERB)
-2. **Use full namespaces** for component references (`Components::ClassName`)
+1. **Always use parentheses** for method calls
+2. **Use Kit syntax for top-level components** (`Icon(...)`, `Link(...)`); full namespace + `render()` only when Kit sugar isn't available (nested views, non-dispatched nested components)
 3. **Use Rails-preferred assertions** (`assert_no_match`, `assert_not_equal`, etc.) instead of MiniTest refute methods
 4. **Run the full test suite** before creating any PR with production Rails code changes
 5. **Edit `en.txt` for text strings**, run `rails lang:update`, never commit `.yml` files

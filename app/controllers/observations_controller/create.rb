@@ -52,7 +52,7 @@ module ObservationsController::Create
     try_to_save_new_observation
     return reload_new_form(naming_params_dig(:reasons)) if @any_errors
 
-    @observation.log(:log_observation_created)
+    @observation.log(:log_observation_created, user: @user)
 
     update_naming(naming_params_dig(:reasons))
     attach_good_images
@@ -61,7 +61,7 @@ module ObservationsController::Create
     save_collection_number
     save_herbarium_record
     strip_images! if @observation.gps_hidden
-    update_field_slip
+    update_field_slip_or_warn
     flash_notice(:runtime_observation_success.t(id: @observation.id))
     redirect_to_next_page
   end
@@ -79,11 +79,16 @@ module ObservationsController::Create
   def create_observation_object(args = {})
     args = args&.permit(permitted_observation_args).to_h
     now = Time.zone.now
-    Observation.new(args&.merge({ created_at: now,
-                                  updated_at: now,
-                                  user: @user,
-                                  name: Name.unknown,
-                                  source: "mo_website" }))
+    obs = Observation.new(created_at: now, updated_at: now, user: @user,
+                          name: Name.unknown, source: "mo_website")
+    # `current_user` must be set before `args` is applied: `place_name=`
+    # (see HasPlaceName) reads it to decide postal vs scientific parsing,
+    # and a single `Observation.new(hash)` call can't guarantee that
+    # ordering if `place_name` and `current_user` were merged into one
+    # hash together.
+    obs.current_user = @user
+    obs.assign_attributes(args) if args
+    obs
   end
 
   def rough_cut
@@ -124,7 +129,9 @@ module ObservationsController::Create
       flash_warning(:edit_collection_number_already_used.t) if
         col_num.observations.any?
     else
-      col_num = CollectionNumber.create(name: name, number: number)
+      col_num = CollectionNumber.new(name: name, number: number)
+      col_num.current_user = @user
+      col_num.save
     end
     col_num.add_observation(@observation)
   end
@@ -206,12 +213,15 @@ module ObservationsController::Create
 
   def create_herbarium_record(herbarium, initial_det, accession_number,
                               herbarium_record_notes)
-    HerbariumRecord.create(
+    record = HerbariumRecord.new(
       herbarium: herbarium,
       initial_det: initial_det,
       accession_number: accession_number,
       notes: herbarium_record_notes
     )
+    record.current_user = @user
+    record.save
+    record
   end
 
   def not_creating_record?(herbarium, accession_number)
@@ -227,7 +237,7 @@ module ObservationsController::Create
 
   def redirect_to_next_page
     if @observation.location_id.nil?
-      redirect_to(new_location_path(where: @observation.place_name,
+      redirect_to(new_location_path(where: @observation.place_name(@user),
                                     set_observation: @observation.id))
     else
       redirect_to(permanent_observation_path(@observation.id))
@@ -249,28 +259,17 @@ module ObservationsController::Create
            location: new_observation_path)
   end
 
-  def update_field_slip
-    field_code = params[:field_code]
-    return if field_code.blank?
+  # The observation is already saved by the time the field slip is applied,
+  # so an invalid code can't abort creation — warn and keep the observation.
+  def update_field_slip_or_warn
+    return unless update_field_slip == :invalid
 
-    existed = FieldSlip.exists?(code: field_code.strip.upcase)
-    field_slip = FieldSlip.find_or_create_by_code(field_code, @user)
-    return unless field_slip
-
-    flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
-
-    occ = field_slip.occurrence
-    occ ||= Occurrence.create!(
-      user: @user, primary_observation: @observation,
-      field_slip: field_slip
-    )
-    @observation.update!(occurrence: occ)
-    field_slip.adopt_user_from(@observation)
+    flash_warning(:create_observation_field_slip_invalid.t(code: field_code))
   end
 
   def init_location_var_for_reload
     # Preserve the user's place_name input for form re-render
-    @default_place_name = @observation.place_name
+    @default_place_name = @observation.place_name(@user)
 
     # keep location_id if it's -1 (new)
     if @location || @observation.location_id.nil? ||

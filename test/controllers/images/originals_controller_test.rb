@@ -97,6 +97,20 @@ module Images
       end
     end
 
+    # `set_user_from_session` applies the same verified/blocked check
+    # `autologin` does, so an unverified user's session resolves to a
+    # nil @user here too - treated the same as `test_not_logged_in`.
+    def test_unverified_user_session_treated_as_logged_out
+      login(users(:unverified).login)
+      with_stubs do
+        get(:show, format: :json, params: { id: @test_image.id })
+        json = @response.parsed_body
+        assert_equal("ready", json["status"])
+        assert_equal(@test_image.url(:huge), json["url"])
+        assert_nil(assigns(:user))
+      end
+    end
+
     def test_image_doesnt_exist
       login("rolf")
       @test_image.destroy
@@ -157,14 +171,15 @@ module Images
 
     def test_user_maxed_out
       login("rolf")
-      User.current.update(original_image_quota: MO.original_image_user_quota)
+      rolf = users(:rolf)
+      rolf.update(original_image_quota: MO.original_image_user_quota)
       with_stubs do
         get(:show, format: :json, params: { id: @test_image.id })
         json = @response.parsed_body
         assert_equal("maxed_out", json["status"])
         assert_nil(assigns(:job))
 
-        User.current.decrement!(:original_image_quota)
+        rolf.decrement!(:original_image_quota)
         get(:show, format: :json, params: { id: @test_image.id })
         json = @response.parsed_body
         assert_equal("loading", json["status"])

@@ -46,7 +46,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
     a(href: article_path(EXTERNAL_LINKS_ARTICLE_ID),
       title: :external_links_help.l,
       aria: { label: :external_links_help.l }) do
-      render(Components::Icon.new(type: :question))
+      Icon(type: :question)
     end
   end
 

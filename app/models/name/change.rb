@@ -22,7 +22,14 @@ module Name::Change
         raise(:runtime_unable_to_create_name.t(name: parse.parent_name))
       end
 
-      parents.each { |n| n.save if n&.new_record? } if save_parents
+      if save_parents
+        parents.each do |n|
+          next unless n&.new_record?
+
+          n.current_user = user
+          n.save
+        end
+      end
     end
     self.attributes = parse.params
   end
@@ -73,8 +80,10 @@ module Name::Change
     change_deprecated(true)
     merge_synonyms(target_name)
     target_name.clear_misspelled(user, :save) if target_name.is_misspelling?
-    save_with_log(user, :log_name_deprecated, other: target_name.display_name) \
-      if save
+    if save
+      save_with_log(user, :log_name_deprecated,
+                    other: target_name.display_name(user))
+    end
     change_misspelled_consensus_names
   end
 
@@ -82,7 +91,7 @@ module Name::Change
   def clear_misspelled(user, save = false)
     return unless misspelling || correct_spelling
 
-    was = correct_spelling.user_display_name(user)
+    was = correct_spelling.display_name(user)
     self.misspelling = false
     self.correct_spelling = nil
     save_with_log(user, :log_name_unmisspelled, other: was) if save

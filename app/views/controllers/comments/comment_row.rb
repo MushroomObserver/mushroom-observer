@@ -13,7 +13,7 @@
 #   so the wrapper has to live with the inner content.
 #
 # Inside the `CommentsForObject` panel, this composition is split:
-# `Components::ListGroup::Base#item` provides the wrapper (so the
+# `Components::ListGroup#item` provides the wrapper (so the
 # none-yet placeholder lives in the same list) and `CommentItem`
 # is rendered directly inside the block.
 module Views::Controllers::Comments

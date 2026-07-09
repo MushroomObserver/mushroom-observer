@@ -43,8 +43,8 @@ class Views::Layouts::Sidebar::ContextNav < Views::Base
   private
 
   def render_heading
-    div(class: class_names(CSS_CLASSES[:heading],
-                           CSS_CLASSES[:mobile_only])) do
+    modifier = class_names(CSS_CLASSES[:heading], CSS_CLASSES[:mobile_only])
+    render(Components::ListGroup::Item.new(class: modifier)) do
       plain("#{:app_context_actions.t}:")
     end
   end
@@ -52,19 +52,19 @@ class Views::Layouts::Sidebar::ContextNav < Views::Base
   def render_sidebar_link(link)
     str, url, args = link
     args ||= {}
-    kwargs = sidebar_link_kwargs(args)
-    render_crud_button_or_link(str, url, args, kwargs)
+    modifier = class_names(CSS_CLASSES[:indent], CSS_CLASSES[:mobile_only])
+    render(Components::ListGroup::LinkItem.new(class: modifier)) do |css_class|
+      kwargs = sidebar_link_kwargs(args, css_class)
+      render_crud_button_or_link(str, url, args, kwargs)
+    end
   end
 
   # Builds the kwargs hash for one sidebar link: indent + mobile-only
-  # classes, the nav-active Stimulus data attrs (only for plain anchor
-  # links — buttons / forms aren't tracked by `nav-active`), and a
-  # button-specific d-block strip.
-  def sidebar_link_kwargs(args)
-    kwargs = merge_context_nav_link_args(
-      args,
-      class: class_names(CSS_CLASSES[:indent], CSS_CLASSES[:mobile_only])
-    )
+  # classes (composed by `LinkItem`), the nav-active Stimulus data
+  # attrs (only for plain anchor links — buttons / forms aren't
+  # tracked by `nav-active`), and a button-specific d-block strip.
+  def sidebar_link_kwargs(args, css_class)
+    kwargs = merge_context_nav_link_args(args, class: css_class)
     strip_d_block_for_button!(kwargs, args)
     return kwargs if args[:button].present?
 

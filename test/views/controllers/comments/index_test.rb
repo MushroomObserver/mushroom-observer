@@ -11,8 +11,8 @@ module Views::Controllers::Comments
     end
 
     # Parity: the old raw `div.list-group { CommentRow }` and the new
-    # `Components::ListGroup::Base { list.item { CommentItem } }` must
-    # produce the same DOM. CommentRow itself wraps CommentItem in a
+    # `ListGroup { list.item { CommentItem } }` must produce the same
+    # DOM. CommentRow itself wraps CommentItem in a
     # `Components::ListGroup::Item`, so both paths delegate to the
     # same component for the `.list-group-item` wrapper.
     def test_list_group_parity_with_legacy_comment_row_render
@@ -72,7 +72,7 @@ module Views::Controllers::Comments
       render(NewCommentList.new(comments: objects, user: @user))
     end
 
-    # New list shape — Components::ListGroup::Base with list.item +
+    # New list shape — Components::ListGroup with list.item +
     # CommentItem. Mirrors what comments/index.rb#render_list now does.
     class NewCommentList < Components::Base
       include Phlex::Rails::Helpers::DOMID
@@ -81,7 +81,7 @@ module Views::Controllers::Comments
       prop :user, _Nilable(::User), default: nil
 
       def view_template
-        render(::Components::ListGroup::Base.new) do |list|
+        ListGroup do |list|
           @comments.each do |comment|
             list.item(class: "comment", id: dom_id(comment)) do
               render(CommentItem.new(comment: comment, user: @user,

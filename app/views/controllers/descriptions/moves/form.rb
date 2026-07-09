@@ -19,7 +19,8 @@ module Views::Controllers::Descriptions::Moves
 
     def view_template
       h4 { "#{:merge_descriptions_move_header.t}:" }
-      render(::Components::Help::Note.new(:p, :merge_descriptions_move_help.t))
+      Help(element: :p,
+           content: :merge_descriptions_move_help.t)
 
       return unless moves.any?
 
@@ -30,8 +31,13 @@ module Views::Controllers::Descriptions::Moves
 
     private
 
+    # `sorted_moves` is only ever populated for NameDescription moves
+    # (`compute_moves` returns [] when the parent doesn't respond to
+    # `synonyms`, which is only Name) - always Name instances.
     def render_move_options
-      options = sorted_moves.map { |name| [name.id, name.display_name.t] }
+      options = sorted_moves.map do |name|
+        [name.id, name.display_name(@user).t]
+      end
       radio_field(:target, *options)
     end
 

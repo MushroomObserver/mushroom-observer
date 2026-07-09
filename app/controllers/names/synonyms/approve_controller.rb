@@ -35,9 +35,10 @@ module Names::Synonyms
       return false unless params.dig(:approve_synonym, :deprecate_others) == "1"
 
       @others = []
-      # Refetch via `show_includes` so each sibling has the descriptions
-      # + rss_log + interests subtrees that `save_with_log`'s
-      # `notify_users` chain reaches into.
+      # Refetch via `show_includes` so each sibling has the
+      # descriptions + rss_log + interests subtrees that
+      # `save_with_log`'s `notify_users` chain reaches into — no need
+      # for `merge_includes`' `.namings`/`.observations` here.
       ids = @name.approved_synonyms.map(&:id)
       Name.show_includes.where(id: ids).find_each do |n|
         n.change_deprecated(true)

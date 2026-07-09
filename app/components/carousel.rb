@@ -5,7 +5,7 @@
 # indicator strip) every carousel-shaped component in MO composes.
 # Items + thumbnails are registered via `c.item(...) { … }` /
 # `c.thumb(...) { … }` — same hybrid pattern as
-# `Components::ListGroup::Base`. The primitive owns the
+# `Components::ListGroup`. The primitive owns the
 # `<div class="item">` / `<li class="carousel-indicator">` wrappers
 # and the caller's block fills the inside.
 #
@@ -60,7 +60,7 @@ class Components::Carousel < Components::Base
   end
 
   # Register a slide. `class:` / `id:` / arbitrary attrs flow onto the
-  # wrapping `<div class="item …">` (mirroring `ListGroup::Base#item`).
+  # wrapping `<div class="item …">` (mirroring `ListGroup#item`).
   # `active: true` overrides the default first-slide-active behavior
   # (`Matrix::Carousel` uses this to active the slide matching its
   # `top_img`); when no slide is marked active, the first one gets it.

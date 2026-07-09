@@ -114,10 +114,10 @@ class API2
 
     def add_one_observation(occ, obs)
       if obs.occurrence && obs.occurrence != occ
-        Occurrence.merge!(occ, obs.occurrence)
+        Occurrence.merge!(occ, obs.occurrence, @user)
       elsif obs.occurrence_id != occ.id
         obs.update!(occurrence: occ)
-        Occurrence.log_observation_added([obs])
+        Occurrence.log_observation_added([obs], @user)
       end
     end
 
@@ -130,7 +130,7 @@ class API2
 
         occ.reassign_thumbnails_from(obs)
         obs.update!(occurrence: nil)
-        Occurrence.log_observation_removed(obs, occ)
+        Occurrence.log_observation_removed(obs, occ, @user)
       end
       occ.reload
       occ.destroy_if_incomplete!

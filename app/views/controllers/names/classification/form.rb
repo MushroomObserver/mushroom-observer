@@ -22,9 +22,7 @@ module Views::Controllers::Names::Classification
 
     def classification_help
       rank = :"rank_#{@name.rank.to_s.downcase}".l
-      render(::Components::Help::Block.new(
-               :p, :form_names_classification_help.t(rank: rank)
-             ))
+      Help(element: :p, content: :form_names_classification_help.t(rank: rank))
     end
 
     def form_action

@@ -49,4 +49,35 @@ class InterestTest < UnitTestCase
       assert_true(Interest.joins(type_tag))
     end
   end
+
+  def test_validate_missing_user
+    interest = Interest.new(
+      target: observations(:minimal_unknown_obs),
+      state: true
+    )
+
+    assert_not(interest.save)
+    assert_includes(interest.errors[:user],
+                    :validate_interest_user_missing.t)
+  end
+
+  def test_validate_target_type_too_long
+    interest = Interest.new(
+      user: rolf,
+      target: observations(:minimal_unknown_obs),
+      state: true
+    )
+    interest.target_type = "A" * 31
+
+    assert_not(interest.save)
+    assert_includes(interest.errors[:target_type],
+                    :validate_interest_object_type_too_long.t)
+  end
+
+  def test_target_format_name_threads_interest_user_through
+    spl = species_lists(:first_species_list)
+    interest = Interest.new(user: rolf, target: spl, state: true)
+
+    assert_equal(spl.unique_format_name(rolf), interest.target_format_name)
+  end
 end

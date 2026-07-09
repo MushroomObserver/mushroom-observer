@@ -167,6 +167,109 @@ class Inat
                    "order_by should be id for pagination")
     end
 
+    def test_base_query_args_import_all_includes_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_username = "some_user"
+        i.inat_ids = ""
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:base_query_args)
+
+      assert_equal("Mushroom Observer URL", args[:without_field],
+                   "Import-all should filter by without_field by default")
+    end
+
+    def test_base_query_args_import_all_recheck_drops_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_username = "some_user"
+        i.inat_ids = ""
+        i.recheck_all = true
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:base_query_args)
+
+      assert_nil(args[:without_field],
+                 "recheck_all import-all must not filter by without_field")
+    end
+
+    def test_base_query_args_ids_mode_drops_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_username = "some_user"
+        i.inat_ids = "123,456"
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:base_query_args)
+
+      assert_nil(args[:without_field],
+                 "Explicit id lists always re-check: no without_field filter")
+    end
+
+    def test_url_request_query_args_recheck_drops_without_field
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.inat_url = "project_id=291058&without_field=foo"
+        i.recheck_all = true
+      end
+      parser = PageParser.new(import)
+
+      args = parser.send(:url_request_query_args, id_above: 0)
+
+      assert_nil(args[:without_field],
+                 "recheck_all URL mode must not filter by without_field, " \
+                 "and the user's own without_field is still stripped")
+    end
+
+    def test_add_ownership_filter_defaults_licensed_true_when_absent
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.inat_username = ""
+        i.inat_ids = "123"
+      end
+      parser = PageParser.new(import)
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG }
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_equal(true, query_args[:licensed],
+                   "licensed should default to true when the stored URL " \
+                   "doesn't specify one")
+    end
+
+    def test_add_ownership_filter_preserves_licensed_false
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = true
+        i.inat_username = ""
+        i.inat_ids = "123"
+      end
+      parser = PageParser.new(import)
+      query_args = { taxon_id: IMPORTABLE_TAXON_IDS_ARG, licensed: false }
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_equal(false, query_args[:licensed],
+                   "licensed:false from the stored URL must not be " \
+                   "overridden — ObservationImporter#unlicensed_other? is " \
+                   "the authoritative safety net, not this fetch filter")
+    end
+
+    def test_add_ownership_filter_sets_user_login_for_own_import
+      import = inat_imports(:dick_inat_import).tap do |i|
+        i.import_others = false
+        i.inat_username = "some_user"
+      end
+      parser = PageParser.new(import)
+      query_args = {}
+
+      parser.send(:add_ownership_filter, query_args)
+
+      assert_equal("some_user", query_args[:user_login],
+                   "Own-import should scope by user_login")
+      assert_nil(query_args[:licensed],
+                 "Own-import must not touch the licensed filter")
+    end
+
     def test_next_page_url_mode_returns_parsed_json
       import = inat_imports(:dick_inat_import).tap do |i|
         i.inat_url = "project_id=291058"

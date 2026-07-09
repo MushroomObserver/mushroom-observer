@@ -84,7 +84,6 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
   def test_body_class_uses_no_user_when_anonymous
     controller.instance_variable_set(:@user, nil)
-    User.current = nil
     html = render(FakePage.new)
     body = Nokogiri::HTML5.parse(html).at_css("body")
     classes = body["class"].split
@@ -186,7 +185,6 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
     langs = Language.where.not(beta: true).to_a
     controller.instance_variable_set(:@user, @user)
     controller.instance_variable_set(:@languages, langs)
-    User.current = @user
     stub_session!(layout: "")
   end
 

@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Enforces the "concrete prop types over `_Any`" rule from
-# `.claude/rules/phlex_conversions.md` ("ALWAYS use concrete prop
+# `.claude/rules/phlex_reference.md` ("ALWAYS use concrete prop
 # types — never `_Any` when the type is known").
 #
 # Scans every `app/components/**/*.rb` and `app/views/**/*.rb` file

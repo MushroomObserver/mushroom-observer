@@ -19,7 +19,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
   prop :has_descriptions, _Boolean, default: false
 
   # Row contents only — the surrounding `<div class="list-group-item">`
-  # is emitted by `Components::ListGroup::Base` in the Index view.
+  # is emitted by `Components::ListGroup` in the Index view.
   def view_template
     render_id_badge
     render_clipboard_wrapper
@@ -49,7 +49,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
     a(href: name_path(@name.id)) do
       span(class: "display-name",
            data: { clipboard_target: "source" }) do
-        trusted_html(@name.user_display_name(@user).t)
+        trusted_html(@name.display_name(@user).t)
       end
     end
   end
@@ -62,7 +62,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
       data: { toggle: "tooltip", placement: "bottom",
               title: :COPY_THIS_NAME.l,
               action: "clipboard#copy" }
-    ) { render(Components::Icon.new(type: :copy)) }
+    ) { Icon(type: :copy) }
   end
 
   def render_count_badge

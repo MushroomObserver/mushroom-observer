@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# One Bootstrap `list-group-item` row. Used by `Components::ListGroup::Base`
+# One Bootstrap `list-group-item` row. Used by `Components::ListGroup`
 # for each item registered via `list.item(...)`, and rendered
 # directly elsewhere (notably the `Comment` model's
 # `after_create_commit` broadcast, which prepends a new comment row

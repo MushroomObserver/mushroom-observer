@@ -17,7 +17,7 @@ class Components::Help::CollapseInfoTrigger < Components::Base
     Link(type: :collapse_toggle,
          target_id: @target_id,
          class: class_names("info-collapse-trigger", @extra_class)) do
-      render(::Components::Icon.new(type: :question))
+      Icon(type: :question)
     end
   end
 end

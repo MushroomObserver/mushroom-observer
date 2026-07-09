@@ -33,6 +33,12 @@ end
 SimpleCov.start("rails") do
   # An always empty file which is always reported as a coverage decrease
   add_filter("/channels/application_cable/channel.rb")
+
+  # Custom RuboCop cops are lint-time tooling — loaded and exercised by
+  # RuboCop, never by the Rails test suite. The "rails" profile's
+  # track_files("{app,lib}/**/*.rb") otherwise pulls them into the report
+  # as a permanent ~0% coverage drag.
+  add_filter("/lib/rubocop/")
 end
 
 # Allow test results to be reported back to runner IDEs.
@@ -77,6 +83,7 @@ require("rails/test_help")
 
   unit_test_case
   component_test_case
+  mailer_test_case
   functional_test_case
   integration_test_case
   capybara_integration_test_case
@@ -171,26 +178,11 @@ module ActiveSupport
     # in integration tests -- they do not yet inherit this setting
     fixtures :all
 
-    # Clean up thread-local storage before each test to ensure isolation
-    # in parallel test execution. This prevents User.current from leaking
-    # between tests running in the same thread.
-    setup do
-      Thread.current[:mushroom_observer_user] = nil
-      Thread.current[:mushroom_observer_location_format] = nil
-    end
-
-    # Clean up thread-local storage after each test
-    teardown do
-      Thread.current[:mushroom_observer_user] = nil
-      Thread.current[:mushroom_observer_location_format] = nil
-    end
-
     # Add more helper methods to be used by all tests here...
 
     # Standard setup to run before every test. Sets the locale,
-    # timezone, makes sure User doesn't think a user is logged in,
-    # and clears Symbol.missing_tags so the teardown assertion only
-    # sees tags raised by the test that just ran.
+    # timezone, and clears Symbol.missing_tags so the teardown
+    # assertion only sees tags raised by the test that just ran.
     #
     # Registered as a `setup do` callback rather than `def setup`
     # so it runs unconditionally — many test classes override
@@ -205,7 +197,6 @@ module ActiveSupport
       # rubocop:disable Rails/TimeZoneAssignment
       Time.zone = "America/New_York"
       # rubocop:enable Rails/TimeZoneAssignment
-      User.current = nil
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
     end
@@ -213,7 +204,10 @@ module ActiveSupport
     # Standard teardown to run after every test.  Just makes sure any
     # images that might have been uploaded are cleared out.
     def teardown
-      assert_equal([], Symbol.missing_tags, "Language tag(s) are missing.")
+      assert_equal([], Symbol.missing_tags,
+                   "Language tag(s) are missing. Run `bin/rails " \
+                   "lang:update` and re-run this test before concluding " \
+                   "this is a pre-existing/unrelated failure.")
       FileUtils.rm_rf(MO.local_image_files)
       UserGroup.clear_cache_for_unit_tests
     end

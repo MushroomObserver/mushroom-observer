@@ -34,7 +34,7 @@ class Views::Controllers::Observations::Show::NameSuggestionsAlert < Views::Base
   def render_name_link(name)
     plain("#{:list_observation_name.t}: ")
     a(href: url_for(name.show_link_args)) do
-      trusted_html(name.display_name.t)
+      trusted_html(name.display_name(current_user).t)
     end
     plain(" (0)")
   end
@@ -42,7 +42,7 @@ class Views::Controllers::Observations::Show::NameSuggestionsAlert < Views::Base
   def render_obs_link(name, count)
     plain("#{:list_observation_observations.t} ")
     a(href: observations_path(pattern: name.text_name)) do
-      trusted_html(name.display_name.t)
+      trusted_html(name.display_name(current_user).t)
     end
     plain(" (#{count})")
   end

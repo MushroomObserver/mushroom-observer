@@ -277,7 +277,7 @@ class LocationsController < ApplicationController
     return unless find_location!
 
     params[:location] ||= {}
-    @display_name = @location.display_name
+    @display_name = @location.display_name(@user)
 
     respond_to do |format|
       format.turbo_stream { render_modal_location_form }
@@ -460,6 +460,7 @@ class LocationsController < ApplicationController
 
   def create_location_ivar_and_save(done)
     @location = Location.new(permitted_location_params)
+    @location.current_user = @user
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
@@ -507,9 +508,10 @@ class LocationsController < ApplicationController
       @location, merge = merge, @location
     end
     if in_admin_mode? || @location.mergable?
-      old_name = @location.display_name
-      new_name = merge.display_name
+      old_name = @location.display_name(@user)
+      new_name = merge.display_name(@user)
       merge.merge(@user, @location)
+      merge.current_user = @user
       merge.save if merge.changed?
       @location = merge
       flash_notice(:runtime_location_merge_success.t(this: old_name,
@@ -527,6 +529,7 @@ class LocationsController < ApplicationController
   # Just change this location in place.
   def update_location_change
     @dubious_where_reasons = []
+    @location.current_user = @user
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
     determine_and_check_location if !@location.locked || in_admin_mode?
@@ -550,6 +553,8 @@ class LocationsController < ApplicationController
   end
 
   def save_flash_and_redirect_or_render!
+    @location.current_user = @user
+
     if !@location.changed?
       flash_warning(:runtime_edit_location_no_change.t)
       redirect_to(location_path(@location.id))
@@ -563,7 +568,7 @@ class LocationsController < ApplicationController
   end
 
   def nontrivial_location_change?
-    old_name = @location.display_name
+    old_name = @location.display_name(@user)
     new_name = @display_name
     new_name.percent_match(old_name) < 0.9
   end
@@ -582,7 +587,7 @@ class LocationsController < ApplicationController
   def email_location_change_content
     :email_location_change.l(
       user: @user.login,
-      old: @location.display_name,
+      old: @location.display_name(@user),
       new: @display_name,
       observations: @location.observations.length,
       show_url: "#{MO.http_domain}/locations/#{@location.id}",
@@ -617,7 +622,7 @@ class LocationsController < ApplicationController
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
                          object: @location, mode: :edit,
-                         title: @location.display_name
+                         title: @location.display_name(@user)
                        ))
     end
   end

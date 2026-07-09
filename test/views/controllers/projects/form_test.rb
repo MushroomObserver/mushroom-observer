@@ -100,7 +100,6 @@ module Views::Controllers::Projects
     private
 
     def render_form(model:, dates_any: true, upload_params: nil)
-      User.current = @user
       render(Form.new(
                model,
                enctype: "multipart/form-data",

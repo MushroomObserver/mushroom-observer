@@ -47,7 +47,7 @@ class TranslationString < AbstractModel
   # Aggregate changes by the same user for up to a day.
   def update_version?
     result = false
-    self.user = User.current || User.admin
+    self.user = current_user || User.admin
     self.updated_at = Time.zone.now unless updated_at_changed?
     if text_changed? && text_change[0].to_s != text_change[1].to_s
       latest = versions.latest

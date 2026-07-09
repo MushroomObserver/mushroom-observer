@@ -138,7 +138,7 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
     return unless (@species_list = find_species_list!)
 
     if permission!(@species_list)
-      @place_name = @species_list.place_name
+      @place_name = @species_list.place_name(@user)
       init_project_vars_for_edit(@species_list)
       render_phlex_edit
     else
@@ -287,13 +287,13 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   end
 
   def validate_place_name
-    if Location.is_unknown?(@species_list.place_name) ||
-       @species_list.place_name.blank?
+    if Location.is_unknown?(@species_list.place_name(@user)) ||
+       @species_list.place_name(@user).blank?
       @species_list.location = Location.unknown
       @species_list.where = nil
     end
 
-    @place_name = @species_list.place_name
+    @place_name = @species_list.place_name(@user)
     @dubious_where_reasons = []
     return if @species_list.location_id
 
@@ -322,6 +322,10 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
   def apply_species_list_params
     if params[:species_list]
+      # Must be set before `attributes=` below: `place_name=` (see
+      # HasPlaceName) reads `current_user` to decide postal vs
+      # scientific parsing.
+      @species_list.current_user = @user
       args = params[:species_list]
       @species_list.attributes = args.permit(permitted_species_list_args)
     end
@@ -344,10 +348,10 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   def log_and_flash_notices(create_or_update)
     id = @species_list.id
     if create_or_update == :create
-      @species_list.log(:log_species_list_created)
+      @species_list.log(:log_species_list_created, user: @user)
       flash_notice(:runtime_species_list_create_success.t(id: id))
     else
-      @species_list.log(:log_species_list_updated)
+      @species_list.log(:log_species_list_updated, user: @user)
       flash_notice(:runtime_species_list_edit_success.t(id: id))
     end
   end
@@ -374,7 +378,8 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
 
     @clone_id = clone_id
     @species_list.when = clone.when
-    @species_list.place_name = clone.place_name
+    @species_list.current_user = @user
+    @species_list.place_name = clone.place_name(@user)
     @species_list.location = clone.location
     @species_list.title = clone.title
   end

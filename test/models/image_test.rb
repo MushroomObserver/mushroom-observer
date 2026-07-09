@@ -3,6 +3,35 @@
 require("test_helper")
 
 class ImageTest < UnitTestCase
+  # log_update/log_destroy/log_create_for/log_reuse_for/log_remove_from
+  # attribute to `current_user` (the acting/editing user), not `user`
+  # (the image's owner) - an admin editing/removing someone else's image
+  # should show up in the RSS log as the admin, not the owner.
+  def test_log_destroy_attributes_to_current_user_not_owner
+    image = images(:turned_over_image)
+    obs = image.observations.first
+    assert_not_equal(rolf, image.user)
+
+    image.current_user = rolf
+    image.log_destroy
+
+    new_line = obs.rss_log.notes.lines.first
+    assert_match(/log_image_destroyed/, new_line)
+    assert_match(/rolf/, new_line)
+    assert_no_match(/#{image.user.login}/, new_line)
+  end
+
+  def test_log_create_for_attributes_to_current_user_not_owner
+    image = images(:turned_over_image)
+    obs = observations(:coprinus_comatus_obs)
+    assert_not_equal(rolf, image.user)
+
+    image.current_user = rolf
+    image.log_create_for(obs)
+
+    assert_match(/rolf/, obs.rss_log.notes)
+  end
+
   def test_votes
     img = images(:in_situ_image)
     assert_empty(img.image_votes)
@@ -37,8 +66,6 @@ class ImageTest < UnitTestCase
   end
 
   def test_copyright_logging
-    User.current = mary
-
     license_one = licenses(:ccnc25)
     license_two = licenses(:ccwiki30)
     name_one = "Bobby Singer"
@@ -52,6 +79,7 @@ class ImageTest < UnitTestCase
       license: license_one,
       copyright_holder: name_one
     )
+    img.current_user = mary
     assert_equal(date_one.year, img.when.year)
     assert_equal(license_one, img.license)
     assert_equal(name_one, img.copyright_holder)
@@ -142,6 +170,160 @@ class ImageTest < UnitTestCase
     assert_raises(RuntimeError) { img.transform(:edible) }
   end
 
+  # Outside the test env the guard clause is skipped and transform shells
+  # out to script/rotate_image with the mapped operator.
+  def test_transform_shells_out_when_not_in_test_env
+    img = images(:in_situ_image)
+    commands = []
+    img.stub(:system, ->(cmd) { commands << cmd }) do
+      Rails.env.stub(:test?, false) do
+        img.transform(:rotate_left)
+      end
+    end
+    assert_equal(["script/rotate_image #{img.id} -90&"], commands)
+  end
+
+  # With no local rendition on disk, compute_dhash! fetches the remote
+  # medium image (the transferred-image path the backfill relies on).
+  def test_compute_dhash_fetches_remote_when_no_local_file
+    img = images(:in_situ_image)
+    img.stub(:full_filepath, "/no/such/file.jpg") do
+      Image::Dhash.stub(:from_url, 123) do
+        assert_equal(123, img.compute_dhash!)
+      end
+    end
+    assert_equal(123, img.reload.dhash)
+  end
+
+  def test_validate_vote_rescues_non_numeric
+    assert_nil(Image.validate_vote(Object.new))
+  end
+
+  def test_num_votes_at_a_given_level
+    img = images(:in_situ_image)
+    assert_equal(0, img.num_votes(2))
+
+    img.change_vote(mary, 2)
+
+    assert_equal(1, img.num_votes(2))
+    assert_equal(0, img.num_votes(4))
+  end
+
+  def test_other_subjects
+    img = images(:in_situ_image)
+
+    assert_not_empty(img.all_subjects)
+    # An unrelated object leaves the image's own subjects in place.
+    assert(img.other_subjects?(Object.new))
+  end
+
+  def test_original_extension_by_content_type
+    {
+      "image/jpeg" => "jpg", "image/gif" => "gif", "image/png" => "png",
+      "image/tiff" => "tiff", "image/bmp" => "bmp",
+      "image/x-ms-bmp" => "bmp", "application/octet-stream" => "raw"
+    }.each do |content_type, ext|
+      assert_equal(ext, Image.new(content_type: content_type).
+                        original_extension)
+    end
+  end
+
+  def test_image_dir_defaults_and_override
+    img = Image.new
+
+    assert_equal(MO.local_image_files, img.image_dir)
+
+    img.image_dir = "/custom/dir"
+
+    assert_equal("/custom/dir", img.image_dir)
+  end
+
+  def test_image_setter_rejects_unknown_type
+    assert_raises(RuntimeError) { Image.new.image = 42 }
+  end
+
+  def test_init_image_from_local_file_blank_path
+    file = Struct.new(:path).new("")
+
+    assert_raises(RuntimeError) do
+      Image.new.init_image_from_local_file(file)
+    end
+  end
+
+  def test_init_image_from_stream_content_length
+    img = Image.new
+    stream = Object.new
+    stream.define_singleton_method(:content_length) { "42\n" }
+
+    img.init_image_from_stream(stream)
+
+    assert_equal("42", img.upload_length)
+  end
+
+  def test_upload_from_url
+    img = Image.new
+    upload = Struct.new(:content, :content_length, :content_type,
+                        :content_md5).
+             new(StringIO.new("data"), 4, "image/jpeg", "abc123")
+    upload.define_singleton_method(:clean_up) { nil }
+
+    API2::UploadFromURL.stub(:new, ->(_url) { upload }) do
+      img.upload_from_url("https://example.org/x.jpg")
+    end
+
+    assert_equal(4, img.upload_length)
+    assert_equal("image/jpeg", img.upload_type)
+    assert_equal("abc123", img.upload_md5sum)
+    assert_respond_to(img.clean_up_proc, :call)
+  end
+
+  def test_validate_image_length_too_big
+    img = Image.new
+    img.upload_length = MO.image_upload_max_size + 1
+
+    assert_not(img.validate_image_length)
+    assert(img.errors[:image].any?)
+  end
+
+  def test_save_to_temp_file_rescues_copy_error
+    img = Image.new
+    img.upload_handle = StringIO.new("data")
+
+    Tempfile.stub(:new, ->(*) { raise("boom") }) do
+      assert_not(img.save_to_temp_file)
+    end
+    assert(img.errors[:image].any?)
+  end
+
+  def test_save_to_temp_file_rejects_invalid_upload_handle
+    img = Image.new
+    img.upload_handle = Object.new # not an IO/StringIO/TeeInput
+
+    assert_not(img.save_to_temp_file)
+    assert(img.errors[:image].any?)
+  end
+
+  def test_process_image_before_save
+    img = Image.new
+
+    assert_not(img.process_image)
+    assert(img.errors[:image].any?)
+  end
+
+  def test_process_image_command_failure
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+
+    img.stub(:move_original, true) do
+      img.stub(:system, false) do
+        Rails.env.stub(:test?, false) do
+          assert_not(img.process_image)
+        end
+      end
+    end
+    assert(img.errors[:image].any?)
+  end
+
   def test_move_original_system_fail
     img = Image.new
     File.stub(:rename, false) do
@@ -170,7 +352,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(thumb)
     assert_empty(other_images)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_nil(term.reload.thumb_image,
@@ -189,7 +370,6 @@ class ImageTest < UnitTestCase
     thumb_id = thumb.id
     other_image_ids = other_images.map(&:id)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_false(term.reload.image_ids.include?(thumb_id),
@@ -205,7 +385,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(thumb)
     assert_empty(other_images)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_nil(obs.reload.thumb_image,
@@ -224,7 +403,6 @@ class ImageTest < UnitTestCase
     thumb_id = thumb.id
     other_image_ids = other_images.map(&:id)
 
-    User.current = thumb.user
     thumb.destroy!
 
     assert_false(obs.reload.image_ids.include?(thumb_id),
@@ -236,7 +414,6 @@ class ImageTest < UnitTestCase
   def test_delete_user_profile_image
     assert_not_nil(rolf.image)
 
-    User.current = rolf.image.user
     rolf.image.destroy!
 
     assert_nil(rolf.reload.image_id,
@@ -249,7 +426,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(image)
     image_id = image.id
 
-    User.current = image.user
     image.destroy!
 
     assert_false(project.reload.image_ids.include?(image_id),
@@ -262,7 +438,6 @@ class ImageTest < UnitTestCase
     assert_not_nil(image)
     image_id = image.id
 
-    User.current = image.user
     image.destroy!
 
     assert_false(group.reload.image_ids.include?(image_id),
@@ -274,7 +449,6 @@ class ImageTest < UnitTestCase
     image_id = image.id
     assert_not_empty(ImageVote.where(image_id: image_id))
 
-    User.current = image.user
     image.destroy!
 
     assert_empty(ImageVote.where(image_id: image_id),

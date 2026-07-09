@@ -51,7 +51,15 @@
 
 class Herbarium < AbstractModel
   # Used by create/edit form.
-  attr_accessor :place_name, :personal, :personal_user_name
+  attr_writer :place_name
+  attr_accessor :personal, :personal_user_name
+
+  # Plain scratch string (not viewer-aware, unlike Location/Observation/
+  # etc's place_name) - accepts and ignores an optional `user` so
+  # Locationable's shared `place_name_exists?` can call it uniformly.
+  def place_name(_user = nil)
+    @place_name
+  end
 
   has_many :herbarium_records, dependent: :destroy
   belongs_to :location
@@ -139,7 +147,7 @@ class Herbarium < AbstractModel
     curators.delete(user)
   end
 
-  def format_name
+  def format_name(_user = nil)
     code.blank? ? name : "#{name} (#{code})"
   end
 
@@ -155,7 +163,7 @@ class Herbarium < AbstractModel
     format_name
   end
 
-  def unique_format_name
+  def unique_format_name(_user = nil)
     "#{format_name} (#{id})"
   end
 
@@ -167,15 +175,17 @@ class Herbarium < AbstractModel
     code.blank? ? name : "#{code} - #{name}"
   end
 
-  def owns_all_records?(user = User.current)
+  def owns_all_records?(user = nil)
+    return false unless user
+
     herbarium_records.all? { |r| r.user_id == user.id }
   end
 
-  def can_make_personal?(user = User.current)
+  def can_make_personal?(user = nil)
     user && !user.personal_herbarium && owns_all_records?(user)
   end
 
-  def can_merge_into?(other, user = User.current)
+  def can_merge_into?(other, user = nil)
     return false if self == other
     # Target must be user's personal herbarium.
     return false if !user || !other || other.personal_user_id != user.id

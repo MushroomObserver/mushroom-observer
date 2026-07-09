@@ -220,7 +220,7 @@ class ImagesController < ApplicationController
                   (val == "0" || (val = Image.validate_vote(val)))
 
     val = nil if val == "0"
-    cur = @image.users_vote
+    cur = @image.users_vote(@user)
     if cur != val
       anon = @user.votes_anonymous == :yes
       @image.change_vote(@user, val, anon: anon)
@@ -264,6 +264,7 @@ class ImagesController < ApplicationController
     return redirect_to(action: :show, id: @image.id) unless
       permission!(@image)
 
+    @image.current_user = @user
     @image.log_destroy
     @image.destroy
     flash_notice(:runtime_image_destroy_success.t(id: params[:id].to_s))

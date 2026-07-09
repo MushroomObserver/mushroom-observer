@@ -37,6 +37,16 @@ class BaseTest < ComponentTestCase
     end
   end
 
+  # Calls `viewer_aware_unique_format_name` directly on a passed-in
+  # `obj`. Used by the fallback-branch test below.
+  class ViewerAwareFormatNameReader < Components::Base
+    prop :obj, _Any
+
+    def view_template
+      plain(viewer_aware_unique_format_name(@obj))
+    end
+  end
+
   def test_trusted_html_with_plain_string
     html = render_component(TestComponent.new)
     doc = Nokogiri::HTML(html)
@@ -120,6 +130,16 @@ class BaseTest < ComponentTestCase
     controller.instance_variable_set(:@query, nil)
 
     assert_equal("no-query", render(CurrentQueryReader.new))
+  end
+
+  # `viewer_aware_unique_format_name` passes the viewer straight
+  # through to `unique_format_name`, for any model.
+  def test_viewer_aware_unique_format_name_works_for_any_model
+    location = locations(:albion)
+
+    html = render(ViewerAwareFormatNameReader.new(obj: location))
+
+    assert_equal(location.unique_format_name, html)
   end
 
   # ----- add_args_to_url -----------------------------------------------

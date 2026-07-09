@@ -19,7 +19,7 @@ class AutocompletersController < ApplicationController
   # type::              Type of string.
   # params[:string]::   String user has entered.
   def new
-    @user = User.current = session_user
+    set_user_from_session
 
     if params[:string].blank? && params[:all].blank?
       render(json: ActiveSupport::JSON.encode([]))
