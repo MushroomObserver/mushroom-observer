@@ -434,7 +434,6 @@ Style/ArrayIntersect:
 Style/ClassVars:
   Exclude:
     - 'app/classes/run_level.rb'
-    - 'app/classes/textile.rb'
     - 'app/extensions/symbol.rb'
     - 'app/models/concerns/language_tracking.rb'
     - 'app/models/language.rb'
