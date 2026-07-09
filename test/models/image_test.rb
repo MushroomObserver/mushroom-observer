@@ -314,8 +314,13 @@ class ImageTest < UnitTestCase
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
 
+    failing_processor = Object.new
+    def failing_processor.process
+      raise("boom")
+    end
+
     img.stub(:move_original, true) do
-      img.stub(:system, false) do
+      Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
           assert_not(img.process_image)
         end
