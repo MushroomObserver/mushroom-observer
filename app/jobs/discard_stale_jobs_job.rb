@@ -3,7 +3,7 @@
 require "mission_control/jobs"
 
 class DiscardStaleJobsJob < ApplicationJob
-  queue_as :default
+  queue_as :maintenance
 
   def perform(discard_date = 1.week.ago.in_time_zone("UTC"))
     discard_stale_failed_jobs(discard_date)
