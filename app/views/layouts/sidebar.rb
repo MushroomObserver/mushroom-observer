@@ -22,7 +22,6 @@ class Views::Layouts::Sidebar < Views::Base
   # reuses the same set for its mobile rendering into the offcanvas
   # sidebar.
   CSS_CLASSES = {
-    wrapper: "navbar navbar-inverse sidebar-nav",
     heading: "disabled font-weight-bold",
     admin: "list-group-item-danger indent",
     indent: "indent",
@@ -46,7 +45,8 @@ class Views::Layouts::Sidebar < Views::Base
       comment { "SIDEBAR LOGO AND NAVIGATION" }
       div(id: "navigation") do
         render_logo
-        div(class: classes[:wrapper], data_controller: "nav-active") do
+        Navbar(variant: :inverse, element: :div, class: "sidebar-nav",
+               data_controller: "nav-active") do
           div(class: "list-group") do
             render_top_section
             render_context_nav_mobile if @user

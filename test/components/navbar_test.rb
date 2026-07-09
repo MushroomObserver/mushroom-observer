@@ -34,6 +34,27 @@ class NavbarTest < ComponentTestCase
                 attribute: { "data-foo" => "bar" })
   end
 
+  def test_variant_defaults_element_to_nav_landmark
+    html = render_component(
+      Components::Navbar.new(variant: :default,
+                             class: "hidden-print mb-2", id: "top_nav")
+    ) { "Content" }
+
+    assert_html(html, "nav.navbar.navbar-default.hidden-print.mb-2" \
+                       "#top_nav", text: "Content")
+  end
+
+  def test_variant_with_explicit_element_overrides_nav_default
+    html = render_component(
+      Components::Navbar.new(variant: :inverse, element: :div,
+                             class: "sidebar-nav",
+                             data_controller: "nav-active")
+    ) { "Content" }
+
+    assert_html(html, "div.navbar.navbar-inverse.sidebar-nav" \
+                       "[data-controller='nav-active']", text: "Content")
+  end
+
   def test_link_classes_constant
     assert_equal(%w[navbar-link btn btn-lg px-0],
                  Components::Navbar::LINK_CLASSES)

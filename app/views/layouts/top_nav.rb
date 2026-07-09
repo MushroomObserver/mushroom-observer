@@ -64,7 +64,7 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   def view_template
-    nav(class: "navbar navbar-default hidden-print mb-2", id: "top_nav") do
+    Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav") do
       render_top_row
       render_search_row
     end
