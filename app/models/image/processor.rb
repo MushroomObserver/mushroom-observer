@@ -22,7 +22,6 @@ class Image
     require "open-uri"
 
     IMAGE_SUBDIRS = Image::URL::SUBDIRECTORIES.values.freeze
-    LOCAL_IMAGES_PATH = MO.local_image_files
 
     # Store Exiftool's database in a temporary directory.
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
@@ -36,12 +35,30 @@ class Image
       ["small", "thumbnail", 160, 95]
     ].freeze
 
+    # MO.local_image_files/MO.image_sources are worker-suffix-aware lazy
+    # methods (config/consts.rb) so parallel test workers get distinct
+    # directories. Recompute per call rather than caching at class-load
+    # time -- if this class autoloads in a forked test worker before that
+    # worker's own TEST_ENV_NUMBER is set, a frozen constant would lock in
+    # the wrong (unsuffixed) path for the rest of that worker's process
+    # lifetime, colliding with every other worker on the same directory.
+    def self.local_images_path
+      MO.local_image_files
+    end
+
     # Data (type/path/subdirs) for every configured image server, keyed by
     # server name. Includes :local (the filesystem MO itself runs on).
-    IMAGE_SERVER_DATA = ServerData.build(LOCAL_IMAGES_PATH, IMAGE_SUBDIRS)
+    # Recomputed per call for the same reason local_images_path is above --
+    # see ServerData for the actual construction.
+    def self.image_server_data
+      ServerData.build(local_images_path, IMAGE_SUBDIRS)
+    end
+
     # Servers we transfer files *to* -- excludes :local, which is where the
     # files already live, not a transfer destination.
-    IMAGE_SERVERS = (IMAGE_SERVER_DATA.keys - [:local]).freeze
+    def self.image_servers
+      image_server_data.keys - [:local]
+    end
 
     attr_reader :transferred_any
 
@@ -83,7 +100,7 @@ class Image
     def transfer_files_to_image_servers
       return if Rails.env.development?
 
-      IMAGE_SERVERS.each do |server|
+      self.class.image_servers.each do |server|
         transfer_all_sizes_to_server_subdirectories(server)
       end
     end
@@ -124,7 +141,7 @@ class Image
     def make_sure_we_have_full_size_locally
       return if File.exist?(full_size_filepath)
 
-      IMAGE_SERVERS.each do |server|
+      self.class.image_servers.each do |server|
         next unless image_server_has_subdir?(server, "orig")
 
         copy_file_from_server(server, "orig/#{@id}.jpg")
@@ -177,7 +194,7 @@ class Image
     def salvage_first_layer_if_multilayer
       return if File.exist?(full_size_filepath)
 
-      layers = Dir.glob("#{LOCAL_IMAGES_PATH}/orig/#{@id}-*.jpg")
+      layers = Dir.glob("#{self.class.local_images_path}/orig/#{@id}-*.jpg")
       biggest_layer = layers.first
       return unless biggest_layer && File.exist?(biggest_layer)
 
@@ -219,7 +236,7 @@ class Image
     end
 
     def transfer_all_sizes_to_server_subdirectories(server)
-      subdirs = IMAGE_SERVER_DATA[server][:subdirs]
+      subdirs = self.class.image_server_data[server][:subdirs]
       IMAGE_SUBDIRS.each do |subdir|
         next unless subdirs.include?(subdir)
 
@@ -241,54 +258,55 @@ class Image
     end
 
     def image_server_has_subdir?(server, subdir)
-      IMAGE_SERVER_DATA[server][:subdirs].include?(subdir)
+      self.class.image_server_data[server][:subdirs].include?(subdir)
     end
 
     # Original file location
     def original_filepath
-      "#{LOCAL_IMAGES_PATH}/orig/#{@id}.#{@ext}"
+      "#{self.class.local_images_path}/orig/#{@id}.#{@ext}"
     end
 
     # full_size, huge, large, medium, small, thumbnail
     Image::URL::SUBDIRECTORIES.each do |size, subdir|
       define_method(:"#{size}_filepath") do
-        "#{LOCAL_IMAGES_PATH}/#{subdir}/#{@id}.jpg"
+        "#{self.class.local_images_path}/#{subdir}/#{@id}.jpg"
       end
     end
 
     ############################################################
 
     def copy_file_to_server(server, local_file, remote_file = local_file)
-      case IMAGE_SERVER_DATA[server][:type]
+      case self.class.image_server_data[server][:type]
       when "file"
         copy_file_to_local_server(server, local_file, remote_file)
       when "ssh"
         copy_file_to_remote_server(server, local_file, remote_file)
       else
-        raise("Unknown image server type: #{IMAGE_SERVER_DATA[server][:type]}")
+        raise("Unknown image server type: " \
+              "#{self.class.image_server_data[server][:type]}")
       end
     end
 
     def copy_file_to_local_server(server, local_file, remote_file)
-      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
+      return unless (remote_path = self.class.image_server_data[server][:path])
 
       FileUtils.mkpath(File.dirname("#{remote_path}/#{remote_file}"))
-      FileUtils.cp("#{LOCAL_IMAGES_PATH}/#{local_file}",
+      FileUtils.cp("#{self.class.local_images_path}/#{local_file}",
                    "#{remote_path}/#{remote_file}")
     end
 
     # Rsync is used to copy files to the image server(s).
     def copy_file_to_remote_server(server, local_file, remote_file)
-      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
+      return unless (remote_path = self.class.image_server_data[server][:path])
 
-      Rsync.run("#{LOCAL_IMAGES_PATH}/#{local_file}",
+      Rsync.run("#{self.class.local_images_path}/#{local_file}",
                 "#{remote_path}/#{remote_file}") do |result|
         @errors << result.error unless result.success?
       end
     end
 
     def copy_file_from_server(server, remote_file)
-      case IMAGE_SERVER_DATA[server][:type]
+      case self.class.image_server_data[server][:type]
       when "file"
         copy_file_from_local_server(server, remote_file)
       when "ssh"
@@ -297,33 +315,33 @@ class Image
         copy_file_from_http_server(server, remote_file)
       else
         raise("Don't know how to get #{remote_file} from #{server} via: " \
-              "#{IMAGE_SERVER_DATA[server][:type]}")
+              "#{self.class.image_server_data[server][:type]}")
       end
     end
 
     def copy_file_from_local_server(server, remote_file)
-      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
+      return unless (remote_path = self.class.image_server_data[server][:path])
 
       FileUtils.cp("#{remote_path}/#{remote_file}",
-                   "#{LOCAL_IMAGES_PATH}/#{remote_file}")
+                   "#{self.class.local_images_path}/#{remote_file}")
     end
 
     def copy_file_from_remote_server(server, remote_file)
-      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
+      return unless (remote_path = self.class.image_server_data[server][:path])
 
       Rsync.run("#{remote_path}/#{remote_file}",
-                "#{LOCAL_IMAGES_PATH}/#{remote_file}")
+                "#{self.class.local_images_path}/#{remote_file}")
     end
 
     def copy_file_from_http_server(server, remote_file)
-      return unless (remote_path = IMAGE_SERVER_DATA[server][:path])
+      return unless (remote_path = self.class.image_server_data[server][:path])
 
       case io = URI.parse("#{remote_path}/#{remote_file}").open
       when StringIO
-        File.write("#{LOCAL_IMAGES_PATH}/#{remote_file}", io.read)
+        File.write("#{self.class.local_images_path}/#{remote_file}", io.read)
       when Tempfile
         io.close
-        FileUtils.mv(io.path, "#{LOCAL_IMAGES_PATH}/#{remote_file}")
+        FileUtils.mv(io.path, "#{self.class.local_images_path}/#{remote_file}")
       end
     end
   end

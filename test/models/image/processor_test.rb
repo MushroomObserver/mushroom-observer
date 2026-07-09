@@ -45,12 +45,12 @@ class Image::ProcessorTest < UnitTestCase
   end
 
   def test_image_server_data_matches_config
-    assert_equal(local_root, Image::Processor::LOCAL_IMAGES_PATH)
+    assert_equal(local_root, Image::Processor.local_images_path)
     assert_equal(remote_server_path(1),
-                 Image::Processor::IMAGE_SERVER_DATA[:remote1][:path])
+                 Image::Processor.image_server_data[:remote1][:path])
     assert_equal(remote_server_path(2),
-                 Image::Processor::IMAGE_SERVER_DATA[:remote2][:path])
-    assert_equal([:remote1, :remote2], Image::Processor::IMAGE_SERVERS,
+                 Image::Processor.image_server_data[:remote2][:path])
+    assert_equal([:remote1, :remote2], Image::Processor.image_servers,
                  ":local must never be a transfer target")
   end
 
