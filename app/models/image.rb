@@ -835,18 +835,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       raise("Invalid transform operator: #{operator.inspect}")
     end
-    # Rotation invalidates the perceptual hash; rotate_image runs in the
-    # background (fire-and-forget), so schedule the rehash with a delay
-    # rather than chaining it to a completion signal we never receive.
-    ImageDhashJob.set(wait: 5.minutes).perform_later(id) if persisted?
-    return if Rails.env.test?
+    return unless persisted?
 
-    # `operator` is one of the three literals set above (never raw input)
-    # and `id` is this record's integer primary key, so neither can carry
-    # shell syntax. The trailing "&" backgrounds the rotate; the shell form
-    # is what enables it. (Brakeman command-injection warning ignored on
-    # this basis in config/brakeman.ignore.)
-    system("script/rotate_image #{id} #{operator}&")
+    # RotateImageJob enqueues ImageDhashJob itself once rotation actually
+    # finishes -- a real completion signal, not a guessed delay.
+    RotateImageJob.perform_later(id, original_extension, operator)
   end
 
   # Compute and store the perceptual hash (Image::Dhash) for this image

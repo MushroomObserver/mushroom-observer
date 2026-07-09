@@ -124,6 +124,13 @@ class Image
       end
     end
 
+    # Ruby port of script/verify_images: lists local vs remote file sizes
+    # per subdir/server, uploads mismatches, and deletes local copies once
+    # confirmed transferred everywhere relevant. See Verifier for details.
+    def self.verify_images(&log)
+      Verifier.new(&log).run
+    end
+
     private
 
     # Strip GPS data
@@ -277,73 +284,13 @@ class Image
     ############################################################
 
     def copy_file_to_server(server, local_file, remote_file = local_file)
-      case self.class.image_server_data[server][:type]
-      when "file"
-        copy_file_to_local_server(server, local_file, remote_file)
-      when "ssh"
-        copy_file_to_remote_server(server, local_file, remote_file)
-      else
-        raise("Unknown image server type: " \
-              "#{self.class.image_server_data[server][:type]}")
-      end
-    end
-
-    def copy_file_to_local_server(server, local_file, remote_file)
-      return unless (remote_path = self.class.image_server_data[server][:path])
-
-      FileUtils.mkpath(File.dirname("#{remote_path}/#{remote_file}"))
-      FileUtils.cp("#{self.class.local_images_path}/#{local_file}",
-                   "#{remote_path}/#{remote_file}")
-    end
-
-    # Rsync is used to copy files to the image server(s).
-    def copy_file_to_remote_server(server, local_file, remote_file)
-      return unless (remote_path = self.class.image_server_data[server][:path])
-
-      Rsync.run("#{self.class.local_images_path}/#{local_file}",
-                "#{remote_path}/#{remote_file}") do |result|
-        @errors << result.error unless result.success?
-      end
+      success = FileTransfer.copy_file_to_server(server, local_file,
+                                                 remote_file)
+      @errors << "Failed to transfer #{local_file} to #{server}" unless success
     end
 
     def copy_file_from_server(server, remote_file)
-      case self.class.image_server_data[server][:type]
-      when "file"
-        copy_file_from_local_server(server, remote_file)
-      when "ssh"
-        copy_file_from_remote_server(server, remote_file)
-      when "http", "https"
-        copy_file_from_http_server(server, remote_file)
-      else
-        raise("Don't know how to get #{remote_file} from #{server} via: " \
-              "#{self.class.image_server_data[server][:type]}")
-      end
-    end
-
-    def copy_file_from_local_server(server, remote_file)
-      return unless (remote_path = self.class.image_server_data[server][:path])
-
-      FileUtils.cp("#{remote_path}/#{remote_file}",
-                   "#{self.class.local_images_path}/#{remote_file}")
-    end
-
-    def copy_file_from_remote_server(server, remote_file)
-      return unless (remote_path = self.class.image_server_data[server][:path])
-
-      Rsync.run("#{remote_path}/#{remote_file}",
-                "#{self.class.local_images_path}/#{remote_file}")
-    end
-
-    def copy_file_from_http_server(server, remote_file)
-      return unless (remote_path = self.class.image_server_data[server][:path])
-
-      case io = URI.parse("#{remote_path}/#{remote_file}").open
-      when StringIO
-        File.write("#{self.class.local_images_path}/#{remote_file}", io.read)
-      when Tempfile
-        io.close
-        FileUtils.mv(io.path, "#{self.class.local_images_path}/#{remote_file}")
-      end
+      FileTransfer.copy_file_from_server(server, remote_file)
     end
   end
 end
