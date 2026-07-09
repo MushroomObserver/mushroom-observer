@@ -88,6 +88,63 @@ class Inat
       assert(builder.stable_result_set?)
     end
 
+    # Regression (#4706): a user-supplied iconic_taxa superset must be
+    # narrowed to the importable subset, not passed through unfiltered.
+    def test_expected_obs_url_strips_unimportable_iconic_taxa
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?user_id=testuser&iconic_taxa=Plantae,Fungi"
+      )
+      builder = build(model)
+
+      url = builder.expected_obs_url
+      assert_not_nil(url)
+      args = Rack::Utils.parse_query(url.split("?", 2).last)
+      assert_equal("Fungi", args["iconic_taxa"],
+                   "Expected link should drop non-importable iconic taxa")
+    end
+
+    # Regression: a space after the comma (e.g. from "Plantae, Fungi")
+    # must not defeat the importable-taxon match.
+    def test_expected_obs_url_strips_whitespace_in_iconic_taxa
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?user_id=testuser&iconic_taxa=Plantae,+Fungi"
+      )
+      builder = build(model)
+
+      url = builder.expected_obs_url
+      args = Rack::Utils.parse_query(url.split("?", 2).last)
+      assert_equal("Fungi", args["iconic_taxa"],
+                   "Expected link should match Fungi despite whitespace")
+    end
+
+    # No iconic_taxa supplied: falls back to the full importable default.
+    def test_expected_obs_url_defaults_iconic_taxa_when_absent
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?user_id=testuser"
+      )
+      builder = build(model)
+
+      url = builder.expected_obs_url
+      args = Rack::Utils.parse_query(url.split("?", 2).last)
+      assert_equal(Inat::Constants::IMPORTABLE_ICONIC_TAXA_ARG,
+                   args["iconic_taxa"],
+                   "Expected link should default to the importable taxa")
+    end
+
+    # User's iconic_taxa has zero overlap with the importable set: no
+    # link can lead anywhere useful, so a plain, unlinked count shows
+    # instead (#4706).
+    def test_expected_obs_url_returns_nil_when_no_importable_overlap
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?user_id=testuser&iconic_taxa=Plantae"
+      )
+      builder = build(model)
+
+      assert_nil(builder.expected_obs_url,
+                 "Expected no link when iconic_taxa excludes all " \
+                 "importable taxa")
+    end
+
     private
 
     def build(model)
