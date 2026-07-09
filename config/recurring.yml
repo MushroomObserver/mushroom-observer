@@ -22,3 +22,9 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at midnight
+  retransfer_images:
+    class: RetransferImagesJob
+    schedule: every day at 12:10am
+  verify_images:
+    class: VerifyImagesJob
+    schedule: every day at 1:01am

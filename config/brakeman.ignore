@@ -115,29 +115,6 @@
       "note": "False positive: Open3.capture3 is called in argv (list) form, so no shell is spawned and each interpolated argument reaches ImageMagick verbatim and cannot be parsed as shell syntax. `path` is not user input: it is an internally constructed absolute path (Image#full_filepath or a Tempfile), so it also cannot begin with '-' and be misread as a convert option."
     },
     {
-      "warning_type": "Command Injection",
-      "warning_code": 14,
-      "fingerprint": "590d3cd50f65173eac040a0c06e53a81af605cd1c821ad07ae8e88ccf49d467b",
-      "check_name": "Execute",
-      "message": "Possible command injection",
-      "file": "app/models/image.rb",
-      "line": 850,
-      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "system(\"script/rotate_image #{id} #{((\"-90\" or \"+90\") or \"-h\")}&\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Image",
-        "method": "transform"
-      },
-      "user_input": "id",
-      "confidence": "Medium",
-      "cwe_id": [
-        77
-      ],
-      "note": "False positive: `id` is this Image record's integer primary key (never a user-supplied string) and the operator is one of three string literals set by the case statement immediately above (unknown operators raise before this line). Neither interpolated value can carry shell metacharacters. The shell-string form is kept because the trailing '&' backgrounds the rotate script."
-    },
-    {
       "warning_type": "SQL Injection",
       "warning_code": 0,
       "fingerprint": "a6e091d1b880b1bf981ac1fe1b928105a62e8f0f3b71bea926142ccd08d1cc97",
