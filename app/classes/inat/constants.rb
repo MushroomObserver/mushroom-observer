@@ -53,12 +53,6 @@ class Inat
     IMPORTABLE_ICONIC_TAXA = %w[Fungi Protozoa].freeze
     IMPORTABLE_ICONIC_TAXA_ARG = IMPORTABLE_ICONIC_TAXA.join(",").freeze
 
-    # base url for iNat CC-licensed and public domain photos
-    LICENSED_PHOTO_BASE =
-      "https://inaturalist-open-data.s3.amazonaws.com/photos"
-    # base url for iNat unlicensed photos
-    UNLICENSED_PHOTO_BASE = "https://static.inaturalist.org/photos"
-    # id of iNat's "Mushroom Observer URL" observation field
     MO_URL_OBSERVATION_FIELD_ID = 5005
 
     # Extracts the MO observation id from a "Mushroom Observer URL" field
