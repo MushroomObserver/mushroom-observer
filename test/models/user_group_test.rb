@@ -43,7 +43,7 @@ class UserGroupTest < UnitTestCase
         results << [user.id, group]
       end
     end
-    threads.each(&:join)
+    threads.each(&:value)
 
     until results.empty?
       user_id, group = results.pop
