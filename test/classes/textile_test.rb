@@ -186,7 +186,7 @@ class TextileTest < UnitTestCase
         results << [name, Textile.last_species]
       end
     end
-    threads.each(&:join)
+    threads.each(&:value)
 
     until results.empty?
       registered, observed = results.pop

@@ -184,6 +184,9 @@ class Textile < String
     self.last_variety    = name
   end
 
+  private_class_method :register_species, :register_subspecies,
+                       :register_variety
+
   # Give unit test access to these internals.
   def self.name_lookup
     Thread.current[THREAD_KEYS[:name_lookup]] ||= {}
