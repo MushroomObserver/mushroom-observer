@@ -46,7 +46,7 @@ class CheckRssLogsJob < ApplicationJob
     return if ids.empty?
 
     query.update_all(column => nil) unless @dry_run
-    log("NULLING #{column} on #{ids.size} orphan rss_log(s)#{ids_suffix(ids)}")
+    log("NULLING #{column} on #{ids.size} orphan rss_log(s)#{log_suffix(ids)}")
   end
 
   def delete_nonorphans_with_bogus_type(type)
@@ -59,7 +59,7 @@ class CheckRssLogsJob < ApplicationJob
 
     query.delete_all unless @dry_run
     log("DELETING #{ids.size} rss_log(s) with bogus #{column}" \
-        "#{ids_suffix(ids)}")
+        "#{log_suffix(ids)}")
   end
 
   def delete_ghosts
@@ -68,7 +68,17 @@ class CheckRssLogsJob < ApplicationJob
     return if ids.empty?
 
     query.delete_all unless @dry_run
-    log("DELETING #{ids.size} ghost rss_log(s)#{ids_suffix(ids)}")
+    log("DELETING #{ids.size} ghost rss_log(s)#{log_suffix(ids)}")
+  end
+
+  # Bounded id sample (only when verbose) plus a "(dry run)" marker so
+  # a dry run's log line doesn't read as if it actually mutated data.
+  def log_suffix(ids)
+    "#{ids_suffix(ids)}#{dry_run_note}"
+  end
+
+  def dry_run_note
+    @dry_run ? " (dry run)" : ""
   end
 
   def ids_suffix(ids)
