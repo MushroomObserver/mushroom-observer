@@ -166,6 +166,37 @@ class TextileTest < UnitTestCase
     assert_equal(1, Textile.textile_name_size)
   end
 
+  # Proves the name-lookup cache is thread-local: N threads each
+  # register a *different* species, then read back `last_species`.
+  # Before the Thread.current[...] conversion this used a bare class
+  # variable shared by every thread, so a thread could see another
+  # thread's registered name here. Barriers force every thread to
+  # finish registering before any of them reads back, maximizing the
+  # chance of exposing cross-thread bleed if the isolation were broken.
+  def test_thread_isolation_of_name_lookup
+    names = (0...8).map { |i| "Species #{i} #{i}alpha" }
+    register_barrier = Concurrent::CyclicBarrier.new(names.size)
+    results = Queue.new
+
+    threads = names.map do |name|
+      Thread.new do
+        Textile.clear_textile_cache
+        Textile.private_register_name(name, "Species")
+        register_barrier.wait
+        results << [name, Textile.last_species]
+      end
+    end
+    threads.each(&:join)
+
+    until results.empty?
+      registered, observed = results.pop
+      assert_equal(registered, observed,
+                   "Thread saw another thread's last_species " \
+                   "(#{registered.inspect} vs #{observed.inspect}) - " \
+                   "name-lookup cache is not thread-isolated")
+    end
+  end
+
   def test_textile_div_safe
     str = "Xyz"
     assert_match(
