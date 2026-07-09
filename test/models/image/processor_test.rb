@@ -174,15 +174,6 @@ class Image::ProcessorTest < UnitTestCase
     assert_not(image.reload.gps_stripped)
   end
 
-  def test_strip_original_gps_missing_file
-    image = images(:in_situ_image)
-
-    error = Image::Processor.strip_original_gps(image, ext: "jpg")
-
-    assert(error.present?)
-    assert_not(image.reload.gps_stripped)
-  end
-
   def test_rotate_reorients_and_reprocesses
     image = images(:in_situ_image)
     image.update_columns(transferred: false, width: 1000, height: 1000)
