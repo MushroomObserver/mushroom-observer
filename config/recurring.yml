@@ -16,9 +16,17 @@ production:
     class: InatImportRecoveryJob
     # schedule must match InatImport::STUCK_THRESHOLD
     schedule: every 3 minutes
+  # repopulate_location_and_observation_center_lat_lng and
+  # discard_stale_jobs both used to fire at exactly midnight - on the
+  # :maintenance queue's 2-thread pool (config/queue.yml), that alone
+  # already saturates both threads, and midnight is also a multiple of
+  # 3, colliding by schedule with recover_stuck_inat_imports above.
+  # Staggered a few minutes apart and off any :00/:03/:06... mark so
+  # a normal run of either doesn't queue behind (or force out) the
+  # other two.
   repopulate_location_and_observation_center_lat_lng:
     class: UpdateBoxAreaAndCenterColumnsJob
-    schedule: every day at midnight
+    schedule: every day at 12:02am
   discard_stale_jobs:
     class: DiscardStaleJobsJob
-    schedule: every day at midnight
+    schedule: every day at 12:04am
