@@ -254,8 +254,15 @@ class Inat
     end
 
     # Does the MO observation's owner (or collector) correspond to the iNat
-    # observer? Match on any candidate MO login equal to the extract's
-    # inat_login, case-insensitively.
+    # observer? Match on any candidate MO login (from the curated
+    # users.inat_username mapping) equal to the extract's inat_login,
+    # case-insensitively.
+    #
+    # Deliberately strict: :na means "no curated identity link" and must not
+    # be resolved by inferring identity from MO login == iNat login, even on
+    # an exact match. Identity comes from explicit user claiming of iNat
+    # ids, not automated inference. :na is a signal to leave alone, not a
+    # gap for the comparator to paper over.
     def collector_status
       return :na if @extract.inat_login.blank? || @mo_logins.empty?
 
