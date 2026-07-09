@@ -12,12 +12,15 @@ class CheckForOrphanedThumbnailsJob < ApplicationJob
     @verbose = verbose
 
     query = orphaned_thumbnails
-    rows = query.pluck(:id, :thumb_image_id)
-    return if rows.empty?
+    count = query.count
+    return if count.zero?
 
+    # Only materialize the actual rows (an extra query) when verbose -
+    # the common non-verbose run just needs the count.
+    rows = query.pluck(:id, :thumb_image_id) if @verbose
     query.update_all(thumb_image_id: nil) unless @dry_run
-    log("NULLING thumb_image_id on #{rows.size} observation(s)" \
-        "#{rows_suffix(rows)}")
+    log("NULLING thumb_image_id on #{count} observation(s)" \
+        "#{rows_suffix(rows)}#{dry_run_note}")
   end
 
   private
@@ -32,6 +35,10 @@ class CheckForOrphanedThumbnailsJob < ApplicationJob
   end
 
   def rows_suffix(rows)
-    @verbose ? " #{rows.inspect}" : ""
+    rows ? " #{rows.inspect}" : ""
+  end
+
+  def dry_run_note
+    @dry_run ? " (dry run)" : ""
   end
 end
