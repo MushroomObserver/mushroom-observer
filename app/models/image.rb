@@ -769,29 +769,31 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     elsif save_to_temp_file
       ext = original_extension
       set_image_size(upload_temp_file) if ext == "jpg"
-      set = width.nil? ? "1" : "0"
+      set_size = width.nil?
       update_attribute(:gps_stripped, true) if strip
-      strip = strip ? "1" : "0"
       # move_original returns true or raises — never false — so there is no
       # reachable else branch here.
-      if move_original
-        cmd = MO.process_image_command.
-              gsub("<id>", id.to_s).
-              gsub("<ext>", ext).
-              gsub("<set>", set).
-              gsub("<strip>", strip)
-        if !Rails.env.test? && !system(cmd)
-          errors.add(:image, :runtime_image_process_failed.t(id: id))
-          result = false
-        else
-          # Only after processing has succeeded (or been skipped in test):
-          # enqueueing earlier would hash an image whose upload ultimately
-          # failed, and could race the resize/strip command writing files.
-          ImageDhashJob.perform_later(id)
-        end
-      end
+      result = process_and_enqueue_dhash(ext, set_size, strip) if move_original
     end
     result
+  end
+
+  # Runs Image::Processor synchronously (skipped in test, see
+  # test/models/image/processor_test.rb for direct coverage), then enqueues
+  # the perceptual-hash job. Only after processing has succeeded: enqueueing
+  # earlier would hash an image whose upload ultimately failed, and could
+  # race the resize/strip command writing files.
+  def process_and_enqueue_dhash(ext, set_size, strip)
+    unless Rails.env.test?
+      Image::Processor.new(image: self, ext: ext, set_size: set_size,
+                           strip_gps: strip).process
+    end
+    ImageDhashJob.perform_later(id)
+    true
+  rescue StandardError => e
+    Rails.logger.error("Image::Processor failed for image #{id}: #{e}")
+    errors.add(:image, :runtime_image_process_failed.t(id: id))
+    false
   end
 
   # Move temp file into its final position.  Adds any errors to the :image
