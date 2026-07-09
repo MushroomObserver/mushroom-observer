@@ -278,6 +278,68 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
+  # Turbo Stream broadcasts that keep every rendered copy of this image
+  # (matrix boxes, side panels, the observation-show carousel) live once
+  # background processing (ProcessImageJob/RotateImageJob) finishes,
+  # without a full page reload. Fires only on the two columns those jobs
+  # actually flip -- an unrelated Image edit (copyright, notes, vote)
+  # never re-renders anything.
+  after_update_commit lambda { |image|
+    image.broadcast_processed_update if image.saved_change_to_transferred? ||
+                                        image.saved_change_to_gps_stripped?
+  }
+
+  # Renders for an anonymous viewer -- there's no request-scoped
+  # current_user to reflect here, same limitation Comment's and
+  # InatImport's own broadcasts accept. A call site with heavier
+  # per-user customization (vote highlighting, an admin-only
+  # affordance) catches up on the next real page load, not via this
+  # broadcast.
+  def broadcast_processed_update
+    broadcast_interactive_sizes
+    broadcast_carousel_slide
+  end
+
+  # One broadcast per size Interactive might be showing on any given
+  # page (see INTERACTIVE_BROADCAST_SIZES) -- outright replace, since
+  # Interactive's wrapper div carries no externally-managed state
+  # (unlike the carousel's .active class below), so a full re-render
+  # is simplest and picks up any width/style change too.
+  def broadcast_interactive_sizes
+    INTERACTIVE_BROADCAST_SIZES.each do |size|
+      html = ApplicationController.renderer.render(
+        Components::Image::Interactive.new(user: nil, image: self,
+                                           size: size),
+        layout: false
+      )
+      broadcast_replace_to(
+        [self, :processed],
+        target: "interactive_image_#{id}_#{size}",
+        html: html
+      )
+    end
+  end
+
+  # `Components::ImageGallery`'s carousel slide: `broadcast_update_to`
+  # (not replace) targeting the existing "carousel_item_<id>" wrapper
+  # that `Components::Carousel` already renders -- an inner-only swap
+  # so the carousel's own .active/.item classing (which slide is
+  # currently showing) is untouched by this broadcast. `Carousel::Item`
+  # itself renders no outer wrapper, just the img/overlays/caption that
+  # belong inside that wrapper, so ImageGallery::Item's own output is
+  # already exactly the right payload.
+  def broadcast_carousel_slide
+    html = ApplicationController.renderer.render(
+      Components::ImageGallery::Item.new(user: nil, image: self),
+      layout: false
+    )
+    broadcast_update_to(
+      [self, :processed],
+      target: "carousel_item_#{id}",
+      html: html
+    )
+  end
+
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
     observations + profile_users + glossary_terms
@@ -364,6 +426,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Return an Array of all image sizes from +:thumbnail+ to +:full_size+.
   ALL_SIZES = ALL_SIZES_INDEX.keys.freeze
+
+  # Sizes `Components::Image::Interactive` gets broadcast for by
+  # Image#broadcast_processed_update. Every call site using the
+  # component's default id_prefix (all but glossary_terms/show.rb,
+  # which overrides it) picks up a live update regardless of which of
+  # these sizes that page happens to render -- a call site with a
+  # custom id_prefix simply has no matching element in its DOM, so its
+  # broadcast is a silent no-op there.
+  INTERACTIVE_BROADCAST_SIZES = (ALL_SIZES - [:full_size]).freeze
 
   # Return an Array of all image sizes as pixels (Integer) instead of Symbol's.
   ALL_SIZES_IN_PIXELS = ALL_SIZES_INDEX.values.freeze

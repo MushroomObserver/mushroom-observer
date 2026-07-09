@@ -32,6 +32,12 @@ class Components::ImageGallery < Components::Base
 
   def view_template
     @carousel_id ||= generate_carousel_id
+    # Rendered as a plain top-level statement, not inside the Carousel
+    # builder block below -- that block is `vanish`ed (its direct
+    # output discarded; only the registered item/thumb blocks survive
+    # to render later), so a `turbo_stream_from` call placed inside it
+    # would silently never emit anything.
+    register_stream_subscriptions
     Panel(panel_id: @panel_id) do |panel|
       panel.with_heading { @title } if @thumbnails
       # `@links` is a `SafeBuffer` from a Rails `capture { … }` block;
@@ -64,6 +70,18 @@ class Components::ImageGallery < Components::Base
            )) do |c|
       register_slides(c)
       register_thumbnails(c) if @thumbnails
+    end
+  end
+
+  # Subscribes this page to Image#broadcast_processed_update's
+  # carousel-slide broadcast, which updates the inside of each
+  # "carousel_item_<id>" wrapper (registered below) once processing
+  # finishes.
+  def register_stream_subscriptions
+    @images.each do |image|
+      next unless image
+
+      turbo_stream_from([image, :processed])
     end
   end
 

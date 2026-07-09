@@ -4,6 +4,7 @@ require("test_helper")
 
 class ImageTest < UnitTestCase
   include ActiveJob::TestHelper
+  include ActionCable::TestHelper
 
   # log_update/log_destroy/log_create_for/log_reuse_for/log_remove_from
   # attribute to `current_user` (the acting/editing user), not `user`
@@ -508,6 +509,46 @@ class ImageTest < UnitTestCase
 
     assert_not(img.gps_stripped)
     assert_not(img.safe_to_serve_original?)
+  end
+
+  def test_broadcast_processed_update_fires_on_transferred_change
+    image = images(:in_situ_image)
+    image.update_column(:transferred, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    # `capture_broadcasts` JSON-decodes each message back to the raw
+    # `<turbo-stream ...>` HTML string ActionCable stores it as.
+    messages = capture_broadcasts(stream) { image.update(transferred: true) }
+
+    # One broadcast_replace_to per INTERACTIVE_BROADCAST_SIZES entry,
+    # plus one broadcast_update_to for the carousel slide.
+    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length + 1,
+                 messages.length)
+    Image::INTERACTIVE_BROADCAST_SIZES.each do |size|
+      target = "interactive_image_#{image.id}_#{size}"
+      assert(messages.any? { |m| m.include?(%(target="#{target}")) },
+             "Expected a broadcast targeting #{target}")
+    end
+    carousel_target = "carousel_item_#{image.id}"
+    assert(messages.any? { |m| m.include?(%(target="#{carousel_target}")) },
+           "Expected a broadcast targeting #{carousel_target}")
+  end
+
+  def test_broadcast_processed_update_fires_on_gps_stripped_change
+    image = images(:in_situ_image)
+    image.update_column(:gps_stripped, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_broadcasts(stream, Image::INTERACTIVE_BROADCAST_SIZES.length + 1) do
+      image.update(gps_stripped: true)
+    end
+  end
+
+  def test_broadcast_processed_update_does_not_fire_on_unrelated_changes
+    image = images(:in_situ_image)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_no_broadcasts(stream) { image.update(notes: "new notes") }
   end
 
   def test_import_link

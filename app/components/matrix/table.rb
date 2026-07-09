@@ -44,8 +44,19 @@ class Components::Matrix::Table < Components::Base
   # the controller's `Rails.cache.exist?` pre-check in
   # `ApplicationController::Indexes#object_fragment_exist?`. Keeping
   # both ends on one method ensures they agree on the key shape.
+  #
+  # Folds in the thumb image's own processing state so a fragment
+  # cached before the image finished processing gets busted once it
+  # has -- `thumb_image` (an Observation/RssLog's thumb, or the
+  # `Image` itself when the matrix object IS one) has no `touch:
+  # true` link back to `object`, so its `after_update_commit`
+  # broadcast (see Image#broadcast_processed_update) never bumps
+  # `object`'s own `updated_at`/`cache_key`, and Image's transferred/
+  # gps_stripped flags wouldn't otherwise appear here at all.
   def self.cache_key_for(object, locale)
-    ["MatrixBox", CACHE_VERSION, locale, object]
+    thumb = object.is_a?(::Image) ? object : object.try(:thumb_image)
+    ["MatrixBox", CACHE_VERSION, locale, object,
+     thumb&.transferred, thumb&.gps_stripped]
   end
 
   # Per-object predicate the render path uses to decide whether to
@@ -54,8 +65,12 @@ class Components::Matrix::Table < Components::Base
   # (`ApplicationController::Indexes#object_fragment_exist?`).
   # Objects with an untransferred thumb_image are skipped — the
   # rendered HTML embeds the image URL, which would be wrong (and
-  # the wrong-cached) until the transfer completes.
+  # wrongly cached) until the transfer completes. An `Image` object
+  # itself (images/index) has no `thumb_image` to defer to -- it IS
+  # the thumb -- so check its own `transferred` directly instead of
+  # falling through the `respond_to?` guard to an unconditional true.
   def self.should_cache_object?(object)
+    return object.transferred != false if object.is_a?(::Image)
     return true unless object.respond_to?(:thumb_image)
 
     object.thumb_image&.transferred != false

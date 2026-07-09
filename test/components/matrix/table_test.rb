@@ -106,6 +106,89 @@ class MatrixTableTest < ComponentTestCase
     )
   end
 
+  # A bare Image object (images/index's matrix table) has no
+  # `thumb_image` to defer to -- it IS the thumb. should_cache_object?
+  # must check the Image's own `transferred` directly instead of
+  # falling through the `respond_to?(:thumb_image)` guard to an
+  # unconditional true (the gap this test guards against).
+  def test_caches_image_objects_with_transferred_true
+    image = images(:connected_coprinus_comatus_image)
+    image.stub(:transferred, true) do
+      component = Components::Matrix::Table.new(
+        objects: [image], user: @user, cached: true
+      )
+
+      cache_called = false
+      component.stub(:low_level_cache, lambda { |_key, &block|
+        cache_called = true
+        block.call
+      }) do
+        render(component)
+      end
+
+      assert(cache_called,
+             "Expected cache to be called for a transferred Image object")
+    end
+  end
+
+  def test_does_not_cache_image_objects_with_transferred_false
+    image = images(:connected_coprinus_comatus_image)
+    image.stub(:transferred, false) do
+      component = Components::Matrix::Table.new(
+        objects: [image], user: @user, cached: true
+      )
+
+      cache_called = false
+      component.stub(:low_level_cache, lambda { |_key, &block|
+        cache_called = true
+        block.call
+      }) do
+        html = render(component)
+        assert_includes(html, "box_#{image.id}")
+      end
+
+      assert_not(cache_called,
+                 "Expected cache NOT to be called for an untransferred " \
+                 "Image object")
+    end
+  end
+
+  # cache_key_for folds in the thumb image's own transferred/
+  # gps_stripped state so a fragment cached before processing finished
+  # gets busted once it has (Image#broadcast_processed_update's
+  # broadcast doesn't touch the parent Observation's own cache_key).
+  def test_cache_key_for_reflects_thumb_image_processing_state
+    obs = observations(:coprinus_comatus_obs)
+    thumb = obs.thumb_image
+
+    transferred_key = thumb.stub(:transferred, true) do
+      Components::Matrix::Table.cache_key_for(obs, I18n.locale)
+    end
+    untransferred_key = thumb.stub(:transferred, false) do
+      Components::Matrix::Table.cache_key_for(obs, I18n.locale)
+    end
+
+    assert_not_equal(transferred_key, untransferred_key)
+  end
+
+  # For a bare Image object, cache_key_for reads the Image's own
+  # transferred/gps_stripped, not a (nonexistent) thumb_image.
+  def test_cache_key_for_image_object_uses_its_own_processing_state
+    image = images(:connected_coprinus_comatus_image)
+
+    image.stub(:transferred, true) do
+      image.stub(:gps_stripped, true) do
+        key = Components::Matrix::Table.cache_key_for(image, I18n.locale)
+
+        assert_equal(
+          ["MatrixBox", Components::Matrix::Table::CACHE_VERSION,
+           I18n.locale, image, true, true],
+          key
+        )
+      end
+    end
+  end
+
   def test_caches_observations_with_nil_thumb_image
     obs = observations(:minimal_unknown_obs)
     assert_nil(obs.thumb_image,
