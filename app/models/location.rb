@@ -332,18 +332,30 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     # Only official_unknown (locale-independent, always English) is
     # cached - :unknown_locations.l below depends on the CURRENT
     # I18n.locale, so it must stay uncached and evaluated fresh here.
-    cached = Rails.cache.fetch("location/official_unknown",
-                               expires_in: 1.day) { official_unknown }
+    # The rescue is deliberately OUTSIDE Rails.cache.fetch: if
+    # official_unknown raises (e.g. a transient DB error), the block
+    # never returns normally, so fetch never writes anything to the
+    # cache - a failure isn't cached for up to a day, it's just
+    # retried on the next call. race_condition_ttl avoids a stampede
+    # of simultaneous recomputation right at expiry.
+    cached = Rails.cache.fetch(
+      "location/official_unknown",
+      expires_in: 1.day, race_condition_ttl: 10.seconds
+    ) { official_unknown }
     (cached + :unknown_locations.l.split(/, */)).uniq
+  rescue StandardError
+    :unknown_locations.l.split(/, */).uniq
   end
 
+  # Raises on failure (a nil Language.official, a missing translation
+  # string, etc.) - deliberately not rescued here, so names_for_unknown
+  # (the only caller) can distinguish "really got []" from "this
+  # failed" and avoid caching the latter.
   def self.official_unknown
     # yikes! need to make sure we always include the English words
     # for "unknown", even when viewing the site in another language
     Language.official.translation_strings.find_by(tag: "unknown_locations").
       text.split(/, */)
-  rescue StandardError
-    []
   end
 
   # Get an instance of the Location whose name means "unknown".
