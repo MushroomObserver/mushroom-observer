@@ -240,8 +240,12 @@ class Vote < AbstractModel
     # This is really expensive, but AN and JH can't think of any better way.
     join = "LEFT OUTER JOIN `observation_views` ON " \
            "#{votes_views_join_condition}"
-    # (user 0 is used for anonymous votes, ignore those)
-    Vote.where.not(user_id: 0).joins(join).
+    # (user 0 is used for anonymous votes, ignore those; observation_id nil
+    # means the naming was never attached to an observation, so there's
+    # nothing to create an ObservationView for. Without this exclusion these
+    # votes never match the LEFT JOIN - NULL never equals NULL in SQL - so
+    # they'd generate a fresh junk ObservationView every night forever.)
+    Vote.where.not(user_id: 0).where.not(observation_id: nil).joins(join).
       where(observation_views: { id: nil }).
       select(arel_table[:observation_id],
              arel_table[:user_id],
