@@ -40,7 +40,7 @@ class QueueConfigTest < UnitTestCase
   def test_database_pool_is_large_enough_for_configured_worker_threads
     config = SolidQueue::Configuration.new
     valid = config.valid?
-    assert_equal(valid, config.error_messages.join("\n"))
+    assert_equal(valid, config.error_messages)
   end
 
   private
