@@ -7,6 +7,8 @@ require("test_helper")
 # script/retransfer_images. See test/classes/image_script_test.rb for the
 # equivalent coverage of the still-live shell scripts.
 class Image::ProcessorTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   TIFF_FIXTURE = Rails.root.join("test/images/pleopsidium.tiff").to_s
   JPG_FIXTURE = Rails.root.join("test/images/sticky.jpg").to_s
   GEOTAGGED_FIXTURE = Rails.root.join("test/images/geotagged.jpg").to_s
@@ -219,6 +221,157 @@ class Image::ProcessorTest < UnitTestCase
     image = images(:in_situ_image)
     image.stub(:user, nil) do
       assert_raises(RuntimeError) { Image::Processor.new(image: image) }
+    end
+  end
+
+  def test_process_strip_gps_failure_emails_webmaster
+    image = images(:in_situ_image)
+    image.update_columns(transferred: false)
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+    processor = Image::Processor.new(image: image, ext: "jpg",
+                                     strip_gps: true)
+
+    processor.stub(:system, false) do
+      assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+        processor.process
+      end
+    end
+  end
+
+  def test_rotate_mirror_horizontal
+    image = images(:in_situ_image)
+    image.update_columns(transferred: false, width: 1000, height: 1000)
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+
+    Image::Processor.new(image: image, ext: "jpg").rotate("-h")
+
+    image.reload
+    assert_equal(407, image.width)
+    assert_equal(500, image.height)
+    assert(image.transferred)
+  end
+
+  def test_rotate_mirror_vertical
+    image = images(:in_situ_image)
+    image.update_columns(transferred: false, width: 1000, height: 1000)
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+
+    Image::Processor.new(image: image, ext: "jpg").rotate("-v")
+
+    image.reload
+    assert_equal(407, image.width)
+    assert_equal(500, image.height)
+    assert(image.transferred)
+  end
+
+  def test_salvage_first_layer_if_multilayer_picks_one_and_cleans_up
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "tiff")
+    File.write("#{local_root}/orig/#{image.id}-0.jpg", "first layer")
+    File.write("#{local_root}/orig/#{image.id}-1.jpg", "second layer")
+
+    processor.send(:salvage_first_layer_if_multilayer)
+
+    assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
+    assert_includes(["first layer", "second layer"],
+                    File.read("#{local_root}/orig/#{image.id}.jpg"))
+    assert_not(File.exist?("#{local_root}/orig/#{image.id}-0.jpg"))
+    assert_not(File.exist?("#{local_root}/orig/#{image.id}-1.jpg"))
+  end
+
+  def test_copy_file_to_server_ssh_type_uses_rsync
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    File.write("#{local_root}/thumb/#{image.id}.jpg", "rsync me")
+    fake_data = { ssh_server: { type: "ssh", path: remote_server_path(1) } }
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      processor.send(:copy_file_to_server, :ssh_server,
+                     "thumb/#{image.id}.jpg")
+    end
+
+    assert_equal(
+      "rsync me",
+      File.read("#{remote_server_path(1)}/thumb/#{image.id}.jpg")
+    )
+  end
+
+  def test_copy_file_to_server_unknown_type_raises
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    fake_data = { weird: { type: "ftp", path: "/tmp" } }
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      assert_raises(RuntimeError) do
+        processor.send(:copy_file_to_server, :weird, "x.jpg")
+      end
+    end
+  end
+
+  def test_copy_file_from_server_ssh_type_uses_rsync
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    File.write("#{remote_server_path(1)}/thumb/#{image.id}.jpg",
+               "remote data")
+    fake_data = { ssh_server: { type: "ssh", path: remote_server_path(1) } }
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      processor.send(:copy_file_from_server, :ssh_server,
+                     "thumb/#{image.id}.jpg")
+    end
+
+    assert_equal("remote data",
+                 File.read("#{local_root}/thumb/#{image.id}.jpg"))
+  end
+
+  def test_copy_file_from_server_http_type_stringio_response
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    fake_data = { http_server: { type: "http", path: "http://example.test" } }
+    fake_uri = Object.new
+    fake_uri.define_singleton_method(:open) { StringIO.new("http body") }
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      URI.stub(:parse, fake_uri) do
+        processor.send(:copy_file_from_server, :http_server,
+                       "thumb/#{image.id}.jpg")
+      end
+    end
+
+    assert_equal("http body",
+                 File.read("#{local_root}/thumb/#{image.id}.jpg"))
+  end
+
+  def test_copy_file_from_server_http_type_tempfile_response
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    fake_data = { http_server: { type: "http", path: "http://example.test" } }
+    tempfile = Tempfile.new("http_test")
+    tempfile.write("tempfile body")
+    tempfile.rewind
+    fake_uri = Object.new
+    fake_uri.define_singleton_method(:open) { tempfile }
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      URI.stub(:parse, fake_uri) do
+        processor.send(:copy_file_from_server, :http_server,
+                       "thumb/#{image.id}.jpg")
+      end
+    end
+
+    assert_equal("tempfile body",
+                 File.read("#{local_root}/thumb/#{image.id}.jpg"))
+  end
+
+  def test_copy_file_from_server_unknown_type_raises
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    fake_data = { weird: { type: "ftp", path: "/tmp" } }
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      assert_raises(RuntimeError) do
+        processor.send(:copy_file_from_server, :weird, "x.jpg")
+      end
     end
   end
 end
