@@ -29,7 +29,7 @@ module Views::Layouts
     prop :letter_param, _Nilable(::String)
 
     def view_template
-      div(class: "pagination-#{@position} navbar-flex mb-2") do
+      div(class: "pagination-#{@position} flex-bar mb-2") do
         div(class: "d-flex") { render(sorter_slot) if sorter_slot? }
         div(class: "d-flex") do
           render_letter_pagination_nav
@@ -45,8 +45,8 @@ module Views::Layouts
 
       this_letter, letters = letter_pagination_pages
 
-      nav(class: "paginate pagination_letters navbar-flex pl-4") do
-        Navbar(class: "mx-0") { :by_letter.l }
+      nav(class: "paginate pagination_letters flex-bar pl-4") do
+        render(Components::Navbar::Text.new(class: "mx-0")) { :by_letter.l }
         render_letter_input(this_letter, letters)
       end
     end
@@ -57,7 +57,7 @@ module Views::Layouts
       setup_letter_params
       setup_page_numbers
 
-      nav(class: "paginate pagination_numbers navbar-flex pl-4") do
+      nav(class: "paginate pagination_numbers flex-bar pl-4") do
         render_page_link(:prev, disabled: @prev_page < 1)
         render_page_label
         render_goto_page_input(@this_page, @max_page)
@@ -77,13 +77,17 @@ module Views::Layouts
     end
 
     def render_page_label
-      Navbar(class: "mx-0 hidden-xs") { :PAGE.l }
+      render(Components::Navbar::Text.new(class: "mx-0 hidden-xs")) { :PAGE.l }
     end
 
     def render_max_page_link(max_page)
       max_url = pagination_link_url(max_page)
-      Navbar(class: "ml-0 mr-2 hidden-xs") { :of.l }
-      Navbar(class: "mx-0") { a(href: max_url) { max_page.to_s } }
+      render(Components::Navbar::Text.new(class: "ml-0 mr-2 hidden-xs")) do
+        :of.l
+      end
+      render(Components::Navbar::Text.new(class: "mx-0")) do
+        a(href: max_url) { max_page.to_s }
+      end
     end
 
     def setup_page_numbers

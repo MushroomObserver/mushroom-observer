@@ -1,31 +1,37 @@
 # frozen_string_literal: true
 
 module Components
-  # Wraps content in Bootstrap's `.navbar-text` styling by default — the
-  # small inline label/link pattern reused across the top nav, the index
-  # pagination bar, and the sort dropdown (`SEARCH.l`, `PAGE.l`,
-  # `by_letter.l`, `sort_by_header.l`, the anonymous-user login
-  # reminder, etc). These are inline content sitting *inside* an
-  # already-real `<nav>` landmark declared elsewhere (or inside a
-  # `<ul>`/`<form>` that dictates its own tag), never a landmark
-  # themselves — element defaults to `<div>`; pass `element:` for the
-  # `<li>`/`<strong>` shapes those callers need. Stays `<div>`/`<span>`
-  # under BS4 too (`.navbar-text`'s canonical BS4 shape is `<span>`,
-  # still non-landmark).
+  # The outer `.navbar` landmark wrapper — a real `<nav class="navbar
+  # navbar-{variant}">` element (top nav), or occasionally a `<div>`
+  # used purely for background/text-color theming (the sidebar's
+  # inverse-styled wrapper, nested *inside* the sidebar's own real
+  # `<nav id="sidebar">` landmark — nesting a second `<nav>` there for
+  # pure theming would be a redundant landmark, so that caller
+  # explicitly overrides `element:` back to `:div`).
   #
-  # Pass `variant:` (`:default` or `:inverse`) to render the *outer*
-  # `.navbar` wrapper instead — this is the one shape that's usually a
-  # real `<nav class="navbar navbar-{variant}">` landmark (top nav), so
-  # `element:` defaults to `:nav` whenever `variant:` is given. The
-  # sidebar's inverse-styled wrapper is the exception: it's a `.navbar
-  # navbar-inverse` div used purely for background/text-color theming,
-  # nested *inside* the sidebar's own real `<nav id="sidebar">` landmark
-  # — nesting a second `<nav>` there for pure theming would be a
-  # redundant landmark, so that caller explicitly overrides back to
-  # `element: :div`. BS4 renames `navbar-inverse`/`navbar-default` to
-  # `navbar-dark`/`navbar-light` (a color-scheme class, not landmark-
-  # specific either) — add those to the variant union when that
-  # migration lands rather than inventing a separate component.
+  # `variant:` (`:default` or `:inverse`) is required — there's no
+  # "no variant" fallback shape here. The inline `.navbar-text` label
+  # pattern that sits *inside* a navbar is a different concept
+  # entirely, not a `.navbar` despite the shared name prefix — see
+  # `Components::Navbar::Text`.
+  #
+  # `element:` defaults to `:nav`, matching the common case; override
+  # explicitly for the sidebar's theming-only div. BS4 renames
+  # `navbar-inverse`/`navbar-default` to `navbar-dark`/`navbar-light`
+  # (a color-scheme class, not landmark-specific either) — add those
+  # to the variant union when that migration lands rather than
+  # inventing a separate component.
+  #
+  # Every instance also gets `navbar-flex` alongside `navbar` — MO's
+  # BS3->BS4 navbar bridge class (unrelated to `.flex-bar`, the plain
+  # 3-utility-class alias used standalone by sorter/search-bar/
+  # pagination/etc — different name specifically so the two don't
+  # read as the same concept). Co-occurring with `navbar` triggers a
+  # compound SCSS rule (`.navbar.navbar-flex` in `mo/_top_nav.scss`)
+  # that overrides the `.navbar` box-model properties BS4 drops or
+  # reshapes (including padding — see `base_class` below), so both
+  # real landmarks stay visually identical today while already being
+  # expressed in BS4-forward terms.
   #
   # Also holds `LINK_CLASSES` and `FORM_CLASS` — plain string/array
   # constants (not renderable shapes) for two other `navbar-*`
@@ -43,18 +49,11 @@ module Components
   # references these constants (instead of retyping the raw strings)
   # gets that swap in one place.
   #
-  # @example Default <div class="navbar-text"> wrapper
-  #   Navbar(class: "mx-0") { plain(:PAGE.l) }
-  #
-  # @example <li class="navbar-text"> wrapper
-  #   Navbar(element: :li, class: "mx-0 hidden-xs") { plain("Sort by:") }
-  #
   # @example The outer <nav class="navbar navbar-default"> landmark
-  #   (element: :nav is the default here — variant: implies it)
   #   Navbar(variant: :default, id: "top_nav") { ... }
   #
   # @example A <div class="navbar navbar-inverse"> theming wrapper
-  #   (explicit element: :div overrides the variant: nav default)
+  #   (explicit element: :div overrides the :nav default)
   #   Navbar(variant: :inverse, element: :div, class: "sidebar-nav",
   #          data_controller: "nav-active") { ... }
   #
@@ -67,21 +66,14 @@ module Components
     FORM_CLASS = "navbar-form"
 
     prop :element, _Nilable(Symbol), default: nil
-    prop :variant, _Nilable(_Union(:default, :inverse)), default: nil
+    prop :variant, _Union(:default, :inverse)
     prop :attributes, _Hash(Symbol, _Any), :**
 
     def view_template(&block)
-      send(effective_element, **computed_attributes, &block)
+      send(@element || :nav, **computed_attributes, &block)
     end
 
     private
-
-    # `variant:` implies the outer `.navbar` landmark shape, so it
-    # defaults `element:` to `:nav` - override explicitly (e.g. the
-    # sidebar's theming-only div) when that default doesn't apply.
-    def effective_element
-      @element || (@variant ? :nav : :div)
-    end
 
     def computed_attributes
       {
@@ -90,8 +82,16 @@ module Components
       }
     end
 
+    # `p-0` is baked in (rather than left for each caller to add)
+    # because the bridge rule's `padding` is a real value, not a
+    # no-op - every current caller wants zero, so callers shouldn't
+    # have to remember it. `.p-0` is `!important`
+    # (`mo/_utilities.scss`), so a future caller wanting *different*
+    # padding can't just add another padding utility class alongside
+    # it and expect a predictable winner - that'll need a real
+    # mechanism (e.g. a `padding:` prop), not a class override.
     def base_class
-      @variant ? "navbar navbar-#{@variant}" : "navbar-text"
+      "navbar navbar-flex navbar-#{@variant} p-0"
     end
   end
 end

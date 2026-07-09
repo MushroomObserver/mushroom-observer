@@ -46,7 +46,7 @@ module Views::Layouts
                     ))
 
       # Main container
-      assert_includes(html, 'class="nav navbar-flex object_pager"')
+      assert_includes(html, 'class="nav flex-bar object_pager"')
 
       # Three li elements
       assert_html(html, "ul.object_pager > li", count: 3)

@@ -14,7 +14,7 @@ module Views::Layouts
       html = render_nav(position: :top, pagination_data: paginated(50, 1))
 
       # Main container has correct position class
-      assert_includes(html, 'class="pagination-top navbar-flex mb-2"')
+      assert_includes(html, 'class="pagination-top flex-bar mb-2"')
 
       # Contains two d-flex divs
       assert_html(html, "div.pagination-top > div.d-flex", count: 2)
@@ -23,13 +23,13 @@ module Views::Layouts
     def test_renders_basic_structure_with_position_bottom
       html = render_nav(position: :bottom, pagination_data: paginated(50, 1))
 
-      assert_includes(html, 'class="pagination-bottom navbar-flex mb-2"')
+      assert_includes(html, 'class="pagination-bottom flex-bar mb-2"')
     end
 
     def test_renders_number_pagination_when_multiple_pages
       html = render_nav(pagination_data: paginated(50, 1))
 
-      assert_includes(html, 'class="paginate pagination_numbers navbar-flex')
+      assert_includes(html, 'class="paginate pagination_numbers flex-bar')
       assert_includes(html, "prev_page_link")
       assert_includes(html, "next_page_link")
       assert_includes(html, 'class="navbar-form px-0 page_input"')
@@ -110,7 +110,7 @@ module Views::Layouts
 
       html = render_nav(pagination_data: pagination_data)
 
-      assert_includes(html, 'class="paginate pagination_letters navbar-flex')
+      assert_includes(html, 'class="paginate pagination_letters flex-bar')
       assert_html(html, "input[name='letter']", attribute: { value: "A" })
     end
 

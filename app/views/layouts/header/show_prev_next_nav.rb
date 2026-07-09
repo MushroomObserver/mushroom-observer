@@ -14,7 +14,7 @@ module Views::Layouts
     def view_template
       return unless @object && @query
 
-      ul(class: "nav navbar-flex object_pager") do
+      ul(class: "nav flex-bar object_pager") do
         li { render_adjacent_link(:prev) }
         li { render_index_link }
         li { render_adjacent_link(:next) }
