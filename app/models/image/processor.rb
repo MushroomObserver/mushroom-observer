@@ -250,11 +250,12 @@ class Image
 
     # Email webmaster if there were any errors
     def email_webmaster
-      QueuedEmail::Webmaster.create_email(
+      message = WebmasterMailer.prepend_user(@user, @errors.join("\n"))
+      WebmasterMailer.build(
         sender_email: @user.email,
         subject: "[MO] process_image",
-        content: @errors.join("\n")
-      )
+        message: message
+      ).deliver_later
     end
 
     def image_server_has_subdir?(server, subdir)
