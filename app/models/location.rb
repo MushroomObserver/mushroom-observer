@@ -329,8 +329,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "unknown", "earth", "world", etc.
   #
   def self.names_for_unknown
-    @@names_for_unknown ||= official_unknown
-    (@@names_for_unknown + :unknown_locations.l.split(/, */)).uniq
+    # Only official_unknown (locale-independent, always English) is
+    # cached - :unknown_locations.l below depends on the CURRENT
+    # I18n.locale, so it must stay uncached and evaluated fresh here.
+    cached = Rails.cache.fetch("location/official_unknown",
+                               expires_in: 1.day) { official_unknown }
+    (cached + :unknown_locations.l.split(/, */)).uniq
   end
 
   def self.official_unknown
