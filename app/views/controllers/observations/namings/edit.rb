@@ -42,7 +42,7 @@ module Views::Controllers::Observations::Namings
     end
 
     def render_observation_details
-      render(Views::Controllers::Observations::Show::ObservationDetailsPanel.new(
+      render(Views::Controllers::Observations::Show::Details.new(
                obs: @observation, user: @user
              ))
     end

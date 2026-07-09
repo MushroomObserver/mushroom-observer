@@ -4,7 +4,7 @@
 # links + sibling-obs external links (read-only) when present.
 # Header has a `[ new ]` modal link when there are any
 # eligible sites the obs doesn't already have a link to.
-class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
+class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :sites, _Nilable(_Array(::ExternalSite)), default: nil

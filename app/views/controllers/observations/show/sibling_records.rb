@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 # Sibling-records concern for the observation details panel:
-# extracted out of `ObservationDetailsPanel` to keep that class
+# extracted out of `Details` to keep that class
 # under the Phlex `Metrics/ClassLength` cop limit — the sibling
 # rendering is a distinct concern (read-only aggregation across
 # siblings in an occurrence) from the obs's own details.
 #
-# Mixed into `ObservationDetailsPanel`. The methods read
+# Mixed into `Details`. The methods read
 # `@siblings` directly; the host class owns the prop.
 module Views::Controllers::Observations::Show::SiblingRecords
   # Read-only `<ul class="tight-list">` of records aggregated

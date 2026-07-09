@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
+class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
   ComponentTestCase
   def setup
     super
@@ -21,7 +21,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
     obs = link.observation
 
     html = render(
-      Views::Controllers::Observations::Show::ExternalLinksPanel.new(
+      Views::Controllers::Observations::Show::Details::ExternalLinks.new(
         obs: obs, user: link.user, sites: nil, siblings: []
       )
     )
@@ -37,7 +37,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
     sibling = observations(:coprinus_comatus_obs)
 
     html = render(
-      Views::Controllers::Observations::Show::ExternalLinksPanel.new(
+      Views::Controllers::Observations::Show::Details::ExternalLinks.new(
         obs: @obs, user: @user, sites: nil, siblings: [sibling]
       )
     )
@@ -63,7 +63,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
       obs.external_links.any?
 
     html = render(
-      Views::Controllers::Observations::Show::ExternalLinksPanel.new(
+      Views::Controllers::Observations::Show::Details::ExternalLinks.new(
         obs: obs, user: @user, sites: nil, siblings: []
       )
     )
@@ -79,7 +79,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
     skip("Need at least one ExternalSite fixture") if sites.empty?
 
     html = render(
-      Views::Controllers::Observations::Show::ExternalLinksPanel.new(
+      Views::Controllers::Observations::Show::Details::ExternalLinks.new(
         obs: @obs, user: @user, sites: sites, siblings: []
       )
     )
@@ -130,7 +130,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
   private
 
   def panel_with(obs, user = @user)
-    Views::Controllers::Observations::Show::ExternalLinksPanel.new(
+    Views::Controllers::Observations::Show::Details::ExternalLinks.new(
       obs: obs, user: user, sites: [], siblings: []
     )
   end

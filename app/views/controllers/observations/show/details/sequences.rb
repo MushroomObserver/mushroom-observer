@@ -8,7 +8,7 @@
 # the `[ archive | edit | destroy ]` triplet — sequences are a
 # real-DELETE target with a `back: observation_path(obs)` query
 # string so the controller returns to the obs after destroy.
-class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
+class Views::Controllers::Observations::Show::Details::Sequences < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :has_sibling_records, _Boolean, default: false

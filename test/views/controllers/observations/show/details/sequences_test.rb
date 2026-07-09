@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Views::Controllers::Observations::Show::SequencesPanelTest <
+class Views::Controllers::Observations::Show::Details::SequencesTest <
   ComponentTestCase
   def setup
     super
@@ -39,7 +39,7 @@ class Views::Controllers::Observations::Show::SequencesPanelTest <
   private
 
   def panel_with(obs, user = @user)
-    Views::Controllers::Observations::Show::SequencesPanel.new(
+    Views::Controllers::Observations::Show::Details::Sequences.new(
       obs: obs, user: user, has_sibling_records: false
     )
   end

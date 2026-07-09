@@ -5,7 +5,7 @@
 # slip, collection-numbers / herbarium-records / sequences sub-
 # panels, and external links. The center column of the obs show
 # page (and also rendered into the naming form pages).
-class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::Base
+class Views::Controllers::Observations::Show::Details < Views::Base
   include Views::Controllers::Observations::Show::SiblingRecords
 
   prop :obs, ::Observation
@@ -21,6 +21,11 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
            )) do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
+      if @obs.external_credit_link
+        panel.with_body(classes: "border-bottom") do
+          render(ImportSource.new(obs: @obs))
+        end
+      end
       panel.with_body { render_body }
     end
   end
@@ -68,7 +73,12 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_where
     p(class: "obs-where", id: "observation_where") do
       plain("#{where_label}: ")
-      render_where_link
+      if @user
+        Link(type: :location,
+             where: @obs.where, location: @obs.location, click: true)
+      else
+        plain(@obs.where)
+      end
       render_vague_notice
     end
   end
@@ -78,15 +88,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       :show_observation_collection_location.t
     else
       :show_observation_seen_at.t
-    end
-  end
-
-  def render_where_link
-    if @user
-      Link(type: :location,
-           where: @obs.where, location: @obs.location, click: true)
-    else
-      plain(@obs.where)
     end
   end
 
@@ -104,7 +105,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     p(class: "obs-where-gps", id: "observation_where_gps") do
       # XXX Consider dropping this from indexes.
       render_gps_display_link if @obs.reveal_location?(@user)
-      render_gps_hidden_msg if @obs.gps_hidden
+      i { plain("(#{:show_observation_gps_hidden.t})") } if @obs.gps_hidden
     end
   end
 
@@ -115,10 +116,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
          "[#{:click_for_map.t}]"].join(" ")
       )
     end
-  end
-
-  def render_gps_hidden_msg
-    i { plain("(#{:show_observation_gps_hidden.t})") }
   end
 
   # "Collector:" and (when they differ) "Entered by:" lines. A field-slip
@@ -267,7 +264,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_collection_numbers
-    render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+    render(CollectionNumbers.new(
              obs: @obs, user: @user,
              has_sibling_records: sibling_has?(:collection_numbers)
            ))
@@ -281,7 +278,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_herbarium_records
-    render(Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+    render(HerbariumRecords.new(
              obs: @obs, user: @user,
              has_sibling_records: sibling_has?(:herbarium_records)
            ))
@@ -291,7 +288,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_sequences
-    render(Views::Controllers::Observations::Show::SequencesPanel.new(
+    render(Sequences.new(
              obs: @obs, user: @user,
              has_sibling_records: sibling_has?(:sequences)
            ))
@@ -309,7 +306,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_external_links_panel
-    render(Views::Controllers::Observations::Show::ExternalLinksPanel.new(
+    render(ExternalLinks.new(
              obs: @obs, user: @user, sites: @sites, siblings: @siblings
            ))
   end

@@ -4,7 +4,7 @@
 # `CollectionNumbersPanel` but for `HerbariumRecord`s, with an
 # additional "search MCP" indented link for records whose
 # herbarium is `web_searchable?`
-class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Base
+class Views::Controllers::Observations::Show::Details::HerbariumRecords < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :has_sibling_records, _Boolean, default: false

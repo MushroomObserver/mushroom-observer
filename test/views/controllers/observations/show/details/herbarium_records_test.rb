@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Views::Controllers::Observations::Show::HerbariumRecordsPanelTest <
+class Views::Controllers::Observations::Show::Details::HerbariumRecordsTest <
   ComponentTestCase
   def setup
     super
@@ -22,7 +22,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanelTest <
     skip("Need an obs fixture without herbarium_records") unless obs
 
     html = render(
-      Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+      Views::Controllers::Observations::Show::Details::HerbariumRecords.new(
         obs: obs, user: obs.user, has_sibling_records: true
       )
     )
@@ -40,7 +40,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanelTest <
     skip("lone_wolf curates herbaria") if stranger.curated_herbaria.any?
 
     html = render(
-      Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+      Views::Controllers::Observations::Show::Details::HerbariumRecords.new(
         obs: obs, user: stranger, has_sibling_records: false
       )
     )
@@ -51,7 +51,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanelTest <
   private
 
   def panel_with(obs, user = @user)
-    Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+    Views::Controllers::Observations::Show::Details::HerbariumRecords.new(
       obs: obs, user: user, has_sibling_records: false
     )
   end

@@ -11,7 +11,7 @@
 # `remove_collection_number_button` is handled by
 # `Components::Link::InlineMod` which knows how to detach a
 # `CollectionNumber` from its observation.
-class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Base
+class Views::Controllers::Observations::Show::Details::CollectionNumbers < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :has_sibling_records, _Boolean, default: false
