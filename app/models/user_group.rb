@@ -83,27 +83,46 @@ class UserGroup < AbstractModel
     user
   end
 
+  # `one_user` caches per-id, so it needs a real thread-safe map rather
+  # than a single Rails.cache slot - Concurrent::Map's fetch_or_store is
+  # atomic (no two threads can both miss and double-construct the same
+  # id), unlike a bare `hash[id] ||= ...`. A class-level instance
+  # variable (not `@@`, which would still trip Style/ClassVars) set
+  # once here at class load, before any threads exist, and never
+  # reassigned afterward - matches the memoization pattern already
+  # used by Language.for_locale's @for_locale_cache.
+  @one_users = Concurrent::Map.new
+
+  class << self
+    attr_reader :one_users
+  end
+
   # Return the meta-group that contains all users.
   def self.all_users
-    @@all_users ||= get_or_construct_user("all users")
+    Rails.cache.fetch("user_group/all_users", expires_in: 1.hour) do
+      get_or_construct_user("all users")
+    end
   end
 
   # Return the meta-group that contains just the given users.  Takes id or User.
   def self.one_user(user)
     user_id = user.is_a?(User) ? user.id.to_i : user.to_i
-    @@one_users ||= {}
-    @@one_users[user_id] ||= find_by_name("user #{user_id}")
+    one_users.fetch_or_store(user_id) { find_by_name("user #{user_id}") }
   end
 
   # Return the meta-group that contains all users.
   def self.reviewers
-    @@reviewers ||= get_or_construct_user("reviewers")
+    Rails.cache.fetch("user_group/reviewers", expires_in: 1.hour) do
+      get_or_construct_user("reviewers")
+    end
   end
 
   # Need to clear these at end of each test or some changes can persist from
   # one unit test to the next, causing very bizarre and frustrating behavior(!)
   def self.clear_cache_for_unit_tests
-    @@all_users = @@one_users = @@reviewers = nil
+    Rails.cache.delete("user_group/all_users")
+    Rails.cache.delete("user_group/reviewers")
+    one_users.clear
   end
 
   # Callback that fires when a new User is created.
