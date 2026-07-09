@@ -40,7 +40,15 @@ class QueueConfigTest < UnitTestCase
   def test_database_pool_is_large_enough_for_configured_worker_threads
     config = SolidQueue::Configuration.new
     valid = config.valid?
-    assert_equal(valid, config.error_messages)
+
+    # config.error_messages is a failure MESSAGE (already a String), not
+    # an expected value -- assert_equal(valid, config.error_messages)
+    # (what the cop suggests, and what a prior Copilot-suggested edit
+    # actually shipped) compares a boolean against a String and can
+    # never pass.
+    # rubocop:disable Minitest/AssertWithExpectedArgument
+    assert(valid, config.error_messages)
+    # rubocop:enable Minitest/AssertWithExpectedArgument
   end
 
   private
