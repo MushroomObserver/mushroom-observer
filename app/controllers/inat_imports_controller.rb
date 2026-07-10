@@ -164,6 +164,7 @@ class InatImportsController < ApplicationController
     {
       requested: fetch_raw_requested_count,
       after_taxon: fetch_after_taxon_count,
+      not_yet_imported: fetch_not_yet_imported_count,
       estimate_with_date: fetch_estimate_with_date_count
     }
   end
