@@ -160,4 +160,13 @@ class IconLinkTest < ComponentTestCase
 
     assert_no_html(html, "a.btn")
   end
+
+  def test_raw_btn_class_raises_argument_error
+    # Matches Link::Get/Modal/User: btn classes must go through
+    # button:/size:, not a raw class: string.
+    assert_raises(ArgumentError) do
+      Components::Link::Icon.new(content: "Next", path: "/x",
+                                 icon: :next, class: "btn btn-primary")
+    end
+  end
 end

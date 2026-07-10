@@ -55,6 +55,7 @@ class Components::Link::Icon < Components::Base
       @path = path
       @opts = opts
     end
+    validate_no_btn_classes!(@opts[:class])
   end
 
   def view_template
