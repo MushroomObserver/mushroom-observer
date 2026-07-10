@@ -14,6 +14,18 @@ class CollapseDivTest < ComponentTestCase
   # Unit tests
   # ---------------------------------------------------------------
 
+  def test_collapse_classes_class_method_matches_instance_rendering
+    assert_equal("collapse", Components::CollapseDiv.collapse_classes)
+    assert_equal("collapse in",
+                 Components::CollapseDiv.collapse_classes(expanded: true))
+    assert_equal("collapse panel-collapse",
+                 Components::CollapseDiv.collapse_classes(panel: true))
+    assert_equal("collapse in panel-collapse no-transition",
+                 Components::CollapseDiv.collapse_classes(
+                   expanded: true, panel: true, html_class: "no-transition"
+                 ))
+  end
+
   def test_closed_by_default
     html = render(Components::CollapseDiv.new(id: "foo"))
 

@@ -81,7 +81,8 @@ module Views::Controllers::Projects::Locations
       tab.body { render_target_row(target, collapse_id, count, subs) }
       return if subs.empty?
 
-      tab.body(id: collapse_id, class: "collapse") do
+      tab.body(id: collapse_id,
+               class: Components::CollapseDiv.collapse_classes) do
         subs.each { |loc| render_sub_row(loc) }
       end
     end

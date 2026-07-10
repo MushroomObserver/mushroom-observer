@@ -35,7 +35,31 @@
 #   render(Components::CollapseDiv.new(id: "target_subs_1", element: :tbody)) do
 #     render_sub_rows
 #   end
+#
+# @example Class-only, for callers that can't render the component
+#   directly (e.g. inside Components::Table's `vanish`-based body
+#   builder -- see Components::Table#body, and
+#   projects/locations/tables.rb for a real caller)
+#   tab.body(id: collapse_id,
+#            class: Components::CollapseDiv.collapse_classes) do
+#     render_sub_rows
+#   end
 class Components::CollapseDiv < Components::Base
+  # `module_function`-style dual access, matching
+  # `Components::Button::Styling`'s `btn_class`/`size_class`: callable
+  # as `Components::CollapseDiv.collapse_classes(...)` for callers that
+  # only need the class string (e.g. builder/registration code that
+  # runs before the component itself could render), and as a private
+  # instance method for `view_template` below.
+  def self.collapse_classes(expanded: nil, panel: false, html_class: nil)
+    [
+      "collapse",
+      ("in" if expanded), # Bootstrap 4: change "in" → "show"
+      ("panel-collapse" if panel),
+      html_class
+    ].compact_blank.join(" ")
+  end
+
   prop :id, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
   prop :panel, _Boolean, default: false
@@ -54,11 +78,7 @@ class Components::CollapseDiv < Components::Base
   private
 
   def collapse_classes
-    class_names(
-      "collapse",
-      ("in" if @expanded), # Bootstrap 4: change "in" → "show"
-      ("panel-collapse" if @panel),
-      @html_class
-    )
+    self.class.collapse_classes(expanded: @expanded, panel: @panel,
+                                html_class: @html_class)
   end
 end
