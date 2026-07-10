@@ -412,11 +412,17 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Safe to show this image's raw original before it's been resized, i.e.
   # gps_hidden was never requested for it, or the strip already succeeded.
   # Memoized: Image::URL may ask this once per size (6x per image render).
+  #
+  # SQL `exists?` instead of `observations.none?(&:gps_hidden)` -- this
+  # Image is usually loaded under Observation.show_includes'
+  # strict_loading scope, which never eager-loads the reverse
+  # image -> observations association, so a lazy `.none?` enumeration
+  # would raise ActiveRecord::StrictLoadingViolationError.
   def safe_to_serve_original?
     return @safe_to_serve_original if defined?(@safe_to_serve_original)
 
     @safe_to_serve_original =
-      gps_stripped || observations.none?(&:gps_hidden)
+      gps_stripped || !observations.where(gps_hidden: true).exists?
   end
 
   def url(size)
