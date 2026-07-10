@@ -301,20 +301,26 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # One broadcast per size Interactive might be showing on any given
-  # page (see INTERACTIVE_BROADCAST_SIZES) -- outright replace, since
-  # Interactive's wrapper div carries no externally-managed state
-  # (unlike the carousel's .active class below), so a full re-render
-  # is simplest and picks up any width/style change too.
+  # page (see INTERACTIVE_BROADCAST_SIZES). `media_only: true` limits
+  # the re-render to just the image itself (src/data-src) -- the model
+  # has no way to know which page-specific image_link/votes/
+  # extra_classes/identify props a given subscriber originally
+  # rendered with, so replaying the *whole* Interactive with defaults
+  # would silently change those (e.g. a matrix-box thumbnail's
+  # image_link falls back to the image's own show page instead of the
+  # parent Observation it was actually pointing at). The link/votes/
+  # overlays stay exactly as the page first rendered them; only the
+  # image source needs to catch up once resized copies exist.
   def broadcast_interactive_sizes
     INTERACTIVE_BROADCAST_SIZES.each do |size|
       html = ApplicationController.renderer.render(
         Components::Image::Interactive.new(user: nil, image: self,
-                                           size: size),
+                                           size: size, media_only: true),
         layout: false
       )
       broadcast_replace_to(
         [self, :processed],
-        target: "interactive_image_#{id}_#{size}",
+        target: "interactive_image_#{id}_#{size}_media",
         html: html
       )
     end

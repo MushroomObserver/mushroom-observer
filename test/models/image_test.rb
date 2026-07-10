@@ -525,13 +525,37 @@ class ImageTest < UnitTestCase
     assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length + 1,
                  messages.length)
     Image::INTERACTIVE_BROADCAST_SIZES.each do |size|
-      target = "interactive_image_#{image.id}_#{size}"
+      target = "interactive_image_#{image.id}_#{size}_media"
       assert(messages.any? { |m| m.include?(%(target="#{target}")) },
              "Expected a broadcast targeting #{target}")
     end
     carousel_target = "carousel_item_#{image.id}"
     assert(messages.any? { |m| m.include?(%(target="#{carousel_target}")) },
            "Expected a broadcast targeting #{carousel_target}")
+  end
+
+  # The broadcast must not replay a page-specific image_link/votes/
+  # extra_classes/identify combination -- it only knows the model, not
+  # which page's props a given subscriber originally rendered with (a
+  # matrix-box thumbnail's real image_link, votes: false on the
+  # image-show page, etc). Confirms the fix for the bug where
+  # rebroadcasting the *whole* Interactive component with defaults
+  # would silently swap a thumbnail's link target to the image's own
+  # show page, or make hidden votes reappear.
+  def test_broadcast_interactive_sizes_omits_link_and_votes_markup
+    image = images(:in_situ_image)
+    image.update_column(:transferred, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    messages = capture_broadcasts(stream) { image.update(transferred: true) }
+
+    media_messages = messages.select { |m| m.include?("_media") }
+    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length,
+                 media_messages.length)
+    media_messages.each do |m|
+      assert_not_includes(m, "stretched-link")
+      assert_not_includes(m, "image-vote-section")
+    end
   end
 
   def test_broadcast_processed_update_fires_on_gps_stripped_change
