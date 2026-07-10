@@ -59,7 +59,83 @@ class Image::Processor::VerifierTest < UnitTestCase
     assert_includes(lines, "Listing local thumb")
   end
 
+  def test_list_server_dispatches_ssh_type_to_ssh_listing
+    fake_data = {
+      ssh_server: { type: "ssh", path: "mo@example.test:/data/mo",
+                    subdirs: %w[orig] }
+    }
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      verifier = Image::Processor::Verifier.new
+      Open3.stub(:capture2, ["remote.jpg\t99\n", stub_status(true)]) do
+        result = verifier.send(:list_server, :ssh_server)
+        assert_equal({ "orig/remote.jpg" => 99 }, result)
+      end
+    end
+  end
+
+  def test_list_subdir_unknown_type_raises
+    verifier = Image::Processor::Verifier.new
+    data = { type: "ftp", path: "ftp://example.test" }
+
+    assert_raises(RuntimeError) do
+      verifier.send(:list_subdir, :weird_server, data, "orig")
+    end
+  end
+
+  def test_list_ssh_subdir_shells_out_to_ssh_find
+    verifier = Image::Processor::Verifier.new
+    captured_args = nil
+    fake_capture2 = lambda do |*args|
+      captured_args = args
+      ["", stub_status(true)]
+    end
+
+    Open3.stub(:capture2, fake_capture2) do
+      verifier.send(:list_ssh_subdir, :ssh_server,
+                    "mo@example.test:/data/mo", "orig")
+    end
+
+    assert_equal(
+      ["ssh", "mo@example.test", "find", "-L", "/data/mo/orig",
+       "-maxdepth", "1", "-type", "f", "-printf", "%f\\t%s\\n"],
+      captured_args
+    )
+  end
+
+  def test_list_ssh_subdir_parses_find_output
+    verifier = Image::Processor::Verifier.new
+    find_output = "123.jpg\t456\n124.jpg\t789\n"
+
+    Open3.stub(:capture2, [find_output, stub_status(true)]) do
+      result = verifier.send(:list_ssh_subdir, :ssh_server,
+                             "mo@example.test:/data/mo", "orig")
+      assert_equal({ "123.jpg" => 456, "124.jpg" => 789 }, result)
+    end
+  end
+
+  def test_list_ssh_subdir_logs_and_returns_empty_on_failure
+    messages = []
+    verifier = Image::Processor::Verifier.new { |msg| messages << msg }
+
+    Open3.stub(:capture2, ["", stub_status(false)]) do
+      result = verifier.send(:list_ssh_subdir, :ssh_server,
+                             "mo@example.test:/data/mo", "orig")
+      assert_equal({}, result)
+    end
+
+    assert_includes(
+      messages, "Failed to list mo@example.test:/data/mo/orig on ssh_server"
+    )
+  end
+
   private
+
+  def stub_status(success)
+    status = Object.new
+    status.define_singleton_method(:success?) { success }
+    status
+  end
 
   def seed_local_files(turned_over, commercial, disconnected)
     File.write("#{local_root}/orig/#{turned_over}.tiff", "A")

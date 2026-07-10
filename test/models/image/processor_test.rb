@@ -83,6 +83,14 @@ class Image::ProcessorTest < UnitTestCase
     )
   end
 
+  def test_write_target_subdirs_raises_on_unknown_size
+    assert_raises(RuntimeError) do
+      Image::Processor::ServerData.write_target_subdirs(
+        [:thumbnail, :bogus_size], Image::Processor::IMAGE_SUBDIRS
+      )
+    end
+  end
+
   def test_process_jpg_resizes_and_transfers
     image = images(:in_situ_image)
     image.update_columns(transferred: false, width: nil, height: nil)
@@ -213,6 +221,17 @@ class Image::ProcessorTest < UnitTestCase
     )
   end
 
+  def test_retransfer_images_does_not_mark_transferred_on_failure
+    in_situ = images(:in_situ_image)
+    File.write("#{local_root}/orig/#{in_situ.id}.jpg", "A")
+
+    Image::Processor::FileTransfer.stub(:copy_file_to_server, false) do
+      Image::Processor.retransfer_images
+    end
+
+    assert_not(in_situ.reload.transferred)
+  end
+
   def test_requires_image
     assert_raises(RuntimeError) { Image::Processor.new(image: nil) }
   end
@@ -236,6 +255,29 @@ class Image::ProcessorTest < UnitTestCase
         processor.process
       end
     end
+
+    # A failed transfer must not mark the image transferred -- otherwise
+    # RetransferImagesJob's `Image.where(transferred: false)` safety net
+    # would never pick this image up again.
+    assert_not(image.reload.transferred)
+  end
+
+  def test_rotate_non_jpg_original_does_not_undo_rotation
+    image = images(:turned_over_image)
+    image.update_columns(transferred: false, width: 1000, height: 1000)
+    FileUtils.cp(TIFF_FIXTURE, "#{local_root}/orig/#{image.id}.tiff")
+    # Simulate a full-size JPG derivative already produced by an earlier
+    # #process run -- #rotate transforms only this file in place. The bug
+    # this guards: the trailing #process call inside #rotate used to
+    # reconvert from the raw tiff whenever ext != "jpg", silently
+    # discarding the rotation just applied to this file.
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+
+    Image::Processor.new(image: image, ext: "tiff").rotate("+90")
+
+    width, height = FastImage.size("#{local_root}/orig/#{image.id}.jpg")
+    assert_equal(500, width)
+    assert_equal(407, height)
   end
 
   def test_rotate_mirror_horizontal
@@ -340,6 +382,26 @@ class Image::ProcessorTest < UnitTestCase
 
     assert_equal("http body",
                  File.read("#{local_root}/thumb/#{image.id}.jpg"))
+  end
+
+  def test_copy_file_from_server_http_type_creates_missing_destination_dir
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    fake_data = { http_server: { type: "http", path: "http://example.test" } }
+    fake_uri = Object.new
+    fake_uri.define_singleton_method(:open) { StringIO.new("http body") }
+    # "new_subdir" is not among the subdirs `setup` pre-creates.
+    assert_not(File.directory?("#{local_root}/new_subdir"))
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      URI.stub(:parse, fake_uri) do
+        processor.send(:copy_file_from_server, :http_server,
+                       "new_subdir/#{image.id}.jpg")
+      end
+    end
+
+    assert_equal("http body",
+                 File.read("#{local_root}/new_subdir/#{image.id}.jpg"))
   end
 
   def test_copy_file_from_server_http_type_tempfile_response

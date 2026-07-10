@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require("open-uri")
+
 class Image
   class Processor
     # Copies one file between the local filesystem and a configured image
@@ -76,6 +78,7 @@ class Image
         return unless (remote_path = Processor.image_server_data[server][:path])
 
         local_path = "#{Processor.local_images_path}/#{local_file}"
+        FileUtils.mkpath(File.dirname(local_path))
         case io = URI.parse("#{remote_path}/#{remote_file}").open
         when StringIO
           File.write(local_path, io.read)

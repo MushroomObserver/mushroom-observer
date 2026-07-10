@@ -41,7 +41,10 @@ class Image
       def self.write_target_subdirs(sizes, image_subdirs)
         return image_subdirs unless sizes
 
-        sizes.map { |size| Image::URL::SUBDIRECTORIES[size] || size }
+        sizes.map do |size|
+          Image::URL::SUBDIRECTORIES[size] ||
+            raise("Unknown image size in image_config.yml: #{size.inspect}")
+        end
       end
     end
   end

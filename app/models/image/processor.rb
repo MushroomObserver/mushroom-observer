@@ -60,7 +60,7 @@ class Image
       image_server_data.keys - [:local]
     end
 
-    attr_reader :transferred_any
+    attr_reader :transferred_any, :errors
 
     def initialize(image:, user: nil, ext: nil, set_size: false,
                    strip_gps: false)
@@ -79,13 +79,13 @@ class Image
     end
 
     def process
-      convert_raw_to_jpg if @ext != "jpg"
+      convert_raw_to_jpg if convert_raw_to_jpg_needed?
       strip_gps_from_file(full_size_filepath) if @strip_gps
       auto_orient_if_needed(full_size_filepath)
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
       transfer_files_to_image_servers
-      mark_image_record_transferred_and_touch_obs if @transferred_any
+      mark_image_record_transferred_and_touch_obs if transferred_cleanly?
       email_webmaster if @errors.any?
     end
 
@@ -118,7 +118,7 @@ class Image
       Image.where(transferred: false).find_each do |image|
         processor = new(image: image)
         processor.transfer_files_to_image_servers
-        if processor.transferred_any
+        if processor.transferred_any && processor.errors.empty?
           processor.mark_image_record_transferred_and_touch_obs
         end
       end
@@ -132,6 +132,17 @@ class Image
     end
 
     private
+
+    # Skip if #rotate already produced this from the current full-size
+    # file -- reconverting from the raw original here would silently
+    # discard that rotation for any non-jpg upload.
+    def convert_raw_to_jpg_needed?
+      @ext != "jpg" && !File.exist?(full_size_filepath)
+    end
+
+    def transferred_cleanly?
+      @transferred_any && @errors.empty?
+    end
 
     # Strip GPS data
     # "GPS:all"/"XMP:Geotag" are group-wildcard deletions, not tags

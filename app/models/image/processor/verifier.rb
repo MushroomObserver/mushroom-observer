@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require("open3")
+
 class Image
   class Processor
     # Ruby port of script/verify_images. Lists every local and remote image
@@ -36,11 +38,57 @@ class Image
         data = @image_server_data[server]
         data[:subdirs].each_with_object({}) do |subdir, files|
           log("Listing #{server} #{subdir}")
-          Dir.glob("#{data[:path]}/#{subdir}/*").each do |path|
-            next unless File.file?(path)
-
-            files["#{subdir}/#{File.basename(path)}"] = File.size(path)
+          list_subdir(server, data, subdir).each do |name, size|
+            files["#{subdir}/#{name}"] = size
           end
+        end
+      end
+
+      # "file" is a local (or locally-mounted) path -- Dir.glob it directly.
+      # "ssh" is a real remote host -- shell out, matching how the original
+      # script/bash_images' read_server_directory handled it.
+      def list_subdir(server, data, subdir)
+        case data[:type]
+        when "file"
+          list_local_subdir("#{data[:path]}/#{subdir}")
+        when "ssh"
+          list_ssh_subdir(server, data[:path], subdir)
+        else
+          raise("Don't know how to list #{server} via: #{data[:type]}")
+        end
+      end
+
+      def list_local_subdir(path)
+        Dir.glob("#{path}/*").each_with_object({}) do |file_path, files|
+          next unless File.file?(file_path)
+
+          files[File.basename(file_path)] = File.size(file_path)
+        end
+      end
+
+      # `data[:path]` for an ssh server is "user@host:/remote/path" (see
+      # ServerData.write_target_path) -- split on the first ":" the same
+      # way rsync/scp remote-path syntax does. `-L` follows symlinks;
+      # `-printf` gives us "name\tsize" lines with no shell quoting to
+      # parse around -- both match read_server_directory's ssh branch.
+      def list_ssh_subdir(server, remote_path, subdir)
+        host, path = remote_path.split(":", 2)
+        output, status = Open3.capture2(
+          "ssh", host, "find", "-L", "#{path}/#{subdir}", "-maxdepth", "1",
+          "-type", "f", "-printf", "%f\\t%s\\n"
+        )
+        unless status.success?
+          log("Failed to list #{host}:#{path}/#{subdir} on #{server}")
+          return {}
+        end
+
+        parse_find_output(output)
+      end
+
+      def parse_find_output(output)
+        output.each_line.with_object({}) do |line, files|
+          name, size = line.chomp.split("\t")
+          files[name] = size.to_i if name.present?
         end
       end
 
