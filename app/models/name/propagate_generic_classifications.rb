@@ -14,7 +14,7 @@ module Name::PropagateGenericClassifications
   end
 
   module ClassMethods
-    # Not currently called by RefreshCachesJob (the script/refresh_caches
+    # Not currently called by MiscDataRepairsJob (the script/refresh_caches
     # cronjob it came from) - deliberately left out pending a full review of
     # its (thousands of) proposed changes. I have placed it here in order to
     # make it easily accessible to unit testing. As a separate file, it

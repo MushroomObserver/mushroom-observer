@@ -2,12 +2,25 @@
 
 # Nightly clean-up: runs a batch of idempotent "make sure X is correct"
 # repair methods across several models. See each method's own
-# documentation for details of what it fixes.
+# documentation for details of what it fixes. Named for what's left
+# after the split below, not "RefreshCachesJob" -- that name implied
+# it still ran the full original set, and half of what's left here
+# (misspelling fixes, culling unverified users) was never a cache
+# refresh to begin with.
 #
 # `Name.propagate_generic_classifications` is deliberately left out — it's
 # a complex operation that wants to make thousands of changes to the
 # database and hasn't been vetted enough to run unattended yet.
-class RefreshCachesJob < ApplicationJob
+#
+# The three tasks that dominated this job's runtime (measured locally
+# against a recent production-size DB copy: UserStats ~9s, Observation
+# content-filter caches ~6.6s, Vote's observation-views repair ~4.8s,
+# vs. well under 2s each for everything below) were split out into
+# their own jobs -- RefreshAllUserStatsJob, RefreshContentFilterCachesJob,
+# UpdateObservationViewsReviewedColumnJob -- so each can be staggered
+# independently and none of the cheap tasks here has to wait behind
+# whichever of the three is having a slow night.
+class MiscDataRepairsJob < ApplicationJob
   queue_as :maintenance
 
   TASKS = [
@@ -18,15 +31,11 @@ class RefreshCachesJob < ApplicationJob
     [Name, :make_sure_names_are_bolded_correctly, "misformatted names"],
     [Observation, :make_sure_no_observations_are_misspelled,
      "misspelled observations"],
-    [Observation, :refresh_content_filter_caches, "content filter caches"],
     [Occurrence, :refresh_has_specimen_cache,
      "occurrence has_specimen cache"],
     [Observation, :refresh_needs_naming_column,
      "observations needing naming"],
-    [Vote, :update_observation_views_reviewed_column,
-     "observations reviewed"],
-    [User, :cull_unverified_users, "cull unverified users"],
-    [UserStats, :refresh_all_user_stats, "update user_stats"]
+    [User, :cull_unverified_users, "cull unverified users"]
   ].freeze
 
   def perform(dry_run: false)
