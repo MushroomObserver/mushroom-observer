@@ -216,21 +216,27 @@ class Inat
                    "non-superimporters")
     end
 
-    def test_superimporter_strips_licensed
+    def test_superimporter_preserves_licensed
       url = "#{API_URL}?project_id=291058&licensed=false"
       result = URLNormalizer.new(url, superimporter: true).normalize
 
-      assert_equal("project_id=291058", result,
-                   "licensed should be stripped for superimporters")
+      # PageParser's add_ownership_filter defaults `licensed` to true for
+      # import-others only when the stored URL doesn't specify a value.
+      # Preserving the user's literal value here lets the confirm page's
+      # estimate counts match the literal request instead of a broader query
+      # (#4636-adjacent).
+      assert_equal("licensed=false&project_id=291058", result,
+                   "licensed should be preserved for superimporters")
     end
 
-    def test_import_others_strips_licensed
+    def test_import_others_preserves_licensed
       url = "#{API_URL}?project_id=291058&licensed=false"
       result = URLNormalizer.new(url, import_others: true).normalize
 
       assert_equal(
-        "project_id=291058", result,
-        "`licensed` param should be stripped if importing others' observation"
+        "licensed=false&project_id=291058", result,
+        "`licensed` param should be preserved when importing others' " \
+        "observations — downstream import behavior may still modify it"
       )
     end
 

@@ -134,9 +134,4 @@ class Language < AbstractModel
     end
     score
   end
-
-  # Be generous to ensure that we don't accidentally miss anything that is
-  # changed while the Rails app is booting.
-  # We need a class variable here
-  @@last_update = 1.minute.ago
 end

@@ -646,8 +646,6 @@ class AbstractModel < ApplicationRecord
 
   # Do we log this event? and how?
   def autolog_event(event, orphan: nil)
-    return unless RunLevel.is_normal?
-
     if autolog_events.include?(event)
       touch = false
     elsif autolog_events.include?(:"#{event}!")
