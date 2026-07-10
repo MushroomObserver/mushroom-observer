@@ -40,7 +40,7 @@
 // away from `.navbar-flex` specifically so the two don't read as the
 // same concept.
 .flex-bar {
-  @extend .d-flex, .justify-content-between, .align-items-center
+  @extend .d-flex, .justify-content-between, .align-items-center;
 }
 
 // BS3→BS4 navbar bridge. Only fires where BOTH classes coexist - that's
@@ -70,10 +70,13 @@
 // folded into `.navbar` itself, or relying on each caller to
 // remember its own override.
 //
-// `min-height` / `margin-bottom` are dropped because they're already
-// no-ops: #top_nav's own `.mb-2` utility (`!important`) already beats
-// `.navbar`'s margin-bottom, and both landmarks' real content always
-// exceeds $navbar-height. BS4's `.navbar` has neither property either.
+// `min-height` / `margin-bottom` are explicitly zeroed below, but
+// both are already no-ops today: #top_nav's own `.mb-2` utility
+// (`!important`) already beats `.navbar`'s margin-bottom, and both
+// landmarks' real content always exceeds $navbar-height. Set here
+// anyway so BS4's actual (zero) values hold once `.navbar`'s own
+// rule stops needing this bridge, rather than leaving them to
+// whatever BS3 happened to set.
 .navbar.navbar-flex {
   display: flex;
   flex-wrap: wrap;
