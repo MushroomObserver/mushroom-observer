@@ -3,6 +3,8 @@
 require("test_helper")
 
 class ImageTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   # log_update/log_destroy/log_create_for/log_reuse_for/log_remove_from
   # attribute to `current_user` (the acting/editing user), not `user`
   # (the image's owner) - an admin editing/removing someone else's image
@@ -166,21 +168,16 @@ class ImageTest < UnitTestCase
 
   def test_transform
     img = Image.new
-    assert_nil(img.transform(:mirror))
+    assert_no_enqueued_jobs { assert_nil(img.transform(:mirror)) }
     assert_raises(RuntimeError) { img.transform(:edible) }
   end
 
-  # Outside the test env the guard clause is skipped and transform shells
-  # out to script/rotate_image with the mapped operator.
-  def test_transform_shells_out_when_not_in_test_env
+  def test_transform_enqueues_rotate_image_job
     img = images(:in_situ_image)
-    commands = []
-    img.stub(:system, ->(cmd) { commands << cmd }) do
-      Rails.env.stub(:test?, false) do
-        img.transform(:rotate_left)
-      end
+    assert_enqueued_with(job: RotateImageJob,
+                         args: [img.id, img.original_extension, "-90"]) do
+      img.transform(:rotate_left)
     end
-    assert_equal(["script/rotate_image #{img.id} -90&"], commands)
   end
 
   # With no local rendition on disk, compute_dhash! fetches the remote
