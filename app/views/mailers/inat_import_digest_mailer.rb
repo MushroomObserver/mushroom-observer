@@ -93,7 +93,7 @@ class Views::Mailers::InatImportDigestMailer < Views::Mailers::Base
   # and doesn't map to a digest, so it's intentionally omitted — /interests
   # is where a user tunes what produces these.)
   def links
-    [[:email_links_your_interests.t, "#{MO.http_domain}/interests"],
-     [:email_links_latest_changes.t, MO.http_domain]]
+    [[:email_links_your_interests.l, "#{MO.http_domain}/interests"],
+     [:email_links_latest_changes.l, MO.http_domain]]
   end
 end
