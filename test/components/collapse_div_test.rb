@@ -284,6 +284,129 @@ class CollapseDivTest < ComponentTestCase
     )
   end
 
+  # Views::Layouts::TopNav search-nav row ------------------------
+
+  def test_top_nav_search_nav_row_parity
+    data_attrs = {
+      controller: "search-type",
+      search_type_help_types_value: [:names, :observations].to_json,
+      search_type_form_types_value: [:names, :observations].to_json
+    }
+
+    old_html = render(phlex_wrapper do
+      div(class: "collapse w-100", id: "search_nav",
+          data: data_attrs) { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "search_nav", html_class: "w-100",
+               attributes: { data: data_attrs }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#search_nav", label: "top_nav_search_nav_row"
+    )
+  end
+
+  # Views::Layouts::TopNav search-nav toggle button ---------------
+  #
+  # Not a byte-diff parity test: adopting Button::CollapseToggle adds
+  # a `.collapsed` class the old hand-rolled markup never had (its
+  # `collapsed:` prop defaults to true, correctly reflecting that
+  # #search_nav starts closed). Verified harmless -- the only CSS
+  # rules keying off `.collapsed` are scoped to `.icon-link`/
+  # `.panel-collapse-trigger` or to descendant `.collapse-toggle-*`
+  # spans (mo/_icons.scss, mo/_form_elements.scss), neither of which
+  # this button has. So this asserts every attribute the old markup
+  # had is preserved, and documents the one accepted addition.
+
+  def test_top_nav_search_nav_toggle_parity
+    html = render(phlex_wrapper do
+      render(::Components::Button.new(
+               type: :collapse_toggle,
+               target_id: "search_nav",
+               variant: :outline, size: :sm,
+               class: "top_nav_button",
+               aria: { expanded: "false", controls: "search_nav" }
+             )) { render(::Components::Icon.new(type: :search, title: "Search")) }
+    end)
+
+    assert_html(html, "button.btn.btn-outline-default.btn-sm.top_nav_button" \
+                       "[data-toggle='collapse'][data-target='#search_nav']" \
+                       "[aria-expanded='false'][aria-controls='search_nav']")
+    # Accepted, verified-harmless addition from Button::CollapseToggle.
+    assert_html(html, "button.collapsed")
+  end
+
+  # Views::Layouts::TopNav::SearchBar collapse targets -------------
+
+  def test_search_bar_elements_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse in w-100", id: "search_bar_elements",
+          data: { search_type_target: "bar",
+                  action: "$shown.bs.collapse->search-type#closeForm" }) do
+        plain("content")
+      end
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "search_bar_elements", expanded: true, html_class: "w-100",
+               attributes: {
+                 data: { search_type_target: "bar",
+                         action:
+                           "$shown.bs.collapse->search-type#closeForm" }
+               }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#search_bar_elements", label: "search_bar_elements"
+    )
+  end
+
+  def test_search_bar_help_target_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse w-100", id: "search_bar_help",
+          data: { search_type_target: "help" })
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "search_bar_help", html_class: "w-100",
+               attributes: { data: { search_type_target: "help" } }
+             ))
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#search_bar_help", label: "search_bar_help"
+    )
+  end
+
+  def test_search_nav_form_target_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse w-100 border-top", id: "search_nav_form",
+          data: { search_type_target: "form",
+                  action: "$shown.bs.collapse->search-type#closeBar" })
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "search_nav_form", html_class: "w-100 border-top",
+               attributes: {
+                 data: { search_type_target: "form",
+                         action: "$shown.bs.collapse->search-type#closeBar" }
+               }
+             ))
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#search_nav_form", label: "search_nav_form"
+    )
+  end
+
   private
 
   def wrap(html)
