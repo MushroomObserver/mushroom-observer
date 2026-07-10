@@ -34,6 +34,14 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at 12:32am
-  check_rss_logs:
-    class: CheckRssLogsJob
+  # check_rss_logs was one job until it got split by measured cost --
+  # see CheckRssLogsJob's own comment for the local timing that drove
+  # it (the observation type alone was ~46% of the total). Staggered
+  # 5 minutes apart, off recover_stuck_inat_imports' every-3-minutes
+  # marks, same reasoning as the stagger above.
+  check_observation_rss_logs:
+    class: CheckObservationRssLogsJob
     schedule: every day at 3:53am
+  check_other_rss_logs:
+    class: CheckOtherRssLogsJob
+    schedule: every day at 3:58am
