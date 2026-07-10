@@ -251,6 +251,17 @@ class InatImportJob < ApplicationJob
   def done
     log("Updating inat_import state to Done")
     inat_import.update(state: "Done", ended_at: Time.zone.now)
+    send_import_digest
+  end
+
+  # Send one digest per interested user for the observations this import
+  # added, replacing the per-naming notifications suppressed during import
+  # (#4757). Best-effort: a digest failure must not fail/retry the job (that
+  # would resend digests), so swallow and log.
+  def send_import_digest
+    Inat::ImportDigest.deliver_for(inat_import)
+  rescue StandardError => e
+    log("Import digest failed: #{e.message}")
   end
 
   # A convenience to let a user create/update their iNat username simply
