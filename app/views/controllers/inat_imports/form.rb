@@ -69,11 +69,9 @@ module Views::Controllers::InatImports
     end
 
     def render_ids_panel
-      div(class: ids_panel_class,
-          data: {
-            type_switch_target: "panel",
-            type_switch_type: "ids"
-          }) do
+      CollapseDiv(expanded: current_method == "ids",
+                  attributes: { data: { type_switch_target: "panel",
+                                        type_switch_type: "ids" } }) do
         textarea_field(:inat_ids, label: false,
                                   wrap_class: "ml-4",
                                   help: :inat_import_list_help.t)
@@ -81,11 +79,9 @@ module Views::Controllers::InatImports
     end
 
     def render_url_panel
-      div(class: url_panel_class,
-          data: {
-            type_switch_target: "panel",
-            type_switch_type: "url"
-          }) do
+      CollapseDiv(expanded: current_method == "url",
+                  attributes: { data: { type_switch_target: "panel",
+                                        type_switch_type: "url" } }) do
         textarea_field(:inat_url, label: false,
                                   wrap_class: "ml-4",
                                   rows: 4,
@@ -93,14 +89,6 @@ module Views::Controllers::InatImports
                                   placeholder: "https://www.inaturalist.org" \
                                               "/observations?taxon_id=12345")
       end
-    end
-
-    def ids_panel_class
-      current_method == "ids" ? "collapse in" : "collapse"
-    end
-
-    def url_panel_class
-      current_method == "url" ? "collapse in" : "collapse"
     end
 
     def current_method

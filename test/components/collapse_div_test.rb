@@ -494,6 +494,52 @@ class CollapseDivTest < ComponentTestCase
     )
   end
 
+  # InatImports::Form panel targets (same no-id type-switch shape) ---
+
+  def test_inat_imports_form_ids_panel_expanded_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse in",
+          data: { type_switch_target: "panel", type_switch_type: "ids" }) do
+        plain("content")
+      end
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               expanded: true,
+               attributes: {
+                 data: { type_switch_target: "panel", type_switch_type: "ids" }
+               }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "[data-type-switch-type='ids']",
+      label: "inat_imports_form_ids_panel"
+    )
+  end
+
+  def test_inat_imports_form_url_panel_collapsed_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse",
+          data: { type_switch_target: "panel",
+                  type_switch_type: "url" }) { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               attributes: {
+                 data: { type_switch_target: "panel", type_switch_type: "url" }
+               }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "[data-type-switch-type='url']",
+      label: "inat_imports_form_url_panel"
+    )
+  end
+
   private
 
   def wrap(html)
