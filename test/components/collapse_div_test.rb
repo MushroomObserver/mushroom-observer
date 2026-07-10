@@ -540,6 +540,40 @@ class CollapseDivTest < ComponentTestCase
     )
   end
 
+  # Observations::Form::Specimen #specimen_fields target -----------
+
+  def test_specimen_fields_expanded_parity
+    old_html = render(phlex_wrapper do
+      div(id: "specimen_fields", class: "collapse in") { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "specimen_fields", expanded: true
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#specimen_fields", label: "specimen_fields_expanded"
+    )
+  end
+
+  def test_specimen_fields_collapsed_parity
+    old_html = render(phlex_wrapper do
+      div(id: "specimen_fields", class: "collapse") { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(id: "specimen_fields")) do
+        plain("content")
+      end
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#specimen_fields", label: "specimen_fields_collapsed"
+    )
+  end
+
   private
 
   def wrap(html)
