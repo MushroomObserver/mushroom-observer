@@ -574,6 +574,49 @@ class CollapseDivTest < ComponentTestCase
     )
   end
 
+  # Observations::Namings::ReasonsFields #naming_reasons_N_notes target
+  # (highest-risk site: live, interactive naming-reasons UI) ---------
+
+  def test_reasons_fields_notes_expanded_parity
+    old_html = render(phlex_wrapper do
+      div(id: "naming_reasons_1_notes",
+          class: class_names("form-group mb-3", "collapse in"),
+          data: { naming_reason_target: "collapse" }) { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "naming_reasons_1_notes", expanded: true,
+               html_class: "form-group mb-3",
+               attributes: { data: { naming_reason_target: "collapse" } }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#naming_reasons_1_notes", label: "reasons_fields_expanded"
+    )
+  end
+
+  def test_reasons_fields_notes_collapsed_parity
+    old_html = render(phlex_wrapper do
+      div(id: "naming_reasons_2_notes",
+          class: class_names("form-group mb-3", "collapse"),
+          data: { naming_reason_target: "collapse" }) { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "naming_reasons_2_notes",
+               html_class: "form-group mb-3",
+               attributes: { data: { naming_reason_target: "collapse" } }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#naming_reasons_2_notes", label: "reasons_fields_collapsed"
+    )
+  end
+
   private
 
   def wrap(html)

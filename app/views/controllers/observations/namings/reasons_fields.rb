@@ -74,12 +74,10 @@ class Views::Controllers::Observations::Namings::ReasonsFields < Views::Base
   end
 
   def render_textarea(reason_ns, reason)
-    # Bootstrap 3: "collapse" when hidden, "collapse in" when visible
-    collapse_class = reason.used? ? "collapse in" : "collapse"
-
-    div(id: "naming_reasons_#{reason.num}_notes",
-        class: class_names("form-group mb-3", collapse_class),
-        data: { naming_reason_target: "collapse" }) do
+    CollapseDiv(id: "naming_reasons_#{reason.num}_notes",
+                expanded: reason.used?,
+                html_class: "form-group mb-3",
+                attributes: { data: { naming_reason_target: "collapse" } }) do
       render(reason_ns.field(:notes).textarea(
                wrapper_options: { label: false },
                rows: 3,
