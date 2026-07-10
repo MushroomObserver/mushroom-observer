@@ -142,6 +142,7 @@ class InatImport < ApplicationRecord
     when :not_importable   then increment!(:ignored_not_importable_count)
     when :date_missing     then append_date_missing(inat_id)
     when :already_imported then increment!(:ignored_already_imported_count)
+    when :unlicensed       then increment!(:ignored_unlicensed_count)
     else raise(ArgumentError.new("Unknown ignored reason: #{reason.inspect}"))
     end
   end
@@ -156,9 +157,10 @@ class InatImport < ApplicationRecord
   end
 
   def ignored_total_count
-    ignored_not_importable_count.to_i +
-      ignored_date_missing_count.to_i +
-      ignored_already_imported_count.to_i
+    ignored_not_importable_count +
+      ignored_date_missing_count +
+      ignored_already_imported_count +
+      ignored_unlicensed_count
   end
 
   def add_response_error(error)
@@ -262,7 +264,7 @@ class InatImport < ApplicationRecord
 
   def append_date_missing(inat_id)
     reload
-    self.ignored_date_missing_count = ignored_date_missing_count.to_i + 1
+    self.ignored_date_missing_count = ignored_date_missing_count + 1
     self.date_missing_inat_ids = date_missing_inat_ids + [inat_id].compact
     save!
   end
