@@ -46,6 +46,15 @@ module Views::Layouts
       assert_not_includes(html, "pagination_numbers")
     end
 
+    def test_page_links_are_styled_as_large_default_buttons
+      html = render_nav(pagination_data: paginated(50, 1))
+
+      # Rendered via Link::Icon's button:/size: kwargs, not via raw
+      # btn/btn-lg strings — see Components::Navbar::LINK_CLASSES.
+      assert_html(html, "a.prev_page_link.btn.btn-default.btn-lg")
+      assert_html(html, "a.next_page_link.btn.btn-default.btn-lg")
+    end
+
     def test_prev_link_disabled_on_first_page
       html = render_nav(pagination_data: paginated(50, 1))
 

@@ -26,7 +26,7 @@ class NavbarTest < ComponentTestCase
   end
 
   def test_link_classes_constant
-    assert_equal(%w[navbar-link btn btn-lg px-0],
+    assert_equal(%w[navbar-link px-0],
                  Components::Navbar::LINK_CLASSES)
   end
 

@@ -117,4 +117,47 @@ class IconLinkTest < ComponentTestCase
 
     assert_html(html, "a[data-turbo-confirm]")
   end
+
+  def test_no_button_kwarg_renders_plain_link
+    html = render(Components::Link::Icon.new(content: "Edit", path: "/x",
+                                             icon: :edit))
+
+    assert_no_html(html, "a.btn")
+  end
+
+  def test_button_default_kwarg_adds_btn_framing
+    html = render(Components::Link::Icon.new(
+                    content: "Next", path: "/x",
+                    icon: :next, button: :default
+                  ))
+
+    assert_html(html, "a.icon-link.btn.btn-default")
+  end
+
+  def test_button_variant_kwarg_adds_matching_btn_class
+    html = render(Components::Link::Icon.new(
+                    content: "Next", path: "/x",
+                    icon: :next, button: :outline
+                  ))
+
+    assert_html(html, "a.btn.btn-outline-default")
+  end
+
+  def test_size_kwarg_adds_size_class_alongside_button
+    html = render(Components::Link::Icon.new(
+                    content: "Next", path: "/x",
+                    icon: :next, button: :default, size: :lg
+                  ))
+
+    assert_html(html, "a.btn.btn-default.btn-lg")
+  end
+
+  def test_button_strip_kwarg_adds_no_btn_framing
+    html = render(Components::Link::Icon.new(
+                    content: "Next", path: "/x",
+                    icon: :next, button: :strip
+                  ))
+
+    assert_no_html(html, "a.btn")
+  end
 end

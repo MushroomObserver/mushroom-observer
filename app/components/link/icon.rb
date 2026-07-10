@@ -29,11 +29,18 @@
 #
 # @example From a Tab PORO (shortcut)
 #   render(Components::Link::Icon.new(tab: Tab::Name::Edit.new(name: @name)))
+#
+# @example Framed as a Bootstrap button (e.g. a navbar icon-button)
+#   render(Components::Link::Icon.new(content: "Prev", path: prev_path,
+#                                     icon: :prev, button: :default,
+#                                     size: :lg))
 class Components::Link::Icon < Components::Base
   include Components::IconLabel
+  include Components::Button::Styling
 
   CONSUMED_OPTS = [:class, :icon, :icon_class, :show_text,
-                   :active_icon, :active_content, :button_to, :confirm].freeze
+                   :active_icon, :active_content, :button_to, :confirm,
+                   :button, :size].freeze
 
   attr_reader :content, :path, :opts
 
@@ -105,13 +112,26 @@ class Components::Link::Icon < Components::Base
     # Clone/Merge/Move). Turbo shows the dialog before following the link.
     base = {
       title: @content,
-      class: class_names("icon-link", @opts[:class]),
+      class: class_names("icon-link", btn_styling, size_class(@opts[:size]),
+                         @opts[:class]),
       data: { toggle: "tooltip", title: @content,
               active_title: @opts[:active_content] }
     }
     base[:data][:turbo_confirm] = @opts[:confirm] if @opts[:confirm]
     base[:role] = "button" if @opts[:button_to]
     base.deep_merge(@opts.except(*CONSUMED_OPTS))
+  end
+
+  # `nil` (button: omitted) means "plain link" — no btn framing at all,
+  # matching Components::Link#btn_styling's semantics so callers can't
+  # tell the two Link subclasses apart by behavior.
+  def btn_styling
+    button = @opts[:button]
+    return nil unless button
+    return nil if button == :strip
+    return class_names("btn", "btn-default") if button == :default
+
+    class_names("btn", btn_class(button))
   end
 
   def render_link_or_button(&block)

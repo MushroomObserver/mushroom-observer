@@ -44,6 +44,12 @@ module Components
   # component can't cover all three shapes, so callers compose these
   # constants with `class_names` instead.
   #
+  # `LINK_CLASSES` intentionally does NOT include `btn`/`btn-lg` —
+  # `Components::Link::Icon` (the shape every current caller renders
+  # through) accepts `button:`/`size:` kwargs directly, so callers pass
+  # `button: :default, size: :lg` instead of baking Bootstrap button
+  # classes into a raw string constant.
+  #
   # BS4 drops `.navbar-form` entirely and renames `.navbar-right` /
   # `.navbar-left` to margin-auto utilities — every caller that
   # references these constants (instead of retyping the raw strings)
@@ -62,7 +68,7 @@ module Components
   #                                   "navbar-left"))
   #   form(class: class_names(Components::Navbar::FORM_CLASS, "px-0"))
   class Navbar < Base
-    LINK_CLASSES = %w[navbar-link btn btn-lg px-0].freeze
+    LINK_CLASSES = %w[navbar-link px-0].freeze
     FORM_CLASS = "navbar-form"
 
     prop :element, _Nilable(Symbol), default: nil
