@@ -31,7 +31,8 @@ class Components::Form::PatternSearch < Components::ApplicationForm
     [:app_search_google, :google]
   ].freeze
 
-  FORM_CLASS = "flex-bar flex-grow-1 navbar-form px-0 gap-2"
+  FORM_CLASS = "flex-bar flex-grow-1 #{Components::Navbar::FORM_CLASS} " \
+               "px-0 gap-2".freeze
 
   def initialize(model, **options)
     options[:id] ||= "pattern_search_form"

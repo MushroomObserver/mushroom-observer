@@ -6,7 +6,8 @@
 # either prop is nil — the helper already gates on the same.
 module Views::Layouts
   class Header::ShowPrevNextNav < Views::Base
-    BTN_CLASSES = (Components::Navbar::LINK_CLASSES + %w[navbar-left]).freeze
+    BTN_CLASSES = (Components::Navbar::LINK_CLASSES +
+                   [Components::Navbar::LEFT_CLASS]).freeze
 
     prop :object, _Nilable(::AbstractModel), default: nil
     prop :query, _Nilable(::Query), default: nil

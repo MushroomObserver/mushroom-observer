@@ -33,27 +33,36 @@ module Components
   # real landmarks stay visually identical today while already being
   # expressed in BS4-forward terms.
   #
-  # Also holds `LINK_CLASSES` and `FORM_CLASS` — plain string/array
-  # constants (not renderable shapes) for two other `navbar-*`
-  # patterns that recur across the same files but don't share one
-  # fixed DOM shape: `.navbar-link` icon-buttons (sometimes a raw
-  # `<a>`, sometimes routed through `Link(type: :icon, ...)`) and
-  # `.navbar-form` (sometimes a real `<form>` tag, sometimes a plain
-  # `<div>` wrapper, sometimes just a `wrapper_class:` string handed
-  # to another component like `Dropdown`). A single Phlex tag-emitting
-  # component can't cover all three shapes, so callers compose these
-  # constants with `class_names` instead.
+  # Also holds several plain string/array constants (not renderable
+  # shapes) for other `navbar-*` patterns that recur across the same
+  # files but don't share one fixed DOM shape: `.navbar-link`
+  # icon-buttons (sometimes a raw `<a>`, sometimes routed through
+  # `Link(type: :icon, ...)`), `.navbar-form` (sometimes a real
+  # `<form>` tag, sometimes a plain `<div>` wrapper, sometimes just a
+  # `wrapper_class:` string handed to another component like
+  # `Dropdown`), and the `.navbar-nav`/`.navbar-right`/`.navbar-left`
+  # trio that shapes the nav-item list inside a `.navbar` landmark. A
+  # single Phlex tag-emitting component can't cover all these shapes,
+  # so callers compose the constants with `class_names` instead.
   #
-  # `LINK_CLASSES` intentionally does NOT include `btn`/`btn-lg` —
-  # `Components::Link::Icon` (the shape every current caller renders
-  # through) accepts `button:`/`size:` kwargs directly, so callers pass
-  # `button: :default, size: :lg` instead of baking Bootstrap button
-  # classes into a raw string constant.
+  # `LINK_CLASS`/`LINK_CLASSES` intentionally do NOT include
+  # `btn`/`btn-lg` — `Components::Link::Icon` (the shape every current
+  # caller renders through) accepts `button:`/`size:` kwargs directly,
+  # so callers pass `button: :default, size: :lg` instead of baking
+  # Bootstrap button classes into a raw string constant. `LINK_CLASS`
+  # is the bare `"navbar-link"` token for callers that need a
+  # different spacing utility than `LINK_CLASSES`'s bundled `px-0`
+  # (e.g. `search_bar.rb`, which wants `px-2`).
   #
   # BS4 drops `.navbar-form` entirely and renames `.navbar-right` /
   # `.navbar-left` to margin-auto utilities — every caller that
   # references these constants (instead of retyping the raw strings)
-  # gets that swap in one place.
+  # gets that swap in one place. `.navbar-nav`'s own migration risk is
+  # different in kind: BS4 keeps the class name but changes its CSS
+  # behavior (float-based in BS3, flex-based in BS4), so `NAV_CLASS`
+  # centralizes the token for consistency, but the actual fix for that
+  # risk is a CSS bridge rule (like `.navbar.navbar-flex` above), not a
+  # future string swap.
   #
   # @example The outer <nav class="navbar navbar-default"> landmark
   #   Navbar(variant: :default, id: "top_nav") { ... }
@@ -65,11 +74,17 @@ module Components
   #
   # @example The class-string constants
   #   a(href: url, class: class_names(Components::Navbar::LINK_CLASSES,
-  #                                   "navbar-left"))
+  #                                   Components::Navbar::LEFT_CLASS))
   #   form(class: class_names(Components::Navbar::FORM_CLASS, "px-0"))
+  #   ul(class: class_names(Components::Navbar::NAV_CLASS,
+  #                         Components::Navbar::RIGHT_CLASS))
   class Navbar < Base
-    LINK_CLASSES = %w[navbar-link px-0].freeze
+    LINK_CLASS = "navbar-link"
+    LINK_CLASSES = [LINK_CLASS, "px-0"].freeze
     FORM_CLASS = "navbar-form"
+    NAV_CLASS = "navbar-nav"
+    RIGHT_CLASS = "navbar-right"
+    LEFT_CLASS = "navbar-left"
 
     prop :element, _Nilable(Symbol), default: nil
     prop :variant, _Union(:default, :inverse)

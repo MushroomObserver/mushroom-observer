@@ -6,7 +6,7 @@
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
 class Views::Layouts::TopNav::SearchBar < Views::Base
-  BAR_TOGGLE_CLASSES = %w[navbar-link px-2].freeze
+  BAR_TOGGLE_CLASSES = [Components::Navbar::LINK_CLASS, "px-2"].freeze
 
   # Search types that have a per-type help expander. Mirrors
   # `Views::Layouts::TopNav::SEARCH_HELP_TYPES`; passed through
