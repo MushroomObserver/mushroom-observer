@@ -95,7 +95,7 @@ class Components::Form::Search < Components::ApplicationForm
   # Header (shown when not local/inline)
 
   def render_header
-    div(class: "navbar-flex w-100") do
+    div(class: "flex-bar w-100") do
       div(class: "font-weight-bold h5 text-larger") do
         plain(:search_form_title.t(type: search_type.to_s.upcase.to_sym))
       end

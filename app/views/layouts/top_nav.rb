@@ -33,12 +33,13 @@ class Views::Layouts::TopNav < Views::Base
     :projects, :herbaria, :species_lists
   ].freeze
 
-  # Container-class set shared by the top-nav row and the
-  # search-nav row. Pulled out so the only difference between the
-  # two — `justify-content-{between,center}` — reads clearly.
-  CONTAINER_CLASSES = %w[
-    container-fluid px-3 d-flex flex-row align-items-center
-  ].freeze
+  # Container classes shared by the top-nav row and the search-nav
+  # row. `w-100` is load-bearing since #top_nav is now `display: flex`
+  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it these two
+  # rows would share one line instead of each getting its own.
+  # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
+  # between` + `align-items-center` alias.
+  CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
@@ -64,7 +65,7 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   def view_template
-    nav(class: "navbar navbar-default hidden-print mb-2", id: "top_nav") do
+    Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav") do
       render_top_row
       render_search_row
     end
@@ -73,8 +74,7 @@ class Views::Layouts::TopNav < Views::Base
   private
 
   def render_top_row
-    div(class: class_names(CONTAINER_CLASSES,
-                           "justify-content-between")) do
+    div(class: class_names(CONTAINER_CLASSES)) do
       div(class: class_names(LEFT_CLASSES)) { render_left }
       div(class: class_names(RIGHT_CLASSES)) { render_right }
     end
@@ -94,13 +94,13 @@ class Views::Layouts::TopNav < Views::Base
       # stashed SafeBuffer; `trusted_html` emits it into Phlex's
       # buffer (a no-op `content_for` call would only read it).
       trusted_html(content_for(:context_nav)) if content_for?(:context_nav)
-      render(Views::Layouts::TopNav::UserNav.new(user: @user)) if @user
+      render(UserNav.new(user: @user)) if @user
     end
-    render(Views::Layouts::TopNav::Login.new) if @user.nil?
+    render(Login.new) if @user.nil?
   end
 
   def render_search_row
-    div(class: class_names(CONTAINER_CLASSES, "justify-content-center")) do
+    div(class: class_names(CONTAINER_CLASSES)) do
       div(class: "collapse w-100", id: "search_nav",
           data: {
             controller: "search-type",
@@ -116,7 +116,7 @@ class Views::Layouts::TopNav < Views::Base
         if controller.controller_name == "identify"
           render(::Views::Controllers::Observations::Identify::FormFilter.new)
         else
-          render(Views::Layouts::TopNav::SearchBar.new(
+          render(SearchBar.new(
                    search_help_types: SEARCH_HELP_TYPES,
                    search_form_types: SEARCH_FORM_TYPES
                  ))

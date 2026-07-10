@@ -20,7 +20,8 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
     if current_user
       render_logged_in
     else
-      Navbar(element: :strong, class: "mx-2 text-nowrap") do
+      render(Components::Navbar::Text.new(element: :strong,
+                                          class: "mx-2 text-nowrap")) do
         plain(:app_login_reminder.t)
       end
     end
@@ -39,7 +40,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
     div(class: "collapse in w-100", id: "search_bar_elements",
         data: { search_type_target: "bar",
                 action: "$shown.bs.collapse->search-type#closeForm" }) do
-      div(class: "navbar-flex w-100 gap-2") do
+      div(class: "flex-bar w-100 gap-2") do
         render_help_toggle
         render(Components::Form::PatternSearch.new(pattern_search_model))
         render_form_toggle unless on_search_page?

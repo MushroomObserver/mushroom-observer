@@ -80,7 +80,7 @@ class SearchFormTest < ComponentTestCase
   def test_renders_header_when_not_local
     html = render_form(local: false)
 
-    assert_html(html, ".navbar-flex")
+    assert_html(html, ".flex-bar")
     assert_html(html, "body",
                 text: :search_form_title.t(type: :OBSERVATIONS))
     assert_html(html,
@@ -98,7 +98,7 @@ class SearchFormTest < ComponentTestCase
   def test_does_not_render_header_when_local
     html = render_form(local: true)
 
-    assert_no_html(html, ".navbar-flex")
+    assert_no_html(html, ".flex-bar")
   end
 
   def test_names_search_form_has_correct_field_ids
