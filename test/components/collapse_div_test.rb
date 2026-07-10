@@ -407,6 +407,44 @@ class CollapseDivTest < ComponentTestCase
     )
   end
 
+  # Header::IndexBar::FilterCaption collapse targets ---------------
+
+  def test_filter_caption_truncated_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse in", id: "caption-truncated",
+          data: { filter_caption_target: "truncated" }) { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "caption-truncated", expanded: true,
+               attributes: { data: { filter_caption_target: "truncated" } }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#caption-truncated", label: "filter_caption_truncated"
+    )
+  end
+
+  def test_filter_caption_full_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse", id: "caption-full",
+          data: { filter_caption_target: "full" }) { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               id: "caption-full",
+               attributes: { data: { filter_caption_target: "full" } }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "#caption-full", label: "filter_caption_full"
+    )
+  end
+
   private
 
   def wrap(html)

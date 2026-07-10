@@ -59,17 +59,18 @@ module Views::Layouts
             query_record: @query.record.id,
             query_alph: @query.record.id.alphabetize
           }) do
-        render_collapse(truncate: true, class: "collapse in",
+        render_collapse(truncate: true, expanded: true,
                         id: "caption-truncated", target: "truncated")
-        render_collapse(truncate: false, class: "collapse",
+        render_collapse(truncate: false, expanded: false,
                         id: "caption-full", target: "full")
       end
     end
 
     private
 
-    def render_collapse(truncate:, class:, id:, target:)
-      div(class:, id:, data: { filter_caption_target: target }) do
+    def render_collapse(truncate:, expanded:, id:, target:)
+      CollapseDiv(id: id, expanded: expanded,
+                  attributes: { data: { filter_caption_target: target } }) do
         render_toggle_button(truncate: truncate)
         render_caption_params(truncate: truncate)
       end
