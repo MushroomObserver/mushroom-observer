@@ -671,7 +671,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # observation (see defaults_from_last_observation_created), so this
     # geotagged image's GPS is stripped for real at upload time. Confirm
     # Camera Info hides it -- see
-    # test_edit_observation_extracts_exif_from_saved_images (rolf) for the
+    # test_edit_observation_extracts_exif_from_saved_images (mary) for the
     # not-stripped counterpart.
     find("#carousel_thumbnail_#{geo.id}").click
     geo_item = find("#carousel_item_#{geo.id}", visible: :all)

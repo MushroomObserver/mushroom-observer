@@ -107,8 +107,12 @@ class Image
 
     def remote_file_exists?(spec)
       url = URI.parse(full_filepath(spec))
-      result = Net::HTTP.new(url.host, url.port).request_head(url.path)
+      http = Net::HTTP.new(url.host, url.port)
+      http.use_ssl = (url.scheme == "https")
+      result = http.request_head(url.path)
       result.code == "200"
+    rescue StandardError
+      false
     end
 
     def source_url(source)

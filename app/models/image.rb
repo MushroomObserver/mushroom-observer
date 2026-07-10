@@ -831,10 +831,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     # happens to match one, since the real destination legitimately doesn't
     # exist yet at this point (we're about to create it).
     original_image = image_url(:original).full_filepath(MO.local_image_files)
-    unless File.rename(upload_temp_file, original_image)
-      raise(SystemCallError.new("Try again."))
-    end
-
+    # File.rename raises SystemCallError on failure (never returns falsy),
+    # so the rescue below is the only failure path -- no need to also
+    # check its return value.
+    File.rename(upload_temp_file, original_image)
     FileUtils.chmod(0o644, original_image)
     true
   rescue SystemCallError

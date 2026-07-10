@@ -123,6 +123,7 @@ class Image::URLTest < UnitTestCase
     fake_response.define_singleton_method(:code) { "200" }
     fake_http = Object.new
     fake_http.define_singleton_method(:request_head) { |_path| fake_response }
+    fake_http.define_singleton_method(:use_ssl=) { |_v| nil }
 
     url.stub(:format_spec, "https://example.test/orig/1.jpg") do
       Net::HTTP.stub(:new, fake_http) do
@@ -137,6 +138,41 @@ class Image::URLTest < UnitTestCase
     fake_response.define_singleton_method(:code) { "404" }
     fake_http = Object.new
     fake_http.define_singleton_method(:request_head) { |_path| fake_response }
+    fake_http.define_singleton_method(:use_ssl=) { |_v| nil }
+
+    url.stub(:format_spec, "https://example.test/orig/1.jpg") do
+      Net::HTTP.stub(:new, fake_http) do
+        assert_not(url.source_exists?(:remote1))
+      end
+    end
+  end
+
+  def test_remote_file_exists_enables_ssl_for_https_urls_only
+    url = Image::URL.new(args(555_011).merge(size: :medium))
+    fake_response = Object.new
+    fake_response.define_singleton_method(:code) { "200" }
+    ssl_flags = []
+    fake_http = Object.new
+    fake_http.define_singleton_method(:request_head) { |_path| fake_response }
+    fake_http.define_singleton_method(:use_ssl=) { |v| ssl_flags << v }
+
+    url.stub(:format_spec, "https://example.test/orig/1.jpg") do
+      Net::HTTP.stub(:new, fake_http) { url.source_exists?(:remote1) }
+    end
+    url.stub(:format_spec, "http://example.test/orig/1.jpg") do
+      Net::HTTP.stub(:new, fake_http) { url.source_exists?(:remote1) }
+    end
+
+    assert_equal([true, false], ssl_flags)
+  end
+
+  def test_source_exists_false_on_remote_network_error
+    url = Image::URL.new(args(555_012).merge(size: :medium))
+    fake_http = Object.new
+    fake_http.define_singleton_method(:use_ssl=) { |_v| nil }
+    fake_http.define_singleton_method(:request_head) do |_path|
+      raise(SocketError.new("getaddrinfo: Name or service not known"))
+    end
 
     url.stub(:format_spec, "https://example.test/orig/1.jpg") do
       Net::HTTP.stub(:new, fake_http) do

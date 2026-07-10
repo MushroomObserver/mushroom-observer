@@ -339,7 +339,9 @@ class ImageTest < UnitTestCase
 
   def test_move_original_system_fail
     img = Image.new
-    File.stub(:rename, false) do
+    # File.rename raises SystemCallError on failure (matching real
+    # behavior -- see the comment in Image#move_original).
+    File.stub(:rename, ->(*) { raise(SystemCallError.new("boom")) }) do
       Kernel.stub(:system, false) do
         assert_raises(RuntimeError) { img.move_original }
       end
