@@ -12,6 +12,7 @@ module Views::Controllers::InatImports
       @inat_import = breakdown[:inat_import]
       @requested = breakdown[:requested]
       @after_taxon = breakdown[:after_taxon]
+      @not_yet_imported = breakdown[:not_yet_imported]
       @estimate_with_date = breakdown[:estimate_with_date]
       @estimated_at = Time.current
       @urls = ::Inat::ConfirmURLBuilder.new(model)
@@ -42,26 +43,37 @@ module Views::Controllers::InatImports
           count_expected_line
           render_nothing_to_import_notice
           br
-          unlicensed_obs_line
+          unlicensed_obs_line unless import_others?
           br
           time_estimate_line
         end
       end
     end
 
+    # Import-others' unlicensed obs are never imported,
+    # so they belong under Total Ignored
+    # Observations rather than own-import's informational-only line.
+    def show_ignored_section?
+      ignored_row_data.any? || import_others?
+    end
+
     def render_ignored_section
-      rows = ignored_row_data
-      return if rows.empty?
+      return unless show_ignored_section?
 
       br
       render_ignored_total
-      render_ignored_overlap_note if rows.size > 1
+      render_ignored_overlap_note if ignored_rows_count > 1
       div(class: "ml-3") do
-        rows.each do |row|
+        ignored_row_data.each do |row|
           render_ignored_row(row[:key], row[:count], row[:url])
         end
+        unlicensed_ignored_row if import_others?
       end
       br
+    end
+
+    def ignored_rows_count
+      ignored_row_data.size + (import_others? ? 1 : 0)
     end
 
     def render_ignored_total
@@ -114,10 +126,15 @@ module Views::Controllers::InatImports
       @expected.to_i - @estimate_with_date.to_i
     end
 
+    # `@not_yet_imported` deliberately doesn't force/default a license value
+    # (unlike `@expected`), so it stays on the same scope as `@after_taxon`
+    # regardless what the user's URL says about `licensed` — subtracting
+    # `@expected` here instead would misattribute unlicensed obs (a separate,
+    # already-reported reason) as "already imported".
     def already_imported_count
-      return unless @after_taxon && @expected
+      return unless @after_taxon && @not_yet_imported
 
-      @after_taxon.to_i - @expected.to_i
+      @after_taxon.to_i - @not_yet_imported.to_i
     end
 
     def requested_obs_line
@@ -188,6 +205,23 @@ module Views::Controllers::InatImports
 
       whitespace
       plain(unlicensed_note_key.l)
+    end
+
+    # Import-others' unlicensed obs are never imported, so this renders inside
+    # the Total Ignored Observations breakdown rather than as its own
+    # always-visible line. Import execution defaults `licensed` to true unless
+    # the stored URL explicitly sets it (see PageParser#add_ownership_filter).
+    # Rendered unconditionally (even when the count is blank/zero) so a failed
+    # estimate is visible as blank, distinguishable from a genuine zero.
+    def unlicensed_ignored_row
+      div(class: "mb-1") do
+        b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
+        span(id: "unlicensed_obs_count") { render_unlicensed_count }
+        if @unlicensed_obs.to_i.positive?
+          whitespace
+          plain(unlicensed_note_key.l)
+        end
+      end
     end
 
     def render_unlicensed_count

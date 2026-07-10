@@ -136,52 +136,6 @@
         77
       ],
       "note": "False positive: `id` is this Image record's integer primary key (never a user-supplied string) and the operator is one of three string literals set by the case statement immediately above (unknown operators raise before this line). Neither interpolated value can carry shell metacharacters. The shell-string form is kept because the trailing '&' backgrounds the rotate script."
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "a6e091d1b880b1bf981ac1fe1b928105a62e8f0f3b71bea926142ccd08d1cc97",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/vote.rb",
-      "line": 251,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "Vote.where.not(:user_id => 0).where.not(:observation_id => nil).joins(\"LEFT OUTER JOIN `observation_views` ON #{votes_views_join_condition}\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Vote",
-        "method": "Vote.add_missing_views_corresponding_to_votes"
-      },
-      "user_input": "votes_views_join_condition",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": "False positive: `votes_views_join_condition` takes no arguments and returns a hardcoded literal string comparing two backtick-quoted column names; it contains no user- or database-supplied input. The method exists only to share the join condition between this method and update_existing_views_corresponding_to_votes."
-    },
-    {
-      "warning_type": "SQL Injection",
-      "warning_code": 0,
-      "fingerprint": "e6b20056c30031cf2a6a33a65a29432ad7e9cfdd21f9d9168b443023bc95bfc5",
-      "check_name": "SQL",
-      "message": "Possible SQL injection",
-      "file": "app/models/vote.rb",
-      "line": 231,
-      "link": "https://brakemanscanner.org/docs/warning_types/sql_injection/",
-      "code": "ObservationView.where(:reviewed => 0).joins(\"JOIN `votes` ON #{votes_views_join_condition}\")",
-      "render_path": null,
-      "location": {
-        "type": "method",
-        "class": "Vote",
-        "method": "Vote.update_existing_views_corresponding_to_votes"
-      },
-      "user_input": "votes_views_join_condition",
-      "confidence": "Medium",
-      "cwe_id": [
-        89
-      ],
-      "note": "False positive: same `votes_views_join_condition` helper as the sibling warning in add_missing_views_corresponding_to_votes -- a hardcoded literal string with no user- or database-supplied input."
     }
   ],
   "brakeman_version": "7.1.1"
