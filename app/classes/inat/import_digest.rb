@@ -44,8 +44,9 @@ class Inat
     end
 
     def import_namings
-      obs_ids = Observation.where(inat_import_id: @inat_import.id).pluck(:id)
-      Naming.where(observation_id: obs_ids).includes(:observation, :name)
+      Naming.joins(:observation).
+        where(observations: { inat_import_id: @inat_import.id }).
+        includes(:observation, :name)
     end
   end
 end

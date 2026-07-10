@@ -13,6 +13,18 @@ class Naming::NotifyTest < UnitTestCase
     assert_not(Naming.notifications_suppressed?)
   end
 
+  def test_suppress_notifications_nests
+    Naming.suppress_notifications do
+      Naming.suppress_notifications do
+        assert(Naming.notifications_suppressed?)
+      end
+      # the inner block exiting must not re-enable notifications while the
+      # outer block is still running
+      assert(Naming.notifications_suppressed?)
+    end
+    assert_not(Naming.notifications_suppressed?)
+  end
+
   def test_suppress_notifications_clears_on_error
     assert_raises(RuntimeError) do
       Naming.suppress_notifications { raise("boom") }

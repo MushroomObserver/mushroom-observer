@@ -17,10 +17,11 @@ module Naming::Notify
     # digest per interested user instead of thousands of individual emails.
     # Thread-local so concurrent requests/jobs don't affect each other.
     def suppress_notifications
+      previous = Thread.current[:naming_suppress_notifications]
       Thread.current[:naming_suppress_notifications] = true
       yield
     ensure
-      Thread.current[:naming_suppress_notifications] = false
+      Thread.current[:naming_suppress_notifications] = previous
     end
 
     def notifications_suppressed?

@@ -262,7 +262,7 @@ class InatImportJob < ApplicationJob
   def send_import_digest
     Inat::ImportDigest.deliver_for(inat_import)
   rescue StandardError => e
-    log("Import digest failed: #{e.message}")
+    log("Import digest failed: #{e.class}: #{e.message}")
   end
 
   # A convenience to let a user create/update their iNat username simply
