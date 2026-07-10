@@ -72,6 +72,13 @@ class CollapseDivTest < ComponentTestCase
     assert_no_html(html, "#override")
   end
 
+  def test_element_kwarg_renders_alternate_tag
+    html = render(Components::CollapseDiv.new(id: "foo", element: :tbody))
+
+    assert_html(html, "tbody.collapse#foo")
+    assert_no_html(html, "div.collapse")
+  end
+
   def test_yields_content
     html = render(phlex_wrapper do
       render(Components::CollapseDiv.new(id: "foo")) { plain("hello") }

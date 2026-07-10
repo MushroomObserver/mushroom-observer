@@ -30,18 +30,25 @@
 #          )) do
 #     render_fields
 #   end
+#
+# @example A collapsible `<tbody>` instead of a `<div>`
+#   render(Components::CollapseDiv.new(id: "target_subs_1", element: :tbody)) do
+#     render_sub_rows
+#   end
 class Components::CollapseDiv < Components::Base
   prop :id, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
   prop :panel, _Boolean, default: false
   prop :html_class, _Nilable(String), default: nil
   prop :attributes, _Hash(Symbol, _Any), default: -> { {} }
+  prop :element, Symbol, default: :div
 
   def view_template(&block)
-    div(id: @id,
-        class: collapse_classes,
-        **@attributes.except(:class, :id),
-        &block)
+    send(@element,
+         id: @id,
+         class: collapse_classes,
+         **@attributes.except(:class, :id),
+         &block)
   end
 
   private
