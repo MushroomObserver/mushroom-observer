@@ -86,12 +86,12 @@ module Components
     RIGHT_CLASS = "navbar-right"
     LEFT_CLASS = "navbar-left"
 
-    prop :element, _Nilable(Symbol), default: nil
+    prop :element, Symbol, default: :nav
     prop :variant, _Union(:default, :inverse)
     prop :attributes, _Hash(Symbol, _Any), :**
 
     def view_template(&block)
-      send(@element || :nav, **computed_attributes, &block)
+      send(@element, **computed_attributes, &block)
     end
 
     private
