@@ -108,4 +108,40 @@ class Image::URLTest < UnitTestCase
     assert_not(called, "should not evaluate the gate when the normal " \
                         "source_order already succeeded")
   end
+
+  def test_source_exists_raises_for_invalid_spec
+    url = Image::URL.new(args(555_008).merge(size: :medium))
+
+    url.stub(:format_spec, "weird://foo") do
+      assert_raises(RuntimeError) { url.source_exists?(:remote1) }
+    end
+  end
+
+  def test_source_exists_true_when_remote_http_head_returns_200
+    url = Image::URL.new(args(555_009).merge(size: :medium))
+    fake_response = Object.new
+    fake_response.define_singleton_method(:code) { "200" }
+    fake_http = Object.new
+    fake_http.define_singleton_method(:request_head) { |_path| fake_response }
+
+    url.stub(:format_spec, "https://example.test/orig/1.jpg") do
+      Net::HTTP.stub(:new, fake_http) do
+        assert(url.source_exists?(:remote1))
+      end
+    end
+  end
+
+  def test_source_exists_false_when_remote_http_head_returns_non_200
+    url = Image::URL.new(args(555_010).merge(size: :medium))
+    fake_response = Object.new
+    fake_response.define_singleton_method(:code) { "404" }
+    fake_http = Object.new
+    fake_http.define_singleton_method(:request_head) { |_path| fake_response }
+
+    url.stub(:format_spec, "https://example.test/orig/1.jpg") do
+      Net::HTTP.stub(:new, fake_http) do
+        assert_not(url.source_exists?(:remote1))
+      end
+    end
+  end
 end
