@@ -124,11 +124,18 @@ class Inat
     end
 
     # When importing own observations: scope by user_login, no licensed filter.
-    # When importing others' observations (superimporter): require licensed,
-    # no user_login — the licensed + taxon filters are the safety constraints.
+    # When importing others' (superimporter): default to
+    # licensed:true unless stored URL specifies a `licensed`
+    # value. This only trims how many observations iNat sends back — it
+    # doesn't guarantee anything.
+    # ObservationImporter#unlicensed_other? is
+    # the check that actually stops an unlicensed obs from another user
+    # from being imported, the same way already_linked? is what actually
+    # stops a duplicate, not the without_field fetch filter (see that
+    # comment for the parallel).
     def add_ownership_filter(query_args)
       if @import.import_others
-        query_args.merge!(LICENSED_FILTER)
+        query_args[:licensed] = true unless query_args.key?(:licensed)
       else
         query_args[:user_login] = @import.inat_username
       end

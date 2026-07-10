@@ -368,7 +368,6 @@ Naming/PredicatePrefix:
     - 'app/classes/eol_data.rb'
     - 'app/classes/name_parse.rb'
     - 'app/classes/pattern_search/observation.rb'
-    - 'app/classes/run_level.rb'
     - 'app/classes/tree.rb'
     - 'app/controllers/api2_controller.rb'
     - 'app/controllers/application_controller.rb'
@@ -426,11 +425,9 @@ Style/ArrayIntersect:
 # Offense count: 62
 Style/ClassVars:
   Exclude:
-    - 'app/classes/run_level.rb'
     - 'app/classes/textile.rb'
     - 'app/extensions/symbol.rb'
     - 'app/models/concerns/language_tracking.rb'
-    - 'app/models/language.rb'
     - 'app/models/location.rb'
     - 'app/models/user_group.rb'
     - 'test/controllers/locations_controller_test.rb'

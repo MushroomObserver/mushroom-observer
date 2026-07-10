@@ -722,6 +722,13 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "button[type='submit'][data-confirm='Are you sure?']")
   end
 
+  # `as: :input` falls through to SuperForm's default submit input.
+  def test_submit_as_input_renders_input_element
+    form = render_form { submit("Save", as: :input) }
+
+    assert_html(form, "input[type='submit'][value='Save']")
+  end
+
   # Upload fields tests
   def test_upload_fields_renders_all_components
     # Create an observation for testing upload fields
