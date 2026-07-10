@@ -81,9 +81,9 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_user_autocompleter
-      div(class: panel_class("user"),
-          data: { type_switch_target: "panel",
-                  type_switch_type: "user" }) do
+      CollapseDiv(expanded: panel_expanded?("user"),
+                  attributes: { data: { type_switch_target: "panel",
+                                        type_switch_type: "user" } }) do
         autocompleter_field(
           :term,
           type: :user,
@@ -96,9 +96,9 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_location_autocompleter
-      div(class: panel_class("location"),
-          data: { type_switch_target: "panel",
-                  type_switch_type: "location" }) do
+      CollapseDiv(expanded: panel_expanded?("location"),
+                  attributes: { data: { type_switch_target: "panel",
+                                        type_switch_type: "location" } }) do
         autocompleter_field(
           :term,
           type: :location,
@@ -110,8 +110,8 @@ module Views::Controllers::Projects::Aliases
       end
     end
 
-    def panel_class(type)
-      current_type == type ? "collapse in" : "collapse"
+    def panel_expanded?(type)
+      current_type == type
     end
 
     def current_type

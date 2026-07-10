@@ -445,6 +445,55 @@ class CollapseDivTest < ComponentTestCase
     )
   end
 
+  # Projects::Aliases::Form panel targets (no id -- Stimulus type-switch
+  # keys off data-type-switch-type, not a collapse-trigger id) --------
+
+  def test_aliases_form_user_panel_expanded_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse in",
+          data: { type_switch_target: "panel", type_switch_type: "user" }) do
+        plain("content")
+      end
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               expanded: true,
+               attributes: {
+                 data: { type_switch_target: "panel",
+                         type_switch_type: "user" }
+               }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "[data-type-switch-type='user']",
+      label: "aliases_form_user_panel"
+    )
+  end
+
+  def test_aliases_form_location_panel_collapsed_parity
+    old_html = render(phlex_wrapper do
+      div(class: "collapse",
+          data: { type_switch_target: "panel",
+                  type_switch_type: "location" }) { plain("content") }
+    end)
+    new_html = render(phlex_wrapper do
+      render(::Components::CollapseDiv.new(
+               attributes: {
+                 data: { type_switch_target: "panel",
+                         type_switch_type: "location" }
+               }
+             )) { plain("content") }
+    end)
+
+    assert_html_element_equivalent(
+      wrap(old_html), wrap(new_html),
+      selector: "[data-type-switch-type='location']",
+      label: "aliases_form_location_panel"
+    )
+  end
+
   private
 
   def wrap(html)
