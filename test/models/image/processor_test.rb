@@ -12,6 +12,8 @@ class Image::ProcessorTest < UnitTestCase
   TIFF_FIXTURE = Rails.root.join("test/images/pleopsidium.tiff").to_s
   JPG_FIXTURE = Rails.root.join("test/images/sticky.jpg").to_s
   GEOTAGGED_FIXTURE = Rails.root.join("test/images/geotagged.jpg").to_s
+  WEBP_FIXTURE = Rails.root.join("test/images/webp_fixture.webp").to_s
+  HEIC_FIXTURE = Rails.root.join("test/images/heic_fixture.heic").to_s
 
   def local_root
     if (worker_num = database_worker_number)
@@ -142,6 +144,43 @@ class Image::ProcessorTest < UnitTestCase
     assert(image.transferred)
     assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
     assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.tiff")
+    assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.jpg")
+  end
+
+  # Image#original_extension maps content_type "image/webp" -> "webp" --
+  # confirms that a real webp upload converts correctly instead of being
+  # mislabeled "raw" and mishandled by ImageMagick.
+  def test_process_converts_webp_original
+    image = images(:turned_over_image)
+    image.update_columns(transferred: false, width: nil, height: nil)
+    FileUtils.cp(WEBP_FIXTURE, "#{local_root}/orig/#{image.id}.webp")
+
+    Image::Processor.new(image: image, ext: "webp", set_size: true).process
+
+    image.reload
+    assert_equal(300, image.width)
+    assert_equal(200, image.height)
+    assert(image.transferred)
+    assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
+    assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.webp")
+    assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.jpg")
+  end
+
+  # Same as above for content_type "image/heif" -> "heic" (the extension
+  # MimeMagic reports for both .heic and .heif uploads).
+  def test_process_converts_heic_original
+    image = images(:turned_over_image)
+    image.update_columns(transferred: false, width: nil, height: nil)
+    FileUtils.cp(HEIC_FIXTURE, "#{local_root}/orig/#{image.id}.heic")
+
+    Image::Processor.new(image: image, ext: "heic", set_size: true).process
+
+    image.reload
+    assert_equal(300, image.width)
+    assert_equal(200, image.height)
+    assert(image.transferred)
+    assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
+    assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.heic")
     assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.jpg")
   end
 
