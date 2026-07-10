@@ -283,8 +283,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Test that Camera Info displays EXIF data from saved "good" images
     # when editing an observation. The server extracts EXIF from original
     # image files and passes it to FormCameraInfo via camera_info props.
+    #
+    # Uses mary, not katrina: katrina's most recent fixture observation
+    # (untrusted_hidden) has gps_hidden: true, which
+    # defaults_from_last_observation_created carries forward into any
+    # new observation she creates -- stripping this test's freshly
+    # uploaded images' GPS for real (see
+    # test_post_edit_and_destroy_with_details_and_location, which
+    # covers that stripped case with katrina). mary has no such
+    # history, so this covers the not-stripped case. (rolf won't work
+    # here either: his keep_filenames preference is "toss", which
+    # discards original_name -- this test looks images up by filename.)
     setup_image_dirs
-    user = users(:katrina)
+    user = users(:mary)
     login!(user)
 
     # Create observation with two geotagged images with different coordinates
@@ -319,8 +330,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     visit(edit_observation_path(new_obs.id))
     assert_selector("body.observations__edit")
 
-    # Find both saved geotagged images
-    imgs = Image.last(2)
+    # Find both saved geotagged images -- scoped to new_obs, not a global
+    # Image.last(2) (races with any other image created elsewhere).
+    imgs = new_obs.images
     miami_img = imgs.find { |img| img.original_name == "geotagged.jpg" }
     pasadena_img = imgs.find do |img|
       img.original_name == "geotagged_s_pasadena.jpg"
@@ -620,19 +632,22 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_when_2i", text: "August")
     assert_select("observation_when_3i", text: "14")
     assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
-    # Just verify that Camera Info displays EXIF for saved images
-    # (observation GPS was already set during creation)
+    # Katrina's gps_hidden carries forward (see below), so this saved
+    # image's GPS was already stripped during creation -- Camera Info
+    # should show it hidden, not the real coordinates.
     geo_item = find(".carousel-item[data-image-status='good']",
                     text: /geotagged_s_pasadena/, visible: :all)
     within(geo_item) do
-      assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, visible: :all)
-      assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s, visible: :all)
+      assert_selector(".exif_lat_wrapper.d-none", visible: :all)
+      assert_no_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s)
     end
     assert_unchecked_field("observation_is_collection_location")
     assert_checked_field("observation_specimen", visible: :all)
     assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
-    imgs = Image.last(2)
+    # Scoped to new_obs, not a global Image.last(2) (races with any other
+    # image created elsewhere).
+    imgs = new_obs.images
     cci = imgs.find { |img| img[:original_name] == "Coprinus_comatus.jpg" }
     geo = imgs.find { |img| img[:original_name] == "geotagged_s_pasadena.jpg" }
     img_ids = imgs.map(&:id)
@@ -652,15 +667,17 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_checked_field("thumb_image_id_#{cci.id}", visible: :all)
     assert_unchecked_field("thumb_image_id_#{geo.id}", visible: :all)
 
-    # Test Bug Fix: Verify saved geotagged image extracts and displays EXIF GPS
-    # Tests that JavaScript extracts EXIF from saved images, not just uploads
+    # Katrina's gps_hidden carries forward from her most recent fixture
+    # observation (see defaults_from_last_observation_created), so this
+    # geotagged image's GPS is stripped for real at upload time. Confirm
+    # Camera Info hides it -- see
+    # test_edit_observation_extracts_exif_from_saved_images (rolf) for the
+    # not-stripped counterpart.
     find("#carousel_thumbnail_#{geo.id}").click
     geo_item = find("#carousel_item_#{geo.id}", visible: :all)
     within(geo_item) do
-      # Camera Info should display GPS coordinates from the saved image
-      assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, wait: 3)
-      assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s)
-      assert_selector(".exif_alt", text: SO_PASA_EXIF[:alt].to_s)
+      assert_selector(".exif_lat_wrapper.d-none", visible: :all, wait: 3)
+      assert_no_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s)
     end
 
     # Submit observation form with changes
@@ -1177,8 +1194,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
   def assert_observation_has_correct_image(expected_values)
     new_obs = Observation.last
-    new_imgs = Image.last(2)
-    assert_obj_arrays_equal(new_imgs, new_obs.images)
+    new_imgs = new_obs.images
     # Dates are no longer copied from image to obs/other images
     # assert_dates_equal(expected_values[:when], new_imgs[0].when)
     assert_equal(expected_values[:user].legal_name,

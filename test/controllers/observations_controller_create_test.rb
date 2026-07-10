@@ -1181,6 +1181,122 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_false(old_img2.reload.gps_stripped)
   end
 
+  # Faster controller-test equivalent of the "not stripped" half of
+  # test_edit_observation_extracts_exif_from_saved_images (system test):
+  # verifies the *edit page's rendered markup* (not just the model's
+  # gps_stripped flag, already covered by test_create_observation_
+  # strip_images above) shows each of two distinct uploaded images'
+  # own EXIF GPS -- no cross-contamination between the two.
+  def test_edit_shows_distinct_exif_per_image_when_not_stripped
+    login("rolf")
+    setup_image_dirs
+
+    miami = Rack::Test::UploadedFile.new(
+      "#{MO.root}/test/images/geotagged.jpg", "image/jpeg"
+    )
+    pasadena = Rack::Test::UploadedFile.new(
+      "#{MO.root}/test/images/geotagged_s_pasadena.jpg", "image/jpeg"
+    )
+
+    post(
+      :create,
+      params: {
+        observation: {
+          when: Time.zone.now,
+          place_name: "California, USA",
+          specimen: "0",
+          thumb_image_id: "0",
+          image: {
+            "0" => { image: miami, copyright_holder: "me",
+                     when: Time.zone.now },
+            "1" => { image: pasadena, copyright_holder: "me",
+                     when: Time.zone.now }
+          }
+        }
+      }
+    )
+
+    obs = Observation.last
+    # Identify by submission order (image "0" / "1"), not original_name --
+    # keep_filenames may discard the original filename entirely depending
+    # on the uploader's preference, which isn't what this test covers.
+    sorted_images = obs.images.sort_by(&:id)
+    assert_equal(2, sorted_images.length, "Both images should have saved")
+    miami_img, pasadena_img = sorted_images
+    assert_false(miami_img.gps_stripped)
+    assert_false(pasadena_img.gps_stripped)
+
+    # A prior multipart POST (file upload) leaves stale Rack env state
+    # that trips Rack::Multipart::EmptyContentError on this GET unless
+    # cleared -- the content-type/length headers only make sense for
+    # the POST that carried them.
+    @request.env.delete("CONTENT_TYPE")
+    @request.env.delete("CONTENT_LENGTH")
+    @request.env.delete("RAW_POST_DATA")
+    get(:edit, params: { id: obs.id })
+    assert_response(:success)
+
+    assert_select("#camera_info_#{miami_img.id} .exif_lat", text: "25.7582")
+    assert_select("#camera_info_#{miami_img.id} .exif_lng", text: "-80.3731")
+    assert_select("#camera_info_#{pasadena_img.id} .exif_lat",
+                  text: "34.1231")
+    assert_select("#camera_info_#{pasadena_img.id} .exif_lng",
+                  text: "-118.1489")
+  end
+
+  # Faster controller-test equivalent of the "stripped" half covered by
+  # test_post_edit_and_destroy_with_details_and_location (system test,
+  # katrina's gps_hidden carried forward): verifies the edit page's
+  # rendered markup hides GPS once gps_hidden strips it -- the wrapper
+  # gets d-none and the value span is empty, not just that the model's
+  # gps_stripped flag is set (already covered by
+  # test_create_observation_strip_images above).
+  def test_edit_hides_exif_when_gps_hidden_strips_it
+    login("rolf")
+    setup_image_dirs
+
+    miami = Rack::Test::UploadedFile.new(
+      "#{MO.root}/test/images/geotagged.jpg", "image/jpeg"
+    )
+
+    post(
+      :create,
+      params: {
+        observation: {
+          when: Time.zone.now,
+          place_name: "California, USA",
+          specimen: "0",
+          thumb_image_id: "0",
+          gps_hidden: "1",
+          image: {
+            "0" => { image: miami, copyright_holder: "me",
+                     when: Time.zone.now }
+          }
+        }
+      }
+    )
+
+    obs = Observation.last
+    assert_equal(1, obs.images.length, "Image should have saved")
+    miami_img = obs.images.first
+    assert_true(miami_img.gps_stripped)
+
+    # A prior multipart POST (file upload) leaves stale Rack env state
+    # that trips Rack::Multipart::EmptyContentError on this GET unless
+    # cleared -- the content-type/length headers only make sense for
+    # the POST that carried them.
+    @request.env.delete("CONTENT_TYPE")
+    @request.env.delete("CONTENT_LENGTH")
+    @request.env.delete("RAW_POST_DATA")
+    get(:edit, params: { id: obs.id })
+    assert_response(:success)
+
+    assert_select("#camera_info_#{miami_img.id} .exif_lat_wrapper.d-none")
+    assert_select("#camera_info_#{miami_img.id} .exif_lat", text: "")
+    assert_select("#camera_info_#{miami_img.id} .exif_lat",
+                  text: "25.7582", count: 0)
+  end
+
   # -----------------------------------
   #  Test extended observation forms.
   # -----------------------------------
