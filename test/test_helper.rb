@@ -209,7 +209,6 @@ module ActiveSupport
                    "lang:update` and re-run this test before concluding " \
                    "this is a pre-existing/unrelated failure.")
       FileUtils.rm_rf(MO.local_image_files)
-      UserGroup.clear_cache_for_unit_tests
     end
 
     # Record time this test started to run.
