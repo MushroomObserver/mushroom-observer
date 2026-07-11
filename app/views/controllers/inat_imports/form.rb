@@ -69,9 +69,9 @@ module Views::Controllers::InatImports
     end
 
     def render_ids_panel
-      CollapseDiv(expanded: current_method == "ids",
-                  attributes: { data: { type_switch_target: "panel",
-                                        type_switch_type: "ids" } }) do
+      Collapsible(expanded: current_method == "ids",
+                  data: { type_switch_target: "panel",
+                          type_switch_type: "ids" }) do
         textarea_field(:inat_ids, label: false,
                                   wrap_class: "ml-4",
                                   help: :inat_import_list_help.t)
@@ -79,9 +79,9 @@ module Views::Controllers::InatImports
     end
 
     def render_url_panel
-      CollapseDiv(expanded: current_method == "url",
-                  attributes: { data: { type_switch_target: "panel",
-                                        type_switch_type: "url" } }) do
+      Collapsible(expanded: current_method == "url",
+                  data: { type_switch_target: "panel",
+                          type_switch_type: "url" }) do
         textarea_field(:inat_url, label: false,
                                   wrap_class: "ml-4",
                                   rows: 4,

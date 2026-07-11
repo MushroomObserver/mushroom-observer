@@ -66,7 +66,7 @@ module Views::Controllers::Projects::Locations
         # Chevron trigger present
         assert_html(html, ".panel-collapse-trigger")
         # Collapse target for sub-locations. Class comes from
-        # Components::CollapseDiv.collapse_classes, not a raw literal.
+        # Components::Collapsible.collapse_classes, not a raw literal.
         assert_html(html, "tbody#target_subs_#{burbank.id}.collapse")
         # Aggregated count: 2 + 3 = 5
         assert_includes(html, "5")

@@ -2,32 +2,32 @@
 
 require("test_helper")
 
-# Unit tests for Components::CollapseDiv, plus parity tests verifying
+# Unit tests for Components::Collapsible, plus parity tests verifying
 # that each converted caller produces identical HTML before and after.
 #
 # Phlex note: blocks passed to `render(component) { ... }` at the test
 # level run in the test's self, so Phlex helpers like `plain` are not
 # available. Content that needs Phlex helpers must live inside an
 # anonymous Components::Base wrapper — see helpers below.
-class CollapseDivTest < ComponentTestCase
+class CollapsibleTest < ComponentTestCase
   # ---------------------------------------------------------------
   # Unit tests
   # ---------------------------------------------------------------
 
   def test_collapse_classes_class_method_matches_instance_rendering
-    assert_equal("collapse", Components::CollapseDiv.collapse_classes)
+    assert_equal("collapse", Components::Collapsible.collapse_classes)
     assert_equal("collapse in",
-                 Components::CollapseDiv.collapse_classes(expanded: true))
+                 Components::Collapsible.collapse_classes(expanded: true))
     assert_equal("collapse panel-collapse",
-                 Components::CollapseDiv.collapse_classes(panel: true))
+                 Components::Collapsible.collapse_classes(panel: true))
     assert_equal("collapse in panel-collapse no-transition",
-                 Components::CollapseDiv.collapse_classes(
+                 Components::Collapsible.collapse_classes(
                    expanded: true, panel: true, html_class: "no-transition"
                  ))
   end
 
   def test_closed_by_default
-    html = render(Components::CollapseDiv.new(id: "foo"))
+    html = render(Components::Collapsible.new(id: "foo"))
 
     assert_html(html, "div.collapse#foo")
     assert_no_html(html, "div.in")
@@ -35,57 +35,54 @@ class CollapseDivTest < ComponentTestCase
   end
 
   def test_expanded_adds_in_class
-    html = render(Components::CollapseDiv.new(id: "foo", expanded: true))
+    html = render(Components::Collapsible.new(id: "foo", expanded: true))
 
     assert_html(html, "div.collapse.in#foo")
   end
 
   def test_panel_adds_panel_collapse_class
-    html = render(Components::CollapseDiv.new(id: "foo", panel: true))
+    html = render(Components::Collapsible.new(id: "foo", panel: true))
 
     assert_html(html, "div.collapse.panel-collapse#foo")
     assert_no_html(html, "div.in")
   end
 
-  def test_expanded_panel_with_html_class
-    html = render(Components::CollapseDiv.new(
+  def test_expanded_panel_with_class
+    html = render(Components::Collapsible.new(
                     id: "foo", expanded: true, panel: true,
-                    html_class: "no-transition"
+                    class: "no-transition"
                   ))
 
     assert_html(html, "div.collapse.in.panel-collapse.no-transition#foo")
   end
 
   def test_nil_id_omits_id_attr
-    html = render(Components::CollapseDiv.new)
+    html = render(Components::Collapsible.new)
 
     assert_html(html, "div.collapse")
     assert_no_html(html, "div[id]")
   end
 
-  def test_attributes_forwarded
-    html = render(Components::CollapseDiv.new(
+  def test_extra_attrs_forwarded
+    html = render(Components::Collapsible.new(
                     id: "geo",
-                    attributes: { data: { form_exif_target: "collapseFields" } }
+                    data: { form_exif_target: "collapseFields" }
                   ))
 
     assert_html(html,
                 "div.collapse#geo[data-form-exif-target='collapseFields']")
   end
 
-  def test_attributes_class_and_id_ignored
-    html = render(Components::CollapseDiv.new(
-                    id: "real",
-                    attributes: { id: "override", class: "override",
-                                  data: { foo: "bar" } }
-                  ))
+  def test_id_kwarg_always_wins_over_any_other_id_source
+    # `id:` is an explicit prop, so it always claims that keyword --
+    # there's no bucket a caller could stash a conflicting id in.
+    html = render(Components::Collapsible.new(id: "real", data: { foo: "bar" }))
 
     assert_html(html, "div.collapse#real[data-foo='bar']")
-    assert_no_html(html, "#override")
   end
 
   def test_element_kwarg_renders_alternate_tag
-    html = render(Components::CollapseDiv.new(id: "foo", element: :tbody))
+    html = render(Components::Collapsible.new(id: "foo", element: :tbody))
 
     assert_html(html, "tbody.collapse#foo")
     assert_no_html(html, "div.collapse")
@@ -93,7 +90,7 @@ class CollapseDivTest < ComponentTestCase
 
   def test_yields_content
     html = render(phlex_wrapper do
-      render(Components::CollapseDiv.new(id: "foo")) { plain("hello") }
+      render(Components::Collapsible.new(id: "foo")) { plain("hello") }
     end)
 
     assert_html(html, "div.collapse#foo", text: "hello")
@@ -148,7 +145,7 @@ class CollapseDivTest < ComponentTestCase
 
   # ApplicationForm::FieldWithHelp collapse div -----------------
 
-  def test_field_with_help_collapse_div_parity
+  def test_field_with_help_collapsible_parity
     help_id = "my_field_help"
 
     old_html = render(phlex_wrapper do
@@ -157,7 +154,7 @@ class CollapseDivTest < ComponentTestCase
       end
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(id: help_id)) do
+      render(::Components::Collapsible.new(id: help_id)) do
         render(::Components::Help.new(well: true)) { plain("help text") }
       end
     end)
@@ -176,9 +173,9 @@ class CollapseDivTest < ComponentTestCase
       div(class: "panel-collapse collapse in no-transition", id: "view_acc")
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "view_acc", expanded: true, panel: true,
-               html_class: "no-transition"
+               class: "no-transition"
              ))
     end)
 
@@ -193,8 +190,8 @@ class CollapseDivTest < ComponentTestCase
       div(class: "panel-collapse collapse no-transition", id: "edit_acc")
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
-               id: "edit_acc", panel: true, html_class: "no-transition"
+      render(::Components::Collapsible.new(
+               id: "edit_acc", panel: true, class: "no-transition"
              ))
     end)
 
@@ -212,7 +209,7 @@ class CollapseDivTest < ComponentTestCase
       div(class: "panel-collapse collapse", id: "pb1")
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(id: "pb1", panel: true))
+      render(::Components::Collapsible.new(id: "pb1", panel: true))
     end)
 
     assert_html_element_equivalent(
@@ -226,7 +223,7 @@ class CollapseDivTest < ComponentTestCase
       div(class: "panel-collapse collapse in", id: "pb2")
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(id: "pb2", panel: true,
+      render(::Components::Collapsible.new(id: "pb2", panel: true,
                                            expanded: true))
     end)
 
@@ -238,7 +235,7 @@ class CollapseDivTest < ComponentTestCase
 
   # Form::LocationMap -------------------------------------------
 
-  def test_location_map_collapse_div_parity
+  def test_location_map_collapsible_parity
     old_html = render(phlex_wrapper do
       div(id: "lm1", class: "form-map collapse",
           data: { map_target: "mapDiv", editable: "true",
@@ -264,9 +261,9 @@ class CollapseDivTest < ComponentTestCase
           data: { form_exif_target: "collapseFields" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "observation_geolocation",
-               attributes: { data: { form_exif_target: "collapseFields" } }
+               data: { form_exif_target: "collapseFields" }
              )) { plain("content") }
     end)
 
@@ -283,10 +280,10 @@ class CollapseDivTest < ComponentTestCase
           data: { form_exif_target: "collapseFields" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "observation_geolocation",
                expanded: true,
-               attributes: { data: { form_exif_target: "collapseFields" } }
+               data: { form_exif_target: "collapseFields" }
              )) { plain("content") }
     end)
 
@@ -310,9 +307,9 @@ class CollapseDivTest < ComponentTestCase
           data: data_attrs) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
-               id: "search_nav", html_class: "w-100",
-               attributes: { data: data_attrs }
+      render(::Components::Collapsible.new(
+               id: "search_nav", class: "w-100",
+               data: data_attrs
              )) { plain("content") }
     end)
 
@@ -363,13 +360,10 @@ class CollapseDivTest < ComponentTestCase
       end
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
-               id: "search_bar_elements", expanded: true, html_class: "w-100",
-               attributes: {
-                 data: { search_type_target: "bar",
-                         action:
-                           "$shown.bs.collapse->search-type#closeForm" }
-               }
+      render(::Components::Collapsible.new(
+               id: "search_bar_elements", expanded: true, class: "w-100",
+               data: { search_type_target: "bar",
+                       action: "$shown.bs.collapse->search-type#closeForm" }
              )) { plain("content") }
     end)
 
@@ -385,9 +379,9 @@ class CollapseDivTest < ComponentTestCase
           data: { search_type_target: "help" })
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
-               id: "search_bar_help", html_class: "w-100",
-               attributes: { data: { search_type_target: "help" } }
+      render(::Components::Collapsible.new(
+               id: "search_bar_help", class: "w-100",
+               data: { search_type_target: "help" }
              ))
     end)
 
@@ -404,12 +398,10 @@ class CollapseDivTest < ComponentTestCase
                   action: "$shown.bs.collapse->search-type#closeBar" })
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
-               id: "search_nav_form", html_class: "w-100 border-top",
-               attributes: {
-                 data: { search_type_target: "form",
-                         action: "$shown.bs.collapse->search-type#closeBar" }
-               }
+      render(::Components::Collapsible.new(
+               id: "search_nav_form", class: "w-100 border-top",
+               data: { search_type_target: "form",
+                       action: "$shown.bs.collapse->search-type#closeBar" }
              ))
     end)
 
@@ -427,9 +419,9 @@ class CollapseDivTest < ComponentTestCase
           data: { filter_caption_target: "truncated" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "caption-truncated", expanded: true,
-               attributes: { data: { filter_caption_target: "truncated" } }
+               data: { filter_caption_target: "truncated" }
              )) { plain("content") }
     end)
 
@@ -445,9 +437,9 @@ class CollapseDivTest < ComponentTestCase
           data: { filter_caption_target: "full" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "caption-full",
-               attributes: { data: { filter_caption_target: "full" } }
+               data: { filter_caption_target: "full" }
              )) { plain("content") }
     end)
 
@@ -468,12 +460,10 @@ class CollapseDivTest < ComponentTestCase
       end
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                expanded: true,
-               attributes: {
-                 data: { type_switch_target: "panel",
-                         type_switch_type: "user" }
-               }
+               data: { type_switch_target: "panel",
+                       type_switch_type: "user" }
              )) { plain("content") }
     end)
 
@@ -491,11 +481,9 @@ class CollapseDivTest < ComponentTestCase
                   type_switch_type: "location" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
-               attributes: {
-                 data: { type_switch_target: "panel",
-                         type_switch_type: "location" }
-               }
+      render(::Components::Collapsible.new(
+               data: { type_switch_target: "panel",
+                       type_switch_type: "location" }
              )) { plain("content") }
     end)
 
@@ -516,11 +504,9 @@ class CollapseDivTest < ComponentTestCase
       end
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                expanded: true,
-               attributes: {
-                 data: { type_switch_target: "panel", type_switch_type: "ids" }
-               }
+               data: { type_switch_target: "panel", type_switch_type: "ids" }
              )) { plain("content") }
     end)
 
@@ -538,10 +524,8 @@ class CollapseDivTest < ComponentTestCase
                   type_switch_type: "url" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
-               attributes: {
-                 data: { type_switch_target: "panel", type_switch_type: "url" }
-               }
+      render(::Components::Collapsible.new(
+               data: { type_switch_target: "panel", type_switch_type: "url" }
              )) { plain("content") }
     end)
 
@@ -559,7 +543,7 @@ class CollapseDivTest < ComponentTestCase
       div(id: "specimen_fields", class: "collapse in") { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "specimen_fields", expanded: true
              )) { plain("content") }
     end)
@@ -575,7 +559,7 @@ class CollapseDivTest < ComponentTestCase
       div(id: "specimen_fields", class: "collapse") { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(id: "specimen_fields")) do
+      render(::Components::Collapsible.new(id: "specimen_fields")) do
         plain("content")
       end
     end)
@@ -596,10 +580,10 @@ class CollapseDivTest < ComponentTestCase
           data: { naming_reason_target: "collapse" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "naming_reasons_1_notes", expanded: true,
-               html_class: "form-group mb-3",
-               attributes: { data: { naming_reason_target: "collapse" } }
+               class: "form-group mb-3",
+               data: { naming_reason_target: "collapse" }
              )) { plain("content") }
     end)
 
@@ -616,10 +600,10 @@ class CollapseDivTest < ComponentTestCase
           data: { naming_reason_target: "collapse" }) { plain("content") }
     end)
     new_html = render(phlex_wrapper do
-      render(::Components::CollapseDiv.new(
+      render(::Components::Collapsible.new(
                id: "naming_reasons_2_notes",
-               html_class: "form-group mb-3",
-               attributes: { data: { naming_reason_target: "collapse" } }
+               class: "form-group mb-3",
+               data: { naming_reason_target: "collapse" }
              )) { plain("content") }
     end)
 

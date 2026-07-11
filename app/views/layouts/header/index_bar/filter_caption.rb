@@ -69,8 +69,8 @@ module Views::Layouts
     private
 
     def render_collapse(truncate:, expanded:, id:, target:)
-      CollapseDiv(id: id, expanded: expanded,
-                  attributes: { data: { filter_caption_target: target } }) do
+      Collapsible(id: id, expanded: expanded,
+                  data: { filter_caption_target: target }) do
         render_toggle_button(truncate: truncate)
         render_caption_params(truncate: truncate)
       end

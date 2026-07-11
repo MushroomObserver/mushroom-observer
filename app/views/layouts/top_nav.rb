@@ -101,18 +101,16 @@ class Views::Layouts::TopNav < Views::Base
 
   def render_search_row
     div(class: class_names(CONTAINER_CLASSES)) do
-      CollapseDiv(id: "search_nav", html_class: "w-100",
-                  attributes: {
-                    data: {
-                      controller: "search-type",
-                      # Stimulus Array values must be JSON. Rails' tag
-                      # helper JSON-encodes arrays automatically; Phlex
-                      # space-joins them ("a b"), which breaks
-                      # JSON.parse in the controller and silently
-                      # disables the help/advanced-search forms (#4492).
-                      search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
-                      search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-                    }
+      Collapsible(id: "search_nav", class: "w-100",
+                  data: {
+                    controller: "search-type",
+                    # Stimulus Array values must be JSON. Rails' tag
+                    # helper JSON-encodes arrays automatically; Phlex
+                    # space-joins them ("a b"), which breaks
+                    # JSON.parse in the controller and silently
+                    # disables the help/advanced-search forms (#4492).
+                    search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
+                    search_type_form_types_value: SEARCH_FORM_TYPES.to_json
                   }) do
         # Identify pages get their own filter bar; everything else
         # gets the pattern-search bar.

@@ -82,7 +82,7 @@ module Views::Controllers::Projects::Locations
       return if subs.empty?
 
       tab.body(id: collapse_id,
-               class: Components::CollapseDiv.collapse_classes) do
+               class: Components::Collapsible.collapse_classes) do
         subs.each { |loc| render_sub_row(loc) }
       end
     end

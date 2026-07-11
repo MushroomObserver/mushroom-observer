@@ -37,10 +37,10 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   end
 
   def render_collapse_bar
-    CollapseDiv(id: "search_bar_elements", expanded: true, html_class: "w-100",
-                attributes: {
-                  data: { search_type_target: "bar",
-                          action: "$shown.bs.collapse->search-type#closeForm" }
+    Collapsible(id: "search_bar_elements", expanded: true, class: "w-100",
+                data: {
+                  search_type_target: "bar",
+                  action: "$shown.bs.collapse->search-type#closeForm"
                 }) do
       div(class: "flex-bar w-100 gap-2") do
         render_help_toggle
@@ -49,8 +49,8 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
       end
       # Per-type help fragment is fetched into here by the
       # search-type Stimulus controller; empty on initial paint.
-      CollapseDiv(id: "search_bar_help", html_class: "w-100",
-                  attributes: { data: { search_type_target: "help" } })
+      Collapsible(id: "search_bar_help", class: "w-100",
+                  data: { search_type_target: "help" })
     end
   end
 
@@ -58,11 +58,9 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # controller populates with whichever advanced-search form
   # matches the selected search type.
   def render_advanced_form_target
-    CollapseDiv(id: "search_nav_form", html_class: "w-100 border-top",
-                attributes: {
-                  data: { search_type_target: "form",
-                          action: "$shown.bs.collapse->search-type#closeBar" }
-                })
+    Collapsible(id: "search_nav_form", class: "w-100 border-top",
+                data: { search_type_target: "form",
+                        action: "$shown.bs.collapse->search-type#closeBar" })
   end
 
   # Bootstrap collapse-trigger for the per-type help fragment
