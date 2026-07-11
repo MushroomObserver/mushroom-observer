@@ -51,8 +51,9 @@ module Views::Layouts
 
       # Rendered via Link::Icon's button:/size: kwargs, not via raw
       # btn/btn-lg strings — see Components::Navbar::LINK_CLASSES.
-      # btn_link (not default) strips the background — these are
-      # plain icon-only nav buttons, not filled buttons.
+      # :link (not :default) removes the background/border while
+      # keeping button padding — plain icon-only nav buttons, not
+      # filled buttons. (:strip would remove padding too.)
       assert_html(html, "a.prev_page_link.btn.btn-link.btn-lg")
       assert_html(html, "a.next_page_link.btn.btn-link.btn-lg")
     end

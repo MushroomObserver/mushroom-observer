@@ -171,9 +171,10 @@ module Views::Layouts
                     ))
 
       # Framed as buttons via Link::Icon's button:/size: kwargs, not
-      # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. btn_link
-      # (not default) strips the background — these are plain
-      # icon-only nav buttons, not filled buttons.
+      # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
+      # (not :default) removes the background/border while keeping
+      # button padding — plain icon-only nav buttons, not filled
+      # buttons. (:strip would remove padding too.)
       assert_html(html, "a.prev_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.index_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.next_object_link.btn.btn-link.btn-lg")

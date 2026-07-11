@@ -70,7 +70,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
          target_id: "search_bar_help",
          icon: :info,
          icon_title: :search_bar_help.l,
-         button: :btn_link,
+         button: :link,
          class: bar_toggle_class(visible: help_visible?),
          data: { search_type_target: "helpToggle" })
   end
@@ -83,7 +83,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
          target_id: "search_nav_form",
          icon: :plus,
          icon_title: :search_bar_more_options.l,
-         button: :btn_link,
+         button: :link,
          class: bar_toggle_class(visible: form_visible?),
          data: { search_type_target: "formToggle" })
   end

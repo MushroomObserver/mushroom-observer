@@ -46,7 +46,7 @@ class Views::Layouts::Sidebar
           type: :post,
           name: tab.title,
           target: tab.path,
-          variant: :btn_link,
+          variant: :link,
           class: class_names(css_class, tab.html_options[:class]),
           data: tab.html_options[:data]
         )
@@ -88,7 +88,7 @@ class Views::Layouts::Sidebar
           type: :post,
           name: tab.title,
           target: tab.path,
-          variant: :btn_link,
+          variant: :link,
           class: class_names(css_class, tab.html_options[:class]),
           data: tab.html_options[:data]
         )

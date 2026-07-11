@@ -48,7 +48,7 @@ module Components
   # `LINK_CLASS`/`LINK_CLASSES` intentionally do NOT include
   # `btn`/`btn-lg` — `Components::Link::Icon` (the shape every current
   # caller renders through) accepts `button:`/`size:` kwargs directly,
-  # so callers pass `button: :btn_link, size: :lg` instead of baking
+  # so callers pass `button: :link, size: :lg` instead of baking
   # Bootstrap button classes into a raw string constant. `LINK_CLASS`
   # is the bare `"navbar-link"` token for callers that need a
   # different spacing utility than `LINK_CLASSES`'s bundled `px-0`

@@ -32,7 +32,7 @@ module Components::Button::Styling
     warning: "btn-warning",
     success: "btn-success",
     info: "btn-info",
-    btn_link: "btn-link",
+    link: "btn-link",
     outline: "btn-outline-default",
     outline_primary: "btn-outline-primary",
     outline_danger: "btn-outline-danger",
@@ -51,8 +51,7 @@ module Components::Button::Styling
   module_function
 
   def btn_class(variant)
-    variant = nil if variant == :default
-    return "btn-default" if variant.nil?
+    return "btn-default" if variant.nil? || variant == :default
     return nil if variant == :strip
 
     css = BTN_VARIANTS[variant]

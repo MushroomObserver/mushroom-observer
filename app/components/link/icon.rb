@@ -32,7 +32,7 @@
 #
 # @example Framed as a Bootstrap button (e.g. a navbar icon-button)
 #   render(Components::Link::Icon.new(content: "Prev", path: prev_path,
-#                                     icon: :prev, button: :btn_link,
+#                                     icon: :prev, button: :link,
 #                                     size: :lg))
 class Components::Link::Icon < Components::Base
   include Components::IconLabel
