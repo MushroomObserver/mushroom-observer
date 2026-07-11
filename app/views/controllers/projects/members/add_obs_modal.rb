@@ -37,10 +37,7 @@ module Views::Controllers::Projects::Members
     end
 
     def render_footer_buttons
-      Button(
-        name: :CANCEL.l,
-        data: { dismiss: "modal" }
-      )
+      render(Components::Modal::CloseButton.new)
       whitespace
       render_submit_button if @count.positive?
     end
