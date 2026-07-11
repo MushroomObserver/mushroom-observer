@@ -71,11 +71,12 @@ class Components::Link < Components::Base
   # Returns the btn class string when `button:` is set, or nil for a
   # plain link. Intentionally different from `Button#btn_styling`:
   # nil means "plain link". Pass `:default` for the grey btn-default
-  # frame (same as omitting `variant:` on Components::Button).
+  # frame (same as omitting `variant:` on Components::Button) --
+  # `btn_class` itself treats `:default` as a synonym for nil, so no
+  # separate branch is needed here for that case.
   def btn_styling
     return nil unless @button
     return nil if @button == :strip
-    return class_names("btn", "btn-default") if @button == :default
 
     class_names("btn", btn_class(@button))
   end

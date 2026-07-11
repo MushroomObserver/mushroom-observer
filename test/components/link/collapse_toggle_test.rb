@@ -96,7 +96,7 @@ class CollapseToggleLinkTest < ComponentTestCase
   end
 
   def test_button_variant_adds_btn_classes
-    html = render_it(button: :btn_link)
+    html = render_it(button: :link)
 
     assert_html(html, "a[data-toggle='collapse']")
   end
@@ -108,7 +108,7 @@ class CollapseToggleLinkTest < ComponentTestCase
   end
 
   def test_size_adds_btn_size_class_alongside_button
-    html = render_it(button: :btn_link, size: :xs)
+    html = render_it(button: :link, size: :xs)
 
     assert_html(html, "a[data-toggle='collapse']")
   end

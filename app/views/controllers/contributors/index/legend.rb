@@ -46,7 +46,7 @@ module Views::Controllers::Contributors
         Link(type: :collapse_toggle,
              target_id: "contribution_legend",
              icon: :info_circle,
-             button: :btn_link,
+             button: :link,
              size: :xs)
       end
 

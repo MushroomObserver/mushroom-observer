@@ -7,7 +7,7 @@
 # "Unknown User" string when `user` is nil.
 #
 # Pass `button:` to add Bootstrap button styling (e.g.
-# `button: :btn_link` renders `btn btn-link` alongside the identifier
+# `button: :link` renders `btn btn-link` alongside the identifier
 # class).
 class Components::Link::User < Components::Link::Object
   prop :user, _Nilable(_Union(::User, Integer)), default: nil

@@ -297,12 +297,42 @@ class RssLog < AbstractModel
   #   :save  => true            # Save changes?
   #
   def add_with_date(tag, user: nil, **args)
+    return if already_orphaned?
+
     entry = encode(tag, relevant_args(args, user: user),
                    args[:time] || Time.zone.now)
-    RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     add_entry(entry)
-    save_without_our_callbacks unless args.key?(:save) && !args[:save]
+    save_dated_entry(args)
+  end
+
+  # Persist a freshly-added entry, honouring the +save+ and +touch+ args:
+  # +save: false+ skips the save entirely; +touch: false+ saves without
+  # bumping +updated_at+ (so the entry doesn't jump to the top of the feed).
+  def save_dated_entry(args)
+    return if args.key?(:save) && !args[:save]
+
+    RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
+    save_without_our_callbacks
+  ensure
+    # record_timestamps is a class-level flag; reset it in an ensure so a
+    # raise in save_without_our_callbacks can't leave it false and silently
+    # suppress updated_at on every later RssLog save in the process.
     RssLog.record_timestamps = true
+  end
+
+  # An orphaned log leads with the destroyed object's title instead of a
+  # timestamped entry (see #orphan), and is meant never to change again.
+  # Prepending a fresh timestamped entry would bury that title and turn the
+  # log back into a "ghost" (all target ids nil, notes newly timestamped)
+  # that script/check_rss_logs then deletes -- destroying the history of a
+  # live object that still points at this log. Refuse the write. See
+  # GitHub issue #4763.
+  #
+  # This is nil-safe (a brand-new log has blank notes) and does not block
+  # #orphan itself: orphan calls add_with_date *before* prepending the
+  # title, so the log still leads with a timestamp at that point.
+  def already_orphaned?
+    notes.present? && !notes.match?(/\A\d{14}/)
   end
 
   # `user:` is a User instance, a bare login string (some callers already

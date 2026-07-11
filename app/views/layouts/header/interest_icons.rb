@@ -21,7 +21,7 @@ module Views::Layouts
     prop :object, ::AbstractModel
 
     def view_template
-      ul(class: "nav navbar-flex interest-eyes h4 my-0") do
+      ul(class: "nav flex-bar interest-eyes h4 my-0") do
         render_icons if @user
       end
     end

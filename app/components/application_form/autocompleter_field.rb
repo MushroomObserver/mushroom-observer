@@ -217,7 +217,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(Components::Icon.new(
                type: :check,
                title: :autocompleter_has_id.l,
-               html_class: "px-2 text-success has-id-indicator",
+               class: "px-2 text-success has-id-indicator",
                data: { target_attr_key => "hasIdIndicator" }
              ))
     end

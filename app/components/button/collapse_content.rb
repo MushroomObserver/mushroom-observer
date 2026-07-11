@@ -13,7 +13,7 @@ module Components::Button::CollapseContent
   def collapse_content
     if @icon
       render(Components::Icon.new(
-               type: @icon, html_class: @icon_class,
+               type: @icon, class: @icon_class,
                title: @icon_title || @open_text || @closed_text
              ))
     end

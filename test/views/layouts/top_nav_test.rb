@@ -161,6 +161,14 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, "a.dropdown-toggle", text: @user.login)
   end
 
+  def test_right_nav_list_uses_navbar_constants
+    html = render(top_nav(user: @user))
+
+    # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS, not raw
+    # navbar-nav/navbar-right literals.
+    assert_html(html, "ul.nav.navbar-nav.navbar-right.hidden-xs.mr-0")
+  end
+
   private
 
   def top_nav(user:, query: nil)

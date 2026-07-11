@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # The GET pattern-search form that lives in the top nav. Renders a
-# `<form class="navbar-flex … " action="/search/pattern" method="get">`
+# `<form class="flex-bar … " action="/search/pattern" method="get">`
 # wrapping a text input with the search-icon affordance and a type
 # select, plus a submit button.
 #
@@ -31,7 +31,8 @@ class Components::Form::PatternSearch < Components::ApplicationForm
     [:app_search_google, :google]
   ].freeze
 
-  FORM_CLASS = "navbar-flex flex-grow-1 navbar-form px-0 gap-2"
+  FORM_CLASS = "flex-bar flex-grow-1 #{Components::Navbar::FORM_CLASS} " \
+               "px-0 gap-2".freeze
 
   def initialize(model, **options)
     options[:id] ||= "pattern_search_form"
@@ -50,7 +51,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
                "flex-grow-1 mb-0") do
       Icon(
         type: :search,
-        html_class: "form-control-feedback hidden-xs"
+        class: "form-control-feedback hidden-xs"
       )
       # `label: false` skips the form-group wrap + auto-label so the
       # input nests directly inside the navbar flex row, matching
