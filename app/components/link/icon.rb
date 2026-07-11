@@ -113,14 +113,24 @@ class Components::Link::Icon < Components::Base
     # Clone/Merge/Move). Turbo shows the dialog before following the link.
     base = {
       title: @content,
-      class: class_names("icon-link", btn_styling, size_class(@opts[:size]),
-                         @opts[:class]),
+      class: class_names("icon-link", button_classes, @opts[:class]),
       data: { toggle: "tooltip", title: @content,
               active_title: @opts[:active_content] }
     }
     base[:data][:turbo_confirm] = @opts[:confirm] if @opts[:confirm]
     base[:role] = "button" if @opts[:button_to]
     base.deep_merge(@opts.except(*CONSUMED_OPTS))
+  end
+
+  # `size:` only ever makes sense alongside real btn framing — a
+  # dangling `btn-lg` with no `.btn` base class isn't valid Bootstrap
+  # markup — so it's computed here, gated on `btn_styling` being
+  # present, rather than appended unconditionally in `link_attrs`.
+  def button_classes
+    styling = btn_styling
+    return nil unless styling
+
+    class_names(styling, size_class(@opts[:size]))
   end
 
   # `nil` (button: omitted) means "plain link" — no btn framing at all,

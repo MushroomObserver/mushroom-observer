@@ -161,6 +161,29 @@ class IconLinkTest < ComponentTestCase
     assert_no_html(html, "a.btn")
   end
 
+  def test_size_kwarg_without_button_does_not_dangle
+    html = render(Components::Link::Icon.new(
+                    content: "Next", path: "/x",
+                    icon: :next, size: :lg
+                  ))
+
+    # No `.btn` base class, so `.btn-lg` alone must not appear either --
+    # a dangling size modifier with no button framing isn't valid
+    # Bootstrap markup.
+    assert_no_html(html, "a.btn")
+    assert_no_html(html, "a.btn-lg")
+  end
+
+  def test_size_kwarg_with_button_strip_does_not_dangle
+    html = render(Components::Link::Icon.new(
+                    content: "Next", path: "/x",
+                    icon: :next, button: :strip, size: :lg
+                  ))
+
+    assert_no_html(html, "a.btn")
+    assert_no_html(html, "a.btn-lg")
+  end
+
   def test_raw_btn_class_raises_argument_error
     # Matches Link::Get/Modal/User: btn classes must go through
     # button:/size:, not a raw class: string.
