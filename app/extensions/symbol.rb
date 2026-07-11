@@ -41,16 +41,19 @@ class Symbol
   end
 
   # Return a list of missing tags we've encountered. A class-level
-  # instance variable (not `@@`, which trips Style/ClassVars), holding
-  # a Concurrent::Array so `<<` below is safe across threads - matches
-  # the @raise_errors pattern just above.
+  # instance variable (not `@@`, which trips Style/ClassVars) -
+  # matches the @raise_errors pattern just above. Test-only: every
+  # setter/reader lives under test/ (test_helper.rb, session_extensions.rb),
+  # and in production the setter is never called, so this is never
+  # touched concurrently outside a single-threaded test worker - no
+  # Concurrent::Array needed.
   def self.missing_tags
-    @missing_tags ||= Concurrent::Array.new
+    @missing_tags ||= []
   end
 
   # Reset the list of missing tags.
-  def self.missing_tags=(tags)
-    @missing_tags = Concurrent::Array.new(tags)
+  class << self
+    attr_writer :missing_tags
   end
 
   # Does this tag have a translation?
