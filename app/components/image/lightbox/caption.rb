@@ -217,8 +217,9 @@ class Components::Image::Lightbox::Caption < Components::Base
     end
   end
 
+  # ApplicationController resets the per-request Textile cache before
+  # every action; this only needs to prime it, not clear it first.
   def prepare_textile_cache
-    Textile.clear_textile_cache
     Textile.register_name(@obs.name)
   end
 
