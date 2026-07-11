@@ -211,24 +211,44 @@ class DeletedObservationLogRestorer
 
     obs = Observation.find_by(id: rec[:obs_id])
     return skip(rec, "obs not found") unless obs
+    return skip(rec, "obs already points at another log") unless linkable?(obs,
+                                                                           rec)
 
     write_insert(rec, obs) unless @dry_run
     done("insert log #{rec[:log_id]} -> obs #{rec[:obs_id]}")
   end
 
+  # Only overwrite rss_log_id when it's blank or already this log, so a log
+  # created since this script was authored (as 140593 got) is never clobbered.
+  def linkable?(obs, rec)
+    obs.rss_log_id.nil? || obs.rss_log_id == rec[:log_id]
+  end
+
   def write_insert(rec, obs)
-    RssLog.insert!(rec.slice(:created_at, :updated_at, :notes).
-                   merge(id: rec[:log_id], observation_id: rec[:obs_id]))
+    RssLog.insert!({ id: rec[:log_id], observation_id: rec[:obs_id],
+                     notes: rec[:notes], created_at: utc(rec[:created_at]),
+                     updated_at: utc(rec[:updated_at]) })
     obs.update_column(:rss_log_id, rec[:log_id])
+  end
+
+  # Recovered timestamps are UTC wall-clock; parse them as UTC so they aren't
+  # shifted through the app time zone.
+  def utc(str)
+    Time.find_zone("UTC").parse(str)
   end
 
   def append_record(rec)
     log = RssLog.find_by(id: rec[:existing_log_id])
     return skip(rec, "log missing") unless log
+    return skip(rec, "obs missing or points elsewhere") unless spliceable?(rec)
     return skip(rec, "already spliced") if log.notes.to_s.include?(rec[:notes])
 
     log.update_columns(notes: spliced(log, rec)) unless @dry_run
     done("splice history -> obs #{rec[:obs_id]} (log #{rec[:existing_log_id]})")
+  end
+
+  def spliceable?(rec)
+    Observation.find_by(id: rec[:obs_id])&.rss_log_id == rec[:existing_log_id]
   end
 
   def spliced(log, rec)
