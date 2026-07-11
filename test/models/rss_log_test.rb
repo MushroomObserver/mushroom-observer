@@ -38,10 +38,12 @@ class RssLogTest < UnitTestCase
 
   def test_add_with_date_refuses_to_write_to_orphaned_log
     log = rss_logs(:location_rss_log)
-    # Orphan it: prepend a title line so notes no longer lead with a
-    # timestamp, exactly as #orphan leaves things.
+    # Orphan it the way #orphan does: clear the target ids and prepend a
+    # title line so notes no longer lead with a timestamp.
+    log.clear_target_id
     log.update(notes: "Target Title\n#{log.notes}")
     assert(log.already_orphaned?)
+    assert_nil(log.target_id)
     before = log.notes
 
     log.add_with_date(:log_location_updated, user: "mary")
@@ -51,6 +53,7 @@ class RssLogTest < UnitTestCase
     # orphan instead of turning back into a deletable "ghost". See #4763.
     assert_equal(before, log.notes)
     assert(log.already_orphaned?)
+    assert_nil(log.target_id)
   end
 
   def test_orphaning_still_works_through_the_guard

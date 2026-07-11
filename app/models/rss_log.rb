@@ -313,6 +313,10 @@ class RssLog < AbstractModel
 
     RssLog.record_timestamps = false if args.key?(:touch) && !args[:touch]
     save_without_our_callbacks
+  ensure
+    # record_timestamps is a class-level flag; reset it in an ensure so a
+    # raise in save_without_our_callbacks can't leave it false and silently
+    # suppress updated_at on every later RssLog save in the process.
     RssLog.record_timestamps = true
   end
 
