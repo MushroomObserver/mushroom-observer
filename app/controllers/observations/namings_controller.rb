@@ -360,9 +360,15 @@ module Observations
     #    UPDATE
 
     def can_update?
-      validate_naming &&
-        (name_not_changing? ||
-         unproposed_name(:runtime_edit_naming_someone_else) &&
+      return false unless validate_naming
+      # A blank or "unknown" name resolves to no @name: NameResolver reports
+      # success (its early return leaves @success true) but flash_naming_errors
+      # has already flagged the blank field. Reject here rather than calling
+      # valid_use_of_imageless(nil, ...) and raising NoMethodError.
+      return false if @name.nil?
+
+      name_not_changing? ||
+        (unproposed_name(:runtime_edit_naming_someone_else) &&
          valid_use_of_imageless(@name, @observation))
     end
 
