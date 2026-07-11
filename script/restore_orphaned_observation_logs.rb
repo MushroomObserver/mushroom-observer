@@ -58,10 +58,10 @@ class OrphanedObservationLogRestorer
   private
 
   def select_zombies
+    # find_each batches by primary key ascending, so no explicit order.
     Observation.
       joins("INNER JOIN rss_logs ON rss_logs.id = observations.rss_log_id").
-      where(rss_logs: { observation_id: nil }).
-      order(:id)
+      where(rss_logs: { observation_id: nil })
   end
 
   def process(obs)
@@ -97,6 +97,7 @@ class OrphanedObservationLogRestorer
   end
 
   def fix(obs, log, parts, new_time)
+    old_time = log.updated_at
     unless @dry_run
       log.update_columns(observation_id: obs.id, notes: parts[2],
                          updated_at: new_time)
@@ -105,7 +106,7 @@ class OrphanedObservationLogRestorer
     return unless @verbose || @dry_run
 
     warn("FIX  obs #{obs.id} (log #{log.id}) owner=#{obs.user_id} " \
-         "updated_at #{log.updated_at.utc.iso8601} -> " \
+         "updated_at #{old_time.utc.iso8601} -> " \
          "#{new_time.utc.iso8601} | title: #{truncate(parts[0])}")
   end
 
@@ -122,8 +123,8 @@ class OrphanedObservationLogRestorer
     return unless (done % 100).zero?
 
     elapsed = Time.zone.now - started
-    warn("  ...#{done}/#{@total} processed " \
-         "(#{elapsed.round}s, #{(done / elapsed).round(1)}/s)")
+    rate = elapsed.positive? ? (done / elapsed).round(1) : done
+    warn("  ...#{done}/#{@total} processed (#{elapsed.round}s, #{rate}/s)")
   end
 
   def report_summary
