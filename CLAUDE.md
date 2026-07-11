@@ -138,6 +138,9 @@ See `.claude/rules/sweeps.md` for PR-scope guidance on broad sweeps
 scope below what the sweep already declared.
 See `.claude/rules/no_raw_sql.md` — no raw SQL strings anywhere in the
 app; use ActiveRecord/Arel instead.
+See `.claude/rules/no_pii_in_public.md` for the hard rule against
+putting PII (emails, etc.) in GitHub issues/PRs/comments — enforced
+by a `PreToolUse` hook.
 
 ## Git Workflow
 
