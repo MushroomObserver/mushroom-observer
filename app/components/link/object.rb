@@ -5,7 +5,7 @@
 # tests / JS hooks.
 #
 # Pass `button:` to add Bootstrap button styling alongside the
-# identifier class (e.g. `button: :btn_link` emits `btn btn-link`).
+# identifier class (e.g. `button: :link` emits `btn btn-link`).
 # Omit `button:` for a plain unstyled link (the default).
 class Components::Link::Object < Components::Link
   prop :object, _Nilable(::AbstractModel), default: nil

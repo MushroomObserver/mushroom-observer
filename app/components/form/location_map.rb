@@ -22,10 +22,10 @@ class Components::Form::LocationMap < Components::Base
   private
 
   def render_map_div
-    CollapseDiv(
+    Collapsible(
       id: @id,
-      html_class: "form-map",
-      attributes: { data: map_data_attributes }
+      class: "form-map",
+      data: map_data_attributes
     )
   end
 

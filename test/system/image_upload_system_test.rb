@@ -71,8 +71,7 @@ class ImageUploadSystemTest < ApplicationSystemTestCase
                     visible: false)
       end
 
-      assert_equal("Please select an image file (JPG, PNG, GIF, etc.)",
-                   alert_text)
+      assert_equal("Please select an image file.", alert_text)
     ensure
       text_file.unlink
     end

@@ -59,8 +59,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   end
 
   def render_specimen_fields
-    div(id: "specimen_fields",
-        class: class_names("collapse", ("in" if @observation.specimen))) do
+    Collapsible(id: "specimen_fields", expanded: @observation.specimen) do
       render_collection_number_fields
       render_herbarium_record_fields
     end

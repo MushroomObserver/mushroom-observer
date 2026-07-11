@@ -4,13 +4,11 @@
 # class added. Optionally adds a tooltip + screen-reader title.
 #
 # @example Just the glyph
-#   render(Components::Icon.new(type: :globe))
+#   Icon(type: :globe)
 #   # => <span class="glyphicon glyphicon-globe link-icon"></span>
 #
 # @example With tooltip + screen-reader title + extra CSS
-#   render(Components::Icon.new(
-#     type: :edit, title: :EDIT.l, html_class: "text-primary"
-#   ))
+#   Icon(type: :edit, title: :EDIT.l, class: "text-primary")
 #   # => <span class="glyphicon glyphicon-edit link-icon text-primary"
 #   #          title="Edit" data-toggle="tooltip">
 #   #      <span class="sr-only">Edit</span>
@@ -89,9 +87,13 @@ class Components::Icon < Components::Base
 
   prop :type, _Nilable(Symbol), default: nil
   prop :title, _Nilable(String), default: nil
-  prop :html_class, _Nilable(String), default: nil
-  prop :data, Hash, default: -> { {} }
-  prop :attributes, Hash, default: -> { {} }
+  # Catch-all for class:, data:, aria:, and any other HTML attrs --
+  # matches Components::Navbar/Collapsible's pattern (plain `class:`/
+  # `data:` in, no separate `html_class:`/`data:` props needed).
+  # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
+  # so a caller passing an explicit `key: nil` (not just omitting the
+  # key) would otherwise raise a Literal::TypeError.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
     glyph = GLYPHS[@type]
@@ -100,7 +102,7 @@ class Components::Icon < Components::Base
     span(class: span_class(glyph),
          title: @title.presence,
          data: span_data,
-         **@attributes) do
+         **@attributes.except(:class, :data)) do
       span(class: "sr-only") { plain(@title) } if @title.present?
     end
   end
@@ -109,10 +111,11 @@ class Components::Icon < Components::Base
 
   def span_class(glyph)
     base = "glyphicon glyphicon-#{glyph} link-icon"
-    class_names(base, @html_class)
+    class_names(base, @attributes[:class])
   end
 
   def span_data
-    @title.present? ? { toggle: "tooltip" }.merge(@data) : @data
+    data = @attributes[:data] || {}
+    @title.present? ? { toggle: "tooltip" }.merge(data) : data
   end
 end

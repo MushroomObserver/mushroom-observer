@@ -80,7 +80,7 @@ class SearchFormTest < ComponentTestCase
   def test_renders_header_when_not_local
     html = render_form(local: false)
 
-    assert_html(html, ".navbar-flex")
+    assert_html(html, ".flex-bar")
     assert_html(html, "body",
                 text: :search_form_title.t(type: :OBSERVATIONS))
     assert_html(html,
@@ -93,12 +93,16 @@ class SearchFormTest < ComponentTestCase
     assert_html(html,
                 "a[data-search-type-target='barToggle'] span.sr-only",
                 text: :search_bar_fewer_options.l.as_displayed)
+    # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
+    # literal.
+    assert_html(html,
+                "a[data-search-type-target='barToggle'].navbar-link")
   end
 
   def test_does_not_render_header_when_local
     html = render_form(local: true)
 
-    assert_no_html(html, ".navbar-flex")
+    assert_no_html(html, ".flex-bar")
   end
 
   def test_names_search_form_has_correct_field_ids

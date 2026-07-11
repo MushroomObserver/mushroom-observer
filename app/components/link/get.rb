@@ -18,7 +18,7 @@
 #
 # @example btn-link variant (underlined, no btn frame)
 #   render(Components::Link::Get.new(
-#     name: user.login, target: user_path(user.id), button: :btn_link
+#     name: user.login, target: user_path(user.id), button: :link
 #   ))
 class Components::Link::Get < Components::Link
   include Components::CRUDPathBuilding
