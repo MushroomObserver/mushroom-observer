@@ -8,10 +8,27 @@ class CheckOtherRssLogsJobTest < ActiveJob::TestCase
   def test_nulls_type_id_on_orphan_notes_for_a_non_observation_type
     log = rss_logs(:name_rss_log)
     log.update_column(:notes, "not a timestamped note\n")
+    # `.delete`, not `.destroy` -- bypasses callbacks so the name is
+    # simply gone without RssLog#orphan properly clearing name_id
+    # first. See CheckObservationRssLogsJobTest for the same pattern.
+    log.name.delete
 
     CheckOtherRssLogsJob.perform_now(verbose: true)
 
     assert_nil(log.reload.name_id)
+  end
+
+  # Regression test for the "landmine" bug (GitHub issue #4763) for a
+  # non-observation type -- see CheckObservationRssLogsJobTest for the
+  # full explanation. A log whose notes look orphaned but whose target
+  # still exists must be left alone.
+  def test_does_not_null_type_id_when_target_is_still_alive
+    log = rss_logs(:name_rss_log2)
+    log.update_column(:notes, "not a timestamped note\n")
+
+    CheckOtherRssLogsJob.perform_now(verbose: true)
+
+    assert_not_nil(log.reload.name_id)
   end
 
   def test_deletes_row_with_bogus_type_id_for_a_non_observation_type

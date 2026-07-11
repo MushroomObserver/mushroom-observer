@@ -7,8 +7,12 @@
 # structured format existed) is an "orphan" note.
 #
 # For each type this job is given (see #check_types):
-#   - orphan notes with a type_id still set: the type_id shouldn't be
-#     there on an orphan note, so null it out.
+#   - orphan notes with a type_id pointing at a row that's actually
+#     gone: the type_id shouldn't be there on an orphan note whose
+#     target no longer exists, so null it out. A type_id pointing at
+#     a row that still exists is left alone -- that's a "landmine"
+#     (GitHub issue #4763), not a true orphan; see
+#     #dangling_reference_query.
 #   - real (timestamped) notes whose type_id points at a deleted row:
 #     the whole log is meaningless without its target, so delete it.
 #     (CheckForBrokenReferencesJob independently catches the same
@@ -59,9 +63,18 @@ class CheckRssLogsJob < ApplicationJob
     delete_nonorphans_with_bogus_type(type)
   end
 
+  # Only nulls rows whose type_id points at a target that's actually
+  # gone (see #dangling_reference_query) -- an orphan-looking note
+  # whose target is still alive is a "landmine" (GitHub issue #4763):
+  # roughly 845 observations were falsely orphaned by a 2016
+  # mass-deletion malfunction and are still very much live. Nulling
+  # their type_id would sever the object's only reverse link to its
+  # own history, compounding the exact data loss #4763/#4764 exist to
+  # stop. Those rows are left untouched here; correcting them is the
+  # separate Option A/B data decision tracked on #4763.
   def null_orphans_with_type(type)
     column = :"#{type}_id"
-    query = RssLog.where.not(column => nil).where(non_timestamped_notes)
+    query = dangling_reference_query(type, column, non_timestamped_notes)
     ids = timed("null_orphans_with_type(#{type})") { query.pluck(:id) }
     return if ids.empty?
 
@@ -71,7 +84,7 @@ class CheckRssLogsJob < ApplicationJob
 
   def delete_nonorphans_with_bogus_type(type)
     column = :"#{type}_id"
-    query = bogus_type_query(type, column)
+    query = dangling_reference_query(type, column, timestamped_notes)
     ids = timed("delete_nonorphans_with_bogus_type(#{type})") do
       query.pluck(:id)
     end
@@ -82,9 +95,14 @@ class CheckRssLogsJob < ApplicationJob
         "#{log_suffix(ids)}")
   end
 
-  def bogus_type_query(type, column)
+  # Rows referencing `type`/`column` whose target no longer exists,
+  # further scoped by `notes_predicate` (timestamped or not). The
+  # `where.not(column => ref_model.all)` is the liveness check: a
+  # `column` value only matches here if it's absent from the live
+  # table entirely.
+  def dangling_reference_query(type, column, notes_predicate)
     ref_model = type.to_s.classify.constantize
-    RssLog.where.not(column => nil).where(timestamped_notes).
+    RssLog.where.not(column => nil).where(notes_predicate).
       where.not(column => ref_model.all)
   end
 
