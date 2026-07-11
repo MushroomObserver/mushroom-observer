@@ -19,8 +19,13 @@ module Components::IconLabel
 
   private
 
+  # `render(...)`, not Kit sugar -- this module is included at varying
+  # nesting depths (Components::Button::Content, itself included by
+  # deeply-nested dispatched subclasses like Components::Button::Edit),
+  # and Kit sugar's bare `Icon(...)` isn't reliably available that far
+  # down the chain.
   def render_icon_glyph(icon, html_class: nil, title: nil)
-    render(Components::Icon.new(type: icon, html_class: html_class,
+    render(Components::Icon.new(type: icon, class: html_class,
                                 title: title))
   end
 

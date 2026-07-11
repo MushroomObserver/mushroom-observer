@@ -141,7 +141,7 @@ class Components::Panel < Components::Base
          aria: collapse_aria) do
       render_collapse_message
 
-      Icon(type: :chevron_down, title: :OPEN.l, html_class: "active-icon")
+      Icon(type: :chevron_down, title: :OPEN.l, class: "active-icon")
       Icon(type: :chevron_up, title: :CLOSE.l)
     end
   end

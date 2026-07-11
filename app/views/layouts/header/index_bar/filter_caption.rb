@@ -95,7 +95,7 @@ module Views::Layouts
         # as an empty-string attr, not "true".
         Icon(
           type: :"chevron_#{direction}",
-          attributes: { aria: { hidden: "true" } }
+          aria: { hidden: "true" }
         )
       end
     end
