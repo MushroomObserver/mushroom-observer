@@ -138,7 +138,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
       data: data
     ) do
       span { :image_remove_remove.l }
-      Icon(type: :remove, html_class: "text-danger ml-3")
+      Icon(type: :remove, class: "text-danger ml-3")
     end
   end
 end

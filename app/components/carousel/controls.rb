@@ -26,7 +26,7 @@ class Components::Carousel::Controls < Components::Base
             role: "button",
             data: { slide: direction.to_s }) do
       div(class: "btn") do
-        Icon(type: icon_type, attributes: { aria: { hidden: "true" } })
+        Icon(type: icon_type, aria: { hidden: "true" })
         span(class: "sr-only") { label.l }
       end
     end

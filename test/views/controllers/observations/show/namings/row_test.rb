@@ -263,7 +263,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     new_html = render(Components::Button::Get.new(
                         target: url,
                         name: name,
-                        variant: :btn_link,
+                        variant: :link,
                         class: "text-wrap text-left px-0"
                       ))
 

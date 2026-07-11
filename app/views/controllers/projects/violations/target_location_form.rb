@@ -128,10 +128,7 @@ module Views::Controllers::Projects::Violations
       submit(:form_violations_modal_target_location_submit.l,
              as: :button, variant: :primary)
       whitespace
-      Button(
-        name: :CANCEL.l,
-        data: { dismiss: "modal" }
-      )
+      render(Components::Modal::CloseButton.new)
     end
 
     def render_suffix_radios

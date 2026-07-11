@@ -48,6 +48,11 @@ test:
   database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? && 'mo_test') || 'mo_test-' + ENV['TEST_ENV_NUMBER'] %>"
   username: mo
   password: mo
+  # Must exceed Solid Queue's own estimated thread need -- see
+  # test/jobs/queue_config_test.rb and the comment on the equivalent
+  # setting in config/database.yml (not checked in; this file is what CI
+  # copies to config/database.yml for test runs).
+  pool: 10
 
 production:
   database: mo_development
