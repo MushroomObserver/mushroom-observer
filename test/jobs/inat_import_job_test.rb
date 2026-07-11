@@ -722,9 +722,9 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
-  # Not-own superimporter import: unlicensed images are skipped and counted;
-  # response_errors includes a summary message.
-  def test_job_skips_unlicensed_images_for_not_own_obs
+  # Not-own superimporter import: an obs with no iNat license is skipped
+  # entirely, not just its images — see ObservationImporter#unlicensed_other?
+  def test_job_skips_unlicensed_obs_for_not_own_import
     @user = users(:dick) # Dick is a superimporter
     assert(InatImport.super_importer?(@user),
            "Test requires user to be a super_importer")
@@ -733,18 +733,56 @@ class InatImportJobTest < ActiveJob::TestCase
     @inat_import.update(import_others: true)
 
     stub_inat_interactions
-    stub_inat_photo_requests # stubs download URLs (won't be called for skipped)
 
-    InatImportJob.perform_now(@inat_import)
+    assert_no_difference(
+      "Observation.count",
+      "Unlicensed obs must not be imported for not-own imports"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_equal(1, @inat_import.reload.ignored_unlicensed_count,
+                 "Should count the unlicensed obs as ignored")
+  end
+
+  # Not-own superimporter import: a *licensed* obs still imports even when
+  # one of its photos individually lacks a license — only that image is
+  # skipped (see MoObservationBuilder::ImageHandling), since
+  # ObservationImporter#unlicensed_other? only gates on the obs's own
+  # license_code, not its photos'.
+  def test_job_imports_licensed_obs_skips_unlicensed_image_for_not_own_import
+    @user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(@user),
+           "Test requires user to be a super_importer")
+
+    create_ivars_from_filename("agrocybe_arvalis")
+    parsed_response = JSON.parse(@mock_inat_response, symbolize_names: true)
+    photos = parsed_response[:results].first[:observation_photos]
+    assert_operator(photos.length, :>=, 2,
+                    "Fixture needs at least 2 photos for this test")
+    photos.second[:photo][:license_code] = nil
+    @mock_inat_response = JSON.generate(parsed_response)
+    @parsed_results = parsed_response[:results]
+    @inat_import = create_inat_import(import_others: true)
+
+    stub_inat_interactions
+
+    assert_difference(
+      "Observation.count", 1,
+      "A licensed obs should still import even with an unlicensed photo"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
 
     obs = Observation.last
-    assert_equal(0, obs.images.length,
-                 "Unlicensed images should be skipped for not-own imports")
-    @inat_import.reload
+    assert_equal(photos.length - 1, obs.images.length,
+                 "Only the licensed photos should be imported")
+    assert_equal(0, @inat_import.reload.ignored_unlicensed_count,
+                 "A licensed obs must not count as an ignored/unlicensed obs")
     assert_match(
-      :inat_skipped_images_summary.t(count: 3),
+      :inat_skipped_images_summary.t(count: 1),
       @inat_import.response_errors,
-      "Should log skipped images summary for not-own superimporter import"
+      "Should log a summary of the 1 skipped unlicensed image"
     )
   end
 

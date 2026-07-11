@@ -46,7 +46,7 @@ module Views::Layouts
                     ))
 
       # Main container
-      assert_includes(html, 'class="nav navbar-flex object_pager"')
+      assert_includes(html, 'class="nav flex-bar object_pager"')
 
       # Three li elements
       assert_html(html, "ul.object_pager > li", count: 3)
@@ -160,6 +160,27 @@ module Views::Layouts
         parent_selector: "a.index_object_link",
         child_selector: "span.glyphicon-list"
       )
+    end
+
+    def test_links_are_styled_as_large_link_buttons
+      @query.current_id = @middle_obs.id
+
+      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
+                      object: @middle_obs,
+                      query: @query
+                    ))
+
+      # Framed as buttons via Link::Icon's button:/size: kwargs, not
+      # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
+      # (not :default) removes the background/border while keeping
+      # button padding — plain icon-only nav buttons, not filled
+      # buttons. (:strip would remove padding too.)
+      assert_html(html, "a.prev_object_link.btn.btn-link.btn-lg")
+      assert_html(html, "a.index_object_link.btn.btn-link.btn-lg")
+      assert_html(html, "a.next_object_link.btn.btn-link.btn-lg")
+      # navbar-left comes from Components::Navbar::LEFT_CLASS, not a
+      # raw literal.
+      assert_html(html, "a.prev_object_link.navbar-left")
     end
 
     def test_links_have_tooltips

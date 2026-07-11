@@ -462,6 +462,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     when "image/png" then "png"
     when "image/tiff" then "tiff"
     when "image/bmp", "image/x-ms-bmp" then "bmp"
+    when "image/webp" then "webp"
+    when "image/heif" then "heic"
     else; "raw"
     end
   end

@@ -31,6 +31,7 @@ class Inat
       @observation = nil
       return if unimportable?
       return if date_missing?
+      return if unlicensed_other?
       return if already_linked?
       return if crosslinked_to_live_mo_obs?
 
@@ -61,16 +62,29 @@ class Inat
       true
     end
 
-    # The primary duplicate gate: any typed iNat ExternalLink for this iNat
+    # Safety net for import-others. This check is what actually stops an
+    # unlicensed observation belonging to another iNat user from being
+    # imported. Own-obs imports are never gated here.
+    def unlicensed_other?
+      return false unless inat_import.import_others
+      return false if @inat_obs[:license_code].present?
+
+      log("Skipped #{@inat_obs[:id]} unlicensed (import-others)")
+      inat_import.add_ignored_obs(:unlicensed)
+      true
+    end
+
+    # The real duplicate check: any typed iNat ExternalLink for this iNat
     # obs (import / mirror / copy / remote_manual / manual) means it already
     # corresponds to an MO observation, so importing it would create a
     # duplicate. With #4565's materialization the link set is complete, so
-    # this MO-side check is authoritative — the iNat-side `without_field`
-    # filter is only a fetch-volume optimization (skipped for explicit id
-    # lists and recheck_all runs). The import ExternalLink's unique index
-    # (one import per target) remains the race-safety guarantee; this
-    # pre-check keeps benign duplicates from emitting noisy RecordNotUnique
-    # exceptions.
+    # this MO-side check is what actually stops a duplicate — the iNat-side
+    # `without_field` filter only trims how many observations iNat sends
+    # back (and it's skipped entirely for explicit id lists and recheck_all
+    # runs). The import ExternalLink's unique index (one import per target)
+    # is still what prevents a duplicate if two imports race each other;
+    # this check just keeps that race from surfacing as a noisy
+    # RecordNotUnique exception.
     def already_linked?
       return false unless ExternalLink.exists?(
         target_type: "Observation",

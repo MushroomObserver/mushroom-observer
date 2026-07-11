@@ -861,6 +861,52 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  # Regression test: a superimporter's URL that itself filters on
+  # `licensed=false` (previewing others' unlicensed obs) must not have that
+  # filter silently stripped by URL normalization. Requested/after-taxon
+  # must reflect the user's literal request (24), Expected must reflect
+  # MO's forced licensed:true policy (0, since the request is entirely
+  # unlicensed), and Already-imported must not absorb the unlicensed obs
+  # into its count.
+  def test_confirm_url_mode_import_others_licensed_false_filter
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    url = "#{INAT_API_OBS_URL}?licensed=false&created_on=2016-02-01" \
+          "&iconic_taxa=Fungi&order=desc&order_by=created_at"
+
+    # Requested / after-taxon / unlicensed-others queries all carry the
+    # user's own licensed=false filter through unmodified.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 24 }.to_json)
+    # The estimate always force-overrides to licensed=true, regardless of
+    # the URL's own filter — none of the (entirely unlicensed) 24 match.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "true")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    login(user.login)
+    post(:create, params: { inat_url: url, import_others: "1", consent: 1 })
+
+    assert_response(:success)
+    assert_select("#requested_count", "24",
+                  "Requested should be the user's literal total_results, " \
+                  "not an unfiltered (broader) count")
+    assert_select("#expected_count", "0",
+                  "Expected should be 0 — MO never imports others' " \
+                  "unlicensed obs, regardless of the URL's own filter")
+    assert_select("#unlicensed_obs_count", "24",
+                  "Unlicensed count should match the requested count " \
+                  "when the whole request is unlicensed")
+    assert_select("#total_ignored_count", "24",
+                  "Total ignored should account for the unlicensed obs")
+    assert_select(
+      "div.ml-3 b", text: "#{:inat_import_confirm_already_imported_caption.l}:",
+                    count: 0
+    )
+  end
+
   def test_confirm_renders_gracefully_when_licensed_estimate_fails
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
@@ -1431,6 +1477,24 @@ class InatImportsControllerTest < FunctionalTestCase
       "Ignored-params warning must name user_login when it is stripped " \
       "as the sole URL param and validation fails before " \
       "normalize_inat_url_param! runs"
+    )
+  end
+
+  # taxon_ids_from_url rescues URI::InvalidURIError and returns [],
+  # so an unparseable URL is treated as having no taxon filter and
+  # is rejected as an invalid URL rather than crashing the request.
+  def test_invalid_uri_in_url_param_rejected_gracefully
+    login
+    url = "https://www.inaturalist.org/observations|invalid"
+
+    post(:create,
+         params: { inat_url: url, inat_username: "rolf_inat_user",
+                   consent: 1 })
+
+    assert_flash_text(
+      :inat_invalid_url.l,
+      "An unparseable iNat URL should flash the invalid-URL message, " \
+      "not raise an exception"
     )
   end
 

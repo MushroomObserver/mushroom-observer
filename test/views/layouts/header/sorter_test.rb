@@ -48,7 +48,7 @@ module Views::Layouts
 
       # Outer is a `<ul>`, not a `<div>` — semantically a list of nav
       # items (label + dropdown).
-      assert_html(html, "ul.navbar-flex.sorter")
+      assert_html(html, "ul.flex-bar.sorter")
       # The label is the first `<li>`.
       assert_html(html, "ul.sorter > li.navbar-text",
                   text: "#{:sort_by_header.l}:")
