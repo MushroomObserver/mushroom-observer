@@ -88,7 +88,10 @@ module Components
 
     prop :element, Symbol, default: :nav
     prop :variant, _Union(:default, :inverse)
-    prop :attributes, _Hash(Symbol, _Any), :**
+    # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
+    # so a caller passing an explicit `key: nil` (not just omitting the
+    # key) would otherwise raise a Literal::TypeError.
+    prop :attributes, _Hash(Symbol, _Any?), :**
 
     def view_template(&block)
       send(@element, **computed_attributes, &block)

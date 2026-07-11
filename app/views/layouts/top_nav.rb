@@ -103,16 +103,17 @@ class Views::Layouts::TopNav < Views::Base
 
   def render_search_row
     div(class: class_names(CONTAINER_CLASSES)) do
-      div(class: "collapse w-100", id: "search_nav",
-          data: {
-            controller: "search-type",
-            # Stimulus Array values must be JSON. Rails' tag helper
-            # JSON-encodes arrays automatically; Phlex space-joins them
-            # ("a b"), which breaks JSON.parse in the controller and
-            # silently disables the help/advanced-search forms (#4492).
-            search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
-            search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-          }) do
+      Collapsible(id: "search_nav", class: "w-100",
+                  data: {
+                    controller: "search-type",
+                    # Stimulus Array values must be JSON. Rails' tag
+                    # helper JSON-encodes arrays automatically; Phlex
+                    # space-joins them ("a b"), which breaks
+                    # JSON.parse in the controller and silently
+                    # disables the help/advanced-search forms (#4492).
+                    search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
+                    search_type_form_types_value: SEARCH_FORM_TYPES.to_json
+                  }) do
         # Identify pages get their own filter bar; everything else
         # gets the pattern-search bar.
         if controller.controller_name == "identify"
@@ -151,9 +152,10 @@ class Views::Layouts::TopNav < Views::Base
     div(class: class_names(Components::Navbar::FORM_CLASS,
                            "px-2 px-sm-3")) do
       Button(
+        type: :collapse_toggle,
+        target_id: "search_nav",
         variant: :outline, size: :sm,
         class: "top_nav_button",
-        data: { toggle: "collapse", target: "#search_nav" },
         aria: { expanded: "false", controls: "search_nav" }
       ) { Icon(type: :search, title: :SEARCH.l) }
     end

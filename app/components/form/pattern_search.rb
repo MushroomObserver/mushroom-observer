@@ -51,7 +51,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
                "flex-grow-1 mb-0") do
       Icon(
         type: :search,
-        html_class: "form-control-feedback hidden-xs"
+        class: "form-control-feedback hidden-xs"
       )
       # `label: false` skips the form-group wrap + auto-label so the
       # input nests directly inside the navbar flex row, matching
