@@ -35,7 +35,7 @@
 #                                     icon: :prev, button: :link,
 #                                     size: :lg))
 class Components::Link::Icon < Components::Base
-  include Components::IconLabel
+  include Components::IconWithText
   include Components::Button::Styling
 
   CONSUMED_OPTS = [:class, :icon, :icon_class, :show_text,
@@ -93,11 +93,11 @@ class Components::Link::Icon < Components::Base
   end
 
   def render_labels
-    render_icon_label(@content, show_text: @opts[:show_text])
+    render_icon_text(@content, show_text: @opts[:show_text])
     return unless stateful?
 
-    render_icon_label(@opts[:active_content], show_text: @opts[:show_text],
-                                              extra_class: "active-label")
+    render_icon_text(@opts[:active_content], show_text: @opts[:show_text],
+                                             extra_class: "active-label")
   end
 
   def icon_class
