@@ -8,17 +8,21 @@ require("test_helper")
 #
 # Scans every `app/components/**/*.rb` and `app/views/**/*.rb` file
 # for `prop … _Any …` declarations and fails on uses outside the
-# one sanctioned context: `_Hash(Key, _Any)` (and its nilable
-# cousin `_Hash(Key, _Any?)`). The Hash carve-out covers
-# HTML-attribute pass-throughs (`attributes`, `data`, `args`,
-# `extra_data`, …) where the value type genuinely is arbitrary.
+# one sanctioned context: `_Hash(Key, _Any)` and its nilable form,
+# spelled either `_Hash(Key, _Any?)` (shorthand) or
+# `_Hash(Key, _Nilable(_Any))` (explicit) — the scanner doesn't
+# enforce one spelling over the other, they're the same type. The
+# Hash carve-out covers HTML-attribute pass-throughs (`attributes`,
+# `data`, `args`, `extra_data`, …) where the value type genuinely is
+# arbitrary.
 #
 # Multi-line aware: a `prop` declaration whose type expression
 # wraps across lines is collected up to its paren-balanced end,
 # and each `_Any` token's innermost enclosing `_Foo(...)` call is
-# checked — only `_Hash(...)` is exempt. A future contributor who
-# tucks `_Any` deep inside a multi-line `_Union(...)` won't slip
-# past this guard.
+# checked — only `_Hash(...)` is exempt (`_Nilable(...)` wrapping is
+# transparent, so it doesn't break the `_Hash` check either). A
+# future contributor who tucks `_Any` deep inside a multi-line
+# `_Union(...)` won't slip past this guard.
 #
 # Why we draw the line at `_Any`:
 #
@@ -68,6 +72,12 @@ class NoAnyPhlexPropsTest < ActiveSupport::TestCase
   def test_scanner_allows_hash_value_any
     assert_clean("prop :foo, _Hash(Symbol, _Any), default: -> { {} }")
     assert_clean("prop :foo, _Hash(_Union(Symbol, String), _Any?)")
+  end
+
+  def test_scanner_allows_hash_value_explicit_nilable_any
+    # `_Nilable(_Any)` (explicit) is the same type as `_Any?`
+    # (shorthand) -- both are sanctioned inside a `_Hash(...)`.
+    assert_clean("prop :foo, _Hash(Symbol, _Nilable(_Any)), :**")
   end
 
   def test_scanner_flags_any_outside_hash_in_multiline_prop
@@ -217,7 +227,11 @@ class NoAnyPhlexPropsTest < ActiveSupport::TestCase
 
   def inside_hash?(stack)
     stack.reverse_each do |name|
-      next if name.empty?
+      # Bare parens and `_Nilable(...)` are transparent wrappers --
+      # `_Hash(Key, _Nilable(_Any))` is exactly as sanctioned as the
+      # `_Hash(Key, _Any?)` shorthand for the same type; this scanner
+      # shouldn't force one spelling over the other.
+      next if name.empty? || name == "_Nilable"
 
       return name == "_Hash"
     end
@@ -241,8 +255,9 @@ class NoAnyPhlexPropsTest < ActiveSupport::TestCase
       or a duck-typed `_Interface(:method_name)`.
 
       The one sanctioned shape is `_Hash(Key, _Any)` (and its
-      nilable cousin) — for HTML-attribute pass-throughs where the
-      value type genuinely is arbitrary.
+      nilable form, `_Any?` or `_Nilable(_Any)` -- either spelling)
+      — for HTML-attribute pass-throughs where the value type
+      genuinely is arbitrary.
 
       Offenders:
       #{rendered.join("\n")}
