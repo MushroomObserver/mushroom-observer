@@ -93,6 +93,10 @@ class SearchFormTest < ComponentTestCase
     assert_html(html,
                 "a[data-search-type-target='barToggle'] span.sr-only",
                 text: :search_bar_fewer_options.l.as_displayed)
+    # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
+    # literal.
+    assert_html(html,
+                "a[data-search-type-target='barToggle'].navbar-link")
   end
 
   def test_does_not_render_header_when_local

@@ -292,7 +292,7 @@ class ButtonSubclassesTest < ComponentTestCase
   def test_edit_with_string_target_and_class
     html = render(Components::Button::Edit.new(
                     target: "/items/42/edit", name: "Edit it",
-                    variant: :btn_link
+                    variant: :link
                   ))
 
     assert_html(html, "a.btn.btn-link[href='/items/42/edit']")

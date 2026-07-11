@@ -29,11 +29,18 @@
 #
 # @example From a Tab PORO (shortcut)
 #   render(Components::Link::Icon.new(tab: Tab::Name::Edit.new(name: @name)))
+#
+# @example Framed as a Bootstrap button (e.g. a navbar icon-button)
+#   render(Components::Link::Icon.new(content: "Prev", path: prev_path,
+#                                     icon: :prev, button: :link,
+#                                     size: :lg))
 class Components::Link::Icon < Components::Base
   include Components::IconLabel
+  include Components::Button::Styling
 
   CONSUMED_OPTS = [:class, :icon, :icon_class, :show_text,
-                   :active_icon, :active_content, :button_to, :confirm].freeze
+                   :active_icon, :active_content, :button_to, :confirm,
+                   :button, :size].freeze
 
   attr_reader :content, :path, :opts
 
@@ -48,6 +55,7 @@ class Components::Link::Icon < Components::Base
       @path = path
       @opts = opts
     end
+    validate_no_btn_classes!(@opts[:class])
   end
 
   def view_template
@@ -105,13 +113,37 @@ class Components::Link::Icon < Components::Base
     # Clone/Merge/Move). Turbo shows the dialog before following the link.
     base = {
       title: @content,
-      class: class_names("icon-link", @opts[:class]),
+      class: class_names("icon-link", button_classes, @opts[:class]),
       data: { toggle: "tooltip", title: @content,
               active_title: @opts[:active_content] }
     }
     base[:data][:turbo_confirm] = @opts[:confirm] if @opts[:confirm]
     base[:role] = "button" if @opts[:button_to]
     base.deep_merge(@opts.except(*CONSUMED_OPTS))
+  end
+
+  # `size:` only ever makes sense alongside real btn framing — a
+  # dangling `btn-lg` with no `.btn` base class isn't valid Bootstrap
+  # markup — so it's computed here, gated on `btn_styling` being
+  # present, rather than appended unconditionally in `link_attrs`.
+  def button_classes
+    styling = btn_styling
+    return nil unless styling
+
+    class_names(styling, size_class(@opts[:size]))
+  end
+
+  # `nil` (button: omitted) means "plain link" — no btn framing at all,
+  # matching Components::Link#btn_styling's semantics so callers can't
+  # tell the two Link subclasses apart by behavior. `btn_class` itself
+  # treats `:default` as a synonym for nil ("btn-default"), so no
+  # separate branch is needed here for that case.
+  def btn_styling
+    button = @opts[:button]
+    return nil unless button
+    return nil if button == :strip
+
+    class_names("btn", btn_class(button))
   end
 
   def render_link_or_button(&block)

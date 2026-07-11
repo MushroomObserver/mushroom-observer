@@ -80,7 +80,7 @@ module Views::Layouts
       action = truncate ? "showFull" : "showTruncated"
       direction = truncate ? "down" : "up"
       Button(
-        variant: :btn_link,
+        variant: :link,
         class: "top-right toggle",
         title: if truncate
                  :filter_caption_expand.l

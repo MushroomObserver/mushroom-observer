@@ -25,12 +25,22 @@ class NavbarTest < ComponentTestCase
                 text: "Content")
   end
 
+  def test_link_class_constant
+    assert_equal("navbar-link", Components::Navbar::LINK_CLASS)
+  end
+
   def test_link_classes_constant
-    assert_equal(%w[navbar-link btn btn-lg px-0],
+    assert_equal(%w[navbar-link px-0],
                  Components::Navbar::LINK_CLASSES)
   end
 
   def test_form_class_constant
     assert_equal("navbar-form", Components::Navbar::FORM_CLASS)
+  end
+
+  def test_nav_right_left_class_constants
+    assert_equal("navbar-nav", Components::Navbar::NAV_CLASS)
+    assert_equal("navbar-right", Components::Navbar::RIGHT_CLASS)
+    assert_equal("navbar-left", Components::Navbar::LEFT_CLASS)
   end
 end

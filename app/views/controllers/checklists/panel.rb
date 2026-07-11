@@ -92,7 +92,7 @@ module Views::Controllers::Checklists
           name: Name.safe_find(name_id)&.text_name
         ),
         icon: :x,
-        variant: :btn_link,
+        variant: :link,
         class: "p-0 ml-1"
       )
     end
