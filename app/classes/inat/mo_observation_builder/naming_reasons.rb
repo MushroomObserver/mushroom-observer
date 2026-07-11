@@ -17,10 +17,16 @@ class Inat
         elsif suggested?(name)
           "#{suggester_with_date(name)}#{corrected_spelling_note(name)}"
         else
-          "#{:inat_observation_taxon.l} " \
+          obs_taxon_explanation(name)
+        end
+      end
+
+      def obs_taxon_explanation(name)
+        inat_link = "<a href=\"#{Inat::Constants::SITE}/observations/" \
+                    "#{inat_obs[:id]}\">iNat #{inat_obs[:id]}</a>"
+        "#{inat_link}, #{:inat_leading_id.l} " \
           "#{Time.zone.today.strftime("%Y-%m-%d")}" \
           "#{corrected_spelling_note(name)}"
-        end
       end
 
       def same_name?(name, other)

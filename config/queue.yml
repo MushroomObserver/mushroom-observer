@@ -14,8 +14,18 @@ default: &default
     - polling_interval: 1
       batch_size: 500
   workers:
-    - queues: [default, mailers]
+    - queues: default
       threads: 4
+      processes: 1
+      polling_interval: 0.1
+    # Mail delivery gets its own single-threaded pool so deliveries run one
+    # at a time. Every send opens a fresh authenticated SMTP session, and
+    # several concurrent sends made Gmail's relay reject the burst with
+    # "454 Too many login attempts" — a large import dumped ~14K such
+    # failures into the queue (#4757). One thread means logins never
+    # overlap; normal mail volume is low, so serial delivery is ample.
+    - queues: mailers
+      threads: 1
       processes: 1
       polling_interval: 0.1
     - queues: maintenance

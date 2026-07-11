@@ -18,14 +18,14 @@
 # explicitly so Bootstrap still finds the collapse pane (Bootstrap
 # reads `data-target` before `href`).
 #
-# Pass `button:` for Bootstrap button styling (e.g. `:btn_link`,
+# Pass `button:` for Bootstrap button styling (e.g. `:link`,
 # `:outline`) and `size:` for size modifiers (e.g. `:xs`, `:sm`).
 #
 # @example icon kwarg toggle (starts closed)
 #   render(Components::Link::CollapseToggle.new(
 #     target_id: "contribution_legend",
 #     icon: :info_circle,
-#     button: :btn_link,
+#     button: :link,
 #     size: :xs
 #   ))
 #

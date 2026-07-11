@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Index-page sort-bar. Two list items in a horizontal nav:
-# `<ul class="navbar-flex pl-3 sorter">` with a `<li>` `Sort by:`
+# `<ul class="flex-bar pl-3 sorter">` with a `<li>` `Sort by:`
 # label + a `<li>` `Components::Dropdown` whose menu lists every
 # available sort option plus a `Reverse` entry. Stashed in
 # `content_for(:sorter)` by `add_sorter` in the index view.
@@ -24,8 +24,9 @@ module Views::Layouts
     def view_template
       return unless visible?
 
-      ul(class: "list-unstyled navbar-flex pl-3 sorter") do
-        Navbar(element: :li, class: "mx-0 hidden-xs") do
+      ul(class: "list-unstyled flex-bar pl-3 sorter") do
+        render(Components::Navbar::Text.new(element: :li,
+                                            class: "mx-0 hidden-xs")) do
           plain("#{:sort_by_header.l}:")
         end
         Dropdown(

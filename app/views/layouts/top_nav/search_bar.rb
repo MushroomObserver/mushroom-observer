@@ -6,7 +6,7 @@
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
 class Views::Layouts::TopNav::SearchBar < Views::Base
-  BAR_TOGGLE_CLASSES = %w[btn btn-link navbar-link px-2].freeze
+  BAR_TOGGLE_CLASSES = [Components::Navbar::LINK_CLASS, "px-2"].freeze
 
   # Search types that have a per-type help expander. Mirrors
   # `Views::Layouts::TopNav::SEARCH_HELP_TYPES`; passed through
@@ -20,7 +20,8 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
     if current_user
       render_logged_in
     else
-      Navbar(element: :strong, class: "mx-2 text-nowrap") do
+      render(Components::Navbar::Text.new(element: :strong,
+                                          class: "mx-2 text-nowrap")) do
         plain(:app_login_reminder.t)
       end
     end
@@ -36,18 +37,20 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   end
 
   def render_collapse_bar
-    div(class: "collapse in w-100", id: "search_bar_elements",
-        data: { search_type_target: "bar",
-                action: "$shown.bs.collapse->search-type#closeForm" }) do
-      div(class: "navbar-flex w-100 gap-2") do
+    Collapsible(id: "search_bar_elements", expanded: true, class: "w-100",
+                data: {
+                  search_type_target: "bar",
+                  action: "$shown.bs.collapse->search-type#closeForm"
+                }) do
+      div(class: "flex-bar w-100 gap-2") do
         render_help_toggle
         render(Components::Form::PatternSearch.new(pattern_search_model))
         render_form_toggle unless on_search_page?
       end
       # Per-type help fragment is fetched into here by the
       # search-type Stimulus controller; empty on initial paint.
-      div(class: "collapse w-100", id: "search_bar_help",
-          data: { search_type_target: "help" })
+      Collapsible(id: "search_bar_help", class: "w-100",
+                  data: { search_type_target: "help" })
     end
   end
 
@@ -55,10 +58,9 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
   # controller populates with whichever advanced-search form
   # matches the selected search type.
   def render_advanced_form_target
-    div(class: "collapse w-100 border-top", id: "search_nav_form",
-        data: { search_type_target: "form",
-                action:
-                  "$shown.bs.collapse->search-type#closeBar" })
+    Collapsible(id: "search_nav_form", class: "w-100 border-top",
+                data: { search_type_target: "form",
+                        action: "$shown.bs.collapse->search-type#closeBar" })
   end
 
   # Bootstrap collapse-trigger for the per-type help fragment
@@ -69,6 +71,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
          target_id: "search_bar_help",
          icon: :info,
          icon_title: :search_bar_help.l,
+         button: :link,
          class: bar_toggle_class(visible: help_visible?),
          data: { search_type_target: "helpToggle" })
   end
@@ -81,6 +84,7 @@ class Views::Layouts::TopNav::SearchBar < Views::Base
          target_id: "search_nav_form",
          icon: :plus,
          icon_title: :search_bar_more_options.l,
+         button: :link,
          class: bar_toggle_class(visible: form_visible?),
          data: { search_type_target: "formToggle" })
   end

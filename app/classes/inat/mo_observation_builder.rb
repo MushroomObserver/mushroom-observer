@@ -22,12 +22,16 @@ class Inat
     end
 
     def mo_observation
-      create_missing_identification_names
-      create_observation
-      add_external_link
-      add_inat_images(inat_obs[:observation_photos])
-      update_names_and_proposals
-      add_inat_sequences
+      # Suppress per-naming notifications during import; the import job sends
+      # one digest per interested user at the end instead (#4757).
+      Naming.suppress_notifications do
+        create_missing_identification_names
+        create_observation
+        add_external_link
+        add_inat_images(inat_obs[:observation_photos])
+        update_names_and_proposals
+        add_inat_sequences
+      end
       @observation
     rescue StandardError => e
       # Remove incomplete Observation from the db

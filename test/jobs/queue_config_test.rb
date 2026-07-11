@@ -28,6 +28,29 @@ class QueueConfigTest < UnitTestCase
                     "deliver_later would never send in production")
   end
 
+  # Regression guard for the incident on 2026-07-09: config/queue.yml's
+  # busiest worker pool needed more threads than config/database.yml's
+  # connection pool had, so Solid Queue's own startup validation
+  # (SolidQueue::Configuration#ensure_correctly_sized_thread_pool) failed
+  # every single time the supervisor (re)started, crash-looping forever --
+  # no queue, including "mailers", was ever claimed again after that.
+  # Nothing in the app raises on this at boot; it only surfaces if
+  # something actually asks Solid Queue to validate its own configuration,
+  # which is exactly what this test does.
+  def test_database_pool_is_large_enough_for_configured_worker_threads
+    config = SolidQueue::Configuration.new
+    valid = config.valid?
+
+    # config.error_messages is a failure MESSAGE (already a String), not
+    # an expected value -- assert_equal(valid, config.error_messages)
+    # (what the cop suggests, and what a prior Copilot-suggested edit
+    # actually shipped) compares a boolean against a String and can
+    # never pass.
+    # rubocop:disable Minitest/AssertWithExpectedArgument
+    assert(valid, config.error_messages)
+    # rubocop:enable Minitest/AssertWithExpectedArgument
+  end
+
   private
 
   def all_queues_covered?

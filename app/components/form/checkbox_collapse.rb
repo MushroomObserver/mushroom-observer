@@ -5,9 +5,9 @@
 # (not the `<input>`), matching the naming-reasons trigger pattern.
 #
 # Extra `checkbox_field` options (help:, wrap_class:, data:, etc.) go in
-# `attributes:` and are forwarded verbatim, matching the CollapseDiv
-# pass-through pattern. Any `label_data:` or `label_aria:` in
-# `attributes:` are merged with the collapse trigger attrs.
+# `attributes:` and are forwarded verbatim. Any `label_data:` or
+# `label_aria:` in `attributes:` are merged with the collapse trigger
+# attrs.
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param field [Symbol] the field name
