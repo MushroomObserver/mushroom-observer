@@ -162,6 +162,27 @@ module Views::Layouts
       )
     end
 
+    def test_links_are_styled_as_large_link_buttons
+      @query.current_id = @middle_obs.id
+
+      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
+                      object: @middle_obs,
+                      query: @query
+                    ))
+
+      # Framed as buttons via Link::Icon's button:/size: kwargs, not
+      # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
+      # (not :default) removes the background/border while keeping
+      # button padding — plain icon-only nav buttons, not filled
+      # buttons. (:strip would remove padding too.)
+      assert_html(html, "a.prev_object_link.btn.btn-link.btn-lg")
+      assert_html(html, "a.index_object_link.btn.btn-link.btn-lg")
+      assert_html(html, "a.next_object_link.btn.btn-link.btn-lg")
+      # navbar-left comes from Components::Navbar::LEFT_CLASS, not a
+      # raw literal.
+      assert_html(html, "a.prev_object_link.navbar-left")
+    end
+
     def test_links_have_tooltips
       @query.current_id = @middle_obs.id
 

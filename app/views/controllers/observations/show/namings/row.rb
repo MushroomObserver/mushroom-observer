@@ -151,7 +151,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
       type: :get,
       target: url_for(occurrence_path(@naming.observation.occurrence)),
       name: :show_observation_matching_observations.l,
-      variant: :btn_link,
+      variant: :link,
       class: "text-wrap text-left px-0"
     )
   end
@@ -161,7 +161,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
     Link(type: :user,
          user: proposer,
          name: proposer.login,
-         button: :btn_link,
+         button: :link,
          attributes: { class: "text-wrap text-left px-0" })
   end
 
@@ -200,7 +200,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
       name: "#{@naming.vote_percent.round}%",
       target: vote_percent_modal_path,
       modal_id: "naming_votes_#{primary.id}",
-      variant: :btn_link, class: "vote-percent px-0"
+      variant: :link, class: "vote-percent px-0"
     )
   end
 

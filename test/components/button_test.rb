@@ -88,6 +88,15 @@ end
 
 # Tests for the Components::Button::Styling concern's raise paths.
 class Components::Button::StylingTest < ComponentTestCase
+  def test_default_variant_matches_nil
+    # :default is an explicit synonym for nil/omitted -- Link/Link::Icon
+    # need to distinguish "no button framing" (nil) from "framed as the
+    # default button" (:default) at their own layer, so btn_class treats
+    # both the same rather than making every such caller translate.
+    assert_equal(Components::Button::Styling.btn_class(nil),
+                 Components::Button::Styling.btn_class(:default))
+  end
+
   def test_unknown_variant_raises_argument_error
     assert_raises(ArgumentError) do
       Components::Button::Styling.btn_class(:nonexistent)

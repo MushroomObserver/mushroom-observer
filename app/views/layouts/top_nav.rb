@@ -89,7 +89,9 @@ class Views::Layouts::TopNav < Views::Base
   def render_right
     render_search_nav_toggle
     render_nav_scan_qr_code
-    ul(class: "nav navbar-nav navbar-right hidden-xs mr-0") do
+    ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
+                          Components::Navbar::RIGHT_CLASS,
+                          "hidden-xs mr-0")) do
       # `content_for(:context_nav)` (no-block) returns the previously
       # stashed SafeBuffer; `trusted_html` emits it into Phlex's
       # buffer (a no-op `content_for` call would only read it).

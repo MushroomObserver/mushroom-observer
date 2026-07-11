@@ -203,7 +203,7 @@ module Views::Controllers::Projects::Locations
           name: loc.display_name
         ),
         icon: :x,
-        variant: :btn_link,
+        variant: :link,
         class: "p-0"
       )
     end
