@@ -36,6 +36,49 @@ class RssLogTest < UnitTestCase
     assert_equal(:rss_created_at.t(type: :observation), detail)
   end
 
+  def test_add_with_date_refuses_to_write_to_orphaned_log
+    log = rss_logs(:location_rss_log)
+    # Orphan it: prepend a title line so notes no longer lead with a
+    # timestamp, exactly as #orphan leaves things.
+    log.update(notes: "Target Title\n#{log.notes}")
+    assert(log.already_orphaned?)
+    before = log.notes
+
+    log.add_with_date(:log_location_updated, user: "mary")
+    log.reload
+
+    # The write is refused: notes are unchanged, so the log stays a proper
+    # orphan instead of turning back into a deletable "ghost". See #4763.
+    assert_equal(before, log.notes)
+    assert(log.already_orphaned?)
+  end
+
+  def test_orphaning_still_works_through_the_guard
+    obs = observations(:detailed_unknown_obs)
+    obs.current_user = users(:dick)
+    log = obs.rss_log
+    assert_not(log.already_orphaned?)
+
+    # Destroying the object orphans its log via #orphan, which calls
+    # add_with_date *before* prepending the title. The guard must not block
+    # that path.
+    obs.destroy!
+    log.reload
+
+    assert(log.orphan?)
+    assert(log.already_orphaned?)
+    assert_equal(:log_observation_destroyed.t(user: "dick"), log.detail)
+  end
+
+  def test_a_fresh_log_is_not_treated_as_orphaned
+    log = RssLog.new
+    assert_not(log.already_orphaned?)
+
+    log.add_with_date(:log_observation_created, user: "mary")
+
+    assert_match(/log_observation_created/, log.notes)
+  end
+
   def test_detail_for_destroyed_object
     obs = observations(:detailed_unknown_obs)
     obs.current_user = users(:dick)
