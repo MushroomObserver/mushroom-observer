@@ -90,10 +90,10 @@ class Components::Icon < Components::Base
   # Catch-all for class:, data:, aria:, and any other HTML attrs --
   # matches Components::Navbar/Collapsible's pattern (plain `class:`/
   # `data:` in, no separate `html_class:`/`data:` props needed).
-  # `_Nilable(_Any)`, not bare `_Any` -- Literal's `_Any` excludes
-  # `NilClass`, so a caller passing an explicit `key: nil` (not just
-  # omitting the key) would otherwise raise a Literal::TypeError.
-  prop :attributes, _Hash(Symbol, _Nilable(_Any)), :**
+  # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
+  # so a caller passing an explicit `key: nil` (not just omitting the
+  # key) would otherwise raise a Literal::TypeError.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
     glyph = GLYPHS[@type]

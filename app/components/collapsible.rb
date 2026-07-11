@@ -69,11 +69,11 @@ class Components::Collapsible < Components::Base
   prop :element, Symbol, default: :div
   # Catch-all for class:, data:, aria:, and any other HTML attrs --
   # matches Components::Navbar's pattern (plain `class:` in, no
-  # separate `html_class:` prop needed). `_Nilable(_Any)`, not bare
-  # `_Any` -- Literal's `_Any` excludes `NilClass`, so a caller passing
-  # an explicit `key: nil` (not just omitting the key) would otherwise
+  # separate `html_class:` prop needed). `_Any?`, not bare `_Any` --
+  # Literal's `_Any` excludes `NilClass`, so a caller passing an
+  # explicit `key: nil` (not just omitting the key) would otherwise
   # raise a Literal::TypeError.
-  prop :attributes, _Hash(Symbol, _Nilable(_Any)), :**
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
     # `:id` never lands in @attributes -- the explicit `id:` prop above
