@@ -31,14 +31,14 @@ module Views::Layouts
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
 
       Link(type: :icon, content: adjacent_title(dir), path: href,
-           icon: dir, button: :default, size: :lg, class: classes)
+           icon: dir, button: :btn_link, size: :lg, class: classes)
     end
 
     def render_index_link
       classes = class_names(BTN_CLASSES, %w[mx-1 index_object_link])
 
       Link(type: :icon, content: index_title, path: index_path,
-           icon: index_icon, button: :default, size: :lg, class: classes)
+           icon: index_icon, button: :btn_link, size: :lg, class: classes)
     end
 
     def no_more?(dir)

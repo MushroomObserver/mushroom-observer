@@ -109,7 +109,7 @@ module Views::Layouts
       url = pagination_link_url(page)
 
       Link(type: :icon, content: direction.to_s.upcase.to_sym.t, path: url,
-           icon: direction, button: :default, size: :lg, class: classes)
+           icon: direction, button: :btn_link, size: :lg, class: classes)
     end
 
     # Build URL for pagination links (prev/next page, max page link).
