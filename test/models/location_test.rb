@@ -469,15 +469,17 @@ class LocationTest < UnitTestCase
     assert_true(Location.is_unknown?("Anywhere"))
   end
 
-  # A failing official_unknown shouldn't raise out of names_for_unknown
-  # - it should fall back to the current locale's words alone. (Test
-  # env's cache_store is :null_store, so whether the failure itself
-  # gets cached can't be exercised here; this pins the raise-safety
-  # part of the fix, which is environment-independent.)
-  def test_names_for_unknown_falls_back_when_official_unknown_fails
-    Location.stub(:official_unknown, -> { raise("boom") }) do
-      names = Location.names_for_unknown
-      assert_equal(:unknown_locations.l.split(/, */).uniq, names)
+  # official_unknown always reads the English word list from i18n,
+  # regardless of the viewer's current locale -- it's a fixed :en
+  # lookup (see Location.official_unknown), not derived from
+  # I18n.locale like :unknown_locations.l is.
+  def test_official_unknown_is_locale_independent
+    english_words = Location.official_unknown
+    assert_includes(english_words, "Unknown")
+    assert_includes(english_words, "Earth")
+
+    I18n.with_locale(:es) do
+      assert_equal(english_words, Location.official_unknown)
     end
   end
 
