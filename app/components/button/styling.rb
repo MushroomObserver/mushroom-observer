@@ -17,7 +17,12 @@
 # `"btn"` class is added separately by each component's `merged_class`, so
 # `variant: :strip` renders no Bootstrap button framing at all. Omit
 # `variant:` (or pass `nil`) for the standard grey button (`btn btn-default`).
-# `:default` is NOT a valid variant symbol — omit the kwarg instead.
+# `:default` is also accepted as an explicit synonym for nil/omitted —
+# `Components::Link`/`Link::Icon` need to distinguish "no button framing
+# at all" (nil, a plain link) from "framed as the default button"
+# (`:default`, a different state at that layer), so `btn_class` treats
+# both the same rather than making every such caller translate `:default`
+# to `nil` itself.
 module Components::Button::Styling
   extend ActiveSupport::Concern
 
@@ -46,6 +51,7 @@ module Components::Button::Styling
   module_function
 
   def btn_class(variant)
+    variant = nil if variant == :default
     return "btn-default" if variant.nil?
     return nil if variant == :strip
 

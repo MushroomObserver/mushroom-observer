@@ -135,12 +135,13 @@ class Components::Link::Icon < Components::Base
 
   # `nil` (button: omitted) means "plain link" — no btn framing at all,
   # matching Components::Link#btn_styling's semantics so callers can't
-  # tell the two Link subclasses apart by behavior.
+  # tell the two Link subclasses apart by behavior. `btn_class` itself
+  # treats `:default` as a synonym for nil ("btn-default"), so no
+  # separate branch is needed here for that case.
   def btn_styling
     button = @opts[:button]
     return nil unless button
     return nil if button == :strip
-    return class_names("btn", "btn-default") if button == :default
 
     class_names("btn", btn_class(button))
   end
