@@ -19,9 +19,12 @@
 #   listing page, not just close the modal in place)
 #   render(Components::Modal::CloseButton.new(target: cancel_path))
 class Components::Modal::CloseButton < Components::Base
-  prop :target, _Nilable(String), default: nil
+  prop :target, _Nilable(_Union(String, Hash, ::AbstractModel)), default: nil
   prop :name, String, default: -> { :CANCEL.l }
-  prop :attributes, _Hash(Symbol, _Any), :**
+  # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
+  # so a caller passing an explicit `key: nil` (not just omitting the
+  # key) would otherwise raise a Literal::TypeError.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
     Button(**button_attrs)
@@ -31,7 +34,7 @@ class Components::Modal::CloseButton < Components::Base
 
   def button_attrs
     attrs = @attributes.dup
-    attrs[:data] = { dismiss: "modal" }.merge(attrs[:data] || {})
+    attrs[:data] = (attrs[:data] || {}).merge(dismiss: "modal")
     attrs[:name] = @name
     if @target
       attrs[:type] = :get
