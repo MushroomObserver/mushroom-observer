@@ -192,6 +192,15 @@ end
   reflection =
     model2.reflections[reflection_name.to_s] ||
     model.reflections[reflection_name.to_s]
+  # An entry naming an association that no longer exists (renamed, removed,
+  # or turned polymorphic - e.g. ExternalLink/FieldSlip losing observation_id)
+  # would crash the whole run at reflection.foreign_key. Warn and skip
+  # instead so the rest of the checks still run.
+  if reflection.nil?
+    puts("STALE CHECK: #{model.name}.#{reflection_name} - no such " \
+         "belongs_to association; skipping. Update or remove this entry.")
+    next
+  end
   column = reflection.foreign_key
   ref_model = reflection.class_name.constantize
   warn("#{model.name} #{reflection_name}...") if verbose
