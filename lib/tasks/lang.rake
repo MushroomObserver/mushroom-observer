@@ -62,6 +62,13 @@ def define_tasks(action, verbose, verbose_method, description)
     perform_action(lang, action)
   end
 
+  # NOTE: `lang.verbose(...)` (LanguageExporter#verbose) does a plain
+  # `puts` when `Language.verbose` is on (the default
+  # unless `silent=yes`). Running these per-language on a thread pool
+  # means lines from different languages can interleave/print
+  # out of order -- an accepted tradeoff of parallelizing, since each
+  # line is already locale-tagged (e.g. "Checking en"), and nothing in
+  # MO's CI or scripts parses this task's stdout.
   desc(description.gsub("XXX", "unofficial").gsub("(S)", "s"))
   task(unofficial: :setup) do
     lang_task_pool.call(Language.unofficial.to_a) do |lang|
