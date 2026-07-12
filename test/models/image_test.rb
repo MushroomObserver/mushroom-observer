@@ -308,6 +308,24 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
   end
 
+  # A failed GPS strip must stop processing before Image::Processor (and
+  # thus a background dhash job) is ever reached -- an unstripped
+  # original must not propagate into resized/transferred copies or get
+  # hashed. See Image::Processor.strip_original_gps.
+  def test_process_image_strip_failure_skips_dhash_job
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+
+    img.stub(:move_original, true) do
+      Image::Processor.stub(:strip_original_gps, "boom") do
+        assert_no_enqueued_jobs(only: ImageDhashJob) do
+          assert_not(img.process_image(strip: true))
+        end
+      end
+    end
+    assert(img.errors[:image].any?)
+  end
+
   def test_process_image_command_failure
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
@@ -328,13 +346,15 @@ class ImageTest < UnitTestCase
   end
 
   # Regression test for a Copilot finding on PR #4751: Image::Processor
-  # records some failures (GPS-strip, transfer) by populating #errors and
-  # returning early WITHOUT raising -- unlike the old
-  # `system(script/process_image)` call, which returned non-zero (a
-  # failure #process_image could see) on the same underlying failures.
-  # process_and_enqueue_dhash must treat a non-empty #errors the same as
-  # a raised exception: fail, and don't enqueue the dhash job for an
-  # image whose processing didn't actually finish.
+  # can record a transfer failure by populating #errors and returning
+  # early WITHOUT raising -- unlike the old `system(script/process_image)`
+  # call, which returned non-zero (a failure #process_image could see) on
+  # the same underlying failure. process_and_enqueue_dhash must treat a
+  # non-empty #errors the same as a raised exception: fail, and don't
+  # enqueue the dhash job for an image whose processing didn't actually
+  # finish. (GPS-strip failures are handled separately and earlier now --
+  # see strip_original_gps? -- so by the time Image::Processor runs at
+  # all, any remaining #errors can only be a transfer failure.)
   def test_process_image_records_failure_without_raising
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
@@ -343,7 +363,7 @@ class ImageTest < UnitTestCase
     def silently_failing_processor.process; end
 
     def silently_failing_processor.errors
-      ["Failed to strip GPS data from orig/1.jpg"]
+      ["Failed to transfer thumb/1.jpg to remote1"]
     end
 
     img.stub(:move_original, true) do

@@ -98,8 +98,7 @@ class Image::ProcessorTest < UnitTestCase
     obs = observations(:detailed_unknown_obs)
     obs.update_columns(updated_at: 1.day.ago)
 
-    Image::Processor.new(image: image, ext: "jpg", set_size: true,
-                         strip_gps: false).process
+    Image::Processor.new(image: image, ext: "jpg", set_size: true).process
 
     image.reload
     assert_equal(407, image.width)
@@ -135,8 +134,7 @@ class Image::ProcessorTest < UnitTestCase
     image.update_columns(transferred: false, width: nil, height: nil)
     FileUtils.cp(TIFF_FIXTURE, "#{local_root}/orig/#{image.id}.tiff")
 
-    Image::Processor.new(image: image, ext: "tiff", set_size: true,
-                         strip_gps: false).process
+    Image::Processor.new(image: image, ext: "tiff", set_size: true).process
 
     image.reload
     assert_equal(2560, image.width)
@@ -147,16 +145,16 @@ class Image::ProcessorTest < UnitTestCase
     assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.jpg")
   end
 
-  def test_process_strips_gps_before_transfer
+  def test_strip_original_gps_success
     image = images(:in_situ_image)
-    image.update_columns(transferred: false, gps_stripped: false)
     FileUtils.cp(GEOTAGGED_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
     assert(MiniExiftool.new("#{local_root}/orig/#{image.id}.jpg").gps_latitude,
            "fixture should start with GPS data")
+    assert_not(image.gps_stripped)
 
-    Image::Processor.new(image: image, ext: "jpg", set_size: false,
-                         strip_gps: true).process
+    error = Image::Processor.strip_original_gps(image, ext: "jpg")
 
+    assert_nil(error)
     stripped = MiniExiftool.new("#{local_root}/orig/#{image.id}.jpg")
     assert_nil(stripped.gps_latitude)
     assert(image.reload.gps_stripped,
@@ -167,17 +165,12 @@ class Image::ProcessorTest < UnitTestCase
   # must stay false on a failed strip, not just "not yet set true" --
   # otherwise #strip_gps!'s `return nil if gps_stripped` guard would
   # permanently block ever retrying a failed strip.
-  def test_process_strip_gps_failure_leaves_gps_stripped_false
+  def test_strip_original_gps_missing_file
     image = images(:in_situ_image)
-    image.update_columns(transferred: false, gps_stripped: false)
-    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
-    processor = Image::Processor.new(image: image, ext: "jpg",
-                                     strip_gps: true)
 
-    processor.stub(:system, false) do
-      processor.process
-    end
+    error = Image::Processor.strip_original_gps(image, ext: "jpg")
 
+    assert(error.present?)
     assert_not(image.reload.gps_stripped)
   end
 
@@ -299,14 +292,17 @@ class Image::ProcessorTest < UnitTestCase
     end
   end
 
-  def test_process_strip_gps_failure_emails_webmaster
+  # GPS stripping no longer happens inside #process at all (see
+  # self.strip_original_gps) -- this now exercises a generic transfer
+  # failure to cover the same #process-level properties: emails the
+  # webmaster and doesn't mark the image transferred.
+  def test_process_transfer_failure_emails_webmaster
     image = images(:in_situ_image)
     image.update_columns(transferred: false)
     FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
-    processor = Image::Processor.new(image: image, ext: "jpg",
-                                     strip_gps: true)
+    processor = Image::Processor.new(image: image, ext: "jpg")
 
-    processor.stub(:system, false) do
+    Image::Processor::FileTransfer.stub(:copy_file_to_server, false) do
       assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
         processor.process
       end
@@ -316,29 +312,6 @@ class Image::ProcessorTest < UnitTestCase
     # RetransferImagesJob's `Image.where(transferred: false)` safety net
     # would never pick this image up again.
     assert_not(image.reload.transferred)
-  end
-
-  # Regression test for a Copilot finding on PR #4751: a failed GPS strip
-  # must stop processing before any file reaches a remote image server --
-  # otherwise the exact data the user asked to strip leaks to public
-  # storage anyway. script/process_image's `set -e` aborted immediately
-  # on the same failure; #process must match that, not just skip marking
-  # the image transferred.
-  def test_process_strip_gps_failure_does_not_transfer_files
-    image = images(:in_situ_image)
-    image.update_columns(transferred: false)
-    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
-    processor = Image::Processor.new(image: image, ext: "jpg",
-                                     strip_gps: true)
-
-    processor.stub(:system, false) do
-      processor.process
-    end
-
-    assert_not(
-      File.exist?("#{remote_server_path(1)}/thumb/#{image.id}.jpg"),
-      "Files must not reach a remote server when GPS stripping failed"
-    )
   end
 
   def test_rotate_non_jpg_original_does_not_undo_rotation

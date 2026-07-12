@@ -8,12 +8,16 @@ class Image
   # instead of a raw SQL `UPDATE`, so `after_update_commit` callbacks fire.
   #
   # 1. convert original to jpeg if necessary
-  # 2. strip GPS data from the original if requested
-  # 3. reorient it correctly if necessary
-  # 4. set width/height of the original image in the database
-  # 5. create the five smaller-sized copies
-  # 6. copy all files to the configured image server(s)
-  # 7. email webmaster if there were any errors
+  # 2. reorient it correctly if necessary
+  # 3. set width/height of the original image in the database
+  # 4. create the five smaller-sized copies
+  # 5. copy all files to the configured image server(s)
+  # 6. email webmaster if there were any errors
+  #
+  # GPS stripping is NOT part of this pipeline -- see self.strip_original_gps,
+  # which runs synchronously in the request cycle (Image#process_image),
+  # before this class's `process` is ever called. That ordering is what
+  # guarantees the original is never exposed with real GPS data still in it.
   class Processor
     require "image_processing/mini_magick"
     require "mini_exiftool_vendored"
@@ -62,8 +66,7 @@ class Image
 
     attr_reader :transferred_any, :errors
 
-    def initialize(image:, user: nil, ext: nil, set_size: false,
-                   strip_gps: false)
+    def initialize(image:, user: nil, ext: nil, set_size: false)
       @image = image
       raise("Image::Processor needs an image.") unless @image
 
@@ -73,18 +76,12 @@ class Image
       @ext = ext || @image.original_extension
       @id = @image.id
       @set_size = set_size
-      @strip_gps = strip_gps
       @transferred_any = false
       @errors = []
     end
 
     def process
       convert_raw_to_jpg if convert_raw_to_jpg_needed?
-      # A failed strip means the file may still carry GPS data -- stop
-      # here rather than transfer it to remote image servers, matching
-      # script/process_image's `set -e` abort-on-failure.
-      return email_webmaster if @strip_gps && !strip_gps_succeeded?
-
       auto_orient_if_needed(full_size_filepath)
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
@@ -152,6 +149,31 @@ class Image
       Verifier.new(&log).run
     end
 
+    # Strips GPS/geotag data from an image's original file synchronously,
+    # before the image is exposed anywhere -- this can't wait on the
+    # deferred resize/transfer pipeline in #process, which may run much
+    # later. Only marks gps_stripped once the strip has actually
+    # succeeded, never optimistically. Returns nil on success, or an
+    # error message string on failure.
+    def self.strip_original_gps(image, ext:)
+      path = "#{local_images_path}/orig/#{image.id}.#{ext}"
+      return "original image file is missing" unless File.exist?(path)
+      return "exiftool failed to strip GPS data" unless
+        strip_gps_from_file(path)
+
+      image.update_attribute(:gps_stripped, true)
+      nil
+    end
+
+    # "GPS:all"/"XMP:Geotag" are group-wildcard deletions, not tags
+    # MiniExiftool's typed `[]=`/`save` recognizes (it silently no-ops on
+    # any tag name outside ExifTool's known-tag map). Shell out directly,
+    # matching what script/process_image already did.
+    def self.strip_gps_from_file(file)
+      system("exiftool", "-gps:all=", "-xmp:geotag=", "-overwrite_original",
+             "-q", file)
+    end
+
     private
 
     # Skip if #rotate already produced this from the current full-size
@@ -163,30 +185,6 @@ class Image
 
     def transferred_cleanly?
       @transferred_any && @errors.empty?
-    end
-
-    # Strip GPS data
-    # "GPS:all"/"XMP:Geotag" are group-wildcard deletions, not tags
-    # MiniExiftool's typed `[]=`/`save` recognizes (it silently no-ops on
-    # any tag name outside ExifTool's known-tag map). Shell out directly,
-    # matching what script/process_image already did.
-    def strip_gps_from_file(file)
-      return if system("exiftool", "-gps:all=", "-xmp:geotag=",
-                       "-overwrite_original", "-q", file)
-
-      @errors << "Failed to strip GPS data from #{file}"
-    end
-
-    # Attempts the strip and marks it durably successful on @image only
-    # once it actually is -- Image#process_image sets gps_stripped false
-    # before calling into here (never true), so a failure here leaves it
-    # false and #strip_gps! remains free to retry later.
-    def strip_gps_succeeded?
-      strip_gps_from_file(full_size_filepath)
-      return false if @errors.any?
-
-      @image.update(gps_stripped: true)
-      true
     end
 
     def make_sure_we_have_full_size_locally
@@ -232,7 +230,6 @@ class Image
       pipeline.call(destination: full_size_filepath)
     end
 
-    # Note this also calls strip_gps_from_file(original_filepath).
     def convert_raw_to_jpg
       pipeline = ImageProcessing::MiniMagick.source(original_filepath).
                  append("-quality", 90).
@@ -242,9 +239,6 @@ class Image
 
       pipeline.call(destination: full_size_filepath)
       salvage_first_layer_if_multilayer
-
-      # Strip GPS out of header of original_file if hiding coordinates.
-      strip_gps_from_file(original_filepath) if @strip_gps
     end
 
     # If there were multiple layers, ImageMagick saves them as 1234-N.jpg.
