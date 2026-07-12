@@ -12,7 +12,7 @@
 # .claude/rules/no_pii_in_public.md.
 #
 # Scope: scans the command string itself (inline `--body`/`-b`/`-f body=`)
-# AND the contents of any `--body-file` (the mandated form for PR/issue
+# AND the contents of any `--body-file` (the mandated form for PR
 # bodies -- see .claude/rules/gh_pr_bodies.md), which is where the real
 # leak hid in the incident that prompted this hook.
 #
