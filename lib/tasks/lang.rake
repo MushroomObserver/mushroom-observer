@@ -36,6 +36,24 @@ def perform_action(lang, action)
   end
 end
 
+# Concurrency for the :all / :unofficial multi-language tasks below.
+# lang:update runs standalone (via CI, a git hook, or a developer
+# directly) -- Solid Queue workers aren't running when this task
+# fires, so this can't be a background job; it has to parallelize
+# in-process. Each Language's export/import/update/strip/check work
+# is independent (its own instance variables, its own
+# "#{locale}.yml"/"#{locale}.txt" files) -- the only shared state is
+# Language.verbose/safe_mode/locales_dir, all set once by the :setup
+# prerequisite chain *before* this runs and never written to during
+# it, so concurrent reads are safe.
+#
+# Lazily built (not a top-level constant) -- rake files are evaluated
+# before the :environment task runs, so Zeitwerk can't resolve
+# ConcurrentEachWithConnection yet at file-load time.
+def lang_task_pool
+  @lang_task_pool ||= ConcurrentEachWithConnection.new(pool_size: 4)
+end
+
 def define_tasks(action, verbose, verbose_method, description)
   desc(description.gsub("XXX", "official").gsub("(S)", ""))
   task(official: :setup) do
@@ -46,7 +64,7 @@ def define_tasks(action, verbose, verbose_method, description)
 
   desc(description.gsub("XXX", "unofficial").gsub("(S)", "s"))
   task(unofficial: :setup) do
-    Language.unofficial.find_each do |lang|
+    lang_task_pool.call(Language.unofficial.to_a) do |lang|
       lang.verbose("#{verbose} #{lang.send(verbose_method)}")
       perform_action(lang, action)
     end
@@ -54,7 +72,7 @@ def define_tasks(action, verbose, verbose_method, description)
 
   desc(description.gsub("XXX", "all").gsub("(S)", "s"))
   task(all: :setup) do
-    Language.find_each do |lang|
+    lang_task_pool.call(Language.all.to_a) do |lang|
       lang.verbose("#{verbose} #{lang.send(verbose_method)}")
       perform_action(lang, action)
     end
