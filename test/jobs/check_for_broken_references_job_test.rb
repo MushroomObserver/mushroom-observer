@@ -137,6 +137,22 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
     assert_includes(alerts.first.message, "STALE CHECK: Baz.qux")
   end
 
+  # A reflection left uncovered by the Checks lists (val stays :need) is
+  # logged AND flagged for the #alerts summary.
+  def test_missing_reflection_is_logged_and_flagged_for_review
+    job = CheckForBrokenReferencesJob.new
+    logged = []
+    job.define_singleton_method(:log) { |msg| logged << msg }
+    job.instance_variable_set(:@reflections, { "Foo.bar" => :need })
+    job.instance_variable_set(:@review_findings, [])
+
+    job.send(:report_missing_reflections)
+
+    assert_includes(logged, "MISSING REFLECTION Foo.bar")
+    assert_includes(job.instance_variable_get(:@review_findings),
+                    "MISSING REFLECTION: Foo.bar")
+  end
+
   # Guards against model drift: every belongs_to must be covered by
   # Checks::MONOMORPHIC/POLYMORPHIC (or be a typed view of a polymorphic
   # target, which discovery skips). A new/renamed/removed association that
