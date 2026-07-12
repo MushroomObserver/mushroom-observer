@@ -52,6 +52,10 @@ if printf '%s\n' "$CHANGED" | grep -qxF "config/locales/en.txt"; then
   echo "🌐 branch switch: en.txt changed — running bin/rails lang:update" >&2
   if bin/rails lang:update >/tmp/post_checkout_lang.log 2>&1; then
     echo "   ✅ lang:update complete (en.yml regenerated)" >&2
+    # Shared with check_lang_update_before_test.sh, so a `rails test`
+    # right after this checkout doesn't redundantly re-run lang:update.
+    git hash-object config/locales/en.txt \
+      > /tmp/mo_lang_update_synced_hash 2>/dev/null || true
   else
     echo "   ⚠️  lang:update failed; see /tmp/post_checkout_lang.log" >&2
   fi

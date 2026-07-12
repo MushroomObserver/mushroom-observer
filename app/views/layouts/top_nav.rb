@@ -33,12 +33,13 @@ class Views::Layouts::TopNav < Views::Base
     :projects, :herbaria, :species_lists
   ].freeze
 
-  # Container-class set shared by the top-nav row and the
-  # search-nav row. Pulled out so the only difference between the
-  # two — `justify-content-{between,center}` — reads clearly.
-  CONTAINER_CLASSES = %w[
-    container-fluid px-3 d-flex flex-row align-items-center
-  ].freeze
+  # Container classes shared by the top-nav row and the search-nav
+  # row. `w-100` is load-bearing since #top_nav is now `display: flex`
+  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it these two
+  # rows would share one line instead of each getting its own.
+  # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
+  # between` + `align-items-center` alias.
+  CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
@@ -64,7 +65,7 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   def view_template
-    nav(class: "navbar navbar-default hidden-print mb-2", id: "top_nav") do
+    Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav") do
       render_top_row
       render_search_row
     end
@@ -73,8 +74,7 @@ class Views::Layouts::TopNav < Views::Base
   private
 
   def render_top_row
-    div(class: class_names(CONTAINER_CLASSES,
-                           "justify-content-between")) do
+    div(class: class_names(CONTAINER_CLASSES)) do
       div(class: class_names(LEFT_CLASSES)) { render_left }
       div(class: class_names(RIGHT_CLASSES)) { render_right }
     end
@@ -89,34 +89,37 @@ class Views::Layouts::TopNav < Views::Base
   def render_right
     render_search_nav_toggle
     render_nav_scan_qr_code
-    ul(class: "nav navbar-nav navbar-right hidden-xs mr-0") do
+    ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
+                          Components::Navbar::RIGHT_CLASS,
+                          "hidden-xs mr-0")) do
       # `content_for(:context_nav)` (no-block) returns the previously
       # stashed SafeBuffer; `trusted_html` emits it into Phlex's
       # buffer (a no-op `content_for` call would only read it).
       trusted_html(content_for(:context_nav)) if content_for?(:context_nav)
-      render(Views::Layouts::TopNav::UserNav.new(user: @user)) if @user
+      render(UserNav.new(user: @user)) if @user
     end
-    render(Views::Layouts::TopNav::Login.new) if @user.nil?
+    render(Login.new) if @user.nil?
   end
 
   def render_search_row
-    div(class: class_names(CONTAINER_CLASSES, "justify-content-center")) do
-      div(class: "collapse w-100", id: "search_nav",
-          data: {
-            controller: "search-type",
-            # Stimulus Array values must be JSON. Rails' tag helper
-            # JSON-encodes arrays automatically; Phlex space-joins them
-            # ("a b"), which breaks JSON.parse in the controller and
-            # silently disables the help/advanced-search forms (#4492).
-            search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
-            search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-          }) do
+    div(class: class_names(CONTAINER_CLASSES)) do
+      Collapsible(id: "search_nav", class: "w-100",
+                  data: {
+                    controller: "search-type",
+                    # Stimulus Array values must be JSON. Rails' tag
+                    # helper JSON-encodes arrays automatically; Phlex
+                    # space-joins them ("a b"), which breaks
+                    # JSON.parse in the controller and silently
+                    # disables the help/advanced-search forms (#4492).
+                    search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
+                    search_type_form_types_value: SEARCH_FORM_TYPES.to_json
+                  }) do
         # Identify pages get their own filter bar; everything else
         # gets the pattern-search bar.
         if controller.controller_name == "identify"
           render(::Views::Controllers::Observations::Identify::FormFilter.new)
         else
-          render(Views::Layouts::TopNav::SearchBar.new(
+          render(SearchBar.new(
                    search_help_types: SEARCH_HELP_TYPES,
                    search_form_types: SEARCH_FORM_TYPES
                  ))
@@ -149,9 +152,10 @@ class Views::Layouts::TopNav < Views::Base
     div(class: class_names(Components::Navbar::FORM_CLASS,
                            "px-2 px-sm-3")) do
       Button(
+        type: :collapse_toggle,
+        target_id: "search_nav",
         variant: :outline, size: :sm,
         class: "top_nav_button",
-        data: { toggle: "collapse", target: "#search_nav" },
         aria: { expanded: "false", controls: "search_nav" }
       ) { Icon(type: :search, title: :SEARCH.l) }
     end

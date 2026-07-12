@@ -523,12 +523,19 @@ module Name::Taxonomy
       rank_range("Stirps", "Genus")
     end
 
+    # `rank` may be a String or Symbol rank name (e.g. "Genus" or :Genus) -
+    # normalized to String since `all_ranks` holds Strings and
+    # Symbol#== String is always false, which would otherwise silently
+    # miss the `.index` lookup even for a valid rank name. Still returns
+    # nil for a rank that plain doesn't exist (e.g. user-entered garbage
+    # in a classification string) - callers like validate_classification
+    # rely on that nil check to flag bad input.
     def rank_index(rank)
-      Name.all_ranks.index(rank)
+      Name.all_ranks.index(rank.to_s)
     end
 
     def compare_ranks(rank_a, rank_b)
-      all_ranks.index(rank_a) <=> all_ranks.index(rank_b)
+      rank_index(rank_a) <=> rank_index(rank_b)
     end
 
     def translate_rank(rank)

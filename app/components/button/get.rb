@@ -11,7 +11,7 @@
 #
 # @example btn-link variant (no btn frame, underlined)
 #   Button(type: :get,
-#     name: user.login, target: user, variant: :btn_link
+#     name: user.login, target: user, variant: :link
 #   )
 class Components::Button::Get < Components::Link::Get
   def initialize(name:, target:, variant: nil, **)

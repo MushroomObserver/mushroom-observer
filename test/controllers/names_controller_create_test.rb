@@ -10,16 +10,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
-    @@emails = []
     super
-  end
-
-  def assert_no_emails
-    msg = @@emails.join("\n")
-    assert_empty(@@emails,
-                 "Wasn't expecting any email notifications; got:\n#{msg}")
-  ensure
-    @@emails = []
   end
 
   # ----------------------------
@@ -442,7 +433,6 @@ class NamesControllerCreateTest < FunctionalTestCase
     assert(name = Name.find_by(text_name: text_name))
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
     assert_equal("Variety", name.rank)
     assert_equal("#{text_name} #{author}", name.search_name)
     assert_equal(author, name.author)

@@ -6,7 +6,8 @@
 # either prop is nil — the helper already gates on the same.
 module Views::Layouts
   class Header::ShowPrevNextNav < Views::Base
-    BTN_CLASSES = (Components::Navbar::LINK_CLASSES + %w[navbar-left]).freeze
+    BTN_CLASSES = (Components::Navbar::LINK_CLASSES +
+                   [Components::Navbar::LEFT_CLASS]).freeze
 
     prop :object, _Nilable(::AbstractModel), default: nil
     prop :query, _Nilable(::Query), default: nil
@@ -14,7 +15,7 @@ module Views::Layouts
     def view_template
       return unless @object && @query
 
-      ul(class: "nav navbar-flex object_pager") do
+      ul(class: "nav flex-bar object_pager") do
         li { render_adjacent_link(:prev) }
         li { render_index_link }
         li { render_adjacent_link(:next) }
@@ -30,14 +31,14 @@ module Views::Layouts
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
 
       Link(type: :icon, content: adjacent_title(dir), path: href,
-           icon: dir, class: classes)
+           icon: dir, button: :link, size: :lg, class: classes)
     end
 
     def render_index_link
       classes = class_names(BTN_CLASSES, %w[mx-1 index_object_link])
 
       Link(type: :icon, content: index_title, path: index_path,
-           icon: index_icon, class: classes)
+           icon: index_icon, button: :link, size: :lg, class: classes)
     end
 
     def no_more?(dir)

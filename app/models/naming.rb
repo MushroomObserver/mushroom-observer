@@ -51,6 +51,10 @@ class Naming < AbstractModel
 
   serialize :reasons, coder: YAML
 
+  # Per-naming notifications, digest-recipient computation, and the
+  # suppress_notifications switch bulk importers use (#4757).
+  include Notify
+
   before_save :did_name_change?
   before_save :enforce_default_reasons
   after_destroy :log_destruction
@@ -172,84 +176,6 @@ class Naming < AbstractModel
   def did_name_change?
     @name_changed = name_id_changed?
     true
-  end
-
-  # Send email notifications after creating or changing the Name.
-  def create_emails # rubocop:disable Metrics/MethodLength
-    return unless @name_changed
-
-    @name_changed = false
-
-    # Send email to people interested in this name.
-    @initial_name_id = name_id
-    taxa = name.approved_name.all_parents
-    taxa.push(name)
-    taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
-    # taxa = name.approved_name.all_parents(
-    #   includes: [:interests], add_self: true, add_lichen: name.is_lichen?
-    # )
-
-    done_user = {}
-    taxa.each do |taxon|
-      NameTracker.where(name: taxon).includes(:user).find_each do |n|
-        next unless (n.user_id != user.id) && !done_user[n.user_id] &&
-                    (!n.require_specimen || observation.specimen)
-        next if n.user.no_emails
-
-        # Migrated from QueuedEmail::NameTracking to deliver_later.
-        # Always notify the tracker.
-        naming = self
-        NamingTrackerMailer.build(receiver: n.user, naming:).deliver_later
-        # Conditionally notify the observer if tracker has note_template.
-        # Don't send if tracker is the observer (they'd get a self-email).
-        if n.note_template.present? && n.approved && n.user != observation.user
-          NamingObserverMailer.build(
-            receiver: observation.user, naming:, name_tracker: n
-          ).deliver_later
-        end
-        done_user[n.user_id] = true
-      end
-    end
-
-    # Send email to people interested in this observation.
-    return unless (obs = observation)
-
-    owner  = obs.user
-    sender = user
-    recipients = []
-
-    # Send notification to owner if they want.
-    recipients.push(owner) if owner&.email_observations_naming
-
-    # Send to people who have registered interest in this observation.
-    # Also remove everyone who has explicitly said they are NOT interested.
-    obs.interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
-
-    # Also send to people who registered positive interest in this name.
-    # (Don't want *disinterest* in name overriding
-    # interest in the observation, say.)
-    taxa.each do |taxon|
-      taxon.interests.each do |interest|
-        recipients.push(interest.user) if interest.state
-      end
-    end
-
-    # Remove users who have opted out of all emails.
-    recipients.reject!(&:no_emails)
-
-    # Send to everyone (except the person who created the naming!)
-    naming = self
-    (recipients.uniq - [sender]).each do |receiver|
-      NameProposalMailer.build(
-        sender:, receiver:, naming:, observation: obs
-      ).deliver_later
-    end
   end
 
   # Log destruction of Naming and recalculate Observation's consensus after

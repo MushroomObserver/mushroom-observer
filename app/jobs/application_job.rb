@@ -1,11 +1,23 @@
 # frozen_string_literal: true
 
+require("zlib")
+
 class ApplicationJob < ActiveJob::Base
   # Automatically retry jobs that encountered a deadlock
   # retry_on ActiveRecord::Deadlocked
 
   # Most jobs are safe to ignore if the underlying records are no
   # longer available discard_on ActiveJob::DeserializationError
+
+  # Textile::THREAD_KEYS's name-lookup cache is thread-local -- isolated
+  # across concurrent job executions, but not auto-reset between
+  # sequential jobs pooled onto the same Solid Queue worker thread.
+  # Jobs never run through ApplicationController's before_action (its
+  # own reset_textile_cache), so mailer jobs that call `.tp`/`.tl` on
+  # translated text (e.g. NamingTrackerMailer, VerifyAccountMailer) can
+  # otherwise pick up a leftover genus abbreviation left by a prior,
+  # unrelated job on the same worker thread. See #3589, #4741.
+  before_perform { Textile.clear_textile_cache }
 
   # Report background-job failures to the same place web errors go (Slack via
   # exception_notification), then re-raise so SolidQueue still records the
@@ -30,7 +42,43 @@ class ApplicationJob < ActiveJob::Base
     end
   end
 
+  # Route review-worthy job output to the #alerts Slack channel (in
+  # addition to the durable job.log record). Reuses the exception_
+  # notification pipeline via a synthetic JobAlert, so it inherits the
+  # same gating and de-duplication as crash notifications without
+  # conflating with them. Notification happens only when ExceptionNotifier
+  # has a registered notifier (production, or wherever NOTIFY_EXCEPTIONS
+  # opts in - see config/initializers/exception_notification.rb);
+  # otherwise it is log-only, and the job.log line still lands.
+  # `job`/`job_id` are set last so caller context can't clobber the
+  # alert's own identity.
+  def alert(message, **context)
+    log(message)
+    return unless ExceptionNotifier.notifiers.any?
+
+    ExceptionNotifier.notify_exception(
+      job_alert(message),
+      data: { **context, job: self.class.name, job_id: job_id }
+    )
+  end
+
   private
+
+  # error_grouping falls back to a backtrace-based key whenever the
+  # message key misses (every first occurrence of a message). A synthetic
+  # JobAlert has no backtrace, so without this every job alert would
+  # collide on one nil-backtrace group and de-dup against unrelated
+  # alerts. Anchor a single synthetic frame to the message so each
+  # distinct alert is its own group; identical messages still group
+  # (that is the point of de-dup). The crc32 keeps the shown frame short
+  # rather than echoing the whole (possibly multi-line) message.
+  def job_alert(message)
+    text = message.to_s
+    anchor = "job-alert:#{self.class.name}:#{Zlib.crc32(text)}"
+    alert = JobAlert.new(text)
+    alert.set_backtrace([anchor])
+    alert
+  end
 
   def job_log_path
     # Use worker-specific log files in parallel testing to avoid conflicts

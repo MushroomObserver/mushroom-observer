@@ -136,6 +136,8 @@ See `.claude/rules/testing.md` for test structure and component test patterns.
 See `.claude/rules/sweeps.md` for PR-scope guidance on broad sweeps
 ("remove X from all models," "convert every Y") — don't self-limit
 scope below what the sweep already declared.
+See `.claude/rules/no_raw_sql.md` — no raw SQL strings anywhere in the
+app; use ActiveRecord/Arel instead.
 
 ## Git Workflow
 

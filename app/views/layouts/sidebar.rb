@@ -22,7 +22,6 @@ class Views::Layouts::Sidebar < Views::Base
   # reuses the same set for its mobile rendering into the offcanvas
   # sidebar.
   CSS_CLASSES = {
-    wrapper: "navbar navbar-inverse sidebar-nav",
     heading: "disabled font-weight-bold",
     admin: "list-group-item-danger indent",
     indent: "indent",
@@ -46,8 +45,13 @@ class Views::Layouts::Sidebar < Views::Base
       comment { "SIDEBAR LOGO AND NAVIGATION" }
       div(id: "navigation") do
         render_logo
-        div(class: classes[:wrapper], data_controller: "nav-active") do
-          div(class: "list-group") do
+        Navbar(variant: :inverse, element: :div, class: "sidebar-nav",
+               data_controller: "nav-active") do
+          # `w-100`: `.navbar.navbar-flex`'s BS4 bridge rule makes this
+          # element's parent `display: flex`; without an explicit
+          # width this direct child would shrink to content size
+          # instead of staying full width.
+          div(class: "list-group w-100") do
             render_top_section
             render_context_nav_mobile if @user
             render_user_sections
