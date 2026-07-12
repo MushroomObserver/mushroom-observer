@@ -14,8 +14,6 @@ MushroomObserver::Application.configure do
   # We redirect from each of these to the real one.
   config.bad_domains = ["www.mushroomobserver.org"]
 
-  # Disable queued email.
-  config.queue_email = false
   config.image_precedence = {
     default: [:local, :remote1]
   }

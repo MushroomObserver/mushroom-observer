@@ -27,9 +27,6 @@ MushroomObserver::Application.configure do
   # Code appended to ids to make "sync_id".  Must start with letter.
   config.server_code = "XX"
 
-  # Turn off email.
-  config.queue_email = false
-
   # Tell ActionMailer not to deliver emails to the real world.
   # The :file delivery method accumulates sent emails in the
   # ../mail directory.  (This is a feature I added. -JPH 20080213)
@@ -48,7 +45,6 @@ MushroomObserver::Application.configure do
   # Use this to actually send some Gmail via SMTP-Relay in development,
   # provided you have the credentials in credentials.yml.enc
   #
-  # config.queue_email = true
   # config.action_mailer.delivery_method = :smtp
   # config.action_mailer.perform_deliveries = true
   # config.action_mailer.raise_delivery_errors = true
