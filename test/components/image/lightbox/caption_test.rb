@@ -207,6 +207,40 @@ class LightboxCaptionTest < ComponentTestCase
     assert_no_html(html, ".vote-meter")
   end
 
+  # Regression test for the #4741/#4772 matrix-box cache-leak bug:
+  # this component renders once per observation on a matrix/index
+  # page (Matrix::Box -> Image::Interactive -> lightbox_caption_html),
+  # not once per request, so ApplicationController's per-request
+  # Textile-cache reset alone doesn't isolate sequential renders in
+  # the same page load. `prepare_textile_cache` must explicitly clear
+  # before registering the current observation's name.
+  #
+  # agaricus_campestris_obs (genus "Agaricus", letter "A") renders
+  # first and registers "A" => "Agaricus" in Textile's cache.
+  # boletus_edulis_obs (genus "Boletus") renders second, with notes
+  # containing a bare "_A. campestris_" abbreviation it never
+  # registered itself. Textile keeps the abbreviated form as the link
+  # *text* either way, so the tell is the link's *href*: leaked state
+  # resolves it to lookup_name/Agaricus+campestris (wrong genus);
+  # correctly isolated, "A. campestris" can't resolve as a name at
+  # all and falls through to a lookup_glossary_term href instead.
+  def test_does_not_leak_name_lookup_across_sequential_renders
+    agaricus_obs = observations(:agaricus_campestris_obs)
+    boletus_obs = observations(:boletus_edulis_obs)
+    boletus_obs.notes = { Other: "_A. campestris_ was not seen here" }
+
+    render_caption(obs: agaricus_obs, image: nil)
+    html = render_caption(obs: boletus_obs, image: nil)
+
+    assert_no_html(
+      html,
+      "#observation_#{boletus_obs.id}_notes a[href*='lookup_name/Agaricus']",
+      "Boletus caption's bare abbreviation resolved against the prior " \
+      "render's leftover Agaricus registration -- Textile's " \
+      "name-lookup cache leaked across sequential renders"
+    )
+  end
+
   private
 
   def render_caption(user: @user, image: @image, obs: @obs, **)

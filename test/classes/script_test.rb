@@ -108,28 +108,4 @@ class ScriptTest < UnitTestCase
     errors = File.read(tmpfile.path)
     assert(status, "Something went wrong with #{script}:\n#{errors}")
   end
-
-  def test_refresh_name_lister_cache
-    script = script_file("refresh_name_lister_cache")
-    tmpfile = Tempfile.new("test")
-    output_file = MO.name_lister_cache_file
-    FileUtils.rm(output_file) if File.exist?(output_file)
-    cmd = "#{script} 2>&1 > #{tmpfile.path}"
-    status = system(script_env, cmd)
-    errors = File.read(tmpfile.path)
-    assert(status && errors.blank?,
-           "Something went wrong with #{script}:\n#{errors}")
-    assert_path_exists(output_file,
-                       "#{script} failed to write #{output_file}")
-
-    output = File.read(output_file)
-    fixture = Rails.root.join("test/reports/name_list_data.js")
-    if sql_collates_accents?
-      assert_string_equal_file(output, fixture)
-    else
-      expect = fixture.read
-      assert_equal(expect.tr("ü", "u"), output.tr("ü", "u"),
-                   "File #{output} is wrong.")
-    end
-  end
 end

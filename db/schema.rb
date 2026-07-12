@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_07_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_11_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -952,6 +952,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_07_120000) do
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.boolean "meta", default: false
+    t.index ["name"], name: "index_user_groups_on_name", unique: true
   end
 
   create_table "user_stats", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

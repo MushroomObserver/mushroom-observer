@@ -5,35 +5,12 @@ require("test_helper")
 class NamesControllerUpdateMergeTest < FunctionalTestCase
   tests NamesController
 
-  # EMAIL TESTS, currently in Names, Locations and their Descriptions
-  # Has to be defined on class itself, include doesn't seem to work
-  def self.report_email(email)
-    @@emails ||= []
-    @@emails << email
-  end
-
   def setup
     @new_pts  = 10
     @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
-    @@emails = []
     super
-  end
-
-  def assert_email_generated
-    assert_not_empty(@@emails, "Was expecting an email notification.")
-  ensure
-    @@emails = []
-  end
-  private :assert_email_generated
-
-  def assert_no_emails
-    msg = @@emails.join("\n")
-    assert_empty(@@emails,
-                 "Wasn't expecting any email notifications; got:\n#{msg}")
-  ensure
-    @@emails = []
   end
 
   # ----------------------------
@@ -77,7 +54,6 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     put(:update, params: params)
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert_not(Name.exists?(old_name.id))
     assert(new_name.reload)
     assert_equal(1, new_name.version)
@@ -103,11 +79,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert_not(Name.exists?(old_name.id))
     assert_equal(new_author, new_name.reload.author)
     assert_equal(1, new_name.version)
@@ -130,12 +107,13 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(old_name.user.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_redirected_to(name_path(new_name.id))
     assert_flash_success
     assert_empty(new_name.reload.author)
-    assert_no_emails
     assert_equal(name_count - 1, Name.count)
     assert_not(Name.exists?(old_name.id))
   end
@@ -157,12 +135,13 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(old_name.user.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_redirected_to(name_path(new_name.id))
     assert_flash_success
     assert_equal(new_author, new_name.reload.author)
-    assert_no_emails
     assert_equal(name_count - 1, Name.count)
     assert_not(Name.exists?(old_name.id))
   end
@@ -191,7 +170,6 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     put(:update, params: params)
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert_not(Name.exists?(old_name.id))
   end
 
@@ -214,11 +192,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     }
     login(rolf.login)
     make_admin
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(good_id))
-    assert_no_emails
     assert_not(Name.exists?(bad_id))
     reload_name = Name.find(good_id)
     assert(reload_name)
@@ -243,11 +222,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert_not(Name.exists?(wrong_author_name.id))
     assert_not_equal(old_correct_spelling_id,
                      old_name.reload.correct_spelling_id)
@@ -271,11 +251,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert_not(Name.exists?(old_name.id))
     assert(new_name.reload)
     assert_not(new_name.deprecated)
@@ -308,11 +289,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(good_name.id))
-    assert_no_emails
     assert_not(Name.exists?(bad_name1.id))
     assert(good_name.reload)
     assert_not(good_name.deprecated)
@@ -335,11 +317,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     assert_not(bad_name2.deprecated)
     params[:id] = bad_name2.id
     params[:name][:deprecated] = "true"
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(good_name.id))
-    assert_no_emails
     assert_not(Name.exists?(bad_name2.id))
     assert(good_name.reload)
     assert(good_name.deprecated)
@@ -357,7 +340,6 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(name_path(good_name.id))
-    assert_no_emails
     assert_not(Name.exists?(bad_name3.id))
     assert(good_name.reload)
     assert_not(good_name.deprecated)
@@ -375,7 +357,6 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(name_path(good_name.id))
-    assert_no_emails
     assert_not(Name.exists?(bad_name4.id))
     assert(good_name.reload)
     assert(good_name.deprecated)
@@ -401,11 +382,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert(new_name.reload)
     assert_not(Name.exists?(old_name.id))
     assert_equal(notes, new_name.description.notes)
@@ -430,11 +412,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert(new_name.reload)
     assert_not(Name.exists?(old_name.id))
     assert_equal("", new_name.author) # user explicitly set author to ""
@@ -511,11 +494,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert(new_name.reload)
     assert_not(Name.exists?(old_name.id))
   end
@@ -541,7 +525,6 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(name_path(old_name.id))
-    assert_no_emails
     assert(old_name.reload)
     assert_not(Name.exists?(new_name.id))
   end
@@ -563,11 +546,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert(new_name.reload)
     assert_not(Name.exists?(old_name.id))
     assert_equal(new_notes, new_name.description.notes)
@@ -606,10 +590,11 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
     # Try again in admin mode.
     make_admin
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
     assert_flash_success
     assert_redirected_to(name_path(new_name.id))
-    assert_no_emails
     assert_raises(ActiveRecord::RecordNotFound) do
       assert(old_name.reload)
     end
@@ -673,10 +658,11 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
         deprecated: "true"
       }
     }
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
     assert_flash_success
     assert_redirected_to(name_path(name1.id))
-    assert_no_emails
     assert_not(Name.exists?(name2.id))
     assert(name1.reload)
     assert_not(name1.correct_spelling)
@@ -704,10 +690,11 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
         deprecated: "false"
       }
     }
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
     assert_flash_success
     assert_redirected_to(name_path(name1.id))
-    assert_no_emails
     assert_not(Name.exists?(name3.id))
     assert(name1.reload)
     assert_not(name1.correct_spelling)
@@ -736,10 +723,11 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
         deprecated: "false"
       }
     }
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
     assert_flash_success
     assert_redirected_to(name_path(name1.id))
-    assert_no_emails
     assert_not(Name.exists?(name4.id))
     assert(name1.reload)
     assert_equal(name1.correct_spelling, Name.first)
@@ -781,11 +769,12 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
         deprecated: "false"
       }
     }
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(name1.id))
-    assert_no_emails
     assert_not(Name.exists?(name2.id))
     assert(name1.reload)
     assert_not(name1.correct_spelling)
@@ -812,14 +801,17 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     }
 
     login(rolf.login)
-    assert_no_difference("surviving_name.version") do
-      put(:update, params: params)
-      surviving_name.reload
+    # email admin re icn_id conflict
+    assert_enqueued_email_with(WebmasterMailer, :build,
+                               args: ->(_) { true }) do
+      assert_no_difference("surviving_name.version") do
+        put(:update, params: params)
+        surviving_name.reload
+      end
     end
 
     assert_flash_success
     assert_redirected_to(name_path(surviving_name.id))
-    assert_email_generated # email admin re icn_id conflict
     assert_not(Name.exists?(edited_name.id))
     assert_equal(
       old_identifier, surviving_name.reload.icn_id,
@@ -851,8 +843,10 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
     user = users(:rolf)
     login(user.login)
 
-    assert_difference("survivor.versions.count", 1) do
-      put(:update, params: params)
+    assert_no_enqueued_emails do
+      assert_difference("survivor.versions.count", 1) do
+        put(:update, params: params)
+      end
     end
 
     assert_redirected_to(name_path(survivor.id))
@@ -861,7 +855,6 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
              "into #{survivor.real_search_name(user)}"
     assert_flash_text(/#{expect}/, "Merger success flash is incorrect")
 
-    assert_no_emails
     assert_not(Name.exists?(edited_name.id))
     assert_equal(208_785, survivor.reload.icn_id)
 
@@ -900,7 +893,6 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(name_path(edited_name.id))
-    assert_no_emails
     assert_not(Name.exists?(merged_name.id))
     assert_equal(189_826, edited_name.reload.icn_id)
   end

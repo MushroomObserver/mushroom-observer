@@ -18,6 +18,10 @@ class FunctionalTestCase < ActionController::TestCase # rubocop:disable Rails/Ac
   include FlashExtensions
   include ControllerExtensions
   include CheckForUnsafeHtml
+  # Rails auto-includes this into ActionDispatch::IntegrationTest but not
+  # ActionController::TestCase -- needed for assert_enqueued_email_with/
+  # assert_no_enqueued_emails (deliver_later-based mailer assertions).
+  include ActionMailer::TestHelper
 
   def get(action, **args)
     super
