@@ -13,8 +13,6 @@
 #   show-page Panel).
 # - `Components::Matrix::Carousel::Item` — per-matrix-box slide,
 #   `:medium` + `original: false` (per the matrix-box-carousel
-#   performance budget — see
-#   `.claude/rules/matrix_box_carousel.md`).
 #
 # `Components::Form::UploadGallery::Item` does NOT subclass this:
 # its slide layout is a row of `image-col` + `form-col` + control

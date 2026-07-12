@@ -5,10 +5,7 @@ require("test_helper")
 # `Components::Matrix::Carousel` is the third caller of
 # `Components::Carousel` (after `ImageGallery` and
 # `Form::UploadGallery`). It exists ahead of the obs-index integration
-# so the primitive's API is validated by all three consumers; the
-# consumer-level integration (rendering it from a matrix box on the
-# obs-index) is a follow-up PR with its own perf work (see
-# `.claude/rules/matrix_box_carousel.md`).
+# so the primitive's API is validated by all three consumers.
 #
 # Class name is flat (matches `MatrixBoxTest` / `MatrixTableTest`)
 # because the top-level `Matrix` constant is Ruby's stdlib matrix
