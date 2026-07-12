@@ -9,13 +9,18 @@
 #   :nil    - null out the FK (row is still meaningful without it)
 #   :zero   - same, but the column isn't nullable (uses 0 as "none")
 #
-# Cross-checks Checks::MONOMORPHIC/POLYMORPHIC (see check_for_broken_
-# references_job/checks.rb) against reality in both directions:
-#   - a real `belongs_to` reflection with no entry in either list logs
-#     "MISSING REFLECTION" (new association, integrity check never added)
-#   - a list entry naming an association that doesn't exist anymore
-#     (renamed/removed/turned polymorphic) logs "STALE CHECK" instead of
-#     raising - these lists are hand-maintained and drift silently otherwise
+# The (model, association) pairs to check come from live reflection
+# introspection (see check_for_broken_references_job/checks.rb), not a
+# hand-maintained list - so a renamed, removed, or newly-polymorphic
+# association can't silently drift out of what's checked. Two things can
+# still need a human's attention, both surfaced as review-worthy log lines
+# rather than silently skipped or raised:
+#   - a Checks::ACTIONS entry naming an association that doesn't exist
+#     anymore logs "STALE ACTIONS ENTRY" (renamed/removed/turned
+#     polymorphic - remove the entry)
+#   - a real association with no Checks::ACTIONS entry logs
+#     "NEEDS ACTION ENTRY" - it's still checked, using the safe
+#     Checks::DEFAULT_ACTION, but a human should categorize it properly
 class CheckForBrokenReferencesJob < ApplicationJob
   queue_as :maintenance
 
@@ -23,20 +28,26 @@ class CheckForBrokenReferencesJob < ApplicationJob
     @dry_run = dry_run
     @verbose = verbose
     @review_findings = []
-    @reflections = discover_belongs_to_reflections
 
-    Checks::MONOMORPHIC.each { |args| check_monomorphic(*args) }
-    Checks::POLYMORPHIC.each { |args| check_polymorphic(*args) }
-    report_missing_reflections
+    Checks.monomorphic_associations.each do |model, reflection_name|
+      check_monomorphic(model, reflection_name)
+    end
+    Checks.polymorphic_associations.each do |model, reflection_name|
+      Checks.polymorphic_targets(model, reflection_name).each do |ref_model|
+        check_polymorphic(model, reflection_name, ref_model)
+      end
+    end
+    report_stale_action_entries
     emit_review_summary
   end
 
   private
 
-  # Everything routed here (dangling :alert references, stale checks,
-  # missing reflections) is "a human should look at this" - collected
-  # across the run and delivered as a single #alerts summary. Routine
-  # :delete/:nil/:zero cleanups stay in job.log only.
+  # Everything routed here (dangling :alert references, stale ACTIONS
+  # entries, new associations needing a considered entry) is "a human
+  # should look at this" - collected across the run and delivered as a
+  # single #alerts summary. Routine :delete/:nil/:zero cleanups stay in
+  # job.log only.
   def note_for_review(line)
     (@review_findings ||= []) << line
   end
@@ -51,55 +62,25 @@ class CheckForBrokenReferencesJob < ApplicationJob
           "#{@review_findings.join("\n- ")}")
   end
 
-  def discover_belongs_to_reflections
-    reflections = {}
-    Dir.foreach(Rails.root.join("app/models")) do |path|
-      next unless path.match?(/^\w+\.rb$/)
-
-      model = model_from_file(path)
-      next unless model
-
-      poly_fks = polymorphic_foreign_keys(model)
-      model.reflect_on_all_associations(:belongs_to).each do |reflection|
-        next if typed_polymorphic_view?(reflection, poly_fks)
-
-        reflections["#{model.name}.#{reflection.name}"] = :need
-      end
+  def report_stale_action_entries
+    Checks.stale_action_entries.each do |key|
+      log("STALE ACTIONS ENTRY: #{key} is declared in " \
+          "CheckForBrokenReferencesJob::Checks::ACTIONS, but no such " \
+          "belongs_to association exists anymore. Remove that entry.")
+      note_for_review("STALE ACTIONS ENTRY: #{key} (declared, but no " \
+                      "such belongs_to)")
     end
-    reflections
   end
 
-  def polymorphic_foreign_keys(model)
-    model.reflect_on_all_associations(:belongs_to).
-      select(&:polymorphic?).map(&:foreign_key)
-  end
-
-  # A scoped belongs_to that reuses a polymorphic association's foreign key -
-  # e.g. Comment#location, defined on `target_id` to allow typed joins - is
-  # just a typed view of the `target` association, already validated by the
-  # polymorphic check. Don't flag it as a separately-uncovered reflection.
-  def typed_polymorphic_view?(reflection, poly_fks)
-    !reflection.polymorphic? && poly_fks.include?(reflection.foreign_key)
-  end
-
-  def model_from_file(path)
-    model = path.sub(/\.rb$/, "").classify.constantize
-    model if model < ActiveRecord::Base
-  rescue NameError
-    nil
-  end
-
-  def check_monomorphic(model, reflection_name, action)
+  def check_monomorphic(model, reflection_name)
     reflection = monomorphic_reflection(model, reflection_name)
-    if reflection.nil?
-      log_stale_check("#{model.name}.#{reflection_name}")
-      return
-    end
-
     column = reflection.foreign_key
     ref_model = reflection.class_name.constantize
-    mark_checked("#{model.name}.#{reflection_name}", model.name,
-                 reflection_name)
+    action = Checks.action_for(model, reflection_name)
+    note_new_action_needed(model, reflection_name) unless
+      Checks.action_defined?(model, reflection_name)
+    log("#{model.name} #{reflection_name}...") if @verbose
+
     query = broken_relation(model, column, ref_model)
     ids = query.pluck(:id)
     return if ids.empty?
@@ -107,33 +88,30 @@ class CheckForBrokenReferencesJob < ApplicationJob
     apply_action(model, column, query, ids, action)
   end
 
-  # A Checks::MONOMORPHIC/POLYMORPHIC entry naming an association that no
-  # longer exists (renamed, removed, or turned polymorphic) is exactly the
-  # kind of drift that goes silently unnoticed without this job actually
-  # running - alert loudly rather than crash or (worse) fail silently.
-  def log_stale_check(key)
-    log("STALE CHECK: #{key} is declared in CheckForBrokenReferencesJob::" \
-        "Checks, but no such belongs_to association exists anymore. " \
-        "Update or remove that entry.")
-    note_for_review("STALE CHECK: #{key} (declared, but no such belongs_to)")
+  # A brand-new association with no considered ACTIONS entry yet is still
+  # checked (using the safe Checks::DEFAULT_ACTION), but flagged so a
+  # human notices and categorizes it - the "self-heals on coverage, not
+  # on judgment" half of this job's design (see Checks's file header).
+  def note_new_action_needed(model, reflection_name)
+    key = "#{model.name}.#{reflection_name}"
+    log("NEEDS ACTION ENTRY: #{key} has no entry in Checks::ACTIONS - " \
+        "checked with the default (#{Checks::DEFAULT_ACTION}) for now. " \
+        "Add a considered entry.")
+    note_for_review("NEEDS ACTION ENTRY: #{key} (using default " \
+                    "#{Checks::DEFAULT_ACTION})")
   end
 
   # `model` may be a `::Version` class (e.g. `Name::Version`), which
-  # doesn't declare its own `belongs_to` reflections - it shares the
-  # base model's (e.g. `Name`'s).
+  # doesn't declare its own `belongs_to` reflection for every association
+  # it's checked on - it may share the base model's (e.g. `Name`'s).
   def monomorphic_reflection(model, reflection_name)
-    model2 = model.name.sub("::Version", "").constantize
-    model2.reflections[reflection_name.to_s] ||
-      model.reflections[reflection_name.to_s]
+    model.reflections[reflection_name.to_s] ||
+      model.name.sub("::Version", "").constantize.
+        reflections[reflection_name.to_s]
   end
 
   def broken_relation(model, column, ref_model)
     model.where(column => 1..).where.not(column => ref_model.all)
-  end
-
-  def mark_checked(key, *verbose_args)
-    log("#{verbose_args.join(" ")}...") if @verbose
-    @reflections[key] = :done
   end
 
   def apply_action(model, column, query, ids, action)
@@ -188,15 +166,8 @@ class CheckForBrokenReferencesJob < ApplicationJob
     raise("OOPS! action for #{model.name}, #{action.inspect}, is invalid!")
   end
 
-  def check_polymorphic(model, ref_model)
-    unless polymorphic_target?(model)
-      log_stale_check("#{model.name}.target")
-      return
-    end
-
-    mark_checked("#{model.name}.target", model.name, "target",
-                 ref_model.name)
-    query = polymorphic_relation(model, ref_model)
+  def check_polymorphic(model, reflection_name, ref_model)
+    query = polymorphic_relation(model, reflection_name, ref_model)
     ids = query.pluck(:id)
     return if ids.empty?
 
@@ -209,22 +180,10 @@ class CheckForBrokenReferencesJob < ApplicationJob
         "whose target #{ref_model.name} doesn't exist#{dry_run_note}")
   end
 
-  def polymorphic_target?(model)
-    reflection = model.reflect_on_association(:target)
-    reflection.present? && reflection.polymorphic?
-  end
-
-  def polymorphic_relation(model, ref_model)
-    model.where(target_type: ref_model.name, target_id: 1..).
-      where.not(target_id: ref_model.all)
-  end
-
-  def report_missing_reflections
-    @reflections.each do |key, val|
-      next if val == :done
-
-      log("MISSING REFLECTION #{key}")
-      note_for_review("MISSING REFLECTION: #{key}")
-    end
+  def polymorphic_relation(model, reflection_name, ref_model)
+    type_column = "#{reflection_name}_type"
+    id_column = "#{reflection_name}_id"
+    model.where(type_column => ref_model.name, id_column => 1..).
+      where.not(id_column => ref_model.all)
   end
 end
