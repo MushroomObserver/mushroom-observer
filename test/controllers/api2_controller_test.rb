@@ -678,8 +678,9 @@ class API2ControllerTest < FunctionalTestCase
 
   # The v1 API (`api` controller) was retired: its routes lingered after
   # APIController was removed, so every /api* request raised
-  # `uninitialized constant APIController` (500-class) instead of a clean
-  # 404. They must no longer be recognized (issue #4782).
+  # `uninitialized constant APIController` -- a RoutingError that renders
+  # a 404, but via a noisy exception/log path rather than a clean
+  # unmatched-route 404. They must no longer be recognized (issue #4782).
   def test_v1_api_routes_are_gone
     ["/api", "/api/observations", "/api/images"].each do |path|
       assert_raises(ActionController::RoutingError,
