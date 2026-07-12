@@ -217,9 +217,14 @@ class Components::Image::Lightbox::Caption < Components::Base
     end
   end
 
-  # ApplicationController resets the per-request Textile cache before
-  # every action; this only needs to prime it, not clear it first.
+  # ApplicationController's per-request reset only covers the FIRST
+  # render on a request. This component renders once per observation
+  # on a matrix/index page (Matrix::Box -> Image::Interactive ->
+  # lightbox_caption_html -> this), so without an explicit clear here,
+  # one observation's genus abbreviation leaks into the next
+  # observation's textile rendering within the same page load.
   def prepare_textile_cache
+    Textile.clear_textile_cache
     Textile.register_name(@obs.name)
   end
 

@@ -7,6 +7,16 @@ class ApplicationJob < ActiveJob::Base
   # Most jobs are safe to ignore if the underlying records are no
   # longer available discard_on ActiveJob::DeserializationError
 
+  # Textile::THREAD_KEYS's name-lookup cache is thread-local -- isolated
+  # across concurrent job executions, but not auto-reset between
+  # sequential jobs pooled onto the same Solid Queue worker thread.
+  # Jobs never run through ApplicationController's before_action (its
+  # own reset_textile_cache), so mailer jobs that call `.tp`/`.tl` on
+  # translated text (e.g. NamingTrackerMailer, VerifyAccountMailer) can
+  # otherwise pick up a leftover genus abbreviation left by a prior,
+  # unrelated job on the same worker thread. See #3589, #4741.
+  before_perform { Textile.clear_textile_cache }
+
   # Report background-job failures to the same place web errors go (Slack via
   # exception_notification), then re-raise so SolidQueue still records the
   # failed execution. The notifiers check keeps this in lockstep with the
