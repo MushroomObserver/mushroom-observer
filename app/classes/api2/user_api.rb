@@ -86,7 +86,7 @@ class API2
       lambda do |obj|
         raise(CanOnlyDeleteYourOwnAccount.new) if user.id != obj.id
 
-        obj.disable_account_and_delete_private_objects
+        obj.disable_and_anonymize_account
       end
     end
   end

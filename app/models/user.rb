@@ -899,19 +899,17 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # licenses, we are perfectly within our rights to retain users' content.
   # But we wish to comply with Apple where it will not otherwise detract from
   # other users' experience.
-  def disable_account_and_delete_private_objects
+  # Handles a user's self-delete request. Everything on MO is CC-licensed
+  # and a self-delete is a weak (sometimes accidental) signal, so we
+  # retain all of the user's content -- observations, images, api keys,
+  # interests, descriptions, projects, etc. -- so the account can be
+  # re-enabled, and merely clear the personal data, block the account,
+  # and anonymize the login. A genuinely empty account (no references at
+  # all) is still fully erased. (#4767 -- the old version hard-deleted
+  # namings/votes/logs and a raft of other content; see git history.)
+  def disable_and_anonymize_account
     disable_account
-    delete_api_keys
-    delete_interests
-    delete_name_trackers
-    delete_observations
-    delete_private_name_descriptions
-    delete_private_location_descriptions
-    delete_private_projects
-    delete_private_species_lists
-    delete_unattached_collection_numbers
-    delete_unattached_herbarium_records
-    delete_unattached_images
+    inactivate_user
     User.erase_user(id) if no_references_left?
   end
 
@@ -928,114 +926,24 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     save
   end
 
-  def delete_api_keys
-    api_keys.delete_all
-  end
-
-  def delete_interests
-    interests.delete_all
-  end
-
-  def delete_name_trackers
-    NameTracker.where(user: self).delete_all
-  end
-
-  def delete_observations
-    [Naming, Vote, RssLog].each do |model|
-      model.joins(:observation).where(observation: { user_id: id }).delete_all
-    end
-    # (all the rest of the observations' dependents should autodestruct)
-    observations.delete_all
-  end
-
-  # Delete user's descriptions that don't have any other authors or editors.
-  # (Oops, editors never got "hooked up" so we have to use versions instead.)
-  def delete_private_name_descriptions
-    ids = private_name_descriptions.map(&:id)
-    NameDescription.where(id: ids).delete_all
-    NameDescription::Version.where(name_description_id: ids).delete_all
-  end
-
-  def private_name_descriptions
-    name_descriptions -
-      name_descriptions.joins(:name_description_authors).
-      where.not(name_description_authors: { user_id: id }) -
-      name_descriptions.joins(:name_description_editors).
-      where.not(name_description_editors: { user_id: id }) -
-      name_descriptions.joins(:versions).
-      where.not(versions: { user_id: id })
-  end
-
-  # Delete user's descriptions that don't have any other authors or editors.
-  # (Oops, editors never got "hooked up" so we have to use versions instead.)
-  def delete_private_location_descriptions
-    ids = private_location_descriptions.map(&:id)
-    LocationDescription.where(id: ids).delete_all
-    LocationDescription::Version.where(location_description_id: ids).delete_all
-  end
-
-  def private_location_descriptions
-    location_descriptions -
-      location_descriptions.joins(:location_description_authors).
-      where.not(location_description_authors: { user_id: id }) -
-      location_descriptions.joins(:location_description_editors).
-      where.not(location_description_editors: { user_id: id }) -
-      location_descriptions.joins(:versions).
-      where.not(versions: { user_id: id })
-  end
-
-  # Delete all the user's projects that don't have any other users on them.
-  def delete_private_projects
-    ids = (projects_created -
-            projects_created.joins(:admin_group_users).
-            where.not(admin_group_users: { id: id }) -
-            projects_created.joins(:member_group_users).
-            where.not(member_group_users: { id: id })).
-          map(&:id)
-    Project.where(id: ids).delete_all
-  end
-
-  # Delete all species_lists the user created unless they belong
-  # to a project.  (Private projects should already have been deleted
-  # by this point, so this in effect, really should read "unless they
-  # belong to a public project".)  I think it's okay to delete
-  # observations even if they are attached to a project.  But
-  # species_lists are potentially a much more collaborative effort, so
-  # I don't think it's okay to delete lists that are attached to
-  # public projects just because the user happened to originally
-  # create them.  -JPH 20220916
-  def delete_private_species_lists
-    ids = (species_lists - species_lists.joins(:project_species_lists)).
-          map(&:id)
-    SpeciesList.where(id: ids).delete_all
-  end
-
-  def delete_unattached_collection_numbers
-    ids = (collection_numbers -
-            collection_numbers.joins(:observation_collection_numbers)).
-          map(&:id)
-    CollectionNumber.where(id: ids).delete_all
-  end
-
-  def delete_unattached_herbarium_records
-    ids = (herbarium_records -
-            herbarium_records.joins(:observation_herbarium_records)).
-          map(&:id)
-    HerbariumRecord.where(id: ids).delete_all
-  end
-
-  def delete_unattached_images
-    ids = (images -
-            images.joins(:glossary_term_images) -
-            images.joins(:observation_images) -
-            images.joins(:project_images) -
-            images.joins(:profile_users)).
-          map(&:id)
-    Image.where(id: ids).delete_all
+  # Everything on MO is CC-licensed and worth retaining, so a self-delete
+  # keeps the user's observations -- and their namings, votes, logs, and
+  # images -- in place under the now-disabled, anonymized account rather
+  # than destroying scientific records. This anonymizes the last
+  # identifying field disable_account leaves, the login, to
+  # "inactive_user_<id>" (name is already blank, so login is all that's
+  # displayed). Observation is a REFERENCE_MODEL again, so the retained
+  # observations keep no_references_left? from erasing the account.
+  #
+  # Formerly delete_observations, which -- via a has_many delete_all with
+  # no :dependent -- NULLed user_id on the observations and hard-deleted
+  # their namings/votes/logs, leaving them ownerless and stripped (#4767).
+  def inactivate_user
+    update_column(:login, "inactive_user_#{id}")
   end
 
   REFERENCE_MODELS = [
-    # APIKey,                        (just deleted all of these)
+    # APIKey,                        (cleared by erase_user, not disable)
     Article,
     CollectionNumber,
     Comment,
@@ -1049,7 +957,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     HerbariumRecord,
     ImageVote,
     Image,
-    # Interest,                      (just deleted all of these)
+    # Interest,                      (cleared by erase_user, not disable)
     Location,
     Location::Version,
     LocationDescription,
@@ -1063,9 +971,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     NameDescriptionAuthor,
     NameDescriptionEditor,
     Naming,
-    # NameTracker,                  (just deleted all of these)
+    # NameTracker,                  (cleared by erase_user, not disable)
     # ObservationView,               (okay if these are all that's left)
-    # Observation,                   (just deleted all of these)
+    Observation, # retained on self-delete now (see #inactivate_user)
     Project,
     Publication,
     Sequence,

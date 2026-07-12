@@ -405,205 +405,34 @@ class UserTest < UnitTestCase
     assert_true(rolf.blocked)
   end
 
-  def test_delete_api_keys
-    assert_operator(0, "<", APIKey.where(user: rolf).count)
-    rolf.delete_api_keys
-    assert_equal(0, APIKey.where(user: rolf).count)
+  def test_inactivate_user
+    count = Observation.where(user: rolf).count
+    assert_operator(0, "<", count)
+
+    rolf.inactivate_user
+
+    # Content is retained (everything on MO is CC-licensed, #4767) -- the
+    # old delete_observations would have NULLed these to zero.
+    assert_equal(count, Observation.where(user: rolf).count)
+    # ...and the account is anonymized (login is the only shown identifier).
+    assert_equal("inactive_user_#{rolf.id}", rolf.reload.login)
   end
 
-  def test_delete_interests
-    assert_operator(0, "<", Interest.where(user: junk).count)
-    junk.delete_interests
-    assert_equal(0, Interest.where(user: junk).count)
-  end
+  # A self-delete on an account with content retains everything, blocks
+  # and anonymizes it -- it is NOT erased (#4767).
+  def test_disable_and_anonymize_account_retains_content
+    obs_count = Observation.where(user_id: rolf.id).count
+    key_count = APIKey.where(user_id: rolf.id).count
+    assert_operator(0, "<", obs_count)
 
-  def test_delete_name_trackers
-    assert_operator(0, "<", NameTracker.where(user: rolf).count)
+    rolf.disable_and_anonymize_account
+    rolf.reload
 
-    rolf.delete_name_trackers
-    assert_equal(0, NameTracker.where(user: rolf).count)
-  end
-
-  def test_delete_observations
-    assert_operator(0, "<", Observation.where(user: rolf).count)
-    rolf.delete_observations
-    assert_equal(0, Observation.where(user: rolf).count)
-  end
-
-  def test_delete_private_name_descriptions
-    # All Rolf's descriptions should be "private" but these two:
-    # Created by rolf, but katrina is author and editor.
-    desc1 = name_descriptions(:coprinus_desc)
-    # Created and authored by rolf, but mary is also editor.
-    desc2 = name_descriptions(:coprinus_comatus_desc)
-    assert_operator(2, "<", NameDescription.where(user: rolf).count)
-
-    rolf.delete_private_name_descriptions
-    assert_obj_arrays_equal(NameDescription.where(user: rolf).to_a,
-                            [desc1, desc2], :sort)
-
-    # All of Dick's should be deletable but for this one:
-    # Rolf has one of the versions of this one.
-    desc3 = name_descriptions(:peltigera_desc)
-    assert_operator(0, "<", desc3.versions.where(user_id: rolf.id).count)
-
-    dick.delete_private_name_descriptions
-    assert_equal(1, NameDescription.where(user: dick).count,
-                 "Failed to delete some NameDescriptions created by dick")
-    # Make sure it left Dick's versions of the undeleted description.
-    assert_operator(0, "<", NameDescription::Version.where(
-      user_id: dick.id,
-      name_description_id: desc3.id
-    ).count)
-
-    # But should be able to delete it if Dick owns all the versions.
-    desc3.versions.update_all(user_id: dick.id)
-    dick.delete_private_name_descriptions
-    assert_equal(0, NameDescription.where(user: dick).count,
-                 "Failed to delete last NameDescription created by dick")
-    assert_equal(0, NameDescription::Version.where(
-      name_description_id: desc3.id
-    ).count)
-  end
-
-  def test_delete_private_location_descriptions
-    # Rolf owns this description and all its versions, but let's add Dick
-    # as an editor to make it non-private.
-    albion = location_descriptions(:albion_desc)
-    albion.editors << dick
-    assert_users_equal(rolf, albion.user)
-    assert_operator(1, "<", albion.versions.count)
-    assert(albion.versions.all? { |ver| ver.user_id == rolf.id })
-
-    # Can't delete while Dick is an editor.
-    rolf.delete_private_location_descriptions
-    assert_not_empty(LocationDescription.where(id: albion.id))
-
-    # Let's remove Dick from the editors, but give one of the versions to Dick.
-    albion.editors.clear
-    albion.versions.update_all(user_id: dick.id)
-    rolf.reload.delete_private_location_descriptions
-    assert_not_nil(LocationDescription.find(albion.id))
-
-    # Now give all the versions back to Rolf so we can finally delete it.
-    albion.versions.update_all(user_id: rolf.id)
-    rolf.reload.delete_private_location_descriptions
-    assert_raises(ActiveRecord::RecordNotFound) \
-      { LocationDescription.find(albion.id) }
-    assert_equal(0, LocationDescription::Version.where(
-      location_description_id: albion.id
-    ).count)
-  end
-
-  def test_delete_private_projects
-    # Dick created several projects.  Most have the admin and member groups set
-    # to dick_only, but one uses albion_admins/albion_users, and another uses
-    # article_writers.  The latter group contains users other than Dick, and
-    # therefore that project (news_article_project) should not be deleted.
-
-    # Prove that Dick owns a few projects using only dick_only.
-    dick_only = user_groups(:dick_only)
-    assert_operator(1, "<",
-                    dick.projects_created.where(admin_group: dick_only,
-                                                user_group: dick_only).count,
-                    "dick should own at least two dick-only projects")
-
-    # Prove that Dick owns albion_project and that its admins and users are
-    # all just Dick despite not being his one-user group, dick_only.
-    albion = projects(:albion_project)
-    albion_admins = user_groups(:albion_admins)
-    albion_users = user_groups(:albion_users)
-    assert_users_equal(dick, albion.user)
-    assert_equal(1, albion_admins.users.count)
-    assert_equal(1, albion_users.users.count)
-    assert_users_equal(dick, albion_admins.users.first)
-    assert_users_equal(dick, albion_users.users.first)
-
-    # Prove that Dick owns news_article_project but that the admin and user
-    # is someone else.
-    news_articles = projects(:news_articles_project)
-    article_writers = user_groups(:article_writers)
-    assert_users_equal(dick, news_articles.user)
-    assert_operator(0, "<",
-                    article_writers.users.count { |user| user != dick },
-                    "article_writers should have a user other than dick")
-
-    dick.delete_private_projects
-    assert_empty(Project.where(id: albion.id))
-    assert_not_empty(Project.where(id: news_articles.id))
-  end
-
-  def test_delete_private_species_lists
-    # Delete all of Mary's many lists except those in projects
-    mary_lists = SpeciesList.where(user: mary)
-    before_count = mary_lists.count
-    proj_lists = mary_lists.select { |list| list.projects.any? }
-    proj_count = proj_lists.count
-    assert_operator(proj_count, ">", 0)
-    assert_operator(before_count, ">", proj_count)
-    mary.delete_private_species_lists
-    after_count = SpeciesList.where(user: mary).count
-    assert_operator(before_count, ">", after_count)
-    assert_equal(proj_count, after_count)
-  end
-
-  def test_delete_unattached_collection_numbers
-    num = collection_numbers(:minimal_unknown_coll_num)
-    assert_equal(1, num.observations.count)
-    obs = num.observations.first
-    assert_users_equal(mary, obs.user)
-
-    # Not unattached at this point.
-    mary.delete_unattached_collection_numbers
-    assert_not_nil(CollectionNumber.find(num.id))
-
-    # This should orphan but not delete the collection number.
-    obs.destroy
-    assert_not_nil(CollectionNumber.find(num.id))
-
-    # Should get deleted now.
-    mary.delete_unattached_collection_numbers
-    assert_empty(CollectionNumber.where(id: num.id))
-  end
-
-  def test_delete_unattached_herbarium_records
-    rec = herbarium_records(:interesting_unknown)
-    assert_users_equal(rolf, rec.user)
-    assert_equal(2, rec.observations.count)
-    obs1 = observations(:minimal_unknown_obs)
-    obs2 = observations(:detailed_unknown_obs)
-    assert_users_equal(mary, obs1.user)
-    assert(obs1.herbarium_records.include?(rec))
-    assert(obs2.herbarium_records.include?(rec))
-
-    # Used by two observations at first.
-    rolf.delete_unattached_herbarium_records
-    assert_not_nil(HerbariumRecord.find(rec.id))
-
-    # Still used by one observation.
-    obs1.destroy
-    rolf.reload.delete_unattached_herbarium_records
-    assert_not_nil(HerbariumRecord.find(rec.id))
-
-    # Now unattached and deletable.
-    obs2.destroy
-    rolf.reload.delete_unattached_herbarium_records
-    assert_raises(ActiveRecord::RecordNotFound) \
-      { HerbariumRecord.find(rec.id) }
-  end
-
-  def test_delete_unattached_images
-    # This is supposedly unused by anything.
-    img1 = images(:convex_image)
-    assert_users_equal(rolf, img1.user)
-
-    # This is used by something.
-    img2 = images(:agaricus_campestris_image)
-    assert_users_equal(rolf, img2.user)
-
-    rolf.delete_unattached_images
-    assert_raises(ActiveRecord::RecordNotFound) { Image.find(img1.id) }
-    assert_not_nil(Image.find(img2.id))
+    assert(User.exists?(rolf.id), "account with content must be retained")
+    assert(rolf.blocked)
+    assert_equal("inactive_user_#{rolf.id}", rolf.login)
+    assert_equal(obs_count, Observation.where(user_id: rolf.id).count)
+    assert_equal(key_count, APIKey.where(user_id: rolf.id).count)
   end
 
   def test_no_references_left
