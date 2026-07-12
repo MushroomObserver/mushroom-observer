@@ -34,3 +34,6 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at 12:32am
+  refresh_name_lister_cache:
+    class: RefreshNameListerCacheJob
+    schedule: every day at 3:33am
