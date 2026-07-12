@@ -28,10 +28,20 @@ require("redcloth")
 #  textilize_without_paragraph:: Parse the first paragraph of the given string.
 #
 class Textile < String
-  @@name_lookup     = {}
-  @@last_species    = nil
-  @@last_subspecies = nil
-  @@last_variety    = nil
+  # Name-lookup abbreviation cache. Shared within one request/thread,
+  # isolated across concurrent requests/threads (`Thread.current[...]`,
+  # matching the pattern in `Observation` - see its per-request change
+  # tracking) - NOT plain instance variables. `register_name` primes
+  # this once per page; the many separate `String#t`/`#tl`/`#tp`/`#tpl`
+  # calls that follow (each a fresh `Textile.new(...)`) all need to
+  # read what it primed within the same request.
+  THREAD_KEYS = {
+    name_lookup: :mo_textile_name_lookup,
+    last_species: :mo_textile_last_species,
+    last_subspecies: :mo_textile_last_subspecies,
+    last_variety: :mo_textile_last_variety
+  }.freeze
+  private_constant(:THREAD_KEYS)
 
   URL_TRUNCATION_LENGTH = 60 unless defined?(URI_TRUNCATION_LENGTH)
   BRACKETED_YEAR = /\[(\d\d\d\d)\]/
@@ -148,53 +158,75 @@ class Textile < String
   end
 
   def self.private_register_name(name, rank)
-    @@name_lookup ||= {}
-    @@name_lookup[Regexp.last_match(1)] = name.split.first if name =~ /([A-Z])/
+    name_lookup[Regexp.last_match(1)] = name.split.first if name =~ /([A-Z])/
     case rank
-    when "Species"
-      @@last_species    = name
-      @@last_subspecies = nil
-      @@last_variety    = nil
-    when "Subspecies"
-      @@last_species    = name.sub(/ ssp\. .*/, "")
-      @@last_subspecies = name
-      @@last_variety    = nil
-    when "Variety"
-      @@last_species    = name.sub(/ (ssp|var)\. .*/, "")
-      @@last_subspecies = name.sub(/ var\. .*/, "")
-      @@last_variety    = name
+    when "Species" then register_species(name)
+    when "Subspecies" then register_subspecies(name)
+    when "Variety" then register_variety(name)
     end
   end
 
+  def self.register_species(name)
+    self.last_species    = name
+    self.last_subspecies = nil
+    self.last_variety    = nil
+  end
+
+  def self.register_subspecies(name)
+    self.last_species    = name.sub(/ ssp\. .*/, "")
+    self.last_subspecies = name
+    self.last_variety    = nil
+  end
+
+  def self.register_variety(name)
+    self.last_species    = name.sub(/ (ssp|var)\. .*/, "")
+    self.last_subspecies = name.sub(/ var\. .*/, "")
+    self.last_variety    = name
+  end
+
+  private_class_method :register_species, :register_subspecies,
+                       :register_variety
+
   # Give unit test access to these internals.
   def self.name_lookup
-    @@name_lookup
+    Thread.current[THREAD_KEYS[:name_lookup]] ||= {}
   end
 
   def self.last_species
-    @@last_species
+    Thread.current[THREAD_KEYS[:last_species]]
+  end
+
+  def self.last_species=(val)
+    Thread.current[THREAD_KEYS[:last_species]] = val
   end
 
   def self.last_subspecies
-    @@last_subspecies
+    Thread.current[THREAD_KEYS[:last_subspecies]]
+  end
+
+  def self.last_subspecies=(val)
+    Thread.current[THREAD_KEYS[:last_subspecies]] = val
   end
 
   def self.last_variety
-    @@last_variety
+    Thread.current[THREAD_KEYS[:last_variety]]
+  end
+
+  def self.last_variety=(val)
+    Thread.current[THREAD_KEYS[:last_variety]] = val
   end
 
   # Report the current size of the name lookup cache.
   def self.textile_name_size
-    @@name_lookup ||= {}
-    @@name_lookup.size
+    name_lookup.size
   end
 
   # Flush the name lookup cache.
   def self.clear_textile_cache
-    @@name_lookup     = {}
-    @@last_species    = nil
-    @@last_subspecies = nil
-    @@last_variety    = nil
+    Thread.current[THREAD_KEYS[:name_lookup]] = {}
+    self.last_species    = nil
+    self.last_subspecies = nil
+    self.last_variety    = nil
   end
 
   ##############################################################################
@@ -246,8 +278,6 @@ class Textile < String
   private_constant(:MARKUP_TO_TAG, :NON_NAME_LINK_PATTERN, :NAME_LINK_PATTERN)
   # Convert __Names__ to links in a textile string.
   def convert_name_links_to_tagged_objects!
-    @@name_lookup ||= {}
-
     # Look for __Name__ turn into "Name":name_id.
     # Look for "Name":name and fill in id.
     # Look for "Name":name_id and make sure id matches name just
@@ -285,7 +315,7 @@ class Textile < String
   # This will be sent to lookup_name.
   def expand_genus_abbreviation(str)
     str.sub(/^([A-Z])\.? +(?=["a-z])/) do |x|
-      (n = @@name_lookup[Regexp.last_match(1)]) ? "#{n} " : x
+      (n = Textile.name_lookup[Regexp.last_match(1)]) ? "#{n} " : x
     end
   end
 
@@ -305,24 +335,24 @@ class Textile < String
   end
 
   def expand_subspecies(str)
-    @@last_species ? "#{@@last_species} subsp. #{str}" : ""
+    Textile.last_species ? "#{Textile.last_species} subsp. #{str}" : ""
   end
 
   def expand_variety(str)
-    if @@last_subspecies
-      "#{@@last_subspecies} var. #{str}"
+    if Textile.last_subspecies
+      "#{Textile.last_subspecies} var. #{str}"
     else
-      @@last_species ? "#{@@last_species} var. #{str}" : ""
+      Textile.last_species ? "#{Textile.last_species} var. #{str}" : ""
     end
   end
 
   def expand_form(str)
-    if @@last_variety
-      "#{@@last_variety} f. #{str}"
-    elsif @@last_subspecies
-      "#{@@last_subspecies} f. #{str}"
+    if Textile.last_variety
+      "#{Textile.last_variety} f. #{str}"
+    elsif Textile.last_subspecies
+      "#{Textile.last_subspecies} f. #{str}"
     else
-      @@last_species ? "#{@@last_species} f. #{str}" : ""
+      Textile.last_species ? "#{Textile.last_species} f. #{str}" : ""
     end
   end
 
