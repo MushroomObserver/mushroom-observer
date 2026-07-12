@@ -62,7 +62,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_collapsed_help_text
-      CollapseDiv(id: help_id) do
+      Collapsible(id: help_id) do
         Help(well: true) { render(help_slot) }
       end
     end

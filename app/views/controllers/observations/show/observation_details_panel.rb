@@ -213,7 +213,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     return if notes == ::Observation.no_notes
 
     div(class: "obs-notes textile", id: "observation_notes") do
-      ::Textile.clear_textile_cache
+      # ApplicationController resets the per-request Textile cache
+      # before every action; this only needs to prime it.
       ::Textile.register_name(@obs.name)
       trusted_html("#{:NOTES.t}:".t)
       div(class: "indent") { render_note_values(notes) }

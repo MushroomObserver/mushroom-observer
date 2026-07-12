@@ -8,7 +8,7 @@ require("test_helper")
 # Content methods (render_footer_detail, render_footer_time,
 # render_user_detail) are tested by creating a minimal anonymous
 # Phlex component that includes the module and calls the method
-# directly in view_template — same technique as collapse_div_test.rb.
+# directly in view_template — same technique as collapsible_test.rb.
 #
 # Slot-level methods (render_log_footer, render_identify_footer,
 # render_project_admin_footer) are tested through a full Box render

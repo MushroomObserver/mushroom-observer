@@ -162,6 +162,11 @@ class IpStats
         File.exist?(MO.okay_ips_file) &&
         @blocked_ips_time >= File.mtime(MO.blocked_ips_file) &&
         @blocked_ips_time >= File.mtime(MO.okay_ips_file)
+    rescue Errno::ENOENT
+      # A file vanished between File.exist? and File.mtime (e.g. mid-rewrite).
+      # Treat as stale so the caller repopulates instead of raising on a
+      # per-request hot path.
+      false
     end
 
     def populate_blocked_ips
@@ -208,7 +213,10 @@ class IpStats
           end
         end
       end
-      File.delete(file1)
+      # File.rename atomically replaces file1 (rename(2) overwrites on the
+      # same filesystem), so file1 is never absent. Do NOT File.delete(file1)
+      # first -- that left a window where every request's blocked_ips_current?
+      # check raised Errno::ENOENT if it hit File.mtime mid-rewrite.
       File.rename(file2, file1)
     end
   end

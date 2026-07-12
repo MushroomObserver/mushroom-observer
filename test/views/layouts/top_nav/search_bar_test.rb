@@ -31,6 +31,10 @@ class Views::Layouts::TopNav
                   text: :search_bar_help.t.as_displayed)
       assert_no_html(html,
                      "a[data-search-type-target='helpToggle'].d-none")
+      # Rendered via CollapseToggle's button:/size: kwarg, not via raw
+      # btn/btn-link strings — see BAR_TOGGLE_CLASSES.
+      assert_html(html,
+                  "a[data-search-type-target='helpToggle'].btn.btn-link")
     end
 
     def test_help_toggle_hidden_when_type_has_no_help
@@ -57,6 +61,8 @@ class Views::Layouts::TopNav
                   text: :search_bar_more_options.l.as_displayed)
       assert_no_html(html,
                      "a[data-search-type-target='formToggle'].d-none")
+      assert_html(html,
+                  "a[data-search-type-target='formToggle'].btn.btn-link")
     end
 
     def test_form_toggle_hidden_when_type_has_no_form

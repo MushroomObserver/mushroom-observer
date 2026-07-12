@@ -23,7 +23,7 @@ export default class extends Controller {
 
     // Check file type - folders have empty type, reject non-images
     if (!file.type || !file.type.startsWith('image/')) {
-      alert("Please select an image file (JPG, PNG, GIF, etc.)");
+      alert("Please select an image file.");
       this.inputTarget.value = "";
       return;
     }

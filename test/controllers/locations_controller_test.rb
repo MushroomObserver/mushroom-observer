@@ -3,35 +3,12 @@
 require("test_helper")
 
 class LocationsControllerTest < FunctionalTestCase
-  # EMAIL TESTS, currently in Names, Locations and their Descriptions
-  # Has to be defined on class itself, include doesn't seem to work
-  def self.report_email(email)
-    @@emails ||= []
-    @@emails << email
-  end
-
   def setup
     @new_pts  = 10
     @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
-    @@emails = []
     super
-  end
-
-  def assert_email_generated
-    assert_not_empty(@@emails, "Was expecting an email notification.")
-  ensure
-    @@emails = []
-  end
-  private :assert_email_generated
-
-  def assert_no_emails
-    msg = @@emails.join("\n")
-    assert_empty(@@emails,
-                 "Wasn't expecting any email notifications; got:\n#{msg}")
-  ensure
-    @@emails = []
   end
 
   # Init params based on existing location.
@@ -1008,12 +985,15 @@ class LocationsControllerTest < FunctionalTestCase
     params = update_params_from_loc(loc)
 
     params[:location][:display_name] = trivial_change
-    put(:update, params: params)
-    assert_no_emails
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     params[:location][:display_name] = nontrivial_change
-    put(:update, params: params)
-    assert_email_generated
+    assert_enqueued_email_with(WebmasterMailer, :build,
+                               args: ->(_) { true }) do
+      put(:update, params: params)
+    end
   end
 
   # Burbank has observations so it stays.

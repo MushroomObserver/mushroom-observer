@@ -469,6 +469,20 @@ class LocationTest < UnitTestCase
     assert_true(Location.is_unknown?("Anywhere"))
   end
 
+  # official_unknown always reads the English word list from i18n,
+  # regardless of the viewer's current locale -- it's a fixed :en
+  # lookup (see Location.official_unknown), not derived from
+  # I18n.locale like :unknown_locations.l is.
+  def test_official_unknown_is_locale_independent
+    english_words = Location.official_unknown
+    assert_includes(english_words, "Unknown")
+    assert_includes(english_words, "Earth")
+
+    I18n.with_locale(:es) do
+      assert_equal(english_words, Location.official_unknown)
+    end
+  end
+
   def test_unknown2
     loc1 = locations(:unknown_location)
     loc2 = Location.unknown

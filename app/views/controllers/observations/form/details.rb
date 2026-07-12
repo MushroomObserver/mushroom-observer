@@ -165,10 +165,10 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_geolocation_fields
-    CollapseDiv(
+    Collapsible(
       id: "observation_geolocation",
       expanded: @observation.lat.present?,
-      attributes: { data: { form_exif_target: "collapseFields" } }
+      data: { form_exif_target: "collapseFields" }
     ) do
       p { :form_observations_click_point.l }
       render_lat_lng_alt_row
