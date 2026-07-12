@@ -43,16 +43,20 @@ class ApplicationJob < ActiveJob::Base
   # Route review-worthy job output to the #alerts Slack channel (in
   # addition to the durable job.log record). Reuses the exception_
   # notification pipeline via a synthetic JobAlert, so it inherits the
-  # same production gating and de-duplication as crash notifications
-  # without conflating with them. A no-op for Slack outside production
-  # (no notifiers registered) - the job.log line still lands.
+  # same gating and de-duplication as crash notifications without
+  # conflating with them. Notification happens only when ExceptionNotifier
+  # has a registered notifier (production, or wherever NOTIFY_EXCEPTIONS
+  # opts in - see config/initializers/exception_notification.rb);
+  # otherwise it is log-only, and the job.log line still lands.
+  # `job`/`job_id` are set last so caller context can't clobber the
+  # alert's own identity.
   def alert(message, **context)
     log(message)
     return unless ExceptionNotifier.notifiers.any?
 
     ExceptionNotifier.notify_exception(
       JobAlert.new(message),
-      data: { job: self.class.name, job_id: job_id, **context }
+      data: { **context, job: self.class.name, job_id: job_id }
     )
   end
 

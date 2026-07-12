@@ -6,4 +6,5 @@
 # should look at this" summary reuses the same Slack pipeline (and
 # de-duplication) as real crashes, while staying visibly distinct from
 # them in the channel ("A JobAlert occurred ...").
-class JobAlert < StandardError; end
+class JobAlert < StandardError
+end
