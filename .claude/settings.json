@@ -16,6 +16,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "test -x .claude/hooks/block_pii_in_gh.sh && exec .claude/hooks/block_pii_in_gh.sh || exit 0",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "test -x .claude/hooks/check_branch_up_to_date.sh && exec .claude/hooks/check_branch_up_to_date.sh || exit 0",
             "timeout": 30
           },
