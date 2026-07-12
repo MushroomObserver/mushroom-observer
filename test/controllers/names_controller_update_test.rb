@@ -194,9 +194,11 @@ class NamesControllerUpdateTest < FunctionalTestCase
     # This does not generate a new_admin_emails_name_change_requests_path email,
     # both because this name has no dependents,
     # and because the email form requires a POST.
-    assert_enqueued_email_with(WebmasterMailer, :build,
-                               args: ->(_) { true }) do
-      put(:update, params: params)
+    assert_enqueued_emails(1) do
+      assert_enqueued_email_with(WebmasterMailer, :build,
+                                 args: ->(_) { true }) do
+        put(:update, params: params)
+      end
     end
     assert_flash_success
     assert_redirected_to(name_path(name.id))
