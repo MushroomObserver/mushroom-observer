@@ -117,7 +117,7 @@ class CheckForBrokenReferencesJob < ApplicationJob
 
   def apply_action(model, column, query, ids, action)
     case action
-    when :alert then alert_broken(model, column, ids)
+    when :alert then alert_broken(model, column, query, ids)
     when :delete then delete_broken(model, column, query, ids)
     when :nil then nullify_broken(model, column, query, ids)
     when :zero then zero_broken(model, column, query, ids)
@@ -125,13 +125,16 @@ class CheckForBrokenReferencesJob < ApplicationJob
     end
   end
 
-  # Logs a count + bounded sample rather than the full id list - :alert
-  # rows should be rare (something's wrong upstream), but an unbounded
-  # `ids.inspect` would blow up log/job.log if that assumption is ever
-  # wrong (e.g. after a bad data migration).
-  def alert_broken(model, column, ids)
-    log("ALERT!! #{model.table_name}.#{column}: #{ids.size} bad row(s), " \
-        "e.g. #{ids.first(10).inspect}")
+  # Logs a count + a bounded [id, column] sample rather than the full list.
+  # Each pair is an offending row's primary key and its dangling #{column}
+  # value, so the sample can't be misread as a list of FK values. :alert
+  # rows should be rare (something's wrong upstream), but an unbounded pluck
+  # would blow up log/job.log if that ever stops holding (e.g. after a bad
+  # data migration).
+  def alert_broken(model, column, query, ids)
+    sample = query.limit(10).pluck(:id, column)
+    log("ALERT!! #{ids.size} #{model.table_name} row(s) with a dangling " \
+        "#{column} - [id, #{column}]: #{sample.inspect}")
   end
 
   def delete_broken(model, column, query, ids)
