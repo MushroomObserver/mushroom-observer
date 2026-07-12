@@ -136,6 +136,9 @@ See `.claude/rules/testing.md` for test structure and component test patterns.
 See `.claude/rules/sweeps.md` for PR-scope guidance on broad sweeps
 ("remove X from all models," "convert every Y") — don't self-limit
 scope below what the sweep already declared.
+See `.claude/rules/copilot_review_comments.md` for replying on the PR
+thread when a Copilot review finding is addressed, so later review
+passes don't re-verify it from scratch.
 See `.claude/rules/no_raw_sql.md` — no raw SQL strings anywhere in the
 app; use ActiveRecord/Arel instead.
 
