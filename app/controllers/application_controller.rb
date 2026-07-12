@@ -54,6 +54,7 @@ class ApplicationController < ActionController::Base
   before_action :set_timezone
   before_action :track_translations
   before_action :apply_user_theme_change
+  before_action :reset_user_group_cache
 
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
@@ -126,6 +127,15 @@ class ApplicationController < ActionController::Base
   def apply_user_theme_change
     change = params[:user_theme].to_s
     change_theme_to(change) if change.present?
+  end
+
+  # UserGroup.all_users/reviewers/one_user memoize per request
+  # (Thread.current[...], not a class ivar) -- reset it here so a
+  # request that never touches these doesn't inherit stale groups
+  # left behind by whatever request ran on this same pooled thread
+  # before it. See UserGroup::THREAD_KEYS.
+  def reset_user_group_cache
+    UserGroup.reset_request_cache
   end
 
   def change_theme_to(change)

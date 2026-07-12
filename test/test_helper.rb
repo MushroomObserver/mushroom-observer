@@ -199,6 +199,11 @@ module ActiveSupport
       # rubocop:enable Rails/TimeZoneAssignment
       clear_logs unless defined?(@@cleared_logs)
       Symbol.missing_tags = []
+      # Functional/integration tests reset this via ApplicationController's
+      # own before_action on every get/post; this covers unit tests that
+      # call UserGroup.all_users/reviewers/one_user directly, with no
+      # request to trigger that reset.
+      UserGroup.reset_request_cache
     end
 
     # Standard teardown to run after every test.  Just makes sure any
