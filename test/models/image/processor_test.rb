@@ -248,6 +248,26 @@ class Image::ProcessorTest < UnitTestCase
     assert_not(in_situ.reload.transferred)
   end
 
+  # Regression test: a failed GPS strip leaves #process's early return
+  # (see test_process_strip_gps_failure_does_not_transfer_files) with
+  # only "orig" present locally -- no derivatives, since make_file_sizes
+  # never ran. retransfer_images must not treat that as "just needs a
+  # retry" and push the (possibly still GPS-tainted) "orig" file alone;
+  # it must skip the image entirely until #process actually completes.
+  def test_retransfer_images_skips_partially_processed_image
+    in_situ = images(:in_situ_image)
+    # Only "orig" exists -- exactly what a failed GPS strip leaves behind.
+    File.write("#{local_root}/orig/#{in_situ.id}.jpg", "still has GPS data")
+
+    Image::Processor.retransfer_images
+
+    assert_not(
+      File.exist?("#{remote_server_path(1)}/orig/#{in_situ.id}.jpg"),
+      "Must not transfer a partially-processed image's files anywhere"
+    )
+    assert_not(in_situ.reload.transferred)
+  end
+
   def test_requires_image
     assert_raises(RuntimeError) { Image::Processor.new(image: nil) }
   end

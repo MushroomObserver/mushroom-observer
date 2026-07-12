@@ -123,10 +123,27 @@ class Image
     def self.retransfer_images
       Image.where(transferred: false).find_each do |image|
         processor = new(image: image)
+        next unless processor.locally_processed?
+
         processor.transfer_files_to_image_servers
         if processor.transferred_any && processor.errors.empty?
           processor.mark_image_record_transferred_and_touch_obs
         end
+      end
+    end
+
+    # True once every expected local derivative exists -- i.e. #process
+    # actually finished (make_file_sizes ran) rather than aborting early
+    # (e.g. a failed GPS strip, see #process). This is a safety-net
+    # retransfer, not a full #process retry: it must never push a
+    # partially-processed image. A missing derivative here means
+    # #process never reached make_file_sizes, so the "orig" file may
+    # still be untouched/GPS-tainted -- blindly transferring whatever
+    # subset of local files DOES exist could leak it via "orig" alone,
+    # even though the transfer itself would report success.
+    def locally_processed?
+      Image::URL::SUBDIRECTORIES.each_key.all? do |size|
+        File.exist?(send(:"#{size}_filepath"))
       end
     end
 
