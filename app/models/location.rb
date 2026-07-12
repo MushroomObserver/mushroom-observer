@@ -329,17 +329,23 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "unknown", "earth", "world", etc.
   #
   def self.names_for_unknown
-    @@names_for_unknown ||= official_unknown
-    (@@names_for_unknown + :unknown_locations.l.split(/, */)).uniq
+    (official_unknown + :unknown_locations.l.split(/, */)).uniq
   end
 
+  # We always include the English words for "unknown", even when
+  # viewing the site in another language, so that e.g. "Unknown"
+  # (typed by an English-speaking user long ago, or hardcoded
+  # somewhere) still matches regardless of the viewer's locale.
+  #
+  # This is static data (en.txt's `unknown_locations` key: "Unknown,
+  # Earth, World, Worldwide, Anywhere, Everywhere") that's already
+  # loaded in memory by I18n -- the same source :unknown_locations.l
+  # above reads for the current locale, just pinned to :en here
+  # instead. No DB round-trip (Language.official.translation_strings),
+  # so nothing worth caching.
   def self.official_unknown
-    # yikes! need to make sure we always include the English words
-    # for "unknown", even when viewing the site in another language
-    Language.official.translation_strings.find_by(tag: "unknown_locations").
-      text.split(/, */)
-  rescue StandardError
-    []
+    I18n.t("#{MO.locale_namespace}.unknown_locations", locale: :en).
+      split(/, */)
   end
 
   # Get an instance of the Location whose name means "unknown".

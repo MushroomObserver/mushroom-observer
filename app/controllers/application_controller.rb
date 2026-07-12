@@ -55,6 +55,7 @@ class ApplicationController < ActionController::Base
   before_action :track_translations
   before_action :apply_user_theme_change
   before_action :reset_user_group_cache
+  before_action :reset_textile_cache
 
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
@@ -136,6 +137,15 @@ class ApplicationController < ActionController::Base
   # before it. See UserGroup::THREAD_KEYS.
   def reset_user_group_cache
     UserGroup.reset_request_cache
+  end
+
+  # Textile::THREAD_KEYS's name-lookup cache is thread-local -- isolated
+  # across concurrent requests, but not auto-reset between sequential
+  # requests pooled onto the same thread. Without this, a request that
+  # primes the cache (Textile.register_name) leaks its abbreviations
+  # into whatever request runs next on that same thread. See #3589.
+  def reset_textile_cache
+    Textile.clear_textile_cache
   end
 
   def change_theme_to(change)
