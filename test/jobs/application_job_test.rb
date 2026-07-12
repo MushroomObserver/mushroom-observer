@@ -24,6 +24,14 @@ class ApplicationJobTest < ActiveJob::TestCase
     end
   end
 
+  # Minimal job that emits a review-worthy alert, to exercise
+  # ApplicationJob#alert.
+  class AlertingJob < ApplicationJob
+    def perform
+      alert("review this", extra: "ctx")
+    end
+  end
+
   # Regression test for #4741/#4772: mailer jobs never run through
   # ApplicationController's before_action, so without ApplicationJob's
   # own reset, a job dispatched to a Solid Queue worker thread right
@@ -64,5 +72,37 @@ class ApplicationJobTest < ActiveJob::TestCase
       end
     end
     assert_not(notified, "Should not notify when no notifier is registered")
+  end
+
+  # #alert routes review-worthy output to the notifier (Slack in prod) as a
+  # JobAlert carrying the job's identity, when alerting is active.
+  def test_alert_notifies_with_job_alert_when_alerting_active
+    reported = nil
+    opts_seen = nil
+    ExceptionNotifier.stub(:notifiers, [:slack]) do
+      ExceptionNotifier.stub(:notify_exception,
+                             lambda { |exception, **opts|
+                               reported = exception
+                               opts_seen = opts
+                             }) do
+        AlertingJob.perform_now
+      end
+    end
+    assert_instance_of(JobAlert, reported)
+    assert_equal("review this", reported.message)
+    assert_equal("ApplicationJobTest::AlertingJob", opts_seen[:data][:job])
+    assert_equal("ctx", opts_seen[:data][:extra])
+    assert(opts_seen[:data].key?(:job_id), "alert should carry the job_id")
+  end
+
+  # With no notifier registered, #alert stays log-only and does not notify.
+  def test_alert_is_log_only_when_alerting_off
+    notified = false
+    ExceptionNotifier.stub(:notifiers, []) do
+      ExceptionNotifier.stub(:notify_exception, ->(*) { notified = true }) do
+        AlertingJob.perform_now
+      end
+    end
+    assert_not(notified, "alert must not notify when no notifier registered")
   end
 end
