@@ -99,6 +99,44 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
     CheckForBrokenReferencesJob.perform_now(verbose: true)
   end
 
+  # A dangling :alert reference produces exactly one summary alert for the
+  # whole run, naming the offending table.column.
+  def test_emits_one_review_alert_for_dangling_alert_reference
+    coll_num = collection_numbers(:minimal_unknown_coll_num)
+    coll_num.update_column(:user_id, DANGLING_ID)
+
+    alerts = capture_alerts { CheckForBrokenReferencesJob.perform_now }
+
+    assert_equal(1, alerts.size, "expected exactly one summary alert per run")
+    assert_instance_of(JobAlert, alerts.first)
+    assert_includes(alerts.first.message, "collection_numbers.user_id")
+  end
+
+  # emit_review_summary is the "at most one alert per run" choke point:
+  # nothing to review => no alert, so a quiet week stays silent.
+  def test_no_alert_when_run_finds_nothing_to_review
+    job = CheckForBrokenReferencesJob.new
+    job.instance_variable_set(:@review_findings, [])
+
+    alerts = capture_alerts { job.send(:emit_review_summary) }
+
+    assert_empty(alerts, "a run with no findings should emit no alert")
+  end
+
+  # Multiple findings in one run collapse into a single summary alert.
+  def test_multiple_findings_collapse_into_one_summary_alert
+    job = CheckForBrokenReferencesJob.new
+    job.instance_variable_set(:@review_findings,
+                              ["dangling foo.bar", "STALE CHECK: Baz.qux"])
+
+    alerts = capture_alerts { job.send(:emit_review_summary) }
+
+    assert_equal(1, alerts.size)
+    assert_includes(alerts.first.message, "2 reference issue")
+    assert_includes(alerts.first.message, "dangling foo.bar")
+    assert_includes(alerts.first.message, "STALE CHECK: Baz.qux")
+  end
+
   # Guards against model drift: every belongs_to must be covered by
   # Checks::MONOMORPHIC/POLYMORPHIC (or be a typed view of a polymorphic
   # target, which discovery skips). A new/renamed/removed association that
@@ -118,5 +156,20 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
     assert_empty(logged.grep(/STALE CHECK/),
                  "Check list names associations that no longer exist:\n" \
                  "#{logged.grep(/STALE CHECK/).join("\n")}")
+  end
+
+  private
+
+  # Records the exceptions handed to the #alerts pipeline while alerting is
+  # forced active, so tests can assert on what a run would post to Slack.
+  def capture_alerts(&block)
+    alerts = []
+    ExceptionNotifier.stub(:notifiers, [:slack]) do
+      ExceptionNotifier.stub(:notify_exception,
+                             lambda { |exception, **_o|
+                               alerts << exception
+                             }, &block)
+    end
+    alerts
   end
 end

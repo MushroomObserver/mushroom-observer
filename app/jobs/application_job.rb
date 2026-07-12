@@ -40,6 +40,22 @@ class ApplicationJob < ActiveJob::Base
     end
   end
 
+  # Route review-worthy job output to the #alerts Slack channel (in
+  # addition to the durable job.log record). Reuses the exception_
+  # notification pipeline via a synthetic JobAlert, so it inherits the
+  # same production gating and de-duplication as crash notifications
+  # without conflating with them. A no-op for Slack outside production
+  # (no notifiers registered) - the job.log line still lands.
+  def alert(message, **context)
+    log(message)
+    return unless ExceptionNotifier.notifiers.any?
+
+    ExceptionNotifier.notify_exception(
+      JobAlert.new(message),
+      data: { job: self.class.name, job_id: job_id, **context }
+    )
+  end
+
   private
 
   def job_log_path

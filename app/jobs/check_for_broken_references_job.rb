@@ -22,14 +22,34 @@ class CheckForBrokenReferencesJob < ApplicationJob
   def perform(dry_run: false, verbose: false)
     @dry_run = dry_run
     @verbose = verbose
+    @review_findings = []
     @reflections = discover_belongs_to_reflections
 
     Checks::MONOMORPHIC.each { |args| check_monomorphic(*args) }
     Checks::POLYMORPHIC.each { |args| check_polymorphic(*args) }
     report_missing_reflections
+    emit_review_summary
   end
 
   private
+
+  # Everything routed here (dangling :alert references, stale checks,
+  # missing reflections) is "a human should look at this" - collected
+  # across the run and delivered as a single #alerts summary. Routine
+  # :delete/:nil/:zero cleanups stay in job.log only.
+  def note_for_review(line)
+    (@review_findings ||= []) << line
+  end
+
+  # At most one alert per run, and none when the run is clean - so a
+  # quiet week is silent rather than a stream of "found 0 problems".
+  def emit_review_summary
+    return if @review_findings.empty?
+
+    count = @review_findings.size
+    alert("found #{count} reference issue(s) needing review:\n- " \
+          "#{@review_findings.join("\n- ")}")
+  end
 
   def discover_belongs_to_reflections
     reflections = {}
@@ -95,6 +115,7 @@ class CheckForBrokenReferencesJob < ApplicationJob
     log("STALE CHECK: #{key} is declared in CheckForBrokenReferencesJob::" \
         "Checks, but no such belongs_to association exists anymore. " \
         "Update or remove that entry.")
+    note_for_review("STALE CHECK: #{key} (declared, but no such belongs_to)")
   end
 
   # `model` may be a `::Version` class (e.g. `Name::Version`), which
@@ -135,6 +156,8 @@ class CheckForBrokenReferencesJob < ApplicationJob
     sample = query.limit(10).pluck(:id, column)
     log("ALERT!! #{ids.size} #{model.table_name} row(s) with a dangling " \
         "#{column} - [id, #{column}]: #{sample.inspect}")
+    note_for_review("#{ids.size} #{model.table_name}.#{column} dangling " \
+                    "(e.g. #{sample.first(3).inspect})")
   end
 
   def delete_broken(model, column, query, ids)
@@ -198,7 +221,10 @@ class CheckForBrokenReferencesJob < ApplicationJob
 
   def report_missing_reflections
     @reflections.each do |key, val|
-      log("MISSING REFLECTION #{key}") if val != :done
+      next if val == :done
+
+      log("MISSING REFLECTION #{key}")
+      note_for_review("MISSING REFLECTION: #{key}")
     end
   end
 end
