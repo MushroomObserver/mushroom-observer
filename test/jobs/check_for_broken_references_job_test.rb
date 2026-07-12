@@ -98,4 +98,25 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
   def test_perform_runs_end_to_end_without_error
     CheckForBrokenReferencesJob.perform_now(verbose: true)
   end
+
+  # Guards against model drift: every belongs_to must be covered by
+  # Checks::MONOMORPHIC/POLYMORPHIC (or be a typed view of a polymorphic
+  # target, which discovery skips). A new/renamed/removed association that
+  # isn't reflected in the lists should fail here, not crash the production
+  # run - which is exactly what happened when ExternalLink/FieldSlip dropped
+  # their observation_id.
+  def test_every_belongs_to_is_covered_or_stale_free
+    job = CheckForBrokenReferencesJob.new
+    logged = []
+    job.define_singleton_method(:log) { |msg| logged << msg }
+    job.perform(dry_run: true)
+
+    assert_empty(logged.grep(/MISSING REFLECTION/),
+                 "Uncovered belongs_to - add to " \
+                 "CheckForBrokenReferencesJob::Checks:\n" \
+                 "#{logged.grep(/MISSING REFLECTION/).join("\n")}")
+    assert_empty(logged.grep(/STALE CHECK/),
+                 "Check list names associations that no longer exist:\n" \
+                 "#{logged.grep(/STALE CHECK/).join("\n")}")
+  end
 end

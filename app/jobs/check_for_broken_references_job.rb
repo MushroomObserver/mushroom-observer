@@ -39,11 +39,27 @@ class CheckForBrokenReferencesJob < ApplicationJob
       model = model_from_file(path)
       next unless model
 
+      poly_fks = polymorphic_foreign_keys(model)
       model.reflect_on_all_associations(:belongs_to).each do |reflection|
+        next if typed_polymorphic_view?(reflection, poly_fks)
+
         reflections["#{model.name}.#{reflection.name}"] = :need
       end
     end
     reflections
+  end
+
+  def polymorphic_foreign_keys(model)
+    model.reflect_on_all_associations(:belongs_to).
+      select(&:polymorphic?).map(&:foreign_key)
+  end
+
+  # A scoped belongs_to that reuses a polymorphic association's foreign key -
+  # e.g. Comment#location, defined on `target_id` to allow typed joins - is
+  # just a typed view of the `target` association, already validated by the
+  # polymorphic check. Don't flag it as a separately-uncovered reflection.
+  def typed_polymorphic_view?(reflection, poly_fks)
+    !reflection.polymorphic? && poly_fks.include?(reflection.foreign_key)
   end
 
   def model_from_file(path)
@@ -164,7 +180,7 @@ class CheckForBrokenReferencesJob < ApplicationJob
   def delete_broken_polymorphic(model, ref_model, query, ids)
     query.delete_all unless @dry_run
     log("DELETING #{ids.count} #{model.name.pluralize(ids.count)} " \
-        "whose target #{ref_model.name} doesn't exist")
+        "whose target #{ref_model.name} doesn't exist#{dry_run_note}")
   end
 
   def polymorphic_target?(model)
