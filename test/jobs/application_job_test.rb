@@ -95,6 +95,24 @@ class ApplicationJobTest < ActiveJob::TestCase
     assert(opts_seen[:data].key?(:job_id), "alert should carry the job_id")
   end
 
+  # A synthetic JobAlert has no real backtrace, so error_grouping would
+  # collide all job alerts on one nil-backtrace key. #alert anchors a
+  # backtrace frame to the message: distinct messages get distinct anchors
+  # (separate de-dup groups), identical messages share one (they de-dup).
+  def test_alert_anchors_backtrace_to_the_message_for_grouping
+    job = AlertingJob.new
+    one = job.send(:job_alert, "message one")
+    two = job.send(:job_alert, "message two")
+    one_again = job.send(:job_alert, "message one")
+
+    assert_equal(1, one.backtrace.size)
+    assert_includes(one.backtrace.first, "ApplicationJobTest::AlertingJob")
+    assert_not_equal(one.backtrace, two.backtrace,
+                     "different messages must get different anchors")
+    assert_equal(one.backtrace, one_again.backtrace,
+                 "identical messages must get the same anchor")
+  end
+
   # With no notifier registered, #alert stays log-only and does not notify.
   def test_alert_is_log_only_when_alerting_off
     notified = false
