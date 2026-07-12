@@ -9,7 +9,6 @@ MAILTO=webmaster@mushroomobserver.org
 */4 * * * * /var/web/mo/bin/run script/parse_log
 1   * * * * /var/web/mo/bin/run script/check_for_orphaned_thumbnails
 13  3 * * * /var/web/mo/bin/run script/backup_blocked_ips.sh
-53  3 * * * /var/web/mo/bin/run script/check_rss_logs
 # This has been superseded by the rsync command above:
 # 13  4 * * * /var/web/mo/bin/run script/verify_images
 43  4 * * * /var/web/mo/bin/run script/refresh_sitemap
