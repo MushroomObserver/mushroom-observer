@@ -901,16 +901,16 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
+  #
+  # NOT full_filepath(:original) -- that helper's test-env fallback (for
+  # EXIF-reading tests without a real per-image file) would redirect this
+  # WRITE into a committed test/images/ fixture whenever original_name
+  # happens to match one, since the real destination legitimately doesn't
+  # exist yet at this point (we're about to create it). File.rename raises
+  # SystemCallError on failure (never returns falsy), so the rescue below
+  # is the only failure path -- no need to also check its return value.
   def move_original
-    # NOT full_filepath(:original) -- that helper's test-env fallback (for
-    # EXIF-reading tests without a real per-image file) would redirect this
-    # WRITE into a committed test/images/ fixture whenever original_name
-    # happens to match one, since the real destination legitimately doesn't
-    # exist yet at this point (we're about to create it).
     original_image = image_url(:original).full_filepath(MO.local_image_files)
-    # File.rename raises SystemCallError on failure (never returns falsy),
-    # so the rescue below is the only failure path -- no need to also
-    # check its return value.
     File.rename(upload_temp_file, original_image)
     FileUtils.chmod(0o644, original_image)
     true

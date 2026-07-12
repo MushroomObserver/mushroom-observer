@@ -330,13 +330,11 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_equal(3, obs.images.length)
     new_img = (obs.images - [old_img1, old_img2]).first
 
-    # Image::Processor#process is disabled in test (Image#process_and_
-    # enqueue_dhash skips it under Rails.env.test?), so the new upload
-    # never actually attempts a strip here -- gps_stripped stays false,
-    # same as any image that hasn't been (successfully) stripped yet.
-    # See test/models/image/processor_test.rb for direct coverage of
-    # #process actually setting gps_stripped true on a real success.
-    assert_false(new_img.gps_stripped)
+    # process_image's synchronous strip_original_gps? call runs regardless
+    # of Rails.env.test? (only the resize/transfer Image::Processor#process
+    # call is skipped in test) -- the new upload's file genuinely exists on
+    # disk once move_original places it, so the strip genuinely succeeds.
+    assert_true(new_img.gps_stripped)
 
     # Make sure it stripped the image which had already been created.
     assert_true(old_img1.reload.gps_stripped)
