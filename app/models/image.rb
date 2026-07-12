@@ -311,6 +311,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # parent Observation it was actually pointing at). The link/votes/
   # overlays stay exactly as the page first rendered them; only the
   # image source needs to catch up once resized copies exist.
+  #
+  # This is a deliberate tradeoff, not an oversight: carrying every
+  # subscriber's original per-page props through the broadcast (rather
+  # than falling back to media_only) isn't possible without threading
+  # that context through the model layer. Whether media_only is the
+  # right long-term answer (vs. e.g. a per-page prop cache) is still
+  # open.
   def broadcast_interactive_sizes
     INTERACTIVE_BROADCAST_SIZES.each do |size|
       html = ApplicationController.renderer.render(
