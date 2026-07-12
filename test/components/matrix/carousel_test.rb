@@ -76,7 +76,7 @@ class MatrixCarouselTest < ComponentTestCase
 
   # Item slide does NOT pull a `:large`/original image — the
   # `Matrix::Carousel::Item` subclass overrides defaults to keep the
-  # per-box render cost down (per the matrix_box_carousel guidance).
+  # per-box render cost down.
   # The img's `src` should be a `medium` (640px) variant rather than
   # the `:original`/`:huge`/`:large` URL.
   def test_slides_use_medium_size_not_large

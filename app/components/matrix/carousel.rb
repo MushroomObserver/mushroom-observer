@@ -8,9 +8,9 @@
 # a previously-viewed slide can highlight it).
 #
 # Reproduces the rendered HTML the abandoned `nimmo-matrix-box-carousels`
-# branch produced — see `.claude/rules/matrix_box_carousel.md` for the
-# DOM contract and the two perf landmines that killed that branch
-# (image N+1 + `:large`/`original: true` image size).
+# branch produced, without its two perf landmines: an N+1 image query
+# per box, and full-resolution (`:large`/`original: true`) images on
+# every slide instead of a smaller lazy-loaded size.
 #
 # Not yet consumed by the obs-index — landing as L1 ahead of the
 # obs-index integration so the abstraction is validated by a third

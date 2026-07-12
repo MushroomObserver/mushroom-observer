@@ -12,7 +12,8 @@
 #   `:large` + `original: true` (full-resolution view inside the
 #   show-page Panel).
 # - `Components::Matrix::Carousel::Item` — per-matrix-box slide,
-#   `:medium` + `original: false` (per the matrix-box-carousel
+#   `:medium` + `original: false` (keeps per-box render cost down;
+#   the lightbox is the explicit path to full resolution).
 #
 # `Components::Form::UploadGallery::Item` does NOT subclass this:
 # its slide layout is a row of `image-col` + `form-col` + control
