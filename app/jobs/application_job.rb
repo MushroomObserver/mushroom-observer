@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require("zlib")
+
 class ApplicationJob < ActiveJob::Base
   # Automatically retry jobs that encountered a deadlock
   # retry_on ActiveRecord::Deadlocked
@@ -71,8 +73,9 @@ class ApplicationJob < ActiveJob::Base
   # (that is the point of de-dup). The crc32 keeps the shown frame short
   # rather than echoing the whole (possibly multi-line) message.
   def job_alert(message)
-    anchor = "job-alert:#{self.class.name}:#{Zlib.crc32(message)}"
-    alert = JobAlert.new(message)
+    text = message.to_s
+    anchor = "job-alert:#{self.class.name}:#{Zlib.crc32(text)}"
+    alert = JobAlert.new(text)
     alert.set_backtrace([anchor])
     alert
   end

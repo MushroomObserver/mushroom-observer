@@ -113,6 +113,15 @@ class ApplicationJobTest < ActiveJob::TestCase
                  "identical messages must get the same anchor")
   end
 
+  # message.to_s normalization keeps the String-only crc32 from raising on
+  # a non-String, and keeps the anchor and alert text consistent.
+  def test_alert_tolerates_non_string_message
+    alert = AlertingJob.new.send(:job_alert, :a_symbol_message)
+
+    assert_equal("a_symbol_message", alert.message)
+    assert_equal(1, alert.backtrace.size)
+  end
+
   # With no notifier registered, #alert stays log-only and does not notify.
   def test_alert_is_log_only_when_alerting_off
     notified = false
