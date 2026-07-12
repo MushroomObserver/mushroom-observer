@@ -23,7 +23,22 @@ class UpdateBoxAreaAndCenterColumnsJob < ApplicationJob
     log("Updated #{loc_updated} locations' box_area and center_lat/lng.")
     log("Updated #{obs_centered} observations' location_lat/lng.")
     log("Nulled #{obs_center_nulled} observations' location_lat/lng.")
+    alert_on_missing_box_area(loc_count)
     # Return the values for debugging
     [loc_updated, obs_centered, obs_center_nulled]
+  end
+
+  private
+
+  # box_area is computed when a Location is saved, so a nil is a data
+  # anomaly - a location persisted through a path that bypassed it - not
+  # routine backlog. Surface it after the repair (so this only fires on a
+  # real run, not a dry-run inspection). A clean run stays silent.
+  def alert_on_missing_box_area(loc_count)
+    return unless loc_count.positive?
+
+    alert("#{loc_count} location(s) have a nil box_area (expected 0) - a " \
+          "location was saved without computing box_area. Repaired this " \
+          "run; investigate the source if it recurs.")
   end
 end
