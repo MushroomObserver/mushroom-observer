@@ -38,9 +38,11 @@ class CheckRssLogsJob < ApplicationJob
   def perform(dry_run: false, verbose: false)
     @dry_run = dry_run
     @verbose = verbose
+    @changes = []
 
     check_types.each { |type| check_type(type) }
     delete_ghosts if check_ghosts?
+    alert_changes
   end
 
   private
@@ -80,6 +82,7 @@ class CheckRssLogsJob < ApplicationJob
 
     query.update_all(column => nil) unless @dry_run
     log("NULLING #{column} on #{ids.size} orphan rss_log(s)#{log_suffix(ids)}")
+    note_change("nulled #{column} on #{ids.size} orphan rss_log(s)", ids)
   end
 
   def delete_nonorphans_with_bogus_type(type)
@@ -93,6 +96,7 @@ class CheckRssLogsJob < ApplicationJob
     query.delete_all unless @dry_run
     log("DELETING #{ids.size} rss_log(s) with bogus #{column}" \
         "#{log_suffix(ids)}")
+    note_change("deleted #{ids.size} rss_log(s) with a bogus #{column}", ids)
   end
 
   # Rows referencing `type`/`column` whose target no longer exists,
@@ -113,6 +117,30 @@ class CheckRssLogsJob < ApplicationJob
 
     query.delete_all unless @dry_run
     log("DELETING #{ids.size} ghost rss_log(s)#{log_suffix(ids)}")
+    note_change("deleted #{ids.size} ghost rss_log(s)", ids)
+  end
+
+  # Record a mutation (with a bounded id sample) for the end-of-run
+  # #alerts summary. Only real changes are recorded - a dry run inspects
+  # without mutating, so it stays silent.
+  def note_change(description, ids)
+    return if @dry_run
+
+    @changes << "#{description} (ids: #{ids.first(30).inspect})"
+  end
+
+  # This job only mutates rss_logs that have fallen out of sync with
+  # their target, which shouldn't happen in normal operation now that
+  # #4764 blocks the writes that created them (see #4763). So any change
+  # is worth review rather than a silent edit: a real run that touched
+  # anything posts one #alerts summary of what it did (the ids are the
+  # only record left for the deletes). A clean run stays silent.
+  def alert_changes
+    return if @changes.empty?
+
+    alert("#{self.class.name} mutated rss_logs that were out of sync with " \
+          "their target - unexpected in normal operation (see " \
+          "#4763/#4764):\n- #{@changes.join("\n- ")}")
   end
 
   # Always logs elapsed time for the query's pluck(:id) (where the full
