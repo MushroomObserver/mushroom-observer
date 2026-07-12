@@ -2,7 +2,7 @@
 
 class Views::Layouts::Sidebar
   # Renders the language toggle + collapsible language list in the
-  # sidebar. An inline accordion (Link::CollapseToggle + CollapseDiv),
+  # sidebar. An inline accordion (Link::CollapseToggle + Collapsible),
   # not a floating dropdown — a popup menu doesn't behave well at the
   # bottom of a long nav (clipping / off-screen risk), and an inline
   # expand keeps everything in the normal document flow.
@@ -60,7 +60,7 @@ class Views::Layouts::Sidebar
 
     def view_template
       render_toggle
-      CollapseDiv(id: COLLAPSE_ID) do
+      Collapsible(id: COLLAPSE_ID) do
         @languages.each { |lang| render_language_row(lang) }
       end
     end
@@ -85,7 +85,7 @@ class Views::Layouts::Sidebar
           span(class: "lang-flag-emoji") { plain(flag_for(I18n.locale)) }
           whitespace
           Icon(type: :chevron_down, title: :OPEN.l,
-               html_class: "active-icon")
+               class: "active-icon")
           Icon(type: :chevron_up, title: :CLOSE.l)
         end
       end

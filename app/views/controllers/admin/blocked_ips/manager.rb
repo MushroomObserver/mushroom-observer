@@ -164,7 +164,7 @@ module Views::Controllers::Admin::BlockedIps
       submit(:REMOVE.l, as: :button,
                         name: remove_param, value: ip,
                         id: "remove_#{@type}_ip_#{ip}",
-                        variant: :btn_link, size: :sm,
+                        variant: :link, size: :sm,
                         class: "font-weight-bold")
     end
 

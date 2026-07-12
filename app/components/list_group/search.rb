@@ -85,7 +85,7 @@ class Components::ListGroup::Search < Components::ApplicationForm
   end
 
   def render_field_slip_input
-    div(class: "field-slip-container field-group navbar-flex") do
+    div(class: "field-slip-container field-group flex-bar") do
       label(for: "field_slip",
             class: "font-weight-normal text-nowrap") do
         plain("Field Slip:")

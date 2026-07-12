@@ -24,8 +24,6 @@ MushroomObserver::Application.configure do
   config.time_zone = "America/New_York"
   ENV["TZ"] = "Eastern Time (US & Canada)"
 
-  # Enable queued email.
-  config.queue_email = true
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
 

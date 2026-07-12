@@ -77,6 +77,26 @@ class UserGroup < AbstractModel
     name.to_s
   end
 
+  # Request-scoped memo for the 3 meta-group lookups below --
+  # `Thread.current[...]`, not a class ivar or `Rails.cache`, so it's
+  # isolated per request/thread (matches `Textile`'s name-lookup
+  # cache, `app/classes/textile.rb`) rather than reintroducing the
+  # cross-request state this class just got rid of. Even with the
+  # unique index on `name`, these turn out to be called many times
+  # in a single request (once per description in a name/location's
+  # reader/writer/admin-group listing -- see
+  # `Description::DetailsAndAltsPanel`), so it's worth memoizing
+  # within that one request. Reset once per real request via
+  # `ApplicationController#reset_user_group_cache`, and once per
+  # unit test (`test_helper.rb`'s `setup`) for tests that call these
+  # methods directly without going through a full request.
+  THREAD_KEYS = {
+    all_users: :mo_user_group_all_users,
+    reviewers: :mo_user_group_reviewers,
+    one_users: :mo_user_group_one_users
+  }.freeze
+  private_constant(:THREAD_KEYS)
+
   def self.get_or_construct_user(name)
     user = find_by_name(name)
     user = UserGroup.new(name: name, meta: 1) if user.nil?
@@ -85,25 +105,32 @@ class UserGroup < AbstractModel
 
   # Return the meta-group that contains all users.
   def self.all_users
-    @@all_users ||= get_or_construct_user("all users")
+    Thread.current[THREAD_KEYS[:all_users]] ||=
+      get_or_construct_user("all users")
   end
 
   # Return the meta-group that contains just the given users.  Takes id or User.
   def self.one_user(user)
     user_id = user.is_a?(User) ? user.id.to_i : user.to_i
-    @@one_users ||= {}
-    @@one_users[user_id] ||= find_by_name("user #{user_id}")
+    one_users_cache[user_id] ||= find_by_name("user #{user_id}")
   end
 
   # Return the meta-group that contains all users.
   def self.reviewers
-    @@reviewers ||= get_or_construct_user("reviewers")
+    Thread.current[THREAD_KEYS[:reviewers]] ||=
+      get_or_construct_user("reviewers")
   end
 
-  # Need to clear these at end of each test or some changes can persist from
-  # one unit test to the next, causing very bizarre and frustrating behavior(!)
-  def self.clear_cache_for_unit_tests
-    @@all_users = @@one_users = @@reviewers = nil
+  def self.one_users_cache
+    Thread.current[THREAD_KEYS[:one_users]] ||= {}
+  end
+  private_class_method :one_users_cache
+
+  # Flush the per-request memo above.
+  def self.reset_request_cache
+    Thread.current[THREAD_KEYS[:all_users]] = nil
+    Thread.current[THREAD_KEYS[:reviewers]] = nil
+    Thread.current[THREAD_KEYS[:one_users]] = {}
   end
 
   # Callback that fires when a new User is created.

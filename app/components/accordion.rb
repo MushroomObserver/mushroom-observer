@@ -27,8 +27,8 @@ class Components::Accordion < Components::Base
   prop :id, String
 
   slot :pane, lambda { |id:, expanded: false, &content|
-    CollapseDiv(
-      id: id, expanded: expanded, html_class: "no-transition"
+    Collapsible(
+      id: id, expanded: expanded, class: "no-transition"
     ) { content&.call }
   }, collection: true
 
