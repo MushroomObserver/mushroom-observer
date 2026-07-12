@@ -676,6 +676,19 @@ class API2ControllerTest < FunctionalTestCase
                    { controller: "api2", action: "comments" })
   end
 
+  # The v1 API (`api` controller) was retired: its routes lingered after
+  # APIController was removed, so every /api* request raised
+  # `uninitialized constant APIController` (500-class) instead of a clean
+  # 404. They must no longer be recognized (issue #4782).
+  def test_v1_api_routes_are_gone
+    ["/api", "/api/observations", "/api/images"].each do |path|
+      assert_raises(ActionController::RoutingError,
+                    "#{path} should not be routed") do
+        Rails.application.routes.recognize_path(path)
+      end
+    end
+  end
+
   def test_vote_anonymity
     obs = observations(:coprinus_comatus_obs)
     rolf.update!(votes_anonymous: "yes")

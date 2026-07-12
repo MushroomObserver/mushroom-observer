@@ -17,24 +17,12 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  api: {
-    api_keys: {},
-    collection_numbers: {},
-    comments: {},
-    external_links: {},
-    external_sites: {},
-    field_slips: {},
-    herbaria: {},
-    herbarium_records: {},
-    images: {},
-    locations: {},
-    names: {},
-    observations: {},
-    projects: {},
-    sequences: {},
-    species_lists: {},
-    users: {}
-  },
+  # The v1 API (`api`) was retired: its APIController was removed long
+  # ago, but these routes lingered, so every /api* request raised
+  # `uninitialized constant APIController` (500-class, logged) instead of
+  # a clean 404 -- ~60 hits in 18 days from bots/stale clients. Dropped
+  # so /api* falls through to a normal 404. See issue #4782. api2 is the
+  # current API.
   api2: {
     api_keys: {},
     collection_numbers: {},
