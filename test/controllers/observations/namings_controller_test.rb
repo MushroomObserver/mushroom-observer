@@ -461,6 +461,26 @@ module Observations
       assert_select("option[selected]", count: 2)
     end
 
+    def test_update_naming_blank_name
+      login("rolf")
+      nam = namings(:coprinus_comatus_naming)
+      old_name = nam.text_name
+      # A blank name field used to raise NoMethodError (nil.imageless?):
+      # NameResolver reports success with no @name. It should now re-render
+      # the edit form with a "name missing" error and leave it unchanged.
+      params = {
+        observation_id: nam.observation_id,
+        id: nam.id.to_s,
+        naming: { name: "" },
+        approved_name: old_name
+      }
+      put(:update, params: params)
+
+      assert_edit
+      assert_flash_error
+      assert_equal(old_name, nam.reload.text_name)
+    end
+
     def test_update_naming_new_name_different_user
       login("mary")
       nam = namings(:coprinus_comatus_other_naming)

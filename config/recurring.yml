@@ -54,3 +54,6 @@ production:
   refresh_all_user_stats:
     class: RefreshAllUserStatsJob
     schedule: every day at 5:26am
+  refresh_name_lister_cache:
+    class: RefreshNameListerCacheJob
+    schedule: every day at 3:33am

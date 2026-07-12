@@ -106,10 +106,7 @@ module Views::Controllers::Projects::Members
     end
 
     def render_footer_buttons
-      Button(
-        name: :CANCEL.l,
-        data: { dismiss: "modal" }
-      )
+      render(Components::Modal::CloseButton.new)
       whitespace
       # `name: "save"` overrides Superform's default `name: "commit"`
       # to avoid colliding with the radio group's own `commit` name —

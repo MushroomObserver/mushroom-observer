@@ -383,10 +383,18 @@ module Name::Scopes
 
   module ClassMethods
     # class methods here, `self` included
+    # `rank_index` (Name::Taxonomy) normalizes String/Symbol rank names but
+    # returns nil for one that isn't recognized at all - raise here instead
+    # of silently defaulting to the start/end of `all_ranks`, since (unlike
+    # validate_classification's user-entered ranks) args to this scope
+    # always come from hardcoded call sites, so an unrecognized one is a
+    # programming error worth failing loudly on.
     def rank_range(min, max)
       all_ranks = Name.all_ranks
-      a = all_ranks.index(min) || 0
-      b = all_ranks.index(max) || (all_ranks.length - 1)
+      a = rank_index(min) ||
+          raise(ArgumentError.new("Unknown rank: #{min.inspect}"))
+      b = rank_index(max) ||
+          raise(ArgumentError.new("Unknown rank: #{max.inspect}"))
       a, b = b, a if a > b # reverse if wrong order
       all_ranks[a..b].map { |r| Name.ranks[r] } # values start at 1
     end

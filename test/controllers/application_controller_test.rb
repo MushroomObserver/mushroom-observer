@@ -70,6 +70,56 @@ class ApplicationControllerTest < FunctionalTestCase
                          "GET against a bad domain should redirect")
   end
 
+  # `reset_user_group_cache` guards against the same landmine pattern
+  # fixed for Textile (#4741): UserGroup.all_users/reviewers/one_user
+  # memoize per request (Thread.current[...]), which survives between
+  # sequential requests pooled onto the same thread unless reset. A
+  # request that never touches these must not inherit a prior
+  # request's memoized groups.
+  def test_reset_user_group_cache_clears_stale_state_before_next_request
+    UserGroup.all_users
+    UserGroup.reviewers
+    UserGroup.one_user(users(:rolf))
+
+    get(:intro)
+
+    assert_response(:success)
+    calls = 0
+    UserGroup.stub(:find_by_name, lambda { |name|
+      calls += 1
+      UserGroup.find_by(name: name)
+    }) do
+      UserGroup.all_users
+      UserGroup.reviewers
+      UserGroup.one_user(users(:rolf))
+    end
+    assert_equal(3, calls,
+                 "UserGroup's per-request memo should be reset before " \
+                 "every request, not leak state from a prior one")
+  end
+
+  # `reset_textile_cache` guards against a landmine bug: Textile's
+  # name-lookup cache is thread-local (isolated across concurrent
+  # requests), but without a per-request reset it survives between
+  # sequential requests pooled onto the same thread -- a page that
+  # primes the cache (`Textile.register_name`) would otherwise leak
+  # its abbreviations into whatever request runs next on that thread.
+  # See #3589.
+  def test_reset_textile_cache_clears_stale_state_before_next_request
+    # Simulate a prior request/page having primed the cache and left
+    # it dirty (no request boundary has run in this test process yet).
+    Textile.register_name(names(:coprinus_comatus))
+    assert_not_empty(Textile.name_lookup,
+                     "Textile.register_name should have primed the cache")
+
+    get(:intro)
+
+    assert_response(:success)
+    assert_empty(Textile.name_lookup,
+                 "Textile's name-lookup cache should be reset before " \
+                 "every request, not leak state from a prior one")
+  end
+
   # `extra_gc` just calls `ObjectSpace.garbage_collect`. Wired in
   # as an `around_action` on some debug-only endpoints; not
   # routinely exercised. Cover by calling directly on a controller
