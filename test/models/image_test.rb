@@ -218,7 +218,8 @@ class ImageTest < UnitTestCase
     {
       "image/jpeg" => "jpg", "image/gif" => "gif", "image/png" => "png",
       "image/tiff" => "tiff", "image/bmp" => "bmp",
-      "image/x-ms-bmp" => "bmp", "application/octet-stream" => "raw"
+      "image/x-ms-bmp" => "bmp", "image/webp" => "webp",
+      "image/heif" => "heic", "application/octet-stream" => "raw"
     }.each do |content_type, ext|
       assert_equal(ext, Image.new(content_type: content_type).
                         original_extension)

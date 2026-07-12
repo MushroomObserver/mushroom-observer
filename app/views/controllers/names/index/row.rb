@@ -56,7 +56,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
 
   def render_copy_button
     Button(
-      variant: :btn_link,
+      variant: :link,
       class: "py-0 link-normal opacity-75",
       role: "button",
       data: { toggle: "tooltip", placement: "bottom",

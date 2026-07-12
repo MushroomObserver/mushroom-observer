@@ -77,6 +77,8 @@ class Components::Button < Components::Base
   #                          open_text: "Close", closed_text: "Open",
   #                          collapsed: true, icon: :globe)
   #   Components::Button.new(name: "Cancel", data: { dismiss: "modal" })
+  #     # for a Modal's footer Cancel button, prefer
+  #     # Components::Modal::CloseButton instead of hand-rolling this
   def self.new(**kwargs, &block)
     type_sym = kwargs[:type]&.to_sym
     if (klass_name = DISPATCH[type_sym])
