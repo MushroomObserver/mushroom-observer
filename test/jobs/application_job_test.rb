@@ -10,6 +10,35 @@ class ApplicationJobTest < ActiveJob::TestCase
     end
   end
 
+  # Minimal job that just reports what it saw in Textile's cache when it
+  # started, to exercise ApplicationJob's before_perform reset. A plain
+  # class-instance-variable (not `@@`) is fine here -- this class has no
+  # subclasses.
+  class ReportsTextileCacheJob < ApplicationJob
+    class << self
+      attr_accessor :seen_name_lookup
+    end
+
+    def perform
+      self.class.seen_name_lookup = Textile.name_lookup.dup
+    end
+  end
+
+  # Regression test for #4741/#4772: mailer jobs never run through
+  # ApplicationController's before_action, so without ApplicationJob's
+  # own reset, a job dispatched to a Solid Queue worker thread right
+  # after another job registered a name on that same thread would see
+  # the leftover Textile cache instead of starting clean.
+  def test_resets_textile_cache_before_each_job
+    Textile.register_name(names(:agaricus))
+
+    ReportsTextileCacheJob.perform_now
+
+    assert_equal({}, ReportsTextileCacheJob.seen_name_lookup,
+                 "Job should start with a clean Textile name-lookup " \
+                 "cache, not one leaked from prior work on this thread")
+  end
+
   # When a notifier is registered (e.g. production), a failing job reports to
   # ExceptionNotifier and still re-raises so SolidQueue records the failure.
   def test_failure_is_reported_and_reraised_when_alerting_active
