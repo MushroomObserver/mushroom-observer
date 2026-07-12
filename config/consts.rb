@@ -169,15 +169,6 @@ MushroomObserver::Application.configure do
   # Available themes.
   config.themes = %w[Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite]
 
-  # Queued email only gets delivered if you have run the rake task email:send.
-  # script/send_email is a cron script for running email:send.  (Delay is in
-  # seconds.)
-  config.queue_email        = false
-  config.email_per_minute   = 25
-  config.email_num_attempts = 3
-  config.email_log          = "#{config.root}/log/email_error.log"
-  config.email_queue_delay  = 5
-
   # Default email addresses.
   config.news_email_address = "news@#{config.domain}"
   config.noreply_email_address = "no-reply@#{config.domain}"
