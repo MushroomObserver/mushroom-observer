@@ -40,7 +40,9 @@ module Views::Controllers::Herbaria
     # --- Left + right columns --------------------------------------
 
     def render_body_columns
-      div(class: "col-xs-12 col-sm-#{map ? 8 : 12}") { render_left_column }
+      div(class: class_names(Grid::FULL, "col-sm-#{map ? 8 : 12}")) do
+        render_left_column
+      end
       render_right_column if map
     end
 
