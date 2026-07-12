@@ -8,9 +8,9 @@
 # a previously-viewed slide can highlight it).
 #
 # Reproduces the rendered HTML the abandoned `nimmo-matrix-box-carousels`
-# branch produced, without its two perf landmines: an N+1 image query
-# per box, and full-resolution (`:large`/`original: true`) images on
-# every slide instead of a smaller lazy-loaded size.
+# branch produced. Sidesteps its full-resolution (`:large`/`original: true`)
+# images-per-slide landmine by using a smaller lazy-loaded size. Callers must
+# preload `images` (e.g. `includes(:images)`) to avoid an N+1 query per box.
 #
 # Not yet consumed by the obs-index — landing as L1 ahead of the
 # obs-index integration so the abstraction is validated by a third
