@@ -55,12 +55,27 @@ class ApplicationJob < ActiveJob::Base
     return unless ExceptionNotifier.notifiers.any?
 
     ExceptionNotifier.notify_exception(
-      JobAlert.new(message),
+      job_alert(message),
       data: { **context, job: self.class.name, job_id: job_id }
     )
   end
 
   private
+
+  # error_grouping falls back to a backtrace-based key whenever the
+  # message key misses (every first occurrence of a message). A synthetic
+  # JobAlert has no backtrace, so without this every job alert would
+  # collide on one nil-backtrace group and de-dup against unrelated
+  # alerts. Anchor a single synthetic frame to the message so each
+  # distinct alert is its own group; identical messages still group
+  # (that is the point of de-dup). The crc32 keeps the shown frame short
+  # rather than echoing the whole (possibly multi-line) message.
+  def job_alert(message)
+    anchor = "job-alert:#{self.class.name}:#{Zlib.crc32(message)}"
+    alert = JobAlert.new(message)
+    alert.set_backtrace([anchor])
+    alert
+  end
 
   def job_log_path
     # Use worker-specific log files in parallel testing to avoid conflicts
