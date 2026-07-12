@@ -191,7 +191,6 @@ Metrics/BlockLength:
     - 'config/routes.rb'
     - 'lib/tasks/cache.rake'
     - 'lib/tasks/lang.rake'
-    - 'script/check_for_broken_references'
     - 'script/mushroom_mapper.rb'
 
 # Offense count: 1

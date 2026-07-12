@@ -34,6 +34,9 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at 12:32am
+  check_for_broken_references:
+    class: CheckForBrokenReferencesJob
+    schedule: every sunday at 7:13am
   # misc_data_repairs (formerly refresh_caches) was one job until it
   # got split by measured cost -- see MiscDataRepairsJob's own comment
   # for the local timing that drove the split. All four fire off the
