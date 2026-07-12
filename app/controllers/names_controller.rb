@@ -689,7 +689,6 @@ class NamesController < ApplicationController
       subject: "Nontrivial Name Change",
       message:
     ).deliver_later
-    NamesControllerUpdateTest.report_email(message) if Rails.env.test?
   end
 
   # `.count` (not `.length`) deliberately: this only needs the
@@ -813,7 +812,6 @@ class NamesController < ApplicationController
       subject: "Merger identifier conflict",
       message:
     ).deliver_later
-    NamesControllerUpdateMergeTest.report_email(message) if Rails.env.test?
   end
 
   # ----------------------------------------------------------------------------
