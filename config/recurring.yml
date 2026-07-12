@@ -2,13 +2,6 @@
 # the future, on a regular basis like cron jobs. These are managed by the
 # scheduler process and are defined in their own configuration file.
 # https://github.com/rails/solid_queue/tree/main#recurring-tasks
-#
-# `schedule:` times below are interpreted in Rails' configured
-# `Time.zone` (`America/New_York`, set in config/environments/
-# production.rb), NOT UTC or the server's raw system clock - confirmed
-# via `Fugit.parse("every day at 5:28am").next_time` inside a booted
-# Rails console, which returns a time in -04:00/-05:00 (US Eastern)
-# depending on daylight saving.
 
 # production:
 #   a_periodic_job:
@@ -41,6 +34,3 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at 12:32am
-  repair_observation_vote_cache:
-    class: RepairObservationVoteCacheJob
-    schedule: every day at 5:28am
