@@ -26,7 +26,7 @@ module Views::Controllers::SpeciesLists
     private
 
     def details_column_classes
-      @image ? "col-sm-8 col-md-9" : "col-xs-12"
+      @image ? "col-sm-8 col-md-9" : Grid::FULL
     end
 
     def render_image_column
