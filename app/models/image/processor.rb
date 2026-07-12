@@ -80,13 +80,11 @@ class Image
 
     def process
       convert_raw_to_jpg if convert_raw_to_jpg_needed?
-      if @strip_gps
-        strip_gps_from_file(full_size_filepath)
-        # A failed strip means the file may still carry GPS data --
-        # stop here rather than transfer it to remote image servers,
-        # matching script/process_image's `set -e` abort-on-failure.
-        return email_webmaster if @errors.any?
-      end
+      # A failed strip means the file may still carry GPS data -- stop
+      # here rather than transfer it to remote image servers, matching
+      # script/process_image's `set -e` abort-on-failure.
+      return email_webmaster if @strip_gps && !strip_gps_succeeded?
+
       auto_orient_if_needed(full_size_filepath)
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
@@ -177,6 +175,18 @@ class Image
                        "-overwrite_original", "-q", file)
 
       @errors << "Failed to strip GPS data from #{file}"
+    end
+
+    # Attempts the strip and marks it durably successful on @image only
+    # once it actually is -- Image#process_image sets gps_stripped false
+    # before calling into here (never true), so a failure here leaves it
+    # false and #strip_gps! remains free to retry later.
+    def strip_gps_succeeded?
+      strip_gps_from_file(full_size_filepath)
+      return false if @errors.any?
+
+      @image.update(gps_stripped: true)
+      true
     end
 
     def make_sure_we_have_full_size_locally

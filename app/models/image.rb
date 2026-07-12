@@ -772,7 +772,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       ext = original_extension
       set_image_size(upload_temp_file) if ext == "jpg"
       set_size = width.nil?
-      update_attribute(:gps_stripped, true) if strip
+      # Not "true" -- stripping hasn't been attempted yet at this point.
+      # Image::Processor#process sets this to true itself, only once the
+      # strip has actually succeeded (see #process's `if @strip_gps`
+      # branch). Marking it prematurely here left a failed strip
+      # permanently unretriable: #strip_gps! no-ops whenever
+      # gps_stripped is already true.
+      update_attribute(:gps_stripped, false) if strip
       # move_original returns true or raises — never false — so there is no
       # reachable else branch here.
       result = process_and_enqueue_dhash(ext, set_size, strip) if move_original

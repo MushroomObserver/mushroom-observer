@@ -1164,11 +1164,13 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     obs = Observation.last
     assert_equal(3, obs.images.length)
     new_img = (obs.images - [old_img1, old_img2]).first
+    # Unlike the update action, #create calls strip_images! (the
+    # already-correct, verified #strip_gps! path) AFTER attach_good_images,
+    # so it covers the brand-new image too -- and since its file genuinely
+    # exists on disk (copied into place above), the strip genuinely
+    # succeeds here. This is independent of Image::Processor#process,
+    # which stays disabled in test either way.
     assert_true(new_img.gps_stripped)
-    # We have script/process_image disabled for tests, so it doesn't actually
-    # strip the uploaded image.
-    # assert_not_equal(File.size(fixture),
-    #                  File.size(new_img.full_filepath("orig")))
 
     # Make sure it stripped the image which had already been created.
     assert_true(old_img1.reload.gps_stripped)

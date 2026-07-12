@@ -149,7 +149,7 @@ class Image::ProcessorTest < UnitTestCase
 
   def test_process_strips_gps_before_transfer
     image = images(:in_situ_image)
-    image.update_columns(transferred: false)
+    image.update_columns(transferred: false, gps_stripped: false)
     FileUtils.cp(GEOTAGGED_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
     assert(MiniExiftool.new("#{local_root}/orig/#{image.id}.jpg").gps_latitude,
            "fixture should start with GPS data")
@@ -159,6 +159,26 @@ class Image::ProcessorTest < UnitTestCase
 
     stripped = MiniExiftool.new("#{local_root}/orig/#{image.id}.jpg")
     assert_nil(stripped.gps_latitude)
+    assert(image.reload.gps_stripped,
+           "gps_stripped should be true once the strip actually succeeds")
+  end
+
+  # Regression test for Copilot/adversarial-review finding: gps_stripped
+  # must stay false on a failed strip, not just "not yet set true" --
+  # otherwise #strip_gps!'s `return nil if gps_stripped` guard would
+  # permanently block ever retrying a failed strip.
+  def test_process_strip_gps_failure_leaves_gps_stripped_false
+    image = images(:in_situ_image)
+    image.update_columns(transferred: false, gps_stripped: false)
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+    processor = Image::Processor.new(image: image, ext: "jpg",
+                                     strip_gps: true)
+
+    processor.stub(:system, false) do
+      processor.process
+    end
+
+    assert_not(image.reload.gps_stripped)
   end
 
   def test_rotate_reorients_and_reprocesses
