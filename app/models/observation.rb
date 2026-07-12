@@ -543,7 +543,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   # mess up the mirrors because misspelled names are "invisible", so their
   # classification and lifeform and such will not necessarily be kept up to
   # date.  Fixes and returns a messages for each one that was wrong.
-  # Used by refresh_caches script
+  # Used by MiscDataRepairsJob
   def self.make_sure_no_observations_are_misspelled(dry_run: false)
     query = Observation.joins(:name).
             where(Name[:correct_spelling_id].not_eq(nil))
@@ -560,7 +560,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Use the original definition of `needs_id` to set the column values.
-  # Used by refresh_caches script
+  # Used by MiscDataRepairsJob
   def self.refresh_needs_naming_column(dry_run: false)
     # Need to repeat `needs_naming:false` even though AR will optimize it out
     # and it'll only appear once in the resulting WHERE condition. Go figure.
