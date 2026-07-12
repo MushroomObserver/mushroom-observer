@@ -154,6 +154,7 @@ class Inat
       assert_equal("false", args["verifiable"],
                    "User-supplied verifiable param must not be overridden")
     end
+
     # Regression: a space after the comma (e.g. from "Plantae, Fungi")
     # must not defeat the importable-taxon match.
     def test_expected_obs_url_strips_whitespace_in_iconic_taxa
