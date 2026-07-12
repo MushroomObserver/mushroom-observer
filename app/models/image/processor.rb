@@ -80,7 +80,13 @@ class Image
 
     def process
       convert_raw_to_jpg if convert_raw_to_jpg_needed?
-      strip_gps_from_file(full_size_filepath) if @strip_gps
+      if @strip_gps
+        strip_gps_from_file(full_size_filepath)
+        # A failed strip means the file may still carry GPS data --
+        # stop here rather than transfer it to remote image servers,
+        # matching script/process_image's `set -e` abort-on-failure.
+        return email_webmaster if @errors.any?
+      end
       auto_orient_if_needed(full_size_filepath)
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
@@ -165,6 +171,13 @@ class Image
         copy_file_from_server(server, "orig/#{@id}.jpg")
         break
       end
+
+      return if File.exist?(full_size_filepath)
+
+      # script/rotate_image aborted immediately if it couldn't fetch the
+      # original -- without this, callers would instead fail later with
+      # a confusing MiniExiftool/MiniMagick "file not found" error.
+      raise("Could not fetch #{full_size_filepath} from any image server")
     end
 
     def reset_file_orientation

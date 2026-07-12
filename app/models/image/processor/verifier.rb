@@ -101,8 +101,11 @@ class Image
             next if listings[server][path] == local[path]
 
             log("Uploading #{path} to #{server}")
-            FileTransfer.copy_file_to_server(server, path)
-            @uploaded << [server, path]
+            if FileTransfer.copy_file_to_server(server, path)
+              @uploaded << [server, path]
+            else
+              log("Failed to upload #{path} to #{server}")
+            end
           end
         end
       end

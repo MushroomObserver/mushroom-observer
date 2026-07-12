@@ -186,6 +186,22 @@ class Image::ProcessorTest < UnitTestCase
     assert(image.reload.transferred)
   end
 
+  # Regression test for a Copilot finding on PR #4751: a silently-failed
+  # fetch (e.g. an ssh/rsync remote missing the file, which doesn't raise
+  # on its own) must not be allowed to proceed to MiniExiftool/MiniMagick
+  # -- those would fail on a missing file with a far less clear error.
+  # script/rotate_image aborted immediately on this failure.
+  def test_make_sure_we_have_full_size_locally_raises_if_fetch_fails
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+
+    processor.stub(:copy_file_from_server, nil) do
+      assert_raises(RuntimeError) do
+        processor.send(:make_sure_we_have_full_size_locally)
+      end
+    end
+  end
+
   def test_retransfer_images_only_touches_untransferred_images
     in_situ = images(:in_situ_image)
     turned_over = images(:turned_over_image)
@@ -260,6 +276,29 @@ class Image::ProcessorTest < UnitTestCase
     # RetransferImagesJob's `Image.where(transferred: false)` safety net
     # would never pick this image up again.
     assert_not(image.reload.transferred)
+  end
+
+  # Regression test for a Copilot finding on PR #4751: a failed GPS strip
+  # must stop processing before any file reaches a remote image server --
+  # otherwise the exact data the user asked to strip leaks to public
+  # storage anyway. script/process_image's `set -e` aborted immediately
+  # on the same failure; #process must match that, not just skip marking
+  # the image transferred.
+  def test_process_strip_gps_failure_does_not_transfer_files
+    image = images(:in_situ_image)
+    image.update_columns(transferred: false)
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+    processor = Image::Processor.new(image: image, ext: "jpg",
+                                     strip_gps: true)
+
+    processor.stub(:system, false) do
+      processor.process
+    end
+
+    assert_not(
+      File.exist?("#{remote_server_path(1)}/thumb/#{image.id}.jpg"),
+      "Files must not reach a remote server when GPS stripping failed"
+    )
   end
 
   def test_rotate_non_jpg_original_does_not_undo_rotation
