@@ -327,6 +327,37 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
   end
 
+  # Regression test for a Copilot finding on PR #4751: Image::Processor
+  # records some failures (GPS-strip, transfer) by populating #errors and
+  # returning early WITHOUT raising -- unlike the old
+  # `system(script/process_image)` call, which returned non-zero (a
+  # failure #process_image could see) on the same underlying failures.
+  # process_and_enqueue_dhash must treat a non-empty #errors the same as
+  # a raised exception: fail, and don't enqueue the dhash job for an
+  # image whose processing didn't actually finish.
+  def test_process_image_records_failure_without_raising
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+
+    silently_failing_processor = Object.new
+    def silently_failing_processor.process; end
+
+    def silently_failing_processor.errors
+      ["Failed to strip GPS data from orig/1.jpg"]
+    end
+
+    img.stub(:move_original, true) do
+      Image::Processor.stub(:new, silently_failing_processor) do
+        Rails.env.stub(:test?, false) do
+          assert_no_enqueued_jobs(only: ImageDhashJob) do
+            assert_not(img.process_image)
+          end
+        end
+      end
+    end
+    assert(img.errors[:image].any?)
+  end
+
   def test_move_original_system_fail
     img = Image.new
     File.stub(:rename, false) do

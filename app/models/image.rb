@@ -787,13 +787,23 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # race the resize/strip command writing files.
   def process_and_enqueue_dhash(ext, set_size, strip)
     unless Rails.env.test?
-      Image::Processor.new(image: self, ext: ext, set_size: set_size,
-                           strip_gps: strip).process
+      processor = Image::Processor.new(image: self, ext: ext,
+                                       set_size: set_size, strip_gps: strip)
+      processor.process
+      # Image::Processor records some failures (GPS-strip, transfer) by
+      # populating #errors and returning early, without raising -- the old
+      # `system(script/process_image)` call returned non-zero on the same
+      # failures, which #process_image treated as failure. Match that.
+      return fail_image_process if processor.errors.any?
     end
     ImageDhashJob.perform_later(id)
     true
   rescue StandardError => e
     Rails.logger.error("Image::Processor failed for image #{id}: #{e}")
+    fail_image_process
+  end
+
+  def fail_image_process # rubocop:disable Naming/PredicateMethod
     errors.add(:image, :runtime_image_process_failed.t(id: id))
     false
   end

@@ -8,6 +8,8 @@ class VerifyImagesJob < ApplicationJob
 
   def perform
     result = Image::Processor.verify_images { |msg| log(msg) }
-    log("Uploaded #{result[:uploaded].size}, deleted #{result[:deleted].size}")
+    uploaded, deleted, failed =
+      result.values_at(:uploaded, :deleted, :failed).map(&:size)
+    log("Uploaded #{uploaded}, deleted #{deleted}, failed #{failed}")
   end
 end

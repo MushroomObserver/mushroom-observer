@@ -221,12 +221,13 @@ class Image
     end
 
     # If there were multiple layers, ImageMagick saves them as 1234-N.jpg.
-    # Take the first one, and delete the rest.
+    # Take the largest one (matching script/process_image's
+    # `ls -rS ... | tail -1`), and delete the rest.
     def salvage_first_layer_if_multilayer
       return if File.exist?(full_size_filepath)
 
       layers = Dir.glob("#{self.class.local_images_path}/orig/#{@id}-*.jpg")
-      biggest_layer = layers.first
+      biggest_layer = layers.max_by { |layer| File.size(layer) }
       return unless biggest_layer && File.exist?(biggest_layer)
 
       FileUtils.cp(biggest_layer, full_size_filepath)

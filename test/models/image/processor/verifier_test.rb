@@ -51,6 +51,7 @@ class Image::Processor::VerifierTest < UnitTestCase
 
     assert_uploads(result, turned_over, commercial, disconnected)
     assert_deletes(result, turned_over, commercial)
+    assert_empty(result[:failed])
   end
 
   # Regression test for a Copilot finding on PR #4751: a failed upload
@@ -58,17 +59,51 @@ class Image::Processor::VerifierTest < UnitTestCase
   # a real transfer failure is silently masked in the job's log/summary.
   def test_upload_mismatches_does_not_record_failed_uploads
     turned_over = images(:turned_over_image).id
-    seed_local_files(turned_over, images(:commercial_inquiry_image).id,
-                     images(:disconnected_coprinus_comatus_image).id)
+    commercial = images(:commercial_inquiry_image).id
+    disconnected = images(:disconnected_coprinus_comatus_image).id
+    seed_local_files(turned_over, commercial, disconnected)
     messages = []
     verifier = Image::Processor::Verifier.new { |msg| messages << msg }
 
     Image::Processor::FileTransfer.stub(:copy_file_to_server, false) do
       result = verifier.run
       assert_empty(result[:uploaded])
+      assert_not_empty(result[:failed])
     end
 
     assert(messages.any? { |msg| msg.start_with?("Failed to upload") })
+  end
+
+  # A raised exception (e.g. missing rsync binary, Errno::ENOENT) from one
+  # file's transfer must not abort the rest of the run -- every other
+  # mismatched file still needs its chance to upload.
+  def test_upload_mismatches_continues_after_one_file_raises
+    turned_over = images(:turned_over_image).id
+    commercial = images(:commercial_inquiry_image).id
+    disconnected = images(:disconnected_coprinus_comatus_image).id
+    seed_local_files(turned_over, commercial, disconnected)
+    messages = []
+    verifier = Image::Processor::Verifier.new { |msg| messages << msg }
+    call_count = 0
+    flaky_copy = lambda do |*_args|
+      call_count += 1
+      raise("boom") if call_count == 1
+
+      true
+    end
+
+    Image::Processor::FileTransfer.stub(:copy_file_to_server, flaky_copy) do
+      result = verifier.run
+      assert_equal(1, result[:failed].size)
+      assert_operator(result[:uploaded].size, :>, 0,
+                      "later files must still upload after an earlier " \
+                      "file's transfer raised")
+    end
+
+    assert(messages.any? do |msg|
+      msg.include?("Failed to upload") &&
+                          msg.include?("boom")
+    end)
   end
 
   def test_verify_yields_log_lines_to_the_given_block

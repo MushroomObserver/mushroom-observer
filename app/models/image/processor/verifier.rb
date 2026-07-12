@@ -15,6 +15,7 @@ class Image
         @log = log
         @uploaded = []
         @deleted = []
+        @failed = []
         # Fetched once per run (not cached at the class level -- see the
         # comment on Image::Processor.local_images_path).
         @image_server_data = Processor.image_server_data
@@ -25,7 +26,7 @@ class Image
         listings = build_listings
         upload_mismatches(listings)
         delete_files_no_longer_needed(listings)
-        { uploaded: @uploaded, deleted: @deleted }
+        { uploaded: @uploaded, deleted: @deleted, failed: @failed }
       end
 
       private
@@ -100,14 +101,26 @@ class Image
             next unless subdirs.include?(subdir_of(path))
             next if listings[server][path] == local[path]
 
-            log("Uploading #{path} to #{server}")
-            if FileTransfer.copy_file_to_server(server, path)
-              @uploaded << [server, path]
-            else
-              log("Failed to upload #{path} to #{server}")
-            end
+            upload_one_file(server, path)
           end
         end
+      end
+
+      # One file's transfer failing (returned false, or raised -- e.g.
+      # a missing rsync binary or Errno::ENOENT) must not abort the rest
+      # of the run: every other mismatched file still needs its chance
+      # to upload.
+      def upload_one_file(server, path)
+        log("Uploading #{path} to #{server}")
+        if FileTransfer.copy_file_to_server(server, path)
+          @uploaded << [server, path]
+        else
+          @failed << [server, path]
+          log("Failed to upload #{path} to #{server}")
+        end
+      rescue StandardError => e
+        @failed << [server, path]
+        log("Failed to upload #{path} to #{server}: #{e.message}")
       end
 
       def delete_files_no_longer_needed(listings)

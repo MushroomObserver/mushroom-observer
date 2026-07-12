@@ -360,6 +360,24 @@ class Image::ProcessorTest < UnitTestCase
     assert_not(File.exist?("#{local_root}/orig/#{image.id}-1.jpg"))
   end
 
+  # Regression test for a Copilot finding on PR #4751: script/process_image
+  # picked the LARGEST layer by file size (`ls -rS ... | tail -1`), not
+  # whichever one Dir.glob happens to return first (filesystem/lexicographic
+  # order, unrelated to size or image content).
+  def test_salvage_first_layer_if_multilayer_picks_largest_by_size
+    image = images(:in_situ_image)
+    processor = Image::Processor.new(image: image, ext: "tiff")
+    # "-0" sorts first alphabetically/by glob order, but is the smaller
+    # file -- proves the choice is size-based, not order-based.
+    File.write("#{local_root}/orig/#{image.id}-0.jpg", "small")
+    File.write("#{local_root}/orig/#{image.id}-1.jpg", "much bigger layer")
+
+    processor.send(:salvage_first_layer_if_multilayer)
+
+    assert_equal("much bigger layer",
+                 File.read("#{local_root}/orig/#{image.id}.jpg"))
+  end
+
   def test_copy_file_to_server_ssh_type_uses_rsync
     image = images(:in_situ_image)
     processor = Image::Processor.new(image: image, ext: "jpg")
