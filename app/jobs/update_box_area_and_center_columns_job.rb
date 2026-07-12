@@ -9,7 +9,6 @@ class UpdateBoxAreaAndCenterColumnsJob < ApplicationJob
     # This should be zero, but count just in case.
     loc_count = Location.where(box_area: nil).count
     log("Found #{loc_count} locations without a box_area.")
-    alert_on_missing_box_area(loc_count)
     # Count the observations associated with locations that are under the
     # max area, but haven't got a center lat/lng, and log what we're updating.
     obs_count = Observation.in_box_of_max_area.where(location_lat: nil).count
@@ -24,6 +23,7 @@ class UpdateBoxAreaAndCenterColumnsJob < ApplicationJob
     log("Updated #{loc_updated} locations' box_area and center_lat/lng.")
     log("Updated #{obs_centered} observations' location_lat/lng.")
     log("Nulled #{obs_center_nulled} observations' location_lat/lng.")
+    alert_on_missing_box_area(loc_count)
     # Return the values for debugging
     [loc_updated, obs_centered, obs_center_nulled]
   end
@@ -32,8 +32,8 @@ class UpdateBoxAreaAndCenterColumnsJob < ApplicationJob
 
   # box_area is computed when a Location is saved, so a nil is a data
   # anomaly - a location persisted through a path that bypassed it - not
-  # routine backlog. Surface it (the job repairs them regardless). A
-  # clean run stays silent.
+  # routine backlog. Surface it after the repair (so this only fires on a
+  # real run, not a dry-run inspection). A clean run stays silent.
   def alert_on_missing_box_area(loc_count)
     return unless loc_count.positive?
 
