@@ -141,7 +141,7 @@ class Components::Panel < Components::Base
          aria: collapse_aria) do
       render_collapse_message
 
-      Icon(type: :chevron_down, title: :OPEN.l, html_class: "active-icon")
+      Icon(type: :chevron_down, title: :OPEN.l, class: "active-icon")
       Icon(type: :chevron_up, title: :CLOSE.l)
     end
   end
@@ -203,11 +203,11 @@ class Components::Panel < Components::Base
   end
 
   def render_collapse_body(classes:, id:, wrapper:, &content)
-    CollapseDiv(
+    Collapsible(
       id: @collapse_id,
       expanded: @expanded,
       panel: true,
-      html_class: @collapse_class
+      class: @collapse_class
     ) { render_plain_body(classes:, id:, wrapper:, &content) }
   end
 

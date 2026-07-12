@@ -80,6 +80,17 @@ class IpStatsTest < UnitTestCase
     assert_true(new_ips.include?(old_ips[1]))
   end
 
+  # blocked_ips_current? checks File.exist? then File.mtime; a rewrite can
+  # remove the file in between. It must not raise on the per-request hot path.
+  def test_blocked_ips_current_survives_file_vanishing_mid_check
+    IpStats.blocked?("12.34.56.78") # prime cache: @blocked_ips_time + files
+    # File.exist? still passes, but File.mtime raises as if the file was
+    # removed by a concurrent rewrite between the two calls.
+    File.stub(:mtime, ->(*) { raise(Errno::ENOENT) }) do
+      assert_not(IpStats.send(:blocked_ips_current?))
+    end
+  end
+
   def test_clear_bad_ips
     assert_not_empty(IpStats.blocked_ips)
     IpStats.clear_blocked_ips

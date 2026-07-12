@@ -425,15 +425,6 @@ Style/ArrayIntersect:
 # Offense count: 62
 Style/ClassVars:
   Exclude:
-    - 'app/classes/textile.rb'
-    - 'app/extensions/symbol.rb'
-    - 'app/models/concerns/language_tracking.rb'
-    - 'app/models/location.rb'
-    - 'app/models/user_group.rb'
-    - 'test/controllers/locations_controller_test.rb'
-    - 'test/controllers/names_controller_create_test.rb'
-    - 'test/controllers/names_controller_update_merge_test.rb'
-    - 'test/controllers/names_controller_update_test.rb'
     - 'test/general_extensions.rb'
     - 'test/language_extensions.rb'
     - 'test/test_helper.rb'

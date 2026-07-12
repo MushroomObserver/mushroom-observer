@@ -22,7 +22,7 @@ class LinkIconTest < ComponentTestCase
   def test_title_adds_tooltip_and_sr_only_label
     html = render(Components::Icon.new(
                     type: :edit, title: :EDIT.l,
-                    html_class: "text-primary"
+                    class: "text-primary"
                   ))
 
     assert_html(html,
@@ -42,9 +42,9 @@ class LinkIconTest < ComponentTestCase
     assert_html(html, "span[data-toggle='tooltip'][data-other='v']")
   end
 
-  def test_attributes_passed_through
+  def test_extra_attrs_passed_through
     html = render(Components::Icon.new(
-                    type: :globe, attributes: { id: "my_icon" }
+                    type: :globe, id: "my_icon"
                   ))
 
     assert_html(html, "span#my_icon.glyphicon-globe")
