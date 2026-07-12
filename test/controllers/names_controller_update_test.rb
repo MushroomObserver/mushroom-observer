@@ -5,35 +5,12 @@ require("test_helper")
 class NamesControllerUpdateTest < FunctionalTestCase
   tests NamesController
 
-  # EMAIL TESTS, currently in Names, Locations and their Descriptions
-  # Has to be defined on class itself, include doesn't seem to work
-  def self.report_email(email)
-    @@emails ||= []
-    @@emails << email
-  end
-
   def setup
     @new_pts  = 10
     @chg_pts  = 10
     @auth_pts = 100
     @edit_pts = 10
-    @@emails = []
     super
-  end
-
-  def assert_email_generated
-    assert_not_empty(@@emails, "Was expecting an email notification.")
-  ensure
-    @@emails = []
-  end
-  private :assert_email_generated
-
-  def assert_no_emails
-    msg = @@emails.join("\n")
-    assert_empty(@@emails,
-                 "Wasn't expecting any email notifications; got:\n#{msg}")
-  ensure
-    @@emails = []
   end
 
   # ----------------------------
@@ -191,7 +168,6 @@ class NamesControllerUpdateTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
     assert_equal("", name.reload.author)
     assert_equal("__Le Genera Galera__, 139. 1935.", name.citation)
     assert_equal(rolf, name.user)
@@ -215,11 +191,13 @@ class NamesControllerUpdateTest < FunctionalTestCase
       }
     }
     login(name.user.login)
-    put(:update, params: params)
     # This does not generate a new_admin_emails_name_change_requests_path email,
     # both because this name has no dependents,
     # and because the email form requires a POST.
-    assert(@@emails.one?)
+    assert_enqueued_email_with(WebmasterMailer, :build,
+                               args: ->(_) { true }) do
+      put(:update, params: params)
+    end
     assert_flash_success
     assert_redirected_to(name_path(name.id))
     assert_equal(desired_text_name, name.reload.search_name)
@@ -244,11 +222,12 @@ class NamesControllerUpdateTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
     assert_equal(@new_pts, rolf.reload.contribution)
     assert_equal(new_notes, name.reload.notes)
     assert_equal(past_names + 1, name.versions.size)
@@ -268,11 +247,13 @@ class NamesControllerUpdateTest < FunctionalTestCase
       }
     }
     login(mary.login)
-    put(:update, params: params)
+    assert_enqueued_email_with(WebmasterMailer, :build,
+                               args: ->(_) { true }) do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_email_generated
     assert(Name.exists?(text_name: "Lactarius"))
     # points for changing Lactarius alpigenes
     assert_equal(@new_pts + @chg_pts, mary.reload.contribution)
@@ -317,12 +298,14 @@ class NamesControllerUpdateTest < FunctionalTestCase
       }
     }
     login(name.user.login)
-    put(:update, params: params)
+    assert_enqueued_email_with(WebmasterMailer, :build,
+                               args: ->(_) { true }) do
+      put(:update, params: params)
+    end
 
     assert_redirected_to(name_path(name.id))
     assert_flash_success
     assert_empty(name.reload.author)
-    assert_email_generated
   end
 
   def test_edit_name_misspelling
@@ -448,11 +431,12 @@ class NamesControllerUpdateTest < FunctionalTestCase
       }
     }
     login(rolf.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_warning
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
     assert_equal(@new_pts, rolf.reload.contribution)
     # (But owner remains of course.)
     assert_equal(name_owner, name.reload.user)
@@ -474,10 +458,11 @@ class NamesControllerUpdateTest < FunctionalTestCase
 
     # No change: go to show_name, warning.
     params[:name][:deprecated] = "true"
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
     assert_flash_warning
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
 
     # Change to accepted: go to approve_name, no flash.
     params[:name][:deprecated] = "false"
@@ -520,10 +505,11 @@ class NamesControllerUpdateTest < FunctionalTestCase
         deprecated: "false"
       }
     }
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
     name.reload
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis (Gyelnik) Hale",
@@ -537,10 +523,12 @@ class NamesControllerUpdateTest < FunctionalTestCase
 
     params[:name][:text_name] = "Xanthoparmelia coloradoensis"
     params[:name][:author] = ""
-    put(:update, params: params)
+    assert_enqueued_email_with(WebmasterMailer, :build,
+                               args: ->(_) { true }) do
+      put(:update, params: params)
+    end
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_email_generated
     name.reload
     assert_equal("Xanthoparmelia coloradoensis", name.text_name)
     assert_equal("Xanthoparmelia coloradoensis", name.search_name)
@@ -574,7 +562,6 @@ class NamesControllerUpdateTest < FunctionalTestCase
 
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
     name.reload
     assert_equal("Variety", name.rank)
     assert_equal("Pleurotus djamor var. djamor", name.text_name)
@@ -607,11 +594,12 @@ class NamesControllerUpdateTest < FunctionalTestCase
         deprecated: "false"
       }
     }
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
     name.reload
     assert_equal("Group", name.rank)
     assert_equal("Lepiota echinatae group", name.text_name)
@@ -791,12 +779,13 @@ class NamesControllerUpdateTest < FunctionalTestCase
     }
 
     login(name.user.login)
-    put(:update, params: params)
+    assert_no_enqueued_emails do
+      put(:update, params: params)
+    end
 
     assert_flash_success(
       "User should be able to make minor changes to Name that has offspring"
     )
-    assert_no_emails
     name.reload
     assert_equal(params[:name][:icn_id], name.icn_id.to_s)
     assert_equal(params[:name][:author], name.author)
@@ -856,13 +845,14 @@ class NamesControllerUpdateTest < FunctionalTestCase
     user = name.user
     login(user.login)
 
-    assert_difference("name.versions.count", 1) do
-      put(:update, params: params)
+    assert_no_enqueued_emails do
+      assert_difference("name.versions.count", 1) do
+        put(:update, params: params)
+      end
     end
     assert_flash_success
     assert_redirected_to(name_path(name.id))
     assert_equal(189_826, name.reload.icn_id)
-    assert_no_emails
 
     assert_equal(rank, Name.ranks.key(name.versions.first.rank),
                  "Rank versioned incorrectly.")
@@ -893,7 +883,6 @@ class NamesControllerUpdateTest < FunctionalTestCase
     end
     assert_flash_success
     assert_redirected_to(name_path(name.id))
-    assert_no_emails
   end
 
   def test_update_change_icn_id_name_with_dependents
