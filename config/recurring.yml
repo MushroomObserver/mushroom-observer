@@ -40,3 +40,29 @@ production:
   verify_images:
     class: VerifyImagesJob
     schedule: every day at 1:01am
+  check_for_broken_references:
+    class: CheckForBrokenReferencesJob
+    schedule: every sunday at 7:13am
+  # misc_data_repairs (formerly refresh_caches) was one job until it
+  # got split by measured cost -- see MiscDataRepairsJob's own comment
+  # for the local timing that drove the split. All four fire off the
+  # same 5:1x/2x slot the original job used, each staggered ~4-5
+  # minutes apart and off recover_stuck_inat_imports' every-3-minutes
+  # marks (18/21/24/27/30), same reasoning as the stagger above:
+  # independent jobs, no cost to spacing them out, and each one's
+  # runtime isn't tightly bounded.
+  misc_data_repairs:
+    class: MiscDataRepairsJob
+    schedule: every day at 5:13am
+  refresh_content_filter_caches:
+    class: RefreshContentFilterCachesJob
+    schedule: every day at 5:17am
+  update_observation_views_reviewed_column:
+    class: UpdateObservationViewsReviewedColumnJob
+    schedule: every day at 5:22am
+  refresh_all_user_stats:
+    class: RefreshAllUserStatsJob
+    schedule: every day at 5:26am
+  refresh_name_lister_cache:
+    class: RefreshNameListerCacheJob
+    schedule: every day at 3:33am
