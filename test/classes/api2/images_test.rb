@@ -280,16 +280,12 @@ class API2::ImagesTest < UnitTestCase
       original_name: "strip_this"
     }
     assert_equal("toss", @user.keep_filenames)
-    File.stub(:rename, true) do
-      File.stub(:chmod, true) do
-        api = API2.execute(params)
-        assert_no_errors(api, "Errors while posting image")
-        assert_equal(1, api.results.length)
-        result = api.results.first
-        assert_not_nil(result, "API did not return the created image")
-        assert_equal(Image.last.id, result["id"].to_i)
-      end
-    end
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    assert_equal(1, api.results.length)
+    result = api.results.first
+    assert_not_nil(result, "API did not return the created image")
+    assert_equal(Image.last.id, result["id"].to_i)
     assert_last_image_correct
   end
 
@@ -321,16 +317,12 @@ class API2::ImagesTest < UnitTestCase
       upload_file: Rails.root.join("test/images/sticky.jpg"),
       original_name: @orig
     }
-    File.stub(:rename, true) do
-      File.stub(:chmod, true) do
-        api = API2.execute(params)
-        assert_no_errors(api, "Errors while posting image")
-        assert_equal(1, api.results.length)
-        result = api.results.first
-        assert_not_nil(result, "API did not return the created image")
-        assert_equal(Image.last.id, result["id"].to_i)
-      end
-    end
+    api = API2.execute(params)
+    assert_no_errors(api, "Errors while posting image")
+    assert_equal(1, api.results.length)
+    result = api.results.first
+    assert_not_nil(result, "API did not return the created image")
+    assert_equal(Image.last.id, result["id"].to_i)
     assert_last_image_correct
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:upload_file))
@@ -354,7 +346,11 @@ class API2::ImagesTest < UnitTestCase
       api_key: @api_key.key,
       upload_url: url
     }
-    File.stub(:rename, false) do
+    # Simulates a cross-filesystem rename failure (e.g. tmp dir and image
+    # root on different mounted volumes) -- move_original's rescue falls
+    # back to a real `cp`, which must still land the file at the correct
+    # path for the (now-synchronous) resize pipeline to find it.
+    File.stub(:rename, ->(*) { raise(Errno::ENOENT) }) do
       api = API2.execute(params)
       assert_no_errors(api, "Errors while posting image")
       assert_equal(1, api.results.length)

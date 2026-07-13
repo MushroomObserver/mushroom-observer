@@ -271,7 +271,11 @@ class API2ControllerTest < FunctionalTestCase
     count = Image.count
     file = Rails.root.join("test/images/sticky.jpg").to_s
     checksum = file_checksum(file)
-    File.stub(:rename, false) do
+    # Simulates a cross-filesystem rename failure (e.g. tmp dir and image
+    # root on different mounted volumes) -- move_original's rescue falls
+    # back to a real `cp`, which must still land the file at the correct
+    # path for the (now-synchronous) resize pipeline to find it.
+    File.stub(:rename, ->(*) { raise(Errno::ENOENT) }) do
       post_and_send_file(:images, file, "image/jpeg",
                          api_key: api_keys(:rolfs_api_key).key,
                          detail: :low,
@@ -302,7 +306,11 @@ class API2ControllerTest < FunctionalTestCase
     file = Rails.root.join("test/images/sticky.jpg").to_s
     upload = UploadedFileWithChecksum.new(file, "image/jpeg")
     checksum = file_checksum(file)
-    File.stub(:rename, false) do
+    # Simulates a cross-filesystem rename failure (e.g. tmp dir and image
+    # root on different mounted volumes) -- move_original's rescue falls
+    # back to a real `cp`, which must still land the file at the correct
+    # path for the (now-synchronous) resize pipeline to find it.
+    File.stub(:rename, ->(*) { raise(Errno::ENOENT) }) do
       params = {
         api_key: api_keys(:rolfs_api_key).key,
         upload: upload,
@@ -325,7 +333,11 @@ class API2ControllerTest < FunctionalTestCase
     file = Rails.root.join("test/images/sticky.jpg").to_s
     upload = UploadedFileWithChecksum.new(file, "image/jpeg")
     checksum = file_checksum(file).reverse
-    File.stub(:rename, false) do
+    # Simulates a cross-filesystem rename failure (e.g. tmp dir and image
+    # root on different mounted volumes) -- move_original's rescue falls
+    # back to a real `cp`, which must still land the file at the correct
+    # path for the (now-synchronous) resize pipeline to find it.
+    File.stub(:rename, ->(*) { raise(Errno::ENOENT) }) do
       params = {
         api_key: api_keys(:rolfs_api_key).key,
         upload: upload,
@@ -340,6 +352,30 @@ class API2ControllerTest < FunctionalTestCase
     assert_match(/MD5/, @api.errors.first.to_s)
   end
 
+  # API uploads process synchronously (Image#process_image's
+  # synchronous: true) so the response can carry correctly-sized derivative
+  # URLs - the mobile app has no way to pick them up later otherwise. A
+  # processing failure must surface as a real API error, not a silent
+  # success with unprocessed derivatives.
+  def test_post_image_processing_failure_is_a_fatal_api_error
+    setup_image_dirs
+    file = Rails.root.join("test/images/sticky.jpg").to_s
+    upload = UploadedFileWithChecksum.new(file, "image/jpeg")
+    checksum = file_checksum(file)
+    ProcessImageJob.stub(:perform_now, false) do
+      params = {
+        api_key: api_keys(:rolfs_api_key).key,
+        upload: upload,
+        md5sum: checksum,
+        detail: :low,
+        format: :json
+      }
+      post(:images, params: params)
+    end
+    assert_api_failed
+    assert_match(/process/i, @api.errors.first.to_s)
+  end
+
   def test_post_maximal_image
     setup_image_dirs
     rolf.update(keep_filenames: "keep_and_show")
@@ -347,7 +383,11 @@ class API2ControllerTest < FunctionalTestCase
     file = Rails.root.join("test/images/Coprinus_comatus.jpg").to_s
     proj = rolf.projects_member.first
     obs = rolf.observations.first
-    File.stub(:rename, false) do
+    # Simulates a cross-filesystem rename failure (e.g. tmp dir and image
+    # root on different mounted volumes) -- move_original's rescue falls
+    # back to a real `cp`, which must still land the file at the correct
+    # path for the (now-synchronous) resize pipeline to find it.
+    File.stub(:rename, ->(*) { raise(Errno::ENOENT) }) do
       post_and_send_file(:images, file, "image/jpeg",
                          api_key: api_keys(:rolfs_api_key).key,
                          vote: "3",

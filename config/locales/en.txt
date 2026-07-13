@@ -4650,6 +4650,7 @@
   runtime_form_names_misspelling_same: Correct spelling and incorrect spelling are the same!
   runtime_image_changed_your_image: "Changed your profile image to image #[id]."
   runtime_image_move_failed: "Something went wrong on the server and we failed to save image #[id]. Please try again."
+  runtime_image_process_failed: "Something went wrong processing image #[id]. Please try again."
   runtime_image_remove_denied: You do not have permission to remove images from this observation.
   runtime_image_remove_missing: This observation doesn't have that image!
   runtime_merge_warning: Because it can be destructive, only the admin can merge existing [types]. An email requesting the proposed merge has been sent to the admins.

@@ -870,7 +870,19 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # be called after the image has been validated and the record saved.  (We
   # need to have an ID at this point.)  Adds any errors to the :image field
   # and returns false.
-  def process_image(strip: false)
+  #
+  # `synchronous: true` blocks until resize/transfer actually finishes,
+  # instead of enqueuing and returning immediately -- for callers with no
+  # way to observe a later background failure or pick up updated URLs once
+  # processing completes. Currently only the API (api2/image_api.rb): the
+  # web UI gets a live update via Image's Turbo Stream broadcast once the
+  # async job finishes, but an API client's response is the only chance it
+  # gets to see correctly-sized derivative URLs (see #4735's mobile-app
+  # coupling discussion for why this matters for the mobile client
+  # specifically). Trades away the request-latency win #4735 set out to
+  # deliver for API-originated uploads, in exchange for not regressing
+  # them the moment this async pipeline ships.
+  def process_image(strip: false, synchronous: false)
     result = true
     if new_record?
       errors.add(:image, "Called process_image before saving image record.")
@@ -888,14 +900,26 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
         # strip has actually succeeded, unlike the old optimistic
         # update_attribute(:gps_stripped, true) that fired regardless.
         result = strip ? strip_original_gps?(ext) : true
-        # Resize/reorient/transfer happens off the request cycle. Skipped
-        # only if the GPS strip above was required and failed: an
-        # unstripped original must not propagate into resized/transferred
-        # copies. ProcessImageJob enqueues ImageDhashJob itself once done.
-        ProcessImageJob.perform_later(id, ext, set_size) if result
+        # Resize/reorient/transfer is skipped only if the GPS strip above
+        # was required and failed: an unstripped original must not
+        # propagate into resized/transferred copies. ProcessImageJob
+        # enqueues ImageDhashJob itself once done, in either case below.
+        result = process_now_or_later?(ext, set_size, synchronous) if result
       end
     end
     result
+  end
+
+  def process_now_or_later?(ext, set_size, synchronous)
+    unless synchronous
+      ProcessImageJob.perform_later(id, ext, set_size)
+      return true
+    end
+
+    return true if ProcessImageJob.perform_now(id, ext, set_size)
+
+    errors.add(:image, :runtime_image_process_failed.t(id: id))
+    false
   end
 
   def strip_original_gps?(ext)
