@@ -4,18 +4,54 @@ require("open3")
 
 class Image
   class Processor
-    # Ruby port of script/verify_images. Lists every local and remote image
-    # file (by subdir/filename => byte size), uploads any local file that's
-    # missing or mismatched on a server that's supposed to have it, then
-    # deletes local copies once they're confirmed to match on every server
-    # that carries that subdirectory -- skipping any size configured in
-    # MO.keep_these_image_sizes_local, which never gets deleted locally.
+    # Verifies (and completes) transfers for the work-list of images not yet
+    # confirmed fully on the image server(s), instead of scanning every file
+    # on every server. See GitHub issue #4791: a full local+remote tree scan
+    # (the original script/verify_images design) is too slow to schedule
+    # frequently, and the blind `find -mmin +N | rsync
+    # --remove-source-files` cron it was replaced by races
+    # Image::Processor#process outright -- it can delete a locally-complete
+    # original before the derived sizes are ever generated, with no idea
+    # any of that is still in flight.
+    #
+    # For each candidate image, checks presence + byte-size of every
+    # expected file directly (no directory listing), uploads anything
+    # missing/mismatched on a server that should have it, and only once
+    # every size is confirmed present and byte-matching everywhere:
+    #   - deletes the local copy of any size not in
+    #     MO.keep_these_image_sizes_local
+    #   - marks the image transferred (see self.candidates/self.recheck for
+    #     why this makes the flag honest, replacing the old
+    #     self.retransfer_images, which could mark an image transferred
+    #     without ever confirming any size actually reached the server)
+    #
+    # Also re-checks a bounded set of recently-completed images
+    # (self.recheck) -- if one of those turns out incomplete, that's the
+    # #4791 failure mode recurring, so it's alert-worthy, not something to
+    # silently re-fix in the dark.
     class Verifier
+      # The routine work-list: anything not yet confirmed complete.
+      def self.candidates
+        Image.where(transferred: false)
+      end
+
+      # The safety check: recently-marked-complete images, re-verified in
+      # case the flag went true without every size actually landing (the
+      # exact #4791 failure mode). Bounded by recency, not a full-history
+      # scan -- if this ever needs to be a wider backstop that should be a
+      # deliberate decision made after seeing an #alerts hit, not an
+      # accidental full scan on every run.
+      def self.recheck
+        Image.where(transferred: true, updated_at: 1.hour.ago..)
+      end
+
       def initialize(&log)
         @log = log
         @uploaded = []
         @deleted = []
+        @completed = []
         @failed = []
+        @alerted = []
         # Fetched once per run (not cached at the class level -- see the
         # comment on Image::Processor.local_images_path).
         @image_server_data = Processor.image_server_data
@@ -23,85 +59,112 @@ class Image
       end
 
       def run
-        listings = build_listings
-        upload_mismatches(listings)
-        delete_files_no_longer_needed(listings)
-        { uploaded: @uploaded, deleted: @deleted, failed: @failed }
+        self.class.candidates.find_each do |image|
+          verify_image(image, alert_if_incomplete: false)
+        end
+        self.class.recheck.find_each do |image|
+          verify_image(image, alert_if_incomplete: true)
+        end
+        { uploaded: @uploaded, deleted: @deleted, completed: @completed,
+          failed: @failed, alerted: @alerted }
       end
 
       private
 
-      def build_listings
-        [:local, *@image_servers].index_with { |server| list_server(server) }
-      end
+      def verify_image(image, alert_if_incomplete:)
+        paths = paths_for(image)
+        local_sizes = paths.index_with { |path| local_size(path) }
+        # Still mid-#process (a size hasn't been generated locally yet) --
+        # nothing to verify or transfer until it exists. Not an error: this
+        # is the normal in-progress window between upload and job
+        # completion, exactly the window #4791's race used to exploit.
+        return if local_sizes.value?(nil)
 
-      def list_server(server)
-        data = @image_server_data[server]
-        data[:subdirs].each_with_object({}) do |subdir, files|
-          log("Listing #{server} #{subdir}")
-          list_subdir(server, data, subdir).each do |name, size|
-            files["#{subdir}/#{name}"] = size
-          end
+        remote_sizes = @image_servers.index_with do |server|
+          remote_sizes_for(server, paths_for_server(server, paths))
+        end
+
+        upload_mismatches(image, paths, local_sizes, remote_sizes)
+
+        if all_synced?(paths, local_sizes, remote_sizes)
+          delete_local_copies(image, paths)
+          mark_transferred(image)
+        elsif alert_if_incomplete
+          alert_incomplete(image)
         end
       end
 
-      # "file" is a local (or locally-mounted) path -- Dir.glob it directly.
-      # "ssh" is a real remote host -- shell out, matching how the original
-      # script/bash_images' read_server_directory handled it.
-      def list_subdir(server, data, subdir)
+      def paths_for(image)
+        paths = Image::URL::SUBDIRECTORIES.values.map do |subdir|
+          "#{subdir}/#{image.id}.jpg"
+        end
+        ext = image.original_extension
+        paths << "orig/#{image.id}.#{ext}" if ext != "jpg"
+        paths
+      end
+
+      def paths_for_server(server, paths)
+        subdirs = @image_server_data[server][:subdirs]
+        paths.select { |path| subdirs.include?(subdir_of(path)) }
+      end
+
+      def local_size(path)
+        full = "#{Processor.local_images_path}/#{path}"
+        File.exist?(full) ? File.size(full) : nil
+      end
+
+      def remote_sizes_for(server, paths)
+        return {} if paths.empty?
+
+        data = @image_server_data[server]
         case data[:type]
         when "file"
-          list_local_subdir("#{data[:path]}/#{subdir}")
+          paths.index_with { |path| remote_file_size(data[:path], path) }
         when "ssh"
-          list_ssh_subdir(server, data[:path], subdir)
+          ssh_sizes(server, data[:path], paths)
         else
-          raise("Don't know how to list #{server} via: #{data[:type]}")
+          raise("Don't know how to check #{server} via: #{data[:type]}")
         end
       end
 
-      def list_local_subdir(path)
-        Dir.glob("#{path}/*").each_with_object({}) do |file_path, files|
-          next unless File.file?(file_path)
-
-          files[File.basename(file_path)] = File.size(file_path)
-        end
+      def remote_file_size(root, path)
+        full = "#{root}/#{path}"
+        File.exist?(full) ? File.size(full) : nil
       end
 
-      # `data[:path]` for an ssh server is "user@host:/remote/path" (see
-      # ServerData.write_target_path) -- split on the first ":" the same
-      # way rsync/scp remote-path syntax does. `-L` follows symlinks;
-      # `-printf` gives us "name\tsize" lines with no shell quoting to
-      # parse around -- both match read_server_directory's ssh branch.
-      def list_ssh_subdir(server, remote_path, subdir)
-        host, path = remote_path.split(":", 2)
+      # One ssh round trip per (image, server) -- checks every expected
+      # file for this one image in a single call, instead of listing the
+      # whole subdirectory (too slow to run often, see #4791) or shelling
+      # out once per file (too chatty against a remote host to schedule
+      # frequently either). `-L` follows symlinks; `-printf` gives us
+      # "path\tsize" lines with no shell quoting to parse around, matching
+      # the original script/bash_images' read_server_directory approach.
+      def ssh_sizes(server, remote_path, paths)
+        host, root = remote_path.split(":", 2)
+        full_paths = paths.map { |path| "#{root}/#{path}" }
         output, status = Open3.capture2(
-          "ssh", host, "find", "-L", "#{path}/#{subdir}", "-maxdepth", "1",
-          "-type", "f", "-printf", "%f\\t%s\\n"
+          "ssh", host, "find", "-L", *full_paths, "-maxdepth", "0",
+          "-printf", "%p\\t%s\\n"
         )
-        unless status.success?
-          log("Failed to list #{host}:#{path}/#{subdir} on #{server}")
-          return {}
-        end
-
-        parse_find_output(output)
+        log("Failed to check #{host} for #{server}") unless status.success?
+        parse_find_output(output, root)
       end
 
-      def parse_find_output(output)
-        output.each_line.with_object({}) do |line, files|
-          name, size = line.chomp.split("\t")
-          files[name] = size.to_i if name.present?
+      def parse_find_output(output, root)
+        output.each_line.with_object({}) do |line, sizes|
+          full_path, size = line.chomp.split("\t")
+          next if full_path.blank?
+
+          sizes[full_path.delete_prefix("#{root}/")] = size.to_i
         end
       end
 
-      def upload_mismatches(listings)
-        local = listings[:local]
+      def upload_mismatches(image, paths, local_sizes, remote_sizes)
         @image_servers.each do |server|
-          subdirs = @image_server_data[server][:subdirs]
-          local.each_key do |path|
-            next unless subdirs.include?(subdir_of(path))
-            next if listings[server][path] == local[path]
+          paths_for_server(server, paths).each do |path|
+            next if remote_sizes[server][path] == local_sizes[path]
 
-            upload_one_file(server, path)
+            upload_one_file(image, server, path)
           end
         end
       end
@@ -110,38 +173,59 @@ class Image
       # a missing rsync binary or Errno::ENOENT) must not abort the rest
       # of the run: every other mismatched file still needs its chance
       # to upload.
-      def upload_one_file(server, path)
+      def upload_one_file(image, server, path)
         log("Uploading #{path} to #{server}")
         if FileTransfer.copy_file_to_server(server, path)
-          @uploaded << [server, path]
+          @uploaded << [image.id, server, path]
         else
-          @failed << [server, path]
+          @failed << [image.id, server, path]
           log("Failed to upload #{path} to #{server}")
         end
       rescue StandardError => e
-        @failed << [server, path]
+        @failed << [image.id, server, path]
         log("Failed to upload #{path} to #{server}: #{e.message}")
       end
 
-      def delete_files_no_longer_needed(listings)
-        local = listings[:local]
-        local.each_key do |path|
-          next if keep_local?(subdir_of(path))
-          next unless fully_synced?(path, listings)
-
-          log("Deleting #{path}")
-          File.delete("#{Processor.local_images_path}/#{path}")
-          @deleted << path
+      # Deliberately checks against the PRE-upload remote_sizes snapshot --
+      # a file just uploaded above isn't re-verified in the same run before
+      # being trusted; it waits for the next run's fresh remote check. That
+      # keeps a routine upload failure and a routine "just fixed it" both
+      # inconclusive here (safe either way: nothing gets deleted or marked
+      # transferred on unverified data).
+      def all_synced?(paths, local_sizes, remote_sizes)
+        @image_servers.all? do |server|
+          paths_for_server(server, paths).all? do |path|
+            remote_sizes[server][path] == local_sizes[path]
+          end
         end
       end
 
-      def fully_synced?(path, listings)
-        local_size = listings[:local][path]
-        @image_servers.all? do |server|
-          subdirs = @image_server_data[server][:subdirs]
-          subdirs.exclude?(subdir_of(path)) ||
-            listings[server][path] == local_size
+      def delete_local_copies(image, paths)
+        paths.each do |path|
+          next if keep_local?(subdir_of(path))
+
+          full = "#{Processor.local_images_path}/#{path}"
+          next unless File.exist?(full)
+
+          log("Deleting #{path}")
+          File.delete(full)
+          @deleted << [image.id, path]
         end
+      end
+
+      def mark_transferred(image)
+        return if image.transferred
+
+        image.update(transferred: true)
+        Observation.joins(:observation_images).
+          where(observation_images: { image_id: image.id }).touch_all
+        @completed << image.id
+      end
+
+      def alert_incomplete(image)
+        @alerted << image.id
+        log("ALERT: image #{image.id} marked transferred, but a size is " \
+            "missing or mismatched on a server that should have it")
       end
 
       def keep_local?(subdir)

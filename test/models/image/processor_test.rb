@@ -3,9 +3,11 @@
 require("test_helper")
 
 # Exercises Image::Processor directly (no shelling out) -- the Ruby
-# replacement for script/process_image, script/rotate_image, and
-# script/retransfer_images. See test/classes/image_script_test.rb for the
-# equivalent coverage of the still-live shell scripts.
+# replacement for script/process_image and script/rotate_image. See
+# test/models/image/processor/verifier_test.rb for the retransfer/verify
+# coverage (Verifier now owns that, see #4791), and
+# test/classes/image_script_test.rb for the equivalent coverage of the
+# still-live shell scripts.
 class Image::ProcessorTest < UnitTestCase
   include ActiveJob::TestHelper
 
@@ -215,72 +217,6 @@ class Image::ProcessorTest < UnitTestCase
     end
   end
 
-  def test_retransfer_images_only_touches_untransferred_images
-    in_situ = images(:in_situ_image)
-    turned_over = images(:turned_over_image)
-    assert_not(in_situ.transferred)
-    assert_not(turned_over.transferred)
-
-    File.write("#{local_root}/orig/#{in_situ.id}.jpg", "A")
-    File.write("#{local_root}/960/#{in_situ.id}.jpg", "B")
-    File.write("#{local_root}/640/#{in_situ.id}.jpg", "C")
-    File.write("#{local_root}/320/#{in_situ.id}.jpg", "D")
-    File.write("#{local_root}/thumb/#{in_situ.id}.jpg", "E")
-    File.write("#{local_root}/1280/#{in_situ.id}.jpg", "F")
-    File.write("#{local_root}/960/#{turned_over.id}.jpg", "G")
-    File.write("#{local_root}/640/#{turned_over.id}.jpg", "H")
-    File.write("#{local_root}/320/#{turned_over.id}.jpg", "I")
-    File.write("#{local_root}/thumb/#{turned_over.id}.jpg", "J")
-    File.write("#{local_root}/1280/#{turned_over.id}.jpg", "K")
-    File.write("#{local_root}/orig/#{turned_over.id}.jpg", "L")
-
-    Image::Processor.retransfer_images
-
-    assert(in_situ.reload.transferred)
-    assert(turned_over.reload.transferred)
-    assert_equal("A",
-                 File.read("#{remote_server_path(1)}/orig/#{in_situ.id}.jpg"))
-    assert_equal("E",
-                 File.read("#{remote_server_path(1)}/thumb/#{in_situ.id}.jpg"))
-    assert_equal("E",
-                 File.read("#{remote_server_path(2)}/thumb/#{in_situ.id}.jpg"))
-    assert_not(
-      File.exist?("#{remote_server_path(2)}/960/#{in_situ.id}.jpg"),
-      "large should NOT go to remote2 (not in its configured :sizes)"
-    )
-  end
-
-  def test_retransfer_images_does_not_mark_transferred_on_failure
-    in_situ = images(:in_situ_image)
-    File.write("#{local_root}/orig/#{in_situ.id}.jpg", "A")
-
-    Image::Processor::FileTransfer.stub(:copy_file_to_server, false) do
-      Image::Processor.retransfer_images
-    end
-
-    assert_not(in_situ.reload.transferred)
-  end
-
-  # Regression test: a failed GPS strip leaves #process's early return
-  # (see test_process_strip_gps_failure_does_not_transfer_files) with
-  # only "orig" present locally -- no derivatives, since make_file_sizes
-  # never ran. retransfer_images must not treat that as "just needs a
-  # retry" and push the (possibly still GPS-tainted) "orig" file alone;
-  # it must skip the image entirely until #process actually completes.
-  def test_retransfer_images_skips_partially_processed_image
-    in_situ = images(:in_situ_image)
-    # Only "orig" exists -- exactly what a failed GPS strip leaves behind.
-    File.write("#{local_root}/orig/#{in_situ.id}.jpg", "still has GPS data")
-
-    Image::Processor.retransfer_images
-
-    assert_not(
-      File.exist?("#{remote_server_path(1)}/orig/#{in_situ.id}.jpg"),
-      "Must not transfer a partially-processed image's files anywhere"
-    )
-    assert_not(in_situ.reload.transferred)
-  end
-
   def test_requires_image
     assert_raises(RuntimeError) { Image::Processor.new(image: nil) }
   end
@@ -309,8 +245,9 @@ class Image::ProcessorTest < UnitTestCase
     end
 
     # A failed transfer must not mark the image transferred -- otherwise
-    # RetransferImagesJob's `Image.where(transferred: false)` safety net
-    # would never pick this image up again.
+    # Verifier's `Image.where(transferred: false)` work-list (see
+    # Image::Processor::Verifier.candidates) would never pick this image
+    # up again.
     assert_not(image.reload.transferred)
   end
 

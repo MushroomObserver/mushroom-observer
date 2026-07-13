@@ -3,12 +3,18 @@ RAILS_ENV=production
 MAILTO=webmaster@mushroomobserver.org
 
 *   * * * * /var/web/mo/bin/run script/update_ip_stats.rb
-*/6 * * * * /var/web/mo/bin/run script/retransfer_images
-# This runs staggered three minutes after retransfer_images:
-3-59/6 * * * * (cd /var/web/mo/public/images && find . -type f -mmin +3) | rsync -a --remove-source-files --files-from=- /var/web/mo/public/images/ mo@images.mushroomobserver.org:/data/images/mo/
+# retransfer_images and the find -mmin +3 | rsync --remove-source-files
+# line below it are both retired (see GitHub issue #4791): the rsync
+# raced Image::Processor#process -- it could delete a locally-complete
+# original before the derived sizes were generated, since it had no idea
+# any of that was still in flight. VerifyImagesJob (config/recurring.yml,
+# every 5 minutes) replaces both: it verifies every size is present and
+# byte-matching on every server before deleting anything local or marking
+# an image transferred, and it's scoped to a DB work-list rather than a
+# full tree scan, so it's cheap enough to run this often.
 */4 * * * * /var/web/mo/bin/run script/parse_log
 13  3 * * * /var/web/mo/bin/run script/backup_blocked_ips.sh
-# This has been superseded by the rsync command above:
+# This has been superseded by VerifyImagesJob (see above):
 # 13  4 * * * /var/web/mo/bin/run script/verify_images
 43  4 * * * /var/web/mo/bin/run script/refresh_sitemap
 43  5 * * * /var/web/mo/bin/run script/backup_database.sh

@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 class Image
-  # Resizes, reorients, and transfers an uploaded image's files, and keeps
-  # the image server(s) in sync with what's stored locally. Runs the steps
-  # that used to live in script/process_image, script/rotate_image, and
-  # script/retransfer_images, but through ActiveRecord (`image.update`)
-  # instead of a raw SQL `UPDATE`, so `after_update_commit` callbacks fire.
+  # Resizes, reorients, and transfers an uploaded image's files, through
+  # ActiveRecord (`image.update`) instead of a raw SQL `UPDATE`, so
+  # `after_update_commit` callbacks fire -- runs the steps that used to
+  # live in script/process_image and script/rotate_image. Keeping the
+  # image server(s) in sync with what's stored locally (script/
+  # retransfer_images and script/verify_images' old jobs) lives in
+  # Verifier now, not here -- see self.verify_images.
   #
   # 1. convert original to jpeg if necessary
   # 2. reorient it correctly if necessary
@@ -107,44 +109,23 @@ class Image
     end
 
     # Mark image as transferred and touch related obs (for caches) if all
-    # good. Public (not private) because `self.retransfer_images` below
-    # calls this on a `processor` instance it created for another image.
+    # good. This is only the optimistic first-attempt marking, right after
+    # this run's own transfer -- Verifier (see self.verify_images) is the
+    # authoritative backstop that confirms every size actually landed on
+    # every server before trusting `transferred`, replacing the old
+    # self.retransfer_images, which could flip the flag without ever
+    # confirming anything reached the server (see #4791).
     def mark_image_record_transferred_and_touch_obs
       @image.update(transferred: @transferred_any)
       Observation.joins(:observation_images).
         where(observation_images: { image_id: @id }).touch_all
     end
 
-    def self.retransfer_images
-      Image.where(transferred: false).find_each do |image|
-        processor = new(image: image)
-        next unless processor.locally_processed?
-
-        processor.transfer_files_to_image_servers
-        if processor.transferred_any && processor.errors.empty?
-          processor.mark_image_record_transferred_and_touch_obs
-        end
-      end
-    end
-
-    # True once every expected local derivative exists -- i.e. #process
-    # actually finished (make_file_sizes ran) rather than aborting early
-    # (e.g. a failed GPS strip, see #process). This is a safety-net
-    # retransfer, not a full #process retry: it must never push a
-    # partially-processed image. A missing derivative here means
-    # #process never reached make_file_sizes, so the "orig" file may
-    # still be untouched/GPS-tainted -- blindly transferring whatever
-    # subset of local files DOES exist could leak it via "orig" alone,
-    # even though the transfer itself would report success.
-    def locally_processed?
-      Image::URL::SUBDIRECTORIES.each_key.all? do |size|
-        File.exist?(send(:"#{size}_filepath"))
-      end
-    end
-
-    # Ruby port of script/verify_images: lists local vs remote file sizes
-    # per subdir/server, uploads mismatches, and deletes local copies once
-    # confirmed transferred everywhere relevant. See Verifier for details.
+    # Verifies (and completes) transfers for images not yet confirmed fully
+    # on the server(s), and re-checks recently-completed ones in case the
+    # flag went true without every size actually landing. See Verifier for
+    # details -- this replaces the old self.retransfer_images (retired,
+    # see #4791) as well as the original script/verify_images port.
     def self.verify_images(&log)
       Verifier.new(&log).run
     end

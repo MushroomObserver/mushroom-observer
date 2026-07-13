@@ -2,10 +2,12 @@
 
 require("test_helper")
 
-# Ruby port of script/verify_images -- see test/classes/image_script_test.rb
-# for the equivalent shell-script coverage this fixture data is drawn from.
+# See test/classes/image_script_test.rb for the equivalent shell-script
+# coverage this fixture data is drawn from, and GitHub issue #4791 for why
+# this is a work-list-scoped port (per-image, per-file checks), not a
+# directory-listing port of the old script.
 class Image::Processor::VerifierTest < UnitTestCase
-  SUBDIRS = %w[thumb 320 640 960 1280 orig].freeze
+  SUBDIRS = Image::URL::SUBDIRECTORIES.values.freeze
 
   def local_root
     if (worker_num = database_worker_number)
@@ -38,30 +40,110 @@ class Image::Processor::VerifierTest < UnitTestCase
     super
   end
 
-  def test_verify_uploads_mismatches_and_deletes_fully_synced_files
-    in_situ = images(:in_situ_image).id
-    turned_over = images(:turned_over_image).id
-    commercial = images(:commercial_inquiry_image).id
-    disconnected = images(:disconnected_coprinus_comatus_image).id
-    seed_local_files(turned_over, commercial, disconnected)
-    seed_remote1_files(in_situ, turned_over, commercial, disconnected)
-    seed_remote2_files(in_situ, turned_over, commercial)
+  def test_candidates_scope_is_untransferred_images
+    assert_includes(Image::Processor::Verifier.candidates,
+                    images(:turned_over_image))
+    assert_not_includes(Image::Processor::Verifier.candidates,
+                        images(:commercial_inquiry_image))
+  end
+
+  def test_recheck_scope_is_recently_completed_images
+    image = images(:commercial_inquiry_image)
+    image.update_columns(transferred: true, updated_at: Time.zone.now)
+    old = images(:connected_coprinus_comatus_image)
+    old.update_columns(transferred: true, updated_at: 1.year.ago)
+
+    assert_includes(Image::Processor::Verifier.recheck, image)
+    assert_not_includes(Image::Processor::Verifier.recheck, old)
+  end
+
+  # A mismatch gets uploaded, but the image isn't trusted as complete on
+  # the same run that just fixed it -- that's deliberate (see Verifier's
+  # all_synced? comment): a freshly-uploaded file isn't re-verified until
+  # the next run's fresh remote check.
+  def test_uploads_mismatch_but_does_not_yet_mark_transferred
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
+    seed_remote(1, image, %w[thumb 320 640 1280 orig])
+    seed_remote(2, image, %w[thumb 320 640])
 
     result = Image::Processor.verify_images
 
-    assert_uploads(result, turned_over, commercial, disconnected)
-    assert_deletes(result, turned_over, commercial)
-    assert_empty(result[:failed])
+    assert_includes(result[:uploaded],
+                    [image.id, :remote1, "960/#{image.id}.jpg"])
+    assert_not(image.reload.transferred)
+    assert_empty(result[:completed])
+    assert_path_exists("#{local_root}/960/#{image.id}.jpg",
+                       "not deleted -- upload isn't verified yet this run")
+  end
+
+  # Nothing to upload from the start (already fully synced) -- completes
+  # in one run: marks transferred and deletes local copies not configured
+  # to stay local.
+  def test_marks_transferred_and_deletes_local_once_fully_synced
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
+    seed_remote(1, image, %w[thumb 320 640 960 1280 orig])
+    seed_remote(2, image, %w[thumb 320 640])
+
+    result = Image::Processor.verify_images
+
+    assert_empty(result[:uploaded])
+    assert_includes(result[:completed], image.id)
+    assert(image.reload.transferred)
+    # thumbnail/small (thumb/320) are in MO.keep_these_image_sizes_local --
+    # never deleted, even though fully synced everywhere relevant.
+    assert_path_exists("#{local_root}/thumb/#{image.id}.jpg")
+    assert_path_exists("#{local_root}/320/#{image.id}.jpg")
+    %w[640 960 1280 orig].each do |dir|
+      assert_not(File.exist?("#{local_root}/#{dir}/#{image.id}.jpg"),
+                 "#{dir} should be deleted -- fully synced and not kept local")
+    end
+  end
+
+  # A local file that hasn't been generated yet (still mid-#process) means
+  # nothing to verify or transfer until it exists -- this is the normal
+  # in-progress window between upload and job completion, exactly the
+  # window #4791's blind rsync used to race.
+  def test_skips_image_still_being_processed
+    image = images(:turned_over_image)
+    image.update_columns(transferred: false)
+    # Only "orig" exists locally -- the rest haven't been generated yet.
+    File.write("#{local_root}/orig/#{image.id}.jpg", "orig-only")
+
+    result = Image::Processor.verify_images
+
+    assert_empty(result[:uploaded])
+    assert_empty(result[:completed])
+    assert_not(image.reload.transferred)
+    assert_path_exists("#{local_root}/orig/#{image.id}.jpg",
+                       "not deleted -- still mid-processing")
+  end
+
+  # A non-jpg original also expects its raw orig/<id>.<ext> file (in
+  # addition to the converted orig/<id>.jpg) to be present and synced.
+  def test_non_jpg_original_checks_the_raw_file_too
+    image = images(:turned_over_image)
+    image.stub(:original_extension, "tiff") do
+      seed_locally_complete(image)
+      File.write("#{local_root}/orig/#{image.id}.tiff", "raw-original")
+      seed_remote(1, image, %w[thumb 320 640 960 1280 orig])
+      File.write("#{remote_server_path(1)}/orig/#{image.id}.tiff",
+                 "raw-original")
+      seed_remote(2, image, %w[thumb 320 640])
+
+      Image::Processor::Verifier.stub(:candidates, Image.where(id: image.id)) do
+        result = Image::Processor.verify_images
+        assert_includes(result[:completed], image.id)
+      end
+    end
   end
 
   # Regression test for a Copilot finding on PR #4751: a failed upload
-  # must not be recorded in the summary as if it succeeded -- otherwise
-  # a real transfer failure is silently masked in the job's log/summary.
+  # must not be recorded in the summary as if it succeeded.
   def test_upload_mismatches_does_not_record_failed_uploads
-    turned_over = images(:turned_over_image).id
-    commercial = images(:commercial_inquiry_image).id
-    disconnected = images(:disconnected_coprinus_comatus_image).id
-    seed_local_files(turned_over, commercial, disconnected)
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
     messages = []
     verifier = Image::Processor::Verifier.new { |msg| messages << msg }
 
@@ -78,10 +160,8 @@ class Image::Processor::VerifierTest < UnitTestCase
   # file's transfer must not abort the rest of the run -- every other
   # mismatched file still needs its chance to upload.
   def test_upload_mismatches_continues_after_one_file_raises
-    turned_over = images(:turned_over_image).id
-    commercial = images(:commercial_inquiry_image).id
-    disconnected = images(:disconnected_coprinus_comatus_image).id
-    seed_local_files(turned_over, commercial, disconnected)
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
     messages = []
     verifier = Image::Processor::Verifier.new { |msg| messages << msg }
     call_count = 0
@@ -101,42 +181,44 @@ class Image::Processor::VerifierTest < UnitTestCase
     end
 
     assert(messages.any? do |msg|
-      msg.include?("Failed to upload") &&
-                          msg.include?("boom")
+      msg.include?("Failed to upload") && msg.include?("boom")
     end)
   end
 
-  def test_verify_yields_log_lines_to_the_given_block
-    lines = []
-    Image::Processor.verify_images { |msg| lines << msg }
-    assert_includes(lines, "Listing local thumb")
+  # The #4791 failure mode itself: an image already marked transferred
+  # (and recently, so it's in the recheck scope) turns out to be missing a
+  # size on a server. Must alert -- not silently re-fix it in the dark.
+  def test_alerts_when_a_recently_transferred_image_is_incomplete
+    image = images(:commercial_inquiry_image)
+    seed_locally_complete(image)
+    image.update_columns(transferred: true, updated_at: Time.zone.now)
+    seed_remote(1, image, %w[thumb 320 640 1280 orig]) # "960" missing
+    seed_remote(2, image, %w[thumb 320 640])
+    messages = []
+
+    result = Image::Processor.verify_images { |msg| messages << msg }
+
+    assert_includes(result[:alerted], image.id)
+    assert(image.reload.transferred, "left alone, not flipped back to false")
+    assert(messages.any? do |msg|
+      msg.include?("ALERT") && msg.include?(image.id.to_s)
+    end)
   end
 
-  def test_list_server_dispatches_ssh_type_to_ssh_listing
-    fake_data = {
-      ssh_server: { type: "ssh", path: "mo@example.test:/data/mo",
-                    subdirs: %w[orig] }
-    }
+  # The same incompleteness on an ordinary (not yet transferred) candidate
+  # is routine, expected mid-processing state -- not alert-worthy.
+  def test_does_not_alert_for_ordinary_untransferred_incomplete_images
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
+    seed_remote(1, image, %w[thumb 320 640 1280 orig]) # "960" missing
+    seed_remote(2, image, %w[thumb 320 640])
 
-    Image::Processor.stub(:image_server_data, fake_data) do
-      verifier = Image::Processor::Verifier.new
-      Open3.stub(:capture2, ["remote.jpg\t99\n", stub_status(true)]) do
-        result = verifier.send(:list_server, :ssh_server)
-        assert_equal({ "orig/remote.jpg" => 99 }, result)
-      end
-    end
+    result = Image::Processor.verify_images
+
+    assert_not_includes(result[:alerted], image.id)
   end
 
-  def test_list_subdir_unknown_type_raises
-    verifier = Image::Processor::Verifier.new
-    data = { type: "ftp", path: "ftp://example.test" }
-
-    assert_raises(RuntimeError) do
-      verifier.send(:list_subdir, :weird_server, data, "orig")
-    end
-  end
-
-  def test_list_ssh_subdir_shells_out_to_ssh_find
+  def test_ssh_sizes_shells_out_with_every_expected_path_in_one_call
     verifier = Image::Processor::Verifier.new
     captured_args = nil
     fake_capture2 = lambda do |*args|
@@ -145,41 +227,52 @@ class Image::Processor::VerifierTest < UnitTestCase
     end
 
     Open3.stub(:capture2, fake_capture2) do
-      verifier.send(:list_ssh_subdir, :ssh_server,
-                    "mo@example.test:/data/mo", "orig")
+      verifier.send(:ssh_sizes, :ssh_server, "mo@example.test:/data/mo",
+                    ["orig/1.jpg", "thumb/1.jpg"])
     end
 
     assert_equal(
-      ["ssh", "mo@example.test", "find", "-L", "/data/mo/orig",
-       "-maxdepth", "1", "-type", "f", "-printf", "%f\\t%s\\n"],
+      ["ssh", "mo@example.test", "find", "-L", "/data/mo/orig/1.jpg",
+       "/data/mo/thumb/1.jpg", "-maxdepth", "0", "-printf", "%p\\t%s\\n"],
       captured_args
     )
   end
 
-  def test_list_ssh_subdir_parses_find_output
+  def test_ssh_sizes_parses_find_output
     verifier = Image::Processor::Verifier.new
-    find_output = "123.jpg\t456\n124.jpg\t789\n"
+    find_output = "/data/mo/orig/1.jpg\t456\n/data/mo/thumb/1.jpg\t789\n"
 
     Open3.stub(:capture2, [find_output, stub_status(true)]) do
-      result = verifier.send(:list_ssh_subdir, :ssh_server,
-                             "mo@example.test:/data/mo", "orig")
-      assert_equal({ "123.jpg" => 456, "124.jpg" => 789 }, result)
+      result = verifier.send(:ssh_sizes, :ssh_server,
+                             "mo@example.test:/data/mo",
+                             ["orig/1.jpg", "thumb/1.jpg"])
+      assert_equal({ "orig/1.jpg" => 456, "thumb/1.jpg" => 789 }, result)
     end
   end
 
-  def test_list_ssh_subdir_logs_and_returns_empty_on_failure
+  def test_ssh_sizes_logs_and_returns_empty_on_failure
     messages = []
     verifier = Image::Processor::Verifier.new { |msg| messages << msg }
 
     Open3.stub(:capture2, ["", stub_status(false)]) do
-      result = verifier.send(:list_ssh_subdir, :ssh_server,
-                             "mo@example.test:/data/mo", "orig")
+      result = verifier.send(:ssh_sizes, :ssh_server,
+                             "mo@example.test:/data/mo", ["orig/1.jpg"])
       assert_equal({}, result)
     end
 
-    assert_includes(
-      messages, "Failed to list mo@example.test:/data/mo/orig on ssh_server"
+    assert_includes(messages, "Failed to check mo@example.test for ssh_server")
+  end
+
+  def test_remote_sizes_for_unknown_type_raises
+    verifier = Image::Processor::Verifier.new
+    verifier.instance_variable_set(
+      :@image_server_data,
+      { weird_server: { type: "ftp", path: "ftp://example.test" } }
     )
+
+    assert_raises(RuntimeError) do
+      verifier.send(:remote_sizes_for, :weird_server, ["orig/1.jpg"])
+    end
   end
 
   private
@@ -190,85 +283,17 @@ class Image::Processor::VerifierTest < UnitTestCase
     status
   end
 
-  def seed_local_files(turned_over, commercial, disconnected)
-    File.write("#{local_root}/orig/#{turned_over}.tiff", "A")
-    File.write("#{local_root}/orig/#{turned_over}.jpg", "AB")
-    File.write("#{local_root}/960/#{turned_over}.jpg", "ABC")
-    File.write("#{local_root}/640/#{turned_over}.jpg", "ABCD")
-    File.write("#{local_root}/320/#{turned_over}.jpg", "ABCDE")
-    File.write("#{local_root}/960/#{commercial}.jpg", "ABCDEF")
-    File.write("#{local_root}/640/#{commercial}.jpg", "ABCDEFG")
-    File.write("#{local_root}/320/#{commercial}.jpg", "ABCDEFGH")
-    File.write("#{local_root}/960/#{disconnected}.jpg", "ABCDEFGHI")
-    File.write("#{local_root}/640/#{disconnected}.jpg", "ABCDEFGHIJ")
-    File.write("#{local_root}/320/#{disconnected}.jpg", "ABCDEFGHIJK")
-  end
-
-  def seed_remote1_files(in_situ, turned_over, commercial, disconnected)
-    root = remote_server_path(1)
-    File.write("#{root}/960/#{in_situ}.jpg", "correct")
-    File.write("#{root}/640/#{in_situ}.jpg", "correct")
-    File.write("#{root}/320/#{in_situ}.jpg", "correct")
-    File.write("#{root}/960/#{turned_over}.jpg", "ABC")
-    File.write("#{root}/640/#{turned_over}.jpg", "ABCD")
-    File.write("#{root}/320/#{turned_over}.jpg", "ABCDE")
-    File.write("#{root}/960/#{commercial}.jpg", "ABCDEF")
-    File.write("#{root}/640/#{commercial}.jpg", "ABCDEFG")
-    File.write("#{root}/320/#{commercial}.jpg", "ABCDEFGH")
-    File.write("#{root}/960/#{disconnected}.jpg", "allcorrupted!")
-    File.write("#{root}/640/#{disconnected}.jpg", "allcorrupted!")
-    File.write("#{root}/320/#{disconnected}.jpg", "allcorrupted!")
-  end
-
-  def seed_remote2_files(in_situ, turned_over, commercial)
-    root = remote_server_path(2)
-    File.write("#{root}/640/#{in_situ}.jpg", "correct")
-    File.write("#{root}/320/#{in_situ}.jpg", "correct")
-    File.write("#{root}/640/#{turned_over}.jpg", "ABCD")
-    File.write("#{root}/320/#{turned_over}.jpg", "ABCDE")
-    File.write("#{root}/640/#{commercial}.jpg", "allcorrupted!")
-    File.write("#{root}/320/#{commercial}.jpg", "allcorrupted!")
-  end
-
-  def assert_uploads(result, turned_over, commercial, disconnected)
-    expected = [
-      [:remote1, "320/#{disconnected}.jpg"],
-      [:remote2, "320/#{commercial}.jpg"],
-      [:remote2, "320/#{disconnected}.jpg"],
-      [:remote1, "640/#{disconnected}.jpg"],
-      [:remote2, "640/#{commercial}.jpg"],
-      [:remote2, "640/#{disconnected}.jpg"],
-      [:remote1, "960/#{disconnected}.jpg"],
-      [:remote1, "orig/#{turned_over}.jpg"],
-      [:remote1, "orig/#{turned_over}.tiff"]
-    ]
-    expected.each { |entry| assert_includes(result[:uploaded], entry) }
-    assert_equal(expected.size, result[:uploaded].size)
-
-    assert_equal("ABCDEFGHIJK",
-                 File.read("#{remote_server_path(1)}/320/#{disconnected}.jpg"))
-    assert_equal("ABCDEFGH",
-                 File.read("#{remote_server_path(2)}/320/#{commercial}.jpg"))
-    assert_equal("AB",
-                 File.read("#{remote_server_path(1)}/orig/#{turned_over}.jpg"))
-    assert_equal(
-      "A", File.read("#{remote_server_path(1)}/orig/#{turned_over}.tiff")
-    )
-  end
-
-  def assert_deletes(result, turned_over, commercial)
-    expected = ["640/#{turned_over}.jpg", "960/#{turned_over}.jpg",
-                "960/#{commercial}.jpg"]
-    expected.each { |path| assert_includes(result[:deleted], path) }
-    assert_equal(expected.size, result[:deleted].size)
-    expected.each do |path|
-      assert_not(File.exist?("#{local_root}/#{path}"), "#{path} should be gone")
+  def seed_locally_complete(image)
+    image.update_columns(transferred: false)
+    SUBDIRS.each do |dir|
+      File.write("#{local_root}/#{dir}/#{image.id}.jpg", "local-#{dir}")
     end
+  end
 
-    # "small" (320) is in MO.keep_these_image_sizes_local -- never deleted,
-    # even though it's fully synced everywhere relevant.
-    assert_path_exists("#{local_root}/320/#{turned_over}.jpg")
-    # 640/commercial mismatches on remote2 -- not eligible for deletion.
-    assert_path_exists("#{local_root}/640/#{commercial}.jpg")
+  def seed_remote(server_num, image, subdirs)
+    root = remote_server_path(server_num)
+    subdirs.each do |dir|
+      File.write("#{root}/#{dir}/#{image.id}.jpg", "local-#{dir}")
+    end
   end
 end
