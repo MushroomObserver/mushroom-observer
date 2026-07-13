@@ -337,6 +337,42 @@ class ImageTest < UnitTestCase
     end
   end
 
+  # synchronous: true (API uploads) must call ProcessImageJob.perform_now,
+  # not perform_later -- the caller has no other way to see updated URLs,
+  # see Image#process_image's comment for why.
+  def test_process_image_synchronous_runs_job_now
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+    performed_now_with = nil
+
+    img.stub(:move_original, true) do
+      ProcessImageJob.stub(:perform_now, lambda { |*args|
+        performed_now_with = args
+        true
+      }) do
+        assert_no_enqueued_jobs(only: ProcessImageJob) do
+          assert(img.process_image(synchronous: true))
+        end
+      end
+    end
+    assert_equal([img.id, img.original_extension, false], performed_now_with)
+  end
+
+  # A synchronous failure (ProcessImageJob.perform_now returns false, i.e.
+  # the processor recorded errors) must surface as a real error on the
+  # image, not just a silent false -- the API caller raises on this.
+  def test_process_image_synchronous_failure_adds_error
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+
+    img.stub(:move_original, true) do
+      ProcessImageJob.stub(:perform_now, false) do
+        assert_not(img.process_image(synchronous: true))
+      end
+    end
+    assert(img.errors[:image].any?)
+  end
+
   def test_move_original_system_fail
     img = Image.new
     # File.rename raises SystemCallError on failure (matching real

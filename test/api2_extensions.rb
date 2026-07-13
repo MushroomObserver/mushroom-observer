@@ -175,7 +175,10 @@ module API2Extensions
     assert_equal_even_if_nil(@vote, img.vote_cache)
     assert_equal(true, img.ok_for_export)
     assert_equal_even_if_nil(@orig, img.original_name)
-    assert_equal(false, img.transferred)
+    # API uploads process synchronously (Image#process_image's
+    # synchronous: true), so by the time the API call returns, the image
+    # has genuinely been resized and transferred - not just enqueued.
+    assert_equal(true, img.transferred)
     assert_obj_arrays_equal([@proj].compact, img.projects)
     assert_obj_arrays_equal([@obs].compact, img.observations)
     assert_equal_even_if_nil(@vote, img.users_vote(@user))

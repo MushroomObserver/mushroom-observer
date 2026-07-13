@@ -93,7 +93,13 @@ class API2
 
     def after_create(img)
       strip = @observations.any?(&:gps_hidden)
-      img.process_image(strip: strip) || raise(ImageUploadFailed.new(img))
+      # synchronous: true -- the API response is the only chance an API
+      # client gets to see correctly-sized derivative URLs; unlike the web
+      # UI, it has no Turbo Stream broadcast to pick up an async job
+      # finishing later. See Image#process_image and #4735's mobile-app
+      # coupling discussion.
+      img.process_image(strip: strip, synchronous: true) ||
+        raise(ImageUploadFailed.new(img))
       @observations.each do |obs|
         obs.update(thumb_image_id: img.id) unless obs.thumb_image_id
         img.log_create_for(obs)
