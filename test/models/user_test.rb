@@ -402,6 +402,7 @@ class UserTest < UnitTestCase
     assert_blank(rolf.email)
     assert_blank(rolf.mailing_address)
     assert_blank(rolf.notes)
+    assert_blank(rolf.name)
     assert_true(rolf.blocked)
   end
 
@@ -430,6 +431,7 @@ class UserTest < UnitTestCase
 
     assert(User.exists?(rolf.id), "account with content must be retained")
     assert(rolf.blocked)
+    assert_blank(rolf.name) # real name (PII) cleared
     assert_equal("inactive_user_#{rolf.id}", rolf.login)
     assert_equal(obs_count, Observation.where(user_id: rolf.id).count)
     assert_equal(key_count, APIKey.where(user_id: rolf.id).count)

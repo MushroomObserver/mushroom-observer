@@ -917,6 +917,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # in case there are still comments, etc. on the site by this user.
   def disable_account
     self.email = ""
+    self.name = "" # real name is PII, and shows via unique_text_name
     self.blocked = true
     self.location_id = nil
     self.image_id = nil
