@@ -437,6 +437,24 @@ class UserTest < UnitTestCase
     assert_equal(key_count, APIKey.where(user_id: rolf.id).count)
   end
 
+  # Anonymization must also scrub the personal herbarium, whose name and
+  # email are frozen at creation and would otherwise leak the original
+  # identity and email (#4793).
+  def test_disable_and_anonymize_account_scrubs_personal_herbarium
+    herbarium = herbaria(:rolf_herbarium)
+    herbarium.update(email: "rolf@example.org")
+    assert_equal(rolf.id, herbarium.personal_user_id)
+
+    rolf.disable_and_anonymize_account
+    herbarium.reload
+
+    assert_equal(
+      :user_personal_herbarium.l(name: "inactive_user_#{rolf.id}"),
+      herbarium.name
+    )
+    assert_equal(MO.webmaster_email_address, herbarium.email)
+  end
+
   def test_no_references_left
     junk = users(:junk)
     spam = users(:spammer)
