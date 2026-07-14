@@ -219,6 +219,38 @@ class ImageTest < UnitTestCase
     assert_equal(123, img.reload.dhash)
   end
 
+  # ImageDhashJob's readiness gate (#4799): a local small/medium
+  # rendition is a ready source, whether or not the transfer to the
+  # remote image server(s) has happened yet.
+  def test_dhash_source_ready_when_local_file_exists
+    img = images(:in_situ_image) # transferred: false
+    small = img.full_filepath(:small)
+    File.stub(:exist?, ->(path) { path == small }) do
+      assert(img.dhash_source_ready?)
+    end
+  end
+
+  # A `transferred` image is ready even with no local rendition -- the
+  # small rendition can be fetched remotely (#4799).
+  def test_dhash_source_ready_when_transferred_with_no_local_file
+    # transferred: true (fixture default -- unlike in_situ_image/
+    # turned_over_image, which both explicitly override it to false)
+    img = images(:connected_coprinus_comatus_image)
+    img.stub(:full_filepath, "/no/such/file.jpg") do
+      assert(img.dhash_source_ready?)
+    end
+  end
+
+  # Neither a local rendition nor a completed transfer -- process_image's
+  # backgrounded resize/transfer script (script/process_image) may still
+  # be running. Not ready; ImageDhashJob must not hash this yet (#4799).
+  def test_dhash_source_not_ready_without_local_file_or_transfer
+    img = images(:in_situ_image) # transferred: false
+    img.stub(:full_filepath, "/no/such/file.jpg") do
+      assert_not(img.dhash_source_ready?)
+    end
+  end
+
   def test_validate_vote_rescues_non_numeric
     assert_nil(Image.validate_vote(Object.new))
   end

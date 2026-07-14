@@ -855,14 +855,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # serves: hash the small (then medium) local rendition and NEVER the
   # full-size original — decoding a large original with ImageMagick can
   # exhaust the host (a routine 25 MP upload froze the site for ~3.5 min,
-  # #4796). The small rendition is generated before ImageDhashJob is
-  # enqueued (Image#process_image), so it is present on fresh
-  # uploads. With no local rendition (e.g. after the originals are
-  # cleaned up), fall back to fetching the transferred small rendition.
+  # #4796). Call only when dhash_source_ready? -- see that method for why
+  # the small rendition is not guaranteed to exist yet when this is
+  # called (#4799).
   def compute_dhash!
-    source = [:small, :medium].
-             map { |size| full_filepath(size) }.
-             find { |path| File.exist?(path) }
+    source = local_dhash_source
     value = if source
               Image::Dhash.from_file(source)
             else
@@ -870,6 +867,25 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
             end
     update_column(:dhash, value)
     value
+  end
+
+  # Is a rendition of this image available to hash yet? `process_image`
+  # backgrounds `script/process_image` (its command string ends in "&"),
+  # so the resize-and-transfer script is often still running when
+  # ImageDhashJob picks up the job it enqueued -- neither a local small/
+  # medium rendition nor the remote transfer may exist yet. Calling
+  # compute_dhash! in that window falls through Image::URL#url to
+  # PLACEHOLDER_URLS (a hostless relative path), and RestClient.get
+  # raises trying to parse it as a URI (#4799). ImageDhashJob checks this
+  # and reschedules itself with backoff instead of hashing prematurely.
+  def dhash_source_ready?
+    local_dhash_source.present? || transferred
+  end
+
+  def local_dhash_source
+    [:small, :medium].
+      map { |size| full_filepath(size) }.
+      find { |path| File.exist?(path) }
   end
 
   # Attempt to strip GPS data from original image. Returns error message as
