@@ -117,17 +117,17 @@
     {
       "warning_type": "Command Injection",
       "warning_code": 14,
-      "fingerprint": "455d0084ff070c5d200d2fe619f97b14c151e79610a1584007ffd7dbd6f546c1",
+      "fingerprint": "48b7c80aa31c4d15eb01a362cf18312e01e2ed217f5f9f8149b30ffe8cb61c4d",
       "check_name": "Execute",
       "message": "Possible command injection",
-      "file": "app/models/image/processor/verifier.rb",
-      "line": 77,
+      "file": "app/models/image/processor/gap_detector.rb",
+      "line": 88,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
       "code": "Open3.capture2(\"ssh\", host, \"find\", \"-L\", \"#{path}/#{subdir}\", \"-maxdepth\", \"1\", \"-type\", \"f\", \"-printf\", \"%f\\\\t%s\\\\n\")",
       "render_path": null,
       "location": {
         "type": "method",
-        "class": "Processor::Verifier",
+        "class": "Processor::GapDetector",
         "method": "list_ssh_subdir"
       },
       "user_input": "path",
@@ -136,7 +136,30 @@
         77
       ],
       "note": "False positive: Open3.capture2 is called in argv (list) form, so no local shell is spawned; `host`/`path`/`subdir` come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure."
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "9e9cea31d8b6b8e684822415d4a65f13fb7af86ed691b0e72ff13194cb813dc6",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/image/processor/verifier.rb",
+      "line": 120,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Open3.capture2(\"ssh\", host, \"find\", \"-L\", *paths.map do\n \"#{root}/#{path}\"\n end, \"-maxdepth\", \"0\", \"-printf\", \"%p\\\\t%s\\\\n\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Processor::Verifier",
+        "method": "ssh_sizes"
+      },
+      "user_input": "root",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": "False positive: Open3.capture2 is called in argv (list) form, so no local shell is spawned; `host`/`root` (from remote_path.split(\":\", 2)) come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure. Checks every expected file for one image in a single ssh round trip, per #4791 -- see the class comment."
     }
   ],
-  "brakeman_version": "7.1.1"
+  "brakeman_version": "8.0.5"
 }
