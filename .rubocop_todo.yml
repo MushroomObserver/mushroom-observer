@@ -421,13 +421,6 @@ Style/ArrayIntersect:
     - 'test/controllers/observations/species_lists_controller_test.rb'
     - 'test/style/no_queries_in_phlex_views_test.rb'
 
-# Offense count: 62
-Style/ClassVars:
-  Exclude:
-    - 'test/general_extensions.rb'
-    - 'test/language_extensions.rb'
-    - 'test/test_helper.rb'
-
 # Offense count: 2
 Style/MissingRespondToMissing:
   Exclude:
