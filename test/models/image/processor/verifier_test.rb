@@ -87,6 +87,32 @@ class Image::Processor::VerifierTest < UnitTestCase
     end
   end
 
+  # Regression (#4751): no :write-configured remote (development's
+  # :mycolab) means @image_servers is empty -- must not vacuously treat
+  # that as "fully synced".
+  def test_does_not_delete_or_mark_transferred_when_no_remote_configured
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
+    local_only_data = {
+      local: { type: "file", path: local_root, subdirs: SUBDIRS }
+    }
+
+    result = Image::Processor.stub(:image_server_data, local_only_data) do
+      Image::Processor.transfer_images([image.id])
+    end
+
+    assert_empty(result[:uploaded])
+    assert_empty(result[:completed])
+    assert_empty(result[:deleted])
+    assert_not(image.reload.transferred)
+    SUBDIRS.each do |dir|
+      assert_path_exists(
+        "#{local_root}/#{dir}/#{image.id}.jpg",
+        "#{dir} should not be deleted -- nothing confirms it's transferred"
+      )
+    end
+  end
+
   # A local file that hasn't been generated yet (still mid-#process) means
   # nothing to verify or transfer until it exists -- this is the normal
   # in-progress window between upload and job completion, exactly the

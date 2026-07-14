@@ -182,7 +182,14 @@ class Image
       # keeps a routine upload failure and a routine "just fixed it" both
       # inconclusive here (safe either way: nothing gets deleted or marked
       # transferred on unverified data).
+      #
+      # `[].all?` is vacuously true -- guard against @image_servers being
+      # empty (development's :mycolab has no :write target, so
+      # ServerData.build excludes it), or every image would be treated as
+      # fully synced and deleted locally with nothing actually transferred.
       def all_synced?(paths, local_sizes, remote_sizes)
+        return false if @image_servers.empty?
+
         @image_servers.all? do |server|
           paths_for_server(server, paths).all? do |path|
             remote_sizes[server][path] == local_sizes[path]
