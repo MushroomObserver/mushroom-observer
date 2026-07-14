@@ -45,7 +45,7 @@ module Views::Controllers::Comments
     # second-window Action Cable broadcast could close a modal
     # the viewing user has open, losing in-progress form input.
     def view_template
-      div(class: "row") do
+      Row do
         render_main_column
         render_avatar_column
       end
@@ -56,7 +56,7 @@ module Views::Controllers::Comments
     private
 
     def render_main_column
-      div(class: class_names(Grid::SM9, "col-lg-10")) do
+      Column(xs: 12, sm: 9, lg: 10) do
         render_target_heading if @show_name
         render_summary
         render_comment_info
@@ -157,7 +157,7 @@ module Views::Controllers::Comments
     # ---- avatar column --------------------------------------------
 
     def render_avatar_column
-      div(class: "d-none d-sm-block col-sm-3 col-lg-2 text-center") do
+      Column(sm: 3, lg: 2, class: "d-none d-sm-block text-center") do
         render_avatar_image if @comment.user.image_id
       end
     end

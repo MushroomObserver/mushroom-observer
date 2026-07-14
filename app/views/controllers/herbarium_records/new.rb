@@ -18,9 +18,9 @@ module Views::Controllers::HerbariumRecords
         )
       )
 
-      div(class: "row") do
-        div(class: Grid::SM7) { render_form_column }
-        div(class: Grid::SM5) { render_observation_box }
+      Row do
+        Column(xs: 12, sm: 7) { render_form_column }
+        Column(xs: 12, sm: 5) { render_observation_box }
       end
     end
 
@@ -35,11 +35,11 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_observation_box
-      ul(class: "row list-unstyled") do
+      Row(element: :ul, class: "list-unstyled") do
         render(Components::Matrix::Box.new(
                  user: @user,
                  object: @observation.rss_log || @observation,
-                 columns: Grid::FULL
+                 columns: Components::Column.classes_for(xs: 12)
                ))
       end
     end

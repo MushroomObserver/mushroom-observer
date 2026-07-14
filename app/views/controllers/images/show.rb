@@ -34,7 +34,7 @@ module Views::Controllers::Images
     private
 
     def render_main_row
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns).to_s) { render_left_column }
         div(class: content_for(:right_columns).to_s) { render_right_column }
       end
@@ -70,7 +70,7 @@ module Views::Controllers::Images
     end
 
     def render_footer_row
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns).to_s) { render_left_footer }
         div(class: content_for(:right_columns).to_s) { render_right_footer }
       end

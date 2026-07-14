@@ -83,7 +83,7 @@ module Views::Controllers::Projects
         p { "*#{:form_projects_date_range.t}*".t }
         p { :form_projects_dates_explain.t }
       end
-      div(class: "container-text ml-4") do
+      Container(width: :text, class: "ml-4") do
         date_field(:start_date,
                    label: "#{:form_projects_start_date.t}: ",
                    wrap_class: "mb-2")

@@ -19,7 +19,7 @@ module Views::Controllers::Users
       container_class(:full)
       column_classes(:six_even)
 
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns)) { render_left_column }
         div(class: content_for(:right_columns)) { render_right_column }
       end

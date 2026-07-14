@@ -47,12 +47,12 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_name_and_type_row
-      div(class: "row") do
-        div(class: Grid::SM6) do
+      Row do
+        Column(xs: 12, sm: 6) do
           render_name_field
           hidden_field(:project_id)
         end
-        div(class: Grid::SM6) { render_target_type_select }
+        Column(xs: 12, sm: 6) { render_target_type_select }
       end
     end
 

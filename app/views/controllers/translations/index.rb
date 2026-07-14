@@ -19,11 +19,11 @@ module Views::Controllers::Translations
       container_class(:wide)
       add_page_title(:edit_translations_title.t)
       render_help_block
-      div(class: "row") do
-        div(class: class_names(Grid::HALF, "translation_container")) do
+      Row do
+        Column(xs: 6, class: "translation_container") do
           render_index_panel
         end
-        div(class: class_names(Grid::HALF, "translation_container")) do
+        Column(xs: 6, class: "translation_container") do
           render_ui_panel
         end
       end
@@ -32,7 +32,7 @@ module Views::Controllers::Translations
     private
 
     def render_help_block
-      div(class: "container-text") do
+      Container(width: :text) do
         Help(element: :p, content: :edit_translations_help.t)
       end
     end

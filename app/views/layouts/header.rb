@@ -59,14 +59,14 @@ module Views::Layouts
     # even when neither inner content_for is set. Keeps the empty
     # row in case any CSS / JS keys off `header > .row:last-child`.
     def render_filter_row
-      div(class: "row") do
+      Row do
         render_type_filters if content_for?(:type_filters)
         render_observation_buttons if content_for?(:observation_buttons)
       end
     end
 
     def render_type_filters
-      div(class: class_names("hidden-print", Grid::FULL)) do
+      Column(xs: 12, class: "hidden-print") do
         trusted_html(content_for(:type_filters))
       end
     end
@@ -81,12 +81,13 @@ module Views::Layouts
     # `content_for?(:left_columns) || "col-sm-8 col-lg-7"` — the `||`
     # there is operating on a boolean, so when `:left_columns` IS set
     # the LHS is `true` and `cols` becomes the literal `true`. Then
-    # `class_names(Grid::FULL, true)` evaluates to `"col-xs-12"`.
-    # Keep the bug for visual parity; fix in a separate PR if needed.
+    # `class_names(Components::Column.classes_for(xs: 12), true)`
+    # evaluates to `"col-xs-12"`. Keep the bug for visual parity; fix
+    # in a separate PR if needed.
     def title_cols
       cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
       cols = "" unless content_for?(:interest_icons)
-      class_names(Grid::FULL, cols)
+      class_names(Components::Column.classes_for(xs: 12), cols)
     end
   end
 end

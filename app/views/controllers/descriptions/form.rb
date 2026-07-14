@@ -22,7 +22,7 @@ module Views::Controllers::Descriptions
     end
 
     def view_template
-      div(class: "container-text") do
+      Container(width: :text) do
         submit(submit_button_text.l, center: true)
         render_source_fields
         render_permissions_fields

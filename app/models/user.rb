@@ -910,6 +910,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   def disable_and_anonymize_account
     disable_account
     inactivate_user
+    anonymize_personal_herbarium
     User.erase_user(id) if no_references_left?
   end
 
@@ -941,6 +942,26 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # their namings/votes/logs, leaving them ownerless and stripped (#4767).
   def inactivate_user
     update_column(:login, "inactive_user_#{id}")
+  end
+
+  # The personal herbarium's name and email are frozen at creation
+  # (create_personal_herbarium) and embed the user's original identity,
+  # so anonymizing the User row alone leaves them as a PII leak (#4793).
+  # Regenerate the name from the now-anonymized identity and reset the
+  # contact email to the site webmaster address. Called after
+  # inactivate_user so the regenerated name picks up the new login, and
+  # before erase_user so it runs whether or not the account is fully
+  # erased -- erase detaches the herbarium (personal_user_id = 0) rather
+  # than deleting it, so the PII would otherwise survive there too.
+  # update_all (not update) so the scrub covers every matching row --
+  # there is no DB uniqueness constraint on personal_user_id -- and
+  # can't be silently blocked by a validation, matching how erase_user's
+  # blank_out_public_references clears these same rows.
+  def anonymize_personal_herbarium
+    Herbarium.where(personal_user_id: id).update_all(
+      name: :user_personal_herbarium.l(name: unique_text_name),
+      email: MO.webmaster_email_address
+    )
   end
 
   REFERENCE_MODELS = [

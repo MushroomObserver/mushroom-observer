@@ -879,18 +879,22 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Compute and store the perceptual hash (Image::Dhash) for this image
   # (#4585/#4673). Derived data, hence update_column — recomputing a hash
-  # is not an edit. Prefers a local file (fresh uploads: the original; the
-  # web server after cleanup: the small rendition); falls back to fetching
-  # the transferred medium rendition. dHash is resolution-invariant, so
-  # any rendition serves.
+  # is not an edit. dHash is resolution-invariant, so any rendition
+  # serves: hash the small (then medium) local rendition and NEVER the
+  # full-size original — decoding a large original with ImageMagick can
+  # exhaust the host (a routine 25 MP upload froze the site for ~3.5 min,
+  # #4796). The small rendition is generated before ImageDhashJob is
+  # enqueued (Image#process_image), so it is present on fresh
+  # uploads. With no local rendition (e.g. after the originals are
+  # cleaned up), fall back to fetching the transferred small rendition.
   def compute_dhash!
-    source = [:original, :medium, :small].
+    source = [:small, :medium].
              map { |size| full_filepath(size) }.
              find { |path| File.exist?(path) }
     value = if source
               Image::Dhash.from_file(source)
             else
-              Image::Dhash.from_url(medium_url)
+              Image::Dhash.from_url(small_url)
             end
     update_column(:dhash, value)
     value
