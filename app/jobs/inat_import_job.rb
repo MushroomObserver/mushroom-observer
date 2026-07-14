@@ -123,9 +123,12 @@ class InatImportJob < ApplicationJob
                                                    !inat_import.reload.canceled?
   end
 
-  # One TransferImagesJob per batch, not per image -- so images go out
-  # steadily as each batch of observations completes, rather than piling
-  # up for the length of a multi-hour import (see #4791's target design).
+  # One TransferImagesJob per batch, not per job -- so images go out
+  # steadily as each batch of observations completes, rather than
+  # piling up for the length of a multi-hour, multi-batch import (see
+  # #4791's target design). Per-image granularity would pile up even
+  # less, but isn't worth the overhead given batches take roughly a
+  # minute each.
   def enqueue_batch_transfer
     image_ids = observation_importer.image_ids
     return if image_ids.empty?
