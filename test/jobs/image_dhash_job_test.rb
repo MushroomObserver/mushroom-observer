@@ -9,11 +9,14 @@ class ImageDhashJobTest < ActiveJob::TestCase
     end
 
     image = images(:in_situ_image)
-    # Point the test-env original fallback at a real fixture file.
-    image.update_columns(original_name: "Coprinus_comatus.jpg")
+    fixture = Rails.root.join("test/images/Coprinus_comatus.jpg").to_s
 
     assert_nil(image.dhash)
-    ImageDhashJob.perform_now(image.id)
+    image.stub(:full_filepath, fixture) do
+      Image.stub(:find_by, image) do
+        ImageDhashJob.perform_now(image.id)
+      end
+    end
 
     assert_not_nil(image.reload.dhash)
   end
