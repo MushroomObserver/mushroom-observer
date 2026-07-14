@@ -21,72 +21,75 @@ class Views::Controllers::TestPages::IconLibraryComparison::Show <
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/" \
     "all.min.css"
 
-  # [MO icon key, Bootstrap Icons name (bi-<name>), Font Awesome Free
-  # solid-style name (fa-<name>)], in the same order as Icon::GLYPHS.
+  # [MO icon key, Font Awesome Free solid-style name (fa-<name>),
+  # Bootstrap Icons name (bi-<name>)], in the same order as Icon::GLYPHS.
+  # Font Awesome first: it's the front-runner candidate, so tuple order
+  # matches display order (Current, FA, Bootstrap) -- keeps further
+  # tweaks conceptually in sync with what's on screen.
   ICON_ROWS = [
-    [:edit, "pencil-square", "pen-to-square"],
-    [:delete, "x-circle", "circle-xmark"],
+    [:edit, "pen-to-square", "pencil-square"],
+    [:delete, "circle-xmark", "x-circle"],
     [:add, "plus", "plus"],
-    [:back, "chevron-bar-left", "backward-step"],
+    [:back, "backward-step", "chevron-bar-left"],
     [:show, "eye", "eye"],
     [:hide, "eye-slash", "eye-slash"],
-    [:reuse, "box-arrow-up-right", "arrows-turn-right"],
-    [:x, "x-lg", "xmark"],
-    [:remove, "x-circle", "circle-xmark"],
-    [:send, "send-fill", "paper-plane"],
-    [:log_in, "box-arrow-in-right", "right-to-bracket"],
-    [:log_out, "box-arrow-right", "right-from-bracket"],
-    [:admin, "gear-wide-connected", "user-gear"],
-    [:inbox, "inbox-fill", "inbox"],
-    [:interests, "megaphone-fill", "bullhorn"],
-    [:settings, "gear-fill", "gear"],
+    [:reuse, "arrows-turn-right", "box-arrow-up-right"],
+    [:x, "xmark", "x-lg"],
+    [:remove, "circle-xmark", "x-circle"],
+    [:send, "paper-plane", "send-fill"],
+    [:log_in, "right-to-bracket", "box-arrow-in-right"],
+    [:log_out, "right-from-bracket", "box-arrow-right"],
+    [:admin, "user-gear", "gear-wide-connected"],
+    [:inbox, "inbox", "inbox-fill"],
+    [:interests, "bullhorn", "megaphone-fill"],
+    [:settings, "gear", "gear-fill"],
     [:ban, "ban", "ban"],
-    [:plus, "plus-circle-fill", "circle-plus"],
-    [:minus, "dash-circle-fill", "circle-minus"],
-    [:trash, "trash3-fill", "trash"],
-    [:cancel, "x-lg", "xmark"],
-    [:email, "envelope-fill", "envelope"],
-    [:question, "question-circle-fill", "circle-question"],
-    [:alert, "exclamation-triangle-fill", "triangle-exclamation"],
+    [:plus, "circle-plus", "plus-circle-fill"],
+    [:minus, "circle-minus", "dash-circle-fill"],
+    [:trash, "trash", "trash3-fill"],
+    [:cancel, "xmark", "x-lg"],
+    [:email, "envelope", "envelope-fill"],
+    [:question, "circle-question", "question-circle-fill"],
+    [:alert, "triangle-exclamation", "exclamation-triangle-fill"],
     [:list, "list-ul", "list-ul"],
-    [:copy, "clipboard2-check-fill", "clipboard-check"],
+    [:copy, "clipboard-check", "clipboard2-check-fill"],
     [:clone, "copy", "copy"],
-    [:merge, "arrow-left-right", "arrow-right-arrow-left"],
+    [:merge, "arrow-right-arrow-left", "arrow-left-right"],
     [:move, "shuffle", "shuffle"],
-    [:adjust, "arrows-vertical", "up-down"],
-    [:make_default, "star-fill", "star"],
-    [:publish, "arrow-up-circle", "circle-up"],
-    [:check, "check-circle-fill", "circle-check"],
-    [:deprecate, "check-circle-fill", "circle-check"],
-    [:approve, "exclamation-circle-fill", "circle-exclamation"],
+    [:adjust, "up-down", "arrows-vertical"],
+    [:make_default, "star", "star-fill"],
+    [:publish, "circle-up", "arrow-up-circle"],
+    [:check, "circle-check", "check-circle-fill"],
+    [:deprecate, "circle-check", "check-circle-fill"],
+    [:approve, "circle-exclamation", "exclamation-circle-fill"],
     [:synonyms, "shuffle", "shuffle"],
-    [:tracking, "megaphone-fill", "bullhorn"],
-    [:manage_lists, "list-columns-reverse", "list-check"],
-    [:observations, "tags-fill", "tags"],
-    [:print, "printer-fill", "print"],
-    [:globe, "globe-americas", "earth-americas"],
-    [:find_on_map, "crosshair", "location-crosshairs"],
-    [:apply, "check2-square", "square-check"],
+    [:tracking, "bullhorn", "megaphone-fill"],
+    [:manage_lists, "list-check", "list-columns-reverse"],
+    [:observations, "tags", "tags-fill"],
+    [:print, "print", "printer-fill"],
+    [:globe, "earth-americas", "globe-americas"],
+    [:find_on_map, "location-crosshairs", "crosshair"],
+    [:apply, "square-check", "check2-square"],
     [:chevron_down, "chevron-down", "chevron-down"],
     [:chevron_up, "chevron-up", "chevron-up"],
     [:chevron_left, "chevron-left", "chevron-left"],
     [:chevron_right, "chevron-right", "chevron-right"],
-    [:qrcode, "qr-code", "qrcode"],
-    [:mobile, "phone-fill", "mobile-screen-button"],
-    [:project, "kanban-fill", "diagram-project"],
+    [:qrcode, "qrcode", "qr-code"],
+    [:mobile, "mobile-screen-button", "phone-fill"],
+    [:project, "diagram-project", "kanban-fill"],
     [:download, "download", "download"],
-    [:new_window, "box-arrow-up-right", "up-right-from-square"],
-    [:search, "search", "magnifying-glass"],
-    [:prev, "caret-left-fill", "caret-left"],
-    [:next, "caret-right-fill", "caret-right"],
-    [:goto, "arrow-90deg-right", "share"],
-    [:grid, "grid-3x3-gap-fill", "table-cells"],
-    [:menu, "list", "bars"],
-    [:info, "question-circle-fill", "circle-question"],
-    [:fullscreen, "arrows-fullscreen", "maximize"],
-    [:matrix, "grid-3x3-gap-fill", "table-cells-large"],
-    [:info_circle, "info-circle-fill", "circle-info"],
-    [:user, "person-fill", "user"]
+    [:new_window, "up-right-from-square", "box-arrow-up-right"],
+    [:search, "magnifying-glass", "search"],
+    [:prev, "caret-left", "caret-left-fill"],
+    [:next, "caret-right", "caret-right-fill"],
+    [:goto, "share", "arrow-90deg-right"],
+    [:grid, "table-cells", "grid-3x3-gap-fill"],
+    [:menu, "bars", "list"],
+    [:info, "circle-question", "question-circle-fill"],
+    [:fullscreen, "maximize", "arrows-fullscreen"],
+    [:matrix, "table-cells-large", "grid-3x3-gap-fill"],
+    [:info_circle, "circle-info", "info-circle-fill"],
+    [:user, "user", "person-fill"]
   ].freeze
 
   ISSUE_URL = "https://github.com/MushroomObserver/mushroom-observer/" \
@@ -124,8 +127,8 @@ class Views::Controllers::TestPages::IconLibraryComparison::Show <
     render(Components::Table.new(ICON_ROWS, variant: :striped)) do |t|
       t.column("MO icon key") { |row| code { row[0].to_s } }
       t.column("Current (Glyphicon)") { |row| glyphicon_cell(row[0]) }
-      t.column("Bootstrap Icons") { |row| bootstrap_icons_cell(row[1]) }
-      t.column("Font Awesome Free") { |row| font_awesome_cell(row[2]) }
+      t.column("Font Awesome Free") { |row| font_awesome_cell(row[1]) }
+      t.column("Bootstrap Icons") { |row| bootstrap_icons_cell(row[2]) }
     end
   end
 
