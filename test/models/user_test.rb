@@ -442,7 +442,7 @@ class UserTest < UnitTestCase
   # identity and email (#4793).
   def test_disable_and_anonymize_account_scrubs_personal_herbarium
     herbarium = herbaria(:rolf_herbarium)
-    herbarium.update(email: "rolf@example.org")
+    herbarium.update!(email: "rolf@example.org")
     assert_equal(rolf.id, herbarium.personal_user_id)
 
     rolf.disable_and_anonymize_account
@@ -453,6 +453,32 @@ class UserTest < UnitTestCase
       herbarium.name
     )
     assert_equal(MO.webmaster_email_address, herbarium.email)
+  end
+
+  # On the erase path (no references left) the herbarium is scrubbed
+  # before erase_user detaches it (personal_user_id -> 0), so the PII
+  # doesn't survive there either (#4793).
+  def test_disable_and_anonymize_account_scrubs_herbarium_on_erase_path
+    user = users(:zero_user)
+    user_id = user.id
+    herbarium = Herbarium.create!(
+      name: "Zero's Personal Herbarium",
+      email: "zero@example.org",
+      personal_user: user
+    )
+    assert_true(user.no_references_left?,
+                "a personal herbarium must not count as a reference")
+
+    user.disable_and_anonymize_account
+
+    assert_not(User.exists?(user_id), "empty account should be erased")
+    herbarium.reload
+    assert_equal(0, herbarium.personal_user_id, "erase detaches herbarium")
+    assert_equal(MO.webmaster_email_address, herbarium.email)
+    assert_equal(
+      :user_personal_herbarium.l(name: "inactive_user_#{user_id}"),
+      herbarium.name
+    )
   end
 
   def test_no_references_left

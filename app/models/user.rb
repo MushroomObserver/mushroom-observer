@@ -953,11 +953,12 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # before erase_user so it runs whether or not the account is fully
   # erased -- erase detaches the herbarium (personal_user_id = 0) rather
   # than deleting it, so the PII would otherwise survive there too.
+  # update_all (not update) so the scrub covers every matching row --
+  # there is no DB uniqueness constraint on personal_user_id -- and
+  # can't be silently blocked by a validation, matching how erase_user's
+  # blank_out_public_references clears these same rows.
   def anonymize_personal_herbarium
-    herbarium = Herbarium.find_by(personal_user_id: id)
-    return unless herbarium
-
-    herbarium.update(
+    Herbarium.where(personal_user_id: id).update_all(
       name: :user_personal_herbarium.l(name: unique_text_name),
       email: MO.webmaster_email_address
     )
