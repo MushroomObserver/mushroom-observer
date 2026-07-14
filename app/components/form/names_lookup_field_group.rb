@@ -133,16 +133,12 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     field_component = @names_namespace.field(field_name).select(
       options,
       wrapper_options: {
-        label: field_label(field_name),
+        label: query_field_label(field_name),
         inline: true
       },
       selected: bool_to_string(field_selected_value(field_name))
     )
     render(field_component)
-  end
-
-  def field_label(field_name)
-    :"query_#{field_name}".l.humanize
   end
 
   def field_selected_value(field_name)

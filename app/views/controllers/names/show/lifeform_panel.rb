@@ -34,7 +34,7 @@ class Views::Controllers::Names::Show::LifeformPanel < Views::Base
   def render_lifeform_terms
     div(class: "mb-2") do
       @name.lifeform.strip.split.each do |word|
-        p { plain(:"lifeform_#{word}".t) }
+        p { plain(lifeform_key(word).t) }
       end
     end
   end

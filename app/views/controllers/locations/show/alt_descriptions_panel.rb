@@ -36,7 +36,7 @@ module Views::Controllers::Locations
         render(Views::Controllers::Descriptions::List.new(
                  user: @user, object: @object, type: @object.type_tag,
                  current: @current,
-                 empty_text: :"show_#{@object.type_tag}_no_descriptions".t
+                 empty_text: show_no_descriptions_as_string(@object.type_tag)
                ))
         render_projects_list if @projects.present?
       end
