@@ -66,7 +66,7 @@ module Views::Layouts
     end
 
     def render_type_filters
-      div(class: "hidden-print col-xs-12") do
+      div(class: class_names("hidden-print", Grid::FULL)) do
         trusted_html(content_for(:type_filters))
       end
     end
@@ -81,12 +81,12 @@ module Views::Layouts
     # `content_for?(:left_columns) || "col-sm-8 col-lg-7"` — the `||`
     # there is operating on a boolean, so when `:left_columns` IS set
     # the LHS is `true` and `cols` becomes the literal `true`. Then
-    # `class_names("col-xs-12", true)` evaluates to `"col-xs-12"`.
+    # `class_names(Grid::FULL, true)` evaluates to `"col-xs-12"`.
     # Keep the bug for visual parity; fix in a separate PR if needed.
     def title_cols
       cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
       cols = "" unless content_for?(:interest_icons)
-      class_names("col-xs-12", cols)
+      class_names(Grid::FULL, cols)
     end
   end
 end
