@@ -800,21 +800,21 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Runs Image::Processor synchronously (skipped in test, see
   # test/models/image/processor_test.rb for direct coverage) to produce a
-  # completed set of local files, then enqueues TransferImagesJob (gets
-  # those files onto the configured image server(s) -- see #4791, this is
-  # deliberately decoupled from upload success: a transfer failure alerts
-  # asynchronously instead of failing the upload) and ImageDhashJob. Only
-  # after resizing has succeeded: enqueueing earlier would hash/transfer
-  # an image whose upload ultimately failed, and could race the resize
-  # command writing files. GPS stripping already happened synchronously in
-  # #process_image above, before this runs -- see
-  # Image::Processor.strip_original_gps for why.
+  # completed set of local files -- #process also computes the perceptual
+  # hash inline from the just-written small rendition, so there is no
+  # separate dhash job to race the transfer (#4796). Then enqueues
+  # TransferImagesJob (gets those files onto the configured image
+  # server(s) -- see #4791, deliberately decoupled from upload success: a
+  # transfer failure alerts asynchronously instead of failing the upload).
+  # Only after resizing has succeeded: enqueueing earlier would transfer
+  # an image whose upload ultimately failed. GPS stripping already
+  # happened synchronously in #process_image above, before this runs --
+  # see Image::Processor.strip_original_gps for why.
   def process_and_enqueue_jobs(ext, set_size)
     unless Rails.env.test?
       Image::Processor.new(image: self, ext: ext, set_size: set_size).process
       TransferImagesJob.perform_later(image_ids: [id])
     end
-    ImageDhashJob.perform_later(id)
     true
   rescue StandardError => e
     Rails.logger.error("Image::Processor failed for image #{id}: #{e}")
@@ -872,8 +872,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     end
     return unless persisted?
 
-    # RotateImageJob enqueues ImageDhashJob itself once rotation actually
-    # finishes -- a real completion signal, not a guessed delay.
+    # RotateImageJob re-runs Image::Processor#process, which resizes and
+    # recomputes the perceptual hash inline (#4796).
     RotateImageJob.perform_later(id, original_extension, operator)
   end
 
@@ -883,10 +883,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # serves: hash the small (then medium) local rendition and NEVER the
   # full-size original — decoding a large original with ImageMagick can
   # exhaust the host (a routine 25 MP upload froze the site for ~3.5 min,
-  # #4796). The small rendition is generated before ImageDhashJob is
-  # enqueued (Image#process_image), so it is present on fresh
-  # uploads. With no local rendition (e.g. after the originals are
-  # cleaned up), fall back to fetching the transferred small rendition.
+  # #4796). Image::Processor#process calls this inline right after it
+  # generates the small rendition, so the local file is present on fresh
+  # uploads and rotations. Batch/backfill callers reach it with no local
+  # rendition (e.g. after the originals are cleaned up), so fall back to
+  # fetching the transferred small rendition.
   def compute_dhash!
     source = [:small, :medium].
              map { |size| full_filepath(size) }.

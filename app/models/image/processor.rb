@@ -82,6 +82,7 @@ class Image
       auto_orient_if_needed(full_size_filepath)
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
+      compute_dhash
     end
 
     def rotate(orientation)
@@ -157,6 +158,22 @@ class Image
     end
 
     private
+
+    # Hash the just-generated small rendition now, while it is still on
+    # local disk. Nothing is kept local (MO.keep_these_image_sizes_local
+    # is empty in production) and TransferImagesJob moves the files to the
+    # image server and deletes the local copies moments later -- so
+    # computing the hash here, in the same synchronous flow that produced
+    # the file, removes the upload->hash race entirely: no separate job,
+    # no waiting for a rendition that may already be gone. Cheap now that
+    # dHash uses the 320px rendition, not the full-size original (#4796).
+    # A hashing failure must not fail the whole image -- the resized files
+    # are already good and worth transferring -- so log and move on.
+    def compute_dhash
+      @image.compute_dhash!
+    rescue Image::Dhash::Error => e
+      Rails.logger.warn("dhash failed for image #{@id}: #{e.message}")
+    end
 
     # copy_file_from_server can raise (e.g. Errno::ENOENT via FileUtils.cp
     # when a "file"-type server doesn't actually have the source, or

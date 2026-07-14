@@ -332,21 +332,28 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
   end
 
-  # A failed GPS strip must stop processing before Image::Processor (and
-  # thus a background dhash job) is ever reached -- an unstripped
-  # original must not propagate into resized/transferred copies or get
-  # hashed. See Image::Processor.strip_original_gps.
-  def test_process_image_strip_failure_skips_dhash_job
+  # A failed GPS strip must stop before Image::Processor#process is ever
+  # reached -- an unstripped original must not propagate into resized/
+  # transferred copies or get hashed (dhash is now computed inside
+  # #process, #4796). See Image::Processor.strip_original_gps.
+  def test_process_image_strip_failure_skips_processing
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
 
+    processed = false
+    processor = Object.new
+    processor.define_singleton_method(:process) { processed = true }
+
     img.stub(:move_original, true) do
       Image::Processor.stub(:strip_original_gps, "boom") do
-        assert_no_enqueued_jobs(only: ImageDhashJob) do
-          assert_not(img.process_image(strip: true))
+        Image::Processor.stub(:new, processor) do
+          Rails.env.stub(:test?, false) do
+            assert_not(img.process_image(strip: true))
+          end
         end
       end
     end
+    assert_not(processed, "strip failure must skip processing (and hashing)")
     assert(img.errors[:image].any?)
   end
 
@@ -370,11 +377,10 @@ class ImageTest < UnitTestCase
   end
 
   # Transfer-to-image-server is no longer part of Image::Processor#process
-  # (see #4791 -- TransferImagesJob owns that now, asynchronously), so a
-  # successful resize enqueues both TransferImagesJob and ImageDhashJob --
-  # a transfer failure is no longer something #process_image can see or
-  # fail on.
-  def test_process_image_enqueues_transfer_and_dhash_jobs
+  # (see #4791 -- TransferImagesJob owns that now, asynchronously), and
+  # the perceptual hash is computed inline in #process (#4796, no separate
+  # job), so a successful resize enqueues only TransferImagesJob.
+  def test_process_image_enqueues_transfer_job
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
     succeeding_processor = Object.new
@@ -385,9 +391,7 @@ class ImageTest < UnitTestCase
         Rails.env.stub(:test?, false) do
           assert_enqueued_with(job: TransferImagesJob,
                                args: [{ image_ids: [img.id] }]) do
-            assert_enqueued_with(job: ImageDhashJob, args: [img.id]) do
-              assert(img.process_image)
-            end
+            assert(img.process_image)
           end
         end
       end

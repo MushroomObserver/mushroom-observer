@@ -113,6 +113,23 @@ class Image::ProcessorTest < UnitTestCase
     end
   end
 
+  # #process hashes the small rendition inline, while it is still local,
+  # instead of leaving it to a separate job that could race the transfer
+  # (#4796).
+  def test_process_computes_dhash
+    unless system("command -v convert >/dev/null 2>&1")
+      skip("ImageMagick `convert` not available")
+    end
+
+    image = images(:in_situ_image)
+    image.update_columns(dhash: nil)
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+
+    Image::Processor.new(image: image, ext: "jpg", set_size: true).process
+
+    assert_not_nil(image.reload.dhash, "#process must compute the dhash")
+  end
+
   def test_process_converts_non_jpg_original
     image = images(:turned_over_image)
     image.update_columns(transferred: false, width: nil, height: nil)
