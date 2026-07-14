@@ -110,7 +110,7 @@ module Views::Layouts
     end
 
     def render_right_side(content_classes, &block)
-      div(id: "right_side", class: Grid::MD10) do
+      Column(id: "right_side", xs: 12, md: 10) do
         render(Views::Layouts::TopNav.new(user: current_user,
                                           query: current_query))
         render(Views::Layouts::App::PageFlash.new)

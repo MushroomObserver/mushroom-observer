@@ -42,7 +42,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Left column --------------------------------------------------
 
   def render_left_column
-    div(class: "#{Grid::SM6} name-section") do
+    Column(xs: 12, sm: 6, class: "name-section") do
       render_rank_line
       render_status_line
       render_name_line
@@ -141,7 +141,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Right column -------------------------------------------------
 
   def render_right_column
-    div(class: "#{Grid::SM6} name-section") do
+    Column(xs: 12, sm: 6, class: "name-section") do
       if @name.icn_id?
         render_icn_id_links
       elsif @name.registrable?

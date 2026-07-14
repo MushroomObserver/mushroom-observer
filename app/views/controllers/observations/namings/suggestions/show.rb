@@ -40,7 +40,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     # ---- suggestions list column ---------------------------------
 
     def render_suggestions_column
-      div(class: "col-sm-8 float-sm-left obs-suggestions-column") do
+      Column(sm: 8, class: "float-sm-left obs-suggestions-column") do
         useful = @suggestions.reject(&:useless?).sort_by(&:max).reverse
         confident, others = useful.partition(&:confident?)
         render_suggestions_table(confident, :suggestions_title.t) \
@@ -152,7 +152,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     # ---- right column: image carousel ----------------------------
 
     def render_images_column
-      div(class: "col-sm-4 float-sm-right") do
+      Column(sm: 4, class: "float-sm-right") do
         render(::Views::Controllers::Observations::Show::ImagesPanel.new(
                  obs: @observation,
                  images: @observation.images_sorted,

@@ -40,8 +40,8 @@ class Views::Layouts::Sidebar < Views::Base
   prop :languages, _Array(Language)
 
   def view_template
-    nav(id: "sidebar",
-        class: "sidebar-offcanvas col-xs-8 col-sm-2 hidden-print") do
+    Column(element: :nav, id: "sidebar", xs: 8, sm: 2,
+           class: "sidebar-offcanvas hidden-print") do
       comment { "SIDEBAR LOGO AND NAVIGATION" }
       div(id: "navigation") do
         render_logo

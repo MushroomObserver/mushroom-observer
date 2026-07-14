@@ -17,7 +17,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   def view_template
     div(class: "row align-items-center naming-row",
         id: "observation_naming_#{primary.id}") do
-      div(class: "col col-sm-11") do
+      Column(col: true, sm: 11) do
         render_main_columns
         render_reasons_row
       end
@@ -80,10 +80,10 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_main_columns
     div(class: "row align-items-center") do
-      div(class: "col col-sm-4") { render_name_cell }
-      div(class: "col col-sm-3") { render_proposer_cell }
-      div(class: "col col-sm-2") { render_vote_tally_cell }
-      div(class: "col col-sm-3") { render_your_vote_cell }
+      Column(col: true, sm: 4) { render_name_cell }
+      Column(col: true, sm: 3) { render_proposer_cell }
+      Column(col: true, sm: 2) { render_vote_tally_cell }
+      Column(col: true, sm: 3) { render_your_vote_cell }
     end
   end
 
@@ -92,7 +92,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_eyes_column
-    div(class: "col-sm-1 d-none d-sm-block px-sm-0") { render_eyes }
+    Column(sm: 1, class: "d-none d-sm-block px-sm-0") { render_eyes }
   end
 
   # ---- name cell -------------------------------------------------

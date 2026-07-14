@@ -20,8 +20,8 @@ module Views::Controllers::Locations
       register_chrome
 
       div(class: "row mt-3") do
-        div(class: "col-md-7") { render_known(@observation_counts) }
-        div(class: "col-md-5") { render_undefined }
+        Column(md: 7) { render_known(@observation_counts) }
+        Column(md: 5) { render_undefined }
       end
     end
 

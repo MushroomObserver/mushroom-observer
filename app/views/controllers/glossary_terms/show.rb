@@ -76,7 +76,7 @@ module Views::Controllers::GlossaryTerms
     def render_other_images
       div(class: "row") do
         @other_images.each do |image|
-          div(class: "col-sm-4") { render_other_image_panel(image) }
+          Column(sm: 4) { render_other_image_panel(image) }
         end
       end
     end

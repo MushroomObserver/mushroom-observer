@@ -119,7 +119,7 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
   def render_modifier_row(fields)
     div(class: "row") do
       fields.each do |field_name|
-        div(class: column_classes) do
+        Column(xs: 12, sm: 6, md: 12, lg: 6) do
           render_select_field(field_name)
         end
       end
@@ -164,9 +164,5 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     when false then "false"
     else ""
     end
-  end
-
-  def column_classes
-    Grid::FORM_COLS
   end
 end

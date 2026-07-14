@@ -20,10 +20,10 @@ module Views::Controllers::Translations
       add_page_title(:edit_translations_title.t)
       render_help_block
       div(class: "row") do
-        div(class: class_names(Grid::HALF, "translation_container")) do
+        Column(xs: 6, class: "translation_container") do
           render_index_panel
         end
-        div(class: class_names(Grid::HALF, "translation_container")) do
+        Column(xs: 6, class: "translation_container") do
           render_ui_panel
         end
       end

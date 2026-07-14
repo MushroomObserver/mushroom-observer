@@ -25,11 +25,11 @@ module Views::Controllers::Names::Synonyms
 
     def view_template
       div(class: "row") do
-        div(class: Grid::SM6) do
+        Column(xs: 12, sm: 6) do
           render_existing_synonyms
           render_proposed_synonyms
         end
-        div(class: Grid::SM6) do
+        Column(xs: 12, sm: 6) do
           render_members_section
         end
       end

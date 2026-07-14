@@ -55,8 +55,8 @@ module Views::Controllers::Locations
       # fires on a bad API key (issue #4535).
       div(id: "gmaps_flash")
       div(class: "row") do
-        div(class: "col-md-8 col-lg-6") { render_fields }
-        div(class: "col-md-4 col-lg-6 mb-3 mt-3") { render_map }
+        Column(md: 8, lg: 6) { render_fields }
+        Column(md: 4, lg: 6, class: "mb-3 mt-3") { render_map }
       end
     end
 
@@ -94,12 +94,12 @@ module Views::Controllers::Locations
 
     def render_coordinate_section
       div(class: "row mt-5") do
-        div(class: "col-sm-8") do
+        Column(sm: 8) do
           render(Components::Form::CompassFields.new(
                    form: self, location: model
                  ))
         end
-        div(class: "col-sm-4") do
+        Column(sm: 4) do
           render(Components::Form::ElevationFields.new(
                    form: self, location: model
                  ))
@@ -139,11 +139,11 @@ module Views::Controllers::Locations
 
     def render_locked_display
       div(class: "row") do
-        div(class: "col-sm-6 col-md-4 col-lg-3") do
+        Column(sm: 6, md: 4, lg: 3) do
           render_locked_fields
           Help(content: :show_location_locked.l)
         end
-        div(class: "col-sm-6 col-md-8 col-lg-9 mb-3 mt-3") do
+        Column(sm: 6, md: 8, lg: 9, class: "mb-3 mt-3") do
           Map(objects: [model])
         end
       end

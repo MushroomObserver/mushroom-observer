@@ -13,9 +13,9 @@ module Views::Controllers::Info
       container_class(:full)
 
       div(class: "row mt-3") do
-        div(class: "hidden-xs col-md-3") { render_thumbs(0, 3) }
-        div(class: "col-md-6 center-block") { render_stats_table }
-        div(class: "hidden-xs col-md-3") { render_thumbs(3, 3) }
+        Column(md: 3, class: "hidden-xs") { render_thumbs(0, 3) }
+        Column(md: 6, class: "center-block") { render_stats_table }
+        Column(md: 3, class: "hidden-xs") { render_thumbs(3, 3) }
       end
     end
 

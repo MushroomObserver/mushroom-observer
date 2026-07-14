@@ -29,7 +29,7 @@ module Views::Controllers::Comments
     private
 
     def render_form_column
-      div(class: Grid::SM8) do
+      Column(xs: 12, sm: 8) do
         comment { "[form:comment]" }
         render(Form.new(@comment, local: true))
         comment { "[eoform:comment]" }
@@ -46,7 +46,7 @@ module Views::Controllers::Comments
     end
 
     def render_images_column
-      div(class: Grid::SM4) do
+      Column(xs: 12, sm: 4) do
         render(::Views::Controllers::Observations::Show::ImagesPanel.new(
                  obs: @target, images: @target.images_sorted, user: @user
                ))

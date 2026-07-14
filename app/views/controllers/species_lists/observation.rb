@@ -19,18 +19,22 @@ module Views::Controllers::SpeciesLists
     def view_template
       div(class: "row") do
         render_image_column if @image
-        div(class: details_column_classes) { render_details_row }
+        render_details_column
       end
     end
 
     private
 
-    def details_column_classes
-      @image ? "col-sm-8 col-md-9" : Grid::FULL
+    def render_details_column
+      if @image
+        Column(sm: 8, md: 9) { render_details_row }
+      else
+        Column(xs: 12) { render_details_row }
+      end
     end
 
     def render_image_column
-      div(class: "col-sm-4 col-md-3") do
+      Column(sm: 4, md: 3) do
         render(Components::Image::Interactive.new(
                  user: @user,
                  image: @observation.thumb_image,

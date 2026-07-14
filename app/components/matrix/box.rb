@@ -16,7 +16,7 @@
 #     user: @user,
 #     object: @observation,
 #     identify: true,
-#     columns: Grid::FULL
+#     columns: Components::Column.classes_for(xs: 12)
 #   )
 #
 # @example Custom block content
@@ -31,7 +31,8 @@ class Components::Matrix::Box < Components::Base
   prop :user, _Nilable(User), default: nil
   prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
-  prop :columns, String, default: Grid::TILE
+  prop :columns, String,
+       default: -> { Components::Column.classes_for(xs: 12, sm: 6, md: 4, lg: 3) }
   prop :extra_class, String, default: ""
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
