@@ -73,7 +73,7 @@ module Views::Controllers::FieldSlips
       # an empty value is fine and the form context
       # (`?species_list=...`) is what carries the actual id.
       hidden_field("species_list", value: @species_list)
-      div(class: "container-text") do
+      Container(width: :text) do
         render_left_column_fields
         render_submit_quick_create if new_record?
         render_notes_panel

@@ -32,7 +32,7 @@ module Views::Controllers::Translations
     private
 
     def render_help_block
-      div(class: "container-text") do
+      Container(width: :text) do
         Help(element: :p, content: :edit_translations_help.t)
       end
     end

@@ -19,12 +19,7 @@ module Views::FullPageBase::LayoutClasses
   def container_class(container = :text)
     container ||= :text
     content_for(:container_class, flush: true) do
-      case container
-      when :text       then "container-text"
-      when :text_image then "container-text-image"
-      when :wide       then "container-wide"
-      else                  "container-full"
-      end
+      Components::Container.class_for(container)
     end
   end
 

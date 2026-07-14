@@ -16,7 +16,7 @@ module Views::Layouts
   class LoginWelcome < Views::Base
     def view_template
       comment { "LOGIN WELCOME" }
-      div(class: "container-text") do
+      Container(width: :text) do
         div(class: "text-center visible-xs-block") do
           img(class: "logo-trim", alt: "MO Logo", src: "/logo-trim.png")
         end

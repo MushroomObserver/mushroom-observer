@@ -13,7 +13,7 @@ module Views::Controllers::Account::APIKeys
       add_context_nav(Tab::Account::APIActions.new)
       container_class(:full)
 
-      div(class: "container-text") do
+      Container(width: :text) do
         ContentPadded { trusted_html(:account_api_keys_help.tp) }
       end
 

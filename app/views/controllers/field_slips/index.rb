@@ -24,7 +24,7 @@ module Views::Controllers::FieldSlips
       container_class(:wide)
 
       render_notice
-      div(class: "content-block") { render_project_or_filter_section }
+      ContentPadded { render_project_or_filter_section }
       render_list
     end
 
