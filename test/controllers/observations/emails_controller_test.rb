@@ -47,6 +47,9 @@ module Observations
       assert_flash_text(:runtime_ask_observation_question_success.t)
     end
 
+    # Regression test for #3791: on success the modal must close (not
+    # stay open looking frozen) and the flash must land in the page's
+    # own #page_flash, not the modal's own in-body flash slot.
     def test_send_observation_question_turbo_stream
       obs = observations(:minimal_unknown_obs)
       params = {
@@ -64,6 +67,12 @@ module Observations
       end
       assert_response(:success)
       assert_flash_text(:runtime_ask_observation_question_success.t)
+      assert_select("turbo-stream[action='close_modal']",
+                    text: "modal_observation_email")
+      assert_select(
+        "turbo-stream[action='remove'][target='modal_observation_email']"
+      )
+      assert_select("turbo-stream[action='update'][target='page_flash']")
     end
 
     def test_send_observation_question_requires_message

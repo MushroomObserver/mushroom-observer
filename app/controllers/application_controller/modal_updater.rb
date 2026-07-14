@@ -18,12 +18,28 @@
 #    re-running validations against a different model state).
 #    Updates the flash AND replaces the `#<id>_form` body with a
 #    freshly-rendered `Components::Modal::TurboForm`.
+#  - `render_modal_close_and_flash(identifier)` — for actions that
+#    SUCCEED and have nothing left to show in the modal: closes +
+#    removes the modal and pushes the accumulated flash into the
+#    page's own `#page_flash`, not the modal's. Use this instead of
+#    `render_modal_flash_update` once the modal's job is done --
+#    that one leaves the modal open, with the flash rendered inside
+#    it instead of on the page, so the modal never closes and just
+#    sits there looking stuck (see #3791).
 #
 module ApplicationController::ModalUpdater
   private
 
   def render_modal_flash_update(identifier)
     render(turbo_stream: turbo_stream_flash_update("modal_#{identifier}_flash"))
+  end
+
+  def render_modal_close_and_flash(identifier)
+    render(turbo_stream: [
+             turbo_stream.close_modal("modal_#{identifier}"),
+             turbo_stream.remove("modal_#{identifier}"),
+             turbo_stream_flash_update
+           ])
   end
 
   def render_modal_form_reload(identifier:, form_locals:)
