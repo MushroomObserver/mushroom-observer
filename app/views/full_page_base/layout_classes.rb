@@ -19,12 +19,7 @@ module Views::FullPageBase::LayoutClasses
   def container_class(container = :text)
     container ||= :text
     content_for(:container_class, flush: true) do
-      case container
-      when :text       then "container-text"
-      when :text_image then "container-text-image"
-      when :wide       then "container-wide"
-      else                  "container-full"
-      end
+      Components::Container.class_for(container)
     end
   end
 
@@ -68,12 +63,31 @@ module Views::FullPageBase::LayoutClasses
 
   private
 
-  # `Grid::LAYOUT_COLUMNS` is the single source of truth for these
-  # pairs — falls back to the `:twelve` (untouched, no-split) pair
+  # The single source of truth for these left/right column-class
+  # pairs -- falls back to the `:twelve` (untouched, no-split) pair
   # for any unrecognized profile name, matching the old case
   # statements' `else` branch.
   def column_pair_for(columns)
-    Grid::LAYOUT_COLUMNS.fetch(columns, Grid::LAYOUT_COLUMNS[:twelve])
+    case columns
+    when :nine_three
+      [Components::Column.classes_for(xs: 12, md: 9, lg: 8),
+       Components::Column.classes_for(xs: 12, md: 3, lg: 4)]
+    when :eight_four
+      [Components::Column.classes_for(xs: 12, md: 8, lg: 7),
+       Components::Column.classes_for(xs: 12, md: 4, lg: 5)]
+    when :seven_five
+      [Components::Column.classes_for(xs: 12, md: 7),
+       Components::Column.classes_for(xs: 12, md: 5)]
+    when :six
+      [Components::Column.classes_for(xs: 12, md: 6, lg: 8),
+       Components::Column.classes_for(xs: 12, md: 6, lg: 4)]
+    when :six_even
+      [Components::Column.classes_for(xs: 12, lg: 6),
+       Components::Column.classes_for(xs: 12, lg: 6)]
+    else
+      full = Components::Column.classes_for(xs: 12)
+      [full, full]
+    end
   end
 
   def left_column_class_for(columns)

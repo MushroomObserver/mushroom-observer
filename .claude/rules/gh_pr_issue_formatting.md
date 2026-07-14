@@ -1,4 +1,20 @@
-# PR body formatting
+# PR and issue title & body formatting
+
+## Titles: backtick every code identifier
+
+**Every `gh pr create`/`gh pr edit`/`gh issue create`/`gh issue edit` `--title` must wrap code in backticks** — class/module names (`` `Image::Processor` ``), method calls (`` `ssh_sizes` ``), file paths (`` `app/models/foo.rb` ``) — exactly like a PR body already does. A title is one line with no code-block cues, which is exactly why this is easy to draft without thinking about it — that's not a reason to skip it, it's the reason to check every time.
+
+```
+# Right
+Fix `Image::Processor#ssh_sizes` logging false failures
+
+# Wrong
+Fix Image::Processor#ssh_sizes logging false failures
+```
+
+This lives in this file (not just something said in conversation) because every file under `.claude/rules/` is auto-loaded into context every session regardless of whether `CLAUDE.md` links to it — that's the mechanism that makes a rule actually stick across sessions. Something only ever stated in conversation does not persist once that conversation ends; a rule file does.
+
+## Bodies: write to a file, never HEREDOC
 
 When using `gh pr create` or `gh pr edit`, **always** write the body to a file first and pass it via `--body-file`. Never use a HEREDOC (`$(cat <<'EOF' ... EOF)`) for a PR body that contains backticks for code formatting.
 

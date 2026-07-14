@@ -24,8 +24,10 @@ module Views::Controllers::Observations::Identify
       add_index_title(@query)
       add_pagination(@pagination_data)
 
-      div(class: "container-text content-block") do
-        p { trusted_html(:obs_needing_id_intro.tp) }
+      Container(width: :text) do
+        ContentPadded do
+          p { trusted_html(:obs_needing_id_intro.tp) }
+        end
       end
 
       PaginatedResults { render_matrix }

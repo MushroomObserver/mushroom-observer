@@ -15,7 +15,7 @@ module Views::Controllers::Locations
       def view_template
         register_chrome
 
-        div(class: "row") do
+        Row do
           render_column(:known)
           render_column(:missing)
           render_column(:unknown)
@@ -31,7 +31,7 @@ module Views::Controllers::Locations
       end
 
       def render_column(key)
-        div(class: Grid::THIRD) do
+        Column(xs: 4) do
           h4 do
             plain(column_label(key))
             plain(" (#{column_data(key).length})")

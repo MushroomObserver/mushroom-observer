@@ -32,7 +32,7 @@ module Views::Controllers::SpeciesLists::NameLists
 
     def render_noscript
       noscript do
-        div(class: "container-text mt-3") do
+        Container(width: :text, class: "mt-3") do
           trusted_html(:name_lister_no_js.tp)
         end
       end

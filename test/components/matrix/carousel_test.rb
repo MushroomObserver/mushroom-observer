@@ -5,10 +5,7 @@ require("test_helper")
 # `Components::Matrix::Carousel` is the third caller of
 # `Components::Carousel` (after `ImageGallery` and
 # `Form::UploadGallery`). It exists ahead of the obs-index integration
-# so the primitive's API is validated by all three consumers; the
-# consumer-level integration (rendering it from a matrix box on the
-# obs-index) is a follow-up PR with its own perf work (see
-# `.claude/rules/matrix_box_carousel.md`).
+# so the primitive's API is validated by all three consumers.
 #
 # Class name is flat (matches `MatrixBoxTest` / `MatrixTableTest`)
 # because the top-level `Matrix` constant is Ruby's stdlib matrix
@@ -79,7 +76,7 @@ class MatrixCarouselTest < ComponentTestCase
 
   # Item slide does NOT pull a `:large`/original image — the
   # `Matrix::Carousel::Item` subclass overrides defaults to keep the
-  # per-box render cost down (per the matrix_box_carousel guidance).
+  # per-box render cost down.
   # The img's `src` should be a `medium` (640px) variant rather than
   # the `:original`/`:huge`/`:large` URL.
   def test_slides_use_medium_size_not_large

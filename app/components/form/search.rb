@@ -119,9 +119,9 @@ class Components::Form::Search < Components::ApplicationForm
   # Form layout
 
   def render_form_columns
-    div(class: "row") do
+    Row do
       field_columns.each do |panels|
-        div(class: Grid::MD6) do
+        Column(xs: 12, md: 6) do
           panels.each do |heading, sections|
             render_panel(heading:, sections:)
           end
@@ -184,9 +184,9 @@ class Components::Form::Search < Components::ApplicationForm
 
   def render_field_row(field_spec:)
     if field_spec.is_a?(Array)
-      div(class: "row") do
+      Row do
         field_spec.each do |subfield|
-          div(class: column_classes) do
+          Column(xs: 12, sm: 6, md: 12, lg: 6) do
             render_search_field(field_name: subfield)
           end
         end
@@ -202,10 +202,6 @@ class Components::Form::Search < Components::ApplicationForm
     return unless field_type
 
     send("render_#{field_type}", field_name:)
-  end
-
-  def column_classes
-    Grid::FORM_COLS
   end
 
   # Helper to check if a field is a date field

@@ -23,7 +23,7 @@ module Views::Controllers::Projects::Members
     private
 
     def render_create_form
-      div(class: "container-text mt-5 ml-3") do
+      Container(width: :text, class: "mt-5 ml-3") do
         div(class: "d-flex align-items-start") do
           autocompleter_field(
             :candidate,
