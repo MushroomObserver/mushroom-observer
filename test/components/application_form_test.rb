@@ -110,6 +110,21 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "label", text: "Login")
   end
 
+  # Regression (Copilot review on #4687): FieldLabelRow#append_colon used
+  # to interpolate the resolved text into a new String ("#{text}:"),
+  # which strips the html_safe flag off a Textile-rendered label --
+  # render_label_content would then re-escape the already-safe <em>
+  # markup instead of rendering it. Unlike checkbox_field's label_text
+  # (which never appends a colon), text_field goes through the
+  # colon-appending path, so this exercises append_colon directly.
+  def test_label_text_preserves_textile_markup_through_colon
+    form = render_form do
+      text_field(:name, label: :prefs_no_emails)
+    end
+
+    assert_html(form, "label em", text: "all")
+  end
+
   # Regression: `prefs_no_emails` ("Opt out of _all_ email from MO.")
   # carries real textile italic markup -- FieldLabelRow#resolved_label_text
   # resolves bare Symbol labels via `.t`, not `.l`, specifically so this

@@ -74,12 +74,12 @@ class FormCheckboxCollapseTest < ComponentTestCase
   end
 
   # Regression test: label: also accepts a bare Symbol translation key,
-  # resolved via .l by the underlying checkbox_field/FieldLabelRow --
+  # resolved via .t by the underlying checkbox_field/FieldLabelRow --
   # not just an explicit String (#4687).
   def test_label_accepts_bare_symbol
     html = render_collapse(label: :APPROVED)
 
-    assert_html(html, "label", text: :APPROVED.l)
+    assert_html(html, "label", text: :APPROVED.t)
   end
 
   private

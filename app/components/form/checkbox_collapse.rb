@@ -14,7 +14,7 @@
 # @param target_id [String] id of the collapse target (no leading #)
 # @param label [String, Symbol] the label text, or a translation key --
 #   passed straight through to checkbox_field, which resolves a Symbol
-#   via `.l` itself (see FieldLabelRow#resolved_label_text).
+#   via `.t` itself (see FieldLabelRow#resolved_label_text).
 # @param expanded [Boolean] initial expanded state (default: false)
 # @param attributes [Hash] extra options forwarded to checkbox_field
 class Components::Form::CheckboxCollapse < Components::Base
