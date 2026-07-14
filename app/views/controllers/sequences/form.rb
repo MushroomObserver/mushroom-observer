@@ -28,7 +28,7 @@ module Views::Controllers::Sequences
     def render_locus_field
       textarea_field(:locus,
                      rows: 1,
-                     label: :LOCUS.l,
+                     label: :LOCUS,
                      between: :required,
                      wrap_class: "w-100")
     end
@@ -41,7 +41,7 @@ module Views::Controllers::Sequences
     end
 
     def render_bases_field
-      textarea_field(:bases, cols: 80, rows: 5, label: :BASES.l,
+      textarea_field(:bases, cols: 80, rows: 5, label: :BASES,
                              class: "font-monospace") do |f|
         f.with_between do
           Help(element: :span,
@@ -68,14 +68,14 @@ module Views::Controllers::Sequences
 
     def render_archive_select
       select_field(:archive, [nil] + sequence_archive_options,
-                   label: :ARCHIVE.l,
+                   label: :ARCHIVE,
                    inline: true,
                    wrap_class: "ml-5")
     end
 
     def render_accession_field
       text_field(:accession,
-                 label: :form_sequence_accession.l,
+                 label: :form_sequence_accession,
                  inline: true,
                  wrap_class: "ml-5")
     end
@@ -88,7 +88,7 @@ module Views::Controllers::Sequences
     def render_notes_field
       textarea_field(:notes,
                      rows: 3,
-                     label: :NOTES.l,
+                     label: :NOTES,
                      between: :optional)
     end
 

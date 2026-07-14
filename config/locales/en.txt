@@ -1754,7 +1754,6 @@
   form_images_notes_help: Enter notes that are specific to this particular image.
   form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
   form_images_original_name: Original file name
-  form_images_select_license: Select a "License":/info/how_to_use#license
   form_images_license_help: Select "license":/info/how_to_use#license you want to give for this image.
   form_images_project_help: Check any projects you wish to attach this image to.
   form_images_camera_date: Camera date

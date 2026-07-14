@@ -12,7 +12,7 @@ module Views::Controllers::SpeciesLists::Uploads
 
     def view_template
       super do
-        file_field(:file, label: "#{:species_list_upload_label.t}:")
+        file_field(:file, label: :species_list_upload_label)
         Help(content: :species_list_upload_help.tp)
         submit(:UPLOAD.l, center: true)
       end

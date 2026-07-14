@@ -70,7 +70,7 @@ module Views::Controllers::GlossaryTerms::Images
     # checkbox in MO's standard `.checkbox` BS3 markup.
     def render_select_checkbox(image)
       checkbox_field("selected[#{image.id}]",
-                     label: "#{:image.t} ##{image.id}",
+                     label: "#{:image.l} ##{image.id}",
                      wrap_class: "my-0",
                      checked_value: "yes",
                      unchecked_value: "no")

@@ -54,7 +54,7 @@ class Components::Form::UploadGallery::Fields < Components::Base
     render(Components::ApplicationForm::TextareaField.new(
              field,
              rows: 2,
-             wrapper_options: { label: :form_images_notes.l }
+             wrapper_options: { label: :form_images_notes }
            ))
   end
 
@@ -63,7 +63,7 @@ class Components::Form::UploadGallery::Fields < Components::Base
     render(Components::ApplicationForm::DateField.new(
              field,
              value: @image&.when,
-             wrapper_options: { label: :form_images_when_taken.l }
+             wrapper_options: { label: :form_images_when_taken }
            ))
   end
 
@@ -71,17 +71,19 @@ class Components::Form::UploadGallery::Fields < Components::Base
     field = image_field_proxy(:copyright_holder, @image&.copyright_holder)
     render(Components::ApplicationForm::TextField.new(
              field,
-             wrapper_options: { label: :form_images_copyright_holder.l }
+             wrapper_options: { label: :form_images_copyright_holder }
            ))
   end
 
   def render_license_field
     field = image_field_proxy(:license_id, selected_license)
-    render(Components::ApplicationForm::SelectField.new(
-             field,
-             collection: license_options,
-             wrapper_options: { label: :form_images_select_license.t.html_safe } # rubocop:disable Rails/OutputSafety
-           ))
+    field_component = Components::ApplicationForm::SelectField.new(
+      field,
+      collection: license_options,
+      wrapper_options: { label: :LICENSE, help_collapse: true }
+    )
+    field_component.with_help { trusted_html(:form_images_license_help.t) }
+    render(field_component)
   end
 
   def render_original_name_field
@@ -89,7 +91,7 @@ class Components::Form::UploadGallery::Fields < Components::Base
     render(Components::ApplicationForm::TextField.new(
              field,
              size: 40,
-             wrapper_options: { label: :form_images_original_name.l }
+             wrapper_options: { label: :form_images_original_name }
            ))
   end
 

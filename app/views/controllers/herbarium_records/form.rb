@@ -37,19 +37,19 @@ module Views::Controllers::HerbariumRecords
     def render_herbarium_name_field
       autocompleter_field(:herbarium_name,
                           type: :herbarium,
-                          label: :NAME.l,
+                          label: :NAME,
                           between: :required)
     end
 
     def render_initial_det_field
       text_field(:initial_det,
-                 label: :herbarium_record_initial_det.l,
+                 label: :herbarium_record_initial_det,
                  between: :optional)
     end
 
     def render_accession_number_field
       text_field(:accession_number,
-                 label: :herbarium_record_accession_number.l,
+                 label: :herbarium_record_accession_number,
                  between: :required)
     end
 
@@ -61,7 +61,7 @@ module Views::Controllers::HerbariumRecords
     def render_notes_field
       textarea_field(:notes,
                      rows: 6,
-                     label: :NOTES.l,
+                     label: :NOTES,
                      between: :optional)
     end
 

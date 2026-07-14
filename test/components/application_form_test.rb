@@ -110,13 +110,19 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "label", text: "Login")
   end
 
+  # Regression: `prefs_no_emails` ("Opt out of _all_ email from MO.")
+  # carries real textile italic markup -- FieldLabelRow#resolved_label_text
+  # resolves bare Symbol labels via `.t`, not `.l`, specifically so this
+  # renders as an actual <em> tag (MO's Textile class's italic output)
+  # instead of literal underscores.
   def test_checkbox_field_prefs_auto_resolves_label_from_i18n
     form = render_form do
       checkbox_field(:no_emails, prefs: true)
     end
 
-    # `:prefs_no_emails.t` → "Opt out of _all_ email from MO."
     assert_includes(form, "Opt out of")
+    assert_html(form, "label em", text: "all")
+    assert_no_html(form, "label", text: "_all_")
   end
 
   def test_auto_label_for_prefs_returns_options_unchanged_when_no_prefs
@@ -128,18 +134,35 @@ class ApplicationFormTest < ComponentTestCase
                  "Without :prefs, options should be untouched")
   end
 
+  # auto_label_for_prefs itself resolves to the bare translation-key
+  # Symbol, not a String -- resolution to actual display text (via
+  # `.t`) happens downstream in FieldLabelRow#resolved_label_text.
   def test_auto_label_for_prefs_drops_prefs_key_when_resolving
     form = Components::ApplicationForm.new(@collection_number,
                                            action: "/test_form_path")
 
     result = form.send(:auto_label_for_prefs, :login,
                        prefs: true, class: "extra")
-    assert_equal("Login", result[:label])
+    assert_equal(:prefs_login, result[:label])
     assert_not(result.key?(:prefs),
                ":prefs should be removed after resolution so it " \
                "doesn't leak into wrapper_options downstream")
     assert_equal("extra", result[:class],
                  "Unrelated options should pass through")
+  end
+
+  # A field label secretly doubling as a clickable link is a UX smell
+  # (not obviously clickable, easy to miss) -- FieldLabelRow raises
+  # rather than silently rendering one. Route link content through
+  # help: instead (see Components::Form::UploadGallery::Fields#
+  # render_license_field for the established pattern).
+  def test_label_containing_a_link_raises
+    error = assert_raises(RuntimeError) do
+      render_form do
+        text_field(:name, label: '<a href="/x">Click</a>'.html_safe)
+      end
+    end
+    assert_match(/contains a link/, error.message)
   end
 
   # Checkbox field tests - CollectionNumber doesn't have boolean fields,
@@ -175,6 +198,21 @@ class ApplicationFormTest < ComponentTestCase
 
     # wrap_class should be on wrapper div, not the input
     assert_html(form, "div.checkbox.mt-3")
+  end
+
+  # Unlike text_field/select_field/etc's colon-suffixed prompt label
+  # (see test_label_containing_a_link_raises above), a checkbox label
+  # can be rich content -- e.g. names/synonyms/form.rb's
+  # synonym-selection checkboxes, whose label is a name link plus a
+  # copy-id badge. CheckboxField#label_text calls resolved_label_text
+  # directly, bypassing FieldLabelRow#label_text's link guard
+  # entirely, so this must render without raising.
+  def test_checkbox_field_label_with_link_does_not_raise
+    form = render_form do
+      checkbox_field(:placeholder, label: '<a href="/x">Click</a>'.html_safe)
+    end
+
+    assert_html(form, "label a[href='/x']", text: "Click")
   end
 
   # Collection mode: `checkbox_field(:field, [label, value], ...)`

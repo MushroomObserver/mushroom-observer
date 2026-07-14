@@ -12,7 +12,7 @@ module Views::Controllers::FieldSlips::QRReader
     end
 
     def view_template
-      text_field(:code, label: :app_qrcode.t,
+      text_field(:code, label: :app_qrcode,
                         data: { qr_reader_target: "input",
                                 action: "qr-reader#handleInput" })
     end

@@ -18,7 +18,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   class CheckboxField < Superform::Rails::Components::Checkbox
     include Phlex::Slotable
     include FieldWithHelp
-    include Phlex::TrustedHtml
+    include FieldLabelRow
 
     slot :between
     slot :append
@@ -244,11 +244,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_options[:label_position] == :before
     end
 
+    # Checkbox labels read as a clickable sentence next to the checkbox
+    # itself, not a field prompt -- never gets FieldLabelRow's colon.
     def label_text
-      label_option = wrapper_options[:label]
-      return if label_option == false
+      return if wrapper_options[:label] == false
 
-      label_option.is_a?(String) ? label_option : field.key.to_s.humanize
+      resolved_label_text
     end
 
     def boolean_wrap_class

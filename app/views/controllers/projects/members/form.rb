@@ -28,7 +28,7 @@ module Views::Controllers::Projects::Members
           autocompleter_field(
             :candidate,
             type: :user,
-            label: "#{:add_object.t(type: :user)}:",
+            label: :add_object.l(type: :user),
             inline: true,
             size: 40
           )

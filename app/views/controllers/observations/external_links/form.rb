@@ -36,7 +36,7 @@ module Views::Controllers::Observations::ExternalLinks
     def render_external_id_field
       text_field(:external_id,
                  size: 40,
-                 label: :EXTERNAL_ID.l,
+                 label: :EXTERNAL_ID,
                  wrap_class: "w-100",
                  data: field_data("externalId"))
     end
@@ -45,7 +45,7 @@ module Views::Controllers::Observations::ExternalLinks
       text_field(:url,
                  size: 40,
                  value: url_seed,
-                 label: :URL.l,
+                 label: :URL,
                  wrap_class: "w-100",
                  data: field_data("url")) do |f|
         f.with_append { :show_observation_add_link_dialog.l }
@@ -66,7 +66,7 @@ module Views::Controllers::Observations::ExternalLinks
     def render_relationship_field
       select_field(:relationship,
                    ExternalLink.relationships.keys.map { |k| [k.humanize, k] },
-                   label: :RELATIONSHIP.l,
+                   label: :RELATIONSHIP,
                    inline: true,
                    selected: model.relationship)
     end
@@ -79,7 +79,7 @@ module Views::Controllers::Observations::ExternalLinks
     def render_site_select
       select_field(:external_site_id,
                    @sites.sort_by(&:name).map { |site| [site.name, site.id] },
-                   label: :EXTERNAL_SITE.l,
+                   label: :EXTERNAL_SITE,
                    inline: true,
                    selected: (@site || @sites.first)&.id,
                    data: { external_link_form_target: "site",

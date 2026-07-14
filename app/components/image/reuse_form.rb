@@ -52,7 +52,7 @@ class Components::Image::ReuseForm < Components::ApplicationForm
 
   def render_id_field_row
     div(class: "form-group form-inline") do
-      text_field(:img_id, label: "#{:image_reuse_id.t}:",
+      text_field(:img_id, label: :image_reuse_id,
                           inline: true, size: 8,
                           data: { autofocus: "true" })
       submit(:image_reuse_reuse.l, as: :button,

@@ -32,7 +32,7 @@ module Views::Controllers::Observations
           Components::Form::Notes::Part.new(
             key: model.notes_normalized_key(part),
             value: model.notes_part_value(part),
-            label: single_notes_part? ? "#{:NOTES.l}:" : "#{part}:"
+            label: single_notes_part? ? :NOTES : part
           )
         end
       end
