@@ -37,7 +37,7 @@ class Components::Image::ReuseForm < Components::ApplicationForm
   end
 
   def view_template
-    div(class: "container-text") do
+    Container(width: :text) do
       render_id_field_row
       Help(class: "form-group", content: :image_reuse_id_help.tp)
       render_toggle_link

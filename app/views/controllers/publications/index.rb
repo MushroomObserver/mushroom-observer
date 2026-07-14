@@ -31,7 +31,7 @@ module Views::Controllers::Publications
       add_context_nav(::Tab::Publication::IndexActions.new)
       container_class(:wide)
 
-      div(class: "container-text") { render_intro }
+      Container(width: :text) { render_intro }
       render_publications_table
       ContentPadded do
         trusted_html(:publication_legend.tp)

@@ -117,8 +117,8 @@ module Views::Layouts
         render(Views::Layouts::Header.new(
                  any_content_filters_applied: @any_content_filters_applied
                ))
-        main(id: "content", class: content_classes,
-             data: { controller: "lightgallery" }) do
+        Container(element: :main, id: "content", class: content_classes,
+                  data: { controller: "lightgallery" }) do
           comment { "MAIN_PAGE_CONTENT" }
           yield
           comment { "/MAIN_PAGE_CONTENT" }
