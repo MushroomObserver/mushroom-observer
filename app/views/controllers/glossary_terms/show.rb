@@ -26,7 +26,7 @@ module Views::Controllers::GlossaryTerms
     private
 
     def render_main_row
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns)) { render_left_column }
         div(class: content_for(:right_columns)) { render_right_column }
       end
@@ -74,7 +74,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_other_images
-      div(class: "row") do
+      Row do
         @other_images.each do |image|
           div(class: "col-sm-4") { render_other_image_panel(image) }
         end

@@ -21,7 +21,7 @@ module Views::Controllers::CollectionNumbers
         )
       )
 
-      div(class: "row") do
+      Row do
         div(class: Grid::SM7) { render_form }
         div(class: Grid::SM5) { render_observation_boxes }
       end
@@ -34,7 +34,7 @@ module Views::Controllers::CollectionNumbers
     end
 
     def render_observation_boxes
-      ul(class: "row list-unstyled") do
+      Row(element: :ul, class: "list-unstyled") do
         @collection_number.observations.each do |obs|
           render(Components::Matrix::Box.new(
                    user: @user,

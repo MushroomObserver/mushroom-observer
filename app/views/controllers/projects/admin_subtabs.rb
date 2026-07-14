@@ -17,7 +17,7 @@ module Views::Controllers::Projects
     end
 
     def view_template
-      div(class: "row") do
+      Row do
         div(class: class_names(Grid::FULL, "pl-4 mt-2 mb-3"),
             id: "project_admin_subtabs") do
           NavTabs(

@@ -42,7 +42,7 @@ module Views::Controllers::Descriptions
     # -- body: two columns ------------------------------------------
 
     def render_two_columns
-      div(class: "row") do
+      Row do
         div(class: Grid::MD6) { render_details_column }
         div(class: Grid::MD6) { render_alts_column }
       end

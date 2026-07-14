@@ -117,7 +117,7 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
   end
 
   def render_modifier_row(fields)
-    div(class: "row") do
+    Row do
       fields.each do |field_name|
         div(class: column_classes) do
           render_select_field(field_name)

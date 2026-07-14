@@ -47,7 +47,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_name_and_type_row
-      div(class: "row") do
+      Row do
         div(class: Grid::SM6) do
           render_name_field
           hidden_field(:project_id)

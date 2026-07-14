@@ -19,7 +19,7 @@ module Views::Controllers::Locations
     def view_template
       register_chrome
 
-      div(class: "row mt-3") do
+      Row(class: "mt-3") do
         div(class: "col-md-7") { render_known(@observation_counts) }
         div(class: "col-md-5") { render_undefined }
       end

@@ -9,7 +9,7 @@ module Views::Controllers::GlossaryTerms
       prop :glossary_term, ::GlossaryTerm
 
       def view_template
-        div(class: "row") do
+        Row do
           div(class: Grid::SM9) { render_left }
           div(class: Grid::SM3) { render_right }
         end

@@ -271,7 +271,7 @@ module Views::Controllers::FieldSlips
       # `value:` option, no Superform model binding.
       @checked_ids = checked_ids
       @primary_id = primary_id
-      ul(class: "row list-unstyled mt-3", data: matrix_data) do
+      Row(element: :ul, class: "list-unstyled mt-3", data: matrix_data) do
         observations.each { |obs| render_observation_row(obs) }
       end
     end

@@ -19,7 +19,7 @@ module Views::Controllers::HerbariumRecords
         )
       )
 
-      div(class: "row") do
+      Row do
         div(class: Grid::SM7) { render_form }
         div(class: Grid::SM5) { render_observation_boxes }
       end
@@ -32,7 +32,7 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_observation_boxes
-      ul(class: "row list-unstyled") do
+      Row(element: :ul, class: "list-unstyled") do
         @herbarium_record.observations.each do |obs|
           render(Components::Matrix::Box.new(
                    user: @user,

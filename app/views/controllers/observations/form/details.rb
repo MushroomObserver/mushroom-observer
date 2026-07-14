@@ -21,7 +21,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   prop :dubious_where_reasons, _Nilable(_Array(String)), default: nil
 
   def view_template
-    div(class: "row") do
+    Row do
       div(class: Grid::MD6) { render_left_column }
       div(class: Grid::MD6) { render_map }
     end
@@ -177,7 +177,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_lat_lng_alt_row
-    div(class: "row no-gutters", id: "observation_lat_lng_alt") do
+    Row(class: "no-gutters", id: "observation_lat_lng_alt") do
       render_coordinate_field(:lat, :LAT, :LATITUDE, "º")
       render_coordinate_field(:lng, :LNG, :LONGITUDE, "º")
       render_coordinate_field(:alt, :ALT, :ALTITUDE, "m")

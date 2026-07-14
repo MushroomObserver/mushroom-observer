@@ -15,7 +15,7 @@ module Views::Controllers::Locations
       def view_template
         register_chrome
 
-        div(class: "row") do
+        Row do
           render_column(:known)
           render_column(:missing)
           render_column(:unknown)
