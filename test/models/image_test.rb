@@ -345,37 +345,29 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
   end
 
-  # Regression test for a Copilot finding on PR #4751: Image::Processor
-  # can record a transfer failure by populating #errors and returning
-  # early WITHOUT raising -- unlike the old `system(script/process_image)`
-  # call, which returned non-zero (a failure #process_image could see) on
-  # the same underlying failure. process_and_enqueue_dhash must treat a
-  # non-empty #errors the same as a raised exception: fail, and don't
-  # enqueue the dhash job for an image whose processing didn't actually
-  # finish. (GPS-strip failures are handled separately and earlier now --
-  # see strip_original_gps? -- so by the time Image::Processor runs at
-  # all, any remaining #errors can only be a transfer failure.)
-  def test_process_image_records_failure_without_raising
+  # Transfer-to-image-server is no longer part of Image::Processor#process
+  # (see #4791 -- TransferImagesJob owns that now, asynchronously), so a
+  # successful resize enqueues both TransferImagesJob and ImageDhashJob --
+  # a transfer failure is no longer something #process_image can see or
+  # fail on.
+  def test_process_image_enqueues_transfer_and_dhash_jobs
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
-
-    silently_failing_processor = Object.new
-    def silently_failing_processor.process; end
-
-    def silently_failing_processor.errors
-      ["Failed to transfer thumb/1.jpg to remote1"]
-    end
+    succeeding_processor = Object.new
+    def succeeding_processor.process; end
 
     img.stub(:move_original, true) do
-      Image::Processor.stub(:new, silently_failing_processor) do
+      Image::Processor.stub(:new, succeeding_processor) do
         Rails.env.stub(:test?, false) do
-          assert_no_enqueued_jobs(only: ImageDhashJob) do
-            assert_not(img.process_image)
+          assert_enqueued_with(job: TransferImagesJob,
+                               args: [{ image_ids: [img.id] }]) do
+            assert_enqueued_with(job: ImageDhashJob, args: [img.id]) do
+              assert(img.process_image)
+            end
           end
         end
       end
     end
-    assert(img.errors[:image].any?)
   end
 
   def test_move_original_system_fail

@@ -4,74 +4,51 @@ require("open3")
 
 class Image
   class Processor
-    # Verifies (and completes) transfers for the work-list of images not yet
-    # confirmed fully on the image server(s), instead of scanning every file
-    # on every server. See GitHub issue #4791: a full local+remote tree scan
-    # (the original script/verify_images design) is too slow to schedule
-    # frequently, and the blind `find -mmin +N | rsync
-    # --remove-source-files` cron it was replaced by races
-    # Image::Processor#process outright -- it can delete a locally-complete
-    # original before the derived sizes are ever generated, with no idea
-    # any of that is still in flight.
+    # Transfers and confirms an explicit set of images onto every configured
+    # image server, instead of scanning every file on every server. See
+    # GitHub issue #4791: a full local+remote tree scan (the original
+    # script/verify_images design) is too slow to schedule frequently, and
+    # the blind `find -mmin +N | rsync --remove-source-files` cron it was
+    # replaced by races Image::Processor#process outright -- it can delete a
+    # locally-complete original before the derived sizes are ever generated,
+    # with no idea any of that is still in flight.
     #
-    # For each candidate image, checks presence + byte-size of every
-    # expected file directly (no directory listing), uploads anything
-    # missing/mismatched on a server that should have it, and only once
-    # every size is confirmed present and byte-matching everywhere:
+    # Driven by an explicit list of images (see TransferImagesJob), not a
+    # DB scan -- checks presence + byte-size of every expected file
+    # directly (no directory listing), uploads anything missing/mismatched
+    # on a server that should have it, and only once every size is
+    # confirmed present and byte-matching everywhere:
     #   - deletes the local copy of any size not in
     #     MO.keep_these_image_sizes_local
-    #   - marks the image transferred (see self.candidates/self.recheck for
-    #     why this makes the flag honest, replacing the old
-    #     self.retransfer_images, which could mark an image transferred
-    #     without ever confirming any size actually reached the server)
+    #   - marks the image transferred
     #
-    # Also re-checks a bounded set of recently-completed images
-    # (self.recheck) -- if one of those turns out incomplete, that's the
-    # #4791 failure mode recurring, so it's alert-worthy, not something to
-    # silently re-fix in the dark.
+    # Re-checking an already-transferred image for drift (the exact #4791
+    # failure mode) is NOT this class's job -- once local copies are
+    # deleted, there's no local byte count left to compare a remote file
+    # against, so that's a presence check against a full remote listing,
+    # not a per-path byte comparison. See Image::Processor::GapDetector.
     class Verifier
-      # The routine work-list: anything not yet confirmed complete.
-      def self.candidates
-        Image.where(transferred: false)
-      end
-
-      # The safety check: recently-marked-complete images, re-verified in
-      # case the flag went true without every size actually landing (the
-      # exact #4791 failure mode). Bounded by recency, not a full-history
-      # scan -- if this ever needs to be a wider backstop that should be a
-      # deliberate decision made after seeing an #alerts hit, not an
-      # accidental full scan on every run.
-      def self.recheck
-        Image.where(transferred: true, updated_at: 1.hour.ago..)
-      end
-
       def initialize(&log)
         @log = log
         @uploaded = []
         @deleted = []
         @completed = []
         @failed = []
-        @alerted = []
         # Fetched once per run (not cached at the class level -- see the
         # comment on Image::Processor.local_images_path).
         @image_server_data = Processor.image_server_data
         @image_servers = @image_server_data.keys - [:local]
       end
 
-      def run
-        self.class.candidates.find_each do |image|
-          verify_image(image, alert_if_incomplete: false)
-        end
-        self.class.recheck.find_each do |image|
-          verify_image(image, alert_if_incomplete: true)
-        end
+      def transfer(images)
+        images.find_each { |image| transfer_image(image) }
         { uploaded: @uploaded, deleted: @deleted, completed: @completed,
-          failed: @failed, alerted: @alerted }
+          failed: @failed }
       end
 
       private
 
-      def verify_image(image, alert_if_incomplete:)
+      def transfer_image(image)
         paths = paths_for(image)
         local_sizes = paths.index_with { |path| local_size(path) }
         # Still mid-#process (a size hasn't been generated locally yet) --
@@ -85,13 +62,10 @@ class Image
         end
 
         upload_mismatches(image, paths, local_sizes, remote_sizes)
+        return unless all_synced?(paths, local_sizes, remote_sizes)
 
-        if all_synced?(paths, local_sizes, remote_sizes)
-          delete_local_copies(image, paths)
-          mark_transferred(image)
-        elsif alert_if_incomplete
-          alert_incomplete(image)
-        end
+        delete_local_copies(image, paths)
+        mark_transferred(image)
       end
 
       def paths_for(image)
@@ -220,12 +194,6 @@ class Image
         Observation.joins(:observation_images).
           where(observation_images: { image_id: image.id }).touch_all
         @completed << image.id
-      end
-
-      def alert_incomplete(image)
-        @alerted << image.id
-        log("ALERT: image #{image.id} marked transferred, but a size is " \
-            "missing or mismatched on a server that should have it")
       end
 
       def keep_local?(subdir)

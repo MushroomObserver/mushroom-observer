@@ -3,9 +3,12 @@
 require("test_helper")
 
 # See test/classes/image_script_test.rb for the equivalent shell-script
-# coverage this fixture data is drawn from, and GitHub issue #4791 for why
-# this is a work-list-scoped port (per-image, per-file checks), not a
-# directory-listing port of the old script.
+# coverage this fixture data is drawn from, GitHub issue #4791 for why
+# this is a work-list-scoped port (per-image, per-file checks) driven by
+# an explicit list of images rather than a directory-listing scan of the
+# old script, and test/jobs/transfer_images_job_test.rb /
+# test/models/image/processor/gap_detector_test.rb for the event-driven
+# job and the occasional-reconciliation piece that call this.
 class Image::Processor::VerifierTest < UnitTestCase
   SUBDIRS = Image::URL::SUBDIRECTORIES.values.freeze
 
@@ -40,25 +43,8 @@ class Image::Processor::VerifierTest < UnitTestCase
     super
   end
 
-  def test_candidates_scope_is_untransferred_images
-    assert_includes(Image::Processor::Verifier.candidates,
-                    images(:turned_over_image))
-    assert_not_includes(Image::Processor::Verifier.candidates,
-                        images(:commercial_inquiry_image))
-  end
-
-  def test_recheck_scope_is_recently_completed_images
-    image = images(:commercial_inquiry_image)
-    image.update_columns(transferred: true, updated_at: Time.zone.now)
-    old = images(:connected_coprinus_comatus_image)
-    old.update_columns(transferred: true, updated_at: 1.year.ago)
-
-    assert_includes(Image::Processor::Verifier.recheck, image)
-    assert_not_includes(Image::Processor::Verifier.recheck, old)
-  end
-
   # A mismatch gets uploaded, but the image isn't trusted as complete on
-  # the same run that just fixed it -- that's deliberate (see Verifier's
+  # the same run that just fixed it -- deliberate (see Verifier's
   # all_synced? comment): a freshly-uploaded file isn't re-verified until
   # the next run's fresh remote check.
   def test_uploads_mismatch_but_does_not_yet_mark_transferred
@@ -67,7 +53,7 @@ class Image::Processor::VerifierTest < UnitTestCase
     seed_remote(1, image, %w[thumb 320 640 1280 orig])
     seed_remote(2, image, %w[thumb 320 640])
 
-    result = Image::Processor.verify_images
+    result = Image::Processor.transfer_images([image.id])
 
     assert_includes(result[:uploaded],
                     [image.id, :remote1, "960/#{image.id}.jpg"])
@@ -86,7 +72,7 @@ class Image::Processor::VerifierTest < UnitTestCase
     seed_remote(1, image, %w[thumb 320 640 960 1280 orig])
     seed_remote(2, image, %w[thumb 320 640])
 
-    result = Image::Processor.verify_images
+    result = Image::Processor.transfer_images([image.id])
 
     assert_empty(result[:uploaded])
     assert_includes(result[:completed], image.id)
@@ -111,7 +97,7 @@ class Image::Processor::VerifierTest < UnitTestCase
     # Only "orig" exists locally -- the rest haven't been generated yet.
     File.write("#{local_root}/orig/#{image.id}.jpg", "orig-only")
 
-    result = Image::Processor.verify_images
+    result = Image::Processor.transfer_images([image.id])
 
     assert_empty(result[:uploaded])
     assert_empty(result[:completed])
@@ -132,23 +118,21 @@ class Image::Processor::VerifierTest < UnitTestCase
                  "raw-original")
       seed_remote(2, image, %w[thumb 320 640])
 
-      Image::Processor::Verifier.stub(:candidates, Image.where(id: image.id)) do
-        result = Image::Processor.verify_images
-        assert_includes(result[:completed], image.id)
-      end
+      result = Image::Processor.transfer_images([image.id])
+      assert_includes(result[:completed], image.id)
     end
   end
 
   # Regression test for a Copilot finding on PR #4751: a failed upload
   # must not be recorded in the summary as if it succeeded.
-  def test_upload_mismatches_does_not_record_failed_uploads
+  def test_transfer_does_not_record_failed_uploads_as_successful
     image = images(:turned_over_image)
     seed_locally_complete(image)
     messages = []
     verifier = Image::Processor::Verifier.new { |msg| messages << msg }
 
     Image::Processor::FileTransfer.stub(:copy_file_to_server, false) do
-      result = verifier.run
+      result = verifier.transfer(Image.where(id: image.id))
       assert_empty(result[:uploaded])
       assert_not_empty(result[:failed])
     end
@@ -159,7 +143,7 @@ class Image::Processor::VerifierTest < UnitTestCase
   # A raised exception (e.g. missing rsync binary, Errno::ENOENT) from one
   # file's transfer must not abort the rest of the run -- every other
   # mismatched file still needs its chance to upload.
-  def test_upload_mismatches_continues_after_one_file_raises
+  def test_transfer_continues_after_one_file_raises
     image = images(:turned_over_image)
     seed_locally_complete(image)
     messages = []
@@ -173,7 +157,7 @@ class Image::Processor::VerifierTest < UnitTestCase
     end
 
     Image::Processor::FileTransfer.stub(:copy_file_to_server, flaky_copy) do
-      result = verifier.run
+      result = verifier.transfer(Image.where(id: image.id))
       assert_equal(1, result[:failed].size)
       assert_operator(result[:uploaded].size, :>, 0,
                       "later files must still upload after an earlier " \
@@ -185,37 +169,17 @@ class Image::Processor::VerifierTest < UnitTestCase
     end)
   end
 
-  # The #4791 failure mode itself: an image already marked transferred
-  # (and recently, so it's in the recheck scope) turns out to be missing a
-  # size on a server. Must alert -- not silently re-fix it in the dark.
-  def test_alerts_when_a_recently_transferred_image_is_incomplete
-    image = images(:commercial_inquiry_image)
-    seed_locally_complete(image)
-    image.update_columns(transferred: true, updated_at: Time.zone.now)
-    seed_remote(1, image, %w[thumb 320 640 1280 orig]) # "960" missing
-    seed_remote(2, image, %w[thumb 320 640])
-    messages = []
-
-    result = Image::Processor.verify_images { |msg| messages << msg }
-
-    assert_includes(result[:alerted], image.id)
-    assert(image.reload.transferred, "left alone, not flipped back to false")
-    assert(messages.any? do |msg|
-      msg.include?("ALERT") && msg.include?(image.id.to_s)
-    end)
-  end
-
-  # The same incompleteness on an ordinary (not yet transferred) candidate
-  # is routine, expected mid-processing state -- not alert-worthy.
-  def test_does_not_alert_for_ordinary_untransferred_incomplete_images
+  def test_transfer_takes_any_enumerable_of_images
     image = images(:turned_over_image)
     seed_locally_complete(image)
-    seed_remote(1, image, %w[thumb 320 640 1280 orig]) # "960" missing
+    seed_remote(1, image, %w[thumb 320 640 960 1280 orig])
     seed_remote(2, image, %w[thumb 320 640])
 
-    result = Image::Processor.verify_images
+    result = Image::Processor::Verifier.new.transfer(
+      Image.where(id: image.id)
+    )
 
-    assert_not_includes(result[:alerted], image.id)
+    assert_includes(result[:completed], image.id)
   end
 
   def test_ssh_sizes_shells_out_with_every_expected_path_in_one_call

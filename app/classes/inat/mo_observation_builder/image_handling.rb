@@ -41,7 +41,10 @@ class Inat
       end
 
       # external_id identifies which iNat photo failed, since an
-      # observation can have several.
+      # observation can have several. Accumulates the created image's id
+      # (read by ObservationImporter, then InatImportJob) so a
+      # TransferImagesJob can be enqueued for the whole import batch at
+      # once, rather than image-by-image.
       def upload_inat_image(params, external_id)
         api = API2.execute(params)
         if api.errors.any?
@@ -49,7 +52,9 @@ class Inat
                 "#{api.errors.join(", ")}")
         end
 
-        api.results.first
+        image = api.results.first
+        @created_image_ids << image.id
+        image
       end
 
       # Recorded directly on the image so it survives regardless of the

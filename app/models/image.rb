@@ -781,10 +781,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
         # once the strip has actually succeeded, unlike the old optimistic
         # update_attribute(:gps_stripped, true) that fired regardless.
         result = strip ? strip_original_gps?(ext) : true
-        # Resize/reorient/transfer is skipped only if the GPS strip above
-        # was required and failed: an unstripped original must not
-        # propagate into resized/transferred copies.
-        result = process_and_enqueue_dhash(ext, set_size) if result
+        # Resize/reorient is skipped only if the GPS strip above was
+        # required and failed: an unstripped original must not propagate
+        # into resized copies.
+        result = process_and_enqueue_jobs(ext, set_size) if result
       end
     end
     result
@@ -799,22 +799,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Runs Image::Processor synchronously (skipped in test, see
-  # test/models/image/processor_test.rb for direct coverage), then enqueues
-  # the perceptual-hash job. Only after processing has succeeded: enqueueing
-  # earlier would hash an image whose upload ultimately failed, and could
-  # race the resize/strip command writing files. GPS stripping already
-  # happened synchronously in #process_image above, before this runs --
-  # see Image::Processor.strip_original_gps for why.
-  def process_and_enqueue_dhash(ext, set_size)
+  # test/models/image/processor_test.rb for direct coverage) to produce a
+  # completed set of local files, then enqueues TransferImagesJob (gets
+  # those files onto the configured image server(s) -- see #4791, this is
+  # deliberately decoupled from upload success: a transfer failure alerts
+  # asynchronously instead of failing the upload) and ImageDhashJob. Only
+  # after resizing has succeeded: enqueueing earlier would hash/transfer
+  # an image whose upload ultimately failed, and could race the resize
+  # command writing files. GPS stripping already happened synchronously in
+  # #process_image above, before this runs -- see
+  # Image::Processor.strip_original_gps for why.
+  def process_and_enqueue_jobs(ext, set_size)
     unless Rails.env.test?
-      processor = Image::Processor.new(image: self, ext: ext,
-                                       set_size: set_size)
-      processor.process
-      # Image::Processor can still record a transfer failure by populating
-      # #errors without raising -- the old `system(script/process_image)`
-      # call returned non-zero on the same failures, which #process_image
-      # treated as failure. Match that.
-      return fail_image_process if processor.errors.any?
+      Image::Processor.new(image: self, ext: ext, set_size: set_size).process
+      TransferImagesJob.perform_later(image_ids: [id])
     end
     ImageDhashJob.perform_later(id)
     true

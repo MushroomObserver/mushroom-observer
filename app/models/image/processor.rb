@@ -1,20 +1,19 @@
 # frozen_string_literal: true
 
 class Image
-  # Resizes, reorients, and transfers an uploaded image's files, through
-  # ActiveRecord (`image.update`) instead of a raw SQL `UPDATE`, so
-  # `after_update_commit` callbacks fire -- runs the steps that used to
-  # live in script/process_image and script/rotate_image. Keeping the
-  # image server(s) in sync with what's stored locally (script/
-  # retransfer_images and script/verify_images' old jobs) lives in
-  # Verifier now, not here -- see self.verify_images.
+  # Resizes and reorients an uploaded image's files, through ActiveRecord
+  # (`image.update`) instead of a raw SQL `UPDATE`, so `after_update_commit`
+  # callbacks fire -- runs the steps that used to live in
+  # script/process_image and script/rotate_image. This class only produces
+  # a completed set of local files -- getting them onto the configured
+  # image server(s) and keeping them in sync (script/retransfer_images and
+  # script/verify_images' old jobs) is TransferImagesJob's job now, not
+  # this class's -- see self.transfer_images.
   #
   # 1. convert original to jpeg if necessary
   # 2. reorient it correctly if necessary
   # 3. set width/height of the original image in the database
   # 4. create the five smaller-sized copies
-  # 5. copy all files to the configured image server(s)
-  # 6. email webmaster if there were any errors
   #
   # GPS stripping is NOT part of this pipeline -- see self.strip_original_gps,
   # which runs synchronously in the request cycle (Image#process_image),
@@ -66,8 +65,6 @@ class Image
       image_server_data.keys - [:local]
     end
 
-    attr_reader :transferred_any, :errors
-
     def initialize(image:, user: nil, ext: nil, set_size: false)
       @image = image
       raise("Image::Processor needs an image.") unless @image
@@ -78,8 +75,6 @@ class Image
       @ext = ext || @image.original_extension
       @id = @image.id
       @set_size = set_size
-      @transferred_any = false
-      @errors = []
     end
 
     def process
@@ -87,9 +82,6 @@ class Image
       auto_orient_if_needed(full_size_filepath)
       update_image_record_width_height_and_transferred if @set_size
       make_file_sizes
-      transfer_files_to_image_servers
-      mark_image_record_transferred_and_touch_obs if transferred_cleanly?
-      email_webmaster if @errors.any?
     end
 
     def rotate(orientation)
@@ -100,34 +92,44 @@ class Image
       process
     end
 
-    def transfer_files_to_image_servers
-      return if Rails.env.development?
+    # Fetches the original back from whichever configured server has it,
+    # if it isn't already local. Public (not just #rotate's concern
+    # anymore) -- Image::Processor::GapDetector calls this too, to
+    # re-fetch a source for regenerating a size missing on some server.
+    # Tries every server with an "orig" subdir, not just the first --
+    # a single unreachable server must not abort the fetch when another
+    # configured server has the same file.
+    def make_sure_we_have_full_size_locally
+      return if File.exist?(full_size_filepath)
 
       self.class.image_servers.each do |server|
-        transfer_all_sizes_to_server_subdirectories(server)
+        next unless image_server_has_subdir?(server, "orig")
+        break if copy_file_from_server(server, "orig/#{@id}.jpg") &&
+                 File.exist?(full_size_filepath)
       end
+
+      return if File.exist?(full_size_filepath)
+
+      # script/rotate_image aborted immediately if it couldn't fetch the
+      # original -- without this, callers would instead fail later with
+      # a confusing MiniExiftool/MiniMagick "file not found" error.
+      raise("Could not fetch #{full_size_filepath} from any image server")
     end
 
-    # Mark image as transferred and touch related obs (for caches) if all
-    # good. This is only the optimistic first-attempt marking, right after
-    # this run's own transfer -- Verifier (see self.verify_images) is the
-    # authoritative backstop that confirms every size actually landed on
-    # every server before trusting `transferred`, replacing the old
-    # self.retransfer_images, which could flip the flag without ever
-    # confirming anything reached the server (see #4791).
-    def mark_image_record_transferred_and_touch_obs
-      @image.update(transferred: @transferred_any)
-      Observation.joins(:observation_images).
-        where(observation_images: { image_id: @id }).touch_all
+    # Transfers and confirms the given images onto every configured image
+    # server. See Verifier for details -- this is the event-driven
+    # replacement for the old self.retransfer_images / poll-based
+    # self.verify_images (both retired, see #4791).
+    def self.transfer_images(image_ids, &log)
+      Verifier.new(&log).transfer(Image.where(id: image_ids))
     end
 
-    # Verifies (and completes) transfers for images not yet confirmed fully
-    # on the server(s), and re-checks recently-completed ones in case the
-    # flag went true without every size actually landing. See Verifier for
-    # details -- this replaces the old self.retransfer_images (retired,
-    # see #4791) as well as the original script/verify_images port.
-    def self.verify_images(&log)
-      Verifier.new(&log).run
+    # Occasional full-listing reconciliation pass. See GapDetector for
+    # details -- this is the target design's part 4 (#4791): catches
+    # server-side drift on already-transferred images that per-image
+    # checks alone can't see once local copies are cleaned up.
+    def self.detect_gaps(&log)
+      GapDetector.new(&log).run
     end
 
     # Strips GPS/geotag data from an image's original file synchronously,
@@ -162,28 +164,6 @@ class Image
     # discard that rotation for any non-jpg upload.
     def convert_raw_to_jpg_needed?
       @ext != "jpg" && !File.exist?(full_size_filepath)
-    end
-
-    def transferred_cleanly?
-      @transferred_any && @errors.empty?
-    end
-
-    def make_sure_we_have_full_size_locally
-      return if File.exist?(full_size_filepath)
-
-      self.class.image_servers.each do |server|
-        next unless image_server_has_subdir?(server, "orig")
-
-        copy_file_from_server(server, "orig/#{@id}.jpg")
-        break
-      end
-
-      return if File.exist?(full_size_filepath)
-
-      # script/rotate_image aborted immediately if it couldn't fetch the
-      # original -- without this, callers would instead fail later with
-      # a confusing MiniExiftool/MiniMagick "file not found" error.
-      raise("Could not fetch #{full_size_filepath} from any image server")
     end
 
     def reset_file_orientation
@@ -269,29 +249,6 @@ class Image
       pipeline.call(destination: destination_filepath)
     end
 
-    def transfer_all_sizes_to_server_subdirectories(server)
-      subdirs = self.class.image_server_data[server][:subdirs]
-      IMAGE_SUBDIRS.each do |subdir|
-        next unless subdirs.include?(subdir)
-
-        copy_file_to_server(server, "#{subdir}/#{@id}.jpg")
-      end
-      if @ext != "jpg" && subdirs.include?("orig")
-        copy_file_to_server(server, "orig/#{@id}.#{@ext}")
-      end
-      @transferred_any = true
-    end
-
-    # Email webmaster if there were any errors
-    def email_webmaster
-      message = WebmasterMailer.prepend_user(@user, @errors.join("\n"))
-      WebmasterMailer.build(
-        sender_email: @user.email,
-        subject: "[MO] process_image",
-        message: message
-      ).deliver_later
-    end
-
     def image_server_has_subdir?(server, subdir)
       self.class.image_server_data[server][:subdirs].include?(subdir)
     end
@@ -309,12 +266,6 @@ class Image
     end
 
     ############################################################
-
-    def copy_file_to_server(server, local_file, remote_file = local_file)
-      success = FileTransfer.copy_file_to_server(server, local_file,
-                                                 remote_file)
-      @errors << "Failed to transfer #{local_file} to #{server}" unless success
-    end
 
     def copy_file_from_server(server, remote_file)
       FileTransfer.copy_file_from_server(server, remote_file)

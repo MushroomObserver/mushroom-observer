@@ -93,42 +93,24 @@ class Image::ProcessorTest < UnitTestCase
     end
   end
 
-  def test_process_jpg_resizes_and_transfers
+  # Transfer is no longer part of #process (see #4791 -- TransferImagesJob
+  # owns that now, asynchronously) -- this only exercises the local resize
+  # side. See test/jobs/transfer_images_job_test.rb for transfer coverage.
+  def test_process_jpg_resizes
     image = images(:in_situ_image)
     image.update_columns(transferred: false, width: nil, height: nil)
     FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
-    obs = observations(:detailed_unknown_obs)
-    obs.update_columns(updated_at: 1.day.ago)
 
     Image::Processor.new(image: image, ext: "jpg", set_size: true).process
 
     image.reload
     assert_equal(407, image.width)
     assert_equal(500, image.height)
-    assert(image.transferred)
+    assert_not(image.transferred, "#process must not mark transferred")
 
     %w[thumb 320 640 960 1280 orig].each do |subdir|
       assert_path_exists("#{local_root}/#{subdir}/#{image.id}.jpg")
-      assert_path_exists(
-        "#{remote_server_path(1)}/#{subdir}/#{image.id}.jpg",
-        "#{subdir} should have gone to remote1"
-      )
     end
-    %w[thumb 320 640].each do |subdir|
-      assert_path_exists(
-        "#{remote_server_path(2)}/#{subdir}/#{image.id}.jpg",
-        "#{subdir} should have gone to remote2"
-      )
-    end
-    %w[960 1280 orig].each do |subdir|
-      assert_not(
-        File.exist?("#{remote_server_path(2)}/#{subdir}/#{image.id}.jpg"),
-        "#{subdir} should NOT have gone to remote2"
-      )
-    end
-
-    assert_operator(obs.reload.updated_at, :>, 1.hour.ago,
-                    "processing should touch observations for cache busting")
   end
 
   def test_process_converts_non_jpg_original
@@ -141,10 +123,8 @@ class Image::ProcessorTest < UnitTestCase
     image.reload
     assert_equal(2560, image.width)
     assert_equal(1920, image.height)
-    assert(image.transferred)
+    assert_not(image.transferred, "#process must not mark transferred")
     assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
-    assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.tiff")
-    assert_path_exists("#{remote_server_path(1)}/orig/#{image.id}.jpg")
   end
 
   def test_strip_original_gps_success
@@ -186,8 +166,7 @@ class Image::ProcessorTest < UnitTestCase
     image.reload
     assert_equal(500, image.width)
     assert_equal(407, image.height)
-    assert(image.transferred)
-    assert_path_exists("#{remote_server_path(1)}/thumb/#{image.id}.jpg")
+    assert_not(image.transferred, "#rotate's #process must not transfer")
   end
 
   def test_rotate_fetches_full_size_from_remote_if_missing_locally
@@ -198,7 +177,39 @@ class Image::ProcessorTest < UnitTestCase
     Image::Processor.new(image: image, ext: "jpg").rotate("+90")
 
     assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
-    assert(image.reload.transferred)
+  end
+
+  # Regression test for the plan's fix to #4791: a single unreachable
+  # server must not abort the fetch when a LATER configured server has
+  # the same file -- the original code broke out of the loop after the
+  # first server with an "orig" subdir, even if that copy silently failed
+  # (returned false, without raising).
+  def test_make_sure_we_have_full_size_locally_tries_every_server
+    image = images(:in_situ_image)
+    FileUtils.cp(JPG_FIXTURE, "#{remote_server_path(1)}/orig/#{image.id}.jpg")
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    fake_data = {
+      unreachable: { type: "file", path: "/nonexistent", subdirs: ["orig"] },
+      remote1: { type: "file", path: remote_server_path(1),
+                 subdirs: ["orig"] }
+    }
+    real_copy = Image::Processor::FileTransfer.method(:copy_file_from_server)
+    flaky_fetch = lambda do |server, remote_file|
+      next false if server == :unreachable
+
+      real_copy.call(server, remote_file)
+    end
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      Image::Processor.stub(:image_servers, [:unreachable, :remote1]) do
+        Image::Processor::FileTransfer.stub(:copy_file_from_server,
+                                            flaky_fetch) do
+          processor.make_sure_we_have_full_size_locally
+        end
+      end
+    end
+
+    assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
   end
 
   # Regression test for a Copilot finding on PR #4751: a silently-failed
@@ -210,9 +221,9 @@ class Image::ProcessorTest < UnitTestCase
     image = images(:in_situ_image)
     processor = Image::Processor.new(image: image, ext: "jpg")
 
-    processor.stub(:copy_file_from_server, nil) do
+    Image::Processor::FileTransfer.stub(:copy_file_from_server, false) do
       assert_raises(RuntimeError) do
-        processor.send(:make_sure_we_have_full_size_locally)
+        processor.make_sure_we_have_full_size_locally
       end
     end
   end
@@ -226,29 +237,6 @@ class Image::ProcessorTest < UnitTestCase
     image.stub(:user, nil) do
       assert_raises(RuntimeError) { Image::Processor.new(image: image) }
     end
-  end
-
-  # GPS stripping no longer happens inside #process at all (see
-  # self.strip_original_gps) -- this now exercises a generic transfer
-  # failure to cover the same #process-level properties: emails the
-  # webmaster and doesn't mark the image transferred.
-  def test_process_transfer_failure_emails_webmaster
-    image = images(:in_situ_image)
-    image.update_columns(transferred: false)
-    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
-    processor = Image::Processor.new(image: image, ext: "jpg")
-
-    Image::Processor::FileTransfer.stub(:copy_file_to_server, false) do
-      assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
-        processor.process
-      end
-    end
-
-    # A failed transfer must not mark the image transferred -- otherwise
-    # Verifier's `Image.where(transferred: false)` work-list (see
-    # Image::Processor::Verifier.candidates) would never pick this image
-    # up again.
-    assert_not(image.reload.transferred)
   end
 
   def test_rotate_non_jpg_original_does_not_undo_rotation
@@ -279,7 +267,6 @@ class Image::ProcessorTest < UnitTestCase
     image.reload
     assert_equal(407, image.width)
     assert_equal(500, image.height)
-    assert(image.transferred)
   end
 
   def test_rotate_mirror_vertical
@@ -292,7 +279,6 @@ class Image::ProcessorTest < UnitTestCase
     image.reload
     assert_equal(407, image.width)
     assert_equal(500, image.height)
-    assert(image.transferred)
   end
 
   def test_salvage_first_layer_if_multilayer_picks_one_and_cleans_up
@@ -326,35 +312,6 @@ class Image::ProcessorTest < UnitTestCase
 
     assert_equal("much bigger layer",
                  File.read("#{local_root}/orig/#{image.id}.jpg"))
-  end
-
-  def test_copy_file_to_server_ssh_type_uses_rsync
-    image = images(:in_situ_image)
-    processor = Image::Processor.new(image: image, ext: "jpg")
-    File.write("#{local_root}/thumb/#{image.id}.jpg", "rsync me")
-    fake_data = { ssh_server: { type: "ssh", path: remote_server_path(1) } }
-
-    Image::Processor.stub(:image_server_data, fake_data) do
-      processor.send(:copy_file_to_server, :ssh_server,
-                     "thumb/#{image.id}.jpg")
-    end
-
-    assert_equal(
-      "rsync me",
-      File.read("#{remote_server_path(1)}/thumb/#{image.id}.jpg")
-    )
-  end
-
-  def test_copy_file_to_server_unknown_type_raises
-    image = images(:in_situ_image)
-    processor = Image::Processor.new(image: image, ext: "jpg")
-    fake_data = { weird: { type: "ftp", path: "/tmp" } }
-
-    Image::Processor.stub(:image_server_data, fake_data) do
-      assert_raises(RuntimeError) do
-        processor.send(:copy_file_to_server, :weird, "x.jpg")
-      end
-    end
   end
 
   def test_copy_file_from_server_ssh_type_uses_rsync

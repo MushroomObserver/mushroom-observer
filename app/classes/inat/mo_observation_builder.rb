@@ -6,7 +6,8 @@ class Inat
     include NamingReasons
     include ImageHandling
 
-    attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs
+    attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs,
+                :created_image_ids
 
     MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
 
@@ -19,6 +20,7 @@ class Inat
       @inat_import = inat_import
       @skipped_images = 0
       @unlicensed_obs = inat_obs[:license_code].blank? ? 1 : 0
+      @created_image_ids = []
     end
 
     def mo_observation

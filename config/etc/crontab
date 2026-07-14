@@ -7,14 +7,15 @@ MAILTO=webmaster@mushroomobserver.org
 # line below it are both retired (see GitHub issue #4791): the rsync
 # raced Image::Processor#process -- it could delete a locally-complete
 # original before the derived sizes were generated, since it had no idea
-# any of that was still in flight. VerifyImagesJob (config/recurring.yml,
-# every 5 minutes) replaces both: it verifies every size is present and
-# byte-matching on every server before deleting anything local or marking
-# an image transferred, and it's scoped to a DB work-list rather than a
-# full tree scan, so it's cheap enough to run this often.
+# any of that was still in flight. TransferImagesJob (config/
+# recurring.yml doesn't schedule it -- it's event-driven, started when
+# processing/an iNat import batch finishes) replaces the transfer side;
+# StaleImageFilesJob (every hour) and ImageGapDetectorJob (weekly) are
+# the safety nets -- see #4791's target design for the 4-part pipeline.
 */4 * * * * /var/web/mo/bin/run script/parse_log
 13  3 * * * /var/web/mo/bin/run script/backup_blocked_ips.sh
-# This has been superseded by VerifyImagesJob (see above):
+# This has been superseded by TransferImagesJob/StaleImageFilesJob/
+# ImageGapDetectorJob (see above):
 # 13  4 * * * /var/web/mo/bin/run script/verify_images
 43  4 * * * /var/web/mo/bin/run script/refresh_sitemap
 43  5 * * * /var/web/mo/bin/run script/backup_database.sh
