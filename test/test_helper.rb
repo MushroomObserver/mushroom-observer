@@ -235,8 +235,8 @@ module ActiveSupport
 
     # Report time this test took to run.
     def end_timer
-      ellapsed = Time.zone.now - ActiveSupport::TestCase.times[method_name]
-      puts("\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}")
+      elapsed = Time.zone.now - ActiveSupport::TestCase.times[method_name]
+      puts("\rTIME: #{elapsed}\t#{self.class.name}::#{method_name}")
     end
 
     # This will ensure that the logs stay a reasonable size.  If you forget to
