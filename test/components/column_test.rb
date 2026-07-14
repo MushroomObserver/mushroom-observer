@@ -14,6 +14,14 @@ class ColumnTest < ComponentTestCase
                  Components::Column.classes_for(xs: 4, offset_xs: 4))
     assert_equal("col col-sm-4",
                  Components::Column.classes_for(col: true, sm: 4))
+    assert_equal("d-none d-sm-block",
+                 Components::Column.classes_for(hide_at: :xs, show_at: :sm))
+    assert_equal("d-block d-sm-none",
+                 Components::Column.classes_for(show_at: :xs, hide_at: :sm))
+    assert_equal("d-md-none",
+                 Components::Column.classes_for(hide_at: :md))
+    assert_equal("d-lg-block",
+                 Components::Column.classes_for(show_at: :lg))
   end
 
   def test_default_renders_div_with_no_width_classes
@@ -44,6 +52,24 @@ class ColumnTest < ComponentTestCase
     html = render(Components::Column.new(col: true, sm: 4))
 
     assert_html(html, "div.col.col-sm-4")
+  end
+
+  def test_hide_at_and_show_at_pair
+    html = render(Components::Column.new(sm: 6, hide_at: :xs, show_at: :sm))
+
+    assert_html(html, "div.col-sm-6.d-none.d-sm-block")
+  end
+
+  def test_show_at_xs_hide_at_sm
+    html = render(Components::Column.new(show_at: :xs, hide_at: :sm))
+
+    assert_html(html, "div.d-block.d-sm-none")
+  end
+
+  def test_hide_at_alone
+    html = render(Components::Column.new(md: 6, hide_at: :md))
+
+    assert_html(html, "div.col-md-6.d-md-none")
   end
 
   def test_extra_class_merges_with_width_classes
