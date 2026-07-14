@@ -23,7 +23,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
     # more reliable than putting flex-column / justify-content-end
     # on each column — those approaches collide with the columns'
     # `d-none d-sm-block` responsive-visibility classes.
-    div(class: "row d-flex align-items-end") do
+    Row(class: "d-flex align-items-end") do
       render_label_columns
       render_propose_icon_column
     end
@@ -33,7 +33,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
 
   def render_label_columns
     Column(xs: 10, sm: 11) do
-      div(class: "row d-flex align-items-end") do
+      Row(class: "d-flex align-items-end") do
         render_label_column(sm_width: 4, extra: "d-block") do
           render_panel_title
         end

@@ -10,7 +10,7 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
   prop :obs, ::Observation
 
   def view_template
-    div(class: "row") do
+    Row do
       Column(sm: 11) do
         div(class: "row") do
           Column(col: true, md: 4) { render_buttons }

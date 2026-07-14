@@ -9,8 +9,10 @@ module Views::Controllers::Sequences
 
     def view_template
       register_chrome
-      ContentPadded(class: "container-text") do
-        render_fields
+      Container(width: :text) do
+        ContentPadded do
+          render_fields
+        end
       end
       render(::Views::Layouts::ObjectFooter.new(
                user: current_user, obj: @sequence

@@ -24,7 +24,7 @@ module Views::Controllers::Names::Synonyms
     # rubocop:enable Metrics/ParameterLists
 
     def view_template
-      div(class: "row") do
+      Row do
         Column(xs: 12, sm: 6) do
           render_existing_synonyms
           render_proposed_synonyms

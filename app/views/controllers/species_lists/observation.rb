@@ -17,7 +17,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def view_template
-      div(class: "row") do
+      Row do
         render_image_column if @image
         render_details_column
       end

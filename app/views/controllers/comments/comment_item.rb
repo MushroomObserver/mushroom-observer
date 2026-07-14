@@ -45,7 +45,7 @@ module Views::Controllers::Comments
     # second-window Action Cable broadcast could close a modal
     # the viewing user has open, losing in-progress form input.
     def view_template
-      div(class: "row") do
+      Row do
         render_main_column
         render_avatar_column
       end

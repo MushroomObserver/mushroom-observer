@@ -31,7 +31,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_body
-    div(class: "row") do
+    Row do
       render_left_column
       render_right_column
     end

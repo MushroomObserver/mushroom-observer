@@ -27,7 +27,7 @@ module Views::Controllers::Projects
         render_banner_without_image
       end
 
-      div(class: "row") do
+      Row do
         Column(xs: 12, id: "project_tabs") do
           NavTabs(
             current: @current_tab, link_class: "mt-3",
@@ -42,7 +42,7 @@ module Views::Controllers::Projects
     private
 
     def render_banner_with_image
-      div(class: "row") do
+      Row do
         Column(xs: 12, id: "project_banner") do
           img(src: @project.image.large_url, class: "banner-image")
           div(class: "bottom-left ml-3 mb-3 p-2") do
@@ -55,7 +55,7 @@ module Views::Controllers::Projects
     end
 
     def render_banner_without_image
-      div(class: "row") do
+      Row do
         Column(xs: 12, id: "project_banner") do
           div(class: "pl-3 mt-3") do
             render_banner_title(with_overlay_styling: false)

@@ -15,7 +15,7 @@ module Views::Controllers::Sequences
       add_context_nav(::Tab::Sequence::Form.new(back_object: @back_object))
 
       obs = @sequence.observation
-      div(class: "row") do
+      Row do
         Column(xs: 12, sm: 7) { render_form_column(obs) }
         Column(xs: 12, sm: 5) { render_matrix_column(obs) }
       end
@@ -37,7 +37,7 @@ module Views::Controllers::Sequences
     end
 
     def render_matrix_column(obs)
-      ul(class: "row list-unstyled") do
+      Row(element: :ul, class: "list-unstyled") do
         render(::Components::Matrix::Box.new(
                  user: current_user,
                  object: obs.rss_log || obs,

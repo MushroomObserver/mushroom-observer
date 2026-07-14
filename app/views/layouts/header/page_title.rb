@@ -17,7 +17,7 @@ module Views::Layouts
       "show_title_nav d-flex justify-content-between pl-3"
 
     def view_template
-      div(class: "row", id: "title_bar") do
+      Row(id: "title_bar") do
         render_left_column unless suppress_title?
         render_right_column if show_right_column?
       end

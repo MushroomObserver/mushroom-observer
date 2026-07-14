@@ -16,7 +16,7 @@ module Views::Controllers::Observations::ExternalLinks
       container_class(:full)
       add_new_title(:add_object, :EXTERNAL_LINK)
 
-      div(class: "row") do
+      Row do
         Column(xs: 12, sm: 7) { render_form }
         Column(xs: 12, sm: 5) { render_matrix_box }
       end
@@ -35,7 +35,7 @@ module Views::Controllers::Observations::ExternalLinks
     end
 
     def render_matrix_box
-      ul(class: "row list-unstyled") do
+      Row(element: :ul, class: "list-unstyled") do
         render(::Components::Matrix::Box.new(
                  user: @user,
                  object: @observation.rss_log || @observation,

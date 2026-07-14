@@ -216,7 +216,7 @@ module Views::Controllers::Observations
     end
 
     def render_naming_specimen_row
-      div(class: "row") do
+      Row do
         render_naming_column if create?
         render_specimen_column
       end

@@ -12,7 +12,7 @@ module Views::Controllers::Info
       add_context_nav(::Tab::Info::SiteStatsActions.new)
       container_class(:full)
 
-      div(class: "row mt-3") do
+      Row(class: "mt-3") do
         Column(md: 3, class: "hidden-xs") { render_thumbs(0, 3) }
         Column(md: 6, class: "center-block") { render_stats_table }
         Column(md: 3, class: "hidden-xs") { render_thumbs(3, 3) }

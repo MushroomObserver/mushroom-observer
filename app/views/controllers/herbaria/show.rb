@@ -20,7 +20,7 @@ module Views::Controllers::Herbaria
       container_class(:wide)
 
       render_mcp_block if @herbarium.mcp_searchable?
-      div(class: "row") { render_body_columns }
+      Row { render_body_columns }
       render_timestamps
     end
 

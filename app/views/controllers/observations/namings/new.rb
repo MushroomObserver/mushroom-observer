@@ -25,7 +25,7 @@ module Views::Controllers::Observations::Namings
 
     def view_template
       add_chrome
-      div(class: "row") do
+      Row do
         Column(xs: 12, sm: 8) do
           div(class: "mt-3") { render_observation_details }
           div(class: "mt-3") { render_naming_form }

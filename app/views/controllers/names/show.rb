@@ -57,7 +57,7 @@ module Views::Controllers::Names
     def view_template
       page_chrome_side_effects
 
-      div(class: "row") do
+      Row do
         render_left_column
         render_right_column
       end
@@ -131,7 +131,7 @@ module Views::Controllers::Names
     end
 
     def render_classification_and_lifeform_row
-      div(class: "row", data: { controller: "name-panels" }) do
+      Row(data: { controller: "name-panels" }) do
         Column(xs: 12, sm: 6) do
           render(Show::ClassificationPanel.new(
                    name: @name, user: @user,

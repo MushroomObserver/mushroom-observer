@@ -79,8 +79,9 @@ module Views::Controllers::Occurrences
 
     def render_new_observation_grid
       all_obs = [@source_obs] + @recent_observations
-      ul(
-        class: "row list-unstyled mt-3",
+      Row(
+        element: :ul,
+        class: "list-unstyled mt-3",
         data: {
           controller: "matrix-table occurrence-form",
           action: "resize@window->matrix-table#rearrange",
@@ -137,8 +138,9 @@ module Views::Controllers::Occurrences
     end
 
     def render_matrix_ul(&block)
-      ul(
-        class: "row list-unstyled mt-3",
+      Row(
+        element: :ul,
+        class: "list-unstyled mt-3",
         data: {
           controller: "matrix-table",
           action: "resize@window->matrix-table#rearrange"

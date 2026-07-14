@@ -27,7 +27,7 @@ module Views::Controllers::VisualGroups
       add_edit_title(@visual_group)
       container_class(:full)
 
-      div(class: "container-text") do
+      Container(width: :text) do
         render_top_nav
         render(Form.new(@visual_group,
                         visual_model: @visual_group.visual_model))

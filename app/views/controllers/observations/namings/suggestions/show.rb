@@ -20,7 +20,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     def view_template
       add_chrome
 
-      div(class: "row") do
+      Row do
         render_suggestions_column
         render_images_column
       end

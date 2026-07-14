@@ -59,7 +59,7 @@ module Views::Layouts
     # even when neither inner content_for is set. Keeps the empty
     # row in case any CSS / JS keys off `header > .row:last-child`.
     def render_filter_row
-      div(class: "row") do
+      Row do
         render_type_filters if content_for?(:type_filters)
         render_observation_buttons if content_for?(:observation_buttons)
       end

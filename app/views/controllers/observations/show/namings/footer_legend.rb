@@ -10,7 +10,7 @@
 # `vote_icon_*` helpers.
 class Views::Controllers::Observations::Show::Namings::FooterLegend < Views::Base
   def view_template
-    div(class: "row") do
+    Row do
       Column(sm: 11) do
         div(class: "row") do
           Column(xs: 4, offset_xs: 4) do

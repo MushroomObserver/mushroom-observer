@@ -54,7 +54,7 @@ module Views::Controllers::Locations
       # geocoder, elevation, or the global `gm_authFailure` Google
       # fires on a bad API key (issue #4535).
       div(id: "gmaps_flash")
-      div(class: "row") do
+      Row do
         Column(md: 8, lg: 6) { render_fields }
         Column(md: 4, lg: 6, class: "mb-3 mt-3") { render_map }
       end
@@ -93,7 +93,7 @@ module Views::Controllers::Locations
     end
 
     def render_coordinate_section
-      div(class: "row mt-5") do
+      Row(class: "mt-5") do
         Column(sm: 8) do
           render(Components::Form::CompassFields.new(
                    form: self, location: model
@@ -138,7 +138,7 @@ module Views::Controllers::Locations
     end
 
     def render_locked_display
-      div(class: "row") do
+      Row do
         Column(sm: 6, md: 4, lg: 3) do
           render_locked_fields
           Help(content: :show_location_locked.l)

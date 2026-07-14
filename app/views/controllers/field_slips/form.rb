@@ -73,7 +73,7 @@ module Views::Controllers::FieldSlips
       # an empty value is fine and the form context
       # (`?species_list=...`) is what carries the actual id.
       hidden_field("species_list", value: @species_list)
-      div(class: "container-text") do
+      Container(width: :text) do
         render_left_column_fields
         render_submit_quick_create if new_record?
         render_notes_panel
@@ -271,7 +271,7 @@ module Views::Controllers::FieldSlips
       # `value:` option, no Superform model binding.
       @checked_ids = checked_ids
       @primary_id = primary_id
-      ul(class: "row list-unstyled mt-3", data: matrix_data) do
+      Row(element: :ul, class: "list-unstyled mt-3", data: matrix_data) do
         observations.each { |obs| render_observation_row(obs) }
       end
     end

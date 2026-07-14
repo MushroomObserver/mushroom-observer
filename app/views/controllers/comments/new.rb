@@ -20,7 +20,7 @@ module Views::Controllers::Comments
                      ))
       add_context_nav(::Tab::Comment::FormNew.new(target: @target))
 
-      div(class: "row") do
+      Row do
         render_form_column
         render_images_column if @target.is_a?(::Observation)
       end

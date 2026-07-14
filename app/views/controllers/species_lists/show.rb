@@ -27,7 +27,7 @@ module Views::Controllers::SpeciesLists
 
     def view_template
       add_chrome
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns)) { render_left_column }
       end
     end
