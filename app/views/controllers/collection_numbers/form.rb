@@ -38,14 +38,14 @@ module Views::Controllers::CollectionNumbers
 
     def render_name_field
       text_field(:name,
-                 label: :collection_number_name.l,
+                 label: :collection_number_name,
                  between: :required,
                  data: { autofocus: true })
     end
 
     def render_number_field
       text_field(:number,
-                 label: :collection_number_number.l,
+                 label: :collection_number_number,
                  between: :required)
     end
 

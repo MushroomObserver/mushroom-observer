@@ -20,10 +20,10 @@ module Views::Controllers::Support
       super do
         render_amount_row
         render_other_amount_inputs
-        checkbox_field(:recurring, label: :donate_recurring.l)
-        text_field(:who, size: 30, label: :donate_who.l, inline: true)
-        checkbox_field(:anonymous, label: :donate_anonymous.l)
-        text_field(:email, size: 30, label: :donate_email.l, inline: true)
+        checkbox_field(:recurring, label: :donate_recurring)
+        text_field(:who, size: 30, label: :donate_who, inline: true)
+        checkbox_field(:anonymous, label: :donate_anonymous)
+        text_field(:email, size: 30, label: :donate_email, inline: true)
         submit(:donate_confirm.l, center: true)
       end
     end
@@ -31,9 +31,9 @@ module Views::Controllers::Support
     private
 
     def render_amount_row
-      div(class: "row") do
+      Row do
         PRESET_AMOUNTS.each do |amount|
-          div(class: Grid::QUARTER) do
+          Column(xs: 3) do
             radio_field(:amount, [amount, "$#{amount.to_i}"])
           end
         end

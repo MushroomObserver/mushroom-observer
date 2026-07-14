@@ -119,11 +119,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    def label_text
-      label_option = wrapper_options[:label]
-      label_option.is_a?(String) ? label_option : field.key.to_s.humanize
-    end
-
     def form_group_class(base, inline, wrap_class)
       classes = base
       classes += " form-inline" if inline && base == "form-group"

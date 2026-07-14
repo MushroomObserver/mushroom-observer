@@ -37,7 +37,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     def render_proposed_field
       autocompleter_field(:proposed_name,
                           type: :name,
-                          label: "#{:name_deprecate_preferred.l}:",
+                          label: :name_deprecate_preferred,
                           inline: true, data: { autofocus: true })
       Help(
         content: :name_deprecate_preferred_help.tp
@@ -45,11 +45,11 @@ module Views::Controllers::Names::Synonyms::Deprecate
     end
 
     def render_misspelling_field
-      checkbox_field(:is_misspelling, label: :form_names_misspelling.l)
+      checkbox_field(:is_misspelling, label: :form_names_misspelling)
     end
 
     def render_comment_field
-      textarea_field(:comment, label: "#{:name_deprecate_comments.l}:",
+      textarea_field(:comment, label: :name_deprecate_comments,
                                cols: 80, rows: 5, inline: true)
       Help(content: deprecate_comments_help)
     end

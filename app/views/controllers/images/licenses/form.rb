@@ -19,7 +19,7 @@ module Views::Controllers::Images::Licenses
   class Form < ::Components::ApplicationForm
     def view_template
       super do
-        div(class: "container-text") do
+        Container(width: :text) do
           trusted_html(:image_updater_help.tp)
         end
         render_table if model.rows.any?

@@ -19,6 +19,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   #
   class FileField < Superform::Rails::Components::Input
     include Phlex::Slotable
+    include FieldLabelRow
 
     slot :between
     slot :append
@@ -62,11 +63,6 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def show_label?
       wrapper_options[:label] != false
-    end
-
-    def label_text
-      label_option = wrapper_options[:label]
-      label_option.is_a?(String) ? label_option : field.key.to_s.humanize
     end
 
     def render_label_row

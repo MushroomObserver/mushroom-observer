@@ -84,7 +84,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_standalone_layout
-      text_field(:notes, label: :account_api_keys_notes_label.t,
+      text_field(:notes, label: :account_api_keys_notes_label,
                          wrap_class: "mt-3")
 
       submit(submit_text, center: true, submits_with: submits_text,
@@ -93,7 +93,7 @@ module Views::Controllers::Account::APIKeys
 
     def render_edit_layout
       render_metadata_table
-      text_field(:notes, label: "#{:NOTES.t}:", wrap_class: "mt-3")
+      text_field(:notes, label: :NOTES, wrap_class: "mt-3")
       div(class: "text-center mt-3") do
         submit(:UPDATE.l)
         # A plain link (not a submit button) — Cancel should navigate

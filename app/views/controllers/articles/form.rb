@@ -16,7 +16,7 @@ module Views::Controllers::Articles
     private
 
     def render_title_field
-      text_field(:title, label: "#{:article_title.t}:",
+      text_field(:title, label: :article_title,
                          data: { autofocus: true }) do |field_component|
         field_component.with_append do
           Help(content: [:form_article_title_help.t,
@@ -26,7 +26,7 @@ module Views::Controllers::Articles
     end
 
     def render_body_field
-      textarea_field(:body, label: "#{:article_body.t}:",
+      textarea_field(:body, label: :article_body,
                             rows: 10) do |field_component|
         field_component.with_append do
           Help(content: :field_textile_link.t)

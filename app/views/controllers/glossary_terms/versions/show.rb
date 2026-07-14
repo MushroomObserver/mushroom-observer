@@ -32,7 +32,7 @@ module Views::Controllers::GlossaryTerms
       private
 
       def render_main_row
-        div(class: "row") do
+        Row do
           div(class: content_for(:left_columns)) do
             render(Term.new(glossary_term: @glossary_term))
           end

@@ -25,7 +25,7 @@ module Views::Controllers::Herbaria::CuratorRequests
         plain(@herbarium.name)
       end
 
-      textarea_field(:notes, label: "#{:NOTES.l}:", rows: 10,
+      textarea_field(:notes, label: :NOTES, rows: 10,
                              data: { autofocus: true })
 
       submit(:SEND.l, center: true)

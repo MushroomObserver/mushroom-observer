@@ -47,7 +47,7 @@ module Views::Controllers::Descriptions::Moves
     end
 
     def render_delete_checkbox
-      checkbox_field(:delete, label: :merge_descriptions_delete_after.t)
+      checkbox_field(:delete, label: :merge_descriptions_delete_after)
     end
 
     def render_submit

@@ -90,21 +90,21 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_visible_fields
-      text_field(:title, label: "#{:form_species_lists_title.l}:")
+      text_field(:title, label: :form_species_lists_title)
       textarea_field(
         :notes, rows: 12,
-                label: "#{:form_species_lists_list_notes.l}:",
+                label: :form_species_lists_list_notes,
                 help: :shared_textile_help.l,
                 help_collapse: true
       )
-      date_field(:when, inline: true, label: "#{:WHEN.l}:")
+      date_field(:when, inline: true, label: :WHEN)
       render(Components::Form::LocationFeedback.new(
                dubious_where_reasons: @dubious_where_reasons,
                button: @button
              ))
       autocompleter_field(:place_name, type: :location,
                                        value: model.place_name(current_user),
-                                       label: "#{:WHERE.l}:")
+                                       label: :WHERE)
     end
 
     def render_project_checkboxes

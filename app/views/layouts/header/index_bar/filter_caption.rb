@@ -158,7 +158,7 @@ module Views::Layouts
 
     # Subquery: `label: [ <nested params> ]` with span wrappers.
     def render_subquery(label, hash, truncate:)
-      span { plain("#{:"query_#{label}".l}: [ ") }
+      span { plain("#{query_param_label(label)}: [ ") }
       render_params_joined(hash, truncate: truncate, wrap_tag: :span)
       span { plain(" ] ") }
     end
@@ -170,7 +170,7 @@ module Views::Layouts
       compact = hash.compact_blank
       return if compact.empty?
 
-      span { plain("#{:"query_#{label}".l}: ") }
+      span { plain("#{query_param_label(label)}: ") }
       if label == :target
         span { plain(lookup_comment_target_val(hash).to_s) }
       else
@@ -186,7 +186,7 @@ module Views::Layouts
     end
 
     def render_plain_param(key, val, truncate:)
-      label = :"query_#{key}".l
+      label = query_param_label(key)
       if val == true
         span { plain(label) }
       else

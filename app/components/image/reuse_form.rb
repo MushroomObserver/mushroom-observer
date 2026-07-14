@@ -37,7 +37,7 @@ class Components::Image::ReuseForm < Components::ApplicationForm
   end
 
   def view_template
-    div(class: "container-text") do
+    Container(width: :text) do
       render_id_field_row
       Help(class: "form-group", content: :image_reuse_id_help.tp)
       render_toggle_link
@@ -52,7 +52,7 @@ class Components::Image::ReuseForm < Components::ApplicationForm
 
   def render_id_field_row
     div(class: "form-group form-inline") do
-      text_field(:img_id, label: "#{:image_reuse_id.t}:",
+      text_field(:img_id, label: :image_reuse_id,
                           inline: true, size: 8,
                           data: { autofocus: "true" })
       submit(:image_reuse_reuse.l, as: :button,

@@ -6,7 +6,7 @@ module Views::Layouts::App
   # so JS has a stable mount point.
   class PageFlash < Views::Base
     def view_template
-      div(class: "container-full hidden-print", id: "page_flash") do
+      div(class: "hidden-print", id: "page_flash") do
         render(FlashNotices.new)
       end
     end

@@ -42,7 +42,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
     @img_id = @img_id.id if @img_id.is_a?(::Image)
     @data = build_render_data(@img_instance, @img_id)
 
-    div(class: "row") do
+    Row do
       render_image_column
       render_form_column unless @sibling
       render_control_buttons
@@ -52,7 +52,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
   private
 
   def render_image_column
-    div(class: Grid::MD6) do
+    Column(xs: 12, md: 6) do
       div(class: "image-position") do
         img(
           src: @data[:img_src],
@@ -65,7 +65,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
   end
 
   def render_form_column
-    div(class: Grid::MD6) do
+    Column(xs: 12, md: 6) do
       div(class: "form-panel") do
         render(Components::Form::UploadGallery::Fields.new(
                  user: @user,

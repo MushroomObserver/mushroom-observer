@@ -48,14 +48,14 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def render_body
-    div(class: "row") do
+    Row do
       render_observations_column
       render_research_links_column
     end
   end
 
   def render_observations_column
-    div(class: "#{Grid::SM6} name-section") do
+    Column(xs: 12, sm: 6, class: "name-section") do
       p { plain(:show_observations_of.t) }
       ul(class: "list-unstyled pl-3") { render_obs_link_rows }
       div(class: "py-3") do
@@ -105,7 +105,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def render_research_links_column
-    div(class: "#{Grid::SM6} name-section") do
+    Column(xs: 12, sm: 6, class: "name-section") do
       p { plain("#{:research_links.l}:") }
       ul(class: "list-unstyled pl-3") { render_research_links }
     end

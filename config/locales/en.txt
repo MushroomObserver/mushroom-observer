@@ -1754,7 +1754,6 @@
   form_images_notes_help: Enter notes that are specific to this particular image.
   form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
   form_images_original_name: Original file name
-  form_images_select_license: Select a "License":/info/how_to_use#license
   form_images_license_help: Select "license":/info/how_to_use#license you want to give for this image.
   form_images_project_help: Check any projects you wish to attach this image to.
   form_images_camera_date: Camera date
@@ -4783,6 +4782,7 @@
   api_user_already_exists: The user "[login]" already exists or is taken.
   api_user_group_taken: The user group "[title]" already exists.
   api_user_not_verified: The user "[login]" is not verified yet; you can request another verification email on the website.
+  api_user_account_blocked: The account "[login]" has been disabled and can no longer be used.
 
   api_help_accession_has: search within accession number
   api_help_accession_number: unique fungarium id

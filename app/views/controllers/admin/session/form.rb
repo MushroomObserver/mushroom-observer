@@ -14,7 +14,7 @@ module Views::Controllers::Admin::Session
         autocompleter_field(
           :user,
           type: :user,
-          label: "#{:LOGIN_NAME.l}:",
+          label: :LOGIN_NAME,
           value: model.user,
           size: 42,
           autofocus: true

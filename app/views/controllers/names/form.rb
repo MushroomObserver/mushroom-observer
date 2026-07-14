@@ -47,7 +47,7 @@ module Views::Controllers::Names
     end
 
     def render_admin_locked_checkbox
-      checkbox_field(:locked, label: :form_names_locked.l, wrap_class: "mt-3")
+      checkbox_field(:locked, label: :form_names_locked, wrap_class: "mt-3")
     end
 
     def render_editable_fields
@@ -62,7 +62,7 @@ module Views::Controllers::Names
     def render_icn_id_field
       div(class: "form-inline my-3") do
         text_field(:icn_id,
-                   label: "#{:form_names_icn_id.l}:",
+                   label: :form_names_icn_id,
                    inline: true,
                    size: 8) do |f|
           f.with_append do
@@ -75,19 +75,19 @@ module Views::Controllers::Names
     def render_rank_and_status_fields
       div(class: "form-inline my-3") do
         select_field(:rank, rank_options,
-                     label: "#{:Rank.l}:",
+                     label: :Rank,
                      wrap_class: "mr-4",
                      selected: @model.rank)
 
         select_field(:deprecated, status_options,
-                     label: "#{:Status.l}:",
+                     label: :Status,
                      selected: (@model.deprecated || false).to_s)
       end
     end
 
     def render_text_name_field
       textarea_field(:text_name,
-                     label: "#{:form_names_text_name.l}:",
+                     label: :form_names_text_name,
                      value: @name_string,
                      rows: 1,
                      data: { autofocus: true }) do |f|
@@ -99,7 +99,7 @@ module Views::Controllers::Names
 
     def render_author_field
       textarea_field(:author,
-                     label: "#{:Authority.l}:",
+                     label: :Authority,
                      rows: 2) do |f|
         f.with_append do
           Help(element: :p, content: :form_names_author_help.l)
@@ -119,7 +119,7 @@ module Views::Controllers::Names
 
     def render_locked_rank_field
       read_only_field(:rank,
-                      label: "#{:Rank.l}:",
+                      label: :Rank,
                       inline: true,
                       wrap_class: "mb-0",
                       text: :"Rank_#{@model.rank.to_s.downcase}".l)
@@ -127,7 +127,7 @@ module Views::Controllers::Names
 
     def render_locked_status_field
       read_only_field(:deprecated,
-                      label: "#{:Status.l}:",
+                      label: :Status,
                       inline: true,
                       wrap_class: "mb-0",
                       text: @model.deprecated ? :DEPRECATED.l : :ACCEPTED.l)
@@ -135,7 +135,7 @@ module Views::Controllers::Names
 
     def render_locked_text_name_field
       read_only_field(:text_name,
-                      label: "#{:Name.l}:",
+                      label: :Name,
                       inline: true,
                       wrap_class: "mb-0",
                       text: @name_string,
@@ -144,7 +144,7 @@ module Views::Controllers::Names
 
     def render_locked_author_field
       read_only_field(:author,
-                      label: "#{:Authority.l}:",
+                      label: :Authority,
                       inline: true,
                       wrap_class: "mb-0",
                       text: @model.author)
@@ -152,7 +152,7 @@ module Views::Controllers::Names
 
     def render_citation_field
       textarea_field(:citation,
-                     label: "#{:Citation.l}:",
+                     label: :Citation,
                      rows: 3) do |f|
         f.with_append do
           Help(element: :p,
@@ -165,14 +165,14 @@ module Views::Controllers::Names
     def render_misspelling_fields
       div(class: "my-4 mx-0") do
         checkbox_field(:misspelling,
-                       label: :form_names_misspelling.l,
+                       label: :form_names_misspelling,
                        checked: @misspelling)
 
         autocompleter_field(
           :correct_spelling,
           type: :name,
           value: @correct_spelling,
-          label: "#{:form_names_misspelling_it_should_be.l}:",
+          label: :form_names_misspelling_it_should_be,
           help: :form_names_misspelling_note.l,
           help_collapse: true
         )
@@ -181,7 +181,7 @@ module Views::Controllers::Names
 
     def render_notes_field
       textarea_field(:notes,
-                     label: "#{:form_names_taxonomic_notes.l}:",
+                     label: :form_names_taxonomic_notes,
                      rows: 6,
                      help: :shared_textile_help.l,
                      help_collapse: true) do |f|

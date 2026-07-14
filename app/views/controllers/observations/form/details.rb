@@ -21,9 +21,9 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   prop :dubious_where_reasons, _Nilable(_Array(String)), default: nil
 
   def view_template
-    div(class: "row") do
-      div(class: Grid::MD6) { render_left_column }
-      div(class: Grid::MD6) { render_map }
+    Row do
+      Column(xs: 12, md: 6) { render_left_column }
+      Column(xs: 12, md: 6) { render_map }
     end
   end
 
@@ -43,7 +43,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_date_field
-    @form.date_field(:when, label: "#{:WHEN.l}:", wrap_class: "mb-3")
+    @form.date_field(:when, label: :WHEN, wrap_class: "mb-3")
   end
 
   # User autocompleter: selecting a suggestion fills the visible field
@@ -55,7 +55,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
     render(@form.field(:collector).autocompleter(
              type: :user,
              wrapper_options: {
-               label: "#{:COLLECTOR.l}:",
+               label: :COLLECTOR,
                wrap_class: "mb-3",
                help: :form_observations_collector_help.t,
                help_collapse: true
@@ -137,7 +137,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_is_collection_location
     @form.checkbox_field(
       :is_collection_location,
-      label: :form_observations_is_collection_location.l,
+      label: :form_observations_is_collection_location,
       wrap_class: "ml-5 mb-5",
       help: :form_observations_is_collection_location_help.t,
       help_collapse: true
@@ -154,7 +154,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              form: @form,
              field: :has_geolocation,
              target_id: "observation_geolocation",
-             label: "#{:GEOLOCATION.l}:",
+             label: :GEOLOCATION,
              expanded: @observation.lat.present?,
              attributes: {
                help: :form_observations_lat_long_help.t,
@@ -177,7 +177,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_lat_lng_alt_row
-    div(class: "row no-gutters", id: "observation_lat_lng_alt") do
+    Row(class: "no-gutters", id: "observation_lat_lng_alt") do
       render_coordinate_field(:lat, :LAT, :LATITUDE, "º")
       render_coordinate_field(:lng, :LNG, :LONGITUDE, "º")
       render_coordinate_field(:alt, :ALT, :ALTITUDE, "m")
@@ -185,7 +185,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_coordinate_field(field, abbr_key, full_key, addon)
-    div(class: Grid::THIRD) do
+    Column(xs: 4) do
       label_html = coordinate_label(abbr_key, full_key)
       @form.text_field(
         field,
@@ -211,7 +211,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_gps_hidden_checkbox
     @form.checkbox_field(
       :gps_hidden,
-      label: :form_observations_gps_hidden.l,
+      label: :form_observations_gps_hidden,
       wrap_class: "ml-5 mb-5"
     )
   end
@@ -219,7 +219,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_log_change
     @form.checkbox_field(
       :log_change,
-      label: :form_observations_log_change.t,
+      label: :form_observations_log_change,
       checked: true
     )
   end

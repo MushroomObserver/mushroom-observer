@@ -24,12 +24,12 @@ module Views::Controllers::Names::Synonyms
     # rubocop:enable Metrics/ParameterLists
 
     def view_template
-      div(class: "row") do
-        div(class: Grid::SM6) do
+      Row do
+        Column(xs: 12, sm: 6) do
           render_existing_synonyms
           render_proposed_synonyms
         end
-        div(class: Grid::SM6) do
+        Column(xs: 12, sm: 6) do
           render_members_section
         end
       end
@@ -102,11 +102,11 @@ module Views::Controllers::Names::Synonyms
     def render_members_section
       render_new_names_alert if @new_names.present?
 
-      checkbox_field(:deprecate_all, label: :form_synonyms_deprecate_synonyms.l)
+      checkbox_field(:deprecate_all, label: :form_synonyms_deprecate_synonyms)
       Help(element: :p, content: :form_synonyms_deprecate_synonyms_help.t)
 
       textarea_field(:synonym_members,
-                     label: "#{:form_synonyms_names.l}:",
+                     label: :form_synonyms_names,
                      data: { autofocus: true }) do |f|
         f.with_between do
           Help(element: :p, content: members_help)

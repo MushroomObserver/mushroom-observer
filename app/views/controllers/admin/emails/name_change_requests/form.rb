@@ -24,7 +24,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
     private
 
     def render_name_field
-      static_field(:name, label: "#{:NAME.t}:",
+      static_field(:name, label: :NAME,
                           value: "#{@name.unique_search_name}" \
                                  "[##{@name.icn_id}]",
                           inline: true)
@@ -32,13 +32,13 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
 
     def render_new_name_field
       read_only_field(:new_name_with_icn_id,
-                      label: "#{:new_name.t}:",
+                      label: :new_name,
                       value: @new_name_with_icn_id,
                       inline: true)
     end
 
     def render_message_field
-      textarea_field(:message, label: "#{:Notes.t}:", rows: 10,
+      textarea_field(:message, label: :Notes, rows: 10,
                                value: "", data: { autofocus: true })
     end
 

@@ -117,6 +117,7 @@ class API2::ErrorTest < UnitTestCase
         [herbarium_records(:interesting_unknown)],
       API2::ImageUploadFailed => [Image.new],
       API2::MustBeAdmin => [projects(:eol_project)],
+      API2::UserAccountBlocked => [users(:rolf)],
       API2::UserNotVerified => [users(:rolf)]
     }
   end

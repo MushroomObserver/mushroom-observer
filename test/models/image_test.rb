@@ -183,16 +183,72 @@ class ImageTest < UnitTestCase
     assert_equal(["script/rotate_image #{img.id} -90&"], commands)
   end
 
-  # With no local rendition on disk, compute_dhash! fetches the remote
-  # medium image (the transferred-image path the backfill relies on).
-  def test_compute_dhash_fetches_remote_when_no_local_file
+  # dHash is computed from the small local rendition — never the full-size
+  # original, whose ImageMagick decode can exhaust the host (#4796).
+  def test_compute_dhash_uses_small_local_rendition
     img = images(:in_situ_image)
+    small = img.full_filepath(:small)
+    hashed = nil
+    File.stub(:exist?, ->(path) { path == small }) do
+      Image::Dhash.stub(:from_file, lambda { |path|
+        hashed = path
+        456
+      }) do
+        assert_equal(456, img.compute_dhash!)
+      end
+    end
+    assert_equal(small, hashed)
+    assert_equal(456, img.reload.dhash)
+  end
+
+  # With no local rendition (e.g. after originals are cleaned up),
+  # compute_dhash! fetches the remote small rendition — still never the
+  # full-size original (#4796).
+  def test_compute_dhash_fetches_remote_small_when_no_local_file
+    img = images(:in_situ_image)
+    fetched = nil
     img.stub(:full_filepath, "/no/such/file.jpg") do
-      Image::Dhash.stub(:from_url, 123) do
+      Image::Dhash.stub(:from_url, lambda { |url|
+        fetched = url
+        123
+      }) do
         assert_equal(123, img.compute_dhash!)
       end
     end
+    assert_equal(img.small_url, fetched)
     assert_equal(123, img.reload.dhash)
+  end
+
+  # ImageDhashJob's readiness gate (#4799): a local small/medium
+  # rendition is a ready source, whether or not the transfer to the
+  # remote image server(s) has happened yet.
+  def test_dhash_source_ready_when_local_file_exists
+    img = images(:in_situ_image) # transferred: false
+    small = img.full_filepath(:small)
+    File.stub(:exist?, ->(path) { path == small }) do
+      assert(img.dhash_source_ready?)
+    end
+  end
+
+  # A `transferred` image is ready even with no local rendition -- the
+  # small rendition can be fetched remotely (#4799).
+  def test_dhash_source_ready_when_transferred_with_no_local_file
+    # transferred: true (fixture default -- unlike in_situ_image/
+    # turned_over_image, which both explicitly override it to false)
+    img = images(:connected_coprinus_comatus_image)
+    img.stub(:full_filepath, "/no/such/file.jpg") do
+      assert(img.dhash_source_ready?)
+    end
+  end
+
+  # Neither a local rendition nor a completed transfer -- process_image's
+  # backgrounded resize/transfer script (script/process_image) may still
+  # be running. Not ready; ImageDhashJob must not hash this yet (#4799).
+  def test_dhash_source_not_ready_without_local_file_or_transfer
+    img = images(:in_situ_image) # transferred: false
+    img.stub(:full_filepath, "/no/such/file.jpg") do
+      assert_not(img.dhash_source_ready?)
+    end
   end
 
   def test_validate_vote_rescues_non_numeric

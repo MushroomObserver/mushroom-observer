@@ -26,14 +26,14 @@ module Views::Controllers::GlossaryTerms
     private
 
     def render_main_row
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns)) { render_left_column }
         div(class: content_for(:right_columns)) { render_right_column }
       end
     end
 
     def render_left_column
-      div(class: "content-block") do
+      ContentPadded do
         div(class: "description") do
           p { trusted_html(@glossary_term.description.tpl) }
         end
@@ -63,7 +63,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_image_action_links
-      div(class: "mb-3 content-block") do
+      ContentPadded(class: "mb-3") do
         link_to(:show_glossary_term_reuse_image.t,
                 reuse_images_for_glossary_term_path(@glossary_term.id))
         br
@@ -74,9 +74,9 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_other_images
-      div(class: "row") do
+      Row do
         @other_images.each do |image|
-          div(class: "col-sm-4") { render_other_image_panel(image) }
+          Column(sm: 4) { render_other_image_panel(image) }
         end
       end
     end
@@ -95,7 +95,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_versions_footer
-      div(class: "mt-3 content-block") do
+      ContentPadded(class: "mt-3") do
         render(::Components::Description::PreviousVersion.new(
                  obj: @glossary_term, versions: @versions.to_a
                ))

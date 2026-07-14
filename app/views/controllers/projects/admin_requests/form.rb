@@ -24,12 +24,12 @@ module Views::Controllers::Projects::AdminRequests
     private
 
     def render_subject_field
-      text_field(:subject, label: "#{:request_subject.t}:", wrap_class: "mt-3",
+      text_field(:subject, label: :request_subject, wrap_class: "mt-3",
                            data: { autofocus: true })
     end
 
     def render_message_field
-      textarea_field(:message, label: "#{:request_message.t}:", rows: 5)
+      textarea_field(:message, label: :request_message, rows: 5)
     end
 
     def form_action

@@ -23,13 +23,13 @@ module Views::Controllers::Comments
     end
 
     def render_summary_field
-      text_field(:summary, label: "#{:form_comments_summary.t}:",
+      text_field(:summary, label: :form_comments_summary,
                            size: 80,
                            data: { autofocus: true })
     end
 
     def render_comment_field
-      textarea_field(:comment, label: "#{:form_comments_comment.t}:",
+      textarea_field(:comment, label: :form_comments_comment,
                                rows: 10) do |f|
         f.with_help { :shared_textile_help.l }
       end
