@@ -127,7 +127,7 @@ module Views::Controllers::Descriptions
     end
 
     def alts_empty_text(type)
-      :"show_#{type}_no_descriptions".t
+      show_no_descriptions_as_string(type)
     end
 
     # "Create New Draft For: <project1> <project2> ..."
