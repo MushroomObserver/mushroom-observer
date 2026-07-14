@@ -56,7 +56,7 @@ module Views::Controllers::Comments
     private
 
     def render_main_column
-      div(class: "col-xs-12 col-sm-9 col-lg-10") do
+      div(class: class_names(Grid::SM9, "col-lg-10")) do
         render_target_heading if @show_name
         render_summary
         render_comment_info

@@ -17,8 +17,8 @@ module Views::Controllers::Observations::Images
       container_class(:wide)
 
       div(class: "row") do
-        div(class: "col-xs-12 col-sm-8 col-md-6 col-lg-4") { render_form }
-        div(class: "col-xs-12 col-sm-4 col-md-6 col-lg-8") do
+        div(class: class_names(Grid::SM8, "col-md-6 col-lg-4")) { render_form }
+        div(class: class_names(Grid::SM4, "col-md-6 col-lg-8")) do
           render_image_preview
         end
       end
