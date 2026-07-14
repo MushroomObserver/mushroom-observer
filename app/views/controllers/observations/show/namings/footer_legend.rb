@@ -10,9 +10,9 @@
 # `vote_icon_*` helpers.
 class Views::Controllers::Observations::Show::Namings::FooterLegend < Views::Base
   def view_template
-    div(class: "row") do
+    Row do
       div(class: "col-sm-11") do
-        div(class: "row") do
+        Row do
           div(class: Grid::CENTERED_THIRD) do
             render_legend("vote-icon-yours", :show_namings_eye_help.t)
           end

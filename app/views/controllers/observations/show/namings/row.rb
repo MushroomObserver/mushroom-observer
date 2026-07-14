@@ -15,7 +15,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   prop :consensus, ::Observation::NamingConsensus
 
   def view_template
-    div(class: "row align-items-center naming-row",
+    Row(class: "align-items-center naming-row",
         id: "observation_naming_#{primary.id}") do
       div(class: "col col-sm-11") do
         render_main_columns
@@ -79,7 +79,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # ---- top-level layout pieces ----------------------------------
 
   def render_main_columns
-    div(class: "row align-items-center") do
+    Row(class: "align-items-center") do
       div(class: "col col-sm-4") { render_name_cell }
       div(class: "col col-sm-3") { render_proposer_cell }
       div(class: "col col-sm-2") { render_vote_tally_cell }

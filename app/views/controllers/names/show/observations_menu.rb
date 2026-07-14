@@ -48,7 +48,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def render_body
-    div(class: "row") do
+    Row do
       render_observations_column
       render_research_links_column
     end

@@ -71,8 +71,9 @@ class Components::Matrix::Table < Components::Base
   prop :project, _Nilable(Project), default: nil
 
   def view_template(&block)
-    ul(
-      class: "row list-unstyled mt-3",
+    Row(
+      element: :ul,
+      class: "list-unstyled mt-3",
       data: {
         controller: "matrix-table",
         action: "resize@window->matrix-table#rearrange"

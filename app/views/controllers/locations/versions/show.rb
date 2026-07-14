@@ -11,7 +11,7 @@ module Views::Controllers::Locations
 
       def view_template
         register_chrome
-        div(class: "row") { render_columns }
+        Row { render_columns }
         render(Views::Controllers::Versions::Previous.new(
                  obj: @location, versions: @versions.to_a
                ))

@@ -16,7 +16,7 @@ module Views::Controllers::Observations::Images
       add_context_nav(::Tab::Observation::ImagesEdit.new(image: @image))
       container_class(:wide)
 
-      div(class: "row") do
+      Row do
         div(class: class_names(Grid::SM8, "col-md-6 col-lg-4")) { render_form }
         div(class: class_names(Grid::SM4, "col-md-6 col-lg-8")) do
           render_image_preview

@@ -119,7 +119,7 @@ class Components::Form::Search < Components::ApplicationForm
   # Form layout
 
   def render_form_columns
-    div(class: "row") do
+    Row do
       field_columns.each do |panels|
         div(class: Grid::MD6) do
           panels.each do |heading, sections|
@@ -184,7 +184,7 @@ class Components::Form::Search < Components::ApplicationForm
 
   def render_field_row(field_spec:)
     if field_spec.is_a?(Array)
-      div(class: "row") do
+      Row do
         field_spec.each do |subfield|
           div(class: column_classes) do
             render_search_field(field_name: subfield)

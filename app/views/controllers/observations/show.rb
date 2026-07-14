@@ -68,7 +68,7 @@ module Views::Controllers::Observations
     # ---- main row: carousel | obs details / name / lists -----
 
     def render_main_row
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns)) { render_carousel }
         div(class: content_for(:right_columns)) { render_right_column }
       end
@@ -111,7 +111,7 @@ module Views::Controllers::Observations
     # ---- secondary row: namings + comments | thumbnail map ----
 
     def render_secondary_row
-      div(class: "row") do
+      Row do
         div(class: content_for(:left_columns)) do
           render_namings_and_comments
         end

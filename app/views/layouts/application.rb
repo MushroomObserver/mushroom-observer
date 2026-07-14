@@ -96,7 +96,7 @@ module Views::Layouts
       div(id: "main_container", class: "px-sm-3",
           data: { controller: "nav links", nav_target: "container" }) do
         render(Views::Layouts::App::Banners.new)
-        div(class: "row row-offcanvas row-offcanvas-left",
+        Row(class: "row-offcanvas row-offcanvas-left",
             data: { nav_target: "offcanvas" }) do
           render(Views::Layouts::Sidebar.new(
                    user: current_user,

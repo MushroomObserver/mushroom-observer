@@ -19,7 +19,7 @@ module Views::Controllers::Translations
       container_class(:wide)
       add_page_title(:edit_translations_title.t)
       render_help_block
-      div(class: "row") do
+      Row do
         div(class: class_names(Grid::HALF, "translation_container")) do
           render_index_panel
         end

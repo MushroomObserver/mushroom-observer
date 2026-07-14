@@ -11,7 +11,7 @@ module Views::Controllers::Sequences
       add_new_title(:add_object, :SEQUENCE)
       add_context_nav(::Tab::Sequence::Form.new(back_object: @observation))
 
-      div(class: "row") do
+      Row do
         div(class: Grid::SM7) { render_form_column }
         div(class: Grid::SM5) { render_matrix_column }
       end
@@ -25,7 +25,7 @@ module Views::Controllers::Sequences
     end
 
     def render_matrix_column
-      ul(class: "row list-unstyled") do
+      Row(element: :ul, class: "list-unstyled") do
         render(::Components::Matrix::Box.new(
                  user: current_user,
                  object: @observation.rss_log || @observation,

@@ -42,7 +42,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
     @img_id = @img_id.id if @img_id.is_a?(::Image)
     @data = build_render_data(@img_instance, @img_id)
 
-    div(class: "row") do
+    Row do
       render_image_column
       render_form_column unless @sibling
       render_control_buttons
