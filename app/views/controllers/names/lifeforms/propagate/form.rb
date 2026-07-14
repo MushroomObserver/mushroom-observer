@@ -29,10 +29,10 @@ module Views::Controllers::Names::Lifeforms::Propagate
             variant: :striped, identifier: "lifeform",
             show_headers: false) do |t|
         t.column(nil) do |word|
-          checkbox_field(:"add_#{word}", label: :"lifeform_#{word}".l)
+          checkbox_field(:"add_#{word}", label: lifeform_key(word).l)
         end
         t.column(nil, class: "container-text") do |word|
-          plain(:"lifeform_help_#{word}".t)
+          plain(lifeform_help_as_string(word))
         end
       end
     end
@@ -48,10 +48,10 @@ module Views::Controllers::Names::Lifeforms::Propagate
             variant: :striped, identifier: "lifeform",
             show_headers: false) do |t|
         t.column(nil) do |word|
-          checkbox_field(:"remove_#{word}", label: :"lifeform_#{word}".l)
+          checkbox_field(:"remove_#{word}", label: lifeform_key(word).l)
         end
         t.column(nil, class: "container-text") do |word|
-          plain(:"lifeform_help_#{word}".t)
+          plain(lifeform_help_as_string(word))
         end
       end
     end

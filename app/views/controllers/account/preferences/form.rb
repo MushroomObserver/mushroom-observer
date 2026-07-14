@@ -283,7 +283,7 @@ class Views::Controllers::Account::Preferences::Form <
 
   def render_boolean_checkbox_filter(filter)
     checkbox_field(filter.sym,
-                   label: :"prefs_filters_#{filter.sym}".t,
+                   label: prefs_filter_label(filter.sym),
                    checked: model.content_filter[filter.sym] ==
                             filter.prefs_vals.first)
   end
@@ -294,14 +294,14 @@ class Views::Controllers::Account::Preferences::Form <
                 [:"prefs_filters_#{filter.sym}_#{val}".t, val]
               end
     select_field(filter.sym, options,
-                 label: "#{:"prefs_filters_#{filter.sym}".t}:",
+                 label: "#{prefs_filter_label(filter.sym)}:",
                  selected: model.content_filter[filter.sym],
                  inline: true)
   end
 
   def render_string_filter(filter)
     text_field(filter.sym,
-               label: "#{:"prefs_filters_#{filter.sym}".t}:",
+               label: "#{prefs_filter_label(filter.sym)}:",
                value: model.content_filter[filter.sym]) do |f|
       f.with_between { render_string_filter_help(filter) }
     end
