@@ -860,7 +860,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # called (#4799).
   def compute_dhash!
     source = local_dhash_source
-    value = source ? Image::Dhash.from_file(source) : Image::Dhash.from_url(small_url)
+    value = if source
+              Image::Dhash.from_file(source)
+            else
+              Image::Dhash.from_url(small_url)
+            end
     update_column(:dhash, value)
     value
   end
