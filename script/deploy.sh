@@ -126,7 +126,7 @@ fi
 # back, then let the trap no-op on exit.
 echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
-echo Updating translations... && rake lang:update && \
+echo Updating translations... && script/lang_update_if_needed.sh && \
 echo Precompiling assets... && rake assets:precompile && \
 echo Starting puma... && sudo service puma start && \
 echo Starting solidqueue... && sudo service solidqueue start && \
