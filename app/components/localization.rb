@@ -42,7 +42,7 @@ module Components::Localization
     :"query_#{key}".l
   end
 
-  # `Name#lifeform`, one word, e.g. `"lichen"` → `:lichen_form`. Returns
+  # `Name#lifeform`, one word, e.g. `"lichen"` → `:lifeform_lichen`. Returns
   # the translation key itself (not resolved) -- callers need both
   # `.l` (checkbox labels) and `.t` (plain display text) depending on
   # context, and `AuthorsAndEditors#user_list_title` also needs the
