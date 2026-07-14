@@ -79,7 +79,7 @@ module Views::Controllers::Locations
     end
 
     def render_display_name_field
-      text_field(:display_name, value: @display_name, label: "#{:WHERE.t}:",
+      text_field(:display_name, value: @display_name, label: :WHERE,
                                 data: display_name_data,
                                 help: :form_locations_help.t,
                                 help_collapse: true,
@@ -108,7 +108,7 @@ module Views::Controllers::Locations
     end
 
     def render_locked_checkbox
-      checkbox_field(:locked, label: :form_locations_locked.t,
+      checkbox_field(:locked, label: :form_locations_locked,
                               wrap_class: "mt-3")
     end
 
@@ -117,12 +117,12 @@ module Views::Controllers::Locations
         p { :form_locations_notes_help.t }
         p { trusted_html(:shared_textile_help.l) }
       end
-      textarea_field(:notes, label: "#{:NOTES.t}:", help: notes_help,
+      textarea_field(:notes, label: :NOTES, help: notes_help,
                              help_collapse: true)
     end
 
     def render_hidden_checkbox
-      checkbox_field(:hidden, label: :form_locations_hidden.t,
+      checkbox_field(:hidden, label: :form_locations_hidden,
                               wrap_class: "mt-3 mr-3",
                               help: :form_locations_hidden_doc.t,
                               help_collapse: true)

@@ -25,7 +25,7 @@ class Components::Form::ElevationFields < Components::Base
     @form.text_field(
       direction,
       value: @location.send(direction)&.to_s,
-      label: :"show_location_#{direction}est".t,
+      label: :"show_location_#{direction}est",
       addon: "m",
       wrap_class: "text-left",
       data: {

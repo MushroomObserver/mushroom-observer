@@ -43,7 +43,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_date_field
-    @form.date_field(:when, label: "#{:WHEN.l}:", wrap_class: "mb-3")
+    @form.date_field(:when, label: :WHEN, wrap_class: "mb-3")
   end
 
   # User autocompleter: selecting a suggestion fills the visible field
@@ -55,7 +55,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
     render(@form.field(:collector).autocompleter(
              type: :user,
              wrapper_options: {
-               label: "#{:COLLECTOR.l}:",
+               label: :COLLECTOR,
                wrap_class: "mb-3",
                help: :form_observations_collector_help.t,
                help_collapse: true
@@ -137,7 +137,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_is_collection_location
     @form.checkbox_field(
       :is_collection_location,
-      label: :form_observations_is_collection_location.l,
+      label: :form_observations_is_collection_location,
       wrap_class: "ml-5 mb-5",
       help: :form_observations_is_collection_location_help.t,
       help_collapse: true
@@ -154,7 +154,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              form: @form,
              field: :has_geolocation,
              target_id: "observation_geolocation",
-             label: "#{:GEOLOCATION.l}:",
+             label: :GEOLOCATION,
              expanded: @observation.lat.present?,
              attributes: {
                help: :form_observations_lat_long_help.t,
@@ -211,7 +211,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_gps_hidden_checkbox
     @form.checkbox_field(
       :gps_hidden,
-      label: :form_observations_gps_hidden.l,
+      label: :form_observations_gps_hidden,
       wrap_class: "ml-5 mb-5"
     )
   end
@@ -219,7 +219,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   def render_log_change
     @form.checkbox_field(
       :log_change,
-      label: :form_observations_log_change.t,
+      label: :form_observations_log_change,
       checked: true
     )
   end

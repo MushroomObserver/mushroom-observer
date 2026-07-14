@@ -35,7 +35,7 @@ class Components::Form::RegionWithBoxFields < Components::Base
     @form_namespace.autocompleter_field(
       :region,
       type: :region,
-      label: "#{:REGION.t}:",
+      label: :REGION,
       value: @query&.region,
       button: :form_locations_find_on_map.l,
       button_data: { map_target: "showBoxBtn", action: "map#showBox" },
@@ -90,7 +90,7 @@ class Components::Form::RegionWithBoxFields < Components::Base
     Column(xs: 4, offset_xs: centered ? 4 : nil) do
       field_component = in_box_ns.field(direction).text(
         wrapper_options: {
-          label: "#{direction.upcase.to_sym.t}:",
+          label: direction.upcase.to_sym,
           addon: "º"
         },
         value: box_value(direction),

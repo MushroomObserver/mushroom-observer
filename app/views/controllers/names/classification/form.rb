@@ -10,7 +10,7 @@ module Views::Controllers::Names::Classification
     end
 
     def view_template
-      textarea_field(:classification, label: "#{:form_names_classification.l}:",
+      textarea_field(:classification, label: :form_names_classification,
                                       rows: 10,
                                       between: classification_help,
                                       data: { autofocus: true })

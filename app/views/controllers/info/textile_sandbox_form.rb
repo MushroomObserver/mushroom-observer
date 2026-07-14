@@ -63,7 +63,7 @@ module Views::Controllers::Info
     end
 
     def render_code_field
-      textarea_field(:code, label: "#{:sandbox_enter.l}:", rows: 8)
+      textarea_field(:code, label: :sandbox_enter, rows: 8)
     end
 
     def render_submit_buttons

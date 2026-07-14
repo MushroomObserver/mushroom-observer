@@ -34,7 +34,7 @@
 #     render(Components::ApplicationForm::AutocompleterField.new(
 #              field, type: :project, hidden_name: :project,
 #              inline: true, size: 60,
-#              label: "#{:field_slip_filter_by.l}:"
+#              label: :field_slip_filter_by
 #            ))
 #   end
 class Components::IndexFilter < Components::Base

@@ -40,24 +40,24 @@ module Views::Controllers::Account
     def render_login_field
       text_field(
         :login,
-        label: "#{:signup_login.l}:",
+        label: :signup_login,
         data: { autofocus: true }
       )
     end
 
     def render_password_fields
-      password_field(:password, label: "#{:signup_choose_password.l}:")
+      password_field(:password, label: :signup_choose_password)
       password_field(
         :password_confirmation,
-        label: "#{:signup_confirm_password.l}:"
+        label: :signup_confirm_password
       )
     end
 
     def render_email_fields
-      text_field(:email, label: "#{:signup_email_address.l}:")
+      text_field(:email, label: :signup_email_address)
       text_field(
         :email_confirmation,
-        label: "#{:signup_email_confirmation.l}:"
+        label: :signup_email_confirmation
       ) do |f|
         f.with_append { render_email_help }
       end
@@ -70,14 +70,14 @@ module Views::Controllers::Account
     end
 
     def render_name_field
-      text_field(:name, label: "#{:signup_name.l}:")
+      text_field(:name, label: :signup_name)
     end
 
     def render_theme_field
       select_field(
         :theme,
         theme_options,
-        label: "#{:signup_preferred_theme.l}:"
+        label: :signup_preferred_theme
       )
     end
 

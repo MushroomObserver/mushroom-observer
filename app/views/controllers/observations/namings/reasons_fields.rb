@@ -46,7 +46,7 @@ class Views::Controllers::Observations::Namings::ReasonsFields < Views::Base
   def render_checkbox(reason_ns, reason)
     render(reason_ns.field(:check).checkbox(
              wrapper_options: {
-               label: reason.label.t,
+               label: reason.label,
                label_data: checkbox_label_data(reason),
                label_aria: checkbox_label_aria(reason)
              },

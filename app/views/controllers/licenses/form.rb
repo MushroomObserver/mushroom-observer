@@ -22,7 +22,7 @@ module Views::Controllers::Licenses
     end
 
     def render_display_name_field
-      text_field(:display_name, label: "#{:license_display_name.t}:",
+      text_field(:display_name, label: :license_display_name,
                                 data: { autofocus: true }) do |f|
         f.with_append do
           Help(content: :license_display_name_help.t)
@@ -31,7 +31,7 @@ module Views::Controllers::Licenses
     end
 
     def render_url_field
-      text_field(:url, label: "#{:license_url.t}:") do |f|
+      text_field(:url, label: :license_url) do |f|
         f.with_append do
           Help(content: :license_url_help.t)
         end
@@ -39,7 +39,7 @@ module Views::Controllers::Licenses
     end
 
     def render_deprecated_checkbox
-      checkbox_field(:deprecated, label: :license_form_checkbox_deprecated.t)
+      checkbox_field(:deprecated, label: :license_form_checkbox_deprecated)
     end
   end
 end

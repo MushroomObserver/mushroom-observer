@@ -8,7 +8,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Renders image upload fields in a :upload namespace.
     # Creates params[:model][:upload][image], etc. (nested under form model)
     # Pass a block to render content in the file field's between slot.
-    def upload_fields(file_field_label: "#{:IMAGE.l}:", **args, &between_block)
+    def upload_fields(file_field_label: :IMAGE.l, **args, &between_block)
       args => {
         copyright_holder:, copyright_year:, licenses:, upload_license_id:
       }
@@ -45,7 +45,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_upload_copyright_holder(upload, holder)
       render(
         upload.field(:copyright_holder).text(
-          wrapper_options: { label: "#{:image_copyright_holder.l}:",
+          wrapper_options: { label: :image_copyright_holder,
                              inline: true },
           value: holder
         )
@@ -56,7 +56,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       render(
         upload.field(:copyright_year).select(
           upload_year_options,
-          wrapper_options: { label: "#{:WHEN.l}:", inline: true },
+          wrapper_options: { label: :WHEN, inline: true },
           selected: year
         )
       )
@@ -67,7 +67,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       # `License.available_names_and_ids`); pass through.
       license_select = upload.field(:license_id).select(
         licenses,
-        wrapper_options: { label: "#{:LICENSE.l}:", inline: true },
+        wrapper_options: { label: :LICENSE, inline: true },
         selected: selected_id
       )
 

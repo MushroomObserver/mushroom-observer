@@ -49,7 +49,7 @@ class Components::Form::CompassFields < Components::Base
     @form.text_field(
       direction,
       value: @location.send(direction).to_s,
-      label: "#{direction.upcase.to_sym.t}:",
+      label: direction.upcase.to_sym,
       addon: "º",
       wrap_class: "text-left",
       data: {

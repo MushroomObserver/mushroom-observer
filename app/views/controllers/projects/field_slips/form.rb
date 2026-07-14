@@ -11,10 +11,10 @@ module Views::Controllers::Projects::FieldSlips
 
     def view_template
       super do
-        number_field(:field_slips, label: :field_slips.l,
+        number_field(:field_slips, label: :field_slips,
                                    inline: true, min: 0)
         checkbox_field(:one_per_page,
-                       label: :field_slips_one_per_page.t)
+                       label: :field_slips_one_per_page)
         submit(:CREATE.l, class: "ml-3")
       end
     end

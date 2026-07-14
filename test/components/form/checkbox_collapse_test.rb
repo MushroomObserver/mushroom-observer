@@ -73,9 +73,18 @@ class FormCheckboxCollapseTest < ComponentTestCase
                 "[data-extra='val']")
   end
 
+  # Regression test: label: also accepts a bare Symbol translation key,
+  # resolved via .t by the underlying checkbox_field/FieldLabelRow --
+  # not just an explicit String (#4687).
+  def test_label_accepts_bare_symbol
+    html = render_collapse(label: :APPROVED)
+
+    assert_html(html, "label", text: :APPROVED.t)
+  end
+
   private
 
-  def render_collapse(expanded: false, attributes: {})
+  def render_collapse(expanded: false, attributes: {}, label: "Specimen")
     form = TestForm.new(@obs, action: "/observations")
     the_form = form
     form.render_block = proc do
@@ -83,7 +92,7 @@ class FormCheckboxCollapseTest < ComponentTestCase
                form: the_form,
                field: :specimen,
                target_id: "specimen_fields",
-               label: "Specimen",
+               label: label,
                expanded: expanded,
                attributes: attributes
              ))
