@@ -41,9 +41,11 @@ class Components::Container < Components::Base
 
   # Dual access, matching Components::Collapsible.collapse_classes --
   # callable directly for string-only callers, and used internally by
-  # #width_class below. Any width not in WIDTH_CLASSES (including
-  # explicit :full) falls back to "container-full", matching
-  # container_class's original case statement.
+  # #width_class below. Any width that isn't a WIDTH_CLASSES key (nil,
+  # or an unrecognized symbol) falls back to "container-full", matching
+  # container_class's original case statement -- :full itself is a
+  # defined key mapping to that same string, not something that relies
+  # on the fallback.
   def self.class_for(width)
     WIDTH_CLASSES.fetch(width, WIDTH_CLASSES[:full])
   end
