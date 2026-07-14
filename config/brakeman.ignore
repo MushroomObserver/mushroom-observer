@@ -140,13 +140,13 @@
     {
       "warning_type": "Command Injection",
       "warning_code": 14,
-      "fingerprint": "9e9cea31d8b6b8e684822415d4a65f13fb7af86ed691b0e72ff13194cb813dc6",
+      "fingerprint": "66e1026ce90d53473baccefa54146c098deae78c3820f4433d48cfe505367061",
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/image/processor/verifier.rb",
       "line": 120,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "Open3.capture2(\"ssh\", host, \"find\", \"-L\", *paths.map do\n \"#{root}/#{path}\"\n end, \"-maxdepth\", \"0\", \"-printf\", \"%p\\\\t%s\\\\n\")",
+      "code": "Open3.capture3(\"ssh\", host, \"find\", \"-L\", *paths.map do\n \"#{root}/#{path}\"\n end, \"-maxdepth\", \"0\", \"-printf\", \"%p\\\\t%s\\\\n\")",
       "render_path": null,
       "location": {
         "type": "method",
@@ -158,7 +158,7 @@
       "cwe_id": [
         77
       ],
-      "note": "False positive: Open3.capture2 is called in argv (list) form, so no local shell is spawned; `host`/`root` (from remote_path.split(\":\", 2)) come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure. Checks every expected file for one image in a single ssh round trip, per #4791 -- see the class comment."
+      "note": "False positive: Open3.capture3 is called in argv (list) form, so no local shell is spawned; `host`/`root` (from remote_path.split(\":\", 2)) come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure. Checks every expected file for one image in a single ssh round trip, per #4791 -- see the class comment. Switched capture2 -> capture3 to also capture stderr (Copilot review fix, see PR discussion) -- fingerprint changed accordingly."
     }
   ],
   "brakeman_version": "8.0.5"
