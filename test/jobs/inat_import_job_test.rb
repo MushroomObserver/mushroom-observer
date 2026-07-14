@@ -1816,6 +1816,22 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # -------- send_import_digest tests (best-effort: a digest failure
+  # must not fail/retry the job, since that would resend digests)
+
+  def test_send_import_digest_swallows_delivery_failure
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    logged = []
+    job.define_singleton_method(:log) { |msg| logged << msg }
+
+    Inat::ImportDigest.stub(:deliver_for, ->(*) { raise("boom") }) do
+      assert_nothing_raised { job.send(:send_import_digest) }
+    end
+
+    assert(logged.any? { |msg| msg.include?("Import digest failed") })
+  end
+
   # -------- Other Utilities
 
   # Hack to turn results with many pages into results with one page

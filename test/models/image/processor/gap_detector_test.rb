@@ -126,7 +126,69 @@ class Image::Processor::GapDetectorTest < UnitTestCase
                  "regeneration should only be attempted once per image")
   end
 
+  # Every seed_remote fixture above is "file"-type (test env's remote1/
+  # remote2) -- list_subdir's "ssh" branch and unknown-type branch are
+  # exercised directly here instead, mirroring Verifier's ssh_sizes tests.
+  def test_list_ssh_subdir_shells_out_correctly
+    detector = Image::Processor::GapDetector.new
+    captured_args = nil
+    fake_capture2 = lambda do |*args|
+      captured_args = args
+      ["", stub_status(true)]
+    end
+
+    Open3.stub(:capture2, fake_capture2) do
+      detector.send(:list_ssh_subdir, :ssh_server,
+                    "mo@example.test:/data/mo", "thumb")
+    end
+
+    assert_equal(
+      ["ssh", "mo@example.test", "find", "-L", "/data/mo/thumb",
+       "-maxdepth", "1", "-type", "f", "-printf", "%f\\t%s\\n"],
+      captured_args
+    )
+  end
+
+  def test_list_ssh_subdir_parses_find_output
+    detector = Image::Processor::GapDetector.new
+    find_output = "1.jpg\t456\n2.jpg\t789\n"
+
+    Open3.stub(:capture2, [find_output, stub_status(true)]) do
+      result = detector.send(:list_ssh_subdir, :ssh_server,
+                             "mo@example.test:/data/mo", "thumb")
+      assert_equal({ "1.jpg" => 456, "2.jpg" => 789 }, result)
+    end
+  end
+
+  def test_list_ssh_subdir_logs_and_returns_empty_on_failure
+    messages = []
+    detector = Image::Processor::GapDetector.new { |msg| messages << msg }
+
+    Open3.stub(:capture2, ["", stub_status(false)]) do
+      result = detector.send(:list_ssh_subdir, :ssh_server,
+                             "mo@example.test:/data/mo", "thumb")
+      assert_equal({}, result)
+    end
+
+    assert(messages.any? { |msg| msg.include?("Failed to list") })
+  end
+
+  def test_list_subdir_unknown_type_raises
+    detector = Image::Processor::GapDetector.new
+
+    assert_raises(RuntimeError) do
+      detector.send(:list_subdir, :weird_server,
+                    { type: "ftp", path: "ftp://example.test" }, "thumb")
+    end
+  end
+
   private
+
+  def stub_status(success)
+    status = Object.new
+    status.define_singleton_method(:success?) { success }
+    status
+  end
 
   def run_detector_for(image)
     Image::Processor::GapDetector.new.run(Image.where(id: image.id))
