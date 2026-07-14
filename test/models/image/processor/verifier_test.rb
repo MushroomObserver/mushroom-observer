@@ -185,12 +185,12 @@ class Image::Processor::VerifierTest < UnitTestCase
   def test_ssh_sizes_shells_out_with_every_expected_path_in_one_call
     verifier = Image::Processor::Verifier.new
     captured_args = nil
-    fake_capture2 = lambda do |*args|
+    fake_capture3 = lambda do |*args|
       captured_args = args
-      ["", stub_status(true)]
+      ["", "", stub_status(true)]
     end
 
-    Open3.stub(:capture2, fake_capture2) do
+    Open3.stub(:capture3, fake_capture3) do
       verifier.send(:ssh_sizes, :ssh_server, "mo@example.test:/data/mo",
                     ["orig/1.jpg", "thumb/1.jpg"])
     end
@@ -206,7 +206,7 @@ class Image::Processor::VerifierTest < UnitTestCase
     verifier = Image::Processor::Verifier.new
     find_output = "/data/mo/orig/1.jpg\t456\n/data/mo/thumb/1.jpg\t789\n"
 
-    Open3.stub(:capture2, [find_output, stub_status(true)]) do
+    Open3.stub(:capture3, [find_output, "", stub_status(true)]) do
       result = verifier.send(:ssh_sizes, :ssh_server,
                              "mo@example.test:/data/mo",
                              ["orig/1.jpg", "thumb/1.jpg"])
@@ -214,17 +214,40 @@ class Image::Processor::VerifierTest < UnitTestCase
     end
   end
 
-  def test_ssh_sizes_logs_and_returns_empty_on_failure
+  # Regression test for a Copilot finding on PR #4751: `find` exits
+  # non-zero whenever ANY requested path is missing (the routine case
+  # this method exists to detect), so a bare non-zero-exit check would
+  # log a false "Failed to check" on nearly every call. Missing-path
+  # stderr noise must NOT trigger the log.
+  def test_ssh_sizes_does_not_log_for_ordinary_missing_paths
     messages = []
     verifier = Image::Processor::Verifier.new { |msg| messages << msg }
+    stderr = "find: '/data/mo/orig/1.jpg': No such file or directory\n"
 
-    Open3.stub(:capture2, ["", stub_status(false)]) do
+    Open3.stub(:capture3, ["", stderr, stub_status(false)]) do
       result = verifier.send(:ssh_sizes, :ssh_server,
                              "mo@example.test:/data/mo", ["orig/1.jpg"])
       assert_equal({}, result)
     end
 
-    assert_includes(messages, "Failed to check mo@example.test for ssh_server")
+    assert_empty(messages)
+  end
+
+  def test_ssh_sizes_logs_and_returns_empty_on_real_failure
+    messages = []
+    verifier = Image::Processor::Verifier.new { |msg| messages << msg }
+    stderr = "ssh: Could not resolve hostname example.test\n"
+
+    Open3.stub(:capture3, ["", stderr, stub_status(false)]) do
+      result = verifier.send(:ssh_sizes, :ssh_server,
+                             "mo@example.test:/data/mo", ["orig/1.jpg"])
+      assert_equal({}, result)
+    end
+
+    assert(messages.any? do |msg|
+      msg.start_with?("Failed to check mo@example.test for ssh_server") &&
+        msg.include?(stderr)
+    end)
   end
 
   def test_remote_sizes_for_unknown_type_raises

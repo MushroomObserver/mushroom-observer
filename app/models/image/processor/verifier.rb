@@ -116,12 +116,28 @@ class Image
       def ssh_sizes(server, remote_path, paths)
         host, root = remote_path.split(":", 2)
         full_paths = paths.map { |path| "#{root}/#{path}" }
-        output, status = Open3.capture2(
+        output, error, status = Open3.capture3(
           "ssh", host, "find", "-L", *full_paths, "-maxdepth", "0",
           "-printf", "%p\\t%s\\n"
         )
-        log("Failed to check #{host} for #{server}") unless status.success?
+        if connection_failed?(status, error)
+          log("Failed to check #{host} for #{server}: #{error}")
+        end
         parse_find_output(output, root)
+      end
+
+      # `find` exits non-zero (writing "No such file or directory" to
+      # stderr per missing path) whenever ANY requested path is missing --
+      # the routine, expected outcome for an image not yet on this server,
+      # not a failure. Only treat this as a real failure if stderr says
+      # something else (ssh-level connection/auth/command errors) --
+      # otherwise this logs on nearly every routine check, since a mix of
+      # present/missing sizes is the normal case this method exists to
+      # detect.
+      def connection_failed?(status, error)
+        return false if status.success?
+
+        error.lines.any? { |line| line.exclude?("No such file or directory") }
       end
 
       def parse_find_output(output, root)

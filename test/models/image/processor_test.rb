@@ -228,6 +228,40 @@ class Image::ProcessorTest < UnitTestCase
     end
   end
 
+  # Regression test for a second Copilot finding on PR #4751:
+  # copy_file_from_server can RAISE (e.g. Errno::ENOENT via FileUtils.cp,
+  # or Rsync.run raising if rsync/ssh is unavailable), not just return
+  # false. A raised exception on one server must not abort the loop any
+  # more than a returned false does -- the next server must still get
+  # its chance.
+  def test_make_sure_we_have_full_size_locally_tries_next_server_after_raise
+    image = images(:in_situ_image)
+    FileUtils.cp(JPG_FIXTURE, "#{remote_server_path(1)}/orig/#{image.id}.jpg")
+    processor = Image::Processor.new(image: image, ext: "jpg")
+    fake_data = {
+      unreachable: { type: "file", path: "/nonexistent", subdirs: ["orig"] },
+      remote1: { type: "file", path: remote_server_path(1),
+                 subdirs: ["orig"] }
+    }
+    real_copy = Image::Processor::FileTransfer.method(:copy_file_from_server)
+    raising_fetch = lambda do |server, remote_file|
+      raise(Errno::ENOENT) if server == :unreachable
+
+      real_copy.call(server, remote_file)
+    end
+
+    Image::Processor.stub(:image_server_data, fake_data) do
+      Image::Processor.stub(:image_servers, [:unreachable, :remote1]) do
+        Image::Processor::FileTransfer.stub(:copy_file_from_server,
+                                            raising_fetch) do
+          processor.make_sure_we_have_full_size_locally
+        end
+      end
+    end
+
+    assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
+  end
+
   def test_requires_image
     assert_raises(RuntimeError) { Image::Processor.new(image: nil) }
   end

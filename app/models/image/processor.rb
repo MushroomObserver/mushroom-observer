@@ -104,8 +104,7 @@ class Image
 
       self.class.image_servers.each do |server|
         next unless image_server_has_subdir?(server, "orig")
-        break if copy_file_from_server(server, "orig/#{@id}.jpg") &&
-                 File.exist?(full_size_filepath)
+        break if try_fetch_orig(server) && File.exist?(full_size_filepath)
       end
 
       return if File.exist?(full_size_filepath)
@@ -158,6 +157,18 @@ class Image
     end
 
     private
+
+    # copy_file_from_server can raise (e.g. Errno::ENOENT via FileUtils.cp
+    # when a "file"-type server doesn't actually have the source, or
+    # Rsync.run raising if rsync/ssh is unavailable) -- a raised exception
+    # must not abort make_sure_we_have_full_size_locally's loop any more
+    # than a returned false does, or a single bad server would prevent
+    # ever trying the next one.
+    def try_fetch_orig(server)
+      copy_file_from_server(server, "orig/#{@id}.jpg")
+    rescue StandardError
+      false
+    end
 
     # Skip if #rotate already produced this from the current full-size
     # file -- reconverting from the raw original here would silently
