@@ -11,12 +11,12 @@
 class Views::Controllers::Observations::Show::Namings::FooterLegend < Views::Base
   def view_template
     Row do
-      div(class: "col-sm-11") do
-        Row do
-          div(class: Grid::CENTERED_THIRD) do
+      Column(sm: 11) do
+        div(class: "row") do
+          Column(xs: 4, offset_xs: 4) do
             render_legend("vote-icon-yours", :show_namings_eye_help.t)
           end
-          div(class: Grid::THIRD) do
+          Column(xs: 4) do
             render_legend("vote-icon-consensus",
                           :show_namings_eyes_help.t)
           end

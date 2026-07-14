@@ -17,8 +17,8 @@ module Views::Controllers::Observations::ExternalLinks
       add_new_title(:add_object, :EXTERNAL_LINK)
 
       Row do
-        div(class: Grid::SM7) { render_form }
-        div(class: Grid::SM5) { render_matrix_box }
+        Column(xs: 12, sm: 7) { render_form }
+        Column(xs: 12, sm: 5) { render_matrix_box }
       end
     end
 
@@ -39,7 +39,7 @@ module Views::Controllers::Observations::ExternalLinks
         render(::Components::Matrix::Box.new(
                  user: @user,
                  object: @observation.rss_log || @observation,
-                 columns: Grid::FULL
+                 columns: Components::Column.classes_for(xs: 12)
                ))
       end
     end

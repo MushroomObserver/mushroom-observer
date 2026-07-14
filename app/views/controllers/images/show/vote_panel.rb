@@ -71,8 +71,8 @@ module Views::Controllers::Images
       def render_vote_row(value, current)
         css = current == value ? "font-weight-bold" : ""
         Row do
-          div(class: Grid::SM6) { render_vote_link(value, css) }
-          div(class: "#{Grid::SM6} hidden-xs") do
+          Column(xs: 12, sm: 6) { render_vote_link(value, css) }
+          Column(xs: 12, sm: 6, class: "hidden-xs") do
             render_vote_and_next_link(value, css)
           end
         end

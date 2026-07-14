@@ -22,11 +22,11 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
 
   def render_body
     Row do
-      div(class: Grid::HALF) do
+      Column(xs: 6) do
         div(class: "font-weight-bold") { plain("#{:on_mo.l}:") }
         render_links_on_mo
       end
-      div(class: Grid::HALF) do
+      Column(xs: 6) do
         div(class: "font-weight-bold") { plain("#{:on_the_web.l}:") }
         render_links_on_web
       end

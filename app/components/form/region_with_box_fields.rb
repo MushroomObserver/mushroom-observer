@@ -77,17 +77,17 @@ class Components::Form::RegionWithBoxFields < Components::Base
   end
 
   def render_east_west_row(directions, in_box_ns)
-    render_compass_input(directions[0], in_box_ns, Grid::THIRD)
+    render_compass_input(directions[0], in_box_ns)
     render_compass_help
-    render_compass_input(directions[1], in_box_ns, Grid::THIRD)
+    render_compass_input(directions[1], in_box_ns)
   end
 
   def render_single_compass_input(direction, in_box_ns)
-    render_compass_input(direction, in_box_ns, Grid::CENTERED_THIRD)
+    render_compass_input(direction, in_box_ns, centered: true)
   end
 
-  def render_compass_input(direction, in_box_ns, col_classes)
-    div(class: col_classes) do
+  def render_compass_input(direction, in_box_ns, centered: false)
+    Column(xs: 4, offset_xs: centered ? 4 : nil) do
       field_component = in_box_ns.field(direction).text(
         wrapper_options: {
           label: "#{direction.upcase.to_sym.t}:",
@@ -104,7 +104,7 @@ class Components::Form::RegionWithBoxFields < Components::Base
   end
 
   def render_compass_help
-    div(class: "#{Grid::THIRD} small text-center p-0") do
+    Column(xs: 4, class: "small text-center p-0") do
       plain(:form_locations_lat_long_help.l)
     end
   end

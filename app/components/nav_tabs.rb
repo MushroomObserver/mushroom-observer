@@ -37,7 +37,7 @@
 #   ))
 #
 # @example With wrapper chrome at the call site
-#   div(class: Grid::FULL, id: "project_tabs") do
+#   Column(xs: 12, id: "project_tabs") do
 #     render(Components::NavTabs.new(current: @current_tab,
 #                                    link_class: "mt-3")) do |tabs|
 #       # ...
