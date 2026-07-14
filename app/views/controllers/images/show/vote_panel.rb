@@ -128,7 +128,7 @@ module Views::Controllers::Images
               variant: :striped, identifier: "show-votes",
               class: "mt-3 mb-0") do |t|
           t.column(:USER.t) { |vote| render_vote_user_cell(vote) }
-          t.column(:VOTE.t) { |vote| short_vote_label(vote) }
+          t.column(:VOTE.t) { |vote| image_vote_as_short_string(vote.value) }
         end
       end
 
@@ -138,10 +138,6 @@ module Views::Controllers::Images
         else
           Link(type: :user, user: vote.user)
         end
-      end
-
-      def short_vote_label(vote)
-        :"image_vote_short_#{vote.value}".t
       end
     end
   end
