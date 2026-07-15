@@ -8,9 +8,10 @@
 # cleared cache never breaks the site, it just costs one DB query per
 # tag until the cache warms back up.
 #
-# Chained AFTER I18n::Backend::SolidCacheKeyValue (see config/application.rb)
-# -- Chain checks backends in order and only reaches this one on a cache
-# miss. Ignores any key outside MO's own namespace (config.locale_namespace,
+# Chained AFTER I18n::Backend::SolidCacheKeyValue (see
+# config/initializers/i18n_backend.rb) -- Chain checks backends in
+# order and only reaches this one on a cache miss. Ignores any key
+# outside MO's own namespace (config.locale_namespace,
 # "mo") so gem-provided translations (ActiveRecord/ActiveModel/etc, still
 # file-loaded via a third Chain backend) aren't shadowed or queried here.
 class I18n::Backend::DbFallback
@@ -60,8 +61,24 @@ class I18n::Backend::DbFallback
     return nil unless language
 
     str = language.translation_strings.find_by(tag: tag)
-    str ||= Language.official.translation_strings.find_by(tag: tag) unless
+    str ||= official_language.translation_strings.find_by(tag: tag) unless
       language.official
     str&.text
+  end
+
+  # Memoized on this DbFallback instance (one per process, built once
+  # at boot -- see config/initializers/i18n_backend.rb) rather than on
+  # Language itself: most non-English lookups hit this fallback on a
+  # cold cache, so an unmemoized query here is an avoidable repeat on
+  # every one of them. `||=` already skips memoizing nil, same
+  # reasoning as Language.for_locale -- if this fires before the
+  # `languages` table is populated, it keeps retrying instead of
+  # caching the miss forever. Deliberately NOT added to Language.official
+  # itself: that would hand every caller (tests included) the same
+  # cached AR instance across requests/tests, and a stale cached
+  # association (e.g. translation_strings) surviving a rolled-back test
+  # transaction is exactly the kind of bug that memoization risks.
+  def official_language
+    @official_language ||= Language.official
   end
 end
