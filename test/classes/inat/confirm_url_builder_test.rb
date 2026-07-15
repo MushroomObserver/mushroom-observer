@@ -4,7 +4,7 @@ require("test_helper")
 
 class Inat
   class ConfirmURLBuilderTest < ::UnitTestCase
-    SITE_URL = "https://www.inaturalist.org/observations"
+    SITE_URL = "#{Inat::Constants::SITE}/observations".freeze
 
     def setup
       @username_model = FormObject::InatImportConfirm.new(
@@ -57,8 +57,8 @@ class Inat
       builder = build(model)
 
       url = builder.requested_obs_url
-      assert_match(%r{\Ahttps://www\.inaturalist\.org/observations\?}, url,
-                   "Confirm-form links must use iNat UI host, never the API")
+      assert(url.start_with?("#{SITE_URL}?"),
+             "Confirm-form links must use iNat UI host, never the API")
     end
 
     # Regression: a URL with leading/trailing whitespace must not be
@@ -70,7 +70,8 @@ class Inat
       builder = build(model)
 
       url = builder.requested_obs_url
-      assert_match(%r{\Ahttps://www\.inaturalist\.org/observations\?}, url)
+      assert(url.start_with?("#{SITE_URL}?"),
+             "Expected URL to start with #{SITE_URL}, got: #{url}")
       assert_match(/user_id=testuser/, url)
     end
 
