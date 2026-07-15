@@ -158,8 +158,10 @@ class ImageTest < UnitTestCase
   def test_presence_of_critical_external_scripts
     assert_not(Rails.root.join("script/bogus_script").exist?,
                "script/bogus_script should not exist!")
-    assert(Rails.root.join("script/retransfer_images").exist?,
-           "Missing script/retransfer_images!")
+    # strip_exif is still shelled out to by Image#strip_gps! (the image
+    # resize/transfer scripts are all Ruby now -- see Image::Processor).
+    assert(Rails.root.join("script/strip_exif").exist?,
+           "Missing script/strip_exif!")
   end
 
   def test_transform
