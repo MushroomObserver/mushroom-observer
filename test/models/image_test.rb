@@ -3,6 +3,8 @@
 require("test_helper")
 
 class ImageTest < UnitTestCase
+  include ActiveJob::TestHelper
+
   # log_update/log_destroy/log_create_for/log_reuse_for/log_remove_from
   # attribute to `current_user` (the acting/editing user), not `user`
   # (the image's owner) - an admin editing/removing someone else's image
@@ -156,31 +158,24 @@ class ImageTest < UnitTestCase
   def test_presence_of_critical_external_scripts
     assert_not(Rails.root.join("script/bogus_script").exist?,
                "script/bogus_script should not exist!")
-    assert(Rails.root.join("script/process_image").exist?,
-           "Missing script/process_image!")
-    assert(Rails.root.join("script/rotate_image").exist?,
-           "Missing script/rotate_image!")
-    assert(Rails.root.join("script/retransfer_images").exist?,
-           "Missing script/retransfer_images!")
+    # strip_exif is still shelled out to by Image#strip_gps! (the image
+    # resize/transfer scripts are all Ruby now -- see Image::Processor).
+    assert(Rails.root.join("script/strip_exif").exist?,
+           "Missing script/strip_exif!")
   end
 
   def test_transform
     img = Image.new
-    assert_nil(img.transform(:mirror))
+    assert_no_enqueued_jobs { assert_nil(img.transform(:mirror)) }
     assert_raises(RuntimeError) { img.transform(:edible) }
   end
 
-  # Outside the test env the guard clause is skipped and transform shells
-  # out to script/rotate_image with the mapped operator.
-  def test_transform_shells_out_when_not_in_test_env
+  def test_transform_enqueues_rotate_image_job
     img = images(:in_situ_image)
-    commands = []
-    img.stub(:system, ->(cmd) { commands << cmd }) do
-      Rails.env.stub(:test?, false) do
-        img.transform(:rotate_left)
-      end
+    assert_enqueued_with(job: RotateImageJob,
+                         args: [img.id, img.original_extension, "-90"]) do
+      img.transform(:rotate_left)
     end
-    assert_equal(["script/rotate_image #{img.id} -90&"], commands)
   end
 
   # dHash is computed from the small local rendition — never the full-size
@@ -217,38 +212,6 @@ class ImageTest < UnitTestCase
     end
     assert_equal(img.small_url, fetched)
     assert_equal(123, img.reload.dhash)
-  end
-
-  # ImageDhashJob's readiness gate (#4799): a local small/medium
-  # rendition is a ready source, whether or not the transfer to the
-  # remote image server(s) has happened yet.
-  def test_dhash_source_ready_when_local_file_exists
-    img = images(:in_situ_image) # transferred: false
-    small = img.full_filepath(:small)
-    File.stub(:exist?, ->(path) { path == small }) do
-      assert(img.dhash_source_ready?)
-    end
-  end
-
-  # A `transferred` image is ready even with no local rendition -- the
-  # small rendition can be fetched remotely (#4799).
-  def test_dhash_source_ready_when_transferred_with_no_local_file
-    # transferred: true (fixture default -- unlike in_situ_image/
-    # turned_over_image, which both explicitly override it to false)
-    img = images(:connected_coprinus_comatus_image)
-    img.stub(:full_filepath, "/no/such/file.jpg") do
-      assert(img.dhash_source_ready?)
-    end
-  end
-
-  # Neither a local rendition nor a completed transfer -- process_image's
-  # backgrounded resize/transfer script (script/process_image) may still
-  # be running. Not ready; ImageDhashJob must not hash this yet (#4799).
-  def test_dhash_source_not_ready_without_local_file_or_transfer
-    img = images(:in_situ_image) # transferred: false
-    img.stub(:full_filepath, "/no/such/file.jpg") do
-      assert_not(img.dhash_source_ready?)
-    end
   end
 
   def test_validate_vote_rescues_non_numeric
@@ -367,18 +330,70 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
   end
 
+  # A failed GPS strip must stop before Image::Processor#process is ever
+  # reached -- an unstripped original must not propagate into resized/
+  # transferred copies or get hashed (dhash is now computed inside
+  # #process, #4796). See Image::Processor.strip_original_gps.
+  def test_process_image_strip_failure_skips_processing
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+
+    processed = false
+    processor = Object.new
+    processor.define_singleton_method(:process) { processed = true }
+
+    img.stub(:move_original, true) do
+      Image::Processor.stub(:strip_original_gps, "boom") do
+        Image::Processor.stub(:new, processor) do
+          Rails.env.stub(:test?, false) do
+            assert_not(img.process_image(strip: true))
+          end
+        end
+      end
+    end
+    assert_not(processed, "strip failure must skip processing (and hashing)")
+    assert(img.errors[:image].any?)
+  end
+
   def test_process_image_command_failure
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
 
+    failing_processor = Object.new
+    def failing_processor.process
+      raise("boom")
+    end
+
     img.stub(:move_original, true) do
-      img.stub(:system, false) do
+      Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
           assert_not(img.process_image)
         end
       end
     end
     assert(img.errors[:image].any?)
+  end
+
+  # Transfer-to-image-server is no longer part of Image::Processor#process
+  # (see #4791 -- TransferImagesJob owns that now, asynchronously), and
+  # the perceptual hash is computed inline in #process (#4796, no separate
+  # job), so a successful resize enqueues only TransferImagesJob.
+  def test_process_image_enqueues_transfer_job
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+    succeeding_processor = Object.new
+    def succeeding_processor.process; end
+
+    img.stub(:move_original, true) do
+      Image::Processor.stub(:new, succeeding_processor) do
+        Rails.env.stub(:test?, false) do
+          assert_enqueued_with(job: TransferImagesJob,
+                               args: [{ image_ids: [img.id] }]) do
+            assert(img.process_image)
+          end
+        end
+      end
+    end
   end
 
   def test_move_original_system_fail
