@@ -4965,7 +4965,7 @@
   query_exclude_consensus: exclude consensus
 
   # records
-  query_external_sites: "[:sites]"
+  query_external_sites: "[:external_sites]"
   query_field_slips: "[:field_slips]"
   query_herbaria: "[:herbaria]"
   query_herbarium_records: "[:herbarium_records]"
