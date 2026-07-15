@@ -43,11 +43,12 @@ class Image::Processor::VerifierTest < UnitTestCase
     super
   end
 
-  # A mismatch gets uploaded, but the image isn't trusted as complete on
-  # the same run that just fixed it -- deliberate (see Verifier's
-  # all_synced? comment): a freshly-uploaded file isn't re-verified until
-  # the next run's fresh remote check.
-  def test_uploads_mismatch_but_does_not_yet_mark_transferred
+  # A first-time upload is confirmed and marked complete on the SAME run:
+  # transfer_image re-reads the servers after uploading, so all_synced?
+  # sees the just-uploaded file. Without the re-read the image would sit
+  # uploaded-but-unmarked forever, since TransferImagesJob runs only once
+  # per image and nothing schedules a second pass.
+  def test_uploads_mismatch_then_marks_transferred_same_run
     image = images(:turned_over_image)
     seed_locally_complete(image)
     seed_remote(1, image, %w[thumb 320 640 1280 orig])
@@ -57,10 +58,31 @@ class Image::Processor::VerifierTest < UnitTestCase
 
     assert_includes(result[:uploaded],
                     [image.id, :remote1, "960/#{image.id}.jpg"])
-    assert_not(image.reload.transferred)
-    assert_empty(result[:completed])
-    assert_path_exists("#{local_root}/960/#{image.id}.jpg",
-                       "not deleted -- upload isn't verified yet this run")
+    assert_includes(result[:completed], image.id)
+    assert(image.reload.transferred)
+    assert_not(File.exist?("#{local_root}/960/#{image.id}.jpg"),
+               "uploaded and confirmed this run -- local copy deleted")
+  end
+
+  # The post-upload re-read is genuine verification, not blind trust in the
+  # uploader's return value: a copy that reports success but didn't
+  # actually land (still missing on the re-read) leaves the image unmarked
+  # and its local copy intact.
+  def test_upload_reporting_success_but_not_present_is_not_marked
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
+    seed_remote(1, image, %w[thumb 320 640 1280 orig])
+    seed_remote(2, image, %w[thumb 320 640])
+
+    # copy_file_to_server claims success but writes nothing to the server.
+    Image::Processor::FileTransfer.stub(:copy_file_to_server, true) do
+      result = Image::Processor.transfer_images([image.id])
+
+      assert_empty(result[:completed])
+      assert_not(image.reload.transferred)
+      assert_path_exists("#{local_root}/960/#{image.id}.jpg",
+                         "not deleted -- re-read never confirmed the upload")
+    end
   end
 
   # Nothing to upload from the start (already fully synced) -- completes
