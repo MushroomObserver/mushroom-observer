@@ -181,7 +181,7 @@ class Image::Processor::GapDetectorTest < UnitTestCase
     assert_equal(
       ["ssh", "mo@example.test", "find", "-L",
        "/data/mo/thumb/1.jpg", "/data/mo/320/1.jpg",
-       "-maxdepth", "0", "-printf", "%p\\t%s\\n"],
+       "-maxdepth", "0", "-printf", "'%p\\t%s\\n'"],
       captured
     )
   end
