@@ -179,7 +179,10 @@ class TranslationsController < ApplicationController
     end
     return unless any_changes
 
-    @lang.update_localization_file
+    # update_localization_file (.yml) is gone (#4807) -- nothing reads it
+    # at runtime anymore, translations are DB/Solid-Cache-backed. Keep
+    # update_export_file (.txt): build_index still parses it directly
+    # for this UI's own sidebar, unrelated to I18n lookup.
     @lang.update_export_file
   end
 

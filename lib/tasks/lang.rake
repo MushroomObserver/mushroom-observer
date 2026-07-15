@@ -73,13 +73,17 @@ end
 namespace :lang do
   desc "Check syntax of official export file, " \
        "integrate changes into database, " \
-       "refresh YAML and export files."
+       "refresh export files."
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
     "strip:all",         # strip out any strings we no longer need
-    "update:all",        # update localization (YAML) files
     "export:unofficial"  # (still needed by some tests)
+    # update:all (regenerate every locale's YAML) deliberately NOT run
+    # here anymore -- translations are DB/Solid-Cache-backed at runtime
+    # (#4807), nothing reads config/locales/*.yml anymore. The
+    # lang:update:* tasks below still exist for a manual/backup
+    # snapshot if ever wanted.
   ]
 
   [

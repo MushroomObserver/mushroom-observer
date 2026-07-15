@@ -408,6 +408,33 @@ class LanguageExporterTest < UnitTestCase
     end
   end
 
+  # Regression (#4807): stripping a tag must also evict its cache entry --
+  # Solid Cache has no delete_matched to catch it later, so a stale
+  # cached value would otherwise remain resolvable after the DB row
+  # backing it is gone.
+  def test_strip_evicts_cached_translation
+    use_test_locales do
+      greek = languages(:greek)
+      @official.write_hash(@official.localization_strings)
+      bogus_tag = "_bogus_stripped_tag_for_cache_test"
+      greek.translation_strings.create!(tag: bogus_tag, text: "stale value",
+                                        user: User.admin)
+      value = "stale value"
+      I18n.backend.store_translations(:el,
+                                      { mo: { bogus_tag.to_sym => value } })
+      cache_backend = I18n.backend.backends.first
+
+      assert_equal("stale value",
+                   cache_backend.send(:lookup, :el, "mo.#{bogus_tag}"))
+
+      assert_true(greek.strip, "Should have stripped the bogus tag")
+
+      assert_nil(TranslationString.find_by(language: greek, tag: bogus_tag))
+      assert_nil(cache_backend.send(:lookup, :el, "mo.#{bogus_tag}"),
+                 "strip must evict the cache entry too, not just the DB row")
+    end
+  end
+
   def test_import_unofficial
     use_test_locales do
       greek = languages(:greek)

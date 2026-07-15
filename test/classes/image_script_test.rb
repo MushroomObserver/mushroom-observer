@@ -3,10 +3,6 @@
 require("test_helper")
 
 class ImageScriptTest < UnitTestCase
-  DATABASE_CONFIG = YAML.safe_load(
-    Rails.root.join("config/database.yml").read
-  )["test"]
-
   def script_file(cmd)
     Rails.root.join("script/#{cmd}").to_s
   end

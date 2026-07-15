@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#
+# One-time (or safely re-runnable) local setup for #4807's Solid-Cache-
+# backed I18n backend: creates and schema-loads the cache database for
+# development and every parallel test worker. Idempotent -- safe to
+# re-run any time; only ever touches cache_* databases, never
+# mo_development/mo_test or their data.
+#
+# Prerequisite: config/database.yml's development: AND test: blocks
+# must both be multi-db (primary:/cache: sub-keys), matching
+# db/macos/database.yml (or db/vagrant/database.yml, db/docker/
+# database.yml) -- `db:create:cache`/`db:schema:load:cache` are Rails'
+# own auto-namespaced per-database tasks, they don't exist without that
+# structure. This script does NOT edit config/database.yml itself (it's
+# gitignored/local) -- if a step below fails with "database 'cache' is
+# not configured", update that file first.
+#
+# Does not require re-running db/initialize.sql first: the `mo` MySQL
+# user already has a broad CREATE grant from that script's very first
+# run (`grant create on *.* to 'mo'@'localhost'`), so `db:create:cache`
+# below can create cache_development/cache_test/cache_test-N from
+# scratch on its own.
+set -euo pipefail
+
+if [ ! -f config/database.yml ]; then
+  echo "config/database.yml not found. Copy from db/macos/database.yml," \
+       "db/vagrant/database.yml, or db/docker/database.yml first."
+  exit 1
+fi
+
+echo "Fixing ar_internal_metadata's environment stamp (prophylactic --" \
+     "restoring a production checkpoint via db/download_checkpoint" \
+     "stamps mo_development as 'production', which falsely trips" \
+     "ActiveRecord's protected-environment check on any later" \
+     "destructive db task, e.g. this script's own steps below)..."
+RAILS_ENV=development bin/rails db:environment:set
+RAILS_ENV=test bin/rails db:environment:set
+
+echo ""
+echo "Setting up cache_development..."
+RAILS_ENV=development bin/rails db:create:cache db:schema:load:cache
+
+echo ""
+echo "Setting up cache_test (base, non-parallel)..."
+RAILS_ENV=test bin/rails db:create:cache db:schema:load:cache
+
+worker_count=$(ruby -e 'require "etc"; puts ENV.fetch("PARALLEL_WORKERS", Etc.nprocessors)')
+echo ""
+echo "Setting up cache_test-0 through cache_test-$((worker_count - 1))" \
+     "(PARALLEL_WORKERS=$worker_count, matching ParallelTestConfigService)..."
+for i in $(seq 0 $((worker_count - 1))); do
+  echo "  worker $i..."
+  TEST_ENV_NUMBER=$i RAILS_ENV=test bin/rails db:create:cache db:schema:load:cache
+done
+
+echo ""
+echo "Done. Cache databases ready: cache_development, cache_test," \
+     "cache_test-0..cache_test-$((worker_count - 1))"

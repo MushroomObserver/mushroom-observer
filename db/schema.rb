@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_11_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_15_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -930,10 +930,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_11_120000) do
   create_table "translation_strings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "language_id", null: false
-    t.string "tag", limit: 100
+    t.string "tag", limit: 100, collation: "utf8mb3_bin"
     t.text "text"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
+    t.index ["language_id", "tag"], name: "index_translation_strings_on_language_id_and_tag"
   end
 
   create_table "triples", id: :integer, charset: "utf8mb3", force: :cascade do |t|

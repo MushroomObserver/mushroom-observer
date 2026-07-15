@@ -131,6 +131,38 @@ module ActiveSupport
       # Configure SimpleCov for this worker with unique command name
       # This allows SimpleCov to merge results from multiple parallel workers
       SimpleCov.command_name("#{SimpleCov.command_name}-#{worker}")
+
+      # Clear ALL connection pools (primary, cache, etc.) after fork --
+      # same fix as config/puma.rb's on_worker_boot, same root cause.
+      # `parallelize` forks via Kernel#fork (see
+      # ActiveSupport::Testing::Parallelization::Worker#start), same as
+      # Puma clustering, so it inherits the same Trilogy
+      # @owner-thread-mismatch hazard: #4807's I18n backend builds its
+      # SolidCache::Store once at boot, *before* this fork, so every
+      # worker process shares that connection's Trilogy handle until
+      # cleared here. Without this, the cache connection's internal
+      # mutex is owned by a thread that doesn't exist in the child --
+      # queries against it either raise Trilogy::SynchronizationError
+      # or hang forever in Monitor#synchronize waiting on a lock no
+      # thread will ever release.
+      ActiveRecord::Base.connection_handler.clear_all_connections!
+
+      # Reset I18n's memoized available-locales set after fork, for the
+      # same reason as the connection-pool clear above: `@@available_
+      # locales_set` (i18n gem's Config#available_locales_set) is a
+      # process-wide class variable, memoized lazily via `||=` on first
+      # use. If anything computes it in the parent process pre-fork --
+      # e.g. while the `languages` table is still empty, before any
+      # worker's own fixtures exist -- every forked worker inherits
+      # that same frozen (locale-incomplete) set via copy-on-write, and
+      # `||=` means no worker ever recomputes it. Symptom: every
+      # non-English locale raises I18n::InvalidLocale in every worker,
+      # since DbFallback#available_locales (Language.pluck(:locale))
+      # never got a chance to contribute them. Clearing here forces a
+      # fresh computation the first time a test actually needs it --
+      # by which point fixtures are loaded and the connection above is
+      # already valid for this worker.
+      I18n.config.clear_available_locales_set
     end
 
     parallelize_teardown do |_worker|
