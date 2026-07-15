@@ -66,8 +66,8 @@ class Image
         # the pre-upload snapshot and can never confirm a first-time upload,
         # so the image sits uploaded-but-unmarked forever -- nothing
         # schedules a second pass (TransferImagesJob runs once per image).
-        remote_sizes = remote_snapshot(paths) if
-          upload_mismatches(image, paths, local_sizes, remote_sizes)
+        uploaded = upload_mismatches(image, paths, local_sizes, remote_sizes)
+        remote_sizes = remote_snapshot(paths) if uploaded
         return unless all_synced?(paths, local_sizes, remote_sizes)
 
         delete_local_copies(image, paths)
