@@ -65,4 +65,12 @@ class TranslationStringTest < UnitTestCase
       assert_includes(error.message, "hasn't been loaded yet")
     end
   end
+
+  def test_update_localization_raises_when_tag_unknown
+    lang = languages(:english)
+    str = lang.translation_strings.build(tag: "_bogus_nonexistent_tag_",
+                                         text: "x")
+    error = assert_raises(RuntimeError) { str.update_localization }
+    assert_includes(error.message, "doesn't exist")
+  end
 end
