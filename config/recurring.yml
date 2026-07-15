@@ -53,7 +53,7 @@ production:
   # as the stagger comment further down.
   image_gap_detector:
     class: ImageGapDetectorJob
-    schedule: every sunday at 7:33am
+    schedule: every day at 7:33am
   check_for_broken_references:
     class: CheckForBrokenReferencesJob
     schedule: every sunday at 7:13am

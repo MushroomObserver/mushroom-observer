@@ -2,11 +2,11 @@
 
 require("test_helper")
 
-# See test/models/image/processor/verifier_test.rb for the per-image,
-# per-file work-list-scoped path (the routine transfer). This is the
-# occasional full-listing reconciliation pass (#4791's target design,
-# part 4) -- it catches drift on already-transferred images once their
-# local copies are gone, which Verifier structurally can't see.
+# See test/models/image/processor/verifier_test.rb for the transfer-time
+# work-list path. This is the incremental reconciliation pass (#4791's
+# target design, part 4): it re-checks already-transferred images past the
+# ImageGapCheckpoint against their specific derived-size paths, and
+# regenerates any missing ones.
 class Image::Processor::GapDetectorTest < UnitTestCase
   SUBDIRS = Image::URL::SUBDIRECTORIES.values.freeze
 
@@ -44,34 +44,22 @@ class Image::Processor::GapDetectorTest < UnitTestCase
   def test_no_gaps_when_transferred_image_is_fully_present_remotely
     image = images(:turned_over_image)
     image.update_columns(transferred: true)
-    seed_remote(1, image, %w[thumb 320 640 960 1280 orig])
+    seed_remote(1, image, %w[thumb 320 640 960 1280])
     seed_remote(2, image, %w[thumb 320 640])
 
-    result = run_detector_for(image)
-
-    assert_empty(result[:gaps])
+    assert_empty(run_detector_for(image)[:gaps])
   end
 
-  # The default scope (Image.where(transferred: true)) is what actually
-  # excludes still-processing images -- find_gaps itself doesn't filter
-  # by transferred status, it trusts whatever scope it's given. So this
-  # exercises Image::Processor.detect_gaps with no explicit override.
-  def test_default_scope_only_includes_transferred_images
-    transferred_image = images(:turned_over_image)
-    transferred_image.update_columns(transferred: true)
-    seed_remote(1, transferred_image, %w[thumb 320 640 1280]) # "960" missing
-    seed_remote(2, transferred_image, %w[thumb 320 640])
+  # A missing original is expected (originals are archived off the server),
+  # not a gap -- only the five derived sizes are checked.
+  def test_missing_original_is_not_a_gap
+    image = images(:turned_over_image)
+    image.update_columns(transferred: true)
+    seed_remote(1, image, %w[thumb 320 640 960 1280]) # all derived, no orig
+    seed_remote(2, image, %w[thumb 320 640])
 
-    untransferred_image = images(:in_situ_image)
-    untransferred_image.update_columns(transferred: false)
-    # Nothing seeded for this one -- would look like a total gap if it
-    # were in scope, but it's still mid-processing, Verifier's concern.
-
-    result = Image::Processor.detect_gaps
-
-    gap_ids = result[:gaps].map(&:first)
-    assert_includes(gap_ids, transferred_image.id)
-    assert_not_includes(gap_ids, untransferred_image.id)
+    assert_empty(run_detector_for(image)[:gaps],
+                 "a missing original must not be reported as a gap")
   end
 
   def test_finds_and_regenerates_a_gap_from_the_original
@@ -96,7 +84,7 @@ class Image::Processor::GapDetectorTest < UnitTestCase
   def test_records_unregenerable_when_no_source_is_available_anywhere
     image = images(:turned_over_image)
     image.update_columns(transferred: true)
-    seed_remote(1, image, %w[thumb 320 640 1280]) # "960" AND "orig" missing
+    seed_remote(1, image, %w[thumb 320 640 1280]) # "960" gap, no orig anywhere
     seed_remote(2, image, %w[thumb 320 640])
 
     result = run_detector_for(image)
@@ -109,8 +97,8 @@ class Image::Processor::GapDetectorTest < UnitTestCase
     image = images(:turned_over_image)
     image.update_columns(transferred: true)
     # Missing on both remote1 (960) and remote2 (640) -- two gaps, one image.
-    seed_remote(1, image, %w[thumb 320 640 1280 orig]) # "960" missing
-    seed_remote(2, image, %w[thumb 320])               # "640" missing
+    seed_remote(1, image, %w[thumb 320 640 1280])
+    seed_remote(2, image, %w[thumb 320])
 
     call_count = 0
     detector = Image::Processor::GapDetector.new
@@ -126,61 +114,112 @@ class Image::Processor::GapDetectorTest < UnitTestCase
                  "regeneration should only be attempted once per image")
   end
 
-  # Every seed_remote fixture above is "file"-type (test env's remote1/
-  # remote2) -- list_subdir's "ssh" branch and unknown-type branch are
-  # exercised directly here instead, mirroring Verifier's ssh_sizes tests.
-  def test_list_ssh_subdir_shells_out_correctly
-    detector = Image::Processor::GapDetector.new
-    captured_args = nil
-    fake_capture3 = lambda do |*args|
-      captured_args = args
-      ["", "", stub_status(true)]
-    end
+  # The default (scheduled) scope only examines transferred images.
+  def test_default_scope_only_includes_transferred_images
+    ImageGapCheckpoint.reset_to(0)
+    transferred_image = images(:turned_over_image)
+    transferred_image.update_columns(transferred: true)
+    seed_remote(1, transferred_image, %w[thumb 320 640 1280]) # "960" missing
+    seed_remote(2, transferred_image, %w[thumb 320 640])
 
-    Open3.stub(:capture3, fake_capture3) do
-      detector.send(:list_ssh_subdir, :ssh_server,
-                    "mo@example.test:/data/mo", "thumb")
+    untransferred_image = images(:in_situ_image)
+    untransferred_image.update_columns(transferred: false)
+
+    gap_ids = Image::Processor.detect_gaps[:gaps].map(&:first)
+
+    assert_includes(gap_ids, transferred_image.id)
+    assert_not_includes(gap_ids, untransferred_image.id)
+  end
+
+  # Images at or below the checkpoint are never re-examined.
+  def test_default_scope_excludes_images_at_or_below_the_checkpoint
+    image = images(:turned_over_image)
+    image.update_columns(transferred: true)
+    seed_remote(1, image, %w[thumb 320 640 1280]) # "960" would be a gap
+    seed_remote(2, image, %w[thumb 320 640])
+
+    ImageGapCheckpoint.reset_to(Image.maximum(:id))
+
+    assert_empty(Image::Processor.detect_gaps[:gaps])
+  end
+
+  # A clean default run advances the mark to the highest id examined.
+  def test_clean_run_advances_checkpoint_to_max_id
+    detector = Image::Processor::GapDetector.new
+    ImageGapCheckpoint.reset_to(0)
+    image = images(:turned_over_image)
+
+    detector.send(:advance_checkpoint, Image.where(id: image.id))
+
+    assert_equal(image.id, ImageGapCheckpoint.last_verified_image_id)
+  end
+
+  # An unrepairable image holds the mark below it, so it keeps being
+  # re-checked (and re-alerted) next run.
+  def test_checkpoint_holds_below_the_lowest_unregenerable_image
+    detector = Image::Processor::GapDetector.new
+    detector.instance_variable_set(:@unregenerable, [70, 30, 50])
+    ImageGapCheckpoint.reset_to(0)
+
+    detector.send(:advance_checkpoint,
+                  Image.where(id: images(:turned_over_image).id))
+
+    assert_equal(29, ImageGapCheckpoint.last_verified_image_id)
+  end
+
+  def test_ssh_sizes_shells_out_with_targeted_paths
+    detector = Image::Processor::GapDetector.new
+    captured = nil
+    Open3.stub(:capture3, lambda { |*args|
+      captured = args
+      ["", "", stub_status(true)]
+    }) do
+      detector.send(:ssh_sizes, :ssh_server, "mo@example.test:/data/mo",
+                    ["thumb/1.jpg", "320/1.jpg"])
     end
 
     assert_equal(
-      ["ssh", "mo@example.test", "find", "-L", "/data/mo/thumb",
-       "-maxdepth", "1", "-type", "f", "-printf", "%f\\t%s\\n"],
-      captured_args
+      ["ssh", "mo@example.test", "find", "-L",
+       "/data/mo/thumb/1.jpg", "/data/mo/320/1.jpg",
+       "-maxdepth", "0", "-printf", "%p\\t%s\\n"],
+      captured
     )
   end
 
-  def test_list_ssh_subdir_parses_find_output
+  def test_ssh_sizes_parses_output_and_strips_root
     detector = Image::Processor::GapDetector.new
-    find_output = "1.jpg\t456\n2.jpg\t789\n"
+    output = "/data/mo/thumb/1.jpg\t456\n/data/mo/320/1.jpg\t789\n"
 
-    Open3.stub(:capture3, [find_output, "", stub_status(true)]) do
-      result = detector.send(:list_ssh_subdir, :ssh_server,
-                             "mo@example.test:/data/mo", "thumb")
-      assert_equal({ "1.jpg" => 456, "2.jpg" => 789 }, result)
+    Open3.stub(:capture3, [output, "", stub_status(true)]) do
+      result = detector.send(:ssh_sizes, :ssh_server,
+                             "mo@example.test:/data/mo",
+                             ["thumb/1.jpg", "320/1.jpg"])
+      assert_equal({ "thumb/1.jpg" => 456, "320/1.jpg" => 789 }, result)
     end
   end
 
-  def test_list_ssh_subdir_logs_and_returns_empty_on_failure
+  # A find exit-status failure whose stderr is only "No such file" is an
+  # expected missing path, not a connection failure -- no log line.
+  def test_ssh_sizes_logs_only_on_real_failure
     messages = []
     detector = Image::Processor::GapDetector.new { |msg| messages << msg }
 
     Open3.stub(:capture3, ["", "Permission denied", stub_status(false)]) do
-      result = detector.send(:list_ssh_subdir, :ssh_server,
-                             "mo@example.test:/data/mo", "thumb")
-      assert_equal({}, result)
+      detector.send(:ssh_sizes, :ssh_server, "mo@example.test:/data/mo",
+                    ["thumb/1.jpg"])
     end
 
     assert(messages.any? do |msg|
-      msg.include?("Failed to list") && msg.include?("Permission denied")
+      msg.include?("Failed to check") && msg.include?("Permission denied")
     end)
   end
 
-  def test_list_subdir_unknown_type_raises
+  def test_remote_sizes_for_unknown_type_raises
     detector = Image::Processor::GapDetector.new
-
+    detector.instance_variable_set(:@image_server_data,
+                                   { weird: { type: "ftp" } })
     assert_raises(RuntimeError) do
-      detector.send(:list_subdir, :weird_server,
-                    { type: "ftp", path: "ftp://example.test" }, "thumb")
+      detector.send(:remote_sizes_for, :weird, ["thumb/1.jpg"])
     end
   end
 
