@@ -37,6 +37,7 @@ class Inat::ConfirmURLBuilder
     requested_obs_url&.then { |u| "#{u}&licensed=false" }
   end
 
+  # Will the requested-obs URL always return the same results?
   def stable_result_set?
     return true if @model.inat_ids.present?
     return false unless (query = requested_obs_query)

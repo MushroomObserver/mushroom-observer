@@ -15,7 +15,8 @@ class Inat
     def test_requested_obs_url_for_username_model
       builder = build(@username_model)
 
-      assert_match(/user_id=testuser/, builder.requested_obs_url)
+      assert_match(/user_id=testuser/, builder.requested_obs_url,
+                   "requested_obs_url should include username")
     end
 
     # Covers the normalize_inat_ui_url branch (line 14): when the query is
@@ -79,11 +80,12 @@ class Inat
     # gain new observations or reidentifications.
     def test_stable_result_set_returns_false_for_date_filtered_url
       model = FormObject::InatImportConfirm.new(
-        inat_url: "#{SITE_URL}?user_id=testuser&d1=2026-05-01&d2=2026-05-31"
+        inat_url: "#{SITE_URL}?d1=2026-05-01&d2=2026-05-31"
       )
       builder = build(model)
 
-      assert_not(builder.stable_result_set?)
+      assert_not(builder.stable_result_set?,
+                 "A URL with only date filters should not be considered stable")
     end
 
     def test_stable_result_set_returns_false_for_username_url
@@ -92,7 +94,8 @@ class Inat
       )
       builder = build(model)
 
-      assert_not(builder.stable_result_set?)
+      assert_not(builder.stable_result_set?,
+                 "A URL with only a username should not be considered stable")
     end
 
     def test_stable_result_set_returns_true_for_id_url
@@ -101,7 +104,8 @@ class Inat
       )
       builder = build(model)
 
-      assert(builder.stable_result_set?)
+      assert(builder.stable_result_set?,
+             "A URL with only id params (id=) should be considered stable")
     end
 
     # Regression (#4706): a user-supplied iconic_taxa superset must be
