@@ -246,6 +246,12 @@ module LanguageExporter
     str = translation_strings.new(tag: tag, text: new_val)
     str.current_user = user
     str.save
+    # DB write alone isn't enough (#4807): unlike the old file-based
+    # backend, Solid Cache persists across deploys/restarts, so a stale
+    # cached value for this tag would otherwise survive indefinitely --
+    # a normal restart used to be what made an `en.txt`-driven `lang:
+    # update` visible, but that's no longer a cache-invalidation event.
+    str.store_localization
   end
 
   def update_string(str, new_val, _old_val, user)
@@ -258,6 +264,7 @@ module LanguageExporter
     str.update(
       text: new_val
     )
+    str.store_localization
   end
 
   # ----------------------------

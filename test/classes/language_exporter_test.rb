@@ -435,6 +435,36 @@ class LanguageExporterTest < UnitTestCase
     end
   end
 
+  # Regression test: import_from_file (the path lang:update's
+  # import:official step uses to pull in hand-edited en.txt changes)
+  # must refresh the cache too, not just the DB row -- unlike the old
+  # file-based backend, Solid Cache persists across deploys/restarts,
+  # so a stale cached value would otherwise survive indefinitely (a
+  # restart used to be what made an en.txt-driven update visible; it
+  # no longer is).
+  def test_import_official_refreshes_cache
+    use_test_locales do
+      hash = @official.localization_strings
+      @official.write_hash(hash)
+
+      stale_value = "stale cached one"
+      I18n.backend.store_translations(:en, { mo: { one: stale_value } })
+      cache_backend = I18n.backend.backends.first
+      assert_equal(stale_value, cache_backend.send(:lookup, :en, "mo.one"))
+
+      final_hash = hash.dup
+      final_hash["one"] = "updated one"
+      @official.write_hash(final_hash)
+
+      assert_true(@official.import_from_file(dick),
+                  "Should have imported the changed tag")
+      assert_equal(
+        "updated one", cache_backend.send(:lookup, :en, "mo.one"),
+        "import_from_file must refresh the cache, not just the DB"
+      )
+    end
+  end
+
   def test_import_unofficial
     use_test_locales do
       greek = languages(:greek)
