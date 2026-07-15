@@ -28,6 +28,8 @@ class Image
     # against, so that's a presence check against a full remote listing,
     # not a per-path byte comparison. See Image::Processor::GapDetector.
     class Verifier
+      include RemoteFiles
+
       def initialize(&log)
         @log = log
         @uploaded = []
@@ -77,76 +79,9 @@ class Image
         paths
       end
 
-      def paths_for_server(server, paths)
-        subdirs = @image_server_data[server][:subdirs]
-        paths.select { |path| subdirs.include?(subdir_of(path)) }
-      end
-
       def local_size(path)
         full = "#{Processor.local_images_path}/#{path}"
         File.exist?(full) ? File.size(full) : nil
-      end
-
-      def remote_sizes_for(server, paths)
-        return {} if paths.empty?
-
-        data = @image_server_data[server]
-        case data[:type]
-        when "file"
-          paths.index_with { |path| remote_file_size(data[:path], path) }
-        when "ssh"
-          ssh_sizes(server, data[:path], paths)
-        else
-          raise("Don't know how to check #{server} via: #{data[:type]}")
-        end
-      end
-
-      def remote_file_size(root, path)
-        full = "#{root}/#{path}"
-        File.exist?(full) ? File.size(full) : nil
-      end
-
-      # One ssh round trip per (image, server) -- checks every expected
-      # file for this one image in a single call, instead of listing the
-      # whole subdirectory (too slow to run often, see #4791) or shelling
-      # out once per file (too chatty against a remote host to schedule
-      # frequently either). `-L` follows symlinks; `-printf` gives us
-      # "path\tsize" lines with no shell quoting to parse around, matching
-      # the original script/bash_images' read_server_directory approach.
-      def ssh_sizes(server, remote_path, paths)
-        host, root = remote_path.split(":", 2)
-        full_paths = paths.map { |path| "#{root}/#{path}" }
-        output, error, status = Open3.capture3(
-          "ssh", host, "find", "-L", *full_paths, "-maxdepth", "0",
-          "-printf", "%p\\t%s\\n"
-        )
-        if connection_failed?(status, error)
-          log("Failed to check #{host} for #{server}: #{error}")
-        end
-        parse_find_output(output, root)
-      end
-
-      # `find` exits non-zero (writing "No such file or directory" to
-      # stderr per missing path) whenever ANY requested path is missing --
-      # the routine, expected outcome for an image not yet on this server,
-      # not a failure. Only treat this as a real failure if stderr says
-      # something else (ssh-level connection/auth/command errors) --
-      # otherwise this logs on nearly every routine check, since a mix of
-      # present/missing sizes is the normal case this method exists to
-      # detect.
-      def connection_failed?(status, error)
-        return false if status.success?
-
-        error.lines.any? { |line| line.exclude?("No such file or directory") }
-      end
-
-      def parse_find_output(output, root)
-        output.each_line.with_object({}) do |line, sizes|
-          full_path, size = line.chomp.split("\t")
-          next if full_path.blank?
-
-          sizes[full_path.delete_prefix("#{root}/")] = size.to_i
-        end
       end
 
       def upload_mismatches(image, paths, local_sizes, remote_sizes)
@@ -223,10 +158,6 @@ class Image
         MO.keep_these_image_sizes_local.any? do |size|
           Image::URL::SUBDIRECTORIES[size] == subdir
         end
-      end
-
-      def subdir_of(path)
-        path.split("/", 2).first
       end
 
       def log(msg)

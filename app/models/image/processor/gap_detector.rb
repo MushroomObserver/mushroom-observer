@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require("open3")
-
 class Image
   class Processor
     # Incremental reconciliation pass (see #4791's target design, part 4):
@@ -18,12 +16,19 @@ class Image
     # moved to archive storage after a while, so a missing `orig` is
     # expected, not a gap.
     class GapDetector
+      include RemoteFiles
+
       # Derived sizes only -- never `orig` (see class comment).
       DERIVED_SUBDIRS = (Image::URL::SUBDIRECTORIES.values - ["orig"]).freeze
 
       # An image is only re-checked once it is at least this old, so a
       # transfer still in flight isn't mistaken for a gap.
       SETTLE_WINDOW = 1.day
+
+      # Paths checked per ssh round trip. Batching many images' paths into
+      # one `find` keeps a daily run to a handful of round trips instead of
+      # one per image; the chunk keeps the argv well under any limit.
+      REMOTE_CHECK_BATCH = 500
 
       def initialize(&log)
         @log = log
@@ -57,86 +62,31 @@ class Image
           where(Image.arel_table[:created_at].lt(SETTLE_WINDOW.ago))
       end
 
+      # Checks the whole scope against each server in batched ssh round
+      # trips (not one per image), returning [image, server, path] for
+      # every derived rendition missing on a server that should carry it.
       def find_gaps(images)
-        gaps = []
-        images.find_each do |image|
-          paths = paths_for(image)
-          @image_servers.each do |server|
-            server_paths = paths_for_server(server, paths)
-            remote = remote_sizes_for(server, server_paths)
-            server_paths.each do |path|
-              gaps << [image, server, path] if remote[path].nil?
-            end
+        images = images.to_a
+        @image_servers.flat_map { |server| gaps_on_server(server, images) }
+      end
+
+      def gaps_on_server(server, images)
+        image_for = {}
+        images.each do |image|
+          paths_for_server(server, paths_for(image)).each do |path|
+            image_for[path] = image
           end
         end
-        gaps
+        image_for.keys.each_slice(REMOTE_CHECK_BATCH).flat_map do |chunk|
+          remote = remote_sizes_for(server, chunk)
+          chunk.filter_map do |path|
+            [image_for[path], server, path] if remote[path].nil?
+          end
+        end
       end
 
       def paths_for(image)
         DERIVED_SUBDIRS.map { |subdir| "#{subdir}/#{image.id}.jpg" }
-      end
-
-      def paths_for_server(server, paths)
-        subdirs = @image_server_data[server][:subdirs]
-        paths.select { |path| subdirs.include?(subdir_of(path)) }
-      end
-
-      # Sizes of the given paths that actually exist on the server; a
-      # missing path is absent (ssh) or nil (file), so callers check
-      # `[path].nil?`. Mirrors Verifier's targeted check -- kept here
-      # rather than extracted to avoid touching that reviewed class.
-      def remote_sizes_for(server, paths)
-        return {} if paths.empty?
-
-        data = @image_server_data[server]
-        case data[:type]
-        when "file"
-          paths.index_with { |path| remote_file_size(data[:path], path) }
-        when "ssh"
-          ssh_sizes(server, data[:path], paths)
-        else
-          raise("Don't know how to check #{server} via: #{data[:type]}")
-        end
-      end
-
-      def remote_file_size(root, path)
-        full = "#{root}/#{path}"
-        File.exist?(full) ? File.size(full) : nil
-      end
-
-      def ssh_sizes(server, remote_path, paths)
-        host, root = remote_path.split(":", 2)
-        full_paths = paths.map { |path| "#{root}/#{path}" }
-        output, error, status = Open3.capture3(
-          "ssh", host, "find", "-L", *full_paths, "-maxdepth", "0",
-          "-printf", "%p\\t%s\\n"
-        )
-        if connection_failed?(status, error)
-          log("Failed to check #{host} for #{server}: #{error.strip}")
-        end
-        parse_find_output(output, root)
-      end
-
-      # A non-zero find exit is expected when some paths are simply missing
-      # ("No such file or directory"); only other stderr is a real
-      # connection/command failure.
-      def connection_failed?(status, error)
-        return false if status.success?
-
-        error.lines.any? { |line| line.exclude?("No such file or directory") }
-      end
-
-      def parse_find_output(output, root)
-        output.each_line.with_object({}) do |line, files|
-          full, size = line.chomp.split("\t")
-          next if full.blank?
-
-          files[full.delete_prefix("#{root}/")] = size.to_i
-        end
-      end
-
-      def subdir_of(path)
-        path.split("/", 2).first
       end
 
       def handle_gap(image, server, path)
