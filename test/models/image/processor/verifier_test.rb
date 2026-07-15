@@ -223,7 +223,7 @@ class Image::Processor::VerifierTest < UnitTestCase
 
     assert_equal(
       ["ssh", "mo@example.test", "find", "-L", "/data/mo/orig/1.jpg",
-       "/data/mo/thumb/1.jpg", "-maxdepth", "0", "-printf", "%p\\t%s\\n"],
+       "/data/mo/thumb/1.jpg", "-maxdepth", "0", "-printf", "'%p\\t%s\\n'"],
       captured_args
     )
   end

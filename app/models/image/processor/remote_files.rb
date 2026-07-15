@@ -39,9 +39,15 @@ class Image
       def ssh_sizes(server, remote_path, paths)
         host, root = remote_path.split(":", 2)
         full_paths = paths.map { |path| "#{root}/#{path}" }
+        # The -printf format MUST be single-quoted: ssh joins the argv
+        # into one string and the *remote* shell re-parses it, stripping
+        # the backslashes from an unquoted %p\t%s\n -- find would then emit
+        # literal "t"/"n" separators and the output couldn't be split
+        # (every path would read as missing). The unit tests stub Open3,
+        # so they can't catch this; it only shows against a real host.
         output, error, status = Open3.capture3(
           "ssh", host, "find", "-L", *full_paths, "-maxdepth", "0",
-          "-printf", "%p\\t%s\\n"
+          "-printf", "'%p\\t%s\\n'"
         )
         if connection_failed?(status, error)
           log("Failed to check #{host} for #{server}: #{error}")
