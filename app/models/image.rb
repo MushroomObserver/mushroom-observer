@@ -30,13 +30,11 @@
 #    Rails.root/public/images/320/<id>.jpg
 #    Rails.root/public/images/thumb/<id>.jpg
 #
-#  They are also transferred to a remote image server with more disk space:
-#  (images take up 100 Gb as of Jan 2010)
-#
-#    http://<image_server>/<dir>/<id>.<ext>
-#
-#  After the images are successfully transferred, we remove the originals from
-#  the web server (see scripts/update_images).
+#  They are also transferred to a remote image server with more disk
+#  space. Once every rendition is confirmed present there, the local
+#  copies are deleted -- nothing is kept local
+#  (MO.keep_these_image_sizes_local is empty in production) -- and MO
+#  serves them from the image server.
 #
 #  == Upload
 #
@@ -51,8 +49,8 @@
 #         :notes      => 'close-up of stipe'
 #       )
 #
-#  2. Attach the image itself by setting the +image+ attribute, then save the
-#     Image record:
+#  2. Attach the image itself by setting the +image+ attribute, then save
+#     the Image record:
 #
 #       # via HTTP form:
 #       image.image = params[:image][:upload]
@@ -67,52 +65,23 @@
 #       # Validate and save record.
 #       image.save
 #
-#  3. After the record is saved, it knows the ID so it can finally write out
-#     the original image:
+#  3. After the record is saved it knows its ID, so #process_image writes
+#     the original to public/images/orig/<id>.<ext> and, if GPS hiding was
+#     requested, strips it synchronously first -- the original must never
+#     be exposed with real coordinates (Image::Processor.strip_original_gps).
 #
-#       ::Rails.root.to_s/public/images/orig/<id>.<ext>
+#  4. #process_image runs Image::Processor#process (pure Ruby, via
+#     ImageMagick) synchronously: convert the original to jpeg if needed,
+#     set width/height, generate the five smaller renditions
+#     (thumb/320/640/960/1280), and compute the perceptual hash
+#     (Image::Dhash) inline from the small rendition (#4796).
 #
-#  4. Now it forks off a tiny shell script that takes care of the rest:
-#
-#       script/process_image $id $ext
-#
-#  5. First it fills in all the other size images with a place-holder:
-#
-#       cd ::Rails.root.to_s/public/images
-#       cp place_holder_<size>.jpg <size>/$id.jpg
-#
-#  6. Next it resizes the original using ImageMagick:
-#
-#       jpegresize 160x160 -q 90 --max-size orig/$id.jpg thumb/$id.jpg
-#       jpegresize 320x320 -q 80 --max-size orig/$id.jpg 320/$id.jpg
-#       jpegresize 640x640 -q 70 --max-size orig/$id.jpg 640/$id.jpg
-#       etc.
-#
-#  7. Lastly it transfers all the images to the image server:
-#
-#       scp orig/$id.<ext>  <user>@<image_server>/orig/$id.<ext>
-#       scp orig/$id.jpg    <user>@<image_server>/orig/$id.jpg
-#       scp 1280/$id.jpg    <user>@<image_server>/1280/$id.jpg
-#       etc.
-#
-#     (If any errors occur in +script/process_image+ they get emailed to the
-#     webmasters.)
-#
-#  8. If all is successful, it sets the +transferred+ bit in the db record.
-#     Until this bit is set, MO knows to serve the image off of the web server
-#     instead, however inefficient this may be.
-#
-#  9. A regular process (every 5 minutes?) tries to re-transfer any images
-#     whose transfer failed.  Bailing at the first sign of trouble.
-#
-#  10. A nightly process runs to check for mistakes and remove any images that
-#     have been successfully transferred:
-#
-#       script/update_images --clean
-#
-#     Currently it only removes ones over 320, leaving the rest local.  Note
-#     that images remain on the web server until this verification process
-#     happens.
+#  5. It enqueues TransferImagesJob, which asynchronously copies every
+#     rendition to the configured image server(s), verifies each landed
+#     (present and byte-matching), sets +transferred+, and only then
+#     deletes the local copies. Until +transferred+ is set, MO serves the
+#     image off the web server. Recurring jobs retry any straggler and
+#     alert on files left behind -- see #4791 for the full pipeline.
 #
 #  == Low Level Details
 #
