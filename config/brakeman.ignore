@@ -117,13 +117,13 @@
     {
       "warning_type": "Command Injection",
       "warning_code": 14,
-      "fingerprint": "48b7c80aa31c4d15eb01a362cf18312e01e2ed217f5f9f8149b30ffe8cb61c4d",
+      "fingerprint": "8a41ca798ea59dea461a867c3396cc2a2cdb37426339788aed825278cd859e4a",
       "check_name": "Execute",
       "message": "Possible command injection",
       "file": "app/models/image/processor/gap_detector.rb",
       "line": 88,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "Open3.capture2(\"ssh\", host, \"find\", \"-L\", \"#{path}/#{subdir}\", \"-maxdepth\", \"1\", \"-type\", \"f\", \"-printf\", \"%f\\\\t%s\\\\n\")",
+      "code": "Open3.capture3(\"ssh\", host, \"find\", \"-L\", \"#{path}/#{subdir}\", \"-maxdepth\", \"1\", \"-type\", \"f\", \"-printf\", \"%f\\\\t%s\\\\n\")",
       "render_path": null,
       "location": {
         "type": "method",
@@ -135,7 +135,7 @@
       "cwe_id": [
         77
       ],
-      "note": "False positive: Open3.capture2 is called in argv (list) form, so no local shell is spawned; `host`/`path`/`subdir` come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure."
+      "note": "False positive: Open3.capture3 is called in argv (list) form, so no local shell is spawned; `host`/`path`/`subdir` come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure."
     },
     {
       "warning_type": "Command Injection",
