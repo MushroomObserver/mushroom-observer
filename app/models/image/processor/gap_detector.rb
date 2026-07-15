@@ -84,12 +84,13 @@ class Image
 
       def list_ssh_subdir(server, remote_path, subdir)
         host, path = remote_path.split(":", 2)
-        output, status = Open3.capture2(
+        output, err, status = Open3.capture3(
           "ssh", host, "find", "-L", "#{path}/#{subdir}", "-maxdepth", "1",
           "-type", "f", "-printf", "%f\\t%s\\n"
         )
         unless status.success?
-          log("Failed to list #{host}:#{path}/#{subdir} on #{server}")
+          log("Failed to list #{host}:#{path}/#{subdir} on " \
+              "#{server}: #{err.strip}")
           return {}
         end
 

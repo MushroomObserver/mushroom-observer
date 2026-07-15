@@ -79,12 +79,16 @@ class Image
 
         local_path = "#{Processor.local_images_path}/#{local_file}"
         FileUtils.mkpath(File.dirname(local_path))
+        # Tempfile (large responses): move it into place. Anything else
+        # readable -- StringIO (small responses) or a generic IO -- gets
+        # streamed; a non-IO makes IO.copy_stream raise rather than let
+        # the method silently report success without writing anything.
         case io = URI.parse("#{remote_path}/#{remote_file}").open
-        when StringIO
-          File.write(local_path, io.read)
         when Tempfile
           io.close
           FileUtils.mv(io.path, local_path)
+        else
+          IO.copy_stream(io, local_path)
         end
         true
       end

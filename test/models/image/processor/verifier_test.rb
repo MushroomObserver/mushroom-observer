@@ -195,7 +195,7 @@ class Image::Processor::VerifierTest < UnitTestCase
     end)
   end
 
-  def test_transfer_takes_any_enumerable_of_images
+  def test_transfer_takes_an_active_record_relation
     image = images(:turned_over_image)
     seed_locally_complete(image)
     seed_remote(1, image, %w[thumb 320 640 960 1280 orig])

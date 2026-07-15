@@ -786,7 +786,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     end
     true
   rescue StandardError => e
-    Rails.logger.error("Image::Processor failed for image #{id}: #{e}")
+    Rails.logger.error("Image::Processor failed for image #{id}: " \
+                       "#{e.full_message(highlight: false)}")
     fail_image_process
   end
 

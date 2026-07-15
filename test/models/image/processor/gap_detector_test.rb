@@ -132,12 +132,12 @@ class Image::Processor::GapDetectorTest < UnitTestCase
   def test_list_ssh_subdir_shells_out_correctly
     detector = Image::Processor::GapDetector.new
     captured_args = nil
-    fake_capture2 = lambda do |*args|
+    fake_capture3 = lambda do |*args|
       captured_args = args
-      ["", stub_status(true)]
+      ["", "", stub_status(true)]
     end
 
-    Open3.stub(:capture2, fake_capture2) do
+    Open3.stub(:capture3, fake_capture3) do
       detector.send(:list_ssh_subdir, :ssh_server,
                     "mo@example.test:/data/mo", "thumb")
     end
@@ -153,7 +153,7 @@ class Image::Processor::GapDetectorTest < UnitTestCase
     detector = Image::Processor::GapDetector.new
     find_output = "1.jpg\t456\n2.jpg\t789\n"
 
-    Open3.stub(:capture2, [find_output, stub_status(true)]) do
+    Open3.stub(:capture3, [find_output, "", stub_status(true)]) do
       result = detector.send(:list_ssh_subdir, :ssh_server,
                              "mo@example.test:/data/mo", "thumb")
       assert_equal({ "1.jpg" => 456, "2.jpg" => 789 }, result)
@@ -164,13 +164,15 @@ class Image::Processor::GapDetectorTest < UnitTestCase
     messages = []
     detector = Image::Processor::GapDetector.new { |msg| messages << msg }
 
-    Open3.stub(:capture2, ["", stub_status(false)]) do
+    Open3.stub(:capture3, ["", "Permission denied", stub_status(false)]) do
       result = detector.send(:list_ssh_subdir, :ssh_server,
                              "mo@example.test:/data/mo", "thumb")
       assert_equal({}, result)
     end
 
-    assert(messages.any? { |msg| msg.include?("Failed to list") })
+    assert(messages.any? do |msg|
+      msg.include?("Failed to list") && msg.include?("Permission denied")
+    end)
   end
 
   def test_list_subdir_unknown_type_raises
