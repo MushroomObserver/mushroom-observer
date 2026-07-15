@@ -31,18 +31,18 @@ module Views::Controllers::InatImports
 
     def render_inat_username_field
       text_field(:inat_username,
-                 label: "#{:inat_username.l}: ", size: 10, wrap_class: "mb-0")
+                 label: :inat_username, size: 10, wrap_class: "mb-0")
     end
 
     def render_import_others_field
       checkbox_field(:import_others,
-                     label: :inat_import_others.l,
+                     label: :inat_import_others,
                      wrap_class: "mt-1")
     end
 
     def render_skip_writeback_field
       checkbox_field(:skip_inat_writeback,
-                     label: :inat_skip_writeback.l,
+                     label: :inat_skip_writeback,
                      wrap_class: "mt-3")
     end
 
@@ -98,14 +98,14 @@ module Views::Controllers::InatImports
     # Applies to "all" and URL imports; id lists always re-check (#4565).
     def render_recheck_all_field
       checkbox_field(:recheck_all,
-                     label: :inat_recheck_all.l,
+                     label: :inat_recheck_all,
                      help: :inat_recheck_all_help.l,
                      wrap_class: "mt-4")
     end
 
     def render_consent_checkbox
       checkbox_field(:consent,
-                     label: :inat_import_consent.l,
+                     label: :inat_import_consent,
                      wrap_class: "mt-3")
     end
 

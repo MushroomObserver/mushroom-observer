@@ -11,8 +11,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Components::Button::Styling
 
     # Wrapper option keys that should not be passed to the field itself
-    WRAPPER_OPTIONS = [:label, :help, :help_collapse, :prefs, :inline,
-                       :wrap_class, :wrap_data, :between, :button,
+    WRAPPER_OPTIONS = [:label, :label_colon, :help, :help_collapse, :prefs,
+                       :inline, :wrap_class, :wrap_data, :between, :button,
                        :button_data, :button_text, :button_href,
                        :button_variant, :button_size, :button_target,
                        :button_rel, :button_title, :button_icon, :addon,
@@ -463,10 +463,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     # drop the `:prefs` option so it doesn't flow downstream. Used by the
     # same set of helpers the ERB applies it to: text, textarea, select,
     # checkbox, radio, number.
+    #
+    # Passes the bare Symbol through -- FieldLabelRow#resolved_label_text
+    # resolves it via `.t`, which is what makes this safe even though
+    # `field_name` is a runtime value (the actual `prefs_<field>` key
+    # isn't known statically here): `.t` renders any real textile markup
+    # correctly (e.g. `prefs_no_emails`, "Opt out of _all_ email from
+    # MO.") instead of leaving literal asterisks/underscores, with no
+    # per-key auditing needed.
     def auto_label_for_prefs(field_name, options)
       return options if options[:prefs].blank?
 
-      options.merge(label: :"prefs_#{field_name}".t).except(:prefs)
+      options.merge(label: :"prefs_#{field_name}").except(:prefs)
     end
 
     # Resolve a field name to a field object the factory methods can

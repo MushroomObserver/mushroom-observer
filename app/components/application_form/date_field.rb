@@ -5,7 +5,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # Compatible with Rails date_select parameter format.
   #
   # @example
-  #   field(:when).date(wrapper_options: { label: "Date:" })
+  #   field(:when).date(wrapper_options: { label: "Date" })
   #
   class DateField < Phlex::HTML
     include Phlex::Rails::Helpers::ClassNames
@@ -37,21 +37,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     private
 
     def render_with_wrapper
-      label_option = wrapper_options[:label]
-      show_label = label_option != false
-      label_text = label_option.is_a?(String) ? label_option : default_label
       wrap_class = wrapper_options[:wrap_class]
 
       div(class: form_group_class(wrap_class)) do
-        render_label_row(label_text, false) if show_label
+        render_label_row(label_text, false) if show_label?
         yield
         render_help_after_field
         render(append_slot) if append_slot
       end
     end
 
-    def default_label
-      field.key.to_s.humanize
+    def show_label?
+      wrapper_options[:label] != false
     end
 
     def form_group_class(wrap_class)

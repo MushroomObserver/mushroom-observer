@@ -27,10 +27,10 @@ module Views::Controllers::Admin::Emails::MergeRequests
     private
 
     def render_object_fields
-      static_field(:old_obj, label: "#{type_label}:",
+      static_field(:old_obj, label: type_label,
                              value: viewer_aware_format_name(@old_obj),
                              inline: true)
-      static_field(:new_obj, label: "#{type_label}:",
+      static_field(:new_obj, label: type_label,
                              value: viewer_aware_format_name(@new_obj),
                              inline: true)
     end
@@ -42,12 +42,12 @@ module Views::Controllers::Admin::Emails::MergeRequests
     end
 
     def render_message_field
-      textarea_field(:message, label: "#{:Notes.t}:", rows: 10,
+      textarea_field(:message, label: :Notes, rows: 10,
                                value: "", data: { autofocus: true })
     end
 
     def type_label
-      @model_class.type_tag.to_s.upcase.to_sym.t
+      @model_class.type_tag.to_s.upcase.to_sym
     end
 
     def form_action

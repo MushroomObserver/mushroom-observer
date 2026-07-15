@@ -118,7 +118,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   def render_ignore_checkbox
     @form.checkbox_field(
       :ignore_proj_conflicts,
-      label: :form_observations_projects_ignore_project_constraints.t
+      label: :form_observations_projects_ignore_project_constraints
     )
   end
 

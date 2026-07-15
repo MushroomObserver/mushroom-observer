@@ -57,12 +57,6 @@ module Components::Localization
     :"lifeform_help_#{word}".t
   end
 
-  # A user content-filter's form label, e.g. `:has_images` →
-  # the textile-rendered filter name.
-  def prefs_filter_label(sym)
-    :"prefs_filters_#{sym}".t
-  end
-
   # `type_tag` (e.g. `"name"`, `"location"`) → the textile-rendered
   # "no descriptions yet" empty-state text for that model type.
   def show_no_descriptions_as_string(type)

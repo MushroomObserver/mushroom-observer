@@ -97,7 +97,7 @@ module Views::Controllers::SpeciesLists::WriteIn
                             textarea: true,
                             rows: 8,
                             value: @list_members,
-                            label: "#{:form_species_lists_write_in_species.t}:")
+                            label: :form_species_lists_write_in_species)
       end
     end
 
@@ -109,7 +109,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       autocompleter_field(:place_name,
                           type: :location,
                           value: model.place_name(current_user),
-                          label: "#{:WHERE.l}:")
+                          label: :WHERE)
     end
 
     def render_member_fields_section
@@ -133,7 +133,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       select_field("member[value]",
                    Vote.confidence_menu,
                    value: @member_vote,
-                   label: "#{:form_species_lists_confidence.t}:",
+                   label: :form_species_lists_confidence,
                    inline: true)
     end
 
@@ -157,14 +157,14 @@ module Views::Controllers::SpeciesLists::WriteIn
                      value: @member_notes[part.to_sym],
                      rows: 1,
                      class: "form-control mb-3",
-                     label: "#{strip_tags(part.tl)}:")
+                     label: strip_tags(part.tl))
     end
 
     def render_coord_fields
       div(class: "form-group form-inline") do
-        render_coord_field(:lat, @member_lat, "#{:LATITUDE.t}:", 8)
-        render_coord_field(:lng, @member_lng, "#{:LONGITUDE.t}:", 8)
-        render_coord_field(:alt, @member_alt, "#{:ALTITUDE.t}:", 6)
+        render_coord_field(:lat, @member_lat, :LATITUDE, 8)
+        render_coord_field(:lng, @member_lng, :LONGITUDE, 8)
+        render_coord_field(:alt, @member_alt, :ALTITUDE, 6)
       end
     end
 
@@ -180,14 +180,14 @@ module Views::Controllers::SpeciesLists::WriteIn
       checkbox_field("member[is_collection_location]",
                      value: "1",
                      checked: @member_is_collection_location,
-                     label: :form_observations_is_collection_location.t)
+                     label: :form_observations_is_collection_location)
     end
 
     def render_specimen_checkbox
       checkbox_field("member[specimen]",
                      value: "1",
                      checked: @member_specimen,
-                     label: :form_observations_specimen_available.t)
+                     label: :form_observations_specimen_available)
     end
   end
 end

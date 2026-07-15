@@ -34,7 +34,7 @@ module Views::Controllers::Names::Trackers
 
     def render_tracker_fields
       checkbox_field(:note_template_enabled,
-                     label: :email_tracking_note.t,
+                     label: :email_tracking_note,
                      wrap_class: "mt-5")
 
       Help(class: "mt-2 mb-5",

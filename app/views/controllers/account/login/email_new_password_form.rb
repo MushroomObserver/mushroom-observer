@@ -7,7 +7,7 @@ module Views::Controllers::Account::Login
   # controller has multiple form-bearing pages.
   class EmailNewPasswordForm < ::Components::ApplicationForm
     def view_template
-      text_field(:login, label: "#{:login_user.t}:", wrap_class: "mt-3",
+      text_field(:login, label: :login_user, wrap_class: "mt-3",
                          data: { autofocus: true })
 
       submit(:SEND.l, center: true)

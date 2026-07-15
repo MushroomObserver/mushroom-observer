@@ -79,6 +79,20 @@ module Form
         assert_html(html, "select option")
       end
 
+      # Regression test: the license field's label used to be a whole
+      # sentence with an embedded link ("Select a License:", where
+      # "License" itself was the link) -- refactored to a plain label
+      # plus a separate collapsible help icon so the label isn't a
+      # disguised link. See #4687 (field-label-colon standardization)
+      # and the discussion that prompted this specific split.
+      def test_license_field_has_plain_label_and_help_link
+        html = render_fields(image: @image, img_id: @image.id, upload: false)
+
+        assert_html(html, "label", text: "License:")
+        assert_html(html, "a.info-collapse-trigger")
+        assert_html(html, "a[href='/info/how_to_use#license']")
+      end
+
       private
 
       def render_fields(image:, img_id:, upload:)

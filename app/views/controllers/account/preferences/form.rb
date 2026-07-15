@@ -48,9 +48,9 @@ class Views::Controllers::Account::Preferences::Form <
   def render_login_section
     text_field(:login, prefs: true)
     text_field(:email, prefs: true)
-    password_field(:password, label: "#{:prefs_password_new.t}:")
+    password_field(:password, label: :prefs_password_new)
     password_field(:password_confirmation,
-                   label: "#{:prefs_password_confirm.t}:")
+                   label: :prefs_password_confirm)
     submit(:SAVE_EDITS.l, center: true)
   end
 
@@ -89,7 +89,7 @@ class Views::Controllers::Account::Preferences::Form <
     # "destructive button" read. No target=_blank / rel / new-tab
     # title here — those would be lies.
     select_field(:keep_filenames, filename_values,
-                 label: :prefs_keep_image_filenames.l,
+                 label: :prefs_keep_image_filenames,
                  **addon_button_defaults,
                  button: :prefs_purge_filenames.t,
                  button_href: images_bulk_filename_purge_path,
@@ -105,7 +105,7 @@ class Views::Controllers::Account::Preferences::Form <
     addon = external_addon(:prefs_apply_to_images.t,
                            images_edit_licenses_path)
     select_field(:license_id, @licenses,
-                 label: "#{:LICENSE.l}:", **addon) do |f|
+                 label: :LICENSE, **addon) do |f|
       f.with_between { render_license_note }
     end
   end
@@ -283,7 +283,7 @@ class Views::Controllers::Account::Preferences::Form <
 
   def render_boolean_checkbox_filter(filter)
     checkbox_field(filter.sym,
-                   label: prefs_filter_label(filter.sym),
+                   label: :"prefs_filters_#{filter.sym}",
                    checked: model.content_filter[filter.sym] ==
                             filter.prefs_vals.first)
   end
@@ -294,14 +294,14 @@ class Views::Controllers::Account::Preferences::Form <
                 [:"prefs_filters_#{filter.sym}_#{val}".t, val]
               end
     select_field(filter.sym, options,
-                 label: "#{prefs_filter_label(filter.sym)}:",
+                 label: :"prefs_filters_#{filter.sym}",
                  selected: model.content_filter[filter.sym],
                  inline: true)
   end
 
   def render_string_filter(filter)
     text_field(filter.sym,
-               label: "#{prefs_filter_label(filter.sym)}:",
+               label: :"prefs_filters_#{filter.sym}",
                value: model.content_filter[filter.sym]) do |f|
       f.with_between { render_string_filter_help(filter) }
     end

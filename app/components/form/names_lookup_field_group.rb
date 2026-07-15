@@ -34,7 +34,7 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     field_component = @names_namespace.field(:lookup).autocompleter(
       type: :name,
       textarea: true,
-      wrapper_options: { label: :NAMES.l },
+      wrapper_options: { label: :NAMES },
       value: prefilled_lookup_value,
       hidden_value: prefilled_lookup_ids
     )

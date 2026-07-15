@@ -168,13 +168,13 @@ module Views::Controllers::Occurrences
       # `distinct_locations` — pass straight through to SelectField.
       render(attrs_ns.field(:location_id).select(
                locations,
-               wrapper_options: { label: :edit_occurrence_location.l }
+               wrapper_options: { label: :edit_occurrence_location }
              ))
     end
 
     def render_date_field(attrs_ns)
       render(attrs_ns.field(:when).date(
-               wrapper_options: { label: :WHEN.l, inline: true }
+               wrapper_options: { label: :WHEN, inline: true }
              ))
     end
 

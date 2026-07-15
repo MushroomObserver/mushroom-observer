@@ -16,8 +16,8 @@ module Views::Controllers::VisualGroups
         render_errors if model.errors.any?
         render_name_field
         textarea_field(:description, cols: 60, rows: 10,
-                                     label: :DESCRIPTION.t)
-        checkbox_field(:approved, label: :APPROVED.t)
+                                     label: :DESCRIPTION)
+        checkbox_field(:approved, label: :APPROVED)
         submit(:SUBMIT.t, center: true)
       end
     end

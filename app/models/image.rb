@@ -886,12 +886,10 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # #4796). Image::Processor#process calls this inline right after it
   # generates the small rendition, so the local file is present on fresh
   # uploads and rotations. Batch/backfill callers reach it with no local
-  # rendition (e.g. after the originals are cleaned up), so fall back to
-  # fetching the transferred small rendition.
+  # rendition (e.g. after the originals are cleaned up), so it falls back
+  # to fetching the transferred small rendition (see local_dhash_source).
   def compute_dhash!
-    source = [:small, :medium].
-             map { |size| full_filepath(size) }.
-             find { |path| File.exist?(path) }
+    source = local_dhash_source
     value = if source
               Image::Dhash.from_file(source)
             else
@@ -899,6 +897,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
             end
     update_column(:dhash, value)
     value
+  end
+
+  # The local small (then medium) rendition path for hashing, or nil if
+  # neither is on disk. compute_dhash! prefers it over the full-size
+  # original (#4796) and falls back to the remote small rendition.
+  def local_dhash_source
+    [:small, :medium].
+      map { |size| full_filepath(size) }.
+      find { |path| File.exist?(path) }
   end
 
   # Attempt to strip GPS data from original image. Returns error message as
