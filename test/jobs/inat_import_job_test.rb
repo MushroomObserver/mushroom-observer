@@ -1788,6 +1788,50 @@ class InatImportJobTest < ActiveJob::TestCase
     end
   end
 
+  # -------- enqueue_batch_transfer tests (#4791's target design: one
+  # TransferImagesJob per import batch, not per image)
+
+  def test_enqueue_batch_transfer_enqueues_job_for_created_images
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    fake_importer = Object.new
+    fake_importer.define_singleton_method(:image_ids) { [111, 222] }
+    job.stub(:observation_importer, fake_importer) do
+      assert_enqueued_with(job: TransferImagesJob,
+                           args: [{ image_ids: [111, 222] }]) do
+        job.send(:enqueue_batch_transfer)
+      end
+    end
+  end
+
+  def test_enqueue_batch_transfer_noop_when_no_images_created
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    fake_importer = Object.new
+    fake_importer.define_singleton_method(:image_ids) { [] }
+    job.stub(:observation_importer, fake_importer) do
+      assert_no_enqueued_jobs(only: TransferImagesJob) do
+        job.send(:enqueue_batch_transfer)
+      end
+    end
+  end
+
+  # -------- send_import_digest tests (best-effort: a digest failure
+  # must not fail/retry the job, since that would resend digests)
+
+  def test_send_import_digest_swallows_delivery_failure
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    logged = []
+    job.define_singleton_method(:log) { |msg| logged << msg }
+
+    Inat::ImportDigest.stub(:deliver_for, ->(*) { raise("boom") }) do
+      assert_nothing_raised { job.send(:send_import_digest) }
+    end
+
+    assert(logged.any? { |msg| msg.include?("Import digest failed") })
+  end
+
   # -------- Other Utilities
 
   # Hack to turn results with many pages into results with one page
