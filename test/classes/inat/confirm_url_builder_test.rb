@@ -46,6 +46,21 @@ class Inat
       assert_no_match(/taxon_id=47170/, url)
     end
 
+    # Regression (#4809): links on the confirm form must always point at
+    # the iNat UI host, even when the user submitted an api.inaturalist.org
+    # URL — api.inaturalist.org has no browsable UI for these paths.
+    def test_requested_obs_url_uses_ui_host_for_api_url
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "https://api.inaturalist.org/v1/observations" \
+                  "?project_id=fundis-rocky-mountain-rare-fungi-challenge"
+      )
+      builder = build(model)
+
+      url = builder.requested_obs_url
+      assert_match(%r{\Ahttps://www\.inaturalist\.org/observations\?}, url,
+                   "Confirm-form links must use iNat UI host, never the API")
+    end
+
     # Regression: a URL with leading/trailing whitespace must not be
     # re-encoded as a query param value (producing "?+++https%3A%2F%2F...").
     def test_requested_obs_url_strips_leading_whitespace_from_url

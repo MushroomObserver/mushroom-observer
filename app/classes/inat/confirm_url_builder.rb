@@ -100,9 +100,10 @@ class Inat::ConfirmURLBuilder
       merge("iconic_taxa" => IMPORTABLE_ICONIC_TAXA_ARG).to_query
   end
 
+  # Always link to the iNat UI, never the API
   def normalize_inat_ui_url(url)
-    uri, query_str = url.split("?", 2)
-    "#{uri}?#{translate_api_to_ui_params(query_str.to_s)}"
+    _uri, query_str = url.split("?", 2)
+    "#{SITE}/observations?#{translate_api_to_ui_params(query_str.to_s)}"
   end
 
   def import_others?
