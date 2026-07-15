@@ -59,15 +59,25 @@ class Image
         # completion, exactly the window #4791's race used to exploit.
         return if local_sizes.value?(nil)
 
-        remote_sizes = @image_servers.index_with do |server|
-          remote_sizes_for(server, paths_for_server(server, paths))
-        end
-
-        upload_mismatches(image, paths, local_sizes, remote_sizes)
+        remote_sizes = remote_snapshot(paths)
+        # Re-read the servers after uploading: a file just pushed here must
+        # be confirmed present by an independent `find` before its local
+        # copy is deleted. Without the re-read, all_synced? compares against
+        # the pre-upload snapshot and can never confirm a first-time upload,
+        # so the image sits uploaded-but-unmarked forever -- nothing
+        # schedules a second pass (TransferImagesJob runs once per image).
+        remote_sizes = remote_snapshot(paths) if
+          upload_mismatches(image, paths, local_sizes, remote_sizes)
         return unless all_synced?(paths, local_sizes, remote_sizes)
 
         delete_local_copies(image, paths)
         mark_transferred(image)
+      end
+
+      def remote_snapshot(paths)
+        @image_servers.index_with do |server|
+          remote_sizes_for(server, paths_for_server(server, paths))
+        end
       end
 
       def paths_for(image)
@@ -84,14 +94,20 @@ class Image
         File.exist?(full) ? File.size(full) : nil
       end
 
+      # Uploads every path whose remote size doesn't match local. Returns
+      # true if it attempted any upload, so the caller knows to re-read the
+      # servers before trusting all_synced? (see transfer_image).
       def upload_mismatches(image, paths, local_sizes, remote_sizes)
+        attempted = false
         @image_servers.each do |server|
           paths_for_server(server, paths).each do |path|
             next if remote_sizes[server][path] == local_sizes[path]
 
+            attempted = true
             upload_one_file(image, server, path)
           end
         end
+        attempted
       end
 
       # One file's transfer failing (returned false, or raised -- e.g.
@@ -111,12 +127,12 @@ class Image
         log("Failed to upload #{path} to #{server}: #{e.message}")
       end
 
-      # Deliberately checks against the PRE-upload remote_sizes snapshot --
-      # a file just uploaded above isn't re-verified in the same run before
-      # being trusted; it waits for the next run's fresh remote check. That
-      # keeps a routine upload failure and a routine "just fixed it" both
-      # inconclusive here (safe either way: nothing gets deleted or marked
-      # transferred on unverified data).
+      # Checks against a snapshot taken AFTER any upload in this run
+      # (transfer_image re-reads the servers when it uploaded anything), so
+      # a first-time upload is confirmed by an independent `find` on the
+      # server before its local copy is deleted -- not trusted on the
+      # uploader's own say-so. A silently-failed upload shows as still
+      # missing here and is safely left unmarked.
       #
       # `[].all?` is vacuously true -- guard against @image_servers being
       # empty (development's :mycolab has no :write target, so
