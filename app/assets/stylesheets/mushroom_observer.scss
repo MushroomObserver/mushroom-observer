@@ -6,6 +6,11 @@
 @import "mo/map_theme_vars_to_bootstrap_vars"; // Overwrite bootstrap variables
 @import "bootstrap";
 
+// Icon font (#3797) -- replaces Bootstrap 3 Glyphicons in
+// Components::Icon. Same self-hosted-via-Sprockets mechanism as
+// bootstrap-sass above (font-awesome-sass gem), not a CDN.
+@import "font-awesome";
+
 // Now, set custom styles for MO elements.
 @import "mo/elements";
 @import "mo/utilities";
