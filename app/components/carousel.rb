@@ -14,8 +14,8 @@
 #   (show-page IMAGES section).
 # - `Components::Form::UploadGallery` — editable image-upload carousel
 #   for the observation form.
-# - (planned) `Components::Matrix::Carousel` — per-matrix-box mini-carousel
-#   (see `.claude/rules/matrix_box_carousel.md`).
+# - `Components::Matrix::Carousel` — per-matrix-box mini-carousel, not
+#   yet consumed by the obs-index (see that class for details).
 #
 # @example
 #   render(Components::Carousel.new(carousel_id: "obs_42")) do |c|

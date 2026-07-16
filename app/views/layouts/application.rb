@@ -96,7 +96,7 @@ module Views::Layouts
       div(id: "main_container", class: "px-sm-3",
           data: { controller: "nav links", nav_target: "container" }) do
         render(Views::Layouts::App::Banners.new)
-        div(class: "row row-offcanvas row-offcanvas-left",
+        Row(class: "row-offcanvas row-offcanvas-left",
             data: { nav_target: "offcanvas" }) do
           render(Views::Layouts::Sidebar.new(
                    user: current_user,
@@ -110,15 +110,15 @@ module Views::Layouts
     end
 
     def render_right_side(content_classes, &block)
-      div(id: "right_side", class: Grid::MD10) do
+      Column(id: "right_side", xs: 12, md: 10) do
         render(Views::Layouts::TopNav.new(user: current_user,
                                           query: current_query))
         render(Views::Layouts::App::PageFlash.new)
         render(Views::Layouts::Header.new(
                  any_content_filters_applied: @any_content_filters_applied
                ))
-        main(id: "content", class: content_classes,
-             data: { controller: "lightgallery" }) do
+        Container(element: :main, id: "content", class: content_classes,
+                  data: { controller: "lightgallery" }) do
           comment { "MAIN_PAGE_CONTENT" }
           yield
           comment { "/MAIN_PAGE_CONTENT" }

@@ -24,7 +24,7 @@ module Views::Controllers::FieldSlips
       container_class(:wide)
 
       render_notice
-      div(class: "content-block") { render_project_or_filter_section }
+      ContentPadded { render_project_or_filter_section }
       render_list
     end
 
@@ -90,7 +90,7 @@ module Views::Controllers::FieldSlips
                  project_field,
                  type: :project, hidden_name: :project, inline: true,
                  size: 60, class: "mb-0",
-                 label: "#{:field_slip_filter_by.l}:"
+                 label: :field_slip_filter_by
                ))
       end
     end

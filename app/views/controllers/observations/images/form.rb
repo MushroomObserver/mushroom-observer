@@ -43,20 +43,20 @@ module Views::Controllers::Observations::Images
 
     def render_image_fields
       text_field(:copyright_holder,
-                 label: "#{:form_images_copyright_holder.t}:")
+                 label: :form_images_copyright_holder)
       text_field(:original_name,
-                 label: "#{:form_images_original_name.t}:")
+                 label: :form_images_original_name)
       date_field(:when, inline: true,
-                        label: "#{:form_images_when_taken.l}:",
+                        label: :form_images_when_taken,
                         help: :form_images_when_help.t,
                         help_collapse: true)
       select_field(:license_id, @licenses,
-                   label: "#{:LICENSE.t}:",
+                   label: :LICENSE,
                    help: :form_images_license_help.t,
                    help_collapse: true)
       # Two-paragraph help: notes-specific + textile-syntax help.
       textarea_field(:notes,
-                     label: "#{:NOTES.t}:",
+                     label: :NOTES,
                      help: textile_help,
                      help_collapse: true,
                      data: { autofocus: true })

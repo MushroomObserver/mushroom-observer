@@ -17,24 +17,14 @@
 # Note that the hash of attributes is not yet actually used.
 #
 ACTIONS = {
-  api: {
-    api_keys: {},
-    collection_numbers: {},
-    comments: {},
-    external_links: {},
-    external_sites: {},
-    field_slips: {},
-    herbaria: {},
-    herbarium_records: {},
-    images: {},
-    locations: {},
-    names: {},
-    observations: {},
-    projects: {},
-    sequences: {},
-    species_lists: {},
-    users: {}
-  },
+  # The v1 API (`api`) was retired: its APIController was removed long
+  # ago, but these routes lingered, so every /api* request matched a
+  # route, failed to load the missing controller, and raised
+  # `uninitialized constant APIController`. That still renders a 404 (a
+  # RoutingError maps to :not_found), but via a noisy raise-log-and-
+  # notify path rather than a clean unmatched-route 404 -- ~60 hits in
+  # 18 days from bots/stale clients. Dropped so /api* just 404s cleanly.
+  # See issue #4782. api2 is the current API.
   api2: {
     api_keys: {},
     collection_numbers: {},

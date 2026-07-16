@@ -18,7 +18,7 @@ module Views::Controllers::Names::Synonyms::Approve
 
       Help(content: :name_approve_deprecate_help.tp)
 
-      textarea_field(:comment, label: "#{:name_approve_comments.l}:",
+      textarea_field(:comment, label: :name_approve_comments,
                                cols: 80, rows: 5, inline: true,
                                data: { autofocus: true })
       Help(
@@ -31,7 +31,7 @@ module Views::Controllers::Names::Synonyms::Approve
     private
 
     def render_approved_names_section
-      checkbox_field(:deprecate_others, label: :name_approve_deprecate.l)
+      checkbox_field(:deprecate_others, label: :name_approve_deprecate)
       p do
         @approved_names.each do |n|
           trusted_html(n.display_name(@user).t)

@@ -31,12 +31,12 @@ module Views::Controllers::Users::Emails
     private
 
     def render_subject_field
-      text_field(:subject, label: "#{:ask_user_question_subject.t}:",
+      text_field(:subject, label: :ask_user_question_subject,
                            size: 70, data: { autofocus: true })
     end
 
     def render_message_field
-      textarea_field(:message, label: "#{:ask_user_question_message.t}:",
+      textarea_field(:message, label: :ask_user_question_message,
                                rows: 10)
     end
 

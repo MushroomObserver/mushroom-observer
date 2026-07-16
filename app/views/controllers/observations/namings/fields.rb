@@ -46,7 +46,7 @@ class Views::Controllers::Observations::Namings::Fields < Views::Base
     @naming_ns = naming_ns
     name_field = naming_ns.field(:name).autocompleter(
       type: :name,
-      wrapper_options: { label: "#{:WHAT.t}:" },
+      wrapper_options: { label: :WHAT },
       value: @given_name,
       autofocus: focus_on_name?
     )
@@ -70,7 +70,7 @@ class Views::Controllers::Observations::Namings::Fields < Views::Base
       render(vote_ns.field(:value).select(
                menu,
                wrapper_options: {
-                 label: "#{:form_naming_confidence.t}:",
+                 label: :form_naming_confidence,
                  wrap_class: "mt-3"
                },
                selected: @vote&.value,

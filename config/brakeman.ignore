@@ -117,26 +117,49 @@
     {
       "warning_type": "Command Injection",
       "warning_code": 14,
-      "fingerprint": "590d3cd50f65173eac040a0c06e53a81af605cd1c821ad07ae8e88ccf49d467b",
+      "fingerprint": "8a41ca798ea59dea461a867c3396cc2a2cdb37426339788aed825278cd859e4a",
       "check_name": "Execute",
       "message": "Possible command injection",
-      "file": "app/models/image.rb",
-      "line": 850,
+      "file": "app/models/image/processor/gap_detector.rb",
+      "line": 88,
       "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
-      "code": "system(\"script/rotate_image #{id} #{((\"-90\" or \"+90\") or \"-h\")}&\")",
+      "code": "Open3.capture3(\"ssh\", host, \"find\", \"-L\", \"#{path}/#{subdir}\", \"-maxdepth\", \"1\", \"-type\", \"f\", \"-printf\", \"%f\\\\t%s\\\\n\")",
       "render_path": null,
       "location": {
         "type": "method",
-        "class": "Image",
-        "method": "transform"
+        "class": "Processor::GapDetector",
+        "method": "list_ssh_subdir"
       },
-      "user_input": "id",
+      "user_input": "path",
       "confidence": "Medium",
       "cwe_id": [
         77
       ],
-      "note": "False positive: `id` is this Image record's integer primary key (never a user-supplied string) and the operator is one of three string literals set by the case statement immediately above (unknown operators raise before this line). Neither interpolated value can carry shell metacharacters. The shell-string form is kept because the trailing '&' backgrounds the rotate script."
+      "note": "False positive: Open3.capture3 is called in argv (list) form, so no local shell is spawned; `host`/`path`/`subdir` come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure."
+    },
+    {
+      "warning_type": "Command Injection",
+      "warning_code": 14,
+      "fingerprint": "66e1026ce90d53473baccefa54146c098deae78c3820f4433d48cfe505367061",
+      "check_name": "Execute",
+      "message": "Possible command injection",
+      "file": "app/models/image/processor/verifier.rb",
+      "line": 120,
+      "link": "https://brakemanscanner.org/docs/warning_types/command_injection/",
+      "code": "Open3.capture3(\"ssh\", host, \"find\", \"-L\", *paths.map do\n \"#{root}/#{path}\"\n end, \"-maxdepth\", \"0\", \"-printf\", \"%p\\\\t%s\\\\n\")",
+      "render_path": null,
+      "location": {
+        "type": "method",
+        "class": "Processor::Verifier",
+        "method": "ssh_sizes"
+      },
+      "user_input": "root",
+      "confidence": "Medium",
+      "cwe_id": [
+        77
+      ],
+      "note": "False positive: Open3.capture3 is called in argv (list) form, so no local shell is spawned; `host`/`root` (from remote_path.split(\":\", 2)) come from Image::Processor::ServerData, itself built from MO.image_sources (config/image_config.yml), never from user input. ssh does join its trailing argv into one string for the remote shell to interpret, same as the original script/bash_images' read_server_directory ssh branch this replaces -- same trust boundary, not a new exposure. Checks every expected file for one image in a single ssh round trip, per #4791 -- see the class comment. Switched capture2 -> capture3 to also capture stderr (Copilot review fix, see PR discussion) -- fingerprint changed accordingly."
     }
   ],
-  "brakeman_version": "7.1.1"
+  "brakeman_version": "8.0.5"
 }

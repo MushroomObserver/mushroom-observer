@@ -43,13 +43,13 @@ module Views::Controllers::SpeciesLists::Projects
           plain(:species_list_projects_which_objects.t)
         end
         checkbox_field(:objects_list,
-                       label: :species_list_projects_this_list.t,
+                       label: :species_list_projects_this_list,
                        checked_value: "1", unchecked_value: "0")
         checkbox_field(:objects_obs,
-                       label: :species_list_projects_observations.t,
+                       label: :species_list_projects_observations,
                        checked_value: "1", unchecked_value: "0")
         checkbox_field(:objects_img,
-                       label: :species_list_projects_images.t,
+                       label: :species_list_projects_images,
                        checked_value: "1", unchecked_value: "0")
       end
     end

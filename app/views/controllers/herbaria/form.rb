@@ -42,7 +42,7 @@ module Views::Controllers::Herbaria
     private
 
     def render_name_field
-      text_field(:name, label: "#{:NAME.t}:") do |f|
+      text_field(:name, label: :NAME) do |f|
         f.with_between { render_name_between }
       end
     end
@@ -73,7 +73,7 @@ module Views::Controllers::Herbaria
       autocompleter_field(
         :personal_user_name,
         type: :user,
-        label: :edit_herbarium_admin_make_personal.t,
+        label: :edit_herbarium_admin_make_personal,
         inline: true
       ) do |f|
         f.with_help { admin_help_text } if admin_help_text
@@ -102,7 +102,7 @@ module Views::Controllers::Herbaria
     def render_personal_checkbox
       checkbox_field(
         :personal,
-        label: :create_herbarium_personal.l,
+        label: :create_herbarium_personal,
         help: personal_checkbox_help,
         help_collapse: true
       )
@@ -119,7 +119,7 @@ module Views::Controllers::Herbaria
 
       text_field(
         :code,
-        label: "#{:create_herbarium_code.l}:",
+        label: :create_herbarium_code,
         inline: true
       ) do |f|
         f.with_help { code_help }
@@ -178,18 +178,18 @@ module Views::Controllers::Herbaria
     end
 
     def render_contact_fields
-      text_field(:email, label: "#{:create_herbarium_email.l}:",
+      text_field(:email, label: :create_herbarium_email,
                          between: :optional)
       textarea_field(
         :mailing_address,
-        label: "#{:create_herbarium_mailing_address.l}:",
+        label: :create_herbarium_mailing_address,
         rows: 5,
         between: :optional
       )
     end
 
     def render_notes_field
-      textarea_field(:description, label: "#{:NOTES.l}:", rows: 10,
+      textarea_field(:description, label: :NOTES, rows: 10,
                                    between: :optional)
     end
 

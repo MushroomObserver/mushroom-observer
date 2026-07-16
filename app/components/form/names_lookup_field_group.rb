@@ -34,7 +34,7 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     field_component = @names_namespace.field(:lookup).autocompleter(
       type: :name,
       textarea: true,
-      wrapper_options: { label: :NAMES.l },
+      wrapper_options: { label: :NAMES },
       value: prefilled_lookup_value,
       hidden_value: prefilled_lookup_ids
     )
@@ -117,9 +117,9 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
   end
 
   def render_modifier_row(fields)
-    div(class: "row") do
+    Row do
       fields.each do |field_name|
-        div(class: column_classes) do
+        Column(xs: 12, sm: 6, md: 12, lg: 6) do
           render_select_field(field_name)
         end
       end
@@ -133,16 +133,12 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     field_component = @names_namespace.field(field_name).select(
       options,
       wrapper_options: {
-        label: field_label(field_name),
+        label: query_field_label(field_name),
         inline: true
       },
       selected: bool_to_string(field_selected_value(field_name))
     )
     render(field_component)
-  end
-
-  def field_label(field_name)
-    :"query_#{field_name}".l.humanize
   end
 
   def field_selected_value(field_name)
@@ -164,9 +160,5 @@ class Components::Form::NamesLookupFieldGroup < Components::Base
     when false then "false"
     else ""
     end
-  end
-
-  def column_classes
-    Grid::FORM_COLS
   end
 end

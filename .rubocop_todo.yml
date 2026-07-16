@@ -191,7 +191,6 @@ Metrics/BlockLength:
     - 'config/routes.rb'
     - 'lib/tasks/cache.rake'
     - 'lib/tasks/lang.rake'
-    - 'script/check_for_broken_references'
     - 'script/mushroom_mapper.rb'
 
 # Offense count: 1
@@ -357,13 +356,6 @@ Naming/AccessorMethodName:
     - 'test/flash_extensions.rb'
     - 'test/language_extensions.rb'
 
-# Offense count: 1
-# Configuration parameters: ForbiddenDelimiters.
-# ForbiddenDelimiters: (?i-mx:(^|\s)(EO[A-Z]{1}|END)(\s|$))
-Naming/HeredocDelimiterNaming:
-  Exclude:
-    - 'script/refresh_name_lister_cache'
-
 # Offense count: 27
 # Configuration parameters: NamePrefix, ForbiddenPrefixes, AllowedMethods, MethodDefinitionMacros, UseSorbetSigs.
 # NamePrefix: is_, has_, have_, does_
@@ -428,13 +420,6 @@ Style/ArrayIntersect:
     - 'script/update_ip_stats.rb'
     - 'test/controllers/observations/species_lists_controller_test.rb'
     - 'test/style/no_queries_in_phlex_views_test.rb'
-
-# Offense count: 62
-Style/ClassVars:
-  Exclude:
-    - 'test/general_extensions.rb'
-    - 'test/language_extensions.rb'
-    - 'test/test_helper.rb'
 
 # Offense count: 2
 Style/MissingRespondToMissing:

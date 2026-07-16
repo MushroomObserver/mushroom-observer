@@ -7,12 +7,13 @@
 #
 # @example Basic usage
 #   field(:name).static(
-#     wrapper_options: { label: "Name:", value: "John Doe" }
+#     wrapper_options: { label: "Name", value: "John Doe" }
 #   )
 class Components::ApplicationForm < Superform::Rails::Form
   class StaticTextField < Phlex::HTML
     include Phlex::Slotable
     include FieldWithHelp
+    include FieldLabelRow
 
     slot :help
 
@@ -30,15 +31,18 @@ class Components::ApplicationForm < Superform::Rails::Form
     def view_template
       inline = @wrapper_options[:inline] || false
       wrap_class = @wrapper_options[:wrap_class]
-      label_text = @wrapper_options[:label]
 
       div(class: form_group_class("form-group", inline, wrap_class)) do
-        render_label(label_text, inline) if label_text
+        render_label(label_text, inline) if show_label?
         p(class: "form-control-static") { display_text }
       end
     end
 
     private
+
+    def show_label?
+      wrapper_options[:label] != false
+    end
 
     def display_text
       @wrapper_options[:value] || @wrapper_options[:text] || ""

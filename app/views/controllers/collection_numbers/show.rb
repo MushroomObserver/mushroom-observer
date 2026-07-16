@@ -16,9 +16,9 @@ module Views::Controllers::CollectionNumbers
       # Top text details + bottom footer both kept at
       # `container-text` width; the obs-matrix between them runs
       # full-width inside the page's full-width `<main>`.
-      div(class: "container-text") { render_details }
+      Container(width: :text) { render_details }
       render_observation_matrix
-      div(class: "container-text") do
+      Container(width: :text) do
         render(::Views::Layouts::ObjectFooter.new(
                  obj: @collection_number, minimal: true
                ))

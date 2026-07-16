@@ -44,7 +44,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
              form: @form,
              field: :specimen,
              target_id: "specimen_fields",
-             label: :form_observations_specimen_available.l,
+             label: :form_observations_specimen_available,
              expanded: @observation.specimen,
              attributes: {
                wrap_class: "mt-0",
@@ -77,7 +77,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   def render_collector_name_field(cn_ns)
     help = :form_observations_collection_number_help.t
     render(cn_ns.field(:name).text(
-             wrapper_options: { label: "#{:collection_number_name.l}:",
+             wrapper_options: { label: :collection_number_name,
                                 help: help, help_collapse: true },
              value: @collectors_name
            ))
@@ -85,7 +85,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
 
   def render_collector_number_field(cn_ns)
     render(cn_ns.field(:number).text(
-             wrapper_options: { label: "#{:collection_number_number.l}:" },
+             wrapper_options: { label: :collection_number_number },
              value: @collectors_number,
              data: { action: "specimen#checkCheckbox" }
            ))
@@ -127,7 +127,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
 
   def render_herbarium_notes(hr_ns)
     render(hr_ns.field(:notes).text(
-             wrapper_options: { label: "#{:herbarium_record_notes.l}:" },
+             wrapper_options: { label: :herbarium_record_notes },
              value: ""
            ))
   end

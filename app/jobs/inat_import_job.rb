@@ -118,8 +118,22 @@ class InatImportJob < ApplicationJob
     parser = build_parser(id_above)
     more_pages = import_batch(parser)
     log_unlicensed_summary
+    enqueue_batch_transfer
     enqueue_continuation(parser.last_import_id) if more_pages &&
                                                    !inat_import.reload.canceled?
+  end
+
+  # One TransferImagesJob per batch, not per job -- so images go out
+  # steadily as each batch of observations completes, rather than
+  # piling up for the length of a multi-hour, multi-batch import (see
+  # #4791's target design). Per-image granularity would pile up even
+  # less, but isn't worth the overhead given batches take roughly a
+  # minute each.
+  def enqueue_batch_transfer
+    image_ids = observation_importer.image_ids
+    return if image_ids.empty?
+
+    TransferImagesJob.perform_later(image_ids: image_ids)
   end
 
   def build_parser(id_above)

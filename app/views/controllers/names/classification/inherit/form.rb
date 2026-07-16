@@ -21,7 +21,7 @@ module Views::Controllers::Names::Classification::Inherit
     def view_template
       render_candidates_alert if @candidates
 
-      text_field(:parent, label: "#{:inherit_classification_parent_name.l}:",
+      text_field(:parent, label: :inherit_classification_parent_name,
                           data: { autofocus: true }, inline: true)
 
       submit(:SUBMIT.l, center: true)

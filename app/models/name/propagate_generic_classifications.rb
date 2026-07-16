@@ -14,10 +14,12 @@ module Name::PropagateGenericClassifications
   end
 
   module ClassMethods
-    # This is used only by script/refresh_caches.  I have placed it here in
-    # order to make it easily accessible to unit testing.  As a separate file,
-    # it should never be loaded by the web server, so it's safe from causing
-    # even more unnecessary bloat.  I think. -JPH 20210814
+    # Not currently called by MiscDataRepairsJob (the script/refresh_caches
+    # cronjob it came from) - deliberately left out pending a full review of
+    # its (thousands of) proposed changes. I have placed it here in order to
+    # make it easily accessible to unit testing. As a separate file, it
+    # should never be loaded by the web server, so it's safe from causing
+    # even more unnecessary bloat. I think. -JPH 20210814
     def propagate_generic_classifications(dry_run: false)
       fixes = []
       accepted_names = build_accepted_names_lookup_table

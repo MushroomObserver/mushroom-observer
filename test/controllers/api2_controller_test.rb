@@ -319,6 +319,23 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
   end
 
+  # Pins the `files` field's exact shape/order - the mobile app (mo-mobile)
+  # indexes into this array positionally (files[0], files[1],
+  # files[-3], etc.), not by key, so a change to Image::ALL_SIZES's order
+  # or count is a breaking API change for that client. See #4735.
+  def test_get_image_files_array_matches_all_sizes_order
+    img = images(:in_situ_image)
+
+    get(:images, params: { id: img.id, detail: :high, format: :json })
+
+    assert_no_api_errors
+    files = response.parsed_body["results"][0]["files"]
+    expected = (Image::ALL_SIZES + [:original]).map do |size|
+      img.send(:"#{size}_url")
+    end
+    assert_equal(expected, files)
+  end
+
   def test_post_corrupt_image
     setup_image_dirs
     count = Image.count
@@ -674,6 +691,20 @@ class API2ControllerTest < FunctionalTestCase
                    { controller: "api2", action: "comments" })
     assert_routing({ path: "/api2/comments", method: :patch },
                    { controller: "api2", action: "comments" })
+  end
+
+  # The v1 API (`api` controller) was retired: its routes lingered after
+  # APIController was removed, so every /api* request raised
+  # `uninitialized constant APIController` -- a RoutingError that renders
+  # a 404, but via a noisy exception/log path rather than a clean
+  # unmatched-route 404. They must no longer be recognized (issue #4782).
+  def test_v1_api_routes_are_gone
+    ["/api", "/api/observations", "/api/images"].each do |path|
+      assert_raises(ActionController::RoutingError,
+                    "#{path} should not be routed") do
+        Rails.application.routes.recognize_path(path)
+      end
+    end
   end
 
   def test_vote_anonymity

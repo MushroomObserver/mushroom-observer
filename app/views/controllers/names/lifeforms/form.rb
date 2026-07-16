@@ -16,10 +16,10 @@ module Views::Controllers::Names::Lifeforms
             variant: :striped, identifier: "lifeform",
             show_headers: false) do |t|
         t.column(nil) do |word|
-          checkbox_field(word.to_sym, label: :"lifeform_#{word}".l)
+          checkbox_field(word.to_sym, label: :"lifeform_#{word}")
         end
         t.column(nil, class: "container-text") do |word|
-          plain(:"lifeform_help_#{word}".t)
+          plain(lifeform_help_as_string(word))
         end
       end
 

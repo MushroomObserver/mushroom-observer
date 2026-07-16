@@ -169,15 +169,6 @@ MushroomObserver::Application.configure do
   # Available themes.
   config.themes = %w[Agaricus Amanita Cantharellaceae Hygrocybe BlackOnWhite]
 
-  # Queued email only gets delivered if you have run the rake task email:send.
-  # script/send_email is a cron script for running email:send.  (Delay is in
-  # seconds.)
-  config.queue_email        = false
-  config.email_per_minute   = 25
-  config.email_num_attempts = 3
-  config.email_log          = "#{config.root}/log/email_error.log"
-  config.email_queue_delay  = 5
-
   # Default email addresses.
   config.news_email_address = "news@#{config.domain}"
   config.noreply_email_address = "no-reply@#{config.domain}"
@@ -266,11 +257,6 @@ MushroomObserver::Application.configure do
 
   # Cloud storage bucket name.
   config.image_bucket_name = "mo-image-archive-bucket"
-
-  # Location of script used to process and transfer images.
-  # (Set to nil to have it do nothing.)
-  config.process_image_command =
-    "#{config.root}/script/process_image <id> <ext> <set> <strip> &"
 
   # Limit size of image uploads (ImageMagick bogs down on large images).
   config.image_upload_max_size = 20_971_520 # 20*1024*1024 = 20 Mb

@@ -42,17 +42,17 @@ module Views::Controllers::Account::Profile
     private
 
     def render_name_field
-      text_field(:name, label: "#{:Name.l}:")
+      text_field(:name, label: :Name)
     end
 
     def render_place_name_field
       autocompleter_field(:place_name, type: :location,
-                                       label: "#{:profile_location.t}:",
+                                       label: :profile_location,
                                        between: "(33%)")
     end
 
     def render_notes_field
-      textarea_field(:notes, label: "#{:profile_notes.t}:",
+      textarea_field(:notes, label: :profile_notes,
                              rows: 10, between: "(33%)")
     end
 
@@ -68,7 +68,7 @@ module Views::Controllers::Account::Profile
 
     def render_mailing_address_field
       textarea_field(:mailing_address,
-                     label: "#{:profile_mailing_address.t}:", rows: 5)
+                     label: :profile_mailing_address, rows: 5)
     end
 
     def render_file_field_between

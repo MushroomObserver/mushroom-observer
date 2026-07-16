@@ -522,6 +522,21 @@ class API2Test < UnitTestCase
     assert_api_pass(params)
   end
 
+  # A blocked/disabled account (e.g. self-deleted) keeps its API keys but
+  # must not be able to authenticate with them. See #4767.
+  def test_blocked_user_rejected
+    params = {
+      method: :post,
+      action: :observation,
+      api_key: @api_key.key,
+      location: "Anywhere"
+    }
+    User.update(rolf.id, blocked: true)
+    assert_api_fail(params)
+    User.update(rolf.id, blocked: false)
+    assert_api_pass(params)
+  end
+
   def test_check_edit_permission
     @api      = API2.new
     @api.user = dick

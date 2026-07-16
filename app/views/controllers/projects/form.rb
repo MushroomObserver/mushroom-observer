@@ -52,30 +52,30 @@ module Views::Controllers::Projects
 
     def render_open_membership
       checkbox_field(:open_membership,
-                     label: :form_projects_open_membership.t)
+                     label: :form_projects_open_membership)
     end
 
     def render_title
       text_field(:title,
-                 label: "#{:form_projects_title.t}:",
+                 label: :form_projects_title,
                  data: { autofocus: true })
     end
 
     def render_summary
       textarea_field(:summary, rows: 5,
-                               label: "#{:SUMMARY.t}:") do |f|
+                               label: :SUMMARY) do |f|
         f.with_help { :shared_textile_help.l }
       end
     end
 
     def render_field_slip_prefix
       text_field(:field_slip_prefix,
-                 label: "#{:FIELD_SLIP_PREFIX.t}:")
+                 label: :FIELD_SLIP_PREFIX)
     end
 
     def render_location
       autocompleter_field(:place_name, type: :location,
-                                       label: "#{:WHERE.t}:")
+                                       label: :WHERE)
     end
 
     def render_dates_section
@@ -83,12 +83,12 @@ module Views::Controllers::Projects
         p { "*#{:form_projects_date_range.t}*".t }
         p { :form_projects_dates_explain.t }
       end
-      div(class: "container-text ml-4") do
+      Container(width: :text, class: "ml-4") do
         date_field(:start_date,
-                   label: "#{:form_projects_start_date.t}: ",
+                   label: :form_projects_start_date,
                    wrap_class: "mb-2")
         date_field(:end_date,
-                   label: "#{:form_projects_end_date.t}: ")
+                   label: :form_projects_end_date)
         render_dates_any_radios
       end
     end

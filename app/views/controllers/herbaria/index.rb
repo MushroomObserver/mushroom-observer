@@ -30,13 +30,15 @@ module Views::Controllers::Herbaria
     end
 
     def render_merge_alert
-      Alert(level: :warning, class: "container-text mt-3") do
-        trusted_html(
-          :herbarium_index_merge_help.tp(
-            name: @merge.format_name,
-            url: reload_with_args(merge: nil)
+      Container(width: :text, class: "mt-3") do
+        Alert(level: :warning) do
+          trusted_html(
+            :herbarium_index_merge_help.tp(
+              name: @merge.format_name,
+              url: reload_with_args(merge: nil)
+            )
           )
-        )
+        end
       end
     end
 

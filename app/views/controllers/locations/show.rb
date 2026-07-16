@@ -18,7 +18,7 @@ module Views::Controllers::Locations
 
       p { :show_location_hidden.l } if @location.hidden
 
-      div(class: "row") { render_main_columns }
+      Row { render_main_columns }
       div(class: "mt-3") do
         render(::Views::Layouts::ObjectFooter.new(
                  user: current_user, obj: @location, versions: @versions.to_a

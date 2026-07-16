@@ -288,6 +288,21 @@ class InatMoObservationBuilderTest < UnitTestCase
     end
   end
 
+  # created_image_ids is what ObservationImporter (then InatImportJob)
+  # reads to enqueue one TransferImagesJob per import batch (#4791).
+  def test_upload_inat_image_accumulates_created_image_ids
+    image = images(:in_situ_image)
+    fake_api = FakeAPI2Response.new([], [image])
+    builder = builder_for
+
+    API2.stub(:execute, fake_api) do
+      result = builder.send(:upload_inat_image, {}, "377332865")
+      assert_equal(image, result)
+    end
+
+    assert_equal([image.id], builder.created_image_ids)
+  end
+
   private
 
   def builder_for(provisional_name: nil, name_override: nil,
