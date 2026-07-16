@@ -390,6 +390,30 @@ module Observations
       assert_equal(expect, rows, "Wrong MyCoPortal Image List csv")
     end
 
+    def test_mycoportal_image_list_marks_images_exported
+      query = Query.lookup_and_save(:Observation, by_users: [dick])
+      obs = Observation.joins(:images).where(id: query.results(&:id)).first
+      image = obs.images.first
+      site = ExternalSite.mycoportal
+
+      login
+      post(:create,
+           params: {
+             q: @controller.q_param(query),
+             download: { format: :mycoportal_image_list,
+                         encoding: "UTF-8" },
+             commit: "Download"
+           })
+
+      assert_response(:success)
+      assert(
+        ExternalLink.exists?(target: image, external_site: site,
+                             relationship: :export),
+        "Downloading the MyCoPortal image list should mark included " \
+        "images as exported"
+      )
+    end
+
     private
 
     def image_rights(image)

@@ -907,6 +907,59 @@ class ReportTest < UnitTestCase
     )
   end
 
+  def test_mycoportal_image_list_excludes_already_exported_image
+    obs = observations(:detailed_unknown_obs)
+    image = images(:in_situ_image)
+    ExternalLink.create!(user: User.admin, target: image,
+                         external_site: ExternalSite.mycoportal,
+                         relationship: :export)
+
+    row = mycoportal_image_list_row(obs, image)
+
+    assert_nil(row, "Already-exported image should be excluded from the list")
+  end
+
+  def test_mycoportal_image_list_mark_exported_creates_link
+    image = images(:in_situ_image)
+    site = ExternalSite.mycoportal
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+    report.body
+
+    report.mark_exported!
+
+    assert(
+      ExternalLink.exists?(target: image, external_site: site,
+                           relationship: :export),
+      "mark_exported! should create an export ExternalLink for image " \
+      "#{image.id}"
+    )
+  end
+
+  def test_mycoportal_image_list_mark_exported_idempotent
+    image = images(:in_situ_image)
+    site = ExternalSite.mycoportal
+
+    2.times do
+      report =
+        Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+      report.body
+      report.mark_exported!
+    end
+
+    assert_equal(
+      1,
+      ExternalLink.where(target: image, external_site: site,
+                         relationship: :export).count,
+      "Running mark_exported! twice should not create duplicate export links"
+    )
+  end
+
+  def test_mycoportal_image_list_mark_exported_before_body_raises
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+
+    assert_raises(RuntimeError) { report.mark_exported! }
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
