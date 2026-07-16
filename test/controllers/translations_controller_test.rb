@@ -570,40 +570,44 @@ class TranslationsControllerTest < FunctionalTestCase
   end
 
   def test_update_translations_rescues_bad_param_access
-    str = translation_strings(:english_one)
-    old_text = str.text
-    lang = languages(:english)
-    @controller.instance_variable_set(:@lang, lang)
-    @controller.instance_variable_set(:@strings, lang.localization_strings)
-    @controller.send(:build_record_maps, lang)
-    params = ActionController::Parameters.new(id: "one", locale: "en")
-    @controller.params = params
+    use_test_locales do
+      str = translation_strings(:english_one)
+      old_text = str.text
+      lang = languages(:english)
+      @controller.instance_variable_set(:@lang, lang)
+      @controller.instance_variable_set(:@strings, lang.localization_strings)
+      @controller.send(:build_record_maps, lang)
+      params = ActionController::Parameters.new(id: "one", locale: "en")
+      @controller.params = params
 
-    params.stub(:[], ->(_key) { raise("boom") }) do
-      @controller.send(:update_translations, ["one"])
+      params.stub(:[], ->(_key) { raise("boom") }) do
+        @controller.send(:update_translations, ["one"])
+      end
+
+      str.reload
+      assert_equal("", str.text)
+    ensure
+      str&.update!(text: old_text)
     end
-
-    str.reload
-    assert_equal("", str.text)
-  ensure
-    str&.update!(text: old_text)
   end
 
   def test_update_rescues_error_and_renders_edit
-    login("rolf")
-    str = translation_strings(:english_one)
-    old_text = str.text
+    use_test_locales do
+      login("rolf")
+      str = translation_strings(:english_one)
+      old_text = str.text
 
-    @controller.stub(:preview_string, ->(*) { raise("boom") }) do
-      patch(
-        :update,
-        params: { id: "one", locale: "en", tag_one: "temp value" },
-        format: :turbo_stream
-      )
+      @controller.stub(:preview_string, ->(*) { raise("boom") }) do
+        patch(
+          :update,
+          params: { id: "one", locale: "en", tag_one: "temp value" },
+          format: :turbo_stream
+        )
+      end
+      assert_response(:success)
+      assert_match(/boom/, assigns(:msg))
+    ensure
+      str&.update!(text: old_text)
     end
-    assert_response(:success)
-    assert_match(/boom/, assigns(:msg))
-  ensure
-    str&.update!(text: old_text)
   end
 end
