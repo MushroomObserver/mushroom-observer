@@ -121,7 +121,7 @@ class Components::Form::Search < Components::ApplicationForm
   def render_form_columns
     Row do
       field_columns.each do |panels|
-        div(class: Grid::MD6) do
+        Column(xs: 12, md: 6) do
           panels.each do |heading, sections|
             render_panel(heading:, sections:)
           end
@@ -186,7 +186,7 @@ class Components::Form::Search < Components::ApplicationForm
     if field_spec.is_a?(Array)
       Row do
         field_spec.each do |subfield|
-          div(class: column_classes) do
+          Column(xs: 12, sm: 6, md: 12, lg: 6) do
             render_search_field(field_name: subfield)
           end
         end
@@ -204,10 +204,6 @@ class Components::Form::Search < Components::ApplicationForm
     send("render_#{field_type}", field_name:)
   end
 
-  def column_classes
-    Grid::FORM_COLS
-  end
-
   # Helper to check if a field is a date field
   def date_field?(field_name)
     [:date, :created_at, :updated_at].include?(field_name)
@@ -223,7 +219,7 @@ class Components::Form::Search < Components::ApplicationForm
               field_value(field_name)
             end
     text_field(field_name,
-               label: field_label(field_name),
+               label: query_field_label(field_name),
                value: value) do |f|
       f.with_help { field_help(field_name) }
     end
@@ -234,7 +230,7 @@ class Components::Form::Search < Components::ApplicationForm
     text_field(field_name,
                textarea: true,
                rows: 1,
-               label: field_label(field_name),
+               label: query_field_label(field_name),
                value: value) do |f|
       f.with_help { field_help(field_name) }
     end
@@ -250,7 +246,7 @@ class Components::Form::Search < Components::ApplicationForm
 
   def render_boolean_select(field_name:, style:)
     select_field(field_name, BOOL_OPTIONS[style],
-                 label: field_label(field_name),
+                 label: query_field_label(field_name),
                  inline: true,
                  selected: bool_to_string(field_value(field_name))) do |f|
       f.with_help { field_help(field_name) }
@@ -264,7 +260,7 @@ class Components::Form::Search < Components::ApplicationForm
     # Valid values from query_attr: [:no, :include, :only]
     options = [%w[no no], %w[include include], %w[only only]]
     select_field(field_name, options,
-                 label: field_label(field_name),
+                 label: query_field_label(field_name),
                  inline: true,
                  selected: field_value(field_name)&.to_s) do |f|
       f.with_help { field_help(field_name) }
@@ -278,7 +274,7 @@ class Components::Form::Search < Components::ApplicationForm
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
              value:, range_value:,
-             label: field_label(field_name)
+             label: query_field_label(field_name)
            )) do |f|
       f.with_help { field_help(field_name) }
     end
@@ -318,7 +314,7 @@ class Components::Form::Search < Components::ApplicationForm
     render(ApplicationForm::SelectRangeField.new(
              form: self, field_name:, options:,
              value:, range_value:,
-             label: field_label(field_name)
+             label: query_field_label(field_name)
            )) do |f|
       f.with_help { field_help(field_name) }
     end
@@ -374,7 +370,7 @@ class Components::Form::Search < Components::ApplicationForm
     autocompleter_field(field_name,
                         type: type,
                         textarea: true,
-                        label: field_label(field_name),
+                        label: query_field_label(field_name),
                         value: prefilled_autocompleter_value(ids, type),
                         hidden_value: ids) do |f|
       f.with_help { multiple_help(field_name) }
@@ -411,10 +407,6 @@ class Components::Form::Search < Components::ApplicationForm
   end
 
   # Field helpers
-
-  def field_label(field_name)
-    :"query_#{field_name}".l.humanize
-  end
 
   def field_help(field_name)
     :"#{model.type_tag}_term_#{field_name}".l

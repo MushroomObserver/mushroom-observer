@@ -30,4 +30,36 @@ module Components::Localization
   def image_vote_as_short_string(val)
     :"image_vote_short_#{val || 0}".l
   end
+
+  # A search/query field's form label, e.g. `:date` → "Date".
+  def query_field_label(field_name)
+    :"query_#{field_name}".l.humanize
+  end
+
+  # A query param's display name in the index filter caption, e.g.
+  # `:by_user` → "By user".
+  def query_param_label(key)
+    :"query_#{key}".l
+  end
+
+  # `Name#lifeform`, one word, e.g. `"lichen"` → `:lifeform_lichen`. Returns
+  # the translation key itself (not resolved) -- callers need both
+  # `.l` (checkbox labels) and `.t` (plain display text) depending on
+  # context, and `AuthorsAndEditors#user_list_title` also needs the
+  # bare symbol to conditionally `.pluralize` before resolving it.
+  def lifeform_key(word)
+    :"lifeform_#{word}"
+  end
+
+  # `Name#lifeform`, one word's help text, e.g. `"lichen"` → the
+  # textile-rendered explanation of what that lifeform means.
+  def lifeform_help_as_string(word)
+    :"lifeform_help_#{word}".t
+  end
+
+  # `type_tag` (e.g. `"name"`, `"location"`) → the textile-rendered
+  # "no descriptions yet" empty-state text for that model type.
+  def show_no_descriptions_as_string(type)
+    :"show_#{type}_no_descriptions".t
+  end
 end

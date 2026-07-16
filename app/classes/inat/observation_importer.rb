@@ -8,7 +8,7 @@ class Inat
     include Inat::Constants
 
     attr_reader :inat_import, :user, :job,
-                :unlicensed_obs_count, :skipped_images_count
+                :unlicensed_obs_count, :skipped_images_count, :image_ids
 
     def initialize(inat_import, user, job = nil)
       @inat_import = inat_import
@@ -16,6 +16,7 @@ class Inat
       @job = job
       @unlicensed_obs_count = 0
       @skipped_images_count = 0
+      @image_ids = []
     end
 
     def import_page(page)
@@ -177,6 +178,7 @@ class Inat
     def accumulate_counts(builder)
       @unlicensed_obs_count += builder.unlicensed_obs
       @skipped_images_count += builder.skipped_images
+      @image_ids.concat(builder.created_image_ids)
       return unless builder.unlicensed_obs == 1
 
       inat_import.add_license_added_obs(inat_id: @inat_obs[:id])

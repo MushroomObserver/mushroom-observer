@@ -48,23 +48,23 @@ module Views::Controllers::Projects::Aliases
 
     def render_name_and_type_row
       Row do
-        div(class: Grid::SM6) do
+        Column(xs: 12, sm: 6) do
           render_name_field
           hidden_field(:project_id)
         end
-        div(class: Grid::SM6) { render_target_type_select }
+        Column(xs: 12, sm: 6) { render_target_type_select }
       end
     end
 
     def render_name_field
-      text_field(:name, label: "#{:Name.t}:", inline: true)
+      text_field(:name, label: :Name, inline: true)
     end
 
     def render_target_type_select
       select_field(
         :target_type,
         target_type_options,
-        label: "#{:project_alias_type.t}:",
+        label: :project_alias_type,
         inline: true,
         data: {
           type_switch_target: "select",
@@ -87,7 +87,7 @@ module Views::Controllers::Projects::Aliases
         autocompleter_field(
           :term,
           type: :user,
-          label: "#{:USER.l}:",
+          label: :USER,
           value: user_term_value,
           hidden_name: :user_id,
           hidden_value: user_hidden_value
@@ -102,7 +102,7 @@ module Views::Controllers::Projects::Aliases
         autocompleter_field(
           :term,
           type: :location,
-          label: "#{:LOCATION.l}:",
+          label: :LOCATION,
           value: location_term_value,
           hidden_name: :location_id,
           hidden_value: location_hidden_value

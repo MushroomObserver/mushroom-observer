@@ -132,14 +132,14 @@ module Views::Controllers::Names
 
     def render_classification_and_lifeform_row
       Row(data: { controller: "name-panels" }) do
-        div(class: Grid::SM6) do
+        Column(xs: 12, sm: 6) do
           render(Show::ClassificationPanel.new(
                    name: @name, user: @user,
                    children_query: @children_query,
                    first_child: @first_child
                  ))
         end
-        div(class: Grid::SM6) do
+        Column(xs: 12, sm: 6) do
           render(Show::LifeformPanel.new(
                    name: @name, user: @user,
                    first_child: @first_child

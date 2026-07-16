@@ -21,7 +21,7 @@ class Components::Form::CompassFields < Components::Base
 
   def render_north_row
     Row(class: "vcenter") do
-      div(class: "#{Grid::CENTERED_THIRD} text-center") do
+      Column(xs: 4, offset_xs: 4, class: "text-center") do
         compass_input(:north)
       end
     end
@@ -29,17 +29,17 @@ class Components::Form::CompassFields < Components::Base
 
   def render_east_west_row
     Row(class: "vcenter mt-3") do
-      div(class: "#{Grid::THIRD} text-center") { compass_input(:west) }
-      div(class: "#{Grid::THIRD} small text-center p-0") do
+      Column(xs: 4, class: "text-center") { compass_input(:west) }
+      Column(xs: 4, class: "small text-center p-0") do
         plain(:form_locations_lat_long_help.l)
       end
-      div(class: "#{Grid::THIRD} text-center") { compass_input(:east) }
+      Column(xs: 4, class: "text-center") { compass_input(:east) }
     end
   end
 
   def render_south_row
     Row(class: "vcenter mt-3") do
-      div(class: "#{Grid::CENTERED_THIRD} text-center") do
+      Column(xs: 4, offset_xs: 4, class: "text-center") do
         compass_input(:south)
       end
     end
@@ -49,7 +49,7 @@ class Components::Form::CompassFields < Components::Base
     @form.text_field(
       direction,
       value: @location.send(direction).to_s,
-      label: "#{direction.upcase.to_sym.t}:",
+      label: direction.upcase.to_sym,
       addon: "º",
       wrap_class: "text-left",
       data: {

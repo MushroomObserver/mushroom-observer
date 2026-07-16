@@ -23,12 +23,12 @@ module Views::Controllers::Descriptions::AuthorRequests
     end
 
     def render_subject_field
-      text_field(:subject, label: "#{:request_subject.t}:",
+      text_field(:subject, label: :request_subject,
                            data: { autofocus: true })
     end
 
     def render_message_field
-      textarea_field(:message, label: "#{:request_message.t}:", rows: 10)
+      textarea_field(:message, label: :request_message, rows: 10)
     end
   end
 end

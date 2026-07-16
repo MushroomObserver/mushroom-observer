@@ -26,7 +26,7 @@ module Views::Controllers::SpeciesLists::Observations
         autocompleter_field(
           :title,
           type: :species_list,
-          label: "#{:species_list_add_remove_label.t}:"
+          label: :species_list_add_remove_label
         )
         div(class: "form-group center-block") do
           submit(:ADD.l)

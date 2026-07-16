@@ -71,8 +71,8 @@ module Views::Controllers::Images
       def render_vote_row(value, current)
         css = current == value ? "font-weight-bold" : ""
         Row do
-          div(class: Grid::SM6) { render_vote_link(value, css) }
-          div(class: "#{Grid::SM6} hidden-xs") do
+          Column(xs: 12, sm: 6) { render_vote_link(value, css) }
+          Column(xs: 12, sm: 6, class: "hidden-xs") do
             render_vote_and_next_link(value, css)
           end
         end
@@ -128,7 +128,7 @@ module Views::Controllers::Images
               variant: :striped, identifier: "show-votes",
               class: "mt-3 mb-0") do |t|
           t.column(:USER.t) { |vote| render_vote_user_cell(vote) }
-          t.column(:VOTE.t) { |vote| short_vote_label(vote) }
+          t.column(:VOTE.t) { |vote| image_vote_as_short_string(vote.value) }
         end
       end
 
@@ -138,10 +138,6 @@ module Views::Controllers::Images
         else
           Link(type: :user, user: vote.user)
         end
-      end
-
-      def short_vote_label(vote)
-        :"image_vote_short_#{vote.value}".t
       end
     end
   end

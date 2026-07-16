@@ -45,7 +45,7 @@ module Views::Controllers::Images::Emails
     end
 
     def render_message_field
-      textarea_field(:message, label: "#{:ask_user_question_message.t}:",
+      textarea_field(:message, label: :ask_user_question_message,
                                rows: 10)
     end
 

@@ -7,11 +7,11 @@ module Views::Controllers::Admin::Donations
   class Form < ::Components::ApplicationForm
     def view_template
       super do
-        text_field(:amount, size: 7, label: "#{:confirm_amount.t}:",
+        text_field(:amount, size: 7, label: :confirm_amount,
                             inline: true)
-        text_field(:who, size: 50, label: "#{:WHO.t}:", inline: true)
-        checkbox_field(:anonymous, label: :donate_anonymous.t)
-        text_field(:email, size: 50, label: "#{:EMAIL.t}:", inline: true)
+        text_field(:who, size: 50, label: :WHO, inline: true)
+        checkbox_field(:anonymous, label: :donate_anonymous)
+        text_field(:email, size: 50, label: :EMAIL, inline: true)
         submit(:create_donation_add.l, center: true)
       end
     end

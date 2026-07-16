@@ -1,6 +1,6 @@
 # Two worker pools so periodic maintenance jobs (cache/data-integrity
 # repairs, recurring cleanup) can't starve user-facing jobs
-# (ImageDhashJob, ImageLoaderJob, FieldSlipJob, InatImportJob, and mail
+# (ImageLoaderJob, TransferImagesJob, FieldSlipJob, InatImportJob, and mail
 # delivery via ActionMailer's deliver_later, which defaults to the
 # "mailers" queue) of threads, and vice versa. Both worker processes run
 # under the same single supervisor (see config/puma.rb +

@@ -28,7 +28,7 @@ class Views::Controllers::Observations::Form::Upload < Views::Base
         multiple: true,
         controller: "form-images",
         action: "change->form-images#addSelectedFiles",
-        wrapper_options: { label: "#{:IMAGES.l}:", class: "my-3" }
+        wrapper_options: { label: :IMAGES, class: "my-3" }
       )
     )
   end

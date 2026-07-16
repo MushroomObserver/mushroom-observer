@@ -32,11 +32,13 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   private
 
   def render_label_columns
-    div(class: "col-xs-10 col-sm-11") do
+    Column(xs: 10, sm: 11) do
       Row(class: "d-flex align-items-end") do
-        render_label_column("col col-sm-4 d-block") { render_panel_title }
+        render_label_column(sm_width: 4, extra: "d-block") do
+          render_panel_title
+        end
         render_label_column { small { trusted_html(:show_namings_user.t) } }
-        render_label_column("col col-sm-2 d-none d-sm-block") do
+        render_label_column(sm_width: 2, extra: "d-none d-sm-block") do
           small { trusted_html(:show_namings_consensus.t) }
         end
         render_label_column do
@@ -47,13 +49,12 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   end
 
   # Default column is `col col-sm-3 d-none d-sm-block` (hidden on
-  # `xs`, visible on `sm+`). Callers override `extra:` for the
-  # outliers — the name-column header is wider (sm-4) and visible
+  # `xs`, visible on `sm+`). Callers override `sm_width:`/`extra:` for
+  # the outliers — the name-column header is wider (sm-4) and visible
   # on `xs` (so the panel title shows on mobile too); the
   # consensus header is narrower (sm-2).
-  def render_label_column(extra = "col col-sm-3 d-none d-sm-block",
-                          &block)
-    div(class: extra, &block)
+  def render_label_column(sm_width: 3, extra: "d-none d-sm-block", &block)
+    Column(col: true, sm: sm_width, class: extra, &block)
   end
 
   def render_panel_title
@@ -65,7 +66,7 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   # click opens the propose-naming modal in place rather than
   # navigating away.
   def render_propose_icon_column
-    div(class: "col-xs-2 col-sm-1") do
+    Column(xs: 2, sm: 1) do
       span(class: "float-right d-sm-none") do
         Button(
           type: :modal,

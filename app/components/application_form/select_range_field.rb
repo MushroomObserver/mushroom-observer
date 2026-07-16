@@ -51,7 +51,8 @@ class Components::ApplicationForm < Superform::Rails::Form
         end
         div(class: "d-inline-block") do
           @form.select_field(:"#{@field_name}_range", @options,
-                             label: :to.l,
+                             label: :to,
+                             label_colon: false,
                              inline: true,
                              selected: @range_value)
         end

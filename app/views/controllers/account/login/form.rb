@@ -16,18 +16,18 @@ module Views::Controllers::Account::Login
     private
 
     def render_login_field
-      text_field(:login, label: "#{:login_user.t}:", wrap_class: "mt-3",
+      text_field(:login, label: :login_user, wrap_class: "mt-3",
                          data: { autofocus: @model.login.blank? })
     end
 
     def render_password_field
-      password_field(:password, label: "#{:login_password.t}:",
+      password_field(:password, label: :login_password,
                                 wrap_class: "mt-3",
                                 data: { autofocus: @model.login.present? })
     end
 
     def render_remember_me_field
-      checkbox_field(:remember_me, label: :login_remember_me.t,
+      checkbox_field(:remember_me, label: :login_remember_me,
                                    wrap_class: "mt-3")
     end
 

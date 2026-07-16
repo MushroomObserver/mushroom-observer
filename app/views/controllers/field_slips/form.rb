@@ -54,7 +54,7 @@ module Views::Controllers::FieldSlips
     # --- "Code only" form: no field-slip code yet, just collect one.
 
     def render_code_only_form
-      text_field(:code, label: "#{:field_slip_code.t}:")
+      text_field(:code, label: :field_slip_code)
       submit(:field_slip_create_obs.t, class: "mt-5")
     end
 
@@ -106,7 +106,7 @@ module Views::Controllers::FieldSlips
     # --- Left-column field-slip attribute fields ---
 
     def render_left_column_fields
-      text_field(:code, label: "#{:field_slip_code.t}:")
+      text_field(:code, label: :field_slip_code)
       render_project_select if model.projects.present?
       render_date_field
       render_collector_field
@@ -114,9 +114,9 @@ module Views::Controllers::FieldSlips
       render_field_slip_name_field
       render_field_slip_id_by_field
       text_field(:other_codes,
-                 label: "#{:field_slip_other_codes.t} " \
-                        "(#{:field_slip_other_example.t}):")
-      checkbox_field(:inat, label: :field_slip_other_inat.t)
+                 label: "#{:field_slip_other_codes.l} " \
+                        "(#{:field_slip_other_example.l})")
+      checkbox_field(:inat, label: :field_slip_other_inat)
     end
 
     def render_project_select
@@ -124,14 +124,14 @@ module Views::Controllers::FieldSlips
       # — pass through to SelectField.
       select_field(:project_id, model.projects,
                    inline: true,
-                   label: "#{:Project.t}:",
+                   label: :Project,
                    selected: model.project&.id)
     end
 
     def render_date_field
       today = Time.zone.today
       date_field(:date,
-                 label: "#{:DATE.t}:",
+                 label: :DATE,
                  inline: true,
                  start_year: today.year - 10,
                  end_year: today.year + 10)
@@ -140,13 +140,13 @@ module Views::Controllers::FieldSlips
     def render_collector_field
       autocompleter_field(:collector,
                           type: :user,
-                          label: "#{:COLLECTOR.t}:")
+                          label: :COLLECTOR)
     end
 
     def render_location_field
       autocompleter_field(:location,
                           type: :location,
-                          label: "#{:LOCATION.t}:",
+                          label: :LOCATION,
                           value: model.location_name,
                           hidden_value: model.location_id)
     end
@@ -154,13 +154,13 @@ module Views::Controllers::FieldSlips
     def render_field_slip_name_field
       autocompleter_field(:field_slip_name,
                           type: :name,
-                          label: "#{:ID.t}:")
+                          label: :ID)
     end
 
     def render_field_slip_id_by_field
       autocompleter_field(:field_slip_id_by,
                           type: :user,
-                          label: "#{:ID_BY.t}:")
+                          label: :ID_BY)
     end
 
     # --- Notes ---
@@ -182,7 +182,7 @@ module Views::Controllers::FieldSlips
         Components::Form::Notes::Part.new(
           key: part.name,
           value: part.value,
-          label: "#{part.label}:"
+          label: part.label
         )
       end
     end

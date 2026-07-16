@@ -89,9 +89,9 @@ module Views::Controllers::Descriptions
       div(class: "form-group") do
         b { "#{:form_description_permissions.l}:" }
         checkbox_field(:public_write,
-                       label: :form_description_public_writable.l,
+                       label: :form_description_public_writable,
                        disabled: permissions_disabled?)
-        checkbox_field(:public, label: :form_description_public_readable.l,
+        checkbox_field(:public, label: :form_description_public_readable,
                                 disabled: permissions_disabled?)
         Help(element: :p, content: :form_description_permissions_help.t)
       end
@@ -106,7 +106,7 @@ module Views::Controllers::Descriptions
     def render_license_field
       # `@licenses` is Rails-shape `[[label, id], ...]` from
       # `License.available_names_and_ids`; pass through.
-      select_field(:license_id, @licenses, label: "#{:License.l}:") do
+      select_field(:license_id, @licenses, label: :License) do
         Help(element: :p, content: :form_description_license_help.t)
       end
     end

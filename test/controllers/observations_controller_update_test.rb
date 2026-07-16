@@ -330,11 +330,11 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_equal(3, obs.images.length)
     new_img = (obs.images - [old_img1, old_img2]).first
 
+    # process_image's synchronous strip_original_gps? call runs regardless
+    # of Rails.env.test? (only the resize/transfer Image::Processor#process
+    # call is skipped in test) -- the new upload's file genuinely exists on
+    # disk once move_original places it, so the strip genuinely succeeds.
     assert_true(new_img.gps_stripped)
-    # We have script/process_image disabled for tests, so it doesn't actually
-    # strip the uploaded image.
-    # assert_not_equal(File.size(fixture),
-    #                  File.size(new_img.full_filepath("orig")))
 
     # Make sure it stripped the image which had already been created.
     assert_true(old_img1.reload.gps_stripped)

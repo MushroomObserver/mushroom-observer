@@ -28,6 +28,22 @@ class InatObservationImporterTest < UnitTestCase
                     "of both elapsed times")
   end
 
+  # accumulate_counts also threads a builder's created_image_ids up onto
+  # the importer -- InatImportJob reads this after each batch to enqueue
+  # one TransferImagesJob per batch (see #4791's target design).
+  def test_accumulate_counts_collects_created_image_ids
+    import = inat_imports(:rolf_inat_import)
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    fake_builder = Object.new
+    fake_builder.define_singleton_method(:unlicensed_obs) { 0 }
+    fake_builder.define_singleton_method(:skipped_images) { 0 }
+    fake_builder.define_singleton_method(:created_image_ids) { [123, 456] }
+
+    importer.send(:accumulate_counts, fake_builder)
+
+    assert_equal([123, 456], importer.image_ids)
+  end
+
   def test_canceled
     import = inat_imports(:ollie_inat_import)
     assert(import.canceled?, "Test needs a canceled InatImport fixture")

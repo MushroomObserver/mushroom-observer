@@ -11,10 +11,10 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
 
   def view_template
     Row do
-      div(class: "col-sm-11") do
-        Row do
-          div(class: "col col-md-4") { render_buttons }
-          div(class: "col col-md-8") { render_consensus_help }
+      Column(sm: 11) do
+        div(class: "row") do
+          Column(col: true, md: 4) { render_buttons }
+          Column(col: true, md: 8) { render_consensus_help }
         end
       end
     end

@@ -29,12 +29,12 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_locked_checkbox
-      checkbox_field(:locked, label: :edit_glossary_term_locked.l,
+      checkbox_field(:locked, label: :edit_glossary_term_locked,
                               wrap_class: "mt-3")
     end
 
     def render_name_field
-      text_field(:name, label: "#{:glossary_term_name.l}:",
+      text_field(:name, label: :glossary_term_name,
                         data: { autofocus: true }) do |f|
         f.with_append do
           p do
@@ -48,7 +48,7 @@ module Views::Controllers::GlossaryTerms
 
     def render_description_field
       textarea_field(:description,
-                     label: "#{:glossary_term_description.l}:",
+                     label: :glossary_term_description,
                      rows: 16) do |f|
         f.with_append do
           p do

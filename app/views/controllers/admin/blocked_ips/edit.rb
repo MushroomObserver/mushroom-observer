@@ -19,8 +19,8 @@ module Views::Controllers::Admin::BlockedIps
       add_page_title("IP Access Manager")
       container_class(:full)
       Row do
-        div(class: Grid::MD6) { render_left_column }
-        div(class: Grid::MD6) { render_right_column }
+        Column(xs: 12, md: 6) { render_left_column }
+        Column(xs: 12, md: 6) { render_right_column }
       end
     end
 
