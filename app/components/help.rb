@@ -14,13 +14,15 @@
 #   Help(type: :collapse_block, target_id: "help_1") { "..." }
 #   Help(type: :collapse_info_trigger, target_id: "help_1")
 #
-# There used to be a second "note" flavor (`help-note` CSS class,
-# `:span` default element) alongside this "block" one (`help-block`,
-# `:div` default) — merged away because `.help-note` and `.help-block`
-# turned out to be CSS-identical (same color rule, nothing else); the
-# only real distinction was ever the default element tag, which
-# `element:` already covers directly. Pass `element: :span` for what
-# used to be a "note".
+# There used to be a second "note" flavor (`Help::Note`, `:span`
+# default element) alongside this "block" one (`Help::Block`, `:div`
+# default) as separate classes; merged into this one dispatcher since
+# the DOM shape only ever differed by element tag + CSS class, both of
+# which `element:` + `render_plain`'s class choice cover directly.
+# `element: :span` renders `.help-note` (color only, genuinely
+# inline); anything else renders `.help-block` (Bootstrap's own class
+# — hardcodes `display: block`, so it must stay off `:span` content or
+# the block display forces it onto its own line regardless of tag).
 #
 # `:tooltip`, `:collapse_block`, and `:collapse_info_trigger` are
 # genuinely different DOM shapes (not just a class/tag variation) and
@@ -111,7 +113,8 @@ class Components::Help < Components::Base
   end
 
   def render_plain(&block)
-    classes = class_names("help-block", @extra_class)
+    base_class = @element == :span ? "help-note" : "help-block"
+    classes = class_names(base_class, @extra_class)
     send(@element, class: classes, id: @id, **@attributes) do
       emit_content(&block)
     end

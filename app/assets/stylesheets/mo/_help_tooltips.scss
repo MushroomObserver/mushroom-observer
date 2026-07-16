@@ -11,6 +11,15 @@ $help-block-max-width: 600px;
   }
 }
 
+// Genuinely inline -- unlike `.help-block` (Bootstrap's own class,
+// `display: block` hardcoded), `.help-note` carries no display
+// override, so it stays on the same line as whatever precedes it
+// (e.g. a field label). Used by `Components::Help`'s `element: :span`
+// shape -- do not merge this back into `.help-block`.
+.help-note {
+  color: $panel-default-text;
+}
+
 .help-block {
   color: $panel-default-text;
   // max-width: $help-block-max-width;

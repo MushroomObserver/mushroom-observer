@@ -9,11 +9,12 @@ require("test_helper")
 #
 # The original version of this file also covered a "help-note" flavor
 # (`Components::Help::Note`, later merged into `Components::Help`).
-# That flavor was removed entirely once `.help-note` / `.help-block`
-# turned out to be CSS-identical — there was never a real second
-# style to keep parity with, only a class-name difference with no
-# rendered effect. `Help(element: :span, ...)` is the direct
-# replacement; see `Components::Help`'s doc comment.
+# That parity coverage was dropped here, but the two classes are NOT
+# interchangeable: `.help-note` stays genuinely inline (color only),
+# while `.help-block` is Bootstrap's own class and hardcodes
+# `display: block`. `Help(element: :span, ...)` renders `.help-note`
+# for exactly this reason — see `Components::Help`'s doc comment and
+# `test/components/help_test.rb`'s `element: :span` coverage.
 class HelpSweepParityTest < ComponentTestCase
   # ----- Help::Block div (default element) ----
 
