@@ -5,11 +5,16 @@ require("test_helper")
 # Proves the actual bug this design fixes (#4807): with the old Simple/
 # file backend, a live translation edit only updated the EDITING Puma
 # worker's own in-memory hash -- the other 2 forked workers kept serving
-# stale text until they restarted. Solid Cache's store is shared (DB-
-# backed) across processes, so two INDEPENDENT backend instances here
-# (constructed separately, sharing no Ruby-process memory -- as if two
-# separate Puma workers) must see each other's writes through the
-# database alone.
+# stale text until they restarted. Two independently-constructed backend
+# instances here (sharing no object/state with each other) must see each
+# other's writes purely through the shared Solid Cache DB table.
+#
+# What this does NOT prove: real fork-level isolation. Both instances
+# run in the same process on the same AR connection here -- this rules
+# out a hidden in-Ruby-memory cache, not a fork-specific connection
+# issue (see test/test_helper.rb's parallelize_setup and config/puma.rb's
+# on_worker_boot for the actual fork-safety fix, which this test doesn't
+# independently exercise).
 class CrossProcessTranslationVisibilityTest < UnitTestCase
   def setup
     super
