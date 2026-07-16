@@ -25,6 +25,18 @@ module Views::Controllers::CollectionNumbers
       assert_html(html, "button[type='submit']", text: :SAVE.l)
     end
 
+    # Regression: `between: :required` must render inline via
+    # `.help-note`, not `.help-block` -- the latter is Bootstrap's own
+    # class and hardcodes `display: block`, which forces "(required)"
+    # onto its own line below the label instead of staying inline.
+    def test_required_marker_renders_inline
+      html = render_form(model: CollectionNumber.new)
+
+      assert_html(html, "span.help-note", text: "(#{:required.l})",
+                                          count: 2)
+      assert_no_html(html, "span.help-block")
+    end
+
     def test_multiple_observations_warning
       record = collection_numbers(:coprinus_comatus_coll_num)
       record.observations << observations(:agaricus_campestris_obs)
