@@ -28,13 +28,8 @@ class Language
   end
 
   def verbose(msg)
-    # Anchored to Language explicitly, not self.class -- a class-
-    # instance-variable isn't shared with any subclass the way a
-    # class variable was, so self.class would silently read a
-    # different (uninitialized) copy if this were ever called on an
-    # instance of a Language subclass. No such subclass exists today,
-    # but there's no reason to make this fragile against one existing
-    # tomorrow when anchoring explicitly costs nothing.
+    # Anchored to Language, not self.class -- a subclass would read
+    # a different (uninitialized) copy of @verbose_messages.
     Language.verbose_messages << msg
   end
 
