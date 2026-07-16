@@ -15,9 +15,9 @@ class FormLocationFeedbackTest < ComponentTestCase
     # `.alert-warning` / `.my-3` Bootstrap classes are pure paint.
     assert_html(html, "#dubious_location_messages")
     assert_html(html, "body", text: "Location not found")
-    assert_html(html, ".help-block")
+    assert_html(html, ".help-note")
     # Help text should include the button name
-    help_note = Nokogiri::HTML(html).at_css(".help-block")
+    help_note = Nokogiri::HTML(html).at_css(".help-note")
     assert(help_note.text.include?("Save"), "Help text should include button")
   end
 
