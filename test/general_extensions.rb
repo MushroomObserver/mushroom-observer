@@ -294,10 +294,14 @@ module GeneralExtensions
     end
   end
 
-  @@fixture_labels = {}
+  class << self
+    attr_accessor :fixture_labels
+  end
+  self.fixture_labels = {}
+
   def get_fixture_label(table, idx)
-    @@fixture_labels[table] ||= read_fixture_labels(table) || []
-    @@fixture_labels[table][idx]
+    GeneralExtensions.fixture_labels[table] ||= read_fixture_labels(table) || []
+    GeneralExtensions.fixture_labels[table][idx]
   end
 
   def read_fixture_labels(table)

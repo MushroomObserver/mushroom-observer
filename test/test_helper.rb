@@ -112,6 +112,17 @@ end
 
 module ActiveSupport
   class TestCase
+    # Shared across every subclass (UnitTestCase, FunctionalTestCase, etc.)
+    # -- anchored explicitly to ActiveSupport::TestCase (not self.class)
+    # so "run once per worker process" semantics survive regardless of
+    # which subclass instance triggers clear_logs/start_timer first. A
+    # self.class-based class-instance-variable would NOT share across
+    # subclasses the way a class variable does, silently giving each
+    # subclass its own copy.
+    class << self
+      attr_accessor :cleared_logs, :times
+    end
+
     # Run tests in parallel with specified workers.
     # `PARALLEL_WORKERS` env var overrides the CPU-count default
     # (used by system tests to cap at the Maps API port whitelist
@@ -197,7 +208,7 @@ module ActiveSupport
       # rubocop:disable Rails/TimeZoneAssignment
       Time.zone = "America/New_York"
       # rubocop:enable Rails/TimeZoneAssignment
-      clear_logs unless defined?(@@cleared_logs)
+      clear_logs unless ActiveSupport::TestCase.cleared_logs
       Symbol.missing_tags = []
       # Functional/integration tests reset this via ApplicationController's
       # own before_action on every get/post; this covers unit tests that
@@ -218,14 +229,14 @@ module ActiveSupport
 
     # Record time this test started to run.
     def start_timer
-      @@times = {} unless defined?(@@times)
-      @@times[method_name] = Time.zone.now
+      ActiveSupport::TestCase.times ||= {}
+      ActiveSupport::TestCase.times[method_name] = Time.zone.now
     end
 
     # Report time this test took to run.
     def end_timer
-      ellapsed = Time.zone.now - @@times[method_name]
-      puts("\rTIME: #{ellapsed}\t#{self.class.name}::#{method_name}")
+      elapsed = Time.zone.now - ActiveSupport::TestCase.times[method_name]
+      puts("\rTIME: #{elapsed}\t#{self.class.name}::#{method_name}")
     end
 
     # This will ensure that the logs stay a reasonable size.  If you forget to
@@ -241,7 +252,7 @@ module ActiveSupport
 
         File.truncate(path, 0)
       end
-      @@cleared_logs = true
+      ActiveSupport::TestCase.cleared_logs = true
     end
   end
 end
