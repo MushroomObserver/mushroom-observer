@@ -94,6 +94,7 @@ class Inat::ConfirmURLBuilder
 
   def translate_api_to_ui_params(query_str)
     args = Rack::Utils.parse_query(query_str.to_s)
+    args["verifiable"] = "any" unless args.key?("verifiable")
     return args.to_query unless args["taxon_id"]&.include?(",")
 
     args.except("taxon_id").

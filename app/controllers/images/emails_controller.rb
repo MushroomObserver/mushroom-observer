@@ -71,7 +71,7 @@ module Images
           redirect_to(image_path(image.id)) and return
         end
         format.turbo_stream do
-          render_modal_flash_update("commercial_inquiry_email") and return
+          render_modal_close_and_flash("commercial_inquiry_email") and return
         end
       end
     end
