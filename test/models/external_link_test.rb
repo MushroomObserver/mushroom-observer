@@ -11,7 +11,7 @@ class ExternalLinkTest < UnitTestCase
     )
     # default (manual) relationship, interpolates a non-iNat site name
     assert_equal(
-      "Manual link to MycoPortal",
+      "Manual link to MyCoPortal",
       external_links(:coprinus_comatus_obs_mycoportal_link).
         relationship_description
     )
