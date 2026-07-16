@@ -197,15 +197,18 @@ class Components::Image::Lightbox::Caption < Components::Base
   end
 
   def render_contact_link(_obs_user)
-    plain(" [")
-    Button(
+    InlineLinkBlock(items: [contact_button])
+  end
+
+  def contact_button
+    Components::Button.new(
       type: :modal,
       name: :show_observation_send_question.l,
       target: new_question_for_observation_path(@obs.id),
       modal_id: "observation_email",
-      variant: :strip, icon: :email
+      variant: :strip, icon: :email,
+      class: Components::InlineLinkBlock.item_class
     )
-    plain("]")
   end
 
   def render_truncated_notes

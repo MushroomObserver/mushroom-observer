@@ -117,8 +117,12 @@ class Components::Base < Phlex::HTML
     end
   end
 
+  # Built via `SafeBuffer.new`, not a String -- `trusted_html` only
+  # skips escaping for an `ActiveSupport::SafeBuffer`, so an
+  # un-flagged String here would render the literal, visible text
+  # "&nbsp;" instead of a non-breaking space.
   def nbsp
-    trusted_html("&nbsp;")
+    trusted_html(ActiveSupport::SafeBuffer.new("&nbsp;"))
   end
 
   # ViewerAwareFormat's default `user` arg.

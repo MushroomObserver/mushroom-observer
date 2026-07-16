@@ -73,7 +73,12 @@ class BaseTest < ComponentTestCase
                     def view_template = span { nbsp }
                   end.new)
 
-    assert_html(html, "span", text: "&nbsp;".as_displayed)
+    # Regression: `nbsp` previously emitted the literal, visible text
+    # "&nbsp;" (double-escaped) instead of a real non-breaking space
+    # -- assert against the actual U+00A0 character a browser would
+    # render, not the raw entity string.
+    assert_html(html, "span", text: "\u00A0")
+    assert_not_includes(html, "&amp;nbsp;")
   end
 
   def test_cache_store_returns_rails_cache

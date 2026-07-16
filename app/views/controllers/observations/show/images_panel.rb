@@ -15,9 +15,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Panel.new(
-             panel_class: "show_images list-group text-center m-0"
-           )) do |panel|
+    Panel(panel_class: "show_images list-group text-center m-0") do |panel|
       panel.with_heading { :IMAGES.t }
       panel.with_heading_links { heading_links }
       panel.with_body { render_body }

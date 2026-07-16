@@ -56,10 +56,15 @@ module Views::Controllers::Observations::Show::SiblingRecords
   end
 
   def render_sibling_sequence_archive(sequence)
-    plain(" [")
-    Link(type: :external,
-         content: :show_observation_archive_link.l,
-         path: sequence.accession_url)
-    plain("]")
+    InlineLinkBlock(items: [archive_link(sequence)])
+  end
+
+  def archive_link(sequence)
+    Components::Link.new(
+      type: :external,
+      content: :show_observation_archive_link.l,
+      path: sequence.accession_url,
+      class: Components::InlineLinkBlock.item_class
+    )
   end
 end

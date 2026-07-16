@@ -87,6 +87,46 @@
   }
 }
 
+// Icon-only inline mod/add links (Components::InlineCRUDLinks'
+// edit/destroy/add links, applied directly to each link/button's own
+// element -- not a wrapper, see Components::InlineLinkBlock). Same
+// border + hover treatment as .badge-id, but deliberately NOT
+// .badge-id itself: .badge's font-size: 60% !important shrinks
+// whatever's nested inside (icon glyphs included), and its default
+// horizontal padding is wider than a bare icon needs.
+//
+// vertical-align: middle -- an inline-block sitting on the text
+// baseline (the default) leaves room below it for a descender it
+// doesn't have, which stretches the surrounding line's height and
+// throws off spacing vs. sibling lines with no icon-link on them.
+// Aligning to the middle of the line box instead avoids that.
+//
+// .glyphicon's `top: 3px` (see _icons.scss) is a relative offset
+// tuned for glyphicons in their usual (untethered) contexts; inside
+// this tight a box it just pushes the icon toward the bottom, so
+// it's undone here specifically.
+.inline-icon-link {
+  display: inline-block;
+  padding: 1px !important;
+  margin-right: 0.25rem;
+  line-height: 1;
+  vertical-align: middle;
+  background-color: transparent;
+  // color: $text-color;
+  // border: 1px solid $text-color;
+  // border-radius: 3px;
+
+  .glyphicon {
+    top: 0;
+    // width: 1em;
+  }
+
+  &:hover {
+    background-color: $link-color;
+    color: $body-bg;
+  }
+}
+
 //
 // alerts
 // --------------------------------------------------

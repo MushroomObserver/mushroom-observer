@@ -123,14 +123,13 @@ module Views::Controllers::Comments
         else
           plain(@comment.user.unique_text_name)
         end
-        whitespace
       end
     end
 
     # Two render contexts, two permission strategies:
     #
     # - Normal request — `@user` is the current viewer.
-    #   `InlineModLinks` gates on `target.user == @user ||
+    #   `InlineCRUDLinks` gates on `target.user == @user ||
     #   in_admin_mode?` so the links don't appear for non-authors.
     # - Action Cable broadcast — `@user` is nil. Fall back to
     #   `comment.user` so the gate passes; the markup ships
@@ -142,9 +141,7 @@ module Views::Controllers::Comments
     def render_mod_links_span
       span(class: "text-nowrap",
            data: { user_specific: @comment.user.id }) do
-        Link(type: :inline_mod,
-             target: @comment,
-             user: @user || @comment.user, indent: false)
+        InlineCRUDLinks(target: @comment, user: @user || @comment.user)
       end
     end
 

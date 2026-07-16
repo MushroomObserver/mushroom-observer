@@ -9,9 +9,8 @@
 #
 # The heading-links icon strip is extracted to
 # `Components::Description::ModLinks` (sibling-in-spirit to
-# `Components::Link::InlineMod`). The "Version: N / Previous Version" line
-# is `Components::Description::PreviousVersion`, replacing
-# `VersionsHelper#show_previous_version`. The license-badge block
+# `Components::InlineCRUDLinks`). The "Version: N / Previous Version" line
+# is `Components::Description::PreviousVersion`. The license-badge block
 # (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
@@ -23,9 +22,7 @@ module Views::Controllers::Descriptions
     prop :review, _Boolean, default: false
 
     def view_template
-      render(Components::Panel.new(
-               panel_id: "description_details_and_alts"
-             )) do |panel|
+      Panel(panel_id: "description_details_and_alts") do |panel|
         panel.with_heading { :show_observation_details.l }
         panel.with_heading_links do
           render(Components::Description::ModLinks.new(

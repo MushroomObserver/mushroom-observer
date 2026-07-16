@@ -14,10 +14,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Panel.new(
-             panel_class: "name-section",
-             panel_id: "nomenclature"
-           )) do |panel|
+    Panel(panel_id: "nomenclature") do |panel|
       panel.with_heading { plain(:show_name_nomenclature.l) }
       panel.with_heading_links { render_edit_link } if @user
       panel.with_body { render_body }
@@ -42,22 +39,24 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Left column --------------------------------------------------
 
   def render_left_column
-    Column(xs: 12, sm: 6, class: "name-section") do
-      render_rank_line
-      render_status_line
-      render_name_line
+    Column(xs: 12, sm: 6) do
+      ul(class: "list-unstyled") do
+        render_rank_line
+        render_status_line
+        render_name_line
+      end
     end
   end
 
   def render_rank_line
-    p do
+    li(class: "hanging-indent") do
       rank_text = @name.rank ? rank_as_string(@name.rank) : :unknown.l
       plain("#{:RANK.l}: #{rank_text}")
     end
   end
 
   def render_status_line
-    p do
+    li(class: "hanging-indent") do
       plain("#{:STATUS.l}: ")
       plain(@name.status)
       plain(" (#{:MISSPELLED.l})") if @name.is_misspelling?
@@ -87,7 +86,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_name_paragraph
-    p do
+    li(class: "hanging-indent") do
       plain("#{:NAME.l}: ")
       plain(@name.real_text_name(@user))
       span(class: "text-nowrap ml-3") { render(synonyms_link) } if synonyms_link
@@ -95,14 +94,14 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_authority_paragraph
-    p do
+    li(class: "hanging-indent") do
       plain("#{:AUTHORITY.l}: ")
       trusted_html(@name.author.to_s.t)
     end
   end
 
   def render_citation_paragraph
-    p do
+    li(class: "hanging-indent") do
       plain("#{:CITATION.l}: ")
       trusted_html(@name.citation.to_s.tl)
     end
@@ -141,27 +140,29 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Right column -------------------------------------------------
 
   def render_right_column
-    Column(xs: 12, sm: 6, class: "name-section") do
-      if @name.icn_id?
-        render_icn_id_links
-      elsif @name.registrable?
-        render_registrable_links
-      elsif @name.searchable_in_registry?
-        render_searchable_registry_links
+    Column(xs: 12, sm: 6) do
+      ul(class: "list-unstyled") do
+        if @name.icn_id?
+          render_icn_id_links
+        elsif @name.registrable?
+          render_registrable_links
+        elsif @name.searchable_in_registry?
+          render_searchable_registry_links
+        end
       end
     end
   end
 
   def render_icn_id_links
-    p do
+    li do
       render_tab_link(Tab::Name::IndexFungorumRecord.new(name: @name))
       plain(" Index Fungorum")
     end
-    p do
+    li do
       render_tab_link(Tab::Name::MycobankRecord.new(name: @name))
       plain(" MycoBank")
     end
-    p { render_fungorum_synonymy_link }
+    li { render_fungorum_synonymy_link }
   end
 
   def render_fungorum_synonymy_link
@@ -173,29 +174,29 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_registrable_links
-    p do
+    li do
       plain("#{:ICN_ID.l}: ")
       em { plain(:show_name_icn_id_missing.l) }
     end
-    p { render_tab_link(Tab::Name::IndexFungorumSearchPage.new) }
-    p do
+    li { render_tab_link(Tab::Name::IndexFungorumSearchPage.new) }
+    li do
       render_tab_link(Tab::Name::IndexFungorumNameSearch.new(name: @name))
     end
-    p { render_tab_link(Tab::Name::MycobankSearch.new(name: @name)) }
+    li { render_tab_link(Tab::Name::MycobankSearch.new(name: @name)) }
   end
 
   def render_searchable_registry_links
-    p { render_tab_link(Tab::Name::IndexFungorumSearchPage.new) }
-    p do
+    li { render_tab_link(Tab::Name::IndexFungorumSearchPage.new) }
+    li do
       render_tab_link(Tab::Name::IndexFungorumNameSearch.new(name: @name))
     end
-    p { render_tab_link(Tab::Name::MycobankBasicSearch.new) }
+    li { render_tab_link(Tab::Name::MycobankBasicSearch.new) }
   end
 
   # --- Misspelling correct-spelling line ----------------------------
 
   def render_misspelling_correct_link
-    p do
+    p(class: "hanging-indent") do
       plain("#{:show_name_misspelling_correct.l}: ")
       if @name.correct_spelling
         a(href: name_path(@name.correct_spelling_id)) do
@@ -214,9 +215,11 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     misspellings = deprecated.select(&:correct_spelling_id)
     deprecated.reject!(&:correct_spelling_id)
 
-    render_synonym_group(label_for_approved, approved)
-    render_synonym_group(:show_name_deprecated_synonyms.l, deprecated)
-    render_synonym_group(:show_name_misspelled_synonyms.l, misspellings)
+    ul(class: "list-unstyled") do
+      render_synonym_group(label_for_approved, approved)
+      render_synonym_group(:show_name_deprecated_synonyms.l, deprecated)
+      render_synonym_group(:show_name_misspelled_synonyms.l, misspellings)
+    end
   end
 
   def label_for_approved
@@ -230,7 +233,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def render_synonym_group(label, names)
     return if names.blank?
 
-    p do
+    li(class: "hanging-indent") do
       plain("#{label}: ")
       names.each_with_index do |n, idx|
         a(href: name_path(n.id)) do

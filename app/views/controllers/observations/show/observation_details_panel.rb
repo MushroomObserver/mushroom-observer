@@ -15,10 +15,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    render(Components::Panel.new(
-             panel_id: "observation_details",
-             panel_class: "name-section"
-           )) do |panel|
+    Panel(panel_id: "observation_details") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
       panel.with_body { render_body }
@@ -41,8 +38,10 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_body
-    render_when_where_who
-    render_specimen_line if @user
+    ul(class: "list-unstyled") do
+      render_when_where_who
+      render_specimen_line if @user
+    end
     render_notes
     render_projects if @user && @obs.projects.present?
     render_field_slip if @user && @obs.field_slip
@@ -59,14 +58,14 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_when
-    p(class: "obs-when", id: "observation_when") do
+    li(class: "obs-when", id: "observation_when") do
       plain("#{:WHEN.t}: ")
       b { @obs.when.web_date }
     end
   end
 
   def render_where
-    p(class: "obs-where", id: "observation_where") do
+    li(class: "obs-where", id: "observation_where") do
       plain("#{where_label}: ")
       render_where_link
       render_vague_notice
@@ -101,7 +100,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_where_gps
     return unless @obs.lat && @user
 
-    p(class: "obs-where-gps", id: "observation_where_gps") do
+    li(class: "obs-where-gps", id: "observation_where_gps") do
       # XXX Consider dropping this from indexes.
       render_gps_display_link if @obs.reveal_location?(@user)
       render_gps_hidden_msg if @obs.gps_hidden
@@ -125,7 +124,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   # obs with no recorded collector shows only "Entered by:" — we don't
   # claim the entering recorder as the collector. See #4211.
   def render_who
-    p(class: "obs-who", id: "observation_who") do
+    li(class: "obs-who", id: "observation_who") do
       if @obs.collector_unrecorded?
         render_entered_by
       else
@@ -181,21 +180,24 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_send_question_link
-    plain(" [")
-    Button(
+    InlineLinkBlock(items: [send_question_button])
+  end
+
+  def send_question_button
+    Components::Button.new(
       type: :modal,
       name: :show_observation_send_question.l,
       target: new_question_for_observation_path(@obs.id),
       modal_id: "observation_email",
-      variant: :strip, icon: :email
+      variant: :strip, icon: :email,
+      class: Components::InlineLinkBlock.item_class
     )
-    plain("]")
   end
 
   # ---- specimen / notes / projects / field slip --------------
 
   def render_specimen_line
-    p(class: "obs-specimen", id: "observation_specimen_available") do
+    li(class: "obs-specimen", id: "observation_specimen_available") do
       if @obs.occurrence&.has_specimen || @obs.specimen
         plain(:show_observation_specimen_available.t)
       else

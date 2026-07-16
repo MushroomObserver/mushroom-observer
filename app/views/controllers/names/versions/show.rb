@@ -78,10 +78,7 @@ module Views::Controllers::Names::Versions
     end
 
     def render_classification_panel
-      render(Components::Panel.new(
-               panel_class: "name-section",
-               panel_id: "name_classification"
-             )) do |panel|
+      Panel(panel_id: "name_classification") do |panel|
         panel.with_heading { plain(:show_name_classification.l) }
         panel.with_body { render_classification_body }
       end
@@ -97,7 +94,7 @@ module Views::Controllers::Names::Versions
     end
 
     def render_inherited_classification_source
-      p(class: "text-muted small mt-2") do
+      p(class: "text-muted small mt-2 mb-0") do
         trusted_html(inherited_classification_text)
       end
     end

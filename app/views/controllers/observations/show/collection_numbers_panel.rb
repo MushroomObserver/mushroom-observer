@@ -9,7 +9,7 @@
 # When there are no records but the user can edit: "no records [ new ]"
 #
 # `remove_collection_number_button` is handled by
-# `Components::Link::InlineMod` which knows how to detach a
+# `Components::InlineCRUDLinks` which knows how to detach a
 # `CollectionNumber` from its observation.
 class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Base
   prop :obs, ::Observation
@@ -58,8 +58,7 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
   def render_editable_row(number)
     li(id: "collection_number_#{number.id}") do
       render_show_link(number)
-      Link(type: :inline_mod,
-           target: number, observation: @obs, user: @user)
+      InlineCRUDLinks(target: number, observation: @obs, user: @user)
     end
   end
 
@@ -92,8 +91,9 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Ba
   end
 
   def render_new_link
-    Link(type: :inline_add,
-         modal_id: "collection_number",
-         tab: ::Tab::CollectionNumber::New.new(observation: @obs))
+    InlineCRUDLinks(
+      modal_id: "collection_number",
+      tab: ::Tab::CollectionNumber::New.new(observation: @obs)
+    )
   end
 end
