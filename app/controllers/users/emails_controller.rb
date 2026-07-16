@@ -63,7 +63,7 @@ module Users
           redirect_to(user_path(receiver.id)) and return
         end
         format.turbo_stream do
-          render_modal_flash_update("user_question_email") and return
+          render_modal_close_and_flash("user_question_email") and return
         end
       end
     end
