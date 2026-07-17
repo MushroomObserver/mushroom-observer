@@ -332,6 +332,32 @@ class Image::ProcessorTest < UnitTestCase
     assert_equal(500, image.height)
   end
 
+  # Regression for a bug found testing #4824: a mirror leaves
+  # width/height unchanged, and transferred can already be false (any
+  # environment with no writable image servers, or a not-yet-transferred
+  # image) -- with no dirty attribute, Rails skipped the UPDATE
+  # entirely, so updated_at (and the #4808 cache-busting URL token
+  # derived from it) never changed and browsers kept serving the
+  # pre-mirror bytes. Rotations dodged this only because width/height
+  # swap. The record must be touched whenever the files are rewritten.
+  def test_rotate_mirror_bumps_updated_at_when_no_attribute_changes
+    image = images(:in_situ_image)
+    FileUtils.cp(JPG_FIXTURE, "#{local_root}/orig/#{image.id}.jpg")
+    width, height = FastImage.size("#{local_root}/orig/#{image.id}.jpg")
+    image.update_columns(transferred: false, width: width, height: height,
+                         updated_at: 1.day.ago)
+    old_updated_at = image.reload.updated_at
+    old_url = image.url(:small)
+
+    Image::Processor.new(image: image, ext: "jpg").rotate("-h")
+
+    image.reload
+    assert_operator(image.updated_at, :>, old_updated_at,
+                    "mirror must bump updated_at so the cache-busting " \
+                    "URL token changes")
+    assert_not_equal(old_url, image.url(:small))
+  end
+
   def test_salvage_first_layer_if_multilayer_picks_one_and_cleans_up
     image = images(:in_situ_image)
     processor = Image::Processor.new(image: image, ext: "tiff")

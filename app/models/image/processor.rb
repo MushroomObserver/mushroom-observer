@@ -255,9 +255,16 @@ class Image
 
     # This also sets transferred to false to save db writes.
     # Needed in rotate, and later overwritten in process.
+    # updated_at is forced explicitly: a mirror (or 180/vertical flip)
+    # leaves width/height unchanged, and transferred can already be
+    # false -- with no dirty attribute Rails skips the UPDATE entirely,
+    # so updated_at (and the #4808 cache-busting URL token derived from
+    # it) would never change and browsers would keep the pre-transform
+    # bytes. Rotations dodge this only by luck (width/height swap).
     def update_image_record_width_height_and_transferred
       width, height = FastImage.size(full_size_filepath)
-      @image.update(width: width, height: height, transferred: false)
+      @image.update(width: width, height: height, transferred: false,
+                    updated_at: Time.zone.now)
     end
 
     def make_file_sizes
