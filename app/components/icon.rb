@@ -1,87 +1,89 @@
 # frozen_string_literal: true
 
-# Renders a Bootstrap 3 Glyphicon `<span>` with the MO `link-icon`
-# class added. Optionally adds a tooltip + screen-reader title.
+# Renders a Font Awesome Free (solid style) `<span>` with the MO
+# `link-icon` class added. Optionally adds a tooltip + screen-reader
+# title.
 #
 # @example Just the glyph
 #   Icon(type: :globe)
-#   # => <span class="glyphicon glyphicon-globe link-icon"></span>
+#   # => <span class="fa-solid fa-earth-americas link-icon"></span>
 #
 # @example With tooltip + screen-reader title + extra CSS
 #   Icon(type: :edit, title: :EDIT.l, class: "text-primary")
-#   # => <span class="glyphicon glyphicon-edit link-icon text-primary"
+#   # => <span class="fa-solid fa-pen-to-square link-icon text-primary"
 #   #          title="Edit" data-toggle="tooltip">
 #   #      <span class="sr-only">Edit</span>
 #   #    </span>
 class Components::Icon < Components::Base
   # Glyph name lookup — `Components::Icon.new(type: :edit)` resolves
-  # `:edit` to the Bootstrap glyphicon class suffix `edit`, emitted as
-  # `glyphicon glyphicon-edit`. Callers across the codebase pass the
-  # semantic symbol; this table is the only place the glyphicon name
-  # is hardcoded.
+  # `:edit` to the Font Awesome Free solid-style icon name `edit`,
+  # emitted as `fa-solid fa-pen-to-square`. Callers across the codebase
+  # pass the semantic symbol; this table is the only place the Font
+  # Awesome icon name is hardcoded. Picked via the side-by-side
+  # comparison page in #4775 (Bootstrap 3 Glyphicons -> Font Awesome).
   GLYPHS = {
-    edit: "edit",
-    delete: "remove-circle",
+    edit: "pen-to-square",
+    delete: "circle-xmark",
     add: "plus",
-    back: "step-backward",
-    show: "eye-open",
-    hide: "eye-close",
-    reuse: "share",
-    x: "remove",
-    remove: "remove-circle",
-    send: "send",
-    log_in: "log-in",
-    log_out: "log-out",
-    admin: "text-background",
+    back: "backward-step",
+    show: "eye",
+    hide: "eye-slash",
+    reuse: "arrows-turn-right",
+    x: "xmark",
+    remove: "circle-xmark",
+    send: "paper-plane",
+    log_in: "right-to-bracket",
+    log_out: "right-from-bracket",
+    admin: "a",
     inbox: "inbox",
     interests: "bullhorn",
-    settings: "cog",
-    ban: "ban-circle",
-    plus: "plus-sign",
-    minus: "minus-sign",
-    trash: "trash",
-    cancel: "remove",
+    settings: "gear",
+    ban: "ban",
+    plus: "circle-plus",
+    minus: "circle-minus",
+    trash: "trash-can",
+    cancel: "xmark",
     email: "envelope",
-    question: "question-sign",
-    alert: "alert",
-    list: "list",
-    copy: "copy",
-    clone: "duplicate",
-    merge: "transfer",
-    move: "random",
-    adjust: "resize-vertical",
+    question: "circle-question",
+    alert: "triangle-exclamation",
+    list: "list-ul",
+    copy: "clipboard-check",
+    clone: "copy",
+    merge: "arrow-right-arrow-left",
+    move: "shuffle",
+    adjust: "up-down",
     make_default: "star",
-    publish: "upload",
-    check: "ok-circle",
-    deprecate: "ok-circle", # approved name needs to look "approved"
-    approve: "exclamation-sign", # deprecated name needs to look "deprecated"
-    synonyms: "random",
+    publish: "circle-up",
+    check: "circle-check",
+    deprecate: "circle-check", # approved name needs to look "approved"
+    approve: "circle-exclamation", # deprecated name needs to look "deprecated"
+    synonyms: "shuffle",
     tracking: "bullhorn",
-    manage_lists: "indent-left",
+    manage_lists: "list-check",
     observations: "tags",
     print: "print",
-    globe: "globe",
-    find_on_map: "screenshot",
-    apply: "check",
+    globe: "earth-americas",
+    find_on_map: "location-crosshairs",
+    apply: "square-check",
     chevron_down: "chevron-down",
     chevron_up: "chevron-up",
     chevron_left: "chevron-left",
     chevron_right: "chevron-right",
     qrcode: "qrcode",
-    mobile: "phone",
-    project: "th-list",
-    download: "download-alt",
-    new_window: "new-window",
-    search: "search",
-    prev: "triangle-left",
-    next: "triangle-right",
-    goto: "share-alt",
-    grid: "th",
-    menu: "align-justify",
-    info: "question-sign",
-    fullscreen: "fullscreen",
-    matrix: "th-large",
-    info_circle: "info-sign",
+    mobile: "mobile-screen-button",
+    project: "diagram-project",
+    download: "download",
+    new_window: "up-right-from-square",
+    search: "magnifying-glass",
+    prev: "caret-left",
+    next: "caret-right",
+    goto: "share",
+    grid: "table-cells",
+    menu: "bars",
+    info: "circle-question",
+    fullscreen: "maximize",
+    matrix: "table-cells-large",
+    info_circle: "circle-info",
     user: "user"
   }.freeze
 
@@ -110,7 +112,7 @@ class Components::Icon < Components::Base
   private
 
   def span_class(glyph)
-    base = "glyphicon glyphicon-#{glyph} link-icon"
+    base = "fa-solid fa-#{glyph} link-icon"
     class_names(base, @attributes[:class])
   end
 

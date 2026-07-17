@@ -65,6 +65,9 @@ gem("sprockets", "~>4.2.1")
 gem("dartsass-sprockets")
 # Use bootstrap style generator
 gem("bootstrap-sass")
+# Icon font (#3797) -- same self-hosted-via-Sprockets pattern as
+# bootstrap-sass above, not a CDN.
+gem("font-awesome-sass")
 # Use Terser as compressor for JavaScript assets
 gem("terser")
 

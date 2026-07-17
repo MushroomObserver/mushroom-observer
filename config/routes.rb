@@ -828,6 +828,8 @@ MushroomObserver::Application.routes.draw do
   # ----- Test pages  -------------------------------------------
   namespace :test_pages do
     resource :flash_redirection, only: [:show], controller: "flash_redirection"
+    resource :icon_library_comparison, only: [:show],
+                                       controller: "icon_library_comparison"
   end
 
   # ----- Translations: standard actions  -------------------------------------

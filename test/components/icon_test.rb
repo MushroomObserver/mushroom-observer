@@ -6,7 +6,7 @@ class LinkIconTest < ComponentTestCase
   def test_glyph_only
     html = render(Components::Icon.new(type: :globe))
 
-    assert_html(html, "span.glyphicon.glyphicon-globe.link-icon")
+    assert_html(html, "span.fa-solid.fa-earth-americas.link-icon")
     # No sr-only inner span when title is absent — just the bare glyph.
     assert_no_html(html, "span.sr-only")
   end
@@ -26,7 +26,7 @@ class LinkIconTest < ComponentTestCase
                   ))
 
     assert_html(html,
-                "span.glyphicon-edit.link-icon.text-primary" \
+                "span.fa-pen-to-square.link-icon.text-primary" \
                 "[title='#{:EDIT.l}'][data-toggle='tooltip']")
     # Screen-reader label so the icon-only link has an accessible name.
     assert_html(html, "span.sr-only", text: :EDIT.l)
@@ -47,6 +47,6 @@ class LinkIconTest < ComponentTestCase
                     type: :globe, id: "my_icon"
                   ))
 
-    assert_html(html, "span#my_icon.glyphicon-globe")
+    assert_html(html, "span#my_icon.fa-earth-americas")
   end
 end

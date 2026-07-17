@@ -169,6 +169,8 @@ GEM
     ffi (1.17.4-x86_64-darwin)
     ffi (1.17.4-x86_64-linux-gnu)
     ffi (1.17.4-x86_64-linux-musl)
+    font-awesome-sass (6.7.2)
+      sassc (~> 2.0)
     fugit (1.12.1)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
@@ -649,6 +651,7 @@ DEPENDENCIES
   debug
   exception_notification
   fastimage
+  font-awesome-sass
   google-cloud-storage
   haversine
   i18n
