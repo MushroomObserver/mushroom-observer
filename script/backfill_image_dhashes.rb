@@ -132,15 +132,27 @@ class BackfillImageDhashes
   end
 
   # Returns the API2 error codes from the response ([] on success).
+  # Timeouts keep one stalled connection from hanging the whole run.
   def request_push(image)
     uri = URI("#{@push_url}/api2/images.json")
     request = Net::HTTP::Patch.new(uri)
     request.set_form_data(id: image.id, set_dhash: image.dhash,
                           api_key: @push_key)
     response = Net::HTTP.start(uri.host, uri.port,
-                               use_ssl: uri.scheme == "https") do |http|
+                               use_ssl: uri.scheme == "https",
+                               open_timeout: 10, read_timeout: 60) do |http|
       http.request(request)
     end
+    parse_push_response(response)
+  end
+
+  # API2 reports its own errors as JSON in a 200 response; a non-2xx
+  # never reached the normal API flow (proxy error, 500, wrong path)
+  # and its body may not be JSON at all -- report the status instead
+  # of a confusing JSON parse error.
+  def parse_push_response(response)
+    return ["HTTP #{response.code}"] unless response.is_a?(Net::HTTPSuccess)
+
     body = JSON.parse(response.body)
     (body["errors"] || []).pluck("code")
   end

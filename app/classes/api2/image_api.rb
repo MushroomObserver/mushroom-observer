@@ -82,6 +82,15 @@ class API2
     end
     # rubocop:enable Layout/MultilineOperationIndentation
 
+    # Maps update_params keys (model attributes) back to the API's set_*
+    # parameter names, so a mixed-setters error names the exact
+    # parameters the caller sent (:when is set via :set_date).
+    SETTER_PARAM_NAMES = {
+      when: :set_date, notes: :set_notes,
+      copyright_holder: :set_copyright_holder, license: :set_license,
+      original_name: :set_original_name
+    }.freeze
+
     # set_dhash bypasses the normal owner-permission update path: it is
     # site-admin-only, exclusive of the other setters (different
     # permission model), and fill-null-only -- an existing different
@@ -91,7 +100,10 @@ class API2
       return super unless @set_dhash
 
       raise(MustBeSiteAdmin.new) unless user.admin
-      raise(OneOrTheOther.new([:set_dhash, :other_setters])) if params.any?
+      return if params.empty?
+
+      mixed = params.keys.map { |k| SETTER_PARAM_NAMES.fetch(k, k) }
+      raise(OneOrTheOther.new([:set_dhash] + mixed))
     end
 
     def build_setter(params)
