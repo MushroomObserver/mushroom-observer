@@ -980,7 +980,7 @@ class ReportTest < UnitTestCase
 
     assert(
       warnings.any? do |msg|
-        msg.include?("Mycoportal export link failed for Image #{image.id}")
+        msg.include?("MyCoPortal export link failed for Image #{image.id}")
       end,
       "mark_exported! should log a warning naming the failed image when " \
       "ExternalLink.create! raises RecordInvalid"
@@ -991,6 +991,18 @@ class ReportTest < UnitTestCase
                            relationship: :export),
       "No ExternalLink should be created when create! raises"
     )
+  end
+
+  def test_mycoportal_image_list_mark_exported_survives_site_lookup_failure
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+    report.body
+
+    site_lookup_fails = -> { raise(ActiveRecord::RecordNotFound) }
+    ExternalSite.stub(:mycoportal, site_lookup_fails) do
+      assert_nothing_raised do
+        report.mark_exported!
+      end
+    end
   end
 
   def hashed_expect(obs)

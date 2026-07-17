@@ -393,6 +393,9 @@ module Observations
     def test_mycoportal_image_list_marks_images_exported
       query = Query.lookup_and_save(:Observation, by_users: [dick])
       obs = Observation.joins(:images).where(id: query.results(&:id)).first
+      assert_not_nil(
+        obs, "Test needs a query which results in an Observation with Images"
+      )
       image = obs.images.first
       site = ExternalSite.mycoportal
 

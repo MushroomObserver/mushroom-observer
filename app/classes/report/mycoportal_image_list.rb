@@ -55,13 +55,27 @@ module Report
         raise("mark_exported! called before body/image_list")
       end
 
-      site = ExternalSite.mycoportal
-      @exported_image_ids.each { |image_id| create_export_link(site, image_id) }
+      export_images!
     end
 
     # --------------------
 
     private
+
+    # Bookkeeping only -- must never let a failure here (e.g. a missing
+    # ExternalSite row, a DB error) turn an already-computed, valid CSV
+    # into a 500. #render_report has already sent the file to the
+    # caller by the time this runs, but Rails discards that response
+    # and renders an error page if the action subsequently raises, so
+    # any exception here would still cost the user their download.
+    def export_images!
+      site = ExternalSite.mycoportal
+      @exported_image_ids.each { |image_id| create_export_link(site, image_id) }
+    rescue StandardError => e
+      Rails.logger.error(
+        "MyCoPortal export-tracking failed: #{e.class}: #{e.message}"
+      )
+    end
 
     def image_list
       rows_data = image_rows_data
@@ -92,7 +106,7 @@ module Report
     def already_exported_image_ids
       ExternalLink.where(external_site: ExternalSite.mycoportal,
                          target_type: "Image", relationship: :export).
-        select(:target_id)
+        select(:target_id).distinct
     end
 
     def create_export_link(site, image_id)
@@ -106,7 +120,7 @@ module Report
                            relationship: :export)
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.warn(
-        "Mycoportal export link failed for Image #{image_id}: #{e.message}"
+        "MyCoPortal export link failed for Image #{image_id}: #{e.message}"
       )
     end
 
