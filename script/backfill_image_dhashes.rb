@@ -65,6 +65,8 @@ class BackfillImageDhashes
 
   def run
     relation = scoped_images
+    puts("Computing the #{@scope}-scope image count " \
+         "(the first query on a cold database can take a while)...")
     total = relation.count
     puts("Backfilling dhashes for #{total} images (scope: #{@scope})")
     relation.find_each.with_index do |image, i|
@@ -97,15 +99,20 @@ class BackfillImageDhashes
     Image.where(id: linked_image_ids)
   end
 
-  # Ids of images belonging to observations that have an iNaturalist
-  # Observation ExternalLink — the reflection/discovery comparison scope.
+  # Images belonging to observations that have an iNaturalist
+  # Observation ExternalLink — the reflection/discovery comparison
+  # scope. A pure-SQL subquery chain, deliberately NOT a pluck: the old
+  # distinct.pluck materialized ~400k image ids into Ruby and shipped
+  # them back as a multi-megabyte IN list on the count AND on every
+  # find_each batch, which crawled for minutes on a cold database
+  # (fresh checkpoint import: empty buffer pool, unanalyzed tables).
+  # Subqueries let MySQL semijoin it all server-side.
   def linked_image_ids
     linked_obs = ExternalLink.
                  where(external_site_id: ExternalSite.inaturalist.id,
                        target_type: "Observation").
                  select(:target_id)
-    ObservationImage.where(observation_id: linked_obs).
-      distinct.pluck(:image_id)
+    ObservationImage.where(observation_id: linked_obs).select(:image_id)
   end
 
   def hash_one(image)
