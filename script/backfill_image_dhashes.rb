@@ -151,6 +151,9 @@ class BackfillImageDhashes
     queue.close
     workers.each(&:join)
     reporter.kill
+    # Final interval-independent report so the progress stream always
+    # ends at 100% even when the run finishes between reporter ticks.
+    report_progress(total)
   end
 
   def start_workers(queue)

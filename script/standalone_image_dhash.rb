@@ -89,9 +89,16 @@ class StandaloneImageDhash
     reporter = start_reporter(ids.length)
     ids.each { |id| queue << id }
     queue.close
+    drain(workers, reporter, ids.length)
+    csv.close
+  end
+
+  def drain(workers, reporter, total)
     workers.each(&:join)
     reporter.kill
-    csv.close
+    # Final interval-independent report so the progress stream always
+    # ends at 100% even when the run finishes between reporter ticks.
+    report_progress(total)
   end
 
   def start_workers(queue, csv)

@@ -78,6 +78,9 @@ class TransferImageDhashes
       apply_one(id, dhash)
       report_progress(i + 1, total)
     end
+    # Final interval-independent report so the progress stream always
+    # ends at 100% even when the run finishes between report intervals.
+    report_progress(total, total, force: true) if total.positive?
     summarize
   end
 
@@ -116,9 +119,9 @@ class TransferImageDhashes
     @limit && @limit <= VERBOSE_LIMIT
   end
 
-  def report_progress(done, total)
+  def report_progress(done, total, force: false)
     now = Time.current
-    return if now - @last_report_at < @report_interval
+    return if !force && now - @last_report_at < @report_interval
 
     @last_report_at = now
     warn("  #{pace_report(done, total, now)} -- " \
