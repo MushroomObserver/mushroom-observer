@@ -410,3 +410,10 @@ Minitest/RefuteFalse:
 
 Capybara/SpecificActions:
   Enabled: true
+
+Rails/TimeZone:
+  # standalone_image_dhash.rb runs on the images server with plain Ruby
+  # (no ActiveSupport) -- Time.zone does not exist there, so the cop's
+  # autocorrect would break it.
+  Exclude:
+    - script/standalone_image_dhash.rb
