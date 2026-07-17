@@ -211,7 +211,7 @@ class CommentsController < ApplicationController
     @comment.log_create
     flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
 
-    refresh_comments_or_redirect_to_show(extra_streams: [prepend_comment_row])
+    refresh_comments_or_redirect_to_show
   end
 
   # Form to edit a comment for an object..

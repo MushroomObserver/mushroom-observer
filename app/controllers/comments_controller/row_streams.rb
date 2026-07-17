@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Turbo Stream row updates for the `create`/`update`/`destroy` actions.
+# Turbo Stream row updates for the `update`/`destroy` actions.
 #
 # The synchronous turbo_stream response has to apply the row change
 # itself -- the `Comment` model's own `after_*_commit` broadcast
@@ -11,17 +11,16 @@
 #
 # The model callbacks stay in place for cross-tab / cross-user sync;
 # these methods only cover the acting user's own request.
+#
+# `create` deliberately has no synchronous counterpart here. Unlike
+# `update`/`remove`, `prepend` isn't idempotent: `after_create_commit`
+# fires (and dispatches its broadcast) before the controller even
+# builds this response, so a synchronous prepend would very often
+# race a second, duplicate prepend of the same row once the broadcast
+# lands. `create` isn't reported broken (#4833 is update/destroy
+# only), so it's left to the model's broadcast alone.
 module CommentsController::RowStreams
   private
-
-  def prepend_comment_row
-    turbo_stream.prepend(
-      "comments",
-      ::Views::Controllers::Comments::CommentRow.new(
-        comment: @comment, user: @user, editable: @user.present?
-      )
-    )
-  end
 
   def update_comment_row
     turbo_stream.update(

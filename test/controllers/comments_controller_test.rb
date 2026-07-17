@@ -427,11 +427,12 @@ class CommentsControllerTest < FunctionalTestCase
     assert_select("turbo-stream[action=?][target=?]", "remove", "modal_comment")
   end
 
-  # The synchronous response has to prepend the new row itself -- the
-  # `Comment` model's own `after_create_commit` broadcast is async
-  # and isn't guaranteed to reach the submitter's own tab before (or
-  # ever, if the connection drops) the modal closes (#4833).
-  def test_create_comment_turbo_stream_prepends_row
+  # Unlike `update`/`destroy`, `create` must NOT also prepend the row
+  # synchronously here: `after_create_commit`'s broadcast fires before
+  # this response is even built, so a synchronous prepend would race
+  # a second, duplicate prepend of the same row once the broadcast
+  # lands (see `CommentsController::RowStreams`).
+  def test_create_comment_turbo_stream_does_not_duplicate_row
     obs = observations(:minimal_unknown_obs)
     params = { target: obs.id,
                type: "Observation",
@@ -440,18 +441,9 @@ class CommentsControllerTest < FunctionalTestCase
     login
     post(:create, params: params, as: :turbo_stream)
     assert_response(:success)
-    comment = Comment.find_by(summary: "Turbo Prepend Test", target: obs)
-    assert_not_nil(comment, "Cannot find Comment")
 
-    assert_select(
-      "turbo-stream[action=?][target=?] " \
-      ".comment##{ActionView::RecordIdentifier.dom_id(comment)}",
-      "prepend", "comments"
-    )
-    assert_select(
-      "turbo-stream[action=?][target=?] .comment-summary",
-      "prepend", "comments", text: comment.summary
-    )
+    assert_select("turbo-stream[action=?][target=?]", "prepend", "comments",
+                  count: 0)
   end
 
   def test_update_comment_turbo_stream_removes_scoped_modal
