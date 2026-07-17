@@ -90,10 +90,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
-    # Other-only notes render the "Notes:" caption with the value as an
-    # indented textile paragraph beneath it.
-    assert_select("#observation_notes", text: /Notes:/)
-    assert_select("#observation_notes .indent .textile p",
+    # Other-only notes render under a "Notes" panel heading, with the
+    # value as a textile paragraph in the panel body.
+    assert_select("#observation_notes .panel-title", text: :NOTES.l)
+    assert_select("#observation_notes .textile p",
                   text: "Second fruiting in bark chips")
   end
 

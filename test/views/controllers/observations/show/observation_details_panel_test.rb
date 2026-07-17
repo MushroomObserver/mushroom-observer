@@ -16,58 +16,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     assert_html(html, "#observation_details")
   end
 
-  # Sibling records: when a sibling carries a Sequence with a
-  # deposit URL, the panel renders the sibling sequence row +
-  # the `[archive]` link from `SiblingRecords`. Covers the
-  # `render_sequences` sibling-block path + the
-  # `render_sibling_sequence_archive` body.
-  def test_sibling_sequence_with_archive_renders
-    seq = sequences(:deposited_sequence)
-    sibling = seq.observation
-
-    html = render(
-      Views::Controllers::Observations::Show::ObservationDetailsPanel.new(
-        obs: @obs, user: @user, sites: [], siblings: [sibling]
-      )
-    )
-
-    # Sibling sequence's show link
-    assert_html(html, "a[href='#{routes.sequence_path(seq.id)}']")
-    # `[archive]` inline link from `render_sibling_sequence_archive`
-    assert_html(
-      html, "a[href='#{seq.accession_url}'][target='_blank']",
-      text: :show_observation_archive_link.t
-    )
-  end
-
-  # Sibling herbarium record covers
-  # `render_sibling_herbarium_record` and
-  # `render_mcp_search_link` when the herbarium is
-  # `web_searchable?`.
-  def test_sibling_herbarium_record_with_web_searchable
-    record = ::HerbariumRecord.joins(:herbarium).
-             where(herbaria: { code: %w[NY NEB FH MICH] }).first ||
-             ::HerbariumRecord.joins(:observations).distinct.first ||
-             skip("Need a herbarium_record attached to an obs")
-    sibling = record.observations.first || skip("Sibling missing")
-
-    html = render(
-      Views::Controllers::Observations::Show::ObservationDetailsPanel.new(
-        obs: @obs, user: @user, sites: [], siblings: [sibling]
-      )
-    )
-
-    # Sibling herb-record show link
-    assert_html(
-      html, "a[href='#{routes.herbarium_record_path(record.id)}']"
-    )
-    # MO attribution link
-    assert_html(
-      html, "small.text-muted " \
-            "a[href='#{routes.permanent_observation_path(sibling.id)}']"
-    )
-  end
-
   # --- Collector / Entered by (#4211) ---
 
   def test_who_collector_is_creator_no_entered_by
@@ -138,37 +86,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
 
     # The "[" ... "]" send-question modal link rides the who line.
     assert_html(html, "#observation_who a[data-controller='modal-toggle']")
-  end
-
-  def test_notes_render_without_collector_special_casing
-    @obs.notes = { Substrate: "wood", Other: "field notes here" }
-
-    html = render(panel_with(@obs))
-    notes = Nokogiri::HTML.fragment(html).at_css("#observation_notes").text
-
-    assert_includes(notes, "field notes here")
-    assert_includes(notes, "wood")
-  end
-
-  # A note value with blank lines must not truncate at the first blank
-  # line; each value renders as a textile block indented beneath its
-  # caption, with blank lines preserved as separate paragraphs.
-  def test_notes_with_blank_lines_not_truncated
-    @obs.notes = { Substrate: "wood",
-                   Other: "first paragraph\n\nsecond paragraph\n\nthird" }
-
-    html = render(panel_with(@obs))
-    notes = Nokogiri::HTML.fragment(html).at_css("#observation_notes")
-
-    # All three paragraphs present (no truncation at the first blank line).
-    assert_includes(notes.text, "first paragraph")
-    assert_includes(notes.text, "second paragraph")
-    assert_includes(notes.text, "third")
-    # The Other value's blank lines survive as separate textile
-    # paragraphs (3), plus one for the single-paragraph Substrate value.
-    assert_operator(notes.css("p").length, :>=, 4,
-                    "Blank lines should render as separate paragraphs")
-    assert_includes(notes.text, "wood")
   end
 
   private

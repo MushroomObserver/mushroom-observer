@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 # "Observation details" panel — when / where / who, optional GPS,
-# specimen-available line, free-text notes, projects list, field
-# slip, collection-numbers / herbarium-records / sequences sub-
-# panels, and external links. The center column of the obs show
-# page (and also rendered into the naming form pages).
+# projects list, field slip, and external links. The center column
+# of the obs show page (and also rendered into the naming form
+# pages). Specimen-available status + collection-numbers /
+# herbarium-records / sequences live in the separate `SpecimenPanel`,
+# rendered right below this one.
 class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::Base
-  include Views::Controllers::Observations::Show::SiblingRecords
-
   prop :obs, ::Observation
   prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
   prop :user, _Nilable(::User), default: nil
@@ -38,14 +37,10 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_body
-    ul(class: "list-unstyled") do
-      render_when_where_who
-      render_specimen_line if @user
-    end
-    render_notes
+    ul(class: "list-unstyled") { render_when_where_who }
     render_projects if @user && @obs.projects.present?
     render_field_slip if @user && @obs.field_slip
-    render_sub_panels_and_external_links if @user
+    render_external_links_panel if @user && show_external_links?
   end
 
   # ---- when / where / who -----------------------------------
@@ -194,52 +189,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     )
   end
 
-  # ---- specimen / notes / projects / field slip --------------
-
-  def render_specimen_line
-    li(class: "obs-specimen", id: "observation_specimen_available") do
-      if @obs.occurrence&.has_specimen || @obs.specimen
-        plain(:show_observation_specimen_available.t)
-      else
-        plain(:show_observation_specimen_not_available.t)
-      end
-    end
-  end
-
-  # Passes each notes value to textile independently rather than
-  # the whole block — a `+photo` value at the start of a line
-  # would otherwise be interpreted as textile bold-emphasis across
-  # subsequent lines.
-  def render_notes
-    notes = @obs.notes
-    return if notes == ::Observation.no_notes
-
-    div(class: "obs-notes textile", id: "observation_notes") do
-      # ApplicationController resets the per-request Textile cache
-      # before every action; this only needs to prime it.
-      ::Textile.register_name(@obs.name)
-      trusted_html("#{:NOTES.t}:".t)
-      div(class: "indent") { render_note_values(notes) }
-    end
-  end
-
-  # "Other"-only notes show just the value (MO omits the lone "Other"
-  # caption); multi-part notes show each caption with its value indented
-  # beneath it. Values render via `.tpl` (full textile) so blank lines
-  # survive as paragraph breaks — `.tl` keeps only the first paragraph
-  # and would truncate the note at its first blank line (#4536).
-  def render_note_values(notes)
-    if notes.keys == [:Other]
-      trusted_html(notes[:Other].to_s.tpl)
-    else
-      notes.each { |key, value| render_note_part(key, value) }
-    end
-  end
-
-  def render_note_part(key, value)
-    trusted_html("+#{key.to_s.tr("_", " ")}+:".tl)
-    div(class: "indent") { trusted_html(value.to_s.tpl) }
-  end
+  # ---- projects / field slip -----------------------------------
 
   def render_projects
     div(class: "obs-projects", id: "observation_projects") do
@@ -260,51 +210,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     end
   end
 
-  # ---- sub-panels (collection / herbarium / sequences / EL) --
-
-  def render_sub_panels_and_external_links
-    render_collection_numbers
-    render_herbarium_records
-    render_sequences
-    render_external_links_panel if show_external_links?
-  end
-
-  def render_collection_numbers
-    render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
-             obs: @obs, user: @user,
-             has_sibling_records: sibling_has?(:collection_numbers)
-           ))
-    render_sibling_records(:collection_numbers) do |cn, sib|
-      a(href: collection_number_path(cn.id)) do
-        trusted_html(cn.format_name)
-      end
-      whitespace
-      sibling_attribution(sib)
-    end
-  end
-
-  def render_herbarium_records
-    render(Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
-             obs: @obs, user: @user,
-             has_sibling_records: sibling_has?(:herbarium_records)
-           ))
-    render_sibling_records(:herbarium_records) do |hr, sib|
-      render_sibling_herbarium_record(hr, sib)
-    end
-  end
-
-  def render_sequences
-    render(Views::Controllers::Observations::Show::SequencesPanel.new(
-             obs: @obs, user: @user,
-             has_sibling_records: sibling_has?(:sequences)
-           ))
-    render_sibling_records(:sequences) do |seq, sib|
-      a(href: sequence_path(seq.id)) { trusted_html(seq.format_name) }
-      render_sibling_sequence_archive(seq) if seq.deposit?
-      whitespace
-      sibling_attribution(sib)
-    end
-  end
+  # ---- external links -----------------------------------------
 
   def show_external_links?
     @obs.external_links.any? || @sites.present? ||

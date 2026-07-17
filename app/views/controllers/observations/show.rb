@@ -100,6 +100,10 @@ module Views::Controllers::Observations
              ))
       return unless @user
 
+      render(SpecimenPanel.new(
+               obs: @observation, user: @user,
+               siblings: @sibling_observations
+             ))
       render(NameInfoPanel.new(obs: @observation, user: @user))
       render(SpeciesListsPanel.new(obs: @observation, user: @user))
       render(AssociatedObservationsPanel.new(
@@ -119,6 +123,7 @@ module Views::Controllers::Observations
           if @user&.thumbnail_maps
             render(ThumbnailMapPanel.new(obs: @observation))
           end
+          render(NotesPanel.new(obs: @observation, user: @user))
         end
       end
     end

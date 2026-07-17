@@ -58,7 +58,7 @@ Link(type: :active, content: title, path: url)
 
 # Good — nested view, no Kit sugar exists, no dispatcher; full
 # namespace + render() is the only way to call it
-render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+render(Views::Controllers::Observations::Show::CollectionNumbersSection.new(
   obs: @obs, user: @user
 ))
 

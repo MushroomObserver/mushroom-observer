@@ -158,7 +158,7 @@ class InlineCRUDLinksTest < ComponentTestCase
 
   # ----- add-link mode (target: absent) ---------------------------
 
-  def test_add_link_mode_renders_icon_only_add_link
+  def test_add_link_mode_renders_icon_and_visible_add_text
     obs = observations(:detailed_unknown_obs)
     tab = ::Tab::CollectionNumber::New.new(observation: obs)
 
@@ -168,6 +168,9 @@ class InlineCRUDLinksTest < ComponentTestCase
 
     assert_html(html, "a[data-modal='modal_collection_number'] " \
                       "span.glyphicon-plus")
-    assert_html(html, "a span.sr-only", text: tab.title)
+    # Generic "Add" (not the tab's own descriptive title) since this
+    # renders beside its own rubric, which already says what's added.
+    assert_html(html, "a span.d-sm-inline", text: :ADD.l)
+    assert_no_html(html, "a span.sr-only")
   end
 end

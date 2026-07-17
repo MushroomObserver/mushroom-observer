@@ -469,7 +469,7 @@ class CollectionNumbersController < ApplicationController
     ).find(@observation.id)
     render_obs_section_update(
       identifier: "collection_numbers",
-      panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+      panel: Views::Controllers::Observations::Show::CollectionNumbersSection.new(
         obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return

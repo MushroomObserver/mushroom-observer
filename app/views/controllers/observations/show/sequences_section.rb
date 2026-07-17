@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-# DNA-sequences sub-panel. Same list-row shape as the other
-# obs-show sub-panels but with an additional archive inline link
-# when the sequence has a deposit accession URL.
+# DNA-sequences section of the Specimen panel. Same list-row shape
+# as the other Specimen sections but with an additional archive
+# inline link when the sequence has a deposit accession URL.
 #
 # `Components::InlineCRUDLinks` handles the archive/edit/destroy
 # group — sequences are a real-DELETE target with a
 # `back: observation_path(obs)` query string so the controller
 # redirects to the obs after destroy.
-class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
+class Views::Controllers::Observations::Show::SequencesSection < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :has_sibling_records, _Boolean, default: false

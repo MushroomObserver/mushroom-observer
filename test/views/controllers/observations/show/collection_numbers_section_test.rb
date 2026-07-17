@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Views::Controllers::Observations::Show::CollectionNumbersPanelTest <
+class Views::Controllers::Observations::Show::CollectionNumbersSectionTest <
   ComponentTestCase
   def setup
     super
@@ -26,7 +26,7 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanelTest <
     skip("Need an obs fixture without collection_numbers") unless obs
 
     html = render(
-      Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+      Views::Controllers::Observations::Show::CollectionNumbersSection.new(
         obs: obs, user: obs.user, has_sibling_records: true
       )
     )
@@ -43,7 +43,7 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanelTest <
     stranger = users(:lone_wolf)
 
     html = render(
-      Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+      Views::Controllers::Observations::Show::CollectionNumbersSection.new(
         obs: obs, user: stranger, has_sibling_records: false
       )
     )
@@ -57,7 +57,7 @@ class Views::Controllers::Observations::Show::CollectionNumbersPanelTest <
   private
 
   def panel_with(obs, user = @user)
-    Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+    Views::Controllers::Observations::Show::CollectionNumbersSection.new(
       obs: obs, user: user, has_sibling_records: false
     )
   end

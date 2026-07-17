@@ -363,6 +363,8 @@
   namings: proposed names
   NEWS: News
   news: news
+  NO_SPECIMEN: No specimen
+  no_specimen: no specimen
   NOTIFICATION: Notification
   notification: notification
   NOTIFICATIONS: Notifications

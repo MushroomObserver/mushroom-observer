@@ -347,7 +347,7 @@ class SequencesController < ApplicationController
     fresh_obs = Observation.includes(sequences: :user).find(@observation.id)
     render_obs_section_update(
       identifier: "sequences",
-      panel: Views::Controllers::Observations::Show::SequencesPanel.new(
+      panel: Views::Controllers::Observations::Show::SequencesSection.new(
         obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return

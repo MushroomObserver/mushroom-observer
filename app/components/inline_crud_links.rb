@@ -134,14 +134,20 @@ class Components::InlineCRUDLinks < Components::Base
     [add_component]
   end
 
+  # `name: :ADD.l` (not `@tab.title`, e.g. "Create Collection Number")
+  # -- this renders beside its own rubric (e.g. "Collection numbers:"),
+  # which already says what's being added, so a generic "Add" label
+  # (icon + text, shown at sm+ via show_text:) reads fine without
+  # repeating the specific type.
   def add_component
     Components::Button.new(
       type: :modal,
-      name: @tab.title,
+      name: :ADD.l,
       target: @tab.path,
       modal_id: @modal_id,
       variant: :strip,
       icon: :add,
+      show_text: true,
       **tab_html_options(@tab)
     )
   end

@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# Herbarium-records sub-panel — same shape as
-# `CollectionNumbersPanel` but for `HerbariumRecord`s, with an
+# Herbarium-records section of the Specimen panel — same shape as
+# `CollectionNumbersSection` but for `HerbariumRecord`s, with an
 # additional "search MCP" indented link for records whose
 # herbarium is `web_searchable?`
-class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Base
+class Views::Controllers::Observations::Show::HerbariumRecordsSection < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :has_sibling_records, _Boolean, default: false

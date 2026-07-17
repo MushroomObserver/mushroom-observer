@@ -79,7 +79,7 @@ Link(type: :active, content: title, path: url)
 Link(type: :get, name: "Show", target: url)
 
 # Good — nested view, no Kit sugar exists, no dispatcher
-render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+render(Views::Controllers::Observations::Show::CollectionNumbersSection.new(
   obs: @obs, user: @user
 ))
 
@@ -254,7 +254,7 @@ app/views/controllers/observations/
   show/
     observation_details_panel.rb   # class Show::ObservationDetailsPanel
     name_info_panel.rb             # class Show::NameInfoPanel
-    collection_numbers_panel.rb    # class Show::CollectionNumbersPanel
+    collection_numbers_section.rb    # class Show::CollectionNumbersSection
     sibling_records.rb             # module Show::SiblingRecords (mixin)
     …
 ```
@@ -270,10 +270,10 @@ the namespace root when referencing it inside another sub-view:
 
 ```ruby
 # In Show::ObservationDetailsPanel:
-render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(...))
+render(Views::Controllers::Observations::Show::CollectionNumbersSection.new(...))
 ```
 
-The bare `CollectionNumbersPanel` form would resolve via Ruby's
+The bare `CollectionNumbersSection` form would resolve via Ruby's
 lexical scope from `Show::ObservationDetailsPanel`, but
 Zeitwerk's autoload-on-undefined-constant doesn't fire on
 unqualified references inside another constant's body —

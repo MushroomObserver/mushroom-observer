@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Collection-numbers sub-panel on the observation details panel.
-# When the user can edit the obs:
+# Collection-numbers section of the Specimen panel on the
+# observation show page. When the user can edit the obs:
 #   - Header line "Collection numbers: [ new ]"
 #   - Bulleted list, each row: link to show + `[ edit | remove ]`
 # When the user can't edit and there are records: a one-line
@@ -11,7 +11,7 @@
 # `remove_collection_number_button` is handled by
 # `Components::InlineCRUDLinks` which knows how to detach a
 # `CollectionNumber` from its observation.
-class Views::Controllers::Observations::Show::CollectionNumbersPanel < Views::Base
+class Views::Controllers::Observations::Show::CollectionNumbersSection < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :has_sibling_records, _Boolean, default: false
