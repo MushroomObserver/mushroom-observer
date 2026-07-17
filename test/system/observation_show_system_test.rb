@@ -176,9 +176,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
-    # new sequence
-    assert_link(:show_observation_add_sequence.l)
-    find_link(:show_observation_add_sequence.l).trigger("click")
+    # new sequence -- scope to the sequences section, since several
+    # other sub-panels also show their own add-link on this page.
+    within("#observation_sequences") do
+      assert_link(:show_observation_add_sequence.l)
+      find_link(:show_observation_add_sequence.l).trigger("click")
+    end
 
     assert_selector("#modal_sequence", wait: 6)
 
@@ -243,15 +246,20 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_link(text: /LSU/)
   end
 
-  def test_add_and_edit_external_links
+  # Add flow lives in the "Shared with" badge line now; edit/destroy of
+  # an individual link are no longer reachable from the obs page (only
+  # the read-only info modal is) -- edit/update/destroy are still
+  # covered at the controller-test level in
+  # observations/external_links_controller_test.rb.
+  def test_add_external_link_and_view_shared_with_badge
     login!(users("mary"))
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
     site = external_sites(:mycoportal)
     within("#observation_external_links") do
-      assert_link(text: :ADD.l)
-      find_link(:ADD.l).trigger("click")
+      assert_link(text: :show_observation_add_link.l)
+      find_link(:show_observation_add_link.l).trigger("click")
     end
 
     # external_id is active by default; the url field is grayed (readonly)
@@ -271,28 +279,13 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_nil(link.url, "an external_id link stores no url")
 
     within("#observation_external_links") do
-      assert_link(text: /MycoPortal/)
-      find_link(:EDIT.l).trigger("click")
+      assert_link(text: "MCP")
+      find_link("MCP").trigger("click")
     end
 
-    # edit: change the external_id
+    assert_selector("#modal_external_link_#{link.id}")
     within("#modal_external_link_#{link.id}") do
-      fill_in("external_link_external_id", with: "13629347")
-      click_commit
+      assert_text(/MycoPortal/)
     end
-    assert_no_selector("#modal_external_link_#{link.id}")
-    assert_equal("13629347", link.reload.external_id)
-
-    # remove (turbo_confirm modal)
-    within("#observation_external_links") do
-      assert_button(text: :destroy_object.t(type: :external_link))
-      find(:css, ".destroy_external_link_link_#{link.id}").click
-    end
-    assert_selector("#mo_confirm", visible: true)
-    within("#mo_confirm") do
-      click_button(class: "btn-danger")
-    end
-    assert_no_selector("#mo_confirm", visible: true)
-    assert_no_link(text: /MycoPortal/)
   end
 end

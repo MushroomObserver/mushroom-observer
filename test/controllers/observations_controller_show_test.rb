@@ -463,12 +463,16 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs_id })
 
     assert_select("a[href *= 'images.google.com']")
-    assert_select("a[href *= 'mycoportal.org']")
 
     # There is a MycoBank link which includes taxon name and MycoBank language
     assert_select("a[href *= 'mycobank.org']") do
       assert_select("a[href *= '/Coprinus%20comatus']")
     end
+
+    # MycoPortal link now lives behind the "Shared with" MCP badge's info
+    # modal, not inline on the page -- see external_links_controller_test.rb
+    # for coverage of the modal's own content.
+    assert_select("#observation_external_links a.badge", text: "MCP")
   end
 
   def test_show_observation_edit_links

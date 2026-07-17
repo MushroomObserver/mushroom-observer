@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# "Observation details" panel — an optional import-source notice,
-# when / where / who, optional GPS, projects list, field slip, and
-# external links. The center column of the obs show page (and also
+# "Observation details" panel — an optional external-links "Shared
+# with" badge line, when / where / who, optional GPS, projects list,
+# and field slip. The center column of the obs show page (and also
 # rendered into the naming form pages). Specimen-available status +
 # collection-numbers / herbarium-records / sequences live in the
 # separate `SpecimenPanel`, rendered right below this one.
@@ -17,9 +17,9 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     Panel(panel_id: "observation_details") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
-      if @obs.external_credit_link
-        panel.with_body(classes: "border-bottom") do
-          render(ImportSource.new(obs: @obs))
+      if @user && show_external_links?
+        panel.with_body(classes: "border-bottom py-2") do
+          render_external_links_section
         end
       end
       panel.with_body { render_body }
@@ -45,7 +45,6 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     ul(class: "list-unstyled") { render_when_where_who }
     render_projects if @user && @obs.projects.present?
     render_field_slip if @user && @obs.field_slip
-    render_external_links_panel if @user && show_external_links?
   end
 
   # ---- when / where / who -----------------------------------
@@ -207,14 +206,14 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     end
   end
 
-  # ---- external links -----------------------------------------
+  # ---- external links ---------------------------------------------
 
   def show_external_links?
     @obs.external_links.any? || @sites.present? ||
       sibling_has?(:external_links)
   end
 
-  def render_external_links_panel
+  def render_external_links_section
     render(ExternalLinks.new(
              obs: @obs, user: @user, sites: @sites, siblings: @siblings
            ))

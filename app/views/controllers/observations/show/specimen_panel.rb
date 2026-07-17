@@ -2,11 +2,11 @@
 
 # "Specimen" panel on the observation show page (and the naming
 # propose/edit pages) — specimen-available status, plus the
-# collection-numbers / herbarium-records / sequences sections.
-# Title reflects whether a specimen is actually recorded. Renders
-# right below the Details panel.
+# collection-numbers / herbarium-records / sequences sections. The
+# first line of the body says whether a specimen is actually
+# recorded. Renders right below the Details panel.
 class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
-  include Views::Controllers::Observations::Show::SiblingRecords
+  include SiblingRecords
 
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -14,7 +14,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
 
   def view_template
     Panel(panel_id: "observation_specimen") do |panel|
-      panel.with_heading { title }
+      panel.with_heading { :SPECIMEN.l }
       panel.with_body { render_body }
     end
   end
@@ -23,10 +23,6 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
 
   def specimen?
     @obs.occurrence&.has_specimen || @obs.specimen
-  end
-
-  def title
-    specimen? ? :SPECIMEN.l : :NO_SPECIMEN.l
   end
 
   def render_body
@@ -47,12 +43,10 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   end
 
   def render_collection_numbers
-    render(
-      Views::Controllers::Observations::Show::CollectionNumbersSection.new(
-        obs: @obs, user: @user,
-        has_sibling_records: sibling_has?(:collection_numbers)
-      )
-    )
+    render(CollectionNumbersSection.new(
+             obs: @obs, user: @user,
+             has_sibling_records: sibling_has?(:collection_numbers)
+           ))
     render_sibling_records(:collection_numbers) do |cn, sib|
       a(href: collection_number_path(cn.id)) do
         trusted_html(cn.format_name)
@@ -63,19 +57,17 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
   end
 
   def render_herbarium_records
-    render(
-      Views::Controllers::Observations::Show::HerbariumRecordsSection.new(
-        obs: @obs, user: @user,
-        has_sibling_records: sibling_has?(:herbarium_records)
-      )
-    )
+    render(HerbariumRecordsSection.new(
+             obs: @obs, user: @user,
+             has_sibling_records: sibling_has?(:herbarium_records)
+           ))
     render_sibling_records(:herbarium_records) do |hr, sib|
       render_sibling_herbarium_record(hr, sib)
     end
   end
 
   def render_sequences
-    render(Views::Controllers::Observations::Show::SequencesSection.new(
+    render(SequencesSection.new(
              obs: @obs, user: @user,
              has_sibling_records: sibling_has?(:sequences)
            ))

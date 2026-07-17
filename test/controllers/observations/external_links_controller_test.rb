@@ -40,6 +40,108 @@ module Observations
       assert_select("form#observation_external_link_form")
     end
 
+    # Turbo-stream `show` renders the informational "Shared with" modal.
+    def test_show_turbo_stream_renders_modal
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+
+      login
+      get(:show, params: { id: link.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("#modal_external_link_#{link.id}")
+      assert_select("a[href='#{link.url}']")
+    end
+
+    # No external_id -- a url-only manual link, not a confirmed match
+    # to a specific record on the other site -- gets the softer
+    # "Uploaded to" title instead of "Observation X on Y".
+    def test_show_turbo_stream_title_uploaded_when_no_external_id
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      assert_nil(link.external_id)
+      obs = link.observation
+      title = :show_observation_uploaded_to_site.t(
+        id: obs.id, site: "iNaturalist"
+      )
+
+      login
+      get(:show, params: { id: link.id }, format: :turbo_stream)
+
+      assert_select("#modal_external_link_#{link.id} h4.modal-title",
+                    text: title)
+    end
+
+    # external_id present -- an import, or a manually-entered id --
+    # is a confirmed match, so the title can say "Observation X on Y".
+    def test_show_turbo_stream_title_shared_on_site_when_external_id
+      link = external_links(:imported_inat_obs_inat_link)
+      assert(link.external_id.present?)
+      obs = link.observation
+      title = :show_observation_shared_on_site.t(
+        id: obs.id, site: "iNaturalist"
+      )
+
+      login
+      get(:show, params: { id: link.id }, format: :turbo_stream)
+
+      assert_select("#modal_external_link_#{link.id} h4.modal-title",
+                    text: title)
+    end
+
+    # A site with 2+ own links -- the modal lists every one, not just
+    # the link the route id happens to point at.
+    def test_show_turbo_stream_multiple_own_links_same_site
+      obs = observations(:coprinus_comatus_obs)
+      inat = external_sites(:inaturalist)
+      link1 = external_links(:coprinus_comatus_obs_inaturalist_link)
+      link2 = ExternalLink.create!(
+        user: rolf, target: obs, external_site: inat,
+        url: "#{inat.base_url}999999"
+      )
+
+      login
+      get(:show, params: { id: link1.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("a[href='#{link1.url}']")
+      assert_select("a[href='#{link2.url}']")
+    end
+
+    # Sibling observation (same Occurrence) with its own link to the
+    # same site shows up in the modal with "(MO #N)" attribution.
+    def test_show_turbo_stream_includes_sibling_links
+      obs1 = observations(:minimal_unknown_obs)
+      obs2 = observations(:coprinus_comatus_obs)
+      occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+      obs1.update!(occurrence: occ)
+      obs2.update!(occurrence: occ)
+      inat = external_sites(:inaturalist)
+      link1 = ExternalLink.create!(
+        user: rolf, target: obs1, external_site: inat,
+        url: "#{inat.base_url}888888"
+      )
+      sibling_link = external_links(:coprinus_comatus_obs_inaturalist_link)
+
+      login
+      get(:show, params: { id: link1.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select("a[href='#{link1.url}']")
+      assert_select("a[href='#{sibling_link.url}']")
+      assert_select(
+        "small.text-muted a[href='#{permanent_observation_path(obs2.id)}']",
+        text: "MO #{obs2.id}"
+      )
+    end
+
+    def test_show_html_redirects_to_observation
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+
+      login
+      get(:show, params: { id: link.id })
+
+      assert_redirected_to(permanent_observation_path(link.observation.id))
+    end
+
     def setup_create_test
       obs  = observations(:agaricus_campestris_obs) # owned by rolf
       obs2 = observations(:agaricus_campestrus_obs) # owned by rolf

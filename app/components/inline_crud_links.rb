@@ -134,20 +134,18 @@ class Components::InlineCRUDLinks < Components::Base
     [add_component]
   end
 
-  # `name: :ADD.l` (not `@tab.title`, e.g. "Create Collection Number")
-  # -- this renders beside its own rubric (e.g. "Collection numbers:"),
-  # which already says what's being added, so a generic "Add" label
-  # (icon + text, shown at sm+ via show_text:) reads fine without
-  # repeating the specific type.
+  # Icon-only -- `name:` (the tab's own descriptive title, e.g. "Add
+  # fungarium record") drives the tooltip + sr-only text but isn't
+  # shown visibly (no `show_text:`), matching the pre-consolidation
+  # `Components::Link::InlineAdd` behavior.
   def add_component
     Components::Button.new(
       type: :modal,
-      name: :ADD.l,
+      name: @tab.title,
       target: @tab.path,
       modal_id: @modal_id,
       variant: :strip,
       icon: :add,
-      show_text: true,
       **tab_html_options(@tab)
     )
   end

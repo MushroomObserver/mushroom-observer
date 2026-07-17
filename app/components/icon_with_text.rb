@@ -4,10 +4,7 @@
 # text `<span>` that's `.sr-only` (hidden, default) or visible (at
 # `sm+`) when `show_text:` is truthy. Included by both
 # `Components::Button::Content` (Button / Link::Get family) and
-# `Components::Link::Icon`, which previously hand-rolled two
-# slightly different versions of the same rendering (and disagreed
-# on the visible-text spacing class: `ml-1` vs `pl-2` — standardized
-# here on `pl-2`).
+# `Components::Link::Icon`.
 #
 # Callers that need multiple icon/text pairs in a specific order
 # (e.g. `Link::Icon`'s stateful icon + active-icon swap) call
@@ -19,10 +16,10 @@ module Components::IconWithText
 
   private
 
-  # `render(...)`, not Kit sugar -- this module is included at varying
+  # `render(...)`, not Kit syntax -- this module is included at varying
   # nesting depths (Components::Button::Content, itself included by
   # deeply-nested dispatched subclasses like Components::Button::Edit),
-  # and Kit sugar's bare `Icon(...)` isn't reliably available that far
+  # and Kit syntax's bare `Icon(...)` isn't reliably available that far
   # down the chain.
   def render_icon_glyph(icon, html_class: nil, title: nil)
     render(Components::Icon.new(type: icon, class: html_class,

@@ -16,26 +16,27 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_html(html, "#observation_details")
   end
 
-  # Import-source notice: a second .panel-body (with border-bottom to
-  # separate it from the main details body) for an imported obs, none
-  # at all for a non-imported one. ImportSourceTest covers the
-  # component's own content in isolation; this covers Details' wiring.
-  def test_renders_import_source_body_for_imported_observation
+  # "Shared with" badges: a second .panel-body (with border-bottom to
+  # separate it from the main details body) when the obs has any
+  # external_link (own or sibling) or an eligible site to add one,
+  # none at all otherwise. ExternalLinksTest covers the component's
+  # own content in isolation; this covers Details' wiring.
+  def test_renders_external_links_body_for_obs_with_external_link
     obs = observations(:imported_inat_obs)
 
     html = render(panel_with(obs))
 
     assert_html(html, "#observation_details > .panel-body.border-bottom " \
-                      "#observation_import_source")
+                      "#observation_external_links")
   end
 
-  def test_does_not_render_import_source_body_when_not_imported
-    assert_nil(@obs.import_link)
+  def test_does_not_render_external_links_body_when_nothing_to_show
+    assert_empty(@obs.external_links)
 
     html = render(panel_with(@obs))
 
     assert_no_html(html, ".border-bottom")
-    assert_no_html(html, "#observation_import_source")
+    assert_no_html(html, "#observation_external_links")
   end
 
   # --- Collector / Entered by (#4211) ---

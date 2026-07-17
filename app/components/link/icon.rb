@@ -38,7 +38,7 @@ class Components::Link::Icon < Components::Base
   include Components::IconWithText
   include Components::Button::Styling
 
-  CONSUMED_OPTS = [:class, :icon, :icon_class, :show_text,
+  RELEVANT_OPTS = [:class, :icon, :icon_class, :show_text,
                    :active_icon, :active_content, :button_to, :confirm,
                    :button, :size].freeze
 
@@ -101,7 +101,7 @@ class Components::Link::Icon < Components::Base
   end
 
   def icon_class
-    class_names(@opts[:icon_class], "px-2")
+    @opts[:icon_class]
   end
 
   def icon_active_class
@@ -119,7 +119,7 @@ class Components::Link::Icon < Components::Base
     }
     base[:data][:turbo_confirm] = @opts[:confirm] if @opts[:confirm]
     base[:role] = "button" if @opts[:button_to]
-    base.deep_merge(@opts.except(*CONSUMED_OPTS))
+    base.deep_merge(@opts.except(*RELEVANT_OPTS))
   end
 
   # `size:` only ever makes sense alongside real btn framing — a

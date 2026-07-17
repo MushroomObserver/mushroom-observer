@@ -41,11 +41,11 @@ class InlineLinkBlockTest < ComponentTestCase
     assert_equal("\u00A0x", text)
   end
 
-  def test_multiple_items_rendered_with_no_wrapper_or_divider
+  def test_multiple_items_rendered_with_nbsp_dividers
     html = render(Components::InlineLinkBlock.new(items: %w[a b c]))
     text = Nokogiri::HTML(html).at_css("span.text-nowrap").text
 
-    assert_equal("\u00A0abc", text)
+    assert_equal("\u00A0a\u00A0b\u00A0c", text)
   end
 
   def test_string_items_rendered_as_trusted_html

@@ -1,39 +1,90 @@
 # frozen_string_literal: true
 
-# External-links sub-panel — list of the obs's external-site
-# links + sibling-obs external links (read-only) when present.
-# Header has a `[ new ]` modal link when there are any
-# eligible sites the obs doesn't already have a link to.
+# Compact "Shared with [iNat] [MCP]" badge line -- the replacement
+# for the old External-Links list panel (and for the ImportSource
+# credit line: an import's own badge modal already shows "Imported
+# from iNaturalist (id)", so a separate always-visible credit line is
+# redundant). Each badge is a modal-trigger link to
+# `ExternalLinksController#show`, which lists every own + sibling
+# `ExternalLink` for that specific site. Hides silently when there's
+# nothing to show and no eligible site to add a link to. Rendered as
+# its own top `panel-body` by `Details`, the slot ImportSource used
+# to occupy.
 class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
   prop :sites, _Nilable(_Array(::ExternalSite)), default: nil
   prop :siblings, _Array(::Observation), default: -> { [] }
 
-  # Production "External Links" help article (textile).
-  EXTERNAL_LINKS_ARTICLE_ID = 58
+  # Hardcoded badge labels, same literal-name-matching pattern already
+  # used by `Components::Link::External#inaturalist?` -- "MCP" isn't an
+  # actual `ExternalSite.name`, just this component's badge text.
+  SITE_BADGES = { "iNaturalist" => "iNat", "MycoPortal" => "MCP" }.freeze
 
   def view_template
-    div(
-      id: "observation_external_links",
-      class: "obs-links",
-      data: { controller: "section-update",
-              section_update_user_value: @user&.id }
-    ) do
-      render_header
-      render_list if list_visible?
+    return if visible_sites.empty? && !show_new_link?
+
+    div(id: "observation_external_links", class: wrapper_class,
+        data: { controller: "section-update",
+                section_update_user_value: @user&.id }) do
+      render_badges
+      render_new_link if show_new_link?
     end
   end
 
   private
 
-  def render_header
+  # Only add the flex/justify-content-between shell when there's a
+  # right-side item (the add link) to space against -- an empty right
+  # side would otherwise leave a wasted flex wrapper around one item.
+  def wrapper_class
+    class_names("obs-links",
+                show_new_link? && "d-flex justify-content-between")
+  end
+
+  def render_badges
+    return unless visible_sites.any?
+
     div do
-      plain("#{:EXTERNAL_LINKS.l} ")
-      render_help_link
-      plain(": ")
-      render_new_link if @sites.present?
+      plain("#{:SHARED_WITH.l}: ")
+      visible_sites.each { |site_name, link| render_badge(site_name, link) }
     end
+  end
+
+  def visible_sites
+    @visible_sites ||= SITE_BADGES.filter_map do |site_name, _label|
+      link = representative_link_for(site_name)
+      [site_name, link] if link
+    end
+  end
+
+  def representative_link_for(site_name)
+    all_links.find { |link| link.external_site.name == site_name }
+  end
+
+  def all_links
+    @obs.external_links + @siblings.flat_map(&:external_links)
+  end
+
+  def render_badge(site_name, link)
+    Button(type: :modal,
+           name: SITE_BADGES[site_name],
+           target: external_link_path(link.id),
+           # `Link::Modal#modal_data` prepends "modal_" itself, so this
+           # combines with `Components::Modal`'s `id:` in the controller
+           # (`"modal_external_link_#{@external_link.id}"`) -- don't
+           # double-prefix here.
+           modal_id: "external_link_#{link.id}",
+           variant: :strip, class: "badge badge-id inline-link text-uppercase",
+           data: { toggle: "tooltip", placement: "bottom",
+                   title: :show_observation_shared_with_tooltip.l(
+                     site: site_name
+                   ) })
+    whitespace
+  end
+
+  def show_new_link?
+    @sites.present?
   end
 
   def render_new_link
@@ -41,69 +92,5 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
       modal_id: "external_link",
       tab: ::Tab::ExternalLink::New.new(observation: @obs)
     )
-  end
-
-  def render_help_link
-    a(href: article_path(EXTERNAL_LINKS_ARTICLE_ID),
-      title: :external_links_help.l,
-      aria: { label: :external_links_help.l }) do
-      Icon(type: :question)
-    end
-  end
-
-  def list_visible?
-    @obs.external_links.any? ||
-      @siblings.any? { |s| s.external_links.any? }
-  end
-
-  def render_list
-    ul(class: "tight-list") do
-      own_external_links.each { |link| render_own_row(link) }
-      sibling_external_links.each do |link, sib|
-        render_sibling_row(link, sib)
-      end
-    end
-  end
-
-  def sibling_external_links
-    pairs = @siblings.flat_map do |sib|
-      sib.external_links.map { |el| [el, sib] }
-    end
-    pairs.sort_by { |link, _sib| link.relationship_date }
-  end
-
-  def render_sibling_row(link, sibling)
-    li do
-      Link(type: :external, link: link)
-      whitespace
-      sibling_attribution(sibling)
-    end
-  end
-
-  def sibling_attribution(sibling)
-    small(class: "text-muted") do
-      plain("(")
-      a(href: permanent_observation_path(sibling.id)) do
-        plain("MO #{sibling.id}")
-      end
-      plain(")")
-    end
-  end
-
-  def own_external_links
-    @obs.external_links.sort_by(&:relationship_date)
-  end
-
-  def render_own_row(link)
-    li(id: "external_link_#{link.id}") do
-      render_external_link(link)
-      if link.can_edit?(@user) || in_admin_mode?
-        InlineCRUDLinks(target: link, user: @user)
-      end
-    end
-  end
-
-  def render_external_link(link)
-    Link(type: :external, link: link)
   end
 end

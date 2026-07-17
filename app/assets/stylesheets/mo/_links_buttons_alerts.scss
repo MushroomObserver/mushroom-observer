@@ -81,6 +81,11 @@
     font-size: 80% !important;
   }
 
+  &.inline-link {
+    font-size: 100% !important;
+    letter-spacing: 0.03em;
+  }
+
   &:hover {
     background-color: $text-color;
     color: $body-bg;
@@ -90,9 +95,10 @@
 // Icon-only inline mod/add links (Components::InlineCRUDLinks'
 // edit/destroy/add links, applied directly to each link/button's own
 // element -- not a wrapper, see Components::InlineLinkBlock). No
-// padding of its own -- the icon's shared `px-2` (see
-// Components::Link::Icon#icon_class) already gives it breathing
-// room; margin-right spaces adjacent items instead.
+// padding of its own on the icon -- Components::InlineLinkBlock
+// separates multiple items with a non-breaking space instead;
+// margin-right here adds a little further breathing room against
+// non-icon-link neighbors.
 //
 // vertical-align: middle -- an inline-block sitting on the text
 // baseline (the default) leaves room below it for a descender it
@@ -111,7 +117,6 @@
   display: inline-block;
   margin-right: 0.25rem;
   line-height: 1;
-  vertical-align: middle;
   background-color: transparent;
   text-decoration: none;
 
@@ -119,28 +124,18 @@
     text-decoration: none;
   }
 
-  .glyphicon {
-    top: 0;
-    vertical-align: middle;
-  }
+  // .glyphicon {
+  //   top: 0;
+  //   vertical-align: middle;
+  // }
 
   // The plus glyph reads visually heavier/bigger than other
   // glyphicons at the same font-size (bold, symmetric shape) --
   // scoped down specifically here, not globally, since it looks
   // fine at full size elsewhere.
-  .glyphicon-plus {
-    font-size: 90%;
-  }
-
-  // When visible text follows the icon (e.g. "Add"), the icon's own
-  // shared `px-2` already provides the gap before it; the text's own
-  // shared `pl-2` (Components::IconWithText::TEXT_VISIBLE_CLASSES)
-  // would double that gap, so it's zeroed here. vertical-align:
-  // middle matches the icon's own alignment.
-  .pl-2 {
-    padding-left: 0;
-    vertical-align: middle;
-  }
+  // .glyphicon-plus {
+  //   font-size: 90%;
+  // }
 }
 
 //
