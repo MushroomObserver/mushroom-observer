@@ -182,6 +182,14 @@ MushroomObserver::Application.configure do
   # config.action_cable.url = "wss://localhost:28080" # use :wss in production
   config.action_cable.allowed_request_origins = [%r{http://*}, %r{https://*/}]
 
+  # Quiet ActionCable's per-connection/per-subscription info chatter
+  # ("Registered connection", "Turbo::StreamsChannel is streaming
+  # from..."). Since #4825 subscribes every rendered image to a
+  # [image, :processed] stream, every page view would emit dozens of
+  # those lines at :info. Warnings and errors still log.
+  config.action_cable.logger =
+    ActiveSupport::Logger.new("log/production.log", level: Logger::WARN)
+
   config.active_job.queue_adapter = :solid_queue
   # Uncomment if queue tables are in a separate db. MO's are in the main db.
   # config.solid_queue.connects_to = { database: { writing: :queue } }

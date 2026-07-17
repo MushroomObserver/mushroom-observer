@@ -116,6 +116,14 @@ MushroomObserver::Application.configure do
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
+
+  # Quiet ActionCable's per-connection/per-subscription info chatter
+  # ("Registered connection", "Turbo::StreamsChannel is streaming
+  # from..."). Since #4825 subscribes every rendered image to a
+  # [image, :processed] stream, a single page load emits dozens of
+  # those lines. Warnings and errors still log.
+  config.action_cable.logger =
+    ActiveSupport::Logger.new($stdout, level: Logger::WARN)
   # Solid Queue as the queue adapter locally, as on production.
   config.active_job.queue_adapter = :solid_queue
   # Uncomment if queue tables are in a separate db. MO's are in the main db.
