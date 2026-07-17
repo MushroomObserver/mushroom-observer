@@ -4,6 +4,7 @@ require("test_helper")
 
 class ImageTest < UnitTestCase
   include ActiveJob::TestHelper
+  include ActionCable::TestHelper
 
   # log_update/log_destroy/log_create_for/log_reuse_for/log_remove_from
   # attribute to `current_user` (the acting/editing user), not `user`
@@ -364,14 +365,24 @@ class ImageTest < UnitTestCase
       raise("boom")
     end
 
+    # Capture the rescue's Rails.logger.error call instead of letting it
+    # through -- the test logger writes to $stdout, so the deliberate
+    # "boom" backtrace otherwise dumps into the suite's console output
+    # looking like a real failure. Capturing also pins the logging
+    # contract itself, which the old passthrough never asserted.
+    logged = nil
     img.stub(:move_original, true) do
       Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
-          assert_not(img.process_image)
+          Rails.logger.stub(:error, ->(msg) { logged = msg }) do
+            assert_not(img.process_image)
+          end
         end
       end
     end
     assert(img.errors[:image].any?)
+    assert_includes(logged, "Image::Processor failed for image #{img.id}")
+    assert_includes(logged, "boom")
   end
 
   # Transfer-to-image-server is no longer part of Image::Processor#process
@@ -541,6 +552,130 @@ class ImageTest < UnitTestCase
     url = Image::URL.new(args.merge(size: :medium))
     assert_not_equal("/place_holder_thumb.jpg", url.url)
     assert_not_equal("/place_holder_320.jpg", url.url)
+  end
+
+  # Rendition URLs are cache-busted with an updated_at token (#4808):
+  # reprocessing (rotate/mirror) rewrites file contents under an
+  # otherwise-stable path, so without the token browsers/CDNs keep
+  # serving the old bytes until a hard refresh.
+  def test_url_includes_updated_at_cache_busting_token
+    img = images(:in_situ_image)
+    img.transferred = true
+    token = img.updated_at.to_i
+
+    Image::ALL_SIZES.each do |size|
+      url = img.url(size)
+      assert(url.end_with?("/#{img.id}.jpg?#{token}"),
+             "Expected #{size} URL #{url.inspect} to end with " \
+             "cache-busting token ?#{token}")
+    end
+  end
+
+  def test_url_cache_busting_token_changes_when_image_is_updated
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    old_url = img.reload.url(:medium)
+
+    img.update_column(:updated_at, img.updated_at + 1.hour)
+
+    assert_not_equal(old_url, img.reload.url(:medium),
+                     "Expected URL to change when updated_at changes")
+  end
+
+  def test_url_placeholders_never_get_a_cache_busting_token
+    url = Image::URL.new(size: :thumbnail, id: 999_999, transferred: false,
+                         extension: "jpg", version: 123)
+
+    assert_equal("/place_holder_thumb.jpg", url.url)
+  end
+
+  # Class-level Image.url (id-only call sites: textile embeds, map
+  # popups, data exports) has no record to read updated_at from --
+  # no token unless the caller passes one. Reports in particular
+  # depend on these URLs staying stable.
+  def test_class_level_url_has_no_token_unless_version_passed
+    img = images(:in_situ_image)
+
+    assert_not_includes(Image.url(:full_size, img.id, transferred: true), "?")
+    assert(Image.url(:full_size, img.id,
+                     transferred: true, version: 123).end_with?("?123"))
+  end
+
+  def test_broadcast_processed_update_fires_on_transferred_change
+    image = images(:in_situ_image)
+    image.update_column(:transferred, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    # `capture_broadcasts` JSON-decodes each message back to the raw
+    # `<turbo-stream ...>` HTML string ActionCable stores it as.
+    messages = capture_broadcasts(stream) { image.update(transferred: true) }
+
+    # One broadcast_replace_to per INTERACTIVE_BROADCAST_SIZES entry --
+    # and nothing else (the carousel-slide broadcast was removed along
+    # with the obs-show carousel's subscription; only the image-show
+    # page subscribes).
+    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length,
+                 messages.length)
+    Image::INTERACTIVE_BROADCAST_SIZES.each do |size|
+      target = "interactive_image_#{image.id}_#{size}_media"
+      assert(messages.any? { |m| m.include?(%(target="#{target}")) },
+             "Expected a broadcast targeting #{target}")
+    end
+  end
+
+  # Processing STARTS by flipping transferred true->false, BEFORE the
+  # renditions are regenerated -- broadcasting at that moment would
+  # push a new-token URL at stale files, and would duplicate
+  # RotateImageJob's explicit end-of-processing broadcast (Copilot
+  # review finding on #4825). Only the completion flip (false->true)
+  # broadcasts.
+  def test_broadcast_does_not_fire_when_transferred_becomes_false
+    image = images(:in_situ_image)
+    image.update_column(:transferred, true)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_no_broadcasts(stream) { image.update(transferred: false) }
+  end
+
+  # The broadcast must not replay a page-specific image_link/votes/
+  # extra_classes/identify combination -- it only knows the model, not
+  # which page's props a given subscriber originally rendered with (a
+  # matrix-box thumbnail's real image_link, votes: false on the
+  # image-show page, etc). Confirms the fix for the bug where
+  # rebroadcasting the *whole* Interactive component with defaults
+  # would silently swap a thumbnail's link target to the image's own
+  # show page, or make hidden votes reappear.
+  def test_broadcast_interactive_sizes_omits_link_and_votes_markup
+    image = images(:in_situ_image)
+    image.update_column(:transferred, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    messages = capture_broadcasts(stream) { image.update(transferred: true) }
+
+    media_messages = messages.select { |m| m.include?("_media") }
+    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length,
+                 media_messages.length)
+    media_messages.each do |m|
+      assert_not_includes(m, "stretched-link")
+      assert_not_includes(m, "image-vote-section")
+    end
+  end
+
+  def test_broadcast_processed_update_fires_on_gps_stripped_change
+    image = images(:in_situ_image)
+    image.update_column(:gps_stripped, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_broadcasts(stream, Image::INTERACTIVE_BROADCAST_SIZES.length) do
+      image.update(gps_stripped: true)
+    end
+  end
+
+  def test_broadcast_processed_update_does_not_fire_on_unrelated_changes
+    image = images(:in_situ_image)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_no_broadcasts(stream) { image.update(notes: "new notes") }
   end
 
   def test_import_link

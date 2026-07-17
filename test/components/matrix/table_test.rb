@@ -106,6 +106,96 @@ class MatrixTableTest < ComponentTestCase
     )
   end
 
+  # A bare Image object (images/index's matrix table) has no
+  # `thumb_image` to defer to -- it IS the thumb. should_cache_object?
+  # must check the Image's own `transferred` directly instead of
+  # falling through the `respond_to?(:thumb_image)` guard to an
+  # unconditional true (the gap this test guards against).
+  def test_caches_image_objects_with_transferred_true
+    image = images(:connected_coprinus_comatus_image)
+    image.stub(:transferred, true) do
+      component = Components::Matrix::Table.new(
+        objects: [image], user: @user, cached: true
+      )
+
+      cache_called = false
+      component.stub(:low_level_cache, lambda { |_key, &block|
+        cache_called = true
+        block.call
+      }) do
+        render(component)
+      end
+
+      assert(cache_called,
+             "Expected cache to be called for a transferred Image object")
+    end
+  end
+
+  def test_does_not_cache_image_objects_with_transferred_false
+    image = images(:connected_coprinus_comatus_image)
+    image.stub(:transferred, false) do
+      component = Components::Matrix::Table.new(
+        objects: [image], user: @user, cached: true
+      )
+
+      cache_called = false
+      component.stub(:low_level_cache, lambda { |_key, &block|
+        cache_called = true
+        block.call
+      }) do
+        html = render(component)
+        assert_includes(html, "box_#{image.id}")
+      end
+
+      assert_not(cache_called,
+                 "Expected cache NOT to be called for an untransferred " \
+                 "Image object")
+    end
+  end
+
+  # cache_key_for folds in the thumb image record so the expanded key
+  # tracks the thumb's updated_at (its cache_key embeds the timestamp)
+  # -- reprocessing bumps it, and the cached HTML embeds a URL token
+  # derived from it (#4808). Nothing touches an RssLog when its thumb
+  # finishes processing, so the thumb must appear in the key itself.
+  def test_cache_key_for_includes_the_thumb_image_record
+    obs = observations(:coprinus_comatus_obs)
+
+    key = Components::Matrix::Table.cache_key_for(obs, I18n.locale)
+
+    assert_equal(
+      ["MatrixBox", Components::Matrix::Table::CACHE_VERSION,
+       I18n.locale, obs, obs.thumb_image],
+      key
+    )
+
+    # The expanded key must change when the thumb's updated_at does --
+    # this is the mechanism the fragment busting relies on.
+    store = ActiveSupport::Cache::MemoryStore.new
+    old_expanded = store.send(:normalize_key, key, {})
+    obs.thumb_image.updated_at += 1.hour
+    new_expanded = store.send(
+      :normalize_key,
+      Components::Matrix::Table.cache_key_for(obs, I18n.locale), {}
+    )
+
+    assert_not_equal(old_expanded, new_expanded)
+  end
+
+  # A bare Image object IS its own thumb: it has no thumb_image, and
+  # its own timestamp already participates in the key via `object`.
+  def test_cache_key_for_image_object_keys_on_the_image_itself
+    image = images(:connected_coprinus_comatus_image)
+
+    key = Components::Matrix::Table.cache_key_for(image, I18n.locale)
+
+    assert_equal(
+      ["MatrixBox", Components::Matrix::Table::CACHE_VERSION,
+       I18n.locale, image, nil],
+      key
+    )
+  end
+
   def test_caches_observations_with_nil_thumb_image
     obs = observations(:minimal_unknown_obs)
     assert_nil(obs.thumb_image,

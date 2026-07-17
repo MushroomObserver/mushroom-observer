@@ -180,6 +180,19 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "custom_panel_id")
   end
 
+  # The carousel deliberately does NOT subscribe to
+  # [image, :processed] broadcasts -- rotate/mirror only happens on
+  # the image-show page, so only that page live-updates; this one
+  # catches up on the next load via the #4808 cache-busting URL token.
+  def test_does_not_subscribe_to_action_cable_for_image_streams
+    component = Components::ImageGallery.new(
+      user: @user, images: @images, object: @obs
+    )
+    html = render(component)
+
+    assert_no_html(html, "turbo-cable-stream-source")
+  end
+
   def test_filters_nil_images
     # Create array with nils mixed in
     images_with_nil = [@images.first, nil, nil]

@@ -19,6 +19,20 @@ class MatrixBoxTest < ComponentTestCase
     assert_includes(html, "image_#{obs.thumb_image_id}")
   end
 
+  # Matrix boxes deliberately do NOT subscribe to
+  # [image, :processed] broadcasts -- rotate/mirror only happens on
+  # the image-show page, and an index page with dozens of boxes would
+  # otherwise open a websocket subscription per thumbnail for an event
+  # that can't happen from this page.
+  def test_does_not_subscribe_to_action_cable_even_with_a_thumbnail
+    obs = observations(:coprinus_comatus_obs)
+    assert_not_nil(obs.thumb_image)
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_no_html(html, "turbo-cable-stream-source")
+  end
+
   def test_renders_observation_without_thumbnail
     obs = observations(:minimal_unknown_obs)
     component = Components::Matrix::Box.new(user: @user, object: obs)

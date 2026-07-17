@@ -32,6 +32,11 @@ class Components::ImageGallery < Components::Base
 
   def view_template
     @carousel_id ||= generate_carousel_id
+    # Deliberately NOT subscribed to [image, :processed] broadcasts:
+    # rotate/mirror only happens on the image-show page, so only that
+    # page (Views::Controllers::Images::Show::ImagePanel) live-updates.
+    # Cross-tab updates aren't a supported config; this page catches
+    # up on the next load via the #4808 cache-busting URL token.
     Panel(panel_id: @panel_id) do |panel|
       panel.with_heading { @title } if @thumbnails
       # `@links` is a `SafeBuffer` from a Rails `capture { … }` block;

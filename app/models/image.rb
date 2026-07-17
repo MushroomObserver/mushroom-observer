@@ -247,6 +247,81 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
+  # Turbo Stream broadcasts that keep the image-show page (the only
+  # subscriber -- see broadcast_processed_update) live once background
+  # processing (RotateImageJob/TransferImagesJob) finishes, without a
+  # full page reload. Fires only on the columns processing
+  # flips -- an unrelated Image edit (copyright, notes, vote) never
+  # re-renders anything. (gps_stripped currently only changes
+  # synchronously at upload, before any page could be subscribed --
+  # kept as a trigger so the pages catch up if that ever goes async.)
+  # Gated on transferred becoming TRUE (not any flip): processing
+  # starts by setting transferred false (Image::Processor#
+  # update_image_record_width_height_and_transferred) BEFORE the
+  # renditions are regenerated, so broadcasting there would push a
+  # new-token URL at stale files -- and would duplicate the explicit
+  # end-of-processing broadcast RotateImageJob already sends. The two
+  # files-consistent moments are processing completion (explicit, in
+  # the job) and transfer completion (this callback).
+  after_update_commit lambda { |image|
+    became_transferred = image.saved_change_to_transferred? &&
+                         image.transferred
+    if became_transferred || image.saved_change_to_gps_stripped?
+      image.broadcast_processed_update
+    end
+  }
+
+  # Renders for an anonymous viewer -- there's no request-scoped
+  # current_user to reflect here, same limitation Comment's and
+  # InatImport's own broadcasts accept. A call site with heavier
+  # per-user customization (vote highlighting, an admin-only
+  # affordance) catches up on the next real page load, not via this
+  # broadcast.
+  #
+  # The only subscriber is the image-show page
+  # (Views::Controllers::Images::Show::ImagePanel) -- rotate/mirror
+  # only happens there, so only there does a live update make sense.
+  # Index matrix boxes and the obs-show carousel deliberately do NOT
+  # subscribe (cross-tab updates aren't a supported config; those
+  # pages catch up on the next load via the #4808 URL token), which is
+  # also why there is no carousel-slide broadcast here.
+  def broadcast_processed_update
+    broadcast_interactive_sizes
+  end
+
+  # One broadcast per size Interactive might be showing on any given
+  # page (see INTERACTIVE_BROADCAST_SIZES). `media_only: true` limits
+  # the re-render to just the image itself (src/data-src) -- the model
+  # has no way to know which page-specific image_link/votes/
+  # extra_classes/identify props a given subscriber originally
+  # rendered with, so replaying the *whole* Interactive with defaults
+  # would silently change those (e.g. a matrix-box thumbnail's
+  # image_link falls back to the image's own show page instead of the
+  # parent Observation it was actually pointing at). The link/votes/
+  # overlays stay exactly as the page first rendered them; only the
+  # image source needs to catch up once resized copies exist.
+  #
+  # This is a deliberate tradeoff, not an oversight: carrying every
+  # subscriber's original per-page props through the broadcast (rather
+  # than falling back to media_only) isn't possible without threading
+  # that context through the model layer. Whether media_only is the
+  # right long-term answer (vs. e.g. a per-page prop cache) is still
+  # open.
+  def broadcast_interactive_sizes
+    INTERACTIVE_BROADCAST_SIZES.each do |size|
+      html = ApplicationController.renderer.render(
+        Components::Image::Interactive.new(user: nil, image: self,
+                                           size: size, media_only: true),
+        layout: false
+      )
+      broadcast_replace_to(
+        [self, :processed],
+        target: "interactive_image_#{id}_#{size}_media",
+        html: html
+      )
+    end
+  end
+
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
     observations + profile_users + glossary_terms
@@ -334,6 +409,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Return an Array of all image sizes from +:thumbnail+ to +:full_size+.
   ALL_SIZES = ALL_SIZES_INDEX.keys.freeze
 
+  # Sizes `Components::Image::Interactive` gets broadcast for by
+  # Image#broadcast_processed_update. All non-full_size sizes, not just
+  # one, because the image-show page (the only subscriber) renders at
+  # a size chosen by the viewer's image-size preference -- the
+  # broadcasts for sizes a given page isn't showing have no matching
+  # element in its DOM and are silent no-ops there.
+  INTERACTIVE_BROADCAST_SIZES = (ALL_SIZES - [:full_size]).freeze
+
   # Return an Array of all image sizes as pixels (Integer) instead of Symbol's.
   ALL_SIZES_IN_PIXELS = ALL_SIZES_INDEX.values.freeze
 
@@ -358,7 +441,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: transferred,
-      extension: extension(size)
+      extension: extension(size),
+      version: updated_at&.to_i
     )
   end
 
@@ -367,7 +451,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: args.fetch(:transferred, true),
-      extension: args.fetch(:extension, "jpg")
+      extension: args.fetch(:extension, "jpg"),
+      version: args[:version]
     )
   end
 
