@@ -63,8 +63,9 @@ class Components::Matrix::Box < Components::Base
       class: class_names("matrix-box", @columns, @extra_class)
     ) do
       # Deliberately NOT subscribed to [image, :processed] broadcasts:
-      # rotate/mirror only happens on the image-show page, so only that
-      # page (Images::Show::ImagePanel) live-updates. An index page
+      # rotate/mirror only happens on the image-show page, so only
+      # that page (Views::Controllers::Images::Show::ImagePanel)
+      # live-updates. An index page
       # with dozens of boxes would otherwise open a websocket
       # subscription (plus a solid_cable MAX(id) query) per thumbnail
       # for an event that can't happen from this page; it catches up
