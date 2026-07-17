@@ -1,2 +1,14 @@
-#!/bin/sh
-wget -qO- "$1" | exiftool -
+#!/bin/bash
+# Usage: exiftool_remote [exiftool flags...] <url>
+#
+# Mirrors Image#read_exif_data's `cmd, *flags, path` calling
+# convention -- the same shape it uses to invoke the local `exiftool`
+# binary directly (flags first, target path/URL last). All arguments
+# except the last are exiftool flags; the last argument is the URL to
+# fetch. Fetches the URL via curl (confirmed on production -- see
+# README_PRODUCTION_INSTALL / script/ubuntu_setup_root -- and ships
+# with macOS by default, unlike wget) and pipes the bytes into
+# exiftool reading from stdin, with those flags applied.
+url="${@: -1}"
+flags=("${@:1:$#-1}")
+curl -s "$url" | exiftool "${flags[@]}" -
