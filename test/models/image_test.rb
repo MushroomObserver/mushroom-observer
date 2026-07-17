@@ -543,6 +543,53 @@ class ImageTest < UnitTestCase
     assert_not_equal("/place_holder_320.jpg", url.url)
   end
 
+  # Rendition URLs are cache-busted with an updated_at token (#4808):
+  # reprocessing (rotate/mirror) rewrites file contents under an
+  # otherwise-stable path, so without the token browsers/CDNs keep
+  # serving the old bytes until a hard refresh.
+  def test_url_includes_updated_at_cache_busting_token
+    img = images(:in_situ_image)
+    img.transferred = true
+    token = img.updated_at.to_i
+
+    Image::ALL_SIZES.each do |size|
+      url = img.url(size)
+      assert(url.end_with?("/#{img.id}.jpg?#{token}"),
+             "Expected #{size} URL #{url.inspect} to end with " \
+             "cache-busting token ?#{token}")
+    end
+  end
+
+  def test_url_cache_busting_token_changes_when_image_is_updated
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    old_url = img.reload.url(:medium)
+
+    img.update_column(:updated_at, img.updated_at + 1.hour)
+
+    assert_not_equal(old_url, img.reload.url(:medium),
+                     "Expected URL to change when updated_at changes")
+  end
+
+  def test_url_placeholders_never_get_a_cache_busting_token
+    url = Image::URL.new(size: :thumbnail, id: 999_999, transferred: false,
+                         extension: "jpg", version: 123)
+
+    assert_equal("/place_holder_thumb.jpg", url.url)
+  end
+
+  # Class-level Image.url (id-only call sites: textile embeds, map
+  # popups, data exports) has no record to read updated_at from --
+  # no token unless the caller passes one. Reports in particular
+  # depend on these URLs staying stable.
+  def test_class_level_url_has_no_token_unless_version_passed
+    img = images(:in_situ_image)
+
+    assert_not_includes(Image.url(:full_size, img.id, transferred: true), "?")
+    assert(Image.url(:full_size, img.id,
+                     transferred: true, version: 123).end_with?("?123"))
+  end
+
   def test_import_link
     img = images(:in_situ_image)
     assert_nil(img.import_link, "Image starts with no import link")

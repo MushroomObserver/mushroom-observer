@@ -358,7 +358,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: transferred,
-      extension: extension(size)
+      extension: extension(size),
+      version: updated_at&.to_i
     )
   end
 
@@ -367,7 +368,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: args.fetch(:transferred, true),
-      extension: args.fetch(:extension, "jpg")
+      extension: args.fetch(:extension, "jpg"),
+      version: args[:version]
     )
   end
 

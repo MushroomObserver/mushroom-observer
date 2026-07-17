@@ -37,7 +37,10 @@ class Components::Matrix::Table < Components::Base
   # read this through `cache_key_for`. Phlex's automatic class +
   # method + line digest doesn't survive into the controller's
   # check, so we encode the version explicitly.
-  CACHE_VERSION = "v1"
+  # v2: image URLs in the fragment now carry a cache-busting
+  # ?<updated_at> token (#4808) -- fragments cached under v1 embed
+  # tokenless URLs and must be regenerated.
+  CACHE_VERSION = "v2"
 
   # The cache key MatrixBox fragments are stored under, used by
   # both the Phlex `low_level_cache` write inside this component and
