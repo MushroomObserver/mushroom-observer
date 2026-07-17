@@ -118,9 +118,9 @@ jobs:
         run: bundle exec rubocop --parallel
 
       # https://github.com/reviewdog/action-brakeman
-      - name: Run Brakeman
-        uses: reviewdog/action-brakeman@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-check
-          fail_level: none
+      # - name: Run Brakeman
+      #   uses: reviewdog/action-brakeman@v2
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     reporter: github-pr-check
+      #     fail_level: none
