@@ -3,7 +3,7 @@
 #  USAGE::
 #
 #    bin/rails runner script/backfill_image_dhashes.rb [--scope SCOPE] \
-#      [--limit N] [--rehash] [--progress-every N] \
+#      [--limit N] [--rehash] [--report-interval SECONDS] \
 #      [--push-url URL --push-key-file PATH]
 #
 #  DESCRIPTION::
@@ -20,10 +20,17 @@
 #      all               — every image (a full-corpus backfill).
 #
 #    Idempotent: images with a dhash are skipped unless --rehash. --limit
-#    scopes a trial run. Hashing prefers a local rendition and falls back to
-#    fetching the transferred medium image, so it works whether or not the
-#    originals are still on this host. An image that fails to hash is logged
-#    and skipped.
+#    scopes a trial run; small trial runs (--limit <= 25) print each
+#    image's id + computed dhash (and its push outcome, in push mode) so
+#    the 1-then-10-then-all ramp can be eyeballed. Hashing prefers a local
+#    rendition and falls back to fetching the transferred medium image, so
+#    it works whether or not the originals are still on this host. An
+#    image that fails to hash is logged and skipped.
+#
+#    Live monitoring: a progress line every --report-interval seconds
+#    (default 10) with count, rate, time remaining, wall-clock completion
+#    estimate (both from the run's own average rate so far), the latest
+#    image id + dhash, and the push counters when pushing.
 #
 #    --push-url + --push-key-file turn on local-compute/API-push mode
 #    (#4585): each hash computed here (on a dev box, sparing the
@@ -41,14 +48,19 @@ require "net/http"
 require "json"
 
 class BackfillImageDhashes
+  # --limit at or below this prints one line per image (id, dhash, push
+  # outcome) -- sized for the check-1-then-10 ramp-up runs.
+  VERBOSE_LIMIT = 25
+
   def initialize(opts)
     @scope = opts[:scope] || "linked"
     @limit = opts[:limit]
     @rehash = opts[:rehash]
-    @progress_every = opts[:progress_every] || 1000
+    @report_interval = opts[:report_interval] || 10
     parse_push_config(opts)
     @stats = Hash.new(0)
     @started_at = Time.current
+    @last_report_at = @started_at
   end
 
   def run
@@ -57,7 +69,7 @@ class BackfillImageDhashes
     puts("Backfilling dhashes for #{total} images (scope: #{@scope})")
     relation.find_each.with_index do |image, i|
       hash_one(image)
-      progress(i + 1, total) if ((i + 1) % @progress_every).zero?
+      report_progress(i + 1, total)
     end
     summarize
   end
@@ -99,10 +111,21 @@ class BackfillImageDhashes
   def hash_one(image)
     image.compute_dhash!
     @stats[:hashed] += 1
+    @last_image = image
     push_dhash(image) if @push_url
+    log_verbose(image) if verbose?
   rescue StandardError => e
     @stats[:error] += 1
     warn("  image #{image.id}: #{e.class}: #{e.message}")
+  end
+
+  def verbose?
+    @limit && @limit <= VERBOSE_LIMIT
+  end
+
+  def log_verbose(image)
+    note = @push_url ? " (#{@last_push})" : ""
+    puts("  image #{image.id}: dhash #{image.dhash}#{note}")
   end
 
   # PATCH the freshly computed hash to the remote MO server. The server
@@ -114,18 +137,22 @@ class BackfillImageDhashes
   def push_dhash(image)
     classify_push(image, request_push(image))
   rescue StandardError => e
+    @last_push = :push_error
     @stats[:push_error] += 1
     warn("  image #{image.id}: push failed: #{e.class}: #{e.message}")
   end
 
   def classify_push(image, error_codes)
     if error_codes.empty?
+      @last_push = :pushed
       @stats[:pushed] += 1
     elsif error_codes.include?("API2::ImageDhashMismatch")
+      @last_push = :mismatch
       @stats[:push_mismatch] += 1
       warn("  image #{image.id}: DHASH MISMATCH on server " \
            "(local #{image.dhash})")
     else
+      @last_push = :push_error
       @stats[:push_error] += 1
       warn("  image #{image.id}: push failed: #{error_codes.join(", ")}")
     end
@@ -157,10 +184,50 @@ class BackfillImageDhashes
     (body["errors"] || []).pluck("code")
   end
 
-  def progress(done, total)
-    elapsed = (Time.current - @started_at).round
-    rate = (done / [elapsed, 1].max.to_f).round(1)
-    warn("  #{done}/#{total} (#{elapsed}s, #{rate}/s)")
+  # Time-based progress: a line every @report_interval seconds with
+  # rate, remaining-time and wall-clock completion estimates (from the
+  # run's own average rate), the latest image processed, and the push
+  # counters in push mode.
+  def report_progress(done, total)
+    now = Time.current
+    return if now - @last_report_at < @report_interval
+
+    @last_report_at = now
+    warn("  #{pace_report(done, total, now)}#{last_image_report}" \
+         "#{push_report}")
+  end
+
+  def pace_report(done, total, now)
+    elapsed = now - @started_at
+    rate = done / [elapsed.to_f, 0.001].max
+    left = rate.positive? ? (total - done) / rate : 0
+    format("%d/%d (%.1f%%) %.1f/s, ~%s left (ETA %s)",
+           done, total, 100.0 * done / [total, 1].max, rate,
+           human_duration(left), (now + left).strftime("%H:%M:%S"))
+  end
+
+  def last_image_report
+    return "" unless @last_image
+
+    " -- last: image #{@last_image.id} dhash #{@last_image.dhash}"
+  end
+
+  def push_report
+    return "" unless @push_url
+
+    " -- pushed #{@stats[:pushed]}, mismatch #{@stats[:push_mismatch]}, " \
+      "push_err #{@stats[:push_error]}"
+  end
+
+  def human_duration(seconds)
+    seconds = seconds.round
+    if seconds >= 3600
+      format("%dh %02dm", seconds / 3600, (seconds % 3600) / 60)
+    elsif seconds >= 60
+      format("%dm %02ds", seconds / 60, seconds % 60)
+    else
+      "#{seconds}s"
+    end
   end
 
   def summarize
@@ -179,8 +246,9 @@ OptionParser.new do |opts|
   opts.on("--rehash", "Recompute existing hashes") do
     options[:rehash] = true
   end
-  opts.on("--progress-every N", Integer, "Progress cadence") do |n|
-    options[:progress_every] = n
+  opts.on("--report-interval N", Integer,
+          "Seconds between progress reports (default 10)") do |n|
+    options[:report_interval] = n
   end
   opts.on("--push-url URL", "Push hashes to this MO server via API2") do |u|
     options[:push_url] = u
