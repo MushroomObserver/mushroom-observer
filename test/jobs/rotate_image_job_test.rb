@@ -38,7 +38,7 @@ class RotateImageJobTest < ActiveJob::TestCase
 
     Image::Processor.stub(:new, fake_processor) do
       assert_broadcasts(stream,
-                        Image::INTERACTIVE_BROADCAST_SIZES.length + 1) do
+                        Image::INTERACTIVE_BROADCAST_SIZES.length) do
         RotateImageJob.perform_now(image.id, "jpg", "-h")
       end
     end
