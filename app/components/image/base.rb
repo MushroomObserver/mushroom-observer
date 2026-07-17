@@ -86,7 +86,13 @@ class Components::Image::Base < Components::Base
       img_class: build_image_classes,
       img_data: build_data_attributes(img_urls),
       img_id: img_id,
-      html_id: "#{@id_prefix}_#{img_id}",
+      # Size-scoped so a broadcast re-render of one size (see
+      # Image#broadcast_processed_update) targets only the element
+      # actually showing that size -- the same image can be on-screen
+      # at different sizes on different pages (matrix-box thumbnail
+      # vs. image-show huge vs. edit-page medium), all sharing the
+      # same default id_prefix.
+      html_id: "#{@id_prefix}_#{img_id}_#{@size}",
       proportion: sizing[:proportion],
       width: sizing[:width],
       image_link: normalize_link(@image_link) || image_path(img_id),

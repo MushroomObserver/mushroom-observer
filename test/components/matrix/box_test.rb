@@ -19,6 +19,26 @@ class MatrixBoxTest < ComponentTestCase
     assert_includes(html, "image_#{obs.thumb_image_id}")
   end
 
+  # The `turbo_stream_from([image, :processed])` cable subscription is
+  # what makes Image#broadcast_processed_update's interactive-size
+  # broadcast reach the page. Only rendered when there's a thumbnail
+  # to subscribe for.
+  def test_subscribes_to_action_cable_for_thumb_image_processed_stream
+    obs = observations(:coprinus_comatus_obs)
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_html(html, "turbo-cable-stream-source")
+  end
+
+  def test_does_not_subscribe_to_action_cable_without_a_thumbnail
+    obs = observations(:minimal_unknown_obs)
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_no_html(html, "turbo-cable-stream-source")
+  end
+
   def test_renders_observation_without_thumbnail
     obs = observations(:minimal_unknown_obs)
     component = Components::Matrix::Box.new(user: @user, object: obs)
