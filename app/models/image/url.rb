@@ -25,7 +25,7 @@ class Image
       small: "/place_holder_320.jpg"
     }.freeze
 
-    attr_accessor :size, :id, :transferred, :extension
+    attr_accessor :size, :id, :transferred, :extension, :version
 
     def initialize(args)
       size = args[:size]
@@ -35,6 +35,7 @@ class Image
       self.id          = args[:id]
       self.transferred = args[:transferred]
       self.extension   = args[:extension]
+      self.version     = args[:version]
     end
 
     def url
@@ -69,8 +70,17 @@ class Image
       result.code == 200
     end
 
+    # Renditions live at stable paths keyed only on id + size, so a
+    # rotate/mirror (or any reprocessing) rewrites the file contents
+    # under an unchanged URL and browsers/CDNs keep serving the old
+    # cached bytes until a hard refresh (#4808). Appending a version
+    # token that changes with the image record makes the URL flip once
+    # reprocessing finishes. The token stays out of full_filepath --
+    # that also builds local filesystem paths, where a query string
+    # would be wrong.
     def source_url(source)
-      full_filepath(format_spec(source, :read))
+      url = full_filepath(format_spec(source, :read))
+      version ? "#{url}?#{version}" : url
     end
 
     def full_filepath(path)

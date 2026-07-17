@@ -37,15 +37,31 @@ class Components::Matrix::Table < Components::Base
   # read this through `cache_key_for`. Phlex's automatic class +
   # method + line digest doesn't survive into the controller's
   # check, so we encode the version explicitly.
-  CACHE_VERSION = "v1"
+  # v2: image URLs in the fragment now carry a cache-busting
+  # ?<updated_at> token (#4808) -- fragments cached under v1 embed
+  # tokenless URLs and must be regenerated.
+  CACHE_VERSION = "v2"
 
   # The cache key MatrixBox fragments are stored under, used by
   # both the Phlex `low_level_cache` write inside this component and
   # the controller's `Rails.cache.exist?` pre-check in
   # `ApplicationController::Indexes#object_fragment_exist?`. Keeping
   # both ends on one method ensures they agree on the key shape.
+  #
+  # Folds in the thumb image record itself so the expanded key tracks
+  # the thumb's updated_at (cache_versioning is off in MO, so an AR
+  # object in the key array expands via cache_key, which embeds its
+  # updated_at timestamp). The rendered HTML embeds the thumb's URL,
+  # tokened on that same updated_at (#4808), so the fragment must bust
+  # whenever it changes. `object` alone isn't enough:
+  # Verifier#mark_transferred touch_all's related Observations when a
+  # transfer completes, but RssLogs are never touched, so an RssLog
+  # box cached before a rotate would otherwise serve the pre-rotate
+  # URL token indefinitely. (An `Image` object IS its own thumb and
+  # already keys on its own timestamp via `object` --
+  # `try(:thumb_image)` is nil there, which is fine.)
   def self.cache_key_for(object, locale)
-    ["MatrixBox", CACHE_VERSION, locale, object]
+    ["MatrixBox", CACHE_VERSION, locale, object, object.try(:thumb_image)]
   end
 
   # Per-object predicate the render path uses to decide whether to
@@ -54,8 +70,12 @@ class Components::Matrix::Table < Components::Base
   # (`ApplicationController::Indexes#object_fragment_exist?`).
   # Objects with an untransferred thumb_image are skipped — the
   # rendered HTML embeds the image URL, which would be wrong (and
-  # the wrong-cached) until the transfer completes.
+  # wrongly cached) until the transfer completes. An `Image` object
+  # itself (images/index) has no `thumb_image` to defer to -- it IS
+  # the thumb -- so check its own `transferred` directly instead of
+  # falling through the `respond_to?` guard to an unconditional true.
   def self.should_cache_object?(object)
+    return object.transferred != false if object.is_a?(::Image)
     return true unless object.respond_to?(:thumb_image)
 
     object.thumb_image&.transferred != false

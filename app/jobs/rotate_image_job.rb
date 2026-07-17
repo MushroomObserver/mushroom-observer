@@ -14,6 +14,14 @@ class RotateImageJob < ApplicationJob
     return unless image
 
     Image::Processor.new(image: image, ext: ext).rotate(orientation)
+    # The rewritten renditions are servable locally right now -- push
+    # them to subscribed pages without waiting for the transfer.
+    # Image's after_update_commit broadcast only fires on a transferred
+    # flip, which happens when TransferImagesJob completes (never, in
+    # environments with no writable image servers, e.g. development) --
+    # and a transform that changes no dimensions (mirror) on a
+    # not-yet-transferred image flips nothing at all.
+    image.reload.broadcast_processed_update
     TransferImagesJob.perform_later(image_ids: [image_id])
   end
 end

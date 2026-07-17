@@ -180,6 +180,24 @@ class ImageGalleryTest < ComponentTestCase
     assert_includes(html, "custom_panel_id")
   end
 
+  # The `turbo_stream_from([image, :processed])` cable subscription is
+  # what makes Image#broadcast_processed_update's carousel-slide
+  # broadcast (an inner-only `broadcast_update_to` on
+  # "carousel_item_<id>") reach the page.
+  def test_subscribes_to_action_cable_for_each_image_processed_stream
+    component = Components::ImageGallery.new(
+      user: @user, images: @images, object: @obs
+    )
+    html = render(component)
+
+    assert_html(html, "turbo-cable-stream-source")
+    # One subscription tag per image, not just one for the whole page.
+    assert_equal(
+      @images.length,
+      Nokogiri::HTML5.fragment(html).css("turbo-cable-stream-source").length
+    )
+  end
+
   def test_filters_nil_images
     # Create array with nils mixed in
     images_with_nil = [@images.first, nil, nil]
