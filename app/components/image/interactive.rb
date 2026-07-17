@@ -69,7 +69,15 @@ class Components::Image::Interactive < Components::Image::Base
     div(
       id: "#{@data[:html_id]}_media",
       class: "image-lazy-sizer overflow-hidden",
-      style: "padding-bottom: #{@data[:proportion]}%;"
+      style: "padding-bottom: #{@data[:proportion]}%;",
+      # The lazyload Stimulus controller (re-)runs
+      # window.lazyLoadInstance.update() on connect. The layout-level
+      # instance only fires on full page loads, so the img.lazy inside
+      # a fragment swapped in by Image#broadcast_processed_update's
+      # Turbo Stream would otherwise stay stuck on placeholder.svg.
+      # Only needed on the broadcast variant -- initial page renders
+      # are covered by the layout.
+      data: (@media_only ? { controller: "lazyload" } : {})
     ) do
       render_lazy_image
       render_noscript_image

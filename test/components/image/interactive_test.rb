@@ -91,6 +91,14 @@ class InteractiveImageTest < ComponentTestCase
     assert_no_html(html, "a.stretched-link")
     assert_no_html(html, ".vote-section")
     assert_not_includes(html, "/custom/path")
+    # The broadcast-swapped fragment must re-trigger LazyLoad itself --
+    # the layout-level lazyload controller only fires on full page
+    # loads, so without this the swapped img.lazy stays on the
+    # placeholder. Initial (non-media_only) renders are covered by the
+    # layout and don't need it.
+    assert_html(html, "div##{media_id}[data-controller='lazyload']")
+    normal_html = render_image(votes: false)
+    assert_no_html(normal_html, "[data-controller='lazyload']")
   end
 
   private
