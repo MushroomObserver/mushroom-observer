@@ -62,12 +62,13 @@ class Components::Matrix::Box < Components::Base
       id: "box_#{@data[:id]}",
       class: class_names("matrix-box", @columns, @extra_class)
     ) do
-      # Rendered here, not inside the Panel(...) block below -- that
-      # block is `vanish`ed (its direct output discarded; only the
-      # `with_thumbnail`/etc. slot registrations survive to render
-      # later), so a `turbo_stream_from` call placed there would
-      # silently never emit anything.
-      turbo_stream_from([@data[:image], :processed]) if @data[:image]
+      # Deliberately NOT subscribed to [image, :processed] broadcasts:
+      # rotate/mirror only happens on the image-show page, so only that
+      # page (Images::Show::ImagePanel) live-updates. An index page
+      # with dozens of boxes would otherwise open a websocket
+      # subscription (plus a solid_cable MAX(id) query) per thumbnail
+      # for an event that can't happen from this page; it catches up
+      # on the next load via the #4808 cache-busting URL token.
       Panel(sizing: true) do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)
