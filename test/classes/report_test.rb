@@ -960,6 +960,39 @@ class ReportTest < UnitTestCase
     assert_raises(RuntimeError) { report.mark_exported! }
   end
 
+  def test_mycoportal_image_list_mark_exported_logs_on_invalid
+    image = images(:in_situ_image)
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+    report.body
+
+    warnings = []
+    stubbed_error = lambda do |*|
+      link = ExternalLink.new
+      link.errors.add(:base, "stubbed failure")
+      raise(ActiveRecord::RecordInvalid.new(link))
+    end
+
+    Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do
+      ExternalLink.stub(:create!, stubbed_error) do
+        report.mark_exported!
+      end
+    end
+
+    assert(
+      warnings.any? do |msg|
+        msg.include?("Mycoportal export link failed for Image #{image.id}")
+      end,
+      "mark_exported! should log a warning naming the failed image when " \
+      "ExternalLink.create! raises RecordInvalid"
+    )
+    assert_not(
+      ExternalLink.exists?(target: image,
+                           external_site: ExternalSite.mycoportal,
+                           relationship: :export),
+      "No ExternalLink should be created when create! raises"
+    )
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when
