@@ -115,6 +115,7 @@ class API2::ErrorTest < UnitTestCase
       API2::FieldSlipInUse => [field_slips(:field_slip_one)],
       API2::HerbariumRecordAlreadyExists =>
         [herbarium_records(:interesting_unknown)],
+      API2::ImageDhashMismatch => [images(:in_situ_image), 12_345],
       API2::ImageUploadFailed => [Image.new],
       API2::MustBeAdmin => [projects(:eol_project)],
       API2::UserAccountBlocked => [users(:rolf)],
