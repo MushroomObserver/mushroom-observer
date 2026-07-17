@@ -365,14 +365,24 @@ class ImageTest < UnitTestCase
       raise("boom")
     end
 
+    # Capture the rescue's Rails.logger.error call instead of letting it
+    # through -- the test logger writes to $stdout, so the deliberate
+    # "boom" backtrace otherwise dumps into the suite's console output
+    # looking like a real failure. Capturing also pins the logging
+    # contract itself, which the old passthrough never asserted.
+    logged = nil
     img.stub(:move_original, true) do
       Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
-          assert_not(img.process_image)
+          Rails.logger.stub(:error, ->(msg) { logged = msg }) do
+            assert_not(img.process_image)
+          end
         end
       end
     end
     assert(img.errors[:image].any?)
+    assert_includes(logged, "Image::Processor failed for image #{img.id}")
+    assert_includes(logged, "boom")
   end
 
   # Transfer-to-image-server is no longer part of Image::Processor#process
