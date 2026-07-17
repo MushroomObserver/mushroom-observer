@@ -62,6 +62,12 @@ class Components::Matrix::Box < Components::Base
       id: "box_#{@data[:id]}",
       class: class_names("matrix-box", @columns, @extra_class)
     ) do
+      # Rendered here, not inside the Panel(...) block below -- that
+      # block is `vanish`ed (its direct output discarded; only the
+      # `with_thumbnail`/etc. slot registrations survive to render
+      # later), so a `turbo_stream_from` call placed there would
+      # silently never emit anything.
+      turbo_stream_from([@data[:image], :processed]) if @data[:image]
       Panel(sizing: true) do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)

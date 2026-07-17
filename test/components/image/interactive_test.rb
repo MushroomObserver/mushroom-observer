@@ -76,17 +76,29 @@ class InteractiveImageTest < ComponentTestCase
     assert_includes(sub_html, "lightbox_link")
   end
 
+  # Image#broadcast_interactive_sizes renders with media_only: true so a
+  # background-processing broadcast never touches page-specific link/
+  # votes/overlay markup -- see the comment on Image#broadcast_interactive_
+  # sizes for why. Confirms only the image container itself renders.
+  def test_media_only_renders_just_the_image_container
+    html = render_image(votes: true, image_link: "/custom/path",
+                        media_only: true)
+    media_id = "interactive_image_#{@image.id}_medium_media"
+
+    assert_html(html, "div##{media_id}.image-lazy-sizer")
+    assert_html(html, "img.image_#{@image.id}")
+    assert_no_html(html, ".image-sizer")
+    assert_no_html(html, "a.stretched-link")
+    assert_no_html(html, ".vote-section")
+    assert_not_includes(html, "/custom/path")
+  end
+
   private
 
-  def render_image(image: @image, size: :medium, votes: false,
-                   image_link: nil, upload: false)
+  def render_image(image: @image, size: :medium, **)
     render(Components::Image::Interactive.new(
-             user: @user,
-             image: image,
-             size: size,
-             votes: votes,
-             image_link: image_link,
-             upload: upload
+             user: @user, image: image, size: size, votes: false,
+             image_link: nil, upload: false, media_only: false, **
            ))
   end
 end

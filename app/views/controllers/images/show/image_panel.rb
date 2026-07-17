@@ -11,6 +11,12 @@ module Views::Controllers::Images
       prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil
 
       def view_template
+        # Subscribes this page to Image#broadcast_processed_update's
+        # interactive-size broadcast (rendered as a plain top-level
+        # statement, not inside the Panel(...) block below -- see
+        # Components::Matrix::Box for why that placement would
+        # silently never emit anything).
+        turbo_stream_from([@image, :processed])
         render(::Components::Panel.new(panel_id: "image_panel")) do |panel|
           panel.with_heading(
             classes:
