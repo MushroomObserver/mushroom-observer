@@ -64,9 +64,9 @@ class BackfillImageDhashes
   end
 
   def run
+    refresh_table_statistics
     relation = scoped_images
-    puts("Computing the #{@scope}-scope image count " \
-         "(the first query on a cold database can take a while)...")
+    puts("Computing the #{@scope}-scope image count...")
     total = relation.count
     puts("Backfilling dhashes for #{total} images (scope: #{@scope})")
     relation.find_each.with_index do |image, i|
@@ -77,6 +77,21 @@ class BackfillImageDhashes
   end
 
   private
+
+  # A freshly-imported database (mysqldump load / checkpoint restore)
+  # has stale InnoDB statistics -- auto-recalc is lazy and sampled --
+  # and the optimizer then plans the scope semijoin catastrophically
+  # (observed: minutes of silent full-scanning). ANALYZE TABLE refreshes
+  # the stats in ~1s and is an online, read-safe maintenance statement.
+  # NOTE: raw SQL by necessity -- ANALYZE TABLE is maintenance DDL with
+  # no ActiveRecord/Arel equivalent; a deliberate, narrow exception to
+  # the no-raw-SQL rule (which targets queries).
+  def refresh_table_statistics
+    puts("Refreshing table statistics (ANALYZE TABLE)...")
+    Image.connection.execute(
+      "ANALYZE TABLE external_links, observation_images, images"
+    )
+  end
 
   def parse_push_config(opts)
     @push_url = opts[:push_url]&.chomp("/")
