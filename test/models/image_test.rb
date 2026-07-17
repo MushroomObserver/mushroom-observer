@@ -610,18 +610,17 @@ class ImageTest < UnitTestCase
     # `<turbo-stream ...>` HTML string ActionCable stores it as.
     messages = capture_broadcasts(stream) { image.update(transferred: true) }
 
-    # One broadcast_replace_to per INTERACTIVE_BROADCAST_SIZES entry,
-    # plus one broadcast_update_to for the carousel slide.
-    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length + 1,
+    # One broadcast_replace_to per INTERACTIVE_BROADCAST_SIZES entry --
+    # and nothing else (the carousel-slide broadcast was removed along
+    # with the obs-show carousel's subscription; only the image-show
+    # page subscribes).
+    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length,
                  messages.length)
     Image::INTERACTIVE_BROADCAST_SIZES.each do |size|
       target = "interactive_image_#{image.id}_#{size}_media"
       assert(messages.any? { |m| m.include?(%(target="#{target}")) },
              "Expected a broadcast targeting #{target}")
     end
-    carousel_target = "carousel_item_#{image.id}"
-    assert(messages.any? { |m| m.include?(%(target="#{carousel_target}")) },
-           "Expected a broadcast targeting #{carousel_target}")
   end
 
   # Processing STARTS by flipping transferred true->false, BEFORE the
@@ -667,7 +666,7 @@ class ImageTest < UnitTestCase
     image.update_column(:gps_stripped, false)
     stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
 
-    assert_broadcasts(stream, Image::INTERACTIVE_BROADCAST_SIZES.length + 1) do
+    assert_broadcasts(stream, Image::INTERACTIVE_BROADCAST_SIZES.length) do
       image.update(gps_stripped: true)
     end
   end
