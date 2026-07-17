@@ -253,7 +253,7 @@ module Observations
       @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
-      klass = Views::Controllers::Observations::Show::ExternalLinksPanel
+      klass = Views::Controllers::Observations::Show::Details::ExternalLinks
       render_obs_section_update(
         identifier: "external_links",
         panel: klass.new(obs: @observation, user: @user,

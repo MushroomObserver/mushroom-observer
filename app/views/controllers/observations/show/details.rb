@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-# "Observation details" panel — when / where / who, optional GPS,
-# projects list, field slip, and external links. The center column
-# of the obs show page (and also rendered into the naming form
-# pages). Specimen-available status + collection-numbers /
-# herbarium-records / sequences live in the separate `SpecimenPanel`,
-# rendered right below this one.
-class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::Base
+# "Observation details" panel — an optional import-source notice,
+# when / where / who, optional GPS, projects list, field slip, and
+# external links. The center column of the obs show page (and also
+# rendered into the naming form pages). Specimen-available status +
+# collection-numbers / herbarium-records / sequences live in the
+# separate `SpecimenPanel`, rendered right below this one.
+class Views::Controllers::Observations::Show::Details < Views::Base
   prop :obs, ::Observation
   prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
   prop :user, _Nilable(::User), default: nil
@@ -17,6 +17,11 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     Panel(panel_id: "observation_details") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
+      if @obs.external_credit_link
+        panel.with_body(classes: "border-bottom") do
+          render(ImportSource.new(obs: @obs))
+        end
+      end
       panel.with_body { render_body }
     end
   end
@@ -62,7 +67,12 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_where
     li(class: "obs-where", id: "observation_where") do
       plain("#{where_label}: ")
-      render_where_link
+      if @user
+        Link(type: :location,
+             where: @obs.where, location: @obs.location, click: true)
+      else
+        plain(@obs.where)
+      end
       render_vague_notice
     end
   end
@@ -72,15 +82,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
       :show_observation_collection_location.t
     else
       :show_observation_seen_at.t
-    end
-  end
-
-  def render_where_link
-    if @user
-      Link(type: :location,
-           where: @obs.where, location: @obs.location, click: true)
-    else
-      plain(@obs.where)
     end
   end
 
@@ -98,7 +99,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
     li(class: "obs-where-gps", id: "observation_where_gps") do
       # XXX Consider dropping this from indexes.
       render_gps_display_link if @obs.reveal_location?(@user)
-      render_gps_hidden_msg if @obs.gps_hidden
+      i { plain("(#{:show_observation_gps_hidden.t})") } if @obs.gps_hidden
     end
   end
 
@@ -109,10 +110,6 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
          "[#{:click_for_map.t}]"].join(" ")
       )
     end
-  end
-
-  def render_gps_hidden_msg
-    i { plain("(#{:show_observation_gps_hidden.t})") }
   end
 
   # "Collector:" and (when they differ) "Entered by:" lines. A field-slip
@@ -218,7 +215,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_external_links_panel
-    render(Views::Controllers::Observations::Show::ExternalLinksPanel.new(
+    render(ExternalLinks.new(
              obs: @obs, user: @user, sites: @sites, siblings: @siblings
            ))
   end

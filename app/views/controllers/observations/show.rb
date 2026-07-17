@@ -2,7 +2,7 @@
 
 # Main observation show page — the parent that composes every
 # obs-show sub-panel (`Components::ImageGallery`,
-# `ObservationDetailsPanel`, `NameInfoPanel`, `SpeciesListsPanel`,
+# `Details`, `NameInfoPanel`, `SpeciesListsPanel`,
 # `AssociatedObservationsPanel`, `ThumbnailMapPanel`, namings
 # partial, comments partial, `Views::Layouts::ObjectFooter`) into a
 # two-column layout.
@@ -43,9 +43,6 @@ module Views::Controllers::Observations
 
     def view_template
       add_chrome
-      render(Views::Controllers::Observations::ImportedSourceBanner.new(
-               observation: @observation
-             ))
       render_main_row
       render_secondary_row
       render_footer if @user
@@ -94,7 +91,7 @@ module Views::Controllers::Observations
     end
 
     def render_right_column
-      render(ObservationDetailsPanel.new(
+      render(Details.new(
                obs: @observation, consensus: @consensus, user: @user,
                sites: @other_sites&.to_a, siblings: @sibling_observations
              ))

@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
+class Views::Controllers::Observations::Show::DetailsTest <
   ComponentTestCase
   def setup
     super
@@ -14,6 +14,28 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     html = render(panel_with(@obs))
 
     assert_html(html, "#observation_details")
+  end
+
+  # Import-source notice: a second .panel-body (with border-bottom to
+  # separate it from the main details body) for an imported obs, none
+  # at all for a non-imported one. ImportSourceTest covers the
+  # component's own content in isolation; this covers Details' wiring.
+  def test_renders_import_source_body_for_imported_observation
+    obs = observations(:imported_inat_obs)
+
+    html = render(panel_with(obs))
+
+    assert_html(html, "#observation_details > .panel-body.border-bottom " \
+                      "#observation_import_source")
+  end
+
+  def test_does_not_render_import_source_body_when_not_imported
+    assert_nil(@obs.import_link)
+
+    html = render(panel_with(@obs))
+
+    assert_no_html(html, ".border-bottom")
+    assert_no_html(html, "#observation_import_source")
   end
 
   # --- Collector / Entered by (#4211) ---
@@ -95,7 +117,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
   end
 
   def panel_with(obs, user = @user)
-    Views::Controllers::Observations::Show::ObservationDetailsPanel.new(
+    Views::Controllers::Observations::Show::Details.new(
       obs: obs, user: user, sites: [], siblings: []
     )
   end
