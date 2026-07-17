@@ -614,6 +614,20 @@ class ImageTest < UnitTestCase
            "Expected a broadcast targeting #{carousel_target}")
   end
 
+  # Processing STARTS by flipping transferred true->false, BEFORE the
+  # renditions are regenerated -- broadcasting at that moment would
+  # push a new-token URL at stale files, and would duplicate
+  # RotateImageJob's explicit end-of-processing broadcast (Copilot
+  # review finding on #4825). Only the completion flip (false->true)
+  # broadcasts.
+  def test_broadcast_does_not_fire_when_transferred_becomes_false
+    image = images(:in_situ_image)
+    image.update_column(:transferred, true)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_no_broadcasts(stream) { image.update(transferred: false) }
+  end
+
   # The broadcast must not replay a page-specific image_link/votes/
   # extra_classes/identify combination -- it only knows the model, not
   # which page's props a given subscriber originally rendered with (a

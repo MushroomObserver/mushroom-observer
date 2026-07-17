@@ -255,9 +255,20 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # re-renders anything. (gps_stripped currently only changes
   # synchronously at upload, before any page could be subscribed --
   # kept as a trigger so the pages catch up if that ever goes async.)
+  # Gated on transferred becoming TRUE (not any flip): processing
+  # starts by setting transferred false (Image::Processor#
+  # update_image_record_width_height_and_transferred) BEFORE the
+  # renditions are regenerated, so broadcasting there would push a
+  # new-token URL at stale files -- and would duplicate the explicit
+  # end-of-processing broadcast RotateImageJob already sends. The two
+  # files-consistent moments are processing completion (explicit, in
+  # the job) and transfer completion (this callback).
   after_update_commit lambda { |image|
-    image.broadcast_processed_update if image.saved_change_to_transferred? ||
-                                        image.saved_change_to_gps_stripped?
+    became_transferred = image.saved_change_to_transferred? &&
+                         image.transferred
+    if became_transferred || image.saved_change_to_gps_stripped?
+      image.broadcast_processed_update
+    end
   }
 
   # Renders for an anonymous viewer -- there's no request-scoped
