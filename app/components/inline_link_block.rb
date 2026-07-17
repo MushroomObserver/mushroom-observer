@@ -2,11 +2,16 @@
 
 # Renders a group of inline mod/add links -- the observation-show
 # sub-panel edit/destroy pairs, the send-question link, sibling
-# records, etc. Pure layout glue: a leading non-breaking space, a
-# further non-breaking space between each item (items carry no
-# padding/margin of their own for this), and a `white-space: nowrap`
-# wrapper so the group can't be split across a line break. It does
-# NOT style the items themselves.
+# records, etc. Pure layout glue: a Bootstrap `.ml-2` on the wrapper
+# (visibly wider than `.inline-icon-link`'s own `margin-right:
+# 0.25rem`, so the gap before the first item reads clearly, not just
+# technically, ahead of the internal item-to-item gaps) PLUS a
+# leading non-breaking space, a further non-breaking space between
+# each item (items carry no padding/margin of their own for that
+# internal spacing), and a `white-space: nowrap` wrapper so the group
+# can't be split across a line break. The margin lands on the wrapper
+# span itself -- not on any item -- so this still does NOT style the
+# items themselves.
 #
 # Each item is expected to already carry `ITEM_CLASS`
 # (`.inline-icon-link`, MO's own bordered, hover-inverting outline
@@ -54,7 +59,7 @@ class Components::InlineLinkBlock < Components::Base
   def view_template
     return if @items.empty?
 
-    span(class: "text-nowrap") do
+    span(class: "text-nowrap ml-2") do
       nbsp
       @items.each_with_index do |item, index|
         nbsp if index.positive?
