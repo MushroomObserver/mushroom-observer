@@ -106,6 +106,27 @@ module Observations
       assert_select("a[href='#{link2.url}']")
     end
 
+    # Own links are sorted by relationship_date, matching the
+    # pre-badge external-links list panel's row order.
+    def test_show_turbo_stream_orders_own_links_by_relationship_date
+      obs = observations(:coprinus_comatus_obs)
+      inat = external_sites(:inaturalist)
+      link1 = external_links(:coprinus_comatus_obs_inaturalist_link)
+      link1.update!(external_created_on: 2.days.ago.to_date)
+      link2 = ExternalLink.create!(
+        user: rolf, target: obs, external_site: inat,
+        url: "#{inat.base_url}999999",
+        external_created_on: 1.day.ago.to_date
+      )
+
+      login
+      get(:show, params: { id: link1.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      hrefs = css_select("a[href]").pluck("href")
+      assert_operator(hrefs.index(link1.url), :<, hrefs.index(link2.url))
+    end
+
     # Sibling observation (same Occurrence) with its own link to the
     # same site shows up in the modal with "(MO #N)" attribution.
     def test_show_turbo_stream_includes_sibling_links
@@ -131,6 +152,39 @@ module Observations
         "small.text-muted a[href='#{permanent_observation_path(obs2.id)}']",
         text: "MO #{obs2.id}"
       )
+    end
+
+    # Sibling links are sorted by relationship_date too, matching own
+    # links' order.
+    def test_show_turbo_stream_orders_sibling_links_by_relationship_date
+      obs1 = observations(:minimal_unknown_obs)
+      obs2 = observations(:coprinus_comatus_obs)
+      obs3 = observations(:agaricus_campestris_obs)
+      occ = Occurrence.create!(user: rolf, primary_observation: obs1)
+      obs1.update!(occurrence: occ)
+      obs2.update!(occurrence: occ)
+      obs3.update!(occurrence: occ)
+      inat = external_sites(:inaturalist)
+      link1 = ExternalLink.create!(
+        user: rolf, target: obs1, external_site: inat,
+        url: "#{inat.base_url}777777"
+      )
+      older_sibling_link =
+        external_links(:coprinus_comatus_obs_inaturalist_link)
+      older_sibling_link.update!(external_created_on: 2.days.ago.to_date)
+      newer_sibling_link = ExternalLink.create!(
+        user: rolf, target: obs3, external_site: inat,
+        url: "#{inat.base_url}666666",
+        external_created_on: 1.day.ago.to_date
+      )
+
+      login
+      get(:show, params: { id: link1.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      hrefs = css_select("a[href]").pluck("href")
+      assert_operator(hrefs.index(older_sibling_link.url), :<,
+                      hrefs.index(newer_sibling_link.url))
     end
 
     def test_show_html_redirects_to_observation

@@ -36,17 +36,21 @@ module Observations::ExternalLinksController::Show
       includes(external_links: :external_site)
   end
 
+  # Sorted by relationship_date, matching the pre-badge external-links
+  # list panel's own row order.
   def site_links_for(obs, site)
-    obs.external_links.select { |link| link.external_site_id == site.id }
+    obs.external_links.select { |link| link.external_site_id == site.id }.
+      sort_by(&:relationship_date)
   end
 
   def sibling_site_links_for(siblings, site)
-    siblings.flat_map do |sib|
+    sib_links = siblings.flat_map do |sib|
       site_links_for(sib, site).map do |link|
         Views::Controllers::Observations::ExternalLinks::Modal::
           SiblingLink.new(link: link, observation: sib)
       end
     end
+    sib_links.sort_by { |sib_link| sib_link.link.relationship_date }
   end
 
   def render_external_link_info_modal

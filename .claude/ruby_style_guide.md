@@ -58,9 +58,8 @@ Link(type: :active, content: title, path: url)
 
 # Good — nested view, no Kit sugar exists, no dispatcher; full
 # namespace + render() is the only way to call it
-render(Views::Controllers::Observations::Show::CollectionNumbersSection.new(
-  obs: @obs, user: @user
-))
+render(Views::Controllers::Observations::Show::SpecimenPanel::
+       CollectionNumbersSection.new(obs: @obs, user: @user))
 
 # Bad — verbose full-namespace render() for a top-level component
 # that already has Kit sugar
