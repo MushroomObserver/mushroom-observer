@@ -111,36 +111,58 @@ class FormNotesTest < ComponentTestCase
                     "last child should be the textile help block")
   end
 
-  # --- Adopt dropdowns ---
+  # --- Occurrence value-source dropdowns ---
 
-  # An inherited part (primary doesn't own the key): a disabled textarea
-  # + a dropdown labelled by source obs, the full value in the option.
-  def test_inherited_part_renders_disabled_textarea_and_adopt_dropdown
-    html = render(InheritedFormNotes.new(Observation.new, action: "/t"))
+  # An :inherit part (primary doesn't store the key): disabled textarea,
+  # a dropdown with Inherit preselected and no "Current value" option.
+  def test_inherit_part_renders_disabled_textarea_with_inherit_selected
+    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
 
     assert_html(
       html,
-      "textarea[name='observation[notes][substrate]'][disabled]" \
-      "[data-notes-adopt-target='value']"
+      "[data-notes-row] textarea[name='observation[notes][substrate]']" \
+      "[disabled][data-notes-adopt-target='value']"
     )
     assert_html(html, "[data-controller='notes-adopt'] select" \
                       "[data-action='change->notes-adopt#adopt']")
+    # Inherit is the preselected current state; Hide is offered too;
+    # there is no Current value (the primary owns no value to keep).
+    assert_html(html, "select option[data-notes-action='inherit'][selected]",
+                text: :form_observations_notes_inherit.l)
+    assert_html(html, "select option[data-notes-action='hide']",
+                text: :form_observations_notes_hide.l)
     # Full value in the option value; source-labelled preview in the text.
-    assert_html(html, "select option[value='wood']", text: "Obs 123: wood")
-    assert_html(html, "select option[value='bark']", text: "Obs 124: bark")
-    assert_includes(html, :form_observations_notes_keep_inherited.l)
+    assert_html(html, "select option[value='wood'][data-notes-action='adopt']",
+                text: "Obs 123: wood")
+    assert_html(html, "select option[value='bark'][data-notes-action='adopt']",
+                text: "Obs 124: bark")
   end
 
-  # An owned part with adopt options (a sibling holds a differing value):
-  # the normal editable textarea keeps its value, plus a dropdown.
-  def test_owned_part_with_adopt_options_keeps_editable_textarea
-    html = render(OwnedAdoptFormNotes.new(Observation.new, action: "/t"))
+  # A :set part (primary stores its own value): editable prefilled
+  # textarea, Current value preselected, plus Inherit / Hide / siblings.
+  def test_set_part_renders_editable_textarea_with_current_selected
+    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
 
-    # Editable (not disabled), pre-filled with the owned value.
-    assert_html(html, "textarea[name='observation[notes][cap]']")
+    assert_html(html, "textarea[name='observation[notes][cap]']", text: "red")
     assert_no_html(html, "textarea[name='observation[notes][cap]'][disabled]")
-    assert_html(html, "select option[value='brown']", text: "Obs 5: brown")
-    assert_includes(html, :form_observations_notes_keep_current.l)
+    assert_html(html, "select option[data-notes-action='current'][selected]",
+                text: :form_observations_notes_current.l)
+    assert_html(html, "select option[value='brown'][data-notes-action='adopt']",
+                text: "Obs 5: brown")
+  end
+
+  # A :hide part (primary stores a blank to suppress): editable-but-empty
+  # textarea, Hide preselected, no Current value option.
+  def test_hide_part_renders_empty_textarea_with_hide_selected
+    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
+
+    assert_html(html, "textarea[name='observation[notes][odor]']")
+    assert_no_html(html, "textarea[name='observation[notes][odor]'][disabled]")
+    assert_html(html, "select option[data-notes-action='hide'][selected]",
+                text: :form_observations_notes_hide.l)
+    # Only the one :set row (cap) offers Current value; neither the
+    # :inherit nor the :hide row does.
+    assert_html(html, "option[data-notes-action='current']", count: 1)
   end
 
   def test_no_adopt_controller_without_adopt_options
@@ -191,29 +213,9 @@ class SinglePartFormNotes < Components::ApplicationForm
   end
 end
 
-class InheritedFormNotes < Components::ApplicationForm
-  def view_template
-    super do
-      render(Components::Form::Notes.new(
-               form: self,
-               parts: [
-                 Components::Form::Notes::Part.new(
-                   key: :cap, value: "red", label: "Cap:"
-                 ),
-                 Components::Form::Notes::Part.new(
-                   key: :substrate, value: "", label: "substrate",
-                   adopt_options: [[123, "wood"], [124, "bark"]],
-                   inherited: true
-                 )
-               ],
-               panel_id: "test_notes",
-               expanded: true
-             ))
-    end
-  end
-end
-
-class OwnedAdoptFormNotes < Components::ApplicationForm
+# One of each occurrence value-source state: :set (cap, owns a value),
+# :inherit (substrate, owns nothing), :hide (odor, owns a blank).
+class OccurrenceFormNotes < Components::ApplicationForm
   def view_template
     super do
       render(Components::Form::Notes.new(
@@ -221,7 +223,16 @@ class OwnedAdoptFormNotes < Components::ApplicationForm
                parts: [
                  Components::Form::Notes::Part.new(
                    key: :cap, value: "red", label: "Cap:",
-                   adopt_options: [[5, "brown"]]
+                   adopt_options: [[5, "brown"]], notes_state: :set
+                 ),
+                 Components::Form::Notes::Part.new(
+                   key: :substrate, value: "", label: "substrate",
+                   adopt_options: [[123, "wood"], [124, "bark"]],
+                   notes_state: :inherit
+                 ),
+                 Components::Form::Notes::Part.new(
+                   key: :odor, value: "", label: "odor",
+                   adopt_options: [[7, "pungent"]], notes_state: :hide
                  )
                ],
                panel_id: "test_notes",

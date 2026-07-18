@@ -23,14 +23,18 @@
 class Components::Form::Notes < Components::Base
   # One notes part. `key` becomes the Superform field key under `:notes`
   # (`form[notes][<key>]`), `value` is the current value, `label` labels
-  # the textarea. `adopt_options`, when present, is a list of
-  # [source_obs_id, value] the observation form supplies for the primary
-  # of an occurrence -- rendered as a dropdown that copies a sibling's
-  # value into the textarea. `inherited` marks a key the record doesn't
-  # own yet: the textarea starts disabled (submits nothing, so the value
-  # stays inherited via the display-time merge) until a value is adopted.
-  Part = Data.define(:key, :value, :label, :adopt_options, :inherited) do
-    def initialize(key:, value:, label:, adopt_options: nil, inherited: false)
+  # the textarea.
+  #
+  # A plain part (`notes_state` nil) renders a normal Superform textarea.
+  # An *occurrence* part (a notes key shared with the other observations
+  # of the primary's occurrence) carries `adopt_options` -- a list of
+  # [source_obs_id, value] sibling values -- and a `notes_state` of one
+  # of :set / :hide / :inherit describing what this observation currently
+  # shows for the key. It renders a three-state dropdown (Current value /
+  # Inherit / Hide / a specific observation's value) that drives the
+  # textarea; see `render_occurrence_part`.
+  Part = Data.define(:key, :value, :label, :adopt_options, :notes_state) do
+    def initialize(key:, value:, label:, adopt_options: nil, notes_state: nil)
       super
     end
   end
@@ -100,54 +104,75 @@ class Components::Form::Notes < Components::Base
   end
 
   def render_part(notes_ns, part)
-    if part.inherited
-      render_inherited_part(part)
-    elsif part.adopt_options.present?
-      div(data: { notes_row: "" }) do
-        render_owned_textarea(notes_ns, part)
-        render_adopt_select(part, inherited: false)
-      end
+    if part.notes_state
+      render_occurrence_part(part)
     else
       render_owned_textarea(notes_ns, part)
     end
   end
 
-  # A key the record doesn't own yet: a gray row whose disabled textarea
-  # submits nothing (so the value stays inherited via the display merge)
-  # until the dropdown adopts a sibling value, which fills + enables it.
-  def render_inherited_part(part)
-    div(class: "form-group",
-        data: { notes_row: "", notes_inherited: "" }) do
-      label(class: "text-muted") { part.label }
-      render_adopt_select(part, inherited: true)
-      textarea(name: "#{@notes_name_prefix}[#{part.key}]",
-               class: "form-control", rows: "3", style: "resize: vertical;",
-               disabled: true, data: { notes_adopt_target: "value" })
+  # A notes key shared with the occurrence's other observations. The
+  # dropdown picks what this observation shows for the key -- its own
+  # current value, an inherited value, nothing (hide), or a specific
+  # sibling's value -- and drives the textarea. An :inherit row starts
+  # disabled (submits nothing, so the value stays inherited via the
+  # display-time merge); :set / :hide start enabled so their value (or
+  # deliberate blank) submits.
+  def render_occurrence_part(part)
+    inherit = part.notes_state == :inherit
+    div(class: occurrence_row_class(inherit), data: { notes_row: "" }) do
+      label { part.label }
+      render_state_select(part)
+      render_occurrence_textarea(part, inherit)
     end
   end
 
-  # Dropdown of sibling values to copy in. Options are labelled by their
-  # source obs + a truncated preview so a long value (e.g. the iNat
-  # imported-data blob) doesn't overflow the control; the full value is
-  # the option value, so adopting copies all of it.
-  def render_adopt_select(part, inherited:)
+  def occurrence_row_class(inherit)
+    inherit ? "form-group text-muted" : "form-group"
+  end
+
+  def render_occurrence_textarea(part, inherit)
+    textarea(name: "#{@notes_name_prefix}[#{part.key}]",
+             class: "form-control", rows: "3", style: "resize: vertical;",
+             disabled: inherit,
+             data: { notes_adopt_target: "value" }) do
+      plain(part.value) unless inherit || part.value.blank?
+    end
+  end
+
+  # Value-source picker: the current state's option is preselected, then
+  # the other states, then each distinct sibling value. Selecting an
+  # option drives the textarea (see notes-adopt_controller.js).
+  def render_state_select(part)
     select(class: "form-control mb-1",
            data: { action: "change->notes-adopt#adopt" }) do
-      option(value: "") { adopt_default_label(inherited) }
-      part.adopt_options.each do |obs_id, value|
-        option(value: value) { adopt_option_label(obs_id, value) }
+      render_state_options(part)
+    end
+  end
+
+  def render_state_options(part)
+    state = part.notes_state
+    if state == :set
+      state_option(:current, :form_observations_notes_current.l, true)
+    end
+    state_option(:inherit, :form_observations_notes_inherit.l,
+                 state == :inherit)
+    state_option(:hide, :form_observations_notes_hide.l, state == :hide)
+    part.adopt_options.each do |obs_id, value|
+      option(value: value, data: { notes_action: "adopt" }) do
+        adopt_option_label(obs_id, value)
       end
     end
   end
 
-  def adopt_default_label(inherited)
-    if inherited
-      :form_observations_notes_keep_inherited.l
-    else
-      :form_observations_notes_keep_current.l
-    end
+  def state_option(action, label, selected)
+    option(value: "", selected: selected,
+           data: { notes_action: action }) { label }
   end
 
+  # Sibling value labelled by its source obs + a truncated preview so a
+  # long value (e.g. the iNat imported-data blob) doesn't overflow the
+  # control; the full value is the option value, so adopting copies it all.
   def adopt_option_label(obs_id, value)
     "Obs #{obs_id}: #{value.squish.truncate(90)}"
   end
@@ -178,9 +203,7 @@ class Components::Form::Notes < Components::Base
                label_sr_only: @single_part_mode
              },
              value: part.value,
-             # Occurrence adopt fields can hold long values (the iNat
-             # imported-data blob), so give them room like inherited rows.
-             rows: part.adopt_options.present? ? 3 : row_count
+             rows: row_count
            ))
   end
 

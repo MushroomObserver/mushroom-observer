@@ -46,9 +46,10 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
-  # Editing the primary of a multi-member occurrence offers gray "adopt"
-  # rows for sibling keys it doesn't own: a select of the distinct
-  # sibling values plus a disabled textarea under the notes params.
+  # Editing the primary of a multi-member occurrence, a sibling key it
+  # doesn't store is an :inherit row -- a disabled textarea plus a
+  # value-source select with Inherit preselected and the sibling value
+  # as an adopt option.
   def test_edit_primary_offers_inherited_notes_adopt_rows
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:detailed_unknown_obs)
@@ -66,11 +67,13 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select(
       "textarea[name='observation[notes][Substrate]'][disabled]"
     )
-    assert_select("select option[value='on birch']")
+    assert_select("select option[data-notes-action='inherit'][selected]")
+    assert_select("select option[value='on birch'][data-notes-action='adopt']")
   end
 
-  # An OWNED key (editable, not disabled) whose sibling holds a different
-  # value also gets an adopt dropdown -- not only unowned keys.
+  # A key the primary DOES store, whose sibling holds a different value,
+  # is a :set row -- an editable textarea plus a select with Current
+  # value preselected and the sibling value as an adopt option.
   def test_edit_primary_offers_adopt_for_owned_key_when_sibling_differs
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:detailed_unknown_obs)
@@ -85,7 +88,8 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     get(:edit, params: { id: primary.id })
 
     assert_select("textarea[name='observation[notes][Cap]']:not([disabled])")
-    assert_select("select option[value='brown']")
+    assert_select("select option[data-notes-action='current'][selected]")
+    assert_select("select option[value='brown'][data-notes-action='adopt']")
   end
 
   # A blank submitted for a sibling-held key is preserved (a deliberate

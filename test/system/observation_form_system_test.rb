@@ -967,10 +967,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
   end
 
-  # For an OWNED key whose sibling differs, adopting the sibling value
-  # then reselecting "keep current value" reverts the editable textarea
-  # to the primary's original value.
-  def test_edit_primary_reverts_owned_note_to_current_value
+  # For a :set key whose sibling differs, the value-source dropdown drives
+  # the textarea through every state: adopt a sibling value, revert to the
+  # current value, inherit (disable so it submits nothing), and hide
+  # (blank but enabled so the blank submits and suppresses the inherited
+  # value).
+  def test_edit_primary_notes_value_source_transitions
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:detailed_unknown_obs)
     [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
@@ -991,8 +993,16 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       find("select option[value='brown']").select_option
       assert_equal("brown", find(selector).value)
 
-      find("select option[value='']").select_option
+      find("select option[data-notes-action='current']").select_option
       assert_equal("red", find(selector).value, "reverts to current value")
+
+      find("select option[data-notes-action='inherit']").select_option
+      assert_equal("", find(selector).value)
+      assert(find(selector).disabled?, "inherit disables the textarea")
+
+      find("select option[data-notes-action='hide']").select_option
+      assert_equal("", find(selector).value)
+      assert_not(find(selector).disabled?, "hide clears but keeps it enabled")
     end
   end
 

@@ -27,21 +27,13 @@ module Views::Controllers::Observations
                ))
       end
 
-      # The owned notes parts (template + orphaned + Other), each carrying
-      # any occurrence adopt options for its key, followed by inherited
-      # parts for sibling keys the primary doesn't own at all.
+      # The plain notes parts (template + orphaned + Other keys that
+      # aren't shared with the occurrence), followed by one three-state
+      # part per notes key the primary shares with its occurrence
+      # siblings (Occurrence#adopt_options_by_key).
       def observation_form_note_parts
         adopt = observation_adopt_options
-        owned = observation_notes_form_parts.map do |part|
-          key = model.notes_normalized_key(part)
-          Components::Form::Notes::Part.new(
-            key: key,
-            value: model.notes_part_value(part),
-            label: single_notes_part? ? :NOTES : part,
-            adopt_options: adopt[key]
-          )
-        end
-        owned + inherited_note_parts(adopt, owned.map(&:key))
+        plain_note_parts(adopt.keys) + occurrence_note_parts(adopt)
       end
 
       # Adopt options per notes key for the primary of a multi-member
@@ -52,15 +44,41 @@ module Views::Controllers::Observations
         model.occurrence.adopt_options_by_key
       end
 
-      # Sibling keys with adopt options that aren't among the owned parts
-      # -- rendered as gray inherited rows.
-      def inherited_note_parts(adopt, owned_keys)
-        (adopt.keys - owned_keys).map do |key|
+      # Template / orphaned / Other parts whose keys aren't shared with
+      # the occurrence -- rendered as ordinary textareas.
+      def plain_note_parts(occurrence_keys)
+        observation_notes_form_parts.filter_map do |part|
+          key = model.notes_normalized_key(part)
+          next if occurrence_keys.include?(key)
+
           Components::Form::Notes::Part.new(
-            key: key, value: "", label: key.to_s.tr("_", " "),
-            adopt_options: adopt[key], inherited: true
+            key: key,
+            value: model.notes_part_value(part),
+            label: single_notes_part? ? :NOTES : part
           )
         end
+      end
+
+      # One three-state part per occurrence-shared key, its notes_state
+      # (:set / :hide / :inherit) read from what the primary actually
+      # stores for the key.
+      def occurrence_note_parts(adopt)
+        adopt.map do |key, options|
+          Components::Form::Notes::Part.new(
+            key: key, value: model.notes[key].to_s,
+            label: key.to_s.tr("_", " "),
+            adopt_options: options, notes_state: notes_state_for(key)
+          )
+        end
+      end
+
+      # What the primary currently shows for a shared key: a stored value
+      # (:set), a stored blank that suppresses the inherited value
+      # (:hide), or no stored key at all, so it inherits (:inherit).
+      def notes_state_for(key)
+        return :inherit unless model.notes.key?(key)
+
+        model.notes[key].present? ? :set : :hide
       end
 
       def observation_notes_form_parts
