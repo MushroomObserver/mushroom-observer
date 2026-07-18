@@ -30,6 +30,18 @@ class Views::Controllers::Observations::Show::DetailsTest <
                       "#observation_external_links")
   end
 
+  # Badges are informational, not gated on being logged in -- an
+  # anonymous viewer should still see that the obs was shared on
+  # another site.
+  def test_renders_external_links_body_for_logged_out_viewer
+    obs = observations(:imported_inat_obs)
+
+    html = render(panel_with(obs, nil))
+
+    assert_html(html, "#observation_details > .panel-body.border-bottom " \
+                      "#observation_external_links")
+  end
+
   def test_does_not_render_external_links_body_when_nothing_to_show
     assert_empty(@obs.external_links)
 

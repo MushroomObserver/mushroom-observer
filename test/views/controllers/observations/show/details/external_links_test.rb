@@ -85,6 +85,21 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     assert_no_html(html, "a[data-modal='modal_external_link']")
   end
 
+  # Badges are informational and shown to a logged-out viewer, but the
+  # add-link affordance still requires being logged in -- even when
+  # `sites:` is (incorrectly, for this case) populated.
+  def test_hides_new_link_for_logged_out_viewer_even_with_sites_present
+    link = external_links(:imported_inat_obs_inat_link)
+    obs = link.observation
+    sites = ::ExternalSite.all.to_a
+    skip("Need at least one ExternalSite fixture") if sites.empty?
+
+    html = render(panel_with(obs, sites: sites, user: nil))
+
+    assert_html(html, "#observation_external_links")
+    assert_no_html(html, "a[data-modal='modal_external_link']")
+  end
+
   def test_sibling_only_link_still_shows_badge
     obs = observations(:detailed_unknown_obs)
     assert_empty(obs.external_links)
@@ -101,9 +116,9 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
   private
 
-  def panel_with(obs, sites: nil, siblings: [])
+  def panel_with(obs, sites: nil, siblings: [], user: @user)
     Views::Controllers::Observations::Show::Details::ExternalLinks.new(
-      obs: obs, user: @user, sites: sites, siblings: siblings
+      obs: obs, user: user, sites: sites, siblings: siblings
     )
   end
 end

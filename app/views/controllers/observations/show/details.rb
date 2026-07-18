@@ -17,7 +17,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     Panel(panel_id: "observation_details") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
-      if @user && show_external_links?
+      if show_external_links?
         panel.with_body(classes: "border-bottom py-2") do
           render_external_links_section
         end
@@ -42,7 +42,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   end
 
   def render_body
-    ul(class: "list-unstyled") { render_when_where_who }
+    ul(class: "list-unstyled mb-0") { render_when_where_who }
     render_projects if @user && @obs.projects.present?
     render_field_slip if @user && @obs.field_slip
   end

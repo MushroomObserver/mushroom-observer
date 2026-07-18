@@ -83,8 +83,10 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     whitespace
   end
 
+  # The badges themselves are informational and shown to everyone;
+  # only the add-link affordance needs a logged-in user.
   def show_new_link?
-    @sites.present?
+    @user && @sites.present?
   end
 
   def render_new_link
