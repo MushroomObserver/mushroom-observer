@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Usage: exiftool_remote [exiftool flags...] <url>
 #
 # Mirrors Image#read_exif_data's `cmd, *flags, path` calling
@@ -9,6 +9,15 @@
 # README_PRODUCTION_INSTALL / script/ubuntu_setup_root -- and ships
 # with macOS by default, unlike wget) and pipes the bytes into
 # exiftool reading from stdin, with those flags applied.
+#
+# pipefail so a failed curl (bad URL, HTTP error, network failure)
+# makes the whole pipeline -- and this script's own exit status, which
+# Image#read_exif_data checks via Open3.capture2e's status.success? --
+# fail too, instead of silently succeeding on whatever exiftool made
+# of empty/partial input. -f/-L: treat HTTP error responses as
+# failures rather than piping an error page's HTML into exiftool, and
+# follow redirects (CDN/S3-signed image URLs commonly redirect).
+set -euo pipefail
 url="${@: -1}"
 flags=("${@:1:$#-1}")
-curl -s "$url" | exiftool "${flags[@]}" -
+curl -fsSL -- "$url" | exiftool "${flags[@]}" -
