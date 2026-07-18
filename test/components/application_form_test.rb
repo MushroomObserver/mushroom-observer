@@ -96,6 +96,21 @@ class ApplicationFormTest < ComponentTestCase
     assert_includes(form, 'rows="10"')
   end
 
+  # The `prepend` slot renders inside the form-group, between the label
+  # row and the textarea (symmetric with `append`, which renders after).
+  def test_textarea_field_with_prepend
+    form = render_form do
+      textarea_field(:notes, label: "Notes") do |f|
+        f.with_prepend { select(class: "value-source") { option { "x" } } }
+      end
+    end
+
+    assert_html(form, ".form-group select.value-source")
+    group = Nokogiri::HTML5.fragment(form).at_css(".form-group")
+    order = group.css("label, select, textarea").map(&:name)
+    assert_equal(%w[label select textarea], order)
+  end
+
   # Regression: `prefs: true` auto-resolves the label from the
   # `prefs_<field>` i18n key, matching ERB
   # `auto_label_if_form_is_account_prefs`. Six helpers honor this:

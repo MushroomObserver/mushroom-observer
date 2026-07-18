@@ -80,19 +80,10 @@ class Components::Form::Notes < Components::Base
       render_above_help if @single_part_mode && @above_help
       Help(content: :form_observations_notes_inherited_help.l) if adopt_rows?
       @form.namespace(:notes) do |notes_ns|
-        @notes_name_prefix ||= notes_name_prefix(notes_ns)
         @parts.each { |part| render_part(notes_ns, part) }
       end
       render_textile_help
     end
-  end
-
-  # Full HTML name up to (but not including) the per-key segment, e.g.
-  # "observation[notes]" -- derived from a real namespaced field so the
-  # inherited-row textareas (rendered as plain HTML, outside Superform)
-  # submit under the same params as the normal fields.
-  def notes_name_prefix(notes_ns)
-    notes_ns.field(:__prefix__).dom.name.to_s.chomp("[__prefix__]")
   end
 
   def adopt_rows?
@@ -105,51 +96,35 @@ class Components::Form::Notes < Components::Base
 
   def render_part(notes_ns, part)
     if part.notes_state
-      render_occurrence_part(part)
+      render_occurrence_part(notes_ns, part)
     else
       render_owned_textarea(notes_ns, part)
     end
   end
 
-  # A notes key shared with the occurrence's other observations. The
-  # dropdown picks what this observation shows for the key -- its own
-  # current value, an inherited value, nothing (hide), or a specific
-  # sibling's value -- and drives the textarea. An :inherit row starts
-  # disabled (submits nothing, so the value stays inherited via the
-  # display-time merge); :set / :hide start enabled so their value (or
-  # deliberate blank) submits.
-  def render_occurrence_part(part)
+  # A notes key shared with the occurrence's other observations. Rendered
+  # through the same Superform textarea field as the plain rows (so it
+  # gets the matching id + `<label for>` association and submits under
+  # `observation[notes][<key>]` identically), with the value-source
+  # dropdown in the field's `prepend` slot. The dropdown picks what this
+  # observation shows for the key -- its own current value, an inherited
+  # value, nothing (hide), or a specific sibling's value -- and drives
+  # the textarea. An :inherit row starts disabled (submits nothing, so
+  # the value stays inherited via the display-time merge); :set / :hide
+  # start enabled so their value (or deliberate blank) submits.
+  def render_occurrence_part(notes_ns, part)
     inherit = part.notes_state == :inherit
-    field_id = occurrence_field_id(part.key)
-    div(class: occurrence_row_class(inherit), data: { notes_row: "" }) do
-      label(for: field_id) { part.label }
-      render_state_select(part)
-      render_occurrence_textarea(part, inherit, field_id)
-    end
-  end
-
-  # The Rails-convention field id for the textarea (matching what
-  # Superform emits for the plain rows), so the row's <label for=...>
-  # associates with it and clicking the label focuses the field.
-  def occurrence_field_id(key)
-    "#{notes_id_prefix}_#{key}"
-  end
-
-  def notes_id_prefix
-    @notes_id_prefix ||= @notes_name_prefix.tr("[", "_").delete("]")
-  end
-
-  def occurrence_row_class(inherit)
-    inherit ? "form-group text-muted" : "form-group"
-  end
-
-  def render_occurrence_textarea(part, inherit, field_id)
-    textarea(id: field_id, name: "#{@notes_name_prefix}[#{part.key}]",
-             class: "form-control", rows: "3", style: "resize: vertical;",
-             disabled: inherit,
-             data: { notes_adopt_target: "value" }) do
-      plain(part.value) unless inherit || part.value.blank?
-    end
+    field = notes_ns.field(part.key).textarea(
+      wrapper_options: {
+        label: part.label,
+        wrap_class: inherit ? "text-muted" : nil,
+        wrap_data: { notes_row: "" }
+      },
+      value: part.value, rows: 3, disabled: inherit,
+      style: "resize: vertical;", data: { notes_adopt_target: "value" }
+    )
+    field.with_prepend { render_state_select(part) }
+    render(field)
   end
 
   # Value-source picker: the current state's option is preselected, then
