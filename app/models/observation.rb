@@ -688,22 +688,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       will_save_change_to_attribute?(:location_id)
   end
 
-  def place_name_and_coordinates(user = nil)
-    if lat.present? && lng.present?
-      lat_string = format_coordinate(lat, "N", "S")
-      lng_string = format_coordinate(lng, "E", "W")
-      "#{place_name(user)} (#{lat_string} #{lng_string})"
-    else
-      place_name(user)
-    end
-  end
-
-  def format_coordinate(value, positive_point, negative_point)
-    return "#{-value.round(4)}°#{negative_point}" if value.negative?
-
-    "#{value.round(4)}°#{positive_point}"
-  end
-
   # Returns latitude if public or if the current user owns the observation.
   # The user should also be able to see hidden latitudes if they are an admin
   # or they are members of a project that the observation belongs to, but
@@ -718,19 +702,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def reveal_location?(user)
     !gps_hidden || can_edit?(user) || project_admin?(user)
-  end
-
-  def display_lat_lng
-    return "" unless lat
-
-    "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
-      "#{lng.abs}°#{lng.negative? ? "W" : "E"}"
-  end
-
-  def display_alt
-    return "" unless alt
-
-    "#{alt.round}m"
   end
 
   def saved_change_to_place?

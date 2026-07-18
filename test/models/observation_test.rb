@@ -1198,17 +1198,6 @@ class ObservationTest < UnitTestCase
     assert_in_delta(-118.3521, obs.public_lng)
   end
 
-  def test_place_name_and_coordinates_with_values
-    obs = observations(:amateur_obs)
-    assert_equal("Pasadena, California, USA (34.1622°N 118.3521°W)",
-                 obs.place_name_and_coordinates)
-  end
-
-  def test_place_name_and_coordinates_has_no_values
-    obs = observations(:unknown_with_no_naming)
-    assert_equal("Who knows where", obs.place_name_and_coordinates)
-  end
-
   def test_check_requirements_no_user
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
@@ -2156,16 +2145,6 @@ class ObservationTest < UnitTestCase
   def test_when_str_falls_back_to_formatted_when
     obs = observations(:minimal_unknown_obs)
     assert_equal(obs.when.strftime("%Y-%m-%d"), obs.when_str)
-  end
-
-  # display_alt formats altitude in meters when present (line 579)
-  # and returns "" when nil.
-  def test_display_alt
-    obs = observations(:minimal_unknown_obs)
-    obs.alt = nil
-    assert_equal("", obs.display_alt)
-    obs.alt = 1234
-    assert_equal("1234m", obs.display_alt)
   end
 
   # other_notes reads the canonical "Other" key (line 673) and

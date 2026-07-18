@@ -50,10 +50,6 @@ class Components::Map::Popup < Components::Base
     @set.observations.length == 1 && @set.observations.first&.id
   end
 
-  def effective_query
-    @effective_query ||= @query || current_query
-  end
-
   def query_path_params
     q = effective_query&.q_param
     q ? { q: q } : {}
@@ -282,22 +278,11 @@ class Components::Map::Popup < Components::Base
     end
   end
 
-  def format_latitude(val)
-    format_coordinate(val, "N", "S")
-  end
-
-  def format_longitude(val)
-    format_coordinate(val, "E", "W")
-  end
-
-  def format_coordinate(val, positive_dir, negative_dir)
-    deg = val.abs.round(4)
-    "#{deg}°#{val.negative? ? negative_dir : positive_dir}"
-  end
-
   # Phlex 2.x doesn't ship `<center>` since it's a deprecated HTML
   # element, but the Google Maps popup historically uses it to stack
   # the box-coord lines on top of each other (the popup's tiny visual
   # vocabulary). Register it so `center { ... }` emits the tag.
   register_element :center
+
+  include Components::Map::EffectiveQuery
 end

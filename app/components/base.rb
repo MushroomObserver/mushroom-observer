@@ -31,6 +31,9 @@ class Components::Base < Phlex::HTML
   # viewer_aware_format.rb for why this isn't a register_value_helper
   # instead).
   include ViewerAwareFormat
+  # `display_lat_lng`, `display_alt`, `place_name_and_coordinates`,
+  # `format_coordinate` — see app/classes/coordinate_format.rb.
+  include CoordinateFormat
 
   # Register custom value helpers (return values)
   register_value_helper :permission?
