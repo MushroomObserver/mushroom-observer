@@ -58,11 +58,6 @@
             "type": "command",
             "command": "test -x .claude/hooks/check_lang_update_before_test.sh && exec .claude/hooks/check_lang_update_before_test.sh || exit 0",
             "timeout": 120
-          },
-          {
-            "type": "command",
-            "command": "test -x .claude/hooks/block_noop_cd.sh && exec .claude/hooks/block_noop_cd.sh || exit 0",
-            "timeout": 10
           }
         ]
       },
