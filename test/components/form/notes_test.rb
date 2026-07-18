@@ -110,6 +110,33 @@ class FormNotesTest < ComponentTestCase
     assert_includes(children.last["class"] || "", "help-block",
                     "last child should be the textile help block")
   end
+
+  # --- Inherited (adopt) fields ---
+
+  def test_inherited_fields_render_gray_adopt_rows
+    html = render(InheritedFormNotes.new(Observation.new, action: "/t"))
+
+    # The disabled textarea submits nothing until adopted, and is named
+    # under the same notes params as the normal fields.
+    assert_html(
+      html,
+      "textarea[name='observation[notes][substrate]'][disabled]" \
+      "[data-notes-adopt-target='value']"
+    )
+    # A select carrying the distinct sibling values plus the keep-blank
+    # default, wired to the adopt controller.
+    assert_html(html, "[data-controller='notes-adopt'] select" \
+                      "[data-action='change->notes-adopt#adopt']")
+    assert_html(html, "select option[value='wood']", text: "wood")
+    assert_html(html, "select option[value='bark']", text: "bark")
+    assert_includes(html, :form_observations_notes_keep_inherited.l)
+  end
+
+  def test_no_inherited_section_without_inherited_fields
+    html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+
+    assert_no_html(html, "[data-controller='notes-adopt']")
+  end
 end
 
 # --- Test form classes -------------------------------------------------
@@ -148,6 +175,29 @@ class SinglePartFormNotes < Components::ApplicationForm
                expanded: true,
                single_part_mode: true,
                above_help: "ABOVE_HELP_MARKER".html_safe
+             ))
+    end
+  end
+end
+
+class InheritedFormNotes < Components::ApplicationForm
+  def view_template
+    super do
+      render(Components::Form::Notes.new(
+               form: self,
+               parts: [
+                 Components::Form::Notes::Part.new(
+                   key: :cap, value: "red", label: "Cap:"
+                 )
+               ],
+               inherited_fields: [
+                 Components::Form::Notes::InheritedField.new(
+                   key: :substrate, label: "substrate",
+                   options: %w[wood bark]
+                 )
+               ],
+               panel_id: "test_notes",
+               expanded: true
              ))
     end
   end

@@ -20,11 +20,25 @@ module Views::Controllers::Observations
         render(Components::Form::Notes.new(
                  form: self,
                  parts: observation_form_note_parts,
+                 inherited_fields: observation_inherited_note_fields,
                  panel_id: "observation_notes",
                  expanded: notes_panel_expanded?,
                  single_part_mode: single_notes_part?,
                  above_help: above_notes_help
                ))
+      end
+
+      # Adopt rows for the primary of a multi-member occurrence: the
+      # sibling keys it doesn't own, each with the distinct sibling
+      # values (Occurrence#inheritable_notes). Empty otherwise.
+      def observation_inherited_note_fields
+        return [] unless model.shows_merged_notes?
+
+        model.occurrence.inheritable_notes.map do |key, options|
+          Components::Form::Notes::InheritedField.new(
+            key: key, label: key.to_s.tr("_", " "), options: options
+          )
+        end
       end
 
       def observation_form_note_parts

@@ -26,8 +26,16 @@ class Components::Form::Notes < Components::Base
   # `value` is the current value, `label` is shown above the textarea.
   Part = Data.define(:key, :value, :label)
 
+  # A key some *other* record carries that this record doesn't own yet,
+  # offered as a gray "adopt" row: a dropdown of the distinct candidate
+  # `options`, which fills a (initially disabled) textarea named
+  # `form[notes][<key>]`. Generic; the observation form supplies these
+  # from its occurrence's sibling notes (Occurrence#inheritable_notes).
+  InheritedField = Data.define(:key, :label, :options)
+
   prop :form, ::Components::ApplicationForm
   prop :parts, _Array(Part)
+  prop :inherited_fields, _Array(InheritedField), default: -> { [] }
   # Panel id; also used to derive `#{panel_id}_inner` (collapse
   # target) and `#{panel_id}_fields` (the inner div the textareas
   # live in).
@@ -66,9 +74,50 @@ class Components::Form::Notes < Components::Base
     div(id: "#{@panel_id}_fields") do
       render_above_help if @single_part_mode && @above_help
       @form.namespace(:notes) do |notes_ns|
+        @notes_name_prefix ||= notes_name_prefix(notes_ns)
         @parts.each { |part| render_part(notes_ns, part) }
       end
+      render_inherited_fields if @inherited_fields.any?
       render_textile_help
+    end
+  end
+
+  # Full HTML name up to (but not including) the per-key segment, e.g.
+  # "observation[notes]" -- derived from a real namespaced field so the
+  # inherited-row textareas (rendered as plain HTML, outside Superform)
+  # submit under the same params as the normal fields.
+  def notes_name_prefix(notes_ns)
+    notes_ns.field(:__prefix__).dom.name.to_s.chomp("[__prefix__]")
+  end
+
+  # Gray "adopt" rows for keys inherited from sibling records. Each row's
+  # dropdown fills + enables its textarea via the notes-adopt Stimulus
+  # controller; left untouched, the disabled textarea submits nothing and
+  # the value stays inherited (shown via the display-time notes merge).
+  def render_inherited_fields
+    div(class: "notes-inherited mt-3", data: { controller: "notes-adopt" }) do
+      Help(content: :form_observations_notes_inherited_help.l)
+      @inherited_fields.each { |field| render_inherited_field(field) }
+    end
+  end
+
+  def render_inherited_field(field)
+    div(class: "form-group", data: { notes_row: "" }) do
+      label(class: "text-muted") { field.label }
+      render_adopt_select(field)
+      textarea(
+        name: "#{@notes_name_prefix}[#{field.key}]",
+        class: "form-control", rows: "1", disabled: true,
+        data: { notes_adopt_target: "value" }
+      )
+    end
+  end
+
+  def render_adopt_select(field)
+    select(class: "form-control input-sm mb-1",
+           data: { action: "change->notes-adopt#adopt" }) do
+      option(value: "") { :form_observations_notes_keep_inherited.l }
+      field.options.each { |value| option(value: value) { value } }
     end
   end
 

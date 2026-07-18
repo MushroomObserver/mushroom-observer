@@ -93,6 +93,21 @@ class Occurrence < AbstractModel
     end
   end
 
+  # For the primary's EDIT form: keys the siblings carry but the primary
+  # does not own, each mapped to the DISTINCT non-blank sibling values in
+  # winner-first (most-recent-sibling) order. Rendered as gray "adopt"
+  # rows so the editor can pull a sibling's value onto the primary.
+  # Ordered hash; keys in most-recent-sibling-first order.
+  def inheritable_notes
+    primary, siblings = primary_and_ranked_siblings
+    return {} unless primary
+
+    unowned_sibling_keys(primary, siblings).each_with_object({}) do |key, out|
+      values = siblings.filter_map { |sib| sib.notes[key].presence }.uniq
+      out[key] = values if values.any?
+    end
+  end
+
   # Auto-destroy if reduced to fewer than 2 observations,
   # unless linked to a field slip (which needs the occurrence).
   def destroy_if_incomplete!
@@ -293,6 +308,11 @@ class Occurrence < AbstractModel
                reject { |obs| obs.id == primary_observation_id }.
                sort_by { |obs| [obs.updated_at, obs.id] }.reverse
     [primary, siblings]
+  end
+
+  # Sibling keys the primary doesn't own, most-recent-sibling-first.
+  def unowned_sibling_keys(primary, siblings)
+    siblings.flat_map { |sib| sib.notes.keys }.uniq - primary.notes.keys
   end
 
   # Primary's keys first, in its own order, then any keys only siblings

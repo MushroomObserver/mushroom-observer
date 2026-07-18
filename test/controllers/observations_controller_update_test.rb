@@ -46,6 +46,29 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Editing the primary of a multi-member occurrence offers gray "adopt"
+  # rows for sibling keys it doesn't own: a select of the distinct
+  # sibling values plus a disabled textarea under the notes params.
+  def test_edit_primary_offers_inherited_notes_adopt_rows
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Substrate: "on birch" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_select("[data-controller='notes-adopt']")
+    assert_select(
+      "textarea[name='observation[notes][Substrate]'][disabled]"
+    )
+    assert_select("select option[value='on birch']")
+  end
+
   def test_collector_can_edit_observation
     obs = observations(:newbie_obs)
     login("foray_newbie")

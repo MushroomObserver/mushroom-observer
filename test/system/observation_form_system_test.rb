@@ -939,6 +939,34 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
+  # Editing the primary of a multi-member occurrence, adopting a
+  # sibling's note value via the gray dropdown enables + fills the
+  # (initially disabled) textarea so it will submit.
+  def test_edit_primary_adopts_sibling_note_value
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Substrate: "on birch" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login!(primary.user)
+
+    visit(edit_observation_path(primary.id))
+    assert_selector("body.observations__edit")
+
+    within("[data-controller='notes-adopt']") do
+      selector = "textarea[name='observation[notes][Substrate]']"
+      assert(find(selector).disabled?, "adopt textarea starts disabled")
+
+      find("select").find(:option, "on birch").select_option
+
+      assert_equal("on birch", find(selector).value)
+      assert_not(find(selector).disabled?, "adopting enables the textarea")
+    end
+  end
+
   ##############################################################################
   #  Helper methods
   #

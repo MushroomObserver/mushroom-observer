@@ -1129,6 +1129,35 @@ class OccurrenceTest < UnitTestCase
     assert_equal({ Substrate: "wood" }, @obs2.reload.notes.to_h)
   end
 
+  # ---- inheritable_notes (adopt-row data for the primary's edit form) --
+
+  def test_inheritable_notes_lists_unowned_sibling_keys_with_distinct_values
+    set_notes(@obs1, Cap: "red") # primary owns Cap
+    set_notes(@obs2, Substrate: "wood", Cap: "brown")
+    set_notes(@obs3, Substrate: "wood", Habitat: "bog")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+
+    inheritable = occ.inheritable_notes
+
+    # Cap is owned by the primary -> not offered.
+    assert_not(inheritable.key?(:Cap))
+    # Substrate is on both siblings with the same value -> one option.
+    assert_equal(["wood"], inheritable[:Substrate])
+    # Habitat only on one sibling.
+    assert_equal(["bog"], inheritable[:Habitat])
+  end
+
+  def test_inheritable_notes_orders_values_winner_first
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "older")
+    set_notes(@obs3, Substrate: "newer")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago) # more recent -> winner
+
+    assert_equal(%w[newer older], occ.inheritable_notes[:Substrate])
+  end
+
   private
 
   def set_notes(obs, **notes)
