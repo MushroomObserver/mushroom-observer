@@ -1129,25 +1129,35 @@ class OccurrenceTest < UnitTestCase
     assert_equal({ Substrate: "wood" }, @obs2.reload.notes.to_h)
   end
 
-  # ---- inheritable_notes (adopt-row data for the primary's edit form) --
+  # ---- adopt_options_by_key (adopt-row data for the primary's edit form) --
 
-  def test_inheritable_notes_lists_unowned_sibling_keys_with_distinct_values
+  def test_adopt_options_include_unowned_and_skip_owned_agreeing_keys
     set_notes(@obs1, Cap: "red") # primary owns Cap
-    set_notes(@obs2, Substrate: "wood", Cap: "brown")
+    set_notes(@obs2, Substrate: "wood", Cap: "red") # Cap agrees -> no option
     set_notes(@obs3, Substrate: "wood", Habitat: "bog")
     occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 1.hour.ago) # more recent -> winner
+    @obs3.update_column(:updated_at, 2.days.ago)
 
-    inheritable = occ.inheritable_notes
+    options = occ.adopt_options_by_key
 
-    # Cap is owned by the primary -> not offered.
-    assert_not(inheritable.key?(:Cap))
-    # Substrate is on both siblings with the same value -> one option.
-    assert_equal(["wood"], inheritable[:Substrate])
-    # Habitat only on one sibling.
-    assert_equal(["bog"], inheritable[:Habitat])
+    # Cap: owned, every sibling agrees -> nothing to adopt.
+    assert_not(options.key?(:Cap))
+    # Substrate: unowned, both siblings "wood" -> one distinct option.
+    assert_equal([[@obs2.id, "wood"]], options[:Substrate])
+    # Habitat: unowned, one sibling.
+    assert_equal([[@obs3.id, "bog"]], options[:Habitat])
   end
 
-  def test_inheritable_notes_orders_values_winner_first
+  def test_adopt_options_offered_for_owned_key_when_a_sibling_differs
+    set_notes(@obs1, Cap: "red") # primary owns Cap = red
+    set_notes(@obs2, Cap: "brown") # sibling differs
+    occ = create_occurrence(@obs1, @obs2)
+
+    assert_equal([[@obs2.id, "brown"]], occ.adopt_options_by_key[:Cap])
+  end
+
+  def test_adopt_options_order_winner_first_with_source_ids
     set_notes(@obs1, Cap: "red")
     set_notes(@obs2, Substrate: "older")
     set_notes(@obs3, Substrate: "newer")
@@ -1155,7 +1165,8 @@ class OccurrenceTest < UnitTestCase
     @obs2.update_column(:updated_at, 2.days.ago)
     @obs3.update_column(:updated_at, 1.hour.ago) # more recent -> winner
 
-    assert_equal(%w[newer older], occ.inheritable_notes[:Substrate])
+    assert_equal([[@obs3.id, "newer"], [@obs2.id, "older"]],
+                 occ.adopt_options_by_key[:Substrate])
   end
 
   private

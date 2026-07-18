@@ -960,10 +960,39 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       selector = "textarea[name='observation[notes][Substrate]']"
       assert(find(selector).disabled?, "adopt textarea starts disabled")
 
-      find("select").find(:option, "on birch").select_option
+      find("select option[value='on birch']").select_option
 
       assert_equal("on birch", find(selector).value)
       assert_not(find(selector).disabled?, "adopting enables the textarea")
+    end
+  end
+
+  # For an OWNED key whose sibling differs, adopting the sibling value
+  # then reselecting "keep current value" reverts the editable textarea
+  # to the primary's original value.
+  def test_edit_primary_reverts_owned_note_to_current_value
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "brown" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login!(primary.user)
+
+    visit(edit_observation_path(primary.id))
+    assert_selector("body.observations__edit")
+
+    within("#observation_notes_fields") do
+      selector = "textarea[name='observation[notes][Cap]']"
+      assert_equal("red", find(selector).value)
+
+      find("select option[value='brown']").select_option
+      assert_equal("brown", find(selector).value)
+
+      find("select option[value='']").select_option
+      assert_equal("red", find(selector).value, "reverts to current value")
     end
   end
 

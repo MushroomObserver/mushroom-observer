@@ -69,6 +69,25 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("select option[value='on birch']")
   end
 
+  # An OWNED key (editable, not disabled) whose sibling holds a different
+  # value also gets an adopt dropdown -- not only unowned keys.
+  def test_edit_primary_offers_adopt_for_owned_key_when_sibling_differs
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "brown" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_select("textarea[name='observation[notes][Cap]']:not([disabled])")
+    assert_select("select option[value='brown']")
+  end
+
   def test_collector_can_edit_observation
     obs = observations(:newbie_obs)
     login("foray_newbie")

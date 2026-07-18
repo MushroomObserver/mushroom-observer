@@ -93,18 +93,22 @@ class Occurrence < AbstractModel
     end
   end
 
-  # For the primary's EDIT form: keys the siblings carry but the primary
-  # does not own, each mapped to the DISTINCT non-blank sibling values in
-  # winner-first (most-recent-sibling) order. Rendered as gray "adopt"
-  # rows so the editor can pull a sibling's value onto the primary.
-  # Ordered hash; keys in most-recent-sibling-first order.
-  def inheritable_notes
+  # For the primary's EDIT form: per notes key, the sibling values worth
+  # offering as "adopt" choices -- DISTINCT (whitespace-trimmed) non-blank
+  # sibling values that DIFFER from the primary's own value, winner-first
+  # (most-recent sibling), each as [source_observation_id, value]. Only
+  # keys with at least one such option are included. This covers both keys
+  # the primary doesn't own (every sibling value differs from nothing) and
+  # keys it owns where a sibling disagrees. The id lets the dropdown label
+  # a long value by its source obs; the value is copied on adopt. Ordered
+  # hash; keys in primary-then-most-recent-sibling order.
+  def adopt_options_by_key
     primary, siblings = primary_and_ranked_siblings
     return {} unless primary
 
-    unowned_sibling_keys(primary, siblings).each_with_object({}) do |key, out|
-      values = siblings.filter_map { |sib| sib.notes[key].presence }.uniq
-      out[key] = values if values.any?
+    all_notes_keys(primary, siblings).each_with_object({}) do |key, out|
+      options = differing_sibling_options(key, primary, siblings)
+      out[key] = options if options.any?
     end
   end
 
@@ -310,9 +314,22 @@ class Occurrence < AbstractModel
     [primary, siblings]
   end
 
-  # Sibling keys the primary doesn't own, most-recent-sibling-first.
-  def unowned_sibling_keys(primary, siblings)
-    siblings.flat_map { |sib| sib.notes.keys }.uniq - primary.notes.keys
+  # Every notes key on any member, primary's first then sibling-only.
+  def all_notes_keys(primary, siblings)
+    (primary.notes.keys + siblings.flat_map { |sib| sib.notes.keys }).uniq
+  end
+
+  # Distinct trimmed non-blank sibling values for `key` that differ from
+  # the primary's own value, winner-first, as [observation_id, value].
+  def differing_sibling_options(key, primary, siblings)
+    own = primary.notes[key].to_s.strip
+    seen = Set.new
+    siblings.filter_map do |sib|
+      value = sib.notes[key].to_s.strip
+      next if value.blank? || value == own || !seen.add?(value)
+
+      [sib.id, value]
+    end
   end
 
   # Primary's keys first, in its own order, then any keys only siblings

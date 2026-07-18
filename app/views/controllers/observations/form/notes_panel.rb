@@ -20,7 +20,6 @@ module Views::Controllers::Observations
         render(Components::Form::Notes.new(
                  form: self,
                  parts: observation_form_note_parts,
-                 inherited_fields: observation_inherited_note_fields,
                  panel_id: "observation_notes",
                  expanded: notes_panel_expanded?,
                  single_part_mode: single_notes_part?,
@@ -28,25 +27,38 @@ module Views::Controllers::Observations
                ))
       end
 
-      # Adopt rows for the primary of a multi-member occurrence: the
-      # sibling keys it doesn't own, each with the distinct sibling
-      # values (Occurrence#inheritable_notes). Empty otherwise.
-      def observation_inherited_note_fields
-        return [] unless model.shows_merged_notes?
-
-        model.occurrence.inheritable_notes.map do |key, options|
-          Components::Form::Notes::InheritedField.new(
-            key: key, label: key.to_s.tr("_", " "), options: options
+      # The owned notes parts (template + orphaned + Other), each carrying
+      # any occurrence adopt options for its key, followed by inherited
+      # parts for sibling keys the primary doesn't own at all.
+      def observation_form_note_parts
+        adopt = observation_adopt_options
+        owned = observation_notes_form_parts.map do |part|
+          key = model.notes_normalized_key(part)
+          Components::Form::Notes::Part.new(
+            key: key,
+            value: model.notes_part_value(part),
+            label: single_notes_part? ? :NOTES : part,
+            adopt_options: adopt[key]
           )
         end
+        owned + inherited_note_parts(adopt, owned.map(&:key))
       end
 
-      def observation_form_note_parts
-        observation_notes_form_parts.map do |part|
+      # Adopt options per notes key for the primary of a multi-member
+      # occurrence (Occurrence#adopt_options_by_key); {} otherwise.
+      def observation_adopt_options
+        return {} unless model.shows_merged_notes?
+
+        model.occurrence.adopt_options_by_key
+      end
+
+      # Sibling keys with adopt options that aren't among the owned parts
+      # -- rendered as gray inherited rows.
+      def inherited_note_parts(adopt, owned_keys)
+        (adopt.keys - owned_keys).map do |key|
           Components::Form::Notes::Part.new(
-            key: model.notes_normalized_key(part),
-            value: model.notes_part_value(part),
-            label: single_notes_part? ? :NOTES : part
+            key: key, value: "", label: key.to_s.tr("_", " "),
+            adopt_options: adopt[key], inherited: true
           )
         end
       end

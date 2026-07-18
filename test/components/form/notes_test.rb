@@ -111,28 +111,39 @@ class FormNotesTest < ComponentTestCase
                     "last child should be the textile help block")
   end
 
-  # --- Inherited (adopt) fields ---
+  # --- Adopt dropdowns ---
 
-  def test_inherited_fields_render_gray_adopt_rows
+  # An inherited part (primary doesn't own the key): a disabled textarea
+  # + a dropdown labelled by source obs, the full value in the option.
+  def test_inherited_part_renders_disabled_textarea_and_adopt_dropdown
     html = render(InheritedFormNotes.new(Observation.new, action: "/t"))
 
-    # The disabled textarea submits nothing until adopted, and is named
-    # under the same notes params as the normal fields.
     assert_html(
       html,
       "textarea[name='observation[notes][substrate]'][disabled]" \
       "[data-notes-adopt-target='value']"
     )
-    # A select carrying the distinct sibling values plus the keep-blank
-    # default, wired to the adopt controller.
     assert_html(html, "[data-controller='notes-adopt'] select" \
                       "[data-action='change->notes-adopt#adopt']")
-    assert_html(html, "select option[value='wood']", text: "wood")
-    assert_html(html, "select option[value='bark']", text: "bark")
+    # Full value in the option value; source-labelled preview in the text.
+    assert_html(html, "select option[value='wood']", text: "Obs 123: wood")
+    assert_html(html, "select option[value='bark']", text: "Obs 124: bark")
     assert_includes(html, :form_observations_notes_keep_inherited.l)
   end
 
-  def test_no_inherited_section_without_inherited_fields
+  # An owned part with adopt options (a sibling holds a differing value):
+  # the normal editable textarea keeps its value, plus a dropdown.
+  def test_owned_part_with_adopt_options_keeps_editable_textarea
+    html = render(OwnedAdoptFormNotes.new(Observation.new, action: "/t"))
+
+    # Editable (not disabled), pre-filled with the owned value.
+    assert_html(html, "textarea[name='observation[notes][cap]']")
+    assert_no_html(html, "textarea[name='observation[notes][cap]'][disabled]")
+    assert_html(html, "select option[value='brown']", text: "Obs 5: brown")
+    assert_includes(html, :form_observations_notes_keep_current.l)
+  end
+
+  def test_no_adopt_controller_without_adopt_options
     html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
 
     assert_no_html(html, "[data-controller='notes-adopt']")
@@ -188,12 +199,29 @@ class InheritedFormNotes < Components::ApplicationForm
                parts: [
                  Components::Form::Notes::Part.new(
                    key: :cap, value: "red", label: "Cap:"
+                 ),
+                 Components::Form::Notes::Part.new(
+                   key: :substrate, value: "", label: "substrate",
+                   adopt_options: [[123, "wood"], [124, "bark"]],
+                   inherited: true
                  )
                ],
-               inherited_fields: [
-                 Components::Form::Notes::InheritedField.new(
-                   key: :substrate, label: "substrate",
-                   options: %w[wood bark]
+               panel_id: "test_notes",
+               expanded: true
+             ))
+    end
+  end
+end
+
+class OwnedAdoptFormNotes < Components::ApplicationForm
+  def view_template
+    super do
+      render(Components::Form::Notes.new(
+               form: self,
+               parts: [
+                 Components::Form::Notes::Part.new(
+                   key: :cap, value: "red", label: "Cap:",
+                   adopt_options: [[5, "brown"]]
                  )
                ],
                panel_id: "test_notes",
