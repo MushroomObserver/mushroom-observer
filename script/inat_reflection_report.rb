@@ -31,9 +31,9 @@ require "fileutils"
 require "optparse"
 
 class InatReflectionReport
-  # Generated report/data files live under reports/ (git-ignored), not
-  # the repo root or a developer's home directory.
-  DEFAULT_OUT = "reports/inat_reflection_report.csv"
+  # Generated report/data files live under projects/ (git-ignored, the
+  # existing dev-projects folder), not the repo root or a home directory.
+  DEFAULT_OUT = "projects/inat_reflection_report.csv"
 
   def initialize(opts)
     @limit = opts[:limit] || 200
