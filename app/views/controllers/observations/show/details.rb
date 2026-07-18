@@ -57,7 +57,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   end
 
   def render_when
-    li(class: "obs-when", id: "observation_when") do
+    li(class: "obs-when hanging-indent", id: "observation_when") do
       plain("#{:WHEN.t}: ")
       b { @obs.when.web_date }
     end
@@ -125,7 +125,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   # obs with no recorded collector shows only "Entered by:" — we don't
   # claim the entering recorder as the collector. See #4211.
   def render_who
-    li(class: "obs-who", id: "observation_who") do
+    li(class: "obs-who hanging-indent", id: "observation_who") do
       if @obs.collector_unrecorded?
         render_entered_by
       else
