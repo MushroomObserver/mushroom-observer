@@ -1178,6 +1178,18 @@ class OccurrenceTest < UnitTestCase
     assert_equal([:Substrate, :Habitat].to_set, occ.sibling_note_keys.to_set)
   end
 
+  # A key whose sibling values are all blank/whitespace inherits nothing,
+  # so it isn't suppressible -- a submitted blank there is just an empty
+  # field, not a suppression marker.
+  def test_sibling_note_keys_excludes_all_blank_keys
+    set_notes(@obs1, Cap: "red") # primary
+    set_notes(@obs2, Substrate: "wood", Odor: "")
+    set_notes(@obs3, Odor: "   ")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+
+    assert_equal([:Substrate].to_set, occ.sibling_note_keys.to_set)
+  end
+
   private
 
   def set_notes(obs, **notes)

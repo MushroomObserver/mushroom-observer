@@ -149,6 +149,13 @@ class FormNotesTest < ComponentTestCase
                 text: :form_observations_notes_current.l)
     assert_html(html, "select option[value='brown'][data-notes-action='adopt']",
                 text: "Obs 5: brown")
+    # Label associates with the textarea; the driving select is
+    # separately labelled for assistive tech.
+    assert_html(html, "label[for='observation_notes_cap']", text: "Cap")
+    assert_html(html, "textarea[id='observation_notes_cap']" \
+                      "[name='observation[notes][cap]']")
+    assert_html(html, "select[aria-label=" \
+                      "'Cap: #{:form_observations_notes_value_source.l}']")
   end
 
   # A :hide part (primary stores a blank to suppress): editable-but-empty
@@ -222,7 +229,7 @@ class OccurrenceFormNotes < Components::ApplicationForm
                form: self,
                parts: [
                  Components::Form::Notes::Part.new(
-                   key: :cap, value: "red", label: "Cap:",
+                   key: :cap, value: "red", label: "Cap",
                    adopt_options: [[5, "brown"]], notes_state: :set
                  ),
                  Components::Form::Notes::Part.new(

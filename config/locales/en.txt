@@ -1873,6 +1873,7 @@
   form_observations_notes_current: Current value
   form_observations_notes_inherit: Inherit from other observations
   form_observations_notes_hide: Hide — show nothing here
+  form_observations_notes_value_source: value source
   form_observations_remove_image_confirm: Are you sure you want to remove this image? This will only remove this image from this observation. If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.

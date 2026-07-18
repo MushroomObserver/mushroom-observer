@@ -120,19 +120,31 @@ class Components::Form::Notes < Components::Base
   # deliberate blank) submits.
   def render_occurrence_part(part)
     inherit = part.notes_state == :inherit
+    field_id = occurrence_field_id(part.key)
     div(class: occurrence_row_class(inherit), data: { notes_row: "" }) do
-      label { part.label }
+      label(for: field_id) { part.label }
       render_state_select(part)
-      render_occurrence_textarea(part, inherit)
+      render_occurrence_textarea(part, inherit, field_id)
     end
+  end
+
+  # The Rails-convention field id for the textarea (matching what
+  # Superform emits for the plain rows), so the row's <label for=...>
+  # associates with it and clicking the label focuses the field.
+  def occurrence_field_id(key)
+    "#{notes_id_prefix}_#{key}"
+  end
+
+  def notes_id_prefix
+    @notes_id_prefix ||= @notes_name_prefix.tr("[", "_").delete("]")
   end
 
   def occurrence_row_class(inherit)
     inherit ? "form-group text-muted" : "form-group"
   end
 
-  def render_occurrence_textarea(part, inherit)
-    textarea(name: "#{@notes_name_prefix}[#{part.key}]",
+  def render_occurrence_textarea(part, inherit, field_id)
+    textarea(id: field_id, name: "#{@notes_name_prefix}[#{part.key}]",
              class: "form-control", rows: "3", style: "resize: vertical;",
              disabled: inherit,
              data: { notes_adopt_target: "value" }) do
@@ -142,12 +154,19 @@ class Components::Form::Notes < Components::Base
 
   # Value-source picker: the current state's option is preselected, then
   # the other states, then each distinct sibling value. Selecting an
-  # option drives the textarea (see notes-adopt_controller.js).
+  # option drives the textarea (see notes-adopt_controller.js). The
+  # select isn't tied to the <label> (it drives, not backs, the field),
+  # so it carries its own aria-label naming the note it controls.
   def render_state_select(part)
     select(class: "form-control mb-1",
+           aria: { label: state_select_aria_label(part) },
            data: { action: "change->notes-adopt#adopt" }) do
       render_state_options(part)
     end
+  end
+
+  def state_select_aria_label(part)
+    "#{part.label}: #{:form_observations_notes_value_source.l}"
   end
 
   def render_state_options(part)
