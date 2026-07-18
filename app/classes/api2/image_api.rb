@@ -71,6 +71,7 @@ class API2
     end
 
     def update_params
+      @set_dhash = parse(:integer, :set_dhash, limit: 0..(2**64 - 1))
       {
         when: parse(:date, :set_date, help: :when_taken),
         notes: parse(:string, :set_notes),
@@ -80,6 +81,39 @@ class API2
       }
     end
     # rubocop:enable Layout/MultilineOperationIndentation
+
+    # Maps update_params keys (model attributes) back to the API's set_*
+    # parameter names, so a mixed-setters error names the exact
+    # parameters the caller sent (:when is set via :set_date).
+    SETTER_PARAM_NAMES = {
+      when: :set_date, notes: :set_notes,
+      copyright_holder: :set_copyright_holder, license: :set_license,
+      original_name: :set_original_name
+    }.freeze
+
+    # set_dhash bypasses the normal owner-permission update path: it is
+    # site-admin-only, exclusive of the other setters (different
+    # permission model), and fill-null-only -- an existing different
+    # value raises ImageDhashMismatch rather than being overwritten
+    # (#4585's local-compute/API-push dhash backfill).
+    def validate_update_params!(params)
+      return super unless @set_dhash
+
+      raise(MustBeSiteAdmin.new) unless user.admin
+      return if params.empty?
+
+      mixed = params.keys.map { |k| SETTER_PARAM_NAMES.fetch(k, k) }
+      raise(OneOrTheOther.new([:set_dhash] + mixed))
+    end
+
+    def build_setter(params)
+      return super unless @set_dhash
+
+      lambda do |img|
+        fill_null_dhash(img)
+        img
+      end
+    end
 
     def validate_create_params!(_params)
       raise(MissingUpload.new) unless @upload
@@ -106,6 +140,18 @@ class API2
     ############################################################################
 
     private
+
+    # update_column, not update!: dhash is derived data -- recording it
+    # is not an edit, and bumping updated_at would flip the image's
+    # cache-busting URL token (#4808) and bust caches for an unchanged
+    # image.
+    def fill_null_dhash(img)
+      if img.dhash.nil?
+        img.update_column(:dhash, @set_dhash)
+      elsif img.dhash != @set_dhash
+        raise(ImageDhashMismatch.new(img, @set_dhash))
+      end
+    end
 
     def parse_create_params!
       @observations = parse_array(:observation, :observations,

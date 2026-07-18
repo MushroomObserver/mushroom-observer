@@ -406,6 +406,59 @@ class API2::ImagesTest < UnitTestCase
     assert_equal("new name", marys_img.original_name)
   end
 
+  # set_dhash is the push half of #4585's local-compute dhash backfill:
+  # site-admin-only, exclusive of other setters, fill-null-only (a
+  # different existing value is a conflict, never overwritten), and it
+  # must not bump updated_at -- that feeds the #4808 cache-busting URL
+  # token, and recording derived data is not an edit.
+  def test_patching_image_dhash
+    admin_key = APIKey.create!(user: users(:admin), notes: "dhash backfill",
+                               verified: Time.zone.now)
+    img = images(:in_situ_image)
+    assert_nil(img.dhash)
+    params = {
+      method: :patch, action: :image, id: img.id, set_dhash: 12_345
+    }
+
+    # A regular user's key is rejected, even for their own image.
+    assert_api_fail(params.merge(api_key: @api_key.key,
+                                 id: images(:rolf_profile_image).id))
+    assert_nil(images(:rolf_profile_image).reload.dhash)
+
+    # Exclusive of the owner-permission setters.
+    assert_api_fail(params.merge(api_key: admin_key.key, set_notes: "x"))
+
+    old_updated_at = img.updated_at
+    assert_api_pass(params.merge(api_key: admin_key.key))
+    img.reload
+    assert_equal(12_345, img.dhash)
+    assert_equal(old_updated_at, img.updated_at,
+                 "recording a dhash must not bump updated_at")
+
+    # Idempotent: same value again is a no-op pass.
+    assert_api_pass(params.merge(api_key: admin_key.key))
+    assert_equal(12_345, img.reload.dhash)
+
+    # Conflict: a different value is refused and the original kept.
+    assert_api_fail(params.merge(api_key: admin_key.key, set_dhash: 999))
+    assert_equal(12_345, img.reload.dhash)
+  end
+
+  def test_patching_image_dhash_accepts_full_unsigned_64_bit_range
+    admin_key = APIKey.create!(user: users(:admin), notes: "dhash backfill",
+                               verified: Time.zone.now)
+    img = images(:in_situ_image)
+    max = (2**64) - 1
+    params = {
+      method: :patch, action: :image, id: img.id, api_key: admin_key.key
+    }
+
+    assert_api_fail(params.merge(set_dhash: -1))
+    assert_api_fail(params.merge(set_dhash: 2**64))
+    assert_api_pass(params.merge(set_dhash: max))
+    assert_equal(max, img.reload.dhash)
+  end
+
   def test_deleting_images
     rolfs_img = rolf.images.sample
     marys_img = mary.images.sample
