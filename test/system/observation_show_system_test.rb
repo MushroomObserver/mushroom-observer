@@ -248,8 +248,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
   # Add flow lives in the "Shared with" badge line now; edit/destroy of
   # an individual link are no longer reachable from the obs page (only
-  # the read-only info modal is) -- edit/update/destroy are still
-  # covered at the controller-test level in
+  # the read-only accordion info pane is) -- edit/update/destroy are
+  # still covered at the controller-test level in
   # observations/external_links_controller_test.rb.
   def test_add_external_link_and_view_shared_with_badge
     login!(users("mary"))
@@ -274,18 +274,38 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     sleep(1)
     assert_no_selector("#modal_external_link")
 
-    link = ExternalLink.last
-    assert_equal("12212326", link.external_id)
-    assert_nil(link.url, "an external_id link stores no url")
+    mcp_link = ExternalLink.last
+    assert_equal("12212326", mcp_link.external_id)
+    assert_nil(mcp_link.url, "an external_id link stores no url")
+
+    # A second site's link, created directly (not via the UI) so the
+    # accordion has two badges to switch between.
+    inat = external_sites(:inaturalist)
+    inat_link = ExternalLink.create!(
+      user: users("mary"), target: @obs, external_site: inat,
+      external_id: "99887766"
+    )
+    visit(observation_path(@obs))
 
     within("#observation_external_links") do
       assert_link(text: "MCP")
-      find_link("MCP").trigger("click")
+      # CSS `.text-uppercase` renders the "iNat" badge text as "INAT" --
+      # match the visible rendering, not the source-code casing.
+      assert_link(text: "INAT")
+      find("a[data-target='#pane_#{inat_link.id}']").trigger("click")
     end
 
-    assert_selector("#modal_external_link_#{link.id}")
-    within("#modal_external_link_#{link.id}") do
-      assert_text(/MyCoPortal/)
+    # Clicking iNat opens its pane, Turbo-fetching the frame content.
+    assert_selector("#pane_#{inat_link.id}.in", wait: 6)
+    within("#pane_#{inat_link.id}") { assert_text(/iNaturalist/) }
+
+    within("#observation_external_links") do
+      find("a[data-target='#pane_#{mcp_link.id}']").trigger("click")
     end
+
+    # Clicking MCP closes iNat's pane (accordion) and opens MCP's own.
+    assert_selector("#pane_#{mcp_link.id}.in", wait: 6)
+    within("#pane_#{mcp_link.id}") { assert_text(/MyCoPortal/) }
+    assert_no_selector("#pane_#{inat_link.id}.in")
   end
 end

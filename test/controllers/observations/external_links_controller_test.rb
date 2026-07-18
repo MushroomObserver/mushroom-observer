@@ -40,56 +40,72 @@ module Observations
       assert_select("form#observation_external_link_form")
     end
 
-    # Turbo-stream `show` renders the informational "Shared with" modal.
-    def test_show_turbo_stream_renders_modal
+    # A Turbo Frame request (the badge's data-turbo-frame click) renders
+    # the informational "Shared with" frame in place of a redirect.
+    def test_show_turbo_frame_renders_info_frame
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
       login
-      get(:show, params: { id: link.id }, format: :turbo_stream)
+      simulate_turbo_frame_request(link)
+      get(:show, params: { id: link.id })
 
       assert_response(:success)
-      assert_select("#modal_external_link_#{link.id}")
+      assert_select("turbo-frame#external_link_frame_#{link.id}")
+      assert_select(
+        "turbo-frame#external_link_frame_#{link.id} h5 strong",
+        text: "#{:show_observation_on_site.t(site: "iNaturalist")}:"
+      )
       assert_select("a[href='#{link.url}']")
     end
 
-    # No external_id -- a url-only manual link, not a confirmed match
-    # to a specific record on the other site -- gets the softer
-    # "Uploaded to" title instead of "Observation X on Y".
-    def test_show_turbo_stream_title_uploaded_when_no_external_id
+    # A repeat click on a pane that's already been fetched (e.g.
+    # re-opening one closed by clicking a sibling badge) comes back as
+    # a cheap 304, not a full re-render -- see
+    # render_external_link_info_frame's fresh_when.
+    def test_show_turbo_frame_returns_not_modified_on_repeat_request
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
-      assert_nil(link.external_id)
-      obs = link.observation
-      title = :show_observation_uploaded_to_site.t(
-        id: obs.id, site: "iNaturalist"
-      )
 
       login
-      get(:show, params: { id: link.id }, format: :turbo_stream)
+      simulate_turbo_frame_request(link)
+      get(:show, params: { id: link.id })
+      assert_response(:success)
+      etag = @response.headers["ETag"]
+      assert_not_nil(etag)
 
-      assert_select("#modal_external_link_#{link.id} h4.modal-title",
-                    text: title)
+      simulate_turbo_frame_request(link)
+      @request.headers["If-None-Match"] = etag
+      get(:show, params: { id: link.id })
+
+      assert_response(:not_modified)
     end
 
-    # external_id present -- an import, or a manually-entered id --
-    # is a confirmed match, so the title can say "Observation X on Y".
-    def test_show_turbo_stream_title_shared_on_site_when_external_id
-      link = external_links(:imported_inat_obs_inat_link)
-      assert(link.external_id.present?)
-      obs = link.observation
-      title = :show_observation_shared_on_site.t(
-        id: obs.id, site: "iNaturalist"
-      )
+    # ...but a real change to the underlying links (add/remove/edit)
+    # invalidates the etag, so a stale client re-fetches fresh content
+    # instead of getting stuck on a 304 forever.
+    def test_show_turbo_frame_etag_changes_when_links_change
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
       login
-      get(:show, params: { id: link.id }, format: :turbo_stream)
+      simulate_turbo_frame_request(link)
+      get(:show, params: { id: link.id })
+      etag = @response.headers["ETag"]
 
-      assert_select("#modal_external_link_#{link.id} h4.modal-title",
-                    text: title)
+      ExternalLink.create!(
+        user: rolf, target: link.observation,
+        external_site: link.external_site,
+        url: "#{link.external_site.base_url}555555"
+      )
+
+      simulate_turbo_frame_request(link)
+      @request.headers["If-None-Match"] = etag
+      get(:show, params: { id: link.id })
+
+      assert_response(:success)
     end
 
-    # A site with 2+ own links -- the modal lists every one, not just
+    # A site with 2+ own links -- the frame lists every one, not just
     # the link the route id happens to point at.
-    def test_show_turbo_stream_multiple_own_links_same_site
+    def test_show_turbo_frame_multiple_own_links_same_site
       obs = observations(:coprinus_comatus_obs)
       inat = external_sites(:inaturalist)
       link1 = external_links(:coprinus_comatus_obs_inaturalist_link)
@@ -99,7 +115,8 @@ module Observations
       )
 
       login
-      get(:show, params: { id: link1.id }, format: :turbo_stream)
+      simulate_turbo_frame_request(link1)
+      get(:show, params: { id: link1.id })
 
       assert_response(:success)
       assert_select("a[href='#{link1.url}']")
@@ -108,7 +125,7 @@ module Observations
 
     # Own links are sorted by relationship_date, matching the
     # pre-badge external-links list panel's row order.
-    def test_show_turbo_stream_orders_own_links_by_relationship_date
+    def test_show_turbo_frame_orders_own_links_by_relationship_date
       obs = observations(:coprinus_comatus_obs)
       inat = external_sites(:inaturalist)
       link1 = external_links(:coprinus_comatus_obs_inaturalist_link)
@@ -120,7 +137,8 @@ module Observations
       )
 
       login
-      get(:show, params: { id: link1.id }, format: :turbo_stream)
+      simulate_turbo_frame_request(link1)
+      get(:show, params: { id: link1.id })
 
       assert_response(:success)
       hrefs = css_select("a[href]").pluck("href")
@@ -128,8 +146,8 @@ module Observations
     end
 
     # Sibling observation (same Occurrence) with its own link to the
-    # same site shows up in the modal with "(MO #N)" attribution.
-    def test_show_turbo_stream_includes_sibling_links
+    # same site shows up in the frame with "(MO #N)" attribution.
+    def test_show_turbo_frame_includes_sibling_links
       obs1 = observations(:minimal_unknown_obs)
       obs2 = observations(:coprinus_comatus_obs)
       occ = Occurrence.create!(user: rolf, primary_observation: obs1)
@@ -143,7 +161,8 @@ module Observations
       sibling_link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
       login
-      get(:show, params: { id: link1.id }, format: :turbo_stream)
+      simulate_turbo_frame_request(link1)
+      get(:show, params: { id: link1.id })
 
       assert_response(:success)
       assert_select("a[href='#{link1.url}']")
@@ -156,7 +175,7 @@ module Observations
 
     # Sibling links are sorted by relationship_date too, matching own
     # links' order.
-    def test_show_turbo_stream_orders_sibling_links_by_relationship_date
+    def test_show_turbo_frame_orders_sibling_links_by_relationship_date
       obs1 = observations(:minimal_unknown_obs)
       obs2 = observations(:coprinus_comatus_obs)
       obs3 = observations(:agaricus_campestris_obs)
@@ -179,7 +198,8 @@ module Observations
       )
 
       login
-      get(:show, params: { id: link1.id }, format: :turbo_stream)
+      simulate_turbo_frame_request(link1)
+      get(:show, params: { id: link1.id })
 
       assert_response(:success)
       hrefs = css_select("a[href]").pluck("href")
@@ -187,6 +207,9 @@ module Observations
                       hrefs.index(newer_sibling_link.url))
     end
 
+    # A direct (non-frame) visit to the show URL -- no Turbo-Frame
+    # header -- falls back to redirecting to the observation, instead
+    # of rendering a bare, layout-less fragment as a full page.
     def test_show_html_redirects_to_observation
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
 
@@ -194,6 +217,10 @@ module Observations
       get(:show, params: { id: link.id })
 
       assert_redirected_to(permanent_observation_path(link.observation.id))
+    end
+
+    def simulate_turbo_frame_request(link)
+      @request.headers["Turbo-Frame"] = "external_link_frame_#{link.id}"
     end
 
     def setup_create_test

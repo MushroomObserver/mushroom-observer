@@ -11,6 +11,23 @@
 # `expanded: true` on the one that starts visible; the rest start
 # collapsed.
 #
+# The inner wrapper's `.panel` class is REQUIRED, not decorative --
+# verified against Bootstrap 3.4.1's actual `js/collapse.js` on
+# GitHub. `Collapse.prototype.show` finds the currently-open sibling
+# pane to auto-close via the literal selector
+# `this.$parent.children('.panel').children('.in, .collapsing')` --
+# i.e. it walks `data-parent` -> `.panel` child -> `.in`/`.collapsing`
+# child. Drop `.panel` and that lookup finds nothing, so the
+# mutual-exclusion (only one pane open at a time) silently breaks --
+# confirmed in the browser, not just from reading the source.
+# `border-none`/`bg-none` strip its visual chrome (border,
+# background); its `margin-bottom: ~20px` is left as the default
+# spacing below an accordion instance, e.g. between successive rows
+# in `account/api_keys/table.rb`. Pass `class:` (via the `attributes:`
+# catch-all) to add to it -- e.g. `class: "m-0"` when the caller
+# already supplies its own spacing -- but `.panel` itself always
+# renders.
+#
 # @example Inline notes editor in a table row
 #   Accordion(id: "notes_#{key.id}") do |accordion|
 #     accordion.with_pane(id: "view_notes_#{key.id}_container",
@@ -21,10 +38,16 @@
 #       edit_notes_form(key)
 #     end
 #   end
+#
+# @example Inline in an already-padded body -- no extra bottom margin
+#   Accordion(id: "external_links_accordion", class: "m-0")
 class Components::Accordion < Components::Base
   include Phlex::Slotable
 
   prop :id, String
+  # Catch-all for class:, data:, aria:, and any other HTML attrs on
+  # the inner `.panel` wrapper -- matches Icon/Collapsible's pattern.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   slot :pane, lambda { |id:, expanded: false, &content|
     Collapsible(
@@ -34,9 +57,15 @@ class Components::Accordion < Components::Base
 
   def view_template
     div(class: "border-none mb-0", id: @id) do
-      div(class: "panel border-none bg-none") do
+      div(class: inner_class, **@attributes.except(:class)) do
         pane_slots.each { |pane| render(pane) } if pane_slots?
       end
     end
+  end
+
+  private
+
+  def inner_class
+    class_names("panel border-none bg-none", @attributes[:class])
   end
 end

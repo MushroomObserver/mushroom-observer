@@ -2,14 +2,19 @@
 
 # see external_links_controller.rb
 module Observations::ExternalLinksController::Show
-  # Informational modal for a "Shared with" badge: every own +
-  # sibling ExternalLink for the clicked link's site.
+  # Informational Turbo Frame for a "Shared with" badge: every own +
+  # sibling ExternalLink for the clicked link's site. The badge link
+  # carries a `data-turbo-frame` attribute, so a click sends a real GET
+  # with a `Turbo-Frame` request header; a direct (non-frame) visit --
+  # e.g. someone following the URL straight -- falls back to
+  # redirecting to the observation instead of rendering a bare fragment.
   def show
     set_ivars_for_show
 
-    respond_to do |format|
-      format.turbo_stream { render_external_link_info_modal }
-      format.html { redirect_to(permanent_observation_path(@observation)) }
+    if request.headers["Turbo-Frame"]
+      render_external_link_info_frame
+    else
+      redirect_to(permanent_observation_path(@observation))
     end
   end
 
@@ -46,44 +51,34 @@ module Observations::ExternalLinksController::Show
   def sibling_site_links_for(siblings, site)
     sib_links = siblings.flat_map do |sib|
       site_links_for(sib, site).map do |link|
-        Views::Controllers::Observations::ExternalLinks::Modal::
+        Views::Controllers::Observations::ExternalLinks::InfoFrame::
           SiblingLink.new(link: link, observation: sib)
       end
     end
     sib_links.sort_by { |sib_link| sib_link.link.relationship_date }
   end
 
-  def render_external_link_info_modal
-    render(Views::Controllers::Observations::ExternalLinks::Modal.new(
-             site_links: site_links_for(@observation, @site),
-             sibling_site_links: sibling_site_links_for(@siblings, @site),
-             user: @user,
-             modal_id: "modal_external_link_#{@external_link.id}",
-             title: info_modal_title
-           ))
-  end
+  # The badge link re-navigates its Turbo Frame on every click (Turbo
+  # has no built-in "fetch once" for repeat frame navigations). ETag
+  # on the exact records the frame renders so a repeat click -- e.g.
+  # re-opening a pane that was closed by clicking a sibling badge --
+  # comes back as a cheap 304 instead of a full re-render, unless a
+  # link was actually added/removed/edited since.
+  def render_external_link_info_frame
+    site_links = site_links_for(@observation, @site)
+    sibling_links = sibling_site_links_for(@siblings, @site)
+    # Etag on the real ExternalLink records (not the SiblingLink Data
+    # wrapper -- it has no cache_key of its own) so the digest reacts
+    # to actual updated_at changes.
+    fresh_when(etag: site_links + sibling_links.map(&:link), public: false)
+    return if performed?
 
-  # An `external_id` means the clicked link points at a specific
-  # record on the site (an import, or a manually-entered id) -- safe
-  # to say "Observation X on iNaturalist". A url-only manual link has
-  # no confirmed corresponding record on the other site, so avoid
-  # implying one; "Uploaded to iNaturalist" doesn't claim a match.
-  #
-  # Named distinctly from the main controller's own `modal_title`
-  # (used by the create/edit form modal, gated on `action_name`) --
-  # that method is defined directly on the class, so it would
-  # otherwise shadow a same-named method from this included module
-  # for every action, including `show`.
-  def info_modal_title
-    if @external_link.external_id.present?
-      :show_observation_shared_on_site.t(
-        id: @observation.id, site: @site.name
-      )
-    else
-      :show_observation_uploaded_to_site.t(
-        id: @observation.id, site: @site.name
-      )
-    end
+    render(Views::Controllers::Observations::ExternalLinks::InfoFrame.new(
+             site_links: site_links,
+             sibling_site_links: sibling_links,
+             frame_id: "external_link_frame_#{@external_link.id}",
+             site_name: @site.name
+           ), layout: false)
   end
 
   def render_external_links_section_update

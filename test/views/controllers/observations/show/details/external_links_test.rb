@@ -70,7 +70,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     )
   end
 
-  def test_badge_modal_id_and_tooltip
+  def test_badge_accordion_trigger_and_tooltip
     link = external_links(:imported_inat_obs_inat_link)
     obs = link.observation
     tooltip = :show_observation_shared_with_tooltip.l(site: "iNaturalist")
@@ -79,8 +79,30 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     assert_html(
       html,
-      "a[data-modal='modal_external_link_#{link.id}']" \
-      "[data-title='#{tooltip}']"
+      "a[data-toggle='collapse'][data-target='#pane_#{link.id}']" \
+      "[data-parent='#external_links_accordion']" \
+      "[data-turbo-frame='external_link_frame_#{link.id}']" \
+      "[data-trigger='tooltip'][data-title='#{tooltip}']"
+    )
+  end
+
+  def test_renders_accordion_pane_and_empty_turbo_frame_per_site
+    inat_link = external_links(:coprinus_comatus_obs_inaturalist_link)
+    mcp_link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    obs = inat_link.observation
+
+    html = render(panel_with(obs))
+
+    assert_html(html, "#external_links_accordion")
+    assert_html(html, "#pane_#{inat_link.id}.collapse")
+    assert_html(html, "#pane_#{mcp_link.id}.collapse")
+    assert_html(
+      html,
+      "#pane_#{inat_link.id} turbo-frame#external_link_frame_#{inat_link.id}"
+    )
+    assert_html(
+      html,
+      "#pane_#{mcp_link.id} turbo-frame#external_link_frame_#{mcp_link.id}"
     )
   end
 
