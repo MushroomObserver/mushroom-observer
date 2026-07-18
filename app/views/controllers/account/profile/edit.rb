@@ -39,9 +39,9 @@ module Views::Controllers::Account::Profile
     def render_image_column
       return unless @user.image
 
-      render(Components::Image::Interactive.new(
-               user: @user, image: @user.image, votes: false
-             ))
+      Image(
+        user: @user, image: @user.image, votes: false
+      )
       Button(
         type: :put,
         variant: :strip,

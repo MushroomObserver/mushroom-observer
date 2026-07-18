@@ -27,10 +27,10 @@ module Views::Controllers::VisualGroups
       render(Components::Matrix::Box.new(id: image.id)) do
         render(Components::Panel.new) do |panel|
           panel.with_thumbnail do
-            render(Components::Image::Interactive.new(
-                     user: @user, image: image, original: true,
-                     votes: false, full_width: true
-                   ))
+            Image(
+              user: @user, image: image, original: true,
+              votes: false, full_width: true
+            )
           end
           panel.with_body do
             render(StatusLinks.new(

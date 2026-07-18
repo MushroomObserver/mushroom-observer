@@ -48,15 +48,15 @@ module Views::Controllers::Shared
              )) do
         render(::Components::Panel.new) do |panel|
           panel.with_body do
-            render(::Components::Image::Interactive.new(
-                     user: @user,
-                     image: image,
-                     votes: false,
-                     original: true,
-                     image_link: attach_url_for(image),
-                     link_method: :post,
-                     extra_classes: "image-to-reuse"
-                   ))
+            Image(
+              user: @user,
+              image: image,
+              votes: false,
+              original: true,
+              image_link: attach_url_for(image),
+              link_method: :post,
+              extra_classes: "image-to-reuse"
+            )
           end
         end
       end

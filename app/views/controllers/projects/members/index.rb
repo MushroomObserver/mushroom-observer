@@ -59,12 +59,12 @@ module Views::Controllers::Projects::Members
     end
 
     def render_user_image(user)
-      render(Components::Image::Interactive.new(
-               user: user,
-               image: user.image,
-               votes: false,
-               size: :thumbnail
-             ))
+      Image(
+        user: user,
+        image: user.image,
+        votes: false,
+        size: :thumbnail
+      )
     end
 
     def render_aliases(user)

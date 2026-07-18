@@ -59,11 +59,11 @@ module Views::Controllers::Images
       # --- Body: interactive image + vote + original filename ------
 
       def render_body
-        render(::Components::Image::Interactive.new(
-                 user: current_user, image: @image,
-                 size: :huge, image_link: "#",
-                 extra_classes: "huge-image", votes: false
-               ))
+        Image(
+          user: current_user, image: @image,
+          size: :huge, image_link: "#",
+          extra_classes: "huge-image", votes: false
+        )
         div(class: "mt-3 text-center") do
           render_vote_interface if current_user
           render_original_name if show_original_name?

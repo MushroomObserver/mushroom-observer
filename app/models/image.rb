@@ -310,8 +310,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def broadcast_interactive_sizes
     INTERACTIVE_BROADCAST_SIZES.each do |size|
       html = ApplicationController.renderer.render(
-        Components::Image::Interactive.new(user: nil, image: self,
-                                           size: size, media_only: true),
+        Components::Image.new(user: nil, image: self,
+                              size: size, media_only: true),
         layout: false
       )
       broadcast_replace_to(

@@ -37,12 +37,12 @@ module Views::Controllers::Observations::Images
     end
 
     def render_image_preview
-      render(::Components::Image::Interactive.new(
-               user: @user,
-               image: @image,
-               size: :medium,
-               votes: true
-             ))
+      Image(
+        user: @user,
+        image: @image,
+        size: :medium,
+        votes: true
+      )
     end
   end
 end

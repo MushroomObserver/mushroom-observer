@@ -55,13 +55,13 @@ module Views::Controllers::GlossaryTerms::Images
     end
 
     def render_image_preview(image)
-      render(Components::Image::Interactive.new(
-               user: @user,
-               image: image,
-               original: true,
-               votes: false,
-               extra_classes: "image-to-remove"
-             ))
+      Image(
+        user: @user,
+        image: image,
+        original: true,
+        votes: false,
+        extra_classes: "image-to-remove"
+      )
     end
 
     # `selected[<image_id>]` with `"yes"`/`"no"` matches the existing
