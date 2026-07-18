@@ -95,11 +95,11 @@ module Views::Controllers::InatImports
       br
     end
 
-    # Import-others' unlicensed obs are never imported,
-    # so they belong under Total Ignored
-    # Observations rather than own-import's informational-only line.
     def show_ignored_section?
-      ignored_row_data.any? || import_others?
+      ignored_row_data.any? ||
+        # Import-others' unlicensed obs are never imported. So they
+        # belong here rather than own-import's informational-only line.
+        import_others?
     end
 
     def ignored_row_data
