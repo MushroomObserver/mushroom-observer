@@ -31,7 +31,7 @@ require "fileutils"
 require "optparse"
 
 class InatReflectionReport
-  # Scratch/output for the iNat-sync effort lives under
+  # Scratch/output for the iNat-sync effort (#4208) lives under
   # projects/inat-sync/ (git-ignored, via the /projects/ folder), not the
   # repo root or a home directory.
   DEFAULT_OUT = "projects/inat-sync/inat_reflection_report.csv"
