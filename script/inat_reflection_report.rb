@@ -14,11 +14,14 @@
 #    to stdout: how many pairs are identical / subset / overlapping /
 #    disjoint by images, and how often date / location / taxon differ.
 #
-#    Self-hashing: for the sampled observations it fills any missing MO image
-#    dHashes (Image#compute_dhash!) and iNat photo dHashes (InatPhotoHash)
-#    on the fly, so it does not depend on the full hashing backfills having
-#    run — only the extract build. Read-only against iNat/MO otherwise;
-#    writes only dHash rows.
+#    Hashes come from the pre-computed caches: images.dhash (MO side) and
+#    the InatPhotoHash table (iNat side), both backfilled corpus-wide, so
+#    the report is a pure DB read + compare with no image downloads. A
+#    missing MO hash is computed on the fly as a fallback (rare — a newly
+#    added image); a missing iNat hash (un-fetchable private/deleted
+#    photo) counts as unmatched. Single-rotation compare only: rotated
+#    copies land in the non-match buckets and are reviewed afterward
+#    (see inat_hashes). Read-only apart from the rare MO fallback hash.
 #
 #    Multi-link MO obs (several iNat links) pick one reflection extract per
 #    #4585: the import link if present, else the highest iNat id.
@@ -107,14 +110,21 @@ class InatReflectionReport
     obs.images.map { |img| img.dhash || safe_hash { img.compute_dhash! } }
   end
 
-  # Each photo hashes to its four rotation dHashes (downloaded once), so an
-  # MO image that is a rotated copy still matches. The single-column
-  # InatPhotoHash cache can't hold a rotation set, so these are computed
-  # fresh per run (the download — the costly part — happens once either way).
+  # Reads the pre-computed single (rotation-0) hash from the
+  # InatPhotoHash cache — the whole corpus is backfilled
+  # (script/hash_inat_photos.rb), so the report is a pure DB compare, no
+  # re-download. A photo with no cached hash (un-fetchable: private or
+  # deleted iNat photos) maps to nil and the comparator counts it
+  # unmatched. Rotation-invariant matching is intentionally NOT done
+  # here: rotated copies are rare, a rotated pair simply falls into the
+  # non-match bucket, and those residuals get a targeted rotation pass
+  # after this report (decided 2026-07-18). Image::Dhash.rotations_from_url
+  # stays in the model for that later pass.
   def inat_hashes(extract)
-    Array(extract.photos).map do |photo|
-      safe_hash { Image::Dhash.rotations_from_url(photo["url"]) }
-    end
+    ids = Array(extract.photos).filter_map { |photo| photo["id"] }
+    cached = InatPhotoHash.where(inat_photo_id: ids).pluck(:inat_photo_id,
+                                                           :dhash).to_h
+    ids.map { |id| cached[id] }
   end
 
   def safe_hash
