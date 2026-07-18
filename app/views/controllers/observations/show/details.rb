@@ -64,7 +64,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   end
 
   def render_where
-    li(class: "obs-where", id: "observation_where") do
+    li(class: "obs-where hanging-indent", id: "observation_where") do
       plain("#{where_label}: ")
       if @user
         Link(type: :location,
