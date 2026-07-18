@@ -15,7 +15,8 @@
 
 module Mappable
   class ClusteredCollection
-    attr_accessor :sets, :extents, :representative_points
+    include Mappable::Collection
+    include CoordinateFormat
 
     # Build a clustered collection directly from a list of mappable
     # objects (no geographic bucketing — one MapSet per object).
@@ -41,10 +42,6 @@ module Mappable
       @extents = calc_extents
       @representative_points =
         [@extents.north_west, @extents.center, @extents.south_east]
-    end
-
-    def mapsets
-      @sets.values
     end
 
     private
@@ -117,25 +114,6 @@ module Mappable
       return "" unless obs.lat
 
       "#{format_latitude(obs.lat)} #{format_longitude(obs.lng)}"
-    end
-
-    def format_latitude(val)
-      format_coordinate(val, "N", "S")
-    end
-
-    def format_longitude(val)
-      format_coordinate(val, "E", "W")
-    end
-
-    def format_coordinate(val, positive_dir, negative_dir)
-      deg = val.abs.round(4)
-      "#{deg}°#{val.negative? ? negative_dir : positive_dir}"
-    end
-
-    def calc_extents
-      result = Mappable::MapSet.new
-      mapsets.each { |mapset| result.update_extents_with_box(mapset) }
-      result
     end
   end
 end

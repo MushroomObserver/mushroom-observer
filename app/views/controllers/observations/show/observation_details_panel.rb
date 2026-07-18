@@ -111,8 +111,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_gps_display_link
     a(href: map_observation_path(id: @obs.id)) do
       trusted_html(
-        [@obs.display_lat_lng.t, @obs.display_alt.t,
-         "[#{:click_for_map.t}]"].join(" ")
+        [display_lat_lng(@obs.lat, @obs.lng).t, display_alt(@obs.alt).t,
+         "[#{:click_for_map.t}]"].compact_blank.join(" ")
       )
     end
   end
