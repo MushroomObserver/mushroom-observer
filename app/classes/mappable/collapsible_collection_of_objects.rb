@@ -46,17 +46,13 @@
 
 module Mappable
   class CollapsibleCollectionOfObjects
-    attr_accessor :sets, :extents, :representative_points
+    include Mappable::Collection
 
     def initialize(objects, max_objects = MO.max_map_objects)
       @max_objects = max_objects
       init_sets(objects)
       group_objects_into_sets
       init_derived_attributes
-    end
-
-    def mapsets
-      @sets.values
     end
 
     def init_derived_attributes
@@ -204,14 +200,6 @@ module Mappable
          lat <= -45 ? -90 : 0
        end,
        lng >= 150 || lng <= -150 ? 180 : round_number(lng, prec)]
-    end
-
-    def calc_extents
-      result = Mappable::MapSet.new
-      mapsets.each do |mapset|
-        result.update_extents_with_box(mapset)
-      end
-      result
     end
   end
 end

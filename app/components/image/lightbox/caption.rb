@@ -166,10 +166,10 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_gps_link
     link_text = [
-      @obs.display_lat_lng.t,
-      @obs.display_alt.t,
+      display_lat_lng(@obs.lat, @obs.lng).t,
+      display_alt(@obs.alt).t,
       "[#{:click_for_map.t}]"
-    ].join(" ")
+    ].compact_blank.join(" ")
     a(href: map_observation_path(id: @obs.id)) { link_text }
   end
 
