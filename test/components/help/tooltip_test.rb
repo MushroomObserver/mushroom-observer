@@ -9,10 +9,10 @@ class HelpTooltipTest < ComponentTestCase
                   ))
 
     assert_html(html, "span.context-help", text: "(?)")
-    # Tooltip wiring: Bootstrap's tooltip JS reads `data-toggle` to
+    # Tooltip wiring: tooltip_controller.js reads `data-trigger` to
     # find triggers and `title=` for the popup text.
     assert_html(html, "span[title='Click for explanation']")
-    assert_html(html, "span[data-toggle='tooltip']")
+    assert_html(html, "span[data-trigger='tooltip']")
   end
 
   def test_extra_class_appends_to_context_help
@@ -30,7 +30,7 @@ class HelpTooltipTest < ComponentTestCase
 
     # Caller's custom data attrs deep-merge with the tooltip
     # wiring — both end up on the span.
-    assert_html(html, "span[data-toggle='tooltip']")
+    assert_html(html, "span[data-trigger='tooltip']")
     assert_html(html, "span[data-other='v']")
   end
 end

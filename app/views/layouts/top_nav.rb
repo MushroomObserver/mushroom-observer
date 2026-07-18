@@ -183,7 +183,7 @@ class Views::Layouts::TopNav < Views::Base
       rubric_text,
       { controller: "/#{ctrlr.controller_path}", action: :index },
       class: "#{ctrlr.controller_name}_index_link",
-      data: { toggle: "tooltip", placement: :bottom,
+      data: { trigger: "tooltip", placement: :bottom,
               title: :INDEX_OBJECT.t(type: ctrlr.controller_name.to_sym) }
     )
   end
@@ -238,7 +238,7 @@ class Views::Layouts::TopNav < Views::Base
       class: "ml-1 mr-0 mx-sm-3 top_nav_button",
       title: full_label,
       aria: { label: full_label },
-      data: { toggle: "tooltip" } }
+      data: { trigger: "tooltip" } }
   end
 
   def nav_create_label

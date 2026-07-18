@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
-# `<span>` with a context-help tooltip — Bootstrap's
-# `data-toggle="tooltip"` displays the `title=` attribute on hover.
+# `<span>` with a context-help tooltip — MO's own
+# `data-trigger="tooltip"` (read by `tooltip_controller.js`) displays
+# the `title=` attribute on hover. Deliberately not
+# `data-toggle="tooltip"`: `data-toggle` is the attribute Bootstrap's
+# own plugins key off of, so a distinct name lets an element carry
+# both a Bootstrap trigger and a tooltip at once.
 # Used for inline label-decorating glyphs (the `?` next to a filter
 # header, etc.).
 #
@@ -17,7 +21,7 @@ class Components::Help::Tooltip < Components::Base
   def view_template
     span(class: class_names("context-help", @extra_class),
          title: @title,
-         data: { toggle: "tooltip" }.merge(@data)) do
+         data: { trigger: "tooltip" }.merge(@data)) do
       plain(@label)
     end
   end

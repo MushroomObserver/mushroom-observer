@@ -114,7 +114,7 @@ class Components::Link::Icon < Components::Base
     base = {
       title: @content,
       class: class_names("icon-link", button_classes, @opts[:class]),
-      data: { toggle: "tooltip", title: @content,
+      data: { trigger: "tooltip", title: @content,
               active_title: @opts[:active_content] }
     }
     base[:data][:turbo_confirm] = @opts[:confirm] if @opts[:confirm]
