@@ -423,14 +423,45 @@ class CommentsControllerTest < FunctionalTestCase
     assert_response(:success)
     # close_modal triggers Bootstrap cleanup (backdrop + body class);
     # remove drops the element so the next open fetches a fresh form.
-    assert_match(
-      /<turbo-stream action="close_modal"[^>]*>\s*<template>modal_comment/,
-      @response.body
+    assert_select("turbo-stream[action='close_modal']", text: "modal_comment")
+    assert_select("turbo-stream[action=?][target=?]", "remove", "modal_comment")
+  end
+
+  # The synchronous response has to insert the new row itself -- the
+  # `Comment` model's own `after_create_commit` broadcast is async
+  # and isn't guaranteed to reach the submitter's own tab before (or
+  # ever, if the connection drops) the modal closes (#4833). It uses
+  # the custom `prepend_once` action, not the built-in `prepend`:
+  # `after_create_commit` dispatches its own broadcast before this
+  # response is even built, so a plain `prepend` here would routinely
+  # race a duplicate insert of the same row. `prepend_once` is a
+  # client-side no-op if the row's id is already in the DOM (see
+  # `config/initializers/turbo_stream_actions.rb`), so whichever of
+  # the two arrives second doesn't duplicate it.
+  def test_create_comment_turbo_stream_prepends_row_once
+    obs = observations(:minimal_unknown_obs)
+    params = { target: obs.id,
+               type: "Observation",
+               comment: { summary: "Turbo Prepend Test",
+                          comment: "Some text." } }
+    login
+    post(:create, params: params, as: :turbo_stream)
+    assert_response(:success)
+    comment = Comment.find_by(summary: "Turbo Prepend Test", target: obs)
+    assert_not_nil(comment, "Cannot find Comment")
+
+    assert_select(
+      "turbo-stream[action=?][target=?] " \
+      ".comment##{ActionView::RecordIdentifier.dom_id(comment)}",
+      "prepend_once", "comments"
     )
-    assert_match(
-      /<turbo-stream action="remove"[^>]*target="modal_comment"/,
-      @response.body
+    assert_select(
+      "turbo-stream[action=?][target=?] .comment-summary",
+      "prepend_once", "comments", text: comment.summary
     )
+    # Guard against reverting to the plain (non-deduping) action.
+    assert_select("turbo-stream[action=?][target=?]", "prepend", "comments",
+                  count: 0)
   end
 
   def test_update_comment_turbo_stream_removes_scoped_modal
@@ -442,14 +473,48 @@ class CommentsControllerTest < FunctionalTestCase
     put(:update, params: params, as: :turbo_stream)
     assert_response(:success)
     target_id = "modal_comment_#{comment.id}"
-    assert_match(
-      /<turbo-stream action="close_modal"[^>]*>\s*<template>#{target_id}/,
-      @response.body
+    assert_select("turbo-stream[action='close_modal']", text: target_id)
+    assert_select("turbo-stream[action=?][target=?]", "remove", target_id)
+  end
+
+  # The synchronous response has to update the row itself -- the
+  # `Comment` model's own `after_update_commit` broadcast is async
+  # and isn't guaranteed to reach the submitter's own tab before (or
+  # ever, if the connection drops) the modal closes (#4833).
+  def test_update_comment_turbo_stream_updates_row
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login_for(comment)
+    params = { id: comment.id,
+               comment: { summary: "Updated Summary",
+                          comment: "Updated body." } }
+    put(:update, params: params, as: :turbo_stream)
+    assert_response(:success)
+
+    assert_select(
+      "turbo-stream[action=?][target=?] .comment-summary",
+      "update", ActionView::RecordIdentifier.dom_id(comment),
+      text: "Updated Summary"
     )
-    assert_match(
-      /<turbo-stream action="remove"[^>]*target="#{target_id}"/,
-      @response.body
+    assert_select(
+      "turbo-stream[action=?][target=?] .comment-body",
+      "update", ActionView::RecordIdentifier.dom_id(comment),
+      text: "Updated body."
     )
+  end
+
+  # The synchronous response has to remove the row itself -- the
+  # `Comment` model's own `after_destroy_commit` broadcast is async
+  # and isn't guaranteed to reach the submitter's own tab before (or
+  # ever, if the connection drops) the modal closes (#4833).
+  def test_destroy_comment_turbo_stream_removes_row
+    comment = comments(:minimal_unknown_obs_comment_1)
+    login_for(comment)
+
+    delete(:destroy, params: { id: comment.id }, as: :turbo_stream)
+    assert_response(:success)
+
+    assert_select("turbo-stream[action=?][target=?]", "remove",
+                  ActionView::RecordIdentifier.dom_id(comment))
   end
 
   def login_for(comment)
@@ -491,6 +556,13 @@ class CommentsControllerTest < FunctionalTestCase
 
     # `capture_turbo_stream_broadcasts` returns
     # `Nokogiri::XML::Element` nodes (the `<turbo-stream>` wrappers).
+    # `prepend_once`, not the built-in `prepend` -- see
+    # `CommentsController::RowStreams` for why the plain action would
+    # risk duplicating the row the controller may have already
+    # inserted synchronously.
+    assert_equal("prepend_once", payloads.last["action"],
+                 "Comment create broadcast should use the deduping " \
+                 "prepend_once action")
     html = payloads.last.to_html
     # The mod-links span carries `data-user-specific` keyed to
     # the comment's author id — that's the CSS's selector hook.
