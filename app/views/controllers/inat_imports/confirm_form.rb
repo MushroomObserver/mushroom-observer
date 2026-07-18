@@ -123,11 +123,6 @@ module Views::Controllers::InatImports
         count: c, url: already_imported_url }
     end
 
-    # `@not_yet_imported` deliberately doesn't force/default a license value
-    # (unlike `@expected`), so it stays on the same scope as `@after_taxon`
-    # regardless what the user's URL says about `licensed` — subtracting
-    # `@expected` here instead would misattribute unlicensed obs (a separate,
-    # already-reported reason) as "already imported".
     def already_imported_count
       return unless @after_taxon && @not_yet_imported
 
