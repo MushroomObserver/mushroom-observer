@@ -1070,7 +1070,70 @@ class OccurrenceTest < UnitTestCase
     end
   end
 
+  # ---- merged_notes -------------------------------------------------
+
+  def test_merged_notes_primary_value_wins
+    set_notes(@obs1, Cap: "primary red", Other: "primary note")
+    set_notes(@obs2, Cap: "sibling brown", Substrate: "wood")
+    occ = create_occurrence(@obs1, @obs2)
+
+    merged = occ.merged_notes
+
+    assert_equal("primary red", merged[:Cap])       # primary wins
+    assert_equal("primary note", merged[:Other])
+    assert_equal("wood", merged[:Substrate])        # inherited from sibling
+  end
+
+  def test_merged_notes_blank_on_primary_suppresses_inherited_key
+    set_notes(@obs1, Cap: "red", Substrate: "")     # blank => delete
+    set_notes(@obs2, Substrate: "wood")
+    occ = create_occurrence(@obs1, @obs2)
+
+    merged = occ.merged_notes
+
+    assert_equal("red", merged[:Cap])
+    assert_not(merged.key?(:Substrate),
+               "blank value on primary should suppress the inherited key")
+  end
+
+  def test_merged_notes_most_recent_sibling_wins
+    set_notes(@obs1, Cap: "red")                    # primary lacks Substrate
+    set_notes(@obs2, Substrate: "older wood")
+    set_notes(@obs3, Substrate: "newer bark")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago)   # more recent
+
+    assert_equal("newer bark", occ.merged_notes[:Substrate])
+  end
+
+  def test_merged_notes_skips_blank_sibling_values
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "")                # blank, skipped
+    set_notes(@obs3, Substrate: "bark")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 1.hour.ago)   # more recent but blank
+    @obs3.update_column(:updated_at, 2.days.ago)
+
+    assert_equal("bark", occ.merged_notes[:Substrate])
+  end
+
+  def test_merged_notes_does_not_mutate_member_notes
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "wood")
+    occ = create_occurrence(@obs1, @obs2)
+
+    occ.merged_notes
+
+    assert_equal({ Cap: "red" }, @obs1.reload.notes.to_h)
+    assert_equal({ Substrate: "wood" }, @obs2.reload.notes.to_h)
+  end
+
   private
+
+  def set_notes(obs, **notes)
+    obs.update!(notes: notes)
+  end
 
   def create_occurrence(primary_obs, *other_obs)
     occ = Occurrence.create!(

@@ -777,6 +777,26 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     NormalizedHash.new(value)
   end
 
+  # Notes to render on this observation's show page. For the primary
+  # observation of a multi-member occurrence this is the per-key merge
+  # across the occurrence (Occurrence#merged_notes), so the primary
+  # surfaces its siblings' notes rather than only its own. Every other
+  # case -- a non-primary sibling, or an observation not in an
+  # occurrence -- shows its own notes unchanged.
+  def display_notes
+    return notes unless shows_merged_notes?
+
+    occurrence.merged_notes
+  end
+
+  # True only for the primary observation of an occurrence that has more
+  # than one member -- the one case where the show page merges notes.
+  def shows_merged_notes?
+    occ = occurrence
+    occ.present? && occ.primary_observation_id == id &&
+      occ.observations.many?
+  end
+
   # Key used for general Observation.notes
   # (notes which were not entered in a notes_template field)
   def self.other_notes_key

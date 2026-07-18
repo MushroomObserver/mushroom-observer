@@ -74,6 +74,25 @@ class Occurrence < AbstractModel
     Observation::NamingConsensus.new(obs).calc_consensus(user)
   end
 
+  # Per-key merge of the member observations' notes, for display on the
+  # primary observation's show page (Observation#display_notes). The
+  # primary's own value wins for any key it holds; a *blank* value on
+  # the primary suppresses that key entirely (an explicit deletion of an
+  # otherwise-inherited value); for a key the primary doesn't hold, the
+  # most-recently-updated sibling with a non-blank value supplies it.
+  #
+  # Display-time only: the members' stored notes are never modified, so
+  # each observation keeps its own notes intact on its own show page.
+  # Returns a plain Hash shaped like Observation#notes.
+  def merged_notes
+    primary, siblings = primary_and_ranked_siblings
+    return {} unless primary
+
+    merged_notes_keys(primary, siblings).each_with_object({}) do |key, out|
+      merge_notes_key(out, key, primary, siblings)
+    end
+  end
+
   # Auto-destroy if reduced to fewer than 2 observations,
   # unless linked to a field slip (which needs the occurrence).
   def destroy_if_incomplete!
@@ -257,6 +276,43 @@ class Occurrence < AbstractModel
     detached.each do |obs|
       Occurrence.log_observation_removed(obs, nil, user)
       Observation::NamingConsensus.new(obs).calc_consensus(user)
+    end
+  end
+
+  # The primary observation and the siblings ordered most-recent-first,
+  # resolved from the (eager-loaded) members rather than the
+  # primary_observation association, which the show page's strict-loading
+  # scope does not preload. Returns [nil, []] if the primary isn't among
+  # the members (shouldn't happen given the belongs-to validation).
+  def primary_and_ranked_siblings
+    members = observations.to_a
+    primary = members.find { |obs| obs.id == primary_observation_id }
+    return [nil, []] unless primary
+
+    siblings = members.
+               reject { |obs| obs.id == primary_observation_id }.
+               sort_by { |obs| [obs.updated_at, obs.id] }.reverse
+    [primary, siblings]
+  end
+
+  # Primary's keys first, in its own order, then any keys only siblings
+  # carry (most-recent sibling first). Keys are already space-normalized
+  # symbols (Observation.notes_normalized_key), so direct comparison
+  # matches the same way the rest of the app treats notes keys.
+  def merged_notes_keys(primary, siblings)
+    keys = primary.notes.keys.dup
+    siblings.each do |sib|
+      sib.notes.each_key { |key| keys << key unless keys.include?(key) }
+    end
+    keys
+  end
+
+  def merge_notes_key(out, key, primary, siblings)
+    if primary.notes.key?(key)
+      # Primary holds the key: its value wins, but a blank suppresses.
+      out[key] = primary.notes[key] if primary.notes[key].present?
+    elsif (sib = siblings.find { |obs| obs.notes[key].present? })
+      out[key] = sib.notes[key]
     end
   end
 end
