@@ -15,11 +15,17 @@
 # gitignored/local) -- if a step below fails with "database 'cache' is
 # not configured", update that file first.
 #
-# Does not require re-running db/initialize.sql first: the `mo` MySQL
-# user already has a broad CREATE grant from that script's very first
-# run (`grant create on *.* to 'mo'@'localhost'`), so `db:create:cache`
-# below can create cache_development/cache_test/cache_test-N from
-# scratch on its own.
+# Prerequisite: the `mo` MySQL user needs the cache_test / `cache_test-%`
+# grants this PR added to db/initialize.sql. `grant create on *.*` (which
+# `mo` already has from that script's first run) only lets `mo` CREATE a
+# database -- it does not grant privileges on tables inside one, which
+# is what db:schema:load:cache needs once db:create:cache makes it. An
+# install whose db/initialize.sql predates this PR will hit
+# "ERROR 1044: Access denied ... to database 'cache_test'" on the step
+# below until these are applied as MySQL root:
+#   grant all privileges on cache_test.* to 'mo'@'localhost' with grant option;
+#   grant all privileges on `cache_test-%`.* to 'mo'@'localhost';
+# (cache_development's grant predates this PR, already covered.)
 set -euo pipefail
 
 if [ ! -f config/database.yml ]; then
