@@ -10,6 +10,9 @@
 #  destroy::
 #
 class CommentsController < ApplicationController
+  include RowStreams
+  include ModalForm
+
   before_action :login_required
   before_action :store_location, only: [:show]
 
@@ -208,7 +211,7 @@ class CommentsController < ApplicationController
     @comment.log_create
     flash_notice(:runtime_form_comments_create_success.t(id: @comment.id))
 
-    refresh_comments_or_redirect_to_show
+    refresh_comments_or_redirect_to_show(extra_streams: [prepend_comment_row])
   end
 
   # Form to edit a comment for an object..
@@ -245,7 +248,7 @@ class CommentsController < ApplicationController
     @comment.attributes = permitted_comment_params if params[:comment]
     reload_form and return unless comment_updated?
 
-    refresh_comments_or_redirect_to_show
+    refresh_comments_or_redirect_to_show(extra_streams: [update_comment_row])
   end
 
   # Callback to destroy a comment.
@@ -257,6 +260,7 @@ class CommentsController < ApplicationController
     return unless (@comment = find_comment!)
 
     @target = @comment.target
+    extra_streams = []
     if !permission!(@comment)
       # all html requests redirect to object show page
     elsif !@comment.destroy
@@ -264,9 +268,10 @@ class CommentsController < ApplicationController
     else
       @comment.log_destroy
       flash_notice(:runtime_form_comments_destroy_success.t(id: params[:id]))
+      extra_streams << remove_comment_row
     end
 
-    refresh_comments_or_redirect_to_show
+    refresh_comments_or_redirect_to_show(extra_streams: extra_streams)
   end
 
   private
@@ -298,40 +303,6 @@ class CommentsController < ApplicationController
     Comment.includes(:user, :target).where(target: @target).to_a
   end
 
-  # The identifier needs to be more specific for an edit form, because
-  # we give users the option to edit any number of their own comments on a
-  # show page. "comment" disambiguates :new, because :edit always has id
-  def render_modal_comment_form
-    render(Components::Modal.new(
-             type: :turbo_form, identifier: modal_identifier,
-             title: modal_title,
-             user: @user, model: @comment
-           ), layout: false)
-  end
-
-  def reload_modal_form
-    render_modal_form_reload(identifier: modal_identifier,
-                             form_locals: { model: @comment })
-  end
-
-  def modal_identifier
-    case action_name
-    when "new", "create"
-      "comment"
-    when "edit", "update"
-      "comment_#{@comment.id}"
-    end
-  end
-
-  def modal_title
-    case action_name
-    when "new", "create"
-      :comment_add_title.t(name: viewer_aware_unique_format_name(@target))
-    when "edit", "update"
-      :comment_edit_title.t(name: viewer_aware_unique_format_name(@target))
-    end
-  end
-
   def permitted_comment_params
     params[:comment].permit([:summary, :comment])
   end
@@ -343,23 +314,18 @@ class CommentsController < ApplicationController
     end
   end
 
-  def refresh_comments_or_redirect_to_show
-    # Comment broadcasts are sent from the model.
-    # The turbo_stream response also closes the modal so the
-    # user doesn't have to wait for Action Cable delivery. The
-    # edit modal is "modal_comment_<id>"; the new modal is
-    # "modal_comment".
-    #
-    # `close_modal` runs Bootstrap's `$(el).modal('hide')` which removes
-    # the backdrop and the `modal-open` body class. We follow with
-    # `remove` to drop the modal element so the next "new comment" click
-    # fetches a fresh form.
+  # `extra_streams` (see `CommentsController::RowStreams`) applies the
+  # row change synchronously; the modal close/remove below doesn't wait
+  # on the model's own Action Cable broadcast. Edit modal id is
+  # "modal_comment_<id>"; the new-comment modal id is "modal_comment".
+  def refresh_comments_or_redirect_to_show(extra_streams: [])
     respond_to do |format|
       format.turbo_stream do
         modal_id = "modal_#{modal_identifier}"
-        render(turbo_stream:
-          turbo_stream.close_modal(modal_id) +
-          turbo_stream.remove(modal_id))
+        render(turbo_stream: extra_streams + [
+          turbo_stream.close_modal(modal_id),
+          turbo_stream.remove(modal_id)
+        ])
       end
       format.html do
         redirect_to(@target.show_link_args)
