@@ -12,7 +12,11 @@
 # the fused `render_icon_with_text`, so the icons and text spans can
 # still be grouped icon-then-icon, text-then-text.
 module Components::IconWithText
-  TEXT_VISIBLE_CLASSES = "d-none d-sm-inline pl-2"
+  # `icon-text-gap`, not a `.pl-*` rem-based utility -- the gap needs
+  # to scale with the surrounding font-size (a `.panel-title` heading's
+  # bold type needs visibly more gap than small body text), which only
+  # an em-based value does. See `_icons.scss` for the rule.
+  TEXT_VISIBLE_CLASSES = "d-none d-sm-inline icon-text-gap"
 
   private
 
