@@ -77,3 +77,6 @@ public/test_images-*
 
 # iNat import audit (#4213) CSV outputs — data, not code
 inat_import_audit*.csv
+
+# Generated report / data output (CSVs etc.) — data, not code
+/reports/

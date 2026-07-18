@@ -27,13 +27,18 @@
 #    #4585: the import link if present, else the highest iNat id.
 
 require "csv"
+require "fileutils"
 require "optparse"
 
 class InatReflectionReport
+  # Generated report/data files live under reports/ (git-ignored), not
+  # the repo root or a developer's home directory.
+  DEFAULT_OUT = "reports/inat_reflection_report.csv"
+
   def initialize(opts)
     @limit = opts[:limit] || 200
     @seed = opts[:seed]
-    @out = opts[:out] || "inat_reflection_report.csv"
+    @out = opts[:out] || DEFAULT_OUT
     @stats = Hash.new(0)
     @field = Hash.new(0)
     @started_at = Time.current
@@ -47,11 +52,16 @@ class InatReflectionReport
       warn("  #{i + 1}/#{ids.length}") if ((i + 1) % 25).zero?
       compare_one(id)
     end
-    CSV.open(@out, "w") { |csv| write_csv(csv, rows) }
+    write_report(rows)
     summarize(rows)
   end
 
   private
+
+  def write_report(rows)
+    FileUtils.mkdir_p(File.dirname(@out))
+    CSV.open(@out, "w") { |csv| write_csv(csv, rows) }
+  end
 
   def inat_site_id
     @inat_site_id ||= ExternalSite.inaturalist.id
