@@ -24,6 +24,12 @@ class CoordinateFormatTest < UnitTestCase
     assert_equal("", stub.display_lat_lng(nil, nil))
   end
 
+  # lat present but lng missing (partial/legacy data) must not raise.
+  def test_display_lat_lng_no_lng
+    stub = Stub.new
+    assert_equal("", stub.display_lat_lng(34.1622, nil))
+  end
+
   def test_display_alt
     stub = Stub.new
     assert_equal("", stub.display_alt(nil))

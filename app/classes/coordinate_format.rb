@@ -13,7 +13,7 @@
 module CoordinateFormat
   # Full-precision (unrounded) lat/lng pair -- "34.1622°N 118.3521°W".
   def display_lat_lng(lat, lng)
-    return "" unless lat
+    return "" unless lat && lng
 
     "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
       "#{lng.abs}°#{lng.negative? ? "W" : "E"}"
