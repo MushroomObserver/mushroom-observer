@@ -31,9 +31,10 @@ require "fileutils"
 require "optparse"
 
 class InatReflectionReport
-  # Generated report/data files live under projects/ (git-ignored, the
-  # existing dev-projects folder), not the repo root or a home directory.
-  DEFAULT_OUT = "projects/inat_reflection_report.csv"
+  # Scratch/output for the iNat-sync effort lives under
+  # projects/inat-sync/ (git-ignored, via the /projects/ folder), not the
+  # repo root or a home directory.
+  DEFAULT_OUT = "projects/inat-sync/inat_reflection_report.csv"
 
   def initialize(opts)
     @limit = opts[:limit] || 200
