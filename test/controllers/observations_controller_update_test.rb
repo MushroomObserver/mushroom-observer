@@ -88,6 +88,42 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("select option[value='brown']")
   end
 
+  # A blank submitted for a sibling-held key is preserved (a deliberate
+  # suppression of the inherited value); a blank for a key no sibling
+  # holds is dropped as usual.
+  def test_update_primary_preserves_blank_only_for_sibling_keys
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Substrate: "on birch" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    put(:update, params: {
+          id: primary.id,
+          observation: {
+            place_name: primary.where,
+            "when(1i)" => primary.when.year.to_s,
+            "when(2i)" => primary.when.month.to_s,
+            "when(3i)" => primary.when.day.to_s,
+            notes: { Cap: "red", Substrate: "", Ephemeral: "" }
+          }
+        })
+
+    primary.reload
+    # Substrate: a sibling holds it -> blank preserved as a suppression.
+    assert(primary.notes.key?(:Substrate))
+    assert(primary.notes[:Substrate].blank?)
+    # Ephemeral: no sibling holds it -> blank dropped.
+    assert_not(primary.notes.key?(:Ephemeral))
+    assert_equal("red", primary.notes[:Cap])
+    # The show-page merge now suppresses the inherited Substrate value.
+    assert_not(occ.reload.merged_notes.key?(:Substrate))
+  end
+
   def test_collector_can_edit_observation
     obs = observations(:newbie_obs)
     login("foray_newbie")

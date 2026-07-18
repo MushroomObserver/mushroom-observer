@@ -112,6 +112,15 @@ class Occurrence < AbstractModel
     end
   end
 
+  # Notes keys held by any non-primary member. A blank value the primary
+  # submits for one of these is a deliberate suppression of the otherwise-
+  # inherited value (see merged_notes), so the edit path must preserve it
+  # rather than compact it away.
+  def sibling_note_keys
+    _primary, siblings = primary_and_ranked_siblings
+    siblings.flat_map { |sib| sib.notes.keys }.uniq
+  end
+
   # Auto-destroy if reduced to fewer than 2 observations,
   # unless linked to a field slip (which needs the occurrence).
   def destroy_if_incomplete!

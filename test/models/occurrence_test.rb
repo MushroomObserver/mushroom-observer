@@ -1169,6 +1169,15 @@ class OccurrenceTest < UnitTestCase
                  occ.adopt_options_by_key[:Substrate])
   end
 
+  def test_sibling_note_keys_lists_all_non_primary_member_keys
+    set_notes(@obs1, Cap: "red") # primary -- excluded
+    set_notes(@obs2, Substrate: "wood")
+    set_notes(@obs3, Habitat: "bog", Substrate: "bark")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+
+    assert_equal([:Substrate, :Habitat].to_set, occ.sibling_note_keys.to_set)
+  end
+
   private
 
   def set_notes(obs, **notes)
