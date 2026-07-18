@@ -6,7 +6,7 @@
 #  == Attributes
 #
 #  id::            Locally unique numerical id, starting at 1.
-#  name::          Name of website, e.g. "MycoPortal".
+#  name::          Name of website, e.g. "MyCoPortal".
 #  project::       Project which talks about the website and whose members
 #                  may edit external_links to this site for any observation.
 #

@@ -19,7 +19,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   # Hardcoded badge labels, same literal-name-matching pattern already
   # used by `Components::Link::External#inaturalist?` -- "MCP" isn't an
   # actual `ExternalSite.name`, just this component's badge text.
-  SITE_BADGES = { "iNaturalist" => "iNat", "MycoPortal" => "MCP" }.freeze
+  SITE_BADGES = { "iNaturalist" => "iNat", "MyCoPortal" => "MCP" }.freeze
 
   def view_template
     return if visible_sites.empty? && !show_new_link?
@@ -58,8 +58,13 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     end
   end
 
+  # Case-insensitive: ExternalSite.name has case-insensitive uniqueness
+  # (see the model validation), so two sites can never collide on
+  # casing alone -- matching case-insensitively here means a stray
+  # casing mismatch between SITE_BADGES and the real record can't
+  # silently hide a badge again.
   def representative_link_for(site_name)
-    all_links.find { |link| link.external_site.name == site_name }
+    all_links.find { |link| link.external_site.name.casecmp?(site_name) }
   end
 
   def all_links

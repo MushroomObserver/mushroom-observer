@@ -285,7 +285,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     assert_selector("#modal_external_link_#{link.id}")
     within("#modal_external_link_#{link.id}") do
-      assert_text(/MycoPortal/)
+      assert_text(/MyCoPortal/)
     end
   end
 end

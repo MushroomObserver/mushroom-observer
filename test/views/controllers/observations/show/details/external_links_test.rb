@@ -52,6 +52,24 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     )
   end
 
+  # Regression test: SITE_BADGES' key must match ExternalSite's real
+  # name casing ("MyCoPortal" -- see Tab::Name::Mycoportal,
+  # Report::MycoPortal, etc. for the same spelling used everywhere
+  # else in the app) or representative_link_for's `==` lookup silently
+  # never finds a match and the MCP badge never renders, no matter how
+  # many MyCoPortal links the observation has.
+  def test_renders_mycoportal_badge
+    link = external_links(:coprinus_comatus_obs_mycoportal_link)
+    obs = link.observation
+
+    html = render(panel_with(obs))
+
+    assert_html(
+      html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
+      text: "MCP"
+    )
+  end
+
   def test_badge_modal_id_and_tooltip
     link = external_links(:imported_inat_obs_inat_link)
     obs = link.observation
