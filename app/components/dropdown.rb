@@ -15,20 +15,20 @@
 # skipped (no spurious divider).
 #
 # @example Single-section (Actions dropdown)
-#   render(Components::Dropdown.new(
+#   Dropdown(
 #     id: "context_nav_toggle",
 #     menu_id: "context_nav",
 #     label: :app_context_actions.l
-#   )) do |menu|
+#   ) do |menu|
 #     menu.section(@links)
 #   end
 #
 # @example Multi-section (user-nav dropdown with auto-divider)
-#   render(Components::Dropdown.new(
+#   Dropdown(
 #     id: "user_nav_toggle",
 #     menu_id: "user_drop_down",
 #     label: @user.login
-#   )) do |menu|
+#   ) do |menu|
 #     menu.section(Tab::UserNav::LoggedIn.new(user: @user))
 #     menu.section(Tab::UserNav::LogOut.new(
 #       user: @user, in_admin_mode: in_admin_mode?

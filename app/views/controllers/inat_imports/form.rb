@@ -47,7 +47,7 @@ module Views::Controllers::InatImports
     end
 
     def render_choose_observations_section
-      render(Components::Panel.new(panel_class: "my-5")) do |panel|
+      Panel(panel_class: "my-5") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
           div(data: { controller: "type-switch" }) do
@@ -110,7 +110,7 @@ module Views::Controllers::InatImports
     end
 
     def render_details_panel
-      render(Components::Panel.new) do |panel|
+      Panel do |panel|
         panel.with_heading { plain(:inat_details_heading.l) }
         panel.with_body do
           ul(class: "pl-4") do

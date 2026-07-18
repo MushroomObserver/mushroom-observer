@@ -12,11 +12,11 @@ module Views::Controllers::Support
                       ))
 
       div(class: "text-center") do
-        render(Components::Table.new(@donor_names,
-                                     variant: :striped,
-                                     identifier: "donors",
-                                     class: "mt-3 mb-3",
-                                     show_headers: false)) do |t|
+        Table(@donor_names,
+              variant: :striped,
+              identifier: "donors",
+              class: "mt-3 mb-3",
+              show_headers: false) do |t|
           t.column(nil) { |name| plain(name) }
         end
       end

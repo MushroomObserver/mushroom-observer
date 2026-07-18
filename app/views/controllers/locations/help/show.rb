@@ -110,9 +110,9 @@ module Views::Controllers::Locations
       end
 
       def render_examples_table
-        render(Components::Table.new(EXAMPLES,
-                                     variant: :striped,
-                                     identifier: "location-help")) do |t|
+        Table(EXAMPLES,
+              variant: :striped,
+              identifier: "location-help") do |t|
           t.column(:location_help_bad.l) { |row| plain(row[0]) }
           t.column(:location_help_good.l) { |row| plain(row[1]) }
           t.column(:location_help_explanation.l) do |row|

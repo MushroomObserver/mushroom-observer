@@ -37,9 +37,9 @@ module Views::Controllers::Descriptions::Permissions
     private
 
     def render_permissions_table
-      render(Components::Table.new(
-               class: "w-100 table-description-permissions"
-             )) do |t|
+      Table(
+        class: "w-100 table-description-permissions"
+      ) do |t|
         t.column(:adjust_permissions_user_header.l, style: "mr-4")
         t.column(:adjust_permissions_reader_header.l, width: "50")
         t.column(:adjust_permissions_writer_header.l, width: "50")

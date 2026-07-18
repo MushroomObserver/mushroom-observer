@@ -19,9 +19,9 @@ module Views::Controllers::Versions
     prop :args, _Hash(Symbol, _Any?), default: -> { {} }
 
     def view_template
-      render(Components::Panel.new(
-               panel_id: "#{@obj.type_tag}_versions"
-             )) do |panel|
+      Panel(
+        panel_id: "#{@obj.type_tag}_versions"
+      ) do |panel|
         panel.with_heading { :VERSIONS.l }
         panel.with_body { render_table }
       end
@@ -30,11 +30,11 @@ module Views::Controllers::Versions
     private
 
     def render_table
-      render(::Components::Table.new(
-               @versions.reverse,
-               variant: :hover, identifier: "versions",
-               show_headers: false, class: "mb-0"
-             )) do |t|
+      Table(
+        @versions.reverse,
+        variant: :hover, identifier: "versions",
+        show_headers: false, class: "mb-0"
+      ) do |t|
         t.column("") { |ver| render_date_cell(ver) }
         t.column("") { |ver| render_user_cell(ver) }
         t.column("") { |ver| render_link_cell(ver) }

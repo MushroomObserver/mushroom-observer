@@ -18,7 +18,7 @@ module Views::Controllers::Locations
       prop :current, _Nilable(::Description), default: nil
 
       def view_template
-        render(Components::Panel.new(panel_id: "alt_descriptions")) do |panel|
+        Panel(panel_id: "alt_descriptions") do |panel|
           panel.with_heading { :show_name_descriptions.l }
           panel.with_heading_links { heading_links }
           panel.with_body { render_body }

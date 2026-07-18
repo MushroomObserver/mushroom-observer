@@ -25,7 +25,7 @@ module Views::Controllers::VisualGroups
     def render_matrix_box(row)
       image, image_status = row
       render(Components::Matrix::Box.new(id: image.id)) do
-        render(Components::Panel.new) do |panel|
+        Panel do |panel|
           panel.with_thumbnail do
             render(Components::Image::Interactive.new(
                      user: @user, image: image, original: true,
