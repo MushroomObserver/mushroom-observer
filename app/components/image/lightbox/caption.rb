@@ -165,7 +165,8 @@ class Components::Image::Lightbox::Caption < Components::Base
   end
 
   def render_gps_link
-    trusted_html([@obs.display_lat_lng.t, @obs.display_alt.t].join(" "))
+    parts = [display_lat_lng(@obs.lat, @obs.lng).t, display_alt(@obs.alt).t]
+    trusted_html(parts.compact_blank.join(" "))
     render_gps_map_link
   end
 
