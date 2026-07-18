@@ -5,7 +5,13 @@ module Observations
   class ExternalLinksController < ApplicationController
     include Show
 
-    before_action :login_required
+    # `show` is defined in the included Show module above.
+    # rubocop:disable Rails/LexicallyScopedActionFilter
+    # `show` is the informational "Shared with" badge modal -- visible
+    # to logged-out viewers, so it's the one action that must NOT
+    # require a session. Every mutating action still does.
+    before_action :login_required, except: [:show]
+    # rubocop:enable Rails/LexicallyScopedActionFilter
 
     def new
       set_ivars_for_new
