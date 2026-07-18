@@ -7,13 +7,22 @@
 # chained with `&&`/`;`/a newline.
 #
 # Deliberately conservative: only blocks when the `cd` target
-# resolves (via a real subshell `cd`, so `~`, `$HOME`, `..`, etc. all
-# expand exactly like they would in the real command) to EXACTLY the
-# current directory. A `cd` into any other directory -- a subdirectory,
-# a sibling repo, `..`, anywhere else -- is a legitimate command and
-# must never be blocked. If resolution fails or is ambiguous for any
-# reason, this hook fails open (does not block) rather than risk a
-# false positive.
+# resolves (via a real `cd` builtin call, so `~`, `$HOME`, `..`, etc.
+# all expand exactly like they would in the real command) to EXACTLY
+# the current directory. A `cd` into any other directory -- a
+# subdirectory, a sibling repo, `..`, anywhere else -- is a legitimate
+# command and must never be blocked. If resolution fails or is
+# ambiguous for any reason, this hook fails open (does not block)
+# rather than risk a false positive.
+#
+# CD_ARG is derived directly from the command about to run, so it
+# could be adversarial/prompt-injection-controlled -- this script
+# NEVER `eval`s it or otherwise re-parses it as shell code. Only plain
+# quote-stripping and a literal `~`/`$HOME` prefix substitution are
+# handled (pure string manipulation); everything else is passed to
+# `cd --` as a literal argument, which resolves paths without
+# executing anything from them. If CD_ARG contains command/process
+# substitution syntax, this hook doesn't attempt to resolve it at all.
 set -euo pipefail
 
 INPUT="$(cat)"
@@ -34,11 +43,36 @@ fi
 
 CD_ARG="$(printf '%s' "$FIRST_SEGMENT" | sed -E 's/^cd[[:space:]]+//')"
 
+# Refuse to interpret anything that could execute code if evaluated
+# further (command substitution, process substitution). Fail open --
+# don't attempt resolution, don't block -- rather than risk running
+# attacker/prompt-injection-controlled shell syntax inside this hook.
+if printf '%s' "$CD_ARG" | grep -qE '`|\$\(|<\(|>\('; then
+  exit 0
+fi
+
+# Strip one layer of matching quotes, if present.
+UNQUOTED="$CD_ARG"
+case "$UNQUOTED" in
+  \"*\") UNQUOTED="${UNQUOTED#\"}"; UNQUOTED="${UNQUOTED%\"}" ;;
+  \'*\') UNQUOTED="${UNQUOTED#\'}"; UNQUOTED="${UNQUOTED%\'}" ;;
+esac
+
+# The only expansions handled: a literal leading `~` or `$HOME` --
+# pure string substitution, never executed. Everything else (absolute
+# paths, relative paths, `..`) needs no expansion at all; `cd` resolves
+# those itself when given the literal argument below.
+case "$UNQUOTED" in
+  "~"|"~/"*) UNQUOTED="${HOME}${UNQUOTED#\~}" ;;
+  "\$HOME"|"\$HOME/"*) UNQUOTED="${HOME}${UNQUOTED#\$HOME}" ;;
+esac
+
 # Resolve the target in a subshell (no effect on this script's own
-# cwd) via a real `cd`, so quoting/`~`/`$HOME`/relative-path expansion
-# all match actual shell semantics instead of being reimplemented here.
+# cwd) via a real `cd` builtin call with UNQUOTED passed as a literal
+# argument -- never re-parsed as shell code, so nothing in it can
+# execute regardless of its contents.
 CURRENT="$(pwd -P)"
-RESOLVED="$(eval "cd -- ${CD_ARG} 2>/dev/null && pwd -P" 2>/dev/null || true)"
+RESOLVED="$(cd -- "$UNQUOTED" 2>/dev/null && pwd -P || true)"
 
 if [ -n "$RESOLVED" ] && [ "$RESOLVED" = "$CURRENT" ]; then
   cat >&2 <<EOF
