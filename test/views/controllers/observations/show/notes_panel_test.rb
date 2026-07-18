@@ -56,6 +56,33 @@ class Views::Controllers::Observations::Show::NotesPanelTest < ComponentTestCase
     assert_includes(notes.text, "wood")
   end
 
+  # A blank Other value alongside other note parts should not print
+  # an empty "Other" caption -- only the parts with real content.
+  def test_blank_other_omitted_from_multi_part_notes
+    @obs.notes = { Substrate: "wood", Other: "" }
+
+    html = render(panel_with(@obs))
+    notes = Nokogiri::HTML.fragment(html).at_css("#observation_notes")
+
+    assert_equal(1, notes.css(".indent").length,
+                 "Blank Other value should not render its own part")
+    assert_includes(notes.text, "wood")
+    assert_not_includes(notes.text, "Other")
+  end
+
+  def test_whitespace_only_other_omitted_from_multi_part_notes
+    @obs.notes = { Substrate: "wood", Other: "   \n  " }
+
+    html = render(panel_with(@obs))
+    notes = Nokogiri::HTML.fragment(html).at_css("#observation_notes")
+
+    assert_equal(
+      1, notes.css(".indent").length,
+      "Whitespace-only Other value should not render its own part"
+    )
+    assert_not_includes(notes.text, "Other")
+  end
+
   private
 
   def panel_with(obs, user = @user)

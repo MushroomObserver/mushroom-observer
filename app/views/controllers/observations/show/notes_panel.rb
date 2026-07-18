@@ -40,6 +40,8 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
   end
 
   def render_note_part(key, value)
+    return if key == :Other && value.to_s.blank?
+
     trusted_html("+#{key.to_s.tr("_", " ")}+:".tl)
     div(class: "indent") { trusted_html(value.to_s.tpl) }
   end
