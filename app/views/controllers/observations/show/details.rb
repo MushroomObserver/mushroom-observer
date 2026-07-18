@@ -95,7 +95,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   def render_where_gps
     return unless @obs.lat && @user
 
-    li(class: "obs-where-gps", id: "observation_where_gps") do
+    li(class: "obs-where-gps indent", id: "observation_where_gps") do
       # XXX Consider dropping this from indexes.
       render_gps_display_link if @obs.reveal_location?(@user)
       i { plain("(#{:show_observation_gps_hidden.t})") } if @obs.gps_hidden
