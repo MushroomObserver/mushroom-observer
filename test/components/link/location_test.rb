@@ -31,13 +31,17 @@ class LocationLinkTest < ComponentTestCase
     assert_includes(html, "(7)")
   end
 
-  def test_click_appends_map_suffix
+  def test_click_appends_map_icon_link
     burbank = locations(:burbank)
     html = render(Components::Link::Location.new(
                     where: burbank.name, location: burbank, click: true
                   ))
 
-    assert_includes(html, :click_for_map.t)
+    location_href = routes.location_path(id: burbank.id)
+    # A standalone icon link, distinct from the label's own anchor --
+    # same href, but carrying the globe glyph + tooltip.
+    assert_html(html, "a[href='#{location_href}'] .glyphicon-globe")
+    assert_html(html, "a[data-title='#{:click_for_map.l}']")
   end
 
   def test_without_location_renders_observations_index_link

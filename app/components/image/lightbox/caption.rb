@@ -165,12 +165,21 @@ class Components::Image::Lightbox::Caption < Components::Base
   end
 
   def render_gps_link
-    link_text = [
-      @obs.display_lat_lng.t,
-      @obs.display_alt.t,
-      "[#{:click_for_map.t}]"
-    ].join(" ")
-    a(href: map_observation_path(id: @obs.id)) { link_text }
+    trusted_html([@obs.display_lat_lng.t, @obs.display_alt.t].join(" "))
+    render_gps_map_link
+  end
+
+  def render_gps_map_link
+    InlineLinkBlock(items: [gps_map_icon])
+  end
+
+  def gps_map_icon
+    Components::Link::Icon.new(
+      content: :click_for_map.l,
+      path: map_observation_path(id: @obs.id),
+      icon: :place,
+      class: Components::InlineLinkBlock.item_class
+    )
   end
 
   def render_obs_who
