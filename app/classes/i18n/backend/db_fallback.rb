@@ -6,7 +6,9 @@
 # (self-healing). This is what makes it safe to stop regenerating
 # config/locales/*.yml on every deploy/edit (#4807): a cold or freshly
 # cleared cache never breaks the site, it just costs one DB query per
-# tag until the cache warms back up.
+# tag (official/English locale) or per tag needing the official-locale
+# fallback (every other locale -- see #text_for) until the cache warms
+# back up.
 #
 # Chained AFTER I18n::Backend::SolidCacheKeyValue (see
 # config/initializers/i18n_backend.rb) -- Chain checks backends in
@@ -56,13 +58,28 @@ class I18n::Backend::DbFallback
   # has no override of its own -- matches the fallback merge
   # LanguageExporter has always baked into every locale's regenerated
   # files (see Language#localization_strings/merge_localization_strings_into).
+  #
+  # One query, not two: a naive `language.translation_strings.find_by`
+  # then `official_language.translation_strings.find_by` on a miss
+  # costs 2 round trips for most non-English tags (most tags aren't
+  # overridden per-locale), materially adding to cache warm-up load
+  # for non-English requests. Fetching both candidate rows in a single
+  # `language_id IN (...)` query (uses the same [language_id, tag]
+  # index either way) and picking the locale-specific one in Ruby
+  # keeps it at one query regardless.
   def text_for(locale, tag)
     language = Language.for_locale(locale)
     return nil unless language
 
-    str = language.translation_strings.find_by(tag: tag)
-    str ||= official_language.translation_strings.find_by(tag: tag) unless
-      language.official
+    language_ids = if language.official
+                     [language.id]
+                   else
+                     [language.id,
+                      official_language.id]
+                   end
+    strings = TranslationString.where(language_id: language_ids, tag: tag).
+              index_by(&:language_id)
+    str = strings[language.id] || strings[official_language.id]
     str&.text
   end
 
