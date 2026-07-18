@@ -9,6 +9,12 @@
 # enumerating keys, and I18n::Backend::SolidCacheKeyValue overrides the
 # one method (#available_locales) that would otherwise need it.
 class I18n::Backend::CacheStoreAdapter
+  # Exposed so config/initializers/i18n_backend.rb's choice of underlying
+  # store (Rails.cache in dev/production, a real SolidCache::Store when
+  # Rails.cache is a NullStore) can be verified directly at boot -- see
+  # test/classes/i18n/backend/cache_wiring_test.rb.
+  attr_reader :store
+
   def initialize(store)
     @store = store
   end

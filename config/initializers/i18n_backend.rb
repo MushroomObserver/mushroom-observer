@@ -21,8 +21,13 @@ Rails.application.config.after_initialize do
     path.to_s.start_with?(Rails.root.join("config/locales").to_s)
   end
 
+  # See I18n::Backend::CacheStoreSelector for why this is Rails.cache
+  # (not a bare SolidCache::Store.new) with a NullStore fallback, rather
+  # than either alone.
   cache_backend = I18n::Backend::SolidCacheKeyValue.new(
-    I18n::Backend::CacheStoreAdapter.new(SolidCache::Store.new), false
+    I18n::Backend::CacheStoreAdapter.new(
+      I18n::Backend::CacheStoreSelector.call
+    ), false
   )
   db_fallback_backend = I18n::Backend::DbFallback.new(cache_backend)
   gem_file_backend = I18n::Backend::Simple.new
