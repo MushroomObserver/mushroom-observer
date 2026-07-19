@@ -40,6 +40,12 @@ class Components::Matrix::Carousel < Components::Base
     @carousel_id ||= generate_carousel_id
     return if @images.empty?
 
+    # Must stay `render(Components::Carousel.new(...))`, not bare
+    # `Carousel(...)` Kit syntax -- this component class is itself
+    # named `Carousel` (Components::Matrix::Carousel), so Kit's
+    # constant lookup would recurse into itself instead of resolving
+    # Components::Carousel (see commit 33fdc952e5 for the same bug
+    # with a view class named `Table`).
     render(Components::Carousel.new(
              carousel_id: @carousel_id,
              show_controls: @images.length > 1,

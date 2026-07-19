@@ -16,7 +16,7 @@ module Views::Controllers::Licenses
     private
 
     def render_table
-      render(::Components::Table.new(@objects)) { |tbl| add_columns(tbl) }
+      Table(@objects) { |tbl| add_columns(tbl) }
     end
 
     def add_columns(tbl)

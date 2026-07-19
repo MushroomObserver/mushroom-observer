@@ -20,6 +20,12 @@ module Views::Controllers::Projects::Aliases
       @project_aliases = project_aliases
     end
 
+    # Must stay `render(::Components::Table.new(...))`, not bare
+    # `Table(...)` Kit syntax -- this view class is itself named
+    # `Table`, so Kit's constant lookup would recurse into itself
+    # instead of resolving Components::Table (see commit 33fdc952e5,
+    # which reverted this exact call from Kit syntax back to
+    # render(...) after hitting the bug).
     def view_template
       render(::Components::Table.new(
                @project_aliases,

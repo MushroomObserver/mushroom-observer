@@ -38,17 +38,17 @@ module Views::Controllers::InatImports
     def render_actions
       div(class: "mt-2 mb-2") do
         if @inat_import.Done?
-          render(Components::Button.new(
-                   type: :get,
-                   name: :results.ti,
-                   target: results_path
-                 ))
+          Button(
+            type: :get,
+            name: :results.ti,
+            target: results_path
+          )
         else
-          render(::Components::Button.new(
-                   type: :put,
-                   name: :cancel.ti,
-                   target: inat_import_cancel_path(id: @inat_import)
-                 ))
+          Button(
+            type: :put,
+            name: :cancel.ti,
+            target: inat_import_cancel_path(id: @inat_import)
+          )
         end
       end
     end

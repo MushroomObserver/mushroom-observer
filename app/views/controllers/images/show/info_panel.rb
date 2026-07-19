@@ -8,9 +8,9 @@ module Views::Controllers::Images
       prop :image, ::Image
 
       def view_template
-        render(::Components::Panel.new(
-                 panel_id: "info_panel", panel_class: "py-2"
-               )) do |panel|
+        Panel(
+          panel_id: "info_panel", panel_class: "py-2"
+        ) do |panel|
           panel.with_heading { "#{:notes.ti}:" }
           panel.with_body { render_body }
         end

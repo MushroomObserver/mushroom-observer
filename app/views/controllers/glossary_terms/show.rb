@@ -53,13 +53,13 @@ module Views::Controllers::GlossaryTerms
     def render_right_column
       return unless @glossary_term.thumb_image
 
-      render(::Components::Image::Interactive.new(
-               user: current_user,
-               image: @glossary_term.thumb_image,
-               size: :medium,
-               votes: true,
-               id_prefix: "glossary_term_image"
-             ))
+      InteractiveImage(
+        user: current_user,
+        image: @glossary_term.thumb_image,
+        size: :medium,
+        votes: true,
+        id_prefix: "glossary_term_image"
+      )
     end
 
     def render_image_action_links
@@ -82,14 +82,14 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_other_image_panel(image)
-      render(::Components::Panel.new) do |panel|
+      Panel do |panel|
         panel.with_thumbnail do
-          render(::Components::Image::Interactive.new(
-                   user: current_user,
-                   image: image,
-                   votes: true,
-                   id_prefix: "glossary_term_image"
-                 ))
+          InteractiveImage(
+            user: current_user,
+            image: image,
+            votes: true,
+            id_prefix: "glossary_term_image"
+          )
         end
       end
     end
@@ -114,9 +114,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_authors_editors_panel
-      render(::Components::Panel.new(
-               panel_id: "glossary_term_authors_editors"
-             )) do |panel|
+      Panel(panel_id: "glossary_term_authors_editors") do |panel|
         panel.with_body do
           render(::Views::Layouts::AuthorsAndEditors.new(
                    obj: @glossary_term,

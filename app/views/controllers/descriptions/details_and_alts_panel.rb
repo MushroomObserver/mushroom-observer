@@ -23,9 +23,7 @@ module Views::Controllers::Descriptions
     prop :review, _Boolean, default: false
 
     def view_template
-      render(Components::Panel.new(
-               panel_id: "description_details_and_alts"
-             )) do |panel|
+      Panel(panel_id: "description_details_and_alts") do |panel|
         panel.with_heading { :show_observation_details.l }
         panel.with_heading_links do
           render(Components::Description::ModLinks.new(

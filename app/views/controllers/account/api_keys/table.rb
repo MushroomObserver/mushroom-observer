@@ -32,6 +32,11 @@ module Views::Controllers::Account::APIKeys
       end
     end
 
+    # Must stay `render(Components::Table.new(...))`, not bare
+    # `Table(...)` Kit syntax -- this view class is itself named
+    # `Table`, so Kit's constant lookup would recurse into itself
+    # instead of resolving Components::Table (see commit 33fdc952e5
+    # for the same bug with a view class named `Table`).
     def render_keys_table
       render(Components::Table.new(
                sorted_keys,

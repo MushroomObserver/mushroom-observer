@@ -19,13 +19,13 @@ class Components::Modal::Confirm < Components::Base
   TITLE_ID = "#{MODAL_ID}_title".freeze
 
   def view_template
-    render(Components::Modal.new(
-             id: MODAL_ID,
-             header: false,
-             controller: "confirm-modal",
-             body_class: "py-4",
-             title_id: TITLE_ID
-           )) do |m|
+    Modal(
+      id: MODAL_ID,
+      header: false,
+      controller: "confirm-modal",
+      body_class: "py-4",
+      title_id: TITLE_ID
+    ) do |m|
       m.with_body do
         render_title
         render_message

@@ -36,18 +36,18 @@
 # props on the host class.
 #
 # @example Basic usage
-#   render(Components::Map.new(objects: [@location]))
+#   Map(objects: [@location])
 #
 # @example Editable map for forms
-#   render(Components::Map.new(
+#   Map(
 #     objects: [@location],
 #     editable: true,
 #     map_type: "location",
 #     controller: nil  # form has the controller
-#   ))
+#   )
 #
 # @example Clustered observations map with cap banner
-#   render(Components::Map.new(
+#   Map(
 #     objects: @observations,
 #     clustering: true,
 #     capped: @observations_capped,
@@ -56,7 +56,7 @@
 #     zoom: 2,
 #     observations_loaded_count: @observations_loaded_count,
 #     observations_total_count: @observations_total_count
-#   ))
+#   )
 #
 class Components::Map < Components::Base
   # Upper bound on points for client-side dynamic clustering

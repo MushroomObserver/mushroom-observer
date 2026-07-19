@@ -6,22 +6,22 @@
 #   heading, heading_links, thumbnail, body, footer
 #
 # @example Basic panel with heading and body
-#   render(Components::Panel.new do |panel|
+#   Panel do |panel|
 #     panel.with_heading { "Title" }
 #     panel.with_body { "Panel content" }
-#   end)
+#   end
 #
 # @example Panel with all subcomponents
-#   render(Components::Panel.new do |panel|
+#   Panel do |panel|
 #     panel.with_heading { strong { "Title" } }
 #     panel.with_thumbnail { image("photo.jpg") }
 #     panel.with_body { "First section" }
 #     panel.with_body { "Second section" }
-#     panel.witih_footer { "Footer text" }
-#   end)
+#     panel.with_footer { "Footer text" }
+#   end
 #
 # @example Panel with collapsing body
-#   render(Components::Panel.new(
+#   Panel(
 #     collapsible: true,
 #     collapse_target: "#hidden"
 #   ) do |panel|
@@ -29,19 +29,19 @@
 #     panel.with_thumbnail { image("photo.jpg") }
 #     panel.with_body { "First section" }
 #     panel.with_body(collapse: true) { "Second section" }
-#     panel.witih_footer { "Footer text" }
-#   end)
+#     panel.with_footer { "Footer text" }
+#   end
 #
 # @example Panel with custom class and ID
-#   render(Components::Panel.new(
+#   Panel(
 #     panel_class: "custom-panel",
 #     panel_id: "my_panel"
 #   ) do |panel|
 #     panel.with_body { "Content" }
-#   end)
+#   end
 #
 # @example Panel with unwrapped body (e.g., for list-group)
-#   render(Components::Panel.new do |panel|
+#   Panel do |panel|
 #     panel.with_heading { "Comments" }
 #     panel.with_body(wrapper: false) do
 #       ul(class: "list-group") do
@@ -49,7 +49,7 @@
 #         li(class: "list-group-item") { "Comment 2" }
 #       end
 #     end
-#   end)
+#   end
 class Components::Panel < Components::Base
   include Phlex::Slotable
 

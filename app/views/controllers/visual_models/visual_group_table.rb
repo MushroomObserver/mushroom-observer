@@ -30,9 +30,9 @@ module Views::Controllers::VisualModels
     private
 
     def render_table
-      render(Components::Table.new(
-               groups, class: "table-striped table-visual-model mb-3 mt-3"
-             )) do |t|
+      Table(
+        groups, class: "table-striped table-visual-model mb-3 mt-3"
+      ) do |t|
         define_columns(t)
       end
     end

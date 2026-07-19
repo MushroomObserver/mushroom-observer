@@ -8,7 +8,7 @@ class Views::Controllers::Names::Show::NotesPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Panel.new(panel_id: "name_notes")) do |panel|
+    Panel(panel_id: "name_notes") do |panel|
       panel.with_heading { plain(:show_name_notes.l) }
       panel.with_heading_links { render_edit_link } if @user
       panel.with_body { trusted_html(@name.notes.tpl) }

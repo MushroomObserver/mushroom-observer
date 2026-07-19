@@ -61,12 +61,12 @@ class Components::ImageGallery < Components::Base
   end
 
   def render_carousel
-    render(Components::Carousel.new(
-             carousel_id: @carousel_id,
-             wrapper_class: "show-carousel",
-             show_controls: @images.compact.length > 1,
-             show_indicators: @thumbnails
-           )) do |c|
+    Carousel(
+      carousel_id: @carousel_id,
+      wrapper_class: "show-carousel",
+      show_controls: @images.compact.length > 1,
+      show_indicators: @thumbnails
+    ) do |c|
       register_slides(c)
       register_thumbnails(c) if @thumbnails
     end

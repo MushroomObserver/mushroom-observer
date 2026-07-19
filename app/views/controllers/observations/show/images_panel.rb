@@ -15,9 +15,9 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Panel.new(
-             panel_class: "show_images list-group text-center m-0"
-           )) do |panel|
+    Panel(
+      panel_class: "show_images list-group text-center m-0"
+    ) do |panel|
       panel.with_heading { :images.ti }
       panel.with_heading_links { heading_links }
       panel.with_body { render_body }
@@ -45,14 +45,14 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   # caller now does the sort (or supplies `images_sorted`).
   def render_image_row(image)
     render(Components::ListGroup::Item.new) do
-      render(Components::Image::Interactive.new(
-               user: @user,
-               image: image,
-               image_link: image.show_link_args.merge(obs: @obs.id),
-               original: true,
-               is_set: true,
-               votes: true
-             ))
+      InteractiveImage(
+        user: @user,
+        image: image,
+        image_link: image.show_link_args.merge(obs: @obs.id),
+        original: true,
+        is_set: true,
+        votes: true
+      )
       render_image_notes(image)
     end
   end

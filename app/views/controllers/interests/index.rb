@@ -55,8 +55,8 @@ module Views::Controllers::Interests
 
     def render_interests_table
       rows = @interests.select(&:target)
-      render(::Components::Table.new(rows, class: "table-striped",
-                                           show_headers: false)) do |t|
+      Table(rows, class: "table-striped",
+                  show_headers: false) do |t|
         t.column("summary") do |item|
           capture { strong { trusted_html(item.summary.t) } }
         end

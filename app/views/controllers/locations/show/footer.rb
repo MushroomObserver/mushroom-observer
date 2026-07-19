@@ -8,7 +8,7 @@ module Views::Controllers::Locations
       prop :versions, _Array(_Interface(:user_id))
 
       def view_template
-        render(::Components::Panel.new(panel_id: "location_footer")) do |panel|
+        Panel(panel_id: "location_footer") do |panel|
           panel.with_body { render_body }
           panel.with_footer { render_previous_version }
         end

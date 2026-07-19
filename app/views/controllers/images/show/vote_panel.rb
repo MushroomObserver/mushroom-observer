@@ -10,9 +10,9 @@ module Views::Controllers::Images
       prop :default_size, _Nilable(_Union(::Symbol, ::String)), default: nil
 
       def view_template
-        render(::Components::Panel.new(
-                 panel_id: "image_vote_content"
-               )) do |panel|
+        Panel(
+          panel_id: "image_vote_content"
+        ) do |panel|
           panel.with_heading { render_current_vote_heading }
           render_user_vote_body(panel) if current_user
           panel.with_body(classes: "p-0") { render_vote_table_container }
