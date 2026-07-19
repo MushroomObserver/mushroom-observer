@@ -59,7 +59,7 @@ module Views::Controllers::Projects::Members
     end
 
     def render_user_image(user)
-      Image(
+      InteractiveImage(
         user: user,
         image: user.image,
         votes: false,

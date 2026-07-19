@@ -53,7 +53,7 @@ module Views::Controllers::GlossaryTerms
     def render_right_column
       return unless @glossary_term.thumb_image
 
-      Image(
+      InteractiveImage(
         user: current_user,
         image: @glossary_term.thumb_image,
         size: :medium,
@@ -84,7 +84,7 @@ module Views::Controllers::GlossaryTerms
     def render_other_image_panel(image)
       render(::Components::Panel.new) do |panel|
         panel.with_thumbnail do
-          Image(
+          InteractiveImage(
             user: current_user,
             image: image,
             votes: true,

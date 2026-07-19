@@ -8,7 +8,7 @@
 # - `Components::Image::ReuseForm` — the small form that takes an Image
 #   id and POSTs to `<target_domain>/images#attach`.
 # - A `paginated_results`-wrapped `Components::Matrix::Table` of
-#   clickable thumbnails (each wrapping `Components::Image::Interactive`
+#   clickable thumbnails (each wrapping `Components::InteractiveImage`
 #   in a POST link to `attach` so a click attaches that image
 #   directly).
 #
@@ -48,7 +48,7 @@ module Views::Controllers::Shared
              )) do
         render(::Components::Panel.new) do |panel|
           panel.with_body do
-            Image(
+            InteractiveImage(
               user: @user,
               image: image,
               votes: false,

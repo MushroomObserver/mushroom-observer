@@ -27,7 +27,7 @@ module Views::Controllers::Info
 
       @observations[offset, count].each do |obs|
         div(class: "pb-1") do
-          Image(
+          InteractiveImage(
             user: current_user,
             image: obs.thumb_image,
             image_link: observation_path(obs.id),

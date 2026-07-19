@@ -31,7 +31,7 @@ module Views::Controllers::GlossaryTerms
           return unless @glossary_term&.thumb_image
 
           p(class: "mt-3") do
-            Image(
+            InteractiveImage(
               user: current_user,
               image: @glossary_term.thumb_image,
               votes: false

@@ -30,7 +30,7 @@ module Views::Controllers::Images::Emails
 
     def render_image_preview
       div(class: "mb-4") do
-        Image(
+        InteractiveImage(
           user: @user,
           image: @image,
           size: :medium,

@@ -39,7 +39,7 @@ module Views::Controllers::Account::Profile
     def render_image_column
       return unless @user.image
 
-      Image(
+      InteractiveImage(
         user: @user, image: @user.image, votes: false
       )
       Button(

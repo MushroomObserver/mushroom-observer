@@ -27,7 +27,7 @@ module Views::Controllers::VisualGroups
       render(Components::Matrix::Box.new(id: image.id)) do
         render(Components::Panel.new) do |panel|
           panel.with_thumbnail do
-            Image(
+            InteractiveImage(
               user: @user, image: image, original: true,
               votes: false, full_width: true
             )

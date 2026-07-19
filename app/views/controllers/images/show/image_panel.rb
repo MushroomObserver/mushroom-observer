@@ -59,7 +59,7 @@ module Views::Controllers::Images
       # --- Body: interactive image + vote + original filename ------
 
       def render_body
-        Image(
+        InteractiveImage(
           user: current_user, image: @image,
           size: :huge, image_link: "#",
           extra_classes: "huge-image", votes: false

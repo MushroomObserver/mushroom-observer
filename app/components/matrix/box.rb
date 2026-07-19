@@ -107,7 +107,7 @@ class Components::Matrix::Box < Components::Base
     return unless @data[:image]
 
     panel.with_thumbnail do
-      Image(
+      InteractiveImage(
         user: @user,
         image: @data[:image],
         image_link: @data[:image_link],

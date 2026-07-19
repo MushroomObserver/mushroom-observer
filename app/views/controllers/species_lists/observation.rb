@@ -35,7 +35,7 @@ module Views::Controllers::SpeciesLists
 
     def render_image_column
       Column(sm: 4, md: 3) do
-        Image(
+        InteractiveImage(
           user: @user,
           image: @observation.thumb_image,
           image_link: observation_path(id: @observation.id),

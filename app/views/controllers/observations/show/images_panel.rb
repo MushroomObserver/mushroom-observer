@@ -45,7 +45,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   # caller now does the sort (or supplies `images_sorted`).
   def render_image_row(image)
     render(Components::ListGroup::Item.new) do
-      Image(
+      InteractiveImage(
         user: @user,
         image: image,
         image_link: image.show_link_args.merge(obs: @obs.id),
