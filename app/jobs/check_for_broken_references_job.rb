@@ -104,7 +104,14 @@ class CheckForBrokenReferencesJob < ApplicationJob
     ids = query.pluck(:id)
     return if ids.empty?
 
-    apply_action(model, column, query, ids, action)
+    # :alert is dispatched here, where ref_model is in scope, so its
+    # human-facing message can name the referenced model; the mutating
+    # actions don't need it.
+    if action == :alert
+      alert_broken(model, column, query, ids, ref_model)
+    else
+      apply_action(model, column, query, ids, action)
+    end
   end
 
   # A Checks::MONOMORPHIC/POLYMORPHIC entry naming an association that no
@@ -138,7 +145,6 @@ class CheckForBrokenReferencesJob < ApplicationJob
 
   def apply_action(model, column, query, ids, action)
     case action
-    when :alert then alert_broken(model, column, query, ids)
     when :delete then delete_broken(model, column, query, ids)
     when :nil then nullify_broken(model, column, query, ids)
     when :zero then zero_broken(model, column, query, ids)
@@ -146,18 +152,26 @@ class CheckForBrokenReferencesJob < ApplicationJob
     end
   end
 
-  # Logs a count + a bounded [id, column] sample rather than the full list.
-  # Each pair is an offending row's primary key and its dangling #{column}
-  # value, so the sample can't be misread as a list of FK values. :alert
-  # rows should be rare (something's wrong upstream), but an unbounded pluck
-  # would blow up log/job.log if that ever stops holding (e.g. after a bad
-  # data migration).
-  def alert_broken(model, column, query, ids)
-    sample = query.limit(10).pluck(:id, column)
-    log("ALERT!! #{ids.size} #{model.table_name} row(s) with a dangling " \
-        "#{column} - [id, #{column}]: #{sample.inspect}")
-    note_for_review("#{ids.size} #{model.table_name}.#{column} dangling " \
-                    "(e.g. #{sample.first(3).inspect})")
+  # Logs a count + a bounded sample rather than the full list, each row
+  # rendered as "<Model> <id> -> missing <RefModel> <fk>" so the message
+  # reads as a sentence and can't be misread as a list of FK values.
+  # :alert rows should be rare (something's wrong upstream), but an
+  # unbounded pluck would blow up log/job.log if that ever stops holding
+  # (e.g. after a bad data migration).
+  def alert_broken(model, column, query, ids, ref_model)
+    pairs = broken_pairs(model, column, query, ref_model)
+    log("ALERT!! #{ids.size} #{model.name} row(s) point to a missing " \
+        "#{ref_model.name} via #{column}: #{pairs.first(10).join("; ")}")
+    note_for_review(
+      "#{ids.size} #{model.name} rows point to a #{ref_model.name} that " \
+      "no longer exists (via #{column}) -- e.g. #{pairs.first(3).join("; ")}"
+    )
+  end
+
+  def broken_pairs(model, column, query, ref_model)
+    query.limit(10).pluck(:id, column).map do |id, fk|
+      "#{model.name} #{id} -> missing #{ref_model.name} #{fk}"
+    end
   end
 
   def delete_broken(model, column, query, ids)

@@ -227,6 +227,20 @@ class UserTest < UnitTestCase
     assert_raises(ActiveRecord::RecordNotFound) { Publication.find(pub_id) }
   end
 
+  # erase_user deletes the user row via delete_all, which bypasses the
+  # `has_one :user_stats, dependent: :destroy` callback, so user_stats
+  # must be erased explicitly (else it's left dangling -- see #26085).
+  def test_erase_user_removes_user_stats
+    user = users(:spammer)
+    UserStats.find_or_create_by!(user_id: user.id)
+    assert(UserStats.exists?(user_id: user.id))
+
+    User.erase_user(user.id)
+
+    assert_not(UserStats.exists?(user_id: user.id),
+               "erase_user should delete the user's user_stats")
+  end
+
   def test_erase_user_with_comment_and_name_descriptions
     user = dick
     num_comments = Comment.count

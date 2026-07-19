@@ -32,6 +32,19 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
     assert_equal(0, article.reload.user_id)
   end
 
+  # UserStats.user flipped from :alert to :delete -- an orphaned stats
+  # row (derived data) is meaningless without its user, so the job now
+  # cleans it up.
+  def test_delete_action_removes_dangling_user_stats
+    stats = user_stats(:rolf)
+    stats.update_column(:user_id, DANGLING_ID)
+
+    CheckForBrokenReferencesJob.perform_now
+
+    assert_not(UserStats.exists?(stats.id),
+               "user_stats whose user_id is dangling should be deleted")
+  end
+
   def test_alert_action_only_reports_does_not_modify
     coll_num = collection_numbers(:minimal_unknown_coll_num)
     coll_num.update_column(:user_id, DANGLING_ID)
@@ -100,7 +113,8 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
   end
 
   # A dangling :alert reference produces exactly one summary alert for the
-  # whole run, naming the offending table.column.
+  # whole run, naming the offending model, the referenced model, the
+  # foreign key, and the dangling id in a readable sentence.
   def test_emits_one_review_alert_for_dangling_alert_reference
     coll_num = collection_numbers(:minimal_unknown_coll_num)
     coll_num.update_column(:user_id, DANGLING_ID)
@@ -109,7 +123,10 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
 
     assert_equal(1, alerts.size, "expected exactly one summary alert per run")
     assert_instance_of(JobAlert, alerts.first)
-    assert_includes(alerts.first.message, "collection_numbers.user_id")
+    message = alerts.first.message
+    assert_includes(message, "CollectionNumber rows point to a User")
+    assert_includes(message, "via user_id")
+    assert_includes(message, "missing User #{DANGLING_ID}")
   end
 
   # emit_review_summary is the "at most one alert per run" choke point:

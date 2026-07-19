@@ -860,6 +860,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [:sequences,                      :user_id],
     [:species_lists,                  :user_id],
     [:user_group_users,               :user_id],
+    # Deleted here because erase_user removes the user row via delete_all,
+    # which bypasses `User has_one :user_stats, dependent: :destroy`.
+    [:user_stats,                     :user_id],
     [:users,                          :id]
   ].freeze
 
