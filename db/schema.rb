@@ -936,7 +936,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_15_120001) do
   create_table "translation_strings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "language_id", null: false
-    t.string "tag", limit: 100, collation: "utf8mb3_bin"
+    t.string "tag", limit: 100
     t.text "text"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
