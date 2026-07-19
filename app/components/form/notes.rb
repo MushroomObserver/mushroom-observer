@@ -180,7 +180,7 @@ class Components::Form::Notes < Components::Base
   # beside it. The full raw value rides in data-notes-value so a click
   # copies it verbatim into the textarea.
   def render_value_button(action, label, value, active:)
-    div(class: "d-flex align-items-baseline mb-1") do
+    div(class: "d-flex align-items-center mb-1") do
       button(type: "button", class: button_class(active),
              data: { notes_action: action, notes_value: value,
                      action: "notes-adopt#choose" }) { label }
