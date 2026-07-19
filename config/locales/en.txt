@@ -3208,8 +3208,6 @@
   edit_translations_no_versions: No old versions.
   edit_translations_singular: singular form
   edit_translations_plural: plural form
-  edit_translations_lowercase: all lowercase as for end of sentence
-  edit_translations_uppercase: all uppercase as for title
   edit_translations_page_expired: The page you were working on has expired. Please go back and reload it, then click on "[:app_edit_translations_on_page]" again.
   edit_translations_help: On the left is a list of translation strings, arranged thematically according to how they appear in the main translation file. If you click on one of the underlined labels, it will allow you to edit the corresponding string in the panel on the right. Click "[:save.ti]" to save your changes.
 

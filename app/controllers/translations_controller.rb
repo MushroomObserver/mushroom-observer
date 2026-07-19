@@ -212,7 +212,7 @@ class TranslationsController < ApplicationController
   def tags_to_edit(ttag, strings)
     tag_list = []
     if ttag.present?
-      [ttag, "#{ttag}s", ttag.upcase, "#{ttag}s".upcase].each do |tt|
+      [ttag, "#{ttag}s"].each do |tt|
         tag_list << tt if strings.key?(tt)
       end
       tag_list = [ttag] if tag_list.empty?
@@ -241,16 +241,7 @@ class TranslationsController < ApplicationController
   def primary_tag(tag3, strings)
     tag2 = "#{tag3}s"
     tag1 = tag3.sub(/s$/i, "")
-    [
-      tag1.downcase,
-      tag2.downcase,
-      tag3.downcase,
-      tag1.upcase,
-      tag2.upcase,
-      tag3.upcase,
-      tag1,
-      tag2
-    ].each do |ttag|
+    [tag1, tag2].each do |ttag|
       return ttag if strings[ttag]
     end
     tag3

@@ -372,7 +372,6 @@ class LanguageExporterTest < UnitTestCase
     hash = languages(:greek).localization_strings
     assert_equal("ένα", hash["one"])
     assert_equal("δύο", hash["two"])
-    assert_equal("Two", hash["TWO"])
   end
 
   def test_import_official
@@ -390,8 +389,6 @@ class LanguageExporterTest < UnitTestCase
       hash["unknown_locations"] = "bubkes"
       final_hash = hash.dup
       final_hash.delete("twos")
-      final_hash.delete("TWO")
-      final_hash.delete("TWOS")
 
       @official.write_hash(final_hash)
       assert_true(@official.import_from_file(dick),
@@ -479,8 +476,6 @@ class LanguageExporterTest < UnitTestCase
                                           "  one: one\n",
                                           "  two: two\n",
                                           "  twos: twos\n",
-                                          "  TWO: Two\n",
-                                          "  TWOS: Twos\n",
                                           "  three: three\n",
                                           "  four: four\n"
                                         ])
@@ -496,7 +491,6 @@ class LanguageExporterTest < UnitTestCase
       data = [
         "  one: one\n", # take this because it is a change from original ένα
         "  twos:  twos\n",   # ignore this because unchanged from template
-        "  TWOS: Twos\n",    # ignore this because not a change from English
         "  three:  τρία\n",  # take this change even though still indented
         "  four: τέσσερα\n"  # this is correct, it had better take this!
       ]

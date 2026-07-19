@@ -22,11 +22,11 @@ class I18n::Backend::DbFallbackTest < UnitTestCase
     assert_equal("ένα", @backend.send(:lookup, :el, "mo.one", [], {}))
   end
 
-  # Greek has no "TWO" of its own -- only English (official) does. Matches
-  # the fallback merge LanguageExporter has always baked into every
-  # locale's regenerated files.
+  # Greek has no override for "three" -- only English (official) does.
+  # Matches the fallback merge LanguageExporter has always baked into
+  # every locale's regenerated files.
   def test_lookup_falls_back_to_official_when_locale_lacks_override
-    assert_equal("Two", @backend.send(:lookup, :el, "mo.TWO", [], {}))
+    assert_equal("three", @backend.send(:lookup, :el, "mo.three", [], {}))
   end
 
   def test_lookup_returns_nil_for_unknown_tag

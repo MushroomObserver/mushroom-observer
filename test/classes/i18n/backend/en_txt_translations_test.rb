@@ -22,7 +22,7 @@ class EnTxtTranslationsTest < UnitTestCase
   # hand_fixtured_english_tags) -- other tests mutate these rows (e.g.
   # LanguageTest#test_update_localization), so comparing them against
   # en.txt's live text would be comparing against the wrong thing entirely.
-  HAND_FIXTURED_TAGS = %w[one two TWO twos TWOS three four all].freeze
+  HAND_FIXTURED_TAGS = %w[one two twos three four all].freeze
 
   def test_every_en_txt_tag_resolves_through_the_real_chain
     en_txt_path = Rails.root.join("config/locales/en.txt")
@@ -40,7 +40,7 @@ class EnTxtTranslationsTest < UnitTestCase
     end
 
     assert_operator(
-      tags_checked, :>, 4000,
+      tags_checked, :>, 3000,
       "Sanity check: en.txt should have thousands of tags -- a " \
       "suspiciously low count means the YAML parse or the exclusion " \
       "list silently swallowed most of them"

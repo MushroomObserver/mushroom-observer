@@ -89,10 +89,7 @@ class TranslationsControllerTest < FunctionalTestCase
     assert(strings.length >= 8)
     assert_equal("one", @controller.primary_tag("one", strings))
     assert_equal("two", @controller.primary_tag("two", strings))
-    assert_equal("two", @controller.primary_tag("Two", strings))
-    assert_equal("two", @controller.primary_tag("TWOS", strings))
-    assert_equal("two", @controller.primary_tag("tWoS", strings))
-    assert_equal("four", @controller.primary_tag("FoUr", strings))
+    assert_equal("two", @controller.primary_tag("twos", strings))
   end
 
   def test_build_index
@@ -243,8 +240,6 @@ class TranslationsControllerTest < FunctionalTestCase
     edit_tags = assigns(:edit_tags)
     assert_includes(edit_tags, "two")
     assert_includes(edit_tags, "twos")
-    assert_includes(edit_tags, "TWO")
-    assert_includes(edit_tags, "TWOS")
   end
 
   # ----------------------------
@@ -348,8 +343,6 @@ class TranslationsControllerTest < FunctionalTestCase
     result = @controller.send(:tags_to_edit, "two", strings)
     assert_includes(result, "two")
     assert_includes(result, "twos")
-    assert_includes(result, "TWO")
-    assert_includes(result, "TWOS")
   end
 
   def test_tags_to_edit_with_no_match

@@ -4,9 +4,9 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 # Synopsis:
-# 0 admin: English: one, two/twos/TWO/TWOS, three, four, unknown_locations
-# 1 rolf:  French:  twos, TWOS
-# 2 mary:  French:  one, two, TWO   (and a past version of Greek one)
+# 0 admin: English: one, two/twos, three, four, unknown_locations
+# 1 rolf:  French:  twos
+# 2 mary:  French:  one, two   (and a past version of Greek one)
 # 4 dick:  Greek:   one, two
 # (English "one" has changed since Mary translated it.)
 
@@ -26,27 +26,11 @@ english_two:
   updated_at: 2012-05-24
   user_id: 0
 
-english_TWO:
-  version: 1
-  language: english
-  tag: TWO
-  text: Two
-  updated_at: 2012-05-24
-  user_id: 0
-
 english_twos:
   version: 1
   language: english
   tag: twos
   text: twos
-  updated_at: 2012-05-24
-  user_id: 0
-
-english_TWOS:
-  version: 1
-  language: english
-  tag: TWOS
-  text: Twos
   updated_at: 2012-05-24
   user_id: 0
 
@@ -82,27 +66,11 @@ french_two:
   updated_at: 2012-05-24
   user: mary
 
-french_TWO:
-  version: 1
-  language: french
-  tag: TWO
-  text: Deux
-  updated_at: 2012-05-24
-  user: mary
-
 french_twos:
   version: 1
   language: french
   tag: twos
   text: deux
-  updated_at: 2012-05-30
-  user: rolf
-
-french_TWOS:
-  version: 1
-  language: french
-  tag: TWOS
-  text: Deux
   updated_at: 2012-05-30
   user: rolf
 
@@ -168,7 +136,7 @@ french_app_contributors:
 # stale, never-updated duplicate that some readers (find_each,
 # find_by) could return instead of the row the test just changed.
 <%
-  hand_fixtured_english_tags = %w[one two TWO twos TWOS three four all]
+  hand_fixtured_english_tags = %w[one two twos three four all]
   en_txt_path = Rails.root.join("config/locales/en.txt")
   YAML.safe_load(File.read(en_txt_path), permitted_classes: [Symbol]).
     each do |tag, text|
