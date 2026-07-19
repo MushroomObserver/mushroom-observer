@@ -112,14 +112,13 @@ class Components::Form::Notes < Components::Base
   # dropdown in the field's `prepend` slot. The dropdown picks what this
   # observation shows for the key -- its own current value, an inherited
   # value, nothing (hide), or a specific sibling's value -- and drives
-  # the textarea. An :inherit row starts disabled (submits nothing, so
-  # the value stays inherited via the display-time merge); :set / :hide
-  # start enabled so their value (or deliberate blank) submits.
-  # :inherit -> disabled (submits nothing, stays inherited). :hide ->
-  # readonly not disabled: a readonly field still submits its (blank)
-  # value, so the merge suppresses the inherited one, but the user can't
-  # type into it (which would silently turn Hide into a stored value) --
-  # to change it they use the dropdown. Both render greyed.
+  # the textarea.
+  #
+  # :inherit -> disabled (submits nothing, so the value stays inherited).
+  # :hide -> readonly, not disabled: a readonly field still submits its
+  # (blank) value, so the merge suppresses the inherited one, but can't
+  # be typed into (which would silently turn Hide into a stored value) --
+  # to change it you use the dropdown. Both render greyed.
   def render_occurrence_part(notes_ns, part)
     inherit = part.notes_state == :inherit
     hide = part.notes_state == :hide
