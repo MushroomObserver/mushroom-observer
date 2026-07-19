@@ -27,18 +27,18 @@ class Components::Form::UploadGallery < Components::Base
   prop :exif_data, _Hash(::Integer, ::Hash), default: -> { {} }
 
   def view_template
-    render(Components::Carousel.new(
-             carousel_id: @carousel_id,
-             wrapper_class: "image-form-carousel",
-             inner_id: "added_images",
-             indicators_id: "added_thumbnails",
-             indicators_class_extra: indicators_d_none,
-             controls_wrap_class: "carousel-control-wrap row",
-             extra_data: {
-               form_images_target: "carousel",
-               form_exif_target: "carousel"
-             }
-           )) do |c|
+    Carousel(
+      carousel_id: @carousel_id,
+      wrapper_class: "image-form-carousel",
+      inner_id: "added_images",
+      indicators_id: "added_thumbnails",
+      indicators_class_extra: indicators_d_none,
+      controls_wrap_class: "carousel-control-wrap row",
+      extra_data: {
+        form_images_target: "carousel",
+        form_exif_target: "carousel"
+      }
+    ) do |c|
       register_slides(c)
       register_thumbnails(c)
     end

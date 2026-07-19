@@ -28,9 +28,9 @@
 #   field = Components::ApplicationForm::FieldProxy.new(
 #             nil, :project_name, @title
 #           )
-#   render(Components::IndexFilter.new(
-#            to: field_slips_path, submit_text: :FILTER.l
-#          )) do
+#   IndexFilter(
+#     to: field_slips_path, submit_text: :FILTER.l
+#   ) do
 #     render(Components::ApplicationForm::AutocompleterField.new(
 #              field, type: :project, hidden_name: :project,
 #              inline: true, size: 60,

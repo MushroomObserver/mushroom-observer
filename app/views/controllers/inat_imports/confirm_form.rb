@@ -32,7 +32,7 @@ module Views::Controllers::InatImports
     private
 
     def render_expected
-      render(Components::Panel.new) do |panel|
+      Panel do |panel|
         panel.with_body do
           render_timestamp_note
           if @requested

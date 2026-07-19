@@ -135,9 +135,9 @@ class Components::Form::Search < Components::ApplicationForm
     collapse_target = collapsible ? panel_collapse_target(heading) : nil
     expanded = collapsible ? panel_open?(sections:) : false
 
-    render(Components::Panel.new(
-             collapsible:, collapse_target:, expanded:
-           )) do |panel|
+    Panel(
+      collapsible:, collapse_target:, expanded:
+    ) do |panel|
       panel.with_heading { :"search_term_group_#{heading}".l }
       panel.with_body do
         render_shown_fields(sections:)

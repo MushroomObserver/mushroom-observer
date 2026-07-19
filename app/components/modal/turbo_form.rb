@@ -86,19 +86,19 @@ class Components::Modal::TurboForm < Components::Base
   end
 
   def view_template
-    render(Components::Modal.new(
-             id: modal_id,
-             title: @title,
-             dialog_class: "modal-dialog modal-lg",
-             user: @user,
-             extra_class: "modal-form",
-             extra_data: turbo_modal_data,
-             # Preserve the pre-refactor DOM-id convention. External
-             # CSS/JS and turbo-stream re-renders may target these by
-             # name (`modal_<identifier>_header`, `_body`).
-             title_id: "#{modal_id}_header",
-             body_id: "#{modal_id}_body"
-           )) do |m|
+    Modal(
+      id: modal_id,
+      title: @title,
+      dialog_class: "modal-dialog modal-lg",
+      user: @user,
+      extra_class: "modal-form",
+      extra_data: turbo_modal_data,
+      # Preserve the pre-refactor DOM-id convention. External
+      # CSS/JS and turbo-stream re-renders may target these by
+      # name (`modal_<identifier>_header`, `_body`).
+      title_id: "#{modal_id}_header",
+      body_id: "#{modal_id}_body"
+    ) do |m|
       if form_owns_modal_sections?
         m.with_form_content { render_form_component }
       else

@@ -40,7 +40,7 @@ module Views::Controllers::Info
     end
 
     def render_stats_table
-      render(Components::Table.new(show_headers: false)) do |t|
+      Table(show_headers: false) do |t|
         t.body do
           ::SiteData::SITE_WIDE_FIELDS.each do |field|
             label = :"site_stats_#{field}".l

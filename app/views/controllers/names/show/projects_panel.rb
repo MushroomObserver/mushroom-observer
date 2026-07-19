@@ -9,7 +9,7 @@ class Views::Controllers::Names::Show::ProjectsPanel < Views::Base
   prop :projects, _Array(::Project)
 
   def view_template
-    render(Components::Panel.new(panel_id: "name_projects")) do |panel|
+    Panel(panel_id: "name_projects") do |panel|
       panel.with_heading { plain(:show_name_create_draft.t) }
       panel.with_body { render_project_links }
     end
