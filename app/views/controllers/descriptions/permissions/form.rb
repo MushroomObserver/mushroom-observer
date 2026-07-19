@@ -29,17 +29,17 @@ module Views::Controllers::Descriptions::Permissions
     end
 
     def view_template
-      submit(:SUBMIT.l, center: true)
+      submit(:submit.ti, center: true)
       render_permissions_table
-      submit(:SUBMIT.l, center: true)
+      submit(:submit.ti, center: true)
     end
 
     private
 
     def render_permissions_table
-      render(Components::Table.new(
-               class: "w-100 table-description-permissions"
-             )) do |t|
+      Table(
+        class: "w-100 table-description-permissions"
+      ) do |t|
         t.column(:adjust_permissions_user_header.l, style: "mr-4")
         t.column(:adjust_permissions_reader_header.l, width: "50")
         t.column(:adjust_permissions_writer_header.l, width: "50")
@@ -87,7 +87,7 @@ module Views::Controllers::Descriptions::Permissions
       when "all users"
         plain(:adjust_permissions_all_users.l)
       when "reviewers"
-        plain(:REVIEWERS.l)
+        plain(:reviewers.ti)
       else
         plain(group.name)
       end

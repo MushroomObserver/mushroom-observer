@@ -12,8 +12,8 @@ module Views::Controllers::Admin::BlockedIps
       prop :api_keys_by_str, ::Hash, default: -> { {} }
 
       def view_template
-        render(::Components::Panel.new(panel_class: "my-3",
-                                       panel_id: "ip_summary")) do |panel|
+        Panel(panel_class: "my-3",
+              panel_id: "ip_summary") do |panel|
           panel.with_heading { plain("Most active users: (top 50)") }
           panel.with_body(wrapper: false) { render_table }
         end
@@ -26,9 +26,9 @@ module Views::Controllers::Admin::BlockedIps
       end
 
       def render_table
-        render(::Components::Table.new(
-                 sorted_ips, class: "ips ips-lined align-middle"
-               )) { |t| render_table_columns(t) }
+        Table(
+          sorted_ips, class: "ips ips-lined align-middle"
+        ) { |t| render_table_columns(t) }
       end
 
       def render_table_columns(table)

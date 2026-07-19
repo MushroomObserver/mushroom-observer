@@ -34,7 +34,7 @@ module Views::Controllers::Descriptions::Merges
       assert_includes(html, :merge_descriptions_delete_after.t)
 
       # Submit button
-      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
+      assert_html(html, "button[type='submit']", text: :submit.ti)
 
       # Permission labels: peltigera_alt_desc is public, not default
       assert_includes(html, "(#{:public.l})")

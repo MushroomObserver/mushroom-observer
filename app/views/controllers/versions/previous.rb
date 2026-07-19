@@ -19,10 +19,10 @@ module Views::Controllers::Versions
     prop :args, _Hash(Symbol, _Any?), default: -> { {} }
 
     def view_template
-      render(Components::Panel.new(
-               panel_id: "#{@obj.type_tag}_versions"
-             )) do |panel|
-        panel.with_heading { :VERSIONS.l }
+      Panel(
+        panel_id: "#{@obj.type_tag}_versions"
+      ) do |panel|
+        panel.with_heading { :versions.ti }
         panel.with_body { render_table }
       end
     end
@@ -30,11 +30,11 @@ module Views::Controllers::Versions
     private
 
     def render_table
-      render(::Components::Table.new(
-               @versions.reverse,
-               variant: :hover, identifier: "versions",
-               show_headers: false, class: "mb-0"
-             )) do |t|
+      Table(
+        @versions.reverse,
+        variant: :hover, identifier: "versions",
+        show_headers: false, class: "mb-0"
+      ) do |t|
         t.column("") { |ver| render_date_cell(ver) }
         t.column("") { |ver| render_user_cell(ver) }
         t.column("") { |ver| render_link_cell(ver) }
@@ -71,7 +71,7 @@ module Views::Controllers::Versions
     end
 
     def emit_version_link_text(ver)
-      label = "#{:VERSION.l} #{ver.version}"
+      label = "#{:version.ti} #{ver.version}"
       if @args[:bold]&.call(ver)
         strong { plain(label) }
       else

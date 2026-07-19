@@ -11,7 +11,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_page_title(:HERBARIUM_RECORDS.l)
+    assert_page_title(:herbarium_records.ti)
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", HerbariumRecord.count,
                   "Wrong number of Herbarium Records")
@@ -25,7 +25,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:index, params: { q: { model: :HerbariumRecord, pattern: pattern } })
 
     assert_response(:success)
-    assert_page_title(:HERBARIUM_RECORDS.l)
+    assert_page_title(:herbarium_records.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     # In results, expect 1 row per herbarium_record
     assert_select("#results tr", 2)
@@ -37,7 +37,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { herbarium: herbarium.id })
 
-    assert_page_title(:HERBARIUM_RECORDS.l)
+    assert_page_title(:herbarium_records.ti)
     assert_displayed_filters("#{:query_herbaria.l}: #{herbarium.name}")
 
     # In results, expect 1 row per herbarium_record
@@ -51,7 +51,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { herbarium: herbarium.id })
 
-    assert_page_title(:HERBARIUM_RECORDS.l)
+    assert_page_title(:herbarium_records.ti)
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
   end
 
@@ -61,7 +61,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     login
     get(:index, params: { observation: obs.id })
 
-    assert_page_title(:HERBARIUM_RECORDS.l)
+    assert_page_title(:herbarium_records.ti)
     assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
     #  "Fungarium Records attached to '#{obs.unique_text_name}'")
     assert_select("#results tr", obs.herbarium_records.size)
@@ -73,7 +73,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs = observations(:strobilurus_diminutivus_obs)
     get(:index, params: { observation: obs.id })
 
-    assert_page_title(:HERBARIUM_RECORDS.l)
+    assert_page_title(:herbarium_records.ti)
     assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
   end
 

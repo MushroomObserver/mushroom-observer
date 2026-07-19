@@ -24,7 +24,7 @@ module Views::Controllers::Names::Classification::Inherit
       text_field(:parent, label: :inherit_classification_parent_name,
                           data: { autofocus: true }, inline: true)
 
-      submit(:SUBMIT.l, center: true)
+      submit(:submit.ti, center: true)
     end
 
     private

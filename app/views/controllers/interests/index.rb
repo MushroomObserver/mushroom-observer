@@ -34,7 +34,7 @@ module Views::Controllers::Interests
         )
         render_filter_pill(nil, :rss_all.l, interests_path)
         @types.each do |type|
-          label = type.underscore.pluralize.upcase.to_sym.l
+          label = type.underscore.pluralize.to_sym.ti
           render_filter_pill(type, label, interests_path(type: type))
         end
       end
@@ -55,8 +55,8 @@ module Views::Controllers::Interests
 
     def render_interests_table
       rows = @interests.select(&:target)
-      render(::Components::Table.new(rows, class: "table-striped",
-                                           show_headers: false)) do |t|
+      Table(rows, class: "table-striped",
+                  show_headers: false) do |t|
         t.column("summary") do |item|
           capture { strong { trusted_html(item.summary.t) } }
         end
@@ -76,7 +76,7 @@ module Views::Controllers::Interests
     end
 
     def render_destroy_link(item)
-      link_to(:DESTROY.l,
+      link_to(:destroy.ti,
               set_interest_path(type: item.target_type,
                                 id: item.target_id, state: 0))
     end

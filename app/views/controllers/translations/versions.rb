@@ -56,10 +56,10 @@ module Views::Controllers::Translations
     end
 
     def render_versions_table(versions)
-      render(Components::Table.new(versions,
-                                   variant: :striped,
-                                   class: "old_versions",
-                                   show_headers: false)) do |t|
+      Table(versions,
+            variant: :striped,
+            class: "old_versions",
+            show_headers: false) do |t|
         t.column(nil) { |v| render_user_cell(v.user_id) }
         t.column(nil) { |v| plain(v.updated_at.web_date) }
         t.column(nil) { |v| p { plain(v.text) } }

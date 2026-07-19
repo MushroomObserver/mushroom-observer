@@ -16,9 +16,9 @@ module Views::Controllers::VisualGroups
         render_errors if model.errors.any?
         render_name_field
         textarea_field(:description, cols: 60, rows: 10,
-                                     label: :DESCRIPTION)
-        checkbox_field(:approved, label: :APPROVED)
-        submit(:SUBMIT.t, center: true)
+                                     label: :description.ti)
+        checkbox_field(:approved, label: :approved.ti)
+        submit(:submit.ti, center: true)
       end
     end
 
@@ -41,7 +41,7 @@ module Views::Controllers::VisualGroups
       div(class: "form-group") do
         div(class: "form-inline") do
           text_field(:name, size: 40, class: "form-control", label: false)
-          span(class: "ml-3") { :VISUAL_GROUP.t }
+          span(class: "ml-3") { :visual_group.ti }
         end
       end
     end

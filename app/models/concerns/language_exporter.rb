@@ -491,7 +491,7 @@ module LanguageExporter
       value.sub!(/^\[\[/, "") ||
       value.sub!(/^\]\]/, "") ||
       value.sub!(/^\[\w+\]/, "") ||
-      value.sub!(/^\[:\w+(?:\(([^\[\]]+)\))?\]/, "") &&
+      value.sub!(/^\[:\w+(?:\.ti)?(?:\(([^\[\]]+)\))?\]/, "") &&
         (!Regexp.last_match(1) ||
         validate_square_brackets_args(Regexp.last_match(1)))
   end

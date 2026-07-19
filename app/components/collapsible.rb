@@ -7,32 +7,32 @@
 # Change the `expanded:` branch here when upgrading.
 #
 # @example Basic (initially closed)
-#   render(Components::Collapsible.new(id: "my_section")) do
+#   Collapsible(id: "my_section") do
 #     plain("Hidden content")
 #   end
 #
 # @example Initially open
-#   render(Components::Collapsible.new(id: "geo", expanded: true)) do
+#   Collapsible(id: "geo", expanded: true) do
 #     render_fields
 #   end
 #
 # @example Inside a Panel (adds panel-collapse class)
-#   render(Components::Collapsible.new(id: "obs_body", expanded: @expanded,
-#                                      panel: true, class: "no-transition")) do
+#   Collapsible(id: "obs_body", expanded: @expanded,
+#               panel: true, class: "no-transition") do
 #     render_body
 #   end
 #
 # @example With extra Stimulus data attrs
-#   render(Components::Collapsible.new(
-#            id: "obs_geo",
-#            expanded: @observation.lat.present?,
-#            data: { form_exif_target: "collapseFields" }
-#          )) do
+#   Collapsible(
+#     id: "obs_geo",
+#     expanded: @observation.lat.present?,
+#     data: { form_exif_target: "collapseFields" }
+#   ) do
 #     render_fields
 #   end
 #
 # @example A collapsible `<tbody>` instead of a `<div>`
-#   render(Components::Collapsible.new(id: "target_subs_1", element: :tbody)) do
+#   Collapsible(id: "target_subs_1", element: :tbody) do
 #     render_sub_rows
 #   end
 #

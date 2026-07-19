@@ -8,7 +8,7 @@ module Views::Controllers::Sequences
 
     def view_template
       div(class: "mt-3") do
-        strong { "#{:OBSERVATION.l}:" }
+        strong { "#{:observation.ti}:" }
         whitespace
         trusted_html(@observation.name.display_name(current_user).t)
         plain(" (#{@observation.id})")

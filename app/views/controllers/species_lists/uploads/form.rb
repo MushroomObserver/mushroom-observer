@@ -14,7 +14,7 @@ module Views::Controllers::SpeciesLists::Uploads
       super do
         file_field(:file, label: :species_list_upload_label)
         Help(content: :species_list_upload_help.tp)
-        submit(:UPLOAD.l, center: true)
+        submit(:upload.ti, center: true)
       end
     end
 

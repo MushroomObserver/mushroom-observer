@@ -20,16 +20,22 @@ module Views::Controllers::Projects::Aliases
       @project_aliases = project_aliases
     end
 
+    # Must stay `render(::Components::Table.new(...))`, not bare
+    # `Table(...)` Kit syntax -- this view class is itself named
+    # `Table`, so Kit's constant lookup would recurse into itself
+    # instead of resolving Components::Table (see commit 33fdc952e5,
+    # which reverted this exact call from Kit syntax back to
+    # render(...) after hitting the bug).
     def view_template
       render(::Components::Table.new(
                @project_aliases,
                variant: :striped, identifier: "project-members",
                class: "mt-3", id: TABLE_ID
              )) do |t|
-        t.column(:NAME.t) { |a| plain(a.name) }
-        t.column(:TARGET_TYPE.t) { |a| plain(a.target_type) }
-        t.column(:TARGET.t) { |a| render_target_cell(a) }
-        t.column(:ACTIONS.t) { |a| render_actions_cell(a) }
+        t.column(:name.ti) { |a| plain(a.name) }
+        t.column(:target_type.ti) { |a| plain(a.target_type) }
+        t.column(:target.ti) { |a| render_target_cell(a) }
+        t.column(:actions.ti) { |a| render_actions_cell(a) }
       end
     end
 

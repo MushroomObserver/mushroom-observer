@@ -276,7 +276,7 @@ class DescriptionTest < UnitTestCase
     assert_equal("Mary's Take by Mary Newbie", desc.partial_text_name)
   end
 
-  # `description_part_title_user: "[USER]'s [:DESCRIPTION]"` (no
+  # `description_part_title_user: "[USER]'s [:description]"` (no
   # text variant).
   def test_partial_text_name_user_source_without_text
     desc = name_descriptions(:peltigera_user_desc)
@@ -295,7 +295,7 @@ class DescriptionTest < UnitTestCase
                  desc.partial_text_name)
   end
 
-  # `description_part_title_source_with_text: "[:DESCRIPTION] From [TEXT]"`.
+  # `description_part_title_source_with_text: "[:description] From [TEXT]"`.
   def test_partial_text_name_source_source_with_text
     desc = name_descriptions(:peltigera_source_desc)
     assert_equal("source", desc.source_type)
@@ -305,7 +305,7 @@ class DescriptionTest < UnitTestCase
                  desc.partial_text_name)
   end
 
-  # `description_full_title_public: Public [:DESCRIPTION] of [object]`
+  # `description_full_title_public: Public [:description] of [object]`
   # — the no-text public format, used in `text_name`.
   def test_text_name_public_source_no_text
     desc = name_descriptions(:suillus_desc)

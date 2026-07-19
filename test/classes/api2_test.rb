@@ -300,7 +300,7 @@ class API2Test < UnitTestCase
     assert_parse(:external_site, site, site.name)
     assert_parse(:external_site, API2::BadParameterValue, "")
     assert_parse(:external_site, API2::ObjectNotFoundByString, "name")
-    assert_parse(:external_site, API2::ObjectNotFoundById, "12345")
+    assert_parse(:external_site, API2::ObjectNotFoundByID, "12345")
   end
 
   def test_parse_image
@@ -313,7 +313,7 @@ class API2Test < UnitTestCase
     assert_parse_r(:image, aor(img2, img1), "#{img2.id}-#{img1.id}")
     assert_parse(:image, API2::BadParameterValue, "")
     assert_parse(:image, API2::BadParameterValue, "name")
-    assert_parse(:image, API2::ObjectNotFoundById, "12345")
+    assert_parse(:image, API2::ObjectNotFoundByID, "12345")
   end
 
   def test_parse_license
@@ -326,7 +326,7 @@ class API2Test < UnitTestCase
     assert_parse_r(:license, aor(lic2, lic1), "#{lic2.id}-#{lic1.id}")
     assert_parse(:license, API2::BadParameterValue, "")
     assert_parse(:license, API2::BadParameterValue, "name")
-    assert_parse(:license, API2::ObjectNotFoundById, "12345")
+    assert_parse(:license, API2::ObjectNotFoundByID, "12345")
   end
 
   def test_parse_location
@@ -340,7 +340,7 @@ class API2Test < UnitTestCase
                    "#{gualala.id}-#{burbank.id}")
     assert_parse(:location, API2::BadParameterValue, "")
     assert_parse(:location, API2::ObjectNotFoundByString, "name")
-    assert_parse(:location, API2::ObjectNotFoundById, "12345")
+    assert_parse(:location, API2::ObjectNotFoundByID, "12345")
     assert_parse(:location, burbank, burbank.name)
     assert_parse(:location, burbank, burbank.scientific_name)
   end
@@ -353,7 +353,7 @@ class API2Test < UnitTestCase
     assert_parse(:place_name, gualala.name, gualala.name)
     assert_parse(:place_name, API2::BadParameterValue, "")
     assert_parse(:place_name, "name", "name")
-    assert_parse(:place_name, API2::ObjectNotFoundById, "12345")
+    assert_parse(:place_name, API2::ObjectNotFoundByID, "12345")
     assert_parse(:place_name, burbank.name, burbank.name)
     assert_parse(:place_name, burbank.name, burbank.scientific_name)
   end
@@ -365,7 +365,7 @@ class API2Test < UnitTestCase
     assert_parse(:name, a_campestris, nil, default: a_campestris)
     assert_parse(:name, a_campestris, a_campestris.id)
     assert_parse(:name, API2::BadParameterValue, "")
-    assert_parse(:name, API2::ObjectNotFoundById, "12345")
+    assert_parse(:name, API2::ObjectNotFoundByID, "12345")
     assert_parse(:name, API2::ObjectNotFoundByString, "Bogus name")
     assert_parse(:name, API2::NameDoesntParse, "yellow mushroom")
     assert_parse(:name, API2::AmbiguousName, "Amanita baccata")
@@ -389,7 +389,7 @@ class API2Test < UnitTestCase
                    "#{unknown_lat_lon_obs.id}-#{a_campestrus_obs.id}")
     assert_parse(:observation, API2::BadParameterValue, "")
     assert_parse(:observation, API2::BadParameterValue, "name")
-    assert_parse(:observation, API2::ObjectNotFoundById, "12345")
+    assert_parse(:observation, API2::ObjectNotFoundByID, "12345")
   end
 
   def test_parse_project
@@ -404,7 +404,7 @@ class API2Test < UnitTestCase
                    "#{bolete_proj.id}-#{eol_proj.id}")
     assert_parse(:project, API2::BadParameterValue, "")
     assert_parse(:project, API2::ObjectNotFoundByString, "name")
-    assert_parse(:project, API2::ObjectNotFoundById, "12345")
+    assert_parse(:project, API2::ObjectNotFoundByID, "12345")
     assert_parse(:project, eol_proj, eol_proj.title)
   end
 
@@ -420,7 +420,7 @@ class API2Test < UnitTestCase
                    "#{another_list.id}-#{first_list.id}")
     assert_parse(:species_list, API2::BadParameterValue, "")
     assert_parse(:species_list, API2::ObjectNotFoundByString, "name")
-    assert_parse(:species_list, API2::ObjectNotFoundById, "12345")
+    assert_parse(:species_list, API2::ObjectNotFoundByID, "12345")
     assert_parse(:species_list, first_list, first_list.title)
   end
 
@@ -432,7 +432,7 @@ class API2Test < UnitTestCase
     assert_parse_r(:user, aor(mary, rolf), "#{mary.id}-#{rolf.id}")
     assert_parse(:user, API2::BadParameterValue, "")
     assert_parse(:user, API2::ObjectNotFoundByString, "name")
-    assert_parse(:user, API2::ObjectNotFoundById, "12345")
+    assert_parse(:user, API2::ObjectNotFoundByID, "12345")
     assert_parse(:user, rolf, rolf.login)
     assert_parse(:user, rolf, rolf.name)
     assert_parse(:user, rolf, rolf.email)
@@ -457,7 +457,7 @@ class API2Test < UnitTestCase
                  limit: limit)
     assert_parse(:object, API2::BadLimitedParameterValue,
                  "license #{licenses(:ccnc25).id}", limit: limit)
-    assert_parse(:object, API2::ObjectNotFoundById, "name 12345",
+    assert_parse(:object, API2::ObjectNotFoundByID, "name 12345",
                  limit: limit)
     assert_parse_a(:object, [obs, nam],
                    "observation #{obs.id}, name #{nam.id}", limit: limit)

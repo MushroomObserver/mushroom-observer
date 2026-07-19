@@ -11,14 +11,14 @@ module Tab::InatImport
     def test_cancel
       tab = Tab::InatImport::Cancel.new
 
-      assert_equal(:cancel_and_create.t(type: :OBSERVATION), tab.title)
+      assert_equal(:cancel_and_create.t(type: :observation), tab.title)
       assert_equal(routes.new_observation_path, tab.path)
     end
 
     def test_index
       tab = Tab::InatImport::Index.new
 
-      assert_equal(:INAT_IMPORTS.t, tab.title)
+      assert_equal(:inat_imports.ti, tab.title)
       assert_equal(routes.inat_imports_path, tab.path)
     end
 

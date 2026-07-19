@@ -23,7 +23,7 @@ module Views::Controllers::Articles
 
     def render_byline
       ContentPadded do
-        plain(:BY.t)
+        plain(:by.ti)
         whitespace
         Link(type: :user, user: @article.user)
         plain(", ")
@@ -32,8 +32,8 @@ module Views::Controllers::Articles
     end
 
     def render_body_panel
-      render(::Components::Panel.new(panel_class: "mt-3",
-                                     panel_id: "article_body")) do |panel|
+      Panel(panel_class: "mt-3",
+            panel_id: "article_body") do |panel|
         panel.with_body { trusted_html(@article.body.tpl) }
       end
     end

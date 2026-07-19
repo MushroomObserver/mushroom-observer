@@ -26,7 +26,7 @@ module Views::Controllers::Admin::Emails::WebmasterQuestions
       br
       render_email_field
       render_message_field
-      submit(:SEND.l, center: true)
+      submit(:send.ti, center: true)
     end
 
     private

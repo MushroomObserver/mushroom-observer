@@ -43,7 +43,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_date_field
-    @form.date_field(:when, label: :WHEN, wrap_class: "mb-3")
+    @form.date_field(:when, label: :when.ti, wrap_class: "mb-3")
   end
 
   # User autocompleter: selecting a suggestion fills the visible field
@@ -55,7 +55,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
     render(@form.field(:collector).autocompleter(
              type: :user,
              wrapper_options: {
-               label: :COLLECTOR,
+               label: :collector.ti,
                wrap_class: "mb-3",
                help: :form_observations_collector_help.t,
                help_collapse: true
@@ -99,7 +99,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   # Label with multiple span variants for different autocompleter states
   def location_label
     capture do
-      span(class: "unconstrained-label") { "#{:WHERE.l}:" }
+      span(class: "unconstrained-label") { "#{:where.ti}:" }
       whitespace
       span(class: "constrained-label") do
         "#{:form_observations_locality_contains.l}:"
@@ -154,7 +154,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              form: @form,
              field: :has_geolocation,
              target_id: "observation_geolocation",
-             label: :GEOLOCATION,
+             label: :geolocation.ti,
              expanded: @observation.lat.present?,
              attributes: {
                help: :form_observations_lat_long_help.t,
@@ -178,9 +178,9 @@ class Views::Controllers::Observations::Form::Details < Views::Base
 
   def render_lat_lng_alt_row
     Row(class: "no-gutters", id: "observation_lat_lng_alt") do
-      render_coordinate_field(:lat, :LAT, :LATITUDE, "º")
-      render_coordinate_field(:lng, :LNG, :LONGITUDE, "º")
-      render_coordinate_field(:alt, :ALT, :ALTITUDE, "m")
+      render_coordinate_field(:lat, :lat, :latitude, "º")
+      render_coordinate_field(:lng, :lng, :longitude, "º")
+      render_coordinate_field(:alt, :alt, :altitude, "m")
     end
   end
 
@@ -203,8 +203,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   # Label with responsive show/hide variants
   def coordinate_label(abbr_key, full_key)
     capture do
-      span(class: "d-none d-sm-inline") { "#{full_key.l}:" }
-      span(class: "d-inline d-sm-none") { "#{abbr_key.l}:" }
+      span(class: "d-none d-sm-inline") { "#{full_key.ti}:" }
+      span(class: "d-inline d-sm-none") { "#{abbr_key.ti}:" }
     end
   end
 

@@ -15,7 +15,7 @@ module Views::Controllers::GlossaryTerms
       render_name_field
       render_description_field
       render_upload_fields if @upload_params
-      submit(:SAVE.t, center: true)
+      submit(:save.ti, center: true)
     end
 
     private

@@ -49,7 +49,7 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_herbarium_field
-      trusted_html(:HERBARIUM.t)
+      trusted_html(:herbarium.ti)
       plain(": ")
       a(href: url_for(herbarium.show_link_args)) do
         trusted_html(herbarium.name.t)
@@ -87,7 +87,7 @@ module Views::Controllers::HerbariumRecords
     def render_notes
       return if @herbarium_record.notes.blank?
 
-      trusted_html("#{:NOTES.l}:\n\n#{@herbarium_record.notes}".tpl)
+      trusted_html("#{:notes.ti}:\n\n#{@herbarium_record.notes}".tpl)
     end
 
     def render_observation_matrix

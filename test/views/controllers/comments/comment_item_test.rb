@@ -77,7 +77,29 @@ module Views::Controllers::Comments
       html = render_item(show_name: true)
 
       assert_html(html, "h4 a[href*='#{@comment.target.id}']")
-      assert_includes(html, @comment.target.class.name.to_sym.t)
+      assert_includes(
+        html, @comment.target.class.name.underscore.to_sym.ti
+      )
+    end
+
+    def test_show_name_target_type_label_underscores_multiword_class
+      # `target_type` must underscore a multi-word PascalCase class
+      # name ("NameDescription") before resolving it as a tag, not
+      # just downcase the first letter -- a bare `class.name.to_sym.t`
+      # (no `.underscore`) is always a missing-tag miss now that
+      # translation tags are lowercase-only (#4843). A single-word
+      # target ("Observation") wouldn't catch a regression back to the
+      # bare form, since downcasing alone happens to produce the
+      # right lowercase tag for one-word class names.
+      desc_comment = ::Comment.create!(
+        target: name_descriptions(:agaricus_campestras_desc),
+        user: @user, summary: "desc comment"
+      )
+
+      html = render_item(comment: desc_comment, show_name: true)
+
+      assert_includes(html, "NameDescription".underscore.to_sym.ti)
+      assert_includes(html, :name_description.ti)
     end
 
     def test_show_name_false_omits_target_heading

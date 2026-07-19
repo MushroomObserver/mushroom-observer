@@ -14,10 +14,10 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Panel.new(
-             panel_class: "name-section",
-             panel_id: "nomenclature"
-           )) do |panel|
+    Panel(
+      panel_class: "name-section",
+      panel_id: "nomenclature"
+    ) do |panel|
       panel.with_heading { plain(:show_name_nomenclature.l) }
       panel.with_heading_links { render_edit_link } if @user
       panel.with_body { render_body }
@@ -52,15 +52,15 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def render_rank_line
     p do
       rank_text = @name.rank ? rank_as_string(@name.rank) : :unknown.l
-      plain("#{:RANK.l}: #{rank_text}")
+      plain("#{:rank.ti}: #{rank_text}")
     end
   end
 
   def render_status_line
     p do
-      plain("#{:STATUS.l}: ")
+      plain("#{:status.ti}: ")
       plain(@name.status)
-      plain(" (#{:MISSPELLED.l})") if @name.is_misspelling?
+      plain(" (#{:misspelled.ti})") if @name.is_misspelling?
       if approve_link || deprecate_link
         span(class: "text-nowrap ml-3") do
           render_synonym_links_inline
@@ -88,7 +88,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_name_paragraph
     p do
-      plain("#{:NAME.l}: ")
+      plain("#{:name.ti}: ")
       plain(@name.real_text_name(@user))
       span(class: "text-nowrap ml-3") { render(synonyms_link) } if synonyms_link
     end
@@ -96,14 +96,14 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_authority_paragraph
     p do
-      plain("#{:AUTHORITY.l}: ")
+      plain("#{:authority.ti}: ")
       trusted_html(@name.author.to_s.t)
     end
   end
 
   def render_citation_paragraph
     p do
-      plain("#{:CITATION.l}: ")
+      plain("#{:citation.ti}: ")
       trusted_html(@name.citation.to_s.tl)
     end
   end
@@ -174,7 +174,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_registrable_links
     p do
-      plain("#{:ICN_ID.l}: ")
+      plain("#{:icn_id.ti}: ")
       em { plain(:show_name_icn_id_missing.l) }
     end
     p { render_tab_link(Tab::Name::IndexFungorumSearchPage.new) }

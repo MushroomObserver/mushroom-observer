@@ -12,14 +12,14 @@ module Views::Controllers::Names::Lifeforms::Propagate
       # Form structure and action
       assert_html(html, "form#name_lifeform_propagate_form")
       assert_html(html, "form[action*='/names/#{name.id}/lifeforms/propagate']")
-      assert_html(html, "button[type='submit']", text: :APPLY.l)
+      assert_html(html, "button[type='submit']", text: :apply.ti)
 
       # Add section
-      assert_includes(html, :ADD.l)
+      assert_includes(html, :add.ti)
       assert_includes(html, :propagate_lifeform_add.l)
 
       # Remove section
-      assert_includes(html, :REMOVE.l)
+      assert_includes(html, :remove.ti)
       assert_includes(html, :propagate_lifeform_remove.l)
 
       # Tables for add and remove

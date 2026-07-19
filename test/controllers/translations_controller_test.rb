@@ -172,7 +172,7 @@ class TranslationsControllerTest < FunctionalTestCase
     get(:index)
     assert_no_flash
     assert_response(:success, locale: "en")
-    assert_select("button[type=submit]", text: :SAVE.l, count: 0)
+    assert_select("button[type=submit]", text: :save.ti, count: 0)
   end
 
   def test_page_expired

@@ -14,9 +14,9 @@ module Views::Layouts
       html = render_for(Query.lookup_and_save(:Observation))
 
       # No params (after stripping :order_by) → both truncated and
-      # full collapses render `:ALL.l` directly, no <b>/<span> tree.
-      assert_html(html, "#caption-truncated .small", text: :ALL.l)
-      assert_html(html, "#caption-full .small", text: :ALL.l)
+      # full collapses render `:all.ti` directly, no <b>/<span> tree.
+      assert_html(html, "#caption-truncated .small", text: :all.ti)
+      assert_html(html, "#caption-full .small", text: :all.ti)
     end
 
     def test_pattern_param_renders_label_and_value
@@ -46,7 +46,7 @@ module Views::Layouts
       # `type_tags_to_label` joins localized labels with ", ".
       assert_html(
         html, "#caption-truncated .small b",
-        text: "#{:OBSERVATIONS.l}, #{:SPECIES_LISTS.l}"
+        text: "#{:observations.ti}, #{:species_lists.ti}"
       )
     end
 

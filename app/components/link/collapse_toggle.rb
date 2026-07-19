@@ -33,7 +33,7 @@
 #   render(Components::Link::CollapseToggle.new(
 #     target_id: "new_form_container",
 #     fallback_href: new_thing_path,
-#     closed_text: :CREATE.l
+#     closed_text: :create.ti
 #   ))
 #
 # @example block form (block wins over kwargs)

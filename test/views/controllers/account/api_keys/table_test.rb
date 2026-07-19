@@ -33,7 +33,7 @@ module Views::Controllers::Account::APIKeys
 
       assert_html(html,
                   "button#activate_api_key_#{key.id}",
-                  text: :ACTIVATE.l)
+                  text: :activate.ti)
     end
 
     def test_renders_verified_indicator_for_verified_key
@@ -64,14 +64,14 @@ module Views::Controllers::Account::APIKeys
       assert_html(html, "a[data-role='edit_api_key'] span.glyphicon")
       assert_html(html,
                   "a[data-role='edit_api_key'] span.collapse-toggle-closed",
-                  text: " #{:EDIT.l.as_displayed}")
+                  text: " #{:edit.ti.as_displayed}")
       # Edit pane (inline-edit Form with Save button).
       assert_html(html,
                   "#edit_api_key_#{key.id}_form " \
                   "input##{"api_key_#{key.id}_notes"}")
       assert_html(html,
                   "#edit_api_key_#{key.id}_form " \
-                  "button[type='submit']", text: :SAVE.l)
+                  "button[type='submit']", text: :save.ti)
     end
 
     def test_renders_remove_button_per_row
@@ -102,7 +102,7 @@ module Views::Controllers::Account::APIKeys
       assert_html(html, "#new_key_form_container #new_api_key_form")
       assert_html(html,
                   "#new_api_key_form " \
-                  "button[type='submit']", text: :CREATE.l)
+                  "button[type='submit']", text: :create.ti)
     end
 
     def test_renders_empty_table_when_user_has_no_keys

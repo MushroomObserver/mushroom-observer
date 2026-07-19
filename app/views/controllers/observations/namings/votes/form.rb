@@ -83,7 +83,7 @@ module Views::Controllers::Observations::Namings::Votes
     def form_localizations
       {
         lose_changes: :show_namings_lose_changes.l.tr("\n", " "),
-        saving: :SAVING.l
+        saving: :saving.ti
       }.to_json
     end
 

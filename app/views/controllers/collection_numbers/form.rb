@@ -50,7 +50,7 @@ module Views::Controllers::CollectionNumbers
     end
 
     def submit_text
-      model.persisted? ? :SAVE.l : :ADD.l
+      model.persisted? ? :save.ti : :add.ti
     end
 
     def form_action

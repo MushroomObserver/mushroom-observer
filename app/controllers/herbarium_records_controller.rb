@@ -502,7 +502,7 @@ class HerbariumRecordsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :add_object.t(type: :HERBARIUM_RECORD)
+      :add_object.t(type: :herbarium_record)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
                          object: @herbarium_record, mode: :edit,

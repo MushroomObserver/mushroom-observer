@@ -11,7 +11,7 @@ module Views::Controllers::Projects::Aliases
 
     def view_template
       add_project_banner(@project)
-      add_page_title(:PROJECT_ALIASES.l)
+      add_page_title(:project_aliases.ti)
       container_class(:wide)
 
       render(Views::Controllers::Projects::AdminSubtabs.new(

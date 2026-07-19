@@ -65,7 +65,7 @@ module Views::Controllers::InatImports
       )
       html = render_status
 
-      assert_includes(html, :ERRORS.t)
+      assert_includes(html, :errors.ti)
     end
 
     def test_results_button_absent_when_not_done

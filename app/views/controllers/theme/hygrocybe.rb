@@ -17,7 +17,7 @@ module Views::Controllers::Theme
       add_context_nav(::Tab::Theme::ShowActions.new)
 
       SPECIES.each { |row| render(SpeciesParagraph.new(row: row)) }
-      trusted_html(:theme_switch.tp(theme: :Hygrocybe.l))
+      trusted_html(:theme_switch.tp(theme: :hygrocybe.l))
     end
   end
 end

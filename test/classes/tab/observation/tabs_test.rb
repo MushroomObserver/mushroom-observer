@@ -137,7 +137,7 @@ module Tab::Observation
     def test_index
       tab = Tab::Observation::Index.new
 
-      assert_equal(:cancel_to_index.t(type: :OBSERVATION), tab.title)
+      assert_equal(:cancel_to_index.t(type: :observation), tab.title)
       assert_equal(routes.observations_path, tab.path)
     end
 

@@ -19,7 +19,7 @@ class Components::Carousel::Controls < Components::Base
   def render_control(direction)
     position = direction == :prev ? "left" : "right"
     icon_type = direction == :prev ? :chevron_left : :chevron_right
-    label = direction == :prev ? :PREV : :NEXT
+    label = direction == :prev ? :prev : :next
 
     link_to("##{@carousel_id}",
             class: "#{position} carousel-control",

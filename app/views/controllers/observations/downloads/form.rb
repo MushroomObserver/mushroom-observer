@@ -50,9 +50,9 @@ module Views::Controllers::Observations::Downloads
     end
 
     def render_submit_buttons
-      submit(:DOWNLOAD.l)
+      submit(:download.ti)
       whitespace
-      submit(:CANCEL.l)
+      submit(:cancel.ti)
     end
 
     def render_print_labels_section

@@ -20,7 +20,7 @@ module Views::Controllers::FieldSlips
 
       assert_html(html, "div#field_slip_#{fs.id}")
       # PROJECT label always renders
-      assert_html(html, "strong", text: "#{:PROJECT.t}:")
+      assert_html(html, "strong", text: "#{:project.ti}:")
       # No-project fallback text appears when project is nil
       assert_html(html, "div#field_slip_#{fs.id}",
                   text: :field_slip_no_project.t.as_displayed)

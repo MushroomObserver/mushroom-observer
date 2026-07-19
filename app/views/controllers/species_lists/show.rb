@@ -78,10 +78,10 @@ module Views::Controllers::SpeciesLists
       return unless @species_list
 
       div(id: "project_species_list_buttons") do
-        project_button(:MAP.l, add_q_param(map_observations_path, @query))
-        project_button(:OBSERVATIONS.l,
+        project_button(:map.ti, add_q_param(map_observations_path, @query))
+        project_button(:observations.ti,
                        add_q_param(observations_path, @query))
-        project_button(:NAMES.l,
+        project_button(:names.ti,
                        checklist_path(species_list_id: @species_list.id))
         render_locations_button
         render_images_button
@@ -91,13 +91,13 @@ module Views::Controllers::SpeciesLists
     def render_locations_button
       return unless related_to_locations?
 
-      project_button(:LOCATIONS.l, related_query_path(Location))
+      project_button(:locations.ti, related_query_path(Location))
     end
 
     def render_images_button
       return unless related_to_locations?
 
-      project_button(:IMAGES.l, related_query_path(::Image))
+      project_button(:images.ti, related_query_path(::Image))
     end
 
     def related_query_path(model)

@@ -49,13 +49,13 @@ class SearchFormTest < ComponentTestCase
   def test_renders_submit_button
     html = render_form
 
-    assert_html(html, "button[type='submit']", text: :SEARCH.l)
+    assert_html(html, "button[type='submit']", text: :search.ti)
   end
 
   def test_renders_clear_button
     html = render_form
 
-    assert_html(html, "a.clear-button", text: :CLEAR.l)
+    assert_html(html, "a.clear-button", text: :clear.ti)
   end
 
   # When local (on a search page), clear button should NOT use turbo_stream
@@ -82,7 +82,7 @@ class SearchFormTest < ComponentTestCase
 
     assert_html(html, ".flex-bar")
     assert_html(html, "body",
-                text: :search_form_title.t(type: :OBSERVATIONS))
+                text: :search_form_title.t(type: :observations))
     assert_html(html,
                 "a[data-toggle='collapse']" \
                 "[href='#search_bar_elements']" \

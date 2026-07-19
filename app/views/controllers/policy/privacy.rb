@@ -56,7 +56,7 @@ module Views::Controllers::Policy
     private
 
     def render_definitions_table
-      render(Components::Table.new(DEFINITIONS, variant: :striped)) do |t|
+      Table(DEFINITIONS, variant: :striped) do |t|
         t.column(:privacy_when_we_say.l, width: "33%") do |row|
           trusted_html(row[0].t)
         end

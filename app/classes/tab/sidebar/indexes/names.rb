@@ -4,7 +4,7 @@
 # observations.
 class Tab::Sidebar::Indexes::Names < Tab::Base
   def title
-    :NAMES.t
+    :names.ti
   end
 
   def path

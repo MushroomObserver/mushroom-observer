@@ -214,12 +214,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_has_id_indicator
-      render(Components::Icon.new(
-               type: :check,
-               title: :autocompleter_has_id.l,
-               class: "px-2 text-success has-id-indicator",
-               data: { target_attr_key => "hasIdIndicator" }
-             ))
+      Icon(
+        type: :check,
+        title: :autocompleter_has_id.l,
+        class: "px-2 text-success has-id-indicator",
+        data: { target_attr_key => "hasIdIndicator" }
+      )
     end
 
     def render_find_button

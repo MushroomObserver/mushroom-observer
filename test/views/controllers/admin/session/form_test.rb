@@ -22,10 +22,10 @@ module Views::Controllers::Admin::Session
 
       # Label
       assert_html(html, "label[for='admin_session_user']",
-                  text: :LOGIN_NAME.l)
+                  text: :login_name.ti)
 
       # Submit button
-      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
+      assert_html(html, "button[type='submit']", text: :submit.ti)
     end
 
     def test_renders_with_prefilled_user

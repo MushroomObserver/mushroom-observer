@@ -51,7 +51,7 @@ module Views::Controllers::Descriptions::Moves
     end
 
     def render_submit
-      submit(:SUBMIT.l, center: true)
+      submit(:submit.ti, center: true)
     end
 
     def moves

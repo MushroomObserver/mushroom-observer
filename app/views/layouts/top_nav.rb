@@ -141,7 +141,7 @@ class Views::Layouts::TopNav < Views::Base
         aria: { expanded: "false", controls: "search_nav" }
       ) do
         img(src: asset_path("mo_icon_bg.svg"),
-            width: "30px", alt: :MENU.t, title: :MENU.t)
+            width: "30px", alt: :menu.ti, title: :menu.ti)
       end
     end
   end
@@ -157,7 +157,7 @@ class Views::Layouts::TopNav < Views::Base
         variant: :outline, size: :sm,
         class: "top_nav_button",
         aria: { expanded: "false", controls: "search_nav" }
-      ) { Icon(type: :search, title: :SEARCH.l) }
+      ) { Icon(type: :search, title: :search.ti) }
     end
   end
 
@@ -184,7 +184,7 @@ class Views::Layouts::TopNav < Views::Base
       { controller: "/#{ctrlr.controller_path}", action: :index },
       class: "#{ctrlr.controller_name}_index_link",
       data: { toggle: "tooltip", placement: :bottom,
-              title: :INDEX_OBJECT.t(type: ctrlr.controller_name.to_sym) }
+              title: :index_object.ti(type: ctrlr.controller_name.to_sym) }
     )
   end
 
@@ -233,7 +233,7 @@ class Views::Layouts::TopNav < Views::Base
     { type: :new,
       target: url_for(controller: "/#{controller.controller_path}",
                       action: :new),
-      name: :ADD.l, label: true,
+      name: :add.ti, label: true,
       variant: :success, size: :sm,
       class: "ml-1 mr-0 mx-sm-3 top_nav_button",
       title: full_label,
@@ -242,8 +242,8 @@ class Views::Layouts::TopNav < Views::Base
   end
 
   def nav_create_label
-    obj_name = controller.controller_model_name.underscore.upcase.to_sym.l
-    [:NEW.l, obj_name].safe_join(" ")
+    obj_name = controller.controller_model_name.underscore.to_sym.ti
+    [:new.ti, obj_name].safe_join(" ")
   end
 
   # QR-scanner link, only for the Observations / FieldSlips

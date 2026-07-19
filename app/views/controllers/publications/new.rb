@@ -6,7 +6,7 @@ module Views::Controllers::Publications
     prop :publication, ::Publication
 
     def view_template
-      add_new_title(:create_object, :PUBLICATION)
+      add_new_title(:create_object, :publication)
       add_context_nav(::Tab::Publication::FormNew.new)
 
       render(Form.new(@publication))

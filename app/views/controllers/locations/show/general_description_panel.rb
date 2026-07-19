@@ -12,9 +12,7 @@ module Views::Controllers::Locations
       def view_template
         return unless @description&.notes?
 
-        render(::Components::Panel.new(
-                 panel_id: "location_general_description"
-               )) do |panel|
+        Panel(panel_id: "location_general_description") do |panel|
           panel.with_heading { :show_name_general_description.l }
           links = heading_links_text
           if current_user && links

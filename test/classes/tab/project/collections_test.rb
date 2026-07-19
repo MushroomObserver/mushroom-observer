@@ -126,7 +126,7 @@ module Tab::Project
       bolete = projects(:bolete_project)
       tab = Tab::Project::AdminFieldSlips.new(project: bolete)
 
-      assert_equal("#{bolete.field_slips.count} #{:FIELD_SLIPS.l}", tab.title)
+      assert_equal("#{bolete.field_slips.count} #{:field_slips.ti}", tab.title)
       assert_equal(routes.field_slips_path(project: bolete.id), tab.path)
       assert_equal("field_slips", tab.alt_title)
       assert_equal("field_slips", tab.nav_key)

@@ -13,8 +13,8 @@ module Views::Controllers::Admin::BlockedIps
       prop :api_keys_by_str, ::Hash, default: -> { {} }
 
       def view_template
-        render(::Components::Panel.new(panel_class: "my-3",
-                                       panel_id: "ip_stats")) do |panel|
+        Panel(panel_class: "my-3",
+              panel_id: "ip_stats") do |panel|
           panel.with_heading { plain("Stats for #{@ip}:") }
           panel.with_heading_links { render_close_link }
           panel.with_body { render_body }
@@ -96,10 +96,10 @@ module Views::Controllers::Admin::BlockedIps
       end
 
       def render_activity_table
-        render(::Components::Table.new(
-                 ip_stats[:activity].last(50).reverse,
-                 class: "ips ips-lined"
-               )) { |t| render_activity_columns(t) }
+        Table(
+          ip_stats[:activity].last(50).reverse,
+          class: "ips ips-lined"
+        ) { |t| render_activity_columns(t) }
       end
 
       def render_activity_columns(table)

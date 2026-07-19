@@ -10,7 +10,7 @@ class Tab::Name::Approve < Tab::Base
   end
 
   def title
-    :APPROVE.l
+    :approve.ti
   end
 
   def path

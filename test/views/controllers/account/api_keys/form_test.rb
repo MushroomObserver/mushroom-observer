@@ -31,7 +31,7 @@ module Views::Controllers::Account::APIKeys
       assert_html(html, "#api_key_notes")
       assert_html(html, "a[data-toggle='collapse']")
       assert_html(html, "a span.glyphicon")
-      assert_html(html, "a span.sr-only", text: :CANCEL.l.as_displayed)
+      assert_html(html, "a span.sr-only", text: :cancel.ti.as_displayed)
     end
 
     def test_cancel_button_has_correct_data_attributes
@@ -74,10 +74,10 @@ module Views::Controllers::Account::APIKeys
       html = render_edit_form(key)
 
       assert_html(html, "table")
-      assert_includes(html, :CREATED.l)
+      assert_includes(html, :created.ti)
       assert_includes(html, :account_api_keys_last_used_column_label.l)
       assert_includes(html, :account_api_keys_num_uses_column_label.l)
-      assert_includes(html, :API_KEY.l)
+      assert_includes(html, :api_key.ti)
       # The API key's raw key value is shown so the user can copy it.
       assert_includes(html, key.key)
     end
@@ -87,13 +87,13 @@ module Views::Controllers::Account::APIKeys
       html = render_edit_form(key)
 
       # Update is a real submit button on the form.
-      assert_html(html, "button[type='submit']", text: :UPDATE.l)
+      assert_html(html, "button[type='submit']", text: :update.ti)
       # Cancel is a navigation link back to the index — NOT a submit.
       # (Pre-Phlex was a submit, which paradoxically meant clicking
       # Cancel ran an update via the controller's update action.)
-      assert_html(html, "a[href='/account/api_keys']", text: :CANCEL.l)
+      assert_html(html, "a[href='/account/api_keys']", text: :cancel.ti)
       assert_no_html(html,
-                     "button[type='submit']", text: :CANCEL.l)
+                     "button[type='submit']", text: :cancel.ti)
     end
 
     def test_edit_layout_renders_notes_input_under_api_key_scope
@@ -134,9 +134,9 @@ module Views::Controllers::Account::APIKeys
                   "[data-parent='#notes_#{key.id}']")
       # Save submit (not Update — that's the standalone-edit layout).
       assert_html(html,
-                  "button[type='submit']", text: :SAVE.l)
+                  "button[type='submit']", text: :save.ti)
       assert_no_html(html,
-                     "button[type='submit']", text: :UPDATE.l)
+                     "button[type='submit']", text: :update.ti)
     end
 
     def test_inline_edit_notes_input_has_per_key_id_to_avoid_collisions

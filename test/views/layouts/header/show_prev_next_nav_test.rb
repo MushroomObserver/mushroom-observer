@@ -127,6 +127,22 @@ module Views::Layouts
                   attribute: { href: expected_href })
     end
 
+    def test_prev_next_link_content_is_title_cased_object_type
+      # `adjacent_title` builds `:"#{dir}_object"` from `dir` (:prev /
+      # :next) -- a stray `.upcase` here (building `:"#{dir.upcase}_
+      # OBJECT"` instead) is always a missing-tag miss now that
+      # translation tags are lowercase-only (#4843).
+      @query.current_id = @middle_obs.id
+
+      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
+                      object: @middle_obs,
+                      query: @query
+                    ))
+
+      assert_includes(html, :prev_object.t(type: "Observation"))
+      assert_includes(html, :next_object.t(type: "Observation"))
+    end
+
     def test_index_link_uses_grid_icon_for_observations
       @query.current_id = @middle_obs.id
 

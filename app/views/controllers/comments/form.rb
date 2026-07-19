@@ -36,7 +36,7 @@ module Views::Controllers::Comments
     end
 
     def submit_text
-      @model.persisted? ? :SAVE_EDITS.l : :CREATE.l
+      @model.persisted? ? :save_edits.ti : :create.ti
     end
   end
 end

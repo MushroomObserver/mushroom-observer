@@ -18,7 +18,7 @@ module Views::Controllers::Locations
     prop :dubious_where_reasons, _Nilable(_Array(::String)), default: nil
     def view_template
       container_class(:full)
-      add_new_title(:create_object, :LOCATION)
+      add_new_title(:create_object, :location)
       add_context_nav(::Tab::Location::FormNew.new(location: @location))
 
       render(Form.new(

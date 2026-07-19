@@ -73,7 +73,7 @@ module Views::Controllers::RssLogs
     # style); the Apply button uses the solid `.btn-default` so it
     # stands out as the commit action.
     def render_submit_button
-      Button(type: :submit, name: :APPLY.t, size: :sm)
+      Button(type: :submit, name: :apply.ti, size: :sm)
     end
 
     # Individual type checkbox styled as a Bootstrap button. Routes

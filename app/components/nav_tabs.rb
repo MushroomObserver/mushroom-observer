@@ -16,30 +16,30 @@
 # than the component itself).
 #
 # @example Plain
-#   render(Components::NavTabs.new(current: "members")) do |tabs|
+#   NavTabs(current: "members") do |tabs|
 #     tabs.tab("Details",        details_path,        key: "details")
 #     tabs.tab("#{n} Members",   members_path,        key: "members")
 #     tabs.tab("#{n} Aliases",   aliases_path,        key: "aliases")
 #   end
 #
 # @example With per-link extra class (matches `project_tabs` markup)
-#   render(Components::NavTabs.new(current: @current_tab,
-#                                  link_class: "mt-3")) do |tabs|
-#     tabs.tab(:SUMMARY.t, project_path(@project), key: "projects")
-#     tabs.tab("#{n} #{:OBS.l}", observations_path(...), key: "obs")
+#   NavTabs(current: @current_tab,
+#           link_class: "mt-3") do |tabs|
+#     tabs.tab(:summary.ti, project_path(@project), key: "projects")
+#     tabs.tab("#{n} #{:obs.l}", observations_path(...), key: "obs")
 #   end
 #
 # @example With a Tab::Collection (preferred for multi-tab strips)
-#   render(Components::NavTabs.new(
+#   NavTabs(
 #     current: @current_tab,
 #     link_class: "mt-3",
 #     tabs: Tab::Project::Banner.new(project: @project, user: @user)
-#   ))
+#   )
 #
 # @example With wrapper chrome at the call site
 #   Column(xs: 12, id: "project_tabs") do
-#     render(Components::NavTabs.new(current: @current_tab,
-#                                    link_class: "mt-3")) do |tabs|
+#     NavTabs(current: @current_tab,
+#             link_class: "mt-3") do |tabs|
 #       # ...
 #     end
 #   end

@@ -438,7 +438,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # button shows "Updating" while in-flight; anything else shows
     # "Submitting".
     def default_submits_with(value)
-      value == :UPDATE.l ? :UPDATING.l : :SUBMITTING.l
+      value == :update.ti ? :updating.ti : :submitting.ti
     end
 
     def submit_merged_options(options, **opts)

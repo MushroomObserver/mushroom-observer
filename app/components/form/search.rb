@@ -97,7 +97,7 @@ class Components::Form::Search < Components::ApplicationForm
   def render_header
     div(class: "flex-bar w-100") do
       div(class: "font-weight-bold h5 text-larger") do
-        plain(:search_form_title.t(type: search_type.to_s.upcase.to_sym))
+        plain(:search_form_title.t(type: search_type.to_s.downcase.to_sym))
       end
       render_search_bar_toggle
     end
@@ -135,9 +135,9 @@ class Components::Form::Search < Components::ApplicationForm
     collapse_target = collapsible ? panel_collapse_target(heading) : nil
     expanded = collapsible ? panel_open?(sections:) : false
 
-    render(Components::Panel.new(
-             collapsible:, collapse_target:, expanded:
-           )) do |panel|
+    Panel(
+      collapsible:, collapse_target:, expanded:
+    ) do |panel|
       panel.with_heading { :"search_term_group_#{heading}".l }
       panel.with_body do
         render_shown_fields(sections:)
@@ -449,7 +449,7 @@ class Components::Form::Search < Components::ApplicationForm
 
   def render_form_buttons
     div(class: "text-center") do
-      submit(:SEARCH.l, class: "d-inline-block mx-3")
+      submit(:search.ti, class: "d-inline-block mx-3")
       render_clear_button
     end
   end
@@ -458,7 +458,7 @@ class Components::Form::Search < Components::ApplicationForm
     data_attrs = @local ? {} : turbo_stream_data
     Button(
       type: :get,
-      name: :CLEAR.l,
+      name: :clear.ti,
       target: clear_url,
       class: "d-inline-block mx-3 clear-button",
       data: data_attrs

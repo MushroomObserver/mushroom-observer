@@ -2,7 +2,7 @@
 
 # Action view for the species_list edit page. Sets page chrome
 # (title, context-nav, container width) and delegates body to the
-# shared `Form` Phlex class with `button: :UPDATE`.
+# shared `Form` Phlex class with `button: :update`.
 module Views::Controllers::SpeciesLists
   class Edit < Views::FullPageBase
     def initialize(species_list:, projects:, dubious_where_reasons:,
@@ -26,7 +26,7 @@ module Views::Controllers::SpeciesLists
                dubious_where_reasons: @dubious_where_reasons,
                submitted_project_ids: @submitted_project_ids,
                user: @user,
-               button: :UPDATE
+               button: :update
              ))
     end
   end

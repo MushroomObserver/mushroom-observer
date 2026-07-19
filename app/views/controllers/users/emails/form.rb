@@ -24,7 +24,7 @@ module Views::Controllers::Users::Emails
         br
         render_subject_field
         render_message_field
-        submit(:SEND.l, center: true)
+        submit(:send.ti, center: true)
       end
     end
 

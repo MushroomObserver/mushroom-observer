@@ -12,7 +12,7 @@ module Views::Controllers::Admin::Users
         Help(content: :change_user_bonuses_help.tp)
         textarea_field(:val, value: model.formatted_bonuses, rows: 5,
                              class: "mt-3")
-        submit(:SAVE_EDITS.l, center: true)
+        submit(:save_edits.ti, center: true)
       end
     end
 

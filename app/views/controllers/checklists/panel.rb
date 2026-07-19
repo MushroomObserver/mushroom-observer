@@ -21,8 +21,11 @@ module Views::Controllers::Checklists
 
     def view_template
       div(id: @panel_id) do
-        # `::Components::Panel` is the shared building-block panel
-        # component — distinct from this view-side `Panel`.
+        # Must stay `render(::Components::Panel.new(...))`, not bare
+        # `Panel(...)` Kit syntax -- this view class is itself named
+        # `Panel`, so Kit's constant lookup would recurse into itself
+        # instead of resolving `Components::Panel` (see commit
+        # 33fdc952e5 for the same bug with a view class named `Table`).
         render(::Components::Panel.new(panel_class: "checklist")) do |panel|
           panel.with_body do
             ul(class: "list-unstyled") do
@@ -84,7 +87,7 @@ module Views::Controllers::Checklists
 
       Button(
         type: :delete,
-        name: :REMOVE.l,
+        name: :remove.ti,
         target: project_target_name_path(
           project_id: @context.project.id, id: name_id
         ),

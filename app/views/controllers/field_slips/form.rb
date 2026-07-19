@@ -124,14 +124,14 @@ module Views::Controllers::FieldSlips
       # — pass through to SelectField.
       select_field(:project_id, model.projects,
                    inline: true,
-                   label: :Project,
+                   label: :project.ti,
                    selected: model.project&.id)
     end
 
     def render_date_field
       today = Time.zone.today
       date_field(:date,
-                 label: :DATE,
+                 label: :date.ti,
                  inline: true,
                  start_year: today.year - 10,
                  end_year: today.year + 10)
@@ -140,13 +140,13 @@ module Views::Controllers::FieldSlips
     def render_collector_field
       autocompleter_field(:collector,
                           type: :user,
-                          label: :COLLECTOR)
+                          label: :collector.ti)
     end
 
     def render_location_field
       autocompleter_field(:location,
                           type: :location,
-                          label: :LOCATION,
+                          label: :location.ti,
                           value: model.location_name,
                           hidden_value: model.location_id)
     end
@@ -154,13 +154,13 @@ module Views::Controllers::FieldSlips
     def render_field_slip_name_field
       autocompleter_field(:field_slip_name,
                           type: :name,
-                          label: :ID)
+                          label: :id.ti)
     end
 
     def render_field_slip_id_by_field
       autocompleter_field(:field_slip_id_by,
                           type: :user,
-                          label: :ID_BY)
+                          label: :id_by.ti)
     end
 
     # --- Notes ---
@@ -198,7 +198,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_edit_action_submits
-      submit(:SAVE_EDITS.t, class: "my-3")
+      submit(:save_edits.ti, class: "my-3")
       submit(:field_slip_create_obs.t, class: "my-3")
     end
 
@@ -234,7 +234,7 @@ module Views::Controllers::FieldSlips
         current = current_observations
         primary_id = current_primary_id(current)
         if current.any?
-          strong { "#{:OBSERVATIONS.t}:" }
+          strong { "#{:observations.ti}:" }
           render_observation_matrix(current,
                                     checked_ids: current.map(&:id),
                                     primary_id: primary_id)

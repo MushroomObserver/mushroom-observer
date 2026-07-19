@@ -7,7 +7,7 @@ module Views::Controllers::Articles
     prop :article, ::Article
 
     def view_template
-      add_new_title(:create_object, :ARTICLE)
+      add_new_title(:create_object, :article)
       add_context_nav(::Tab::Article::FormNew.new)
       render(Form.new(@article))
     end

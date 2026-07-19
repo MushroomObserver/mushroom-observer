@@ -12,11 +12,11 @@ module Views::Controllers::VisualModels
 
     def test_renders_form_with_name_field
       assert_html(@html, "input[name='visual_model[name]']")
-      assert_html(@html, ".form-group.field", text: :VISUAL_MODEL.l)
+      assert_html(@html, ".form-group.field", text: :visual_model.ti)
     end
 
     def test_renders_submit_button
-      assert_html(@html, "button[type='submit']", text: :SUBMIT.t)
+      assert_html(@html, "button[type='submit']", text: :submit.ti)
       assert_html(@html, ".center-block")
     end
 

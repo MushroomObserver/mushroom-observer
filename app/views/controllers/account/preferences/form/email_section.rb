@@ -33,7 +33,7 @@ module Views::Controllers::Account::Preferences::Form::EmailSection
       render_email_group(label_key, fields)
     end
     Help(content: :prefs_email_note.tp, class: "mt-4")
-    submit(:SAVE_EDITS.l, center: true)
+    submit(:save_edits.ti, center: true)
   end
 
   def render_email_group(label_key, fields)

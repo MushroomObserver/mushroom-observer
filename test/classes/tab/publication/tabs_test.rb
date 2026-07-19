@@ -22,7 +22,7 @@ module Tab::Publication
     def test_new
       tab = Tab::Publication::New.new
 
-      assert_equal(:add_object.t(type: :PUBLICATION), tab.title)
+      assert_equal(:add_object.t(type: :publication), tab.title)
       assert_equal(routes.new_publication_path, tab.path)
     end
 

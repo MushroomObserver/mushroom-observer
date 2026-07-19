@@ -4,9 +4,9 @@
 # `content_for(:title)` by `Views::FullPageBase#add_show_title` /
 # `#add_edit_title` for show and edit pages.
 #
-# `mode: :show` emits `<flex><IdBadge/> <span>{title}</span></flex>`;
+# `mode: :show` emits `<flex><IDBadge/> <span>{title}</span></flex>`;
 # `mode: :edit` emits
-# `<flex><IdBadge/> <span>Edit {Type}: {title}</span></flex>`.
+# `<flex><IDBadge/> <span>Edit {Type}: {title}</span></flex>`.
 # The title piece itself is:
 # - Observation → `Views::Controllers::Observations::ConsensusNameLink`
 #   (wraps the consensus name in a link to the name page).
@@ -27,7 +27,7 @@ module Views::Layouts
 
     def view_template
       div(class: "d-flex align-items-center") do
-        IdBadge(object: @object, extra_class: "mr-4")
+        IDBadge(object: @object, extra_class: "mr-4")
         whitespace
         span { render_title_span }
       end

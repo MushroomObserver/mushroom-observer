@@ -24,7 +24,7 @@ module Names
       login
       get(:index)
 
-      assert_page_title(:NAME_DESCRIPTIONS.l)
+      assert_page_title(:name_descriptions.ti)
     end
 
     def test_index_by_author_of_one_description
@@ -55,7 +55,7 @@ module Names
       get(:index, params: { by_author: user })
 
       assert_select("body.descriptions__index")
-      assert_page_title(:NAME_DESCRIPTIONS.l)
+      assert_page_title(:name_descriptions.ti)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
                     { count: descs_authored_by_user_count },
@@ -116,7 +116,7 @@ module Names
       get(:index, params: { by_editor: user.id })
 
       assert_select("body.descriptions__index")
-      assert_page_title(:NAME_DESCRIPTIONS.l)
+      assert_page_title(:name_descriptions.ti)
       assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
                     { count: descs_edited_by_user_count },

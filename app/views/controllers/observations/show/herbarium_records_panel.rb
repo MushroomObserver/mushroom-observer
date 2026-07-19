@@ -41,7 +41,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
 
   def render_editable_list(records)
     div do
-      plain("#{:Herbarium_records.t}: ")
+      plain("#{:herbarium_records.ti}: ")
       render_new_link
     end
     ul(class: "tight-list") do
@@ -77,7 +77,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
   # Read-only list: `div` heading + tight-list with show-link + br +
   # MCP search link when web-searchable).
   def render_readonly_list(records)
-    div { plain("#{:Herbarium_record.t}:") }
+    div { plain("#{:herbarium_record.ti}:") }
     ul(class: "tight-list") do
       records.each { |record| render_readonly_row(record) }
     end
@@ -98,7 +98,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanel < Views::Bas
 
   def render_empty_with_new_link
     label = if @has_sibling_records
-              "#{:Herbarium_records.t}: "
+              "#{:herbarium_records.ti}: "
             else
               "#{:show_observation_no_herbarium_records.t} "
             end

@@ -27,9 +27,9 @@ class Components::ListGroup::Search < Components::ApplicationForm
   # Wrap the rendered `<form>` in the list-search panel so the panel
   # sits OUTSIDE the form tag — same shape the ERB partial used.
   def around_template(&block)
-    render(Components::Panel.new(
-             panel_id: "list_search", panel_class: "mt-3"
-           )) do |panel|
+    Panel(
+      panel_id: "list_search", panel_class: "mt-3"
+    ) do |panel|
       panel.with_body { super(&block) }
     end
   end
@@ -103,7 +103,7 @@ class Components::ListGroup::Search < Components::ApplicationForm
     # form-group wrapper — matched here with `wrap_class:` so the
     # margin sits on `.form-group.dropdown`, not on the `<input>`.
     autocompleter_field(
-      "name", type: :name, label: :SEARCH, wrap_class: "mb-2",
+      "name", type: :name, label: :search.ti, wrap_class: "mb-2",
               data: {
                 search_status_target: "input",
                 action: [

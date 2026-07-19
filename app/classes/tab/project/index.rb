@@ -4,7 +4,7 @@
 # action-nav contexts (project form pages, member form pages).
 class Tab::Project::Index < Tab::Base
   def title
-    :cancel_to_index.t(type: :PROJECT)
+    :cancel_to_index.t(type: :project)
   end
 
   def path

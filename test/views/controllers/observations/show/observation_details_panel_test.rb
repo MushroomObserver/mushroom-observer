@@ -77,10 +77,10 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     html = render(panel_with(@obs))
     text = who_text(html)
 
-    assert_includes(text, :COLLECTOR.l)
+    assert_includes(text, :collector.ti)
     assert_html(html,
                 "#observation_who a[href='#{routes.user_path(@obs.user_id)}']")
-    assert_not_includes(text, :ENTERED_BY.l)
+    assert_not_includes(text, :entered_by.ti)
   end
 
   def test_who_free_text_collector_shows_entered_by
@@ -90,7 +90,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     text = who_text(render(panel_with(@obs)))
 
     assert_includes(text, "Jane Forager")
-    assert_includes(text, :ENTERED_BY.l)
+    assert_includes(text, :entered_by.ti)
   end
 
   def test_who_collector_user_links_and_entered_by
@@ -104,7 +104,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     assert_html(
       html, "#observation_who a[href='#{routes.user_path(collector.id)}']"
     )
-    assert_includes(who_text(html), :ENTERED_BY.l)
+    assert_includes(who_text(html), :entered_by.ti)
   end
 
   def test_who_plain_text_when_logged_out
@@ -124,8 +124,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
 
     text = who_text(render(panel_with(obs)))
 
-    assert_not_includes(text, :COLLECTOR.l)
-    assert_includes(text, :ENTERED_BY.l)
+    assert_not_includes(text, :collector.ti)
+    assert_includes(text, :entered_by.ti)
     assert_includes(text, obs.user.unique_text_name)
   end
 

@@ -77,7 +77,7 @@ module Views::Layouts
     end
 
     def render_page_label
-      render(Components::Navbar::Text.new(class: "mx-0 hidden-xs")) { :PAGE.l }
+      render(Components::Navbar::Text.new(class: "mx-0 hidden-xs")) { :page.ti }
     end
 
     def render_max_page_link(max_page)
@@ -108,7 +108,7 @@ module Views::Layouts
       )
       url = pagination_link_url(page)
 
-      Link(type: :icon, content: direction.to_s.upcase.to_sym.t, path: url,
+      Link(type: :icon, content: direction.to_s.to_sym.ti, path: url,
            icon: direction, button: :link, size: :lg, class: classes)
     end
 
@@ -161,7 +161,7 @@ module Views::Layouts
           type: :submit,
           variant: :outline,
           class: "px-2"
-        ) { Icon(type: :goto, title: :GOTO.l) }
+        ) { Icon(type: :goto, title: :goto.ti) }
       end
     end
 

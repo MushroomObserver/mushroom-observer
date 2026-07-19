@@ -107,16 +107,16 @@ class Components::Matrix::Box < Components::Base
     return unless @data[:image]
 
     panel.with_thumbnail do
-      render(Components::Image::Interactive.new(
-               user: @user,
-               image: @data[:image],
-               image_link: @data[:image_link],
-               obs: @data[:obs] || {},
-               votes: @votes && @data.fetch(:votes, true),
-               full_width: @data.fetch(:full_width, true),
-               identify: @identify,
-               observation_view: @observation_view
-             ))
+      InteractiveImage(
+        user: @user,
+        image: @data[:image],
+        image_link: @data[:image_link],
+        obs: @data[:obs] || {},
+        votes: @votes && @data.fetch(:votes, true),
+        full_width: @data.fetch(:full_width, true),
+        identify: @identify,
+        observation_view: @observation_view
+      )
     end
   end
 
@@ -156,7 +156,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_id_badge(obj)
     whitespace
-    IdBadge(object: obj, extra_class: "rss-id")
+    IDBadge(object: obj, extra_class: "rss-id")
   end
 
   def render_occurrence_link

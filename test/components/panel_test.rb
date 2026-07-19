@@ -180,7 +180,7 @@ class PanelTest < ComponentTestCase
     html = render(component) do |panel|
       panel.with_heading { "Observation" }
       panel.with_thumbnail do
-        render(Components::Image::Interactive.new(
+        render(Components::InteractiveImage.new(
                  user: user,
                  image: image,
                  size: :thumbnail,
@@ -210,7 +210,7 @@ class PanelTest < ComponentTestCase
     html = render(component) do |panel|
       panel.with_heading { "Observation" }
       panel.with_thumbnail do
-        render(Components::Image::Interactive.new(
+        render(Components::InteractiveImage.new(
                  user: user,
                  image: image,
                  size: :thumbnail,

@@ -20,7 +20,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
         p { :email_merge_request_help.tp(type: @model_class.type_tag) }
         render_object_fields
         render_message_field
-        submit(:SEND.l, center: true)
+        submit(:send.ti, center: true)
       end
     end
 
@@ -42,12 +42,12 @@ module Views::Controllers::Admin::Emails::MergeRequests
     end
 
     def render_message_field
-      textarea_field(:message, label: :Notes, rows: 10,
+      textarea_field(:message, label: :notes.ti, rows: 10,
                                value: "", data: { autofocus: true })
     end
 
     def type_label
-      @model_class.type_tag.to_s.upcase.to_sym
+      @model_class.type_tag.to_sym.ti
     end
 
     def form_action

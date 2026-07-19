@@ -24,7 +24,7 @@ class Components::ImageGallery < Components::Base
   prop :user, _Nilable(::User)
   prop :object, _Nilable(::AbstractModel), default: nil
   prop :size, Components::Image::Base::Size, default: :large
-  prop :title, ::String, default: -> { :IMAGES.t }
+  prop :title, ::String, default: -> { :images.ti }
   prop :links, ::String, default: ""
   prop :thumbnails, _Boolean, default: true
   prop :carousel_id, _Nilable(::String), default: nil
@@ -61,12 +61,12 @@ class Components::ImageGallery < Components::Base
   end
 
   def render_carousel
-    render(Components::Carousel.new(
-             carousel_id: @carousel_id,
-             wrapper_class: "show-carousel",
-             show_controls: @images.compact.length > 1,
-             show_indicators: @thumbnails
-           )) do |c|
+    Carousel(
+      carousel_id: @carousel_id,
+      wrapper_class: "show-carousel",
+      show_controls: @images.compact.length > 1,
+      show_indicators: @thumbnails
+    ) do |c|
       register_slides(c)
       register_thumbnails(c) if @thumbnails
     end
