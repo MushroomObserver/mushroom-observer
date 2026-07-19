@@ -431,7 +431,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Info to include about each location in merge requests.
   def merge_info
     num_obs = observations.count
-    "#{:LOCATION.l} ##{id}: #{name} [o=#{num_obs}]"
+    "#{:location.ti} ##{id}: #{name} [o=#{num_obs}]"
   end
 
   # Strip out special characters, punctuation, and small words from a name.

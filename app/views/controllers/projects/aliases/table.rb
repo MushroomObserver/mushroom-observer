@@ -26,10 +26,10 @@ module Views::Controllers::Projects::Aliases
                variant: :striped, identifier: "project-members",
                class: "mt-3", id: TABLE_ID
              )) do |t|
-        t.column(:NAME.t) { |a| plain(a.name) }
-        t.column(:TARGET_TYPE.t) { |a| plain(a.target_type) }
-        t.column(:TARGET.t) { |a| render_target_cell(a) }
-        t.column(:ACTIONS.t) { |a| render_actions_cell(a) }
+        t.column(:name.ti) { |a| plain(a.name) }
+        t.column(:target_type.ti) { |a| plain(a.target_type) }
+        t.column(:target.ti) { |a| render_target_cell(a) }
+        t.column(:actions.ti) { |a| render_actions_cell(a) }
       end
     end
 

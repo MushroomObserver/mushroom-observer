@@ -59,9 +59,9 @@ module Views::Layouts
     def render_minimal
       ContentPadded(class: "small") do
         p do
-          plain("#{:CREATED_AT.l}: #{@obj.created_at.web_date}")
+          plain("#{:created_at.ti}: #{@obj.created_at.web_date}")
           br
-          plain("#{:UPDATED_AT.l}: #{@obj.updated_at.web_date}")
+          plain("#{:updated_at.ti}: #{@obj.updated_at.web_date}")
           br
         end
       end

@@ -16,7 +16,7 @@ module Views::Controllers::GlossaryTerms
          default: nil
 
     def view_template
-      add_new_title(:create_object, :GLOSSARY_TERM)
+      add_new_title(:create_object, :glossary_term)
       add_context_nav(::Tab::GlossaryTerm::FormNew.new)
 
       render(Form.new(

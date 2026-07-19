@@ -91,7 +91,7 @@ module Views::Controllers::SpeciesLists
       Button(
         type: :put,
         variant: :strip,
-        name: :REMOVE.t,
+        name: :remove.ti,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id,

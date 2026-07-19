@@ -87,7 +87,7 @@ module Views::Controllers::SpeciesLists
     end
 
     def test_renders_submit_buttons_top_and_bottom
-      html = render_form(species_list: SpeciesList.new, button: :CREATE)
+      html = render_form(species_list: SpeciesList.new, button: :create)
 
       # `submit(button.l, center: true)` is called twice — one above
       # the fields and one below. Locks in the count so a future
@@ -246,7 +246,7 @@ module Views::Controllers::SpeciesLists
     def render_form(species_list:, **)
       defaults = {
         projects: [], dubious_where_reasons: [],
-        user: @user, button: :CREATE, clone_id: nil
+        user: @user, button: :create, clone_id: nil
       }
       render(Form.new(species_list, **defaults, **))
     end

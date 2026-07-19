@@ -45,8 +45,8 @@
 # @example Row mode (Stimulus-rooted rows)
 #   render(Components::Table.new(@trackers,
 #                                tbody_id: "field_slip_job_trackers")) do |t|
-#     t.column(:FILENAME.t)
-#     t.column(:STATUS.t, class: "text-right")
+#     t.column(:filename.ti)
+#     t.column(:status.ti, class: "text-right")
 #     t.row { |tracker| render(TrackerRow.new(tracker: tracker, user: @user)) }
 #   end
 #
@@ -55,8 +55,8 @@
 #     class: "name-lister",
 #     attributes: { data: { controller: "name-list" } }
 #   )) do |t|
-#     t.column(:NAME.t, width: "20%")
-#     t.column(:OPTIONS.t, width: "80%")
+#     t.column(:name.ti, width: "20%")
+#     t.column(:options.ti, width: "80%")
 #     t.body do
 #       tr { td { scroller(:names) }; td { scroller(:options) } }
 #       tr { td(colspan: "2") { render(Form.new(...)) } }

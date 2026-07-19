@@ -236,7 +236,7 @@ class Sequence < AbstractModel
   private
 
   def log_name
-    "#{:SEQUENCE.t} ##{id || "?"}"
+    "#{:sequence.ti} ##{id || "?"}"
   end
 
   def accession_added?

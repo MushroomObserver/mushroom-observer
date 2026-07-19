@@ -22,7 +22,7 @@ module Views::Controllers::Images::Emails
         render_image_preview
         render_user_label
         render_message_field
-        submit(:SEND.l, center: true)
+        submit(:send.ti, center: true)
       end
     end
 

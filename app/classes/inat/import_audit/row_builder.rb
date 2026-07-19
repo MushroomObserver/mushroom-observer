@@ -69,7 +69,7 @@ module Inat::ImportAudit
     # --- Collector / identity ---
 
     def collector_columns(obs, snapshot)
-      uploader = snapshot_field(snapshot, :USER.l)
+      uploader = snapshot_field(snapshot, :user.ti)
       {
         collector: obs.collector,
         collector_user_login: obs.collector_user&.login,

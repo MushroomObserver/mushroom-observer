@@ -30,7 +30,7 @@ class AccordionSystemTest < ApplicationSystemTestCase
     assert_no_selector("##{edit_pane_id}.in")
 
     # 1. Click "Edit" — edit pane opens, view pane collapses.
-    within("#notes_#{key_id}") { click_on(:EDIT.l) }
+    within("#notes_#{key_id}") { click_on(:edit.ti) }
 
     assert_selector("##{edit_pane_id}.collapse.in")
     assert_no_selector("##{view_pane_id}.in")
@@ -44,7 +44,7 @@ class AccordionSystemTest < ApplicationSystemTestCase
     assert_no_selector("##{edit_pane_id}.in")
 
     # 3. Click "Edit" again — edit pane opens again.
-    within("#notes_#{key_id}") { click_on(:EDIT.l) }
+    within("#notes_#{key_id}") { click_on(:edit.ti) }
 
     assert_selector("##{edit_pane_id}.collapse.in")
 

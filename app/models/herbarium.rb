@@ -198,7 +198,7 @@ class Herbarium < AbstractModel
   def merge_info
     num_cur = curators.count
     num_rec = herbarium_records.count
-    "#{:HERBARIUM.l} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
+    "#{:herbarium.ti} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
   end
 
   def merge(src)

@@ -52,7 +52,7 @@ module Views::Controllers::Account::APIKeys
       table.column(:account_api_keys_active_column_label.t) do |key|
         render_verified_or_activate(key)
       end
-      table.column(:CREATED.t) { |key| key.created_at.web_date }
+      table.column(:created.ti) { |key| key.created_at.web_date }
     end
 
     def register_usage_columns(table)
@@ -62,11 +62,11 @@ module Views::Controllers::Account::APIKeys
       table.column(:account_api_keys_num_uses_column_label.t) do |key|
         key.num_uses.positive? ? key.num_uses : "--"
       end
-      table.column(:API_KEY.t, &:key)
+      table.column(:api_key.ti, &:key)
     end
 
     def register_action_columns(table)
-      table.column(:NOTES.t) { |key| render_notes_accordion(key) }
+      table.column(:notes.ti) { |key| render_notes_accordion(key) }
       table.column("") { |key| render_remove_button(key) }
     end
 
@@ -76,7 +76,7 @@ module Views::Controllers::Account::APIKeys
           render_verified_check_box(key)
         else
           Button(type: :patch,
-                 name: :ACTIVATE.l,
+                 name: :activate.ti,
                  target: account_activate_api_key_path(key.id),
                  id: "activate_api_key_#{key.id}")
         end
@@ -112,7 +112,7 @@ module Views::Controllers::Account::APIKeys
       Link(type: :collapse_toggle,
            target_id: "edit_notes_#{key.id}_container",
            icon: :edit,
-           closed_text: " #{:EDIT.l}",
+           closed_text: " #{:edit.ti}",
            button: :default,
            data: { role: "edit_api_key", parent: "#notes_#{key.id}" })
     end
@@ -131,7 +131,7 @@ module Views::Controllers::Account::APIKeys
     def render_remove_button(key)
       Button(type: :delete,
              target: account_api_key_path(key.id),
-             name: :REMOVE.l,
+             name: :remove.ti,
              variant: :outline,
              icon: :remove,
              id: "remove_api_key_#{key.id}")

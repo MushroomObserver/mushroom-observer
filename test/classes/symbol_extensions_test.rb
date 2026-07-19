@@ -38,11 +38,9 @@ class SymbolExtensionsTest < UnitTestCase
 
     # Test capitalization and number.
     assert_equal("name", :name.l)
-    assert_equal("Name", :Name.l)
-    assert_equal("Name", :NAME.l)
+    assert_equal("Name", :name.ti)
     assert_equal("observation list", :species_list.l)
-    assert_equal("Observation list", :Species_list.l)
-    assert_equal("Observation List", :SPECIES_LIST.l)
+    assert_equal("Observation List", :species_list.ti)
     assert_equal("observation list",
                  Symbol.test_localize("[type]", type: :species_list))
     assert_equal("Observation list",
@@ -51,10 +49,13 @@ class SymbolExtensionsTest < UnitTestCase
                  Symbol.test_localize("[tYpE]", type: :species_list))
     assert_equal("Observation List",
                  Symbol.test_localize("[TYPE]", type: :species_list))
+    assert_equal("Observation Lists",
+                 Symbol.test_localize("[TYPES]", type: :species_list))
     assert_equal("observation list", Symbol.test_localize("[:species_list]"))
+    assert_equal("Observation List",
+                 Symbol.test_localize("[:species_list.ti]"))
     assert_equal("Observation list", Symbol.test_localize("[:Species_list]"))
     assert_equal("Observation list", Symbol.test_localize("[:sPeCiEs_lIsT]"))
-    assert_equal("Observation List", Symbol.test_localize("[:SPECIES_LIST]"))
   end
 
   def test_hello
@@ -78,7 +79,7 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_Yep # rubocop:disable Naming/MethodName
-    assert_equal("Yes", :YEP.t)
+    assert_equal("Yes", :yep.ti)
   end
 
   def test_yep
@@ -86,7 +87,7 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_Nope # rubocop:disable Naming/MethodName
-    assert_equal("No", :NOPE.t)
+    assert_equal("No", :nope.ti)
   end
 
   def test_nope

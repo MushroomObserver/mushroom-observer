@@ -7,7 +7,7 @@ class Tab::Project::AdminMembers < Tab::Base
   end
 
   def title
-    "#{@project.user_group.users.count} #{:MEMBERS.l}"
+    "#{@project.user_group.users.count} #{:members.ti}"
   end
 
   def path

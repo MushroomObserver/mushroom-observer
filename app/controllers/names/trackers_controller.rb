@@ -79,9 +79,9 @@ module Names
 
     def submit_tracking_form_update
       case params[:commit]
-      when :UPDATE.l
+      when :update.ti
         create_or_update_name_tracker_and_interest(@name.id)
-      when :DISABLE.l
+      when :disable.ti
         destroy_name_tracker_interest_and_flash
       end
       redirect_to(name_path(@name.id))

@@ -55,12 +55,12 @@ class Components::Modal::Confirm < Components::Base
 
   def render_buttons
     Button(
-      name: :CANCEL.l,
+      name: :cancel.ti,
       data: { action: "confirm-modal#cancel" }
     )
     whitespace
     Button(
-      name: :OK.l,
+      name: :ok.ti,
       variant: :danger,
       data: { action: "confirm-modal#confirm",
               confirm_modal_target: "confirmButton" }

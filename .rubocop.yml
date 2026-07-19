@@ -12,6 +12,9 @@ plugins:
   - rubocop-performance
   - rubocop-rails
 
+require:
+  - ./lib/rubocop/cop/mo/lowercase_translation_tag
+
 AllCops:
   NewCops: enable
   ########################### Excluded files ###################################
@@ -35,6 +38,13 @@ AllCops:
 # ------------------------------------------------------------------------------
 
 ########### Individual cops for which MO uses a non-default configuration
+
+MO/LowercaseTranslationTag:
+  Description: >-
+    Translation tag symbols (used with .l/.t/.tl/.tp/.tpl/.ti) must be
+    lowercase -- see lib/rubocop/cop/mo/lowercase_translation_tag.rb
+    and GH issue #4843.
+  Enabled: true
 
 Gemspec:
   # Not relevent (MO is not a gem)

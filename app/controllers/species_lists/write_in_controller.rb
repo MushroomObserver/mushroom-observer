@@ -31,7 +31,7 @@ module SpeciesLists
         Views::Controllers::SpeciesLists::WriteIn::New.new(
           species_list: @species_list,
           user: @user,
-          button: :ADD,
+          button: :add,
           new_names: @new_names,
           deprecated_names: @deprecated_names,
           multiple_names: @multiple_names,

@@ -119,10 +119,18 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
 
     # I have no clue how to ensure translations are set any particular way.
     # This stub causes every single translation to be simply:
-    #   "locale:mo.tag"
+    #   "locale:mo.tag" (or "Locale:Mo.Tag" for a .ti caller, since .ti
+    #   titleizes whatever localize/I18n.t returns -- title-casing this
+    #   stub's own diagnostic string is a harmless side effect, not a
+    #   real translation).
     # Makes it very easy to test which language is being used!
     # But note that the standard login helper won't work because it is
     # expecting the English translations to work correctly.
+    #
+    # Compute each expected string via the same Symbol#t/#l/#ti call the
+    # production code makes (see `stubbed_label`/`stubbed` below) rather
+    # than hardcoding the stub's output -- so this test doesn't go stale
+    # if a call site's tag or method (.t vs .l vs .ti) ever changes.
     translator = lambda do |*args|
       "#{I18n.locale}:#{args.first}"
     end
@@ -130,16 +138,21 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     I18n.stub(:t, translator) do
       Capybara.reset_sessions!
       visit("/account/login/new")
-      fill_in("en:mo.login_user:", with: sender.login)
-      fill_in("en:mo.login_password:", with: "testpassword")
-      click_button("en:mo.login_login")
+      fill_in(stubbed_label(:login_user), with: sender.login)
+      fill_in(stubbed_label(:login_password), with: "testpassword")
+      click_button(:login_login.l)
       visit("/users/#{receiver.id}/emails/new")
-      fill_in("fr:mo.ask_user_question_subject", with: "Bonjour!")
-      fill_in("fr:mo.ask_user_question_message:", with: "Ça va?")
-      click_button("fr:mo.SEND")
+      fill_in(stubbed_label(:ask_user_question_subject), with: "Bonjour!")
+      fill_in(stubbed_label(:ask_user_question_message), with: "Ça va?")
+      click_button(:send.ti)
       notices = page.find_by_id("flash_notices")
-      notices.assert_text("fr:mo.runtime_ask_user_question_success")
+      notices.assert_text(:runtime_ask_user_question_success.l)
     end
+  end
+
+  # Field-prompt labels get a trailing ":" (FieldLabelRow#append_colon).
+  def stubbed_label(tag)
+    "#{tag.t}:"
   end
 
   def test_observation_pattern_search_with_bad_keyword

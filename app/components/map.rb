@@ -224,8 +224,8 @@ class Components::Map < Components::Base
   def localization_data
     {
       nothing_to_map: nothing_to_map_text,
-      observations: :Observations.t,
-      locations: :Locations.t,
+      observations: :observations.ti,
+      locations: :locations.ti,
       show_all: :show_all.t,
       map_all: :map_all.t,
       map_cap_banner: I18n.t("#{MO.locale_namespace}.map_cap_banner")

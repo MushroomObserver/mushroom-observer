@@ -32,7 +32,7 @@ module Views::Controllers::Observations::Images
 
     def view_template
       super do
-        submit(:SAVE_EDITS.l, center: true)
+        submit(:save_edits.ti, center: true)
         render_image_fields
         render_project_checkboxes if @projects.any?
         render_footer_buttons
@@ -51,12 +51,12 @@ module Views::Controllers::Observations::Images
                         help: :form_images_when_help.t,
                         help_collapse: true)
       select_field(:license_id, @licenses,
-                   label: :LICENSE,
+                   label: :license.ti,
                    help: :form_images_license_help.t,
                    help_collapse: true)
       # Two-paragraph help: notes-specific + textile-syntax help.
       textarea_field(:notes,
-                     label: :NOTES,
+                     label: :notes.ti,
                      help: textile_help,
                      help_collapse: true,
                      data: { autofocus: true })
@@ -70,7 +70,7 @@ module Views::Controllers::Observations::Images
 
     def render_project_checkboxes
       div(class: "form-group") do
-        p(class: "font-weight-bold") { plain("#{:PROJECTS.t}:") }
+        p(class: "font-weight-bold") { plain("#{:projects.ti}:") }
         Help(content: :form_images_project_help.t)
         div(class: "form-group") do
           # Sentinel: ensures `image[project_ids]` is always present in
@@ -97,7 +97,7 @@ module Views::Controllers::Observations::Images
 
     def render_footer_buttons
       div(class: "text-center mt-3 mb-5") do
-        submit(:SAVE_EDITS.l)
+        submit(:save_edits.ti)
         Button(
           type: :get,
           name: :cancel_and_show.t(type: :image),

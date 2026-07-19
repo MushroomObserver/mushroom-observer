@@ -149,14 +149,14 @@ class Components::Map::Popup < Components::Base
 
   def render_observation_header
     div(class: "map-popup-header") do
-      plain("#{@set.observations.length} #{:Observations.t} ")
+      plain("#{@set.observations.length} #{:observations.ti} ")
       render_associated_links(:observation)
     end
   end
 
   def render_location_header
     div(class: "map-popup-header") do
-      plain("#{@set.underlying_locations.length} #{:Locations.t} ")
+      plain("#{@set.underlying_locations.length} #{:locations.ti} ")
       render_associated_links(:location)
     end
   end
@@ -214,7 +214,7 @@ class Components::Map::Popup < Components::Base
     elsif obs.respond_to?(:text_name) && obs.text_name.present?
       em { plain(obs.text_name.to_s) }
     else
-      plain("#{:Observation.t} ##{obs.id}")
+      plain("#{:observation.ti} ##{obs.id}")
     end
   end
 
@@ -249,7 +249,7 @@ class Components::Map::Popup < Components::Base
     return nil unless obs.respond_to?(:vote_cache)
 
     pct = ::Vote.percent(obs.vote_cache)
-    "#{:Confidence.t}: #{pct.floor}%"
+    "#{:confidence.ti}: #{pct.floor}%"
   end
 
   # ----------------------------------------------------------------

@@ -17,7 +17,7 @@ module Views::Controllers::HerbariumRecords
       assert_html(html, "input[name='herbarium_record[initial_det]']")
       assert_html(html, "input[name='herbarium_record[accession_number]']")
       assert_html(html, "textarea[name='herbarium_record[notes]']")
-      assert_html(html, "button[type='submit']", text: :ADD.l)
+      assert_html(html, "button[type='submit']", text: :add.ti)
       assert_html(html, "form[data-turbo='true']")
     end
 
@@ -25,7 +25,7 @@ module Views::Controllers::HerbariumRecords
       record = herbarium_records(:interesting_unknown)
       html = render_form(model: record)
 
-      assert_html(html, "button[type='submit']", text: :SAVE.l)
+      assert_html(html, "button[type='submit']", text: :save.ti)
     end
 
     def test_multiple_observations_warning

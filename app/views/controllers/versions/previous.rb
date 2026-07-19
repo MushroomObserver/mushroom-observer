@@ -22,7 +22,7 @@ module Views::Controllers::Versions
       render(Components::Panel.new(
                panel_id: "#{@obj.type_tag}_versions"
              )) do |panel|
-        panel.with_heading { :VERSIONS.l }
+        panel.with_heading { :versions.ti }
         panel.with_body { render_table }
       end
     end
@@ -71,7 +71,7 @@ module Views::Controllers::Versions
     end
 
     def emit_version_link_text(ver)
-      label = "#{:VERSION.l} #{ver.version}"
+      label = "#{:version.ti} #{ver.version}"
       if @args[:bold]&.call(ver)
         strong { plain(label) }
       else

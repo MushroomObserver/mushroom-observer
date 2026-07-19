@@ -10,6 +10,7 @@
 #  tl::          Localize, textilize with obj links (no paragraphs).
 #  tp::          Localize, textilize with paragraphs (no obj links).
 #  tpl::         Localize, textilize with paragraphs and obj links.
+#  ti::          Localize, then title-case the result (no textilizing).
 #
 #  upcase_first  Capitalize 1st letter of Symbol, leaving remainder alone
 #
@@ -181,7 +182,7 @@ class Symbol
       result = result.gsub("[[", "[").gsub("]]", "]")
     end
     if capitalize_result
-      # Make token attempt to capitalize result if requested [:TAG] for :tag.
+      # Make token attempt to capitalize result if requested [:tag] for :tag.
       result = result.upcase_first
     end
     result
@@ -211,7 +212,7 @@ class Symbol
             (x == x.upcase)
         val = args[arg]
         if val.is_a?(Symbol)
-          val.to_s.upcase.to_sym.l
+          val.to_s.downcase.to_sym.ti
         else
           val.to_s.strip_html.upcase_first
         end
@@ -221,7 +222,7 @@ class Symbol
             (y == y.upcase)
         val = args[arg]
         if val.is_a?(Symbol)
-          :"#{val.to_s.upcase}S".l
+          :"#{val.to_s.downcase}s".ti
         else
           val.to_s.strip_html.upcase_first
         end
@@ -251,9 +252,10 @@ class Symbol
   end
 
   def localize_recursive_expansion(val, args, level) # :nodoc:
-    val.gsub(/ \[ :(\w+?) (?:\( ([^()\[\]]+) \))? \] /x) do
+    val.gsub(/ \[ :(\w+?) (\.ti)? (?:\( ([^()\[\]]+) \))? \] /x) do
       tag = Regexp.last_match(1).to_sym
-      args2 = Regexp.last_match(2).to_s
+      titleize = Regexp.last_match(2).present?
+      args2 = Regexp.last_match(3).to_s
       hash = args.dup
       if args2.present?
         args2.split(",").each do |pair|
@@ -285,7 +287,8 @@ class Symbol
           end
         end
       end
-      tag.l(hash, level + [self])
+      result = tag.l(hash, level + [self])
+      titleize ? result.titleize : result
     end
   end
 
@@ -305,6 +308,16 @@ class Symbol
 
   def tpl(*)
     localize(*).tpl(false)
+  end
+
+  # Localize, then title-case the result. No textilizing: title-cased
+  # tags are short UI labels, never Textile-formatted body text, and
+  # some callers interpolate the result straight into an HTML attribute
+  # (e.g. a `title:`) where inserted markup would be wrong. Use this
+  # instead of authoring a separate ALL-CAPS twin tag for a title-cased
+  # presentation of an existing lowercase tag.
+  def ti(*)
+    localize(*).titleize
   end
 
   def strip_html(*)

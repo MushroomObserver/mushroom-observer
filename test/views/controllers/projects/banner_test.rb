@@ -128,8 +128,8 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       assert_html(html, "#project_tabs")
-      assert_includes(html, :NAMES.l)
-      assert_includes(html, :LOCATIONS.l)
+      assert_includes(html, :names.ti)
+      assert_includes(html, :locations.ti)
       # No targets, so no Update tab
       assert_not_includes(html, :project_updates_title.l)
     end

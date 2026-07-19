@@ -27,7 +27,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
       html = render_form
       value = "#{@name.unique_search_name}[##{@name.icn_id}]"
 
-      assert_html(html, "label[for='email_name']", text: "#{:NAME.l}:")
+      assert_html(html, "label[for='email_name']", text: "#{:name.ti}:")
       assert_html(html, "label[for='email_name'] + p.form-control-static",
                   text: value)
     end
@@ -48,7 +48,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
     def test_renders_message_field
       html = render_form
 
-      assert_html(html, "label[for='email_message']", text: :Notes.l)
+      assert_html(html, "label[for='email_message']", text: :notes.ti)
       assert_html(html,
                   "textarea[name='email[message]'][rows='10']" \
                   "[data-autofocus]")
@@ -57,7 +57,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
     def test_renders_submit_button
       html = render_form
 
-      assert_html(html, "button[type='submit']", text: :SEND.l)
+      assert_html(html, "button[type='submit']", text: :send.ti)
       assert_html(html, ".center-block")
     end
 

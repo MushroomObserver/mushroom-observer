@@ -31,7 +31,7 @@ module Tab::License
     def test_edit
       tab = Tab::License::Edit.new(license: @license)
 
-      assert_equal(:EDIT.t, tab.title)
+      assert_equal(:edit.ti, tab.title)
       assert_equal(routes.edit_license_path(@license.id), tab.path)
       assert_equal(@license, tab.model)
     end
@@ -39,7 +39,7 @@ module Tab::License
     def test_destroy
       tab = Tab::License::Destroy.new(license: @license)
 
-      assert_equal(:DESTROY.t, tab.title)
+      assert_equal(:destroy.ti, tab.title)
       assert_equal(@license, tab.path)
       assert_equal(:destroy, tab.html_options[:button])
       assert_equal(@license, tab.model)

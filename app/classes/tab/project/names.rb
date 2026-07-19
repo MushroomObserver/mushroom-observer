@@ -7,7 +7,7 @@ class Tab::Project::Names < Tab::Base
   end
 
   def title
-    "#{@project.name_count} #{:NAMES.l}"
+    "#{@project.name_count} #{:names.ti}"
   end
 
   def path

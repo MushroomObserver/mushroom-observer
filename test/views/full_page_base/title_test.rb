@@ -84,7 +84,7 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
     # An object without a `document_title` method gets
     # AbstractModel's default — the localized type-tag label.
     pub = publications(:one_pub)
-    assert_equal(:PUBLICATION.l,
+    assert_equal(:publication.ti,
                  @page.send(:document_title_for, pub))
   end
 
@@ -96,7 +96,7 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
     # edge case, but worth keeping covered).
     fake = Struct.new(:type_tag).new(:observation)
 
-    assert_equal(:OBSERVATION.l,
+    assert_equal(:observation.ti,
                  @page.send(:document_title_for, fake))
   end
 
@@ -108,7 +108,7 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
                        @page.send(:document_title_for, obs), obs)
 
     # "OBSERVATION <id>: <text_name>" — all plain text.
-    assert_match(/\A#{:OBSERVATION.l} #{obs.id}: /, title)
+    assert_match(/\A#{:observation.ti} #{obs.id}: /, title)
     assert_no_match(/[_*<>]/, title)
   end
 
@@ -117,7 +117,7 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
     title = @page.send(:edit_document_title,
                        @page.send(:document_title_for, obs), obs)
 
-    assert_match(/\A#{:EDIT.l} #{:OBSERVATION.l} #{obs.id}: /, title)
+    assert_match(/\A#{:edit.ti} #{:observation.ti} #{obs.id}: /, title)
   end
 
   private

@@ -56,9 +56,9 @@ module Views::Layouts::App
         class: "close",
         data: { banner_target: "dismissButton",
                 version: banner.version },
-        aria: { label: :CLOSE.l }
+        aria: { label: :close.ti }
       ) do
-        Icon(type: :chevron_up, title: :CLOSE.l)
+        Icon(type: :chevron_up, title: :close.ti)
       end
       p { trusted_html(banner.message.t) }
     end
@@ -68,7 +68,7 @@ module Views::Layouts::App
           data: { banner_target: "container" }) do
         div(class: "show_banner_icon text-green d-block",
             data: { banner_target: "showButton" }) do
-          Icon(type: :chevron_down, title: :SHOW.l)
+          Icon(type: :chevron_down, title: :show.ti)
         end
       end
     end

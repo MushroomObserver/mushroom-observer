@@ -11,7 +11,7 @@ class Tab::Name::EditDescription < Tab::Base
   end
 
   def title
-    :EDIT.l
+    :edit.ti
   end
 
   def path

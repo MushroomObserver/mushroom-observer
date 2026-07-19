@@ -23,7 +23,7 @@ class Views::Controllers::Observations::Form::Lists < Views::Base
 
   def view_template
     render(panel) do |p|
-      p.with_heading { :SPECIES_LISTS.l }
+      p.with_heading { :species_lists.ti }
       p.with_body(collapse: true) { render_body }
     end
   end

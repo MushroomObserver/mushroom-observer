@@ -23,13 +23,13 @@ module Views::Controllers::Descriptions
 
     def view_template
       Container(width: :text) do
-        submit(submit_button_text.l, center: true)
+        submit(submit_button_text.ti, center: true)
         render_source_fields
         render_permissions_fields
         render_license_field
         render_description_header
         render_note_fields
-        submit(submit_button_text.l, center: true)
+        submit(submit_button_text.ti, center: true)
         render_merge_fields if @merge
       end
     end
@@ -106,7 +106,7 @@ module Views::Controllers::Descriptions
     def render_license_field
       # `@licenses` is Rails-shape `[[label, id], ...]` from
       # `License.available_names_and_ids`; pass through.
-      select_field(:license_id, @licenses, label: :License) do
+      select_field(:license_id, @licenses, label: :license.ti) do
         Help(element: :p, content: :form_description_license_help.t)
       end
     end
@@ -115,7 +115,7 @@ module Views::Controllers::Descriptions
 
     def render_description_header
       if name_description?
-        p { b { :DESCRIPTION.t } }
+        p { b { :description.ti } }
         Help(content: :shared_textile_help.l, id: "textilize_note")
       else
         hr
@@ -238,7 +238,7 @@ module Views::Controllers::Descriptions
     end
 
     def submit_button_text
-      new_record? ? :CREATE : :SAVE_EDITS
+      new_record? ? :create : :save_edits
     end
 
     def form_action

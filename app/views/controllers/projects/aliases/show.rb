@@ -41,10 +41,10 @@ module Views::Controllers::Projects::Aliases
       pid = @project_alias.project_id
       a(href: edit_project_alias_path(
         project_id: pid, id: @project_alias.id
-      )) { plain(:EDIT.t) }
+      )) { plain(:edit.ti) }
       plain(" | ")
       a(href: project_aliases_path) do
-        plain(:BACK.t)
+        plain(:back.ti)
       end
     end
   end

@@ -44,7 +44,7 @@ module Views::Controllers::VisualModels
     end
 
     def define_name_column(table)
-      table.column(:NAME.t) { |g| link_to(g.name, visual_group_path(g)) }
+      table.column(:name.ti) { |g| link_to(g.name, visual_group_path(g)) }
     end
 
     def define_count_columns(table)
@@ -57,8 +57,10 @@ module Views::Controllers::VisualModels
     end
 
     def define_action_columns(table)
-      table.column(:EDIT.t) { |g| link_to(:EDIT.t, edit_visual_group_path(g)) }
-      table.column(:DESTROY.t) { |g| render_destroy_link(g) }
+      table.column(:edit.ti) do |g|
+        link_to(:edit.ti, edit_visual_group_path(g))
+      end
+      table.column(:destroy.ti) { |g| render_destroy_link(g) }
     end
 
     def render_top_nav
@@ -66,7 +68,7 @@ module Views::Controllers::VisualModels
         [
           link_to(:visual_group_create.t,
                   new_visual_model_visual_group_path(@visual_model)),
-          link_to(:edit_object.t(type: :VISUAL_MODEL),
+          link_to(:edit_object.t(type: :visual_model),
                   edit_visual_model_path(@visual_model)),
           link_to(:show_visual_model_index.t, visual_models_path)
         ].each_with_index do |link, i|

@@ -25,7 +25,7 @@ module Views::Controllers::Admin::Users
 
     def test_renders_submit_button
       assert_html(@html,
-                  "button[type='submit']", text: :SAVE_EDITS.l)
+                  "button[type='submit']", text: :save_edits.ti)
       assert_html(@html, ".center-block")
     end
 

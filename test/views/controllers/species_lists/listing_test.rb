@@ -49,7 +49,7 @@ module Views::Controllers::SpeciesLists
       assert_html(html, "form[action='#{remove_path}']")
       assert_html(html, "input[name='_method'][value='put']")
       assert_html(html, "[data-turbo-confirm]")
-      assert_html(html, "form button", text: :REMOVE.t)
+      assert_html(html, "form button", text: :remove.ti)
     end
 
     # `add: true` → put-button with `commit=add`; no confirm.
@@ -65,18 +65,18 @@ module Views::Controllers::SpeciesLists
       assert_html(html, "form[action='#{add_path}']")
       assert_html(html, "input[name='_method'][value='put']")
       assert_no_html(html, "[data-turbo-confirm]")
-      assert_html(html, "form button", text: :ADD.t)
+      assert_html(html, "form button", text: :add.ti)
     end
 
     # `place` rescues StandardError from `place_name.t` and falls back
-    # to `:UNKNOWN.l`. Stub `place_name` to raise so the rescue fires.
+    # to `:unknown.ti`. Stub `place_name` to raise so the rescue fires.
     def test_place_falls_back_to_unknown_when_place_name_raises
       @species_list.define_singleton_method(:place_name) do
         raise(StandardError.new("bad place"))
       end
       html = render_listing
 
-      assert_html(html, "span", text: :UNKNOWN.l.as_displayed)
+      assert_html(html, "span", text: :unknown.ti.as_displayed)
     end
 
     # `remove` wins when both flags set — defensive guard.
@@ -84,7 +84,7 @@ module Views::Controllers::SpeciesLists
       html = render_listing(observation: @observation,
                             remove: true, add: true)
 
-      assert_html(html, "form button", text: :REMOVE.t)
+      assert_html(html, "form button", text: :remove.ti)
       # `assert_no_html` doesn't take `text:`, so verify "only one
       # form rendered" instead — guarantees both buttons can't be
       # present simultaneously.

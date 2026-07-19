@@ -15,7 +15,7 @@ module Names::Descriptions
     def test_group_name_of_one_user_group
       assert_equal(:adjust_permissions_all_users.t,
                    @controller.group_name(user_groups(:all_users)))
-      assert_equal(:REVIEWERS.t,
+      assert_equal(:reviewers.ti,
                    @controller.group_name(user_groups(:reviewers)))
       assert_equal(rolf.legal_name,
                    @controller.group_name(user_groups(:rolf_only)))

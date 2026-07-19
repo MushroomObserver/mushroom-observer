@@ -214,7 +214,7 @@ class ButtonSubclassesTest < ComponentTestCase
   # Delete with a String target: caller controls the path entirely,
   # no identifier class is built, but delete-action defaults
   # (text-danger, confirm, icon) still apply. `default_name` falls
-  # back to `:DESTROY.l` since there's no type to interpolate.
+  # back to `:destroy.ti` since there's no type to interpolate.
   def test_delete_with_string_target
     html = render(
       Components::Button::Delete.new(target: "/items/42", name: "Destroy")
@@ -301,20 +301,20 @@ class ButtonSubclassesTest < ComponentTestCase
   end
 
   # String / Hash targets have no recoverable type, so `default_name`
-  # falls back to the generic `:EDIT.l` instead of
+  # falls back to the generic `:edit.ti` instead of
   # `:edit_object.t(type: …)`.
   def test_edit_with_string_target_default_name
     html = render(
       Components::Button::Edit.new(target: "/items/42/edit")
     )
 
-    assert_html(html, "a span.sr-only", text: :EDIT.l)
+    assert_html(html, "a span.sr-only", text: :edit.ti)
   end
 
   # New: GET + explicit path + icon `:add`. Always pass an explicit
   # string path — new-form routes often require extra params
   # (e.g. `observation_id:`) that a model-instance target can't
-  # express. The default name is the generic `:ADD.l`; callers
+  # express. The default name is the generic `:add.ti`; callers
   # should pass an explicit `name:`.
   def test_new_with_string_target_and_icon
     path = routes.new_herbarium_path
@@ -367,13 +367,13 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a.btn.btn-outline-default")
   end
 
-  # Generic `:ADD.l` fallback when no `name:` is supplied.
+  # Generic `:add.ti` fallback when no `name:` is supplied.
   def test_new_default_name_add_l
     html = render(
       Components::Button::New.new(target: routes.new_herbarium_path)
     )
 
-    assert_html(html, "a span.sr-only", text: :ADD.l)
+    assert_html(html, "a span.sr-only", text: :add.ti)
   end
 
   # Download: GET + explicit path + icon `:download`. The species

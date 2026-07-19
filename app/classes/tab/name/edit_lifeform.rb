@@ -7,7 +7,7 @@ class Tab::Name::EditLifeform < Tab::Base
   end
 
   def title
-    :EDIT.l
+    :edit.ti
   end
 
   def path

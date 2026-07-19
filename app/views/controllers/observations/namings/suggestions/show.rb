@@ -53,7 +53,7 @@ module Views::Controllers::Observations::Namings::Suggestions
     def render_suggestions_table(group, heading)
       h3 { plain(heading) }
       Table(group, class: "table-namings") do |t|
-        t.column(:NAME.t) { |sugg| render_suggestion_details(sugg) }
+        t.column(:name.ti) { |sugg| render_suggestion_details(sugg) }
         t.column(:image.t) { |sugg| render_suggestion_image(sugg) }
       end
     end

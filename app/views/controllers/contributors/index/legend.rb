@@ -68,7 +68,7 @@ module Views::Controllers::Contributors
                  show_headers: false,
                  class: "text-center bg-none mx-lg-5"
                )) do |t|
-          # `user_stats_*` values are `[:IMAGES]`-style cross-refs to
+          # `user_stats_*` values are `[:images]`-style cross-refs to
           # plain-text root keys ("Images", "Votes", …); needs `.t`
           # for the cross-ref expansion, but the resolved text has
           # no HTML markup so `plain` is sufficient.

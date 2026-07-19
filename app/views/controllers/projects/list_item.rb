@@ -14,7 +14,7 @@ module Views::Controllers::Projects
 
     def view_template
       div(class: "text-larger") do
-        IdBadge(object: @project, extra_class: "rss-id mr-4")
+        IDBadge(object: @project, extra_class: "rss-id mr-4")
       end
       div do
         render_title_row
@@ -31,7 +31,7 @@ module Views::Controllers::Projects
         end
         if @project.open_membership
           whitespace
-          span(class: "ml-4") { plain("(#{:OPEN.t})") }
+          span(class: "ml-4") { plain("(#{:open.ti})") }
         end
       end
     end

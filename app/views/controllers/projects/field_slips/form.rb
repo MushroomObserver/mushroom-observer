@@ -15,7 +15,7 @@ module Views::Controllers::Projects::FieldSlips
                                    inline: true, min: 0)
         checkbox_field(:one_per_page,
                        label: :field_slips_one_per_page)
-        submit(:CREATE.l, class: "ml-3")
+        submit(:create.ti, class: "ml-3")
       end
     end
 

@@ -42,7 +42,7 @@ module Views::Controllers::Herbaria
     private
 
     def render_name_field
-      text_field(:name, label: :NAME) do |f|
+      text_field(:name, label: :name.ti) do |f|
         f.with_between { render_name_between }
       end
     end
@@ -159,7 +159,7 @@ module Views::Controllers::Herbaria
 
     def location_label
       capture do
-        span(class: "unconstrained-label") { "#{:LOCATION.l}:" }
+        span(class: "unconstrained-label") { "#{:location.ti}:" }
         whitespace
         span(class: "create-label") do
           "#{:form_observations_create_locality.l}:"
@@ -189,12 +189,12 @@ module Views::Controllers::Herbaria
     end
 
     def render_notes_field
-      textarea_field(:description, label: :NOTES, rows: 10,
+      textarea_field(:description, label: :notes.ti, rows: 10,
                                    between: :optional)
     end
 
     def submit_text
-      create? ? :CREATE.l : :SAVE.l
+      create? ? :create.ti : :save.ti
     end
 
     def create?

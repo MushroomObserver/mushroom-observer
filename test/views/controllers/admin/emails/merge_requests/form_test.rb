@@ -28,7 +28,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
       html = render_form
 
       assert_html(html, "label[for='email_old_obj']",
-                  text: "#{:NAME.l}:")
+                  text: "#{:name.ti}:")
       assert_html(html, "label[for='email_old_obj'] + p.form-control-static",
                   text: @old_name.unique_format_name.t.as_displayed)
     end
@@ -37,7 +37,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
       html = render_form
 
       assert_html(html, "label[for='email_new_obj']",
-                  text: "#{:NAME.l}:")
+                  text: "#{:name.ti}:")
       assert_html(html, "label[for='email_new_obj'] + p.form-control-static",
                   text: @new_name.unique_format_name.t.as_displayed)
     end
@@ -46,7 +46,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
       html = render_form
 
       assert_html(html, "label[for='email_message']",
-                  text: :Notes.l)
+                  text: :notes.ti)
       assert_html(html,
                   "textarea[name='email[message]'][rows='10']" \
                   "[data-autofocus]")
@@ -55,7 +55,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
     def test_renders_submit_button
       html = render_form
 
-      assert_html(html, "button[type='submit']", text: :SEND.l)
+      assert_html(html, "button[type='submit']", text: :send.ti)
       assert_html(html, ".center-block")
     end
 

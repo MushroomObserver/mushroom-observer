@@ -18,7 +18,7 @@ module Views::Controllers::Projects
       assert_html(html, "a[href='/projects/#{project.id}/members']")
       assert_html(html, "a[href='/projects/#{project.id}/aliases']")
       assert_html(html, "a[href='/field_slips?project=#{project.id}']",
-                  text: "#{project.field_slips.count} #{:FIELD_SLIPS.l}")
+                  text: "#{project.field_slips.count} #{:field_slips.ti}")
     end
 
     def test_details_active_when_current
@@ -56,7 +56,7 @@ module Views::Controllers::Projects
       expected_count = project.user_group.users.count
       html = render_subtabs(project: project, current_subtab: "details")
 
-      assert_includes(html, "#{expected_count} #{:MEMBERS.l}")
+      assert_includes(html, "#{expected_count} #{:members.ti}")
     end
 
     def test_alias_count_in_label
@@ -64,7 +64,7 @@ module Views::Controllers::Projects
       expected_count = project.aliases.length
       html = render_subtabs(project: project, current_subtab: "details")
 
-      assert_includes(html, "#{expected_count} #{:PROJECT_ALIASES.l}")
+      assert_includes(html, "#{expected_count} #{:project_aliases.ti}")
     end
 
     private

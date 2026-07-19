@@ -52,7 +52,7 @@ module Views::Controllers::Descriptions::Merges
     end
 
     def render_submit
-      submit(:SUBMIT.l, center: true)
+      submit(:submit.ti, center: true)
     end
 
     def merges

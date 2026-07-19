@@ -76,7 +76,7 @@ module Names
       assert_nil(name_tracker)
       params = {
         id: name.id,
-        commit: :ENABLE.t,
+        commit: :enable.ti,
         name_tracker: {
           note_template_enabled: "",
           note_template: ""
@@ -107,7 +107,7 @@ module Names
       assert_nil(name_tracker)
       params = {
         id: name.id,
-        commit: :ENABLE.t,
+        commit: :enable.ti,
         name_tracker: {
           note_template_enabled: "1",
           note_template: "A note about :observation from :observer"
@@ -180,7 +180,7 @@ module Names
       assert(interest)
       params = {
         id: name.id,
-        commit: :DISABLE.t,
+        commit: :disable.ti,
         name_tracker: {
           note_template_enabled: "1",
           note_template: "A note about :observation from :observer"

@@ -27,7 +27,7 @@ module Views::Controllers::Projects::Updates
     def render_add_button
       Button(
         type: :post,
-        name: :ADD.t,
+        name: :add.ti,
         target: add_observation_project_update_path(
           project_id: @project.id, id: @obs.id,
           show_excluded: @show_excluded
@@ -39,7 +39,7 @@ module Views::Controllers::Projects::Updates
     def render_exclude_button
       Button(
         type: :post,
-        name: :EXCLUDE.t,
+        name: :exclude.ti,
         target: exclude_observation_project_update_path(
           project_id: @project.id, id: @obs.id,
           show_excluded: @show_excluded

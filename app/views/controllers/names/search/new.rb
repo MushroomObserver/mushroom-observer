@@ -9,7 +9,7 @@ class Views::Controllers::Names::Search::New < Views::FullPageBase
   prop :local, _Boolean, default: true
 
   def view_template
-    add_new_title(:search_object, :NAMES)
+    add_new_title(:search_object, :names)
     container_class(:wide)
 
     div(id: "names_search_container") do

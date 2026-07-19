@@ -20,15 +20,15 @@ module Views::Controllers::Herbaria::CuratorRequests
 
     def view_template
       div(class: "form-group mt-3") do
-        strong { "#{:HERBARIUM.l}:" }
+        strong { "#{:herbarium.ti}:" }
         whitespace
         plain(@herbarium.name)
       end
 
-      textarea_field(:notes, label: :NOTES, rows: 10,
+      textarea_field(:notes, label: :notes.ti, rows: 10,
                              data: { autofocus: true })
 
-      submit(:SEND.l, center: true)
+      submit(:send.ti, center: true)
     end
   end
 end

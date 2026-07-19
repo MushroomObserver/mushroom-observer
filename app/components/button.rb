@@ -12,27 +12,27 @@
 #
 # @example Stimulus action button
 #   Button(
-#     name: :CANCEL.l,
+#     name: :cancel.ti,
 #     data: { action: "confirm-modal#cancel" }
 #   )
 #
 # @example Danger variant
 #   Button(
-#     name: :OK.l,
+#     name: :ok.ti,
 #     variant: :danger,
 #     data: { action: "confirm-modal#confirm",
 #             confirm_modal_target: "confirmButton" }
 #   )
 #
 # @example Icon-only (sr-only label)
-#   Button(name: :REMOVE.l, icon: :x, variant: :strip)
+#   Button(name: :remove.ti, icon: :x, variant: :strip)
 #
 # @example Rich content via block (name: optional)
 #   Button(
 #     data: { action: "form-exif#transfer:prevent" }
 #   ) do
-#     span(class: "when-enabled") { :ENABLED.l }
-#     span(class: "when-disabled") { :DISABLED.l }
+#     span(class: "when-enabled") { :enabled.l }
+#     span(class: "when-disabled") { :disabled.l }
 #   end
 #
 class Components::Button < Components::Base

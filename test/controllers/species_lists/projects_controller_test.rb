@@ -55,7 +55,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj.id.to_s]
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       proj.reload
@@ -77,7 +77,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_error
@@ -98,7 +98,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_response(:redirect)
@@ -155,7 +155,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: []
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_warning # no changes
@@ -171,7 +171,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj2.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_warning # no changes
@@ -187,7 +187,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj1.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_success
@@ -203,7 +203,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj1.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_warning # already attached
@@ -219,7 +219,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: []
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       assert_flash_warning # no changes
@@ -235,7 +235,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj2.id.to_s]
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       assert_flash_success
@@ -251,7 +251,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj2.id.to_s]
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       assert_flash_warning # no changes
@@ -267,7 +267,7 @@ module SpeciesLists
             objects_img: "0",
             project_ids: [proj1.id.to_s]
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       assert_flash_success
@@ -292,7 +292,7 @@ module SpeciesLists
             objects_img: "1",
             project_ids: []
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_warning # no changes
@@ -307,7 +307,7 @@ module SpeciesLists
             objects_img: "1",
             project_ids: []
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       assert_flash_warning # no changes
@@ -322,7 +322,7 @@ module SpeciesLists
             objects_img: "1",
             project_ids: [proj2.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_success # no permission
@@ -338,7 +338,7 @@ module SpeciesLists
             objects_img: "1",
             project_ids: [proj2.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_warning # already done
@@ -354,7 +354,7 @@ module SpeciesLists
             objects_img: "1",
             project_ids: [proj1.id.to_s]
           },
-          commit: :ATTACH.l
+          commit: :attach.ti
         }
       )
       assert_flash_success
@@ -372,7 +372,7 @@ module SpeciesLists
             objects_img: "1",
             project_ids: [proj2.id.to_s]
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       assert_flash_success
@@ -391,7 +391,7 @@ module SpeciesLists
             objects_img: "1",
             project_ids: [proj2.id.to_s]
           },
-          commit: :REMOVE.l
+          commit: :remove.ti
         }
       )
       assert_flash_warning # already done

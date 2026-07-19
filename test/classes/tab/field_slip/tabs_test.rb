@@ -15,7 +15,7 @@ module Tab::FieldSlip
     def test_index
       tab = Tab::FieldSlip::Index.new
 
-      assert_equal(:INDEX_OBJECT.t(type: :field_slips), tab.title)
+      assert_equal(:index_object.ti(type: :field_slips), tab.title)
       assert_equal(routes.field_slips_path, tab.path)
       assert_equal(FieldSlip, tab.model)
     end
@@ -31,7 +31,7 @@ module Tab::FieldSlip
     def test_show
       tab = Tab::FieldSlip::Show.new(field_slip: @field_slip)
 
-      assert_equal(:SHOW_OBJECT.t(type: :field_slip), tab.title)
+      assert_equal(:show_object.t(type: :field_slip), tab.title)
       assert_equal(routes.field_slip_path(@field_slip), tab.path)
       assert_equal(@field_slip, tab.model)
     end

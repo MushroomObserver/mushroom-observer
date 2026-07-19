@@ -14,7 +14,7 @@ module Views::Controllers::Names::Trackers
       html = render_form(model: NameTracker.new(name: @name))
 
       # Submit button for new tracker
-      assert_html(html, "button[type='submit']", text: :ENABLE.t)
+      assert_html(html, "button[type='submit']", text: :enable.ti)
 
       # Note template checkbox and help
       assert_html(html, "body", text: :email_tracking_note.l)
@@ -31,8 +31,8 @@ module Views::Controllers::Names::Trackers
     def test_existing_tracker_form
       html = render_form(model: name_trackers(:coprinus_comatus_name_tracker))
 
-      assert_html(html, "button[type='submit']", text: :UPDATE.t)
-      assert_html(html, "button[type='submit']", text: :DISABLE.t)
+      assert_html(html, "button[type='submit']", text: :update.ti)
+      assert_html(html, "button[type='submit']", text: :disable.ti)
     end
 
     private

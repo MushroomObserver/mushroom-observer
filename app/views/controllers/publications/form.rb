@@ -50,7 +50,7 @@ module Views::Controllers::Publications
     end
 
     def submit_text
-      @model.persisted? ? :SAVE.t : :CREATE.t
+      @model.persisted? ? :save.ti : :create.ti
     end
   end
 end

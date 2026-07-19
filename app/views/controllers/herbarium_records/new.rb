@@ -11,7 +11,7 @@ module Views::Controllers::HerbariumRecords
 
     def view_template
       container_class(:full)
-      add_new_title(:add_object, :HERBARIUM_RECORD)
+      add_new_title(:add_object, :herbarium_record)
       add_context_nav(
         Tab::HerbariumRecord::FormNew.new(
           observation: @observation, q_param: q_param
@@ -28,7 +28,7 @@ module Views::Controllers::HerbariumRecords
 
     def render_form_column
       span(class: "text-larger mb-3") do
-        trusted_html(:Observation.t)
+        trusted_html(:observation.ti)
         plain(" ##{@observation.id}")
       end
       render(Form.new(@herbarium_record, observation: @observation))

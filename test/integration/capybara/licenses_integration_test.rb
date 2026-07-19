@@ -6,9 +6,9 @@ require("test_helper")
 class LicensesIntegrationTest < CapybaraIntegrationTestCase
   def test_link_to_licenses
     login(users(:admin))
-    assert_no_selector(:link, text: :LICENSES.l)
+    assert_no_selector(:link, text: :licenses.ti)
 
     first("button", text: "Turn on Admin Mode").click
-    assert_selector(:link, text: :LICENSES.l)
+    assert_selector(:link, text: :licenses.ti)
   end
 end

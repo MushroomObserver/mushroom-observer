@@ -145,7 +145,7 @@ module Views::Controllers::VisualGroups
     # the registered Rails `link_to` helper keeps them.
     def render_reload_link
       Button(
-        name: :RELOAD.t,
+        name: :reload.ti,
         class: "ml-2",
         onclick: "window.location.reload(true)"
       )

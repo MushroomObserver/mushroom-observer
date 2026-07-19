@@ -13,12 +13,12 @@ module Views::Controllers::VisualGroups
 
     def test_renders_form_with_name_field
       assert_html(@html, "input[name='visual_group[name]'][size='40']")
-      assert_html(@html, "span", text: :VISUAL_GROUP.l)
+      assert_html(@html, "span", text: :visual_group.ti)
     end
 
     def test_renders_form_with_description_field
       assert_html(@html, "label[for='visual_group_description']",
-                  text: :DESCRIPTION.l)
+                  text: :description.ti)
       assert_html(@html,
                   "textarea[name='visual_group[description]']" \
                   "[rows='10'][cols='60']")
@@ -26,12 +26,12 @@ module Views::Controllers::VisualGroups
 
     def test_renders_form_with_approved_checkbox
       assert_html(@html, "label[for='visual_group_approved']",
-                  text: :APPROVED.l)
+                  text: :approved.ti)
       assert_html(@html, "input[name='visual_group[approved]']")
     end
 
     def test_renders_submit_button
-      assert_html(@html, "button[type='submit']", text: :SUBMIT.t)
+      assert_html(@html, "button[type='submit']", text: :submit.ti)
       assert_html(@html, ".center-block")
     end
 

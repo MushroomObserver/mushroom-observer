@@ -8,7 +8,7 @@ module Views::Controllers::Locations
       prop :local, _Boolean, default: true
 
       def view_template
-        add_new_title(:search_object, :LOCATIONS)
+        add_new_title(:search_object, :locations)
         container_class(:wide)
 
         div(id: "locations_search_container") do

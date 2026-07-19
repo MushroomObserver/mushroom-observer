@@ -80,7 +80,7 @@ class Components::Form::UploadGallery::Fields < Components::Base
     field_component = Components::ApplicationForm::SelectField.new(
       field,
       collection: license_options,
-      wrapper_options: { label: :LICENSE, help_collapse: true }
+      wrapper_options: { label: :license.ti, help_collapse: true }
     )
     field_component.with_help { trusted_html(:form_images_license_help.t) }
     render(field_component)

@@ -172,7 +172,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     within("#pattern_search_form") { click_button("Search") }
 
     assert_no_selector("#content div.alert-warning")
-    # assert_selector("#title", text: :NAMES.l)
+    # assert_selector("#title", text: :names.ti)
     assert_selector("#filters", text: corrected_pattern)
   end
 
@@ -203,7 +203,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit(edit_lifeform_of_name_path(name))
 
     check("lifeform[lichenicolous]")
-    click_on(:SAVE.l)
+    click_on(:save.ti)
 
     assert_equal(" lichenicolous ", name.reload.lifeform,
                  "Failed to update lifeform")
@@ -272,7 +272,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     end
 
     check("propagate_lifeform[add_lichenicolous]")
-    click_on(:APPLY.l)
+    click_on(:apply.ti)
 
     assert_equal(genus.lifeform, species.reload.lifeform,
                  "Failed to propogate lifeform to subtaxon")
@@ -285,7 +285,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit(edit_classification_of_name_path(name))
 
     fill_in("name[classification]", with: "Kingdom: _Fungi_")
-    click_on(:SAVE.l)
+    click_on(:save.ti)
 
     assert_match(/Fungi/, name.reload.classification)
   end
@@ -302,7 +302,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     visit(form_to_inherit_classification_of_name_path(name))
 
     fill_in("inherit_classification[parent]", with: parent.text_name)
-    click_on(:SUBMIT.l)
+    click_on(:submit.ti)
 
     assert_match(/Basidiomycota/, name.reload.classification)
   end

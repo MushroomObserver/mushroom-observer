@@ -19,7 +19,7 @@ module Views::Controllers::Support
     def render_details
       plain("#{:confirm_amount.l}: $#{formatted_amount}")
       br
-      yep_or_nope = @donation.recurring ? :YEP.l : :NOPE.l
+      yep_or_nope = @donation.recurring ? :yep.ti : :nope.ti
       plain("#{:confirm_recurring.l}: #{yep_or_nope}")
       br
       render_who_or_anonymous

@@ -61,14 +61,14 @@ class InatObsTest < UnitTestCase
     snapshot_subparts =
       <<~SNAPSHOT.gsub(/^\s+/, "").chomp
         #{mock_inat_obs.send(:copyright)}
-        #{:USER.l}: #{mock_inat_obs[:user][:login]}
-        #{:OBSERVED.l}: #{mock_inat_obs.when}
+        #{:user.l.upcase_first}: #{mock_inat_obs[:user][:login]}
+        #{:observed.l.upcase_first}: #{mock_inat_obs.when}
         #{:show_observation_inat_lat_lng.l}: #{mock_inat_obs.lat_lon_accuracy}
-        #{:PLACE.l}: #{mock_inat_obs[:place_guess]}
-        #{:ID.l}: #{mock_inat_obs.inat_taxon_name}
-        #{:DQA.l}: #{mock_inat_obs.dqa}
+        #{:place.l.upcase_first}: #{mock_inat_obs[:place_guess]}
+        #{:id.l.upcase_first}: #{mock_inat_obs.inat_taxon_name}
+        #{:dqa.l.upcase_first}: #{mock_inat_obs.dqa}
         #{:show_observation_inat_suggested_ids.l}: #{mock_inat_obs.suggested_id_names}
-        #{:OBSERVATION_FIELDS.t}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}
+        #{:observation_fields.l.upcase_first}: #{mock_inat_obs.obs_fields(mock_inat_obs.inat_obs_fields)}
       SNAPSHOT
     expected_snapshot = "\n#{snapshot_subparts}"
     assert_equal(expected_snapshot, mock_inat_obs.snapshot)

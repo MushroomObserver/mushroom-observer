@@ -11,7 +11,7 @@ module Views::Controllers::Projects
     end
 
     def view_template
-      add_new_title(:create_object, :PROJECT)
+      add_new_title(:create_object, :project)
       add_context_nav(::Tab::Project::FormNew.new)
 
       render(Views::Controllers::Projects::Form.new(

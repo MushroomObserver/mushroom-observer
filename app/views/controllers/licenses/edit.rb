@@ -18,7 +18,7 @@ module Views::Controllers::Licenses
     # "Editing: <display_name> #(id):"
     def edit_title
       capture do
-        plain("#{:EDITING.l}: ")
+        plain("#{:editing.ti}: ")
         trusted_html(show_title_html)
       end
     end

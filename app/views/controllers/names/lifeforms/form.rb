@@ -23,7 +23,7 @@ module Views::Controllers::Names::Lifeforms
         end
       end
 
-      submit(:SAVE.t, center: true)
+      submit(:save.ti, center: true)
     end
 
     private

@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Smoke tests for each sidebar Collection. Single-tab POROs aren't
-# tested individually — each is a one-line `:KEY.t` + path + id;
+# tested individually — each is a one-line `:key.t` + path + id;
 # composition tests below pin the wiring.
 module Tab::Sidebar
   class CollectionsTest < UnitTestCase

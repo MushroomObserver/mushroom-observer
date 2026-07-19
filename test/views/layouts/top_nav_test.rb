@@ -40,14 +40,14 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     # the create button's "green" styling is part of its identity).
     assert_html(html, "a.btn-success[href='#{routes.new_observation_path}']")
     # aria-label and title are the localized "New Observation" string
-    full_label = "#{:NEW.l} #{:OBSERVATION.l}"
+    full_label = "#{:new.ti} #{:observation.ti}"
     assert_html(html, "a.btn-success[aria-label='#{full_label}']")
     assert_html(html, "a.btn-success[title='#{full_label}']")
     assert_html(html, "a.btn-success[data-toggle='tooltip']")
     # Responsive content: the word "Add" appears in a span hidden at
     # xs width and shown at sm and up.
     assert_html(html, "a.btn-success span.d-none.d-sm-inline",
-                text: :ADD.l)
+                text: :add.ti)
   end
 
   def test_nav_create_hidden_when_user_absent
@@ -85,7 +85,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     selector = "#rubric a[href='#{routes.observations_path}']"
     assert_html(html, selector)
-    assert_html(html, selector, text: :OBSERVATIONS.t)
+    assert_html(html, selector, text: :observations.ti)
   end
 
   def test_rubric_renders_as_plain_text_on_index_page
@@ -131,7 +131,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
                "[data-action='nav#toggleOffcanvas']"
     assert_html(html, selector)
     # Logo glyph
-    assert_html(html, "#left_nav_toggle img[alt='#{:MENU.t}']")
+    assert_html(html, "#left_nav_toggle img[alt='#{:menu.ti}']")
   end
 
   def test_search_nav_toggle_renders_with_collapse_wiring

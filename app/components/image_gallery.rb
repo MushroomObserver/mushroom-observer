@@ -24,7 +24,7 @@ class Components::ImageGallery < Components::Base
   prop :user, _Nilable(::User)
   prop :object, _Nilable(::AbstractModel), default: nil
   prop :size, Components::Image::Base::Size, default: :large
-  prop :title, ::String, default: -> { :IMAGES.t }
+  prop :title, ::String, default: -> { :images.ti }
   prop :links, ::String, default: ""
   prop :thumbnails, _Boolean, default: true
   prop :carousel_id, _Nilable(::String), default: nil

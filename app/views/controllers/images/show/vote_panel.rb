@@ -127,8 +127,8 @@ module Views::Controllers::Images
         Table(sorted_votes,
               variant: :striped, identifier: "show-votes",
               class: "mt-3 mb-0") do |t|
-          t.column(:USER.t) { |vote| render_vote_user_cell(vote) }
-          t.column(:VOTE.t) { |vote| image_vote_as_short_string(vote.value) }
+          t.column(:user.ti) { |vote| render_vote_user_cell(vote) }
+          t.column(:vote.ti) { |vote| image_vote_as_short_string(vote.value) }
         end
       end
 

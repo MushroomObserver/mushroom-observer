@@ -55,6 +55,24 @@ class LocalizationFilesTest < UnitTestCase
     )
   end
 
+  # Translation tags are lowercase-only (GH issue #4843) -- title-cased
+  # display goes through Symbol#ti, not a separate ALL-CAPS twin tag.
+  # A non-lowercase tag key is either dead (nothing can reach it
+  # exact-case, since MO/LowercaseTranslationTag bans uppercase Symbol
+  # call sites) or reintroduces the twin-tag foot-gun that made the
+  # `:Votes.t` bug (574 redundant translation_strings queries)
+  # possible in the first place.
+  def test_no_uppercase_tag_keys
+    offenders = i18n_keys.map(&:to_s).reject { |tag| tag == tag.downcase }
+    assert_empty(
+      offenders,
+      "Found ALL-CAPS/mixed-case translation tag key(s) in en.txt: " \
+      "#{offenders.sort.join(", ")}\n" \
+      "Translation tags must be lowercase; use Symbol#ti for a " \
+      "title-cased presentation instead of a twin tag."
+    )
+  end
+
   def test_find_missing_tags_and_duplicate_method_defs
     tags = known_tags
     missing_tags = []

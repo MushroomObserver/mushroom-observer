@@ -75,13 +75,13 @@ module SpeciesLists
 
     def commit_and_redirect
       case params[:commit]
-      when :ATTACH.l
+      when :attach.ti
         if attach_objects_to_projects
           redirect_to(species_list_path(@list.id)) and return
         end
 
         flash_warning(:runtime_no_changes.t)
-      when :REMOVE.l
+      when :remove.ti
         if remove_objects_from_projects
           redirect_to(species_list_path(@list.id)) and return
         end

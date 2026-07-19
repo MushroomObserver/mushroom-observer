@@ -84,7 +84,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     )}']"
     assert_html(html, "#{form_selector} button span.glyphicon-remove-circle")
     assert_html(html, "#{form_selector} button span.sr-only",
-                text: :REMOVE.t)
+                text: :remove.ti)
   end
 
   private

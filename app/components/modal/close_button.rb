@@ -20,7 +20,7 @@
 #   render(Components::Modal::CloseButton.new(target: cancel_path))
 class Components::Modal::CloseButton < Components::Base
   prop :target, _Nilable(_Union(String, Hash, ::AbstractModel)), default: nil
-  prop :name, String, default: -> { :CANCEL.l }
+  prop :name, String, default: -> { :cancel.ti }
   # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
   # so a caller passing an explicit `key: nil` (not just omitting the
   # key) would otherwise raise a Literal::TypeError.

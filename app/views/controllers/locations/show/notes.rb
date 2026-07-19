@@ -10,7 +10,7 @@ module Views::Controllers::Locations
         return if @location.notes.blank?
 
         render(::Components::Panel.new(panel_id: "location_notes")) do |panel|
-          panel.with_heading { :NOTES.l }
+          panel.with_heading { :notes.ti }
           panel.with_body { trusted_html(@location.notes.to_s.tpl) }
         end
       end

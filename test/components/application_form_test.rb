@@ -732,16 +732,16 @@ class ApplicationFormTest < ComponentTestCase
   # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
   # button shows "Updating" in-flight, anything else shows "Submitting".
   def test_submit_default_submits_with_for_update_button
-    form = render_form { submit(:UPDATE.l) }
+    form = render_form { submit(:update.ti) }
 
-    submits_with = "data-turbo-submits-with='#{:UPDATING.l}'"
+    submits_with = "data-turbo-submits-with='#{:updating.ti}'"
     assert_html(form, "button[type='submit'][#{submits_with}]")
   end
 
   def test_submit_default_submits_with_for_create_button
-    form = render_form { submit(:CREATE.l) }
+    form = render_form { submit(:create.ti) }
 
-    submits_with = "data-turbo-submits-with='#{:SUBMITTING.l}'"
+    submits_with = "data-turbo-submits-with='#{:submitting.ti}'"
     assert_html(form, "button[type='submit'][#{submits_with}]")
   end
 
@@ -798,19 +798,19 @@ class ApplicationFormTest < ComponentTestCase
 
     # Image file field
     assert_html(form, "input[type='file']")
-    assert_includes(form, :IMAGE.l)
+    assert_includes(form, :image.ti)
 
     # Copyright holder field
     assert_includes(form, :image_copyright_holder.l)
     assert_html(form, "input[value='Test User']")
 
     # Year select
-    assert_includes(form, :WHEN.l)
+    assert_includes(form, :when.ti)
     assert_html(form, "select")
     assert_html(form, "option[value='2024'][selected]")
 
     # License select
-    assert_includes(form, :LICENSE.l)
+    assert_includes(form, :license.ti)
     assert_includes(form, "Creative Commons")
     assert_includes(form, "Public Domain")
   end

@@ -4,7 +4,7 @@
 # displayed next to an object's title (matrix box, project banner,
 # species-list listing row, etc.). Clicking the badge copies the
 # numeric id into the clipboard.
-class Components::IdBadge < Components::Base
+class Components::IDBadge < Components::Base
   prop :object, ::AbstractModel
   prop :extra_class, _Nilable(String), default: "mr-4"
 
@@ -15,10 +15,10 @@ class Components::IdBadge < Components::Base
       role: "button",
       data: {
         toggle: "tooltip", placement: "bottom",
-        title: :COPY_THIS_ID.l,
+        title: :copy_this_id.ti,
         controller: "clipboard", clipboard_target: "source",
         action: "clipboard#copy",
-        clipboard_copied_value: :COPIED.l
+        clipboard_copied_value: :copied.ti
       }
     ) do
       plain(@object.id&.to_s || "?")

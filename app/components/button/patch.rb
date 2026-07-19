@@ -4,7 +4,7 @@
 #
 # @example
 #   Button(type: :patch,
-#     name: :ACTIVATE.l,
+#     name: :activate.ti,
 #     target: account_activate_api_key_path(key.id)
 #   )
 class Components::Button::Patch < Components::Button::CRUDBase

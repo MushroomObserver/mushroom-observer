@@ -8,7 +8,7 @@ module Views::Controllers::Locations
       def view_template
         div(id: "locations_search_help") do
           p(class: "mt-3 font-weight-bold") do
-            plain("#{:LOCATIONS.l} #{:SEARCHES.l}")
+            plain("#{:locations.ti} #{:searches.ti}")
           end
           trusted_html(:pattern_search_terms_help.tp)
           trusted_html(::PatternSearch::Location.terms_help.tp)

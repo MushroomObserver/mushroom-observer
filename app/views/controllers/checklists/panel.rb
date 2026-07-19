@@ -84,7 +84,7 @@ module Views::Controllers::Checklists
 
       Button(
         type: :delete,
-        name: :REMOVE.l,
+        name: :remove.ti,
         target: project_target_name_path(
           project_id: @context.project.id, id: name_id
         ),

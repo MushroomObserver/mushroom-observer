@@ -23,7 +23,7 @@ class ProjectAliasFormSystemTest < ApplicationSystemTestCase
                     visible: :all)
 
     # Switch to User type
-    select(:USER.l, from: "project_alias[target_type]")
+    select(:user.ti, from: "project_alias[target_type]")
 
     # Now user autocompleter should be visible, location hidden
     assert_selector("[data-type-switch-type='user'].collapse.in")
@@ -31,7 +31,7 @@ class ProjectAliasFormSystemTest < ApplicationSystemTestCase
                     visible: :all)
 
     # Switch back to Location
-    select(:LOCATION.l, from: "project_alias[target_type]")
+    select(:location.ti, from: "project_alias[target_type]")
 
     # Location visible again, user hidden
     assert_selector("[data-type-switch-type='location'].collapse.in")
