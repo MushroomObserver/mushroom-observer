@@ -20,7 +20,7 @@ module Views::Layouts
     def view_template
       ul(class: "nav d-flex align-items-center " \
                 "justify-content-end mt-0 h4 object_edit") do
-        li { render_edit_button } if can_edit_object?
+        li { render_edit_button } if can_edit_object? && !read_only_reflection?
         li { render_delete_button } if can_destroy_object?
       end
     end
@@ -41,6 +41,13 @@ module Views::Layouts
 
     def can_edit_object?
       in_admin_mode? || @object.can_edit?(@user)
+    end
+
+    # A read-only reflection (#4214) can't have its scalar core edited on
+    # MO, so no edit icon -- change it at the source and resync. Delete is
+    # a separate lifecycle concern and stays available.
+    def read_only_reflection?
+      @object.respond_to?(:reflection?) && @object.reflection?
     end
 
     def can_destroy_object?

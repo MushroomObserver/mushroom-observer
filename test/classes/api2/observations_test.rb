@@ -556,6 +556,26 @@ class API2::ObservationsTest < UnitTestCase
     assert_obj_arrays_equal([obs], spec.observations)
   end
 
+  # A read-only reflection (#4214) can't be edited through the API
+  # either, even by its owner — the setter raises before any update.
+  def test_patching_a_reflection_is_blocked
+    obs = observations(:coprinus_comatus_obs)
+    assert(obs.can_edit?(rolf), "owner would otherwise be able to edit")
+    obs.update_column(:reflected_at, Time.zone.now)
+    params = {
+      method: :patch,
+      action: :observation,
+      api_key: @api_key.key,
+      id: obs.id,
+      set_date: "2012-12-12"
+    }
+    assert_api_fail(params)
+    assert(@api.errors.any?(API2::ObservationIsReadOnly),
+           "editing a reflection should raise ObservationIsReadOnly")
+    assert_not_equal(Date.parse("2012-12-12"), obs.reload.when,
+                     "a reflection's date must not change via the API")
+  end
+
   def test_patching_observations
     rolfs_obs = observations(:coprinus_comatus_obs)
     marys_obs = observations(:detailed_unknown_obs)

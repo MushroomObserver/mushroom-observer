@@ -123,6 +123,10 @@ class API2
     def build_setter(params)
       lambda do |obs|
         must_have_edit_permission!(obs)
+        # A read-only reflection is kept in sync from its source (#4214);
+        # block scalar-core edits here as the web edit form does.
+        raise(ObservationIsReadOnly.new(obs)) if obs.reflection?
+
         update_notes_fields(obs)
         obs.update!(params)
         update_images(obs)
