@@ -29,7 +29,7 @@
 #     panel.with_thumbnail { image("photo.jpg") }
 #     panel.with_body { "First section" }
 #     panel.with_body(collapse: true) { "Second section" }
-#     panel.witih_footer { "Footer text" }
+#     panel.with_footer { "Footer text" }
 #   end
 #
 # @example Panel with custom class and ID
