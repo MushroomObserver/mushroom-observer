@@ -66,11 +66,14 @@ module Views::Controllers::Observations
       # differing sibling values as adopt options (empty when they agree).
       def occurrence_note_parts(shared_keys)
         adopt = shared_adopt_options
+        inherited = shared_inherited_values
         shared_keys.map do |key|
           Components::Form::Notes::Part.new(
             key: key, value: model.notes[key].to_s,
             label: key.to_s.tr("_", " "),
-            adopt_options: adopt[key] || [], notes_state: notes_state_for(key)
+            adopt_options: adopt[key] || [],
+            notes_state: notes_state_for(key),
+            inherited_value: inherited[key]
           )
         end
       end
@@ -81,6 +84,15 @@ module Views::Controllers::Observations
         return {} unless model.shows_merged_notes?
 
         model.occurrence.adopt_options_by_key
+      end
+
+      # The value each shared key inherits (most-recent sibling's) so the
+      # form's :inherit state can show it greyed; {} when not the primary
+      # of a multi-member occurrence.
+      def shared_inherited_values
+        return {} unless model.shows_merged_notes?
+
+        model.occurrence.inherited_values_by_key
       end
 
       # What the primary currently shows for a shared key: a stored value

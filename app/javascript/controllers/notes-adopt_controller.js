@@ -5,8 +5,9 @@ import { Controller } from "@hotwired/stimulus"
 // button either copies a specific value into the textarea (its own or a
 // sibling's, carried in data-notes-value) or applies an action:
 //   - "current"/"adopt": copy that value in (editable).
-//   - "inherit": clear + disable, so it submits nothing and the value
-//     stays inherited via the display-time merge.
+//   - "inherit": show the inherited value (from the row) + disable, so it
+//     submits nothing and the value stays inherited via the display-time
+//     merge -- greyed so you can see what will display.
 //   - "hide": clear + make readonly (not disabled), so a blank still
 //     submits (suppressing the inherited value) but can't be typed into.
 //   - "concatenate": join all distinct values (own + siblings) into one.
@@ -24,7 +25,10 @@ export default class extends Controller {
 
     switch (button.dataset.notesAction) {
       case "inherit":
-        this.setRow(row, textarea, { value: "", disabled: true })
+        this.setRow(row, textarea, {
+          value: row.dataset.notesInheritedValue || "",
+          disabled: true,
+        })
         break
       case "hide":
         this.setRow(row, textarea, { value: "", readOnly: true })

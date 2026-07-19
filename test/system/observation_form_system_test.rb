@@ -1023,7 +1023,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_equal("red", find(selector).value, "restores its own value")
 
       find("button[data-notes-action='inherit']").click
-      assert_equal("", find(selector).value)
+      assert_equal("brown", find(selector).value,
+                   "inherit shows the value it inherits (the sibling's)")
       assert(find(selector).disabled?, "inherit disables the textarea")
 
       find("button[data-notes-action='hide']").click

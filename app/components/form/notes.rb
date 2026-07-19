@@ -33,11 +33,21 @@ class Components::Form::Notes < Components::Base
   # shows for the key. It renders value + action buttons (This
   # Observation / each sibling / Inherit / Hide / All) that drive the
   # textarea; see `render_occurrence_part`.
-  Part = Data.define(:key, :value, :label, :adopt_options, :notes_state) do
-    def initialize(key:, value:, label:, adopt_options: nil, notes_state: nil)
+  Part = Data.define(:key, :value, :label, :adopt_options, :notes_state,
+                     :inherited_value) do
+    def initialize(key:, value:, label:, adopt_options: nil,
+                   notes_state: nil, inherited_value: nil)
       super
     end
   end
+
+  # The value beside a source button is a single line that fills the
+  # remaining width and ellipsizes -- so it shows more on a wide screen
+  # and less on a phone, without wrapping or blowing out the row. Click
+  # the button to see the full value in the textarea.
+  VALUE_PREVIEW_STYLE =
+    "flex:1;min-width:0;overflow:hidden;" \
+    "text-overflow:ellipsis;white-space:nowrap;"
 
   prop :form, ::Components::ApplicationForm
   prop :parts, _Array(Part)
@@ -113,11 +123,16 @@ class Components::Form::Notes < Components::Base
   # shows for the key -- its own value, an inherited value, nothing
   # (hide), or a specific sibling's value -- and drive the textarea.
   #
-  # :inherit -> disabled (submits nothing, so the value stays inherited).
+  # :inherit -> disabled, showing the value it inherits (greyed, so you
+  # see what will display) -- disabled submits nothing, so the value
+  # stays inherited via the display-time merge.
   # :hide -> readonly, not disabled: a readonly field still submits its
   # (blank) value, so the merge suppresses the inherited one, but can't
   # be typed into (which would silently turn Hide into a stored value) --
   # to change it you click another button. Both render greyed.
+  #
+  # The inherited value also rides on the row (data-notes-inherited-value)
+  # so clicking Inherit later can restore it without re-querying siblings.
   def render_occurrence_part(notes_ns, part)
     inherit = part.notes_state == :inherit
     hide = part.notes_state == :hide
@@ -126,9 +141,11 @@ class Components::Form::Notes < Components::Base
       wrapper_options: {
         label: part.label,
         wrap_class: muted ? "text-muted" : nil,
-        wrap_data: { notes_row: "" }
+        wrap_data: { notes_row: "",
+                     notes_inherited_value: part.inherited_value.to_s }
       },
-      value: part.value, rows: 3, disabled: inherit, readonly: hide,
+      value: inherit ? part.inherited_value.to_s : part.value,
+      rows: 3, disabled: inherit, readonly: hide,
       style: "resize: vertical;", data: { notes_adopt_target: "value" }
     )
     field.with_prepend { render_value_buttons(part) }
@@ -142,7 +159,7 @@ class Components::Form::Notes < Components::Base
   # marked active so Inherit and Hide stay distinguishable when the
   # textarea is empty.
   def render_value_buttons(part)
-    div(class: "small mb-1", data: { notes_values: "" }) do
+    div(class: "small mb-2", data: { notes_values: "" }) do
       render_source_buttons(part)
       render_action_buttons(part)
     end
@@ -159,20 +176,22 @@ class Components::Form::Notes < Components::Base
     end
   end
 
-  # A source button labelled by its origin, with the (truncated) value
-  # shown beside it. The full raw value rides in data-notes-value so a
-  # click copies it verbatim into the textarea.
+  # A source button labelled by its origin, with the value on one line
+  # beside it. The full raw value rides in data-notes-value so a click
+  # copies it verbatim into the textarea.
   def render_value_button(action, label, value, active:)
-    div do
+    div(class: "d-flex align-items-baseline mb-1") do
       button(type: "button", class: button_class(active),
              data: { notes_action: action, notes_value: value,
                      action: "notes-adopt#choose" }) { label }
-      plain(": #{shared_value_preview(value)}")
+      span(class: "ml-2", style: VALUE_PREVIEW_STYLE) do
+        shared_value_preview(value)
+      end
     end
   end
 
   def render_action_buttons(part)
-    div(class: "mt-1") do
+    div(class: "d-flex flex-wrap mt-1") do
       action_button(:inherit, :form_observations_notes_inherit.l,
                     active: part.notes_state == :inherit)
       action_button(:hide, :form_observations_notes_hide.l,
@@ -192,11 +211,11 @@ class Components::Form::Notes < Components::Base
   end
 
   def button_class(active)
-    class_names("btn btn-sm btn-default mr-1", "active" => active)
+    class_names("btn btn-default mr-2 mb-1", "active" => active)
   end
 
   def shared_value_preview(value)
-    value.squish.truncate(120)
+    value.squish
   end
 
   # "All" (concatenate) only makes sense with 2+ distinct values to

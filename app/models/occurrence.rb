@@ -125,6 +125,18 @@ class Occurrence < AbstractModel
     end.uniq
   end
 
+  # For the primary's EDIT form: per shared notes key, the value that
+  # would be inherited if the primary held none of its own -- the
+  # most-recent sibling's non-blank value (the same one merge_notes_key
+  # picks). Lets the form's "Inherit" state show what it resolves to.
+  def inherited_values_by_key
+    _primary, siblings = primary_and_ranked_siblings
+    sibling_note_keys.index_with do |key|
+      siblings.find { |sib| sib.notes[key].to_s.strip.present? }&.
+        notes&.[](key)
+    end
+  end
+
   # Auto-destroy if reduced to fewer than 2 observations,
   # unless linked to a field slip (which needs the occurrence).
   def destroy_if_incomplete!

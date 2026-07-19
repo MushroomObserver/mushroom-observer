@@ -129,6 +129,13 @@ class FormNotesTest < ComponentTestCase
                       "[disabled][data-notes-adopt-target='value']")
     assert_html(html, "textarea[name='observation[notes][odor]'][readonly]")
 
+    # :inherit shows the inherited value greyed (disabled), and the row
+    # carries it so a click can restore it.
+    assert_html(html, "textarea[name='observation[notes][substrate]']",
+                text: "wood")
+    assert_html(html,
+                "[data-notes-row][data-notes-inherited-value='wood']")
+
     # "This Observation" button only where the primary stores a value
     # (cap), active, carrying the raw value; siblings carry theirs.
     assert_html(html, "button[data-notes-action='current']" \
@@ -250,7 +257,7 @@ class OccurrenceFormNotes < Components::ApplicationForm
                  Components::Form::Notes::Part.new(
                    key: :substrate, value: "", label: "substrate",
                    adopt_options: [[123, "wood"], [124, "bark"]],
-                   notes_state: :inherit
+                   notes_state: :inherit, inherited_value: "wood"
                  ),
                  Components::Form::Notes::Part.new(
                    key: :odor, value: "", label: "odor",

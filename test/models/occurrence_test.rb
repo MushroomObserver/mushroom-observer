@@ -1200,6 +1200,30 @@ class OccurrenceTest < UnitTestCase
     assert_equal([:Substrate].to_set, occ.sibling_note_keys.to_set)
   end
 
+  # ---- inherited_values_by_key (what the :inherit state shows greyed) ----
+
+  def test_inherited_values_by_key_picks_most_recent_sibling_value
+    set_notes(@obs1, Cap: "red") # primary -- not a source
+    set_notes(@obs2, Substrate: "older")
+    set_notes(@obs3, Substrate: "newer") # more recent -> winner
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago)
+
+    assert_equal("newer", occ.inherited_values_by_key[:Substrate])
+  end
+
+  def test_inherited_values_by_key_skips_blank_sibling_values
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "wood") # only non-blank value
+    set_notes(@obs3, Substrate: "   ") # blank -> skipped even if newer
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago)
+
+    assert_equal("wood", occ.inherited_values_by_key[:Substrate])
+  end
+
   private
 
   def set_notes(obs, **notes)

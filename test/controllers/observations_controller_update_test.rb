@@ -66,6 +66,9 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select(
       "textarea[name='observation[notes][Substrate]'][disabled]"
     )
+    # The disabled textarea shows the value it inherits (the sibling's).
+    assert_select("textarea[name='observation[notes][Substrate]']",
+                  text: "on birch")
     assert_select("button[data-notes-action='inherit'].active")
     assert_select("button[data-notes-value='on birch']")
   end
