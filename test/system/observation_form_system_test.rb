@@ -290,6 +290,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Create observation with two geotagged images with different coordinates
     visit(new_observation_path)
     assert_selector("body.observations__new")
+    # The new-observation form copies gps_hidden from the user's last
+    # observation (`defaults_from_last_observation_created`), with no
+    # recency window (unlike `when`) -- so it may already be checked
+    # here depending on katrina's fixture history (currently true, via
+    # the untrusted_hidden fixture). Force it off regardless: the
+    # uploaded images' GPS needs to survive (Image::Processor.
+    # strip_original_gps would otherwise permanently strip it from the
+    # originals on save). The checkbox lives inside a closed Bootstrap
+    # `.collapse` section (#observation_geolocation) not opened by
+    # anything at this point in the flow, so a real click isn't
+    # possible -- set it via JS.
+    execute_script("document.getElementById(" \
+                   "'observation_gps_hidden').checked = false")
 
     # Upload first geotagged image (Miami area)
     click_attach_file("geotagged.jpg")
@@ -375,6 +388,19 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_checked_field("observation_is_collection_location", visible: :all)
     assert_no_checked_field("observation_specimen", visible: :all)
     assert_field(other_notes_id, with: "", visible: :all)
+
+    # The new-observation form copies gps_hidden from the user's last
+    # observation (`defaults_from_last_observation_created`), with no
+    # recency window (unlike `when`) -- so it may already be checked
+    # here depending on katrina's fixture history. Force it off
+    # regardless: Image::Processor.strip_original_gps would otherwise
+    # permanently strip GPS from the geotagged image uploaded below,
+    # before this test's later EXIF assertions. The checkbox lives
+    # inside a closed Bootstrap `.collapse` section
+    # (#observation_geolocation) not opened by anything at this point
+    # in the flow, so a real click isn't possible -- set it via JS.
+    execute_script("document.getElementById(" \
+                   "'observation_gps_hidden').checked = false")
 
     # Move to the previous step, Images/Details
     images_details = find_by_id("observation_images_details")

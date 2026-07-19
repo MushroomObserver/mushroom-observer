@@ -4,16 +4,16 @@
 #
 # This Phlex component renders an interactive image with lazy loading,
 # lightbox support, voting, and other features. It inherits shared
-# functionality from BaseImage.
+# functionality from Image::Base.
 #
 # @example
-#   render Components::Image::Interactive.new(
+#   InteractiveImage(
 #     user: @user,
 #     image: @image,
 #     size: :thumbnail,
 #     votes: true
 #   )
-class Components::Image::Interactive < Components::Image::Base
+class Components::InteractiveImage < Components::Image::Base
   # Override :image prop to only accept Image instances (not Integer IDs).
   # InteractiveImage is for displaying existing, persisted images.
   # Form components like `Form::UploadGallery::Item` inherit from

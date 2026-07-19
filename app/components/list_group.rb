@@ -62,7 +62,7 @@
 #   end
 #
 # @example Flush variant inside a panel
-#   render(Components::Panel.new) do |panel|
+#   Panel do |panel|
 #     panel.with_body(wrapper: false) do
 #       ListGroup(flush: true) do |list|
 #         @items.each { |i| list.item { plain(i) } }

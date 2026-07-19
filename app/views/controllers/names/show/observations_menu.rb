@@ -24,9 +24,9 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Panel.new(
-             panel_id: "name_observations_menu"
-           )) do |panel|
+    Panel(
+      panel_id: "name_observations_menu"
+    ) do |panel|
       panel.with_heading { plain(:about_this_taxon.l) }
       panel.with_heading_links { render_tracker_link }
       panel.with_body { render_body }

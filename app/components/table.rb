@@ -29,32 +29,32 @@
 # args.
 #
 # @example Column mode (uniform rows)
-#   render(Components::Table.new(@users, variant: :striped)) do |t|
+#   Table(@users, variant: :striped) do |t|
 #     t.column("Name") { |user| user.name }
 #     t.column("Email") { |user| user.email }
 #   end
 #
 # @example Column mode with per-column attrs and identifier
-#   render(Components::Table.new(@users,
-#                                variant: :striped,
-#                                identifier: "user-list")) do |t|
+#   Table(@users,
+#         variant: :striped,
+#         identifier: "user-list") do |t|
 #     t.column("Name", width: "33%") { |user| user.name }
 #     t.column("Actions", class: "text-right") { |u| destroy_button(u) }
 #   end
 #
 # @example Row mode (Stimulus-rooted rows)
-#   render(Components::Table.new(@trackers,
-#                                tbody_id: "field_slip_job_trackers")) do |t|
+#   Table(@trackers,
+#         tbody_id: "field_slip_job_trackers") do |t|
 #     t.column(:FILENAME.t)
 #     t.column(:STATUS.t, class: "text-right")
 #     t.row { |tracker| render(TrackerRow.new(tracker: tracker, user: @user)) }
 #   end
 #
 # @example Body mode (table-level data attrs + mixed rows)
-#   render(Components::Table.new(
+#   Table(
 #     class: "name-lister",
 #     attributes: { data: { controller: "name-list" } }
-#   )) do |t|
+#   ) do |t|
 #     t.column(:NAME.t, width: "20%")
 #     t.column(:OPTIONS.t, width: "80%")
 #     t.body do

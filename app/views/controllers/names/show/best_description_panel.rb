@@ -20,9 +20,9 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
   def view_template
     return if brief_text.blank?
 
-    render(Components::Panel.new(
-             panel_id: "name_general_description"
-           )) do |panel|
+    Panel(
+      panel_id: "name_general_description"
+    ) do |panel|
       panel.with_heading { plain(:show_name_general_description.l) }
       panel.with_heading_links { render_heading_links } if @user
       panel.with_body { trusted_html(brief_text.tpl) }

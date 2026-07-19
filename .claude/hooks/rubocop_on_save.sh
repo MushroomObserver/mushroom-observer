@@ -32,6 +32,21 @@ case "$FILE" in
   *) exit 0 ;;
 esac
 
+# Skip db/schema.rb -- it's auto-generated (no style discipline
+# applied to it) and .rubocop.yml already excludes "db/**/*", but
+# RuboCop's Exclude only applies to auto-discovered targets, not
+# files passed explicitly on the command line, so this hook has to
+# honor the same exclusion itself for schema.rb specifically.
+# Without this, invoking rubocop directly on it triggers a full-file
+# autocorrect (adds frozen_string_literal, reflows every create_table
+# line, etc.) on top of whatever one-line hand-edit prompted the save
+# -- a huge, unreviewable diff unrelated to the actual change.
+# Migrations (db/migrate/*) are NOT excluded here -- they're
+# hand-written code and still expected to pass rubocop normally.
+case "$FILE" in
+  */db/schema.rb) exit 0 ;;
+esac
+
 # Skip files that don't exist (the tool may have failed to write).
 [ -f "$FILE" ] || exit 0
 

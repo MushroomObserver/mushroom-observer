@@ -15,10 +15,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    render(Components::Panel.new(
-             panel_id: "observation_details",
-             panel_class: "name-section"
-           )) do |panel|
+    Panel(panel_id: "observation_details",
+          panel_class: "name-section") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
       panel.with_body { render_body }
