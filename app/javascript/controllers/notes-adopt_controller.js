@@ -7,8 +7,8 @@ import { Controller } from "@hotwired/stimulus"
 //   - "current": restore the primary's own pristine value (enabled).
 //   - "inherit": clear + disable the textarea so it submits nothing and
 //     the value stays inherited via the display-time merge.
-//   - "hide":    clear but keep enabled, so a blank submits and the
-//     display merge suppresses the inherited value.
+//   - "hide":    clear + make readonly (not disabled) so a blank still
+//     submits (suppressing the inherited value) but can't be typed into.
 //   - "adopt" (any sibling value): copy that value in (enabled), which
 //     the primary can then edit.
 //
@@ -33,22 +33,23 @@ export default class extends Controller {
 
     switch (option.dataset.notesAction) {
       case "inherit":
-        this.setRow(row, textarea, "", true)
+        this.setRow(row, textarea, { value: "", disabled: true })
         break
       case "hide":
-        this.setRow(row, textarea, "", false)
+        this.setRow(row, textarea, { value: "", readOnly: true })
         break
       case "current":
-        this.setRow(row, textarea, this.originals.get(textarea) ?? "", false)
+        this.setRow(row, textarea, { value: this.originals.get(textarea) ?? "" })
         break
       default: // "adopt": a specific sibling value
-        this.setRow(row, textarea, option.value, false)
+        this.setRow(row, textarea, { value: option.value })
     }
   }
 
-  setRow(row, textarea, value, disabled) {
+  setRow(row, textarea, { value, disabled = false, readOnly = false }) {
     textarea.value = value
     textarea.disabled = disabled
-    row.classList.toggle("text-muted", disabled)
+    textarea.readOnly = readOnly
+    row.classList.toggle("text-muted", disabled || readOnly)
   }
 }

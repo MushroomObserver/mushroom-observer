@@ -970,8 +970,8 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   # For a :set key whose sibling differs, the value-source dropdown drives
   # the textarea through every state: adopt a sibling value, revert to the
   # current value, inherit (disable so it submits nothing), and hide
-  # (blank but enabled so the blank submits and suppresses the inherited
-  # value).
+  # (blank + readonly so the blank still submits and suppresses the
+  # inherited value, but can't be typed into).
   def test_edit_primary_notes_value_source_transitions
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:detailed_unknown_obs)
@@ -1002,7 +1002,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
       find("select option[data-notes-action='hide']").select_option
       assert_equal("", find(selector).value)
-      assert_not(find(selector).disabled?, "hide clears but keeps it enabled")
+      # readonly (so the blank still submits), not disabled, not typeable.
+      assert_not(find(selector).disabled?, "hide is readonly, not disabled")
+      assert(find(selector)[:readonly], "hide makes the textarea readonly")
     end
   end
 

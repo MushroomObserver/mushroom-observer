@@ -158,12 +158,13 @@ class FormNotesTest < ComponentTestCase
                       "'Cap: #{:form_observations_notes_value_source.l}']")
   end
 
-  # A :hide part (primary stores a blank to suppress): editable-but-empty
-  # textarea, Hide preselected, no Current value option.
-  def test_hide_part_renders_empty_textarea_with_hide_selected
+  # A :hide part (primary stores a blank to suppress): a readonly (not
+  # disabled) empty textarea -- readonly still submits the blank, but
+  # can't be typed into -- with Hide preselected and no Current value.
+  def test_hide_part_renders_readonly_empty_textarea_with_hide_selected
     html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
 
-    assert_html(html, "textarea[name='observation[notes][odor]']")
+    assert_html(html, "textarea[name='observation[notes][odor]'][readonly]")
     assert_no_html(html, "textarea[name='observation[notes][odor]'][disabled]")
     assert_html(html, "select option[data-notes-action='hide'][selected]",
                 text: :form_observations_notes_hide.l)
