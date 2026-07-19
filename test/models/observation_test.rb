@@ -2125,6 +2125,20 @@ class ObservationTest < UnitTestCase
     assert_not(obs.reflection?)
   end
 
+  # Only the owner (or someone who could edit it) may resync a reflection
+  # from its source (#4215); a non-reflection is never resyncable.
+  def test_resyncable_by
+    obs = observations(:imported_inat_obs)
+    assert_not(obs.resyncable_by?(obs.user),
+               "a non-reflection is not resyncable")
+
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert(obs.resyncable_by?(obs.user), "owner can resync a reflection")
+    assert_not(obs.resyncable_by?(users(:mary)),
+               "an unrelated user cannot resync")
+    assert_not(obs.resyncable_by?(nil), "a nil user cannot resync")
+  end
+
   # ----- Coverage gap tests for app/models/observation.rb -----
 
   # field_slip= is a no-op when the slip arg is nil — the early

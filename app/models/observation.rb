@@ -1136,6 +1136,15 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     reflected_at.present?
   end
 
+  # Who may trigger a resync of a reflection from its source (#4215):
+  # the owner or anyone who could otherwise edit it. Admins are allowed
+  # too, but that's request context, so the controller adds it.
+  def resyncable_by?(user)
+    return false unless reflection? && user
+
+    user_id == user.id || can_edit?(user)
+  end
+
   # Structured form of source_credit for external imports — returns
   # { text:, url: } so renderers can build the link element with
   # whatever attributes they need (e.g. target="_blank" for off-site).
