@@ -525,11 +525,15 @@ class UserTest < UnitTestCase
 
   def test_culling_unverified_users
     unverified = users(:unverified)
+    key = APIKey.create!(user: unverified, notes: "cull test")
     msgs = User.cull_unverified_users(dry_run: true)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
+    assert(APIKey.exists?(key.id), "dry run should not delete the api_key")
     msgs = User.cull_unverified_users(dry_run: false)
     assert_equal("Deleted 1 unverified user(s).", msgs.first)
     assert_nil(User.find_by(id: unverified.id))
+    assert_not(APIKey.exists?(key.id),
+               "culling should delete the unverified user's api_key")
   end
 
   def test_lookup_unique_text_name
