@@ -1034,6 +1034,29 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
   end
 
+  # "Concatenate All" joins the primary's value and the sibling values
+  # into the editable textarea.
+  def test_edit_primary_concatenates_shared_note_values
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "brown" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login!(primary.user)
+
+    visit(edit_observation_path(primary.id))
+    assert_selector("body.observations__edit")
+
+    within("#observation_notes_fields") do
+      selector = "textarea[name='observation[notes][Cap]']"
+      find("select option[data-notes-action='concatenate']").select_option
+      assert_equal("red\nbrown", find(selector).value)
+    end
+  end
+
   ##############################################################################
   #  Helper methods
   #

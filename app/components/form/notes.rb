@@ -130,8 +130,32 @@ class Components::Form::Notes < Components::Base
       value: part.value, rows: 3, disabled: inherit, readonly: hide,
       style: "resize: vertical;", data: { notes_adopt_target: "value" }
     )
-    field.with_prepend { render_state_select(part) }
+    field.with_prepend do
+      render_shared_values(part)
+      render_state_select(part)
+    end
     render(field)
+  end
+
+  # Read-only display of the values available for this shared key -- the
+  # primary's own (if any) plus each sibling's -- so the user can see
+  # what they're choosing between, not just the truncated dropdown labels.
+  def render_shared_values(part)
+    div(class: "small text-muted mb-1", data: { notes_values: "" }) do
+      if part.notes_state == :set && part.value.present?
+        div do
+          "#{:form_observations_notes_this_observation.l}: " \
+              "#{shared_value_preview(part.value)}"
+        end
+      end
+      part.adopt_options.each do |obs_id, value|
+        div { "Obs #{obs_id}: #{shared_value_preview(value)}" }
+      end
+    end
+  end
+
+  def shared_value_preview(value)
+    value.squish.truncate(120)
   end
 
   # Value-source picker: the current state's option is preselected, then
@@ -164,6 +188,16 @@ class Components::Form::Notes < Components::Base
         adopt_option_label(obs_id, value)
       end
     end
+    return unless concatenatable?(part)
+
+    state_option(:concatenate, :form_observations_notes_concatenate.l, false)
+  end
+
+  # "Concatenate All" only makes sense with 2+ distinct values to combine
+  # (the primary's own, if any, plus the distinct sibling values).
+  def concatenatable?(part)
+    own = part.notes_state == :set && part.value.present? ? 1 : 0
+    (own + part.adopt_options.size) >= 2
   end
 
   def state_option(action, label, selected)

@@ -11,6 +11,7 @@ import { Controller } from "@hotwired/stimulus"
 //     submits (suppressing the inherited value) but can't be typed into.
 //   - "adopt" (any sibling value): copy that value in (enabled), which
 //     the primary can then edit.
+//   - "concatenate": join all distinct values (own + siblings) into one.
 //
 // Connects to data-controller="notes-adopt"
 export default class extends Controller {
@@ -41,9 +42,26 @@ export default class extends Controller {
       case "current":
         this.setRow(row, textarea, { value: this.originals.get(textarea) ?? "" })
         break
+      case "concatenate":
+        this.setRow(row, textarea, {
+          value: this.concatenatedValue(event.target, textarea)
+        })
+        break
       default: // "adopt": a specific sibling value
         this.setRow(row, textarea, { value: option.value })
     }
+  }
+
+  // All distinct non-blank values for this key -- the primary's own plus
+  // each sibling's (the adopt options) -- joined for the "Concatenate All"
+  // action, so e.g. every observation's `Other` note ends up in one field.
+  concatenatedValue(select, textarea) {
+    const values = [this.originals.get(textarea) ?? ""]
+    select
+      .querySelectorAll('option[data-notes-action="adopt"]')
+      .forEach((o) => values.push(o.value))
+    const distinct = [...new Set(values.map((v) => v.trim()).filter(Boolean))]
+    return distinct.join("\n")
   }
 
   setRow(row, textarea, { value, disabled = false, readOnly = false }) {

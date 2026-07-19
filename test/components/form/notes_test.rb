@@ -173,6 +173,23 @@ class FormNotesTest < ComponentTestCase
     assert_html(html, "option[data-notes-action='current']", count: 1)
   end
 
+  # Each shared row shows a read-only list of the available values (the
+  # primary's own + each sibling's), and offers "Concatenate All" only
+  # where there are 2+ distinct values to combine.
+  def test_shared_values_list_and_concatenate_option
+    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
+
+    this_obs = :form_observations_notes_this_observation.l
+    assert_html(html, "[data-notes-values] div", text: "#{this_obs}: red")
+    assert_html(html, "[data-notes-values] div", text: "Obs 5: brown")
+    assert_html(html, "[data-notes-values] div", text: "Obs 123: wood")
+
+    # cap (own "red" + sibling "brown") and substrate (two siblings) each
+    # have 2 values -> Concatenate All; odor (one sibling) does not.
+    assert_html(html, "select option[data-notes-action='concatenate']",
+                text: :form_observations_notes_concatenate.l, count: 2)
+  end
+
   def test_no_adopt_controller_without_adopt_options
     html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
 
