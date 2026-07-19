@@ -30,8 +30,8 @@ class Components::Form::Notes < Components::Base
   # of the primary's occurrence) carries `adopt_options` -- a list of
   # [source_obs_id, value] sibling values -- and a `notes_state` of one
   # of :set / :hide / :inherit describing what this observation currently
-  # shows for the key. It renders a three-state dropdown (Current value /
-  # Inherit / Hide / a specific observation's value) that drives the
+  # shows for the key. It renders value + action buttons (This
+  # Observation / each sibling / Inherit / Hide / All) that drive the
   # textarea; see `render_occurrence_part`.
   Part = Data.define(:key, :value, :label, :adopt_options, :notes_state) do
     def initialize(key:, value:, label:, adopt_options: nil, notes_state: nil)
@@ -88,7 +88,7 @@ class Components::Form::Notes < Components::Base
 
   # Any occurrence (value-source) row -- keyed on notes_state, not
   # adopt_options, since a shared key whose values agree still gets the
-  # Current/Inherit/Hide dropdown, just no sibling values to adopt.
+  # This Observation / Inherit / Hide buttons, just no sibling to adopt.
   def adopt_rows?
     @parts.any?(&:notes_state)
   end
@@ -108,17 +108,16 @@ class Components::Form::Notes < Components::Base
   # A notes key shared with the occurrence's other observations. Rendered
   # through the same Superform textarea field as the plain rows (so it
   # gets the matching id + `<label for>` association and submits under
-  # `observation[notes][<key>]` identically), with the value-source
-  # dropdown in the field's `prepend` slot. The dropdown picks what this
-  # observation shows for the key -- its own current value, an inherited
-  # value, nothing (hide), or a specific sibling's value -- and drives
-  # the textarea.
+  # `observation[notes][<key>]` identically), with the value + action
+  # buttons in the field's `prepend` slot. They pick what this observation
+  # shows for the key -- its own value, an inherited value, nothing
+  # (hide), or a specific sibling's value -- and drive the textarea.
   #
   # :inherit -> disabled (submits nothing, so the value stays inherited).
   # :hide -> readonly, not disabled: a readonly field still submits its
   # (blank) value, so the merge suppresses the inherited one, but can't
   # be typed into (which would silently turn Hide into a stored value) --
-  # to change it you use the dropdown. Both render greyed.
+  # to change it you click another button. Both render greyed.
   def render_occurrence_part(notes_ns, part)
     inherit = part.notes_state == :inherit
     hide = part.notes_state == :hide
@@ -132,86 +131,79 @@ class Components::Form::Notes < Components::Base
       value: part.value, rows: 3, disabled: inherit, readonly: hide,
       style: "resize: vertical;", data: { notes_adopt_target: "value" }
     )
-    field.with_prepend do
-      render_shared_values(part)
-      render_state_select(part)
-    end
+    field.with_prepend { render_value_buttons(part) }
     render(field)
   end
 
-  # Read-only display of the values available for this shared key -- the
-  # primary's own (if any) plus each sibling's -- so the user can see
-  # what they're choosing between, not just the truncated dropdown labels.
-  def render_shared_values(part)
-    div(class: "small text-muted mb-1", data: { notes_values: "" }) do
-      if part.notes_state == :set && part.value.present?
-        div do
-          "#{:form_observations_notes_this_observation.l}: " \
-              "#{shared_value_preview(part.value)}"
-        end
-      end
-      part.adopt_options.each do |obs_id, value|
-        div { "Obs #{obs_id}: #{shared_value_preview(value)}" }
-      end
+  # The value-source controls: one clickable button per available value
+  # (the primary's own, then each sibling's, each showing its value),
+  # then the Inherit / Hide / All actions. Clicking drives the textarea
+  # (see notes-adopt_controller.js); the button for the current state is
+  # marked active so Inherit and Hide stay distinguishable when the
+  # textarea is empty.
+  def render_value_buttons(part)
+    div(class: "small mb-1", data: { notes_values: "" }) do
+      render_source_buttons(part)
+      render_action_buttons(part)
     end
+  end
+
+  def render_source_buttons(part)
+    if part.notes_state == :set && part.value.present?
+      render_value_button(:current,
+                          :form_observations_notes_this_observation.l,
+                          part.value, active: true)
+    end
+    part.adopt_options.each do |obs_id, value|
+      render_value_button(:adopt, "Obs #{obs_id}", value, active: false)
+    end
+  end
+
+  # A source button labelled by its origin, with the (truncated) value
+  # shown beside it. The full raw value rides in data-notes-value so a
+  # click copies it verbatim into the textarea.
+  def render_value_button(action, label, value, active:)
+    div do
+      button(type: "button", class: button_class(active),
+             data: { notes_action: action, notes_value: value,
+                     action: "notes-adopt#choose" }) { label }
+      plain(": #{shared_value_preview(value)}")
+    end
+  end
+
+  def render_action_buttons(part)
+    div(class: "mt-1") do
+      action_button(:inherit, :form_observations_notes_inherit.l,
+                    active: part.notes_state == :inherit)
+      action_button(:hide, :form_observations_notes_hide.l,
+                    active: part.notes_state == :hide)
+      next unless concatenatable?(part)
+
+      action_button(:concatenate, :form_observations_notes_all.l,
+                    active: false)
+    end
+  end
+
+  def action_button(action, label, active:)
+    button(type: "button", class: button_class(active),
+           data: { notes_action: action, action: "notes-adopt#choose" }) do
+      label
+    end
+  end
+
+  def button_class(active)
+    class_names("btn btn-sm btn-default mr-1", "active" => active)
   end
 
   def shared_value_preview(value)
     value.squish.truncate(120)
   end
 
-  # Value-source picker: the current state's option is preselected, then
-  # the other states, then each distinct sibling value. Selecting an
-  # option drives the textarea (see notes-adopt_controller.js). The
-  # select isn't tied to the <label> (it drives, not backs, the field),
-  # so it carries its own aria-label naming the note it controls.
-  def render_state_select(part)
-    select(class: "form-control mb-1",
-           aria: { label: state_select_aria_label(part) },
-           data: { action: "change->notes-adopt#adopt" }) do
-      render_state_options(part)
-    end
-  end
-
-  def state_select_aria_label(part)
-    "#{part.label}: #{:form_observations_notes_value_source.l}"
-  end
-
-  def render_state_options(part)
-    state = part.notes_state
-    if state == :set
-      state_option(:current, :form_observations_notes_current.l, true)
-    end
-    state_option(:inherit, :form_observations_notes_inherit.l,
-                 state == :inherit)
-    state_option(:hide, :form_observations_notes_hide.l, state == :hide)
-    part.adopt_options.each do |obs_id, value|
-      option(value: value, data: { notes_action: "adopt" }) do
-        adopt_option_label(obs_id, value)
-      end
-    end
-    return unless concatenatable?(part)
-
-    state_option(:concatenate, :form_observations_notes_concatenate.l, false)
-  end
-
-  # "Concatenate All" only makes sense with 2+ distinct values to combine
-  # (the primary's own, if any, plus the distinct sibling values).
+  # "All" (concatenate) only makes sense with 2+ distinct values to
+  # combine (the primary's own, if any, plus the distinct sibling values).
   def concatenatable?(part)
     own = part.notes_state == :set && part.value.present? ? 1 : 0
     (own + part.adopt_options.size) >= 2
-  end
-
-  def state_option(action, label, selected)
-    option(value: "", selected: selected,
-           data: { notes_action: action }) { label }
-  end
-
-  # Sibling value labelled by its source obs + a truncated preview so a
-  # long value (e.g. the iNat imported-data blob) doesn't overflow the
-  # control; the full value is the option value, so adopting copies it all.
-  def adopt_option_label(obs_id, value)
-    "Obs #{obs_id}: #{value.squish.truncate(90)}"
   end
 
   def render_above_help

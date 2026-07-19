@@ -47,9 +47,8 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
   end
 
   # Editing the primary of a multi-member occurrence, a sibling key it
-  # doesn't store is an :inherit row -- a disabled textarea plus a
-  # value-source select with Inherit preselected and the sibling value
-  # as an adopt option.
+  # doesn't store is an :inherit row -- a disabled textarea plus buttons
+  # with Inherit active and the sibling value as an adopt button.
   def test_edit_primary_offers_inherited_notes_adopt_rows
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:detailed_unknown_obs)
@@ -67,13 +66,13 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select(
       "textarea[name='observation[notes][Substrate]'][disabled]"
     )
-    assert_select("select option[data-notes-action='inherit'][selected]")
-    assert_select("select option[value='on birch'][data-notes-action='adopt']")
+    assert_select("button[data-notes-action='inherit'].active")
+    assert_select("button[data-notes-value='on birch']")
   end
 
   # A key the primary DOES store, whose sibling holds a different value,
-  # is a :set row -- an editable textarea plus a select with Current
-  # value preselected and the sibling value as an adopt option.
+  # is a :set row -- an editable textarea plus a This Observation button
+  # (active) and the sibling value as an adopt button.
   def test_edit_primary_offers_adopt_for_owned_key_when_sibling_differs
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:detailed_unknown_obs)
@@ -88,14 +87,14 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     get(:edit, params: { id: primary.id })
 
     assert_select("textarea[name='observation[notes][Cap]']:not([disabled])")
-    assert_select("select option[data-notes-action='current'][selected]")
-    assert_select("select option[value='brown'][data-notes-action='adopt']")
+    assert_select("button[data-notes-action='current'].active")
+    assert_select("button[data-notes-value='brown'][data-notes-action='adopt']")
   end
 
   # A shared key whose value AGREES across the occurrence still gets the
-  # value-source dropdown (Current/Inherit/Hide) -- just no adopt option
-  # -- so the UI is consistent regardless of whether the values differ.
-  def test_edit_primary_renders_dropdown_for_agreeing_shared_key
+  # buttons (This Observation/Inherit/Hide) -- just no adopt button -- so
+  # the UI is consistent regardless of whether the values differ.
+  def test_edit_primary_renders_buttons_for_agreeing_shared_key
     primary = observations(:coprinus_comatus_obs)
     sibling = observations(:detailed_unknown_obs)
     [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
@@ -110,8 +109,8 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     assert_select("[data-controller='notes-adopt']")
     assert_select("textarea[name='observation[notes][Cap]']")
-    assert_select("select option[data-notes-action='current'][selected]")
-    assert_select("select option[data-notes-action='adopt']", count: 0)
+    assert_select("button[data-notes-action='current'].active")
+    assert_select("button[data-notes-action='adopt']", count: 0)
   end
 
   # A blank submitted for a sibling-held key is preserved (a deliberate

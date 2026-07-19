@@ -111,83 +111,46 @@ class FormNotesTest < ComponentTestCase
                     "last child should be the textile help block")
   end
 
-  # --- Occurrence value-source dropdowns ---
+  # --- Occurrence value-source buttons ---
 
-  # An :inherit part (primary doesn't store the key): disabled textarea,
-  # a dropdown with Inherit preselected and no "Current value" option.
-  def test_inherit_part_renders_disabled_textarea_with_inherit_selected
+  # For each shared key the primary shows value + action buttons: a
+  # button per available value (its own, then each sibling's, carrying
+  # the raw value beside the shown preview), then Inherit / Hide / All.
+  # The button for the current state is active; the textarea reflects it.
+  def test_occurrence_rows_render_value_and_action_buttons
     html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
 
-    assert_html(
-      html,
-      "[data-notes-row] textarea[name='observation[notes][substrate]']" \
-      "[disabled][data-notes-adopt-target='value']"
-    )
-    assert_html(html, "[data-controller='notes-adopt'] select" \
-                      "[data-action='change->notes-adopt#adopt']")
-    # Inherit is the preselected current state; Hide is offered too;
-    # there is no Current value (the primary owns no value to keep).
-    assert_html(html, "select option[data-notes-action='inherit'][selected]",
-                text: :form_observations_notes_inherit.l)
-    assert_html(html, "select option[data-notes-action='hide']",
-                text: :form_observations_notes_hide.l)
-    # Full value in the option value; source-labelled preview in the text.
-    assert_html(html, "select option[value='wood'][data-notes-action='adopt']",
-                text: "Obs 123: wood")
-    assert_html(html, "select option[value='bark'][data-notes-action='adopt']",
-                text: "Obs 124: bark")
-  end
+    assert_html(html, "[data-controller='notes-adopt']")
 
-  # A :set part (primary stores its own value): editable prefilled
-  # textarea, Current value preselected, plus Inherit / Hide / siblings.
-  def test_set_part_renders_editable_textarea_with_current_selected
-    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
-
-    assert_html(html, "textarea[name='observation[notes][cap]']", text: "red")
+    # Textarea states: :set editable, :inherit disabled, :hide readonly.
     assert_no_html(html, "textarea[name='observation[notes][cap]'][disabled]")
-    assert_html(html, "select option[data-notes-action='current'][selected]",
-                text: :form_observations_notes_current.l)
-    assert_html(html, "select option[value='brown'][data-notes-action='adopt']",
-                text: "Obs 5: brown")
-    # Label associates with the textarea; the driving select is
-    # separately labelled for assistive tech.
-    assert_html(html, "label[for='observation_notes_cap']", text: "Cap")
-    assert_html(html, "textarea[id='observation_notes_cap']" \
-                      "[name='observation[notes][cap]']")
-    assert_html(html, "select[aria-label=" \
-                      "'Cap: #{:form_observations_notes_value_source.l}']")
-  end
-
-  # A :hide part (primary stores a blank to suppress): a readonly (not
-  # disabled) empty textarea -- readonly still submits the blank, but
-  # can't be typed into -- with Hide preselected and no Current value.
-  def test_hide_part_renders_readonly_empty_textarea_with_hide_selected
-    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
-
+    assert_html(html, "[data-notes-row] " \
+                      "textarea[name='observation[notes][substrate]']" \
+                      "[disabled][data-notes-adopt-target='value']")
     assert_html(html, "textarea[name='observation[notes][odor]'][readonly]")
-    assert_no_html(html, "textarea[name='observation[notes][odor]'][disabled]")
-    assert_html(html, "select option[data-notes-action='hide'][selected]",
-                text: :form_observations_notes_hide.l)
-    # Only the one :set row (cap) offers Current value; neither the
-    # :inherit nor the :hide row does.
-    assert_html(html, "option[data-notes-action='current']", count: 1)
-  end
 
-  # Each shared row shows a read-only list of the available values (the
-  # primary's own + each sibling's), and offers "Concatenate All" only
-  # where there are 2+ distinct values to combine.
-  def test_shared_values_list_and_concatenate_option
-    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
+    # "This Observation" button only where the primary stores a value
+    # (cap), active, carrying the raw value; siblings carry theirs.
+    assert_html(html, "button[data-notes-action='current']" \
+                      "[data-notes-value='red'].active",
+                text: :form_observations_notes_this_observation.l, count: 1)
+    assert_html(html, "button[data-notes-action='adopt']" \
+                      "[data-notes-value='brown']", text: "Obs 5")
+    assert_html(html, "button[data-notes-action='adopt']" \
+                      "[data-notes-value='wood']", text: "Obs 123")
 
-    this_obs = :form_observations_notes_this_observation.l
-    assert_html(html, "[data-notes-values] div", text: "#{this_obs}: red")
-    assert_html(html, "[data-notes-values] div", text: "Obs 5: brown")
-    assert_html(html, "[data-notes-values] div", text: "Obs 123: wood")
+    # Active state per row: cap -> current, substrate -> inherit,
+    # odor -> hide.
+    assert_html(html, "button[data-notes-action='inherit'].active", count: 1)
+    assert_html(html, "button[data-notes-action='hide'].active", count: 1)
 
-    # cap (own "red" + sibling "brown") and substrate (two siblings) each
-    # have 2 values -> Concatenate All; odor (one sibling) does not.
-    assert_html(html, "select option[data-notes-action='concatenate']",
-                text: :form_observations_notes_concatenate.l, count: 2)
+    # "All" only where there are 2+ values: cap (own + brown) and
+    # substrate (wood + bark), not odor (one sibling value).
+    assert_html(html, "button[data-notes-action='concatenate']",
+                text: :form_observations_notes_all.l, count: 2)
+
+    # The label still associates with the textarea.
+    assert_html(html, "label[for='observation_notes_cap']", text: "Cap")
   end
 
   def test_no_adopt_controller_without_adopt_options
@@ -196,17 +159,19 @@ class FormNotesTest < ComponentTestCase
     assert_no_html(html, "[data-controller='notes-adopt']")
   end
 
-  # A shared key whose value agrees across observations (no differing
-  # sibling value, so empty adopt_options) still gets the value-source
-  # dropdown -- just with no sibling values to adopt.
-  def test_agreeing_shared_key_still_renders_dropdown
+  # A shared key whose value agrees across observations (empty
+  # adopt_options) still gets the buttons -- This Observation (active)
+  # plus Inherit/Hide -- but no sibling to adopt and no All (one value).
+  def test_agreeing_shared_key_still_renders_buttons
     html = render(AgreeingKeyFormNotes.new(Observation.new, action: "/t"))
 
     assert_html(html, "[data-controller='notes-adopt']")
-    assert_html(html, "select option[data-notes-action='current'][selected]")
-    assert_html(html, "select option[data-notes-action='inherit']")
-    assert_html(html, "select option[data-notes-action='hide']")
-    assert_no_html(html, "select option[data-notes-action='adopt']")
+    assert_html(html, "button[data-notes-action='current']" \
+                      "[data-notes-value='white'].active")
+    assert_html(html, "button[data-notes-action='inherit']")
+    assert_html(html, "button[data-notes-action='hide']")
+    assert_no_html(html, "button[data-notes-action='adopt']")
+    assert_no_html(html, "button[data-notes-action='concatenate']")
   end
 end
 
