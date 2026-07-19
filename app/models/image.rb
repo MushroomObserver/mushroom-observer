@@ -982,17 +982,25 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # remotely. Returns nil if it fails. Costly.
   # @param hide_gps [Boolean, nil] Override GPS hiding. If nil, checks
   #   observations to determine whether to hide GPS.
+  #
+  # No Shellwords.escape needed here -- Open3.capture2e's array form
+  # (`cmd, *flags, path`) execs directly, bypassing the shell entirely,
+  # so nothing ever interprets shell metacharacters. Escaping anyway
+  # used to be harmless (no argument here ever contained one), but
+  # original_url now carries a `?<version>` cache-buster (#4808) --
+  # Shellwords.escape turned that `?` into a literal `\?` in the
+  # argument itself (array form never strips the backslash back out),
+  # so every remote (transferred) EXIF re-read silently 404'd.
   def read_exif_data(flags = [], hide_gps: nil)
     hide_gps = observations.any?(&:gps_hidden) if hide_gps.nil?
 
     if transferred
-      cmd = Shellwords.escape("script/exiftool_remote")
-      path = Shellwords.escape(original_url)
+      cmd = "script/exiftool_remote"
+      path = original_url
     else
-      cmd  = Shellwords.escape("exiftool")
-      path = Shellwords.escape(full_filepath("orig"))
+      cmd = "exiftool"
+      path = full_filepath("orig")
     end
-    flags.map { |flag| Shellwords.escape(flag) }
     result, status = Open3.capture2e(cmd, *flags, path)
 
     data = status.success? ? self.class.parse_exif_data(result, hide_gps) : nil

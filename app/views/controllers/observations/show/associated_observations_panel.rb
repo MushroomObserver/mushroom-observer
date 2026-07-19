@@ -13,10 +13,10 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    render(Components::Panel.new(
-             panel_id: "associated_observations",
-             panel_class: "name-section"
-           )) do |panel|
+    Panel(
+      panel_id: "associated_observations",
+      panel_class: "name-section"
+    ) do |panel|
       if siblings?
         panel.with_heading { plain(:OCCURRENCES.t) }
         panel.with_heading_links { matching_observations_link }

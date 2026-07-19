@@ -46,7 +46,7 @@ module Views::Controllers::Shared
       render(::Components::Matrix::Box.new(
                extra_class: "text-center", id: image.id
              )) do
-        render(::Components::Panel.new) do |panel|
+        Panel do |panel|
           panel.with_body do
             InteractiveImage(
               user: @user,

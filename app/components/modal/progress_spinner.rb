@@ -16,19 +16,19 @@ class Components::Modal::ProgressSpinner < Components::Base
   CAPTION_ID = "#{MODAL_ID}_caption".freeze
 
   def view_template
-    render(Components::Modal.new(
-             id: MODAL_ID,
-             header: false,
-             dialog_class: "modal-dialog modal-sm",
-             body_class: "text-center",
-             body_id: BODY_ID,
-             title_id: CAPTION_ID,
-             extra_data: {
-               action: "section-update:updated@window->modal#hide",
-               keyboard: "false",
-               backdrop: "static"
-             }
-           )) do |m|
+    Modal(
+      id: MODAL_ID,
+      header: false,
+      dialog_class: "modal-dialog modal-sm",
+      body_class: "text-center",
+      body_id: BODY_ID,
+      title_id: CAPTION_ID,
+      extra_data: {
+        action: "section-update:updated@window->modal#hide",
+        keyboard: "false",
+        backdrop: "static"
+      }
+    ) do |m|
       m.with_body { render_caption_and_spinner }
     end
   end

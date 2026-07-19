@@ -16,14 +16,14 @@ class Views::Controllers::Observations::Show::ThumbnailMapPanel < Views::Base
   prop :obs, ::Observation
 
   def view_template
-    render(Components::Panel.new(
-             panel_id: "observation_thumbnail_map",
-             attributes: {
-               data: { controller: "thumbnail-map",
-                       coordinates: { x: x, y: y }.to_json,
-                       map_url: map_observation_path(id: @obs.id) }
-             }
-           )) do |panel|
+    Panel(
+      panel_id: "observation_thumbnail_map",
+      attributes: {
+        data: { controller: "thumbnail-map",
+                coordinates: { x: x, y: y }.to_json,
+                map_url: map_observation_path(id: @obs.id) }
+      }
+    ) do |panel|
       panel.with_heading { :MAP.t }
       panel.with_heading_links { heading_links }
       panel.with_body { render_body }

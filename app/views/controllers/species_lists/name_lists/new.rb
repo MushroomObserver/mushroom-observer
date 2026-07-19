@@ -42,10 +42,10 @@ module Views::Controllers::SpeciesLists::NameLists
     # Stimulus root the JS uses for keyboard navigation between the
     # three scroller columns + the submit form below.
     def render_lister_table
-      render(Components::Table.new(
-               class: "name-lister mt-3 w-100",
-               attributes: { cols: "3", data: lister_data }
-             )) do |t|
+      Table(
+        class: "name-lister mt-3 w-100",
+        attributes: { cols: "3", data: lister_data }
+      ) do |t|
         t.column(:name_lister_genera.t, width: "20%")
         t.column(:name_lister_species.t, width: "40%")
         t.column(:name_lister_names.t, width: "40%")

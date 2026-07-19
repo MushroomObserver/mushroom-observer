@@ -26,10 +26,8 @@ module Views::Controllers::Contributors
       ].freeze
 
       def view_template
-        render(::Components::Panel.new(
-                 panel_class: "collapse",
-                 panel_id: "contribution_legend"
-               )) do |panel|
+        Panel(panel_class: "collapse",
+              panel_id: "contribution_legend") do |panel|
           panel.with_heading { render_heading }
           panel.with_heading_links { render_toggle_button }
           panel.with_body { render_body }
@@ -63,11 +61,11 @@ module Views::Controllers::Contributors
       end
 
       def render_weights_table
-        render(::Components::Table.new(
-                 ::UserStats.fields_with_weight.keys,
-                 show_headers: false,
-                 class: "text-center bg-none mx-lg-5"
-               )) do |t|
+        Table(
+          ::UserStats.fields_with_weight.keys,
+          show_headers: false,
+          class: "text-center bg-none mx-lg-5"
+        ) do |t|
           # `user_stats_*` values are `[:IMAGES]`-style cross-refs to
           # plain-text root keys ("Images", "Votes", …); needs `.t`
           # for the cross-ref expansion, but the resolved text has
@@ -79,10 +77,10 @@ module Views::Controllers::Contributors
       end
 
       def render_example_math_table
-        render(::Components::Table.new(
-                 show_headers: false,
-                 class: "table-condensed bg-none w-auto mx-auto"
-               )) do |t|
+        Table(
+          show_headers: false,
+          class: "table-condensed bg-none w-auto mx-auto"
+        ) do |t|
           t.body { render_example_math_rows }
         end
       end

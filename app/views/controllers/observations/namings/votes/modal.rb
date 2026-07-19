@@ -20,7 +20,12 @@ module Views::Controllers::Observations::Namings::Votes
     prop :title, String
 
     def view_template
-      render(Components::Modal.new(
+      # Must stay `render(::Components::Modal.new(...))`, not bare
+      # `Modal(...)` Kit syntax -- this view class is itself named
+      # `Modal`, so Kit's constant lookup would recurse into itself
+      # instead of resolving `Components::Modal` (see commit
+      # 33fdc952e5 for the same bug with a view class named `Table`).
+      render(::Components::Modal.new(
                id: @modal_id, user: @user
              )) do |modal|
         modal.with_title_content do

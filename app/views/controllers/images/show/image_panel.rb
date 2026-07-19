@@ -17,7 +17,7 @@ module Views::Controllers::Images
         # Components::Matrix::Box for why that placement would
         # silently never emit anything).
         turbo_stream_from([@image, :processed])
-        render(::Components::Panel.new(panel_id: "image_panel")) do |panel|
+        Panel(panel_id: "image_panel") do |panel|
           panel.with_heading(
             classes:
               "text-center small font-weight-normal image-controls"

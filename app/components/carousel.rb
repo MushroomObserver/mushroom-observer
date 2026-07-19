@@ -18,7 +18,7 @@
 #   yet consumed by the obs-index (see that class for details).
 #
 # @example
-#   render(Components::Carousel.new(carousel_id: "obs_42")) do |c|
+#   Carousel(carousel_id: "obs_42") do |c|
 #     @images.each do |image|
 #       c.item(id: "carousel_item_#{image.id}", class: "carousel-item") do
 #         render(Components::ImageGallery::Item.new(image: image, user: @user))
