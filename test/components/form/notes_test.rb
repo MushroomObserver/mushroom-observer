@@ -195,9 +195,41 @@ class FormNotesTest < ComponentTestCase
 
     assert_no_html(html, "[data-controller='notes-adopt']")
   end
+
+  # A shared key whose value agrees across observations (no differing
+  # sibling value, so empty adopt_options) still gets the value-source
+  # dropdown -- just with no sibling values to adopt.
+  def test_agreeing_shared_key_still_renders_dropdown
+    html = render(AgreeingKeyFormNotes.new(Observation.new, action: "/t"))
+
+    assert_html(html, "[data-controller='notes-adopt']")
+    assert_html(html, "select option[data-notes-action='current'][selected]")
+    assert_html(html, "select option[data-notes-action='inherit']")
+    assert_html(html, "select option[data-notes-action='hide']")
+    assert_no_html(html, "select option[data-notes-action='adopt']")
+  end
 end
 
 # --- Test form classes -------------------------------------------------
+
+# One shared key whose values agree: :set with empty adopt_options.
+class AgreeingKeyFormNotes < Components::ApplicationForm
+  def view_template
+    super do
+      render(Components::Form::Notes.new(
+               form: self,
+               parts: [
+                 Components::Form::Notes::Part.new(
+                   key: :gills, value: "white", label: "gills",
+                   adopt_options: [], notes_state: :set
+                 )
+               ],
+               panel_id: "test_notes",
+               expanded: true
+             ))
+    end
+  end
+end
 
 class MultiPartFormNotes < Components::ApplicationForm
   def view_template

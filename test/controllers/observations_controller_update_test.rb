@@ -92,6 +92,28 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_select("select option[value='brown'][data-notes-action='adopt']")
   end
 
+  # A shared key whose value AGREES across the occurrence still gets the
+  # value-source dropdown (Current/Inherit/Hide) -- just no adopt option
+  # -- so the UI is consistent regardless of whether the values differ.
+  def test_edit_primary_renders_dropdown_for_agreeing_shared_key
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "red" }) # same value -> agrees
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_select("[data-controller='notes-adopt']")
+    assert_select("textarea[name='observation[notes][Cap]']")
+    assert_select("select option[data-notes-action='current'][selected]")
+    assert_select("select option[data-notes-action='adopt']", count: 0)
+  end
+
   # A blank submitted for a sibling-held key is preserved (a deliberate
   # suppression of the inherited value); a blank for a key no sibling
   # holds is dropped as usual.

@@ -86,8 +86,11 @@ class Components::Form::Notes < Components::Base
     end
   end
 
+  # Any occurrence (value-source) row -- keyed on notes_state, not
+  # adopt_options, since a shared key whose values agree still gets the
+  # Current/Inherit/Hide dropdown, just no sibling values to adopt.
   def adopt_rows?
-    @parts.any? { |part| part.adopt_options.present? }
+    @parts.any?(&:notes_state)
   end
 
   def adopt_controller_attrs
