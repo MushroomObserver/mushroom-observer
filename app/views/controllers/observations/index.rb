@@ -57,7 +57,7 @@ module Views::Controllers::Observations
 
       add_context_nav(
         Tab::Observation::IndexActions.new(
-          query: @query, where: params[:where],
+          query: @query, where: string_param(:where),
           q_param: q_param(@query), controller: controller
         )
       )
