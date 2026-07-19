@@ -38,6 +38,11 @@ end
 # See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
 gem("trilogy")
 
+# Scrubs invalid UTF-8 bytes out of incoming request params/headers at
+# the Rack layer, so a scanner's malformed bytes can't reach a String
+# op deep in the app and raise `invalid byte sequence in UTF-8` (a 500).
+gem("rack-utf8_sanitizer", require: "rack/utf8_sanitizer")
+
 # solid_cache for cache store db
 gem("solid_cache")
 # add locale to cache key
