@@ -310,8 +310,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def broadcast_interactive_sizes
     INTERACTIVE_BROADCAST_SIZES.each do |size|
       html = ApplicationController.renderer.render(
-        Components::Image::Interactive.new(user: nil, image: self,
-                                           size: size, media_only: true),
+        Components::InteractiveImage.new(user: nil, image: self,
+                                         size: size, media_only: true),
         layout: false
       )
       broadcast_replace_to(
@@ -409,7 +409,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Return an Array of all image sizes from +:thumbnail+ to +:full_size+.
   ALL_SIZES = ALL_SIZES_INDEX.keys.freeze
 
-  # Sizes `Components::Image::Interactive` gets broadcast for by
+  # Sizes `Components::InteractiveImage` gets broadcast for by
   # Image#broadcast_processed_update. All non-full_size sizes, not just
   # one, because the image-show page (the only subscriber) renders at
   # a size chosen by the viewer's image-size preference -- the
