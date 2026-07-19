@@ -144,6 +144,9 @@ app; use ActiveRecord/Arel instead.
 See `.claude/rules/no_pii_in_public.md` for the hard rule against
 putting PII (emails, etc.) in GitHub issues/PRs/comments — enforced
 by a `PreToolUse` hook.
+See `.claude/rules/code_comments.md` — comment the *why* (only when
+unclear), never the *what*; keep one source of truth, don't duplicate
+the same rationale across files.
 
 ## Git Workflow
 
