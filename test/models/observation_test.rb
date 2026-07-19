@@ -2562,4 +2562,57 @@ class ObservationTest < UnitTestCase
     assert_nil(obs.reload.collector_user_id,
                "inconsistent FK reconciled away from the free-text string")
   end
+
+  # ---- display_notes / shows_merged_notes? -------------------------
+
+  # The primary of a multi-member occurrence renders the per-key merge
+  # across the occurrence (surfacing sibling notes); everyone else shows
+  # their own notes untouched.
+  def test_display_notes_merges_only_for_the_primary
+    primary, sibling = build_notes_occurrence(
+      { Cap: "red" }, { Substrate: "wood" }
+    )
+
+    assert(primary.shows_merged_notes?)
+    assert_equal("red", primary.display_notes[:Cap])
+    assert_equal("wood", primary.display_notes[:Substrate]) # inherited
+
+    assert_not(sibling.shows_merged_notes?)
+    assert_equal({ Substrate: "wood" }, sibling.display_notes.to_h)
+  end
+
+  def test_display_notes_returns_own_when_not_in_occurrence
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    obs.update!(notes: { Cap: "red" })
+
+    assert_not(obs.shows_merged_notes?)
+    assert_equal({ Cap: "red" }, obs.display_notes.to_h)
+  end
+
+  def test_display_notes_not_merged_for_single_member_occurrence
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    obs.update!(notes: { Cap: "red" })
+    occ = Occurrence.create!(user: rolf, primary_observation: obs)
+    obs.update!(occurrence: occ)
+
+    assert_not(obs.shows_merged_notes?)
+  end
+
+  private
+
+  # Build a two-member occurrence from two obs fixtures with the given
+  # notes; returns [primary, sibling].
+  def build_notes_occurrence(primary_notes, sibling_notes)
+    primary = observations(:minimal_unknown_obs)
+    sibling = observations(:coprinus_comatus_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: primary_notes)
+    sibling.update!(notes: sibling_notes)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    [primary, sibling]
+  end
 end

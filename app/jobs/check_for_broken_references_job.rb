@@ -19,6 +19,11 @@
 class CheckForBrokenReferencesJob < ApplicationJob
   queue_as :maintenance
 
+  # One dangling-reference finding: the referencing model + column, the
+  # referenced model, and the offending rows. Bundled so every action can
+  # name the referenced model in its report without a long param list.
+  Finding = Data.define(:model, :column, :ref_model, :query, :ids)
+
   def perform(dry_run: false, verbose: false)
     @dry_run = dry_run
     @verbose = verbose
@@ -104,7 +109,11 @@ class CheckForBrokenReferencesJob < ApplicationJob
     ids = query.pluck(:id)
     return if ids.empty?
 
-    apply_action(model, column, query, ids, action)
+    apply_action(
+      Finding.new(model: model, column: column, ref_model: ref_model,
+                  query: query, ids: ids),
+      action
+    )
   end
 
   # A Checks::MONOMORPHIC/POLYMORPHIC entry naming an association that no
@@ -136,46 +145,66 @@ class CheckForBrokenReferencesJob < ApplicationJob
     @reflections[key] = :done
   end
 
-  def apply_action(model, column, query, ids, action)
+  # Every action -- the mutating :delete/:nil/:zero cleanups as well as
+  # :alert -- reports to the #alerts summary, so a dangling reference is
+  # always visible: a cleanup you didn't expect is itself the signal that
+  # some deletion path isn't cleaning up at its source. The sample is
+  # captured up front, before the mutation removes/changes those rows.
+  def apply_action(finding, action)
+    pairs = broken_pairs(finding)
     case action
-    when :alert then alert_broken(model, column, query, ids)
-    when :delete then delete_broken(model, column, query, ids)
-    when :nil then nullify_broken(model, column, query, ids)
-    when :zero then zero_broken(model, column, query, ids)
-    else raise_invalid_action(model, action)
+    when :alert then alert_broken(finding, pairs)
+    when :delete then delete_broken(finding, pairs)
+    when :nil then nullify_broken(finding, pairs)
+    when :zero then zero_broken(finding, pairs)
+    else raise_invalid_action(finding.model, action)
     end
   end
 
-  # Logs a count + a bounded [id, column] sample rather than the full list.
-  # Each pair is an offending row's primary key and its dangling #{column}
-  # value, so the sample can't be misread as a list of FK values. :alert
-  # rows should be rare (something's wrong upstream), but an unbounded pluck
-  # would blow up log/job.log if that ever stops holding (e.g. after a bad
-  # data migration).
-  def alert_broken(model, column, query, ids)
-    sample = query.limit(10).pluck(:id, column)
-    log("ALERT!! #{ids.size} #{model.table_name} row(s) with a dangling " \
-        "#{column} - [id, #{column}]: #{sample.inspect}")
-    note_for_review("#{ids.size} #{model.table_name}.#{column} dangling " \
-                    "(e.g. #{sample.first(3).inspect})")
+  # A bounded sample, each row rendered as "<Model> <id> -> missing
+  # <RefModel> <fk>" so the message reads as a sentence and can't be
+  # misread as a list of FK values. Bounded because an unbounded pluck
+  # would blow up log/job.log after e.g. a bad data migration.
+  def broken_pairs(finding)
+    finding.query.limit(10).pluck(:id, finding.column).map do |id, fk|
+      "#{finding.model.name} #{id} -> missing #{finding.ref_model.name} #{fk}"
+    end
   end
 
-  def delete_broken(model, column, query, ids)
-    query.delete_all unless @dry_run
-    log("DELETING #{ids.count} #{model.name.pluralize(ids.count)} " \
-        "whose #{column} doesn't exist#{dry_run_note}")
+  def alert_broken(finding, pairs)
+    summary = "#{finding.ids.size} #{finding.model.name} rows point to a " \
+              "#{finding.ref_model.name} that no longer exists " \
+              "(via #{finding.column})"
+    log("ALERT!! #{summary}: #{pairs.first(10).join("; ")}")
+    review_note(pairs, summary)
   end
 
-  def nullify_broken(model, column, query, ids)
-    query.update_all(column => nil) unless @dry_run
-    log("SETTING #{ids.count} nonexistent #{model.table_name}.#{column} " \
-        "TO NIL#{dry_run_note}")
+  def delete_broken(finding, pairs)
+    finding.query.delete_all unless @dry_run
+    report_cleanup(finding, pairs, "Deleted")
   end
 
-  def zero_broken(model, column, query, ids)
-    query.update_all(column => 0) unless @dry_run
-    log("SETTING #{ids.count} nonexistent #{model.table_name}.#{column} " \
-        "TO ZERO#{dry_run_note}")
+  def nullify_broken(finding, pairs)
+    finding.query.update_all(finding.column => nil) unless @dry_run
+    report_cleanup(finding, pairs, "Nulled")
+  end
+
+  def zero_broken(finding, pairs)
+    finding.query.update_all(finding.column => 0) unless @dry_run
+    report_cleanup(finding, pairs, "Zeroed")
+  end
+
+  # Log + #alerts summary for a mutating cleanup (:delete/:nil/:zero).
+  def report_cleanup(finding, pairs, verb)
+    summary = "#{verb} #{finding.ids.size} #{finding.model.name} rows " \
+              "referencing a missing #{finding.ref_model.name} " \
+              "(via #{finding.column})#{dry_run_note}"
+    log(summary)
+    review_note(pairs, summary)
+  end
+
+  def review_note(pairs, summary)
+    note_for_review("#{summary} -- e.g. #{pairs.first(3).join("; ")}")
   end
 
   # Appended to mutation log lines so a dry run doesn't read as if it
@@ -204,9 +233,14 @@ class CheckForBrokenReferencesJob < ApplicationJob
   end
 
   def delete_broken_polymorphic(model, ref_model, query, ids)
+    finding = Finding.new(model: model, column: :target_id,
+                          ref_model: ref_model, query: query, ids: ids)
+    pairs = broken_pairs(finding)
     query.delete_all unless @dry_run
-    log("DELETING #{ids.count} #{model.name.pluralize(ids.count)} " \
-        "whose target #{ref_model.name} doesn't exist#{dry_run_note}")
+    summary = "Deleted #{ids.size} #{model.name} rows whose target " \
+              "#{ref_model.name} no longer exists#{dry_run_note}"
+    log(summary)
+    review_note(pairs, summary)
   end
 
   def polymorphic_target?(model)

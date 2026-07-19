@@ -5,31 +5,53 @@ require("test_helper")
 class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
   DANGLING_ID = 999_999_999
 
-  def test_delete_action_removes_dangling_row
+  def test_delete_action_removes_dangling_row_and_reports
     key = api_keys(:rolfs_api_key)
     key.update_column(:user_id, DANGLING_ID)
 
-    CheckForBrokenReferencesJob.perform_now
+    alerts = capture_alerts { CheckForBrokenReferencesJob.perform_now }
 
     assert_not(APIKey.exists?(key.id))
+    # :delete now reports to the #alerts summary, not just job.log.
+    assert_includes(alerts.first.message, "Deleted")
+    assert_includes(alerts.first.message, "APIKey")
   end
 
-  def test_nil_action_nulls_dangling_column
+  def test_nil_action_nulls_dangling_column_and_reports
     list = species_lists(:first_species_list)
     list.update_column(:location_id, DANGLING_ID)
 
-    CheckForBrokenReferencesJob.perform_now
+    alerts = capture_alerts { CheckForBrokenReferencesJob.perform_now }
 
     assert_nil(list.reload.location_id)
+    msg = alerts.first.message
+    assert_includes(msg, "Nulled")
+    assert_includes(msg, "via location_id")
   end
 
-  def test_zero_action_zeroes_dangling_column
+  def test_zero_action_zeroes_dangling_column_and_reports
     article = articles(:premier_article)
     article.update_column(:user_id, DANGLING_ID)
 
-    CheckForBrokenReferencesJob.perform_now
+    alerts = capture_alerts { CheckForBrokenReferencesJob.perform_now }
 
     assert_equal(0, article.reload.user_id)
+    msg = alerts.first.message
+    assert_includes(msg, "Zeroed")
+    assert_includes(msg, "via user_id")
+  end
+
+  # UserStats.user flipped from :alert to :delete -- an orphaned stats
+  # row (derived data) is meaningless without its user, so the job now
+  # cleans it up.
+  def test_delete_action_removes_dangling_user_stats
+    stats = user_stats(:rolf)
+    stats.update_column(:user_id, DANGLING_ID)
+
+    CheckForBrokenReferencesJob.perform_now
+
+    assert_not(UserStats.exists?(stats.id),
+               "user_stats whose user_id is dangling should be deleted")
   end
 
   def test_alert_action_only_reports_does_not_modify
@@ -82,10 +104,13 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
   def test_invalid_action_raises
     job = CheckForBrokenReferencesJob.new
     job.instance_variable_set(:@dry_run, true)
+    finding = CheckForBrokenReferencesJob::Finding.new(
+      model: APIKey, column: :user_id, ref_model: User,
+      query: APIKey.none, ids: [1]
+    )
 
     assert_raises(RuntimeError) do
-      job.send(:apply_action, APIKey, :user_id, APIKey.none, [1],
-               :bogus_action)
+      job.send(:apply_action, finding, :bogus_action)
     end
   end
 
@@ -100,7 +125,8 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
   end
 
   # A dangling :alert reference produces exactly one summary alert for the
-  # whole run, naming the offending table.column.
+  # whole run, naming the offending model, the referenced model, the
+  # foreign key, and the dangling id in a readable sentence.
   def test_emits_one_review_alert_for_dangling_alert_reference
     coll_num = collection_numbers(:minimal_unknown_coll_num)
     coll_num.update_column(:user_id, DANGLING_ID)
@@ -109,7 +135,10 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
 
     assert_equal(1, alerts.size, "expected exactly one summary alert per run")
     assert_instance_of(JobAlert, alerts.first)
-    assert_includes(alerts.first.message, "collection_numbers.user_id")
+    message = alerts.first.message
+    assert_includes(message, "CollectionNumber rows point to a User")
+    assert_includes(message, "via user_id")
+    assert_includes(message, "missing User #{DANGLING_ID}")
   end
 
   # emit_review_summary is the "at most one alert per run" choke point:
