@@ -54,7 +54,7 @@ class Components::Image::VoteInterface < Components::Base
 
     div(
       class: "vote-meter progress",
-      title: "#{@image.num_votes} #{:Votes.t}"
+      title: "#{@image.num_votes} #{:VOTES.t}"
     ) do
       div(
         class: "progress-bar",
