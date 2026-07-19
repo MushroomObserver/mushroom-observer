@@ -733,6 +733,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
         UserGroup.one_user(id)&.destroy
       end
       UserGroupUser.where(user_id: ids).delete_all
+      # delete_all below bypasses `has_many :api_keys, dependent: :destroy`,
+      # so clean them here too (erase_user handles this via OWN_RECORDS).
+      APIKey.where(user_id: ids).delete_all
       User.where(id: ids).delete_all
     end
 
@@ -860,6 +863,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     [:sequences,                      :user_id],
     [:species_lists,                  :user_id],
     [:user_group_users,               :user_id],
+    # These are removed here because erase_user deletes the user row via
+    # delete_all, which bypasses the User's has_one/has_many
+    # `dependent: :destroy` callbacks -- so they'd otherwise be orphaned
+    # (and swept later by CheckForBrokenReferencesJob).
+    [:observation_views,              :user_id],
+    [:project_members,                :user_id],
+    [:user_stats,                     :user_id],
     [:users,                          :id]
   ].freeze
 
