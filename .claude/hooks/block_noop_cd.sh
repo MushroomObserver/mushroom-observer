@@ -18,11 +18,13 @@
 # CD_ARG is derived directly from the command about to run, so it
 # could be adversarial/prompt-injection-controlled -- this script
 # NEVER `eval`s it or otherwise re-parses it as shell code. Only plain
-# quote-stripping and a literal `~`/`$HOME` prefix substitution are
-# handled (pure string manipulation); everything else is passed to
-# `cd --` as a literal argument, which resolves paths without
-# executing anything from them. If CD_ARG contains command/process
-# substitution syntax, this hook doesn't attempt to resolve it at all.
+# quote-stripping, an optional leading `--` end-of-options marker
+# (`cd -- .` is equivalent to `cd .`), and a literal `~`/`$HOME`/`$PWD`
+# prefix substitution are handled (pure string manipulation); everything
+# else is passed to `cd --` as a literal argument, which resolves paths
+# without executing anything from them. If CD_ARG contains command/
+# process substitution syntax, this hook doesn't attempt to resolve it
+# at all.
 set -euo pipefail
 
 INPUT="$(cat)"
@@ -41,7 +43,8 @@ if ! printf '%s' "$FIRST_SEGMENT" | grep -qE '^cd[[:space:]]+[^[:space:]]'; then
   exit 0
 fi
 
-CD_ARG="$(printf '%s' "$FIRST_SEGMENT" | sed -E 's/^cd[[:space:]]+//')"
+CD_ARG="$(printf '%s' "$FIRST_SEGMENT" |
+  sed -E 's/^cd[[:space:]]+//; s/^--[[:space:]]+//')"
 
 # Refuse to interpret anything that could execute code if evaluated
 # further (command substitution, process substitution). Fail open --
@@ -58,20 +61,22 @@ case "$UNQUOTED" in
   \'*\') UNQUOTED="${UNQUOTED#\'}"; UNQUOTED="${UNQUOTED%\'}" ;;
 esac
 
-# The only expansions handled: a literal leading `~` or `$HOME` --
-# pure string substitution, never executed. Everything else (absolute
-# paths, relative paths, `..`) needs no expansion at all; `cd` resolves
-# those itself when given the literal argument below.
+CURRENT="$(pwd -P)"
+
+# The only expansions handled: a literal leading `~`, `$HOME`, or
+# `$PWD` -- pure string substitution, never executed. Everything else
+# (absolute paths, relative paths, `..`) needs no expansion at all;
+# `cd` resolves those itself when given the literal argument below.
 case "$UNQUOTED" in
   "~"|"~/"*) UNQUOTED="${HOME}${UNQUOTED#\~}" ;;
   "\$HOME"|"\$HOME/"*) UNQUOTED="${HOME}${UNQUOTED#\$HOME}" ;;
+  "\$PWD"|"\$PWD/"*) UNQUOTED="${CURRENT}${UNQUOTED#\$PWD}" ;;
 esac
 
 # Resolve the target in a subshell (no effect on this script's own
 # cwd) via a real `cd` builtin call with UNQUOTED passed as a literal
 # argument -- never re-parsed as shell code, so nothing in it can
 # execute regardless of its contents.
-CURRENT="$(pwd -P)"
 RESOLVED="$(cd -- "$UNQUOTED" 2>/dev/null && pwd -P || true)"
 
 if [ -n "$RESOLVED" ] && [ "$RESOLVED" = "$CURRENT" ]; then
