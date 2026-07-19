@@ -5,31 +5,40 @@ require("test_helper")
 class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
   DANGLING_ID = 999_999_999
 
-  def test_delete_action_removes_dangling_row
+  def test_delete_action_removes_dangling_row_and_reports
     key = api_keys(:rolfs_api_key)
     key.update_column(:user_id, DANGLING_ID)
 
-    CheckForBrokenReferencesJob.perform_now
+    alerts = capture_alerts { CheckForBrokenReferencesJob.perform_now }
 
     assert_not(APIKey.exists?(key.id))
+    # :delete now reports to the #alerts summary, not just job.log.
+    assert_includes(alerts.first.message, "Deleted")
+    assert_includes(alerts.first.message, "APIKey")
   end
 
-  def test_nil_action_nulls_dangling_column
+  def test_nil_action_nulls_dangling_column_and_reports
     list = species_lists(:first_species_list)
     list.update_column(:location_id, DANGLING_ID)
 
-    CheckForBrokenReferencesJob.perform_now
+    alerts = capture_alerts { CheckForBrokenReferencesJob.perform_now }
 
     assert_nil(list.reload.location_id)
+    msg = alerts.first.message
+    assert_includes(msg, "Nulled")
+    assert_includes(msg, "via location_id")
   end
 
-  def test_zero_action_zeroes_dangling_column
+  def test_zero_action_zeroes_dangling_column_and_reports
     article = articles(:premier_article)
     article.update_column(:user_id, DANGLING_ID)
 
-    CheckForBrokenReferencesJob.perform_now
+    alerts = capture_alerts { CheckForBrokenReferencesJob.perform_now }
 
     assert_equal(0, article.reload.user_id)
+    msg = alerts.first.message
+    assert_includes(msg, "Zeroed")
+    assert_includes(msg, "via user_id")
   end
 
   # UserStats.user flipped from :alert to :delete -- an orphaned stats
@@ -95,10 +104,13 @@ class CheckForBrokenReferencesJobTest < ActiveJob::TestCase
   def test_invalid_action_raises
     job = CheckForBrokenReferencesJob.new
     job.instance_variable_set(:@dry_run, true)
+    finding = CheckForBrokenReferencesJob::Finding.new(
+      model: APIKey, column: :user_id, ref_model: User,
+      query: APIKey.none, ids: [1]
+    )
 
     assert_raises(RuntimeError) do
-      job.send(:apply_action, APIKey, :user_id, APIKey.none, [1],
-               :bogus_action)
+      job.send(:apply_action, finding, :bogus_action)
     end
   end
 
