@@ -101,10 +101,33 @@ class InteractiveImageTest < ComponentTestCase
     assert_no_html(normal_html, "[data-controller='lazyload']")
   end
 
+  def test_kit_syntax_renders_same_as_direct_instantiation
+    view = Class.new(Components::Base) do
+      def initialize(user:, image:)
+        super()
+        @user = user
+        @image = image
+      end
+
+      def view_template
+        InteractiveImage(user: @user, image: @image, votes: false)
+      end
+    end
+
+    html = render(view.new(user: @user, image: @image))
+    direct_html = render(
+      Components::InteractiveImage.new(
+        user: @user, image: @image, votes: false
+      )
+    )
+
+    assert_equal(direct_html, html)
+  end
+
   private
 
   def render_image(image: @image, size: :medium, **)
-    render(Components::Image::Interactive.new(
+    render(Components::InteractiveImage.new(
              user: @user, image: image, size: size, votes: false,
              image_link: nil, upload: false, media_only: false, **
            ))

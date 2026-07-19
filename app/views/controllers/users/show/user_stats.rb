@@ -43,7 +43,7 @@ module Views::Controllers::Users
       }.freeze
 
       def view_template
-        render(::Components::Panel.new(panel_id: "user_stats")) do |panel|
+        Panel(panel_id: "user_stats") do |panel|
           panel.with_heading { :show_user_title.t(user: @name) }
           panel.with_body { render_table }
         end
@@ -53,9 +53,9 @@ module Views::Controllers::Users
 
       def render_table
         @total = 0
-        render(Components::Table.new(variant: :condensed,
-                                     class: "bg-none mb-0",
-                                     show_headers: false)) do |t|
+        Table(variant: :condensed,
+              class: "bg-none mb-0",
+              show_headers: false) do |t|
           t.body do
             @rows.each { |row| render_row(row) }
             render_total_rows if @total.positive?

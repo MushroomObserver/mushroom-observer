@@ -6,14 +6,14 @@
 # `"p-3"`.
 #
 # @example
-#   render(Components::ContentPadded.new(id: "details")) do
+#   ContentPadded(id: "details") do
 #     p { plain("Field 1: ...") }
 #   end
 #
 # @example with extra classes + data attrs
-#   render(Components::ContentPadded.new(
-#            class: "shadow-sm", data: { controller: "modal" }
-#          )) { ... }
+#   ContentPadded(
+#     class: "shadow-sm", data: { controller: "modal" }
+#   ) { ... }
 class Components::ContentPadded < Components::Base
   # @param attrs [Hash] HTML attrs forwarded verbatim to the `<div>`.
   #   `class:` is composed with the default `"p-3"`.
