@@ -25,6 +25,7 @@
 #                                (filter: catches errors for integration tests)
 #
 class ApplicationController < ActionController::Base
+  include ScalarParams
   include LoginSystem
   include Authentication
   include Internationalization
@@ -279,19 +280,6 @@ class ApplicationController < ActionController::Base
     end || "thumbnail"
   end
   helper_method :default_thumbnail_size
-
-  # A request param expected to be a scalar string (e.g. `?letter=A`).
-  # Returns the string, or nil when the param is absent or arrives as a
-  # non-scalar -- e.g. a scanner's `?letter[foo]=bar`, which Rails parses
-  # into an ActionController::Parameters hash. Treating that garbage
-  # shape as "not given" keeps it out of sinks that raise on a non-string
-  # (an ActiveRecord bind, a Literal `String` prop, `String#to_sym`,
-  # etc.), which otherwise turn a probe into a 500.
-  def string_param(key)
-    value = params[key]
-    value if value.is_a?(String)
-  end
-  helper_method :string_param
 
   def default_thumbnail_size_set(val)
     if @user && @user.thumbnail_size != val

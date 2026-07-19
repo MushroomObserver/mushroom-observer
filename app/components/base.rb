@@ -4,6 +4,7 @@ class Components::Base < Phlex::HTML
   extend Literal::Properties
 
   # Include any helpers you want to be available across all components
+  include ScalarParams
   include Phlex::Rails::Helpers::Routes
   include Phlex::Rails::Helpers::AssetPath
   include Phlex::Rails::Helpers::LinkTo
@@ -70,7 +71,6 @@ class Components::Base < Phlex::HTML
   register_value_helper :controller_path
   register_value_helper :action_name
   register_value_helper :params
-  register_value_helper :string_param
   register_value_helper :request
   register_value_helper :session
 
