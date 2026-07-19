@@ -25,6 +25,7 @@
 #                                (filter: catches errors for integration tests)
 #
 class ApplicationController < ActionController::Base
+  include ScalarParams
   include LoginSystem
   include Authentication
   include Internationalization

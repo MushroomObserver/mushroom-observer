@@ -122,7 +122,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     center_lng
   ].freeze
 
-  acts_as_versioned(if_changed: VERSIONED_COLUMNS)
+  # See Name: delete_all the versions on destroy so they don't dangle.
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS,
+                    association_options: { dependent: :delete_all })
   non_versioned_columns.push(
     "created_at",
     "updated_at",

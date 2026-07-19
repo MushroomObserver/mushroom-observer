@@ -3,6 +3,28 @@
 require("test_helper")
 
 class TranslationStringTest < UnitTestCase
+  # Destroying a versioned record must delete its versions, else they're
+  # left with a dangling FK (swept by CheckForBrokenReferencesJob).
+  def test_destroy_cascades_to_versions
+    str = translation_strings(:greek_one)
+    version_ids = TranslationString::Version.
+                  where(translation_string_id: str.id).pluck(:id)
+    assert(version_ids.any?, "fixture should have versions")
+
+    str.destroy!
+
+    assert_empty(TranslationString::Version.where(id: version_ids),
+                 "destroying a translation_string should delete its versions")
+    # Name and Location share the same cascade config.
+    [Name, Location, TranslationString].each do |model|
+      assert_equal(
+        :delete_all,
+        model.reflect_on_association(:versions).options[:dependent],
+        "#{model} versions should cascade-delete on destroy"
+      )
+    end
+  end
+
   def test_rename_tags_upcase
     str = TranslationString.create(
       { tag: "JOHN", text: "Harding",

@@ -356,7 +356,12 @@ class Name < AbstractModel
     icn_id
   ].freeze
 
-  acts_as_versioned(if_changed: VERSIONED_COLUMNS)
+  # delete_all the versions when a name is destroyed (e.g. merged away),
+  # else they're left with a dangling name_id (swept by
+  # CheckForBrokenReferencesJob). The description/glossary versioned
+  # models use :nullify instead -- an unresolved inconsistency.
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS,
+                    association_options: { dependent: :delete_all })
   non_versioned_columns.push(
     "created_at",
     "updated_at",
