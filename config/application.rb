@@ -52,11 +52,9 @@ module MushroomObserver
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
 
-    # Scrub invalid UTF-8 out of every incoming request before anything
-    # (including Rails' own param-filtering for the logs) touches it.
-    # Automated scanners POST malformed bytes; without this they reach a
-    # String op deep in the app and raise `invalid byte sequence in
-    # UTF-8` (a 500). Inserted at the front of the stack so it runs first.
+    # Scrub invalid UTF-8 out of every request at the front of the stack,
+    # before anything (including Rails' log param-filtering) touches it --
+    # else a scanner's malformed bytes reach a String op and 500.
     config.middleware.insert_before(0, Rack::UTF8Sanitizer)
 
     # Tells rails not to generate controller-specific css and js stubs.

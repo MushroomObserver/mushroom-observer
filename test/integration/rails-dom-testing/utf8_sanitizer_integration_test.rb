@@ -2,12 +2,10 @@
 
 require("test_helper")
 
-# Rack::UTF8Sanitizer (wired in config/application.rb) scrubs invalid
-# UTF-8 bytes out of every incoming request, so a scanner's malformed
-# bytes in a form POST can't reach a String op deep in the app and raise
-# `invalid byte sequence in UTF-8` (a 500). These reproduce the shapes
-# seen in the wild: POST /account/login and POST /support/confirm with
-# an invalid byte (0xFF / 0xFE, URL-encoded) in a form value.
+# Regression for Rack::UTF8Sanitizer (see config/application.rb): a POST
+# with an invalid UTF-8 byte in a form value should be served, not 500.
+# Reproduces the shapes seen in the wild -- POST /account/login and
+# /support/confirm with a 0xFF / 0xFE byte URL-encoded in a form value.
 #
 # Subclasses ActionDispatch::IntegrationTest directly (not
 # IntegrationTestCase, which turns CSRF protection on) so the tokenless
