@@ -228,17 +228,24 @@ class UserTest < UnitTestCase
   end
 
   # erase_user deletes the user row via delete_all, which bypasses the
-  # `has_one :user_stats, dependent: :destroy` callback, so user_stats
-  # must be erased explicitly (else it's left dangling -- see #26085).
-  def test_erase_user_removes_user_stats
+  # User's `dependent: :destroy` callbacks, so these user-owned records
+  # must be erased explicitly (else they're left dangling -- see #26085).
+  def test_erase_user_removes_own_leaked_records
     user = users(:spammer)
     UserStats.find_or_create_by!(user_id: user.id)
-    assert(UserStats.exists?(user_id: user.id))
+    ObservationView.find_or_create_by!(
+      observation: observations(:minimal_unknown_obs), user: user
+    )
+    ProjectMember.create!(project: projects(:bolete_project), user: user)
 
     User.erase_user(user.id)
 
     assert_not(UserStats.exists?(user_id: user.id),
                "erase_user should delete the user's user_stats")
+    assert_not(ObservationView.exists?(user_id: user.id),
+               "erase_user should delete the user's observation_views")
+    assert_not(ProjectMember.exists?(user_id: user.id),
+               "erase_user should delete the user's project_members")
   end
 
   def test_erase_user_with_comment_and_name_descriptions
