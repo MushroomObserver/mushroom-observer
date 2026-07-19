@@ -182,7 +182,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
     t.string "accession_number", limit: 80, null: false
   end
 
-  create_table "image_gap_checkpoints", charset: "utf8mb3", force: :cascade do |t|
+  create_table "image_gap_checkpoints", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "last_verified_image_id", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -936,7 +936,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_18_120000) do
   create_table "translation_strings", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.integer "version"
     t.integer "language_id", null: false
-    t.string "tag", limit: 100, collation: "utf8mb3_bin"
+    t.string "tag", limit: 100
     t.text "text"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
