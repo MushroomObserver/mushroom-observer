@@ -1869,7 +1869,7 @@
   form_observations_use_locality: Use these bounds and select a point within
   form_observations_edit_locality: "[:EDIT] this [:locality]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
-  form_observations_notes_inherited_help: Some of these notes are shared with other observations of the same occurrence. For each, choose what this observation shows — its current value, an inherited value from the others, a specific observation's value, or nothing.
+  form_observations_notes_inherited_help: Some of these notes are shared with other observations of the same occurrence. For each, click a value to use it — This Observation's own or another observation's — or Inherit to show the value from the others, Hide to show nothing, or All to combine them.
   form_observations_notes_inherit: Inherit
   form_observations_notes_hide: Hide
   form_observations_notes_all: All

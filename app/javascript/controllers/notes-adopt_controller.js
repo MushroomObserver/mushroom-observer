@@ -58,12 +58,20 @@ export default class extends Controller {
 
   // All distinct non-blank values for this key -- the primary's own plus
   // each sibling's (the value buttons carry them) -- joined one per line.
+  // Dedup on the trimmed value, but keep each RAW value in the output, so
+  // intentional whitespace/indentation/trailing newlines survive verbatim
+  // (matching the adopt path, which also copies the value unchanged).
   concatenatedValue(row) {
+    const seen = new Set()
     const values = []
-    row
-      .querySelectorAll("[data-notes-value]")
-      .forEach((b) => values.push(b.dataset.notesValue))
-    const distinct = [...new Set(values.map((v) => v.trim()).filter(Boolean))]
-    return distinct.join("\n")
+    row.querySelectorAll("[data-notes-value]").forEach((button) => {
+      const raw = button.dataset.notesValue
+      const key = raw.trim()
+      if (key && !seen.has(key)) {
+        seen.add(key)
+        values.push(raw)
+      }
+    })
+    return values.join("\n")
   }
 }

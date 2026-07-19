@@ -159,7 +159,7 @@ class Components::Form::Notes < Components::Base
   # marked active so Inherit and Hide stay distinguishable when the
   # textarea is empty.
   def render_value_buttons(part)
-    div(class: "small mb-2", data: { notes_values: "" }) do
+    div(class: "small mb-2") do
       render_source_buttons(part)
       render_action_buttons(part)
     end
@@ -178,10 +178,14 @@ class Components::Form::Notes < Components::Base
 
   # A source button labelled by its origin, with the value on one line
   # beside it. The full raw value rides in data-notes-value so a click
-  # copies it verbatim into the textarea.
+  # copies it verbatim into the textarea. The button's aria-label folds
+  # in the value (shown in a separate span sighted users read) so a
+  # screen reader announces which value the button chooses.
   def render_value_button(action, label, value, active:)
+    button_aria = "#{label}: #{value.squish.truncate(100)}"
     div(class: "d-flex align-items-center mb-1") do
       button(type: "button", class: button_class(active),
+             aria: { label: button_aria },
              data: { notes_action: action, notes_value: value,
                      action: "notes-adopt#choose" }) { label }
       span(class: "ml-2", style: VALUE_PREVIEW_STYLE) do

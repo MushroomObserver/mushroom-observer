@@ -143,6 +143,10 @@ class FormNotesTest < ComponentTestCase
                 text: :form_observations_notes_this_observation.l, count: 1)
     assert_html(html, "button[data-notes-action='adopt']" \
                       "[data-notes-value='brown']", text: "Obs 5")
+    # Screen readers announce the value via the button's aria-label,
+    # since the shown value lives in a separate span.
+    assert_html(html, "button[data-notes-action='adopt']" \
+                      "[aria-label='Obs 5: brown']")
     assert_html(html, "button[data-notes-action='adopt']" \
                       "[data-notes-value='wood']", text: "Obs 123")
 
