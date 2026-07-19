@@ -32,7 +32,10 @@ class Components::ImageTest < ComponentTestCase
     end
 
     html = render(view.new(user: @user, image: @image))
+    interactive_html = render(Components::Image::Interactive.new(
+      user: @user, image: @image, votes: false
+    ))
 
-    assert_html(html, "img.image_#{@image.id}")
+    assert_equal(interactive_html, html)
   end
 end
