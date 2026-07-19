@@ -28,12 +28,12 @@ module Views::Controllers::Users
     def render_admin_table
       style { ".permissions td { padding: 3px 5px 3px 5px }" }
       PaginatedResults do
-        render(Components::Table.new(
-                 @users,
-                 variant: :striped,
-                 identifier: "permissions",
-                 attributes: { align: "center", cellspacing: "2" }
-               )) do |t|
+        Table(
+          @users,
+          variant: :striped,
+          identifier: "permissions",
+          attributes: { align: "center", cellspacing: "2" }
+        ) do |t|
           [:users_by_name_verified, :users_by_name_groups,
            :users_by_name_last_login, :users_by_name_id,
            :users_by_name_login, :users_by_name_name,

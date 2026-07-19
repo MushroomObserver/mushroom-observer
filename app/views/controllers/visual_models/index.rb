@@ -9,10 +9,10 @@ module Views::Controllers::VisualModels
 
     def view_template
       h1 { plain("Visual Models") }
-      render(Components::Table.new(
-               @visual_models,
-               class: "table-striped table-visual-model mb-3 mt-3"
-             )) do |t|
+      Table(
+        @visual_models,
+        class: "table-striped table-visual-model mb-3 mt-3"
+      ) do |t|
         t.column("Name", width: "33%") { |vm| link_to(vm.name, vm) }
         t.column(nil, width: "33%") do |vm|
           link_to("Edit", edit_visual_model_path(vm))

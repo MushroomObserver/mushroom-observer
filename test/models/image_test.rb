@@ -697,4 +697,56 @@ class ImageTest < UnitTestCase
     assert(img.external_links.loaded?)
     assert_equal(link, img.import_link)
   end
+
+  # ---- EXIF geocode reading (local file vs. remote via curl+exiftool) --
+
+  # The image geotagged.jpg has this data (see also
+  # ObservationFormSystemTest::GEOTAGGED_EXIF).
+  GEOTAGGED_EXIF_GPS = { lat: 25.7582, lng: -80.3731, alt: 4 }.freeze
+
+  def test_read_exif_geocode_local_file
+    img = images(:in_situ_image)
+    stage_geotagged_file(img.full_filepath("orig"))
+
+    data = img.read_exif_geocode(hide_gps: false)
+
+    assert_equal(GEOTAGGED_EXIF_GPS[:lat], data[:lat])
+    assert_equal(GEOTAGGED_EXIF_GPS[:lng], data[:lng])
+    assert_equal(GEOTAGGED_EXIF_GPS[:alt], data[:alt])
+  ensure
+    FileUtils.rm_f(img.full_filepath("orig"))
+  end
+
+  # Regression test: `script/exiftool_remote` used to only read `$1`
+  # as a bare URL (fetched via `wget`), but `Image#read_exif_data`
+  # calls it with `flags..., url` -- the same `cmd, *flags, path`
+  # shape it uses for the local `exiftool` binary directly. That
+  # argument-shape mismatch (compounded by `wget` not being installed
+  # on every dev machine, unlike `curl`) silently broke EXIF re-reads
+  # for any already-transferred image -- `read_exif_geocode` always
+  # returned nil. See the corrected `curl [flags] url`-forwarding
+  # shape in `script/exiftool_remote`.
+  def test_read_exif_geocode_transferred_image
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    # original_url carries a `?<version>` cache-buster (#4808) that
+    # curl correctly strips when resolving a `file://` URL -- but it's
+    # not part of the real filesystem path, so strip it here too
+    # before using this to stage the fixture file.
+    remote_path = img.original_url.delete_prefix("file://").sub(/\?.*\z/, "")
+    stage_geotagged_file(remote_path)
+
+    data = img.read_exif_geocode(hide_gps: false)
+
+    assert_equal(GEOTAGGED_EXIF_GPS[:lat], data[:lat])
+    assert_equal(GEOTAGGED_EXIF_GPS[:lng], data[:lng])
+    assert_equal(GEOTAGGED_EXIF_GPS[:alt], data[:alt])
+  ensure
+    FileUtils.rm_f(remote_path)
+  end
+
+  def stage_geotagged_file(path)
+    FileUtils.mkdir_p(File.dirname(path))
+    FileUtils.cp(Rails.root.join("test/images/geotagged.jpg"), path)
+  end
 end

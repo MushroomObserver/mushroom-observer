@@ -4,21 +4,21 @@ module Components
   # Bootstrap alert component
   #
   # @example Basic usage
-  #   render(Components::Alert.new(message: "Success!", level: :success))
+  #   Alert(message: "Success!", level: :success)
   #
   # @example With block
-  #   render(Components::Alert.new(level: :warning)) do
+  #   Alert(level: :warning) do
   #     plain "Warning: "
   #     strong "Be careful!"
   #   end
   #
   # @example With custom attributes
-  #   render(Components::Alert.new(
+  #   Alert(
   #     message: "Info message",
   #     level: :info,
   #     id: "my-alert",
   #     class: "my-custom-class"
-  #   ))
+  #   )
   class Alert < Base
     prop :message, String, default: ""
     prop :level, _Union(:success, :info, :warning, :danger), default: :warning

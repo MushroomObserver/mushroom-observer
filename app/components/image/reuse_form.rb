@@ -6,7 +6,7 @@
 # `GlossaryTerms::ImagesController#reuse`. One `img_id` field plus
 # a "show all users' images / show only mine" toggle link beneath.
 # The surrounding image matrix lives outside this form and POSTs
-# directly via per-thumbnail links (`Components::Image::Interactive`).
+# directly via per-thumbnail links (`Components::InteractiveImage`).
 #
 # The `target` is the domain object whose images are being chosen
 # for — `Observation`, `User` (profile), or `GlossaryTerm`. The

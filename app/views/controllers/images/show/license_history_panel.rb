@@ -14,7 +14,7 @@ module Views::Controllers::Images
         return if chgs.empty?
 
         @chgs = chgs
-        render(::Components::Panel.new) do |panel|
+        Panel do |panel|
           panel.with_body { render_table }
         end
       end

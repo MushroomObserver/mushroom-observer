@@ -17,7 +17,7 @@ module Views::Controllers::Images
         # Components::Matrix::Box for why that placement would
         # silently never emit anything).
         turbo_stream_from([@image, :processed])
-        render(::Components::Panel.new(panel_id: "image_panel")) do |panel|
+        Panel(panel_id: "image_panel") do |panel|
           panel.with_heading(
             classes:
               "text-center small font-weight-normal image-controls"
@@ -59,11 +59,11 @@ module Views::Controllers::Images
       # --- Body: interactive image + vote + original filename ------
 
       def render_body
-        render(::Components::Image::Interactive.new(
-                 user: current_user, image: @image,
-                 size: :huge, image_link: "#",
-                 extra_classes: "huge-image", votes: false
-               ))
+        InteractiveImage(
+          user: current_user, image: @image,
+          size: :huge, image_link: "#",
+          extra_classes: "huge-image", votes: false
+        )
         div(class: "mt-3 text-center") do
           render_vote_interface if current_user
           render_original_name if show_original_name?

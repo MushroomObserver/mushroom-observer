@@ -12,10 +12,8 @@ module Views::Controllers::SpeciesLists
     end
 
     def view_template
-      render(Components::Panel.new(
-               panel_id: "list_details",
-               panel_class: "mt-3 mb-0"
-             )) do |panel|
+      Panel(panel_id: "list_details",
+            panel_class: "mt-3 mb-0") do |panel|
         panel.with_body { render_body }
       end
     end
