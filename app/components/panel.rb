@@ -17,7 +17,7 @@
 #     panel.with_thumbnail { image("photo.jpg") }
 #     panel.with_body { "First section" }
 #     panel.with_body { "Second section" }
-#     panel.witih_footer { "Footer text" }
+#     panel.with_footer { "Footer text" }
 #   end
 #
 # @example Panel with collapsing body
