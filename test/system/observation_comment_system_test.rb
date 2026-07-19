@@ -233,4 +233,36 @@ class ObservationCommentSystemTest < ApplicationSystemTestCase
       assert_no_selector("#comment_#{ufo.id}")
     end
   end
+
+  # Regression test for #4833: submitting the new-comment modal has to
+  # show the comment on the page right away -- no reliance on (or wait
+  # for) the model's async Action Cable broadcast to catch up.
+  def test_new_comment_appears_immediately
+    rolf = users("rolf")
+    obs = observations(:coprinus_comatus_obs)
+
+    login!(rolf)
+    visit("/#{obs.id}")
+
+    assert_selector("body.observations__show")
+    within("#comments_for_object") do
+      click_link(:show_comments_add_comment.l)
+    end
+
+    assert_selector("#modal_comment")
+    within("#comment_form") do
+      fill_in("comment_summary", with: "Immediate Comment")
+      fill_in("comment_comment", with: "Shows up right away.")
+      click_commit
+    end
+
+    assert_no_selector("#modal_comment")
+
+    comment = Comment.find_by(summary: "Immediate Comment", target: obs)
+    assert_not_nil(comment, "Comment wasn't saved")
+    within("#comment_#{comment.id}") do
+      assert_text("Immediate Comment")
+      assert_text("Shows up right away.")
+    end
+  end
 end

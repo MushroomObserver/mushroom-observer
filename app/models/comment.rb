@@ -129,11 +129,17 @@ class Comment < AbstractModel
   # Action Cable broadcasts that keep the comments list group on
   # show pages live across browser windows / users.
   #
-  # - `after_create_commit` (prepend): a brand-new row, wrapper +
+  # - `after_create_commit` (prepend_once): a brand-new row, wrapper +
   #   inner. Renders `Views::Controllers::Comments::CommentRow`
   #   (full `<div class="list-group-item comment"
   #   id="comment_<id>">…CommentItem…</div>`) so the wrapper id is
   #   set up for later update/replace broadcasts to target.
+  #   `CommentsController#create` also inserts this same row
+  #   synchronously (`CommentsController::RowStreams`) so the
+  #   submitter doesn't wait on Action Cable delivery -- the custom
+  #   `prepend_once` action (config/initializers/turbo_stream_actions.rb)
+  #   is a client-side no-op if that id is already in the DOM, so
+  #   whichever of the two arrives second doesn't duplicate the row.
   # - `after_update_commit` (update, not replace): the wrapper
   #   already exists in the DOM with id `"comment_<id>"`; only the
   #   inner content needs to change. `broadcast_update_to`
@@ -149,8 +155,9 @@ class Comment < AbstractModel
   # payload in the application layout — we want the Phlex component's
   # HTML and nothing else.
   after_create_commit lambda { |comment|
-    comment.broadcast_prepend_to(
+    comment.broadcast_action_to(
       [comment.target, :comments],
+      action: :prepend_once,
       target: "comments",
       html: ::ApplicationController.renderer.render(
         ::Views::Controllers::Comments::CommentRow.new(
