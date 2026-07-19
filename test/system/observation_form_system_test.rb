@@ -965,6 +965,99 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
+  # Editing the primary of a multi-member occurrence, adopting a
+  # sibling's note value via its button enables + fills the (initially
+  # disabled) textarea so it will submit.
+  def test_edit_primary_adopts_sibling_note_value
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Substrate: "on birch" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login!(primary.user)
+
+    visit(edit_observation_path(primary.id))
+    assert_selector("body.observations__edit")
+
+    within("[data-controller='notes-adopt']") do
+      selector = "textarea[name='observation[notes][Substrate]']"
+      assert(find(selector).disabled?, "adopt textarea starts disabled")
+
+      find("button[data-notes-value='on birch']").click
+
+      assert_equal("on birch", find(selector).value)
+      assert_not(find(selector).disabled?, "adopting enables the textarea")
+    end
+  end
+
+  # For a :set key whose sibling differs, the value/action buttons drive
+  # the textarea through every state: adopt a sibling value, revert to the
+  # own value, inherit (disable so it submits nothing), and hide (blank +
+  # readonly so the blank still submits and suppresses the inherited
+  # value, but can't be typed into).
+  def test_edit_primary_notes_value_source_transitions
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "brown" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login!(primary.user)
+
+    visit(edit_observation_path(primary.id))
+    assert_selector("body.observations__edit")
+
+    within("#observation_notes_fields") do
+      selector = "textarea[name='observation[notes][Cap]']"
+      assert_equal("red", find(selector).value)
+
+      find("button[data-notes-value='brown']").click
+      assert_equal("brown", find(selector).value)
+
+      find("button[data-notes-action='current']").click
+      assert_equal("red", find(selector).value, "restores its own value")
+
+      find("button[data-notes-action='inherit']").click
+      assert_equal("brown", find(selector).value,
+                   "inherit shows the value it inherits (the sibling's)")
+      assert(find(selector).disabled?, "inherit disables the textarea")
+
+      find("button[data-notes-action='hide']").click
+      assert_equal("", find(selector).value)
+      # readonly (so the blank still submits), not disabled, not typeable.
+      assert_not(find(selector).disabled?, "hide is readonly, not disabled")
+      assert(find(selector)[:readonly], "hide makes the textarea readonly")
+    end
+  end
+
+  # The "All" button joins the primary's value and the sibling values
+  # into the editable textarea.
+  def test_edit_primary_concatenates_shared_note_values
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "brown" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login!(primary.user)
+
+    visit(edit_observation_path(primary.id))
+    assert_selector("body.observations__edit")
+
+    within("#observation_notes_fields") do
+      selector = "textarea[name='observation[notes][Cap]']"
+      find("button[data-notes-action='concatenate']").click
+      assert_equal("red\nbrown", find(selector).value)
+    end
+  end
+
   ##############################################################################
   #  Helper methods
   #

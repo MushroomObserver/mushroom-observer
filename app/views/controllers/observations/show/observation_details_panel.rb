@@ -207,7 +207,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   # would otherwise be interpreted as textile bold-emphasis across
   # subsequent lines.
   def render_notes
-    notes = @obs.notes
+    notes = @obs.display_notes
     return if notes == ::Observation.no_notes
 
     div(class: "obs-notes textile", id: "observation_notes") do
