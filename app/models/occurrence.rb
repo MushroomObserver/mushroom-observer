@@ -334,14 +334,18 @@ class Occurrence < AbstractModel
 
   # Distinct trimmed non-blank sibling values for `key` that differ from
   # the primary's own value, winner-first, as [observation_id, value].
+  # Adopting copies a sibling's value verbatim, so return the RAW value;
+  # trim only for the blank/agreement checks and de-duping, so the exact
+  # stored text (incl. leading/trailing whitespace) survives an adopt.
   def differing_sibling_options(key, primary, siblings)
     own = primary.notes[key].to_s.strip
     seen = Set.new
     siblings.filter_map do |sib|
-      value = sib.notes[key].to_s.strip
-      next if value.blank? || value == own || !seen.add?(value)
+      raw = sib.notes[key].to_s
+      normalized = raw.strip
+      next if normalized.blank? || normalized == own || !seen.add?(normalized)
 
-      [sib.id, value]
+      [sib.id, raw]
     end
   end
 

@@ -1157,6 +1157,16 @@ class OccurrenceTest < UnitTestCase
     assert_equal([[@obs2.id, "brown"]], occ.adopt_options_by_key[:Cap])
   end
 
+  # Adopting copies the value verbatim, so the option payload keeps the
+  # sibling's exact text; trimming is only for the agreement/dedup checks.
+  def test_adopt_options_preserve_raw_sibling_value
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Cap: "  brown\n")
+    occ = create_occurrence(@obs1, @obs2)
+
+    assert_equal([[@obs2.id, "  brown\n"]], occ.adopt_options_by_key[:Cap])
+  end
+
   def test_adopt_options_order_winner_first_with_source_ids
     set_notes(@obs1, Cap: "red")
     set_notes(@obs2, Substrate: "older")
