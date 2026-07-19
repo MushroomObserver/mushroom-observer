@@ -189,7 +189,11 @@ class CheckForBrokenReferencesJob
       [User,                         :location,             :nil],
       [UserGroupUser,                :user,                 :delete],
       [UserGroupUser,                :user_group,           :delete],
-      [UserStats,                    :user,                 :alert],
+      # Derived per-user stats (rebuilt by refresh_all_user_stats) --
+      # meaningless without their user, so safe to delete. erase_user now
+      # removes them up front (User::OWN_RECORDS); this cleans up the
+      # ~26k that erase_user leaked before that fix, and stays a net.
+      [UserStats,                    :user,                 :delete],
       [VisualGroup,                  :visual_model,         :alert],
       [VisualGroupImage,             :image,                :delete],
       [VisualGroupImage,             :visual_group,         :delete],

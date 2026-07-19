@@ -64,10 +64,11 @@ module ApplicationController::Internationalization
   end
 
   def params_locale
-    return unless params[:user_locale]
+    locale = string_param(:user_locale)
+    return unless locale
 
-    logger.debug("[I18n] loading locale: #{params[:user_locale]} from params")
-    params[:user_locale]
+    logger.debug("[I18n] loading locale: #{locale} from params")
+    locale
   end
 
   def prefs_locale

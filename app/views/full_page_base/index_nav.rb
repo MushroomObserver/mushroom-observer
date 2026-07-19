@@ -60,7 +60,7 @@ module Views::FullPageBase::IndexNav
              anchor: args[:anchor],
              request_url: request_url_for_links,
              form_action_url: form_action_url,
-             letter_param: params[:letter]
+             letter_param: string_param(:letter)
            )) do |component|
       if content_for?(:sorter)
         component.with_sorter { trusted_html(content_for(:sorter)) }

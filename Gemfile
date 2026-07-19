@@ -38,6 +38,9 @@ end
 # See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
 gem("trilogy")
 
+# Scrubs invalid UTF-8 from incoming requests; wired in config/application.rb.
+gem("rack-utf8_sanitizer", require: "rack/utf8_sanitizer")
+
 # solid_cache for cache store db
 gem("solid_cache")
 # add locale to cache key
