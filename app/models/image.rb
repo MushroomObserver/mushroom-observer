@@ -965,17 +965,35 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Attempt to strip GPS data from original image. Returns error message as
   # string if it fails.
+  #
+  # Runs under the image's row lock, serialized with
+  # Image::Processor::Verifier#transfer_image -- see the GPS-leak
+  # rationale there. Under the lock, `transferred` is the transfer's
+  # settled state: still local means the strip rewrote files the
+  # in-flight/pending upload predates, so re-enqueue TransferImagesJob
+  # (idempotent) to push the stripped set.
   def strip_gps!
     return nil if gps_stripped
 
+    error = nil
+    with_lock do
+      break if gps_stripped # may have flipped while waiting for the lock
+
+      error = run_strip_exif_script
+      unless error
+        update_attribute(:gps_stripped, true)
+        TransferImagesJob.perform_later(image_ids: [id]) unless transferred
+      end
+    end
+    error
+  end
+
+  def run_strip_exif_script
     # Pass the worker-specific image root for parallel testing
     env = { "MO_IMAGE_ROOT" => MO.local_image_files }
     output, status = Open3.capture2e(env, "script/strip_exif", id.to_s,
                                      transferred ? "1" : "0")
-    return output unless status.success?
-
-    update_attribute(:gps_stripped, true)
-    nil
+    status.success? ? nil : output
   end
 
   # Get exif data from image by reading the header straight off the file,
