@@ -46,6 +46,112 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Editing the primary of a multi-member occurrence, a sibling key it
+  # doesn't store is an :inherit row -- a disabled textarea plus buttons
+  # with Inherit active and the sibling value as an adopt button.
+  def test_edit_primary_offers_inherited_notes_adopt_rows
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Substrate: "on birch" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_select("[data-controller='notes-adopt']")
+    assert_select(
+      "textarea[name='observation[notes][Substrate]'][disabled]"
+    )
+    # The disabled textarea shows the value it inherits (the sibling's).
+    assert_select("textarea[name='observation[notes][Substrate]']",
+                  text: "on birch")
+    assert_select("button[data-notes-action='inherit'].active")
+    assert_select("button[data-notes-value='on birch']")
+  end
+
+  # A key the primary DOES store, whose sibling holds a different value,
+  # is a :set row -- an editable textarea plus a This Observation button
+  # (active) and the sibling value as an adopt button.
+  def test_edit_primary_offers_adopt_for_owned_key_when_sibling_differs
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "brown" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_select("textarea[name='observation[notes][Cap]']:not([disabled])")
+    assert_select("button[data-notes-action='current'].active")
+    assert_select("button[data-notes-value='brown'][data-notes-action='adopt']")
+  end
+
+  # A shared key whose value AGREES across the occurrence still gets the
+  # buttons (This Observation/Inherit/Hide) -- just no adopt button -- so
+  # the UI is consistent regardless of whether the values differ.
+  def test_edit_primary_renders_buttons_for_agreeing_shared_key
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Cap: "red" }) # same value -> agrees
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    get(:edit, params: { id: primary.id })
+
+    assert_select("[data-controller='notes-adopt']")
+    assert_select("textarea[name='observation[notes][Cap]']")
+    assert_select("button[data-notes-action='current'].active")
+    assert_select("button[data-notes-action='adopt']", count: 0)
+  end
+
+  # A blank submitted for a sibling-held key is preserved (a deliberate
+  # suppression of the inherited value); a blank for a key no sibling
+  # holds is dropped as usual.
+  def test_update_primary_preserves_blank_only_for_sibling_keys
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:detailed_unknown_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red" })
+    sibling.update!(notes: { Substrate: "on birch" })
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+
+    put(:update, params: {
+          id: primary.id,
+          observation: {
+            place_name: primary.where,
+            "when(1i)" => primary.when.year.to_s,
+            "when(2i)" => primary.when.month.to_s,
+            "when(3i)" => primary.when.day.to_s,
+            notes: { Cap: "red", Substrate: "", Ephemeral: "" }
+          }
+        })
+
+    primary.reload
+    # Substrate: a sibling holds it -> blank preserved as a suppression.
+    assert(primary.notes.key?(:Substrate))
+    assert(primary.notes[:Substrate].blank?)
+    # Ephemeral: no sibling holds it -> blank dropped.
+    assert_not(primary.notes.key?(:Ephemeral))
+    assert_equal("red", primary.notes[:Cap])
+    # The show-page merge now suppresses the inherited Substrate value.
+    assert_not(occ.reload.merged_notes.key?(:Substrate))
+  end
+
   def test_collector_can_edit_observation
     obs = observations(:newbie_obs)
     login("foray_newbie")

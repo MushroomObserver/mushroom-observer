@@ -38,8 +38,12 @@ class TranslationString < AbstractModel
   belongs_to :language
   belongs_to :user
 
+  # See Name: delete_all the versions on destroy so they don't dangle.
+  # This is the biggest source -- language import/export removes strings
+  # regularly (see Concerns::LanguageExporter).
   acts_as_versioned(
-    if: :update_version?
+    if: :update_version?,
+    association_options: { dependent: :delete_all }
   )
   non_versioned_columns.push("tag")
 

@@ -1070,7 +1070,165 @@ class OccurrenceTest < UnitTestCase
     end
   end
 
+  # ---- merged_notes -------------------------------------------------
+
+  def test_merged_notes_primary_value_wins
+    set_notes(@obs1, Cap: "primary red", Other: "primary note")
+    set_notes(@obs2, Cap: "sibling brown", Substrate: "wood")
+    occ = create_occurrence(@obs1, @obs2)
+
+    merged = occ.merged_notes
+
+    assert_equal("primary red", merged[:Cap])       # primary wins
+    assert_equal("primary note", merged[:Other])
+    assert_equal("wood", merged[:Substrate])        # inherited from sibling
+  end
+
+  def test_merged_notes_blank_on_primary_suppresses_inherited_key
+    set_notes(@obs1, Cap: "red", Substrate: "")     # blank => delete
+    set_notes(@obs2, Substrate: "wood")
+    occ = create_occurrence(@obs1, @obs2)
+
+    merged = occ.merged_notes
+
+    assert_equal("red", merged[:Cap])
+    assert_not(merged.key?(:Substrate),
+               "blank value on primary should suppress the inherited key")
+  end
+
+  def test_merged_notes_most_recent_sibling_wins
+    set_notes(@obs1, Cap: "red")                    # primary lacks Substrate
+    set_notes(@obs2, Substrate: "older wood")
+    set_notes(@obs3, Substrate: "newer bark")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago)   # more recent
+
+    assert_equal("newer bark", occ.merged_notes[:Substrate])
+  end
+
+  def test_merged_notes_skips_blank_sibling_values
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "")                # blank, skipped
+    set_notes(@obs3, Substrate: "bark")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 1.hour.ago)   # more recent but blank
+    @obs3.update_column(:updated_at, 2.days.ago)
+
+    assert_equal("bark", occ.merged_notes[:Substrate])
+  end
+
+  def test_merged_notes_does_not_mutate_member_notes
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "wood")
+    occ = create_occurrence(@obs1, @obs2)
+
+    occ.merged_notes
+
+    assert_equal({ Cap: "red" }, @obs1.reload.notes.to_h)
+    assert_equal({ Substrate: "wood" }, @obs2.reload.notes.to_h)
+  end
+
+  # ---- adopt_options_by_key (adopt-row data for the primary's edit form) --
+
+  def test_adopt_options_include_unowned_and_skip_owned_agreeing_keys
+    set_notes(@obs1, Cap: "red") # primary owns Cap
+    set_notes(@obs2, Substrate: "wood", Cap: "red") # Cap agrees -> no option
+    set_notes(@obs3, Substrate: "wood", Habitat: "bog")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 1.hour.ago) # more recent -> winner
+    @obs3.update_column(:updated_at, 2.days.ago)
+
+    options = occ.adopt_options_by_key
+
+    # Cap: owned, every sibling agrees -> nothing to adopt.
+    assert_not(options.key?(:Cap))
+    # Substrate: unowned, both siblings "wood" -> one distinct option.
+    assert_equal([[@obs2.id, "wood"]], options[:Substrate])
+    # Habitat: unowned, one sibling.
+    assert_equal([[@obs3.id, "bog"]], options[:Habitat])
+  end
+
+  def test_adopt_options_offered_for_owned_key_when_a_sibling_differs
+    set_notes(@obs1, Cap: "red") # primary owns Cap = red
+    set_notes(@obs2, Cap: "brown") # sibling differs
+    occ = create_occurrence(@obs1, @obs2)
+
+    assert_equal([[@obs2.id, "brown"]], occ.adopt_options_by_key[:Cap])
+  end
+
+  # Adopting copies the value verbatim, so the option payload keeps the
+  # sibling's exact text; trimming is only for the agreement/dedup checks.
+  def test_adopt_options_preserve_raw_sibling_value
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Cap: "  brown\n")
+    occ = create_occurrence(@obs1, @obs2)
+
+    assert_equal([[@obs2.id, "  brown\n"]], occ.adopt_options_by_key[:Cap])
+  end
+
+  def test_adopt_options_order_winner_first_with_source_ids
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "older")
+    set_notes(@obs3, Substrate: "newer")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago) # more recent -> winner
+
+    assert_equal([[@obs3.id, "newer"], [@obs2.id, "older"]],
+                 occ.adopt_options_by_key[:Substrate])
+  end
+
+  def test_sibling_note_keys_lists_all_non_primary_member_keys
+    set_notes(@obs1, Cap: "red") # primary -- excluded
+    set_notes(@obs2, Substrate: "wood")
+    set_notes(@obs3, Habitat: "bog", Substrate: "bark")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+
+    assert_equal([:Substrate, :Habitat].to_set, occ.sibling_note_keys.to_set)
+  end
+
+  # A key whose sibling values are all blank/whitespace inherits nothing,
+  # so it isn't suppressible -- a submitted blank there is just an empty
+  # field, not a suppression marker.
+  def test_sibling_note_keys_excludes_all_blank_keys
+    set_notes(@obs1, Cap: "red") # primary
+    set_notes(@obs2, Substrate: "wood", Odor: "")
+    set_notes(@obs3, Odor: "   ")
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+
+    assert_equal([:Substrate].to_set, occ.sibling_note_keys.to_set)
+  end
+
+  # ---- inherited_values_by_key (what the :inherit state shows greyed) ----
+
+  def test_inherited_values_by_key_picks_most_recent_sibling_value
+    set_notes(@obs1, Cap: "red") # primary -- not a source
+    set_notes(@obs2, Substrate: "older")
+    set_notes(@obs3, Substrate: "newer") # more recent -> winner
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago)
+
+    assert_equal("newer", occ.inherited_values_by_key[:Substrate])
+  end
+
+  def test_inherited_values_by_key_skips_blank_sibling_values
+    set_notes(@obs1, Cap: "red")
+    set_notes(@obs2, Substrate: "wood") # only non-blank value
+    set_notes(@obs3, Substrate: "   ") # blank -> skipped even if newer
+    occ = create_occurrence(@obs1, @obs2, @obs3)
+    @obs2.update_column(:updated_at, 2.days.ago)
+    @obs3.update_column(:updated_at, 1.hour.ago)
+
+    assert_equal("wood", occ.inherited_values_by_key[:Substrate])
+  end
+
   private
+
+  def set_notes(obs, **notes)
+    obs.update!(notes: notes)
+  end
 
   def create_occurrence(primary_obs, *other_obs)
     occ = Occurrence.create!(

@@ -21,10 +21,33 @@
 # `NotesFieldPart` objects, etc.) into uniform `Part` structs before
 # passing — see `ObservationForm#observation_form_note_parts`.
 class Components::Form::Notes < Components::Base
-  # Normalized shape for one notes part. `key` becomes the
-  # Superform field key under `:notes` (`form[notes][<key>]`),
-  # `value` is the current value, `label` is shown above the textarea.
-  Part = Data.define(:key, :value, :label)
+  # One notes part. `key` becomes the Superform field key under `:notes`
+  # (`form[notes][<key>]`), `value` is the current value, `label` labels
+  # the textarea.
+  #
+  # A plain part (`notes_state` nil) renders a normal Superform textarea.
+  # An *occurrence* part (a notes key shared with the other observations
+  # of the primary's occurrence) carries `adopt_options` -- a list of
+  # [source_obs_id, value] sibling values -- and a `notes_state` of one
+  # of :set / :hide / :inherit describing what this observation currently
+  # shows for the key. It renders value + action buttons (This
+  # Observation / each sibling / Inherit / Hide / All) that drive the
+  # textarea; see `render_occurrence_part`.
+  Part = Data.define(:key, :value, :label, :adopt_options, :notes_state,
+                     :inherited_value) do
+    def initialize(key:, value:, label:, adopt_options: nil,
+                   notes_state: nil, inherited_value: nil)
+      super
+    end
+  end
+
+  # The value beside a source button is a single line that fills the
+  # remaining width and ellipsizes -- so it shows more on a wide screen
+  # and less on a phone, without wrapping or blowing out the row. Click
+  # the button to see the full value in the textarea.
+  VALUE_PREVIEW_STYLE =
+    "flex:1;min-width:0;overflow:hidden;" \
+    "text-overflow:ellipsis;white-space:nowrap;"
 
   prop :form, ::Components::ApplicationForm
   prop :parts, _Array(Part)
@@ -63,13 +86,147 @@ class Components::Form::Notes < Components::Base
   end
 
   def render_notes_inner
-    div(id: "#{@panel_id}_fields") do
+    div(id: "#{@panel_id}_fields", **adopt_controller_attrs) do
       render_above_help if @single_part_mode && @above_help
+      Help(content: :form_observations_notes_inherited_help.l) if adopt_rows?
       @form.namespace(:notes) do |notes_ns|
         @parts.each { |part| render_part(notes_ns, part) }
       end
       render_textile_help
     end
+  end
+
+  # Any occurrence (value-source) row -- keyed on notes_state, not
+  # adopt_options, since a shared key whose values agree still gets the
+  # This Observation / Inherit / Hide buttons, just no sibling to adopt.
+  def adopt_rows?
+    @parts.any?(&:notes_state)
+  end
+
+  def adopt_controller_attrs
+    adopt_rows? ? { data: { controller: "notes-adopt" } } : {}
+  end
+
+  def render_part(notes_ns, part)
+    if part.notes_state
+      render_occurrence_part(notes_ns, part)
+    else
+      render_owned_textarea(notes_ns, part)
+    end
+  end
+
+  # A notes key shared with the occurrence's other observations. Rendered
+  # through the same Superform textarea field as the plain rows (so it
+  # gets the matching id + `<label for>` association and submits under
+  # `observation[notes][<key>]` identically), with the value + action
+  # buttons in the field's `prepend` slot. They pick what this observation
+  # shows for the key -- its own value, an inherited value, nothing
+  # (hide), or a specific sibling's value -- and drive the textarea.
+  #
+  # :inherit -> disabled, showing the value it inherits (greyed, so you
+  # see what will display) -- disabled submits nothing, so the value
+  # stays inherited via the display-time merge.
+  # :hide -> readonly, not disabled: a readonly field still submits its
+  # (blank) value, so the merge suppresses the inherited one, but can't
+  # be typed into (which would silently turn Hide into a stored value) --
+  # to change it you click another button. Both render greyed.
+  #
+  # The inherited value also rides on the row (data-notes-inherited-value)
+  # so clicking Inherit later can restore it without re-querying siblings.
+  def render_occurrence_part(notes_ns, part)
+    inherit = part.notes_state == :inherit
+    hide = part.notes_state == :hide
+    muted = inherit || hide
+    field = notes_ns.field(part.key).textarea(
+      wrapper_options: {
+        label: part.label,
+        wrap_class: muted ? "text-muted" : nil,
+        wrap_data: { notes_row: "",
+                     notes_inherited_value: part.inherited_value.to_s }
+      },
+      value: inherit ? part.inherited_value.to_s : part.value,
+      rows: 3, disabled: inherit, readonly: hide,
+      style: "resize: vertical;", data: { notes_adopt_target: "value" }
+    )
+    field.with_prepend { render_value_buttons(part) }
+    render(field)
+  end
+
+  # The value-source controls: one clickable button per available value
+  # (the primary's own, then each sibling's, each showing its value),
+  # then the Inherit / Hide / All actions. Clicking drives the textarea
+  # (see notes-adopt_controller.js); the button for the current state is
+  # marked active so Inherit and Hide stay distinguishable when the
+  # textarea is empty.
+  def render_value_buttons(part)
+    div(class: "small mb-2") do
+      render_source_buttons(part)
+      render_action_buttons(part)
+    end
+  end
+
+  def render_source_buttons(part)
+    if part.notes_state == :set && part.value.present?
+      render_value_button(:current,
+                          :form_observations_notes_this_observation.l,
+                          part.value, active: true)
+    end
+    part.adopt_options.each do |obs_id, value|
+      render_value_button(:adopt, "Obs #{obs_id}", value, active: false)
+    end
+  end
+
+  # A source button labelled by its origin, with the value on one line
+  # beside it. The full raw value rides in data-notes-value so a click
+  # copies it verbatim into the textarea. The button's aria-label folds
+  # in the value (shown in a separate span sighted users read) so a
+  # screen reader announces which value the button chooses.
+  def render_value_button(action, label, value, active:)
+    button_aria = "#{label}: #{value.squish.truncate(100)}"
+    div(class: "d-flex align-items-center mb-1") do
+      button(type: "button", class: button_class(active),
+             aria: { label: button_aria },
+             data: { notes_action: action, notes_value: value,
+                     action: "notes-adopt#choose" }) { label }
+      span(class: "ml-2", style: VALUE_PREVIEW_STYLE) do
+        shared_value_preview(value)
+      end
+    end
+  end
+
+  def render_action_buttons(part)
+    div(class: "d-flex flex-wrap mt-1") do
+      action_button(:inherit, :form_observations_notes_inherit.l,
+                    active: part.notes_state == :inherit)
+      action_button(:hide, :form_observations_notes_hide.l,
+                    active: part.notes_state == :hide)
+      next unless concatenatable?(part)
+
+      action_button(:concatenate, :form_observations_notes_all.l,
+                    active: false)
+    end
+  end
+
+  def action_button(action, label, active:)
+    button(type: "button", class: button_class(active),
+           data: { notes_action: action, action: "notes-adopt#choose" }) do
+      label
+    end
+  end
+
+  def button_class(active)
+    class_names("btn btn-default mr-2 mb-1", "active" => active)
+  end
+
+  def shared_value_preview(value)
+    value.squish
+  end
+
+  # "All" (concatenate) only makes sense with 2+ distinct values to
+  # combine (the primary's own, if any, plus the distinct sibling values).
+  def concatenatable?(part)
+    own = part.notes_state == :set && part.value.present? ? 1 : 0
+    (own + part.adopt_options.size) >= 2
   end
 
   def render_above_help
@@ -87,7 +244,7 @@ class Components::Form::Notes < Components::Base
     Help(content: :shared_textile_help.l)
   end
 
-  def render_part(notes_ns, part)
+  def render_owned_textarea(notes_ns, part)
     render(notes_ns.field(part.key).textarea(
              wrapper_options: {
                label: part.label,

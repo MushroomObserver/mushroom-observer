@@ -4,6 +4,7 @@ class Components::Base < Phlex::HTML
   extend Literal::Properties
 
   # Include any helpers you want to be available across all components
+  include ScalarParams
   include Phlex::Rails::Helpers::Routes
   include Phlex::Rails::Helpers::AssetPath
   include Phlex::Rails::Helpers::LinkTo

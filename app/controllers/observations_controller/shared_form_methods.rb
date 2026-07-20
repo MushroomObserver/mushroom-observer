@@ -54,15 +54,31 @@ module ObservationsController::SharedFormMethods
     params[:observation].permit(permitted_observation_args).to_h
   end
 
-  # Symbolize keys; delete key/value pair if value blank
-  # Also avoids param permitting issues
+  # Symbolize keys and drop blank values -- except a blank on a key some
+  # occurrence sibling holds, which is a deliberate suppression of the
+  # otherwise-inherited value on the primary's show page
+  # (Occurrence#merged_notes) and so must be stored, not compacted.
+  # Also avoids param permitting issues.
   def notes_to_sym_and_compact
     return Observation.no_notes unless notes_param_present?
 
     symbolized = params[:observation][:notes].to_unsafe_h.symbolize_keys
     # Collector has its own column; never let it live in notes (#4211).
     symbolized.delete(:Collector)
-    symbolized.compact_blank!
+    suppressible = suppressible_notes_keys
+    symbolized.reject! do |key, value|
+      value.blank? && suppressible.exclude?(key)
+    end
+    symbolized
+  end
+
+  # Keys where a blank value means "suppress the inherited value" rather
+  # than "delete" -- the sibling keys of a primary in a multi-member
+  # occurrence. Empty for creates and non-primary/non-occurrence edits.
+  def suppressible_notes_keys
+    return Set.new unless @observation&.shows_merged_notes?
+
+    @observation.occurrence.sibling_note_keys.to_set
   end
 
   def notes_param_present?

@@ -189,7 +189,8 @@ class ImagesController < ApplicationController
   def set_default_size
     # Decide which size to display.
     @default_size = @user ? @user.image_size : :medium
-    @size = params[:size].blank? ? @default_size : params[:size].to_sym
+    size = string_param(:size)
+    @size = size.present? ? size.to_sym : @default_size
 
     # Maybe make this size the default image size for this user.
     return unless @user &&
