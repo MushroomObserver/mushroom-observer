@@ -14,6 +14,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldWrapperRendering
     attr_reader :wrapper_options
 
+    private
+
     def show_label?
       wrapper_options[:label] != false
     end
