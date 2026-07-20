@@ -58,6 +58,13 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal("Observation list", Symbol.test_localize("[:sPeCiEs_lIsT]"))
   end
 
+  def test_titleize_localized_all_locales
+    assert_titleize_localized_en
+    assert_titleize_localized_no_ops
+    assert_titleize_localized_turkic
+    assert_titleize_localized_sentence_case
+  end
+
   def test_hello
     assert_equal("Hello world", :hello.t)
   end
@@ -125,5 +132,105 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal("[:never_add]", :never_add.t)
     assert_equal("[:never_add(an_arg=:arg)]", :never_add.t(an_arg: :arg))
     Symbol.missing_tags = []
+  end
+
+  # Real translated content for :species_list.l and :rss_logs.l (both
+  # real multi-word `.ti` inputs in production -- see
+  # filter_caption.rb#type_tags_to_label for :rss_logs.ti) across
+  # every one of MO's 16 production locales, not just the 6 the test
+  # fixtures carry. Values pulled directly from the production
+  # checkpoint so the assertions exercise real translator output, not
+  # a made-up placeholder string.
+  TI_TEST_STRINGS = {
+    en: { species_list: "observation list", rss_logs: "activity logs" },
+    ar: { species_list: "قائمة الأنواع", rss_logs: "سجلات النشاط" },
+    fa: { species_list: "فهرست گونه ها",
+          rss_logs: "سیاهههای مربوط به فعالیت" },
+    zh: { species_list: "观察记录列表", rss_logs: "活动记录" },
+    jp: { species_list: "種名一覧", rss_logs: "履歴" },
+    # German nouns are capitalized wherever they fall in the phrase --
+    # "Änderungen" (Changes) here is correct mid-phrase, not a typo.
+    # `.capitalize` would downcase it to "änderungen", which is wrong.
+    de: { species_list: "Artenliste",
+          rss_logs: "Logbuchen der neuen Änderungen" },
+    tr: { species_list: "tür listesi", rss_logs: "etkinlik kayıtları",
+          index: "indeks" },
+    be: { species_list: "спіс відаў", rss_logs: "часопісы дзейнасці" },
+    el: { species_list: "κατάλογος Ειδών", rss_logs: "αρχεία Μεταβολών" },
+    es: { species_list: "lista de observaciones",
+          rss_logs: "registros de actividad" },
+    fr: { species_list: "liste d'espèces", rss_logs: "journals d'activité" },
+    it: { species_list: "elenco delle specie",
+          rss_logs: "registri d'attività" },
+    pl: { species_list: "lista gatunków", rss_logs: "dzienniki aktywności" },
+    pt: { species_list: "lista de espécies",
+          rss_logs: "registos de atividade" },
+    ru: { species_list: "список видов", rss_logs: "логи активности" },
+    uk: { species_list: "список видів", rss_logs: "журнали активності" }
+  }.freeze
+
+  private
+
+  def assert_titleize_localized_en
+    strs = TI_TEST_STRINGS[:en]
+    I18n.with_locale(:en) do
+      assert_equal("Observation List",
+                   Symbol.titleize_localized(strs[:species_list]))
+      assert_equal("Activity Logs",
+                   Symbol.titleize_localized(strs[:rss_logs]))
+    end
+  end
+
+  # No letter-casing concept at all (ar/fa/zh/jp), or (de) the base
+  # translation is already correctly capitalized -- .capitalize would
+  # be destructive either way, so `Symbol::TI_NO_OP_LOCALES` is a
+  # pure pass-through.
+  def assert_titleize_localized_no_ops
+    Symbol::TI_NO_OP_LOCALES.each do |locale|
+      strs = TI_TEST_STRINGS.fetch(locale)
+      I18n.with_locale(locale) do
+        assert_equal(strs[:species_list],
+                     Symbol.titleize_localized(strs[:species_list]),
+                     "Expected no-op for locale #{locale}")
+        assert_equal(strs[:rss_logs],
+                     Symbol.titleize_localized(strs[:rss_logs]),
+                     "Expected no-op for locale #{locale}")
+      end
+    end
+  end
+
+  # Turkish's i/I case-mapping is locale-specific (dotted/dotless);
+  # "indeks" (:index.l) shows the distinction from plain .capitalize.
+  def assert_titleize_localized_turkic
+    strs = TI_TEST_STRINGS[:tr]
+    Symbol::TI_TURKIC_LOCALES.each do |locale|
+      I18n.with_locale(locale) do
+        assert_equal("Tür listesi",
+                     Symbol.titleize_localized(strs[:species_list]))
+        assert_equal("İndeks", Symbol.titleize_localized(strs[:index]))
+      end
+    end
+  end
+
+  # Every other locale MO supports: sentence-case (capitalize only the
+  # first letter). Matches the "Listes d'espèces" example in #4844 --
+  # only the phrase's first letter is capitalized, so an apostrophe-led
+  # word later in the phrase (French/Italian elision) is untouched,
+  # sidestepping .titleize's English-contraction assumption entirely.
+  def assert_titleize_localized_sentence_case
+    other_locales = TI_TEST_STRINGS.keys -
+                    (Symbol::TI_NO_OP_LOCALES + Symbol::TI_TURKIC_LOCALES +
+                     [:en])
+    other_locales.each do |locale|
+      strs = TI_TEST_STRINGS.fetch(locale)
+      I18n.with_locale(locale) do
+        assert_equal(strs[:species_list].capitalize,
+                     Symbol.titleize_localized(strs[:species_list]),
+                     "Expected sentence-case for locale #{locale}")
+        assert_equal(strs[:rss_logs].capitalize,
+                     Symbol.titleize_localized(strs[:rss_logs]),
+                     "Expected sentence-case for locale #{locale}")
+      end
+    end
   end
 end

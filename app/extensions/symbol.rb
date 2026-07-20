@@ -288,7 +288,7 @@ class Symbol
         end
       end
       result = tag.l(hash, level + [self])
-      titleize ? result.titleize : result
+      titleize ? Symbol.titleize_localized(result) : result
     end
   end
 
@@ -310,14 +310,52 @@ class Symbol
     localize(*).tpl(false)
   end
 
-  # Localize, then title-case the result. No textilizing: title-cased
-  # tags are short UI labels, never Textile-formatted body text, and
-  # some callers interpolate the result straight into an HTML attribute
-  # (e.g. a `title:`) where inserted markup would be wrong. Use this
-  # instead of authoring a separate ALL-CAPS twin tag for a title-cased
+  # Locales with no letter-casing concept at all -- capitalize/titleize
+  # are meaningless there, and a stray Latin/Cyrillic substring (e.g.
+  # an embedded species name) could get destructively downcased by
+  # `.capitalize`, same risk as German below.
+  TI_CASELESS_LOCALES = [:ar, :fa, :zh, :jp].freeze
+
+  # German capitalizes every noun regardless of sentence position, so
+  # translators already store the finished, correctly-capitalized
+  # string as the base translation -- an audit of 280 comparable
+  # ALL-CAPS/lowercase tag pairs found 178 byte-for-byte identical.
+  # `.capitalize` would be destructive here (it downcases everything
+  # after the first letter, breaking embedded capitalized nouns).
+  TI_NO_OP_LOCALES = (TI_CASELESS_LOCALES + [:de]).freeze
+
+  # Turkish's i/I case-mapping is locale-specific (dotted/dotless);
+  # `.capitalize(:turkic)` handles it correctly. Applying :turkic
+  # universally breaks every other locale's words starting with "i"
+  # ("Image" -> "İmage").
+  TI_TURKIC_LOCALES = [:tr].freeze
+
+  # Locale-aware title-casing shared by `ti` and the `[:tag.ti]`
+  # embedded-ref syntax. English gets full title-case (`.titleize`);
+  # everywhere else that has letter casing at all, only the first
+  # letter is capitalized -- `.titleize`'s word-start regex is
+  # ASCII-only (silently a no-op on Cyrillic/Greek) and its apostrophe
+  # handling assumes English contractions, backwards for French/
+  # Italian elision prefixes ("d'especes"). Capitalizing only the
+  # first letter of the whole string sidesteps both problems.
+  def self.titleize_localized(str)
+    locale = I18n.locale.to_sym
+    return str.titleize if locale == :en
+    return str if TI_NO_OP_LOCALES.include?(locale)
+    return str.capitalize(:turkic) if TI_TURKIC_LOCALES.include?(locale)
+
+    str.capitalize
+  end
+
+  # Localize, then title-case the result for the current locale (see
+  # `titleize_localized`). No textilizing: title-cased tags are short
+  # UI labels, never Textile-formatted body text, and some callers
+  # interpolate the result straight into an HTML attribute (e.g. a
+  # `title:`) where inserted markup would be wrong. Use this instead
+  # of authoring a separate ALL-CAPS twin tag for a title-cased
   # presentation of an existing lowercase tag.
   def ti(*)
-    localize(*).titleize
+    Symbol.titleize_localized(localize(*))
   end
 
   def strip_html(*)
