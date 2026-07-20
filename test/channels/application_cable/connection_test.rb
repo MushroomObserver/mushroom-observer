@@ -28,6 +28,13 @@ class ApplicationCable::ConnectionTest < ActionCable::Connection::TestCase
     assert_reject_connection { connect(session: { user_id: unverified.id }) }
   end
 
+  def test_cookie_user_must_be_verified_and_unblocked
+    unverified = users(:unverified)
+    cookies["mo_user"] = "#{unverified.id} #{unverified.auth_code}"
+
+    assert_reject_connection { connect }
+  end
+
   def test_rejects_connection
     # Use `assert_reject_connection` matcher to verify that
     # connection is rejected

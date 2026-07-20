@@ -33,10 +33,10 @@ module ApplicationCable
     def validate_user_in_autologin_cookie
       return unless (cookie = cookies["mo_user"]) &&
                     (split = cookie.split) &&
-                    (user = User.where(id: split[0]).first) &&
+                    (user = User.safe_find(split[0])) &&
                     (split[1] == user.auth_code)
 
-      user
+      user if user.verified && !user.blocked?
     end
   end
 end
