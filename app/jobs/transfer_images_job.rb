@@ -9,6 +9,13 @@
 class TransferImagesJob < ApplicationJob
   queue_as(:default)
 
+  # Each image's transfer serializes on its row lock with the writers
+  # that rewrite its files in place (Image#strip_gps!,
+  # Image::Processor#rotate -- see Verifier#transfer_image). A slow
+  # re-render can hold the lock past MySQL's wait timeout; requeue
+  # instead of failing the transfer permanently.
+  retry_on ActiveRecord::LockWaitTimeout, wait: 30.seconds, attempts: 5
+
   def perform(image_ids:)
     result = Image::Processor.transfer_images(image_ids) { |msg| log(msg) }
     log("Uploaded #{result[:uploaded].size}, " \
