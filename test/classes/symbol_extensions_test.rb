@@ -191,6 +191,21 @@ class SymbolExtensionsTest < UnitTestCase
     Symbol.missing_tags = []
   end
 
+  # capitalize_first_letter_only (the plain sentence-case path) must
+  # NOT downcase the rest of the string the way String#capitalize
+  # does -- that was destroying embedded acronyms the lowercase tag
+  # already stores correctly whenever they aren't the very first word
+  # (confirmed against real content: Polish's icn_id tag stores
+  # "ICN Identyfikator"; plain .capitalize flattened it to
+  # "Icn identyfikator").
+  def test_capitalize_first_letter_only_preserves_embedded_casing
+    assert_equal("Lista gatunków",
+                 Symbol.capitalize_first_letter_only("lista gatunków"))
+    assert_equal("ICN Identyfikator",
+                 Symbol.capitalize_first_letter_only("ICN Identyfikator"))
+    assert_equal("", Symbol.capitalize_first_letter_only(""))
+  end
+
   # Real translated content for :species_list.l and :rss_logs.l (both
   # real multi-word `.ti` inputs in production -- see
   # filter_caption.rb#type_tags_to_label for :rss_logs.ti) across
@@ -318,10 +333,10 @@ class SymbolExtensionsTest < UnitTestCase
     other_locales.each do |locale|
       strs = TI_TEST_STRINGS.fetch(locale)
       I18n.with_locale(locale) do
-        assert_equal(strs[:species_list].capitalize,
+        assert_equal(Symbol.capitalize_first_letter_only(strs[:species_list]),
                      Symbol.titleize_localized(strs[:species_list]),
                      "Expected sentence-case for locale #{locale}")
-        assert_equal(strs[:rss_logs].capitalize,
+        assert_equal(Symbol.capitalize_first_letter_only(strs[:rss_logs]),
                      Symbol.titleize_localized(strs[:rss_logs]),
                      "Expected sentence-case for locale #{locale}")
       end

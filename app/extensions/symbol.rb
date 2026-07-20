@@ -396,7 +396,24 @@ class Symbol
       TI_WORD_CAPITALIZE_LOCALES.include?(locale)
     return str if TI_NO_OP_LOCALES.include?(locale)
 
-    str.capitalize
+    capitalize_first_letter_only(str)
+  end
+
+  # Capitalizes just the first letter, leaving the rest of +str+
+  # exactly as stored -- unlike `String#capitalize`, which also
+  # downcases everything after the first letter. That downcasing
+  # destroys an embedded acronym the lowercase tag already stores
+  # correctly whenever it isn't the very first word (confirmed against
+  # real content: Polish's `icn_id` tag stores `"ICN Identyfikator"`,
+  # and plain `.capitalize` was flattening it to `"Icn identyfikator"`,
+  # lowercasing "ICN" and destroying "Identyfikator" along with it).
+  # Same "translators already store correct casing" premise as
+  # `TI_NO_OP_LOCALES` -- sentence-case only needs to add the one
+  # letter of capitalization the lowercase tag doesn't already have.
+  def self.capitalize_first_letter_only(str)
+    return str if str.empty?
+
+    str[0].upcase + str[1..]
   end
 
   # Capitalizes every run of letters in +str+, treating apostrophes
