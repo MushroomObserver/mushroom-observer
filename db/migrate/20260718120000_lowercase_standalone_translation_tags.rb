@@ -14,6 +14,14 @@
 # never will be again).
 #
 # Run this before `rails lang:update`, not after.
+#
+# Also adds the [language_id, tag] index translation_strings has never
+# had -- not even on language_id, the has_many :translation_strings
+# foreign key. Language#strip and Language#translation_strings_hash
+# both scan the table filtered by language_id on every lang:update,
+# and the 74 renames below each run a where(tag: ...).update_all(...)
+# scan of their own; adding the index first means the renames below
+# benefit from it too.
 class LowercaseStandaloneTranslationTags < ActiveRecord::Migration[7.2]
   RENAMES = {
     Agaricus: :agaricus,
@@ -93,10 +101,12 @@ class LowercaseStandaloneTranslationTags < ActiveRecord::Migration[7.2]
   }.freeze
 
   def up
+    add_index(:translation_strings, [:language_id, :tag])
     TranslationString.rename_tags(RENAMES)
   end
 
   def down
     TranslationString.rename_tags(RENAMES.invert)
+    remove_index(:translation_strings, [:language_id, :tag])
   end
 end
