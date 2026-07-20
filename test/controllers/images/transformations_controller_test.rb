@@ -38,7 +38,9 @@ module Images
     # A full-page redirect on a Turbo request tears down and
     # re-subscribes the image show page's Action Cable subscription,
     # dropping RotateImageJob's async broadcast if it lands during
-    # that gap (#4854). A turbo_stream request must not redirect.
+    # that gap (#4854). A turbo_stream request must not redirect, and
+    # must still surface the flash notice (a plain 204 discarded it
+    # silently instead of rendering it).
     def test_transform_turbo_stream_does_not_redirect
       image = images(:in_situ_image)
       user = image.user
@@ -47,7 +49,9 @@ module Images
       login(user.login)
       put(:update, params: params, format: :turbo_stream)
 
-      assert_response(:no_content)
+      assert_response(:success)
+      assert_select("turbo-stream[action='update'][target='page_flash']")
+      assert_select("#flash_notices", text: :image_show_transform_note.l)
     end
   end
 end
