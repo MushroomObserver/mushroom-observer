@@ -334,28 +334,50 @@ class Symbol
   # `.capitalize`.
   TI_TURKIC_LOCALES = [:tr].freeze
 
-  # Latin-script locales where `.titleize` actually capitalizes every
-  # word correctly, confirmed against real translated content: es, pt,
-  # pl (plus en). Excludes French and Italian despite being
-  # Latin-script -- both routinely use apostrophe-elided articles
-  # ("d'activité", "d'attività"), and `.titleize`'s apostrophe
-  # handling assumes English contraction suffixes, capitalizing the
-  # letter right after the apostrophe ("D'activité") instead of
-  # leaving it alone.
-  TI_TITLEIZE_LOCALES = [:en, :es, :pt, :pl].freeze
+  # English only. `.titleize`'s word-start regex (`[a-z]`) is
+  # ASCII-only, so it silently fails to capitalize any word starting
+  # with an accented letter (í, ó, ą, ź, etc.) -- confirmed against
+  # real translated content in es/pt/pl, where this isn't rare (any
+  # word starting with a diacritic). English is pure ASCII, so it
+  # never hits this bug; everyone else uses `capitalize_each_word`
+  # below instead, which is Unicode-aware via `String#capitalize`.
+  TI_TITLEIZE_LOCALES = [:en].freeze
 
-  # Cyrillic/Greek locales: `.titleize`'s word-start regex is
-  # ASCII-only, so it's a silent no-op here -- not even
-  # sentence-casing. `String#capitalize` itself IS Unicode-aware
-  # though, so `capitalize_each_word` below reproduces per-word
-  # title-casing by hand. Confirmed against real translated content
-  # that multi-word ALL-CAPS translations in these locales are
-  # predominantly per-word-capitalized, the same convention as
-  # English -- so this gets meaningfully closer to the stored text
-  # than sentence-case would, even though (like `.titleize` itself)
-  # it doesn't know which words are connectors/acronyms that a human
-  # translator would leave alone.
-  TI_WORD_CAPITALIZE_LOCALES = [:el, :ru, :uk, :be].freeze
+  # Locales where translators predominantly write multi-word ALL-CAPS
+  # content as per-word title-case, confirmed against real translated
+  # content (#4844 deviation audit against a production checkpoint).
+  # `es`/`pt` moved here from `TI_TITLEIZE_LOCALES` to dodge the
+  # `.titleize` diacritic bug above (`capitalize_each_word` handles
+  # "índice"/"źródło" correctly since `String#capitalize` is
+  # Unicode-aware). `pl`/`ru` were removed after the same audit showed
+  # the *opposite*: both are dominated by sentence-case (67%/68% of
+  # their deviations), confirmed further by a same-tag cross-reference
+  # against `uk` showing zero counter-examples -- they're in the
+  # sentence-case default below instead now.
+  TI_WORD_CAPITALIZE_LOCALES = [:es, :pt, :el, :uk, :be].freeze
+
+  # Small connector words that stay lowercase even in a
+  # `TI_WORD_CAPITALIZE_LOCALES` locale, confirmed empirically:
+  # Spanish/Portuguese translators consistently don't capitalize
+  # these ("de" alone was ours-capitalized/theirs-lowercase in 16/257
+  # es tags and 23/261 pt tags -- the single most common deviation in
+  # both locales). "в" (Ukrainian "in"/"at") is a preposition, the
+  # same word class as the Romance examples -- only one directly
+  # confirmed occurrence in the audit data, but the linguistic
+  # category match is strong enough to include it. Never applies to a
+  # word's own first position within `capitalize_each_word` -- see the
+  # `first` tracking there.
+  #
+  # Checked el/be for the same pattern and left them out: be's
+  # deviations are dominated by translator inconsistency (whole tags
+  # left uncapitalized) rather than a specific-word exception; el had
+  # no repeated word at all. Revisit if more data surfaces a real
+  # signal for either.
+  TI_LOWERCASE_WORDS = {
+    es: %w[de del o].freeze,
+    pt: %w[de ou].freeze,
+    uk: %w[в].freeze
+  }.freeze
 
   # Locale-aware title-casing shared by `ti` and the `[:tag.ti]`
   # embedded-ref syntax. `TI_TITLEIZE_LOCALES` get full title-case via
@@ -381,9 +403,23 @@ class Symbol
   # and hyphens as part of the word they're attached to (same
   # word-boundary behavior `.titleize` has, including its French/
   # Italian elision-prefix limitation -- which is why those two
-  # locales aren't routed through this method either).
+  # locales aren't routed through this method either). A word that's
+  # already all-uppercase (2+ letters) is left untouched instead of
+  # being run through `.capitalize` -- which would downcase everything
+  # after the first letter, destroying real acronyms the lowercase tag
+  # already stores correctly ("API key" -> ours was flattening this to
+  # "Api Key" before; confirmed same issue with "ICN", "OK", "ДНК"
+  # across nearly every word-capitalize locale). Applies
+  # `TI_LOWERCASE_WORDS` exceptions to any non-first word.
   def self.capitalize_each_word(str, turkic: false)
+    exceptions = TI_LOWERCASE_WORDS[I18n.locale.to_sym] || []
+    first = true
     str.gsub(/\p{Alpha}[\p{Alpha}'’-]*/) do |word|
+      was_first = first
+      first = false
+      next word if word == word.upcase && word.length > 1
+      next word.downcase if !was_first && exceptions.include?(word.downcase)
+
       turkic ? word.capitalize(:turkic) : word.capitalize
     end
   end

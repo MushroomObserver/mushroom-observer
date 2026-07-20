@@ -79,6 +79,49 @@ class SymbolExtensionsTest < UnitTestCase
     I18n.available_locales = original_locales
   end
 
+  # "ids"/"icn" acronyms added to config/initializers/inflections.rb
+  # after the #4844 deviation audit found `.titleize` splitting
+  # "IDs" into "I Ds" and downcasing "ICN" to "Icn".
+  def test_titleize_acronym_inflections
+    assert_equal("IDs", "ids".titleize)
+    assert_equal("ICN Identifier", "icn identifier".titleize)
+  end
+
+  # capitalize_each_word (the TI_WORD_CAPITALIZE_LOCALES path) leaves
+  # an already-all-uppercase word untouched instead of running it
+  # through .capitalize, which would downcase everything after the
+  # first letter and destroy a real acronym the lowercase tag already
+  # stores correctly -- confirmed against real content across nearly
+  # every word-capitalize locale ("API key" -> "Api Key", "ДНК" ->
+  # "Днк", before this fix).
+  def test_capitalize_each_word_preserves_acronyms
+    assert_equal("API Key", Symbol.capitalize_each_word("API key"))
+    I18n.with_locale(:uk) do
+      assert_equal("Ключ API", Symbol.capitalize_each_word("ключ API"))
+    end
+  end
+
+  # TI_LOWERCASE_WORDS: Spanish/Portuguese/Ukrainian small connector
+  # words stay lowercase even when the rest of the phrase is
+  # capitalized, confirmed empirically (#4844 deviation audit) -- but
+  # only outside the first-word position.
+  def test_capitalize_each_word_lowercase_exceptions
+    I18n.with_locale(:es) do
+      assert_equal("Grupo de Admin",
+                   Symbol.capitalize_each_word("grupo de admin"))
+      # First word is never exempted, even if it matches the list.
+      assert_equal("De Nuevo", Symbol.capitalize_each_word("de nuevo"))
+    end
+    I18n.with_locale(:pt) do
+      assert_equal("Grupo ou Clado",
+                   Symbol.capitalize_each_word("grupo ou clado"))
+    end
+    I18n.with_locale(:uk) do
+      assert_equal("Внесення в Каталог",
+                   Symbol.capitalize_each_word("внесення в каталог"))
+    end
+  end
+
   def test_hello
     assert_equal("Hello world", :hello.t)
   end
@@ -184,17 +227,15 @@ class SymbolExtensionsTest < UnitTestCase
   }.freeze
 
   TI_TITLEIZE_EXPECTED = {
-    en: { species_list: "Observation List", rss_logs: "Activity Logs" },
-    es: { species_list: "Lista De Observaciones",
-          rss_logs: "Registros De Actividad" },
-    pt: { species_list: "Lista De Espécies",
-          rss_logs: "Registos De Atividade" },
-    pl: { species_list: "Lista Gatunków", rss_logs: "Dzienniki Aktywności" }
+    en: { species_list: "Observation List", rss_logs: "Activity Logs" }
   }.freeze
 
   TI_WORD_CAPITALIZE_EXPECTED = {
+    es: { species_list: "Lista de Observaciones",
+          rss_logs: "Registros de Actividad" },
+    pt: { species_list: "Lista de Espécies",
+          rss_logs: "Registos de Atividade" },
     el: { species_list: "Κατάλογος Ειδών", rss_logs: "Αρχεία Μεταβολών" },
-    ru: { species_list: "Список Видов", rss_logs: "Логи Активности" },
     uk: { species_list: "Список Видів", rss_logs: "Журнали Активності" },
     be: { species_list: "Спіс Відаў", rss_logs: "Часопісы Дзейнасці" }
   }.freeze
