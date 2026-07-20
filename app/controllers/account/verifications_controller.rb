@@ -114,6 +114,7 @@ module Account
     def mark_user_verified_and_login(user)
       @user = user
       session_user_set(user)
+      autologin_cookie_set(user)
       @user.verify
     end
   end

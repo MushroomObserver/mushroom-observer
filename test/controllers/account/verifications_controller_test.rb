@@ -37,6 +37,11 @@ module Account
       assert(@request.session[:user_id])
       assert_users_equal(user, assigns(:user))
       assert_not_nil(user.reload.verified)
+      # A verification-link login must set the autologin cookie too,
+      # else the user's Action Cable connection can never authenticate
+      # (#4854) -- it only ever checked this cookie, not the session.
+      assert(cookies["mo_user"],
+             "Verifying via email link should set the autologin cookie")
 
       get(:new, params: { id: user.id, auth_code: user.auth_code })
       assert_redirected_to(account_welcome_path)

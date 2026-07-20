@@ -12,7 +12,19 @@ module Images
       transform_image_and_flash_notices(image) if permission!(image)
 
       # NOTE: 2022/12 params[:size] is unused in show_image
-      redirect_to(image_path(image))
+      #
+      # A full-page redirect tears down and re-subscribes the
+      # turbo_stream_from([@image, :processed]) Action Cable
+      # subscription on the show page -- if RotateImageJob's async
+      # broadcast_processed_update fires during that reconnect gap,
+      # the broadcast is dropped with no replay (#4854). Responding
+      # with an empty turbo_stream instead keeps the existing
+      # subscription alive so the broadcast, once the job finishes,
+      # reaches the page normally. Non-Turbo requests still redirect.
+      respond_to do |format|
+        format.turbo_stream { head(:no_content) }
+        format.html { redirect_to(image_path(image)) }
+      end
     end
 
     private

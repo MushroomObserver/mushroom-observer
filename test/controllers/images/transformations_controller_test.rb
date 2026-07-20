@@ -34,5 +34,20 @@ module Images
       assert_flash_text(flash)
       assert_redirected_to(image_path(image.id))
     end
+
+    # A full-page redirect on a Turbo request tears down and
+    # re-subscribes the image show page's Action Cable subscription,
+    # dropping RotateImageJob's async broadcast if it lands during
+    # that gap (#4854). A turbo_stream request must not redirect.
+    def test_transform_turbo_stream_does_not_redirect
+      image = images(:in_situ_image)
+      user = image.user
+      params = { id: image.id, op: "rotate_left", size: user.image_size }
+
+      login(user.login)
+      put(:update, params: params, format: :turbo_stream)
+
+      assert_response(:no_content)
+    end
   end
 end
