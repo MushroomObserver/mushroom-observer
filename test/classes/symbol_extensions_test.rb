@@ -59,7 +59,8 @@ class SymbolExtensionsTest < UnitTestCase
   end
 
   def test_titleize_localized_all_locales
-    assert_titleize_localized_en
+    assert_titleize_localized_titleize_locales
+    assert_titleize_localized_word_capitalize_locales
     assert_titleize_localized_no_ops
     assert_titleize_localized_turkic
     assert_titleize_localized_sentence_case
@@ -169,15 +170,53 @@ class SymbolExtensionsTest < UnitTestCase
     uk: { species_list: "список видів", rss_logs: "журнали активності" }
   }.freeze
 
+  TI_TITLEIZE_EXPECTED = {
+    en: { species_list: "Observation List", rss_logs: "Activity Logs" },
+    es: { species_list: "Lista De Observaciones",
+          rss_logs: "Registros De Actividad" },
+    pt: { species_list: "Lista De Espécies",
+          rss_logs: "Registos De Atividade" },
+    pl: { species_list: "Lista Gatunków", rss_logs: "Dzienniki Aktywności" }
+  }.freeze
+
+  TI_WORD_CAPITALIZE_EXPECTED = {
+    el: { species_list: "Κατάλογος Ειδών", rss_logs: "Αρχεία Μεταβολών" },
+    ru: { species_list: "Список Видов", rss_logs: "Логи Активности" },
+    uk: { species_list: "Список Видів", rss_logs: "Журнали Активності" },
+    be: { species_list: "Спіс Відаў", rss_logs: "Часопісы Дзейнасці" }
+  }.freeze
+
   private
 
-  def assert_titleize_localized_en
-    strs = TI_TEST_STRINGS[:en]
-    I18n.with_locale(:en) do
-      assert_equal("Observation List",
-                   Symbol.titleize_localized(strs[:species_list]))
-      assert_equal("Activity Logs",
-                   Symbol.titleize_localized(strs[:rss_logs]))
+  def assert_titleize_localized_titleize_locales
+    Symbol::TI_TITLEIZE_LOCALES.each do |locale|
+      strs = TI_TEST_STRINGS.fetch(locale)
+      expected = TI_TITLEIZE_EXPECTED.fetch(locale)
+      I18n.with_locale(locale) do
+        assert_equal(expected[:species_list],
+                     Symbol.titleize_localized(strs[:species_list]),
+                     "Expected full title-case for locale #{locale}")
+        assert_equal(expected[:rss_logs],
+                     Symbol.titleize_localized(strs[:rss_logs]),
+                     "Expected full title-case for locale #{locale}")
+      end
+    end
+  end
+
+  # Cyrillic/Greek: .titleize itself is a no-op here, so
+  # capitalize_each_word does the per-word capitalization by hand.
+  def assert_titleize_localized_word_capitalize_locales
+    Symbol::TI_WORD_CAPITALIZE_LOCALES.each do |locale|
+      strs = TI_TEST_STRINGS.fetch(locale)
+      expected = TI_WORD_CAPITALIZE_EXPECTED.fetch(locale)
+      I18n.with_locale(locale) do
+        assert_equal(expected[:species_list],
+                     Symbol.titleize_localized(strs[:species_list]),
+                     "Expected per-word capitalize for locale #{locale}")
+        assert_equal(expected[:rss_logs],
+                     Symbol.titleize_localized(strs[:rss_logs]),
+                     "Expected per-word capitalize for locale #{locale}")
+      end
     end
   end
 
@@ -205,7 +244,7 @@ class SymbolExtensionsTest < UnitTestCase
     strs = TI_TEST_STRINGS[:tr]
     Symbol::TI_TURKIC_LOCALES.each do |locale|
       I18n.with_locale(locale) do
-        assert_equal("Tür listesi",
+        assert_equal("Tür Listesi",
                      Symbol.titleize_localized(strs[:species_list]))
         assert_equal("İndeks", Symbol.titleize_localized(strs[:index]))
       end
@@ -220,7 +259,8 @@ class SymbolExtensionsTest < UnitTestCase
   def assert_titleize_localized_sentence_case
     other_locales = TI_TEST_STRINGS.keys -
                     (Symbol::TI_NO_OP_LOCALES + Symbol::TI_TURKIC_LOCALES +
-                     [:en])
+                     Symbol::TI_TITLEIZE_LOCALES +
+                     Symbol::TI_WORD_CAPITALIZE_LOCALES)
     other_locales.each do |locale|
       strs = TI_TEST_STRINGS.fetch(locale)
       I18n.with_locale(locale) do

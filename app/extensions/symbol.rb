@@ -327,24 +327,65 @@ class Symbol
   # Turkish's i/I case-mapping is locale-specific (dotted/dotless);
   # `.capitalize(:turkic)` handles it correctly. Applying :turkic
   # universally breaks every other locale's words starting with "i"
-  # ("Image" -> "İmage").
+  # ("Image" -> "İmage"). Audited against real translated content:
+  # 42 twin-pair tags matched a per-word title-case derivation vs. 15
+  # for sentence-case, so Turkish joins the word-capitalize family
+  # too, just with :turkic mapping applied per word instead of plain
+  # `.capitalize`.
   TI_TURKIC_LOCALES = [:tr].freeze
 
+  # Latin-script locales where `.titleize` actually capitalizes every
+  # word correctly, confirmed against real translated content: es, pt,
+  # pl (plus en). Excludes French and Italian despite being
+  # Latin-script -- both routinely use apostrophe-elided articles
+  # ("d'activité", "d'attività"), and `.titleize`'s apostrophe
+  # handling assumes English contraction suffixes, capitalizing the
+  # letter right after the apostrophe ("D'activité") instead of
+  # leaving it alone.
+  TI_TITLEIZE_LOCALES = [:en, :es, :pt, :pl].freeze
+
+  # Cyrillic/Greek locales: `.titleize`'s word-start regex is
+  # ASCII-only, so it's a silent no-op here -- not even
+  # sentence-casing. `String#capitalize` itself IS Unicode-aware
+  # though, so `capitalize_each_word` below reproduces per-word
+  # title-casing by hand. Confirmed against real translated content
+  # that multi-word ALL-CAPS translations in these locales are
+  # predominantly per-word-capitalized, the same convention as
+  # English -- so this gets meaningfully closer to the stored text
+  # than sentence-case would, even though (like `.titleize` itself)
+  # it doesn't know which words are connectors/acronyms that a human
+  # translator would leave alone.
+  TI_WORD_CAPITALIZE_LOCALES = [:el, :ru, :uk, :be].freeze
+
   # Locale-aware title-casing shared by `ti` and the `[:tag.ti]`
-  # embedded-ref syntax. English gets full title-case (`.titleize`);
+  # embedded-ref syntax. `TI_TITLEIZE_LOCALES` get full title-case via
+  # `.titleize`; `TI_TURKIC_LOCALES` and `TI_WORD_CAPITALIZE_LOCALES`
+  # get the same per-word effect via `capitalize_each_word`;
   # everywhere else that has letter casing at all, only the first
-  # letter is capitalized -- `.titleize`'s word-start regex is
-  # ASCII-only (silently a no-op on Cyrillic/Greek) and its apostrophe
-  # handling assumes English contractions, backwards for French/
-  # Italian elision prefixes ("d'especes"). Capitalizing only the
-  # first letter of the whole string sidesteps both problems.
+  # letter is capitalized (sentence-case) -- which also sidesteps the
+  # apostrophe bug the title-casing paths share, since only the very
+  # first letter of the whole string is ever touched.
   def self.titleize_localized(str)
     locale = I18n.locale.to_sym
-    return str.titleize if locale == :en
+    return str.titleize if TI_TITLEIZE_LOCALES.include?(locale)
+    return capitalize_each_word(str, turkic: true) if
+      TI_TURKIC_LOCALES.include?(locale)
+    return capitalize_each_word(str) if
+      TI_WORD_CAPITALIZE_LOCALES.include?(locale)
     return str if TI_NO_OP_LOCALES.include?(locale)
-    return str.capitalize(:turkic) if TI_TURKIC_LOCALES.include?(locale)
 
     str.capitalize
+  end
+
+  # Capitalizes every run of letters in +str+, treating apostrophes
+  # and hyphens as part of the word they're attached to (same
+  # word-boundary behavior `.titleize` has, including its French/
+  # Italian elision-prefix limitation -- which is why those two
+  # locales aren't routed through this method either).
+  def self.capitalize_each_word(str, turkic: false)
+    str.gsub(/\p{Alpha}[\p{Alpha}'’-]*/) do |word|
+      turkic ? word.capitalize(:turkic) : word.capitalize
+    end
   end
 
   # Localize, then title-case the result for the current locale (see
