@@ -27,8 +27,9 @@ DESCRIPTION
   This attempts to strip the GPS data from the EXIF header of the original
   image. If it is stored locally, easy-peasy. If it has already been
   transferred, then it runs the strip command remotely on the image server.
-  If it has been moved to Digital Ocean object store, then we return an
-  error message and tell the user to re-upload the image.
+  Copies archived to Google Cloud Storage (mo-image-archive-bucket) are
+  NOT touched -- once an original only exists there, this script can't
+  strip it.
 
 END
 
