@@ -179,6 +179,72 @@ class ImageTest < UnitTestCase
     end
   end
 
+  # A local strip rewrites files that any in-flight/pending upload
+  # predates (see Image::Processor::Verifier#transfer_image for the
+  # race), so it must re-enqueue the transfer to push the stripped set.
+  def test_strip_gps_local_image_strips_and_reenqueues_transfer
+    img = images(:in_situ_image)
+    captured = nil
+    fake_capture2e = lambda do |_env, *args|
+      captured = args
+      ["", stub_status(true)]
+    end
+
+    Open3.stub(:capture2e, fake_capture2e) do
+      assert_enqueued_with(job: TransferImagesJob,
+                           args: [{ image_ids: [img.id] }]) do
+        assert_nil(img.strip_gps!)
+      end
+    end
+
+    assert_equal(["script/strip_exif", img.id.to_s, "0"], captured)
+    assert_true(img.reload.gps_stripped)
+  end
+
+  # An already-transferred image is stripped server-side -- nothing
+  # local to push, so no transfer job.
+  def test_strip_gps_transferred_image_strips_remotely_without_enqueue
+    img = images(:in_situ_image)
+    img.update_columns(transferred: true)
+    captured = nil
+    fake_capture2e = lambda do |_env, *args|
+      captured = args
+      ["", stub_status(true)]
+    end
+
+    Open3.stub(:capture2e, fake_capture2e) do
+      assert_no_enqueued_jobs { assert_nil(img.strip_gps!) }
+    end
+
+    assert_equal(["script/strip_exif", img.id.to_s, "1"], captured)
+    assert_true(img.reload.gps_stripped)
+  end
+
+  def test_strip_gps_failure_marks_nothing_and_enqueues_nothing
+    img = images(:in_situ_image)
+
+    Open3.stub(:capture2e, ["boom", stub_status(false)]) do
+      assert_no_enqueued_jobs { assert_equal("boom", img.strip_gps!) }
+    end
+
+    assert_false(img.reload.gps_stripped)
+  end
+
+  def test_strip_gps_noop_when_already_stripped
+    img = images(:in_situ_image)
+    img.update_columns(gps_stripped: true)
+
+    Open3.stub(:capture2e, ->(*) { raise("must not shell out") }) do
+      assert_no_enqueued_jobs { assert_nil(img.strip_gps!) }
+    end
+  end
+
+  def stub_status(success)
+    status = Object.new
+    status.define_singleton_method(:success?) { success }
+    status
+  end
+
   # dHash is computed from the small local rendition — never the full-size
   # original, whose ImageMagick decode can exhaust the host (#4796).
   def test_compute_dhash_uses_small_local_rendition
