@@ -141,6 +141,13 @@ class Image
       GapDetector.new(&log).run
     end
 
+    # Tripwire scan of the given images' originals on the image
+    # server(s) for GPS tags that survived stripping -- see GpsLeakScan
+    # and GpsLeakDetectorJob (#4859).
+    def self.detect_gps_leaks(images, &log)
+      GpsLeakScan.new(&log).scan(images)
+    end
+
     # Strips GPS/geotag data from an image's original file synchronously,
     # before the image is exposed anywhere -- this can't wait on the
     # deferred resize/transfer pipeline in #process, which may run much
