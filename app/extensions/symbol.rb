@@ -366,6 +366,7 @@ class Symbol
     # (this is a value in the :es array, not a locale key).
     es: %w[a con de del el la las los o para por].freeze,
     pt: %w[a as com da das de do dos e em o os ou para por].freeze,
+    el: %w[στο στις εκ ή].freeze,
     uk: %w[в].freeze
   }.freeze
 
