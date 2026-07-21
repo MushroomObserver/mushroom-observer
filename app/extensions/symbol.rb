@@ -355,29 +355,16 @@ class Symbol
   # default below instead.
   TI_WORD_CAPITALIZE_LOCALES = [:en, :es, :pt, :el, :uk, :be].freeze
 
-  # Small connector words that stay lowercase even in a
-  # `TI_WORD_CAPITALIZE_LOCALES` locale, confirmed empirically. "de"
-  # alone was ours-capitalized/theirs-lowercase in 16/257 es tags and
-  # 23/261 pt tags -- the single most common deviation in both
-  # locales. English's "at"/"by"/"or" are the same pattern
-  # (`CREATED_AT`/`ENTERED_BY`/`RANK_GROUP` et al); "with"/"and" added
-  # alongside them on the same standard English title-case convention
-  # (small conjunctions/prepositions stay lowercase) even without a
-  # confirmed audit hit yet. "в" (Ukrainian "in"/"at") is a
-  # preposition, the same word class as the others -- only one
-  # directly confirmed occurrence in the audit data, but the
-  # linguistic category match is strong enough to include it. Never
-  # applies to a word's own first position within
-  # `capitalize_each_word` -- see the `first` tracking there.
-  #
-  # Checked el/be for the same pattern and left them out: be's
-  # deviations are dominated by translator inconsistency (whole tags
-  # left uncapitalized) rather than a specific-word exception; el had
-  # no repeated word at all. Revisit if more data surfaces a real
-  # signal for either.
+  # Small connector words (articles, prepositions, conjunctions) that
+  # stay lowercase in title case, same as standard English style-guide
+  # convention. Never applies to a word's own first position -- see
+  # `first` below.
   TI_LOWERCASE_WORDS = {
     en: %w[at by or with and].freeze,
-    es: %w[de del o].freeze,
+    # "el" here is the Spanish definite article, not the :el (Greek)
+    # locale symbol -- coincidental overlap, no functional collision
+    # (this is a value in the :es array, not a locale key).
+    es: %w[a con de del el la las los o para por].freeze,
     pt: %w[de ou].freeze,
     uk: %w[в].freeze
   }.freeze
