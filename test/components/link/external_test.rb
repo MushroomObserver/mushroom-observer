@@ -89,7 +89,7 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_html(html,
                 "a[href='#{link.url}']" \
                 "[target='_blank'][rel='noopener noreferrer']",
-                text: "Manual link to MycoPortal")
+                text: "Manual link to MyCoPortal")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
   end

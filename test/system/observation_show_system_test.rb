@@ -271,7 +271,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_nil(link.url, "an external_id link stores no url")
 
     within("#observation_external_links") do
-      assert_link(text: /MycoPortal/)
+      assert_link(text: /MyCoPortal/)
       find_link(:edit.ti).trigger("click")
     end
 
@@ -293,6 +293,6 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
-    assert_no_link(text: /MycoPortal/)
+    assert_no_link(text: /MyCoPortal/)
   end
 end
