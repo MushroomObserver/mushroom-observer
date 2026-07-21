@@ -3,6 +3,29 @@
 require("test_helper")
 
 class SymbolExtensionsTest < UnitTestCase
+  # Symbol.titleize_localized (and I18n.with_locale generally) is a
+  # pure function of I18n.locale -- it never touches
+  # TranslationString/Language. But I18n.available_locales is derived
+  # from whichever config/locales/*.yml files exist, which `rails
+  # lang:update` generates only for locales with a Language row in
+  # whatever DB it ran against. CI's test DB only has the 6 languages
+  # fixtures.yml defines, so I18n.with_locale(:pl) (etc.) would raise
+  # I18n::InvalidLocale there even though the fixture set has nothing
+  # to do with what these tests are actually exercising. Widened once
+  # for the whole class rather than per-test, since multiple tests in
+  # this file need locales outside the fixture set.
+  def setup
+    super
+    @original_locales = I18n.available_locales
+    I18n.available_locales =
+      (@original_locales + TI_TEST_STRINGS.keys).uniq
+  end
+
+  def teardown
+    I18n.available_locales = @original_locales
+    super
+  end
+
   def test_localize_postprocessing
     Symbol.raise_errors
     assert_equal("",             Symbol.test_localize(""))
@@ -58,24 +81,11 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal("Observation list", Symbol.test_localize("[:sPeCiEs_lIsT]"))
   end
 
-  # Symbol.titleize_localized is a pure function of I18n.locale -- it
-  # never touches TranslationString/Language. But I18n.available_locales
-  # is derived from whichever config/locales/*.yml files exist, which
-  # `rails lang:update` generates only for locales with a Language row
-  # in whatever DB it ran against. CI's test DB only has the 6
-  # languages fixtures.yml defines, so I18n.with_locale(:pl) (etc.)
-  # would raise I18n::InvalidLocale there even though the fixture set
-  # has nothing to do with what this test is actually exercising.
   def test_titleize_localized_all_locales
-    original_locales = I18n.available_locales
-    I18n.available_locales = (original_locales + TI_TEST_STRINGS.keys).uniq
-
     assert_titleize_localized_word_capitalize_locales
     assert_titleize_localized_no_ops
     assert_titleize_localized_turkic
     assert_titleize_localized_sentence_case
-  ensure
-    I18n.available_locales = original_locales
   end
 
   # capitalize_each_word (the TI_WORD_CAPITALIZE_LOCALES path) leaves
