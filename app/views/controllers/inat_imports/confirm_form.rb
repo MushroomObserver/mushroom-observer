@@ -50,12 +50,35 @@ module Views::Controllers::InatImports
       end
     end
 
-    # Import-others' unlicensed obs are never imported,
-    # so they belong under Total Ignored
-    # Observations rather than own-import's informational-only line.
-    def show_ignored_section?
-      ignored_row_data.any? || import_others?
+    def render_timestamp_note
+      return unless @expected
+
+      t = @estimated_at.strftime("%Y-%m-%d %H:%M:%S %Z")
+      p(id: "as_of") { plain(:inat_import_confirm_expected_as_of.t(time: t)) }
+      return if stable_result_set?
+
+      p(class: "staleness-note") do
+        plain(:inat_import_confirm_expected_staleness.l)
+      end
     end
+
+    def stable_result_set? = @urls.stable_result_set?
+
+    def requested_obs_line
+      b { plain(:inat_import_confirm_requested_caption.l) }
+      plain(": ")
+      span(id: "requested_count") do
+        url = requested_obs_url
+        if url
+          render(Components::Link::External.new(content: @requested.to_s,
+                                                path: url))
+        else
+          plain(@requested.to_s)
+        end
+      end
+    end
+
+    def requested_obs_url = @urls.requested_obs_url
 
     def render_ignored_section
       return unless show_ignored_section?
@@ -72,9 +95,55 @@ module Views::Controllers::InatImports
       br
     end
 
-    def ignored_rows_count
-      ignored_row_data.size + (import_others? ? 1 : 0)
+    def show_ignored_section?
+      ignored_row_data.any? ||
+        # Import-others' unlicensed obs are never imported. So they
+        # belong here rather than own-import's informational-only line.
+        import_others?
     end
+
+    def ignored_row_data
+      [not_importable_row, already_imported_row, no_date_row].compact
+    end
+
+    def not_importable_row
+      return unless (c = not_importable_count)&.positive?
+
+      { key: :inat_import_confirm_not_importable_caption, count: c, url: nil }
+    end
+
+    def not_importable_count
+      @requested.to_i - @after_taxon.to_i if @requested && @after_taxon
+    end
+
+    def already_imported_row
+      return unless (c = already_imported_count)&.positive?
+
+      { key: :inat_import_confirm_already_imported_caption,
+        count: c, url: already_imported_url }
+    end
+
+    def already_imported_count
+      return unless @after_taxon && @not_yet_imported
+
+      @after_taxon.to_i - @not_yet_imported.to_i
+    end
+
+    def already_imported_url = @urls.already_imported_url
+
+    def no_date_row
+      return unless (c = no_date_count)&.positive?
+
+      { key: :inat_import_confirm_no_date_caption, count: c, url: nil }
+    end
+
+    def no_date_count
+      return unless @expected && @estimate_with_date
+
+      @expected.to_i - @estimate_with_date.to_i
+    end
+
+    def import_others? = model.import_others == "1"
 
     def render_ignored_total
       return unless @requested && (@estimate_with_date || @expected)
@@ -93,76 +162,8 @@ module Views::Controllers::InatImports
       end
     end
 
-    def ignored_row_data
-      [not_importable_row, already_imported_row, no_date_row].compact
-    end
-
-    def not_importable_row
-      return unless (c = not_importable_count)&.positive?
-
-      { key: :inat_import_confirm_not_importable_caption, count: c, url: nil }
-    end
-
-    def already_imported_row
-      return unless (c = already_imported_count)&.positive?
-
-      { key: :inat_import_confirm_already_imported_caption,
-        count: c, url: already_imported_url }
-    end
-
-    def no_date_row
-      return unless (c = no_date_count)&.positive?
-
-      { key: :inat_import_confirm_no_date_caption, count: c, url: nil }
-    end
-
-    def not_importable_count
-      @requested.to_i - @after_taxon.to_i if @requested && @after_taxon
-    end
-
-    def no_date_count
-      return unless @expected && @estimate_with_date
-
-      @expected.to_i - @estimate_with_date.to_i
-    end
-
-    # `@not_yet_imported` deliberately doesn't force/default a license value
-    # (unlike `@expected`), so it stays on the same scope as `@after_taxon`
-    # regardless what the user's URL says about `licensed` — subtracting
-    # `@expected` here instead would misattribute unlicensed obs (a separate,
-    # already-reported reason) as "already imported".
-    def already_imported_count
-      return unless @after_taxon && @not_yet_imported
-
-      @after_taxon.to_i - @not_yet_imported.to_i
-    end
-
-    def requested_obs_line
-      b { plain(:inat_import_confirm_requested_caption.l) }
-      plain(": ")
-      span(id: "requested_count") do
-        url = requested_obs_url
-        if url
-          render(Components::Link::External.new(content: @requested.to_s,
-                                                path: url))
-        else
-          plain(@requested.to_s)
-        end
-      end
-    end
-
-    def count_expected_line
-      b { plain(:inat_import_confirm_expected_caption.l) }
-      plain(": ")
-      span(id: "expected_count") do
-        url = expected_obs_url
-        count = (@estimate_with_date || @expected).to_s
-        if url
-          render(Components::Link::External.new(content: count, path: url))
-        else
-          plain(count)
-        end
-      end
+    def ignored_rows_count
+      ignored_row_data.size + (import_others? ? 1 : 0)
     end
 
     def render_ignored_row(caption_key, count, url)
@@ -175,36 +176,6 @@ module Views::Controllers::InatImports
           plain(count.to_s)
         end
       end
-    end
-
-    def render_nothing_to_import_notice
-      # Match the count that drives the display and the Proceed button, so
-      # the notice shows whenever that count is 0 (e.g. all obs undated).
-      return unless (@estimate_with_date || @expected)&.zero?
-
-      p { plain(:inat_import_confirm_nothing_to_import.l) }
-    end
-
-    def render_timestamp_note
-      return unless @expected
-
-      t = @estimated_at.strftime("%Y-%m-%d %H:%M:%S %Z")
-      p(id: "as_of") { plain(:inat_import_confirm_expected_as_of.t(time: t)) }
-      return if stable_result_set?
-
-      p(class: "staleness-note") do
-        plain(:inat_import_confirm_expected_staleness.l)
-      end
-    end
-
-    def unlicensed_obs_line
-      b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
-      plain(": ")
-      span(id: "unlicensed_obs_count") { render_unlicensed_count }
-      return unless @unlicensed_obs.to_i.positive?
-
-      whitespace
-      plain(unlicensed_note_key.l)
     end
 
     # Import-others' unlicensed obs are never imported, so this renders inside
@@ -234,12 +205,48 @@ module Views::Controllers::InatImports
       end
     end
 
+    def unlicensed_obs_url = @urls.unlicensed_obs_url
+
     def unlicensed_note_key
       if import_others?
         :inat_import_confirm_unlicensed_others_note
       else
         :inat_import_confirm_unlicensed_obs_note
       end
+    end
+
+    def count_expected_line
+      b { plain(:inat_import_confirm_expected_caption.l) }
+      plain(": ")
+      span(id: "expected_count") do
+        url = expected_obs_url
+        count = (@estimate_with_date || @expected).to_s
+        if url
+          render(Components::Link::External.new(content: count, path: url))
+        else
+          plain(count)
+        end
+      end
+    end
+
+    def expected_obs_url = @urls.expected_obs_url
+
+    def render_nothing_to_import_notice
+      # Match the count that drives the display and the Proceed button, so
+      # the notice shows whenever that count is 0 (e.g. all obs undated).
+      return unless (@estimate_with_date || @expected)&.zero?
+
+      p { plain(:inat_import_confirm_nothing_to_import.l) }
+    end
+
+    def unlicensed_obs_line
+      b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
+      plain(": ")
+      span(id: "unlicensed_obs_count") { render_unlicensed_count }
+      return unless @unlicensed_obs.to_i.positive?
+
+      whitespace
+      plain(unlicensed_note_key.l)
     end
 
     def time_estimate_line
@@ -252,14 +259,14 @@ module Views::Controllers::InatImports
       format_hms((@estimate_with_date || @expected) * avg_import_seconds)
     end
 
-    def avg_import_seconds
-      @inat_import&.initial_avg_import_seconds ||
-        InatImport::BASE_AVG_IMPORT_SECONDS
-    end
-
     def format_hms(seconds)
       s = seconds.to_i
       Kernel.format("%02d:%02d:%02d", s / 3600, s % 3600 / 60, s % 60)
+    end
+
+    def avg_import_seconds
+      @inat_import&.initial_avg_import_seconds ||
+        InatImport::BASE_AVG_IMPORT_SECONDS
     end
 
     def render_explanation = p { plain(:inat_import_confirm_explanation.l) }
@@ -286,13 +293,5 @@ module Views::Controllers::InatImports
     end
 
     def nothing_to_import? = (@estimate_with_date || @expected).to_i.zero?
-
-    def import_others? = model.import_others == "1"
-
-    def requested_obs_url = @urls.requested_obs_url
-    def expected_obs_url = @urls.expected_obs_url
-    def already_imported_url = @urls.already_imported_url
-    def unlicensed_obs_url = @urls.unlicensed_obs_url
-    def stable_result_set? = @urls.stable_result_set?
   end
 end
