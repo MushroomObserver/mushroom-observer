@@ -5,6 +5,8 @@ require("test_helper")
 # tests of Transformations controller
 module Images
   class TransformationsControllerTest < FunctionalTestCase
+    include ActiveJob::TestHelper
+
     def test_transform_rotate_left
       run_transform(opr: "rotate_left")
     end
@@ -52,6 +54,23 @@ module Images
       assert_response(:success)
       assert_select("turbo-stream[action='update'][target='page_flash']")
       assert_select("#flash_notices", text: :image_show_transform_note.l)
+    end
+
+    # Real file + real job run, unlike run_transform above -- confirms
+    # rotation actually swapped width/height, not just the flash text.
+    def test_transform_rotate_swaps_dimensions
+      image = images(:in_situ_image)
+      seed_real_image_file(image) # 1600x1200
+
+      login(image.user.login)
+      perform_enqueued_jobs do
+        put(:update, params: { id: image.id, op: "rotate_left",
+                               size: image.user.image_size })
+      end
+
+      image.reload
+      assert_equal(1200, image.width)
+      assert_equal(1600, image.height)
     end
   end
 end
