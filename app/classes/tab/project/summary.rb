@@ -7,7 +7,7 @@ class Tab::Project::Summary < Tab::Base
   end
 
   def title
-    :SUMMARY.t
+    :summary.ti
   end
 
   def path

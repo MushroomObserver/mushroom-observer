@@ -44,7 +44,7 @@ module Tab::Sequence
         sequence: @sequence, observation: @observation
       )
 
-      assert_equal(:EDIT.t, tab.title)
+      assert_equal(:edit.ti, tab.title)
       assert_equal(
         routes.edit_sequence_path(id: @sequence.id, back: @observation.id),
         tab.path

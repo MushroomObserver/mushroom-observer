@@ -74,7 +74,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert(obs.notes.to_s.include?("Observation Fields: none"),
+    assert(obs.notes.to_s.include?("Observation fields: none"),
            "Notes should indicate if there were no iNat 'Observation Fields'")
 
     assert(obs.collector.present?, "Import should populate the collector")
@@ -1575,9 +1575,11 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.notes.key?(snapshot_key),
            "Observation Notes missing #{snapshot_key}")
     [
-      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
-      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
-      :OBSERVATION_FIELDS.l
+      :user.l.upcase_first, :observed.l.upcase_first,
+      :show_observation_inat_lat_lng.l, :place.l.upcase_first,
+      :id.l.upcase_first, :dqa.l.upcase_first,
+      :show_observation_inat_suggested_ids.l,
+      :observation_fields.l.upcase_first
     ].each do |caption|
       assert_match(
         /#{caption}/, obs.notes.to_s,

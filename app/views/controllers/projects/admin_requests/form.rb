@@ -13,7 +13,7 @@ module Views::Controllers::Projects::AdminRequests
       raw(:admin_request_note.tp) # rubocop:disable Rails/OutputSafety
       render_subject_field
       render_message_field
-      submit(:SEND.l, center: true)
+      submit(:send.ti, center: true)
     end
 
     # Override to use :email scope

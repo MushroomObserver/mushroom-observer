@@ -36,7 +36,7 @@ module Views::Controllers::Observations
     prop :field_code_locked, _Boolean, default: false
 
     def view_template
-      add_new_title(:create_object, :OBSERVATION)
+      add_new_title(:create_object, :observation)
       add_context_nav(Tab::Observation::FormNew.new(q_param: q_param))
       container_class(:wide)
 

@@ -335,7 +335,7 @@ class Components::ButtonDispatcherTest < ComponentTestCase
                                          name: nil))
 
     assert_html(html, "form[action='/items/1/delete']")
-    assert_html(html, "button[type='submit']", text: :DESTROY.l)
+    assert_html(html, "button[type='submit']", text: :destroy.ti)
   end
 
   def test_variant_passes_through_mutation_dispatch

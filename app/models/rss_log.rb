@@ -342,7 +342,7 @@ class RssLog < AbstractModel
   end
 
   def user_login(user)
-    return :UNKNOWN.l unless user
+    return :unknown.ti unless user
 
     user.is_a?(String) ? user : user.login
   end

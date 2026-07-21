@@ -17,14 +17,14 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
         render_name_field
         render_new_name_field
         render_message_field
-        submit(:SEND.l, center: true)
+        submit(:send.ti, center: true)
       end
     end
 
     private
 
     def render_name_field
-      static_field(:name, label: :NAME,
+      static_field(:name, label: :name.ti,
                           value: "#{@name.unique_search_name}" \
                                  "[##{@name.icn_id}]",
                           inline: true)
@@ -38,7 +38,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
     end
 
     def render_message_field
-      textarea_field(:message, label: :Notes, rows: 10,
+      textarea_field(:message, label: :notes.ti, rows: 10,
                                value: "", data: { autofocus: true })
     end
 

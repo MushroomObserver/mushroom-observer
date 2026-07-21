@@ -27,10 +27,10 @@ module Views::Controllers::SpeciesLists
       # The four header labels — `assert_html(text:)` only checks the
       # first matching element, so use plain text assertions for the
       # presence-of-label checks (multiple `<b>` siblings in the panel).
-      assert_html(html, "strong", text: "#{:WHEN.t}:")
-      assert_includes(html, "#{:OBSERVATIONS.t}:")
-      assert_includes(html, "#{:WHERE.t}:")
-      assert_includes(html, "#{:WHO.t}:")
+      assert_html(html, "strong", text: "#{:when.ti}:")
+      assert_includes(html, "#{:observations.ti}:")
+      assert_includes(html, "#{:where.ti}:")
+      assert_includes(html, "#{:who.ti}:")
     end
 
     # Download button is `Button::Download` pointed at the irregular
@@ -55,7 +55,7 @@ module Views::Controllers::SpeciesLists
       html = render_details(species_list: @species_list.reload)
 
       # The PROJECTS label only renders when the species_list has any.
-      assert_includes(html, "#{:PROJECTS.t}:")
+      assert_includes(html, "#{:projects.ti}:")
       # And each project shows up as a link_to_object.
       assert_html(html,
                   "a[href='#{routes.project_path(project.id)}']")
@@ -78,7 +78,7 @@ module Views::Controllers::SpeciesLists
       @species_list.projects.clear
       html = render_details(species_list: @species_list.reload)
 
-      assert_not_includes(html, "#{:PROJECTS.t}:")
+      assert_not_includes(html, "#{:projects.ti}:")
     end
 
     def test_renders_notes_when_present
@@ -86,14 +86,14 @@ module Views::Controllers::SpeciesLists
       html = render_details
 
       assert_includes(html, "These are notes")
-      assert_includes(html, "#{:NOTES.t}:")
+      assert_includes(html, "#{:notes.ti}:")
     end
 
     def test_does_not_render_notes_when_blank
       @species_list.update(notes: "")
       html = render_details
 
-      assert_not_includes(html, "#{:NOTES.t}:")
+      assert_not_includes(html, "#{:notes.ti}:")
     end
 
     private

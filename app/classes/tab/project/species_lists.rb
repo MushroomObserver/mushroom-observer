@@ -7,7 +7,7 @@ class Tab::Project::SpeciesLists < Tab::Base
   end
 
   def title
-    "#{@project.species_lists.length} #{:SPECIES_LISTS.l}"
+    "#{@project.species_lists.length} #{:species_lists.ti}"
   end
 
   def path

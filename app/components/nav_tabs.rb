@@ -25,8 +25,8 @@
 # @example With per-link extra class (matches `project_tabs` markup)
 #   NavTabs(current: @current_tab,
 #           link_class: "mt-3") do |tabs|
-#     tabs.tab(:SUMMARY.t, project_path(@project), key: "projects")
-#     tabs.tab("#{n} #{:OBS.l}", observations_path(...), key: "obs")
+#     tabs.tab(:summary.ti, project_path(@project), key: "projects")
+#     tabs.tab("#{n} #{:obs.l}", observations_path(...), key: "obs")
 #   end
 #
 # @example With a Tab::Collection (preferred for multi-tab strips)

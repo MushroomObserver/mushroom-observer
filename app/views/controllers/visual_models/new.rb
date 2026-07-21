@@ -6,7 +6,7 @@ module Views::Controllers::VisualModels
     prop :visual_model, VisualModel
 
     def view_template
-      add_new_title(:new_object, :VISUAL_MODEL)
+      add_new_title(:new_object, :visual_model)
 
       render(Form.new(@visual_model))
       link_to("Back", visual_models_path)

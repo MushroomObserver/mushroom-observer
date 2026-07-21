@@ -14,7 +14,7 @@ module Views::Controllers::Observations::ExternalLinks
 
     def view_template
       container_class(:full)
-      add_new_title(:add_object, :EXTERNAL_LINK)
+      add_new_title(:add_object, :external_link)
 
       Row do
         Column(xs: 12, sm: 7) { render_form }

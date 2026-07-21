@@ -6,7 +6,7 @@ class ModalCloseButtonTest < ComponentTestCase
   def test_default_renders_dismiss_only_cancel_button
     html = render(Components::Modal::CloseButton.new)
 
-    assert_html(html, "button[data-dismiss='modal']", text: :CANCEL.l)
+    assert_html(html, "button[data-dismiss='modal']", text: :cancel.ti)
     assert_no_html(html, "a")
   end
 
@@ -15,7 +15,7 @@ class ModalCloseButtonTest < ComponentTestCase
 
     # Still dismisses the modal via JS AND navigates to the real path.
     assert_html(html, "a[href='/foo/cancel'][data-dismiss='modal']",
-                text: :CANCEL.l)
+                text: :cancel.ti)
   end
 
   def test_target_kwarg_accepts_an_abstract_model

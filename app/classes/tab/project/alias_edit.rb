@@ -21,7 +21,7 @@ class Tab::Project::AliasEdit < Tab::Base
   end
 
   def alt_title
-    :EDIT.t
+    :edit.ti
   end
 
   def model

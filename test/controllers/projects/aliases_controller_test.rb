@@ -19,7 +19,7 @@ module Projects
       url = "/projects/#{@project.id}/aliases/#{@project_alias.id}/edit"
       assert_select("table.table-project-members") do
         # sr-only label inside the icon-only edit link — more
-        # descriptive than the prior `:EDIT.l` for accessibility.
+        # descriptive than the prior `:edit.ti` for accessibility.
         assert_select("a[href='#{url}']", text: /Edit Project Alias/)
       end
     end

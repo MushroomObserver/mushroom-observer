@@ -13,7 +13,7 @@ module Views::Controllers::Descriptions::AuthorRequests
       render_note
       render_subject_field
       render_message_field
-      submit(:SEND.t, center: true)
+      submit(:send.ti, center: true)
     end
 
     private

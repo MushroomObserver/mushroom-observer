@@ -9,8 +9,8 @@ module Views::Controllers::Projects::Updates
         html = render_footer(show_excluded: false)
 
         assert_html(html, "#update_footer_#{obs.id}")
-        assert_includes(html, :ADD.l)
-        assert_includes(html, :EXCLUDE.l)
+        assert_includes(html, :add.ti)
+        assert_includes(html, :exclude.ti)
         assert_html(html, "form[action*='add_observation']")
         assert_html(html, "form[action*='exclude_observation']")
       end
@@ -19,7 +19,7 @@ module Views::Controllers::Projects::Updates
         html = render_footer(show_excluded: true)
 
         assert_html(html, "#update_footer_#{obs.id}")
-        assert_includes(html, :ADD.l)
+        assert_includes(html, :add.ti)
         assert_html(html, "form[action*='add_observation']")
         assert_no_html(html, "form[action*='exclude_observation']")
       end

@@ -124,7 +124,7 @@ module Name::Format
     num_obs     = observations.count
     num_namings = namings.count
     num_notify  = interests.count # includes name_trackers
-    "#{:NAME.l} ##{id}: #{real_search_name} [#obs: #{num_obs}, " \
+    "#{:name.ti} ##{id}: #{real_search_name} [#obs: #{num_obs}, " \
       "#namings: #{num_namings}, #users_with_interest: #{num_notify}]"
   end
 

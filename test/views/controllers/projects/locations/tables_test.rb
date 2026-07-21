@@ -10,8 +10,8 @@ module Views::Controllers::Projects::Locations
 
         assert_html(html, "#locations_table")
         assert_html(html, "table.table")
-        assert_includes(html, :LOCATION.l)
-        assert_includes(html, :PROJECT_ALIASES.l)
+        assert_includes(html, :location.ti)
+        assert_includes(html, :project_aliases.ti)
         # Burbank is a target location
         assert_includes(html, locations(:burbank).display_name)
       end

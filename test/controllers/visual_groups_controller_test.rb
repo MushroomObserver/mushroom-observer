@@ -135,7 +135,7 @@ class VisualGroupsControllerTest < FunctionalTestCase
       )
     end
     # Reload button only on needs_review (which is the default).
-    assert_select("button[onclick]", text: :RELOAD.t)
+    assert_select("button[onclick]", text: :reload.ti)
   end
 
   def test_edit_filter_form_reload_link_hidden_on_included

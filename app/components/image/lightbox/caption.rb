@@ -113,7 +113,7 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_obs_when
     p(class: "obs-when", id: "observation_when") do
-      plain("#{:WHEN.l}: ")
+      plain("#{:when.ti}: ")
       b { @obs.when.web_date }
     end
   end
@@ -177,7 +177,7 @@ class Components::Image::Lightbox::Caption < Components::Base
     obs_user = @obs.user
 
     p(class: "obs-who", id: "observation_who") do
-      plain("#{:WHO.l}: ")
+      plain("#{:who.ti}: ")
       render_obs_user(obs_user)
       render_contact_link(obs_user) if show_contact_link?(obs_user)
     end
@@ -230,7 +230,7 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def formatted_truncated_notes
     @obs.notes_show_formatted.truncate(150, separator: " ").
-      sub(/\A/, "#{:NOTES.l}: ").wring_out_textile.tpl
+      sub(/\A/, "#{:notes.ti}: ").wring_out_textile.tpl
   end
 
   def render_image_caption

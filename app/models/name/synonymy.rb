@@ -3,7 +3,7 @@
 module Name::Synonymy
   # Returns "Deprecated" or "Valid" in the local language.
   def status
-    deprecated ? :DEPRECATED.l : :ACCEPTED.l
+    deprecated ? :deprecated.ti : :accepted.ti
   end
 
   # Returns an Array of all synonym Name's including itself at front of list.

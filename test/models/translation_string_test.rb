@@ -43,6 +43,64 @@ class TranslationStringTest < UnitTestCase
     assert_equal("Wesley", str.reload.text)
   end
 
+  # #4844's theme-tag migration renamed BlackOnWhite -> black_on_white
+  # in production and the non-English rows vanished -- only the English
+  # row survived. This reproduces the actual bug shape: one tag with a
+  # row in EVERY language, not just English, renamed in a single
+  # rename_tags call. If rename_tags (or a caller) ever drops rows for
+  # a multi-language tag, this must catch it.
+  def test_rename_tags_preserves_every_language_row
+    langs = [languages(:english), languages(:french), languages(:greek),
+             languages(:russian), languages(:spanish), languages(:portuguese)]
+    strs = langs.map do |lang|
+      TranslationString.create(
+        { tag: "OldMultiLangTag", text: "text in #{lang.locale}",
+          user: users(:rolf), language: lang }
+      )
+    end
+
+    TranslationString.rename_tags("OldMultiLangTag" => "new_multi_lang_tag")
+
+    assert_empty(TranslationString.where(tag: "OldMultiLangTag"))
+    renamed = TranslationString.where(tag: "new_multi_lang_tag")
+    assert_equal(langs.length, renamed.count,
+                 "rename_tags should preserve one row per language, not " \
+                 "just English")
+    strs.each do |str|
+      reloaded = str.reload
+      assert_equal("new_multi_lang_tag", reloaded.tag)
+      assert_equal("text in #{reloaded.language.locale}", reloaded.text)
+    end
+  end
+
+  # The actual production bug: rename_tags itself is fine (see above),
+  # but LanguageExporter#strip deletes any translation_strings row
+  # whose tag isn't in en.txt -- and DB-only tags like black_on_white
+  # were, by design, never in en.txt. So any lang:update run (deploy,
+  # or manual) after the rename strips every language's row for a
+  # DB-only tag, English included. If English still exists afterward
+  # in production, it's because a later import:official run recreated
+  # it from a since-reverted en.txt line, not because strip spared it.
+  def test_strip_deletes_db_only_tag_in_every_language
+    langs = [languages(:english), languages(:french), languages(:greek),
+             languages(:russian), languages(:spanish), languages(:portuguese)]
+    langs.each do |lang|
+      TranslationString.create(
+        { tag: "db_only_tag_not_in_en_txt", text: "text in #{lang.locale}",
+          user: users(:rolf), language: lang }
+      )
+    end
+
+    langs.each(&:strip)
+
+    assert_empty(
+      TranslationString.where(tag: "db_only_tag_not_in_en_txt"),
+      "LanguageExporter#strip deletes rows for any tag missing from " \
+      "en.txt -- this is exactly what happened to black_on_white's " \
+      "non-English translations after the #4844 rename"
+    )
+  end
+
   def test_rename_tags_snakecase
     str = TranslationString.create(
       { tag: "interesting_things", text: "Stuff that we may want to know.",

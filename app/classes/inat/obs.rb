@@ -315,16 +315,16 @@ class Inat
     def snapshot_raw_str
       result = "#{copyright}\n"
       {
-        USER: self[:user][:login],
-        OBSERVED: self.when,
+        user: self[:user][:login],
+        observed: self.when,
         show_observation_inat_lat_lng: lat_lon_accuracy,
-        PLACE: self[:place_guess],
-        ID: inat_taxon_name,
-        DQA: dqa,
+        place: self[:place_guess],
+        id: inat_taxon_name,
+        dqa: dqa,
         show_observation_inat_suggested_ids: suggested_id_names,
-        OBSERVATION_FIELDS: obs_fields(inat_obs_fields)
+        observation_fields: obs_fields(inat_obs_fields)
       }.each do |label, value|
-        result += "#{label.to_sym.l}: #{value}\n"
+        result += "#{label.to_sym.l.upcase_first}: #{value}\n"
       end
       result.
         chomp # prevent blank line between Snapshot and :Other Notes fields

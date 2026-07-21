@@ -29,7 +29,7 @@
 #             nil, :project_name, @title
 #           )
 #   IndexFilter(
-#     to: field_slips_path, submit_text: :FILTER.l
+#     to: field_slips_path, submit_text: :filter.ti
 #   ) do
 #     render(Components::ApplicationForm::AutocompleterField.new(
 #              field, type: :project, hidden_name: :project,

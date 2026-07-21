@@ -13,7 +13,7 @@ module Views::Controllers::SpeciesLists
       end
 
       def view_template
-        add_new_title(:search_object, :SPECIES_LISTS)
+        add_new_title(:search_object, :species_lists)
         container_class(:wide)
 
         div(id: "species_lists_search_container") do

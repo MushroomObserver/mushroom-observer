@@ -63,7 +63,7 @@ module Views::Controllers::FieldSlips
       assert_includes(html, :field_slip_quick_create_obs.t)
       assert_includes(html, :field_slip_add_images.t)
       # Edit-only buttons should NOT appear.
-      assert_not_includes(html, :SAVE_EDITS.t)
+      assert_not_includes(html, :save_edits.ti)
     end
 
     def test_species_list_hidden_field_always_emitted
@@ -88,7 +88,7 @@ module Views::Controllers::FieldSlips
       html = render_form(fs)
 
       # Edit-mode submits.
-      assert_includes(html, :SAVE_EDITS.t)
+      assert_includes(html, :save_edits.ti)
       assert_includes(html, :field_slip_create_obs.t)
       # New-record-only buttons should NOT appear.
       assert_not_includes(html, :field_slip_quick_create_obs.t)

@@ -53,12 +53,12 @@ module Views::Controllers::Herbaria
       table.column(:herbarium_index_records.t) do |h|
         plain(h.herbarium_records.length)
       end
-      table.column(:HERBARIUM.t) { |h| render_name_cell(h) }
+      table.column(:herbarium.ti) { |h| render_name_cell(h) }
       table.column(user_header) { |h| render_user_cell(h) }
     end
 
     def user_header
-      nonpersonal? ? "" : :USER.t
+      nonpersonal? ? "" : :user.ti
     end
 
     # --- 3rd column: name link / merge POST + edit / merge actions --
@@ -113,14 +113,14 @@ module Views::Controllers::Herbaria
       Button(
         type: :edit,
         target: herbarium,
-        name: :EDIT.l,
+        name: :edit.ti,
         icon: nil, variant: :strip,
         class: "edit_herbarium_link_#{herbarium.id}"
       )
       plain(" | ")
       Button(
         type: :get,
-        name: :MERGE.l,
+        name: :merge.ti,
         target: herbaria_path(merge: herbarium.id),
         icon: nil, variant: :strip,
         class: "merge_herbarium_link_#{herbarium.id}"

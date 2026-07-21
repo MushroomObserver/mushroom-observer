@@ -8,7 +8,7 @@ class Tab::SpeciesList::Index < Tab::Base
   end
 
   def title
-    :cancel_to_index.t(type: :SPECIES_LIST)
+    :cancel_to_index.t(type: :species_list)
   end
 
   def path

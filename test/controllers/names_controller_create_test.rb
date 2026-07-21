@@ -25,7 +25,7 @@ class NamesControllerCreateTest < FunctionalTestCase
       assert_select("option[selected]", text: "Species")
     end
     assert_select("select#name_deprecated") do
-      assert_select("option[selected]", text: :ACCEPTED.l)
+      assert_select("option[selected]", text: :accepted.ti)
     end
     assert_select("form #name_icn_id", { count: 1 },
                   "Form is missing field for icn_id")

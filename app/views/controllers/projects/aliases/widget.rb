@@ -61,7 +61,7 @@ module Views::Controllers::Projects::Aliases
       span(id: "project_alias") do
         Button(
           type: :modal,
-          name: :ADD.t,
+          name: :add.ti,
           target: new_project_alias_path(
             project_id: @project.id,
             target_id: @target.id,

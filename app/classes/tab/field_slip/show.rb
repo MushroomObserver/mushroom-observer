@@ -8,7 +8,7 @@ class Tab::FieldSlip::Show < Tab::Base
   end
 
   def title
-    :SHOW_OBJECT.t(type: :field_slip)
+    :show_object.t(type: :field_slip)
   end
 
   def path

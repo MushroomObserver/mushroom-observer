@@ -18,18 +18,18 @@ module Views::Controllers::Licenses
     def render_fields
       render_id_and_name
       labeled_field(:license_url.l, link_to_url)
-      labeled_field(:DEPRECATED.l, @license.deprecated.to_s)
+      labeled_field(:deprecated.ti, @license.deprecated.to_s)
       render_timestamps
     end
 
     def render_id_and_name
-      labeled_field(:ID.l, @license.id)
+      labeled_field(:id.ti, @license.id)
       labeled_field(:license_display_name.l, @license.display_name)
     end
 
     def render_timestamps
-      labeled_field(:CREATED.l, formatted_date(@license.created_at))
-      labeled_field(:UPDATED.l, formatted_date(@license.updated_at))
+      labeled_field(:created.ti, formatted_date(@license.created_at))
+      labeled_field(:updated.ti, formatted_date(@license.updated_at))
     end
 
     def show_title

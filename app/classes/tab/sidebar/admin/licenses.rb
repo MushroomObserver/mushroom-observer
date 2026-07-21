@@ -3,7 +3,7 @@
 # Sidebar admin nav: licenses index.
 class Tab::Sidebar::Admin::Licenses < Tab::Base
   def title
-    :LICENSES.t
+    :licenses.ti
   end
 
   def path

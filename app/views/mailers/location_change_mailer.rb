@@ -104,8 +104,8 @@ class Views::Mailers::LocationChangeMailer < Views::Mailers::Base
   end
 
   def fields
-    text = "*#{:Time.l}:* #{@time.email_time}\n"
-    text += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+    text = "*#{:time.ti}:* #{@time.email_time}\n"
+    text += "*#{:by.ti}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
     text
   end
 

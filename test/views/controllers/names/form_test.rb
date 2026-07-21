@@ -15,7 +15,7 @@ module Views::Controllers::Names
       # Form structure
       assert_html(html, "form#name_form")
       assert_html(html, "form[action='/names'][method='post']")
-      assert_html(html, "button[type='submit']", text: :CREATE.t)
+      assert_html(html, "button[type='submit']", text: :create.ti)
 
       # Help and fields
       assert_includes(html, :form_names_detailed_help.l)
@@ -25,28 +25,28 @@ module Views::Controllers::Names
 
       # Rank select
       assert_html(html, "select[name='name[rank]']")
-      assert_includes(html, :Rank.l)
+      assert_includes(html, :rank.ti)
       assert_html(html, "option[value='Species']")
       assert_html(html, "option[value='Genus']")
       assert_html(html, "option[value='Family']")
 
       # Status select
       assert_html(html, "select[name='name[deprecated]']")
-      assert_includes(html, :Status.l)
-      assert_includes(html, :ACCEPTED.l)
-      assert_includes(html, :DEPRECATED.l)
+      assert_includes(html, :status.ti)
+      assert_includes(html, :accepted.ti)
+      assert_includes(html, :deprecated.ti)
 
       # Text name and author fields
       assert_html(html, "textarea[name='name[text_name]'][data-autofocus]")
       assert_includes(html, :form_names_text_name.l)
       assert_includes(html, :form_names_text_name_help.l)
       assert_html(html, "textarea[name='name[author]']")
-      assert_includes(html, :Authority.l)
+      assert_includes(html, :authority.ti)
       assert_includes(html, :form_names_author_help.l)
 
       # Citation field
       assert_html(html, "textarea[name='name[citation]']")
-      assert_includes(html, :Citation.l)
+      assert_includes(html, :citation.ti)
       assert_includes(html, :form_names_citation_help.l)
 
       # Notes field with between content
@@ -73,7 +73,7 @@ module Views::Controllers::Names
       name = names(:coprinus_comatus)
       html = render_form(model: name, name_string: name.text_name)
 
-      assert_html(html, "button[type='submit']", text: :SAVE_EDITS.t)
+      assert_html(html, "button[type='submit']", text: :save_edits.ti)
       assert_html(html, "form[action='/names/#{name.id}'][method='post']")
       assert_html(html, "input[name='_method'][value='patch']")
     end
@@ -93,7 +93,7 @@ module Views::Controllers::Names
       assert_includes(html, :show_name_locked.tp.as_displayed)
       rank_text = :"Rank_#{locked_name.rank.to_s.downcase}".l
       assert_includes(html, rank_text)
-      status_text = locked_name.deprecated ? :DEPRECATED.l : :ACCEPTED.l
+      status_text = locked_name.deprecated ? :deprecated.ti : :accepted.ti
       assert_includes(html, status_text)
     end
 

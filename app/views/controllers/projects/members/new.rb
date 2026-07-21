@@ -30,10 +30,10 @@ module Views::Controllers::Projects::Members
       Table(@users.sort_by(&:login),
             variant: :striped, identifier: "project-members",
             class: "mt-3") do |t|
-        t.column(:Login_name.l) do |u|
+        t.column(:login_name.ti) do |u|
           Link(type: :user, user: u, name: u.login)
         end
-        t.column(:Full_name.l) { |u| plain(u.name) }
+        t.column(:full_name.ti) { |u| plain(u.name) }
         t.column(nil) { |u| render_add_button(u) }
       end
     end
@@ -42,7 +42,7 @@ module Views::Controllers::Projects::Members
       Button(
         type: :post,
         variant: :strip,
-        name: :ADD.l,
+        name: :add.ti,
         target: project_members_path(
           project_id: @project.id,
           candidate: user.id

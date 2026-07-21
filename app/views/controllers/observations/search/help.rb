@@ -8,7 +8,7 @@ module Views::Controllers::Observations::Search
   class Help < Views::Base
     def view_template
       p(class: "mt-3 font-weight-bold") do
-        plain("#{:OBSERVATIONS.t} #{:SEARCHES.t}")
+        plain("#{:observations.ti} #{:searches.ti}")
       end
       trusted_html(:pattern_search_terms_help.tp)
       trusted_html(PatternSearch::Observation.terms_help.tp)

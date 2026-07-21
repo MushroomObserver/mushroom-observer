@@ -39,11 +39,11 @@ class FormLocationFeedbackTest < ComponentTestCase
   def test_accepts_symbol_button_parameter
     html = render(Components::Form::LocationFeedback.new(
                     dubious_where_reasons: ["Reason".html_safe],
-                    button: :CREATE
+                    button: :create
                   ))
 
     assert_html(html, ".alert-warning#dubious_location_messages",
-                text: :CREATE.l)
+                text: :create.ti)
   end
 
   private

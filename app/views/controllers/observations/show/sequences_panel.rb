@@ -94,7 +94,7 @@ class Views::Controllers::Observations::Show::SequencesPanel < Views::Base
     return nil if sequence.bases.blank?
 
     Components::Button::Clipboard.new(
-      text: sequence.bases, name: :COPY_THIS_SEQUENCE.l
+      text: sequence.bases, name: :copy_this_sequence.ti
     )
   end
 end

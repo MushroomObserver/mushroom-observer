@@ -132,7 +132,7 @@ class NamesControllerShowTest < FunctionalTestCase
   def test_show_name_icn_id_missing
     # Name is registrable, but icn_id is not filled in
     name = names(:coprinus)
-    label = :ICN_ID.l.to_s
+    label = :icn_id.ti.to_s
 
     login
     get(:show, params: { id: name.id })
@@ -174,7 +174,7 @@ class NamesControllerShowTest < FunctionalTestCase
     get(:show, params: { id: name.id })
 
     # Name isn't registrable; it shouldn't have an icn_id label or record link
-    assert(/#{:ICN_ID.l}/ !~ @response.body,
+    assert(/#{:icn_id.ti}/ !~ @response.body,
            "Page should not have ICN identifier label")
     assert_select(
       "body a[href='#{Tab::Name::IndexFungorumRecord.new(name: name).path}']",
@@ -208,7 +208,7 @@ class NamesControllerShowTest < FunctionalTestCase
     name = names(:eukarya)
     login
     get(:show, params: { id: name.id })
-    assert(/#{:ICN_ID.l}/ !~ @response.body,
+    assert(/#{:icn_id.ti}/ !~ @response.body,
            "Page should not have ICN identifier label")
   end
 
@@ -323,7 +323,7 @@ class NamesControllerShowTest < FunctionalTestCase
 
     assert_no_match(
       footer_created_by, @response.body,
-      "Footer should omit `#{:Created.l} line if created_at is absent"
+      "Footer should omit `#{:created.ti} line if created_at is absent"
     )
   end
 

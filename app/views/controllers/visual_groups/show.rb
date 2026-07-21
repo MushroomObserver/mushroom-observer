@@ -51,12 +51,12 @@ module Views::Controllers::VisualGroups
 
     def render_description_and_approval
       p do
-        strong { plain("#{:DESCRIPTION.t}:") }
+        strong { plain("#{:description.ti}:") }
         br
         plain(@visual_group.description.to_s)
       end
       p do
-        strong { plain("#{:APPROVED.t}:") }
+        strong { plain("#{:approved.ti}:") }
         whitespace
         plain(@visual_group.approved.to_s)
       end

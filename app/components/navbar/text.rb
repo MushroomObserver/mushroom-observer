@@ -19,7 +19,7 @@
 # bare `Navbar(...)` call.
 #
 # @example Default <div class="navbar-text"> wrapper
-#   render(Components::Navbar::Text.new(class: "mx-0")) { plain(:PAGE.l) }
+#   render(Components::Navbar::Text.new(class: "mx-0")) { plain(:page.ti) }
 #
 # @example <li class="navbar-text"> wrapper
 #   render(Components::Navbar::Text.new(element: :li,

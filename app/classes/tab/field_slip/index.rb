@@ -3,7 +3,7 @@
 # "Field slips index" link.
 class Tab::FieldSlip::Index < Tab::Base
   def title
-    :INDEX_OBJECT.t(type: :field_slips)
+    :index_object.ti(type: :field_slips)
   end
 
   def path

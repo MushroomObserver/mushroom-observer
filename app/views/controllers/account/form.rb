@@ -85,7 +85,7 @@ module Views::Controllers::Account
       # "RANDOM" is a sentinel value that triggers random theme
       # selection.
       [[:theme_random.l, "RANDOM"]] +
-        MO.themes.map { |t| [t.to_sym.l, t] }
+        MO.themes.map { |t| [t.underscore.to_sym.l, t] }
     end
   end
 end

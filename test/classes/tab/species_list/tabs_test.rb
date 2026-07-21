@@ -143,7 +143,7 @@ module Tab::SpeciesList
       bare = Tab::SpeciesList::Index.new
       with_q = Tab::SpeciesList::Index.new(q_param: "Y")
 
-      assert_equal(:cancel_to_index.t(type: :SPECIES_LIST), bare.title)
+      assert_equal(:cancel_to_index.t(type: :species_list), bare.title)
       assert_equal(routes.species_lists_path, bare.path)
       assert_includes(with_q.path, "q=Y")
     end
@@ -151,7 +151,7 @@ module Tab::SpeciesList
     def test_create
       tab = Tab::SpeciesList::Create.new
 
-      assert_equal(:create_object.t(type: :SPECIES_LIST), tab.title)
+      assert_equal(:create_object.t(type: :species_list), tab.title)
       assert_equal(routes.new_species_list_path, tab.path)
     end
 

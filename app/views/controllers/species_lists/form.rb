@@ -62,11 +62,11 @@ module Views::Controllers::SpeciesLists
 
     def view_template
       super do
-        submit(@button.l, center: true)
+        submit(@button.ti, center: true)
         render_hidden_fields
         render_visible_fields
         render_project_checkboxes if @projects.any?
-        submit(@button.l, center: true)
+        submit(@button.ti, center: true)
       end
     end
 
@@ -97,19 +97,19 @@ module Views::Controllers::SpeciesLists
                 help: :shared_textile_help.l,
                 help_collapse: true
       )
-      date_field(:when, inline: true, label: :WHEN)
+      date_field(:when, inline: true, label: :when.ti)
       render(Components::Form::LocationFeedback.new(
                dubious_where_reasons: @dubious_where_reasons,
                button: @button
              ))
       autocompleter_field(:place_name, type: :location,
                                        value: model.place_name(current_user),
-                                       label: :WHERE)
+                                       label: :where.ti)
     end
 
     def render_project_checkboxes
       div(class: "form-group") do
-        label(for: "project") { plain("#{:PROJECTS.t}:") }
+        label(for: "project") { plain("#{:projects.ti}:") }
         Help(
           content: :form_species_lists_project_help.t
         )

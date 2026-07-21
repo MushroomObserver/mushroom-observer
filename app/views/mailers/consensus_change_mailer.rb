@@ -27,8 +27,8 @@ class Views::Mailers::ConsensusChangeMailer < Views::Mailers::Base
   def fields
     text = "*#{:email_field_old_name.l}:* #{name_field(@old_name)}\n"
     text += "*#{:email_field_new_name.l}:* #{name_field(@new_name)}\n"
-    text += "*#{:Time.l}:* #{@time.email_time}\n"
-    text += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+    text += "*#{:time.ti}:* #{@time.email_time}\n"
+    text += "*#{:by.ti}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
     text
   end
 

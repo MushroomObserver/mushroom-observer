@@ -227,11 +227,11 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
   def modal_title
     case action_name
     when "new", "create"
-      :new_object.t(type: :HERBARIUM)
+      :new_object.t(type: :herbarium)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
                          object: @herbarium, mode: :edit,
-                         title: :HERBARIUM_RECORD.l
+                         title: :herbarium_record.ti
                        ))
     end
   end

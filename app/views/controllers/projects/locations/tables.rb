@@ -118,8 +118,8 @@ module Views::Controllers::Projects::Locations
            target_id: collapse_id,
            collapsed: true,
            class: "panel-collapse-trigger") do
-        Icon(type: :chevron_down, title: :OPEN.l, class: "active-icon")
-        Icon(type: :chevron_up, title: :CLOSE.l)
+        Icon(type: :chevron_down, title: :open.ti, class: "active-icon")
+        Icon(type: :chevron_up, title: :close.ti)
       end
     end
 
@@ -141,9 +141,9 @@ module Views::Controllers::Projects::Locations
       Table(rows,
             variant: :striped, identifier: "project-members",
             class: "mt-3") do |t|
-        t.column(:LOCATION.l)
-        t.column(:OBSERVATIONS.l)
-        t.column(:PROJECT_ALIASES.l)
+        t.column(:location.ti)
+        t.column(:observations.ti)
+        t.column(:project_aliases.ti)
         if admin?
           t.column(:project_target_locations_title.l,
                    class: "text-center")
@@ -196,7 +196,7 @@ module Views::Controllers::Projects::Locations
     def render_remove_button(loc)
       Button(
         type: :delete,
-        name: :REMOVE.l,
+        name: :remove.ti,
         target: project_target_location_path(
           project_id: @project.id, id: loc.id
         ),

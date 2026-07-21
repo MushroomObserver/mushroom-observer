@@ -15,7 +15,7 @@
 #
 # @example with overrides
 #   Button(type: :delete, target: @api_key,
-#                                 name: :REMOVE.l, icon: :remove)
+#                                 name: :remove.ti, icon: :remove)
 #
 # @example bare icon, no btn frame
 #   Button(type: :delete, target: @term,
@@ -38,7 +38,7 @@ class Components::Button::Delete < Components::Button::CRUDBase
 
   def default_name(target)
     if target.is_a?(String) || target.is_a?(Hash)
-      :DESTROY.l
+      :destroy.ti
     else
       :destroy_object.t(type: target.type_tag)
     end

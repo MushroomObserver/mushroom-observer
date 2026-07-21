@@ -10,6 +10,7 @@
 #  tl::          Localize, textilize with obj links (no paragraphs).
 #  tp::          Localize, textilize with paragraphs (no obj links).
 #  tpl::         Localize, textilize with paragraphs and obj links.
+#  ti::          Localize, then title-case the result (no textilizing).
 #
 #  upcase_first  Capitalize 1st letter of Symbol, leaving remainder alone
 #
@@ -181,7 +182,7 @@ class Symbol
       result = result.gsub("[[", "[").gsub("]]", "]")
     end
     if capitalize_result
-      # Make token attempt to capitalize result if requested [:TAG] for :tag.
+      # Make token attempt to capitalize result if requested [:tag] for :tag.
       result = result.upcase_first
     end
     result
@@ -211,7 +212,7 @@ class Symbol
             (x == x.upcase)
         val = args[arg]
         if val.is_a?(Symbol)
-          val.to_s.upcase.to_sym.l
+          val.to_s.downcase.to_sym.ti
         else
           val.to_s.strip_html.upcase_first
         end
@@ -221,7 +222,7 @@ class Symbol
             (y == y.upcase)
         val = args[arg]
         if val.is_a?(Symbol)
-          :"#{val.to_s.upcase}S".l
+          :"#{val.to_s.downcase}s".ti
         else
           val.to_s.strip_html.upcase_first
         end
@@ -251,9 +252,10 @@ class Symbol
   end
 
   def localize_recursive_expansion(val, args, level) # :nodoc:
-    val.gsub(/ \[ :(\w+?) (?:\( ([^()\[\]]+) \))? \] /x) do
+    val.gsub(/ \[ :(\w+?) (\.ti)? (?:\( ([^()\[\]]+) \))? \] /x) do
       tag = Regexp.last_match(1).to_sym
-      args2 = Regexp.last_match(2).to_s
+      titleize = Regexp.last_match(2).present?
+      args2 = Regexp.last_match(3).to_s
       hash = args.dup
       if args2.present?
         args2.split(",").each do |pair|
@@ -285,7 +287,8 @@ class Symbol
           end
         end
       end
-      tag.l(hash, level + [self])
+      result = tag.l(hash, level + [self])
+      titleize ? Symbol.titleize_localized(result) : result
     end
   end
 
@@ -305,6 +308,148 @@ class Symbol
 
   def tpl(*)
     localize(*).tpl(false)
+  end
+
+  # Locales with no letter-casing concept at all -- capitalize/titleize
+  # are meaningless there, and a stray Latin/Cyrillic substring (e.g.
+  # an embedded species name) could get destructively downcased by
+  # `.capitalize`, same risk as German below.
+  TI_CASELESS_LOCALES = [:ar, :fa, :zh, :jp].freeze
+
+  # German capitalizes every noun regardless of sentence position, so
+  # translators already store the finished, correctly-capitalized
+  # string as the base translation -- an audit of 280 comparable
+  # ALL-CAPS/lowercase tag pairs found 178 byte-for-byte identical.
+  # `.capitalize` would be destructive here (it downcases everything
+  # after the first letter, breaking embedded capitalized nouns).
+  TI_NO_OP_LOCALES = (TI_CASELESS_LOCALES + [:de]).freeze
+
+  # Turkish's i/I case-mapping is locale-specific (dotted/dotless);
+  # `.capitalize(:turkic)` handles it correctly. Applying :turkic
+  # universally breaks every other locale's words starting with "i"
+  # ("Image" -> "İmage"). Audited against real translated content:
+  # 42 twin-pair tags matched a per-word title-case derivation vs. 15
+  # for sentence-case, so Turkish joins the word-capitalize family
+  # too, just with :turkic mapping applied per word instead of plain
+  # `.capitalize`.
+  TI_TURKIC_LOCALES = [:tr].freeze
+
+  # Locales where translators predominantly write multi-word ALL-CAPS
+  # content as per-word title-case, confirmed against real translated
+  # content (#4844 deviation audit against a production checkpoint).
+  # Everyone here goes through `capitalize_each_word`, never Rails'
+  # `.titleize` -- `.titleize`'s word-start regex (`[a-z]`) is
+  # ASCII-only, so it silently fails to capitalize any word starting
+  # with an accented letter (í, ó, ą, ź, etc.), and its plural-acronym
+  # handling ("IDs") needs a dedicated inflection just to work at all.
+  # `capitalize_each_word` has neither problem: `String#capitalize` is
+  # Unicode-aware, and its own acronym handling (see below) needs no
+  # config. `en` was on `.titleize` until it wasn't -- once `at`/`by`/
+  # `or` were confirmed as English's own connector-word exceptions
+  # (same pattern as es/pt's "de"), there was no remaining reason for
+  # English to be the one locale on a different code path. `pl`/`ru`
+  # are deliberately NOT here: the same audit showed the opposite for
+  # them, dominated by sentence-case (67%/68% of their deviations),
+  # confirmed further by a same-tag cross-reference against `uk`
+  # showing zero counter-examples -- they're in the sentence-case
+  # default below instead.
+  TI_WORD_CAPITALIZE_LOCALES = [:en, :es, :pt, :el, :uk, :be].freeze
+
+  # Small connector words (articles, prepositions, conjunctions) that
+  # stay lowercase in title case, same as standard English style-guide
+  # convention. Never applies to a word's own first position -- see
+  # `first` below.
+  TI_LOWERCASE_WORDS = {
+    en: %w[at by or with and].freeze,
+    # "el" here is the Spanish definite article, not the :el (Greek)
+    # locale symbol -- coincidental overlap, no functional collision
+    # (this is a value in the :es array, not a locale key).
+    es: %w[a con de del el la las los o para por].freeze,
+    pt: %w[a as com da das de do dos e em o os ou para por].freeze,
+    el: %w[στο στις εκ ή].freeze,
+    uk: %w[в].freeze
+  }.freeze
+
+  # Locale-aware title-casing shared by `ti` and the `[:tag.ti]`
+  # embedded-ref syntax. `TI_TURKIC_LOCALES` and
+  # `TI_WORD_CAPITALIZE_LOCALES` get per-word title-case via
+  # `capitalize_each_word`; everywhere else that has letter casing at
+  # all, only the first letter is capitalized (sentence-case) -- which
+  # also sidesteps the apostrophe bug title-casing shares, since only
+  # the very first letter of the whole string is ever touched.
+  def self.titleize_localized(str)
+    locale = I18n.locale.to_sym
+    return capitalize_each_word(str, turkic: true) if
+      TI_TURKIC_LOCALES.include?(locale)
+    return capitalize_each_word(str) if
+      TI_WORD_CAPITALIZE_LOCALES.include?(locale)
+    return str if TI_NO_OP_LOCALES.include?(locale)
+
+    capitalize_first_letter_only(str)
+  end
+
+  # Capitalizes just the first letter, leaving the rest of +str+
+  # exactly as stored -- unlike `String#capitalize`, which also
+  # downcases everything after the first letter. That downcasing
+  # destroys an embedded acronym the lowercase tag already stores
+  # correctly whenever it isn't the very first word (confirmed against
+  # real content: Polish's `icn_id` tag stores `"ICN Identyfikator"`,
+  # and plain `.capitalize` was flattening it to `"Icn identyfikator"`,
+  # lowercasing "ICN" and destroying "Identyfikator" along with it).
+  # Same "translators already store correct casing" premise as
+  # `TI_NO_OP_LOCALES` -- sentence-case only needs to add the one
+  # letter of capitalization the lowercase tag doesn't already have.
+  def self.capitalize_first_letter_only(str)
+    return str if str.empty?
+
+    str[0].upcase + str[1..]
+  end
+
+  # Capitalizes every run of letters in +str+, treating apostrophes,
+  # hyphens, and parentheses as part of the word they're attached to
+  # (same word-boundary behavior `.titleize` has, including its
+  # French/Italian elision-prefix limitation -- which is why those two
+  # locales aren't routed through this method either). Parentheses
+  # matter for grammatical-gender suffix notation, e.g. Portuguese
+  # "editor(a)"/"editores(as)" -- without them, the lone letter inside
+  # the parens gets matched as its own "word" and capitalized
+  # ("Editor(A)"), which is wrong; keeping it attached to the
+  # preceding word means only the word's own first letter is ever
+  # touched. A word that already has an uppercase letter past its
+  # first position is left untouched instead of being run through
+  # `.capitalize` -- which
+  # would downcase everything after the first letter, destroying a
+  # real acronym the lowercase tag already stores correctly. Confirmed
+  # against real content across nearly every word-capitalize locale:
+  # fully-uppercase acronyms ("API key" -> ours was flattening this to
+  # "Api Key"; same for "ICN", "OK", "ДНК") and mixed-case ones too
+  # ("IDs" -> ours was flattening this to "Ids"). No acronym config
+  # needed -- if the lowercase tag already capitalized a letter that
+  # isn't the word's first, that's a deliberate signal to leave it
+  # alone. Applies `TI_LOWERCASE_WORDS` exceptions to any non-first
+  # word.
+  def self.capitalize_each_word(str, turkic: false)
+    exceptions = TI_LOWERCASE_WORDS[I18n.locale.to_sym] || []
+    first = true
+    str.gsub(/\p{Alpha}[\p{Alpha}'’()-]*/) do |word|
+      was_first = first
+      first = false
+      next word if word[1..].each_char.any? { |c| c != c.downcase }
+      next word.downcase if !was_first && exceptions.include?(word.downcase)
+
+      turkic ? word.capitalize(:turkic) : word.capitalize
+    end
+  end
+
+  # Localize, then title-case the result for the current locale (see
+  # `titleize_localized`). No textilizing: title-cased tags are short
+  # UI labels, never Textile-formatted body text, and some callers
+  # interpolate the result straight into an HTML attribute (e.g. a
+  # `title:`) where inserted markup would be wrong. Use this instead
+  # of authoring a separate ALL-CAPS twin tag for a title-cased
+  # presentation of an existing lowercase tag.
+  def ti(*)
+    Symbol.titleize_localized(localize(*))
   end
 
   def strip_html(*)

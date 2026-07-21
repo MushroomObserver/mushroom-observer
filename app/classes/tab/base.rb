@@ -8,7 +8,7 @@
 # Subclasses live under `Tab::<Domain>::<Name>` at
 # `app/classes/tab/<domain>/<name>.rb` and implement:
 #
-#   #title          — String (usually a `:FOO.t` lookup)
+#   #title          — String (usually a `:foo.t` lookup)
 #   #path           — String (a route helper result, e.g. `project_path(id:)`)
 #   #alt_title      — String, optional. Overrides the auto-derived
 #                     selector class. Use when `title` includes a
@@ -30,7 +30,7 @@
 #       @project = project
 #     end
 #
-#     def title = :SUMMARY.t
+#     def title = :summary.ti
 #     def path = project_path(id: @project.id)
 #     def alt_title = "summary"
 #   end
@@ -190,7 +190,7 @@ class Tab::Base
   end
 
   # Model-aware flavour: includes the model name in the slug (so the
-  # same `:EDIT.t` title on different models produces distinct
+  # same `:edit.ti` title on different models produces distinct
   # classes) and, when the model has an `id`, a second
   # `…_link_<id>` per-instance class for ID-pinned selectors.
   def model_html_class
