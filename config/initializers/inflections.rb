@@ -32,8 +32,9 @@ ActiveSupport::Inflector.inflections(:en) do |inflect|
   inflect.acronym("UI")
   inflect.acronym("CRUD")
   inflect.acronym("ID")
-  inflect.acronym("IDs")
   inflect.acronym("OK")
+  # International Code of Nomenclature -- MO's own taxonomic domain
+  # acronym, not tied to any specific Rails call site.
   inflect.acronym("ICN")
   inflect.irregular("bonus", "bonuses")
   inflect.irregular("info", "info")

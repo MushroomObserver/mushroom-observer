@@ -70,7 +70,6 @@ class SymbolExtensionsTest < UnitTestCase
     original_locales = I18n.available_locales
     I18n.available_locales = (original_locales + TI_TEST_STRINGS.keys).uniq
 
-    assert_titleize_localized_titleize_locales
     assert_titleize_localized_word_capitalize_locales
     assert_titleize_localized_no_ops
     assert_titleize_localized_turkic
@@ -79,33 +78,38 @@ class SymbolExtensionsTest < UnitTestCase
     I18n.available_locales = original_locales
   end
 
-  # "ids"/"icn" acronyms added to config/initializers/inflections.rb
-  # after the #4844 deviation audit found `.titleize` splitting
-  # "IDs" into "I Ds" and downcasing "ICN" to "Icn".
-  def test_titleize_acronym_inflections
-    assert_equal("IDs", "ids".titleize)
-    assert_equal("ICN Identifier", "icn identifier".titleize)
-  end
-
   # capitalize_each_word (the TI_WORD_CAPITALIZE_LOCALES path) leaves
-  # an already-all-uppercase word untouched instead of running it
-  # through .capitalize, which would downcase everything after the
-  # first letter and destroy a real acronym the lowercase tag already
-  # stores correctly -- confirmed against real content across nearly
-  # every word-capitalize locale ("API key" -> "Api Key", "ДНК" ->
-  # "Днк", before this fix).
+  # a word with any uppercase letter past its first position untouched
+  # instead of running it through .capitalize, which would downcase
+  # everything after the first letter and destroy a real acronym the
+  # lowercase tag already stores correctly -- confirmed against real
+  # content across nearly every word-capitalize locale: fully-uppercase
+  # acronyms ("API key" -> "Api Key", "ДНК" -> "Днк") and mixed-case
+  # ones too ("IDs" -> "Ids"), before this fix. No acronym config
+  # needed either way.
   def test_capitalize_each_word_preserves_acronyms
     assert_equal("API Key", Symbol.capitalize_each_word("API key"))
+    assert_equal("IDs", Symbol.capitalize_each_word("IDs"))
     I18n.with_locale(:uk) do
       assert_equal("Ключ API", Symbol.capitalize_each_word("ключ API"))
     end
   end
 
-  # TI_LOWERCASE_WORDS: Spanish/Portuguese/Ukrainian small connector
-  # words stay lowercase even when the rest of the phrase is
-  # capitalized, confirmed empirically (#4844 deviation audit) -- but
-  # only outside the first-word position.
+  # TI_LOWERCASE_WORDS: small connector words stay lowercase even when
+  # the rest of the phrase is capitalized, confirmed empirically
+  # (#4844 deviation audit) -- but only outside the first-word
+  # position.
   def test_capitalize_each_word_lowercase_exceptions
+    I18n.with_locale(:en) do
+      assert_equal("Created at", Symbol.capitalize_each_word("created at"))
+      assert_equal("Entered by", Symbol.capitalize_each_word("entered by"))
+      assert_equal("Group or Clade",
+                   Symbol.capitalize_each_word("group or clade"))
+      assert_equal("Widget with Gadget",
+                   Symbol.capitalize_each_word("widget with gadget"))
+      assert_equal("Widget and Gadget",
+                   Symbol.capitalize_each_word("widget and gadget"))
+    end
     I18n.with_locale(:es) do
       assert_equal("Grupo de Admin",
                    Symbol.capitalize_each_word("grupo de admin"))
@@ -241,11 +245,8 @@ class SymbolExtensionsTest < UnitTestCase
     uk: { species_list: "список видів", rss_logs: "журнали активності" }
   }.freeze
 
-  TI_TITLEIZE_EXPECTED = {
-    en: { species_list: "Observation List", rss_logs: "Activity Logs" }
-  }.freeze
-
   TI_WORD_CAPITALIZE_EXPECTED = {
+    en: { species_list: "Observation List", rss_logs: "Activity Logs" },
     es: { species_list: "Lista de Observaciones",
           rss_logs: "Registros de Actividad" },
     pt: { species_list: "Lista de Espécies",
@@ -257,23 +258,8 @@ class SymbolExtensionsTest < UnitTestCase
 
   private
 
-  def assert_titleize_localized_titleize_locales
-    Symbol::TI_TITLEIZE_LOCALES.each do |locale|
-      strs = TI_TEST_STRINGS.fetch(locale)
-      expected = TI_TITLEIZE_EXPECTED.fetch(locale)
-      I18n.with_locale(locale) do
-        assert_equal(expected[:species_list],
-                     Symbol.titleize_localized(strs[:species_list]),
-                     "Expected full title-case for locale #{locale}")
-        assert_equal(expected[:rss_logs],
-                     Symbol.titleize_localized(strs[:rss_logs]),
-                     "Expected full title-case for locale #{locale}")
-      end
-    end
-  end
-
-  # Cyrillic/Greek: .titleize itself is a no-op here, so
-  # capitalize_each_word does the per-word capitalization by hand.
+  # capitalize_each_word does the per-word capitalization by hand for
+  # every locale here, including English -- see TI_WORD_CAPITALIZE_LOCALES.
   def assert_titleize_localized_word_capitalize_locales
     Symbol::TI_WORD_CAPITALIZE_LOCALES.each do |locale|
       strs = TI_TEST_STRINGS.fetch(locale)
@@ -328,7 +314,6 @@ class SymbolExtensionsTest < UnitTestCase
   def assert_titleize_localized_sentence_case
     other_locales = TI_TEST_STRINGS.keys -
                     (Symbol::TI_NO_OP_LOCALES + Symbol::TI_TURKIC_LOCALES +
-                     Symbol::TI_TITLEIZE_LOCALES +
                      Symbol::TI_WORD_CAPITALIZE_LOCALES)
     other_locales.each do |locale|
       strs = TI_TEST_STRINGS.fetch(locale)
