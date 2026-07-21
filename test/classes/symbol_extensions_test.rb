@@ -95,6 +95,18 @@ class SymbolExtensionsTest < UnitTestCase
     end
   end
 
+  # Parentheses count as part of the word they're attached to, same
+  # as apostrophes/hyphens -- otherwise a grammatical-gender suffix
+  # like Portuguese "(a)"/"(as)" gets matched as its own one-letter
+  # "word" and capitalized ("Editor(A)"), which is wrong.
+  def test_capitalize_each_word_preserves_gender_suffix_parens
+    I18n.with_locale(:pt) do
+      assert_equal("Editor(a)", Symbol.capitalize_each_word("editor(a)"))
+      assert_equal("Editores(as)",
+                   Symbol.capitalize_each_word("editores(as)"))
+    end
+  end
+
   # TI_LOWERCASE_WORDS: small connector words stay lowercase even when
   # the rest of the phrase is capitalized, confirmed empirically
   # (#4844 deviation audit) -- but only outside the first-word

@@ -365,7 +365,7 @@ class Symbol
     # locale symbol -- coincidental overlap, no functional collision
     # (this is a value in the :es array, not a locale key).
     es: %w[a con de del el la las los o para por].freeze,
-    pt: %w[de ou].freeze,
+    pt: %w[a as com da das de do dos e em o os ou para por].freeze,
     uk: %w[в].freeze
   }.freeze
 
@@ -404,13 +404,19 @@ class Symbol
     str[0].upcase + str[1..]
   end
 
-  # Capitalizes every run of letters in +str+, treating apostrophes
-  # and hyphens as part of the word they're attached to (same
-  # word-boundary behavior `.titleize` has, including its French/
-  # Italian elision-prefix limitation -- which is why those two
-  # locales aren't routed through this method either). A word that
-  # already has an uppercase letter past its first position is left
-  # untouched instead of being run through `.capitalize` -- which
+  # Capitalizes every run of letters in +str+, treating apostrophes,
+  # hyphens, and parentheses as part of the word they're attached to
+  # (same word-boundary behavior `.titleize` has, including its
+  # French/Italian elision-prefix limitation -- which is why those two
+  # locales aren't routed through this method either). Parentheses
+  # matter for grammatical-gender suffix notation, e.g. Portuguese
+  # "editor(a)"/"editores(as)" -- without them, the lone letter inside
+  # the parens gets matched as its own "word" and capitalized
+  # ("Editor(A)"), which is wrong; keeping it attached to the
+  # preceding word means only the word's own first letter is ever
+  # touched. A word that already has an uppercase letter past its
+  # first position is left untouched instead of being run through
+  # `.capitalize` -- which
   # would downcase everything after the first letter, destroying a
   # real acronym the lowercase tag already stores correctly. Confirmed
   # against real content across nearly every word-capitalize locale:
@@ -424,7 +430,7 @@ class Symbol
   def self.capitalize_each_word(str, turkic: false)
     exceptions = TI_LOWERCASE_WORDS[I18n.locale.to_sym] || []
     first = true
-    str.gsub(/\p{Alpha}[\p{Alpha}'’-]*/) do |word|
+    str.gsub(/\p{Alpha}[\p{Alpha}'’()-]*/) do |word|
       was_first = first
       first = false
       next word if word[1..].each_char.any? { |c| c != c.downcase }
