@@ -60,10 +60,10 @@ module Views::FullPageBase::Title
   def add_index_title(query, map: false)
     title = if map
               :map_locations_title.l(
-                locations: query.model.table_name.upcase.to_sym.l
+                locations: query.model.table_name.to_sym.ti
               )
             elsif query
-              query.model.table_name.upcase.to_sym.l
+              query.model.table_name.to_sym.ti
             else
               ""
             end
@@ -111,11 +111,10 @@ module Views::FullPageBase::Title
   private
 
   # Models without `document_title` fall back to their localized type
-  # tag (`OBSERVATION`, `LOCATION`, etc.). The browser-tab text renders
+  # tag (`observation`, `location`, etc.). The browser-tab text renders
   # as plain text, so textile / HTML must NOT leak through.
   def document_title_for(object)
-    return :"#{object.type_tag.to_s.upcase}".l \
-      unless object.respond_to?(:document_title)
+    return object.type_tag.ti unless object.respond_to?(:document_title)
 
     object.document_title
   end
@@ -123,14 +122,14 @@ module Views::FullPageBase::Title
   # `Observation 23435: Amanita novinupta`
   def show_document_title(string, object)
     [
-      :"#{object.type_tag.to_s.upcase}".l,
+      object.type_tag.ti,
       "#{object.id}:",
       string
     ].safe_join(" ")
   end
 
   def edit_document_title(string, object)
-    [:EDIT.l, show_document_title(string, object)].safe_join(" ")
+    [:edit.ti, show_document_title(string, object)].safe_join(" ")
   end
 
   # The actual content of `<title>` in `<head>`. Strips textile / HTML

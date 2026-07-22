@@ -85,12 +85,21 @@ class Image
       compute_dhash
     end
 
+    # Holds the image's row lock for the whole fetch/transform/re-render:
+    # rotation rewrites every local file in place, the same shape as the
+    # GPS strip -- see Verifier#transfer_image for the interleavings this
+    # serialization prevents (here it's the server silently keeping the
+    # pre-rotate renditions while the rotated local set is deleted).
+    # RotateImageJob re-enqueues TransferImagesJob afterward, so the
+    # stranded interleaving self-heals just like strip_gps!'s.
     def rotate(orientation)
-      make_sure_we_have_full_size_locally
-      reset_file_orientation
-      transform_full_size_file(orientation)
-      update_image_record_width_height_and_transferred
-      process
+      @image.with_lock do
+        make_sure_we_have_full_size_locally
+        reset_file_orientation
+        transform_full_size_file(orientation)
+        update_image_record_width_height_and_transferred
+        process
+      end
     end
 
     # Fetches the original back from whichever configured server has it,
@@ -130,6 +139,13 @@ class Image
     # checks alone can't see once local copies are cleaned up.
     def self.detect_gaps(&log)
       GapDetector.new(&log).run
+    end
+
+    # Tripwire scan of the given images' originals on the image
+    # server(s) for GPS tags that survived stripping -- see GpsLeakScan
+    # and GpsLeakDetectorJob (#4859).
+    def self.detect_gps_leaks(images, &log)
+      GpsLeakScan.new(&log).scan(images)
     end
 
     # Strips GPS/geotag data from an image's original file synchronously,

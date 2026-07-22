@@ -74,7 +74,7 @@ module Views::Controllers::Descriptions
 
       # Two submit buttons (top + bottom), value = CREATE for a new record.
       assert_html(html,
-                  "button[type='submit']", text: :CREATE.l,
+                  "button[type='submit']", text: :create.ti,
                                            count: 2)
     end
 
@@ -103,7 +103,7 @@ module Views::Controllers::Descriptions
 
       # Submit buttons read SAVE_EDITS, not CREATE, for an existing record.
       assert_html(html,
-                  "button[type='submit']", text: :SAVE_EDITS.l,
+                  "button[type='submit']", text: :save_edits.ti,
                                            count: 2)
     end
 

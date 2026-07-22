@@ -51,15 +51,15 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def render_rank_line
     li(class: "hanging-indent") do
       rank_text = @name.rank ? rank_as_string(@name.rank) : :unknown.l
-      plain("#{:RANK.l}: #{rank_text}")
+      plain("#{:rank.ti}: #{rank_text}")
     end
   end
 
   def render_status_line
     li(class: "hanging-indent") do
-      plain("#{:STATUS.l}: ")
+      plain("#{:status.ti}: ")
       plain(@name.status)
-      plain(" (#{:MISSPELLED.l})") if @name.is_misspelling?
+      plain(" (#{:misspelled.ti})") if @name.is_misspelling?
       if approve_link || deprecate_link
         span(class: "text-nowrap ml-3") do
           render_synonym_links_inline
@@ -87,7 +87,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_name_paragraph
     li(class: "hanging-indent") do
-      plain("#{:NAME.l}: ")
+      plain("#{:name.ti}: ")
       plain(@name.real_text_name(@user))
       span(class: "text-nowrap ml-3") { render(synonyms_link) } if synonyms_link
     end
@@ -95,14 +95,14 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_authority_paragraph
     li(class: "hanging-indent") do
-      plain("#{:AUTHORITY.l}: ")
+      plain("#{:authority.ti}: ")
       trusted_html(@name.author.to_s.t)
     end
   end
 
   def render_citation_paragraph
     li(class: "hanging-indent") do
-      plain("#{:CITATION.l}: ")
+      plain("#{:citation.ti}: ")
       trusted_html(@name.citation.to_s.tl)
     end
   end
@@ -175,7 +175,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_registrable_links
     li do
-      plain("#{:ICN_ID.l}: ")
+      plain("#{:icn_id.ti}: ")
       em { plain(:show_name_icn_id_missing.l) }
     end
     li { render_tab_link(Tab::Name::IndexFungorumSearchPage.new) }

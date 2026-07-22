@@ -3,7 +3,7 @@
 # Sidebar indexes nav: projects index.
 class Tab::Sidebar::Indexes::Projects < Tab::Base
   def title
-    :PROJECTS.t
+    :projects.ti
   end
 
   def path

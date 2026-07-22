@@ -116,7 +116,7 @@ module Views::Controllers::Herbaria
 
     def render_notes
       div(class: "mt-3") do
-        div(class: "font-weight-bold") { plain("#{:NOTES.t}:") }
+        div(class: "font-weight-bold") { plain("#{:notes.ti}:") }
         trusted_html(@herbarium.description.tpl)
       end
     end
@@ -136,16 +136,16 @@ module Views::Controllers::Herbaria
           Map(objects: [@herbarium.location])
         end
         p(id: "herbarium_location") do
-          plain("#{:LOCATION.l}: #{@herbarium.location.text_name}")
+          plain("#{:location.ti}: #{@herbarium.location.text_name}")
         end
       end
     end
 
     def render_timestamps
       div(class: "mt-3", style: "max-width:#{map ? 930 : 600}px") do
-        plain("#{:CREATED_AT.t}: #{@herbarium.created_at.web_date}")
+        plain("#{:created_at.ti}: #{@herbarium.created_at.web_date}")
         br
-        plain("#{:UPDATED_AT.t}: #{@herbarium.updated_at.web_date}")
+        plain("#{:updated_at.ti}: #{@herbarium.updated_at.web_date}")
         br
       end
     end

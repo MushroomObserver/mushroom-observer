@@ -58,7 +58,7 @@ class Components::Link::Location < Components::Link::Object
     a(href: url_for(observations_path(where: @where)),
       class: "index_observations_at_where_link") do
       render_label(@where)
-      plain(" [#{:SEARCH.t}]") if @click
+      plain(" [#{:search.ti}]") if @click
     end
   end
 

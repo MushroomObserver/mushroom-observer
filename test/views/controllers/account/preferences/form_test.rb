@@ -35,7 +35,7 @@ class Views::Controllers::Account::Preferences::FormTest <
     assert_html(html, "input[type='password']" \
                       "[name='user[password_confirmation]'][value='']")
     # Each section has its own submit button (one of 6).
-    assert_html(html, "button[type='submit']", text: :SAVE_EDITS.l)
+    assert_html(html, "button[type='submit']", text: :save_edits.ti)
   end
 
   # ---- Section 2: Privacy ----

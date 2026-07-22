@@ -9,6 +9,10 @@
 class RotateImageJob < ApplicationJob
   queue_as(:default)
 
+  # See TransferImagesJob -- a rotate can block on the same row lock
+  # behind an in-flight transfer or an earlier rotate of the same image.
+  retry_on ActiveRecord::LockWaitTimeout, wait: 30.seconds, attempts: 5
+
   def perform(image_id, ext, orientation)
     image = Image.find_by(id: image_id)
     return unless image

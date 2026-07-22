@@ -29,7 +29,7 @@ class UserLinkTest < ComponentTestCase
     html = render(Components::Link::User.new(user: 42))
 
     assert_html(html, "a[href='#{routes.user_path(42)}']",
-                text: "#{:USER.t} #42")
+                text: "#{:user.ti} #42")
     assert_html(html, "a.user_link_42")
   end
 

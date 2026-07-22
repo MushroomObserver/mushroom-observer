@@ -10,7 +10,7 @@ module Views::Controllers::Account::Login
       text_field(:login, label: :login_user, wrap_class: "mt-3",
                          data: { autofocus: true })
 
-      submit(:SEND.l, center: true)
+      submit(:send.ti, center: true)
     end
 
     # Override to use :new_user scope instead of :user

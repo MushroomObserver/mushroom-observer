@@ -11,7 +11,7 @@ class Tab::Sequence::Edit < Tab::Base
   end
 
   def title
-    :EDIT.t
+    :edit.ti
   end
 
   def path

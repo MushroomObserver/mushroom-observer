@@ -58,7 +58,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   def render_when
     li(class: "obs-when hanging-indent", id: "observation_when") do
-      plain("#{:WHEN.t}: ")
+      plain("#{:when.ti}: ")
       b { @obs.when.web_date }
     end
   end
@@ -142,7 +142,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   # collector is the entering user; when they differ it moves to the
   # "Entered by:" line (you email the MO account, not a free-text name).
   def render_collector
-    plain("#{:COLLECTOR.t}: ")
+    plain("#{:collector.ti}: ")
     render_collector_identity
     return if @obs.collector_differs_from_creator?
 
@@ -150,7 +150,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   end
 
   def render_entered_by
-    plain("#{:ENTERED_BY.t}: ")
+    plain("#{:entered_by.ti}: ")
     render_user_link(@obs.user)
     render_send_question_link if show_send_question?
   end
@@ -199,7 +199,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   def render_projects
     div(class: "obs-projects", id: "observation_projects") do
-      span { plain("#{:PROJECTS.t}:") }
+      span { plain("#{:projects.ti}:") }
       br
       @obs.projects.each do |project|
         div(class: "indent") do
@@ -211,7 +211,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do
-      span { plain("#{:FIELD_SLIP.t}: ") }
+      span { plain("#{:field_slip.ti}: ") }
       Link(type: :object, object: @obs.field_slip)
     end
   end

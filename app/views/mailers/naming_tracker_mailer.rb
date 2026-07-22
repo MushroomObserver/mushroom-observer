@@ -74,8 +74,8 @@ class Views::Mailers::NamingTrackerMailer < Views::Mailers::Base
   end
 
   def fields_text
-    text = "*#{:Observer.l}:* xxx\n"
-    text += "*#{:Identifier.l}:* yyy\n"
+    text = "*#{:observer.ti}:* xxx\n"
+    text += "*#{:identifier.ti}:* yyy\n"
     text += specimen_line
     text += "*#{:email_field_image_count.l}:* #{@observation.images.length}\n"
     text

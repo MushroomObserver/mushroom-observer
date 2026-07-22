@@ -42,7 +42,7 @@ module Tab::Name
     def test_deprecate
       tab = Tab::Name::Deprecate.new(name: @name)
 
-      assert_equal(:DEPRECATE.l, tab.title)
+      assert_equal(:deprecate.ti, tab.title)
       assert_equal(routes.form_to_deprecate_synonym_of_name_path(@name.id),
                    tab.path)
     end
@@ -50,7 +50,7 @@ module Tab::Name
     def test_approve
       tab = Tab::Name::Approve.new(name: @name)
 
-      assert_equal(:APPROVE.l, tab.title)
+      assert_equal(:approve.ti, tab.title)
       assert_equal(routes.form_to_approve_synonym_of_name_path(@name.id),
                    tab.path)
     end
@@ -58,7 +58,7 @@ module Tab::Name
     def test_edit_lifeform
       tab = Tab::Name::EditLifeform.new(name: @name)
 
-      assert_equal(:EDIT.l, tab.title)
+      assert_equal(:edit.ti, tab.title)
       assert_equal(routes.edit_lifeform_of_name_path(@name.id), tab.path)
     end
 
@@ -73,7 +73,7 @@ module Tab::Name
     def test_edit_classification
       tab = Tab::Name::EditClassification.new(name: @name)
 
-      assert_equal(:EDIT.l, tab.title)
+      assert_equal(:edit.ti, tab.title)
       assert_equal(routes.edit_classification_of_name_path(@name.id),
                    tab.path)
     end

@@ -15,7 +15,7 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
   def view_template
     Panel(panel_id: "associated_observations") do |panel|
       if siblings?
-        panel.with_heading { plain(:OCCURRENCES.t) }
+        panel.with_heading { plain(:occurrences.ti) }
         panel.with_heading_links { matching_observations_link }
         panel.with_body { render_body }
       else

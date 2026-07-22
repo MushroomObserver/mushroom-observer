@@ -86,7 +86,7 @@ module SpeciesLists
       assert_equal(old_count, spl.reload.observations.size)
 
       put(:update,
-          params: params.merge(commit: :ADD.l,
+          params: params.merge(commit: :add.ti,
                                species_list: { title: spl.title }))
       assert_response(:redirect)
       assert_redirected_to(%r{/species_lists})
@@ -95,7 +95,7 @@ module SpeciesLists
 
       login("mary")
       put(:update,
-          params: params.merge(commit: :ADD.l,
+          params: params.merge(commit: :add.ti,
                                species_list: { title: spl.title }))
       assert_response(:redirect)
       assert_redirected_to(%r{/species_lists})
@@ -103,7 +103,7 @@ module SpeciesLists
       assert_equal(new_count, spl.reload.observations.size)
 
       put(:update,
-          params: params.merge(commit: :REMOVE.l,
+          params: params.merge(commit: :remove.ti,
                                species_list: { title: spl.id.to_s }))
       assert_response(:redirect)
       assert_redirected_to(%r{/species_lists})
@@ -124,7 +124,7 @@ module SpeciesLists
       query = Query.lookup(:Observation, id_in_set: ids)
       params = {
         q: @controller.q_param(query),
-        commit: :ADD.l,
+        commit: :add.ti,
         species_list: { title: spl.title }
       }
       login(spl.user.login)

@@ -22,7 +22,7 @@ class Views::Controllers::Observations::Show::ThumbnailMapPanel < Views::Base
                     coordinates: { x: x, y: y }.to_json,
                     map_url: map_observation_path(id: @obs.id) }
           }) do |panel|
-      panel.with_heading { :MAP.t }
+      panel.with_heading { :map.ti }
       panel.with_heading_links { heading_links }
       panel.with_body { render_body }
     end

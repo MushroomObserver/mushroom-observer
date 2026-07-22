@@ -17,7 +17,7 @@ module Views::Controllers::Projects::Members
       # Form structure
       assert_html(html, "form#project_member_form")
       assert_html(html, "form[action='/projects/#{@project.id}/members']")
-      assert_html(html, "button[type='submit']", text: :ADD.l)
+      assert_html(html, "button[type='submit']", text: :add.ti)
 
       # Autocompleter field
       assert_html(html, "[data-controller*='autocompleter']")

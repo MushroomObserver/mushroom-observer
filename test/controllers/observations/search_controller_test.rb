@@ -11,7 +11,7 @@ module Observations
       login
       get(:show)
       assert_select("body.search__show")
-      assert_select("p", text: /#{:OBSERVATIONS.t} #{:SEARCHES.t}/)
+      assert_select("p", text: /#{:observations.ti} #{:searches.ti}/)
     end
 
     def test_show_help_turbo
@@ -236,7 +236,7 @@ module Observations
              query_observations: {
                names: { lookup: "Agaricus" }
              },
-             commit: :CLEAR.l # This is "Clear" in English
+             commit: :clear.ti # This is "Clear" in English
            })
 
       # Verify it redirected to :new (not to index with search results)

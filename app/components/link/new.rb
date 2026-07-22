@@ -12,7 +12,7 @@
 class Components::Link::New < Components::Link::Get
   def initialize(target:, name: nil, icon: :add, **)
     super(target: target,
-          name: name || :ADD.l,
+          name: name || :add.ti,
           action: :new,
           icon: icon,
           **)

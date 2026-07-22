@@ -27,7 +27,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     # rubocop:enable Metrics/ParameterLists
 
     def view_template
-      submit(:SUBMIT.l, center: true)
+      submit(:submit.ti, center: true)
       render_name_feedback if model.proposed_name.present?
       render_proposed_field
       render_misspelling_field
@@ -59,7 +59,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     def render_name_feedback
       render(Components::Form::NameFeedback.new(
                given_name: model.proposed_name,
-               button_name: :SUBMIT.l,
+               button_name: :submit.ti,
                names: @names,
                valid_names: @valid_names,
                suggest_corrections: @suggest_corrections || false,

@@ -452,7 +452,7 @@ class CollectionNumbersController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :add_object.t(type: :COLLECTION_NUMBER)
+      :add_object.t(type: :collection_number)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
                          object: @collection_number, mode: :edit,

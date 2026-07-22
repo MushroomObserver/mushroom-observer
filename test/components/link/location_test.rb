@@ -72,6 +72,6 @@ class LocationLinkTest < ComponentTestCase
                     where: "Some Place, USA", click: true
                   ))
 
-    assert_includes(html, :SEARCH.t)
+    assert_includes(html, :search.ti)
   end
 end

@@ -10,7 +10,7 @@ module Views::Controllers::Names
     prop :approved_rank, _Nilable(String), default: nil
 
     def view_template
-      add_new_title(:create_object, :NAME)
+      add_new_title(:create_object, :name)
       add_context_nav(Tab::Name::FormNew.new)
 
       render(Form.new(

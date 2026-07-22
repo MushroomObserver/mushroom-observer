@@ -9,7 +9,7 @@ module Views::Controllers::Articles
       super do
         render_title_field
         render_body_field
-        submit(:SUBMIT.t, center: true)
+        submit(:submit.ti, center: true)
       end
     end
 

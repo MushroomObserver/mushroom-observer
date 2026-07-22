@@ -12,7 +12,7 @@ module Views::Controllers::Names::Synonyms::Approve
     end
 
     def view_template
-      submit(:APPROVE.l, center: true)
+      submit(:approve.ti, center: true)
 
       render_approved_names_section if @approved_names.present?
 

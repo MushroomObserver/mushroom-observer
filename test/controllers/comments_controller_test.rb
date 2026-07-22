@@ -19,7 +19,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by: by })
 
-    assert_page_title(:COMMENTS.l)
+    assert_page_title(:comments.ti)
     assert_sorted_by(by)
   end
 
@@ -31,7 +31,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: params)
     assert_select(".comment", count: comments.size)
-    assert_page_title(:COMMENTS.l)
+    assert_page_title(:comments.ti)
     assert_displayed_filters("#{:query_target.l}: #{target.unique_text_name.t}")
   end
 
@@ -72,7 +72,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: { model: :Comment, pattern: } })
 
-    assert_page_title(:COMMENTS.l)
+    assert_page_title(:comments.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
 
@@ -99,7 +99,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_page_title(:COMMENTS.l)
+    assert_page_title(:comments.ti)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     # All Rolf's Comments are Observations, so the results should have
     # as many links to Observations as Rolf has Comments
@@ -138,7 +138,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("body.comments__index")
-    assert_page_title(:COMMENTS.l)
+    assert_page_title(:comments.ti)
     assert_displayed_filters("#{:query_for_user.l}: #{user.name}")
     assert_session_query_record_is_correct
   end

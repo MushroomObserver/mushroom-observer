@@ -12,6 +12,7 @@
 #
 class ExternalSite < AbstractModel
   INATURALIST_NAME = "iNaturalist"
+  MYCOPORTAL_NAME = "MyCoPortal"
 
   belongs_to :project
   has_many   :external_links
@@ -52,6 +53,12 @@ class ExternalSite < AbstractModel
   # by indexed unique name.
   def self.inaturalist
     find_by!(name: INATURALIST_NAME)
+  end
+
+  # The MyCoPortal site row, seeded by fixtures/migration. Cheap lookup
+  # by indexed unique name.
+  def self.mycoportal
+    find_by!(name: MYCOPORTAL_NAME)
   end
 
   # URL of the per-record page on this site for the given external_id

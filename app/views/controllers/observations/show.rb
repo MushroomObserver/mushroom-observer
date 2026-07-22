@@ -75,7 +75,7 @@ module Views::Controllers::Observations
       ImageGallery(
         object: @observation, images: @images,
         carousel_id: "observation_images", user: @user,
-        title: :IMAGES.t, links: carousel_links
+        title: :images.ti, links: carousel_links
       )
     end
 

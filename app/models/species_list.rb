@@ -285,7 +285,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   def unique_format_name(_user = nil)
     title = self.title
     if title.blank?
-      :SPECIES_LIST.l + " ##{id || "?"}"
+      :species_list.ti + " ##{id || "?"}"
     else
       title + " (#{id || "?"})"
     end

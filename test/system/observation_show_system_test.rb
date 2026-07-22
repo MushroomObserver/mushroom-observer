@@ -96,7 +96,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     # try remove button (uses turbo_confirm modal)
     within("#observation_collection_numbers") do
-      assert_button(:REMOVE.l)
+      assert_button(:remove.ti)
       find(:css, ".remove_collection_number_link_#{c_n.id}").click
     end
     # confirm modal appears
@@ -154,8 +154,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # Test remove herbarium record (uses turbo_confirm modal)
     within("#observation_herbarium_records") do
       # Verify remove button has text-danger class
-      assert_selector("button.text-danger", text: :REMOVE.l)
-      click_button(:REMOVE.l)
+      assert_selector("button.text-danger", text: :remove.ti)
+      click_button(:remove.ti)
     end
     # confirm modal appears
     assert_selector("#mo_confirm", visible: true)
@@ -221,7 +221,7 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     seq = Sequence.last
     within("#observation_sequences") do
       assert_link(text: /LSU/)
-      assert_link(:EDIT.t)
+      assert_link(:edit.ti)
       find(:css, ".edit_sequence_link_#{seq.id}").trigger("click")
     end
 

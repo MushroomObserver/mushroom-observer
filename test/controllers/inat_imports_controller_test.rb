@@ -43,7 +43,7 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_select("th", text: :USER.t)
+    assert_select("th", text: :user.ti)
   end
 
   def test_index_results_link_only_for_imports_with_linked_observations

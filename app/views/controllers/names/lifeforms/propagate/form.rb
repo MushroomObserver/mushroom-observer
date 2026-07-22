@@ -13,14 +13,14 @@ module Views::Controllers::Names::Lifeforms::Propagate
       render_add_section
       br
       render_remove_section
-      submit(:APPLY.l, center: true)
+      submit(:apply.ti, center: true)
     end
 
     private
 
     def render_add_section
       p do
-        b { :ADD.l }
+        b { :add.ti }
         plain(": ")
         plain(:propagate_lifeform_add.l)
       end
@@ -39,7 +39,7 @@ module Views::Controllers::Names::Lifeforms::Propagate
 
     def render_remove_section
       p do
-        b { :REMOVE.l }
+        b { :remove.ti }
         plain(": ")
         plain(:propagate_lifeform_remove.l)
       end

@@ -112,7 +112,7 @@ class InatImportsController < ApplicationController
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
 
-    inat_import = InatImport.find_by(id: params[:state], user: @user)
+    inat_import = InatImport.find_by(id: string_param(:state), user: @user)
     return not_authorized unless inat_import
 
     # Guard against a repeated (browser refresh) or late callback: only a

@@ -35,7 +35,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_project_line
-      strong { plain("#{:PROJECT.t}:") }
+      strong { plain("#{:project.ti}:") }
       whitespace
       if @field_slip.project
         Link(type: :object, object: @field_slip.project)
@@ -47,15 +47,15 @@ module Views::Controllers::FieldSlips
     def render_observation_details
       obs = observation
       render_observation_top_lines(obs)
-      strong { plain("#{:NOTES.t}:") }
+      strong { plain("#{:notes.ti}:") }
       render_notes_block
       render_observation_id_lines(obs)
     end
 
     def render_observation_top_lines(obs)
-      labeled(:DATE) { plain(obs.when.to_s) }
+      labeled(:date) { plain(obs.when.to_s) }
       render_collector_line(obs)
-      labeled(:LOCATION) { render_location_link(obs) }
+      labeled(:location) { render_location_link(obs) }
     end
 
     # Omit the line entirely when no collector is recorded (#4211).
@@ -64,20 +64,20 @@ module Views::Controllers::FieldSlips
     def render_collector_line(obs)
       return unless obs.collector_textile
 
-      labeled(:COLLECTOR) { trusted_html(obs.collector_textile.tl) }
+      labeled(:collector) { trusted_html(obs.collector_textile.tl) }
     end
 
     def render_observation_id_lines(obs)
-      labeled(:ID) { trusted_html(obs.field_slip_name.tl) }
-      labeled(:ID_BY) { trusted_html(obs.field_slip_id_by.tl) }
+      labeled(:id) { trusted_html(obs.field_slip_name.tl) }
+      labeled(:id_by) { trusted_html(obs.field_slip_id_by.tl) }
       return if obs.other_codes.to_s.empty?
 
       labeled(:field_slip_other_codes) { trusted_html(obs.other_codes.tl) }
     end
 
-    # Emits `<strong>LABEL: </strong>` + the block's content + `<br>`.
+    # Emits `<strong>Label: </strong>` + the block's content + `<br>`.
     def labeled(key)
-      strong { plain("#{key.t}: ") }
+      strong { plain("#{key.ti}: ") }
       yield
       br
     end
@@ -113,7 +113,7 @@ module Views::Controllers::FieldSlips
     # callers of `FieldSlipPanel` must preserve that contract.
     def render_observations_section
       all_obs = @field_slip.observations.to_a
-      strong { plain("#{:OBSERVATIONS.t}:") }
+      strong { plain("#{:observations.ti}:") }
       if all_obs.any?
         render_observations_matrix(all_obs)
       else

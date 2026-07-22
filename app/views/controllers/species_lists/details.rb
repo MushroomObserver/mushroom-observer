@@ -33,7 +33,7 @@ module Views::Controllers::SpeciesLists
     def render_header_row
       div(class: "d-flex justify-content-between align-items-center") do
         div do
-          strong { plain("#{:WHEN.l}:") }
+          strong { plain("#{:when.ti}:") }
           whitespace
           plain(@species_list.when.web_date)
         end
@@ -55,31 +55,31 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_count
       div do
-        b { plain("#{:OBSERVATIONS.l}:") }
+        b { plain("#{:observations.ti}:") }
         whitespace
         plain(@query.num_results.to_s)
       end
     end
 
     # `location_link` raises if `@species_list.where` is blank — fall
-    # back to a plain `:UNKNOWN.t` label in that case.
+    # back to a plain `:unknown.ti` label in that case.
     def render_where
       div do
-        b { plain("#{:WHERE.l}:") }
+        b { plain("#{:where.ti}:") }
         whitespace
         begin
           Link(type: :location,
                where: @species_list.where,
                location: @species_list.location, click: true)
         rescue StandardError
-          plain(:UNKNOWN.t)
+          plain(:unknown.ti)
         end
       end
     end
 
     def render_who
       div do
-        b { plain("#{:WHO.l}:") }
+        b { plain("#{:who.ti}:") }
         whitespace
         Link(type: :user, user: @species_list.user)
       end
@@ -87,7 +87,7 @@ module Views::Controllers::SpeciesLists
 
     def render_projects
       div do
-        b { plain("#{:PROJECTS.l}:") }
+        b { plain("#{:projects.ti}:") }
         whitespace
         @species_list.projects.each_with_index do |project, idx|
           plain(" | ") if idx.positive?
@@ -100,7 +100,7 @@ module Views::Controllers::SpeciesLists
     # render through `trusted_html` because `.tpl` returns already-safe markup.
     def render_notes
       div do
-        trusted_html("*#{:NOTES.l}:* #{@species_list.notes}".tpl)
+        trusted_html("*#{:notes.ti}:* #{@species_list.notes}".tpl)
       end
     end
   end

@@ -33,19 +33,19 @@ module Views::Controllers::SpeciesLists
     private
 
     # `place_name.t` can blow up on lists without a place -
-    # `rescue :UNKNOWN.l` is fallback.
+    # `rescue :unknown.ti` is fallback.
     def place
       @place ||= begin
                    @species_list.place_name(current_user).t
                  rescue StandardError
-                   :UNKNOWN.l
+                   :unknown.ti
                  end
     end
 
     def render_info
       div(class: "list_info d-flex align-items-start") do
         div(class: "text-larger") do
-          IdBadge(object: @species_list, extra_class: "rss-id mr-4")
+          IDBadge(object: @species_list, extra_class: "rss-id mr-4")
         end
         div do
           render_title_row
@@ -93,7 +93,7 @@ module Views::Controllers::SpeciesLists
       Button(
         type: :put,
         variant: :strip,
-        name: :REMOVE.t,
+        name: :remove.ti,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id,
@@ -106,7 +106,7 @@ module Views::Controllers::SpeciesLists
     def render_add_obs_button
       Button(
         type: :put,
-        name: :ADD.t,
+        name: :add.ti,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id,

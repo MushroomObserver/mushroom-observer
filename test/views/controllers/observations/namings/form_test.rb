@@ -24,7 +24,7 @@ module Views::Controllers::Observations::Namings
       assert_html(html, "input[name='naming[reasons][1][check]']")
 
       # Submit button
-      assert_html(html, "button[type='submit']", text: :CREATE.l)
+      assert_html(html, "button[type='submit']", text: :create.ti)
 
       # Blank context collapses fields, has blank vote option
       assert_html(
@@ -44,7 +44,7 @@ module Views::Controllers::Observations::Namings
                   "form[id='obs_#{@observation.id}_naming_#{naming.id}_form']")
 
       # Submit button
-      assert_html(html, "button[type='submit']", text: :SAVE_EDITS.l)
+      assert_html(html, "button[type='submit']", text: :save_edits.ti)
 
       # Vote and reasons fields present in edit form
       assert_html(html, "select[name='naming[vote][value]']")

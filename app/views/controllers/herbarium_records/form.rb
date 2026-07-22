@@ -37,7 +37,7 @@ module Views::Controllers::HerbariumRecords
     def render_herbarium_name_field
       autocompleter_field(:herbarium_name,
                           type: :herbarium,
-                          label: :NAME,
+                          label: :name.ti,
                           between: :required)
     end
 
@@ -61,12 +61,12 @@ module Views::Controllers::HerbariumRecords
     def render_notes_field
       textarea_field(:notes,
                      rows: 6,
-                     label: :NOTES,
+                     label: :notes.ti,
                      between: :optional)
     end
 
     def submit_text
-      model.persisted? ? :SAVE.l : :ADD.l
+      model.persisted? ? :save.ti : :add.ti
     end
 
     def form_action

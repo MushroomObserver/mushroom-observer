@@ -39,7 +39,7 @@ module Views::Controllers::Comments
       Panel(
         panel_id: "comments_for_object"
       ) do |panel|
-        panel.with_heading { plain(:COMMENTS.t) }
+        panel.with_heading { plain(:comments.ti) }
         panel.with_heading_links { render_add_comment_link } if @editable
         panel.with_body(wrapper: false) { render_comments_list }
         panel.with_footer { render_and_more_link } if show_and_more_footer?

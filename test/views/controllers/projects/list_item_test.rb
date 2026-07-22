@@ -30,7 +30,7 @@ module Views::Controllers::Projects
       html = render(ListItem.new(project: project))
 
       assert_html(html, "span.ml-4")
-      assert_includes(html, :OPEN.t)
+      assert_includes(html, :open.ti)
     end
 
     def test_closed_membership_no_badge

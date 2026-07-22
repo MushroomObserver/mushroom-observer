@@ -16,7 +16,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_select("#context_nav a[href='#{names_path}']", { count: 0 },
                   "right `tabs` should not link to All Names")
   end
@@ -45,7 +45,7 @@ class NamesControllerIndexTest < FunctionalTestCase
   end
 
   def index_related_query_assertions(user)
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters(:query_observation_query.l)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     result_names = Name.joins(:observations).with_correct_spelling.
@@ -82,7 +82,7 @@ class NamesControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params:)
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -97,7 +97,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { has_observations: true })
 
     assert_response(:success)
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters(:query_has_observations.l)
     assert_select(
       "#results a:match('href', ?)", %r{#{names_path}/\d+},
@@ -121,7 +121,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { has_observations: true, letter: letter })
 
     assert_response(:success)
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters(:query_has_observations.l)
     names.each do |name|
       assert_select("#results a[href*='/names/#{name.id}'] .display-name",
@@ -134,7 +134,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { has_descriptions: true })
 
     assert_response(:success)
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters(:query_has_descriptions.l)
     assert_select("#results", { text: /not the default/ },
                   "Results should include non-default descriptions")
@@ -152,7 +152,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { needs_description: true })
 
     assert_response(:success)
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters(:query_needs_description.l)
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -168,7 +168,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
     assert_select(
       "#results a:match('href', ?)", %r{^#{names_path}/\d+},
@@ -226,7 +226,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: user })
 
-    assert_page_title(:NAMES.l)
+    assert_page_title(:names.ti)
     assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
     assert_select("#results a:match('href',?)", %r{^/names/\d+},
                   { count: names_edited_by_user.count },

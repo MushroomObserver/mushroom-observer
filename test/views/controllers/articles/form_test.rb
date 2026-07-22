@@ -28,7 +28,7 @@ module Views::Controllers::Articles
     end
 
     def test_renders_submit_button_centered
-      assert_html(@html, "button[type='submit']", text: :SUBMIT.t)
+      assert_html(@html, "button[type='submit']", text: :submit.ti)
       assert_html(@html, ".center-block")
     end
 

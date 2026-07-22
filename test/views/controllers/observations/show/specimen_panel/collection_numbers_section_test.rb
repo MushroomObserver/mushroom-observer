@@ -31,7 +31,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
         )
       )
 
-      assert_includes(html, "#{:Collection_numbers.t}:")
+      assert_includes(html, "#{:collection_numbers.ti}:")
       assert_no_html(html, "li")
     end
 

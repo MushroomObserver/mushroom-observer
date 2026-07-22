@@ -48,7 +48,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     # Editable list: header + tight-list with edit/remove links.
     def render_editable_list(numbers)
       div do
-        plain("#{:Collection_numbers.t}: ")
+        plain("#{:collection_numbers.ti}: ")
         render_new_link
       end
       ul(class: "tight-list") do
@@ -72,8 +72,8 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
     # Read-only one-liner: "Collection number(s): a, b, c"
     def render_readonly_list(numbers)
-      label = numbers.length > 1 ? :Collection_numbers : :Collection_number
-      plain("#{label.t}: ")
+      label = numbers.length > 1 ? :collection_numbers : :collection_number
+      plain("#{label.ti}: ")
       numbers.each_with_index do |number, idx|
         plain(", ") if idx.positive?
         render_show_link(number)
@@ -83,7 +83,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     # No records yet but user can add: status text + `[+]`.
     def render_empty_with_new_link
       label = if @has_sibling_records
-                "#{:Collection_numbers.t}: "
+                "#{:collection_numbers.ti}: "
               else
                 "#{:show_observation_no_collection_numbers.t} "
               end

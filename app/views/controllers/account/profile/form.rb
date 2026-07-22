@@ -29,20 +29,20 @@ module Views::Controllers::Account::Profile
 
     def view_template
       super do
-        submit(:UPDATE.l, center: true)
+        submit(:update.ti, center: true)
         render_name_field
         render_place_name_field
         render_notes_field
         render_upload_fields
         render_mailing_address_field
-        submit(:UPDATE.l, center: true)
+        submit(:update.ti, center: true)
       end
     end
 
     private
 
     def render_name_field
-      text_field(:name, label: :Name)
+      text_field(:name, label: :name.ti)
     end
 
     def render_place_name_field

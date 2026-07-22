@@ -21,7 +21,7 @@ class Views::Controllers::Observations::Show::SpecimenPanelTest <
 
     html = render(panel_with(@obs))
 
-    assert_html(html, "#observation_specimen .panel-title", text: :SPECIMEN.l)
+    assert_html(html, "#observation_specimen .panel-title", text: :specimen.ti)
     assert_html(html, "#observation_specimen_available",
                 text: :show_observation_specimen_available.t)
   end
@@ -31,7 +31,7 @@ class Views::Controllers::Observations::Show::SpecimenPanelTest <
 
     html = render(panel_with(@obs))
 
-    assert_html(html, "#observation_specimen .panel-title", text: :SPECIMEN.l)
+    assert_html(html, "#observation_specimen .panel-title", text: :specimen.ti)
     assert_html(html, "#observation_specimen_available",
                 text: :show_observation_specimen_not_available.t)
   end

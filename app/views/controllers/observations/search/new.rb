@@ -15,7 +15,7 @@ module Views::Controllers::Observations::Search
     prop :local, _Boolean, default: true
 
     def view_template
-      add_new_title(:search_object, :OBSERVATIONS)
+      add_new_title(:search_object, :observations)
       container_class(:wide)
 
       div(id: "observations_search_container") do

@@ -10,7 +10,7 @@ module Views::Controllers::Herbaria
     end
 
     def view_template
-      add_new_title(:new_object, :HERBARIUM)
+      add_new_title(:new_object, :herbarium)
       add_context_nav(::Tab::Herbarium::FormNew.new(q_param: q_param))
 
       render(Views::Controllers::Herbaria::Form.new(

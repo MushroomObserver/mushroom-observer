@@ -79,7 +79,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
       variant: :strip,
       icon: :remove,
       icon_class: "text-danger",
-      name: :REMOVE.t,
+      name: :remove.ti,
       target: remove_path,
       confirm: :are_you_sure.l
     )

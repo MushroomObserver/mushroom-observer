@@ -77,9 +77,9 @@ class FormCheckboxCollapseTest < ComponentTestCase
   # resolved via .t by the underlying checkbox_field/FieldLabelRow --
   # not just an explicit String (#4687).
   def test_label_accepts_bare_symbol
-    html = render_collapse(label: :APPROVED)
+    html = render_collapse(label: :approved.ti)
 
-    assert_html(html, "label", text: :APPROVED.t)
+    assert_html(html, "label", text: :approved.ti)
   end
 
   private

@@ -16,7 +16,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
 
   def view_template
     Panel(panel_class: "show_images list-group text-center m-0") do |panel|
-      panel.with_heading { :IMAGES.t }
+      panel.with_heading { :images.ti }
       panel.with_heading_links { heading_links }
       panel.with_body { render_body }
     end

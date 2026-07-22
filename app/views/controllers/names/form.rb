@@ -43,7 +43,7 @@ module Views::Controllers::Names
     end
 
     def button_text
-      @model.new_record? ? :CREATE.l : :SAVE_EDITS.l
+      @model.new_record? ? :create.ti : :save_edits.ti
     end
 
     def render_admin_locked_checkbox
@@ -75,12 +75,12 @@ module Views::Controllers::Names
     def render_rank_and_status_fields
       div(class: "form-inline my-3") do
         select_field(:rank, rank_options,
-                     label: :Rank,
+                     label: :rank.ti,
                      wrap_class: "mr-4",
                      selected: @model.rank)
 
         select_field(:deprecated, status_options,
-                     label: :Status,
+                     label: :status.ti,
                      selected: (@model.deprecated || false).to_s)
       end
     end
@@ -99,7 +99,7 @@ module Views::Controllers::Names
 
     def render_author_field
       textarea_field(:author,
-                     label: :Authority,
+                     label: :authority.ti,
                      rows: 2) do |f|
         f.with_append do
           Help(element: :p, content: :form_names_author_help.l)
@@ -119,7 +119,7 @@ module Views::Controllers::Names
 
     def render_locked_rank_field
       read_only_field(:rank,
-                      label: :Rank,
+                      label: :rank.ti,
                       inline: true,
                       wrap_class: "mb-0",
                       text: :"Rank_#{@model.rank.to_s.downcase}".l)
@@ -127,15 +127,15 @@ module Views::Controllers::Names
 
     def render_locked_status_field
       read_only_field(:deprecated,
-                      label: :Status,
+                      label: :status.ti,
                       inline: true,
                       wrap_class: "mb-0",
-                      text: @model.deprecated ? :DEPRECATED.l : :ACCEPTED.l)
+                      text: @model.deprecated ? :deprecated.ti : :accepted.ti)
     end
 
     def render_locked_text_name_field
       read_only_field(:text_name,
-                      label: :Name,
+                      label: :name.ti,
                       inline: true,
                       wrap_class: "mb-0",
                       text: @name_string,
@@ -144,7 +144,7 @@ module Views::Controllers::Names
 
     def render_locked_author_field
       read_only_field(:author,
-                      label: :Authority,
+                      label: :authority.ti,
                       inline: true,
                       wrap_class: "mb-0",
                       text: @model.author)
@@ -152,7 +152,7 @@ module Views::Controllers::Names
 
     def render_citation_field
       textarea_field(:citation,
-                     label: :Citation,
+                     label: :citation.ti,
                      rows: 3) do |f|
         f.with_append do
           Help(element: :p,
@@ -197,7 +197,7 @@ module Views::Controllers::Names
 
     def status_options
       # Use strings because Phlex omits value attribute for boolean false
-      [[:ACCEPTED.l, "false"], [:DEPRECATED.l, "true"]]
+      [[:accepted.ti, "false"], [:deprecated.ti, "true"]]
     end
 
     def show_misspelling_fields?

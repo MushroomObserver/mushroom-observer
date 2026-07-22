@@ -17,10 +17,10 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "table.table-project-members")
 
       # Column headers
-      assert_includes(html, :NAME.t)
-      assert_includes(html, :TARGET_TYPE.t)
-      assert_includes(html, :TARGET.t)
-      assert_includes(html, :ACTIONS.t)
+      assert_includes(html, :name.ti)
+      assert_includes(html, :target_type.ti)
+      assert_includes(html, :target.ti)
+      assert_includes(html, :actions.ti)
 
       # Linked target cells (User-target row + Location-target row)
       assert_html(html, "td a[href='/users/#{@user.id}']")
@@ -42,7 +42,7 @@ module Views::Controllers::Projects::Aliases
       html = render_table(project_aliases: ProjectAlias.none)
 
       assert_html(html, "table##{Table::TABLE_ID}")
-      assert_html(html, "th", text: :NAME.t)
+      assert_html(html, "th", text: :name.ti)
       # No body rows
       assert_no_html(html, "tbody tr")
     end

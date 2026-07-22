@@ -5,10 +5,10 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    return if @obs.notes == ::Observation.no_notes
+    return if @obs.display_notes == ::Observation.no_notes
 
     Panel(panel_id: "observation_notes") do |panel|
-      panel.with_heading { :NOTES.l }
+      panel.with_heading { :notes.ti }
       panel.with_body { render_notes }
     end
   end
@@ -22,7 +22,7 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
       # ApplicationController resets the per-request Textile cache
       # before every action; this only needs to prime it.
       ::Textile.register_name(@obs.name)
-      render_note_values(@obs.notes)
+      render_note_values(@obs.display_notes)
     end
   end
 

@@ -882,11 +882,11 @@ class ProjectTest < UnitTestCase
   def test_member_status
     project = projects(:eol_project)
 
-    assert_equal(:OWNER.t, project.member_status(project.user))
+    assert_equal(:owner.ti, project.member_status(project.user))
     admin = (project.admin_group.users - [project.user]).first
-    assert_equal(:ADMIN.t, project.member_status(admin))
+    assert_equal(:admin.ti, project.member_status(admin))
     member = (project.user_group.users - project.admin_group.users).first
-    assert_equal(:MEMBER.t, project.member_status(member))
+    assert_equal(:member.ti, project.member_status(member))
     assert_nil(project.member_status(users(:zero_user)))
   end
 

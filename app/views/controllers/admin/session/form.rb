@@ -14,12 +14,12 @@ module Views::Controllers::Admin::Session
         autocompleter_field(
           :user,
           type: :user,
-          label: :LOGIN_NAME,
+          label: :login_name.ti,
           value: model.user,
           size: 42,
           autofocus: true
         )
-        submit(:SUBMIT.l, center: true)
+        submit(:submit.ti, center: true)
       end
     end
 

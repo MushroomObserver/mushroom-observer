@@ -83,6 +83,26 @@ class Views::Controllers::Observations::Show::NotesPanelTest < ComponentTestCase
     assert_not_includes(notes.text, "Other")
   end
 
+  # The primary observation of a multi-member occurrence renders the
+  # per-key notes merge, so a sibling's note value appears on the
+  # primary's panel alongside the primary's own.
+  def test_notes_merge_surfaces_sibling_values_for_primary
+    primary = observations(:detailed_unknown_obs)
+    sibling = observations(:coprinus_comatus_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red cap" })
+    sibling.update!(notes: { Substrate: "on oak wood" })
+    occ = Occurrence.create!(user: @user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+
+    html = render(panel_with(primary))
+    notes = Nokogiri::HTML.fragment(html).at_css("#observation_notes").text
+
+    assert_includes(notes, "red cap")      # primary's own value
+    assert_includes(notes, "on oak wood")  # inherited from the sibling
+  end
+
   private
 
   def panel_with(obs, user = @user)

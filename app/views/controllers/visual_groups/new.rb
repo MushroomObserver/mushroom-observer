@@ -7,7 +7,7 @@ module Views::Controllers::VisualGroups
     prop :visual_group, VisualGroup
 
     def view_template
-      add_new_title(:new_object, :VISUAL_GROUP)
+      add_new_title(:new_object, :visual_group)
 
       render(Form.new(@visual_group, visual_model: @visual_model))
       link_to("Back", visual_model_visual_groups_path(@visual_model))

@@ -17,8 +17,8 @@ module Views::Layouts
       # `Created at: <date>` / `Updated at: <date>` inside the
       # padded wrapper.
       assert_html(html, "div.p-3 p")
-      assert_includes(html, "#{:CREATED_AT.l}: #{obj.created_at.web_date}")
-      assert_includes(html, "#{:UPDATED_AT.l}: #{obj.updated_at.web_date}")
+      assert_includes(html, "#{:created_at.ti}: #{obj.created_at.web_date}")
+      assert_includes(html, "#{:updated_at.ti}: #{obj.updated_at.web_date}")
       # No user attribution, no view-stats wrapper class.
       assert_no_html(html, ".footer-view-stats")
       assert_no_html(html, "a[class^='user_link_']")

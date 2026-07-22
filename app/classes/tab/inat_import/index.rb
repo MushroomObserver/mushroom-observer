@@ -3,7 +3,7 @@
 # Link to the user's iNat imports index from the new-import form.
 class Tab::InatImport::Index < Tab::Base
   def title
-    :INAT_IMPORTS.t
+    :inat_imports.ti
   end
 
   def path

@@ -53,8 +53,8 @@ class SequencesController < ApplicationController
     [
       ["created_at",  :sort_by_created_at.t],
       ["updated_at",  :sort_by_updated_at.t],
-      ["user",        :USER.t],
-      ["observation", :OBSERVATION.t]
+      ["user",        :user.ti],
+      ["observation", :observation.ti]
     ].freeze
   end
 
@@ -333,7 +333,7 @@ class SequencesController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :add_object.t(type: :SEQUENCE)
+      :add_object.t(type: :sequence)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
                          object: @sequence, mode: :edit,

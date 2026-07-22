@@ -27,7 +27,7 @@ module Views::Controllers::Projects::Violations
 
     def view_template
       h4 do
-        trusted_html("#{:PROJECT.l}: ")
+        trusted_html("#{:project.ti}: ")
         Link(type: :object, object: @project)
       end
 

@@ -3,7 +3,7 @@
 # Sidebar indexes nav: locations index.
 class Tab::Sidebar::Indexes::Locations < Tab::Base
   def title
-    :LOCATIONS.t
+    :locations.ti
   end
 
   def path

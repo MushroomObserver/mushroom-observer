@@ -10,7 +10,7 @@ module Views::Controllers::FieldSlips
     prop :notice, _Nilable(String), default: nil
 
     def view_template
-      add_page_title("#{:FIELD_SLIP.t}: #{@field_slip.code}")
+      add_page_title("#{:field_slip.ti}: #{@field_slip.code}")
       add_edit_icons(@field_slip, current_user)
       container_class(:full)
 

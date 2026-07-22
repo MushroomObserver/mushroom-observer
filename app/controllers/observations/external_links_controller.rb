@@ -242,11 +242,11 @@ module Observations
     def modal_title
       case action_name
       when "new", "create"
-        :add_object.t(type: :EXTERNAL_LINK)
+        :add_object.t(type: :external_link)
       when "edit", "update"
         render_to_string(Views::Layouts::Header::ObjectTitle.new(
                            object: @external_link, mode: :edit,
-                           title: :EXTERNAL_LINK.l
+                           title: :external_link.ti
                          ))
       end
     end

@@ -23,11 +23,11 @@ module Views::Controllers::Names::Trackers
     def render_submit_buttons
       div(class: "text-center my-3") do
         if model.persisted?
-          submit(:UPDATE.t)
+          submit(:update.ti)
           whitespace
-          submit(:DISABLE.t)
+          submit(:disable.ti)
         else
-          submit(:ENABLE.t)
+          submit(:enable.ti)
         end
       end
     end

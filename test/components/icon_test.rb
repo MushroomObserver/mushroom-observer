@@ -21,15 +21,15 @@ class LinkIconTest < ComponentTestCase
 
   def test_title_adds_tooltip_and_sr_only_label
     html = render(Components::Icon.new(
-                    type: :edit, title: :EDIT.l,
+                    type: :edit, title: :edit.ti,
                     class: "text-primary"
                   ))
 
     assert_html(html,
                 "span.glyphicon-edit.link-icon.text-primary" \
-                "[title='#{:EDIT.l}'][data-toggle='tooltip']")
+                "[title='#{:edit.ti}'][data-toggle='tooltip']")
     # Screen-reader label so the icon-only link has an accessible name.
-    assert_html(html, "span.sr-only", text: :EDIT.l)
+    assert_html(html, "span.sr-only", text: :edit.ti)
   end
 
   def test_caller_data_attrs_merge_with_tooltip_data

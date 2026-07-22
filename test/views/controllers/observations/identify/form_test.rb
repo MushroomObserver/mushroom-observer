@@ -57,8 +57,8 @@ module Views::Controllers::Observations::Identify
       assert_no_html(html, "option[value='region'][selected]")
 
       # Submit buttons
-      assert_html(html, "button[type='submit']", text: :SEARCH.l)
-      assert_html(html, "button[type='submit']", text: :CLEAR.l)
+      assert_html(html, "button[type='submit']", text: :search.ti)
+      assert_html(html, "button[type='submit']", text: :clear.ti)
     end
 
     def test_renders_with_region_filter

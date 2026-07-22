@@ -3,7 +3,7 @@
 # A single row in the Names index list.
 #
 # Each row carries:
-#   - `Components::IdBadge` with the Name's id
+#   - `Components::IDBadge` with the Name's id
 #   - the localized display-name link (with a Stimulus
 #     `clipboard` controller wrapped around the name + a
 #     copy-button so users can clipboard the name string)
@@ -31,14 +31,14 @@ class Views::Controllers::Names::Index::Row < Views::Base
 
   def render_id_badge
     span do
-      IdBadge(object: @name, extra_class: "rss-id mr-4")
+      IDBadge(object: @name, extra_class: "rss-id mr-4")
     end
   end
 
   def render_clipboard_wrapper
     span(
       data: { controller: "clipboard",
-              clipboard_copied_value: :COPIED.l }
+              clipboard_copied_value: :copied.ti }
     ) do
       render_display_name_link
       render_copy_button
@@ -60,7 +60,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
       class: "py-0 link-normal opacity-75",
       role: "button",
       data: { toggle: "tooltip", placement: "bottom",
-              title: :COPY_THIS_NAME.l,
+              title: :copy_this_name.ti,
               action: "clipboard#copy" }
     ) { Icon(type: :copy) }
   end

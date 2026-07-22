@@ -100,7 +100,9 @@ module Views::Controllers::Comments
     end
 
     def target_type
-      span(class: "small") { plain(@comment.target.class.name.to_sym.t) }
+      span(class: "small") do
+        plain(@comment.target.class.name.underscore.to_sym.ti)
+      end
     rescue StandardError
       plain(:runtime_object_deleted.to_s)
     end
@@ -117,7 +119,7 @@ module Views::Controllers::Comments
 
     def render_author_span
       span(class: "comment-author text-nowrap") do
-        plain("#{:BY.t}: ")
+        plain("#{:by.ti}: ")
         if @editable
           Link(type: :user, user: @comment.user)
         else

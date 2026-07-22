@@ -46,7 +46,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     return unless visible_sites.any?
 
     div do
-      plain("#{:SHARED_WITH.l}: ")
+      plain("#{:shared_with.ti}: ")
       visible_sites.each { |site_name, link| render_badge(site_name, link) }
     end
   end

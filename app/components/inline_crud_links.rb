@@ -324,7 +324,7 @@ class Components::InlineCRUDLinks < Components::Base
 
   # ---- :destroy_name handlers -------------------------------
 
-  def name_remove = :REMOVE.l
+  def name_remove = :remove.ti
   def name_destroy_object = :destroy_object.t(type: @target.type_tag)
 
   # ---- :destroy_class handlers ------------------------------

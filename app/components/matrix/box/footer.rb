@@ -46,7 +46,7 @@ class Components::Matrix::Box
         br
         plain("#{:list_users_contribution.l}: #{user.contribution}")
         br
-        link_to(:OBSERVATIONS.l, observations_path(by_user: user.id))
+        link_to(:observations.ti, observations_path(by_user: user.id))
       end
     end
 
@@ -70,7 +70,7 @@ class Components::Matrix::Box
       panel.with_footer(classes: "text-center") do
         Button(
           type: :post,
-          name: :EXCLUDE.t,
+          name: :exclude.ti,
           target: exclude_observation_project_update_path(
             project_id: @project.id, id: @data[:what].id
           ),

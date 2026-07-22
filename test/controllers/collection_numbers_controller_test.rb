@@ -10,7 +10,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_page_title(:COLLECTION_NUMBERS.l)
+    assert_page_title(:collection_numbers.ti)
   end
 
   def test_index_with_query
@@ -21,7 +21,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { q: @controller.q_param(query) })
 
     assert_response(:success)
-    assert_page_title(:COLLECTION_NUMBERS.l)
+    assert_page_title(:collection_numbers.ti)
     assert_displayed_filters("#{:query_by_users.l}: Rolf Singer")
     # In results, expect 1 row per collection_number.
     assert_select("#results tr", query.num_results)
@@ -35,7 +35,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_page_title(:COLLECTION_NUMBERS.l)
+    assert_page_title(:collection_numbers.ti)
     assert(
       collection_number_links.first[:href].
         start_with?(collection_number_path(last_number.id)),
@@ -52,7 +52,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { observation: obs.id })
 
     assert_no_flash
-    assert_page_title(:COLLECTION_NUMBERS.l)
+    assert_page_title(:collection_numbers.ti)
     assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
   end
 
@@ -64,7 +64,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { observation: obs.id })
 
     assert_no_flash
-    assert_page_title(:COLLECTION_NUMBERS.l)
+    assert_page_title(:collection_numbers.ti)
     assert_displayed_filters("#{:query_observations.l}: #{obs.id}")
   end
 
@@ -75,7 +75,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login
     get(:index, params: { observation: obs.id })
 
-    assert_page_title(:COLLECTION_NUMBERS.l)
+    assert_page_title(:collection_numbers.ti)
     assert_flash_text(/no matching collection numbers found/i)
   end
 
@@ -89,7 +89,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { q: { model: :CollectionNumber, pattern: pattern } })
 
     assert_response(:success)
-    assert_page_title(:COLLECTION_NUMBERS.l)
+    assert_page_title(:collection_numbers.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     # Results should have 2 links per collection_number
     # a show link, and (because logged in user created the numbers)

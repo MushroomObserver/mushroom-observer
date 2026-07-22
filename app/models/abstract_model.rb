@@ -95,11 +95,11 @@ class AbstractModel < ApplicationRecord
   # `document_title` — plain text for the browser tab `<title>`.
   # Defaults to the same label (it's already plain).
   def page_title(_user = nil)
-    :"#{type_tag.to_s.upcase}".l
+    type_tag.ti
   end
 
   def document_title
-    :"#{type_tag.to_s.upcase}".l
+    type_tag.ti
   end
 
   ##############################################################################
@@ -325,7 +325,7 @@ class AbstractModel < ApplicationRecord
         out << message
       else
         name = attribute.to_s.to_sym.l
-        obj = type_tag.to_s.upcase_first.to_sym.l
+        obj = type_tag.ti
         out << "#{obj} #{name} #{message}."
       end
     end

@@ -58,7 +58,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @option options [Boolean] :monospace add monospace font class
     # All other wrapper options same as text_field
     # @yield [field_component] Optional block to set slots:
-    #   `with_between`, `with_append`, `with_help`
+    #   `with_between`, `with_prepend` (between label row and field),
+    #   `with_append`, `with_help`
     def textarea_field(field_name, **options)
       options = auto_label_for_prefs(field_name, options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
@@ -438,7 +439,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # button shows "Updating" while in-flight; anything else shows
     # "Submitting".
     def default_submits_with(value)
-      value == :UPDATE.l ? :UPDATING.l : :SUBMITTING.l
+      value == :update.ti ? :updating.ti : :submitting.ti
     end
 
     def submit_merged_options(options, **opts)

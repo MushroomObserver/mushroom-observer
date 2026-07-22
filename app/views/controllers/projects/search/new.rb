@@ -11,7 +11,7 @@ module Views::Controllers::Projects::Search
     prop :local, _Boolean, default: true
 
     def view_template
-      add_new_title(:search_object, :PROJECTS)
+      add_new_title(:search_object, :projects)
       container_class(:wide)
 
       div(id: "projects_search_container") do

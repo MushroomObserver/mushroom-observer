@@ -81,7 +81,7 @@ module Views::Controllers::Observations::Namings
     end
 
     def button_name
-      @create ? :CREATE.l : :SAVE_EDITS.l
+      @create ? :create.ti : :save_edits.ti
     end
 
     def render_name_feedback

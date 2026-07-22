@@ -40,13 +40,13 @@ module Views::Controllers::InatImports
         if @inat_import.Done?
           Button(
             type: :get,
-            name: :RESULTS.l,
+            name: :results.ti,
             target: results_path
           )
         else
           Button(
             type: :put,
-            name: :CANCEL.l,
+            name: :cancel.ti,
             target: inat_import_cancel_path(id: @inat_import)
           )
         end
@@ -75,7 +75,7 @@ module Views::Controllers::InatImports
     end
 
     def render_status_line
-      span(class: "font-weight-bold") { "#{:STATUS.l}: " }
+      span(class: "font-weight-bold") { "#{:status.ti}: " }
       span { plain(@inat_import.state.to_s) }
     end
 
@@ -137,7 +137,7 @@ module Views::Controllers::InatImports
     def render_error_line
       return if @inat_import.response_errors.blank?
 
-      span(class: "font-weight-bold") { plain("#{:ERRORS.l}: ") }
+      span(class: "font-weight-bold") { plain("#{:errors.ti}: ") }
     end
 
     def show_ignored_section?

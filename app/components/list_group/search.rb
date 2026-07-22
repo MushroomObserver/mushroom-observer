@@ -103,7 +103,7 @@ class Components::ListGroup::Search < Components::ApplicationForm
     # form-group wrapper — matched here with `wrap_class:` so the
     # margin sits on `.form-group.dropdown`, not on the `<input>`.
     autocompleter_field(
-      "name", type: :name, label: :SEARCH, wrap_class: "mb-2",
+      "name", type: :name, label: :search.ti, wrap_class: "mb-2",
               data: {
                 search_status_target: "input",
                 action: [

@@ -32,7 +32,7 @@ module Views::Controllers::Projects::Members
             inline: true,
             size: 40
           )
-          submit(:ADD.t, class: "ml-3")
+          submit(:add.ti, class: "ml-3")
         end
       end
     end

@@ -14,7 +14,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
 
   def view_template
     Panel(panel_id: "observation_specimen") do |panel|
-      panel.with_heading { :SPECIMEN.l }
+      panel.with_heading { :specimen.ti }
       panel.with_body { render_body }
     end
   end

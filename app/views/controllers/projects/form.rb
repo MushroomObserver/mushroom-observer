@@ -63,19 +63,19 @@ module Views::Controllers::Projects
 
     def render_summary
       textarea_field(:summary, rows: 5,
-                               label: :SUMMARY) do |f|
+                               label: :summary.ti) do |f|
         f.with_help { :shared_textile_help.l }
       end
     end
 
     def render_field_slip_prefix
       text_field(:field_slip_prefix,
-                 label: :FIELD_SLIP_PREFIX)
+                 label: :field_slip_prefix.ti)
     end
 
     def render_location
       autocompleter_field(:place_name, type: :location,
-                                       label: :WHERE)
+                                       label: :where.ti)
     end
 
     def render_dates_section
@@ -125,7 +125,7 @@ module Views::Controllers::Projects
     end
 
     def submit_text
-      model.persisted? ? :SAVE_EDITS.l : :CREATE.l
+      model.persisted? ? :save_edits.ti : :create.ti
     end
   end
 end
