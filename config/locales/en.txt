@@ -409,7 +409,6 @@
   editors: editors
   email: email
   emails: emails
-  email_address: email address
   email_addresss: email addresses
   field_slip_prefix: field slip prefix
   filename: filename
@@ -641,7 +640,6 @@
   destroy_object: Destroy [TYPE]
   edit_object: Edit [TYPE]
   list_objects: List [TYPES]
-  remove_object: Remove [TYPE]
   remove_objects: Remove [TYPES]
   update_object: Update [TYPE]
   show_all: Show All
@@ -653,7 +651,6 @@
   map_legend_tentative: Tentative
   map_legend_disputed: Disputed (≤0%)
   map_legend_mixed: Mixed consensus
-  map_legend_location_only: Location only (no observations)
   map_cap_banner: Showing the first [loaded] of [total] observations. Zoom in or narrow your filter to see the rest.
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
@@ -1383,7 +1380,6 @@
 
   # account/email_new_password
   email_new_password_title: Email New Password
-  email_new_password_login: Login
 
   # observer/email_merge_request
   email_merge_request_title: Send [TYPE] Merge Request
@@ -2056,11 +2052,9 @@
   show_name_latest_review: "Latest review: [date] by [user]"
   show_name_most_confident: Most Confident Observations
   show_name_previous_version: Previous Version
-  show_name_other_versions: Other Versions
   show_name_creator: First person to use this name on MO
   show_name_editor: "[:editors.ti]"
   show_name_editors: "[:editors.ti]"
-  show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it. Confidence value is for __this__ name, not the consensus name.)"
   show_name_nomenclature: Nomenclature
   show_name_classification: Classification
   show_name_general_description: "[:form_names_gen_desc]"
@@ -2190,7 +2184,6 @@
 
   # locations/show_past_location
   show_past_location_title: "[:version.ti] [num]: [name]"
-  show_past_location_other_versions: Other Versions
   show_past_location_no_version: No version specified
 
   # locations/show_past_location_description
@@ -3044,9 +3037,7 @@
   merge_descriptions_move_help: This will move the source description into a synonym. It will just copy it if you elect not to delete the old description. If you wish to merge with an existing description in the other name, you must first move your description into that name, then select [:show_description_merge] again from there.
 
   # species_list/name_lister
-  name_lister_bad_browser: This page will not work on your browser, sorry!
   name_lister_bad_submit: Invalid commit button '[BUTTON]'.
-  name_lister_charset: Character Encoding
   name_lister_charset_help: "(Try changing this if authors get garbled.)"
   name_lister_genera: Genera
   name_lister_help: "*Create List:* Click a genus in the first column to pull up a list of species in that genus. Select any of these taxa and press return or double-click to add species to your list. Accepted names are in boldface; deprecated names are followed by one or more accepted alternatives. You may choose any. To remove a name, select it in the third column, and press delete or double-click. (You may also use arrows to navigate, or type partial names to search within a column.)\n\n*Save List:* When you are finished, click any of the buttons at the bottom of the page. \"Create [:species_list]\" takes you back to the old creation form, where you will be able to enter date, location, notes, etc. before saving the list.\n\n*Reports :* The plain text report gives you a simple list of taxa with no formatting. Rich text can be used to import the list into Microsoft Word complete with authors and all the formatting intact. Spreadsheet produces a CSV file, with name, author, citation, and accepted columns. Common names are not available yet. Reports should automatically download in a separate tab or window; if not, go to your browser's File menu and click 'Save As'."
@@ -3210,7 +3201,6 @@
   edit_translations_original_text: Original Text
   edit_translations_old_versions: Old Versions
   edit_translations_full_text: full text
-  edit_translations_no_versions: No old versions.
   edit_translations_singular: singular form
   edit_translations_plural: plural form
   edit_translations_lowercase: all lowercase as for end of sentence
@@ -3259,15 +3249,6 @@
   add_project_no_location: No location matching '[where]' found.
   add_project_need_title: Projects must have a title.
   add_project_success: Project was successfully created.
-
-  # account/add_user_to_group
-  add_user_to_group_already: "[user] is already a member of [group]."
-  add_user_to_group_group: Group name
-  add_user_to_group_no_group: Unable to find the group, '[group]'.
-  add_user_to_group_no_user: Unable to find the [:user], '[user]'.
-  add_user_to_group_success: "[user] added to [group]."
-  add_user_to_group_title: Add [:user] to Group
-  add_user_to_group_user: "[:user.ti] name"
 
   # admin_request/author_request emails
   admin_request_change_member_status: Change [:user]'s status
@@ -3521,8 +3502,6 @@
   email_subject_comment: "[:comment.ti] About [name]"
   email_subject_commercial_inquiry: Commercial Inquiry About [Name]
   email_subject_consensus_change: Consensus Changed from [old] to [new]
-  email_subject_denied: "[:user.ti] Creation Blocked"
-  email_subject_features: New [:app_title] Features
   email_subject_location_change: "[name] Has Been Changed"
   email_subject_naming_for_observer: Research Request
   email_subject_naming_for_tracker: Naming Notification - [name]
@@ -3538,9 +3517,6 @@
   email_subject_observation_change: "[:observation.ti] Changed, [name]"
   email_subject_observation_destroy: "[:observation.ti] Destroyed, [name]"
   email_subject_observation_question: Question About [name]
-  email_subject_publish_name: Name Published
-  email_subject_registration: "[name] Registration Verification"
-  email_subject_update_registration: "[name] Registration Update"
   email_subject_verify: Email Verification
   email_subject_verify_api_key: Activate API Key
   email_subject_webmaster_question: Question From [user]
@@ -3556,7 +3532,6 @@
   email_field_no_specimen_available: Specimen is no longer available
   email_field_north: "[:north.ti] edge"
   email_field_old_name: Old [:name]
-  email_field_published: Published by
   email_field_removed_images: Removed image(s)
   email_field_south: "[:south.ti] edge"
   email_field_specimen_available: Specimen is now available
@@ -3568,7 +3543,6 @@
   # "Helpful" links at the bottom of the email.
   email_links_change_prefs: Change your preferences
   email_links_disable_tracking: Disable tracking for this [type]
-  email_links_email_publisher: Send email to the publisher
   email_links_latest_changes: Latest changes at [:app_title]
   email_links_not_interested: I'm not interested in this [type]
   email_links_post_comment: Post a [:comment]
@@ -3599,7 +3573,6 @@
   email_commercial_intro: "h2. *Commercial Inquiry*\n\n[user] ([email]) asked the [:app_title] website to forward the following commercial inquiry to you about your image [image]:"
   email_consensus_change_intro: "h2. *Consensus Change*\n\nConsensus has changed for observation #[id]:"
   email_add_herbarium_record_not_curator_intro: "h2. *Fungarium Record Added By Non-Curator*\n\nThe user, [login], added the fungarium record, [herbarium_label], to the fungarium, [herbarium_name], which you curate."
-  email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold identifier : [old_identifier]\nnew identifier : [new_identifier]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nnamings : [namings]\nshow name : [show_url]\nedit name : [edit_url]"
   email_location_change: "User made nontrivial change to a location:\n\nuser : [user]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nshow location : [show_url]\nedit location : [edit_url]"
   email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nshow url : [show_url]\nedit url : [edit_url]"
@@ -3622,9 +3595,6 @@
   email_object_change_reason_interest: You received this email because you expressed interest in this [type].
   email_observation_destroyed_intro: h2. *Observation Destroyed*
   email_observation_question_intro: "h2. *Question from Another User*\n\n[user] ([email]) asked the [:app_title] website to forward the following question to you about your observation <u>[name]</u>:"
-  email_publish_name_intro: "h2. *Draft of Name Has Been Published*\n\nA description of a name has been published on the [:app_title] website. You are receiving this email since you are listed as either an author for this taxon or as a reviewer on the site."
-  email_registration_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and intended to register [how_many] attendee(s) for the [name]:\n\n[link]"
-  email_update_registration_intro: "h2. *Hello [user]*\n\nYour registration for the [name] has been updated from\n\n[before]\n\n\nto\n\n\n[after]"
   email_user_question_intro: "h2. *Question from Another User*\n\n[user] ([email]) asked the [:app_title] website to forward the following email to you:"
   email_verify_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and activate your [:app_title] account:\n\n[link]"
   email_verify_api_key_intro: "h2. *Hello [user]*\n\nThe application \"[app]\" (associated with user \"[app_user]\") has requested access to your [:app_title] account. If you recognize this application and wish to give them permission to post observations, etc. in your name, all you have to do is click on the activation link below to activate the API key they just created. Note that you can review your list of API keys at any time by visiting the [:account_api_keys_title] from your \"[:app_preferences]\" page.\n\nActivate Key: [activate_link]\n[:account_api_keys_link]: [manager_link]\n\nTo report a suspicious access request, just respond to this email."
@@ -3986,20 +3956,16 @@
   validate_too_long: "[Field] must be less than [max] characters long."
   validate_too_long_or_short: "[Field] must be [min] to [max] characters long."
   validate_too_many_characters: "[Field] has too many characters."
-  validate_too_short: "[Field] must be at least [min] characters long."
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
   validate_user_selection: You selected
   validate_today: today is
 
   # One-time-use error messages.
-  validate_image_content_type_images_only: You can only upload [:images].
-  validate_image_file_missing: Had problems uploading [:image].
   validate_image_file_too_big: We can't handle [:images] that big. Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right. Please try uploading your image again.
   validate_invalid_year: Year is invalid. Should be between 1500 and present.
   validate_future_time: Time travel is not allowed; use a past date or the current date.
-  validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
   validate_user_email_mismatch: Your email addresses don't match. Please check for a typo.
@@ -4013,11 +3979,8 @@
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
   validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
-  validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
-  validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
   validate_image_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_image_user_missing: "[:validate_missing(field=:user)]"
-  validate_image_when_missing: "[:validate_missing(field=:date)]"
   validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_interest_user_missing: "[:validate_missing(field=:user)]"
   validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
@@ -4025,12 +3988,10 @@
   validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
   validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
   validate_location_north_too_high: "[:validate_too_large(field=:latitude,max=90)]"
-  validate_location_search_name_too_long: "[:validate_too_long(field=''search_name'',max=200)]"
   validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
   validate_location_user_missing: "[:validate_missing(field=:user)]"
   validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
   validate_name_author_too_long: "[:validate_too_many_characters(field=:authority)]"
-  validate_name_shorten: Shorten [:form_names_text_name] and/or [:authority.ti].
   validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
   validate_name_use_first_author: Use the first author followed by “et al.” per <a href="https://www.iapt-taxon.org/nomen/main.php?page=art46" target="_new">ICN Recommendation 46C.2</a>
   validate_name_user_missing: "[:validate_missing(field=:user)]"
@@ -4040,19 +4001,12 @@
   validate_name_equivalent_exists: "Equivalent Name already exists"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
   validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
-  validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"
-  validate_naming_reason_reason_invalid: "[:validate_invalid(field=''reason_code'')]"
   validate_naming_user_missing: "[:validate_missing(field=:user)]"
   validate_notification_user_missing: "[:validate_missing(field=:user)]"
   validate_observation_user_missing: "[:validate_missing(field=:user)]"
-  validate_observation_when_missing: "[:validate_missing(field=:date)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
-  validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
-  validate_project_ends_before_start: End date is before the start date
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-  validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"
-  validate_project_user_missing: "[:validate_missing(field=:user)]"
   validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
   validate_sequence_accession_unique: "[:accessions.ti] for an [:observation.ti] must be unique"
@@ -4172,7 +4126,6 @@
   runtime_image_uploaded: Uploaded image '[name]'.
   runtime_index_no_at_location: No [types] at [location].
   runtime_index_no_by_rss_log: No [types] have had any recent activity.
-  runtime_index_no_for_object: No [types] for this object.
   runtime_index_no_for_user: No [types] for [user].
   runtime_index_no_in_species_list: No [types] in [name].
   runtime_index_no_inside_observation: "Observation #[id] has no [types]."
@@ -4186,7 +4139,6 @@
   runtime_login_failed: Login unsuccessful.
   runtime_login_success: Login successful.
   runtime_map_nothing_to_map: Nothing to map.
-  runtime_name_in_use_with_notes: The name '[name]' is already in use and [other] has notes.
   runtime_no_conditions: You didn't specify any conditions!
   runtime_no_upload_image: Had problems uploading image '[name]'.
   runtime_object_deleted: This object has been deleted.
