@@ -120,7 +120,7 @@ class Components::Matrix::Table < Components::Base
   private
 
   def render_cached_boxes
-    @batched_store = BatchedCacheStore.new(Rails.cache, cacheable_keys)
+    @batched_store = build_batched_store
 
     @objects.each do |object|
       if cacheable_render?(object)
@@ -146,6 +146,16 @@ class Components::Matrix::Table < Components::Base
     # of a stale, already-flushed wrapper.
     @batched_store&.flush_writes!
     @batched_store = nil
+  end
+
+  # Skip the batched store (and its upfront read_multi) entirely when
+  # caching is off -- `low_level_cache` (phlex-rails) already yields
+  # unconditionally in that case and never touches `cache_store`, so
+  # building it here would be a pure-waste DB round trip.
+  def build_batched_store
+    return unless Rails.application.config.action_controller.perform_caching
+
+    BatchedCacheStore.new(Rails.cache, cacheable_keys)
   end
 
   def cacheable_keys

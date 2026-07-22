@@ -475,4 +475,34 @@ class MatrixTableTest < ComponentTestCase
       "or a later #cache_store call would incorrectly reuse it"
     )
   end
+
+  def test_render_cached_boxes_skips_the_batched_read_when_caching_is_off
+    obs = observations(:coprinus_comatus_obs)
+    obs.thumb_image.update_column(:transferred, true)
+    component = Components::Matrix::Table.new(
+      objects: [obs], user: @user, cached: true
+    )
+    spy = CountingCacheStore.new(ActiveSupport::Cache::MemoryStore.new)
+
+    original_cache = Rails.cache
+    original_perform_caching =
+      Rails.application.config.action_controller.perform_caching
+    begin
+      Rails.cache = spy
+      Rails.application.config.action_controller.perform_caching = false
+      render(component)
+    ensure
+      Rails.cache = original_cache
+      Rails.application.config.action_controller.perform_caching =
+        original_perform_caching
+    end
+
+    assert_equal(
+      0, spy.read_multi_calls,
+      "perform_caching = false means low_level_cache never touches " \
+      "cache_store -- building the batched store anyway would be a " \
+      "wasted read_multi on every render"
+    )
+    assert_equal(0, spy.write_multi_calls)
+  end
 end

@@ -26,13 +26,13 @@ class Components::Matrix::Table::BatchedCacheStoreTest < UnitTestCase
     def read_multi(*keys, **options)
       @read_multi_calls += 1
       @read_multi_options = options
-      @real_store.read_multi(*keys)
+      @real_store.read_multi(*keys, **options)
     end
 
     def write_multi(hash, **options)
       @write_multi_calls += 1
       @write_multi_options = options
-      @real_store.write_multi(hash)
+      @real_store.write_multi(hash, **options)
     end
 
     delegate :read, to: :@real_store
