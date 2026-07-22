@@ -48,6 +48,23 @@ class Image::Processor::FileTransferTest < UnitTestCase
     )
   end
 
+  def test_copy_file_to_server_ssh_type_raises_rsync_error_with_detail
+    # No local source file exists, so the real rsync exits non-zero; the
+    # failure must raise RsyncError carrying the exit code and stderr,
+    # never swallow it as a bare false.
+    fake_data = { ssh_server: { type: "ssh", path: remote_server_path(1) } }
+
+    error = Image::Processor.stub(:image_server_data, fake_data) do
+      assert_raises(Image::Processor::FileTransfer::RsyncError) do
+        Image::Processor::FileTransfer.copy_file_to_server(
+          :ssh_server, "thumb/does-not-exist.jpg"
+        )
+      end
+    end
+
+    assert_match(/rsync exited \d+:/, error.message)
+  end
+
   def test_copy_file_to_server_unknown_type_raises
     fake_data = { weird: { type: "ftp", path: "/tmp" } }
 
