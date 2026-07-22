@@ -450,6 +450,13 @@ automatic template-digest busting. If you're editing `Matrix::Box`'s
 rendering with caching toggled on, remember to bump `CACHE_VERSION`
 or you'll see stale HTML for previously-cached rows.
 
+Because the store is a real database table now, neither restarting
+the server nor toggling `bin/rails dev:cache` off and back on clears
+it (`dev:cache`'s only side effect is `tmp:clear`, which doesn't touch
+`cache_development`). If you need a clean slate -- e.g. you forgot to
+bump `CACHE_VERSION` and want to confirm that's really the cause --
+run `Rails.cache.clear` from `bin/rails console`.
+
 ## Other
 
 You probably need to generate a new development master key (see below)
