@@ -56,7 +56,7 @@ class I18n::Backend::DbFallback
 
   # Falls back to the official (English) locale's text when this locale
   # has no override of its own -- matches the fallback merge
-  # LanguageExporter has always baked into every locale's regenerated
+  # Language::Exporter has always baked into every locale's regenerated
   # files (see Language#localization_strings/merge_localization_strings_into).
   #
   # One query, not two: a naive `language.translation_strings.find_by`

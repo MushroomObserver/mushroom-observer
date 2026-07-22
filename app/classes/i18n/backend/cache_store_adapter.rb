@@ -28,7 +28,7 @@ class I18n::Backend::CacheStoreAdapter
   end
 
   # Not part of KeyValue's own #[]/#[]= contract -- exposed so
-  # LanguageExporter#strip (lib/tasks/lang.rake's strip step) can evict an
+  # Language::Exporter#strip (lib/tasks/lang.rake's strip step) can evict an
   # exact stripped tag's cache entry. Solid Cache has no delete_matched
   # (see #4807), only exact-key delete.
   delegate :delete, to: :@store

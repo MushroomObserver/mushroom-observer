@@ -23,7 +23,7 @@ class I18n::Backend::DbFallbackTest < UnitTestCase
   end
 
   # Greek has no override for "three" -- only English (official) does.
-  # Matches the fallback merge LanguageExporter has always baked into
+  # Matches the fallback merge Language::Exporter has always baked into
   # every locale's regenerated files.
   def test_lookup_falls_back_to_official_when_locale_lacks_override
     assert_equal("three", @backend.send(:lookup, :el, "mo.three", [], {}))

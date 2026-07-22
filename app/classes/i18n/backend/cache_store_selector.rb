@@ -6,7 +6,7 @@
 # config/environments/test.rb's config.cache_store = :null_store). The
 # i18n cache backend is load-bearing (every I18n.t/.l call goes through
 # it), unlike a disposable fragment cache, so it can never silently
-# become a no-op: several tests (LanguageExporterTest, PatternSearchTest,
+# become a no-op: several tests (Language::ExporterTest, PatternSearchTest,
 # HerbariumRecordTest) call I18n.backend.store_translations /
 # TranslationString.store_localizations and then assert the write is
 # visible through I18n.t -- a NullStore-backed cache would make that

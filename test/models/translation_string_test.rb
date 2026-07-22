@@ -74,7 +74,7 @@ class TranslationStringTest < UnitTestCase
   end
 
   # The actual production bug: rename_tags itself is fine (see above),
-  # but LanguageExporter#strip deletes any translation_strings row
+  # but Language::Exporter#strip deletes any translation_strings row
   # whose tag isn't in en.txt -- and DB-only tags like black_on_white
   # were, by design, never in en.txt. So any lang:update run (deploy,
   # or manual) after the rename strips every language's row for a
@@ -95,7 +95,7 @@ class TranslationStringTest < UnitTestCase
 
     assert_empty(
       TranslationString.where(tag: "db_only_tag_not_in_en_txt"),
-      "LanguageExporter#strip deletes rows for any tag missing from " \
+      "Language::Exporter#strip deletes rows for any tag missing from " \
       "en.txt -- this is exactly what happened to black_on_white's " \
       "non-English translations after the #4844 rename"
     )

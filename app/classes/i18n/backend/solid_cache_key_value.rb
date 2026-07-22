@@ -11,7 +11,7 @@ class I18n::Backend::SolidCacheKeyValue < I18n::Backend::KeyValue
   end
 
   # Evicts one exact tag's cache entry for one locale -- used by
-  # LanguageExporter#strip (lib/tasks/lang.rake), which knows exactly
+  # Language::Exporter#strip (lib/tasks/lang.rake), which knows exactly
   # which tags it's removing. Solid Cache has no delete_matched (#4807),
   # only exact-key delete -- verified empirically that a stored "mo:"
   # tag's key is "<locale>.<namespace>.<tag>" (matches lookup's own

@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class LanguageExporterTest < UnitTestCase
+class Language::ExporterTest < UnitTestCase
   attr_accessor :tmp_dir
 
   def setup
@@ -31,17 +31,17 @@ class LanguageExporterTest < UnitTestCase
     assert_invalid(:validate_tag, "one two")
     assert_invalid(:validate_tag, "one[two]")
     assert_invalid(:validate_tag, "pfüssel")
-    assert_valid(:validate_string, "blah")
-    assert_invalid(:validate_string, "yes")
-    assert_invalid(:validate_string, "NO")
-    assert_valid(:validate_string, "one 2 three")
-    assert_valid(:validate_string, "one-two, three!")
-    assert_valid(:validate_string, '"anything goes [here] # wow"')
-    assert_valid(:validate_string, "'anything goes [here] # wow'")
-    assert_invalid(:validate_string, "[:blah]")
-    assert_valid(:validate_string, '"[:blah]"')
-    assert_valid(:validate_string, "tags[:blah]")
-    assert_invalid(:validate_string, "Data: values, are, here")
+    assert_valid(:validate_string?, "blah")
+    assert_invalid(:validate_string?, "yes")
+    assert_invalid(:validate_string?, "NO")
+    assert_valid(:validate_string?, "one 2 three")
+    assert_valid(:validate_string?, "one-two, three!")
+    assert_valid(:validate_string?, '"anything goes [here] # wow"')
+    assert_valid(:validate_string?, "'anything goes [here] # wow'")
+    assert_invalid(:validate_string?, "[:blah]")
+    assert_valid(:validate_string?, '"[:blah]"')
+    assert_valid(:validate_string?, "tags[:blah]")
+    assert_invalid(:validate_string?, "Data: values, are, here")
     assert_valid(:validate_square_brackets, "this is right")
     assert_valid(:validate_square_brackets, "this is [good] right")
     assert_valid(:validate_square_brackets, "this is [:good] right")
@@ -112,7 +112,7 @@ class LanguageExporterTest < UnitTestCase
   end
 
   def test_verbose_puts_message_when_language_verbose
-    real_verbose = LanguageExporter.instance_method(:verbose)
+    real_verbose = Language::Exporter.instance_method(:verbose)
     Language.stub(:verbose, true) do
       out, = capture_io { real_verbose.bind_call(@official, "hello") }
       assert_equal("hello\n", out)

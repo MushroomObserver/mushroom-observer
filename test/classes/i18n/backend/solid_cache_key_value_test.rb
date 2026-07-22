@@ -36,7 +36,7 @@ class I18n::Backend::SolidCacheKeyValueTest < UnitTestCase
   # (I18n::Backend::KeyValue::Implementation#store_translations:
   # `key = "#{locale}.#{key}"`) -- if the i18n gem's internal key
   # format ever changes, this breaks loudly instead of silently
-  # leaving stale cache entries behind after LanguageExporter#strip.
+  # leaving stale cache entries behind after Language::Exporter#strip.
   def test_delete_translation_uses_the_same_key_store_translations_writes
     @backend.store_translations(:en, { mo: { @tag => "hello" } })
     adapter = I18n::Backend::CacheStoreAdapter.new(SolidCache::Store.new)
