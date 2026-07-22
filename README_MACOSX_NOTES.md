@@ -431,6 +431,25 @@ Hopefully this is not necessary on a fresh clean system, but
   rails t
 ```
 
+## Fragment caching in development
+
+Rails' fragment/low-level caching is off by default in development
+(`config.action_controller.perform_caching = false`) so that editing
+a view always shows your latest change instead of a stale cached
+fragment. Run `bin/rails dev:cache` to toggle it on (creates
+`tmp/caching-dev.txt`); run it again to toggle back off.
+
+When it's on, the cache store is Solid Cache (the `cache_development`
+database), matching production — not an in-process memory store — so
+a cache read/write costs a real query locally too, same as prod.
+
+MO's fragment-caching call site, `Components::Matrix::Table` (the
+observations/images grid), keys its fragments on a hand-maintained
+`CACHE_VERSION` string (see `app/components/matrix/table.rb`), not
+automatic template-digest busting. If you're editing `Matrix::Box`'s
+rendering with caching toggled on, remember to bump `CACHE_VERSION`
+or you'll see stale HTML for previously-cached rows.
+
 ## Other
 
 You probably need to generate a new development master key (see below)
