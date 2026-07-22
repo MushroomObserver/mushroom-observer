@@ -9,7 +9,7 @@ module Views::Controllers::Theme
       trusted_html(:color_themes_text.tp)
       p do
         MO.themes.each do |name|
-          a(href: url_for(action: name)) { plain(name.to_sym.l) }
+          a(href: url_for(action: name)) { plain(name.underscore.to_sym.l) }
           br
         end
       end

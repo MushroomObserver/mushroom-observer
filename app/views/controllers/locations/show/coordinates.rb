@@ -11,7 +11,7 @@ module Views::Controllers::Locations
         render(
           ::Components::Panel.new(panel_id: "location_coordinates")
         ) do |panel|
-          panel.with_heading { :COORDINATES.l }
+          panel.with_heading { :coordinates.ti }
           links = heading_links
           panel.with_heading_links { trusted_html(links) } if links.present?
           panel.with_body { render_body }
@@ -69,7 +69,7 @@ module Views::Controllers::Locations
 
       def render_north
         div(class: "text-center my-4") do
-          b { "#{:NORTH.l}:" }
+          b { "#{:north.ti}:" }
           whitespace
           plain("#{@location.north}°")
         end
@@ -77,7 +77,7 @@ module Views::Controllers::Locations
 
       def render_south
         div(class: "text-center my-4") do
-          b { "#{:SOUTH.l}:" }
+          b { "#{:south.ti}:" }
           whitespace
           plain("#{@location.south}°")
         end
@@ -87,14 +87,14 @@ module Views::Controllers::Locations
         Row do
           Column(xs: 6) do
             span(class: "pull-left") do
-              b { "#{:WEST.l}:" }
+              b { "#{:west.ti}:" }
               whitespace
               plain("#{@location.west}°")
             end
           end
           Column(xs: 6) do
             span(class: "pull-right") do
-              b { "#{:EAST.l}:" }
+              b { "#{:east.ti}:" }
               whitespace
               plain("#{@location.east}°")
             end

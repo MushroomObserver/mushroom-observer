@@ -132,7 +132,7 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_add_button
-      submit(:ADD.l, as: :button, class: "mr-3")
+      submit(:add.ti, as: :button, class: "mr-3")
     end
 
     def render_clear_button
@@ -161,11 +161,11 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_remove_button(ip)
-      submit(:REMOVE.l, as: :button,
-                        name: remove_param, value: ip,
-                        id: "remove_#{@type}_ip_#{ip}",
-                        variant: :link, size: :sm,
-                        class: "font-weight-bold")
+      submit(:remove.ti, as: :button,
+                         name: remove_param, value: ip,
+                         id: "remove_#{@type}_ip_#{ip}",
+                         variant: :link, size: :sm,
+                         class: "font-weight-bold")
     end
 
     def remove_param

@@ -27,7 +27,7 @@ class Views::Controllers::Observations::Show::HerbariumRecordsPanelTest <
       )
     )
 
-    assert_includes(html, "#{:Herbarium_records.t}:")
+    assert_includes(html, "#{:herbarium_records.ti}:")
     assert_no_html(html, "li")
   end
 

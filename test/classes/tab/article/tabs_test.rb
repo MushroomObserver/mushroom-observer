@@ -23,7 +23,7 @@ module Tab::Article
     def test_new
       tab = Tab::Article::New.new
 
-      assert_equal(:create_object.t(type: :ARTICLE), tab.title)
+      assert_equal(:create_object.t(type: :article), tab.title)
       assert_equal(routes.new_article_path, tab.path)
       assert_equal(Article, tab.model)
     end

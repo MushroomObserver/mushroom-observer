@@ -60,7 +60,7 @@ module Views::Controllers::Locations
       assert_html(html, ".input-group-btn")
 
       # Submit button for new record
-      assert_html(html, "button[type='submit']", text: :CREATE.l)
+      assert_html(html, "button[type='submit']", text: :create.ti)
 
       # No turbo for local form
       assert_no_html(html, "form[data-turbo]")
@@ -82,7 +82,7 @@ module Views::Controllers::Locations
                     ))
 
       assert_html(html, "form[action*='/locations/#{location.id}']")
-      assert_html(html, "button[type='submit']", text: :UPDATE.l)
+      assert_html(html, "button[type='submit']", text: :update.ti)
     end
 
     def test_renders_locked_checkbox_in_admin_mode

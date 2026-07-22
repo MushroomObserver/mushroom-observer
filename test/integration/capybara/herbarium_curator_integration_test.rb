@@ -173,7 +173,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit(new_herbarium_record_path(observation_id: obs.id))
     first(class: "nonpersonal_herbaria_index_link").click
 
-    assert_match(:HERBARIA.l, page.title)
+    assert_match(:herbaria.ti, page.title)
   end
 
   def test_single_herbarium_search
@@ -181,7 +181,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     visit("/")
     within("#pattern_search_form") do
       fill_in("pattern_search_pattern", with: "New York")
-      select(:HERBARIA.l, from: "pattern_search_type")
+      select(:herbaria.ti, from: "pattern_search_type")
       click_commit
     end
     assert_selector("#title", text: herbaria(:nybg_herbarium).format_name)
@@ -193,10 +193,10 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     pattern = "Personal"
     within("#pattern_search_form") do
       fill_in("pattern_search_pattern", with: pattern)
-      select(:HERBARIA.l, from: "pattern_search_type")
+      select(:herbaria.ti, from: "pattern_search_type")
       click_commit
     end
-    assert_match(:HERBARIA.l, page.title)
+    assert_match(:herbaria.ti, page.title)
     assert_selector("#filters", text: "#{:query_pattern.l}: #{pattern}")
   end
 
@@ -206,11 +206,11 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     pattern = "Coprinus comatus"
     within("#pattern_search_form") do
       fill_in("pattern_search_pattern", with: pattern)
-      select(:HERBARIUM_RECORDS.l, from: "pattern_search_type")
+      select(:herbarium_records.ti, from: "pattern_search_type")
       click_commit
     end
     assert_selector("body.herbarium_records__index")
-    assert_match(:HERBARIUM_RECORDS.l, page.title)
+    assert_match(:herbarium_records.ti, page.title)
     assert_selector("#filters", text: "#{:query_pattern.l}: #{pattern}")
   end
 

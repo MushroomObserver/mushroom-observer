@@ -116,8 +116,8 @@ class Views::Mailers::NameChangeMailer < Views::Mailers::Base
   end
 
   def fields
-    text = "*#{:Time.l}:* #{@time.email_time}\n"
-    text += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+    text = "*#{:time.ti}:* #{@time.email_time}\n"
+    text += "*#{:by.ti}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
     text
   end
 
@@ -149,7 +149,7 @@ class Views::Mailers::NameChangeMailer < Views::Mailers::Base
     return "" if new_name.real_text_name(@receiver) ==
                  old_name.real_text_name(@receiver)
 
-    "*#{:Name.l} #{now_label}:* #{new_name.real_text_name(@receiver)}\n"
+    "*#{:name.ti} #{now_label}:* #{new_name.real_text_name(@receiver)}\n"
   end
 
   def one_liner(key, attr, compare_attr)
@@ -162,13 +162,13 @@ class Views::Mailers::NameChangeMailer < Views::Mailers::Base
   def license_liner
     return "" unless new_desc && new_desc.license_id != old_desc&.license_id
 
-    "*#{:License.l} #{now_label}:* #{new_desc.license.display_name}\n"
+    "*#{:license.ti} #{now_label}:* #{new_desc.license.display_name}\n"
   end
 
   def review_status_liner
     return "" unless @review_status && @review_status != "no_change"
 
-    "*#{:Reviewed.l} #{now_label}:* #{@review_status}\n"
+    "*#{:reviewed.ti} #{now_label}:* #{@review_status}\n"
   end
 
   def status_liners
@@ -198,7 +198,7 @@ class Views::Mailers::NameChangeMailer < Views::Mailers::Base
                 else
                   "--"
                 end
-    "*#{:Correct_spelling.l} #{now_label}:* #{new_spell} " \
+    "*#{:correct_spelling.ti} #{now_label}:* #{new_spell} " \
       "(#{new_name.correct_spelling_id}, #{old_name.correct_spelling_id})\n"
   end
 

@@ -11,7 +11,7 @@ module Views::Controllers::Images
         Panel(
           panel_id: "info_panel", panel_class: "py-2"
         ) do |panel|
-          panel.with_heading { "#{:NOTES.t}:" }
+          panel.with_heading { "#{:notes.ti}:" }
           panel.with_body { render_body }
         end
       end
@@ -19,7 +19,7 @@ module Views::Controllers::Images
       private
 
       def render_body
-        info_row(:WHEN.t, @image.when.web_date)
+        info_row(:when.ti, @image.when.web_date)
         owner_row
         render_associated_rows
         render_notes if @image.notes.present?
@@ -38,35 +38,35 @@ module Views::Controllers::Images
 
       def owner_row
         div do
-          plain("#{:OWNER.t}: ")
+          plain("#{:owner.ti}: ")
           Link(type: :user, user: @image.user)
         end
       end
 
       def project_row(proj)
         div do
-          plain("#{:PROJECT.t}: ")
+          plain("#{:project.ti}: ")
           Link(type: :object, object: proj)
         end
       end
 
       def observation_row(obs)
         div do
-          plain("#{:OBSERVATION.t}: ")
+          plain("#{:observation.ti}: ")
           link_to(viewer_aware_unique_format_name(obs).t, obs.show_link_args)
         end
       end
 
       def profile_user_row(user)
         div do
-          plain("#{:USER.t}: ")
+          plain("#{:user.ti}: ")
           link_to(user.format_name.t, user.show_link_args)
         end
       end
 
       def glossary_term_row(term)
         div do
-          plain("#{:GLOSSARY_TERM.t}: ")
+          plain("#{:glossary_term.ti}: ")
           link_to(term.format_name.t, term.show_link_args)
         end
       end

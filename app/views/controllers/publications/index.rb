@@ -79,9 +79,9 @@ module Views::Controllers::Publications
       return "" unless in_admin_mode? || pub.can_edit?(current_user)
 
       capture do
-        link_to(:EDIT.l, edit_publication_path(pub))
+        link_to(:edit.ti, edit_publication_path(pub))
         whitespace
-        link_to(:DESTROY.l, { action: :destroy, id: pub.id },
+        link_to(:destroy.ti, { action: :destroy, id: pub.id },
                 data: { confirm: :are_you_sure.t })
       end
     end

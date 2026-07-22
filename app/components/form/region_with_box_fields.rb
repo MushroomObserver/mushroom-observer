@@ -35,7 +35,7 @@ class Components::Form::RegionWithBoxFields < Components::Base
     @form_namespace.autocompleter_field(
       :region,
       type: :region,
-      label: :REGION,
+      label: :region.ti,
       value: @query&.region,
       button: :form_locations_find_on_map.l,
       button_data: { map_target: "showBoxBtn", action: "map#showBox" },

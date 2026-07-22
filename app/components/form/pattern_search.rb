@@ -18,16 +18,16 @@
 #          ))
 class Components::Form::PatternSearch < Components::ApplicationForm
   SEARCH_TYPE_OPTIONS = [
-    [:COMMENTS, :comments],
-    [:GLOSSARY, :glossary_terms],
-    [:HERBARIA, :herbaria],
-    [:HERBARIUM_RECORDS, :herbarium_records],
-    [:LOCATIONS, :locations],
-    [:NAMES, :names],
-    [:OBSERVATIONS, :observations],
-    [:PROJECTS, :projects],
-    [:SPECIES_LISTS, :species_lists],
-    [:USERS, :users],
+    [:comments, :comments],
+    [:glossary, :glossary_terms],
+    [:herbaria, :herbaria],
+    [:herbarium_records, :herbarium_records],
+    [:locations, :locations],
+    [:names, :names],
+    [:observations, :observations],
+    [:projects, :projects],
+    [:species_lists, :species_lists],
+    [:users, :users],
     [:app_search_google, :google]
   ].freeze
 
@@ -86,7 +86,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   # controller reads exact `"herbarium_records"`, so a Symbol here
   # would silently break the search.
   def sorted_type_options
-    SEARCH_TYPE_OPTIONS.map { |label, value| [label.t, value.to_s] }.sort
+    SEARCH_TYPE_OPTIONS.map { |label, value| [label.ti, value.to_s] }.sort
   end
 
   def render_submit

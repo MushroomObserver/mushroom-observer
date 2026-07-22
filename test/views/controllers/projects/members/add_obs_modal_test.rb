@@ -23,7 +23,7 @@ module Views::Controllers::Projects::Members
 
       assert_html(html, ".modal-footer button[type='button']" \
                         "[data-dismiss='modal']",
-                  text: :CANCEL.l)
+                  text: :cancel.ti)
     end
 
     # Submit button uses `btn: "btn btn-primary"` (not `class:`). Verify it

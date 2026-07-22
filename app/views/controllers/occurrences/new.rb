@@ -16,7 +16,7 @@ module Views::Controllers::Occurrences
 
     def view_template
       container_class(:full)
-      add_new_title(:create_occurrence_title, :OCCURRENCE)
+      add_new_title(:create_occurrence_title, :occurrence)
       # Sibling reference within the module.
       render(Form.new(
                model: Occurrence.new(primary_observation: @source_obs),

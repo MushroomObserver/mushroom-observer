@@ -131,7 +131,7 @@ module Views::Controllers::Observations::Images
       html = render_form(image: img)
 
       # One above the fields, one in the footer.
-      assert_html(html, "button[type='submit']", text: :SAVE_EDITS.l,
+      assert_html(html, "button[type='submit']", text: :save_edits.ti,
                                                  count: 2)
     end
 

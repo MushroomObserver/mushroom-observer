@@ -70,7 +70,7 @@ class APIKeysIntegrationTest < CapybaraIntegrationTestCase
     # Type something into the notes field (which should NOT be saved).
     fill_in("api_key_notes", with: "Should not save this")
 
-    click_link(:CANCEL.l)
+    click_link(:cancel.ti)
 
     # Cancel navigates back to the index, and the key's notes are
     # unchanged.
@@ -101,7 +101,7 @@ class APIKeysIntegrationTest < CapybaraIntegrationTestCase
 
     # Submit the form
     within("#edit_notes_#{key.id}_container form") do
-      click_button(:SAVE.l)
+      click_button(:save.ti)
     end
 
     # Verify successful update (stays on index page)

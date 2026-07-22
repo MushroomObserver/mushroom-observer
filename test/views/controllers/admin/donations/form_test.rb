@@ -19,7 +19,7 @@ module Views::Controllers::Admin::Donations
 
     def test_renders_form_with_who_field
       assert_html(@html, "label[for='donation_who']",
-                  text: :WHO.l)
+                  text: :who.ti)
       assert_html(@html,
                   "input[name='donation[who]'][size='50']")
     end
@@ -33,7 +33,7 @@ module Views::Controllers::Admin::Donations
 
     def test_renders_form_with_email_field
       assert_html(@html, "label[for='donation_email']",
-                  text: :EMAIL.l)
+                  text: :email.ti)
       assert_html(@html, "input[name='donation[email]']")
     end
 

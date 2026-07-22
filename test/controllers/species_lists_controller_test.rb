@@ -93,7 +93,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index)
 
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
       { count: SpeciesList.count },
@@ -112,7 +112,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_equal(SpeciesList.order_by(:user).map(&:user_id),
                  assigns(:objects).map(&:user_id))
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     assert_sorted_by(by)
   end
 
@@ -123,7 +123,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id, by: by })
 
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     assert_sorted_by(by)
   end
 
@@ -133,7 +133,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { id: list.id })
 
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     assert_sorted_by("date")
   end
 
@@ -144,7 +144,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { q: { model: :SpeciesList, pattern: } })
 
     assert_response(:success)
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     assert_select(
       "#content a:match('href', ?)", %r{^#{species_lists_path}/\d+},
@@ -159,7 +159,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user })
 
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
   end
 
@@ -170,7 +170,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_response(:success)
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
   end
 
   def test_index_for_user_who_does_not_exist
@@ -194,7 +194,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     # there's no banner for this project
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     spl = project.species_lists.first
     assert_select(
       "a[href*='species_lists/#{spl.id}?project=#{project.id}']",
@@ -209,7 +209,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_page_title(:SPECIES_LISTS.l)
+    assert_page_title(:species_lists.ti)
     assert_flash_text(:runtime_no_matches.l(types: :species_lists))
   end
 

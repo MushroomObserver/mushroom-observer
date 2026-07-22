@@ -19,7 +19,7 @@ module Views::Controllers::InatImports
         render_choose_observations_section
         render_skip_writeback_field if @admin
         render_details_panel
-        submit(:SUBMIT.l)
+        submit(:submit.ti)
       end
     end
 

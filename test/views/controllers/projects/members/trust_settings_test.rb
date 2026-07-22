@@ -123,7 +123,7 @@ module Views::Controllers::Projects::Members
       html = render_form
 
       assert_html(html, "button[type='button'][data-dismiss='modal']",
-                  text: :CANCEL.l)
+                  text: :cancel.ti)
     end
 
     private

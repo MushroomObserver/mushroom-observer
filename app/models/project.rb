@@ -314,9 +314,9 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def member_status(user)
-    return :OWNER.t if user == self.user
-    return :ADMIN.t if is_admin?(user)
-    return :MEMBER.t if member?(user)
+    return :owner.ti if user == self.user
+    return :admin.ti if is_admin?(user)
+    return :member.ti if member?(user)
 
     nil
   end

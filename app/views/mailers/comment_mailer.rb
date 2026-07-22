@@ -88,13 +88,13 @@ class Views::Mailers::CommentMailer < Views::Mailers::Base
   end
 
   def fields
-    text = "*#{:Created.l}:* #{@comment.created_at.email_time}\n"
+    text = "*#{:created.ti}:* #{@comment.created_at.email_time}\n"
     if @comment.user
-      text += "*#{:By.l}:* #{@comment.user.legal_name} " \
+      text += "*#{:by.ti}:* #{@comment.user.legal_name} " \
               "(#{@comment.user.login})\n"
     end
-    text += "*#{:Summary.l}:* #{@comment.summary}\n"
-    text += "*#{:Comment.l}:*\n" if @comment.comment
+    text += "*#{:summary.ti}:* #{@comment.summary}\n"
+    text += "*#{:comment.ti}:*\n" if @comment.comment
     text
   end
 

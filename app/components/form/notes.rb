@@ -69,7 +69,7 @@ class Components::Form::Notes < Components::Base
 
   def view_template
     render(panel) do |p|
-      p.with_heading { plain(:NOTES.l) }
+      p.with_heading { plain(:notes.ti) }
       p.with_body(collapse: true) { render_notes_inner }
     end
   end

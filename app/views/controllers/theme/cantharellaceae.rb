@@ -19,7 +19,7 @@ module Views::Controllers::Theme
       add_context_nav(::Tab::Theme::ShowActions.new)
 
       SPECIES.each { |row| render(SpeciesParagraph.new(row: row)) }
-      trusted_html(:theme_switch.tp(theme: :Cantharellaceae.l))
+      trusted_html(:theme_switch.tp(theme: :cantharellaceae.l))
     end
   end
 end

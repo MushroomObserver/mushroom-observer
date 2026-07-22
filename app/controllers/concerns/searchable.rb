@@ -108,7 +108,7 @@ module Searchable
     def search_object_name = :"query_#{search_type}"
 
     def clear_form?
-      if params[:commit] == :CLEAR.l
+      if params[:commit] == :clear.ti
         clear_relevant_query
         return true
       end

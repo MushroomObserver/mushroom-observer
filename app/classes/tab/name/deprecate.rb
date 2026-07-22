@@ -10,7 +10,7 @@ class Tab::Name::Deprecate < Tab::Base
   end
 
   def title
-    :DEPRECATE.l
+    :deprecate.ti
   end
 
   def path

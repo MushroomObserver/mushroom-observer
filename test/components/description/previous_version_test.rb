@@ -13,7 +13,7 @@ class PreviousVersionTest < ComponentTestCase
                     obj: @name, versions: @name.versions.to_a
                   ))
 
-    assert_includes(html, "#{:VERSION.t}: #{@name.version}")
+    assert_includes(html, "#{:version.ti}: #{@name.version}")
   end
 
   def test_renders_previous_version_link_when_multi_version

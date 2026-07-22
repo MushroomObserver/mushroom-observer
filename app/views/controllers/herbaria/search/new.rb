@@ -11,7 +11,7 @@ module Views::Controllers::Herbaria::Search
     end
 
     def view_template
-      add_new_title(:search_object, :HERBARIA)
+      add_new_title(:search_object, :herbaria)
       container_class(:wide)
 
       div(id: "herbaria_search_container") do

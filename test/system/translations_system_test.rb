@@ -31,7 +31,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           assert_selector("#translation_form")
 
           within("#translation_form") do
-            assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
+            assert_selector("button[type=submit]", text: :save.ti, count: 1)
             assert_field("tag_two", type: :textarea, with: "two")
             assert_field("tag_twos", type: :textarea, with: "twos")
             assert_field("tag_TWO", type: :textarea, with: "Two")
@@ -68,7 +68,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
 
           within("#translations_index") { assert_text("uno") }
           assert_equal("uno", :one.l)
-          assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
+          assert_selector("button[type=submit]", text: :save.ti, count: 1)
           assert_field("tag_one", type: :textarea, with: "uno")
           fill_in("tag_one", with: old_one)
           within("#translation_form") { click_commit }
@@ -82,7 +82,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           within("#translations_index") { assert_text("ichi") }
           assert_equal("one", :one.l)
 
-          assert_selector("button[type=submit]", text: :SAVE.l, count: 1)
+          assert_selector("button[type=submit]", text: :save.ti, count: 1)
           assert_field("tag_one", type: :textarea, with: "ichi")
           I18n.with_locale(:el) { assert_equal("ichi", :one.l) }
 

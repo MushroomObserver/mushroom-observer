@@ -82,7 +82,7 @@ module Views::Controllers::Observations
     end
 
     def button_name
-      create? ? :CREATE.l : :SAVE_EDITS.l
+      create? ? :create.ti : :save_edits.ti
     end
 
     # Override Superform's form_action to include approval query params
@@ -132,7 +132,7 @@ module Views::Controllers::Observations
 
     def render_images_details_panel
       render(images_details_panel) do |panel|
-        panel.with_heading { "#{:IMAGES.l} + #{:show_observation_details.l}" }
+        panel.with_heading { "#{:images.ti} + #{:show_observation_details.l}" }
         render_upload_body(panel)
         render_images_body(panel)
         render_details_body(panel)
@@ -187,7 +187,7 @@ module Views::Controllers::Observations
 
     def render_naming_specimen_panel
       render(naming_specimen_panel) do |panel|
-        panel.with_heading { "#{:IDENTIFICATION.l} + #{:SPECIMEN.l}" }
+        panel.with_heading { "#{:identification.ti} + #{:specimen.ti}" }
         panel.with_body(collapse: true) do
           render_name_feedback if create? && @given_name.present?
           render_naming_specimen_row

@@ -8,7 +8,7 @@ class Tab::Observation::Index < Tab::Base
   end
 
   def title
-    :cancel_to_index.t(type: :OBSERVATION)
+    :cancel_to_index.t(type: :observation)
   end
 
   def path

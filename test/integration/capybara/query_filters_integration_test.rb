@@ -41,7 +41,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     page.select("Observations", from: :pattern_search_type)
     within("#pattern_search_form") { click_button("Search") }
 
-    assert_match(:OBSERVATIONS.l, page.title, "Wrong page")
+    assert_match(:observations.ti, page.title, "Wrong page")
     assert_selector("#filters", text: obs.name.text_name)
     page.find_by_id("index_bar").assert_text(:filtered.t)
     results = page.find_by_id("results")
@@ -69,7 +69,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
     assert(obs_imged_checkbox.checked?,
            "'#{:prefs_filters_has_images.t}' checkbox should be checked.")
     page.uncheck("user[has_images]")
-    click_button(:SAVE_EDITS.t.to_s, match: :first)
+    click_button(:save_edits.ti.to_s, match: :first)
 
     obs_imged_checkbox = find_field("user[has_images]")
     assert_not(obs_imged_checkbox.checked?,
@@ -120,7 +120,7 @@ class QueryFiltersIntegrationTest < CapybaraIntegrationTestCase
 
     #   Turn on :has_specimen
     page.check("user[has_specimen]")
-    click_button(:SAVE_EDITS.t.to_s, match: :first)
+    click_button(:save_edits.ti.to_s, match: :first)
     user.reload
     assert_equal("yes", user.content_filter[:has_specimen])
 

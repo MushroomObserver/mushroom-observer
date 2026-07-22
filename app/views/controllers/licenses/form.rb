@@ -8,7 +8,7 @@ module Views::Controllers::Licenses
       render_display_name_field
       render_url_field
       render_deprecated_checkbox
-      submit(:SUBMIT.t, center: true)
+      submit(:submit.ti, center: true)
     end
 
     private

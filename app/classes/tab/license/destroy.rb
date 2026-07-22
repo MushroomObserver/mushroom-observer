@@ -10,7 +10,7 @@ class Tab::License::Destroy < Tab::Base
   end
 
   def title
-    :DESTROY.t
+    :destroy.ti
   end
 
   def path

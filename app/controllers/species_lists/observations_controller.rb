@@ -85,9 +85,9 @@ module SpeciesLists
     def do_add_remove_observations_by_query(spl, query)
       return unless permission!(spl)
 
-      if params[:commit] == :ADD.l
+      if params[:commit] == :add.ti
         do_add_observations_by_query(spl, query)
-      elsif params[:commit] == :REMOVE.l
+      elsif params[:commit] == :remove.ti
         do_remove_observations_by_query(spl, query)
       else
         flash_error("Invalid mode: #{params[:commit].inspect}")

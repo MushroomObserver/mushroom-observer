@@ -57,7 +57,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_name_field
-      text_field(:name, label: :Name, inline: true)
+      text_field(:name, label: :name.ti, inline: true)
     end
 
     def render_target_type_select
@@ -75,8 +75,8 @@ module Views::Controllers::Projects::Aliases
 
     def target_type_options
       [
-        [:LOCATION.l, "location"],
-        [:USER.l, "user"]
+        [:location.ti, "location"],
+        [:user.ti, "user"]
       ]
     end
 
@@ -87,7 +87,7 @@ module Views::Controllers::Projects::Aliases
         autocompleter_field(
           :term,
           type: :user,
-          label: :USER,
+          label: :user.ti,
           value: user_term_value,
           hidden_name: :user_id,
           hidden_value: user_hidden_value
@@ -102,7 +102,7 @@ module Views::Controllers::Projects::Aliases
         autocompleter_field(
           :term,
           type: :location,
-          label: :LOCATION,
+          label: :location.ti,
           value: location_term_value,
           hidden_name: :location_id,
           hidden_value: location_hidden_value
@@ -142,7 +142,7 @@ module Views::Controllers::Projects::Aliases
       if model.new_record?
         :create_object.t(type: :project_alias)
       else
-        :SAVE.l
+        :save.ti
       end
     end
 

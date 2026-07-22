@@ -6,7 +6,7 @@
 #
 # @example
 #   Button(type: :download,
-#     name: :DOWNLOAD.t,
+#     name: :download.ti,
 #     target: new_download_species_list_path(id: @sl.id)
 #   )
 class Components::Button::Download < Components::Link::Download

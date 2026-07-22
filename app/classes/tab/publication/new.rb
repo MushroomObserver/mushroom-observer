@@ -3,7 +3,7 @@
 # "Add publication" link.
 class Tab::Publication::New < Tab::Base
   def title
-    :add_object.t(type: :PUBLICATION)
+    :add_object.t(type: :publication)
   end
 
   def path

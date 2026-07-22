@@ -17,10 +17,10 @@ class LinkGetTest < ComponentTestCase
   end
 
   def test_icon_kwarg_renders_icon_inside_anchor
-    html = render_link(name: :EDIT.l, target: @path, icon: :edit)
+    html = render_link(name: :edit.ti, target: @path, icon: :edit)
 
     assert_html(html, "a span.glyphicon")
-    assert_html(html, "a span.sr-only", text: :EDIT.l)
+    assert_html(html, "a span.sr-only", text: :edit.ti)
   end
 
   def test_block_renders_inside_anchor

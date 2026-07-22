@@ -191,7 +191,7 @@ module Views::Controllers::Projects
       count = @project.count_violations
       Button(
         type: :get,
-        name: "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
+        name: "#{count} #{:constraint_violations.ti}",
         target: project_violations_path(project_id: @project.id),
         variant: count.positive? ? :warning : nil,
         size: :lg,

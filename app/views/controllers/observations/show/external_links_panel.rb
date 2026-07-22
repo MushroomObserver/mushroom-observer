@@ -29,7 +29,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanel < Views::Base
 
   def render_header
     div do
-      plain("#{:EXTERNAL_LINKS.l} ")
+      plain("#{:external_links.ti} ")
       render_help_link
       plain(": ")
       render_new_link if @sites.present?

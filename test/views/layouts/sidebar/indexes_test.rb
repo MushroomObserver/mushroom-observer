@@ -24,7 +24,7 @@ class Views::Layouts::Sidebar
       html = render_component
 
       # Should have heading with "Indexes:" text
-      assert_includes(html, :INDEXES.t)
+      assert_includes(html, :indexes.ti)
 
       # Should include navigation links
       assert_html(html, ".glossary_link")
@@ -55,7 +55,7 @@ class Views::Layouts::Sidebar
         indent: "list-group-item indent"
       }
       render(Section.new(
-               heading_key: :INDEXES,
+               heading_key: :indexes,
                tabs: Tab::Sidebar::IndexesActions.new.map(&:to_a),
                classes: classes
              ))

@@ -24,7 +24,7 @@ module Tab::ExternalLink
     def test_edit
       tab = Tab::ExternalLink::Edit.new(link: @link)
 
-      assert_equal(:EDIT.l, tab.title)
+      assert_equal(:edit.ti, tab.title)
       assert_equal(routes.edit_external_link_path(id: @link), tab.path)
       assert_equal(:edit, tab.html_options[:icon])
       assert_equal(@link, tab.model)

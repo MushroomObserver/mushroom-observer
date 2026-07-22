@@ -96,9 +96,9 @@ class Views::Mailers::ObservationChangeMailer < Views::Mailers::Base
   end
 
   def fields
-    text = @observation ? "" : "*#{:Observation.l}:* #{@note}\n"
-    text += "*#{:Time.l}:* #{@time.email_time}\n"
-    text += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+    text = @observation ? "" : "*#{:observation.ti}:* #{@note}\n"
+    text += "*#{:time.ti}:* #{@time.email_time}\n"
+    text += "*#{:by.ti}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
     text
   end
 
@@ -110,7 +110,7 @@ class Views::Mailers::ObservationChangeMailer < Views::Mailers::Base
     return "" unless @observation && @note
 
     text = @note.split(",").filter_map { |field| change_line(field) }.join
-    text += "*#{:Notes.l} #{now_label}:*\n" if notes_changed?
+    text += "*#{:notes.ti} #{now_label}:*\n" if notes_changed?
     text
   end
 
@@ -119,9 +119,9 @@ class Views::Mailers::ObservationChangeMailer < Views::Mailers::Base
   def change_line(field)
     case field
     when "date"
-      "*#{:Date.l} #{now_label}:* #{@observation.when.email_date}\n"
+      "*#{:date.ti} #{now_label}:* #{@observation.when.email_date}\n"
     when "location"
-      "*#{:Location.l} #{now_label}:* #{@observation.place_name(@receiver)}\n"
+      "*#{:location.ti} #{now_label}:* #{@observation.place_name(@receiver)}\n"
     when "specimen" then specimen_line
     when "is_collection_location" then collection_location_line
     else simple_change_line(field)

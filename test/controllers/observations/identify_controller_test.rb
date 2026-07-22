@@ -110,7 +110,7 @@ module Observations
 
       # clear the query and be sure we get everything,
       # ...minus the ones marked reviewed and the one voted on
-      get(:index, params: { commit: :CLEAR.l })
+      get(:index, params: { commit: :clear.ti })
       assert_no_flash
       assert_select(".matrix-box", obs_count - 6)
     end

@@ -29,8 +29,8 @@ class Views::Mailers::OccurrenceChangeMailer < Views::Mailers::Base
   end
 
   def fields
-    text = "*#{:Time.l}:* #{Time.zone.now.email_time}\n"
-    text += "*#{:By.l}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
+    text = "*#{:time.ti}:* #{Time.zone.now.email_time}\n"
+    text += "*#{:by.ti}:* #{@sender.legal_name} (#{@sender.login})\n" if @sender
     text
   end
 

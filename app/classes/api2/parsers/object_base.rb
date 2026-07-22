@@ -24,7 +24,7 @@ class API2
         obj = model.safe_find(str.to_i)
         return obj if obj
 
-        raise(ObjectNotFoundById.new(str, model))
+        raise(ObjectNotFoundByID.new(str, model))
       end
 
       def try_finding_by_string(str)

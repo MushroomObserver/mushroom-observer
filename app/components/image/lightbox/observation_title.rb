@@ -44,7 +44,7 @@ class Components::Image::Lightbox::ObservationTitle < Components::Base
   end
 
   def render_label
-    span(class: "font-weight-normal") { "#{:OBSERVATION.l}: " }
+    span(class: "font-weight-normal") { "#{:observation.ti}: " }
   end
 
   def render_link

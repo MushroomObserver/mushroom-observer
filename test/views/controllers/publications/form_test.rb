@@ -29,7 +29,7 @@ module Views::Controllers::Publications
     def test_renders_submit_button
       html = render_component_form
 
-      assert_html(html, "button[type='submit']", text: :CREATE.t)
+      assert_html(html, "button[type='submit']", text: :create.ti)
       assert_html(html, "button[type='submit'][data-turbo-submits-with]")
     end
 

@@ -11,7 +11,7 @@ module Views::Controllers::CollectionNumbers
 
     def view_template
       container_class(:full)
-      add_new_title(:add_object, :COLLECTION_NUMBER)
+      add_new_title(:add_object, :collection_number)
       add_context_nav(
         Tab::CollectionNumber::FormNew.new(observation: @observation)
       )

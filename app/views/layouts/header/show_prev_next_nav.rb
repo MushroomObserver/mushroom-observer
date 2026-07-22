@@ -56,7 +56,7 @@ module Views::Layouts
     end
 
     def adjacent_title(dir)
-      :"#{dir.upcase}_OBJECT".t(type: type_name)
+      :"#{dir}_object".t(type: type_name)
     end
 
     def index_path
@@ -65,7 +65,7 @@ module Views::Layouts
     end
 
     def index_title
-      :INDEX_OBJECT.t(type: type_name.pluralize)
+      :index_object.ti(type: type_name.pluralize)
     end
 
     def index_icon
@@ -77,7 +77,7 @@ module Views::Layouts
     end
 
     def type_name
-      @type_name ||= :"#{type_tag.upcase}".l
+      @type_name ||= type_tag.ti
     end
   end
 end

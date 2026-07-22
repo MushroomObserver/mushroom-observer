@@ -37,8 +37,8 @@ class SequencesControllerTest < FunctionalTestCase
     get(:index, params: { all: true })
 
     assert_response(:success)
-    # assert_select("#title", { text: "#{:SEQUENCE.l} Index" },
-    #               "index should display #{:SEQUENCES.l} Index")
+    # assert_select("#title", { text: "#{:sequence.ti} Index" },
+    #               "index should display #{:sequences.ti} Index")
     assert_select("body.sequences__index", true)
     Sequence.find_each do |sequence|
       assert_select(
@@ -55,7 +55,7 @@ class SequencesControllerTest < FunctionalTestCase
     get(:index, params: { by: })
 
     assert_response(:success)
-    assert_page_title(:SEQUENCES.l)
+    assert_page_title(:sequences.ti)
     assert_sorted_by(by)
 
     Sequence.find_each do |sequence|

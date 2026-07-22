@@ -617,7 +617,7 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :create_object.t(type: :LOCATION)
+      :create_object.t(type: :location)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
                          object: @location, mode: :edit,

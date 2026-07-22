@@ -33,13 +33,13 @@ class ModalConfirmTest < ComponentTestCase
     # Cancel button in .modal-footer.
     assert_html(html,
                 ".modal-footer > button[data-action='confirm-modal#cancel']",
-                text: :CANCEL.l)
+                text: :cancel.ti)
 
     # Confirm button in .modal-footer with the Stimulus target the
     # controller mutates to wire up the actual submit action.
     assert_html(html,
                 ".modal-footer > button[data-action='confirm-modal#confirm']" \
                 "[data-confirm-modal-target='confirmButton']",
-                text: :OK.l)
+                text: :ok.ti)
   end
 end

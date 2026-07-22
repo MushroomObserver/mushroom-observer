@@ -20,7 +20,7 @@ module Views::Controllers::Licenses
     end
 
     def add_columns(tbl)
-      tbl.column("#{:ID.l}:") { |lic| lic.id.to_s }
+      tbl.column("#{:id.ti}:") { |lic| lic.id.to_s }
       tbl.column(:license_display_name.l) do |lic|
         link_to(lic.display_name, lic)
       end

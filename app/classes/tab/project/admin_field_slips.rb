@@ -11,7 +11,7 @@ class Tab::Project::AdminFieldSlips < Tab::Base
   end
 
   def title
-    "#{@project.field_slips.count} #{:FIELD_SLIPS.l}"
+    "#{@project.field_slips.count} #{:field_slips.ti}"
   end
 
   def path

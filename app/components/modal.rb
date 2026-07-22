@@ -27,7 +27,7 @@
 #     m.with_footer do
 #       button(type: "submit", class: "btn btn-primary") { "OK" }
 #       button(type: "button", class: "btn btn-default",
-#              data: { dismiss: "modal" }) { :CANCEL.l }
+#              data: { dismiss: "modal" }) { :cancel.ti }
 #     end
 #   end
 #
@@ -204,7 +204,7 @@ class Components::Modal < Components::Base
       variant: :strip,
       class: "close",
       data: { dismiss: "modal" },
-      aria: { label: :CLOSE.l }
+      aria: { label: :close.ti }
     ) do
       span(aria: { hidden: "true" }) { "×" }
     end

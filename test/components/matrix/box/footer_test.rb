@@ -44,7 +44,7 @@ class MatrixBoxFooterTest < ComponentTestCase
     assert_html(html, "div.rss-detail.small")
     assert_html(html,
                 "a[href='#{routes.observations_path(by_user: user.id)}']",
-                text: :OBSERVATIONS.l.as_displayed)
+                text: :observations.ti.as_displayed)
   end
 
   # ---------------------------------------------------------------

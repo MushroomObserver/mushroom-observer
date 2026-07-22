@@ -246,7 +246,7 @@ module Projects
       )
       assert_select(
         "##{modal_id} .modal-footer button[data-dismiss=modal]",
-        { text: :CANCEL.l }
+        { text: :cancel.ti }
       )
       assert_select("##{modal_id} form", { count: 0 },
                     "No form when there's nothing to submit")

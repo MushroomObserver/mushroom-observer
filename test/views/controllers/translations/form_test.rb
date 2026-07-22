@@ -114,7 +114,7 @@ module Views::Controllers::Translations
 
     def test_renders_save_button
       assert_html(html, "button[type='submit'][id='save_button']",
-                  text: :SAVE.l)
+                  text: :save.ti)
     end
 
     def test_save_button_has_stimulus_target
@@ -129,7 +129,7 @@ module Views::Controllers::Translations
 
     def test_renders_cancel_button
       assert_html(html, "button[type='button'][id='cancel_button']",
-                  text: :CANCEL.l)
+                  text: :cancel.ti)
     end
 
     def test_cancel_button_has_stimulus_target
@@ -137,7 +137,7 @@ module Views::Controllers::Translations
     end
 
     def test_renders_reload_link
-      assert_html(html, "a#reload_button.btn", text: :RELOAD.l)
+      assert_html(html, "a#reload_button.btn", text: :reload.ti)
     end
 
     def test_reload_link_has_correct_href

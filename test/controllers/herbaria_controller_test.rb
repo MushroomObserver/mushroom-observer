@@ -138,7 +138,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { q: @controller.q_param(query) })
 
     assert_response(:success)
-    assert_page_title(:HERBARIA.l)
+    assert_page_title(:herbaria.ti)
     assert_select(
       "a:match('href', ?)", %r{^#{herbaria_path}/(\d+)}, { count: set.size },
       "Filtered index should list the results of the latest Herbaria query"
@@ -150,7 +150,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index)
 
     assert_response(:success)
-    assert_page_title(:HERBARIA.l)
+    assert_page_title(:herbaria.ti)
     Herbarium.find_each do |herbarium|
       assert_select(
         "a[href *= '#{herbarium_path(herbarium)}']", true,
@@ -272,7 +272,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { nonpersonal: true })
 
-    assert_page_title(:HERBARIA.l)
+    assert_page_title(:herbaria.ti)
     assert_displayed_filters(:query_nonpersonal.l)
     Herbarium.where(personal_user_id: nil).find_each do |herbarium|
       assert_select(
@@ -296,7 +296,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login
     get(:index, params: { q: { model: Herbarium, pattern: pattern } })
 
-    assert_page_title(:HERBARIA.l)
+    assert_page_title(:herbaria.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
     Herbarium.where.not(personal_user_id: nil).find_each do |herbarium|
       assert_select(
@@ -320,7 +320,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:index, params: { by: })
 
     assert_response(:success)
-    assert_page_title(:HERBARIA.l)
+    assert_page_title(:herbaria.ti)
     assert_sorted_by(by)
     Herbarium.find_each do |herbarium|
       assert_select(
@@ -367,7 +367,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: herbarium.id })
 
     assert_response(:success)
-    assert_page_title(:EDIT.l)
+    assert_page_title(:edit.ti)
   end
 
   def test_edit_with_curators_by_non_curator
@@ -384,7 +384,7 @@ class HerbariaControllerTest < FunctionalTestCase
     login("rolf")
     get(:edit, params: { id: nybg.id })
     assert_response(:success)
-    assert_page_title(:EDIT.l)
+    assert_page_title(:edit.ti)
   end
 
   def test_edit_turbo
@@ -404,7 +404,7 @@ class HerbariaControllerTest < FunctionalTestCase
     get(:edit, params: { id: nybg.id })
 
     assert_response(:success)
-    assert_page_title(:EDIT.l)
+    assert_page_title(:edit.ti)
   end
 
   # ---------- Actions to Modify data: (create, update, destroy, etc.) ---------

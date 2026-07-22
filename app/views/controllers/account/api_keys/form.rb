@@ -47,7 +47,7 @@ module Views::Controllers::Account::APIKeys
                            class: "form-control border-none")
 
         render(Components::InputGroup::Addon.new) do
-          submit(:CREATE.l, submits_with: submits_text)
+          submit(:create.ti, submits_with: submits_text)
         end
       end
     end
@@ -66,7 +66,7 @@ module Views::Controllers::Account::APIKeys
                            class: "form-control border-none")
 
         render(Components::InputGroup::Addon.new) do
-          submit(:SAVE.l, submits_with: submits_text)
+          submit(:save.ti, submits_with: submits_text)
         end
       end
     end
@@ -77,7 +77,7 @@ module Views::Controllers::Account::APIKeys
              target_id: @cancel_target,
              collapsed: false,
              icon: :cancel,
-             icon_title: :CANCEL.l,
+             icon_title: :cancel.ti,
              button: :default,
              data: { parent: "##{@cancel_parent}" })
       end
@@ -93,14 +93,14 @@ module Views::Controllers::Account::APIKeys
 
     def render_edit_layout
       render_metadata_table
-      text_field(:notes, label: :NOTES, wrap_class: "mt-3")
+      text_field(:notes, label: :notes.ti, wrap_class: "mt-3")
       div(class: "text-center mt-3") do
-        submit(:UPDATE.l)
+        submit(:update.ti)
         # A plain link (not a submit button) — Cancel should navigate
         # back without submitting the form.
         Button(
           type: :get,
-          name: :CANCEL.l,
+          name: :cancel.ti,
           target: account_api_keys_path,
           class: "ml-3"
         )
@@ -109,12 +109,12 @@ module Views::Controllers::Account::APIKeys
 
     def render_metadata_table
       table do
-        metadata_row(:CREATED.t, model.created_at.web_date)
+        metadata_row(:created.ti, model.created_at.web_date)
         metadata_row(:account_api_keys_last_used_column_label.t,
                      last_used_value)
         metadata_row(:account_api_keys_num_uses_column_label.t,
                      num_uses_value)
-        metadata_row(:API_KEY.t, model.key)
+        metadata_row(:api_key.ti, model.key)
       end
     end
 
@@ -138,7 +138,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def submits_text
-      :SAVING.l
+      :saving.ti
     end
   end
 end

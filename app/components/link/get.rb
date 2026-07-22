@@ -12,7 +12,7 @@
 #
 # @example outlined button
 #   render(Components::Link::Get.new(
-#     name: :EDIT.l, target: @herbarium, action: :edit,
+#     name: :edit.ti, target: @herbarium, action: :edit,
 #     icon: :edit, button: :outline
 #   ))
 #

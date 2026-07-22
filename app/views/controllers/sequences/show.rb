@@ -27,7 +27,7 @@ module Views::Controllers::Sequences
       render_blast_link
       return if @sequence.notes.blank?
 
-      render_field(:NOTES, -> { trusted_html(@sequence.notes.tp) })
+      render_field(:notes, -> { trusted_html(@sequence.notes.tp) })
     end
 
     private
@@ -47,7 +47,7 @@ module Views::Controllers::Sequences
     def render_obs_line
       obs = @sequence.observation
       p do
-        strong { "#{:OBSERVATION.l}:" }
+        strong { "#{:observation.ti}:" }
         whitespace
         link_to(obs.show_link_args) do
           trusted_html(obs.name.display_name(current_user).t)
@@ -58,7 +58,7 @@ module Views::Controllers::Sequences
 
     def render_field(label_key, value)
       p do
-        strong { "#{label_key.l}:" }
+        strong { "#{label_key.ti}:" }
         whitespace
         value.is_a?(::Proc) ? value.call : plain(value.to_s)
       end
@@ -69,7 +69,7 @@ module Views::Controllers::Sequences
     # so the locus line uses a `<div>` wrapper instead.
     def render_locus
       div(class: "mb-3") do
-        strong { "#{:LOCUS.l}:" }
+        strong { "#{:locus.ti}:" }
         whitespace
         pre(class: "d-inline text-monospace") { plain(@sequence.locus) }
       end
@@ -77,10 +77,10 @@ module Views::Controllers::Sequences
 
     def render_bases
       p do
-        strong { "#{:BASES.l}:" }
+        strong { "#{:bases.ti}:" }
         whitespace
         render(::Components::Button::Clipboard.new(
-                 text: @sequence.bases, name: :COPY_THIS_SEQUENCE.l,
+                 text: @sequence.bases, name: :copy_this_sequence.ti,
                  class: "ml-1"
                ))
       end
@@ -92,7 +92,7 @@ module Views::Controllers::Sequences
 
     def render_deposit
       p do
-        strong { "#{:DEPOSIT.l}:" }
+        strong { "#{:deposit.ti}:" }
         whitespace
         render_archive_link
         plain(": ")

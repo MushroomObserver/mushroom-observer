@@ -15,7 +15,7 @@ module Views::Controllers::Names::Classification
                                       between: classification_help,
                                       data: { autofocus: true })
 
-      submit(:SAVE.l, center: true)
+      submit(:save.ti, center: true)
     end
 
     private

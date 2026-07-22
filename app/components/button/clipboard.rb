@@ -12,7 +12,7 @@
 #
 # @example Inline copy button for a DNA sequence
 #   render(Components::Button::Clipboard.new(
-#     text: @sequence.bases, name: :COPY_THIS_SEQUENCE.l
+#     text: @sequence.bases, name: :copy_this_sequence.ti
 #   ))
 class Components::Button::Clipboard < Components::Button
   def initialize(text:, name:, **rest)
@@ -36,7 +36,7 @@ class Components::Button::Clipboard < Components::Button
       controller: "clipboard",
       clipboard_text_value: @text,
       action: "clipboard#copy",
-      clipboard_copied_value: :COPIED.l
+      clipboard_copied_value: :copied.ti
     }
   end
 end

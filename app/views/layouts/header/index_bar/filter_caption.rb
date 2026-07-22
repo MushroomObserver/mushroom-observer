@@ -8,10 +8,10 @@
 # can yield it on index actions.
 module Views::Layouts
   class Header::IndexBar::FilterCaption < Views::Base
-    # `type` param sentinels (no plural form) — use `:ALL` / `:NONE`
+    # `type` param sentinels (no plural form) — use `:all` / `:none`
     # directly. The `none` sentinel arises when the controller
     # sanitizes invalid type tags down to `"none"`.
-    SENTINEL_TYPE_TAGS = { "all" => :ALL, "none" => :NONE }.freeze
+    SENTINEL_TYPE_TAGS = { "all" => :all, "none" => :none }.freeze
 
     # The following params store IDs; the captions are more legible
     # if they print a relevant "name" or "title" of the record.
@@ -112,7 +112,7 @@ module Views::Layouts
         render_params_joined(@query.params, truncate: truncate,
                                             wrap_tag: wrap_tag)
       else
-        plain(:ALL.l)
+        plain(:all.ti)
       end
     end
 
@@ -271,11 +271,10 @@ module Views::Layouts
     # Space-separated RssLog type tag list ("species_list project") →
     # localized labels joined by ", ". `SENTINEL_TYPE_TAGS` covers
     # `"all"` / `"none"` (which have no plural); everything else
-    # goes through `tag.pluralize.upcase.to_sym.t` (order matters
-    # — `upcase.pluralize` would yield `:SPECIES_LISTs`).
+    # goes through `tag.pluralize.to_sym.ti`.
     def type_tags_to_label(val)
       val.split.map do |tag|
-        (SENTINEL_TYPE_TAGS[tag] || tag.pluralize.upcase.to_sym).t
+        (SENTINEL_TYPE_TAGS[tag] || tag.pluralize.to_sym).ti
       end.join(", ")
     end
   end
