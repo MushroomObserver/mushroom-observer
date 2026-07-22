@@ -755,6 +755,58 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_nil(session["return-to"])
   end
 
+  # `uncached_object_ids` batches the MatrixBox cache-key pre-check
+  # into one `read_multi` instead of one `Rails.cache.exist?` per
+  # object -- verify it still resolves each object correctly (one
+  # already cached, one not, one uncacheable) with a single round trip.
+  def test_uncached_object_ids_batches_the_cache_precheck
+    login
+    cached_obs = observations(:coprinus_comatus_obs)
+    uncached_obs = observations(:agaricus_campestris_obs)
+    cached_obs.thumb_image.update_column(:transferred, true)
+    uncached_obs.thumb_image.update_column(:transferred, true)
+    untransferred_obs = observations(:detailed_unknown_obs)
+    untransferred_obs.thumb_image&.update_column(:transferred, false)
+
+    locale = I18n.locale
+    cached_key = Components::Matrix::Table.cache_key_for(cached_obs, locale)
+
+    real_store = ActiveSupport::Cache::MemoryStore.new
+    real_store.write(cached_key, ["<li>already cached</li>", {}])
+    spy = CountingCacheStoreForIndexes.new(real_store)
+
+    original_cache = Rails.cache
+    Rails.cache = spy
+    ids = @controller.send(
+      :uncached_object_ids,
+      [cached_obs, uncached_obs, untransferred_obs], locale
+    )
+    Rails.cache = original_cache
+
+    assert_equal(1, spy.read_multi_calls,
+                 "expected one batched read regardless of object count")
+    assert_equal([uncached_obs.id, untransferred_obs.id].sort, ids.sort,
+                 "the cached object should be excluded; the genuine " \
+                 "miss and the uncacheable object should both need " \
+                 "eager-loading")
+  end
+
+  # Counts read_multi calls so the test above can assert one round
+  # trip regardless of object count.
+  class CountingCacheStoreForIndexes
+    attr_reader :read_multi_calls
+
+    def initialize(real_store)
+      @real_store = real_store
+      @read_multi_calls = 0
+    end
+
+    def read_multi(*keys)
+      @read_multi_calls += 1
+      @real_store.read_multi(*keys)
+    end
+  end
+
   PARAMS_UNDER_LIMIT =
     { names: {
         lookup: ["Agaricus campestris"],

@@ -366,4 +366,84 @@ class MatrixTableTest < ComponentTestCase
                                          "different cache keys")
     end
   end
+
+  # Counts read_multi/write_multi calls so the batching tests below can
+  # assert exactly one round trip regardless of object count.
+  class CountingCacheStore
+    attr_reader :read_multi_calls, :write_multi_calls
+
+    def initialize(real_store)
+      @real_store = real_store
+      @read_multi_calls = 0
+      @write_multi_calls = 0
+    end
+
+    def read_multi(*keys)
+      @read_multi_calls += 1
+      @real_store.read_multi(*keys)
+    end
+
+    def write_multi(hash)
+      @write_multi_calls += 1
+      @real_store.write_multi(hash)
+    end
+
+    delegate :read, :write, to: :@real_store
+  end
+
+  def test_render_cached_boxes_resolves_a_hit_and_a_miss_in_one_round_trip
+    observations = [
+      observations(:coprinus_comatus_obs),
+      observations(:agaricus_campestris_obs)
+    ]
+    observations.each do |obs|
+      obs.thumb_image.update_column(:transferred, true)
+    end
+
+    real_store = ActiveSupport::Cache::MemoryStore.new
+    first_key = Components::Matrix::Table.cache_key_for(
+      observations.first, I18n.locale
+    )
+    # Pre-warm only the first object's fragment -- proves a genuine
+    # mix of hit + miss both resolve correctly in one batched pass,
+    # not just an all-hit or all-miss case.
+    real_store.write(first_key, ["<li>already cached</li>", {}])
+    spy = CountingCacheStore.new(real_store)
+
+    component = Components::Matrix::Table.new(
+      objects: observations, user: @user, cached: true
+    )
+
+    # Phlex-rails' low_level_cache gates on perform_caching (unset,
+    # so falsy, in the test env by default) -- without this, it always
+    # `yield`s and never touches cache_store at all.
+    original_cache = Rails.cache
+    original_perform_caching =
+      Rails.application.config.action_controller.perform_caching
+    Rails.cache = spy
+    Rails.application.config.action_controller.perform_caching = true
+    html = render(component)
+    Rails.cache = original_cache
+    Rails.application.config.action_controller.perform_caching =
+      original_perform_caching
+
+    assert_equal(1, spy.read_multi_calls,
+                 "expected one batched read regardless of object count")
+    assert_equal(1, spy.write_multi_calls,
+                 "expected one batched write regardless of miss count")
+
+    assert_includes(html, "already cached",
+                    "first object should be served from the prefetched " \
+                    "hit, not recomputed")
+    assert_not_includes(html, "box_#{observations.first.id}")
+    assert_includes(html, "box_#{observations.second.id}",
+                    "second object was a genuine miss and must render")
+
+    second_key = Components::Matrix::Table.cache_key_for(
+      observations.second, I18n.locale
+    )
+    cached_buffer, = real_store.read(second_key)
+    assert_includes(cached_buffer, "box_#{observations.second.id}",
+                    "the miss must be written to the store")
+  end
 end

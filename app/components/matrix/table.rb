@@ -33,7 +33,7 @@ class Components::Matrix::Table < Components::Base
   # observable behavior the cached fragment captures). This is the
   # invalidation lever for cached `MatrixBox` fragments — both the
   # write site (`render_cached_boxes`) and the controller's
-  # pre-check (`ApplicationController::Indexes#object_fragment_exist?`)
+  # pre-check (`ApplicationController::Indexes#uncached_object_ids`)
   # read this through `cache_key_for`. Phlex's automatic class +
   # method + line digest doesn't survive into the controller's
   # check, so we encode the version explicitly.
@@ -42,10 +42,10 @@ class Components::Matrix::Table < Components::Base
   # tokenless URLs and must be regenerated.
   CACHE_VERSION = "v2"
 
-  # The cache key MatrixBox fragments are stored under, used by
-  # both the Phlex `low_level_cache` write inside this component and
-  # the controller's `Rails.cache.exist?` pre-check in
-  # `ApplicationController::Indexes#object_fragment_exist?`. Keeping
+  # The cache key MatrixBox fragments are stored under, used by both
+  # the write inside this component and the controller's batched
+  # `read_multi` pre-check in
+  # `ApplicationController::Indexes#uncached_object_ids`. Keeping
   # both ends on one method ensures they agree on the key shape.
   #
   # Folds in the thumb image record itself so the expanded key tracks
@@ -67,7 +67,7 @@ class Components::Matrix::Table < Components::Base
   # Per-object predicate the render path uses to decide whether to
   # write the fragment cache (`render_cached_boxes`) AND the
   # controller's pre-check uses to decide whether to consult it
-  # (`ApplicationController::Indexes#object_fragment_exist?`).
+  # (`ApplicationController::Indexes#uncached_object_ids`).
   # Objects with an untransferred thumb_image are skipped — the
   # rendered HTML embeds the image URL, which would be wrong (and
   # wrongly cached) until the transfer completes. An `Image` object
@@ -111,13 +111,23 @@ class Components::Matrix::Table < Components::Base
     div(class: "clearfix")
   end
 
+  # Overrides Components::Base#cache_store for the duration of a
+  # #render_cached_boxes call -- see BatchedCacheStore.
+  def cache_store
+    @batched_store || super
+  end
+
   private
 
   def render_cached_boxes
+    @batched_store = BatchedCacheStore.new(Rails.cache, cacheable_keys)
+
     @objects.each do |object|
       if cacheable_render?(object)
         # `low_level_cache` with the deterministic key from
         # `cache_key_for` — same key the controller pre-check uses.
+        # Talks to `cache_store` (overridden above), unaware it's the
+        # batched wrapper rather than Rails.cache directly.
         low_level_cache(
           self.class.cache_key_for(object, I18n.locale)
         ) { render(Components::Matrix::Box.new(user: @user, object: object)) }
@@ -128,6 +138,13 @@ class Components::Matrix::Table < Components::Base
                ))
       end
     end
+
+    @batched_store.flush_writes!
+  end
+
+  def cacheable_keys
+    @objects.select { |object| cacheable_render?(object) }.
+      map { |object| self.class.cache_key_for(object, I18n.locale) }
   end
 
   # Mirrors the controller's `matrix_caches_in_this_request?` AND
