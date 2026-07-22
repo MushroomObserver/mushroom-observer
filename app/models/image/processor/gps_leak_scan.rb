@@ -23,6 +23,10 @@ class Image
       GPS_CONDITION = "$GPS:GPSLatitude or $GPS:GPSLongitude or " \
                       "$XMP:GPSLatitude or $XMP:GPSLongitude"
       CHUNK = 400
+      # BatchMode fails fast instead of hanging on a password/host-key
+      # prompt; without these a single dead host could wedge the
+      # recurring job's worker indefinitely.
+      SSH_OPTIONS = ["-o", "BatchMode=yes", "-o", "ConnectTimeout=10"].freeze
 
       def initialize(&log)
         @log = log
@@ -68,7 +72,8 @@ class Image
       def remote_gps_hits(server, host, full_paths)
         command = "exiftool -q -q -m -fast2 -if '#{GPS_CONDITION}' " \
                   "-p '$directory/$filename' #{full_paths.join(" ")}"
-        output, error, _status = Open3.capture3("ssh", host, command)
+        output, error, _status =
+          Open3.capture3("ssh", *SSH_OPTIONS, host, command)
         report_real_errors(server, host, error)
         output.lines.filter_map { |line| line[%r{/(\d+)\.\w+\s*\z}, 1]&.to_i }
       end

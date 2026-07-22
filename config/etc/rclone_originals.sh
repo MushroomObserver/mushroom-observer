@@ -26,8 +26,8 @@ log=$root/rclone/rclone_originals.log
 
 # fresh log each night -- INFO logs one line per uploaded file
 rm -f "$log"
+# rclone is the last command so its exit status is the script's --
+# cron/operators can detect a failed sync instead of a masking exit 0.
 rclone --config /home/mo/.config/rclone/rclone.conf \
   copy "$root/orig" "google:$bucket/orig" \
   --log-file "$log" --log-level INFO
-
-exit 0

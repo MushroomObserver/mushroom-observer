@@ -30,19 +30,21 @@ class Image::Processor::GpsLeakScanTest < UnitTestCase
 
     assert_equal([image.id], hits)
     assert_equal("ssh", captured[0])
-    assert_equal("mo@example.test", captured[1],
+    assert_includes(captured, "BatchMode=yes",
+                    "ssh must fail fast, never hang on a prompt")
+    assert_equal("mo@example.test", captured[-2],
                  "only the ssh server with an orig subdir should be " \
                  "scanned -- never thumbs_only or the file-type local")
-    assert_includes(captured[2], "$GPS:GPSLatitude or $GPS:GPSLongitude")
-    assert_includes(captured[2], "-fast2")
-    assert_includes(captured[2], "/data/mo/orig/#{image.id}.jpg")
+    assert_includes(captured[-1], "$GPS:GPSLatitude or $GPS:GPSLongitude")
+    assert_includes(captured[-1], "-fast2")
+    assert_includes(captured[-1], "/data/mo/orig/#{image.id}.jpg")
   end
 
   def test_includes_raw_original_path_for_non_jpg_images
     image = images(:in_situ_image)
     commands = []
     fake_capture3 = lambda do |*args|
-      commands << args[2]
+      commands << args[-1]
       ["", "", nil]
     end
 
