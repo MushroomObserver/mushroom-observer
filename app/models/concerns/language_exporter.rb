@@ -124,12 +124,12 @@ module LanguageExporter
   # That is, remove any strings from unofficial locales which are not also
   # in the official locale.
   def strip
-    any_changes = false
     good_tags = Language.official.read_export_file
-    translation_strings.reject { |str| good_tags.key?(str.tag) }.each do |str|
-      verbose("  deleting :#{str.tag}")
-      translation_strings.delete(str) unless safe_mode
-      any_changes = true
+    obsolete = translation_strings.reject { |str| good_tags.key?(str.tag) }
+    any_changes = obsolete.any?
+    if any_changes
+      obsolete.each { |str| verbose("  deleting :#{str.tag}") }
+      delete_translation_strings(obsolete) unless safe_mode
     end
     any_changes
   end
@@ -206,6 +206,16 @@ module LanguageExporter
   ##############################################################################
 
   private
+
+  # Bulk, not one .destroy per record -- each individual destroy also
+  # ran its own separate DELETE for that record's versions, so a
+  # `strip` removing hundreds of tags across many locales was doing
+  # thousands of round trips.
+  def delete_translation_strings(strs)
+    ids = strs.map(&:id)
+    TranslationString::Version.where(translation_string_id: ids).delete_all
+    TranslationString.where(id: ids).delete_all
+  end
 
   def merge_localization_strings_into(data)
     translation_strings.includes([:user, :versions]).find_each do |str|
