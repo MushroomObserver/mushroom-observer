@@ -31,6 +31,22 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       assert_no_html(html, "li")
     end
 
+    # Empty + can-edit path with NO sibling records: the generic
+    # no_objects tag ("No [types]"), not the plural-title label.
+    def test_empty_with_no_sibling_records_uses_no_objects_label
+      obs = ::Observation.where.missing(:herbarium_records).first
+      skip("Need an obs fixture without herbarium_records") unless obs
+
+      html = render(
+        HerbariumRecordsSection.new(
+          obs: obs, user: obs.user, has_sibling_records: false
+        )
+      )
+
+      assert_includes(html, :no_objects.t(type: :herbarium_record))
+      assert_no_html(html, "li")
+    end
+
     def test_readonly_list_when_viewer_cannot_add
       record = ::HerbariumRecord.joins(:observations).
                where.not(herbarium_id: nil).distinct.first ||

@@ -20,6 +20,9 @@
 ActiveSupport::Inflector.inflections(:en) do |inflect|
   # Rails thinks all words ending in "men" are already plural
   inflect.irregular("specimen", "specimens")
+  # "taxon" is a core MO concept; Rails' default inflector doesn't know
+  # the Greek "-on" -> "-a" plural (unlike "criterion"/"phenomenon").
+  inflect.irregular("taxon", "taxa")
   inflect.acronym("API")
   inflect.acronym("API2")
   inflect.acronym("GM")

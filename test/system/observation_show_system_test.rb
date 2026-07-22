@@ -31,9 +31,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     scroll_to(find_by_id("observation_collection_numbers"), align: :center)
     within("#observation_collection_numbers") do
-      assert_link(:create_collection_number.l)
+      assert_link(:add_object.t(type: :collection_number))
       # Link is too small to click normally, use trigger
-      find_link(:create_collection_number.l).trigger("click")
+      find_link(:add_object.t(type: :collection_number)).trigger("click")
     end
 
     assert_selector("#modal_collection_number", wait: 6)
@@ -179,8 +179,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     # new sequence -- scope to the sequences section, since several
     # other sub-panels also show their own add-link on this page.
     within("#observation_sequences") do
-      assert_link(:show_observation_add_sequence.l)
-      find_link(:show_observation_add_sequence.l).trigger("click")
+      assert_link(:add_object.t(type: :sequence))
+      find_link(:add_object.t(type: :sequence)).trigger("click")
     end
 
     assert_selector("#modal_sequence", wait: 6)
@@ -258,8 +258,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     site = external_sites(:mycoportal)
     within("#observation_external_links") do
-      assert_link(text: :show_observation_add_link.l)
-      find_link(:show_observation_add_link.l).trigger("click")
+      assert_link(text: :add_object.t(type: :external_link))
+      find_link(:add_object.t(type: :external_link)).trigger("click")
     end
 
     # external_id is active by default; the url field is grayed (readonly)

@@ -47,6 +47,12 @@ class InlineCRUDLinksTest < ComponentTestCase
     assert_html(html,
                 "button.inline-icon-link" \
                 ".remove_collection_number_link_#{cn.id}")
+    assert_html(
+      html,
+      "form[data-turbo-confirm='" \
+      "#{:remove_object_confirm.t(type: :collection_number,
+                                  association: :observation)}']"
+    )
   end
 
   def test_sequence_real_destroy_with_back_redirect
@@ -96,6 +102,12 @@ class InlineCRUDLinksTest < ComponentTestCase
     )
     assert_html(html, "form[action='#{expected_path}'][method='post']")
     assert_html(html, "button.remove_herbarium_record_link_#{record.id}")
+    assert_html(
+      html,
+      "form[data-turbo-confirm='" \
+      "#{:remove_object_confirm.t(type: :herbarium_record,
+                                  association: :observation)}']"
+    )
   end
 
   def test_naming_edit_and_destroy_links

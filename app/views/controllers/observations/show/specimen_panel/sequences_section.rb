@@ -41,9 +41,9 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
     def header_label
       if sequences.any? || @has_sibling_records
-        "#{:show_observation_dna_sequences.l}: "
+        "#{append_colon(:sequences.ti)} "
       else
-        "#{:show_observation_no_sequences.l} "
+        "#{:no_objects.t(type: :sequence)} "
       end
     end
 

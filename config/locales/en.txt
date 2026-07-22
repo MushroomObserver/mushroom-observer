@@ -330,8 +330,8 @@
   regions: regions
   rss_log: activity log
   rss_logs: activity logs
-  sequence: sequence
-  sequences: sequences
+  sequence: DNA sequence
+  sequences: DNA sequences
   shared_with: shared with
   source: source
   sources: sources
@@ -634,6 +634,7 @@
   add_object: Add [TYPE]
   add_objects: Add [TYPES]
   all_objects: All [TYPES]
+  no_objects: No [types]
   cancel_and_create: "[:cancel.ti] ([:create.ti] [TYPE])"
   cancel_and_show: Cancel (Show [TYPE])
   cancel_to_index: "[:cancel.ti] ([TYPE] [:index.ti])"
@@ -2158,15 +2159,8 @@
   show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden. To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
-  show_observation_add_link: Add an external link
   show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
-  show_observation_no_collection_numbers: No [:collection_numbers]
-  show_observation_remove_collection_number: Remove collection number from this observation?
-  show_observation_no_herbarium_records: No [:herbarium_records]
-  show_observation_remove_herbarium_record: Remove fungarium record from this observation?
-  show_observation_add_sequence: Add [:sequence.ti]
-  show_observation_dna_sequences: DNA sequences
-  show_observation_no_sequences: No DNA sequences
+  remove_object_confirm: Remove [type] from this [association]?
   show_observation_archive_link: Show Archive Record
   show_observation_blast_link: Run NCBI BLAST®
   show_observation_mycoblast_link: Open MycoBLAST
@@ -2532,7 +2526,6 @@
   herbarium_record_collection: Find in MyCoPortal
 
   # herbarium_record/create_herbarium_record
-  create_herbarium_record: Add Fungarium Record
   create_herbarium_record_accession_number_help: "Must be a unique identifier for this fungarium. If you do not know the accession number, or there isn't one yet, use the observation number or your own collection number. Examples:\n&nbsp;&nbsp;12419\n&nbsp;&nbsp;BRY-L-0025845\n&nbsp;&nbsp;MO 174623\n&nbsp;&nbsp;Joe Smith 17-013"
   create_herbarium_separately: The fungarium you entered doesn't exist. Please create it separately and then add the fungarium record to your observation.
   create_herbarium_record_missing_herbarium_name: Missing fungarium name.
@@ -2564,7 +2557,6 @@
   collection_number_user: Record Creator
 
   # collection_number/create_collection_number
-  create_collection_number: Add Collection Number
   create_collection_number_missing_name: Missing collector's name.
   create_collection_number_missing_number: Missing collector's number.
 

@@ -67,7 +67,7 @@ class Components::InlineCRUDLinks < Components::Base
       destroy_path: :path_detach_from_obs,
       destroy_name: :name_remove,
       destroy_class: :class_remove_collection_number,
-      destroy_confirm: :confirm_remove_collection_number,
+      destroy_confirm: :confirm_remove_object,
       can_edit: :can_edit_via_observation?
     },
     ::HerbariumRecord => {
@@ -76,7 +76,7 @@ class Components::InlineCRUDLinks < Components::Base
       destroy_path: :path_detach_from_obs,
       destroy_name: :name_remove,
       destroy_class: :class_remove_herbarium_record,
-      destroy_confirm: :confirm_remove_herbarium_record,
+      destroy_confirm: :confirm_remove_object,
       can_edit: :can_edit_via_target?
     },
     ::Sequence => {
@@ -355,12 +355,8 @@ class Components::InlineCRUDLinks < Components::Base
 
   # ---- :destroy_confirm handlers ----------------------------
 
-  def confirm_remove_collection_number
-    :show_observation_remove_collection_number.l
-  end
-
-  def confirm_remove_herbarium_record
-    :show_observation_remove_herbarium_record.l
+  def confirm_remove_object
+    :remove_object_confirm.t(type: @target.type_tag, association: :observation)
   end
 
   # ---- :can_edit handlers -----------------------------------

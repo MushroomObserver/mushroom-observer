@@ -35,6 +35,22 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       assert_no_html(html, "li")
     end
 
+    # Empty + can-edit path with NO sibling records: the generic
+    # no_objects tag ("No [types]"), not the plural-title label.
+    def test_empty_with_no_sibling_records_uses_no_objects_label
+      obs = ::Observation.where.missing(:collection_numbers).first
+      skip("Need an obs fixture without collection_numbers") unless obs
+
+      html = render(
+        CollectionNumbersSection.new(
+          obs: obs, user: obs.user, has_sibling_records: false
+        )
+      )
+
+      assert_includes(html, :no_objects.t(type: :collection_number))
+      assert_no_html(html, "li")
+    end
+
     # Read-only one-liner: obs has collection numbers but the
     # viewer doesn't have edit permission.
     def test_readonly_list_when_viewer_cannot_edit
@@ -48,9 +64,10 @@ class Views::Controllers::Observations::Show::SpecimenPanel
         )
       )
 
-      # No `<ul class="tight-list">` editable list, no edit-modal
-      # links — readonly path just renders the show-link.
-      assert_no_html(html, "ul.tight-list")
+      # Readonly rows render in the same tight-list shape as the
+      # editable list (unified via RecordListSection), just without
+      # edit-modal links -- show-link only.
+      assert_html(html, "ul.tight-list li a")
       assert_no_html(html, "a[data-modal*='collection_number']")
     end
 

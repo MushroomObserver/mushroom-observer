@@ -17,6 +17,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # `.claude/rules/phlex_reference.md`'s Kit-syntax section for the
     # full mechanism.
     include ::Components
+    # `::Components` above only carries Kit-sugar bare methods, not
+    # Components::Base's other instance methods -- `append_colon`
+    # (used by FieldLabelRow#label_text) needs its own explicit
+    # include for the same reason Kit sugar does: these field classes
+    # don't inherit Components::Base.
+    include Components::Localization
 
     def render_help_in_label_row
       render_help_icon if help_slot && wrapper_options[:help_collapse]
