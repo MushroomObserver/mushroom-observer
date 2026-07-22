@@ -50,7 +50,22 @@ class Image
 
       private
 
+      # The whole stat/upload/confirm/delete sequence holds the image's
+      # row lock, serialized with Image#strip_gps! (and any concurrent
+      # transfer of the same image). strip_gps! rewrites orig/<id>.* in
+      # place; unserialized, it can interleave here so the confirm
+      # compares pre-strip sizes on both ends, deletes the just-stripped
+      # local set, and leaves the server holding the pre-strip original
+      # -- real GPS the user asked to hide, with nothing left on disk for
+      # StaleImageFilesJob to flag. Locking only the confirm/delete step
+      # wouldn't close it: a second transfer that statted the files
+      # pre-strip could still push the pre-strip original after the
+      # stripped one was confirmed and the local copies deleted.
       def transfer_image(image)
+        image.with_lock { locked_transfer_image(image) }
+      end
+
+      def locked_transfer_image(image)
         paths = paths_for(image)
         local_sizes = paths.index_with { |path| local_size(path) }
         # Still mid-#process (a size hasn't been generated locally yet) --

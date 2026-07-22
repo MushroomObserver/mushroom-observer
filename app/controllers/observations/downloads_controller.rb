@@ -62,6 +62,7 @@ module Observations
         query: @query, format: @format, encoding: @encoding, user: @user
       )
       render_report(report)
+      report.mark_exported! if report.respond_to?(:mark_exported!)
     end
 
     FORMATS = %w[

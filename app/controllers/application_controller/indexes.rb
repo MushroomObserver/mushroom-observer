@@ -441,40 +441,45 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     # If temporarily disabling cached matrix boxes: eager load everything
     # ids_to_eager_load = objects_simple
 
-    ids_to_eager_load = objects_simple.reject do |obj|
-      object_fragment_exist?(obj, locale)
-    end.pluck(:id)
+    ids_to_eager_load = uncached_object_ids(objects_simple, locale)
     # now get the heavy loaded instances:
     objects_eager = query.model.where(id: ids_to_eager_load).includes(include)
     # our Array extension: collates new instances with old, in original order
     objects_simple.collate_new_instances(objects_eager)
   end
 
-  # Check if a cached partial exists for this object.
-  # Pre-check: does the `MatrixBox` fragment for this object+locale
-  # already exist in the cache? If yes, the row doesn't need eager-
-  # loaded associations (it'll be served from cache as-is); if no,
-  # the row needs eager-loading.
+  # Which of `objects` need eager-loading because their `MatrixBox`
+  # fragment isn't already cached. One `read_multi` round trip covers
+  # every object's cache-key check, instead of one `Rails.cache.exist?`
+  # query per object (Solid Cache is DB-backed, so that was one SQL
+  # query per row on the index).
   #
-  # Two-stage gate. Both have to be true for the row to be served
-  # from cache:
-  #   1. `matrix_caches_in_this_request?` (per-request) — false
-  #      when `Components::Matrix::Table#render_cached_boxes` would
-  #      bypass the cache for this whole render (identify mode,
-  #      project-admin view). Controllers override.
-  #   2. `MatrixTable.should_cache_object?` (per-object) — false
-  #      when the object itself isn't cacheable (e.g. an
-  #      Observation with an untransferred thumb image).
+  # Gate: `matrix_caches_in_this_request?` is already guaranteed true
+  # by this method's only caller (`objects_with_only_needed_eager_loads`
+  # returns early otherwise); `MatrixTable.should_cache_object?`
+  # (per-object) is false when the object itself isn't cacheable (e.g.
+  # an Observation with an untransferred thumb image) -- those always
+  # need eager-loading, no cache lookup necessary.
   #
-  # Then `Rails.cache.exist?` confirms the fragment is actually in
-  # the store. Uses the shared key from `MatrixTable.cache_key_for`
-  # so the read matches what `MatrixTable#render_cached_boxes`
-  # writes.
-  def object_fragment_exist?(obj, locale)
-    return false unless matrix_caches_in_this_request?
-    return false unless ::Components::Matrix::Table.should_cache_object?(obj)
+  # Uses the shared key from `MatrixTable.cache_key_for` so the read
+  # matches what `MatrixTable#render_cached_boxes` writes.
+  def uncached_object_ids(objects, locale)
+    cacheable, uncacheable = objects.partition do |obj|
+      ::Components::Matrix::Table.should_cache_object?(obj)
+    end
+    keys_by_object = cacheable.index_by do |obj|
+      ::Components::Matrix::Table.cache_key_for(obj, locale)
+    end
+    cached_keys = if keys_by_object.empty?
+                    []
+                  else
+                    Rails.cache.read_multi(
+                      *keys_by_object.keys
+                    ).keys
+                  end
 
-    Rails.cache.exist?(::Components::Matrix::Table.cache_key_for(obj, locale))
+    uncached = keys_by_object.except(*cached_keys)
+    (uncached.values + uncacheable).pluck(:id)
   end
 
   # Associations the per-object cache pre-check needs to consult

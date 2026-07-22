@@ -132,15 +132,15 @@ module LanguageExporter
   # That is, remove any strings from unofficial locales which are not also
   # in the official locale.
   def strip
-    any_changes = false
     good_tags = Language.official.read_export_file
-    translation_strings.reject { |str| good_tags.key?(str.tag) }.each do |str|
-      verbose("  deleting :#{str.tag}")
+    obsolete = translation_strings.reject { |str| good_tags.key?(str.tag) }
+    any_changes = obsolete.any?
+    if any_changes
+      obsolete.each { |str| verbose("  deleting :#{str.tag}") }
       unless safe_mode
-        translation_strings.delete(str)
-        evict_cached_translation(str.tag)
+        delete_translation_strings(obsolete)
+        obsolete.each { |str| evict_cached_translation(str.tag) }
       end
-      any_changes = true
     end
     any_changes
   end
@@ -219,6 +219,16 @@ module LanguageExporter
   ##############################################################################
 
   private
+
+  # Bulk, not one .destroy per record -- each individual destroy also
+  # ran its own separate DELETE for that record's versions, so a
+  # `strip` removing hundreds of tags across many locales was doing
+  # thousands of round trips.
+  def delete_translation_strings(strs)
+    ids = strs.map(&:id)
+    TranslationString::Version.where(translation_string_id: ids).delete_all
+    TranslationString.where(id: ids).delete_all
+  end
 
   # Solid Cache has no delete_matched (#4807) -- strip already knows
   # exactly which tag it's removing, so evict that one exact cache entry

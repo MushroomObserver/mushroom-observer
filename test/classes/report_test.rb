@@ -907,6 +907,104 @@ class ReportTest < UnitTestCase
     )
   end
 
+  def test_mycoportal_image_list_excludes_already_exported_image
+    obs = observations(:detailed_unknown_obs)
+    image = images(:in_situ_image)
+    ExternalLink.create!(user: User.admin, target: image,
+                         external_site: ExternalSite.mycoportal,
+                         relationship: :export)
+
+    row = mycoportal_image_list_row(obs, image)
+
+    assert_nil(row, "Already-exported image should be excluded from the list")
+  end
+
+  def test_mycoportal_image_list_mark_exported_creates_link
+    image = images(:in_situ_image)
+    site = ExternalSite.mycoportal
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+    report.body
+
+    report.mark_exported!
+
+    assert(
+      ExternalLink.exists?(target: image, external_site: site,
+                           relationship: :export),
+      "mark_exported! should create an export ExternalLink for image " \
+      "#{image.id}"
+    )
+  end
+
+  def test_mycoportal_image_list_mark_exported_idempotent
+    image = images(:in_situ_image)
+    site = ExternalSite.mycoportal
+
+    2.times do
+      report =
+        Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+      report.body
+      report.mark_exported!
+    end
+
+    assert_equal(
+      1,
+      ExternalLink.where(target: image, external_site: site,
+                         relationship: :export).count,
+      "Running mark_exported! twice should not create duplicate export links"
+    )
+  end
+
+  def test_mycoportal_image_list_mark_exported_before_body_raises
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+
+    assert_raises(RuntimeError) { report.mark_exported! }
+  end
+
+  def test_mycoportal_image_list_mark_exported_logs_on_invalid
+    image = images(:in_situ_image)
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+    report.body
+
+    warnings = []
+    stubbed_error = lambda do |*|
+      link = ExternalLink.new
+      link.errors.add(:base, "stubbed failure")
+      raise(ActiveRecord::RecordInvalid.new(link))
+    end
+
+    Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do
+      ExternalLink.stub(:create!, stubbed_error) do
+        report.mark_exported!
+      end
+    end
+
+    assert(
+      warnings.any? do |msg|
+        msg.include?("MyCoPortal export link failed for Image #{image.id}")
+      end,
+      "mark_exported! should log a warning naming the failed image when " \
+      "ExternalLink.create! raises RecordInvalid"
+    )
+    assert_not(
+      ExternalLink.exists?(target: image,
+                           external_site: ExternalSite.mycoportal,
+                           relationship: :export),
+      "No ExternalLink should be created when create! raises"
+    )
+  end
+
+  def test_mycoportal_image_list_mark_exported_survives_site_lookup_failure
+    report = Report::MycoportalImageList.new(query: Query.lookup(:Observation))
+    report.body
+
+    site_lookup_fails = -> { raise(ActiveRecord::RecordNotFound) }
+    ExternalSite.stub(:mycoportal, site_lookup_fails) do
+      assert_nothing_raised do
+        report.mark_exported!
+      end
+    end
+  end
+
   def hashed_expect(obs)
     obs_location = obs.location
     obs_when = obs.when

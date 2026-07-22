@@ -37,6 +37,7 @@ class Inat::ConfirmURLBuilder
     requested_obs_url&.then { |u| "#{u}&licensed=false" }
   end
 
+  # Will the requested-obs URL always return the same results?
   def stable_result_set?
     return true if @model.inat_ids.present?
     return false unless (query = requested_obs_query)
@@ -101,9 +102,10 @@ class Inat::ConfirmURLBuilder
       merge("iconic_taxa" => IMPORTABLE_ICONIC_TAXA_ARG).to_query
   end
 
+  # map host and params to the iNat UI
   def normalize_inat_ui_url(url)
-    uri, query_str = url.split("?", 2)
-    "#{uri}?#{translate_api_to_ui_params(query_str.to_s)}"
+    _uri, query_str = url.split("?", 2)
+    "#{SITE}/observations?#{translate_api_to_ui_params(query_str.to_s)}"
   end
 
   def import_others?

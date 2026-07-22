@@ -59,12 +59,12 @@ module Views::Controllers::Account
       html = render_form
 
       # Random theme option
-      assert_includes(html, :theme_random.l)
-      assert_includes(html, 'value="RANDOM"')
+      assert_html(html, "option[value='RANDOM']", text: :theme_random.l)
 
-      # All available themes
+      # All available themes, each with its translated label
       MO.themes.each do |theme|
-        assert_includes(html, "value=\"#{theme}\"")
+        assert_html(html, "option[value='#{theme}']",
+                    text: theme.underscore.to_sym.l)
       end
     end
 

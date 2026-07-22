@@ -25,7 +25,7 @@ class LookupsController < ApplicationController
     lookup_general(Name)
   end
 
-  # This was created in late July 2012 to give MycoPortal a safe way to link
+  # This was created in late July 2012 to give MyCoPortal a safe way to link
   # back to MO's show_name pages.  In particular, it was not intended to be
   # used with a name ID.  It can actually return a deprecated name if you give
   # it a name ID.  This is, of course, bizarre behavior, but we're ignoring it

@@ -23,10 +23,10 @@ module Observations
 
     # `MatrixTable` always renders in `identify: true` mode here, which
     # bypasses the fragment cache — the per-user vote selector and
-    # footer chrome can't be cached. The pre-check on
-    # `object_fragment_exist?` must agree, otherwise the controller
-    # would skip eager-loading rows it thinks are cache hits and then
-    # render uncached boxes → N+1.
+    # footer chrome can't be cached. The pre-check in
+    # `Indexes#objects_with_only_needed_eager_loads` must agree,
+    # otherwise the controller would skip eager-loading rows it
+    # thinks are cache hits and then render uncached boxes → N+1.
     def matrix_caches_in_this_request?
       false
     end
