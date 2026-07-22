@@ -420,12 +420,17 @@ class MatrixTableTest < ComponentTestCase
     original_cache = Rails.cache
     original_perform_caching =
       Rails.application.config.action_controller.perform_caching
-    Rails.cache = spy
-    Rails.application.config.action_controller.perform_caching = true
-    html = render(component)
-    Rails.cache = original_cache
-    Rails.application.config.action_controller.perform_caching =
-      original_perform_caching
+    html = begin
+             Rails.cache = spy
+             Rails.application.config.action_controller.perform_caching = true
+             render(component)
+           ensure
+             # Must run even if render raises, or a broken spy cache store
+             # leaks into every other test in this worker process.
+             Rails.cache = original_cache
+             Rails.application.config.action_controller.perform_caching =
+               original_perform_caching
+           end
 
     assert_equal(1, spy.read_multi_calls,
                  "expected one batched read regardless of object count")
@@ -445,5 +450,29 @@ class MatrixTableTest < ComponentTestCase
     cached_buffer, = real_store.read(second_key)
     assert_includes(cached_buffer, "box_#{observations.second.id}",
                     "the miss must be written to the store")
+  end
+
+  def test_batched_store_is_cleared_after_render_completes
+    obs = observations(:coprinus_comatus_obs)
+    obs.thumb_image.update_column(:transferred, true)
+    component = Components::Matrix::Table.new(
+      objects: [obs], user: @user, cached: true
+    )
+
+    original_perform_caching =
+      Rails.application.config.action_controller.perform_caching
+    begin
+      Rails.application.config.action_controller.perform_caching = true
+      render(component)
+    ensure
+      Rails.application.config.action_controller.perform_caching =
+        original_perform_caching
+    end
+
+    assert_nil(
+      component.instance_variable_get(:@batched_store),
+      "a stale batched wrapper must not survive past its own render, " \
+      "or a later #cache_store call would incorrectly reuse it"
+    )
   end
 end

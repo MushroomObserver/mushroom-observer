@@ -138,8 +138,14 @@ class Components::Matrix::Table < Components::Base
                ))
       end
     end
-
-    @batched_store.flush_writes!
+  ensure
+    # Runs even if a box raised partway through -- flushes whatever
+    # was already computed instead of silently discarding it. Cleared
+    # afterward so a stray later #cache_store call (component reuse,
+    # an unrelated caching need) falls through to Rails.cache instead
+    # of a stale, already-flushed wrapper.
+    @batched_store&.flush_writes!
+    @batched_store = nil
   end
 
   def cacheable_keys

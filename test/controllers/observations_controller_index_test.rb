@@ -776,12 +776,17 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     spy = CountingCacheStoreForIndexes.new(real_store)
 
     original_cache = Rails.cache
-    Rails.cache = spy
-    ids = @controller.send(
-      :uncached_object_ids,
-      [cached_obs, uncached_obs, untransferred_obs], locale
-    )
-    Rails.cache = original_cache
+    ids = begin
+            Rails.cache = spy
+            @controller.send(
+              :uncached_object_ids,
+              [cached_obs, uncached_obs, untransferred_obs], locale
+            )
+          ensure
+            # Must run even if the call above raises, or a broken spy cache
+            # store leaks into every other test in this worker process.
+            Rails.cache = original_cache
+          end
 
     assert_equal(1, spy.read_multi_calls,
                  "expected one batched read regardless of object count")

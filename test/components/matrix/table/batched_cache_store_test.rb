@@ -14,7 +14,8 @@ class Components::Matrix::Table::BatchedCacheStoreTest < UnitTestCase
   # store issues exactly one read_multi/write_multi regardless of how
   # many individual keys are involved -- the whole point of this class.
   class CallCountingStore
-    attr_reader :read_multi_calls, :write_multi_calls
+    attr_reader :read_multi_calls, :write_multi_calls,
+                :read_multi_options, :write_multi_options
 
     def initialize(real_store)
       @real_store = real_store
@@ -22,13 +23,15 @@ class Components::Matrix::Table::BatchedCacheStoreTest < UnitTestCase
       @write_multi_calls = 0
     end
 
-    def read_multi(*keys)
+    def read_multi(*keys, **options)
       @read_multi_calls += 1
+      @read_multi_options = options
       @real_store.read_multi(*keys)
     end
 
-    def write_multi(hash)
+    def write_multi(hash, **options)
       @write_multi_calls += 1
+      @write_multi_options = options
       @real_store.write_multi(hash)
     end
 
@@ -136,6 +139,30 @@ class Components::Matrix::Table::BatchedCacheStoreTest < UnitTestCase
 
     assert_equal("computed", result)
     assert_equal(0, spy.read_multi_calls)
+  end
+
+  def test_options_are_forwarded_to_both_read_multi_and_write_multi
+    spy = CallCountingStore.new(@store)
+    batched = Components::Matrix::Table::BatchedCacheStore.new(
+      spy, ["a"], expires_in: 5.minutes
+    )
+    batched.fetch("a") { "fresh_a" }
+    batched.flush_writes!
+
+    assert_equal({ expires_in: 5.minutes }, spy.read_multi_options)
+    assert_equal({ expires_in: 5.minutes }, spy.write_multi_options)
+  end
+
+  def test_flush_writes_clears_pending_writes_so_a_second_call_is_a_noop
+    spy = CallCountingStore.new(@store)
+    batched = Components::Matrix::Table::BatchedCacheStore.new(spy, ["a"])
+    batched.fetch("a") { "fresh_a" }
+
+    batched.flush_writes!
+    batched.flush_writes!
+
+    assert_equal(1, spy.write_multi_calls,
+                 "a second flush must not re-write already-flushed entries")
   end
 end
 # rubocop:enable Style/RedundantFetchBlock
