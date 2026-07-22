@@ -64,7 +64,13 @@ export default class extends Controller {
     this.form = this.element;
     this.drop_zone = this.formTarget;
     this.submit_buttons = this.element.querySelectorAll('input[type="submit"]');
-    this.max_image_size = this.element.dataset.upload_max_size;
+    // Phlex renders `data: { upload_max_size: ... }` as the DOM attribute
+    // `data-upload-max-size`, which reads back as `dataset.uploadMaxSize`
+    // (camelCase) -- NOT `dataset.upload_max_size`. The old underscore key
+    // was always undefined, so every `file_size > this.max_image_size`
+    // check silently passed and no size limit was ever enforced client-side
+    // (issue #4872). Number() so the comparisons are numeric, not string.
+    this.max_image_size = Number(this.element.dataset.uploadMaxSize);
 
     this.fileStore = { items: [], index: {} }
 
@@ -184,6 +190,18 @@ export default class extends Controller {
   }
 
   uploadAll() {
+    // Block submission entirely if any pending image is over the size
+    // limit, rather than silently dropping it and stalling the upload
+    // queue on a failed empty POST (issue #4872). Report every offending
+    // file by name so the user knows exactly what to fix.
+    const _oversized = this.fileStore.items.filter(
+      (item) => item.file_size > this.max_image_size
+    );
+    if (_oversized.length > 0) {
+      this.reportOversizedItems(_oversized);
+      return false;
+    }
+
     // disable submit and remove image buttons during upload process.
     this.submit_buttons.forEach(
       (element) => { element.disabled = true }
@@ -204,6 +222,15 @@ export default class extends Controller {
     }
 
     return false;
+  }
+
+  // Show a prominent, blocking message naming each file that exceeds the
+  // upload size limit, so an over-limit photo can never be mistaken for a
+  // successful upload (issue #4872). The message text carries the limit;
+  // we append the offending file names.
+  reportOversizedItems(items) {
+    const _names = items.map((item) => item.file_name).join("\n");
+    alert(`${this.localized_text.image_too_big_text}\n\n${_names}`);
   }
 
   onUploadedCallback() {
@@ -505,6 +532,14 @@ export default class extends Controller {
     });
 
     const _formData = this.asFormData(item);
+    // asFormData returns null for an over-limit file. uploadAll blocks
+    // these up front (issue #4872), so this is a belt-and-suspenders guard:
+    // skip the pointless empty POST and keep the queue moving instead of
+    // stalling on a failed request.
+    if (_formData === null) {
+      this.onUploadedCallback();
+      return;
+    }
     const response = await post(this.upload_image_uri,
       { body: _formData, responseKind: "json" });
 
