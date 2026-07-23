@@ -28,7 +28,7 @@ module Views::Controllers::Observations::ExternalLinks
           plain("#{:show_observation_on_site.l(site: @site_name)}:")
         end
       end
-      ul(class: "tight-list pl-0") do
+      ul(class: "tight-list pl-3") do
         @site_links.each do |link|
           li(class: "hanging-indent") { Link(type: :external, link: link) }
         end

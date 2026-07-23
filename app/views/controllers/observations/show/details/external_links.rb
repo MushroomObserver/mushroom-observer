@@ -103,9 +103,10 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   def render_accordion
     return unless visible_sites.any?
 
-    Accordion(id: "external_links_accordion", class: "m-0") do |accordion|
+    Accordion(id: "external_links_accordion", class: "m-0",
+              slide: true) do |accordion|
       visible_sites.map(&:last).each do |link|
-        accordion.with_pane(id: "pane_#{link.id}", pane_class: "pl-4") do
+        accordion.with_pane(id: "pane_#{link.id}") do
           turbo_frame_tag("external_link_frame_#{link.id}")
         end
       end

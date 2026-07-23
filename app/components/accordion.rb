@@ -9,8 +9,7 @@
 # Add as many `with_pane` slots as needed. `id:` is required on each
 # pane — callers' `data-target` / `href` must point at it. Pass
 # `expanded: true` on the one that starts visible; the rest start
-# collapsed. Pass `pane_class:` to add classes to that one pane's
-# `.collapse` div (e.g. `pane_class: "pl-4"` to indent its contents).
+# collapsed.
 #
 # The inner wrapper's `.panel` class is REQUIRED, not decorative --
 # verified against Bootstrap 3.4.1's actual `js/collapse.js` on
@@ -42,18 +41,25 @@
 #
 # @example Inline in an already-padded body -- no extra bottom margin
 #   Accordion(id: "external_links_accordion", class: "m-0")
+#
+# @example Bootstrap's default slide transition instead of the fade
+#   Accordion(id: "external_links_accordion", slide: true)
 class Components::Accordion < Components::Base
   include Phlex::Slotable
 
   prop :id, String
+  # Every pane fades (via `.fade-not-slide`, see Collapsible) rather
+  # than sliding open/closed by default -- pass `slide: true` for
+  # Bootstrap's own default slide transition instead.
+  prop :slide, _Boolean, default: false
   # Catch-all for class:, data:, aria:, and any other HTML attrs on
   # the inner `.panel` wrapper -- matches Icon/Collapsible's pattern.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
-  slot :pane, lambda { |id:, expanded: false, pane_class: nil, &content|
+  slot :pane, lambda { |id:, expanded: false, &content|
     Collapsible(
       id: id, expanded: expanded,
-      class: class_names("fade-not-slide", pane_class)
+      class: (@slide ? nil : "fade-not-slide")
     ) { content&.call }
   }, collection: true
 
