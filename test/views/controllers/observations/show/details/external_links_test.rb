@@ -84,7 +84,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
       "a[data-toggle='collapse'][data-target='#pane_#{link.id}']" \
       "[data-parent='#external_links_accordion']" \
       "[data-turbo-frame='external_link_frame_#{link.id}']" \
-      "[data-trigger='tooltip'][data-title='#{tooltip}']"
+      "[data-tooltip-target='trigger'][data-title='#{tooltip}']"
     )
   end
 
