@@ -36,13 +36,14 @@ class Components::ImageFragment::LightboxCaption < Components::Base
   prop :votes, _Boolean, default: true
 
   def view_template
+    render_vote_section
+
     if @obs.is_a?(::Observation)
       render_obs_caption_parts
     elsif @image&.notes.present?
       render_image_caption
     end
 
-    render_vote_section
     render_image_links
   end
 
