@@ -10,7 +10,7 @@
 # an external site's numeric id shown next to an ExternalLink.
 #
 # `title:` overrides the tooltip text (default "Copy this ID") -- e.g.
-# Link::External passes a site-specific "Copy this iNaturalist ID" so
+# Link::External passes a site-specific "Copy iNaturalist ID" so
 # the badge reads unambiguously when an observation has several
 # external-site ids next to each other.
 #

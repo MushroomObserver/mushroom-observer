@@ -83,10 +83,10 @@ class IDBadgeTest < ComponentTestCase
   def test_title_prop_overrides_default_tooltip_title
     obs = observations(:minimal_unknown_obs)
     html = render(Components::IDBadge.new(
-                    object: obs, size: :md, title: "Copy this Foo ID"
+                    object: obs, size: :md, title: "Copy Foo ID"
                   ))
 
-    assert_html(html, "button[data-title='Copy this Foo ID']")
+    assert_html(html, "button[data-title='Copy Foo ID']")
     assert_no_html(html, "button[data-title='#{:copy_this_id.ti}']")
   end
 end
