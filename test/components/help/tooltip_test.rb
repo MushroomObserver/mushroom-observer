@@ -10,10 +10,10 @@ class HelpTooltipTest < ComponentTestCase
 
     assert_html(html, "span.context-help", text: "(?)")
     # Tooltip wiring: the tooltip Stimulus controller reads
-    # `data-tooltip-target="trigger"` to find triggers and `title=`
+    # `data-tooltip-target="tip"` to find triggers and `title=`
     # for the popup text.
     assert_html(html, "span[title='Click for explanation']")
-    assert_html(html, "span[data-tooltip-target='trigger']")
+    assert_html(html, "span[data-tooltip-target='tip']")
   end
 
   def test_extra_class_appends_to_context_help
@@ -31,7 +31,7 @@ class HelpTooltipTest < ComponentTestCase
 
     # Caller's custom data attrs deep-merge with the tooltip
     # wiring — both end up on the span.
-    assert_html(html, "span[data-tooltip-target='trigger']")
+    assert_html(html, "span[data-tooltip-target='tip']")
     assert_html(html, "span[data-other='v']")
   end
 end

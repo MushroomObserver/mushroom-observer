@@ -27,7 +27,7 @@ class LinkIconTest < ComponentTestCase
 
     assert_html(html,
                 "span.glyphicon-edit.link-icon.text-primary" \
-                "[title='#{:edit.ti}'][data-tooltip-target='trigger']")
+                "[title='#{:edit.ti}'][data-tooltip-target='tip']")
     # Screen-reader label so the icon-only link has an accessible name.
     assert_html(html, "span.sr-only", text: :edit.ti)
   end
@@ -39,7 +39,7 @@ class LinkIconTest < ComponentTestCase
                   ))
 
     # Tooltip target still present alongside caller's custom data attr.
-    assert_html(html, "span[data-tooltip-target='trigger'][data-other='v']")
+    assert_html(html, "span[data-tooltip-target='tip'][data-other='v']")
   end
 
   def test_extra_attrs_passed_through

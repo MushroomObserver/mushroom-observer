@@ -67,6 +67,6 @@ class Components::Link::Get < Components::Link
 
   def tooltip_data
     { title: @name,
-      data: { tooltip_target: "trigger", placement: "top", title: @name } }
+      data: { tooltip_target: "tip", placement: "top", title: @name } }
   end
 end

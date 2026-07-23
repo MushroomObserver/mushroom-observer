@@ -12,7 +12,7 @@ class IconLinkTest < ComponentTestCase
     # data-tooltip-target/data-title pair the tooltip Stimulus
     # controller reads.
     assert_html(html, "a[href='/foo'][title='Edit'].icon-link" \
-                      "[data-tooltip-target='trigger'][data-title='Edit']")
+                      "[data-tooltip-target='tip'][data-title='Edit']")
     # Icon glyph + screen-reader-only label inside the anchor.
     assert_html(html, "a span.glyphicon-edit")
     assert_html(html, "a span.sr-only", text: "Edit")
@@ -94,7 +94,7 @@ class IconLinkTest < ComponentTestCase
     # `data: { ... }` from the caller deep_merges with the tooltip
     # data attrs, so both the tooltip wiring AND the caller's custom
     # attrs end up on the anchor.
-    assert_html(html, "a[data-my-attr='v'][data-tooltip-target='trigger']")
+    assert_html(html, "a[data-my-attr='v'][data-tooltip-target='tip']")
   end
 
   # `tab:` shortcut — derive content / path / opts from a Tab PORO so
