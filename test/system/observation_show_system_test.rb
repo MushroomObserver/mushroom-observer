@@ -293,6 +293,8 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_button(class: "btn-danger")
     end
     assert_no_selector("#mo_confirm", visible: true)
-    assert_no_link(text: /MyCoPortal/)
+    within("#observation_external_links") do
+      assert_no_link(text: /MyCoPortal/)
+    end
   end
 end

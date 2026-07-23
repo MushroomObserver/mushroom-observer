@@ -8,6 +8,14 @@ class Image
     # server. No per-image state -- shared by Image::Processor (per-upload
     # transfers) and Image::Processor::Verifier (bulk local/remote sync).
     module FileTransfer
+      # Raised when rsync exits non-zero, carrying its exit code and
+      # stderr. Without these, a failed upload logs only "Failed to upload
+      # X to Y" -- a transient ssh/network blip (exit 30/255/12) then reads
+      # identically to a full disk (11) or a permissions problem (23), and
+      # only the exit code and stderr tell them apart. See
+      # Verifier#upload_one_file, whose rescue logs this message.
+      class RsyncError < StandardError; end
+
       def self.copy_file_to_server(server, local_file, remote_file = local_file)
         case Processor.image_server_data[server][:type]
         when "file"
@@ -44,14 +52,20 @@ class Image
         true
       end
 
-      # Rsync is used to copy files to remote image server(s).
+      # Rsync is used to copy files to remote image server(s). Raises
+      # RsyncError (exit code + stderr) rather than returning false on
+      # failure, so the caller's log records why the upload failed instead
+      # of a bare boolean.
       def self.copy_file_to_remote_server(server, local_file, remote_file)
         return unless (remote_path = Processor.image_server_data[server][:path])
 
         result = nil
         Rsync.run("#{Processor.local_images_path}/#{local_file}",
                   "#{remote_path}/#{remote_file}") { |r| result = r }
-        result.success?
+        return true if result.success?
+
+        raise(RsyncError.new("rsync exited #{result.exitcode}: " \
+                          "#{result.error.to_s.strip}"))
       end
 
       def self.copy_file_from_local_server(server, remote_file, local_file)

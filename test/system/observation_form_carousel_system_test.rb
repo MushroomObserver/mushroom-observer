@@ -87,4 +87,30 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
              "Thumbnail #{i + 1} src should be base64, got: #{src[0..50]}")
     end
   end
+
+  # An image over the upload size limit must block submission with a
+  # visible, blocking message naming the file -- never be silently
+  # dropped (issue #4872). Stub the limit tiny so a normal test image
+  # exceeds it, rather than fabricating a 20+ MB file.
+  def test_oversized_image_blocks_submission_with_alert
+    setup_image_dirs
+    login!(rolf)
+
+    MO.stub(:image_upload_max_size, 1000) do
+      visit(new_observation_path)
+      click_attach_file("Coprinus_comatus.jpg")
+      assert_selector(".carousel-item[data-image-status='upload']", wait: 10)
+
+      assert_no_difference(["Image.count", "Observation.count"]) do
+        alert_text = accept_alert do
+          within("#observation_form") { click_commit }
+        end
+        assert_includes(alert_text, "Coprinus_comatus.jpg",
+                        "alert must name the over-limit file")
+      end
+
+      # Submission was blocked client-side: still on the new-obs form.
+      assert_selector("body.observations__new")
+    end
+  end
 end

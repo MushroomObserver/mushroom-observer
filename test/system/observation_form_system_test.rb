@@ -1326,9 +1326,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_text(:show_observation_seen_at.l)
     end
     if new_obs.specimen
-      assert_text(/Fungarium records/)
+      assert_text(:herbarium_records.ti)
     else
-      assert_text(/No specimen/)
+      assert_text(:show_observation_specimen_not_available.l)
     end
     assert_text(new_obs.notes_show_formatted)
     # assert_text(new_img.notes) # nope, in the caption on carousel
