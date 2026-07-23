@@ -125,10 +125,12 @@ class Image
         attempted
       end
 
-      # One file's transfer failing (returned false, or raised -- e.g.
-      # a missing rsync binary or Errno::ENOENT) must not abort the rest
-      # of the run: every other mismatched file still needs its chance
-      # to upload.
+      # One file's transfer failing must not abort the rest of the run:
+      # every other mismatched file still needs its chance to upload. A
+      # failure surfaces either as a falsy return (a server configured
+      # with no path) or a raise -- FileTransfer::RsyncError (exit code +
+      # stderr), a missing rsync binary, Errno::ENOENT -- and the rescue
+      # logs the raised message so the reason lands in the job log.
       def upload_one_file(image, server, path)
         log("Uploading #{path} to #{server}")
         if FileTransfer.copy_file_to_server(server, path)
