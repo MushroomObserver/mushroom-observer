@@ -10,7 +10,7 @@
 # @example With tooltip + screen-reader title + extra CSS
 #   Icon(type: :edit, title: :edit.ti, class: "text-primary")
 #   # => <span class="glyphicon glyphicon-edit link-icon text-primary"
-#   #          title="Edit" data-tooltip-target="trigger">
+#   #          title="Edit" data-tooltip-target="tip">
 #   #      <span class="sr-only">Edit</span>
 #   #    </span>
 class Components::Icon < Components::Base
@@ -118,6 +118,6 @@ class Components::Icon < Components::Base
 
   def span_data
     data = @attributes[:data] || {}
-    @title.present? ? { tooltip_target: "trigger" }.merge(data) : data
+    @title.present? ? { tooltip_target: "tip" }.merge(data) : data
   end
 end

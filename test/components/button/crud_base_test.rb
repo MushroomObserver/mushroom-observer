@@ -239,7 +239,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a span.glyphicon-edit")
     assert_html(html, "a span.sr-only",
                 text: :edit_object.t(type: :herbarium))
-    assert_html(html, "a[data-tooltip-target='trigger']")
+    assert_html(html, "a[data-tooltip-target='tip']")
   end
 
   # `icon: nil` opt-out for text-only edit links.
@@ -254,7 +254,7 @@ class ButtonSubclassesTest < ComponentTestCase
                 text: :edit_object.t(type: :herbarium))
     assert_no_html(html, "a span.glyphicon")
     assert_no_html(html, "a span.sr-only")
-    assert_no_html(html, "a[data-tooltip-target='trigger']")
+    assert_no_html(html, "a[data-tooltip-target='tip']")
   end
 
   # Default renders the standard btn-default frame.
@@ -328,7 +328,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a span.glyphicon-plus")
     assert_html(html, "a span.sr-only",
                 text: :new_object.t(type: :herbarium))
-    assert_html(html, "a[data-tooltip-target='trigger']")
+    assert_html(html, "a[data-tooltip-target='tip']")
   end
 
   # `icon: nil` opt-out: text-only new links.
@@ -343,7 +343,7 @@ class ButtonSubclassesTest < ComponentTestCase
     assert_html(html, "a[href='#{path}']", text: "New Herbarium")
     assert_no_html(html, "a span.glyphicon")
     assert_no_html(html, "a span.sr-only")
-    assert_no_html(html, "a[data-tooltip-target='trigger']")
+    assert_no_html(html, "a[data-tooltip-target='tip']")
   end
 
   # Default renders the standard btn-default frame.

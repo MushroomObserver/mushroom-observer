@@ -89,7 +89,7 @@ module Views::Layouts
                end,
         data: { filter_caption_target: action,
                 action: "filter-caption##{action}",
-                tooltip_target: "trigger" }
+                tooltip_target: "tip" }
       ) do
         # aria-hidden as a string — Phlex 2 renders boolean `true`
         # as an empty-string attr, not "true".

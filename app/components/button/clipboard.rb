@@ -28,7 +28,7 @@ class Components::Button::Clipboard < Components::Button
   private
 
   def tooltip_data(name)
-    { tooltip_target: "trigger", placement: "bottom", title: name }
+    { tooltip_target: "tip", placement: "bottom", title: name }
   end
 
   def clipboard_data
