@@ -14,6 +14,7 @@ plugins:
 
 require:
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
+  - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
 
 AllCops:
   NewCops: enable
@@ -45,6 +46,29 @@ MO/LowercaseTranslationTag:
     lowercase -- see lib/rubocop/cop/mo/lowercase_translation_tag.rb
     and GH issue #4843.
   Enabled: true
+
+MO/NoRawLinkOrButtonTo:
+  Description: >-
+    Phlex views/components must use Components::Link/Components::Button
+    (Link(...)/Button(...) Kit syntax) instead of calling link_to/
+    button_to directly -- see
+    lib/rubocop/cop/mo/no_raw_link_or_button_to.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # The Link/Button component family's own implementations -- these
+    # legitimately call link_to/button_to to BUILD the abstraction
+    # every other Phlex file is required to use instead.
+    - "app/components/button.rb"
+    - "app/components/button/**/*.rb"
+    - "app/components/link.rb"
+    - "app/components/link/**/*.rb"
+    - "app/components/link_rendering.rb"
+    # Emails can't use interactive Bootstrap/Stimulus components --
+    # they need plain, inline-styled tags with no JS dependency.
+    - "app/views/mailers/**/*.rb"
 
 Gemspec:
   # Not relevent (MO is not a gem)
