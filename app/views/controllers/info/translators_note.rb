@@ -20,7 +20,8 @@ module Views::Controllers::Info
 
     def render_lang(lang)
       li do
-        link_to(lang.name, reload_with_args(user_locale: lang.locale))
+        Link(type: :get, name: lang.name,
+             target: reload_with_args(user_locale: lang.locale))
         if lang.beta
           whitespace
           span { "(beta)" }

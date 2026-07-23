@@ -15,7 +15,9 @@ module Views::Controllers::Theme
 
     def build_description
       link_html = capture do
-        link_to({ action: :Amanita }) { trusted_html("**__Amanita__**".t) }
+        Link(type: :get, name: "Amanita", target: { action: :Amanita }) do
+          trusted_html("**__Amanita__**".t)
+        end
       end
       textile = :theme_black_on_white_description.tp(link: "XXX")
       ::ActiveSupport::SafeBuffer.new(textile.to_s.sub("XXX", link_html))

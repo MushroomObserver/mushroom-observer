@@ -66,7 +66,7 @@ module Views::Controllers::VisualGroups
     def render_image_id_line
       plain("#{:image_reuse_id.t}:")
       whitespace
-      link_to(@image_id, image_path(id: @image_id))
+      Link(type: :get, name: @image_id, target: image_path(id: @image_id))
     end
 
     def status_text(status)

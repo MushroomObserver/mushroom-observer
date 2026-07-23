@@ -21,10 +21,12 @@ class Components::Carousel::Controls < Components::Base
     icon_type = direction == :prev ? :chevron_left : :chevron_right
     label = direction == :prev ? :prev : :next
 
-    link_to("##{@carousel_id}",
-            class: "#{position} carousel-control",
-            role: "button",
-            data: { slide: direction.to_s }) do
+    Link(type: :get,
+         name: label.l,
+         target: "##{@carousel_id}",
+         class: "#{position} carousel-control",
+         role: "button",
+         data: { slide: direction.to_s }) do
       div(class: "btn") do
         Icon(type: icon_type, aria: { hidden: "true" })
         span(class: "sr-only") { label.l }

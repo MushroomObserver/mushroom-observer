@@ -56,7 +56,8 @@ module Views::Controllers::SpeciesLists
 
     def render_title_row
       div do
-        link_to(@species_list.show_link_with_project(@project)) do
+        Link(type: :get, name: @species_list.text_name.t,
+             target: @species_list.show_link_with_project(@project)) do
           span(class: "list_what h4") do
             trusted_html(@species_list.text_name.t)
           end

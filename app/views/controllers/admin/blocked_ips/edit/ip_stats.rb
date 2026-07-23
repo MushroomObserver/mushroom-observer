@@ -28,7 +28,8 @@ module Views::Controllers::Admin::BlockedIps
       end
 
       def render_close_link
-        link_to("[Close]", edit_admin_blocked_ips_path)
+        Link(type: :get, name: "[Close]",
+             target: edit_admin_blocked_ips_path)
       end
 
       def render_body

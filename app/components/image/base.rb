@@ -239,13 +239,21 @@ class Components::Image::Base < Components::Base
     when :get
       a(href: path, class: stretched_link_classes)
     when :post, :put, :patch, :delete
-      # These require button_to which generates a form with CSRF protection
-      button_to(
-        path,
-        method: @link_method,
-        class: stretched_link_classes,
-        form: { data: { turbo: true } }
-      ) { "" }
+      # These require a mutation Button, which generates a form with
+      # CSRF protection (Button::CRUDBase defaults `form: { data:
+      # { turbo: true } }`, matching the original `button_to` call).
+      # `variant: :strip` skips the default btn framing so only
+      # `stretched_link_classes` apply, and `icon: nil` suppresses
+      # Button::Delete's default delete icon -- both matching the
+      # bare, empty stretched-link content of the original.
+      Button(
+        type: @link_method,
+        name: "",
+        icon: nil,
+        target: path,
+        variant: :strip,
+        class: stretched_link_classes
+      )
     end
   end
 

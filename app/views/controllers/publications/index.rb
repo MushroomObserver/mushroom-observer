@@ -62,7 +62,10 @@ module Views::Controllers::Publications
 
     def add_full_link_column(tbl)
       tbl.column("#{:publication_full.l} (#{full_count})") do |pub|
-        link_to(pub) { trusted_html(pub.full.t.strip_links) }
+        full_text = pub.full.t.strip_links
+        Link(type: :get, name: full_text, target: pub) do
+          trusted_html(full_text)
+        end
       end
     end
 
@@ -71,8 +74,8 @@ module Views::Controllers::Publications
 
       str = pub.link.sub(%r{^.*://+}, "").sub(%r{(/|\?).*}, "")
       capture do
-        link_to(str, pub.link, title: pub.link,
-                               data: { tooltip_target: "tip" })
+        Link(type: :get, name: str, target: pub.link, title: pub.link,
+             data: { tooltip_target: "tip" })
       end
     end
 
@@ -80,10 +83,9 @@ module Views::Controllers::Publications
       return "" unless in_admin_mode? || pub.can_edit?(current_user)
 
       capture do
-        link_to(:edit.ti, edit_publication_path(pub))
+        Link(type: :get, name: :edit.ti, target: edit_publication_path(pub))
         whitespace
-        link_to(:destroy.ti, { action: :destroy, id: pub.id },
-                data: { confirm: :are_you_sure.t })
+        Button(type: :delete, target: pub)
       end
     end
   end

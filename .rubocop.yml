@@ -69,6 +69,11 @@ MO/NoRawLinkOrButtonTo:
     # Emails can't use interactive Bootstrap/Stimulus components --
     # they need plain, inline-styled tags with no JS dependency.
     - "app/views/mailers/**/*.rb"
+    # A copy-to-clipboard <button role="button"> styled as a .badge,
+    # not an action button -- Components::Button's whole abstraction
+    # is .btn-family styling/variants, which doesn't fit a badge.
+    # Genuinely a different primitive, not a bypass of Button.
+    - "app/components/id_badge.rb"
 
 Gemspec:
   # Not relevent (MO is not a gem)

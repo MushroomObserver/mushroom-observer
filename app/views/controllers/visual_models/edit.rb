@@ -9,9 +9,9 @@ module Views::Controllers::VisualModels
       add_edit_title(@visual_model)
 
       render(Form.new(@visual_model))
-      link_to("Show", visual_model_path(@visual_model))
+      Link(type: :get, name: "Show", target: visual_model_path(@visual_model))
       plain(" | ")
-      link_to("Back", visual_models_path)
+      Link(type: :get, name: "Back", target: visual_models_path)
     end
   end
 end

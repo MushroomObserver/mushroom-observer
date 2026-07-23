@@ -75,7 +75,7 @@ module Views::Controllers::Projects::FieldSlips
 
     def render_field_slip_link
       if @tracker.status == "Done" && @user == @tracker.user
-        link_to(@tracker.filename, @tracker.link)
+        Link(type: :get, name: @tracker.filename, target: @tracker.link)
       else
         plain(@tracker.filename)
       end
