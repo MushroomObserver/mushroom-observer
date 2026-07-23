@@ -40,7 +40,8 @@ class ObservationViewsController < ApplicationController
   def caption_toggle_stream
     turbo_stream.replace(
       "caption_reviewed_toggle_#{@obs_id}",
-      Components::Image::MarkAsReviewedToggle.new(
+      Components::ObservationFragment.new(
+        type: :mark_as_reviewed_toggle,
         observation_view: @observation_view,
         selector: "caption_reviewed"
       )
@@ -50,7 +51,8 @@ class ObservationViewsController < ApplicationController
   def box_toggle_stream
     turbo_stream.replace(
       "box_reviewed_toggle_#{@obs_id}",
-      Components::Image::MarkAsReviewedToggle.new(
+      Components::ObservationFragment.new(
+        type: :mark_as_reviewed_toggle,
         observation_view: @observation_view,
         selector: "box_reviewed",
         label_class: "stretched-link"
@@ -66,7 +68,8 @@ class ObservationViewsController < ApplicationController
   def lightbox_caption_stream
     caption = view_context.capture do
       view_context.render(
-        Components::Image::Lightbox::Caption.new(
+        Components::ImageFragment.new(
+          type: :lightbox_caption,
           user: @user, obs: @obs, identify: true,
           observation_view: @observation_view
         )

@@ -21,8 +21,8 @@
 #
 # Image **copyright** and **notes** belong on the LIGHTBOX caption
 # (the `data-sub-html` attribute of the lightbox link, built by
-# `Components::Image::Lightbox::Caption`). They are NOT emitted in
-# the visible carousel-caption overlay.
+# `Components::ImageFragment::LightboxCaption`). They are NOT emitted
+# in the visible carousel-caption overlay.
 #
 # Image **original filename** IS visible in the carousel-caption
 # (inside the `.image-info.d-none.d-sm-block` wrapper, hidden on xs

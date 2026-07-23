@@ -57,11 +57,12 @@ class Components::Matrix::Box
       panel.with_footer(
         classes: "panel-active text-center position-relative"
       ) do
-        render(Components::Image::MarkAsReviewedToggle.new(
-                 observation_view: @observation_view,
-                 selector: "box_reviewed",
-                 label_class: "stretched-link"
-               ))
+        ObservationFragment(
+          type: :mark_as_reviewed_toggle,
+          observation_view: @observation_view,
+          selector: "box_reviewed",
+          label_class: "stretched-link"
+        )
       end
     end
 

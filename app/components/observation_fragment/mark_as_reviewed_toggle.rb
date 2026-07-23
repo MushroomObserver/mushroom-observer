@@ -6,18 +6,17 @@
 #
 # @example Default usage (lightbox caption)
 #   obs_view = observation_view_for(@obs, @user)
-#   render(Components::Image::MarkAsReviewedToggle.new(
-#            observation_view: obs_view
-#          ))
+#   ObservationFragment(type: :mark_as_reviewed_toggle,
+#                        observation_view: obs_view)
 #
 # @example Matrix box usage
-#   render(Components::Image::MarkAsReviewedToggle.new(
-#     observation_view: obs_view,
-#     selector: "box_reviewed",
-#     label_class: "stretched-link"
-#   ))
+#   ObservationFragment(type: :mark_as_reviewed_toggle,
+#                        observation_view: obs_view,
+#                        selector: "box_reviewed",
+#                        label_class: "stretched-link")
 #
-class Components::Image::MarkAsReviewedToggle < Components::ApplicationForm
+class Components::ObservationFragment::MarkAsReviewedToggle <
+      Components::ApplicationForm
   def initialize(observation_view:, selector: "caption_reviewed",
                  label_class: "")
     @observation_view = observation_view

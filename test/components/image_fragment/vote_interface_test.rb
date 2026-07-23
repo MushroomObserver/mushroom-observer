@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class ImageCaptionVoteInterfaceTest < ComponentTestCase
+class ImageFragmentVoteInterfaceTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -26,7 +26,7 @@ class ImageCaptionVoteInterfaceTest < ComponentTestCase
   private
 
   def render_component(votes:)
-    render(Components::Image::VoteInterface.new(
+    render(Components::ImageFragment::VoteInterface.new(
              user: @user,
              image: @image,
              votes: votes

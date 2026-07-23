@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class LightboxObservationTitleTest < ComponentTestCase
+class ObservationFragmentLightboxTitleTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -62,7 +62,7 @@ class LightboxObservationTitleTest < ComponentTestCase
   private
 
   def render_title(user: @user, identify: false)
-    render(Components::Image::Lightbox::ObservationTitle.new(
+    render(Components::ObservationFragment::LightboxTitle.new(
              obs: @obs,
              user: user,
              identify: identify

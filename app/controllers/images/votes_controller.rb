@@ -28,11 +28,12 @@ module Images
         format.turbo_stream do
           # Was `render(partial: "images/votes/update")`, the partial
           # just emitted a single `turbo_stream.update("image_vote_#{id}")`
-          # wrapping `Components::Image::VoteInterface` — inlined here.
+          # wrapping `Components::ImageFragment::VoteInterface` — inlined
+          # here.
           render(turbo_stream: turbo_stream.update(
             "image_vote_#{@image.id}",
-            ::Components::Image::VoteInterface.new(
-              user: @user, image: @image, votes: true
+            ::Components::ImageFragment.new(
+              type: :vote_interface, user: @user, image: @image, votes: true
             )
           ))
         end

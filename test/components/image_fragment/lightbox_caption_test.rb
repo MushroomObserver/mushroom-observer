@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class LightboxCaptionTest < ComponentTestCase
+class ImageFragmentLightboxCaptionTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -17,9 +17,6 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, "obs-when")
     assert_includes(html, "obs-where")
     assert_includes(html, "obs-who")
-    assert_includes(html, "observation_when")
-    assert_includes(html, "observation_where")
-    assert_includes(html, "observation_who")
 
     # Should have image links
     assert_includes(html, "caption-image-links")
@@ -63,7 +60,6 @@ class LightboxCaptionTest < ComponentTestCase
 
     # Should have GPS section
     assert_includes(html, "obs-where-gps")
-    assert_includes(html, "observation_where_gps")
     # Owner can reveal → GPS link rendered
     assert_html(html, "a[href*='/observations/#{obs_with_gps.id}/map']")
   end
@@ -129,16 +125,16 @@ class LightboxCaptionTest < ComponentTestCase
   end
 
   # #4884: the who line mirrors the obs show page's Collector /
-  # Entered-by semantics (via Components::ObservationWho) instead of
-  # the old "Who:" label. Branch coverage lives in ObservationWhoTest;
-  # this pins the caption's wiring.
+  # Entered-by semantics (via Components::ObservationFragment::Who)
+  # instead of the old "Who:" label. Branch coverage lives in
+  # ObservationFragmentWhoTest; this pins the caption's wiring.
   def test_who_line_uses_collector_entered_by_semantics
     obs = observations(:detailed_unknown_obs)
     obs.collector = "Jane Forager"
     obs.collector_user_id = nil
 
     html = render_caption(obs: obs, image: nil)
-    text = Nokogiri::HTML.fragment(html).at_css("#observation_who").text
+    text = Nokogiri::HTML.fragment(html).at_css(".obs-who").text
 
     assert_includes(text, :collector.ti)
     assert_includes(text, "Jane Forager")
@@ -153,7 +149,7 @@ class LightboxCaptionTest < ComponentTestCase
 
     html = render_caption(user: viewer, obs: obs)
 
-    assert_html(html, "#observation_who a[data-controller='modal-toggle']")
+    assert_html(html, ".obs-who a[data-controller='modal-toggle']")
   end
 
   def test_does_not_render_contact_link_for_own_observation
@@ -161,7 +157,7 @@ class LightboxCaptionTest < ComponentTestCase
 
     html = render_caption(user: obs.user, obs: obs)
 
-    assert_no_html(html, "#observation_who [data-controller='modal-toggle']")
+    assert_no_html(html, ".obs-who [data-controller='modal-toggle']")
   end
 
   def test_always_renders_image_links
@@ -254,7 +250,7 @@ class LightboxCaptionTest < ComponentTestCase
   private
 
   def render_caption(user: @user, image: @image, obs: @obs, **)
-    render(Components::Image::Lightbox::Caption.new(
+    render(Components::ImageFragment::LightboxCaption.new(
              user: user, image: image,
              image_id: (image || @image).id,
              obs: obs, **

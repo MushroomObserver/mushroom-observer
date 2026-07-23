@@ -65,12 +65,12 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   # Carousel items embed `Components::ImageGallery::Item`, which inherits from
-  # `BaseImage` and dispatches to `Components::Image::VoteInterface` via
-  # `render_image_vote_section`. Asserts the dispatch actually emits
+  # `BaseImage` and dispatches to `Components::ImageFragment::VoteInterface`
+  # via `render_image_vote_section`. Asserts the dispatch actually emits
   # the vote section markers — a previous version of the dispatch
-  # `render(Components::Image::VoteInterface.new(...))` was malformed
-  # Phlex and silently no-op'd
-  # so the lightbox / carousel never showed votes.
+  # `render(Components::ImageFragment::VoteInterface.new(...))` was
+  # malformed Phlex and silently no-op'd so the lightbox / carousel never
+  # showed votes.
   def test_carousel_item_renders_vote_section
     image = @images.first
     component = Components::ImageGallery.new(
@@ -284,7 +284,7 @@ class ImageGalleryTest < ComponentTestCase
   # Regression: the visible `.carousel-caption` overlay must NEVER
   # contain image copyright or notes. Those belong on the lightbox
   # caption (`data-sub-html` on the lightbox link, built by
-  # `Components::Image::Lightbox::Caption`). Image *original
+  # `Components::ImageFragment::LightboxCaption`). Image *original
   # filename* IS allowed in the carousel-caption (inside the
   # `.image-info.d-none.d-sm-block` wrapper, hidden on xs and
   # visible from sm+) when the owner's `keep_filenames` opt-in

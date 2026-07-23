@@ -191,14 +191,15 @@ class Components::Image::Base < Components::Base
     return unless lightbox_data
 
     capture do
-      render(Components::Image::Lightbox::Caption.new(
-               user: @user,
-               image: lightbox_data[:image],
-               image_id: lightbox_data[:image_id],
-               obs: lightbox_data[:obs],
-               identify: lightbox_data[:identify],
-               observation_view: lightbox_data[:observation_view]
-             ))
+      ImageFragment(
+        type: :lightbox_caption,
+        user: @user,
+        image: lightbox_data[:image],
+        image_id: lightbox_data[:image_id],
+        obs: lightbox_data[:obs],
+        identify: lightbox_data[:identify],
+        observation_view: lightbox_data[:observation_view]
+      )
     end
   end
 
@@ -206,11 +207,8 @@ class Components::Image::Base < Components::Base
   def render_image_vote_section
     return unless @votes && @img_instance
 
-    render(Components::Image::VoteInterface.new(
-             user: @user,
-             image: @img_instance,
-             votes: @votes
-           ))
+    ImageFragment(type: :vote_interface,
+                  user: @user, image: @img_instance, votes: @votes)
   end
 
   # Render original filename if applicable
