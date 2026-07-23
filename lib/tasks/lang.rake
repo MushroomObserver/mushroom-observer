@@ -82,6 +82,20 @@ namespace :lang do
     "export:unofficial"  # (still needed by some tests)
   ]
 
+  desc "Find en.txt tags with no remaining reference anywhere " \
+       "(issue #4867 purge audit -- prints a candidate list, " \
+       "does not delete anything)."
+  task find_unused_tags: :environment do
+    result = Language::UnusedTagFinder.call
+    puts("Scanned #{result.files_scanned} files.")
+    puts("Total tags: #{result.total}")
+    puts("Protected (dynamic-construction risk): " \
+         "#{result.protected_tags.size}")
+    puts("Confirmed unused: #{result.confirmed_unused.size}")
+    puts
+    result.confirmed_unused.each { |tag| puts("  #{tag}") }
+  end
+
   [
     [:check,  :check_export_syntax,      "Checking",  :export_file,
      "Check syntax of XXX YAML file(S)."],
