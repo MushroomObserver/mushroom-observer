@@ -19,6 +19,11 @@
 # bydefault <dwca-dir>/mycoportal_backfill_missing.csv
 # pass --missing-out to override.
 #
+# Observations/Images already linked (skipped, not recreated) are written
+# to a second report, bydefault <dwca-dir>/mycoportal_backfill_skipped.csv
+# (columns include the existing ExternalLink's id, for traceability)
+# pass --skipped-out to override.
+#
 # occurrences.csv's "catalogNumber" ("MUOB <id>") is the MO Observation id;
 # its own "id" column is MCP's internal occid. multimedia.csv's "coreid"
 # joins to that occid.
@@ -79,9 +84,12 @@ class BackfillMycoportalExportLinks
           parser.banner = "Usage: bin/rails runner " \
                           "script/backfill_mycoportal_export_links.rb"
           add_dwca_options(parser, opts)
-          add_missing_out_option(parser, opts)
+          add_report_options(parser, opts)
         end.parse!(argv)
-        opts[:missing_out] ||= default_missing_out(opts[:dwca_dir])
+        opts[:missing_out] ||= default_report_path(opts[:dwca_dir],
+                                                   "missing")
+        opts[:skipped_out] ||= default_report_path(opts[:dwca_dir],
+                                                   "skipped")
         opts
       end
 
@@ -89,19 +97,24 @@ class BackfillMycoportalExportLinks
 
       def default_options
         { apply: ENV["APPLY"] == "1", dwca_dir: DEFAULT_DWCA_DIR,
-          occurrences: nil, multimedia: nil,
-          keep_csvs: false, missing_out: nil }
+          occurrences: nil, multimedia: nil, keep_csvs: false,
+          missing_out: nil, skipped_out: nil }
       end
 
-      def default_missing_out(dwca_dir)
-        File.join(dwca_dir, "mycoportal_backfill_missing.csv")
+      def default_report_path(dwca_dir, name)
+        File.join(dwca_dir, "mycoportal_backfill_#{name}.csv")
       end
 
-      def add_missing_out_option(parser, opts)
+      def add_report_options(parser, opts)
         parser.on("--missing-out FILE",
                   "Missing report path (default: " \
                   "<dwca-dir>/mycoportal_backfill_missing.csv)") do |val|
           opts[:missing_out] = val
+        end
+        parser.on("--skipped-out FILE",
+                  "Already-present report path (default: " \
+                  "<dwca-dir>/mycoportal_backfill_skipped.csv)") do |val|
+          opts[:skipped_out] = val
         end
       end
 
@@ -149,16 +162,23 @@ class BackfillMycoportalExportLinks
     @apply = opts.fetch(:apply)
     @keep_csvs = opts.fetch(:keep_csvs)
     @missing_out = opts.fetch(:missing_out)
+    @skipped_out = opts.fetch(:skipped_out)
     @site = ExternalSite.mycoportal
     @admin = User.admin
+    reset_run_state!
+  end
+
+  def reset_run_state!
     @stats = { images: Hash.new(0), observations: Hash.new(0) }
     @missing = []
+    @skipped = []
     @images_seen = 0
     @occurrences_seen = 0
   end
+  private :reset_run_state!
 
   def run
-    @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    @stopwatch = Stopwatch.new
     extract_dwca_zip! unless @occurrences_csv
     warn("Processing MyCoPortal DwC-A (site=#{@site.name}, " \
          "#{@apply ? "APPLY" : "dry run"}) ...")
@@ -259,7 +279,7 @@ class BackfillMycoportalExportLinks
   def process_occurrence_batch(batch)
     ids = batch.filter_map { |r| r[:mo_id] }
     known_ids = Observation.where(id: ids).pluck(:id).to_set
-    existing = existing_links(target_type: "Observation", ids: ids).to_set
+    existing = existing_links(target_type: "Observation", ids: ids)
     batch.each { |row| process_occurrence_row(row, known_ids, existing) }
     @occurrences_seen += batch.size
     return unless (@occurrences_seen % PROGRESS_EVERY).zero?
@@ -269,17 +289,24 @@ class BackfillMycoportalExportLinks
 
   def process_occurrence_row(row, known_ids, existing)
     return increment_stat("Observation", :unparseable) unless row[:mo_id]
-    unless known_ids.include?(row[:mo_id])
-      return record_missing(target_type: "Observation", occid: row[:occid],
-                            mo_id: row[:mo_id])
-    end
-    if existing.include?(row[:mo_id])
-      return increment_stat("Observation", :already_present)
-    end
+    return record_missing_observation(row) unless
+      known_ids.include?(row[:mo_id])
+    return record_skipped_observation(row, existing) if
+      existing.key?(row[:mo_id])
 
     create_export_link(target_type: "Observation", target_id: row[:mo_id],
                        external_id: row[:occid],
                        external_created_on: row[:date_entered])
+  end
+
+  def record_missing_observation(row)
+    record_missing(target_type: "Observation", occid: row[:occid],
+                   mo_id: row[:mo_id])
+  end
+
+  def record_skipped_observation(row, existing)
+    record_skipped(target_type: "Observation", occid: row[:occid],
+                   mo_id: row[:mo_id], link_id: existing[row[:mo_id]])
   end
 
   # stream in batches, never CSV.read the whole file because it's huge.
@@ -310,7 +337,7 @@ class BackfillMycoportalExportLinks
   def process_image_batch(batch)
     ids = batch.filter_map { |r| r[:image_id] }
     known_ids = Image.where(id: ids).pluck(:id).to_set
-    existing = existing_links(target_type: "Image", ids: ids).to_set
+    existing = existing_links(target_type: "Image", ids: ids)
     batch.each { |row| process_image_row(row, known_ids, existing) }
     @images_seen += batch.size
     warn("  #{@images_seen} images processed") if
@@ -319,16 +346,26 @@ class BackfillMycoportalExportLinks
 
   def process_image_row(row, known_ids, existing)
     return increment_stat("Image", :unparseable) unless row[:image_id]
-    unless known_ids.include?(row[:image_id])
-      return record_missing(target_type: "Image", occid: row[:occid],
-                            mo_id: @mo_id_by_occid[row[:occid]],
-                            image_id: row[:image_id])
-    end
-    return increment_stat("Image", :already_present) if
-      existing.include?(row[:image_id])
+    return record_missing_image(row) unless
+      known_ids.include?(row[:image_id])
+    return record_skipped_image(row, existing) if
+      existing.key?(row[:image_id])
 
     create_export_link(target_type: "Image", target_id: row[:image_id],
                        external_created_on: row[:metadata_date])
+  end
+
+  def record_missing_image(row)
+    record_missing(target_type: "Image", occid: row[:occid],
+                   mo_id: @mo_id_by_occid[row[:occid]],
+                   image_id: row[:image_id])
+  end
+
+  def record_skipped_image(row, existing)
+    record_skipped(target_type: "Image", occid: row[:occid],
+                   mo_id: @mo_id_by_occid[row[:occid]],
+                   image_id: row[:image_id],
+                   link_id: existing[row[:image_id]])
   end
 
   # Bumps last_synced_at on already-linked records in this batch, so the
@@ -338,7 +375,7 @@ class BackfillMycoportalExportLinks
     scope = ExternalLink.where(target_type: target_type, target_id: ids,
                                external_site: @site, relationship: :export)
     scope.update_all(last_synced_at: Time.current) if @apply
-    scope.pluck(:target_id)
+    scope.pluck(:target_id, :id).to_h
   end
 
   def create_export_link(target_type:, target_id:, external_id: nil,
@@ -373,9 +410,19 @@ class BackfillMycoportalExportLinks
     @missing << [target_type, occid, mo_id, image_id]
   end
 
+  # Already linked -- report which ExternalLink covers this record
+  # alongside the plain already_present count, for traceability.
+  def record_skipped(target_type:, occid:, mo_id:, link_id:, image_id: nil)
+    increment_stat(target_type, :already_present)
+    @skipped << [target_type, occid, mo_id, image_id, link_id]
+  end
+
   def write_reports
     write_csv(@missing_out, %w[entity_type occid mo_obs_id image_id],
               @missing)
+    write_csv(@skipped_out,
+              %w[entity_type occid mo_obs_id image_id external_link_id],
+              @skipped)
   end
 
   def write_csv(path, header, rows)
@@ -393,7 +440,8 @@ class BackfillMycoportalExportLinks
     print_entity_summary("Images", @stats[:images])
     print_entity_summary("Observations", @stats[:observations])
     puts("  missing report: -> #{@missing_out}")
-    puts("  elapsed: #{elapsed_summary}")
+    puts("  skipped report: -> #{@skipped_out}")
+    puts("  elapsed: #{@stopwatch}")
     puts
     puts(@apply ? "APPLIED." : "Dry run. Re-run with APPLY=1 to write.")
   end
@@ -407,19 +455,29 @@ class BackfillMycoportalExportLinks
     puts("    unparseable: #{stats[:unparseable]}")
   end
 
-  def elapsed_summary
-    format_duration(Process.clock_gettime(Process::CLOCK_MONOTONIC) -
-                     @started_at)
-  end
+  # Elapsed wall-clock time, formatted for the summary. Monotonic clock --
+  # immune to system clock adjustments -- not Time.now.
+  class Stopwatch
+    def initialize
+      @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    end
 
-  def format_duration(seconds)
-    total = seconds.round
-    hours, remainder = total.divmod(3600)
-    minutes, secs = remainder.divmod(60)
-    return format("%dh %dm %ds", hours, minutes, secs) if hours.positive?
-    return format("%dm %ds", minutes, secs) if minutes.positive?
+    def to_s
+      format_duration(Process.clock_gettime(Process::CLOCK_MONOTONIC) -
+                       @started_at)
+    end
 
-    format("%ds", secs)
+    private
+
+    def format_duration(seconds)
+      total = seconds.round
+      hours, remainder = total.divmod(3600)
+      minutes, secs = remainder.divmod(60)
+      return format("%dh %dm %ds", hours, minutes, secs) if hours.positive?
+      return format("%dm %ds", minutes, secs) if minutes.positive?
+
+      format("%ds", secs)
+    end
   end
 end
 

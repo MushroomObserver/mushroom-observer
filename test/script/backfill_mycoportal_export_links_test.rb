@@ -64,6 +64,21 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
   end
 
+  def test_image_already_present_is_written_to_skipped_report
+    image = images(:in_situ_image)
+    link = make_link(image)
+
+    run_script([occurrence_row(1, "MUOB 1")],
+               [multimedia_row(1, image_url(image.id))])
+
+    skipped = CSV.read(@skipped_out, headers: true)
+    row = skipped.find { |r| r["entity_type"] == "Image" }
+    assert_not_nil(row, "Expected a skipped-image row in the report")
+    assert_equal("1", row["occid"])
+    assert_equal(image.id.to_s, row["image_id"])
+    assert_equal(link.id.to_s, row["external_link_id"])
+  end
+
   def test_created_link_stores_metadata_date_as_external_created_on
     image = images(:in_situ_image)
     multimedia_csv = write_csv(
@@ -74,9 +89,11 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     occurrences_csv = write_csv(%w[id catalogNumber],
                                 [occurrence_row(1, "MUOB 1")])
     @missing_out = Tempfile.new(["missing", ".csv"]).path
+    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
-      apply: true, keep_csvs: false, missing_out: @missing_out
+      apply: true, keep_csvs: false, missing_out: @missing_out,
+      skipped_out: @skipped_out
     )
 
     capture_io { subject.run }
@@ -188,9 +205,11 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
     multimedia_csv = write_csv(%w[coreid identifier], [])
     @missing_out = Tempfile.new(["missing", ".csv"]).path
+    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
-      apply: true, keep_csvs: false, missing_out: @missing_out
+      apply: true, keep_csvs: false, missing_out: @missing_out,
+      skipped_out: @skipped_out
     )
 
     capture_io { subject.run }
@@ -219,6 +238,22 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                          relationship: :export).count,
       "Re-running should not create a duplicate export link"
     )
+  end
+
+  def test_observation_already_present_is_written_to_skipped_report
+    obs = observations(:coprinus_comatus_obs)
+    link = ExternalLink.create!(user: User.admin, target: obs,
+                                external_site: @site, relationship: :export,
+                                external_id: "500")
+
+    run_script([occurrence_row(500, "MUOB #{obs.id}")], [])
+
+    skipped = CSV.read(@skipped_out, headers: true)
+    row = skipped.find { |r| r["entity_type"] == "Observation" }
+    assert_not_nil(row, "Expected a skipped-observation row in the report")
+    assert_equal("500", row["occid"])
+    assert_equal(obs.id.to_s, row["mo_obs_id"])
+    assert_equal(link.id.to_s, row["external_link_id"])
   end
 
   def test_observation_not_found_locally_is_reported
@@ -282,12 +317,12 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
   end
 
-  def test_format_duration
-    subject = build
+  def test_stopwatch_formats_elapsed_duration
+    stopwatch = BackfillMycoportalExportLinks::Stopwatch.new
 
-    assert_equal("5s", subject.send(:format_duration, 5))
-    assert_equal("2m 5s", subject.send(:format_duration, 125))
-    assert_equal("1h 1m 5s", subject.send(:format_duration, 3665))
+    assert_equal("5s", stopwatch.send(:format_duration, 5))
+    assert_equal("2m 5s", stopwatch.send(:format_duration, 125))
+    assert_equal("1h 1m 5s", stopwatch.send(:format_duration, 3665))
   end
 
   def test_run_prints_elapsed_time_in_summary
@@ -295,9 +330,11 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                                 [occurrence_row(1, "MUOB 1")])
     multimedia_csv = write_csv(%w[coreid identifier], [])
     @missing_out = Tempfile.new(["missing", ".csv"]).path
+    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
-      apply: false, keep_csvs: false, missing_out: @missing_out
+      apply: false, keep_csvs: false, missing_out: @missing_out,
+      skipped_out: @skipped_out
     )
 
     out, = capture_io { subject.run }
@@ -318,20 +355,27 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       defaults[:missing_out],
       "missing_out should default to a path inside dwca_dir, not the CWD"
     )
+    assert_equal(
+      File.join(BackfillMycoportalExportLinks::Options::DEFAULT_DWCA_DIR,
+                "mycoportal_backfill_skipped.csv"),
+      defaults[:skipped_out],
+      "skipped_out should default to a path inside dwca_dir, not the CWD"
+    )
 
     opts = BackfillMycoportalExportLinks::Options.parse(
       ["--dwca-dir", "/tmp/somewhere",
        "--occurrences", "o.csv", "--multimedia", "m.csv",
-       "--keep-csvs", "--missing-out", "n.csv"]
+       "--keep-csvs", "--missing-out", "n.csv", "--skipped-out", "s.csv"]
     )
     assert_equal("/tmp/somewhere", opts[:dwca_dir])
     assert_equal("o.csv", opts[:occurrences])
     assert_equal("m.csv", opts[:multimedia])
     assert_equal(true, opts[:keep_csvs])
     assert_equal("n.csv", opts[:missing_out])
+    assert_equal("s.csv", opts[:skipped_out])
   end
 
-  def test_parse_options_missing_out_defaults_relative_to_custom_dwca_dir
+  def test_parse_options_reports_default_relative_to_custom_dwca_dir
     opts = BackfillMycoportalExportLinks::Options.parse(
       ["--dwca-dir", "/tmp/somewhere-else"]
     )
@@ -340,6 +384,12 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       File.join("/tmp/somewhere-else", "mycoportal_backfill_missing.csv"),
       opts[:missing_out],
       "missing_out should track a --dwca-dir override when not given " \
+      "explicitly"
+    )
+    assert_equal(
+      File.join("/tmp/somewhere-else", "mycoportal_backfill_skipped.csv"),
+      opts[:skipped_out],
+      "skipped_out should track a --dwca-dir override when not given " \
       "explicitly"
     )
   end
@@ -360,10 +410,11 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     multimedia_csv = write_csv(%w[coreid identifier],
                                [multimedia_row(1, image_url(image.id))])
     @missing_out = Tempfile.new(["missing", ".csv"]).path
+    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv,
       multimedia: multimedia_csv, apply: true, keep_csvs: false,
-      missing_out: @missing_out
+      missing_out: @missing_out, skipped_out: @skipped_out
     )
 
     capture_io { subject.run }
@@ -440,9 +491,11 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   def test_raises_when_no_matching_zip_is_found
     dwca_dir = Dir.mktmpdir("test_dwca_empty")
     @missing_out = Tempfile.new(["missing", ".csv"]).path
+    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: dwca_dir, occurrences: nil, multimedia: nil,
-      apply: true, keep_csvs: false, missing_out: @missing_out
+      apply: true, keep_csvs: false, missing_out: @missing_out,
+      skipped_out: @skipped_out
     )
 
     error = assert_raises(RuntimeError) { capture_io { subject.run } }
@@ -465,7 +518,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: "o.csv",
       multimedia: "m.csv", apply: false, keep_csvs: false,
-      missing_out: "n.csv"
+      missing_out: "n.csv", skipped_out: "s.csv"
     )
   end
 
@@ -492,15 +545,17 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   end
 
   # Runs the backfill against temp CSVs (output suppressed) and returns the
-  # instance so tests can inspect @stats. Missing-report path is @missing_out.
+  # instance so tests can inspect @stats. Report paths are @missing_out/
+  # @skipped_out.
   def run_script(occurrence_rows, multimedia_rows, apply: true)
     occurrences_csv = write_csv(%w[id catalogNumber], occurrence_rows)
     multimedia_csv = write_csv(%w[coreid identifier], multimedia_rows)
     @missing_out = Tempfile.new(["missing", ".csv"]).path
+    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv,
       multimedia: multimedia_csv, apply: apply, keep_csvs: false,
-      missing_out: @missing_out
+      missing_out: @missing_out, skipped_out: @skipped_out
     )
     capture_io { subject.run }
     subject
@@ -510,9 +565,11 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   # --multimedia given), so #run really globs for a zip and extracts it.
   def run_against_zip_dir(dwca_dir, keep_csvs:)
     @missing_out = Tempfile.new(["missing", ".csv"]).path
+    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: dwca_dir, occurrences: nil, multimedia: nil,
-      apply: true, keep_csvs: keep_csvs, missing_out: @missing_out
+      apply: true, keep_csvs: keep_csvs, missing_out: @missing_out,
+      skipped_out: @skipped_out
     )
     capture_io { subject.run }
     subject
