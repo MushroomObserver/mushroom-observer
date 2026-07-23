@@ -210,12 +210,11 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     links? || (@user && @sites.present?)
   end
 
-  # Own/sibling links to show as badges -- rendered above when/where/
-  # who. With nothing to show yet (only an eligible site to add one
-  # to), the section instead renders below when/where/who, as the
-  # last item, so the page doesn't lead with an empty-looking "+".
+  # Own/sibling links to show as badges. Called 3x per render.
   def links?
-    @obs.external_links.any? || sibling_has?(:external_links)
+    return @links if defined?(@links)
+
+    @links = @obs.external_links.any? || sibling_has?(:external_links)
   end
 
   def with_external_links_body(panel)
