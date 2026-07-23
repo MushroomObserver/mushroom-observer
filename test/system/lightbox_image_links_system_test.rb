@@ -4,12 +4,14 @@ require("application_system_test_case")
 
 # Regression tests for issue #4884: the "Show Original Image" and
 # "Show EXIF Header" links at the bottom of the lightbox caption were
-# dead. The global `.vote-section` thumbnail hover-overlay styling
-# (absolute bottom-pinned, opacity 0) leaked into `.lg-sub-html`,
-# leaving an invisible strip covering the links row and swallowing
-# every click. Clicking each link here fails with Cuprite's
-# "another element would receive the click" error if that overlay
-# ever comes back.
+# dead. The caption embedded the image vote interface, and the global
+# `.vote-section` thumbnail hover-overlay styling (absolute
+# bottom-pinned, opacity 0) leaked into `.lg-sub-html`, leaving an
+# invisible strip covering the links row and swallowing every click.
+# The caption no longer renders a vote section (its votes couldn't
+# sync anyway — the caption is a clone stored in `data-sub-html`);
+# clicking each link here fails with Cuprite's "another element would
+# receive the click" error if any such overlay ever comes back.
 class LightboxImageLinksSystemTest < ApplicationSystemTestCase
   def test_lightbox_original_and_exif_links
     rolf = users("rolf")
@@ -25,10 +27,9 @@ class LightboxImageLinksSystemTest < ApplicationSystemTestCase
     first(".theater-btn", visible: :all).trigger("click")
     assert_selector(".lg-sub-html")
 
-    # The vote interface renders visibly in the caption (not as the
-    # thumbnail-style invisible hover overlay).
+    # No vote UI in the caption — see class comment.
     within(".lg-sub-html") do
-      assert_selector(".vote-section .image-vote-links")
+      assert_no_selector(".vote-section", visible: :all)
     end
 
     # EXIF link opens the EXIF modal.

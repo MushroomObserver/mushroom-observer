@@ -203,41 +203,15 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, "caption-image-links")
   end
 
-  # The lightbox overlay is populated from this component's rendered HTML
-  # (read out of the theater button's `data-sub-html`). It now embeds the
-  # vote interface so users can vote without leaving the overlay —
-  # matching the in-page image-show panel.
-  def test_renders_vote_section_for_logged_in_user
+  # No vote UI in the lightbox caption (#4884). The global
+  # `.vote-section` styling is an absolute bottom-pinned, opacity-0
+  # thumbnail hover-overlay; inside `.lg-sub-html` it becomes an
+  # invisible strip covering the caption's bottom links row and
+  # swallowing clicks. Vote updates also can't sync to the caption
+  # (it's a clone stored in `data-sub-html`), so the caption skips
+  # the vote interface entirely.
+  def test_does_not_render_vote_section
     html = render_caption
-
-    assert_html(html, ".vote-section#image_vote_#{@image.id}")
-    assert_html(html, ".vote-meter.progress")
-    assert_html(html, ".vote-buttons .image-vote-links")
-  end
-
-  # Anonymous viewers can't vote, so the section is suppressed entirely
-  # (matches `images/show/_image_panel.html.erb`'s `if @user` gate).
-  def test_does_not_render_vote_section_for_logged_out_user
-    html = render_caption(user: nil)
-
-    assert_no_html(html, ".vote-section")
-    assert_no_html(html, ".vote-meter")
-  end
-
-  # No image in scope (e.g. obs-only pre-render contexts) → no votes.
-  def test_does_not_render_vote_section_without_image
-    html = render_caption(image: nil)
-
-    assert_no_html(html, ".vote-section")
-  end
-
-  # `votes: false` propagates from the parent `BaseImage` and
-  # suppresses the lightbox vote section — needed on pages that
-  # don't pre-load `:image_votes` (e.g. account/profile/images
-  # reuse page), otherwise `Image#users_vote(@user)` triggers a
-  # Bullet N+1 inside the vote interface.
-  def test_does_not_render_vote_section_when_votes_disabled
-    html = render_caption(votes: false)
 
     assert_no_html(html, ".vote-section")
     assert_no_html(html, ".vote-meter")
