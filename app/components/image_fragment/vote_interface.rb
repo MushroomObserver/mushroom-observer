@@ -10,26 +10,66 @@
 # - Vote buttons for all vote values
 # - Current user's vote display
 #
-# @example
+# @example Thumbnail hover overlay (default -- matrix box, InteractiveImage)
 #   ImageFragment(type: :vote_interface, user: @user, image: @image,
 #                 votes: true)
+#
+# @example Lightbox caption (always visible, no hover ancestor, and a
+# second live copy can coexist in the DOM alongside the in-page one)
+#   ImageFragment(type: :vote_interface, user: @user, image: @image,
+#                 votes: true, context: :lightbox)
 class Components::ImageFragment::VoteInterface < Components::Base
   prop :user, _Nilable(::User)
   prop :image, ::Image
   prop :votes, _Boolean, default: true
+  # Where this is being rendered -- two independent concerns hang off
+  # it, deliberately not conflated:
+  #
+  # Styling: only `:overlay` (the default) gets the absolutely
+  # positioned, hover-revealed treatment (`.vote-section`, see
+  # mo/_images.scss) meant for sitting on top of a thumbnail inside an
+  # `.image-sizer` ancestor (InteractiveImage/matrix-box). Every other
+  # context gets the plain, always-visible `.vote-section-inline`
+  # block -- e.g. `:lightbox`, or a future non-lightbox inline caller
+  # (the image show page has been mentioned) that still isn't an
+  # overlay.
+  #
+  # Element ids: only `:lightbox` gets every id this component emits
+  # (`vote_html_id`) prefixed. That's not a styling concern -- it's
+  # because the lightbox is the one context where a *second* live copy
+  # of the same image's vote UI can end up in the DOM simultaneously
+  # (opening the lightbox injects its caption's copy alongside the
+  # original in-page one), which would otherwise collide on id. A
+  # future inline-but-not-lightbox context with only ever one copy on
+  # the page doesn't need the prefix. `Images::VotesController#update`'s
+  # turbo-stream response updates both the plain and `lightbox_`-
+  # prefixed ids after a vote so both copies stay in sync.
+  prop :context, Symbol, default: :overlay
 
   def view_template
     return unless @votes && @image
 
     div(
-      class: "vote-section require-user",
-      id: "image_vote_#{@image.id}"
+      class: section_classes,
+      id: vote_html_id("image_vote")
     ) do
       render_vote_meter_and_links
     end
   end
 
   private
+
+  def section_classes
+    class_names(
+      @context == :overlay ? "vote-section" : "vote-section-inline",
+      "require-user"
+    )
+  end
+
+  def vote_html_id(base)
+    prefix = @context == :lightbox ? "lightbox_" : ""
+    "#{prefix}#{base}_#{@image.id}"
+  end
 
   def render_vote_meter_and_links
     vote_pct = calculate_vote_percentage
@@ -55,7 +95,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
     ) do
       div(
         class: "progress-bar",
-        id: "vote_meter_bar_#{@image.id}",
+        id: vote_html_id("vote_meter_bar"),
         style: "width: #{vote_percentage}%"
       )
     end
@@ -65,7 +105,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
     div(class: "vote-buttons mt-2") do
       div(
         class: "image-vote-links",
-        id: "image_vote_links_#{@image.id}"
+        id: vote_html_id("image_vote_links")
       ) do
         div(class: "text-center small") do
           render_user_vote_link

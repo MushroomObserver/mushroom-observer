@@ -74,6 +74,16 @@ svg.placeholder {
   }
 }
 
+// Non-overlay `Components::ImageFragment::VoteInterface` contexts
+// (`context:` other than `:overlay`, e.g. the lightbox caption) --
+// no absolute positioning, no hover-to-reveal, no forced white text.
+// Just a plain always-visible block using the surrounding context's
+// own text color.
+.vote-section-inline {
+  text-align: center;
+  padding: 0.5em 0.25em;
+}
+
 .matrix-box {
   .vote-buttons {
     font-size: 0.875em;

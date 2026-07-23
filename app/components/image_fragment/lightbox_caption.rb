@@ -27,6 +27,13 @@ class Components::ImageFragment::LightboxCaption < Components::Base
   prop :obs, _Union(::Observation, Hash), default: -> { {} }
   prop :identify, _Boolean, default: false
   prop :observation_view, _Nilable(::ObservationView), default: nil
+  # Propagated from the parent `BaseImage` (carousel /
+  # interactive-image). When the parent disables votes -- e.g. the
+  # profile-images reuse page passes `votes: false` because it
+  # doesn't pre-load `:image_votes` -- the lightbox caption must also
+  # skip the vote section. Otherwise `VoteInterface` calls
+  # `Image#users_vote(@user)` and triggers a Bullet N+1.
+  prop :votes, _Boolean, default: true
 
   def view_template
     if @obs.is_a?(::Observation)
@@ -35,6 +42,7 @@ class Components::ImageFragment::LightboxCaption < Components::Base
       render_image_caption
     end
 
+    render_vote_section
     render_image_links
   end
 
@@ -116,6 +124,18 @@ class Components::ImageFragment::LightboxCaption < Components::Base
 
   def render_image_caption
     div(class: "image-notes") { @image.notes.tl.truncate_html(300) }
+  end
+
+  # `context: :lightbox` -- plain always-visible styling (no
+  # `.image-sizer` hover ancestor here to reveal a `:overlay`), and
+  # every id this emits gets prefixed so it can't collide with the
+  # in-page vote section that's also live in the DOM once the
+  # lightbox is open. See `Components::ImageFragment::VoteInterface`.
+  def render_vote_section
+    return unless @votes && @user && @image
+
+    ImageFragment(type: :vote_interface, user: @user, image: @image,
+                  votes: true, context: :lightbox)
   end
 
   def render_image_links

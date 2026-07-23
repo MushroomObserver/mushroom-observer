@@ -76,6 +76,25 @@ class InteractiveImageTest < ComponentTestCase
     assert_includes(sub_html, "lightbox_link")
   end
 
+  # #4886: `votes:` threads all the way from `InteractiveImage` through
+  # `BaseImage#lightbox_caption_html` into the lightbox caption's own
+  # `context: :lightbox` copy of the vote UI, embedded in the theater
+  # button's `data-sub-html`.
+  def test_theater_button_sub_html_includes_lightbox_vote_section
+    html = render_image(votes: true)
+
+    sub_html = Nokogiri::HTML(html).at_css("a.theater-btn")["data-sub-html"]
+    assert_includes(sub_html, "vote-section-inline")
+    assert_includes(sub_html, "lightbox_image_vote_#{@image.id}")
+  end
+
+  def test_theater_button_sub_html_omits_vote_section_when_votes_disabled
+    html = render_image(votes: false)
+
+    sub_html = Nokogiri::HTML(html).at_css("a.theater-btn")["data-sub-html"]
+    assert_not_includes(sub_html, "vote-section-inline")
+  end
+
   # Image#broadcast_interactive_sizes renders with media_only: true so a
   # background-processing broadcast never touches page-specific link/
   # votes/overlay markup -- see the comment on Image#broadcast_interactive_

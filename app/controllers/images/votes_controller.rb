@@ -26,18 +26,36 @@ module Images
           end
         end
         format.turbo_stream do
-          # Was `render(partial: "images/votes/update")`, the partial
-          # just emitted a single `turbo_stream.update("image_vote_#{id}")`
-          # wrapping `Components::ImageFragment::VoteInterface` — inlined
-          # here.
-          render(turbo_stream: turbo_stream.update(
-            "image_vote_#{@image.id}",
-            ::Components::ImageFragment.new(
-              type: :vote_interface, user: @user, image: @image, votes: true
-            )
-          ))
+          render(turbo_stream: vote_interface_streams)
         end
       end
+    end
+
+    private
+
+    # Was `render(partial: "images/votes/update")`, the partial just
+    # emitted a single `turbo_stream.update("image_vote_#{id}")`
+    # wrapping `Components::ImageFragment::VoteInterface` — inlined
+    # here. Two targets, not one: the lightbox caption's copy
+    # (`context: :lightbox`) can be live in the DOM alongside the
+    # in-page one when the lightbox is open, under a `lightbox_`-
+    # prefixed id (see `VoteInterface#vote_html_id`).
+    # `turbo_stream.update` on an id that isn't currently in the DOM
+    # (lightbox closed) is a no-op, not an error.
+    def vote_interface_streams
+      [
+        turbo_stream.update("image_vote_#{@image.id}",
+                            vote_interface),
+        turbo_stream.update("lightbox_image_vote_#{@image.id}",
+                            vote_interface(context: :lightbox))
+      ]
+    end
+
+    def vote_interface(context: :overlay)
+      ::Components::ImageFragment.new(
+        type: :vote_interface,
+        user: @user, image: @image, votes: true, context: context
+      )
     end
   end
 end

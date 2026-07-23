@@ -23,13 +23,37 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
     assert_equal("", html)
   end
 
+  # :overlay (default) -- the absolutely-positioned, hover-revealed
+  # thumbnail treatment, plain (unprefixed) element ids.
+  def test_overlay_context_is_the_default
+    html = render_component
+
+    assert_html(html, ".vote-section#image_vote_#{@image.id}")
+    assert_no_html(html, ".vote-section-inline")
+    assert_html(html, "#vote_meter_bar_#{@image.id}")
+    assert_html(html, "#image_vote_links_#{@image.id}")
+  end
+
+  # :lightbox -- plain always-visible styling, and every id prefixed
+  # so a live in-page :overlay copy and this :lightbox copy of the
+  # same image's vote UI can coexist in the DOM without colliding.
+  def test_lightbox_context_uses_inline_styling_and_prefixed_ids
+    html = render_component(context: :lightbox)
+
+    assert_html(html, ".vote-section-inline#lightbox_image_vote_#{@image.id}")
+    assert_no_html(html, ".vote-section")
+    assert_html(html, "#lightbox_vote_meter_bar_#{@image.id}")
+    assert_html(html, "#lightbox_image_vote_links_#{@image.id}")
+  end
+
   private
 
-  def render_component(votes:)
+  def render_component(votes: true, context: :overlay)
     render(Components::ImageFragment::VoteInterface.new(
              user: @user,
              image: @image,
-             votes: votes
+             votes: votes,
+             context: context
            ))
   end
 end

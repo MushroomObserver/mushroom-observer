@@ -57,6 +57,11 @@ module Images
       end
     end
 
+    # Two turbo-stream targets, not one: the in-page vote section
+    # (:overlay context) and the lightbox caption's copy (:lightbox
+    # context, a `lightbox_`-prefixed id) -- both can be live in the
+    # DOM at once once the lightbox is open. See
+    # Components::ImageFragment::VoteInterface#vote_html_id.
     def test_cast_vote_turbo_stream
       image = images(:in_situ_image)
       login(users(:mary).login)
@@ -67,6 +72,8 @@ module Images
       assert_response(:success)
       assert_select("turbo-stream[action='update']" \
                     "[target='image_vote_#{image.id}']")
+      assert_select("turbo-stream[action='update']" \
+                    "[target='lightbox_image_vote_#{image.id}']")
     end
 
     # These try to test the results of ajax calls.
