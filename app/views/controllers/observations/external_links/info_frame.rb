@@ -5,8 +5,11 @@
 # `Turbo-Frame` request header. Renders a bold "On iNaturalist:" label
 # followed by the site's own + sibling `ExternalLink` rows inside the
 # frame the clicked badge targets. Own rows get an inline edit/destroy
-# `InlineCRUDLinks` (self-gated on `link.can_edit?(user)`); sibling
-# rows never do. Otherwise purely informational, not a form.
+# `InlineCRUDLinks` (self-gated on `link.can_edit?(user)`), EXCEPT when
+# `@obs` is a read-only reflection (#4214) -- its own external link is
+# the sync source, so no edit/destroy affordance at all, just a note
+# pointing at the source. Sibling rows never get InlineCRUDLinks
+# either way. Otherwise purely informational, not a form.
 module Views::Controllers::Observations::ExternalLinks
   class InfoFrame < Views::Base
     # A sibling observation's link to the same site, paired with the
@@ -40,12 +43,26 @@ module Views::Controllers::Observations::ExternalLinks
 
     # Edit/destroy affordance for the current obs's own links only --
     # a sibling's link (below) isn't this page's to manage, even if
-    # the viewer happens to have edit permission on it too.
+    # the viewer happens to have edit permission on it too. A
+    # read-only reflection gets a note instead -- its own link can't
+    # be edited or destroyed on MO at all (#4214).
     def render_own_row(link)
       li(class: "hanging-indent") do
         Link(type: :external, link: link)
-        whitespace
-        InlineCRUDLinks(target: link, observation: @obs, user: @user)
+        if @obs.reflection?
+          render_read_only_note
+        else
+          whitespace
+          InlineCRUDLinks(target: link, observation: @obs, user: @user)
+        end
+      end
+    end
+
+    # Read-only reflections (#4214) can't be edited on MO; the note tells
+    # the user to change the record at its source and resync.
+    def render_read_only_note
+      div(class: "reflection-read-only-note text-muted small mt-1") do
+        plain(:observation_reflection_read_only_note.l)
       end
     end
 

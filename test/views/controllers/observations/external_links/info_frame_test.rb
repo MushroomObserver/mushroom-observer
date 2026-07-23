@@ -67,6 +67,27 @@ module Views::Controllers::Observations::ExternalLinks
       assert_no_html(html, "button.destroy_external_link_link_#{link.id}")
     end
 
+    # A read-only reflection's own link can't be edited or destroyed on
+    # MO at all (#4214) -- no InlineCRUDLinks, just a note pointing at
+    # the source, even for a viewer who'd otherwise have permission.
+    def test_reflection_shows_read_only_note_not_mod_links
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      obs = link.observation
+      user = users(:rolf)
+      assert(link.can_edit?(user),
+             "Need a user fixture with edit permission on this link")
+      obs.update_column(:reflected_at, Time.zone.now)
+
+      html = render(frame_with(obs: obs, site_links: [link], user: user))
+
+      assert_html(html, ".reflection-read-only-note",
+                  text: :observation_reflection_read_only_note.l)
+      assert_no_html(html, "button.destroy_external_link_link_#{link.id}")
+      assert_no_html(
+        html, "a[data-modal='modal_#{link.type_tag}_#{link.id}']"
+      )
+    end
+
     private
 
     def sibling_link(link, observation)
