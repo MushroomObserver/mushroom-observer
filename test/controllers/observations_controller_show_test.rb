@@ -56,7 +56,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     get(:show, params: { id: obs1.id })
     assert_response(:success)
-    assert_select("#associated_observations")
+    assert_select("#matching_observations")
     assert_select("a[href*='occurrences/#{occ.id}']")
   end
 
@@ -314,12 +314,12 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("#comments_for_object")
     # Phlex panels — assert against their stable IDs (no template
     # lookup): _name_info / _observation_details / _namings /
-    # _thumbnail_map / _associated_observations / _species_lists.
+    # _thumbnail_map / _matching_observations / _species_lists.
     assert_select("#observation_name_info")
     assert_select("#observation_details")
     assert_select("#observation_namings")
     assert_select("#observation_thumbnail_map")
-    assert_select("#associated_observations")
+    assert_select("#matching_observations")
     assert_select("#observation_species_lists")
   end
   private :assert_show_observation
