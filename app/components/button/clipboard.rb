@@ -3,7 +3,7 @@
 # Icon button that copies `text:` to the clipboard via the Stimulus
 # `clipboard` controller. `name:` becomes the tooltip label and sr-only
 # accessible name (the icon is the visual; the name is never shown
-# inline). Defaults to the copy icon, xs size, and outline styling —
+# inline). Defaults to the copy icon, xs size, and no btn framing —
 # override any of these with the usual `Components::Button` kwargs.
 #
 # Bases aren't always displayed near the button (e.g. the sequences
@@ -19,7 +19,7 @@ class Components::Button::Clipboard < Components::Button
     @text = text
     rest[:icon] ||= :copy
     rest[:size] ||= :xs
-    rest[:variant] ||= :outline
+    rest[:variant] ||= :strip
     caller_data = rest.delete(:data) || {}
     rest[:data] = tooltip_data(name).merge(clipboard_data).merge(caller_data)
     super(name: name, **rest)
