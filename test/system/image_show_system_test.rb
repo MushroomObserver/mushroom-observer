@@ -18,6 +18,9 @@ class ImageShowSystemTest < ApplicationSystemTestCase
 
     visit("/images/#{image.id}")
     assert_selector("body.images__show")
+    # Let external assets (Maps JS, license badge) finish loading so
+    # they don't count as pending connections against the next action.
+    sleep(1)
 
     page.execute_script("window.moTestMarker = true")
 
