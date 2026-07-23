@@ -3,6 +3,26 @@
 require("test_helper")
 
 class Language::UnusedTagFinderTest < UnitTestCase
+  # Permanent regression guard for issue #4867: fails CI if a tag
+  # loses its last reference (deleted caller, cascading orphan from
+  # some other tag's removal, etc.) and nobody cleans it up. If this
+  # fails on a tag that's actually reached via a new dynamic
+  # `:"prefix_#{var}_suffix"` construction, add that pattern to
+  # Language::UnusedTagFinder::KNOWN_DYNAMIC_* instead of ignoring
+  # the failure.
+  def test_no_unused_tags_remain
+    result = Language::UnusedTagFinder.call
+
+    assert_empty(
+      result.confirmed_unused,
+      "Found en.txt tag(s) with no remaining reference anywhere: " \
+      "#{result.confirmed_unused.join(", ")}. Delete them from en.txt " \
+      "(then run `bin/rails lang:update`), or if this is a false " \
+      "positive from a new dynamic tag-construction pattern, add it " \
+      "to Language::UnusedTagFinder::KNOWN_DYNAMIC_*."
+    )
+  end
+
   def test_call_returns_a_sane_result_against_the_real_en_txt
     result = Language::UnusedTagFinder.call
 
