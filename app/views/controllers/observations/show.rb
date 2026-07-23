@@ -3,7 +3,7 @@
 # Main observation show page — the parent that composes every
 # obs-show sub-panel (`Components::ImageGallery`,
 # `Details`, `NameInfoPanel`, `SpeciesListsPanel`, `ProjectsPanel`,
-# `AssociatedObservationsPanel`, `ThumbnailMapPanel`, namings
+# `MatchingObservationsPanel`, `ThumbnailMapPanel`, namings
 # partial, comments partial, `Views::Layouts::ObjectFooter`) into a
 # two-column layout.
 #
@@ -104,7 +104,7 @@ module Views::Controllers::Observations
       render(NameInfoPanel.new(obs: @observation, user: @user))
       render(SpeciesListsPanel.new(obs: @observation, user: @user))
       render(ProjectsPanel.new(obs: @observation))
-      render(AssociatedObservationsPanel.new(
+      render(MatchingObservationsPanel.new(
                obs: @observation, occurrence: @occurrence,
                siblings: @sibling_observations
              ))
