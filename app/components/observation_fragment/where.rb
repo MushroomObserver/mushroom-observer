@@ -39,6 +39,6 @@ class Components::ObservationFragment::Where < Components::Base
 
     title = :show_observation_vague_location.l.dup
     title << " #{:show_observation_improve_location.l}" if @user == @obs.user
-    p(class: "ml-3") { em { plain(title) } }
+    p(class: "vague-location-notice ml-3") { em { plain(title) } }
   end
 end
