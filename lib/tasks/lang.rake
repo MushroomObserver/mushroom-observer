@@ -47,11 +47,14 @@ end
 # prerequisite chain *before* this runs and never written to during
 # it, so concurrent reads are safe.
 #
-# Lazily built (not a top-level constant) -- rake files are evaluated
-# before the :environment task runs, so Zeitwerk can't resolve
-# ConcurrentEachWithConnection yet at file-load time.
+# Built lazily inside a method (not a top-level constant) -- rake
+# files are evaluated before the :environment task runs, so Zeitwerk
+# can't resolve ConcurrentEachWithConnection yet at file-load time.
+# Not memoized: the object itself only holds `pool_size` (an Integer)
+# -- the real Concurrent::FixedThreadPool is created fresh inside
+# every #call, so caching this wrapper saves nothing.
 def lang_task_pool
-  @lang_task_pool ||= ConcurrentEachWithConnection.new(pool_size: 4)
+  ConcurrentEachWithConnection.new(pool_size: 4)
 end
 
 def define_tasks(action, verbose, verbose_method, description)

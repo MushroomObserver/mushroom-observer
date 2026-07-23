@@ -41,7 +41,7 @@ class ConcurrentEachWithConnectionTest < UnitTestCase
     assert_equal(3, connection_ids.size)
   end
 
-  def test_reraises_first_error_after_all_items_finish
+  def test_reraises_the_single_error_unchanged_after_all_items_finish
     results = Concurrent::Array.new
 
     error = assert_raises(RuntimeError) do
@@ -52,9 +52,22 @@ class ConcurrentEachWithConnectionTest < UnitTestCase
       end
     end
 
-    assert_match(/boom on 2/, error.message)
+    assert_equal("boom on 2", error.message)
     # The other items still ran despite item 2's failure.
     assert_equal([1, 3], results.to_a.sort)
+  end
+
+  def test_raises_a_combined_error_when_multiple_items_fail_differently
+    error = assert_raises(RuntimeError) do
+      ConcurrentEachWithConnection.new(pool_size: 4).call([1, 2, 3]) do |n|
+        raise(ArgumentError.new("bad arg #{n}")) if n == 1
+        raise(TypeError.new("bad type #{n}")) if n == 3
+      end
+    end
+
+    assert_match(/2 errors/, error.message)
+    assert_match(/ArgumentError: bad arg 1/, error.message)
+    assert_match(/TypeError: bad type 3/, error.message)
   end
 
   def test_processes_more_items_than_pool_size
