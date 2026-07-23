@@ -33,6 +33,16 @@ class AccordionTest < ComponentTestCase
     assert_html(html, "div.panel.bg-none")
   end
 
+  def test_pane_class_merges_onto_that_panes_collapse_div
+    html = render_accordion do |a|
+      a.with_pane(id: "view_42", expanded: true, pane_class: "pl-4")
+      a.with_pane(id: "edit_42")
+    end
+
+    assert_html(html, "#view_42.collapse.in.pl-4")
+    assert_no_html(html, "#edit_42.pl-4")
+  end
+
   def test_extra_class_merges_onto_inner_panel_div
     html = render(
       Components::Accordion.new(id: "notes_42", class: "m-0")

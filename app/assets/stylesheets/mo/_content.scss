@@ -106,6 +106,16 @@ ul.tight-list {
   font-weight: bold;
 }
 
+// Separates each open accordion pane from the badge row above it.
+// Scoped to `.in` (Bootstrap 3's "expanded" class, toggled by its own
+// collapse.js) rather than a static `.border-top` utility, so the
+// line only shows while the pane is actually visible -- a collapsed
+// `.collapse` div still occupies the DOM (just height: 0), so an
+// unconditional border would render as a stray line above nothing.
+#external_links_accordion .collapse.in {
+  border-top: 1px solid $panel-inner-border;
+}
+
 .h3.page-title {
   font-size: 22px;
 

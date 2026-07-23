@@ -9,7 +9,8 @@
 # Add as many `with_pane` slots as needed. `id:` is required on each
 # pane — callers' `data-target` / `href` must point at it. Pass
 # `expanded: true` on the one that starts visible; the rest start
-# collapsed.
+# collapsed. Pass `pane_class:` to add classes to that one pane's
+# `.collapse` div (e.g. `pane_class: "pl-4"` to indent its contents).
 #
 # The inner wrapper's `.panel` class is REQUIRED, not decorative --
 # verified against Bootstrap 3.4.1's actual `js/collapse.js` on
@@ -49,9 +50,10 @@ class Components::Accordion < Components::Base
   # the inner `.panel` wrapper -- matches Icon/Collapsible's pattern.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
-  slot :pane, lambda { |id:, expanded: false, &content|
+  slot :pane, lambda { |id:, expanded: false, pane_class: nil, &content|
     Collapsible(
-      id: id, expanded: expanded, class: "no-transition"
+      id: id, expanded: expanded,
+      class: class_names("fade-not-slide", pane_class)
     ) { content&.call }
   }, collection: true
 

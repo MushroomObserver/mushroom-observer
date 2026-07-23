@@ -29,13 +29,15 @@ module Views::Controllers::Observations::ExternalLinks
         end
       end
       ul(class: "tight-list pl-0") do
-        @site_links.each { |link| li { Link(type: :external, link: link) } }
+        @site_links.each do |link|
+          li(class: "hanging-indent") { Link(type: :external, link: link) }
+        end
         @sibling_site_links.each { |sib_link| render_sibling_row(sib_link) }
       end
     end
 
     def render_sibling_row(sib_link)
-      li do
+      li(class: "hanging-indent") do
         Link(type: :external, link: sib_link.link)
         whitespace
         sibling_attribution(sib_link.observation)
