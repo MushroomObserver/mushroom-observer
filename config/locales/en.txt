@@ -2145,8 +2145,7 @@
   show_observation_improve_location: If you would like it to be included in maps, choose a more precise location.
   show_observation_specimen_available: Specimen available
   show_observation_specimen_not_available: No specimen available
-  show_observation_shared_on_site: Observation [id] on [site]
-  show_observation_uploaded_to_site: Uploaded to [site] ([id])
+  show_observation_on_site: On [site]
   show_observation_shared_with_tooltip: Show this observation on [site]
   show_observation_no_images: No images
   show_observation_remove_images: "[:remove_objects(type=:image)]"

@@ -156,9 +156,9 @@ class Components::Dropdown < Components::Base
   # interfere with dropdown click handling.
   def strip_tooltip_data(kwargs)
     data = kwargs[:data]
-    return kwargs unless data.is_a?(Hash) && data[:toggle] == "tooltip"
+    return kwargs unless data.is_a?(Hash) && data[:trigger] == "tooltip"
 
-    stripped = data.except(:toggle, :title, :placement)
+    stripped = data.except(:trigger, :title, :placement)
     stripped.empty? ? kwargs.except(:data) : kwargs.merge(data: stripped)
   end
 

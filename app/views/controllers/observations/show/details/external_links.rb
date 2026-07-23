@@ -4,12 +4,15 @@
 # for the old External-Links list panel (and for the ImportSource
 # credit line: an import's own badge modal already shows "Imported
 # from iNaturalist (id)", so a separate always-visible credit line is
-# redundant). Each badge is a modal-trigger link to
-# `ExternalLinksController#show`, which lists every own + sibling
-# `ExternalLink` for that specific site. Hides silently when there's
-# nothing to show and no eligible site to add a link to. Rendered as
-# its own top `panel-body` by `Details`, the slot ImportSource used
-# to occupy.
+# redundant). Each badge is an accordion-collapse trigger AND a Turbo
+# Frame link to `ExternalLinksController#show` in one -- clicking
+# opens (or switches to) that badge's pane directly below the badge
+# row, and the pane's empty `turbo-frame` fetches the list of every
+# own + sibling `ExternalLink` for that site. Only one pane is ever
+# open (native Bootstrap collapse accordion via `data-parent`). Hides
+# silently when there's nothing to show and no eligible site to add a
+# link to. Rendered as its own top `panel-body` by `Details`, the slot
+# ImportSource used to occupy.
 class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -24,11 +27,14 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   def view_template
     return if visible_sites.empty? && !show_new_link?
 
-    div(id: "observation_external_links", class: wrapper_class,
+    div(id: "observation_external_links",
         data: { controller: "section-update",
                 section_update_user_value: @user&.id }) do
-      render_badges
-      render_new_link if show_new_link?
+      div(class: wrapper_class) do
+        render_badges
+        render_new_link if show_new_link?
+      end
+      render_accordion
     end
   end
 
@@ -37,6 +43,9 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   # Only add the flex/justify-content-between shell when there's a
   # right-side item (the add link) to space against -- an empty right
   # side would otherwise leave a wasted flex wrapper around one item.
+  # Kept on its own inner div (not the outer #observation_external_links
+  # container) so the accordion pane below it isn't itself a flex item
+  # trying to sit beside the badges/add-link row.
   def wrapper_class
     class_names("obs-links",
                 show_new_link? && "d-flex justify-content-between")
@@ -72,20 +81,35 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   end
 
   def render_badge(site_name, link)
-    Button(type: :modal,
-           name: SITE_BADGES[site_name],
-           target: external_link_path(link.id),
-           # `Link::Modal#modal_data` prepends "modal_" itself, so this
-           # combines with `Components::Modal`'s `id:` in the controller
-           # (`"modal_external_link_#{@external_link.id}"`) -- don't
-           # double-prefix here.
-           modal_id: "external_link_#{link.id}",
-           variant: :strip, class: "badge badge-id inline-link text-uppercase",
-           data: { toggle: "tooltip", placement: "bottom",
-                   title: :show_observation_shared_with_tooltip.l(
-                     site: site_name
-                   ) })
+    Link(type: :collapse_toggle,
+         target_id: "pane_#{link.id}",
+         fallback_href: external_link_path(link.id),
+         class: "badge badge-id inline-link text-uppercase",
+         data: {
+           parent: "#external_links_accordion",
+           turbo_frame: "external_link_frame_#{link.id}",
+           trigger: "tooltip", placement: "bottom",
+           title: :show_observation_shared_with_tooltip.l(
+             site: site_name
+           )
+         }) { plain(SITE_BADGES[site_name]) }
     whitespace
+  end
+
+  # Accordion panes, one per visible site -- each an empty Turbo Frame
+  # populated on first click by the matching badge above. Sits inside
+  # the same section-update wrapper as the badges, so a CRUD-triggered
+  # re-render resets every pane to closed along with the badge list.
+  def render_accordion
+    return unless visible_sites.any?
+
+    Accordion(id: "external_links_accordion", class: "m-0") do |accordion|
+      visible_sites.map(&:last).each do |link|
+        accordion.with_pane(id: "pane_#{link.id}") do
+          turbo_frame_tag("external_link_frame_#{link.id}")
+        end
+      end
+    end
   end
 
   # The badges themselves are informational and shown to everyone;

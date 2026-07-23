@@ -33,6 +33,22 @@ class AccordionTest < ComponentTestCase
     assert_html(html, "div.panel.bg-none")
   end
 
+  def test_extra_class_merges_onto_inner_panel_div
+    html = render(
+      Components::Accordion.new(id: "notes_42", class: "m-0")
+    ) { |a| a.with_pane(id: "p") { "x" } }
+
+    assert_html(html, "div.panel.border-none.bg-none.m-0")
+  end
+
+  def test_extra_data_attrs_merge_onto_inner_panel_div
+    html = render(
+      Components::Accordion.new(id: "notes_42", data: { foo: "bar" })
+    ) { |a| a.with_pane(id: "p") { "x" } }
+
+    assert_html(html, "#notes_42 div.panel[data-foo='bar']")
+  end
+
   private
 
   def render_accordion(&block)
