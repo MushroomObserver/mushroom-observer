@@ -409,6 +409,7 @@
   editors: editors
   email: email
   emails: emails
+  email_address: email address
   email_addresss: email addresses
   field_slip_prefix: field slip prefix
   filename: filename
