@@ -44,7 +44,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   end
 
   def render_body
-    ul(class: "tight-list") do
+    ul(class: "tight-list pl-0 mb-0") do
       @siblings.each do |sibling|
         li do
           a(href: permanent_observation_path(sibling.id)) do
