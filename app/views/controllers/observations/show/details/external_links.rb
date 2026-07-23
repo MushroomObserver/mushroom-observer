@@ -46,15 +46,19 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
 
   private
 
-  # Only add the flex/justify-content-between shell when there's a
-  # right-side item (the add link) to space against -- an empty right
-  # side would otherwise leave a wasted flex wrapper around one item.
+  # Only add the flex/justify-content-between shell when there's both
+  # a left side (badges) AND a right side (the add link) to space
+  # apart -- with no badges yet, the add link instead sits right after
+  # the "No external links" caption inline, matching the "No
+  # fungarium records [ + ]" pattern used elsewhere (RecordListSection)
+  # rather than getting shoved to the far right of an empty row.
   # Kept on its own inner div (not the outer #observation_external_links
   # container) so the accordion pane below it isn't itself a flex item
   # trying to sit beside the badges/add-link row.
   def wrapper_class
     class_names("obs-links",
-                show_new_link? && "d-flex justify-content-between")
+                visible_sites.any? && show_new_link? &&
+                  "d-flex justify-content-between")
   end
 
   def render_badges
