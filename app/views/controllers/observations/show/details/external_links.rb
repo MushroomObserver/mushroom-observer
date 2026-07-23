@@ -11,7 +11,9 @@
 # own + sibling `ExternalLink` for that site. Only one pane is ever
 # open (native Bootstrap collapse accordion via `data-parent`). Hides
 # silently when there's nothing to show and no eligible site to add a
-# link to. `Details` renders this inside a `.panel-body.p-0` (own id +
+# link to; when there's an eligible site but no badges yet, shows a
+# "No external links" caption alongside the add link instead of an
+# unlabeled "+". `Details` renders this inside a `.panel-body.p-0` (own id +
 # section-update wiring live on that panel-body, not here) so the
 # badge row and the accordion below it can each supply their own
 # padding and be genuinely full-width against the panel edge -- see
@@ -32,7 +34,11 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     return if visible_sites.empty? && !show_new_link?
 
     div(class: class_names(wrapper_class, "p-3 border-bottom")) do
-      render_badges
+      if visible_sites.any?
+        render_badges
+      else
+        plain(:no_objects.t(type: :external_link))
+      end
       render_new_link if show_new_link?
     end
     render_accordion
@@ -40,20 +46,22 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
 
   private
 
-  # Only add the flex/justify-content-between shell when there's a
-  # right-side item (the add link) to space against -- an empty right
-  # side would otherwise leave a wasted flex wrapper around one item.
+  # Only add the flex/justify-content-between shell when there's both
+  # a left side (badges) AND a right side (the add link) to space
+  # apart -- with no badges yet, the add link instead sits right after
+  # the "No external links" caption inline, matching the "No
+  # fungarium records [ + ]" pattern used elsewhere (RecordListSection)
+  # rather than getting shoved to the far right of an empty row.
   # Kept on its own inner div (not the outer #observation_external_links
   # container) so the accordion pane below it isn't itself a flex item
   # trying to sit beside the badges/add-link row.
   def wrapper_class
     class_names("obs-links",
-                show_new_link? && "d-flex justify-content-between")
+                visible_sites.any? && show_new_link? &&
+                  "d-flex justify-content-between")
   end
 
   def render_badges
-    return unless visible_sites.any?
-
     div do
       plain("#{:shared_with.ti}: ")
       visible_sites.each { |site_name, link| render_badge(site_name, link) }

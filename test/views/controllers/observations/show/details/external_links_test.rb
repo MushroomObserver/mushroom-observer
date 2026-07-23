@@ -119,6 +119,41 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     assert_html(html, "a[data-modal='modal_external_link']")
   end
 
+  # No badges yet, but an eligible site to add one to: shows a "No
+  # external links" caption instead of a bare, unlabeled "+".
+  def test_renders_no_links_caption_when_empty_but_addable
+    obs = observations(:detailed_unknown_obs)
+    assert_empty(obs.external_links)
+    sites = ::ExternalSite.all.to_a
+    skip("Need at least one ExternalSite fixture") if sites.empty?
+
+    html = render(panel_with(obs, sites: sites))
+
+    assert_html(html, "div.p-3.border-bottom",
+                text: :no_objects.t(type: :external_link).as_displayed)
+    assert_no_html(html, "a.badge.badge-id")
+    assert_html(html, "a[data-modal='modal_external_link']")
+    # No flex/justify-content-between shell with no badges to space
+    # against -- the add link sits right after the caption inline,
+    # matching the "No fungarium records [ + ]" pattern.
+    assert_no_html(html, ".d-flex.justify-content-between")
+  end
+
+  # With both badges AND an addable site, the row DOES use the flex
+  # shell to push the add link to the far right, away from the badges.
+  def test_wraps_badges_and_add_link_in_flex_row_when_both_present
+    link = external_links(:imported_inat_obs_inat_link)
+    obs = link.observation
+    sites = ::ExternalSite.all.to_a
+    skip("Need at least one ExternalSite fixture") if sites.empty?
+
+    html = render(panel_with(obs, sites: sites))
+
+    assert_html(html, "div.d-flex.justify-content-between")
+    assert_html(html, "a.badge.badge-id", text: "iNat")
+    assert_html(html, "a[data-modal='modal_external_link']")
+  end
+
   def test_hides_new_link_when_no_sites
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     obs = link.observation
