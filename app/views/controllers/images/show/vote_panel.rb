@@ -91,7 +91,7 @@ module Views::Controllers::Images
         div(class: "pt-2") do
           link_to(text, vote_link_args.merge(vote: value),
                   class: css, title: help,
-                  data: { toggle: "tooltip", placement: "left",
+                  data: { tooltip_target: "tip", placement: "left",
                           role: "image_vote", val: value, id: @image.id })
         end
       end
@@ -103,7 +103,7 @@ module Views::Controllers::Images
         div(class: "pt-2") do
           link_to(text, vote_link_args.merge(vote: value, next: true),
                   class: css, title: help,
-                  data: { toggle: "tooltip" })
+                  data: { tooltip_target: "tip" })
         end
       end
 
