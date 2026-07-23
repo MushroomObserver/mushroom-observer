@@ -110,8 +110,33 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       subject.send(:process_batch, [{ occid: "1", image_id: nil }])
     end
 
-    assert_match(/#{BackfillMycoportalExportLinks::PROGRESS_EVERY} processed/o,
-                 err)
+    assert_match(
+      /#{BackfillMycoportalExportLinks::PROGRESS_EVERY} images processed/o,
+      err
+    )
+  end
+
+  def test_format_duration
+    subject = build
+
+    assert_equal("5s", subject.send(:format_duration, 5))
+    assert_equal("2m 5s", subject.send(:format_duration, 125))
+    assert_equal("1h 1m 5s", subject.send(:format_duration, 3665))
+  end
+
+  def test_run_prints_elapsed_time_in_summary
+    occurrences_csv = write_csv(%w[id catalogNumber],
+                                [occurrence_row(1, "MUOB 1")])
+    multimedia_csv = write_csv(%w[coreid identifier], [])
+    @missing_out = Tempfile.new(["missing", ".csv"]).path
+    subject = BackfillMycoportalExportLinks.new(
+      dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
+      apply: false, keep_csvs: false, missing_out: @missing_out
+    )
+
+    out, = capture_io { subject.run }
+
+    assert_match(/elapsed: (\d+h )?(\d+m )?\d+s/, out)
   end
 
   def test_parse_options_defaults_and_overrides

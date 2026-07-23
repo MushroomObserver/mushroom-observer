@@ -85,6 +85,7 @@ class BackfillMycoportalExportLinks
   end
 
   def run
+    @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     extract_dwca_zip! unless @occurrences_csv
     @mo_id_by_occid = load_occurrences
     warn("Loaded #{@mo_id_by_occid.size} occurrences " \
@@ -254,7 +255,7 @@ class BackfillMycoportalExportLinks
                pluck(:target_id).to_set
     batch.each { |row| process_row(row, known_ids, existing) }
     @seen += batch.size
-    warn("  #{@seen} processed") if (@seen % PROGRESS_EVERY).zero?
+    warn("  #{@seen} images processed") if (@seen % PROGRESS_EVERY).zero?
   end
 
   def process_row(row, known_ids, existing)
@@ -307,8 +308,24 @@ class BackfillMycoportalExportLinks
     puts("  invalid (see warnings above): #{@stats[:invalid]}")
     puts("  image not found in MO: #{@stats[:mo_missing]} -> #{@missing_out}")
     puts("  unparseable identifier: #{@stats[:unparseable]}")
+    puts("  elapsed: #{elapsed_summary}")
     puts
     puts(@apply ? "APPLIED." : "Dry run. Re-run with APPLY=1 to write.")
+  end
+
+  def elapsed_summary
+    format_duration(Process.clock_gettime(Process::CLOCK_MONOTONIC) -
+                     @started_at)
+  end
+
+  def format_duration(seconds)
+    total = seconds.round
+    hours, remainder = total.divmod(3600)
+    minutes, secs = remainder.divmod(60)
+    return format("%dh %dm %ds", hours, minutes, secs) if hours.positive?
+    return format("%dm %ds", minutes, secs) if minutes.positive?
+
+    format("%ds", secs)
   end
 end
 
