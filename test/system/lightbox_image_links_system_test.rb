@@ -8,10 +8,13 @@ require("application_system_test_case")
 # `.vote-section` thumbnail hover-overlay styling (absolute
 # bottom-pinned, opacity 0) leaked into `.lg-sub-html`, leaving an
 # invisible strip covering the links row and swallowing every click.
-# The caption no longer renders a vote section (its votes couldn't
-# sync anyway — the caption is a clone stored in `data-sub-html`);
-# clicking each link here fails with Cuprite's "another element would
-# receive the click" error if any such overlay ever comes back.
+# The caption's own vote UI (restored properly in #4886/#4892) uses a
+# distinct `.vote-section-inline` class -- plain, always-visible, no
+# absolute positioning -- specifically so this can't recur; clicking
+# each link here fails with Cuprite's "another element would receive
+# the click" error if the unsafe `.vote-section` flavor ever comes
+# back. The caption itself is a real, hidden DOM element nested in the
+# theater-btn now, not a captured-HTML clone in `data-sub-html` (#4894).
 class LightboxImageLinksSystemTest < ApplicationSystemTestCase
   def test_lightbox_original_and_exif_links
     rolf = users("rolf")
@@ -27,7 +30,8 @@ class LightboxImageLinksSystemTest < ApplicationSystemTestCase
     first(".theater-btn", visible: :all).trigger("click")
     assert_selector(".lg-sub-html")
 
-    # No vote UI in the caption — see class comment.
+    # The caption's own vote UI is `.vote-section-inline`, not the
+    # unsafe hover-overlay `.vote-section` — see class comment.
     within(".lg-sub-html") do
       assert_no_selector(".vote-section", visible: :all)
     end

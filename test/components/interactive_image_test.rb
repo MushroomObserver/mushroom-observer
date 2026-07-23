@@ -62,37 +62,47 @@ class InteractiveImageTest < ComponentTestCase
     assert_equal("", html)
   end
 
-  def test_theater_button_has_data_sub_html_with_image_links
+  # #4894: the caption is a real, hidden DOM element nested inside the
+  # theater-btn (not a captured-HTML string in `data-sub-html`) -- a
+  # `div`, not an `a`, since it now legally contains the caption's own
+  # interactive content (vote buttons, propose-naming trigger).
+  # `data-sub-html` is a plain CSS selector lightGallery resolves at
+  # open time (`subHtmlSelectorRelative: true`, see
+  # lightgallery_controller.js).
+  def test_theater_button_has_data_sub_html_selector_with_image_links
     html = render_image
 
-    # Should have theater button with data-sub-html attribute
-    assert_html(html, "a.theater-btn[data-sub-html]")
+    assert_html(html, "div.theater-btn[data-sub-html='.lightbox-caption']")
 
-    # The data-sub-html should contain the image links from LightboxCaption
-    sub_html = Nokogiri::HTML(html).at_css("a.theater-btn")["data-sub-html"]
-    assert_includes(sub_html, "caption-image-links")
-    assert_includes(sub_html, "/images/#{@image.id}/original")
-    assert_includes(sub_html, "/images/#{@image.id}/exif")
-    assert_includes(sub_html, "lightbox_link")
+    caption = Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption")
+    assert_equal("lightbox_caption_#{@image.id}", caption["id"])
+    assert_includes(caption["class"], "d-none")
+    caption_html = caption.to_html
+    assert_includes(caption_html, "caption-image-links")
+    assert_includes(caption_html, "/images/#{@image.id}/original")
+    assert_includes(caption_html, "/images/#{@image.id}/exif")
+    assert_includes(caption_html, "lightbox_link")
   end
 
   # #4886: `votes:` threads all the way from `InteractiveImage` through
-  # `BaseImage#lightbox_caption_html` into the lightbox caption's own
-  # `context: :lightbox` copy of the vote UI, embedded in the theater
-  # button's `data-sub-html`.
-  def test_theater_button_sub_html_includes_lightbox_vote_section
+  # `BaseImage#render_lightbox_caption` into the lightbox caption's own
+  # `context: :lightbox` copy of the vote UI, nested in the theater
+  # button's hidden caption element.
+  def test_theater_button_caption_includes_lightbox_vote_section
     html = render_image(votes: true)
 
-    sub_html = Nokogiri::HTML(html).at_css("a.theater-btn")["data-sub-html"]
-    assert_includes(sub_html, "vote-section-inline")
-    assert_includes(sub_html, "lightbox_image_vote_#{@image.id}")
+    caption_html =
+      Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption").to_html
+    assert_includes(caption_html, "vote-section-inline")
+    assert_includes(caption_html, "lightbox_image_vote_#{@image.id}")
   end
 
-  def test_theater_button_sub_html_omits_vote_section_when_votes_disabled
+  def test_theater_button_caption_omits_vote_section_when_votes_disabled
     html = render_image(votes: false)
 
-    sub_html = Nokogiri::HTML(html).at_css("a.theater-btn")["data-sub-html"]
-    assert_not_includes(sub_html, "vote-section-inline")
+    caption_html =
+      Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption").to_html
+    assert_not_includes(caption_html, "vote-section-inline")
   end
 
   # Image#broadcast_interactive_sizes renders with media_only: true so a

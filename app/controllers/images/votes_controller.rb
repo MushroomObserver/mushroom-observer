@@ -37,11 +37,10 @@ module Images
     # emitted a single `turbo_stream.update("image_vote_#{id}")`
     # wrapping `Components::ImageFragment::VoteInterface` — inlined
     # here. Two targets, not one: the lightbox caption's copy
-    # (`context: :lightbox`) can be live in the DOM alongside the
-    # in-page one when the lightbox is open, under a `lightbox_`-
-    # prefixed id (see `VoteInterface#vote_html_id`).
-    # `turbo_stream.update` on an id that isn't currently in the DOM
-    # (lightbox closed) is a no-op, not an error.
+    # (`context: :lightbox`) lives under a `lightbox_`-prefixed id
+    # (see `VoteInterface#vote_html_id`) inside the hidden caption
+    # element that's always in the DOM now (#4894), so this update
+    # reaches it whether the lightbox is open or closed.
     def vote_interface_streams
       [
         turbo_stream.update("image_vote_#{@image.id}",

@@ -283,8 +283,9 @@ class ImageGalleryTest < ComponentTestCase
 
   # Regression: the visible `.carousel-caption` overlay must NEVER
   # contain image copyright or notes. Those belong on the lightbox
-  # caption (`data-sub-html` on the lightbox link, built by
-  # `Components::ImageFragment::LightboxCaption`). Image *original
+  # caption (the hidden `.lightbox-caption` element nested in the
+  # theater-btn, built by `Components::ImageFragment::LightboxCaption`
+  # -- see #4894). Image *original
   # filename* IS allowed in the carousel-caption (inside the
   # `.image-info.d-none.d-sm-block` wrapper, hidden on xs and
   # visible from sm+) when the owner's `keep_filenames` opt-in
@@ -317,7 +318,7 @@ class ImageGalleryTest < ComponentTestCase
     assert_html(html, ".carousel-caption .vote-section")
 
     # Copyright + notes are NOT in the carousel-caption. (They are
-    # in the lightbox `data-sub-html` instead.)
+    # in the lightbox's hidden `.lightbox-caption` element instead.)
     assert_no_html(html, ".carousel-caption .image-copyright")
     assert_no_html(html, ".carousel-caption .image-notes")
   end

@@ -4,7 +4,7 @@
 # lightbox.
 #
 # Handles two types of captions:
-# 1. Observation captions - full details with when/where/who, notes, and naming
+# 1. Observation captions - full details with when/where/who and naming
 # 2. Image captions - just the image notes
 #
 # Both types include image links (original, EXIF) at the bottom.
@@ -53,7 +53,6 @@ class Components::ImageFragment::LightboxCaption < Components::Base
     render_identify_ui if @identify
     render_obs_title
     render_obs_when_where_who
-    render_truncated_notes
   end
 
   def render_identify_ui
@@ -96,31 +95,6 @@ class Components::ImageFragment::LightboxCaption < Components::Base
       ObservationFragment(type: :where_gps, obs: @obs, user: @user)
       ObservationFragment(type: :who, obs: @obs, user: @user)
     end
-  end
-
-  def render_truncated_notes
-    return unless @obs.notes?
-
-    prepare_textile_cache
-    div(class: "obs-notes", id: "observation_#{@obs.id}_notes") do
-      formatted_truncated_notes
-    end
-  end
-
-  # ApplicationController's per-request reset only covers the FIRST
-  # render on a request. This component renders once per observation
-  # on a matrix/index page (Matrix::Box -> Image::Interactive ->
-  # lightbox_caption_html -> this), so without an explicit clear here,
-  # one observation's genus abbreviation leaks into the next
-  # observation's textile rendering within the same page load.
-  def prepare_textile_cache
-    Textile.clear_textile_cache
-    Textile.register_name(@obs.name)
-  end
-
-  def formatted_truncated_notes
-    @obs.notes_show_formatted.truncate(150, separator: " ").
-      sub(/\A/, "#{:notes.ti}: ").wring_out_textile.tpl
   end
 
   def render_image_caption

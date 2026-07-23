@@ -11,53 +11,49 @@ export default class extends Controller {
       selector: '.theater-btn',
       plugins: [lgZoom],
       licenseKey: '3B4BAB91-98EF-411A-975E-3334D00D1A8C',
-      defaultCaptionHeight: 200
+      defaultCaptionHeight: 200,
+      // The caption is a real, hidden DOM element nested inside each
+      // `.theater-btn` (see Components::Image::Base#render_lightbox_caption),
+      // not a captured-HTML string -- `data-sub-html` on the theater-btn
+      // is the CSS selector ".lightbox-caption" now. `relative: true`
+      // scopes lightGallery's lookup to the specific item
+      // ($LG(items).eq(index).find(selector)) instead of grabbing the
+      // first ".lightbox-caption" anywhere on the page. See #4894.
+      subHtmlSelectorRelative: true
     });
 
-    // Listen for refresh events
-    this.boundRefresh = this.refresh.bind(this);
-    this.element.addEventListener('lightgallery:refresh', this.boundRefresh);
-
-    // Register custom Turbo Stream action for updating lightbox captions
-    this.registerTurboStreamAction();
+    // Turbo Streams update the hidden caption / vote-section DOM
+    // directly now (ordinary `update`/`replace` actions), but
+    // lightGallery only re-reads a slide's caption on open or slide
+    // transition, not via a DOM mutation observer -- so an already-open
+    // lightbox needs an explicit refresh to pick up a stream-driven
+    // change. Listen generically rather than adding a custom Turbo
+    // Stream action per caller.
+    this.boundMaybeRefresh = this.maybeRefreshOnStream.bind(this);
+    document.addEventListener(
+      'turbo:before-stream-render', this.boundMaybeRefresh
+    );
   }
 
   disconnect() {
     if (this.gallery) {
       this.gallery.destroy();
     }
-    if (this.boundRefresh) {
-      this.element.removeEventListener('lightgallery:refresh', this.boundRefresh);
-    }
-    delete Turbo.StreamActions.update_lightbox_caption;
+    document.removeEventListener(
+      'turbo:before-stream-render', this.boundMaybeRefresh
+    );
   }
 
-  // Refresh the gallery to pick up updated data-sub-html attributes
+  maybeRefreshOnStream(event) {
+    const target = event.target.target;
+    if (target && /^(lightbox_caption_|lightbox_image_vote_)/.test(target)) {
+      this.refresh();
+    }
+  }
+
   refresh() {
     if (this.gallery) {
       this.gallery.refresh();
-    }
-  }
-
-  // Register custom Turbo Stream action to update lightbox captions.
-  // Standard Turbo Stream actions operate on element content, but captions
-  // are stored in data-sub-html attributes, requiring a custom action.
-  registerTurboStreamAction() {
-    const controller = this;
-    Turbo.StreamActions.update_lightbox_caption = function () {
-      const obsId = this.getAttribute("obs-id");
-      const captionHtml = this.templateElement.innerHTML;
-      controller.updateCaption(obsId, captionHtml);
-    };
-  }
-
-  // Update the caption for a specific observation's lightbox
-  updateCaption(obsId, captionHtml) {
-    const theaterBtn = this.element.querySelector(`#box_${obsId} .theater-btn`);
-
-    if (theaterBtn) {
-      theaterBtn.dataset.subHtml = captionHtml;
-      this.refresh();
     }
   }
 }

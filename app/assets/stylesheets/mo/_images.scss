@@ -44,6 +44,10 @@ svg.placeholder {
 .theater-btn {
   @extend .top-right, .text-center, .mr-2, .mt-2;
   padding: 0.125em;
+  // `.theater-btn` is a `div` now, not an `a` (#4894 -- an `a` can't
+  // legally contain the caption's interactive content nested inside
+  // it), so the pointer cursor needs to be explicit.
+  cursor: pointer;
 
   &:hover {
     color: rgba(white, 0.75);

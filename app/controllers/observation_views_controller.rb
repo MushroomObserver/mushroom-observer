@@ -31,10 +31,10 @@ class ObservationViewsController < ApplicationController
 
   def render_update_streams
     render(turbo_stream: [
-             caption_toggle_stream,
-             box_toggle_stream,
-             lightbox_caption_stream
-           ])
+      caption_toggle_stream,
+      box_toggle_stream,
+      lightbox_caption_stream
+    ].compact)
   end
 
   def caption_toggle_stream
@@ -60,31 +60,28 @@ class ObservationViewsController < ApplicationController
     )
   end
 
-  # `<turbo-stream action="update_lightbox_caption" obs-id="…">` is a
-  # custom Turbo Stream action (handled by the lightbox Stimulus
-  # controller). Build it via Rails' `tag` builder so `@obs_id` is
-  # attribute-escaped — passing strings straight into a heredoc is
-  # an XSS shape even when `@obs_id` happens to be an integer today.
+  # The lightbox caption is a real, hidden DOM element now (see
+  # Components::Image::Base#render_lightbox_caption, #4894) -- a plain
+  # `update` swaps its content directly, same as any other Turbo
+  # target. `update`, not `replace`, so the wrapping
+  # `#lightbox_caption_<id>.lightbox-caption.d-none` element itself
+  # (lightGallery's selector target) survives the swap.
   def lightbox_caption_stream
-    caption = view_context.capture do
-      view_context.render(
-        Components::ImageFragment.new(
-          type: :lightbox_caption,
-          user: @user, obs: @obs, identify: true,
-          observation_view: @observation_view,
-          # Same thumb image the matrix-box theater button opens the
-          # lightbox on -- without it, LightboxCaption's @image is nil,
-          # so the original/EXIF links break (empty /images//original)
-          # and the vote section (gated on @image) silently disappears
-          # from the refreshed caption.
-          image: @obs.thumb_image
-        )
+    return unless @obs.thumb_image
+
+    turbo_stream.update(
+      "lightbox_caption_#{@obs.thumb_image.id}",
+      Components::ImageFragment.new(
+        type: :lightbox_caption,
+        user: @user, obs: @obs, identify: true,
+        observation_view: @observation_view,
+        # Same thumb image the matrix-box theater button opens the
+        # lightbox on -- without it, LightboxCaption's @image is nil,
+        # so the original/EXIF links break (empty /images//original)
+        # and the vote section (gated on @image) silently disappears
+        # from the refreshed caption.
+        image: @obs.thumb_image
       )
-    end
-    view_context.tag.turbo_stream(
-      view_context.tag.template { caption },
-      action: "update_lightbox_caption",
-      "obs-id": @obs_id
     )
   end
 end
