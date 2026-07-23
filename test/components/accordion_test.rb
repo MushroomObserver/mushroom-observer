@@ -39,6 +39,12 @@ class AccordionTest < ComponentTestCase
     assert_html(html, "#p.fade-not-slide")
   end
 
+  def test_with_pane_class_lands_on_the_pane_alongside_fade_not_slide
+    html = render_accordion { |a| a.with_pane(id: "p", class: "p-3") { "x" } }
+
+    assert_html(html, "#p.fade-not-slide.p-3")
+  end
+
   def test_slide_true_uses_bootstraps_default_transition
     html = render(
       Components::Accordion.new(id: "notes_42", slide: true)

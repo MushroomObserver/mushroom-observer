@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
 # "Observation details" panel — an optional external-links "Shared
-# with" badge line, when / where / who, optional GPS, projects list,
-# and field slip. The center column of the obs show page (and also
-# rendered into the naming form pages). Specimen-available status +
-# collection-numbers / herbarium-records / sequences live in the
-# separate `SpecimenPanel`, rendered right below this one.
+# with" badge line, when / where / who, optional GPS, and field slip.
+# The center column of the obs show page (and also rendered into the
+# naming form pages). Specimen-available status + collection-numbers /
+# herbarium-records / sequences live in the separate `SpecimenPanel`,
+# rendered right below this one. The projects list lives in its own
+# `ProjectsPanel`, rendered alongside `SpeciesListsPanel`.
 class Views::Controllers::Observations::Show::Details < Views::Base
   prop :obs, ::Observation
   prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
@@ -18,7 +19,9 @@ class Views::Controllers::Observations::Show::Details < Views::Base
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
       if show_external_links?
-        panel.with_body(classes: "border-bottom py-2") do
+        panel.with_body(classes: "p-0", id: "observation_external_links",
+                        data: { controller: "section-update",
+                                section_update_user_value: @user&.id }) do
           render_external_links_section
         end
       end
@@ -43,7 +46,6 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   def render_body
     ul(class: "list-unstyled mb-0") { render_when_where_who }
-    render_projects if @user && @obs.projects.present?
     render_field_slip if @user && @obs.field_slip
   end
 
@@ -195,19 +197,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     )
   end
 
-  # ---- projects / field slip -----------------------------------
-
-  def render_projects
-    div(class: "obs-projects", id: "observation_projects") do
-      span { plain("#{:projects.ti}:") }
-      br
-      @obs.projects.each do |project|
-        div(class: "indent") do
-          Link(type: :object, object: project)
-        end
-      end
-    end
-  end
+  # ---- field slip -----------------------------------------------
 
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do

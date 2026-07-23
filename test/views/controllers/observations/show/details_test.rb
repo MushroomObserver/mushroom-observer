@@ -16,18 +16,20 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_html(html, "#observation_details")
   end
 
-  # "Shared with" badges: a second .panel-body (with border-bottom to
-  # separate it from the main details body) when the obs has any
-  # external_link (own or sibling) or an eligible site to add one,
-  # none at all otherwise. ExternalLinksTest covers the component's
-  # own content in isolation; this covers Details' wiring.
+  # "Shared with" badges: a second .panel-body (zero-padding -- its
+  # children, the badge row and the accordion, supply their own
+  # padding/border individually) when the obs has any external_link
+  # (own or sibling) or an eligible site to add one, none at all
+  # otherwise. ExternalLinksTest covers the component's own content in
+  # isolation; this covers Details' wiring.
   def test_renders_external_links_body_for_obs_with_external_link
     obs = observations(:imported_inat_obs)
 
     html = render(panel_with(obs))
 
-    assert_html(html, "#observation_details > .panel-body.border-bottom " \
-                      "#observation_external_links")
+    assert_html(html, "#observation_details > " \
+                      ".panel-body.p-0#observation_external_links" \
+                      "[data-controller='section-update']")
   end
 
   # Badges are informational, not gated on being logged in -- an
@@ -38,8 +40,8 @@ class Views::Controllers::Observations::Show::DetailsTest <
 
     html = render(panel_with(obs, nil))
 
-    assert_html(html, "#observation_details > .panel-body.border-bottom " \
-                      "#observation_external_links")
+    assert_html(html, "#observation_details > " \
+                      ".panel-body.p-0#observation_external_links")
   end
 
   def test_does_not_render_external_links_body_when_nothing_to_show

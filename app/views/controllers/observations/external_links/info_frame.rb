@@ -23,12 +23,12 @@ module Views::Controllers::Observations::ExternalLinks
     private
 
     def render_body
-      h5 do
+      h5(class: "mt-0") do
         strong do
           plain("#{:show_observation_on_site.l(site: @site_name)}:")
         end
       end
-      ul(class: "tight-list pl-3") do
+      ul(class: "tight-list pl-3 mb-0") do
         @site_links.each do |link|
           li(class: "hanging-indent") { Link(type: :external, link: link) }
         end

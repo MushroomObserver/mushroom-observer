@@ -9,7 +9,10 @@
 # Add as many `with_pane` slots as needed. `id:` is required on each
 # pane — callers' `data-target` / `href` must point at it. Pass
 # `expanded: true` on the one that starts visible; the rest start
-# collapsed.
+# collapsed. Pass `class:` on a pane for styling specific to that
+# pane's own content (e.g. `class: "p-3"` when the accordion itself
+# sits inside a zero-padding parent) -- separate from the `class:`
+# passed to `Accordion` itself, which styles the shared `.panel` wrapper.
 #
 # The inner wrapper's `.panel` class is REQUIRED, not decorative --
 # verified against Bootstrap 3.4.1's actual `js/collapse.js` on
@@ -56,10 +59,10 @@ class Components::Accordion < Components::Base
   # the inner `.panel` wrapper -- matches Icon/Collapsible's pattern.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
-  slot :pane, lambda { |id:, expanded: false, &content|
+  slot :pane, lambda { |id:, expanded: false, class: nil, &content|
     Collapsible(
       id: id, expanded: expanded,
-      class: (@slide ? nil : "fade-not-slide")
+      class: class_names((@slide ? nil : "fade-not-slide"), grab(class:))
     ) { content&.call }
   }, collection: true
 

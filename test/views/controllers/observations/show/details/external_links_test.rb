@@ -25,7 +25,9 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs))
 
-    assert_html(html, "#observation_external_links")
+    # Badge row supplies its own padding/border -- the parent
+    # panel-body (rendered by Details, not this view) is `.p-0`.
+    assert_html(html, "div.p-3.border-bottom")
     assert_html(
       html, "a.badge.badge-id[href='#{routes.external_link_path(link.id)}']",
       text: "iNat"
@@ -93,9 +95,10 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs))
 
-    assert_html(html, "#external_links_accordion")
-    assert_html(html, "#pane_#{inat_link.id}.collapse")
-    assert_html(html, "#pane_#{mcp_link.id}.collapse")
+    # Each pane supplies its own padding -- the parent panel-body
+    # (rendered by Details, not this view) is `.p-0`.
+    assert_html(html, "#pane_#{inat_link.id}.collapse.p-3")
+    assert_html(html, "#pane_#{mcp_link.id}.collapse.p-3")
     assert_html(
       html,
       "#pane_#{inat_link.id} turbo-frame#external_link_frame_#{inat_link.id}"
@@ -136,7 +139,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs, sites: sites, user: nil))
 
-    assert_html(html, "#observation_external_links")
+    assert_html(html, "div.p-3.border-bottom")
     assert_no_html(html, "a[data-modal='modal_external_link']")
   end
 

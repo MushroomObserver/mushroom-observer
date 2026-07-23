@@ -11,8 +11,12 @@
 # own + sibling `ExternalLink` for that site. Only one pane is ever
 # open (native Bootstrap collapse accordion via `data-parent`). Hides
 # silently when there's nothing to show and no eligible site to add a
-# link to. Rendered as its own top `panel-body` by `Details`, the slot
-# ImportSource used to occupy.
+# link to. `Details` renders this inside a `.panel-body.p-0` (own id +
+# section-update wiring live on that panel-body, not here) so the
+# badge row and the accordion below it can each supply their own
+# padding and be genuinely full-width against the panel edge -- see
+# `app/views/controllers/images/show/vote_panel.rb` for the same
+# `panel-body.p-0` + self-padding-children pattern.
 class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -27,15 +31,11 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   def view_template
     return if visible_sites.empty? && !show_new_link?
 
-    div(id: "observation_external_links",
-        data: { controller: "section-update",
-                section_update_user_value: @user&.id }) do
-      div(class: wrapper_class) do
-        render_badges
-        render_new_link if show_new_link?
-      end
-      render_accordion
+    div(class: class_names(wrapper_class, "p-3 border-bottom")) do
+      render_badges
+      render_new_link if show_new_link?
     end
+    render_accordion
   end
 
   private
@@ -84,7 +84,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     Link(type: :collapse_toggle,
          target_id: "pane_#{link.id}",
          fallback_href: external_link_path(link.id),
-         class: "badge badge-id inline-link text-uppercase",
+         class: "badge badge-id badge-xl text-uppercase",
          data: {
            parent: "#external_links_accordion",
            turbo_frame: "external_link_frame_#{link.id}",
@@ -103,10 +103,10 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   def render_accordion
     return unless visible_sites.any?
 
-    Accordion(id: "external_links_accordion", class: "m-0",
-              slide: true) do |accordion|
+    Accordion(id: "external_links_accordion", class: "m-0") do |accordion|
       visible_sites.map(&:last).each do |link|
-        accordion.with_pane(id: "pane_#{link.id}") do
+        accordion.with_pane(id: "pane_#{link.id}",
+                            class: "p-3 border-bottom") do
           turbo_frame_tag("external_link_frame_#{link.id}")
         end
       end

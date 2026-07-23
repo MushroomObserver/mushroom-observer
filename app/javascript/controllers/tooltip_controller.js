@@ -12,10 +12,20 @@ export default class extends Controller {
 
   connect() {
     this.element.dataset.tooltip = "connected";
-    this.activateTooltips();
+    this.activateTooltips(this.element);
+    // Content added later via a turbo-frame fetch (e.g. the external
+    // links "Shared with" pane) never gets this controller's one-time
+    // connect() sweep -- turbo:frame-load fires once per frame
+    // navigation, scoped to just that frame's new content.
+    this.frameLoadListener = (event) => this.activateTooltips(event.target);
+    document.addEventListener("turbo:frame-load", this.frameLoadListener);
   }
 
-  activateTooltips() {
-    $('[data-trigger="tooltip"]').tooltip()
+  disconnect() {
+    document.removeEventListener("turbo:frame-load", this.frameLoadListener);
+  }
+
+  activateTooltips(scope) {
+    $(scope).find('[data-trigger="tooltip"]').tooltip()
   }
 }
