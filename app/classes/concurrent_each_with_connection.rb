@@ -1,17 +1,14 @@
 # frozen_string_literal: true
 
 # Runs a block once per item, up to `pool_size` at a time, each on its
-# own ActiveRecord connection. For work that has to parallelize
-# in-process rather than as a background job -- e.g. lib/tasks/lang.rake's
-# multi-language export/import tasks, which run standalone (CI, a git
-# hook, or a developer directly) with no Solid Queue workers running.
+# own ActiveRecord connection -- for work that has to parallelize
+# in-process rather than as a background job (e.g. lib/tasks/lang.rake's
+# multi-language tasks, which run standalone with no Solid Queue workers
+# available).
 #
-# One item's failure doesn't stop the others from completing, but the
-# overall call still fails loud once everything settles: a single
-# failure re-raises that exact error (class + message unchanged); two
-# or more failures raise one RuntimeError listing every one of them,
-# so a deploy-time run doesn't lose N-1 failures' worth of diagnostic
-# information behind whichever error happened to be collected first.
+# One item's failure doesn't stop the others; a single failure re-raises
+# unchanged, two or more raise one combined RuntimeError naming all of
+# them, so a run doesn't lose every failure but one.
 #
 # @example
 #   ConcurrentEachWithConnection.new(pool_size: 4).call(Language.all) do |lang|

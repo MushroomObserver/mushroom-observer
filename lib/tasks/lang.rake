@@ -36,23 +36,17 @@ def perform_action(lang, action)
   end
 end
 
-# Concurrency for the :all / :unofficial multi-language tasks below.
-# lang:update runs standalone (via CI, a git hook, or a developer
-# directly) -- Solid Queue workers aren't running when this task
-# fires, so this can't be a background job; it has to parallelize
-# in-process. Each Language's export/import/update/strip/check work
-# is independent (its own instance variables, its own
-# "#{locale}.yml"/"#{locale}.txt" files) -- the only shared state is
-# Language.verbose/safe_mode/locales_dir, all set once by the :setup
-# prerequisite chain *before* this runs and never written to during
-# it, so concurrent reads are safe.
+# Each Language's export/import/update/strip/check work is independent
+# (own instance variables, own "#{locale}.yml"/"#{locale}.txt" files).
+# The only shared state -- Language.verbose/safe_mode/locales_dir -- is
+# set once by the :setup prerequisite chain before this runs and never
+# written to during it, so concurrent reads are safe. See
+# ConcurrentEachWithConnection for why this parallelizes in-process.
 #
-# Built lazily inside a method (not a top-level constant) -- rake
-# files are evaluated before the :environment task runs, so Zeitwerk
-# can't resolve ConcurrentEachWithConnection yet at file-load time.
-# Not memoized: the object itself only holds `pool_size` (an Integer)
-# -- the real Concurrent::FixedThreadPool is created fresh inside
-# every #call, so caching this wrapper saves nothing.
+# Built lazily (not a top-level constant): rake files are evaluated
+# before :environment, so Zeitwerk can't resolve the constant yet.
+# Not memoized -- the wrapper only holds `pool_size`; the real thread
+# pool is built fresh inside every #call, so caching it saves nothing.
 def lang_task_pool
   ConcurrentEachWithConnection.new(pool_size: 4)
 end
@@ -65,13 +59,10 @@ def define_tasks(action, verbose, verbose_method, description)
     perform_action(lang, action)
   end
 
-  # NOTE: `lang.verbose(...)` (LanguageExporter#verbose) does a plain
-  # `puts` when `Language.verbose` is on (the default
-  # unless `silent=yes`). Running these per-language on a thread pool
-  # means lines from different languages can interleave/print
-  # out of order -- an accepted tradeoff of parallelizing, since each
-  # line is already locale-tagged (e.g. "Checking en"), and nothing in
-  # MO's CI or scripts parses this task's stdout.
+  # `lang.verbose` puts when `Language.verbose` is on (default unless
+  # `silent=yes`). Threaded output can interleave across locales --
+  # harmless, since each line is already locale-tagged (e.g. "Checking
+  # en") and nothing parses this task's stdout.
   desc(description.gsub("XXX", "unofficial").gsub("(S)", "s"))
   task(unofficial: :setup) do
     lang_task_pool.call(Language.unofficial.to_a) do |lang|
