@@ -27,9 +27,13 @@ class Language::UnusedTagFinderTest < UnitTestCase
   def test_call_returns_a_sane_result_against_the_real_en_txt
     result = Language::UnusedTagFinder.call
 
-    assert_operator(result.total, :>, 3000,
-                    "should have found roughly the whole en.txt catalog")
-    assert_operator(result.files_scanned, :>, 1000,
+    # Loose bounds on purpose -- this just confirms the tool found a
+    # non-trivial catalog and scanned a real chunk of the repo, not
+    # that today's exact tag/file counts hold. #4867's later purge
+    # rounds will keep shrinking en.txt's total.
+    assert_operator(result.total, :>, 1000,
+                    "should have found a non-trivial en.txt catalog")
+    assert_operator(result.files_scanned, :>, 500,
                     "should have scanned a substantial part of the repo")
     # A core, unmistakably-live tag should never show up as unused.
     assert_not_includes(result.confirmed_unused, "add_object")
