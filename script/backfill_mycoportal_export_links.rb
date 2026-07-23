@@ -2,23 +2,22 @@
 # frozen_string_literal: true
 
 # One-time backfill of ExternalLink (relationship: :export) rows for every
-# image already present in MyCoPortal (MCP), from a Darwin Core Archive
-# backup of the MUOB collection.
-#
-# MCP does not expose a stable, unauthenticated URL this script can fetch
-# automatically -- the backup has to be downloaded manually first (see
-# USAGE below) and placed in DEFAULT_DWCA_DIR (tmp/mycoportal_dwca/).
+# observations and images already present in MyCoPortal (MCP)
+# (Based on a Darwin Core Archive (DwC-A) backup of the MUOB collection)
+
+# The backup must be downloaded manually first (see USAGE below)
+# and placed in DEFAULT_DWCA_DIR (tmp/mycoportal_dwca/).
+
 # This script finds the newest such zip and extracts
 # occurrences.csv / multimedia.csv
-# The extracted CSVs are deleted again once the run finishes;
-# pass --keep-csvs to retain them instead (the zip itself is never
-# touched either way).
+# The extracted CSVs are deleted bye default once the run finishes;
+# Pass --keep-csvs to retain them
 # Pass --occurrences/--multimedia to skip the zip entirely and use
 # already-extracted files instead.
 #
-# Images MCP has that don't exist locally are written to a report, by
-# default <dwca-dir>/mycoportal_backfill_missing.csv (pass --missing-out
-# to override).
+# Observations/Images MCP has that don't exist in MO are written to a report,
+# bydefault <dwca-dir>/mycoportal_backfill_missing.csv
+# pass --missing-out to override.
 #
 # occurrences.csv's "catalogNumber ("MUOB <id>") is the MO Observation id.
 # multimedia.csv's "coreid" joins to occurrences.csv's "id" (occid)
@@ -29,11 +28,11 @@
 #
 # USAGE:
 #
-#   Before running the script, download a copy of the MUOB data to
-#   tmp/mycoportal_dwca/ using the instructions at
+#   Before running the script, create a backup of the MUOB data and
+#   download it to tmp/mycoportal_dwca/
+#   using the instructions at
 #   https://docs.symbiota.org/Collection_Manager_Guide/Downloading/downloading_copy
-#   The downloaded data will have a name like
-#   MUOB_backup_2026-07-22_190455_DwC-A.zip
+#   (The download will have a name like MUOB_backup_2026-07-22_190455_DwC-A.zip
 #
 #   # Dry run by default
 #   bin/rails runner script/backfill_mycoportal_export_links.rb
@@ -46,7 +45,7 @@
 #     --occurrences tmp/MUOB_DwC-A/occurrences.csv \
 #     --multimedia tmp/MUOB_DwC-A/multimedia.csv
 #
-#   # Keep the extracted CSVs instead of deleting them after the run:
+#   # Keep the CSVs instead of deleting them after the run:
 #   bin/rails runner script/backfill_mycoportal_export_links.rb --keep-csvs
 #
 #   # List all options:
