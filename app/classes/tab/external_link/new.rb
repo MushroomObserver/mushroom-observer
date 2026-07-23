@@ -8,7 +8,7 @@ class Tab::ExternalLink::New < Tab::Base
   end
 
   def title
-    :show_observation_add_link.l
+    :add_object.t(type: :external_link)
   end
 
   def path

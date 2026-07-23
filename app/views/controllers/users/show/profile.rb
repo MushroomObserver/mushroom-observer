@@ -136,7 +136,7 @@ module Views::Controllers::Users
       def life_list_text
         species = @life_list.num_species_observed
         higher = @life_list.num_higher_level_observed
-        taxa_word = higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
+        taxa_word = pluralize_tag(:checklist_taxon, higher).l
         if species.positive? && higher.positive?
           :show_user_life_list.t(species: species, higher: higher,
                                  taxa_word: taxa_word)

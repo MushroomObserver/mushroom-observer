@@ -128,6 +128,42 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, :show_observation_seen_at.l)
   end
 
+  # #4884: the who line mirrors the obs show page's Collector /
+  # Entered-by semantics (via Components::ObservationWho) instead of
+  # the old "Who:" label. Branch coverage lives in ObservationWhoTest;
+  # this pins the caption's wiring.
+  def test_who_line_uses_collector_entered_by_semantics
+    obs = observations(:detailed_unknown_obs)
+    obs.collector = "Jane Forager"
+    obs.collector_user_id = nil
+
+    html = render_caption(obs: obs, image: nil)
+    text = Nokogiri::HTML.fragment(html).at_css("#observation_who").text
+
+    assert_includes(text, :collector.ti)
+    assert_includes(text, "Jane Forager")
+    assert_includes(text, :entered_by.ti)
+    assert_not_includes(text, "#{:who.ti}: ")
+  end
+
+  def test_renders_contact_link_when_owner_accepts_general_questions
+    obs = observations(:owner_accepts_general_questions)
+    viewer = users(:rolf)
+    assert_not_equal(obs.user, viewer)
+
+    html = render_caption(user: viewer, obs: obs)
+
+    assert_html(html, "#observation_who a[data-controller='modal-toggle']")
+  end
+
+  def test_does_not_render_contact_link_for_own_observation
+    obs = observations(:owner_accepts_general_questions)
+
+    html = render_caption(user: obs.user, obs: obs)
+
+    assert_no_html(html, "#observation_who [data-controller='modal-toggle']")
+  end
+
   def test_always_renders_image_links
     html = render_caption
 
@@ -167,41 +203,15 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, "caption-image-links")
   end
 
-  # The lightbox overlay is populated from this component's rendered HTML
-  # (read out of the theater button's `data-sub-html`). It now embeds the
-  # vote interface so users can vote without leaving the overlay —
-  # matching the in-page image-show panel.
-  def test_renders_vote_section_for_logged_in_user
+  # No vote UI in the lightbox caption (#4884). The global
+  # `.vote-section` styling is an absolute bottom-pinned, opacity-0
+  # thumbnail hover-overlay; inside `.lg-sub-html` it becomes an
+  # invisible strip covering the caption's bottom links row and
+  # swallowing clicks. Vote updates also can't sync to the caption
+  # (it's a clone stored in `data-sub-html`), so the caption skips
+  # the vote interface entirely.
+  def test_does_not_render_vote_section
     html = render_caption
-
-    assert_html(html, ".vote-section#image_vote_#{@image.id}")
-    assert_html(html, ".vote-meter.progress")
-    assert_html(html, ".vote-buttons .image-vote-links")
-  end
-
-  # Anonymous viewers can't vote, so the section is suppressed entirely
-  # (matches `images/show/_image_panel.html.erb`'s `if @user` gate).
-  def test_does_not_render_vote_section_for_logged_out_user
-    html = render_caption(user: nil)
-
-    assert_no_html(html, ".vote-section")
-    assert_no_html(html, ".vote-meter")
-  end
-
-  # No image in scope (e.g. obs-only pre-render contexts) → no votes.
-  def test_does_not_render_vote_section_without_image
-    html = render_caption(image: nil)
-
-    assert_no_html(html, ".vote-section")
-  end
-
-  # `votes: false` propagates from the parent `BaseImage` and
-  # suppresses the lightbox vote section — needed on pages that
-  # don't pre-load `:image_votes` (e.g. account/profile/images
-  # reuse page), otherwise `Image#users_vote(@user)` triggers a
-  # Bullet N+1 inside the vote interface.
-  def test_does_not_render_vote_section_when_votes_disabled
-    html = render_caption(votes: false)
 
     assert_no_html(html, ".vote-section")
     assert_no_html(html, ".vote-meter")

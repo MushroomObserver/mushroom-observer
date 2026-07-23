@@ -31,7 +31,7 @@ module Tab::Sequence
     def test_new
       tab = Tab::Sequence::New.new(observation: @observation)
 
-      assert_equal(:show_observation_add_sequence.t, tab.title)
+      assert_equal(:add_object.t(type: :sequence), tab.title)
       assert_equal(
         routes.new_sequence_path(observation_id: @observation.id),
         tab.path

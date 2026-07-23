@@ -7,7 +7,7 @@
 # `Components::Link::Icon`, gated by user permissions and description
 # state.
 #
-# Sibling-in-spirit to `Components::Link::InlineMod` (the bracketed
+# Sibling-in-spirit to `Components::InlineCRUDLinks` (the bracketed
 # `[edit | destroy]` strip that sits next to records in obs-show
 # sub-panels), but distinct in shape: this one is the icon row
 # attached to the panel heading, with " | " separators rather than

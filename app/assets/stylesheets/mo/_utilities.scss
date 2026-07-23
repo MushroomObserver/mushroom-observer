@@ -771,7 +771,7 @@
 }
 
 // Bootstrap 3 - collapse "fade" instead of "slide"
-.no-transition.collapsing {
+.fade-not-slide.collapsing {
   // transition-duration: 0.3s;
   transition: height 0s, opacity 0.3s;
   opacity: 0;

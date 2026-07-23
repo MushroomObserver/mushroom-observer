@@ -89,7 +89,13 @@ MushroomObserver::Application.configure do
     # (it will show [cache hit] even if set to false)
     config.action_controller.enable_fragment_cache_logging = true
 
-    config.cache_store = :memory_store # :mem_cache_store via application.rb
+    # Match production's store (config/application.rb) rather than
+    # :memory_store -- Solid Cache is DB-backed, so a per-item cache
+    # loop costs one query per item here too, the same as prod. A
+    # local :memory_store hides that cost entirely (in-process hash
+    # lookups are free), which let the N+1-cache-round-trip bug behind
+    # #4865 go unnoticed locally for a long time.
+    config.cache_store = :solid_cache_store
     config.public_file_server.headers = {
       "Cache-Control" => "public, max-age=#{2.days.to_i}"
     }

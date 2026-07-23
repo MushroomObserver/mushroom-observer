@@ -5,8 +5,11 @@
 # a free-text `where` string is available). The visible label is a
 # pair of `<span>`s carrying the postal + scientific representation
 # so per-user formatting can swap them via CSS. An optional `count:`
-# appends " (N)"; an optional `click: true` appends " [Click for map]"
-# / " [Search]" depending on the link target.
+# appends " (N)". An optional `click: true` appends a further
+# affordance: for a known Location, a standalone `.inline-icon-link`
+# globe icon (tooltip "Click for map") pointing at the same
+# `location_path`; for the free-text fallback, the existing text
+# " [Search]" (unchanged -- that one isn't a map link).
 class Components::Link::Location < Components::Link::Object
   prop :where, _Nilable(String), default: nil
   prop :location,
@@ -27,11 +30,28 @@ class Components::Link::Location < Components::Link::Object
   private
 
   def render_location_link
-    a(href: add_q_param(location_path(id: location_obj.id), @query),
+    a(href: location_href,
       class: "show_location_link show_location_link_#{location_obj.id}") do
       render_label(location_obj.name)
-      plain(" [#{:click_for_map.t}]") if @click
     end
+    render_click_for_map if @click
+  end
+
+  def location_href
+    add_q_param(location_path(id: location_obj.id), @query)
+  end
+
+  def render_click_for_map
+    InlineLinkBlock(items: [click_for_map_icon])
+  end
+
+  def click_for_map_icon
+    Components::Link::Icon.new(
+      content: :click_for_map.l,
+      path: location_href,
+      icon: :map,
+      class: Components::InlineLinkBlock.item_class
+    )
   end
 
   def render_where_link

@@ -75,9 +75,9 @@ class Components::Panel < Components::Base
   slot :thumbnail, lambda { |classes: nil, id: nil, data: nil, &content|
     render_thumbnail(classes:, id:, data:, &content)
   }
-  slot :body, lambda { |classes: nil, id: nil, collapse: false, wrapper: true,
-                       &content|
-    render_body(classes:, collapse:, id:, wrapper:, &content)
+  slot :body, lambda { |classes: nil, id: nil, data: nil, collapse: false,
+                       wrapper: true, &content|
+    render_body(classes:, collapse:, id:, data:, wrapper:, &content)
   }, collection: true
   slot :footer, lambda { |classes: nil, &content|
     render_footer(classes:, &content)
@@ -189,26 +189,28 @@ class Components::Panel < Components::Base
     div(**args, &content)
   end
 
-  def render_body(classes:, id:, collapse:, wrapper:, &content)
-    return render_collapse_body(classes:, id:, wrapper:, &content) if collapse
+  def render_body(classes:, id:, data:, collapse:, wrapper:, &content)
+    if collapse
+      return render_collapse_body(classes:, id:, data:, wrapper:, &content)
+    end
 
-    render_plain_body(classes:, id:, wrapper:, &content)
+    render_plain_body(classes:, id:, data:, wrapper:, &content)
   end
 
-  def render_plain_body(classes:, id:, wrapper:, &content)
+  def render_plain_body(classes:, id:, data:, wrapper:, &content)
     return yield if wrapper == false
 
     classes = class_names("panel-body", classes)
-    div(class: classes, id:, &content)
+    div(class: classes, id:, data:, &content)
   end
 
-  def render_collapse_body(classes:, id:, wrapper:, &content)
+  def render_collapse_body(classes:, id:, data:, wrapper:, &content)
     Collapsible(
       id: @collapse_id,
       expanded: @expanded,
       panel: true,
       class: @collapse_class
-    ) { render_plain_body(classes:, id:, wrapper:, &content) }
+    ) { render_plain_body(classes:, id:, data:, wrapper:, &content) }
   end
 
   def render_footer(classes:)

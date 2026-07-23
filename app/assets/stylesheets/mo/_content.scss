@@ -44,21 +44,25 @@
 // style tweaks
 // --------------------------------------------------
 
-.name-section p {
+// Indents every line of a paragraph EXCEPT the first -- e.g. a
+// wrapped "Kingdom: Fungi" classification row should have its
+// continuation line align under "Fungi", not restart at the margin.
+// The `hanging` keyword does this directly (indents all lines but
+// the first) -- opt this onto the specific `<p>` that wants it, not
+// an ancestor selector. The old approach (`.name-section p { padding-
+// left: 1em; text-indent: -1em; }`) applied to every `<p>` inside any
+// panel merely marked `panel_class: "name-section"` -- almost none of
+// which wanted a hanging indent -- and needed two separate resets
+// elsewhere (`.obs-notes .textile p`, `.glyphicon`) to undo the leak.
+.hanging-indent {
   margin: 0;
-  padding-left: 1em;
-  text-indent: -1em;
+  text-indent: 1em hanging;
 }
 
 .obs-notes {
-  // Notes values are indented via `.indent` wrappers, so cancel the
-  // inherited `.name-section p` hanging indent (padding-left + negative
-  // text-indent) that would otherwise push every line after the first.
   // Keep a blank-line gap between paragraphs, trimming the trailing one.
   .textile p {
     margin: 0 0 1em;
-    padding-left: 0;
-    text-indent: 0;
   }
 
   .textile p:last-child {

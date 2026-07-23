@@ -14,7 +14,7 @@ module Views::Controllers::Projects
 
     def view_template
       div(class: "text-larger") do
-        IDBadge(object: @project, extra_class: "rss-id mr-4")
+        IDBadge(object: @project, size: :md)
       end
       div do
         render_title_row

@@ -8,7 +8,7 @@ class Tab::HerbariumRecord::New < Tab::Base
   end
 
   def title
-    :create_herbarium_record.l
+    :add_object.t(type: :herbarium_record)
   end
 
   def path

@@ -7,7 +7,7 @@
 # When `@icon` is set:
 #   - icon always renders first
 #   - text (`@name`) follows in `span.sr-only` by default, or in
-#     `span.d-none.d-sm-inline.pl-2` when `@label` is truthy
+#     `span.d-none.d-sm-inline` when `@label` is truthy
 #     (visible at sm+ breakpoints, hidden on xs — for nav buttons
 #     that show an icon on mobile and icon+text on wider screens)
 # When only `@name` is set: plain text, no span wrapper.

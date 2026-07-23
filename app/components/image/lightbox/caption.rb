@@ -39,13 +39,6 @@ class Components::Image::Lightbox::Caption < Components::Base
   prop :obs, _Union(Observation, Hash), default: -> { {} }
   prop :identify, _Boolean, default: false
   prop :observation_view, _Nilable(ObservationView), default: nil
-  # Propagated from the parent `BaseImage` (carousel /
-  # interactive-image). When the parent disables votes — e.g. the
-  # profile-images reuse page passes `votes: false` because it
-  # doesn't pre-load `:image_votes` — the lightbox caption must
-  # also skip the vote section. Otherwise `ImageVoteInterface`
-  # calls `Image#users_vote(@user)` and triggers a Bullet N+1.
-  prop :votes, _Boolean, default: true
 
   def view_template
     if @obs.is_a?(Observation)
@@ -54,7 +47,6 @@ class Components::Image::Lightbox::Caption < Components::Base
       render_image_caption
     end
 
-    render_vote_section
     render_image_links
   end
 
@@ -165,47 +157,28 @@ class Components::Image::Lightbox::Caption < Components::Base
   end
 
   def render_gps_link
-    link_text = [
-      display_lat_lng(@obs.lat, @obs.lng).t,
-      display_alt(@obs.alt).t,
-      "[#{:click_for_map.t}]"
-    ].compact_blank.join(" ")
-    a(href: map_observation_path(id: @obs.id)) { link_text }
+    parts = [display_lat_lng(@obs.lat, @obs.lng).t, display_alt(@obs.alt).t]
+    trusted_html(parts.compact_blank.join(" "))
+    render_gps_map_link
+  end
+
+  def render_gps_map_link
+    InlineLinkBlock(items: [gps_map_icon])
+  end
+
+  def gps_map_icon
+    Components::Link::Icon.new(
+      content: :click_for_map.l,
+      path: map_observation_path(id: @obs.id),
+      icon: :place,
+      class: Components::InlineLinkBlock.item_class
+    )
   end
 
   def render_obs_who
-    obs_user = @obs.user
-
     p(class: "obs-who", id: "observation_who") do
-      plain("#{:who.ti}: ")
-      render_obs_user(obs_user)
-      render_contact_link(obs_user) if show_contact_link?(obs_user)
+      ObservationWho(obs: @obs, user: @user)
     end
-  end
-
-  def render_obs_user(obs_user)
-    if @user
-      Link(type: :user, user: obs_user)
-    else
-      plain(obs_user.unique_text_name)
-    end
-  end
-
-  def show_contact_link?(obs_user)
-    @user && obs_user != @user && !obs_user&.no_emails &&
-      obs_user&.email_general_question
-  end
-
-  def render_contact_link(_obs_user)
-    plain(" [")
-    Button(
-      type: :modal,
-      name: :show_observation_send_question.l,
-      target: new_question_for_observation_path(@obs.id),
-      modal_id: "observation_email",
-      variant: :strip, icon: :email
-    )
-    plain("]")
   end
 
   def render_truncated_notes
@@ -235,24 +208,6 @@ class Components::Image::Lightbox::Caption < Components::Base
 
   def render_image_caption
     div(class: "image-notes") { @image.notes.tl.truncate_html(300) }
-  end
-
-  # Vote interface inside the lightbox overlay — same component that
-  # renders below carousel/interactive images. Gated on `@user` to match
-  # `images/show/_image_panel.html.erb`'s "login required to vote" rule;
-  # anonymous viewers see no vote UI. Also skipped when `@votes` is
-  # false (parent opted out — see prop doc above) or no image is in
-  # scope (obs-only pre-render contexts).
-  def render_vote_section
-    return unless @votes && @user && @image
-
-    div(class: "mt-3 text-center") do
-      render(Components::Image::VoteInterface.new(
-               user: @user,
-               image: @image,
-               votes: true
-             ))
-    end
   end
 
   def render_image_links

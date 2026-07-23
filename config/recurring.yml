@@ -54,6 +54,16 @@ production:
   image_gap_detector:
     class: ImageGapDetectorJob
     schedule: every day at 7:33am
+  # Weekly GPS-leak tripwire (#4859): scans the last two weeks'
+  # gps_hidden originals on the image server for GPS tags that survived
+  # stripping. History -- three separate mechanisms silently re-leaked
+  # ~9,700 images over 2019-2026 while every DB flag read clean -- says
+  # only a periodic check of the actual served bytes catches the class.
+  # Staggered off the other maintenance slots and the every-3-minutes
+  # marks, same reasoning as above.
+  gps_leak_detector:
+    class: GpsLeakDetectorJob
+    schedule: every monday at 4:43am
   check_for_broken_references:
     class: CheckForBrokenReferencesJob
     schedule: every sunday at 7:13am

@@ -345,9 +345,11 @@ class SequencesController < ApplicationController
   def render_sequences_section_update
     # Refetch with just the sequences subtree the panel reads.
     fresh_obs = Observation.includes(sequences: :user).find(@observation.id)
+    klass = Views::Controllers::Observations::Show::SpecimenPanel::
+            SequencesSection
     render_obs_section_update(
       identifier: "sequences",
-      panel: Views::Controllers::Observations::Show::SequencesPanel.new(
+      panel: klass.new(
         obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return

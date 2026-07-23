@@ -17,7 +17,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     login!("mary")
     visit("/#{obs.id}")
     assert_selector(id: "observation_details")
-    click_on(:create_herbarium_record.t)
+    click_on(:add_object.t(type: :herbarium_record))
     within("#herbarium_record_form") do
       click_commit
     end

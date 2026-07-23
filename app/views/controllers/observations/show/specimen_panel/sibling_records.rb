@@ -1,0 +1,72 @@
+# frozen_string_literal: true
+
+# Sibling-records concern for the Specimen panel's sub-sections
+# (collection numbers / herbarium records / sequences): read-only
+# aggregation of records from sibling observations in the same
+# occurrence — a distinct concern from the sub-sections' own
+# per-obs rendering.
+#
+# Mixed into `SpecimenPanel`. The methods read
+# `@siblings` directly; the host class owns the prop.
+class Views::Controllers::Observations::Show::SpecimenPanel
+  module SiblingRecords
+    # Read-only `<ul class="tight-list">` of records aggregated
+    # from sibling observations. Caller's block yields
+    # `(record, sibling)` per row. No-op when no siblings have
+    # records for the requested association.
+    #
+    def render_sibling_records(association)
+      items = @siblings.flat_map do |sib|
+        sib.send(association).map { |rec| [rec, sib] }
+      end
+      return if items.empty?
+
+      ul(class: "tight-list") do
+        items.each { |rec, sib| li { yield(rec, sib) } }
+      end
+    end
+
+    # Renders the trailing "(MO <id>)" link in
+    # `<small class="text-muted">` after every sibling row.
+    def sibling_attribution(sibling)
+      small(class: "text-muted") do
+        plain("(")
+        a(href: permanent_observation_path(sibling.id)) do
+          plain("MO #{sibling.id}")
+        end
+        plain(")")
+      end
+    end
+
+    def render_sibling_herbarium_record(record, sibling)
+      a(href: herbarium_record_path(record.id)) do
+        trusted_html(record.accession_at_herbarium.t)
+      end
+      whitespace
+      sibling_attribution(sibling)
+      render_mcp_search_link(record) if record.herbarium.web_searchable?
+    end
+
+    def render_mcp_search_link(record)
+      br
+      span(class: "indent") do
+        Link(type: :external,
+             content: :herbarium_record_collection.l,
+             path: record.herbarium.mcp_url(record.accession_number))
+      end
+    end
+
+    def render_sibling_sequence_archive(sequence)
+      InlineLinkBlock(items: [archive_link(sequence)])
+    end
+
+    def archive_link(sequence)
+      Components::Link.new(
+        type: :external,
+        content: :show_observation_archive_link.l,
+        path: sequence.accession_url,
+        class: Components::InlineLinkBlock.item_class
+      )
+    end
+  end
+end
