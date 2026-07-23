@@ -42,7 +42,21 @@ module RuboCop
         RESTRICT_ON_SEND = [:link_to, :button_to, :button].freeze
 
         def on_send(node)
+          return if node.method?(:button) && !bare_call?(node)
+
           add_offense(node, message: format(MSG, method: node.method_name))
+        end
+
+        private
+
+        # `:button` is only Phlex's native tag helper when called bare
+        # (or on an explicit `self`) -- `form.button(...)`/`obj.button(...)`
+        # is some other API's `#button` method, not the tag helper this
+        # cop exists to ban. `link_to`/`button_to` stay banned regardless
+        # of receiver (e.g. `view_context.link_to(...)` is still Rails'
+        # helper, still bypassing `Link`/`Button`).
+        def bare_call?(node)
+          node.receiver.nil? || node.receiver.self_type?
         end
       end
     end
