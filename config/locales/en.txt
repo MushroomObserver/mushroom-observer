@@ -1094,6 +1094,8 @@
   log_observation_destroyed: "[:log_object_destroyed_by_user(type=:observation)]"
   log_observation_updated: "[:log_object_updated_by_user(type=:observation)]"
   log_observation_updated_at: "[:log_object_updated_by_user(type=:observation)]"
+  log_observation_resynced: Resynced from imported source by [user].
+  log_observation_source_deleted: Imported source no longer exists; Mushroom Observer record kept.
   log_project_added_admin: "[:log_object_added_by_user_with_name(type=:admin)]"
   log_project_added_member: "[:log_object_added_by_user_with_name(type=:member)]"
   log_project_created: "[:log_object_created_by_user(type=:project)]"
@@ -1128,6 +1130,14 @@
   source_credit_external_text: Imported from [name]
   source_credit_help_link: About imported observations
   observation_reflection_read_only_note: Read-only reflection of its imported source. To change it, edit it at the source and resync.
+  observation_resync_button: Sync now
+  observation_resync_confirm: If you recently edited this observation on iNaturalist, it may take up to 10 seconds for those changes to appear there. Ready to sync now, or would you rather wait?
+  observation_resync_started: Syncing this observation from its source. This may take a moment.
+  observation_resync_denied: You do not have permission to sync this observation.
+  observation_resync_synced: Synced with iNaturalist.
+  observation_resync_unchanged: Already up to date with iNaturalist.
+  observation_resync_source_deleted: This observation's iNaturalist source could not be found. It may have been deleted.
+  observation_resync_failed: Couldn't sync with iNaturalist right now. Please try again later.
 
   ##############################################################################
 

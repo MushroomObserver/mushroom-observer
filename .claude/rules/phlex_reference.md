@@ -1063,6 +1063,81 @@ Resources:
 - Phlex caching: https://www.phlex.fun/components/caching
 - Literal properties: https://literal.fun/docs/properties.html
 
+## Rendering Phlex outside a request — `ApplicationController.renderer`
+
+Model callbacks and background jobs that broadcast HTML (Action Cable /
+Turbo Streams) have no controller or view context. MO's fix is
+`ApplicationController.renderer.render(component, layout: false)` —
+established precedent: `Comment#after_create_commit`/`#after_update_commit`
+(`app/models/comment.rb`), `Image#broadcast_processed_update`
+(`app/models/image.rb`), `InatImport#after_update_commit`
+(`app/models/inat_import.rb`), `Inat::ObservationResyncer#broadcast`
+(`app/classes/inat/observation_resyncer.rb`).
+
+**Hard rule, reproduced directly (not taken from Phlex/Rails docs —
+verify again yourself if this ever seems to misbehave, don't just trust
+this paragraph): a block passed to `ApplicationController.renderer.
+render` never reaches the component.** Minimal repro:
+
+```ruby
+class Probe < Components::Base
+  def view_template
+    plain(block_given? ? "has block" : "no block")
+  end
+end
+ApplicationController.renderer.render(Probe.new, layout: false) { plain("x") }
+# => "no block" -- block_given? is false inside view_template. The
+# block isn't merely mis-scoped or silently erroring; Rails' renderer
+# never forwards it to the component's own render_in call at all.
+```
+
+So `renderer.render(MyComponent.new(...)) { trusted_html(...) }` renders
+as if the block were never given — no error, just the component's
+no-block branch (or nothing, if it unconditionally assumed a block).
+This is *not* the same as passing a block to Phlex's own `render(...)`
+or Kit-syntax call (`Alert(...) { ... }`) from *inside* another
+component's `view_template` — that block form works fine and is how
+`Views::Layouts::App::FlashNotices` renders trusted flash content
+today. The difference is which renderer receives the block: Rails'
+`ActionController::Renderer#render` (drops it) vs. Phlex's own in-tree
+render call (forwards it).
+
+**Consequence: every component broadcast this way must be fully
+self-contained** — all its content baked into constructor props, nothing
+supplied via a block at the `ApplicationController.renderer.render` call
+site. If you need trusted/HTML-safe content in a broadcast (a translated
+flash message, textile-rendered text, etc.), don't reach for a bare
+`Components::Alert.new(message: ...)` (its `message:` prop always
+escapes via `plain()`) and don't try to smuggle a block through the
+renderer. Instead, wrap the trusted-content logic in its own tiny view
+whose `view_template` calls the working in-tree block form internally:
+
+```ruby
+# The wrapper is self-contained (message/level are props); the block it
+# passes to Alert is safe because that call happens inside a real Phlex
+# render chain, not at the ApplicationController.renderer boundary.
+class Views::Layouts::App::MessageAlert < Views::Base
+  prop :message, String
+  prop :level, _Union(:success, :info, :warning, :danger)
+
+  def view_template
+    Alert(level: @level, id: "flash_notices", class: "mt-3") do
+      trusted_html(@message)
+    end
+  end
+end
+
+# Broadcast call site — one self-contained instance, no external block:
+ApplicationController.renderer.render(
+  Views::Layouts::App::MessageAlert.new(message: tag.t, level: :success),
+  layout: false
+)
+```
+
+Before assuming a renderer/block combination works, test it — this
+exact failure mode (silent empty output, no exception) is easy to ship
+unnoticed if you only check that the code runs without erroring.
+
 ## Form Components (Superform)
 
 **Every form component must extend `Components::ApplicationForm`.** This rule

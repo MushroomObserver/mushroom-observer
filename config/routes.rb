@@ -636,6 +636,7 @@ MushroomObserver::Application.routes.draw do
                           as: "reuse_images_for")
       post("images/attach", to: "observations/images#attach",
                             as: "attach_image_to")
+      post("resync", to: "observations/inat_resyncs#create", as: "resync")
     end
 
     collection do

@@ -88,6 +88,46 @@ module Views::Controllers::Observations::ExternalLinks
       )
     end
 
+    # A reflection's owner (or anyone who could otherwise edit it) sees
+    # a "Sync now" button alongside the read-only note (#4215).
+    def test_reflection_shows_sync_button_when_resyncable
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      obs = link.observation
+      user = users(:rolf)
+      obs.update_column(:reflected_at, Time.zone.now)
+      assert(obs.resyncable_by?(user),
+             "Need a user fixture who may resync this reflection")
+      path = routes.resync_observation_path(obs.id)
+
+      html = render(frame_with(obs: obs, site_links: [link], user: user))
+
+      assert_html(html, "form[action='#{path}'][method='post']")
+      assert_html(html, "form button.reflection-sync-button",
+                  text: :observation_resync_button.l)
+      # Recent source-side edits can take a moment to propagate -- the
+      # Turbo confirm dialog lets the user choose to wait instead.
+      assert_html(
+        html,
+        "button.reflection-sync-button" \
+        "[data-turbo-confirm='#{:observation_resync_confirm.l}']"
+      )
+    end
+
+    # A viewer without edit permission may not trigger a resync, even
+    # though the observation itself is a reflection.
+    def test_reflection_hides_sync_button_when_not_resyncable
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      obs = link.observation
+      user = users(:dick)
+      obs.update_column(:reflected_at, Time.zone.now)
+      assert_not(obs.resyncable_by?(user),
+                 "Need a user fixture who may NOT resync this reflection")
+
+      html = render(frame_with(obs: obs, site_links: [link], user: user))
+
+      assert_no_html(html, ".reflection-sync-button")
+    end
+
     private
 
     def sibling_link(link, observation)
