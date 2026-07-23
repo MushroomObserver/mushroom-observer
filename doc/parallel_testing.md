@@ -257,14 +257,20 @@ This pattern is already implemented for:
 
 **Problem**: Tests that export or modify locale files conflict.
 
-**✅ Solution**: Use worker-specific locale directories:
+**✅ Solution**: Wrap the test in `use_test_locales` (defined in
+`test/general_extensions.rb`) -- it points `Language.locales_path` at a
+worker-specific directory (`config/test_locales-0`,
+`config/test_locales-1`, etc., via `Language.alt_locales_path`) for the
+duration of the block, then removes it:
 
 ```ruby
-def test_export_locales
-  # config/consts.rb automatically handles this
-  # test_locales → test_locales-0, test_locales-1, etc.
-  LanguageExporter.export_locales
-  # Exports to worker-specific directory
+def test_update_export_file
+  use_test_locales do
+    file = @official.export_file
+    FileUtils.copy(template, file)
+    @official.update_export_file
+    # ... assertions against the worker-specific file ...
+  end
 end
 ```
 

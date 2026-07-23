@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class LanguageTrackingTest < UnitTestCase
+class Language::TrackingTest < UnitTestCase
   # Tracking is intentionally sticky (no automatic per-request reset -
   # see ApplicationController#track_translations), so another test
   # running earlier in this same worker process may have left it on.

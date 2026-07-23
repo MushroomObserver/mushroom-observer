@@ -21,12 +21,12 @@
 #
 ################################################################################
 
-module LanguageExporter
-  def self.included(base)
-    base.extend(ClassMethods)
-  end
+# Validation methods share mutable instance state; not worth splitting.
+# rubocop:disable Metrics/ModuleLength
+module Language::Exporter
+  extend ActiveSupport::Concern
 
-  module ClassMethods
+  class_methods do
     attr_accessor :verbose, :safe_mode
     attr_reader :locales_path
 
@@ -98,26 +98,40 @@ module LanguageExporter
       user.nil? && !official
 
     user ||= User.admin
-    any_changes = false
-    old_data = localization_strings
     new_data = read_export_file
-    good_tags = Language.official.read_export_file
-    tag_lookup = translation_strings_hash
-    new_data.each do |tag, new_val|
-      next unless new_val.is_a?(String) && good_tags.key?(tag)
+    context = {
+      # Importing the official locale reads+parses the same file twice
+      # otherwise -- `new_data` already *is* the official file's data.
+      good_tags: official ? new_data : Language.official.read_export_file,
+      old_data: localization_strings,
+      tag_lookup: translation_strings_hash,
+      user: user
+    }
 
-      new_val = clean_string(new_val)
-      old_val = clean_string(old_data[tag])
-      next unless old_data[tag].nil? || (old_val != new_val)
-
-      if (str = tag_lookup[tag])
-        update_string(str, new_val, old_val, user)
-      else
-        create_string(tag, new_val, old_val, user)
-      end
-      any_changes = true
+    new_data.reduce(false) do |any_changes, (tag, new_val)|
+      changed = import_tag?(tag, new_val, context)
+      any_changes || changed
     end
-    any_changes
+  end
+
+  # One tag's worth of `import_from_file`'s work. Returns whether it
+  # actually changed anything (new/updated string), so the caller can
+  # fold that into its overall `any_changes` result.
+  def import_tag?(tag, new_val, context)
+    good_tags, old_data, tag_lookup, user =
+      context.values_at(:good_tags, :old_data, :tag_lookup, :user)
+    return false unless new_val.is_a?(String) && good_tags.key?(tag)
+
+    new_val = clean_string(new_val)
+    old_val = clean_string(old_data[tag])
+    return false unless old_data[tag].nil? || (old_val != new_val)
+
+    if (str = tag_lookup[tag])
+      update_string(str, new_val, old_val, user)
+    else
+      create_string(tag, new_val, old_val, user)
+    end
+    true
   end
 
   # Strip tags "unused" translation strings from unofficial locales.
@@ -258,12 +272,8 @@ module LanguageExporter
     output_lines = []
     in_tag = false
     template_lines.each do |line|
-      if line =~ /^(\W+['"]?(\w+)['"]?:)/
-        out = Regexp.last_match(1)
-        tag = Regexp.last_match(2)
-        out += translated.key?(tag) ? " " : "  "
-        out += format_string(strings[tag])
-        output_lines << out
+      if (formatted = format_export_tag_def_line(line, strings, translated))
+        output_lines << formatted
         in_tag = true if / >\s*$/.match?(line)
       elsif in_tag
         in_tag = false unless /\S/.match?(line)
@@ -272,6 +282,18 @@ module LanguageExporter
       end
     end
     output_lines
+  end
+
+  # Formats one template line as a tag-definition line, or returns nil
+  # if `line` isn't one (a comment, blank line, or multi-line-string
+  # continuation, all handled by the caller instead).
+  def format_export_tag_def_line(line, strings, translated)
+    return nil unless line =~ /^(\W+['"]?(\w+)['"]?:)/
+
+    out = Regexp.last_match(1)
+    tag = Regexp.last_match(2)
+    out += translated.key?(tag) ? " " : "  "
+    out + format_string(strings[tag])
   end
 
   def format_string(val)
@@ -307,35 +329,44 @@ module LanguageExporter
     read_export_file_lines.each do |line|
       next unless line =~ /^ *['"]?(\w+)['"]?:/
 
-      if once[Regexp.last_match(1)] && !twice[Regexp.last_match(1)]
-        verbose("#{locale} #{Regexp.last_match(1)}: " \
-                "tag appears more than once")
-        twice[Regexp.last_match(1)] = true
-        pass = false
-      end
-      once[Regexp.last_match(1)] = true
+      tag = Regexp.last_match(1)
+      pass = false if tag_duplicated?(tag, once, twice)
+      once[tag] = true
     end
     pass
   end
 
+  def tag_duplicated?(tag, once, twice)
+    return false unless once[tag] && !twice[tag]
+
+    verbose("#{locale} #{tag}: tag appears more than once")
+    twice[tag] = true
+    true
+  end
+
   def check_export_file_data
     pass = true
-    data = read_export_file
-    data.each do |tag, str|
-      unless tag.is_a?(String)
-        verbose("#{locale} #{tag}: tag is a #{tag.class.name} " \
-                "instead of a String")
-        pass = false
-      end
-      unless str.is_a?(String)
-        verbose("#{locale} #{tag}: value is a #{str.class.name} " \
-                "instead of a String")
-        pass = false
-      end
-      unless validate_square_brackets(str)
-        verbose("#{locale} #{tag}: square brackets messed up: #{str.inspect}")
-        pass = false
-      end
+    read_export_file.each do |tag, str|
+      pass = false unless check_export_file_entry(tag, str)
+    end
+    pass
+  end
+
+  def check_export_file_entry(tag, str)
+    pass = true
+    unless tag.is_a?(String)
+      verbose("#{locale} #{tag}: tag is a #{tag.class.name} " \
+              "instead of a String")
+      pass = false
+    end
+    unless str.is_a?(String)
+      verbose("#{locale} #{tag}: value is a #{str.class.name} " \
+              "instead of a String")
+      pass = false
+    end
+    unless validate_square_brackets(str)
+      verbose("#{locale} #{tag}: square brackets messed up: #{str.inspect}")
+      pass = false
     end
     pass
   end
@@ -367,19 +398,32 @@ module LanguageExporter
   end
 
   def check_export_tag_def_line(quoted_tag, tag, str)
-    if @in_tag
-      verbose("#{locale} #{@line_number}: " \
-              "didn't finish multi-line string for #{@in_tag}")
-      @in_tag = false
-      @pass = false
-    end
-    if (quoted_tag.start_with?("'") && !quoted_tag.end_with?("'")) ||
-       (quoted_tag.start_with?('"') && !quoted_tag.end_with?('"')) ||
-       (quoted_tag.match(/['"]$/) && !quoted_tag.match(/^['"]/))
-      verbose("#{locale} #{@line_number}: " \
-              "invalid tag quotes: #{quoted_tag.inspect}")
-      @pass = false
-    end
+    check_unfinished_multiline_string
+    check_tag_quotes(quoted_tag)
+    check_tag_validity(quoted_tag, tag)
+    check_tag_value(tag, str.strip)
+  end
+
+  def check_unfinished_multiline_string
+    return unless @in_tag
+
+    verbose("#{locale} #{@line_number}: " \
+            "didn't finish multi-line string for #{@in_tag}")
+    @in_tag = false
+    @pass = false
+  end
+
+  def check_tag_quotes(quoted_tag)
+    return unless (quoted_tag.start_with?("'") && !quoted_tag.end_with?("'")) ||
+                  (quoted_tag.start_with?('"') && !quoted_tag.end_with?('"')) ||
+                  (quoted_tag.match(/['"]$/) && !quoted_tag.match(/^['"]/))
+
+    verbose("#{locale} #{@line_number}: " \
+            "invalid tag quotes: #{quoted_tag.inspect}")
+    @pass = false
+  end
+
+  def check_tag_validity(quoted_tag, tag)
     if /^(yes|no)$/i.match?(quoted_tag)
       verbose("#{locale} #{@line_number}: " \
               "'yes' and 'no' must be quoted in YAML files")
@@ -388,13 +432,15 @@ module LanguageExporter
       verbose("#{locale} #{@line_number}: invalid tag: #{tag.inspect}")
       @pass = false
     end
-    str.strip!
+  end
+
+  def check_tag_value(tag, str)
     if str == ">"
       @in_tag = tag
     elsif str == ""
       verbose("#{locale} #{@line_number}: missing string")
       @pass = false
-    elsif !validate_string(str)
+    elsif !validate_string?(str)
       verbose("#{locale} #{@line_number}: invalid string: #{str.inspect}")
       @pass = false
     end
@@ -424,21 +470,23 @@ module LanguageExporter
     str.match(/^\w+$/)
   end
 
-  def validate_string(str)
+  def validate_string?(str)
     str = str.strip.squeeze(" ")
-    pass = true
-    if /^(yes|no)$/i.match?(str)
-      pass = false
-    elsif str.start_with?("'")
-      pass = false unless /^'([^'\\]|\\.)*'$/.match?(str)
-    elsif str.start_with?('"')
-      pass = false unless /^"([^"\\]|\\.)*"$/.match?(str)
-    # Disable cop because conditions must be tested in order
-    elsif /:(\s|$)| #/.match?(str) || # rubocop:disable Lint/DuplicateBranch
-          (/^[^\w(]/.match?(str) && str[0].is_ascii_character?)
-      pass = false
-    end
-    pass
+    return false if /^(yes|no)$/i.match?(str)
+    return quoted_string_valid?(str, "'") if str.start_with?("'")
+    return quoted_string_valid?(str, '"') if str.start_with?('"')
+
+    !unquoted_string_invalid?(str)
+  end
+
+  def quoted_string_valid?(str, quote)
+    pattern = quote == "'" ? /^'([^'\\]|\\.)*'$/ : /^"([^"\\]|\\.)*"$/
+    pattern.match?(str)
+  end
+
+  def unquoted_string_invalid?(str)
+    /:(\s|$)| #/.match?(str) ||
+      (/^[^\w(]/.match?(str) && str[0].is_ascii_character?)
   end
 
   def validate_square_brackets(value)
@@ -478,3 +526,4 @@ module LanguageExporter
     pass
   end
 end
+# rubocop:enable Metrics/ModuleLength
