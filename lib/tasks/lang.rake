@@ -38,9 +38,11 @@ end
 
 # Each Language's export/import/update/strip/check work is independent
 # (own instance variables, own "#{locale}.yml"/"#{locale}.txt" files).
-# The only shared state -- Language.verbose/safe_mode/locales_dir -- is
-# set once by the :setup prerequisite chain before this runs and never
-# written to during it, so concurrent reads are safe. See
+# The class-level state this call path touches --
+# Language.verbose/safe_mode/locales_dir -- is set once by the :setup
+# prerequisite chain before this runs and never written to during it,
+# so concurrent reads are safe. (Language.for_locale has its own
+# memoized cache, but nothing reachable from here calls it.) See
 # ConcurrentEachWithConnection for why this parallelizes in-process.
 #
 # Built lazily (not a top-level constant): rake files are evaluated
