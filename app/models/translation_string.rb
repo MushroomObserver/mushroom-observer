@@ -40,7 +40,7 @@ class TranslationString < AbstractModel
 
   # See Name: delete_all the versions on destroy so they don't dangle.
   # This is the biggest source -- language import/export removes strings
-  # regularly (see Concerns::LanguageExporter).
+  # regularly (see Language::Exporter).
   acts_as_versioned(
     if: :update_version?,
     association_options: { dependent: :delete_all }

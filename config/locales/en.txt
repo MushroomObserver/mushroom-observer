@@ -171,7 +171,6 @@
 ################################################################################
 
   all_months: January February March April May June July August September October November December
-  all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
 
   # Important examples:
   hello: Hello world
@@ -313,7 +312,6 @@
   occurrence: occurrence
   occurrences: occurrences
   of: of
-  past_location: location change
   past_locations: location changes
   past_name: name change
   past_names: name changes
@@ -514,7 +512,6 @@
   # "WHERE_GROUP" is used for the whole group of lat/lng and place_name.
   what: scientific name
   when: when
-  where_group: where
   where: locality
   who: who
   entered_by: entered by
@@ -643,8 +640,6 @@
   destroy_object: Destroy [TYPE]
   edit_object: Edit [TYPE]
   list_objects: List [TYPES]
-  remove_object: Remove [TYPE]
-  remove_objects: Remove [TYPES]
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
@@ -655,7 +650,6 @@
   map_legend_tentative: Tentative
   map_legend_disputed: Disputed (≤0%)
   map_legend_mixed: Mixed consensus
-  map_legend_location_only: Location only (no observations)
   map_cap_banner: Showing the first [loaded] of [total] observations. Zoom in or narrow your filter to see the rest.
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
@@ -665,13 +659,11 @@
   show_name_description: Show [DESCRIPTION]
   show_object: Show [TYPE]
   show_objects: Show [TYPES]
-  sort_by_object: Sort by [TYPE]
   search_object: Search [TYPE]
 
   # Other generic phrases.
   added_to_list: Added observation to "[list]".
   attached_to_project: Attached [object] to "[project]".
-  and_num_more: And [num] more...
   are_you_sure: Are you sure?
   opens_in_new_tab: Opens in a new tab
   click_for_map: Click for map
@@ -681,7 +673,6 @@
   maximum: maximum
   on_mo: On MO
   on_the_web: On the web
-  on_site: On [site]
   project_first_collection: "**First collection of \"[name]\" for \"[project]\". Consider vouchering!**"
   project_count_collections: "[count] collections of \"[name]\" for \"[project]\"."
   show_on_map: Show on map
@@ -898,27 +889,8 @@
   vote_confidence_40: Doubtful
   vote_confidence_20: Not Likely
   vote_confidence_0: As If!
-  vote_agreement_100: I'd Call It That
-  vote_agreement_80: Promising
-  vote_agreement_60: Could Be
-  vote_agreement_40: Doubtful
-  vote_agreement_20: Not Likely
-  vote_agreement_0: As If!
 
   # Time quantities.
-  time_just_seconds_ago: seconds ago
-  time_one_minute_ago: a minute ago
-  time_minutes_ago: "[n] minutes ago"
-  time_one_hour_ago: an hour ago
-  time_hours_ago: "[n] hours ago"
-  time_one_day_ago: yesterday
-  time_days_ago: "[n] days ago, [date]"
-  time_one_week_ago: last week, [date]
-  time_weeks_ago: "[n] weeks ago, [date]"
-  time_one_month_ago: last month, [date]
-  time_months_ago: "[n] months ago, [date]"
-  time_one_year_ago: last year, [date]
-  time_years_ago: "[n] years ago, [date]"
 
   # Lifeform "tags".
   lifeform_basidiolichen: Basidiolichen
@@ -1175,7 +1147,6 @@
   app_privacy_policy: Privacy Policy
   app_donate: Donate
   app_send_a_comment: Send a Comment
-  app_index_a_z: "[:indexes.ti]: [:names.ti]"
   app_list_locations: "[:list_objects(type=:location)]"
   app_list_projects: "[:list_objects(type=:project)]"
   app_latest: Latest
@@ -1185,18 +1156,13 @@
   app_observations_left: "[:observations.ti]"
   app_create_observation: "[:create_object(type=:observation)]"
   app_help_id_obs: Help Identify
-  app_sort_by_date_obs: "[:sort_by_object(type=:date)]"
-  app_sort_by: "[:sort_by_object(type=order)]"
   app_species_list: "[:species_lists.ti]"
   app_create_list: Create List
-  app_sort_by_date_spl: "[:sort_by_object(type=:date)]"
-  app_sort_by_title: "[:sort_by_object(type=:title)]"
   app_account: Account
   app_all_lists: All Lists
   app_login: Login
   app_login_reminder: Login or create an account to access more fungal content
   app_create_account: Create Account
-  app_current_user: Current User
   app_comments_for_you: Comments for You
   app_mobile: Get Mobile App
   app_qrcode: Enter Field Slip Code
@@ -1207,7 +1173,6 @@
   app_your_summary: Your Summary
   app_preferences: Preferences
   app_life_list: Life List
-  app_checklist: Checklist
   app_join_mailing_list: Join Mailing List
   app_logout: Logout
   app_admin: Admin
@@ -1215,28 +1180,19 @@
   app_blocked_ips: Blocked IPs
   app_switch_users: Switch Users
   app_users: "[:list_objects(type=:user)]"
-  app_email_all_users: Email All Users
-  app_add_to_group: Add to Group
   app_turn_admin_on: Turn on Admin Mode
   app_turn_admin_off: Turn off Admin Mode
   app_languages: Languages
   app_contributors: Contributors
   app_site_stats: Site Stats
-  app_colors_from: Colors from [theme]
-  app_powered_by: Powered by
-  app_preferred_browser: Preferred browser
-  app_feature_tracker: Feature Tracker
   app_publications: Publications
   app_more: More
-  app_other: Other
   app_report_a_bug: Report a Bug
 
   # This is for the search bar at the top of every page.
   app_find: Find
   app_search: Search
   app_search_google: Site (via google)
-  app_timer: "time: [seconds] sec"
-  app_index_timer: "[num] results in [seconds] sec"
   app_context_actions: Actions
 
   # This shows up at the bottom of every page. We recommend something like: \n
@@ -1247,10 +1203,6 @@
   app_edit_translations_on_page: Edit Translations on this Page
 
   # These are general alerts that appear near the top of the page.
-  app_no_ajax: Your Browser Is Out of Date
-  app_no_browser: We Don't Recognize Your Browser
-  app_no_javascript: Javascript Is Disabled
-  app_no_session: You Have Cookies Disabled
 
   # Title of the RSS auto-discovery link in the HTML header section.
   app_rss: "[:app_title] RSS"
@@ -1315,7 +1267,6 @@
 
   # names/new
   create_name_multiple_names_match: There are already multiple names matching "[str]".
-  create_name_duplicate_identifier: is used by another Name
 
   # sequences/show
   show_sequence_title: "Sequence for Observation #[id]"
@@ -1329,7 +1280,6 @@
   unknown_user_name: "?"
 
   # observations/identify
-  obs_needing_id: Needing Identification
   obs_needing_id_intro: "Here you can quickly scan unidentified observations, propose a name, or vote on a current name. Use the search bar above to filter by location, taxon or user.\n\nIf you feel you can't improve on an identification, \"[:mark_as_reviewed]\" and it won't come up again. (It will still appear for others.)\n\n*\"Lightbox\" shortcuts:*\n&lsqb;&larr;&rsqb; &lsqb;&rarr;&rsqb; move between observations, &lsqb;return&rsqb; propose a name, &lsqb;/&rsqb; mark as reviewed."
   mark_as_reviewed: Mark as reviewed
   marked_as_reviewed: Marked as reviewed
@@ -1342,7 +1292,6 @@
 
   # observations/download_observations
   download_observations_title: Download Observations
-  download_observations_back: Cancel (Back to Index)
   download_observations_format: Choose format
   download_observations_raw: CSV spreadsheet
   download_observations_adolf: The Adolf Special™
@@ -1385,7 +1334,6 @@
 
   # account/email_new_password
   email_new_password_title: Email New Password
-  email_new_password_login: Login
 
   # observer/email_merge_request
   email_merge_request_title: Send [TYPE] Merge Request
@@ -1604,12 +1552,7 @@
 
   # images/new
   image_set_default: Set as default thumbnail
-  image_add_title: Add an Image for [name]
   image_add_default: Default thumbnail
-  image_add_image: "[:image.ti]"
-  image_add_optional: "[:optional]"
-  image_add_upload: "[:upload.ti]"
-  image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":https://creativecommons.org/licenses/by-nc-sa/4.0/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
   image_exif_copied: Info copied
   image_use_exif: Use this info
   image_camera_info: Camera info
@@ -1622,7 +1565,6 @@
   image_reuse_just_yours: Only show your images.
 
   # observations/images/edit
-  image_edit_title: "Editing Image: [name]"
 
   # observations/images/remove
   image_remove_remove: Remove
@@ -1669,7 +1611,6 @@
   exif_data_for_image: EXIF Data for Image [image]
 
   # observations/list_observations
-  list_observations_location_all: All Locations
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
   list_observations_alternate_spellings: Maybe you meant one of the following names?
@@ -1685,7 +1626,6 @@
   list_place_names_map: Map Locations
   list_place_names_merge: Merge
   list_place_names_parenthetical: Number in parentheses shows Observation count.
-  list_place_names_popularity: "\"[:sort_by_num_views]\" means how many times the page was visited."
   list_place_names_undef: Undefined Locations
   list_place_names_undef_order: "(by frequency)"
 
@@ -1761,7 +1701,6 @@
   name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum).\nThis will be added to the Comments for [name]."
 
   # name/name_index (and other actions using same view)
-  name_index_add_name: Add Name
 
   # name/map
   name_map_title: Occurrence Map for [name]
@@ -1814,7 +1753,6 @@
   news_content_pr_208: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/208\">PR #208</a> (December 13, 2015) <u>Rails 4.2.5</u>\n\nAt long last the Mushroom Observer website is up to date with the latest stable version of Ruby on Rails (4.2.5). This has not been true since at least March of 2009. The upgrade process started last August when we were still using the 2.1.1 version of Ruby on Rails.\n\nThis has been a huge team effort by all the volunteer developers on the project. Thanks to every one of you for helping to make this happen.\n\nFor those who are interested in the technical low-down of this specific release, we got to 4.1 last month and the biggest change between 4.1 and 4.2 was a new HTML parsing library that required many minor code changes throughout out code base. There have also been some changes to how email is handled and a variety of other small changes to the code base. You should see no new changes in the site due to this latest upgrade, but of course <a href=\"/admins/emails/webmaster_questions/new\">send us a note</a> if you see anything wrong."
 
   # shared/_observation_list
-  observation_made_confidence: Community confidence
 
   # account/preferences/edit
   prefs_title: Change Preferences
@@ -1940,7 +1878,6 @@
   image_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
   # account/reverify
-  reverify_welcome: Reverify Account
   reverify_link: Reverify
   reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
 
@@ -1948,11 +1885,9 @@
   rss_description: List of changes to [:app_title] as they happen.
   rss_log_of_deleted_item: Deleted Item
   rss_log_title: Activity Log
-  rss_by: by [user]
   rss_title: "[:app_title]"
   rss_filtered_mouseover: "[:app_title] has applied filter(s) based on your preferences."
   rss_show: "Show:"
-  rss_hide: "Hide:"
   rss_all: Everything
   rss_all_help: Show all object types.
   rss_one_observation: "[:observations.ti]"
@@ -1964,15 +1899,11 @@
   rss_one_article: "[:news.ti]"
   rss_one_help: Show only [types].
   rss_make_default: Make This My Default
-  rss_this_is_default: This Is Your Default
   rss_created_at: "[TYPE] Created"
-  rss_changed: "[TYPE] Changed"
   rss_destroyed: "[TYPE] Destroyed"
-  rss_consensus_reached: Consensus established
 
   # shared/_textile_help
   general_textile_link: Can be formatted with <a href="/info/textile_sandbox/new" target="_new">Textile</a>.
-  shared_textile_link: More details here.
   shared_textile_help: Notes can be formatted using the <a href="/info/textile_sandbox/new" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
   field_textile_link: This field can be formatted with <a href="/info/textile_sandbox/new" target="_new">Textile</a>.
@@ -1983,11 +1914,9 @@
   show_comments_and_more: And [num] more...
 
   # observation/_show_consensus
-  show_consensus_species: Species in [name]
 
   # name/show_name_description or location/show_location_description
   show_description_empty: Nothing has been written for this description yet.
-  show_description_destroy: "[:destroy.ti]"
   show_description_edit: "[:edit.ti]"
   show_description_clone: Clone
   show_description_merge: Merge With Another
@@ -2005,8 +1934,6 @@
   show_description_adjust_permissions_help: Change the set of users who are allowed to view, modify or administrate this description.
 
   # observer/_show_images
-  show_images_small_thumbs: "(small thumbnails)"
-  show_images_large_thumbs: "(large thumbnails)"
 
   # observer/_show_lists
   show_lists_header: "[:species_lists.ti]"
@@ -2039,7 +1966,6 @@
   show_name_preferred_synonyms: Preferred Synonyms
   show_name_deprecated_synonyms: Deprecated Synonyms
   show_name_misspelled_synonyms: Misspellings
-  show_name_misspelling: This name is misspelled.
   show_name_misspelling_correct: "[:correct_spelling.ti]"
   show_name_refresh_classification: Refresh from Genus
   show_name_propagate_classification: Propagate to Subtaxa
@@ -2053,23 +1979,19 @@
   show_name_description_authors: "[:description.ti] authors"
   show_name_description_editor: "[:description.ti] editor"
   show_name_description_editors: "[:description.ti] editors"
-  show_name_author_request: Request Authorship Credit
   show_name_content_status: Description status
   show_name_latest_review: "Latest review: [date] by [user]"
   show_name_most_confident: Most Confident Observations
   show_name_previous_version: Previous Version
-  show_name_other_versions: Other Versions
   show_name_creator: First person to use this name on MO
   show_name_editor: "[:editors.ti]"
   show_name_editors: "[:editors.ti]"
-  show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it. Confidence value is for __this__ name, not the consensus name.)"
   show_name_nomenclature: Nomenclature
   show_name_classification: Classification
   show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
   google_name_search: Google Search
-  index_fungorum: Index Fungorum
   index_fungorum_search: Index Fungorum search page
   index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
@@ -2078,11 +2000,6 @@
   sf_species_synonymy: SF Species Synonymy
 
   # names - links to observations
-  show_name_observations: More [:observations.ti]
-  show_name_observations_of: More [:observations.ti] of [name]
-  show_name_all_observations: More [:observations.ti] (all synonyms)
-  show_name_synonym_observations: Synonym [:observations.ti]
-  show_name_other_observations: Similar [:observations.ti]
   show_observations_of: "[:observations.ti] of:"
   obss_of_this_name: this name
   obss_of_taxon: this taxon, any name
@@ -2103,13 +2020,11 @@
   show_name_num_notifications: "*Number of users interested in this name:* [num]"
 
   # observations/_show_namings
-  show_namings_proposed_name: "[:naming.ti]"
   show_namings_proposed_names: "[:namings.ti]"
   show_namings_no_names_yet: No names have been proposed yet.
   show_namings_propose_new_name: Propose Another Name
   show_namings_eye_help: Observer's choice
   show_namings_eyes_help: Current consensus
-  show_namings_community_favorite: This is the community favorite.
   show_namings_consensus: Community Vote
   show_namings_no_votes: no votes
   show_namings_your_vote: Your Vote
@@ -2119,23 +2034,14 @@
   show_namings_user: "[:user.ti]"
   show_namings_consensus_help: For each name listed above select your opinion of how well that name applies to this observation. Select '[:show_namings_propose_new_name]' if you want to suggest another option. See the "How to Use":/info/how_to_use#voting page for more details on how the votes are tallied.
   show_namings_lose_changes: You must click '[:show_namings_update_votes]' to save any changes you've made to your votes.
-  show_namings_please_login: Please login to propose your own names and vote on existing names.
 
   # observations/show_observation
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
-  show_observation_no_clear_preference: no clear preference
   show_observation_details: "[:detail.ti]"
-  show_observation_details_inat_import: Imported [date] from
-  show_observation_details_inat_export: Copied to iNaturalist as
   show_observation_inat_lat_lng: Public lat/lng
   show_observation_inat_suggested_ids: Suggested IDs
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
-  show_observation_propose_new_name: "[:show_namings_propose_new_name]"
-  show_observation_debug_consensus: Debug Consensus
-  show_observation_alternative_names: Alternative Name(s)
-  show_observation_preferred_names: Preferred Name(s)
-  show_observation_observation_created_at: Observation created
   # This is used if this is the location where the thing was growing.
   show_observation_collection_location: Collection location
   # This is used if this is NOT the location where the thing was growing.
@@ -2148,14 +2054,11 @@
   show_observation_on_site: On [site]
   show_observation_shared_with_tooltip: Show this observation on [site]
   show_observation_no_images: No images
-  show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
-  show_observation_species_lists: "[:species_lists.ti]"
   show_observation_manage_species_lists: Manage Observation Lists
   show_observation_add_to_species_list: Add to an Observation List
   show_observation_send_question: Send Observer a Question
-  show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden. To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
   show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
@@ -2187,7 +2090,6 @@
 
   # locations/show_past_location
   show_past_location_title: "[:version.ti] [num]: [name]"
-  show_past_location_other_versions: Other Versions
   show_past_location_no_version: No version specified
 
   # locations/show_past_location_description
@@ -2201,7 +2103,6 @@
   show_past_name_description_title: "[:version.ti] [num]: [name]"
 
   # object/show_past_versions
-  show_past_version_merged_with: "(merged with #[id])"
 
   # observer/show_rss_log
   show_rss_log_title: Log for [title]
@@ -2214,40 +2115,31 @@
   show_votes_users: "[:users.ti]"
   show_votes_vote: "[:vote.ti]"
   show_votes_weight: Weight
-  show_votes_average: Average
   show_votes_score: Score
-  show_votes_go_public: Make all of my votes public.
-  show_votes_go_private: Make all of my votes anonymous.
   show_votes_total: "Overall Score\nsum(score * weight) /\n(total weight + 1)"
   show_votes_descript: User's votes are weighted by their contribution to the site (log<small>10</small> contribution). In addition, the user who created the observation gets an extra vote.
-  show_votes_go_public_confirm: This will make all your votes for all observations public, not just your vote for this name. Is this what you want to do?
-  show_votes_go_private_confirm: This will make all your votes for all observations anonymous, not just your vote for this name. Is this what you want to do?
   show_votes_gone_public: Thank you! Your preferences have been updated. Other users can now see your votes.
   show_votes_gone_private: Your preferences have been updated. Other users can no longer see your votes.
 
   # users/show
   show_user_about: About [user]
   show_user_title: Contribution Summary for [user]
-  show_user_contributors: "[:app_contributors]"
   show_user_observations_by: Observations by [name]
   show_user_your_observations: Your Observations
   show_user_comments_for: Comments for [name]
   show_user_comments_for_you: Comments for You
   show_user_your_notifications: Your Email Alerts
-  show_user_edit_profile: Edit Profile
   show_user_email_to: Email [name]
   show_user_joined: Joined
   show_user_mailing_address: Mailing Address for Collections
   show_user_primary_location: Primary Location
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
-  show_user_language_contribution: "Translations: [name]"
   show_user_life_list: "[species] species and [higher] higher-level [taxa_word] observed"
   show_user_life_list_species: "[species] species observed"
   show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
-  sequence_edit_title: Editing [name]
 
   # account/signup
   signup_title: Account signup
@@ -2258,7 +2150,6 @@
   signup_choose_password: Choose password
   signup_confirm_password: Confirm password
   signup_preferred_theme: Preferred Theme (optional)
-  signup_random: Random
   signup_button: Signup
   signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\nOnce you verify your account, you can change your email on your account Preferences page. We will never show your email address on a webpage that others can access unless you choose to display it by including it in your login, your user name, or comments or other text which you input. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
 
@@ -2296,7 +2187,6 @@
   species_list_show_save_as_txt: Save as Plain Text
   species_list_show_save_as_rtf: Save as Rich Text
   species_list_show_save_as_csv: Save as Spreadsheet
-  species_list_show_print_labels: Print Labels
   species_list_show_set_source: Save This List for Later
   species_list_show_set_source_help: Save this list for the next time you create or edit an observation list. It will display a list of the species in this list for you to choose from.
   species_list_show_clone_list: Make a Copy of This List
@@ -2310,9 +2200,7 @@
   species_list_show_edit: Edit This List
   species_list_show_clear_list: Clear This List
   species_list_show_destroy: Destroy This List
-  species_list_show_members: Members
   species_list_show_no_members: This list contains no observations.
-  species_list_show_regular_index: Regular Index
   species_list_show_regular_index_help: Show observations in the "regular" index as a table of thumbnails.
 
   # species_list/species_lists_by_title
@@ -2329,7 +2217,6 @@
 
   # species_list/download
   species_list_download_title: Observation List Reports and Downloads
-  species_list_download_back: Back to Observation List
   species_list_labels_header: Print Labels for Observation
   species_list_labels_button: Print Labels
   species_list_report_header: Save a Checklist of Names
@@ -2340,8 +2227,6 @@
   species_list_write_in_title: "Add New Observations to [list_title]"
 
   # sequence/add_sequence
-  sequence_add_edit: "[:edit_object(type=:observation)]"
-  sequence_add_owner_id: "[:show_observation_owner_id]"
 
   # sequence/form_sequence
   form_sequence_locus_help: "Start with a short abbreviation (because the [:observation.ti] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp;ITS\n&nbsp;&nbsp;multi-locus\n&nbsp;&nbsp;LSU large subunit ribosomal RNA gene, partial sequence"
@@ -2370,21 +2255,13 @@
   verify_note: "Your account has been verified...\n\nYou should now be able to post observations, upload images, edit name descriptions, define new locations, add comments, and propose and vote on identifications at \"[:app_title]\":[domain].\n\nThanks for joining!"
 
   # account/choose_password
-  account_choose_password_title: Verifying Your Account
-  account_choose_password_warning: You must choose a password before we can verify your account.
 
   # account/welcome
   welcome_no_user_title: User not set in session
-  welcome_logout_link: Logout
   welcome_no_user_note: If you are not a spammer, please report this as an error.
   welcome_note: You are now logged into the system...
 
   # semantic_vernacular/delete
-  delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
-  semantic_vernacular_index: Go to all Semantic Vernacular Descriptions
-  semantic_vernacular_proposed: Proposed by [name] at [date_time]
-  semantic_vernacular_delete: Delete
-  semantic_vernacular_title: "SVD Detail: [name]"
 
   # glossary term fields
   glossary_term_created_at: Created At
@@ -2430,7 +2307,6 @@
   article_body: Body
 
   # article/create_article
-  article_body_required: "[:article_body] [:required.ti]"
   article_title_required: "[:article_title] [:required.ti]"
   form_article_title_help: This field will appear in the Activity Feed.
 
@@ -2449,7 +2325,6 @@
 
   # publication/index
   publication_index: Publication List
-  publication_index_title: List of All Publications
   publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/admin/emails/webmaster_questions/new.
   publication_full_help: When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author.
   publication_legend: "*P* indicates that it is a scientific, peer-reviewed article.\n*M* indicates that the article explicitly mentions or references the Mushroom Observer."
@@ -2472,7 +2347,6 @@
 
   # herbaria/show
   show_herbarium_herbarium_record_count: This fungarium contains [count] fungarium record(s).
-  show_herbarium_mcp_db_missing: Missing
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'.
   show_herbarium_curator_request: Request to be a Curator
@@ -2512,7 +2386,6 @@
   herbarium_index_merge_help: Click on the fungarium below that you would like to merge "[name]" into. This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new fungarium. If you do not have permission to perform the merge, it will send a request to the admins. ("+Cancel merge.+":[url])
 
   # herbaria/filtered
-  list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
 
   # herbarium record fields
@@ -2535,12 +2408,10 @@
   # herbarium_record/edit_herbarium_record
   edit_herbarium_record: Edit Fungarium Record
   edit_herbarium_record_back_to_index: Back to Fungarium Record Index
-  edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from a fungarium record.
   edit_herbarium_record_already_used: This fungarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
   edit_affects_multiple_observations: The changes you make here will affect all of the observations shown. If you wish to change a single observation, go to that observation, remove the incorrect [type] from it, then add the correct one. That will leave the [type] unchanged for any other observations associated with it.
 
   # herbarium_record/destroy_herbarium_record
-  delete_herbarium_record: Destroy Fungarium Record
 
   # herbarium_record/herbarium_record_index (not a real page)
   herbarium_record_index_title: "[subject] Fungarium Record Index"
@@ -2562,7 +2433,6 @@
   # collection_number/edit_collection_number
   edit_collection_number: Edit Collection Number
   edit_collection_number_back_to_index: Back to Collection Number Index
-  edit_collection_number_cant_add_or_remove: Only the observer can add or remove a collection number to or from an observation.
   edit_collection_number_already_used: This collection number is shared with another observation. If you need to fix it, remove it from your observation, then add the correct one.
   edit_collection_numbers_merged: Merged [this] into [that]. If this was not what you meant to do, remove the collection number from one of the observations, then add the correct one.
 
@@ -2570,10 +2440,8 @@
   delete_collection_number: Destroy Collection Number
 
   # collection_number/collection_number_index (not a real page)
-  collection_number_index_title: "[subject] Collection Number Index"
 
   # collection_number/list_collection_numbers
-  list_collection_numbers_title: "[:list_objects(type=:collection_number)]"
 
 
 
@@ -2646,8 +2514,6 @@
   visual_group_create: Create [:visual_group.ti]
 
   # visual_groups/show
-  definitional_images: Definitional Images
-  show_visual_group_title: "[name] [:visual_group.ti]"
 
   # visual_groups/destroy
   destroy_visual_group_success: "[:visual_group.ti] [:destroyed]"
@@ -2678,14 +2544,11 @@
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
   field_slip_creator: Creator
-  field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
   field_slip_edit: "[:edit_object(type=:FIELD_SLIP)]"
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
   field_slip_filter_by: Filter by [:project.ti]
-  field_slip_index: "[:index_object(type=:FIELD_SLIPS)]"
-  field_slip_job_no_project: No Project with id=[ID]
   field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_keep_obs: Save with Current Observation
   field_slip_last_obs: Switch to Last Observation
@@ -2693,7 +2556,6 @@
   field_slip_no_observation: No Observation found
   field_slip_select_observations: Select Observations to Associate
   field_slip_save_with_observations: Save with Selected Observations
-  field_slip_via_occurrence: via occurrence
   field_slip_no_project: No Project found
   field_slip_nil_project: "(No Project)"
   field_slip_other_codes: Other Codes
@@ -2702,9 +2564,7 @@
   field_slip_project_success: Field Slip will be associated with the [TITLE] Project
   field_slip_qr_intro: This page is primarily intended for scanning "MO Field Slips":https://mushroomobserver.org/articles/37 using a QR code scanner. It should work with QR codes that only contain the field slip code. You can also enter the code by hand into the text box and hit return.
   field_slip_quick_no_location: Quick create requires an existing location
-  field_slip_quick_no_name: Quick create requires an existing name
 
-  field_slip_show: Show [:field_slip.ti]
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: Welcome to the [TITLE] Project!
   field_slips_max_for_project: You may create up to [MAX] slips for this project.
@@ -2725,14 +2585,9 @@
   naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
   show_observation_add_matching_observations: Add Matching Observations
   show_observation_matching_observations: Matching Observations
-  show_observation_from_sibling: "(MO [id])"
-  show_occurrence_title: Occurrence
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
-  show_occurrence_primary: Primary
   edit_occurrence_submit: Save Changes
-  edit_occurrence_remove: Remove
   edit_occurrence_add_heading: Add Recently Viewed Observations
-  edit_occurrence_add: Add
   edit_occurrence_location: "Location:"
   edit_occurrence_details_heading: Primary Observation Details
   edit_occurrence_no_edit_permission: You don't have permission to edit this observation's details.
@@ -2741,7 +2596,6 @@
   occurrence_not_found: Occurrence not found.
   occurrence_resolve_projects_title: "Add Observations to Projects"
   occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
-  occurrence_resolve_projects_done: "Primary observation added to [count] projects/lists."
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
@@ -2805,7 +2659,6 @@
   account_api_keys_create_success: Sucessfully created a new API Key.
   account_api_keys_create_failed: "Failed to create a new API Key:"
   account_api_keys_removed_some: Successfully removed [num] selected API Key(s).
-  account_api_keys_removed_none: No API Keys were selected.
   account_api_keys_updated: Successfully updated API Key notes.
   account_api_keys_activated: Successfully activated key for [notes].
   account_api_keys_no_notes: You left name/description field empty.
@@ -2834,8 +2687,6 @@
   checklist_for: Checklist for
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
-  checklist_for_project_location_title: Checklist for [project] at [location]
-  checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
   checklist_target_summary: "Target names: [total] total, [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
@@ -2873,7 +2724,6 @@
 
   # name/eol_preview
   eol_preview_name_count: "[count] description(s)"
-  eol_preview_image_count: "[count] image(s)"
   eol_preview_title: EOL Preview
   eol_preview_explanation: "This page provides links to or shows the content that is currently scheduled for delivery to the \"Encyclopedia of Life\":https://eol.org (EOL). The features related to this effort are still very new and far from polished since it has been implemented quickly to meet the immediate needs to develop the fungus related content on the EOL. The content delivered from [:app_title] to the EOL will be credited both as coming from the [:app_title] website and the individual content providers.\n\nOn this page each section represents one taxon. The descriptive paragraphs for each listed taxon will be sent with the exception of any paragraphs marked 'Notes'. Both the taxa and the images that are being sent have been at least quickly reviewed by expert members of the [:app_title] community.\n\nThe review status of a specific taxon is given on the page for that taxon and can only be set by a designated expert. Images are selected based on the voting history of specific observations and their quality. Currently only designated experts can set the quality level of an image, but this is expected to become a open voting process for the entire [:app_title] community in the near future.\n\nCurrently the designated experts are either mycology professors that are teaching classes that are planning to provide data to EOL through the [:app_title] or individuals in the [:app_title] community who have shown dedication to the site and are recognized experts in mushroom or fungal identification. All aspect of the process of providing data to EOL are under discussion and open to change so please send any questions or comments you have to the [:app_title] \"webmaster\":/admin/emails/webmaster_questions/new.\n\nThe best way to participate in this amazing opportunity is to find a taxon you care about and work to expand the descriptive paragraphs for this taxon."
 
@@ -2894,8 +2744,6 @@
   image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/admin/emails/webmaster_questions/new for help.
 
   # interest-related controls in names, observations, etc.
-  interest_watch: Watch
-  interest_ignore: Ignore
   interest_watch_help: Click here if you want us to send you email whenever there is a change in this [object].
   interest_ignore_help: Click here if you want to stop getting any emails about this [object].
   interest_default_help: Click here if you want to go back to the default -- having your account preferences determine whether you get email about this [object].
@@ -2911,13 +2759,11 @@
   # location/list_merge_options
   list_merge_are_you_sure: Assign location? This cannot be undone.
   list_merge_options_near_matches: Near Matches
-  list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
 
   # observation/inat_imports
   inat_import_create_title: Import observations from iNaturalist
   inat_what_to_import: What to import
-  inat_choose_observations: "Inat Observations to Import:"
   inat_import_list: A list of observations
   inat_import_list_help: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
   inat_import_all: All my iNat observations
@@ -2930,7 +2776,6 @@
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
-  inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
   inat_url_label: Observations from an iNat search URL
   inat_url_hint: "On iNat, filter observations by taxon, place, date, quality grade, etc., then copy the URL from your browser and paste it here. Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
@@ -2945,10 +2790,8 @@
   inat_cannot_communicate: Cannot communicate with iNat. Please try again later. If you keep getting this message, please notify webmaster.
   inat_unknown_param: "iNat rejected the request: [error]"
 
-  inat_import_started: Your import has started. Refresh page to update results.
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
-  inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
   inat_leading_id: Leading ID as of
   inat_corrected_spelling: (corrected spelling)
@@ -2956,7 +2799,6 @@
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_not_imported: Not Imported
 
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_requested_caption: Requested Observations
@@ -3001,7 +2843,6 @@
   inat_import_tracker_done: "Click [:results] to see imported Observations."
   inat_import_tracker_done_with_errors: "Import finished with errors — see details above."
   inat_import_nothing_imported: Nothing was imported.
-  inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: "# Imported"
   inat_import_tracker_leave_page: You may continue working in MO by opening another tab, or by leaving this page. To return to this page, you can (a) go back in your browser, or (b) click Create Observation, iNat Import; if the import is in progress, this page will be redisplayed.
   inat_import_tracker_pending: Please wait until your pending iNat Import is Done before starting a new one.
@@ -3014,10 +2855,8 @@
   inat_import_tracker_license_added_heading: Observations Imported with MO Default License
   inat_import_tracker_license_added_note: "[count] observation(s) had no iNat license; your default MO license was applied."
   inat_import_tracker_license_added_reimport: "Re-import [count] observation(s) after adding a license on iNat"
-  inat_importables_explanation: "An ??importable?? observation is an iNat observation which: you created, whose iNat identity is a fungus or slime mold, and which was neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script."
 
   # observer/list_notifications
-  list_notifications_title: Email Alerts for [user]
 
   # observer/list_users
   list_users_joined: Joined
@@ -3030,18 +2869,13 @@
   merge_descriptions_title: Merge [object]
   merge_descriptions_merge_header: Merge with another description
   merge_descriptions_move_header: Move / copy to a synonym
-  merge_descriptions_merge: "[:merge.ti]"
-  merge_descriptions_move: Move / Copy
-  merge_descriptions_merge_or_move: Merge / Move / Copy
   merge_descriptions_no_others: "(there are no other descriptions)"
   merge_descriptions_delete_after: Delete old description after merge?
   merge_descriptions_merge_help: This will copy any non-blank sections from the source description into the description you select below. If the target description already has text in any of those fields, you will be given an editing form with the text from both descriptions. This will allow you to reconcile any conflicts by hand before saving the form and making the merger official.
   merge_descriptions_move_help: This will move the source description into a synonym. It will just copy it if you elect not to delete the old description. If you wish to merge with an existing description in the other name, you must first move your description into that name, then select [:show_description_merge] again from there.
 
   # species_list/name_lister
-  name_lister_bad_browser: This page will not work on your browser, sorry!
   name_lister_bad_submit: Invalid commit button '[BUTTON]'.
-  name_lister_charset: Character Encoding
   name_lister_charset_help: "(Try changing this if authors get garbled.)"
   name_lister_genera: Genera
   name_lister_help: "*Create List:* Click a genus in the first column to pull up a list of species in that genus. Select any of these taxa and press return or double-click to add species to your list. Accepted names are in boldface; deprecated names are followed by one or more accepted alternatives. You may choose any. To remove a name, select it in the third column, and press delete or double-click. (You may also use arrows to navigate, or type partial names to search within a column.)\n\n*Save List:* When you are finished, click any of the buttons at the bottom of the page. \"Create [:species_list]\" takes you back to the old creation form, where you will be able to enter date, location, notes, etc. before saving the list.\n\n*Reports :* The plain text report gives you a simple list of taxa with no formatting. Rich text can be used to import the list into Microsoft Word complete with authors and all the formatting intact. Spreadsheet produces a CSV file, with name, author, citation, and accepted columns. Common names are not available yet. Reports should automatically download in a separate tab or window; if not, go to your browser's File menu and click 'Save As'."
@@ -3056,17 +2890,10 @@
 
   # name/needed_descriptions
   needed_descriptions_help: The following species names are the ones that have the most [:observations], but do not have a general description in the [:app_title]. Adding a general description to these common species would be a big help.
-  needed_descriptions_title: Top 100 Needed Species [:descriptions]
 
   # observer/no_ajax
-  no_ajax_body: It looks like your browser is out of date. You still have access to all of the capabilities of this site, however unless you upgrade your browser we will not be able to make use of some very useful javascript features that modern browsers support. This includes dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.
-  no_ajax_browsers: "Browsers that we recommend (and test the site on regularly) are:\n\n* Firefox / Iceweasel 1.0 or higher\n\n* Internet Explorer 5.5 or higher\n\n* Netscape 7.0 or higher\n\n* Safari 1.2 or higher\n\n* Opera (we know 8.0 works)\n\n* Chrome\n\nIf you know that your browser supports AJAX but it's not listed here, please \"send us an e-mail\":/admin/emails/webmaster_questions/new."
-  no_ajax_dont_care: If you don't care and you're tired of seeing the "Your Browser is Out of Date" tab at the top of every page, "please click here":/javascript/turn_javascript_off. (Login and go to preferences to re-enable auto-detection.)
-  no_ajax_title: Your Browser is Out of Date
 
   # observer/no_browser
-  no_browser_body: "We have not seen your browser before. This means we don't know if it supports the full capabilities of this site. Since there are pages that won't work if we guess wrong (like voting on [:observation] names), we have to assume the worst. However this means that a number of useful features are not available, like dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.\n\nIf you would like to override this decision, \"click here to turn javascript on\":/javascript/turn_javascript_on. If you are tired of seeing the \"We Don't Recognize Your Browser\" tab at the top of every page, please \"click here to turn javascript off\":/javascript/turn_javascript_off. (Login and go to preferences to re-enable auto-detection.)"
-  no_browser_title: We Don't Recognize Your Browser
 
   # account/no_email
   no_email_how_to_reenable: Go to your "Preferences":/account/preferences/edit page to re-enable this feature.
@@ -3101,13 +2928,8 @@
   no_email_general_question_success: Question email disabled for [name].
 
   # observer/no_javascript
-  no_javascript_body: "It looks like you have javascript disabled on your browser. You will still have access to all of the capabilities of this site, however unless you enable javascript we will not be able to make use of some very useful features that modern browsers support. This includes dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.\n\nIf you would like to turn Javascript on, but aren't sure how, try looking it up on google with this search: \"How do I enable JavaScript in my browser?\":https://www.google.com/search?hl=en&q=How+do+I+enable+Javascript+in+my+browser%3F&btnG=Google+Search"
-  no_javascript_dont_care: If you *do* have javascript enabled, but our auto-detection algorithm is failing to detect it correctly, "please click here":/javascript/turn_javascript_on. If you don't care and you're tired of seeing the "Javascript Disabled" tab at the top of every page, "please click here":/javascript/turn_javascript_off. (Login and go to preferences to re-enable auto-detection.)
-  no_javascript_title: You Have Javascript Disabled
 
   # observer/no_session
-  no_session_body: "It looks like your browser is refusing cookies. Without cookies, our site has no way of remembering who you are from one page to the next. This means that you will not be able to create an account and login, and therefore you will not be able to create [:observations], upload [:images], make [:comments], and much more. You will still be able to view everything that the general public has access to, but you will just be an observer, you will not be able to participate actively.\n\nAll we will do is store a big long number on your computer. Next time you go to our site, we will look up that number and use it to keep track of who you are. (We get multiple requests every second from around the world -- without this ID we wouldn't stand a chance of keeping everyone straight!) This ID is encrypted and keeps no sensitive information in it.\n\nIf you would like to turn cookies on, but aren't sure how, try looking it up on google with this search: \"How do I enable cookies in my browser?\":https://www.google.com/search?hl=en&q=How+do+I+enable+cookies+on+my+browser%3F&btnG=Google+Search Note that most browsers will let you enable cookies for individual sites, allowing you to protect your privacy everywhere else. For example, in Firefox, go into Edit -> Preferences -> Privacy Tab -> Exceptions."
-  no_session_title: You Have Cookies Disabled
 
   # info/textile
   sandbox_enter: Enter Textile you wish to test here
@@ -3137,15 +2959,9 @@
   set_interest_user_mismatch: Another [:user] is logged on at this machine. Please log them off, log back in as you, and try again.
 
   # observer/show_notifications
-  show_notifications_title: New Notifications for [user]
 
   # species_list/bulk_editor
-  species_list_bulk_editor_title: Observation List Bulk Editor
-  species_list_bulk_editor_another: Another
-  species_list_bulk_editor_reuse: Reuse
   species_list_bulk_editor_success: Successfully updated [n] observation(s).
-  species_list_bulk_editor_you_own_no_observations: You don't own any observations in this observation list.
-  species_list_bulk_editor_ambiguous_namings: "The proposed names are confusing for observation [id]: [name]. Please \"go to that observation\":/[id] and make your changes there."
   species_list_bulk_editor_help: "Hold your mouse over any of the fields in the table below to see what the field is supposed to be. The text fields are, in order: notes (top right), date, location, latitude, longitude, elevation (second row). Check boxes indicate, respectively, if location is where collected, and specimen. All links open in new tabs."
 
   # observer/<Theme>
@@ -3195,17 +3011,10 @@
   edit_translations_bad_locale: "Invalid locale code: [locale]"
   edit_translations_login_required: Must be logged in to edit translations.
   edit_translations_reviewer_required: Only reviewers have permission to edit the English translations.
-  edit_translations_created_at: Created translation for [tag].
-  edit_translations_changed: Changed translation for [tag].
-  edit_translations_no_changes: Nothing changed.
   edit_translations_saving: Saving...
   edit_translations_loading: Loading...
   edit_translations_will_lose_changes: There are unsaved changes. Would you like to continue anyway?
-  edit_translations_switch_language: Switch Language
-  edit_translations_original_text: Original Text
   edit_translations_old_versions: Old Versions
-  edit_translations_full_text: full text
-  edit_translations_no_versions: No old versions.
   edit_translations_singular: singular form
   edit_translations_plural: plural form
   edit_translations_lowercase: all lowercase as for end of sentence
@@ -3215,15 +3024,12 @@
 
   # observer/turn_javascript_nil
   turn_javascript_nil_body: We will resume auto-detection of the state of javascript.
-  turn_javascript_nil_title: Auto-Detect Javascript
 
   # observer/turn_javascript_off
   turn_javascript_off_body: We will now ignore javascript.
-  turn_javascript_off_title: Turn Javascript Off
 
   # observer/turn_javascript_on
   turn_javascript_on_body: We will now assume javascript is on.
-  turn_javascript_on_title: Turn Javascript On
 
   ##############################################################################
 
@@ -3245,7 +3051,6 @@
   add_members_already_removed_member: Already removed [user] from members.
 
   # project/<id>/members
-  index_members_title: Members of
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
@@ -3254,15 +3059,6 @@
   add_project_no_location: No location matching '[where]' found.
   add_project_need_title: Projects must have a title.
   add_project_success: Project was successfully created.
-
-  # account/add_user_to_group
-  add_user_to_group_already: "[user] is already a member of [group]."
-  add_user_to_group_group: Group name
-  add_user_to_group_no_group: Unable to find the group, '[group]'.
-  add_user_to_group_no_user: Unable to find the [:user], '[user]'.
-  add_user_to_group_success: "[user] added to [group]."
-  add_user_to_group_title: Add [:user] to Group
-  add_user_to_group_user: "[:user.ti] name"
 
   # admin_request/author_request emails
   admin_request_change_member_status: Change [:user]'s status
@@ -3275,7 +3071,6 @@
   author_request_title: Authorship Request for [title]
   author_request_note: "[:admin_request_note]"
   request_message: Message
-  request_show_user: Show details on sender
   request_subject: Subject
   request_success: Delivered email.
 
@@ -3319,14 +3114,12 @@
 
   # observer/send_feature_email
   send_feature_email_success: Delivered feature mail.
-  send_feature_email_denied: Only the admin can send feature mail.
 
   # project/destroy_project
   destroy_project_failed: Failed to destroy project.
   destroy_project_success: Project destroyed.
 
   # project/edit_project
-  edit_project_destroy: "[:destroy_object(type=:project)]"
   alphanumerics_only: must only contain ASCII alphanumerics and dashes
 
   # project/_form_projects
@@ -3345,11 +3138,9 @@
   form_projects_use_date_range: Use above dates
 
   # project/list_projects
-  list_projects_title: "[:list_objects(type=:project)]"
   list_projects_add_project: "[:add_object(type=:project)]"
 
   # draft/publish_draft
-  publish_draft_denied: "Permission denied: Only the creator of a draft or a project admin can publish a draft."
 
   # project/review_authors
   review_authors_add_author: Add
@@ -3363,25 +3154,16 @@
 
   # project/show_project
   show_project_add_members: Add Members
-  show_project_admin_group: Admin Group
   show_project_admin_request: Admin Request
   show_project_administer: Administer Project
-  show_project_by: Owned By
   show_project_created_at: Created
-  show_project_destroy: Destroy Project
   show_project_drafts: Drafts
-  show_project_edit: Edit Project
   show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_no_prefix: This project has no field slip prefix yet, which is required before field slips can be created.
   show_project_field_slip_prefix: Field Slip Prefix
   show_project_field_slip_set_prefix: Set a field slip prefix
   show_project_join: Join Project
-  show_project_location: Location
   show_project_leave: Leave Project
-  show_project_published: Reviewed Published Names
-  show_project_summary: Summary
-  show_project_user_group: User Group
-  show_project_violation_count: Project has [count] constraint violation(s)
   show_project_admin_title: Project Admin
   show_project_admin_tab: Admin
   show_project_admin_details_tab: Details
@@ -3400,7 +3182,6 @@
 
   # project/violations/index
   form_violations_help: Each row shows an Observation that fails one or more of this Project's constraints. Use the per-row actions to bring it into compliance.
-  violations_index_title: "[:constraint_violations.ti]"
   form_violations_latitude_none: "Lat: Any"
   form_violations_location_none: "[:location.ti]: Any"
   form_violations_longitude_none: "Lon: Any"
@@ -3425,7 +3206,6 @@
   form_violations_modal_target_location_submit: Add Target
 
   # users/by_name
-  users_by_name_title: Users by Name
   users_by_name_created_at: Created
   users_by_name_groups: Groups
   users_by_name_id: ID
@@ -3441,9 +3221,7 @@
   index_license_header: Licenses
 
   # licenses/show
-  show_license_header: License
   index_license: Index
-  license_default: Default License
 
   # licenses/form
   create_license_title: Create License
@@ -3456,7 +3234,6 @@
 
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation
-  create_donation_not_allowed: Only admins can record donations
   create_donation_add: Add
   create_donation_tab: Record Donation
 
@@ -3516,8 +3293,6 @@
   email_subject_comment: "[:comment.ti] About [name]"
   email_subject_commercial_inquiry: Commercial Inquiry About [Name]
   email_subject_consensus_change: Consensus Changed from [old] to [new]
-  email_subject_denied: "[:user.ti] Creation Blocked"
-  email_subject_features: New [:app_title] Features
   email_subject_location_change: "[name] Has Been Changed"
   email_subject_naming_for_observer: Research Request
   email_subject_naming_for_tracker: Naming Notification - [name]
@@ -3533,9 +3308,6 @@
   email_subject_observation_change: "[:observation.ti] Changed, [name]"
   email_subject_observation_destroy: "[:observation.ti] Destroyed, [name]"
   email_subject_observation_question: Question About [name]
-  email_subject_publish_name: Name Published
-  email_subject_registration: "[name] Registration Verification"
-  email_subject_update_registration: "[name] Registration Update"
   email_subject_verify: Email Verification
   email_subject_verify_api_key: Activate API Key
   email_subject_webmaster_question: Question From [user]
@@ -3551,7 +3323,6 @@
   email_field_no_specimen_available: Specimen is no longer available
   email_field_north: "[:north.ti] edge"
   email_field_old_name: Old [:name]
-  email_field_published: Published by
   email_field_removed_images: Removed image(s)
   email_field_south: "[:south.ti] edge"
   email_field_specimen_available: Specimen is now available
@@ -3563,7 +3334,6 @@
   # "Helpful" links at the bottom of the email.
   email_links_change_prefs: Change your preferences
   email_links_disable_tracking: Disable tracking for this [type]
-  email_links_email_publisher: Send email to the publisher
   email_links_latest_changes: Latest changes at [:app_title]
   email_links_not_interested: I'm not interested in this [type]
   email_links_post_comment: Post a [:comment]
@@ -3594,7 +3364,6 @@
   email_commercial_intro: "h2. *Commercial Inquiry*\n\n[user] ([email]) asked the [:app_title] website to forward the following commercial inquiry to you about your image [image]:"
   email_consensus_change_intro: "h2. *Consensus Change*\n\nConsensus has changed for observation #[id]:"
   email_add_herbarium_record_not_curator_intro: "h2. *Fungarium Record Added By Non-Curator*\n\nThe user, [login], added the fungarium record, [herbarium_label], to the fungarium, [herbarium_name], which you curate."
-  email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold identifier : [old_identifier]\nnew identifier : [new_identifier]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nnamings : [namings]\nshow name : [show_url]\nedit name : [edit_url]"
   email_location_change: "User made nontrivial change to a location:\n\nuser : [user]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nshow location : [show_url]\nedit location : [edit_url]"
   email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nshow url : [show_url]\nedit url : [edit_url]"
@@ -3617,9 +3386,6 @@
   email_object_change_reason_interest: You received this email because you expressed interest in this [type].
   email_observation_destroyed_intro: h2. *Observation Destroyed*
   email_observation_question_intro: "h2. *Question from Another User*\n\n[user] ([email]) asked the [:app_title] website to forward the following question to you about your observation <u>[name]</u>:"
-  email_publish_name_intro: "h2. *Draft of Name Has Been Published*\n\nA description of a name has been published on the [:app_title] website. You are receiving this email since you are listed as either an author for this taxon or as a reviewer on the site."
-  email_registration_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and intended to register [how_many] attendee(s) for the [name]:\n\n[link]"
-  email_update_registration_intro: "h2. *Hello [user]*\n\nYour registration for the [name] has been updated from\n\n[before]\n\n\nto\n\n\n[after]"
   email_user_question_intro: "h2. *Question from Another User*\n\n[user] ([email]) asked the [:app_title] website to forward the following email to you:"
   email_verify_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and activate your [:app_title] account:\n\n[link]"
   email_verify_api_key_intro: "h2. *Hello [user]*\n\nThe application \"[app]\" (associated with user \"[app_user]\") has requested access to your [:app_title] account. If you recognize this application and wish to give them permission to post observations, etc. in your name, all you have to do is click on the activation link below to activate the API key they just created. Note that you can review your list of API keys at any time by visiting the [:account_api_keys_title] from your \"[:app_preferences]\" page.\n\nActivate Key: [activate_link]\n[:account_api_keys_link]: [manager_link]\n\nTo report a suspicious access request, just respond to this email."
@@ -3668,8 +3434,6 @@
 
   # Note, glossary terms should appear in alphabetical order.
   how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image. Each comment is owned by a particular \"User\":#user. A comment may only be edited or deleted by the owner or a site administrator. You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comments' in the upper right of the page (the 'inbox' icon)."
-  how_contribution: "*Contribution* - A number or score that measures the quantity and quality of contributions a \"User\":#user has made to [:app_title]. Click '[:app_your_summary]' to see a break-down of your own contribution. You earn points for every \"Observation\":#observation, \"Image\":#image, \"Comment\":#comment, etc. you have posted. \"Describing Species\":#describing_species and \"Defining Locations\":defining_locations are some of the most important contributions a user can make. (See \"How To Help\":/info/how_to_help for a list of other ways to help out.) Currently, contribution is used only in weighting your \"Votes\":#vote when voting on \"Proposed Names\":#proposed_names for observations."
-  how_description: "*Species Description* - A collection of text describing a \"Name\":#name. Every name automatically gets one official description that everyone in the community is allowed to read and modify. Additional descriptions may be created by any \"User\":#user, including project members. The owner of a description may choose any level of read or write permissions, and can control who is given authorship credit. Since descriptions, especially the official one, are often collaborative efforts, modifications by a user are subject to community review, and past versions are kept to facilitate this process. The content of a description includes a set list of sections, including things like '[:form_names_gen_desc]', '[:form_names_diag_desc]', '[:form_names_look_alikes]', '[:form_names_refs]' and other notes."
   how_image: "*Image* - A photograph or illustration of one or more mushroom species. Images are associated with one or more \"Observations\":#observation. A given Image is owned by a particular \"User\":#user who may or may not be the copyright holder. Only the owner or a site administrator can remove an image or edit the associated information. All images in the site are required to be released under one of the \"Creative Commons licenses\":https://creativecommons.org or in the public domain. If you dispute the given copyright or the licensing of an image you are the copyright holder of, send mail to the \"webmaster\":/admin/emails/webmaster_questions/new."
 
   how_license: "**License** – When you post an image or other content on Mushroom Observer (“your Work’), you grant one of the following \"CC (Creative Commons) Licenses\":https://creativecommons.org/licenses/ for others to use your Work:\n-  \"CC-BY-SA - Attribution-ShareAlike\":https://creativecommons.org/licenses/by-sa/4.0/ (Wikipedia compatible): MO's default license. Others can use your Work, however they must credit any new creations based on your Work the same as the original.\n- \"CC-BY - Attribution\":https://creativecommons.org/licenses/by/ (Wikipedia compatible): Others can use your Work as long as they credit you. Others can create new material based on your work.\n- \"CC-BY-NC - Attribution-NonCommercial\":https://creativecommons.org/licenses/by-nc/4.0/: Others can use your Work, and create new material based on it, however they can’t profit from the new material.\n- \"CC-BY-NC-SA - Attribution-NonCommercial-ShareAlike\":https://creativecommons.org/licenses/by-nc-sa/4.0: Others can use your Work, so long as they don’t profit off it and use identical credits for new creations.\n- \"CC-BY-ND - Attribution-NoDerivs\":https://creativecommons.org/licenses/by-nd/4.0/: Others can use your Work, however they can’t alter your Work to create new materials.\n- \"CC-BY-NC-ND - Attribution-NonCommercial-NoDerivs\":https://creativecommons.org/licenses/by-nc-nd/4.0: Others can use your Work, however they can’t profit off it or change it.\n- \"CC0 - No Copyright/Public Domain\":https://creativecommons.org/publicdomain/zero/ (Wikipedia compatible): You waive your rights to your Work. Others can use it without crediting you, and can create new material based on it.\nYou can change your default license by selecting the 'License' on \"your Preferences\":/account/preferences/edit and clicking on ‘Save Changes’. You can also set licenses on a per image basis."
@@ -3970,7 +3734,6 @@
 
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."
-  validate_invalid: Invalid [field].
   validate_invalid_url: Invalid URL.
   validate_missing: Missing [field].
   validate_not_a_number: "[Field] is not a number."
@@ -3981,20 +3744,16 @@
   validate_too_long: "[Field] must be less than [max] characters long."
   validate_too_long_or_short: "[Field] must be [min] to [max] characters long."
   validate_too_many_characters: "[Field] has too many characters."
-  validate_too_short: "[Field] must be at least [min] characters long."
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
   validate_user_selection: You selected
   validate_today: today is
 
   # One-time-use error messages.
-  validate_image_content_type_images_only: You can only upload [:images].
-  validate_image_file_missing: Had problems uploading [:image].
   validate_image_file_too_big: We can't handle [:images] that big. Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right. Please try uploading your image again.
   validate_invalid_year: Year is invalid. Should be between 1500 and present.
   validate_future_time: Time travel is not allowed; use a past date or the current date.
-  validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
   validate_user_email_mismatch: Your email addresses don't match. Please check for a typo.
@@ -4008,11 +3767,8 @@
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
   validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
-  validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
-  validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
   validate_image_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_image_user_missing: "[:validate_missing(field=:user)]"
-  validate_image_when_missing: "[:validate_missing(field=:date)]"
   validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_interest_user_missing: "[:validate_missing(field=:user)]"
   validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
@@ -4020,12 +3776,10 @@
   validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
   validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
   validate_location_north_too_high: "[:validate_too_large(field=:latitude,max=90)]"
-  validate_location_search_name_too_long: "[:validate_too_long(field=''search_name'',max=200)]"
   validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
   validate_location_user_missing: "[:validate_missing(field=:user)]"
   validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
   validate_name_author_too_long: "[:validate_too_many_characters(field=:authority)]"
-  validate_name_shorten: Shorten [:form_names_text_name] and/or [:authority.ti].
   validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
   validate_name_use_first_author: Use the first author followed by “et al.” per <a href="https://www.iapt-taxon.org/nomen/main.php?page=art46" target="_new">ICN Recommendation 46C.2</a>
   validate_name_user_missing: "[:validate_missing(field=:user)]"
@@ -4035,19 +3789,12 @@
   validate_name_equivalent_exists: "Equivalent Name already exists"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
   validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
-  validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"
-  validate_naming_reason_reason_invalid: "[:validate_invalid(field=''reason_code'')]"
   validate_naming_user_missing: "[:validate_missing(field=:user)]"
   validate_notification_user_missing: "[:validate_missing(field=:user)]"
   validate_observation_user_missing: "[:validate_missing(field=:user)]"
-  validate_observation_when_missing: "[:validate_missing(field=:date)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
-  validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
-  validate_project_ends_before_start: End date is before the start date
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-  validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"
-  validate_project_user_missing: "[:validate_missing(field=:user)]"
   validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
   validate_sequence_accession_unique: "[:accessions.ti] for an [:observation.ti] must be unique"
@@ -4077,15 +3824,12 @@
   validate_vote_value_out_of_bounds: "[:validate_not_in_range(field=:vote)]"
 
   # Runtime error and success messages.
-  runtime_added: Successfully added [type].
   runtime_added_id: "Successfully added [type] #[value]."
   runtime_added_id_to: "Successfully added [type] #[value] to [name]."
   runtime_added_name: Successfully added [type] '[value]'.
-  runtime_added_name_to: Successfully added [type] '[value]' to [name].
   runtime_added_to: Successfully added [type] to [name].
   runtime_admin_only: That operation is restricted to site admins.
   runtime_already_exists: "[Type] already exists: '[value]'"
-  runtime_already_used: "[Type] is already in use: '[value]'"
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
   runtime_created_name: Successfully created [type] '[value]'.
@@ -4093,10 +3837,8 @@
   runtime_date_should_be_yyyymmdd: Date should be in year-month-day format.
   runtime_delivered_message: Successfully delivered message.
   runtime_delivered_question: Successfully delivered question.
-  runtime_delivered_request: Successfully delivered request.
   runtime_destroyed: Successfully destroyed [type].
   runtime_destroyed_id: "Successfully destroyed [type] #[value]."
-  runtime_destroyed_name: Successfully destroyed [type] '[value]'.
   runtime_failed_to_strip_gps: "Failed to strip GPS data from full-size image's EXIF header: [msg]"
   runtime_invalid: "[Type] is invalid: '[value]'"
   runtime_lat_long_error: "Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively. Use decimal notation or degrees/minutes/seconds. Examples:\n-123.4567\n123.4567 W\n123 27.402 W\n123 24 24.12 W\n123° 24’ 24.12” W\n123deg 24min 24.12sec W"
@@ -4104,50 +3846,31 @@
   runtime_merge_success: Successfully merged [type] [src] into [dest].
   runtime_missing: Missing [field].
   runtime_no_changes: No changes made.
-  runtime_no_create: Unable to create [type].
-  runtime_no_create_id: "Unable to create [type] #[value]."
   runtime_no_create_name: Unable to create [type] '[value]'.
   runtime_no_destroy: Unable to destroy [type].
   runtime_no_destroy_id: "Unable to destroy [type] #[value]."
-  runtime_no_destroy_name: Unable to destroy [type] '[value]'.
-  runtime_no_match: Can't find [type].
   runtime_no_match_id: "Can't find [type] #[value]."
   runtime_no_match_name: Can't find [type] matching '[value]'.
   runtime_no_matches: No matching [types] found.
-  runtime_no_matches_pattern: No [types] matching '[value]' found.
-  runtime_no_matches_regexp: No [types] matching '[value]' found.
   runtime_no_more: There are no more [types].
   runtime_search_string_too_long: "Search string too long ([length] characters). Maximum is [max] characters."
-  runtime_no_objects: There are no [types].
   runtime_no_parse: "Unable to parse: '[value]'"
   runtime_no_save: Unable to save [type].
   runtime_no_update: Unable to update [type].
-  runtime_no_update_id: "Unable to update [type] #[value]."
-  runtime_no_update_name: Unable to update [type] '[value]'.
-  runtime_not_owner: You are not the owner of [type] '[value]'.
   runtime_not_owner_id: "You are not the owner of [type] #[value]."
   runtime_removed: Successfully removed [type].
   runtime_removed_from: Successfully removed [type] from [name].
   runtime_removed_id: "Successfully removed [type] #[value]."
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
-  runtime_removed_name: Successfully removed [type] '[value]'.
-  runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
   runtime_spiders_begone: Spiders Begone! Please login (mushroomobserver.org/account/login/new) to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.
-  runtime_uploaded: Successfully uploaded [type].
-  runtime_uploaded_id: "Successfully uploaded [type] #[value]."
   runtime_uploaded_name: Successfully uploaded [type] '[value]'.
-  runtime_user_hasnt_authored: "[user] hasn't written any [types]."
-  runtime_user_hasnt_created: "[user] hasn't created any [types]."
-  runtime_user_hasnt_edited: "[user] hasn't edited any [types]."
 
   # One-time-use messages.
-  runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
   runtime_bad_qr_code: "Bad QR code: [code]."
   runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of observation lists or which have good documentation. Please read the discussion under "_Imageless_":/names/31080.
-  runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
   runtime_description_added_reader: Gave view permission to [name].
   runtime_description_added_writer: Gave edit permission to [name].
@@ -4162,27 +3885,14 @@
   runtime_description_removed_writer: Revoked edit permission for [name].
   runtime_destroy_description_not_admin: Only a description's admins can delete that description.
   runtime_duplicate_rank: "Rank appears twice: '[rank]'"
-  runtime_herbarium_record_already_exists: Fungarium record [number] at [herbarium] already used by someone else.
   runtime_image_updated_notes: "Updated notes on image #[id]."
   runtime_image_uploaded: Uploaded image '[name]'.
-  runtime_index_no_at_location: No [types] at [location].
-  runtime_index_no_by_rss_log: No [types] have had any recent activity.
-  runtime_index_no_for_object: No [types] for this object.
-  runtime_index_no_for_user: No [types] for [user].
-  runtime_index_no_in_species_list: No [types] in [name].
-  runtime_index_no_inside_observation: "Observation #[id] has no [types]."
-  runtime_index_no_of_children: There are no [types] for children of [name].
-  runtime_index_no_of_name: There are no [types] of [name].
-  runtime_index_no_of_parents: There are no [types] for parents of [name].
-  runtime_index_no_with: There are no [types] with [attachments].
   runtime_invalid_for_rank: "Name is invalid for the rank [rank]: '[name]'"
   runtime_invalid_rank: "Ranks are out of order: '[line_rank]' is the same as or below '[rank]'"
   runtime_location_merge_failed: Failed to merge observation [name].
   runtime_login_failed: Login unsuccessful.
   runtime_login_success: Login successful.
   runtime_map_nothing_to_map: Nothing to map.
-  runtime_name_in_use_with_notes: The name '[name]' is already in use and [other] has notes.
-  runtime_no_conditions: You didn't specify any conditions!
   runtime_no_upload_image: Had problems uploading image '[name]'.
   runtime_object_deleted: This object has been deleted.
   runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
@@ -4193,7 +3903,6 @@
   runtime_species_list_clear_success: Successfully removed all observations from list.
   runtime_suggest_one_alternate: No [types] match "[match]", maybe you meant this?
   runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
-  runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
   runtime_wrong_rank_admin: "Wrong rank for [name]; suffix implies [expect], not [actual]. Submit again to create [name] with rank [actual]."
 
@@ -4209,7 +3918,6 @@
   runtime_create_name_success: "[:runtime_created_name(type=:name,value=name)]"
   runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
   runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
-  runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
   runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
   runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
   runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
@@ -4233,43 +3941,25 @@
   runtime_form_comments_destroy_failed: "[:runtime_no_destroy_id(type=:comment,value=id)]"
   runtime_form_comments_destroy_success: "[:runtime_destroyed_id(type=:comment,value=id)]"
   runtime_form_comments_edit_success: "[:runtime_updated_id(type=:comment,value=id)]"
-  runtime_image_destroy_failed: "[:runtime_no_destroy_id(type=:image,value=id)]"
   runtime_image_destroy_success: "[:runtime_destroyed_id(type=:image,value=id)]"
   runtime_image_edit_success: "[:runtime_updated_id(type=:image,value=id)]"
   runtime_image_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
   runtime_image_remove_success: "[:runtime_removed_id(type=:image,value=id)]"
-  runtime_image_resize_denied: "[:runtime_admin_only]"
   runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
   runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
   runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
   runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
-  runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
   runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
   runtime_license_duplicate_attributed: Duplicate display_name, form_name, or url
-  runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
-  runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
   runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
-  runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
-  runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
   runtime_location_merge_success: "[:runtime_merge_success(type=:location,src=this,dest=that)]"
   runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
-  runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
-  runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
-  runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
   runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
   runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
-  runtime_name_description_index_no_matches: "[:runtime_no_matches(type=:name_description)]"
   runtime_name_description_success: "[:runtime_created_id(type=:name_description,value=id)]"
-  runtime_name_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:name_description)]"
-  runtime_name_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:name_description)]"
-  runtime_name_index_no_matches: "[:runtime_no_matches(type=:name)]"
-  runtime_names_by_editor_error: "[:runtime_user_hasnt_edited(type=:name)]"
-  runtime_names_by_user_error: "[:runtime_user_hasnt_created(type=:name)]"
-  runtime_naming_created_at: "[:runtime_created_at(type=:naming)]"
   runtime_naming_updated_at: "[:runtime_updated_at(type=:naming)]"
   runtime_no_more_search_objects: "[:runtime_no_more]"
-  runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
   runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
   runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
   runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
@@ -4287,7 +3977,6 @@
   runtime_species_list_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
   runtime_unable_to_create_name: "[:runtime_no_create_name(type=:name,value=name)]"
   runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
-  runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
   runtime_user_bad_rank: "Invalid rank: '[rank]'"
   runtime_visual_group_created_at: "[:runtime_created_at(type=:visual_group)]"
   runtime_visual_model_created_at: "[:runtime_created_at(type=:visual_model)]"
@@ -4302,7 +3991,6 @@
   runtime_description_foreign_write_wrong: Descriptions from other servers must be read-only.
   runtime_description_make_default_only_public: You are only allowed to make public descriptions the default. All users must be allowed at least to read it.
   runtime_description_merge_conflict: There is a conflict. Please merge the two descriptions by hand. (Look at the text fields below. Where there is a conflict both descriptions have been entered one on top of the other separated by a line.) You may cancel the operation at any time without making any changes. When you are finished, be sure to destroy the old description.
-  runtime_description_move_invalid_classification: The classification has incorrect syntax. We can't save a new description with it like this, so we've temporarily blanked out the classification field until you correct it.
   runtime_description_must_be_admin: You must be an admin for a description to use this feature.
   runtime_description_permissions_fixed: This type of description has fixed permissions.
   runtime_description_public_read_wrong: Public descriptions must be readable by the general public.
@@ -4317,9 +4005,6 @@
   runtime_image_changed_your_image: "Changed your profile image to image #[id]."
   runtime_image_move_failed: "Something went wrong on the server and we failed to save image #[id]. Please try again."
   runtime_image_process_failed: "Something went wrong on the server and we failed to process image #[id]. Please try again."
-  runtime_image_remove_denied: You do not have permission to remove images from this observation.
-  runtime_image_remove_missing: This observation doesn't have that image!
-  runtime_merge_warning: Because it can be destructive, only the admin can merge existing [types]. An email requesting the proposed merge has been sent to the admins.
   runtime_name_for_description_not_found: Sorry, the name this description belongs to no longer exists.
   runtime_object_not_found: "Sorry, the [type] you tried to display (id #[id]) does not exist. Someone may have deleted it or merged it into another."
   runtime_profile_must_define: You must define this location before we can make it your primary location. Any other changes to your profile have been saved.
@@ -4666,10 +4351,8 @@
   sort_by_activity: "[:activity.ti]"
   sort_by_box_area: Area
   sort_by_code: Code
-  sort_by_code_then_name: Code and Name
   sort_by_confidence: "[:confidence_level.ti]"
   sort_by_contribution: Contribution
-  sort_by_copyright_holder: "[:copyright_holder.ti]"
   sort_by_created_at: Date Created
   sort_by_curator: "[:curator.ti]"
   sort_by_date: "[:date.ti]"
@@ -4686,8 +4369,6 @@
   sort_by_name: "[:name.ti]"
   sort_by_num_views: Popularity
   sort_by_number: Number
-  sort_by_observation: "[:observation.ti]"
-  sort_by_owners_quality: Owner's Quality
   sort_by_posted: Date Posted
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
@@ -4697,20 +4378,11 @@
   sort_by_title: "[:title.ti]"
   sort_by_updated_at: Time Last Modified
   sort_by_user: "[:user.ti]"
-  sort_by_where: "[:location.ti]"
 
   ##############################################################################
 
   # DEBUGGING STUFF -- this doesn't need translating
 
   # observations/recalc
-  observer_recalc_old_name: "old_name: [name]"
-  observer_recalc_new_name: "new_name: [name]"
-  observer_recalc_caught_error: "Caught exception: [error]"
 
   # observer/status
-  system_status_browser_status_size: Browser status cache size
-  system_status_clear_caches: Clear Caches
-  system_status_gc: GC
-  system_status_textile_name_size: Textile name cache size
-  system_status_title: Server Status

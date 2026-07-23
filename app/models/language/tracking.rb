@@ -29,7 +29,7 @@
 #
 ################################################################################
 
-module LanguageTracking
+module Language::Tracking
   # `tags_used` tracks which tags got used on the CURRENT page/request
   # - `before_action { Language.track_usage }` primes it, later code
   # in that same request reads it back via `note_usage_of_tag`/

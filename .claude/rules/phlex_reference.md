@@ -418,10 +418,6 @@ class ListGroupTest < ComponentTestCase
 end
 ```
 
-See `test/views/controllers/comments/index_test.rb`
-(`LegacyCommentList` / `NewCommentList`, nested inside `IndexTest`)
-for the established pattern.
-
 ## `register_value_helper` is a code smell — ask before you reach for it
 
 The conversion goal is to **eliminate** the helper, not paper it

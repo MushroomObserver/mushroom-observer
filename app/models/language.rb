@@ -16,21 +16,21 @@
 #
 #  == Localization and export files
 #
-#  Translation strings are exported to two sets of files.  See LanguageExporter
-#  module for more information.
+#  Translation strings are exported to two sets of files.  See
+#  Language::Exporter module for more information.
 #
 #  == Tracking translations used on a page
 #
 #  Very simple global mechanism for keeping track of which localization strings
-#  are used on each page.  See LanguageTracking module for more info.
+#  are used on each page.  See Language::Tracking module for more info.
 #
 ################################################################################
 
 class Language < AbstractModel
-  include LanguageExporter
+  include Exporter
 
   class << self
-    include LanguageTracking
+    include Tracking
   end
 
   has_many :translation_strings, dependent: :destroy

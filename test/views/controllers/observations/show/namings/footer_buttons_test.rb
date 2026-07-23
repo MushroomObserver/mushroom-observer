@@ -85,40 +85,6 @@ class Views::Controllers::Observations::Show::Namings::FooterButtonsTest <
     end
   end
 
-  # ---- parity tests ------------------------------------------------
-
-  class OldSuggestButton < Components::Base
-    def initialize(name:, data:)
-      super()
-      @name = name
-      @data = data
-    end
-
-    def view_template
-      button(type: :button,
-             class: "btn btn-default btn-sm mt-2",
-             data: @data) { plain(@name) }
-    end
-  end
-
-  def test_suggest_button_parity
-    name = :show_namings_suggest_names.l
-    data = { controller: "suggestions",
-             action: "suggestions#suggestTaxa",
-             results_url: "/foo",
-             localization: "{}",
-             image_ids: "[1]" }
-
-    old_html = render(OldSuggestButton.new(name: name, data: data))
-    new_html = render(Components::Button.new(
-                        name: name, size: :sm, class: "mt-2", data: data
-                      ))
-
-    assert_html_element_equivalent(old_html, new_html,
-                                   selector: "button",
-                                   label: "suggest_button")
-  end
-
   private
 
   def render_footer_buttons(user: @user, obs: @obs)
