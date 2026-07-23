@@ -10,19 +10,19 @@
 
 # This script finds the newest such zip and extracts
 # occurrences.csv / multimedia.csv
-# The extracted CSVs are deleted bye default once the run finishes;
+# The extracted CSVs are deleted by default once the run finishes;
 # Pass --keep-csvs to retain them
 # Pass --occurrences/--multimedia to skip the zip entirely and use
 # already-extracted files instead.
 #
 # Observations/Images MCP has that don't exist in MO are written to a report,
-# bydefault <dwca-dir>/mycoportal_backfill_missing.csv
-# pass --missing-out to override.
+# by default <dwca-dir>/mycoportal_backfill_missing.csv
+# Pass --missing-out to override.
 #
 # Observations/Images already linked (skipped, not recreated) are written
-# to a second report, bydefault <dwca-dir>/mycoportal_backfill_skipped.csv
+# to a second report, by default <dwca-dir>/mycoportal_backfill_skipped.csv
 # (columns include the existing ExternalLink's id, for traceability)
-# pass --skipped-out to override.
+# Pass --skipped-out to override.
 #
 # occurrences.csv's "catalogNumber" ("MUOB <id>") is the MO Observation id;
 # its own "id" column is MCP's internal occid. multimedia.csv's "coreid"
@@ -170,8 +170,6 @@ class BackfillMycoportalExportLinks
 
   def reset_run_state!
     @stats = { images: Hash.new(0), observations: Hash.new(0) }
-    @missing = []
-    @skipped = []
     @images_seen = 0
     @occurrences_seen = 0
   end
@@ -182,11 +180,12 @@ class BackfillMycoportalExportLinks
     extract_dwca_zip! unless @occurrences_csv
     warn("Processing MyCoPortal DwC-A (site=#{@site.name}, " \
          "#{@apply ? "APPLY" : "dry run"}) ...")
+    @reports = ReportWriter.new(@missing_out, @skipped_out)
     process_occurrences
     each_multimedia_batch { |batch| process_image_batch(batch) }
-    write_reports
     print_summary
   ensure
+    @reports&.close
     cleanup_extracted_files
   end
 
@@ -407,31 +406,14 @@ class BackfillMycoportalExportLinks
   # locally -- report for triage rather than silently skipping.
   def record_missing(target_type:, occid:, mo_id:, image_id: nil)
     increment_stat(target_type, :mo_missing)
-    @missing << [target_type, occid, mo_id, image_id]
+    @reports.missing([target_type, occid, mo_id, image_id])
   end
 
   # Already linked -- report which ExternalLink covers this record
   # alongside the plain already_present count, for traceability.
   def record_skipped(target_type:, occid:, mo_id:, link_id:, image_id: nil)
     increment_stat(target_type, :already_present)
-    @skipped << [target_type, occid, mo_id, image_id, link_id]
-  end
-
-  def write_reports
-    write_csv(@missing_out, %w[entity_type occid mo_obs_id image_id],
-              @missing)
-    write_csv(@skipped_out,
-              %w[entity_type occid mo_obs_id image_id external_link_id],
-              @skipped)
-  end
-
-  def write_csv(path, header, rows)
-    return if rows.empty?
-
-    CSV.open(path, "w") do |csv|
-      csv << header
-      rows.each { |row| csv << row }
-    end
+    @reports.skipped([target_type, occid, mo_id, image_id, link_id])
   end
 
   def print_summary
@@ -453,6 +435,40 @@ class BackfillMycoportalExportLinks
     puts("    invalid (see warnings above): #{stats[:invalid]}")
     puts("    not found in MO: #{stats[:mo_missing]}")
     puts("    unparseable: #{stats[:unparseable]}")
+  end
+
+  # Streams missing/skipped rows straight to CSV as they're discovered,
+  # rather than buffering them in a growing Array for the whole run.
+  # This script's main repeat-use case is a reconciliation run, where
+  # most records are already linked -- at the collection's current size
+  # (over a million images) buffering every "skipped" row until the very
+  # end would mean holding all of them in memory at once. Streaming also
+  # means a run that raises partway through still leaves a partial,
+  # readable report on disk instead of losing everything buffered so far.
+  class ReportWriter
+    MISSING_HEADER = %w[entity_type occid mo_obs_id image_id].freeze
+    SKIPPED_HEADER = %w[entity_type occid mo_obs_id image_id
+                        external_link_id].freeze
+
+    def initialize(missing_out, skipped_out)
+      @missing_csv = CSV.open(missing_out, "w")
+      @missing_csv << MISSING_HEADER
+      @skipped_csv = CSV.open(skipped_out, "w")
+      @skipped_csv << SKIPPED_HEADER
+    end
+
+    def missing(row)
+      @missing_csv << row
+    end
+
+    def skipped(row)
+      @skipped_csv << row
+    end
+
+    def close
+      @missing_csv.close
+      @skipped_csv.close
+    end
   end
 
   # Elapsed wall-clock time, formatted for the summary. Monotonic clock --

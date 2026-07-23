@@ -88,8 +88,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
     occurrences_csv = write_csv(%w[id catalogNumber],
                                 [occurrence_row(1, "MUOB 1")])
-    @missing_out = Tempfile.new(["missing", ".csv"]).path
-    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
       apply: true, keep_csvs: false, missing_out: @missing_out,
@@ -204,8 +204,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
          "dateEntered" => "2019-07-22 14:38:43" }]
     )
     multimedia_csv = write_csv(%w[coreid identifier], [])
-    @missing_out = Tempfile.new(["missing", ".csv"]).path
-    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
       apply: true, keep_csvs: false, missing_out: @missing_out,
@@ -329,8 +329,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     occurrences_csv = write_csv(%w[id catalogNumber],
                                 [occurrence_row(1, "MUOB 1")])
     multimedia_csv = write_csv(%w[coreid identifier], [])
-    @missing_out = Tempfile.new(["missing", ".csv"]).path
-    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
       apply: false, keep_csvs: false, missing_out: @missing_out,
@@ -409,8 +409,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                                 [occurrence_row(1, "MUOB 1")])
     multimedia_csv = write_csv(%w[coreid identifier],
                                [multimedia_row(1, image_url(image.id))])
-    @missing_out = Tempfile.new(["missing", ".csv"]).path
-    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv,
       multimedia: multimedia_csv, apply: true, keep_csvs: false,
@@ -473,8 +473,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                            [occurrence_row(999, "MUOB 999")],
                            [multimedia_row(999, image_url(999_999_999))])
     # File.utime needs a plain Time, not an ActiveSupport::TimeWithZone --
-    # this is filesystem-mtime manipulation, not app-facing date logic.
-    old_time = ::Time.now - 100 # rubocop:disable Rails/TimeZone
+    # #to_time converts without going through the flagged Time.now/Time.new.
+    old_time = Time.current.to_time - 100
     File.utime(old_time, old_time, older)
     build_dwca_zip(dwca_dir, "MUOB_backup_2026-01-01_000000_DwC-A.zip",
                    [occurrence_row(1, "MUOB 1")],
@@ -490,8 +490,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
 
   def test_raises_when_no_matching_zip_is_found
     dwca_dir = Dir.mktmpdir("test_dwca_empty")
-    @missing_out = Tempfile.new(["missing", ".csv"]).path
-    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: dwca_dir, occurrences: nil, multimedia: nil,
       apply: true, keep_csvs: false, missing_out: @missing_out,
@@ -550,8 +550,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   def run_script(occurrence_rows, multimedia_rows, apply: true)
     occurrences_csv = write_csv(%w[id catalogNumber], occurrence_rows)
     multimedia_csv = write_csv(%w[coreid identifier], multimedia_rows)
-    @missing_out = Tempfile.new(["missing", ".csv"]).path
-    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv,
       multimedia: multimedia_csv, apply: apply, keep_csvs: false,
@@ -564,8 +564,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   # Runs the backfill against a real dwca_dir (no --occurrences/
   # --multimedia given), so #run really globs for a zip and extracts it.
   def run_against_zip_dir(dwca_dir, keep_csvs:)
-    @missing_out = Tempfile.new(["missing", ".csv"]).path
-    @skipped_out = Tempfile.new(["skipped", ".csv"]).path
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: dwca_dir, occurrences: nil, multimedia: nil,
       apply: true, keep_csvs: keep_csvs, missing_out: @missing_out,
@@ -599,14 +599,20 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     end
   end
 
-  # Retains the Tempfile object (not just its path) for the rest of the
-  # test -- otherwise Ruby's GC can finalize (unlink) it before the
-  # script gets around to reading it via CSV.foreach, an intermittent
-  # ENOENT unrelated to whatever the test is actually checking.
   def write_csv(headers, rows)
-    file = Tempfile.new(["csv", ".csv"])
+    path = temp_csv_path("csv")
+    write_csv_to(path, headers, rows)
+    path
+  end
+
+  # Retains the Tempfile object (not just its path) for the rest of the
+  # test -- otherwise Ruby's GC can finalize (unlink) it once nothing else
+  # references it, even after the script has since written fresh content
+  # to that same path, causing an intermittent ENOENT unrelated to
+  # whatever the test is actually checking.
+  def temp_csv_path(prefix)
+    file = Tempfile.new([prefix, ".csv"])
     (@tempfiles ||= []) << file
-    write_csv_to(file.path, headers, rows)
     file.path
   end
 
