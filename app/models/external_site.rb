@@ -72,6 +72,24 @@ class ExternalSite < AbstractModel
     template.sub("{id}", external_id.to_s)
   end
 
+  # Reverse of #observation_url: given a URL this site actually
+  # produced, extract whatever filled the `{id}` placeholder --
+  # e.g. "1950183" out of MyCoPortal's
+  # ".../index.php?occid=1950183", or the bare id out of iNat's
+  # base_url-only template. nil if the url doesn't have this site's
+  # template shape (or the template has no `{id}` at all).
+  def id_from_url(url)
+    return nil if url.blank?
+
+    template = url_template.presence || "#{base_url}{id}"
+    # -1 limit: {id} is usually the last token, and split drops trailing
+    # empty strings by default -- losing the empty string after it means
+    # losing the capture group meant to go there.
+    pattern = template.split("{id}", -1).
+              map { |part| Regexp.escape(part) }.join("(.+)")
+    /\A#{pattern}\z/.match(url)&.captures&.first
+  end
+
   def member?(user)
     return false unless project
 

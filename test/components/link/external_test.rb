@@ -56,20 +56,24 @@ class Components::Link::ExternalTest < ComponentTestCase
 
   # ---- ExternalLink AR record (link:) form ----
 
-  def test_inat_link_renders_relationship_id_and_date
+  def test_inat_link_renders_relationship_date_and_id_badge
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     html = render(Components::Link::External.new(link: link))
 
     assert_html(html, "a[href='#{link.url}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
-                text: "Manual link to iNaturalist (234723)")
+                text: "Manual link to iNaturalist")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
+    # The id is a sibling copy-to-clipboard badge, not link text -- a
+    # <button> nested inside the <a> would be invalid HTML.
+    assert_html(html, "button.badge-id", text: "234723")
+    assert_no_html(html, "a button")
   end
 
   # Regression: import links store external_id with a nil url (url is derived).
   # The component used to call link.url.sub(...) -> NoMethodError on nil.
-  def test_inat_import_link_with_nil_url_renders_derived_id
+  def test_inat_import_link_with_nil_url_renders_derived_id_badge
     site = external_sites(:inaturalist)
     link = ExternalLink.new(external_site: site, relationship: :import,
                             external_id: "372490529")
@@ -79,10 +83,11 @@ class Components::Link::ExternalTest < ComponentTestCase
 
     assert_html(html, "a[href='#{site.observation_url("372490529")}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
-                text: "Imported from iNaturalist (372490529)")
+                text: "Imported from iNaturalist")
+    assert_html(html, "button.badge-id", text: "372490529")
   end
 
-  def test_other_site_renders_relationship_label_and_date
+  def test_mycoportal_link_renders_relationship_date_and_id_badge
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     html = render(Components::Link::External.new(link: link))
 
@@ -92,5 +97,17 @@ class Components::Link::ExternalTest < ComponentTestCase
                 text: "Manual link to MyCoPortal")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
+    assert_html(html, "button.badge-id", text: "1950183")
+  end
+
+  def test_site_with_no_id_accessor_renders_no_badge
+    site = ExternalSite.new(name: "GenBank",
+                            base_url: "https://genbank.example/")
+    link = ExternalLink.new(external_site: site,
+                            url: "https://genbank.example/123")
+
+    html = render(Components::Link::External.new(link: link))
+
+    assert_no_html(html, "button.badge-id")
   end
 end

@@ -25,6 +25,22 @@ class IDBadgeTest < ComponentTestCase
     assert_html(html, "button", text: "?")
   end
 
+  def test_renders_value_when_no_object_given
+    # Not an AbstractModel id -- e.g. an external site's own numeric id
+    # (see Components::Link::External).
+    html = render(Components::IDBadge.new(value: "234723", extra_class: nil))
+
+    assert_html(html, "button[type='button']", text: "234723")
+    assert_html(html, "button[data-controller='clipboard']")
+  end
+
+  def test_object_id_wins_over_value_when_both_given
+    obs = observations(:minimal_unknown_obs)
+    html = render(Components::IDBadge.new(object: obs, value: "999999"))
+
+    assert_html(html, "button", text: obs.id.to_s)
+  end
+
   def test_extra_class_overrides_default_spacing
     obs = observations(:minimal_unknown_obs)
     html = render(Components::IDBadge.new(
