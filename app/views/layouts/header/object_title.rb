@@ -27,7 +27,7 @@ module Views::Layouts
 
     def view_template
       div(class: "d-flex align-items-center") do
-        IDBadge(object: @object, extra_class: "mr-4")
+        IDBadge(object: @object, size: :sm)
         whitespace
         span { render_title_span }
       end

@@ -8,15 +8,27 @@
 # Pass `object:` for an AbstractModel's own id (the common case), or
 # `value:` for an id that isn't an AbstractModel's id at all -- e.g.
 # an external site's numeric id shown next to an ExternalLink.
+#
+# `size:` picks the badge's font-size modifier -- `.badge-id` itself
+# has no inherent font-size, so every caller states its size
+# explicitly rather than relying on an implicit default:
+#   :xl -- uppercase site-abbreviation accordion triggers ("iNat", "MCP")
+#   :lg -- copy-to-clipboard external-site record id (Link::External)
+#   :md -- rss-feed-style contexts (matrix box title, list rows)
+#   :sm -- sitting next to a large page-title heading
 class Components::IDBadge < Components::Base
+  SIZE_CLASSES = { xl: "badge-xl", lg: "badge-lg",
+                   md: "badge-md", sm: "badge-sm" }.freeze
+
   prop :object, _Nilable(::AbstractModel), default: nil
   prop :value, _Nilable(_Union(String, Integer)), default: nil
+  prop :size, _Union(*SIZE_CLASSES.keys)
   prop :extra_class, _Nilable(String), default: "mr-4"
 
   def view_template
     button(
       type: "button",
-      class: class_names("badge badge-id", @extra_class),
+      class: class_names("badge badge-id", SIZE_CLASSES[@size], @extra_class),
       role: "button",
       data: {
         trigger: "tooltip", placement: "bottom",

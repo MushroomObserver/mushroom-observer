@@ -79,7 +79,7 @@ module Views::Controllers::Projects
 
       h1(class: title_classes, id: "title") do
         div(class: "d-flex align-items-center") do
-          IDBadge(object: @project)
+          IDBadge(object: @project, size: :sm)
           whitespace
           Link(type: :object, object: @project)
         end

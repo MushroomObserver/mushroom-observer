@@ -66,9 +66,10 @@
 
 // badges
 
-// Used for record id in title.
+// Used for record id in title. No inherent font-size of its own --
+// every caller (Components::IDBadge's size: prop) states one of the
+// sibling .badge-* modifiers below explicitly.
 .badge-id {
-  font-size: 60% !important;
   font-weight: normal;
   background-color: transparent;
   color: $text-color;
@@ -77,16 +78,40 @@
   flex-shrink: 0;
   // align-self: self-start;
 
-  &.rss-id {
-    font-size: 80% !important;
-  }
-
-  &.inline-link {
+  // Uppercase site-abbreviation accordion triggers ("iNat", "MCP").
+  &.badge-xl {
     font-size: 100% !important;
     letter-spacing: 0.03em;
   }
 
-  &:hover {
+  // Copy-to-clipboard external-site record id, inline next to its
+  // link (Components::Link::External) -- just digits, so smaller and
+  // tighter than .badge-xl's uppercase-label sizing.
+  &.badge-lg {
+    font-size: 90% !important;
+  }
+
+  // rss-feed-style contexts (matrix box title, list rows).
+  &.badge-md {
+    font-size: 80% !important;
+  }
+
+  // Sitting next to a large page-title heading.
+  &.badge-sm {
+    font-size: 60% !important;
+  }
+
+  // [data-toggle="collapse"]:not(.collapsed) -- an accordion-trigger
+  // badge (e.g. the external-links "Shared with [iNat]" badges) keeps
+  // this same filled look while its pane is open, not just on hover,
+  // so the active pane is visible at a glance. Bootstrap's
+  // collapse.js itself toggles `.collapsed` on every trigger as its
+  // target opens/closes -- no extra JS or markup needed here. Scoped
+  // to [data-toggle="collapse"] so plain (non-trigger) id badges --
+  // which never carry `.collapsed` at all -- don't match `:not
+  // (.collapsed)` and end up permanently "hover" styled.
+  &:hover,
+  &[data-toggle="collapse"]:not(.collapsed) {
     background-color: $text-color;
     color: $body-bg;
   }

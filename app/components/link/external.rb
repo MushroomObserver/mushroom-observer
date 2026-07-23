@@ -54,7 +54,7 @@ class Components::Link::External < Components::Base
     return unless @site_record_id
 
     whitespace
-    IDBadge(value: @site_record_id, extra_class: nil)
+    IDBadge(value: @site_record_id, size: :lg)
   end
 
   private
