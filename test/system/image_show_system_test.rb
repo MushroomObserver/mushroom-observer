@@ -18,9 +18,10 @@ class ImageShowSystemTest < ApplicationSystemTestCase
 
     visit("/images/#{image.id}")
     assert_selector("body.images__show")
-    # Let external assets (Maps JS, license badge) finish loading so
-    # they don't count as pending connections against the next action.
-    sleep(1)
+    # Wait for external assets (Maps JS, license badge) to finish
+    # loading so they don't register as pending connections against
+    # the next Ferrum action (#4854 follow-up flakiness).
+    page.driver.browser.network.wait_for_idle
 
     page.execute_script("window.moTestMarker = true")
 
