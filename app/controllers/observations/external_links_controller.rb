@@ -3,7 +3,15 @@
 # Add, edit and remove external links assoc. with obs.
 module Observations
   class ExternalLinksController < ApplicationController
-    before_action :login_required
+    include Show
+
+    # `show` is defined in the included Show module above.
+    # rubocop:disable Rails/LexicallyScopedActionFilter
+    # `show` is the informational "Shared with" badge modal -- visible
+    # to logged-out viewers, so it's the one action that must NOT
+    # require a session. Every mutating action still does.
+    before_action :login_required, except: [:show]
+    # rubocop:enable Rails/LexicallyScopedActionFilter
 
     def new
       set_ivars_for_new
@@ -241,24 +249,6 @@ module Observations
                            title: :external_link.ti
                          ))
       end
-    end
-
-    def render_external_links_section_update
-      # Refetch with just the external-links subtree the panel +
-      # `sites_user_can_add_links_to_for_obs` access — much cheaper
-      # than the full `show_includes` tree for a panel re-render.
-      @observation = Observation.includes(
-        external_links: { external_site: { project: :user_group } }
-      ).find(@observation.id)
-      @other_sites = ExternalSite.sites_user_can_add_links_to_for_obs(
-        @user, @observation, admin: in_admin_mode?
-      )
-      klass = Views::Controllers::Observations::Show::ExternalLinksPanel
-      render_obs_section_update(
-        identifier: "external_links",
-        panel: klass.new(obs: @observation, user: @user,
-                         sites: @other_sites&.to_a, siblings: [])
-      ) and return
     end
 
     # this updates both the form and the flash

@@ -18,7 +18,7 @@
 #
 # @example Inside a Panel (adds panel-collapse class)
 #   Collapsible(id: "obs_body", expanded: @expanded,
-#               panel: true, class: "no-transition") do
+#               panel: true, class: "fade-not-slide") do
 #     render_body
 #   end
 #

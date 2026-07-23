@@ -35,7 +35,7 @@ require("test_helper")
 #     `ActiveRecord::Relation`, an `Array` of a known model, or a
 #     duck-typed shape reachable via `_Interface(:method_name)`.
 #   - Even when the value really is polymorphic (a Comment
-#     target, an InlineModLinks target, …), `_Interface(:type_tag,
+#     target, an InlineCRUDLinks target, …), `_Interface(:type_tag,
 #     :id)` pins the contract more tightly than `_Any` and still
 #     accepts the full polymorphic set.
 class NoAnyPhlexPropsTest < ActiveSupport::TestCase

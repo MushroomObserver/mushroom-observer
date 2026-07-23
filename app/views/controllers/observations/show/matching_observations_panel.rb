@@ -2,23 +2,20 @@
 
 # "Matching observations" panel on the observation show page. When
 # the observation's occurrence has siblings, the heading is the bare
-# "Occurrences" title with an icon-only link to the occurrence
+# "Matching Observations" title with an icon-only link to the occurrence
 # flush right, and the body lists the sibling observations as a
 # tight ul. When there's no occurrence yet, the whole heading is an
 # icon+text "Add Matching Observations" link (no body).
 #
-class Views::Controllers::Observations::Show::AssociatedObservationsPanel < Views::Base
+class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views::Base
   prop :obs, ::Observation
   prop :occurrence, _Nilable(::Occurrence), default: nil
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    Panel(
-      panel_id: "associated_observations",
-      panel_class: "name-section"
-    ) do |panel|
+    Panel(panel_id: "matching_observations") do |panel|
       if siblings?
-        panel.with_heading { plain(:occurrences.ti) }
+        panel.with_heading { plain(:show_observation_matching_observations.ti) }
         panel.with_heading_links { matching_observations_link }
         panel.with_body { render_body }
       else
@@ -47,7 +44,7 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanel < View
   end
 
   def render_body
-    ul(class: "tight-list") do
+    ul(class: "tight-list pl-0 mb-0") do
       @siblings.each do |sibling|
         li do
           a(href: permanent_observation_path(sibling.id)) do

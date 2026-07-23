@@ -91,6 +91,22 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "Second body")
   end
 
+  def test_panel_with_body_id_and_data
+    html = render(Components::Panel.new) do |panel|
+      panel.with_heading { "Test" }
+      panel.with_body(classes: "p-0", id: "my_section",
+                      data: { controller: "section-update",
+                              section_update_user_value: 42 }) do
+        "Body content"
+      end
+    end
+
+    assert_html(html, "div.panel-body.p-0#my_section" \
+                      "[data-controller='section-update']" \
+                      "[data-section-update-user-value='42']",
+                text: "Body content")
+  end
+
   def test_panel_with_thumbnail
     html = render(Components::Panel.new) do |panel|
       panel.with_heading { "Test" }

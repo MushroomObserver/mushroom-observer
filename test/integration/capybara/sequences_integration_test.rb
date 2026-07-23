@@ -11,7 +11,7 @@ class SequencesIntegrationTest < CapybaraIntegrationTestCase
     login(mary)
 
     visit(observation_path(obs))
-    click_on("Add Sequence")
+    click_on(:add_object.t(type: :sequence))
     fill_in("sequence[locus]", with: "New locus")
     click_on("Add")
     assert_equal(sequence_original_count, Sequence.count,

@@ -19,13 +19,16 @@
 #   Link(type: :download,       target: path, name: "CSV")
 #   Link(type: :modal,          modal_id: "m", name: "Open", target: url)
 #   Link(type: :collapse_toggle, target_id: "div_id")
-#   Link(type: :inline_mod,     target: @record, observation: @obs,
-#                               user: current_user)
-#   Link(type: :inline_add,     modal_id: "m", tab: some_tab)
 #   Link(type: :external,       tab: some_tab)
 #   Link(type: :icon,           tab: some_tab)
 #   Link(type: :active,         content: "Latest",
 #                               path: observations_path)
+#
+# The inline edit/destroy/add link group used to live here as
+# `:inline_mod` / `:inline_add` -- it renders zero, one, or two links
+# (not "a link"), so it moved out of this namespace to
+# `Components::InlineCRUDLinks` (dispatch) + `Components::InlineLinkBlock`
+# (layout glue).
 class Components::Link < Components::Base
   include Components::Button::Styling
   include Components::Button::Content
@@ -40,8 +43,6 @@ class Components::Link < Components::Base
     external: :External,
     get: :Get,
     icon: :Icon,
-    inline_add: :InlineAdd,
-    inline_mod: :InlineMod,
     location: :Location,
     modal: :Modal,
     new: :New,

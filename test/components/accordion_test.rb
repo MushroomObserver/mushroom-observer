@@ -33,6 +33,42 @@ class AccordionTest < ComponentTestCase
     assert_html(html, "div.panel.bg-none")
   end
 
+  def test_panes_fade_by_default
+    html = render_accordion { |a| a.with_pane(id: "p") { "x" } }
+
+    assert_html(html, "#p.fade-not-slide")
+  end
+
+  def test_with_pane_class_lands_on_the_pane_alongside_fade_not_slide
+    html = render_accordion { |a| a.with_pane(id: "p", class: "p-3") { "x" } }
+
+    assert_html(html, "#p.fade-not-slide.p-3")
+  end
+
+  def test_slide_true_uses_bootstraps_default_transition
+    html = render(
+      Components::Accordion.new(id: "notes_42", slide: true)
+    ) { |a| a.with_pane(id: "p") { "x" } }
+
+    assert_no_html(html, "#p.fade-not-slide")
+  end
+
+  def test_extra_class_merges_onto_inner_panel_div
+    html = render(
+      Components::Accordion.new(id: "notes_42", class: "m-0")
+    ) { |a| a.with_pane(id: "p") { "x" } }
+
+    assert_html(html, "div.panel.border-none.bg-none.m-0")
+  end
+
+  def test_extra_data_attrs_merge_onto_inner_panel_div
+    html = render(
+      Components::Accordion.new(id: "notes_42", data: { foo: "bar" })
+    ) { |a| a.with_pane(id: "p") { "x" } }
+
+    assert_html(html, "#notes_42 div.panel[data-foo='bar']")
+  end
+
   private
 
   def render_accordion(&block)

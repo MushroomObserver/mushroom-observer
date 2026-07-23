@@ -43,7 +43,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # The naming whose proposer / edit links belong to the current
   # observation. For a MergedNaming this is the sibling that lives
   # on the focal observation, if any; for a plain Naming it's
-  # itself. The name-cell uses this to drive the InlineModLinks
+  # itself. The name-cell uses this to drive the InlineCRUDLinks
   # `editable` decision — only local namings get edit/destroy
   # controls because cross-observation edits aren't reachable
   # from here.
@@ -105,7 +105,6 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
     name_for_link = local || primary
     ::Textile.register_name(name_for_link.name)
     render_name_link(name_for_link)
-    whitespace
     render_mod_links(name_for_link) if local
   end
 
@@ -120,8 +119,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_mod_links(naming)
     div(class: "text-nowrap") do
-      Link(type: :inline_mod,
-           target: naming, user: @user, indent: false)
+      InlineCRUDLinks(target: naming, user: @user)
     end
   end
 

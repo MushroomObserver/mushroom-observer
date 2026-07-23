@@ -61,6 +61,8 @@ class Components::Icon < Components::Base
     observations: "tags",
     print: "print",
     globe: "globe",
+    map: "globe",
+    place: "map-marker",
     find_on_map: "screenshot",
     apply: "check",
     chevron_down: "chevron-down",

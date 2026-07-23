@@ -8,7 +8,7 @@ class Tab::CollectionNumber::New < Tab::Base
   end
 
   def title
-    :create_collection_number.l
+    :add_object.t(type: :collection_number)
   end
 
   def path

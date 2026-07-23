@@ -24,9 +24,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    Panel(
-      panel_id: "name_observations_menu"
-    ) do |panel|
+    Panel(panel_id: "name_observations_menu") do |panel|
       panel.with_heading { plain(:about_this_taxon.l) }
       panel.with_heading_links { render_tracker_link }
       panel.with_body { render_body }
@@ -55,11 +53,11 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def render_observations_column
-    Column(xs: 12, sm: 6, class: "name-section") do
-      p { plain(:show_observations_of.t) }
+    Column(xs: 12, sm: 6) do
+      p(class: "m-0") { plain(:show_observations_of.t) }
       ul(class: "list-unstyled pl-3") { render_obs_link_rows }
       div(class: "py-3") do
-        p { render_tab_link(Tab::Name::OccurrenceMap.new(name: @name)) }
+        p(class: "m-0") { render_tab_link(Tab::Name::OccurrenceMap.new(name: @name)) }
       end
     end
   end
@@ -105,8 +103,8 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def render_research_links_column
-    Column(xs: 12, sm: 6, class: "name-section") do
-      p { plain("#{:research_links.l}:") }
+    Column(xs: 12, sm: 6) do
+      p(class: "m-0") { plain("#{:research_links.l}:") }
       ul(class: "list-unstyled pl-3") { render_research_links }
     end
   end

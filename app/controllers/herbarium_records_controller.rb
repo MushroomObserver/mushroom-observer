@@ -520,9 +520,11 @@ class HerbariumRecordsController < ApplicationController
       :projects,
       herbarium_records: [{ herbarium: :curators }, :user]
     ).find(@observation.id)
+    klass = Views::Controllers::Observations::Show::SpecimenPanel::
+            HerbariumRecordsSection
     render_obs_section_update(
       identifier: "herbarium_records",
-      panel: Views::Controllers::Observations::Show::HerbariumRecordsPanel.new(
+      panel: klass.new(
         obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return

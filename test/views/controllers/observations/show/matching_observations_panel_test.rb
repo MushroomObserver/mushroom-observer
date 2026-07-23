@@ -3,8 +3,8 @@
 require("test_helper")
 
 # Smoke + HTML parity for
-# `Views::Controllers::Observations::Show::AssociatedObservationsPanel`.
-class Views::Controllers::Observations::Show::AssociatedObservationsPanelTest <
+# `Views::Controllers::Observations::Show::MatchingObservationsPanel`.
+class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
   ComponentTestCase
   def setup
     super
@@ -46,7 +46,7 @@ class Views::Controllers::Observations::Show::AssociatedObservationsPanelTest <
   private
 
   def panel_with(siblings:, occurrence:)
-    Views::Controllers::Observations::Show::AssociatedObservationsPanel.new(
+    Views::Controllers::Observations::Show::MatchingObservationsPanel.new(
       obs: @obs, occurrence: occurrence, siblings: siblings
     )
   end

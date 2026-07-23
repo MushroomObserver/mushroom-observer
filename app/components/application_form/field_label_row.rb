@@ -76,18 +76,9 @@ class Components::ApplicationForm < Superform::Rails::Form
             "content instead of embedding it in the label: #{text.inspect}")
     end
 
-    # The standard trailing ":" on field-prompt labels (#4687) -- the
-    # one place to change or delete it site-wide if we ever decide to.
-    #
-    # `[text, ":"].safe_join` rather than `"#{text}:"`: plain string
-    # interpolation coerces an html_safe SafeBuffer label (e.g. Textile
-    # markup from `resolved_label_text`'s `.t` call) back into an
-    # unsafe String, so render_label_content would then escape it --
-    # `safe_join` preserves the html_safe flag when `text` already
-    # carries one, and safely escapes it when it doesn't.
-    def append_colon(text)
-      [text, ":"].safe_join
-    end
+    # append_colon lives on Components::Localization, included into
+    # FieldWithHelp (see field_with_help.rb) -- shared with label-style
+    # text rendered outside of forms.
 
     # Default label text: resolved text + colon, unless the caller
     # opts out via `label_colon: false` (e.g. SelectRangeField's "to"

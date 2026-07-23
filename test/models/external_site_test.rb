@@ -87,6 +87,53 @@ class ExternalSiteTest < UnitTestCase
     )
   end
 
+  def test_id_from_url_falls_back_to_base_url
+    site = external_sites(:inaturalist) # no url_template
+    assert_equal("12345", site.id_from_url("#{site.base_url}12345"),
+                 "reverses observation_url's base_url-only fallback shape")
+  end
+
+  def test_id_from_url_uses_template
+    site = external_sites(:mycoportal) # has a {id} url_template
+    assert_equal(
+      "999",
+      site.id_from_url(
+        "https://mycoportal.org/portal/collections/individual/" \
+        "index.php?occid=999"
+      ),
+      "reverses the {id} placeholder out of a template-shaped url"
+    )
+  end
+
+  def test_id_from_url_no_match
+    site = external_sites(:inaturalist)
+    assert_nil(site.id_from_url("https://unrelated.example.com/123"))
+  end
+
+  # Some MyCoPortal links stored in production are search-result urls a
+  # user pasted in by hand, not a direct link to one occurrence record --
+  # a different path shape entirely, not just a different id. The
+  # anchored full-string match must reject these rather than extracting
+  # whatever trailing text happens to follow the id_from_url regex.
+  def test_id_from_url_rejects_non_conforming_prefix
+    site = external_sites(:mycoportal)
+
+    assert_nil(site.id_from_url(
+                 "https://mycoportal.org/portal/collections/list.php" \
+                 "?db=all&taxa=Amanita+muscaria"
+               ))
+    assert_nil(site.id_from_url(
+                 "https://mycoportal.org/portal/collections/misc/" \
+                 "collprofiles.php?collid=123"
+               ))
+  end
+
+  def test_id_from_url_blank_url
+    site = external_sites(:inaturalist)
+    assert_nil(site.id_from_url(nil))
+    assert_nil(site.id_from_url(""))
+  end
+
   def test_inaturalist_finder
     assert_equal(external_sites(:inaturalist), ExternalSite.inaturalist)
   end

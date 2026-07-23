@@ -467,9 +467,11 @@ class CollectionNumbersController < ApplicationController
     fresh_obs = Observation.includes(
       :projects, collection_numbers: :user
     ).find(@observation.id)
+    klass = Views::Controllers::Observations::Show::SpecimenPanel::
+            CollectionNumbersSection
     render_obs_section_update(
       identifier: "collection_numbers",
-      panel: Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
+      panel: klass.new(
         obs: fresh_obs, user: @user, has_sibling_records: false
       )
     ) and return

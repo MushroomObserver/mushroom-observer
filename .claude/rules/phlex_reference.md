@@ -79,9 +79,8 @@ Link(type: :active, content: title, path: url)
 Link(type: :get, name: "Show", target: url)
 
 # Good — nested view, no Kit sugar exists, no dispatcher
-render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
-  obs: @obs, user: @user
-))
+render(Views::Controllers::Observations::Show::SpecimenPanel::
+       CollectionNumbersSection.new(obs: @obs, user: @user))
 
 # Bad — verbose full-namespace render() for something with Kit sugar
 render(Components::Icon.new(type: :edit))
@@ -252,10 +251,12 @@ constants under a class just as under a module). File layout:
 app/views/controllers/observations/
   show.rb                          # class Views::Controllers::Observations::Show
   show/
-    observation_details_panel.rb   # class Show::ObservationDetailsPanel
+    details.rb                     # class Show::Details
     name_info_panel.rb             # class Show::NameInfoPanel
-    collection_numbers_panel.rb    # class Show::CollectionNumbersPanel
-    sibling_records.rb             # module Show::SiblingRecords (mixin)
+    specimen_panel.rb              # class Show::SpecimenPanel
+    specimen_panel/
+      collection_numbers_section.rb  # class Show::SpecimenPanel::CollectionNumbersSection
+      sibling_records.rb             # module Show::SpecimenPanel::SiblingRecords (mixin)
     …
 ```
 
@@ -269,12 +270,13 @@ When an action class renders a sub-view, qualify the constant from
 the namespace root when referencing it inside another sub-view:
 
 ```ruby
-# In Show::ObservationDetailsPanel:
-render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(...))
+# In Show::Details:
+render(Views::Controllers::Observations::Show::SpecimenPanel::
+       CollectionNumbersSection.new(...))
 ```
 
-The bare `CollectionNumbersPanel` form would resolve via Ruby's
-lexical scope from `Show::ObservationDetailsPanel`, but
+The bare `CollectionNumbersSection` form would resolve via Ruby's
+lexical scope from `Show::Details`, but
 Zeitwerk's autoload-on-undefined-constant doesn't fire on
 unqualified references inside another constant's body —
 preferring the qualified form keeps things robust.

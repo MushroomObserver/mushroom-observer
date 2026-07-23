@@ -621,7 +621,7 @@ MushroomObserver::Application.routes.draw do
 
     member do
       resources :external_links,
-                only: [:new, :create, :edit, :update, :destroy],
+                only: [:show, :new, :create, :edit, :update, :destroy],
                 shallow: true, controller: "observations/external_links"
 
       get("map", to: "observations/maps#show")

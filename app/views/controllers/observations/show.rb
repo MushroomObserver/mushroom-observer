@@ -2,17 +2,17 @@
 
 # Main observation show page — the parent that composes every
 # obs-show sub-panel (`Components::ImageGallery`,
-# `ObservationDetailsPanel`, `NameInfoPanel`, `SpeciesListsPanel`,
-# `AssociatedObservationsPanel`, `ThumbnailMapPanel`, namings
+# `Details`, `NameInfoPanel`, `SpeciesListsPanel`, `ProjectsPanel`,
+# `MatchingObservationsPanel`, `ThumbnailMapPanel`, namings
 # partial, comments partial, `Views::Layouts::ObjectFooter`) into a
 # two-column layout.
 #
 # Renders `add_show_title` + owner-naming line + pager / interest /
 # edit icons (logged-in only) into the page chrome, then a `.row`
 # with the carousel on the left and observation details / name
-# info / species lists / matching obs on the right. Second `.row`
-# below: namings table + comments on the left, thumbnail map on
-# the right (logged-in only).
+# info / species lists / projects / matching obs on the right.
+# Second `.row` below: namings table + comments on the left,
+# thumbnail map on the right (logged-in only).
 #
 # `owner_naming_line` is now `Observations::OwnerNamingLine`;
 # `link_to_display_name_brief_authors` is now
@@ -43,9 +43,6 @@ module Views::Controllers::Observations
 
     def view_template
       add_chrome
-      render(Views::Controllers::Observations::ImportedSourceBanner.new(
-               observation: @observation
-             ))
       render_main_row
       render_secondary_row
       render_footer if @user
@@ -94,15 +91,20 @@ module Views::Controllers::Observations
     end
 
     def render_right_column
-      render(ObservationDetailsPanel.new(
+      render(Details.new(
                obs: @observation, consensus: @consensus, user: @user,
                sites: @other_sites&.to_a, siblings: @sibling_observations
              ))
       return unless @user
 
+      render(SpecimenPanel.new(
+               obs: @observation, user: @user,
+               siblings: @sibling_observations
+             ))
       render(NameInfoPanel.new(obs: @observation, user: @user))
       render(SpeciesListsPanel.new(obs: @observation, user: @user))
-      render(AssociatedObservationsPanel.new(
+      render(ProjectsPanel.new(obs: @observation))
+      render(MatchingObservationsPanel.new(
                obs: @observation, occurrence: @occurrence,
                siblings: @sibling_observations
              ))
@@ -119,6 +121,7 @@ module Views::Controllers::Observations
           if @user&.thumbnail_maps
             render(ThumbnailMapPanel.new(obs: @observation))
           end
+          render(NotesPanel.new(obs: @observation, user: @user))
         end
       end
     end

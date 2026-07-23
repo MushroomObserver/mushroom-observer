@@ -34,7 +34,7 @@ module Tab::CollectionNumber
     def test_new
       tab = Tab::CollectionNumber::New.new(observation: @observation)
 
-      assert_equal(:create_collection_number.l, tab.title)
+      assert_equal(:add_object.t(type: :collection_number), tab.title)
       assert_equal(
         routes.new_collection_number_path(observation_id: @observation.id),
         tab.path

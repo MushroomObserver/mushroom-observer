@@ -147,13 +147,6 @@ class ExternalLink < AbstractModel
     external_site.name
   end
 
-  # Human-readable description of how this link relates to the external site,
-  # e.g. "Copied by iNaturalist" / "Imported from iNaturalist". Shown on the
-  # observation page so the relationship (not just the bare link) is visible.
-  def relationship_description
-    :"external_link_relationship_#{relationship}".l(site: site_name)
-  end
-
   # Best estimate of when this relationship arose, for display next to the
   # link. When we know the external record's creation date the relationship
   # can only exist once both records do, so use the later of (external record,
@@ -188,6 +181,31 @@ class ExternalLink < AbstractModel
   # site's url_template + external_id (#4299). Import links store no url.
   def link_url
     url.presence || external_site&.observation_url(external_id)
+  end
+
+  # This link's id on the external site, when the site is iNaturalist --
+  # nil for every other site. Import links already have it in the
+  # external_id column; manual links only store url, so
+  # ExternalSite#id_from_url reverse-derives it from link_url instead.
+  def inaturalist_id
+    return nil unless external_site&.name == ExternalSite::INATURALIST_NAME
+
+    external_site.id_from_url(link_url)
+  end
+
+  # Same as #inaturalist_id, for MyCoPortal.
+  def mycoportal_id
+    return nil unless external_site&.name == ExternalSite::MYCOPORTAL_NAME
+
+    external_site.id_from_url(link_url)
+  end
+
+  # This link's id on its external site, for whichever site has an id
+  # accessor above -- nil for a site with none. The one caller that
+  # cares (Components::Link::External, for the copy-to-clipboard
+  # IDBadge) doesn't need to know which site it is to ask for its id.
+  def site_record_id
+    inaturalist_id || mycoportal_id
   end
 
   def can_edit?(user)

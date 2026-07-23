@@ -128,6 +128,24 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, :show_observation_seen_at.l)
   end
 
+  def test_renders_contact_link_when_owner_accepts_general_questions
+    obs = observations(:owner_accepts_general_questions)
+    viewer = users(:rolf)
+    assert_not_equal(obs.user, viewer)
+
+    html = render_caption(user: viewer, obs: obs)
+
+    assert_html(html, "#observation_who a[data-controller='modal-toggle']")
+  end
+
+  def test_does_not_render_contact_link_for_own_observation
+    obs = observations(:owner_accepts_general_questions)
+
+    html = render_caption(user: obs.user, obs: obs)
+
+    assert_no_html(html, "#observation_who [data-controller='modal-toggle']")
+  end
+
   def test_always_renders_image_links
     html = render_caption
 

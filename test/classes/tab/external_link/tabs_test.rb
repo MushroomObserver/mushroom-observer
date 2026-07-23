@@ -16,7 +16,7 @@ module Tab::ExternalLink
     def test_new
       tab = Tab::ExternalLink::New.new(observation: @observation)
 
-      assert_equal(:show_observation_add_link.l, tab.title)
+      assert_equal(:add_object.t(type: :external_link), tab.title)
       assert_equal(routes.new_external_link_path(id: @observation.id), tab.path)
       assert_nil(tab.html_options[:icon])
     end

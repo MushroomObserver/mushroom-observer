@@ -165,12 +165,22 @@ class Components::Image::Lightbox::Caption < Components::Base
   end
 
   def render_gps_link
-    link_text = [
-      display_lat_lng(@obs.lat, @obs.lng).t,
-      display_alt(@obs.alt).t,
-      "[#{:click_for_map.t}]"
-    ].compact_blank.join(" ")
-    a(href: map_observation_path(id: @obs.id)) { link_text }
+    parts = [display_lat_lng(@obs.lat, @obs.lng).t, display_alt(@obs.alt).t]
+    trusted_html(parts.compact_blank.join(" "))
+    render_gps_map_link
+  end
+
+  def render_gps_map_link
+    InlineLinkBlock(items: [gps_map_icon])
+  end
+
+  def gps_map_icon
+    Components::Link::Icon.new(
+      content: :click_for_map.l,
+      path: map_observation_path(id: @obs.id),
+      icon: :place,
+      class: Components::InlineLinkBlock.item_class
+    )
   end
 
   def render_obs_who
@@ -197,15 +207,18 @@ class Components::Image::Lightbox::Caption < Components::Base
   end
 
   def render_contact_link(_obs_user)
-    plain(" [")
-    Button(
+    InlineLinkBlock(items: [contact_button])
+  end
+
+  def contact_button
+    Components::Button.new(
       type: :modal,
       name: :show_observation_send_question.l,
       target: new_question_for_observation_path(@obs.id),
       modal_id: "observation_email",
-      variant: :strip, icon: :email
+      variant: :strip, icon: :email,
+      class: Components::InlineLinkBlock.item_class
     )
-    plain("]")
   end
 
   def render_truncated_notes

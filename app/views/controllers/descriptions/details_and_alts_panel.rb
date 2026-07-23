@@ -9,9 +9,8 @@
 #
 # The heading-links icon strip is extracted to
 # `Components::Description::ModLinks` (sibling-in-spirit to
-# `Components::Link::InlineMod`). The "Version: N / Previous Version" line
-# is `Components::Description::PreviousVersion`, replacing
-# `VersionsHelper#show_previous_version`. The license-badge block
+# `Components::InlineCRUDLinks`). The "Version: N / Previous Version" line
+# is `Components::Description::PreviousVersion`. The license-badge block
 # (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
