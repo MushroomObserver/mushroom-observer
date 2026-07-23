@@ -79,8 +79,9 @@ module Views::Controllers::Herbaria
     end
 
     def render_plain_name_link(herbarium)
-      link_to(herbarium.name.t, herbarium_path(herbarium),
-              class: "herbarium_link_#{herbarium.id}")
+      Link(type: :get, name: herbarium.name.t,
+           target: herbarium_path(herbarium),
+           class: "herbarium_link_#{herbarium.id}")
     end
 
     # Cannot POST from a link without js; use a button instead.

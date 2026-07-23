@@ -28,7 +28,10 @@ module Views::Controllers::Theme
 
     def render_link
       label = @row.raw_link_label ? @row.name : "**__#{@row.name}__**"
-      link_to(image_path(id: @row.image_id)) { trusted_html(label.t) }
+      Link(type: :get, name: @row.name,
+           target: image_path(id: @row.image_id)) do
+        trusted_html(label.t)
+      end
     end
   end
 end

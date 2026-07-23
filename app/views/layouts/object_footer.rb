@@ -180,8 +180,8 @@ module Views::Layouts
       return unless @obj.respond_to?(:rss_log_id) && @obj.rss_log_id
 
       br
-      trusted_html(link_to(:show_object.t(type: :log),
-                           activity_log_path(@obj.rss_log_id)))
+      Link(type: :get, name: :show_object.t(type: :log),
+           target: activity_log_path(@obj.rss_log_id))
     end
   end
 end

@@ -46,7 +46,8 @@ class Components::Matrix::Box
         br
         plain("#{:list_users_contribution.l}: #{user.contribution}")
         br
-        link_to(:observations.ti, observations_path(by_user: user.id))
+        Link(type: :get, name: :observations.ti,
+             target: observations_path(by_user: user.id))
       end
     end
 

@@ -53,12 +53,15 @@ module Views::Controllers::VisualGroups
     end
 
     def render_back_nav_links
-      link_to(:visual_group_show.t, visual_group_path(@visual_group))
+      Link(type: :get, name: :visual_group_show.t,
+           target: visual_group_path(@visual_group))
       whitespace
       plain("|")
       whitespace
-      link_to(:visual_group_index.t,
-              visual_model_visual_groups_path(@visual_group.visual_model))
+      Link(type: :get, name: :visual_group_index.t,
+           target: visual_model_visual_groups_path(
+             @visual_group.visual_model
+           ))
     end
 
     def render_filter_section
@@ -73,7 +76,8 @@ module Views::Controllers::VisualGroups
         strong { plain("#{:visual_group_includes_names.t}:") }
         br
         @visual_group.distinct_names.each do |name|
-          link_to(name[0], distinct_name_filter_path(name[0]))
+          Link(type: :get, name: name[0],
+               target: distinct_name_filter_path(name[0]))
           br
         end
       end

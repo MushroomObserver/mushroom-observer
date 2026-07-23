@@ -63,7 +63,7 @@ module Views::Controllers::Images
 
       def license_link_html(license)
         capture do
-          link_to(license.display_name.t, license.url)
+          Link(type: :get, name: license.display_name.t, target: license.url)
         end
       end
     end

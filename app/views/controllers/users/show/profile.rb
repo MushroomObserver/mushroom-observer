@@ -83,7 +83,8 @@ module Views::Controllers::Users
         p do
           strong { "#{:show_user_personal_herbarium.l}:" }
           whitespace
-          link_to(@show_user.personal_herbarium.show_link_args) do
+          Link(type: :get, name: @show_user.personal_herbarium.name,
+               target: @show_user.personal_herbarium.show_link_args) do
             trusted_html(@show_user.personal_herbarium.name.t)
           end
         end
@@ -126,7 +127,8 @@ module Views::Controllers::Users
       def render_footer
         return unless @life_list.num_taxa.positive?
 
-        link_to(checklist_path(id: @show_user.id)) do
+        Link(type: :get, name: :app_life_list.l,
+             target: checklist_path(id: @show_user.id)) do
           strong { :app_life_list.l }
         end
         plain(": ")

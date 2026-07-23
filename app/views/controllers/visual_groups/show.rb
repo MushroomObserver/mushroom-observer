@@ -43,10 +43,13 @@ module Views::Controllers::VisualGroups
     end
 
     def render_nav_links
-      link_to(:visual_group_edit.t, edit_visual_group_path(@visual_group))
+      Link(type: :get, name: :visual_group_edit.t,
+           target: edit_visual_group_path(@visual_group))
       plain(" | ")
-      link_to(:visual_group_index.t,
-              visual_model_visual_groups_path(@visual_group.visual_model))
+      Link(type: :get, name: :visual_group_index.t,
+           target: visual_model_visual_groups_path(
+             @visual_group.visual_model
+           ))
     end
 
     def render_description_and_approval
@@ -65,8 +68,8 @@ module Views::Controllers::VisualGroups
     def render_filter_banner
       strong { plain("Showing definitional images for \"#{@filter}\"") }
       br
-      link_to("Show All Definitional Images",
-              visual_group_path(@visual_group))
+      Link(type: :get, name: "Show All Definitional Images",
+           target: visual_group_path(@visual_group))
     end
 
     def render_counts_and_names
@@ -83,8 +86,8 @@ module Views::Controllers::VisualGroups
 
     def render_distinct_name_links
       @visual_group.distinct_names.each do |name|
-        link_to(name[0],
-                visual_group_path(@visual_group, filter: name[0]))
+        Link(type: :get, name: name[0],
+             target: visual_group_path(@visual_group, filter: name[0]))
         br
       end
     end

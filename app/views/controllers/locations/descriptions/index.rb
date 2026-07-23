@@ -34,7 +34,10 @@ module Views::Controllers::Locations
         ListGroup do |list|
           @descriptions.each do |desc|
             list.item do
-              link_to(desc.show_link_args) { trusted_html(desc.format_name.t) }
+              Link(type: :get, name: desc.format_name.t,
+                   target: desc.show_link_args) do
+                trusted_html(desc.format_name.t)
+              end
             end
           end
         end
