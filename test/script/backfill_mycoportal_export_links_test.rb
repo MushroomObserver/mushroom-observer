@@ -41,7 +41,9 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                          apply: false)
 
     assert_nil(link_for(image))
-    assert_equal(1, subject.instance_variable_get(:@stats)[:created])
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:created]
+    )
   end
 
   def test_already_present_is_skipped
@@ -51,7 +53,9 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     subject = run_script([occurrence_row(1, "MUOB 1")],
                          [multimedia_row(1, image_url(image.id))])
 
-    assert_equal(1, subject.instance_variable_get(:@stats)[:already_present])
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:already_present]
+    )
     assert_equal(
       1,
       ExternalLink.where(target: image, external_site: @site,
@@ -139,11 +143,15 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     subject = run_script([occurrence_row(1, "MUOB 1")],
                          [multimedia_row(1, image_url(bogus_id))])
 
-    assert_equal(1, subject.instance_variable_get(:@stats)[:mo_missing])
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:mo_missing]
+    )
     missing = CSV.read(@missing_out, headers: true)
-    assert_equal("1", missing.first["occid"])
-    assert_equal("1", missing.first["mo_obs_id"])
-    assert_equal(bogus_id.to_s, missing.first["image_id"])
+    row = missing.find { |r| r["entity_type"] == "Image" }
+    assert_not_nil(row, "Expected a missing-image row in the report")
+    assert_equal("1", row["occid"])
+    assert_equal("1", row["mo_obs_id"])
+    assert_equal(bogus_id.to_s, row["image_id"])
   end
 
   def test_unparseable_identifier_is_reported
@@ -152,7 +160,90 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       [{ "coreid" => "1", "identifier" => "https://example.com/not-mo.jpg" }]
     )
 
-    assert_equal(1, subject.instance_variable_get(:@stats)[:unparseable])
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:unparseable]
+    )
+  end
+
+  def test_creates_export_link_for_known_observation
+    obs = observations(:coprinus_comatus_obs)
+
+    run_script([occurrence_row(500, "MUOB #{obs.id}")], [])
+
+    link = ExternalLink.find_by(target: obs, external_site: @site,
+                                relationship: :export)
+    assert_not_nil(link, "Expected an export ExternalLink for the obs")
+    assert_equal("500", link.external_id,
+                 "Observation links should store the occid as external_id")
+    assert_nil(link.url,
+               "url should be derived from external_id, not stored directly")
+  end
+
+  def test_observation_link_stores_date_entered_as_external_created_on
+    obs = observations(:coprinus_comatus_obs)
+    occurrences_csv = write_csv(
+      %w[id catalogNumber dateEntered],
+      [{ "id" => "500", "catalogNumber" => "MUOB #{obs.id}",
+         "dateEntered" => "2019-07-22 14:38:43" }]
+    )
+    multimedia_csv = write_csv(%w[coreid identifier], [])
+    @missing_out = Tempfile.new(["missing", ".csv"]).path
+    subject = BackfillMycoportalExportLinks.new(
+      dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
+      apply: true, keep_csvs: false, missing_out: @missing_out
+    )
+
+    capture_io { subject.run }
+
+    link = ExternalLink.find_by(target: obs, external_site: @site,
+                                relationship: :export)
+    assert_not_nil(link, "Expected an export ExternalLink for the obs")
+    assert_equal(Date.new(2019, 7, 22), link.external_created_on)
+  end
+
+  def test_observation_already_present_is_skipped
+    obs = observations(:coprinus_comatus_obs)
+    ExternalLink.create!(user: User.admin, target: obs,
+                         external_site: @site, relationship: :export,
+                         external_id: "500")
+
+    subject = run_script([occurrence_row(500, "MUOB #{obs.id}")], [])
+
+    assert_equal(
+      1,
+      subject.instance_variable_get(:@stats)[:observations][:already_present]
+    )
+    assert_equal(
+      1,
+      ExternalLink.where(target: obs, external_site: @site,
+                         relationship: :export).count,
+      "Re-running should not create a duplicate export link"
+    )
+  end
+
+  def test_observation_not_found_locally_is_reported
+    bogus_id = Observation.maximum(:id).to_i + 1000
+
+    subject = run_script([occurrence_row(500, "MUOB #{bogus_id}")], [])
+
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:observations][:mo_missing]
+    )
+    missing = CSV.read(@missing_out, headers: true)
+    row = missing.find { |r| r["entity_type"] == "Observation" }
+    assert_not_nil(row, "Expected a missing-observation row in the report")
+    assert_equal("500", row["occid"])
+    assert_equal(bogus_id.to_s, row["mo_obs_id"])
+  end
+
+  def test_observation_unparseable_catalog_number_is_reported
+    subject = run_script(
+      [{ "id" => "500", "catalogNumber" => "not-a-muob-number" }], []
+    )
+
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:observations][:unparseable]
+    )
   end
 
   def test_invalid_record_is_logged_and_skipped
@@ -169,18 +260,20 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                            [multimedia_row(1, image_url(image.id))])
     end
 
-    assert_equal(1, subject.instance_variable_get(:@stats)[:invalid])
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:images][:invalid]
+    )
     assert_nil(link_for(image))
   end
 
   def test_progress_logging_at_interval
     subject = build
-    subject.instance_variable_set(:@seen,
+    subject.instance_variable_set(:@images_seen,
                                   BackfillMycoportalExportLinks::
                                     PROGRESS_EVERY - 1)
 
     _out, err = capture_io do
-      subject.send(:process_batch, [{ occid: "1", image_id: nil }])
+      subject.send(:process_image_batch, [{ occid: "1", image_id: nil }])
     end
 
     assert_match(
@@ -213,20 +306,20 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   end
 
   def test_parse_options_defaults_and_overrides
-    defaults = BackfillMycoportalExportLinks.parse_options([])
+    defaults = BackfillMycoportalExportLinks::Options.parse([])
     assert_nil(defaults[:occurrences], "Nil by default -- looks for a zip")
     assert_nil(defaults[:multimedia], "Nil by default -- looks for a zip")
-    assert_equal(BackfillMycoportalExportLinks::DEFAULT_DWCA_DIR,
+    assert_equal(BackfillMycoportalExportLinks::Options::DEFAULT_DWCA_DIR,
                  defaults[:dwca_dir])
     assert_equal(false, defaults[:keep_csvs])
     assert_equal(
-      File.join(BackfillMycoportalExportLinks::DEFAULT_DWCA_DIR,
+      File.join(BackfillMycoportalExportLinks::Options::DEFAULT_DWCA_DIR,
                 "mycoportal_backfill_missing.csv"),
       defaults[:missing_out],
       "missing_out should default to a path inside dwca_dir, not the CWD"
     )
 
-    opts = BackfillMycoportalExportLinks.parse_options(
+    opts = BackfillMycoportalExportLinks::Options.parse(
       ["--dwca-dir", "/tmp/somewhere",
        "--occurrences", "o.csv", "--multimedia", "m.csv",
        "--keep-csvs", "--missing-out", "n.csv"]
@@ -239,7 +332,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   end
 
   def test_parse_options_missing_out_defaults_relative_to_custom_dwca_dir
-    opts = BackfillMycoportalExportLinks.parse_options(
+    opts = BackfillMycoportalExportLinks::Options.parse(
       ["--dwca-dir", "/tmp/somewhere-else"]
     )
 
@@ -361,7 +454,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
 
   def test_parse_options_apply_from_env
     ENV["APPLY"] = "1"
-    assert(BackfillMycoportalExportLinks.parse_options([])[:apply])
+    assert(BackfillMycoportalExportLinks::Options.parse([])[:apply])
   ensure
     ENV.delete("APPLY")
   end

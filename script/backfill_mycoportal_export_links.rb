@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 # One-time backfill of ExternalLink (relationship: :export) rows for every
-# observations and images already present in MyCoPortal (MCP)
+# Observation and Image already present in MyCoPortal (MCP)
 # (Based on a Darwin Core Archive (DwC-A) backup of the MUOB collection)
 
 # The backup must be downloaded manually first (see USAGE below)
@@ -19,12 +19,18 @@
 # bydefault <dwca-dir>/mycoportal_backfill_missing.csv
 # pass --missing-out to override.
 #
-# occurrences.csv's "catalogNumber ("MUOB <id>") is the MO Observation id.
-# multimedia.csv's "coreid" joins to occurrences.csv's "id" (occid)
+# occurrences.csv's "catalogNumber" ("MUOB <id>") is the MO Observation id;
+# its own "id" column is MCP's internal occid. multimedia.csv's "coreid"
+# joins to that occid.
+#
+# Images do not live on MCP -- they link out to other sites (MO itself, or
+# a mirror). An ExternalLink's url must target the external site itself,
+# so Image links get no url and no external_id (no per-image id exists in
+# the dump either -- see the plan doc for why).
 #
 # Re-running this script doubles as a reconciliation check:
-# in a dry run, a nonzero "would create" count means MCP has images
-# MO doesn't think it exported.
+# in a dry run, a nonzero "would create" count means MCP has
+# observations/images MO doesn't think it exported.
 #
 # USAGE:
 #
@@ -57,7 +63,73 @@ require "fileutils"
 require "zip"
 
 class BackfillMycoportalExportLinks
-  DEFAULT_DWCA_DIR = Rails.root.join("tmp/mycoportal_dwca").to_s
+  # CLI option parsing, kept in its own nested class rather than a bare
+  # top-level `def parse_options` -- other scripts in this directory
+  # define exactly that name, and two top-level defs with the same name
+  # silently collide if both scripts are ever `require`d into one process
+  # (confirmed: this script's own test suite would collide with
+  # materialize_external_links.rb's if both defined a top-level method).
+  class Options
+    DEFAULT_DWCA_DIR = Rails.root.join("tmp/mycoportal_dwca").to_s
+
+    class << self
+      def parse(argv)
+        opts = default_options
+        OptionParser.new do |parser|
+          parser.banner = "Usage: bin/rails runner " \
+                          "script/backfill_mycoportal_export_links.rb"
+          add_dwca_options(parser, opts)
+          add_missing_out_option(parser, opts)
+        end.parse!(argv)
+        opts[:missing_out] ||= default_missing_out(opts[:dwca_dir])
+        opts
+      end
+
+      private
+
+      def default_options
+        { apply: ENV["APPLY"] == "1", dwca_dir: DEFAULT_DWCA_DIR,
+          occurrences: nil, multimedia: nil,
+          keep_csvs: false, missing_out: nil }
+      end
+
+      def default_missing_out(dwca_dir)
+        File.join(dwca_dir, "mycoportal_backfill_missing.csv")
+      end
+
+      def add_missing_out_option(parser, opts)
+        parser.on("--missing-out FILE",
+                  "Missing report path (default: " \
+                  "<dwca-dir>/mycoportal_backfill_missing.csv)") do |val|
+          opts[:missing_out] = val
+        end
+      end
+
+      def add_dwca_options(parser, opts)
+        parser.on("--dwca-dir DIR",
+                  "Where to find the downloaded DwC-A zip and extract " \
+                  "it (default: #{DEFAULT_DWCA_DIR})") do |val|
+          opts[:dwca_dir] = val
+        end
+        parser.on("--occurrences FILE",
+                  "Skip the zip; use an already-extracted " \
+                  "occurrences.csv (requires --multimedia too)") do |val|
+          opts[:occurrences] = val
+        end
+        parser.on("--multimedia FILE",
+                  "Skip the zip; use an already-extracted multimedia.csv " \
+                  "(requires --occurrences too)") do |val|
+          opts[:multimedia] = val
+        end
+        parser.on("--keep-csvs",
+                  "Keep the extracted occurrences.csv/multimedia.csv " \
+                  "after the run instead of deleting them") do
+          opts[:keep_csvs] = true
+        end
+      end
+    end
+  end
+
   ZIP_NAME_GLOB = "MUOB_backup_*_DwC-A.zip"
   BATCH = 2000
   PROGRESS_EVERY = 100_000
@@ -79,80 +151,23 @@ class BackfillMycoportalExportLinks
     @missing_out = opts.fetch(:missing_out)
     @site = ExternalSite.mycoportal
     @admin = User.admin
-    @stats = Hash.new(0)
+    @stats = { images: Hash.new(0), observations: Hash.new(0) }
     @missing = []
-    @seen = 0
+    @images_seen = 0
+    @occurrences_seen = 0
   end
 
   def run
     @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     extract_dwca_zip! unless @occurrences_csv
-    @mo_id_by_occid = load_occurrences
-    warn("Loaded #{@mo_id_by_occid.size} occurrences " \
-         "(site=#{@site.name}, #{@apply ? "APPLY" : "dry run"})")
-    each_multimedia_batch { |batch| process_batch(batch) }
+    warn("Processing MyCoPortal DwC-A (site=#{@site.name}, " \
+         "#{@apply ? "APPLY" : "dry run"}) ...")
+    process_occurrences
+    each_multimedia_batch { |batch| process_image_batch(batch) }
     write_reports
     print_summary
   ensure
     cleanup_extracted_files
-  end
-
-  # A class method because other scripts define a top-level `parse_options`
-  class << self
-    def parse_options(argv)
-      opts = default_options
-      OptionParser.new do |parser|
-        parser.banner = "Usage: bin/rails runner " \
-                        "script/backfill_mycoportal_export_links.rb"
-        add_dwca_options(parser, opts)
-        add_missing_out_option(parser, opts)
-      end.parse!(argv)
-      opts[:missing_out] ||= default_missing_out(opts[:dwca_dir])
-      opts
-    end
-
-    private
-
-    def default_options
-      { apply: ENV["APPLY"] == "1", dwca_dir: DEFAULT_DWCA_DIR,
-        occurrences: nil, multimedia: nil,
-        keep_csvs: false, missing_out: nil }
-    end
-
-    def default_missing_out(dwca_dir)
-      File.join(dwca_dir, "mycoportal_backfill_missing.csv")
-    end
-
-    def add_missing_out_option(parser, opts)
-      parser.on("--missing-out FILE",
-                "Missing-image report path (default: " \
-                "<dwca-dir>/mycoportal_backfill_missing.csv)") do |val|
-        opts[:missing_out] = val
-      end
-    end
-
-    def add_dwca_options(parser, opts)
-      parser.on("--dwca-dir DIR",
-                "Where to find the downloaded DwC-A zip and extract it " \
-                "(default: #{DEFAULT_DWCA_DIR})") do |val|
-        opts[:dwca_dir] = val
-      end
-      parser.on("--occurrences FILE",
-                "Skip the zip; use an already-extracted occurrences.csv " \
-                "(requires --multimedia too)") do |val|
-        opts[:occurrences] = val
-      end
-      parser.on("--multimedia FILE",
-                "Skip the zip; use an already-extracted multimedia.csv " \
-                "(requires --occurrences too)") do |val|
-        opts[:multimedia] = val
-      end
-      parser.on("--keep-csvs",
-                "Keep the extracted occurrences.csv/multimedia.csv " \
-                "after the run instead of deleting them") do
-        opts[:keep_csvs] = true
-      end
-    end
   end
 
   private
@@ -216,21 +231,62 @@ class BackfillMycoportalExportLinks
     FileUtils.rm_f(@multimedia_csv)
   end
 
-  # occid (occurrences.csv's own "id") -> MO observation id,
-  # read from catalogNumber ("MUOB <id>").
-  def load_occurrences
-    CSV.foreach(@occurrences_csv, headers: true).
-      each_with_object({}) do |row, hash|
-        match = CATALOG_NUMBER_REGEXP.match(row["catalogNumber"].to_s.strip)
-        hash[row["id"]] = match[1].to_i if match
-      end
+  # Single streamed pass over occurrences.csv: builds @mo_id_by_occid (used
+  # to annotate the Image missing-report with an MO id) and batch-processes
+  # each row as an Observation export-link candidate in the same pass --
+  # avoids reading this ~300MB file twice.
+  def process_occurrences
+    @mo_id_by_occid = {}
+    batch = []
+    CSV.foreach(@occurrences_csv, headers: true) do |row|
+      parsed = parse_occurrence_row(row)
+      @mo_id_by_occid[parsed[:occid]] = parsed[:mo_id] if parsed[:mo_id]
+      batch << parsed
+      next unless batch.size == BATCH
+
+      process_occurrence_batch(batch)
+      batch = []
+    end
+    process_occurrence_batch(batch) if batch.any?
+  end
+
+  def parse_occurrence_row(row)
+    match = CATALOG_NUMBER_REGEXP.match(row["catalogNumber"].to_s.strip)
+    { occid: row["id"], mo_id: match && match[1].to_i,
+      date_entered: row["dateEntered"].presence }
+  end
+
+  def process_occurrence_batch(batch)
+    ids = batch.filter_map { |r| r[:mo_id] }
+    known_ids = Observation.where(id: ids).pluck(:id).to_set
+    existing = existing_links(target_type: "Observation", ids: ids).to_set
+    batch.each { |row| process_occurrence_row(row, known_ids, existing) }
+    @occurrences_seen += batch.size
+    return unless (@occurrences_seen % PROGRESS_EVERY).zero?
+
+    warn("  #{@occurrences_seen} occurrences processed")
+  end
+
+  def process_occurrence_row(row, known_ids, existing)
+    return increment_stat("Observation", :unparseable) unless row[:mo_id]
+    unless known_ids.include?(row[:mo_id])
+      return record_missing(target_type: "Observation", occid: row[:occid],
+                            mo_id: row[:mo_id])
+    end
+    if existing.include?(row[:mo_id])
+      return increment_stat("Observation", :already_present)
+    end
+
+    create_export_link(target_type: "Observation", target_id: row[:mo_id],
+                       external_id: row[:occid],
+                       external_created_on: row[:date_entered])
   end
 
   # stream in batches, never CSV.read the whole file because it's huge.
   def each_multimedia_batch
     batch = []
     CSV.foreach(@multimedia_csv, headers: true) do |row|
-      batch << parse_row(row)
+      batch << parse_multimedia_row(row)
       next unless batch.size == BATCH
 
       yield(batch)
@@ -239,7 +295,7 @@ class BackfillMycoportalExportLinks
     yield(batch) if batch.any?
   end
 
-  def parse_row(row)
+  def parse_multimedia_row(row)
     { occid: row["coreid"], image_id: image_id_from(row["identifier"]),
       # MetadataDate is the closest available proxy for when MCP created
       # this media record -- not a guaranteed creation date, but the best
@@ -251,64 +307,75 @@ class BackfillMycoportalExportLinks
     IMAGE_ID_REGEXP.match(identifier.to_s.strip)&.[](1)&.to_i
   end
 
-  def process_batch(batch)
+  def process_image_batch(batch)
     ids = batch.filter_map { |r| r[:image_id] }
     known_ids = Image.where(id: ids).pluck(:id).to_set
-    existing = existing_image_links(ids)
-    batch.each { |row| process_row(row, known_ids, existing.to_set) }
-    @seen += batch.size
-    warn("  #{@seen} images processed") if (@seen % PROGRESS_EVERY).zero?
+    existing = existing_links(target_type: "Image", ids: ids).to_set
+    batch.each { |row| process_image_row(row, known_ids, existing) }
+    @images_seen += batch.size
+    warn("  #{@images_seen} images processed") if
+      (@images_seen % PROGRESS_EVERY).zero?
   end
 
-  # Bumps last_synced_at on already-linked images in this batch, so the
+  def process_image_row(row, known_ids, existing)
+    return increment_stat("Image", :unparseable) unless row[:image_id]
+    unless known_ids.include?(row[:image_id])
+      return record_missing(target_type: "Image", occid: row[:occid],
+                            mo_id: @mo_id_by_occid[row[:occid]],
+                            image_id: row[:image_id])
+    end
+    return increment_stat("Image", :already_present) if
+      existing.include?(row[:image_id])
+
+    create_export_link(target_type: "Image", target_id: row[:image_id],
+                       external_created_on: row[:metadata_date])
+  end
+
+  # Bumps last_synced_at on already-linked records in this batch, so the
   # field reflects the most recent confirmed sync rather than only the
   # first one -- useful for the reconciliation-check use case.
-  def existing_image_links(ids)
-    scope = ExternalLink.where(target_type: "Image", target_id: ids,
+  def existing_links(target_type:, ids:)
+    scope = ExternalLink.where(target_type: target_type, target_id: ids,
                                external_site: @site, relationship: :export)
     scope.update_all(last_synced_at: Time.current) if @apply
     scope.pluck(:target_id)
   end
 
-  def process_row(row, known_ids, existing)
-    return (@stats[:unparseable] += 1) unless row[:image_id]
-    return record_missing(row) unless known_ids.include?(row[:image_id])
-    return (@stats[:already_present] += 1) if existing.include?(row[:image_id])
-
-    create_export_link(row)
-  end
-
-  def create_export_link(row)
+  def create_export_link(target_type:, target_id:, external_id: nil,
+                         external_created_on: nil)
     if @apply
       begin
-        ExternalLink.create!(
-          user: @admin, target_type: "Image",
-          # images do not live on MCP. Instead they links to other sites.
-          # However, an ExternalLink url must target the external site
-          # Therefore, do not populate url
-          # url: nil
-          target_id: row[:image_id], external_site: @site,
-          relationship: :export,
-          external_created_on: row[:metadata_date],
-          last_synced_at: Time.current
-        )
+        ExternalLink.create!(user: @admin, target_type: target_type,
+                             target_id: target_id, external_site: @site,
+                             relationship: :export, external_id: external_id,
+                             external_created_on: external_created_on,
+                             last_synced_at: Time.current)
       rescue ActiveRecord::RecordInvalid => e
-        warn("  Image #{row[:image_id]}: #{e.message}")
-        return (@stats[:invalid] += 1)
+        warn("  #{target_type} #{target_id}: #{e.message}")
+        return increment_stat(target_type, :invalid)
       end
     end
-    @stats[:created] += 1
+    increment_stat(target_type, :created)
   end
 
-  # Image referenced by MCP's multimedia dump no longer (or never did)
-  # exists locally -- report for triage rather than silently skipping.
-  def record_missing(row)
-    @stats[:mo_missing] += 1
-    @missing << [row[:occid], @mo_id_by_occid[row[:occid]], row[:image_id]]
+  def increment_stat(target_type, key)
+    @stats[stat_key(target_type)][key] += 1
+  end
+
+  def stat_key(target_type)
+    target_type == "Image" ? :images : :observations
+  end
+
+  # Referenced by MCP's DwC-A dump but doesn't (or no longer does) exist
+  # locally -- report for triage rather than silently skipping.
+  def record_missing(target_type:, occid:, mo_id:, image_id: nil)
+    increment_stat(target_type, :mo_missing)
+    @missing << [target_type, occid, mo_id, image_id]
   end
 
   def write_reports
-    write_csv(@missing_out, %w[occid mo_obs_id image_id], @missing)
+    write_csv(@missing_out, %w[entity_type occid mo_obs_id image_id],
+              @missing)
   end
 
   def write_csv(path, header, rows)
@@ -323,14 +390,21 @@ class BackfillMycoportalExportLinks
   def print_summary
     puts
     puts("== summary#{" (dry run)" unless @apply} ==")
-    puts("  created: #{@stats[:created]}")
-    puts("  already present (skipped): #{@stats[:already_present]}")
-    puts("  invalid (see warnings above): #{@stats[:invalid]}")
-    puts("  image not found in MO: #{@stats[:mo_missing]} -> #{@missing_out}")
-    puts("  unparseable identifier: #{@stats[:unparseable]}")
+    print_entity_summary("Images", @stats[:images])
+    print_entity_summary("Observations", @stats[:observations])
+    puts("  missing report: -> #{@missing_out}")
     puts("  elapsed: #{elapsed_summary}")
     puts
     puts(@apply ? "APPLIED." : "Dry run. Re-run with APPLY=1 to write.")
+  end
+
+  def print_entity_summary(label, stats)
+    puts("  #{label}:")
+    puts("    created: #{stats[:created]}")
+    puts("    already present (skipped): #{stats[:already_present]}")
+    puts("    invalid (see warnings above): #{stats[:invalid]}")
+    puts("    not found in MO: #{stats[:mo_missing]}")
+    puts("    unparseable: #{stats[:unparseable]}")
   end
 
   def elapsed_summary
@@ -351,6 +425,6 @@ end
 
 if $PROGRAM_NAME == __FILE__
   BackfillMycoportalExportLinks.new(
-    BackfillMycoportalExportLinks.parse_options(ARGV)
+    BackfillMycoportalExportLinks::Options.parse(ARGV)
   ).run
 end
