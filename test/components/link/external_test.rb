@@ -69,6 +69,9 @@ class Components::Link::ExternalTest < ComponentTestCase
     # <button> nested inside the <a> would be invalid HTML.
     assert_html(html, "button.badge-id", text: "234723")
     assert_no_html(html, "a button")
+    # Tooltip names the site so it's unambiguous next to other badges.
+    title = :copy_this_site_id.ti(site: "iNaturalist")
+    assert_html(html, "button.badge-id[data-title='#{title}']")
   end
 
   # Regression: import links store external_id with a nil url (url is derived).
@@ -98,6 +101,8 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
     assert_html(html, "button.badge-id", text: "1950183")
+    title = :copy_this_site_id.ti(site: "MyCoPortal")
+    assert_html(html, "button.badge-id[data-title='#{title}']")
   end
 
   def test_site_with_no_id_accessor_renders_no_badge

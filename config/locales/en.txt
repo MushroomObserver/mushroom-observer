@@ -535,6 +535,7 @@
   copy_this_id: "copy this [:id.ti]"
   copy_this_name: "copy this [:name.ti]"
   copy_this_sequence: "copy this [:sequence.ti]"
+  copy_this_site_id: "copy this [site] [:id.ti]"
   copied: copied
   create: create
   define: define

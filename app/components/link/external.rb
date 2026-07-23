@@ -28,6 +28,7 @@ class Components::Link::External < Components::Base
     super()
     @link = link
     @site_record_id = nil
+    @site_name = nil
     if tab
       @content = tab.title
       @path = tab.path
@@ -35,6 +36,7 @@ class Components::Link::External < Components::Base
     elsif link
       @content = relationship_text
       @site_record_id = link.site_record_id
+      @site_name = link.site_name
       @path = link.link_url
       @opts = opts
     else
@@ -54,7 +56,8 @@ class Components::Link::External < Components::Base
     return unless @site_record_id
 
     whitespace
-    IDBadge(value: @site_record_id, size: :lg)
+    IDBadge(value: @site_record_id, size: :lg,
+            title: :copy_this_site_id.ti(site: @site_name))
   end
 
   private

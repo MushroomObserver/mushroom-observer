@@ -9,6 +9,11 @@
 # `value:` for an id that isn't an AbstractModel's id at all -- e.g.
 # an external site's numeric id shown next to an ExternalLink.
 #
+# `title:` overrides the tooltip text (default "Copy this ID") -- e.g.
+# Link::External passes a site-specific "Copy this iNaturalist ID" so
+# the badge reads unambiguously when an observation has several
+# external-site ids next to each other.
+#
 # `size:` picks the badge's font-size modifier -- `.badge-id` itself
 # has no inherent font-size, so every caller states its size
 # explicitly rather than relying on an implicit default:
@@ -23,6 +28,7 @@ class Components::IDBadge < Components::Base
   prop :object, _Nilable(::AbstractModel), default: nil
   prop :value, _Nilable(_Union(String, Integer)), default: nil
   prop :size, _Union(*SIZE_CLASSES.keys)
+  prop :title, _Nilable(String), default: nil
   prop :extra_class, _Nilable(String), default: "mr-4"
 
   def view_template
@@ -32,7 +38,7 @@ class Components::IDBadge < Components::Base
       role: "button",
       data: {
         tooltip_target: "tip", placement: "bottom",
-        title: :copy_this_id.ti,
+        title: @title || :copy_this_id.ti,
         controller: "clipboard", clipboard_target: "source",
         action: "clipboard#copy",
         clipboard_copied_value: :copied.ti
