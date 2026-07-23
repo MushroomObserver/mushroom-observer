@@ -4,8 +4,10 @@
 # `clipboard` controller. `name:` becomes the tooltip label and sr-only
 # accessible name (the icon is the visual; the name is never shown
 # inline). Defaults to the copy icon, xs size, and link styling (btn-link
-# resets native <button> chrome without adding visible framing) —
-# override any of these with the usual `Components::Button` kwargs.
+# resets native <button> chrome without adding visible framing); `.py-0`
+# is always added since .btn-xs's own vertical padding otherwise sits
+# the icon below the baseline of surrounding inline text — override any
+# of these with the usual `Components::Button` kwargs.
 #
 # Bases aren't always displayed near the button (e.g. the sequences
 # panel row shows only the locus), so copying from the model value
@@ -27,6 +29,10 @@ class Components::Button::Clipboard < Components::Button
   end
 
   private
+
+  def merged_class
+    class_names(super, "py-0")
+  end
 
   def tooltip_data(name)
     { tooltip_target: "tip", placement: "bottom", title: name }

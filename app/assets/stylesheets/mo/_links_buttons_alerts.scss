@@ -144,15 +144,16 @@
   line-height: 1;
   background-color: transparent;
   text-decoration: none;
+  vertical-align: middle;
 
   &:hover {
     text-decoration: none;
   }
 
-  // .glyphicon {
-  //   top: 0;
-  //   vertical-align: middle;
-  // }
+  .glyphicon {
+    top: 0;
+    vertical-align: middle;
+  }
 
   // The plus glyph reads visually heavier/bigger than other
   // glyphicons at the same font-size (bold, symmetric shape) --
