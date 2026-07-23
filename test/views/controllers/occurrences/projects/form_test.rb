@@ -248,37 +248,6 @@ module Views::Controllers::Occurrences::Projects
       )
     end
 
-    # ---- parity tests ------------------------------------------------
-
-    class OldCancelLink < Components::Base
-      def initialize(path:, name:)
-        super()
-        @path = path
-        @name = name
-      end
-
-      def view_template
-        a(href: @path, class: "btn btn-default",
-          data: { dismiss: "modal" }) { plain(@name) }
-      end
-    end
-
-    def test_cancel_link_parity
-      path = "/occurrences/new?observation_id=1"
-      name = :cancel.ti
-
-      old_html = render(OldCancelLink.new(path: path, name: name))
-      new_html = render(Components::Button::Get.new(
-                          target: path,
-                          name: name,
-                          data: { dismiss: "modal" }
-                        ))
-
-      assert_html_element_equivalent(old_html, new_html,
-                                     selector: "a",
-                                     label: "occurrences_projects_cancel_link")
-    end
-
     private
 
     # Sibling reference within the namespace — `Form` resolves to
