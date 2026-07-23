@@ -20,7 +20,7 @@ class DevCacheWarning
   # in their output.
   def self.applicable?(
     env: Rails.env,
-    server_or_console: defined?(Rails::Server) || defined?(Rails::Console),
+    server_or_console: !!(defined?(Rails::Server) || defined?(Rails::Console)),
     cache_file_exists: Rails.root.join("tmp/caching-dev.txt").exist?
   )
     env.development? && server_or_console && !cache_file_exists
