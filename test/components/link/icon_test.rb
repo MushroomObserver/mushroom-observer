@@ -8,9 +8,10 @@ class IconLinkTest < ComponentTestCase
                     content: "Edit", path: "/foo", icon: :edit
                   ))
 
-    # Outer anchor: href, tooltip title, icon-link class, and the
-    # data-tooltip-target/data-title pair the tooltip Stimulus
-    # controller reads.
+    # Outer anchor: href, tooltip title, icon-link class, the
+    # data-tooltip-target pair the tooltip Stimulus controller reads
+    # to activate Bootstrap's tooltip plugin, and the data-title
+    # Bootstrap's own plugin reads for the popup text.
     assert_html(html, "a[href='/foo'][title='Edit'].icon-link" \
                       "[data-tooltip-target='tip'][data-title='Edit']")
     # Icon glyph + screen-reader-only label inside the anchor.

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 # `<span>` with a context-help tooltip — `data-tooltip-target="tip"`
-# (the tooltip Stimulus controller's target) displays the `title=`
-# attribute on hover. Used for inline label-decorating glyphs (the `?`
-# next to a filter header, etc.).
+# marks the element as the tooltip Stimulus controller's target, which
+# activates Bootstrap's tooltip plugin; that plugin then displays the
+# `title=` attribute on hover. Used for inline label-decorating glyphs
+# (the `?` next to a filter header, etc.).
 #
 # @example
 #   render(Components::Help::Tooltip.new(label: "(?)",

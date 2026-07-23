@@ -10,8 +10,9 @@ class HelpTooltipTest < ComponentTestCase
 
     assert_html(html, "span.context-help", text: "(?)")
     # Tooltip wiring: the tooltip Stimulus controller reads
-    # `data-tooltip-target="tip"` to find triggers and `title=`
-    # for the popup text.
+    # `data-tooltip-target="tip"` to find triggers and activate
+    # Bootstrap's tooltip plugin, which reads `title=` for the popup
+    # text.
     assert_html(html, "span[title='Click for explanation']")
     assert_html(html, "span[data-tooltip-target='tip']")
   end
