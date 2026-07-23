@@ -317,6 +317,22 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
   end
 
+  def test_occurrence_progress_logging_at_interval
+    subject = build
+    subject.instance_variable_set(:@occurrences_seen,
+                                  BackfillMycoportalExportLinks::
+                                    PROGRESS_EVERY - 1)
+
+    _out, err = capture_io do
+      subject.send(:process_occurrence_batch, [{ occid: "1", mo_id: nil }])
+    end
+
+    assert_match(
+      /#{BackfillMycoportalExportLinks::PROGRESS_EVERY} occurrences processed/o,
+      err
+    )
+  end
+
   def test_stopwatch_formats_elapsed_duration
     stopwatch = BackfillMycoportalExportLinks::Stopwatch.new
 
@@ -488,6 +504,83 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     FileUtils.remove_entry(dwca_dir) if dwca_dir && Dir.exist?(dwca_dir)
   end
 
+  # zip.find_entry(filename) only matches an exact path, so a DwC-A that
+  # nests occurrences.csv/multimedia.csv under a subdirectory (confirmed:
+  # find_entry("occurrences.csv") returns nil for an entry actually named
+  # "nested/occurrences.csv") has to fall back to a basename search.
+  def test_extract_entry_falls_back_to_basename_for_nested_zip_entries
+    image = images(:in_situ_image)
+    dwca_dir = Dir.mktmpdir("test_dwca")
+    zip_path = File.join(dwca_dir, "MUOB_backup_2026-01-01_000000_DwC-A.zip")
+    Zip::File.open(zip_path, create: true) do |zip|
+      zip.get_output_stream("nested/occurrences.csv") do |f|
+        f.write(csv_string(%w[id catalogNumber], [occurrence_row(1, "MUOB 1")]))
+      end
+      zip.get_output_stream("nested/multimedia.csv") do |f|
+        f.write(csv_string(%w[coreid identifier],
+                           [multimedia_row(1, image_url(image.id))]))
+      end
+    end
+
+    run_against_zip_dir(dwca_dir, keep_csvs: false)
+
+    assert(link_for(image),
+           "Expected extraction to find the nested entries by basename")
+  ensure
+    FileUtils.remove_entry(dwca_dir) if dwca_dir && Dir.exist?(dwca_dir)
+  end
+
+  # BATCH-boundary flush inside the streamed CSV loops: with BATCH
+  # temporarily set to 1, a 2-row input forces process_occurrences /
+  # each_multimedia_batch to flush mid-loop (not just via the trailing
+  # "leftover batch" call after the CSV.foreach loop ends).
+  def test_process_occurrences_flushes_at_the_batch_boundary
+    obs = observations(:coprinus_comatus_obs)
+    other_obs = observations(:detailed_unknown_obs)
+    occurrences_csv = write_csv(
+      %w[id catalogNumber],
+      [occurrence_row(500, "MUOB #{obs.id}"),
+       occurrence_row(501, "MUOB #{other_obs.id}")]
+    )
+    multimedia_csv = write_csv(%w[coreid identifier], [])
+
+    with_batch_size(1) do
+      run_script_against(occurrences_csv, multimedia_csv)
+    end
+
+    assert(
+      ExternalLink.exists?(target: obs, external_site: @site,
+                           relationship: :export),
+      "Expected the first batch (flushed mid-loop) to be processed"
+    )
+    assert(
+      ExternalLink.exists?(target: other_obs, external_site: @site,
+                           relationship: :export),
+      "Expected the second, trailing batch to also be processed"
+    )
+  end
+
+  def test_each_multimedia_batch_flushes_at_the_batch_boundary
+    image = images(:in_situ_image)
+    other_image = images(:peltigera_image)
+    occurrences_csv = write_csv(%w[id catalogNumber],
+                                [occurrence_row(1, "MUOB 1")])
+    multimedia_csv = write_csv(
+      %w[coreid identifier],
+      [multimedia_row(1, image_url(image.id)),
+       multimedia_row(1, image_url(other_image.id))]
+    )
+
+    with_batch_size(1) do
+      run_script_against(occurrences_csv, multimedia_csv)
+    end
+
+    assert(link_for(image),
+           "Expected the first batch (flushed mid-loop) to be processed")
+    assert(link_for(other_image),
+           "Expected the second, trailing batch to also be processed")
+  end
+
   def test_raises_when_no_matching_zip_is_found
     dwca_dir = Dir.mktmpdir("test_dwca_empty")
     @missing_out = temp_csv_path("missing")
@@ -550,6 +643,10 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   def run_script(occurrence_rows, multimedia_rows, apply: true)
     occurrences_csv = write_csv(%w[id catalogNumber], occurrence_rows)
     multimedia_csv = write_csv(%w[coreid identifier], multimedia_rows)
+    run_script_against(occurrences_csv, multimedia_csv, apply: apply)
+  end
+
+  def run_script_against(occurrences_csv, multimedia_csv, apply: true)
     @missing_out = temp_csv_path("missing")
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
@@ -559,6 +656,19 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
     capture_io { subject.run }
     subject
+  end
+
+  # Temporarily shrinks BATCH so a small fixture-sized input can still
+  # force the mid-loop "batch is full, flush it" path, not just the
+  # trailing "leftover partial batch" flush after the CSV ends.
+  def with_batch_size(size)
+    original = BackfillMycoportalExportLinks::BATCH
+    BackfillMycoportalExportLinks.send(:remove_const, :BATCH)
+    BackfillMycoportalExportLinks.const_set(:BATCH, size)
+    yield
+  ensure
+    BackfillMycoportalExportLinks.send(:remove_const, :BATCH)
+    BackfillMycoportalExportLinks.const_set(:BATCH, original)
   end
 
   # Runs the backfill against a real dwca_dir (no --occurrences/
