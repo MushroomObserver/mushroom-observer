@@ -4,7 +4,9 @@
 # the response body for `external_links#show` when requested with a
 # `Turbo-Frame` request header. Renders a bold "On iNaturalist:" label
 # followed by the site's own + sibling `ExternalLink` rows inside the
-# frame the clicked badge targets. Purely informational, not a form.
+# frame the clicked badge targets. Own rows get an inline edit/destroy
+# `InlineCRUDLinks` (self-gated on `link.can_edit?(user)`); sibling
+# rows never do. Otherwise purely informational, not a form.
 module Views::Controllers::Observations::ExternalLinks
   class InfoFrame < Views::Base
     # A sibling observation's link to the same site, paired with the
@@ -15,6 +17,8 @@ module Views::Controllers::Observations::ExternalLinks
     prop :sibling_site_links, _Array(SiblingLink), default: -> { [] }
     prop :frame_id, String
     prop :site_name, String
+    prop :obs, ::Observation
+    prop :user, _Nilable(::User), default: nil
 
     def view_template
       turbo_frame_tag(@frame_id) { render_body }
@@ -29,10 +33,19 @@ module Views::Controllers::Observations::ExternalLinks
         end
       end
       ul(class: "tight-list pl-3 mb-0") do
-        @site_links.each do |link|
-          li(class: "hanging-indent") { Link(type: :external, link: link) }
-        end
+        @site_links.each { |link| render_own_row(link) }
         @sibling_site_links.each { |sib_link| render_sibling_row(sib_link) }
+      end
+    end
+
+    # Edit/destroy affordance for the current obs's own links only --
+    # a sibling's link (below) isn't this page's to manage, even if
+    # the viewer happens to have edit permission on it too.
+    def render_own_row(link)
+      li(class: "hanging-indent") do
+        Link(type: :external, link: link)
+        whitespace
+        InlineCRUDLinks(target: link, observation: @obs, user: @user)
       end
     end
 

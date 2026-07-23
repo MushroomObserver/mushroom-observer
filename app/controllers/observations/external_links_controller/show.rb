@@ -23,10 +23,19 @@ module Observations::ExternalLinksController::Show
   def set_ivars_for_show
     @external_link = ExternalLink.show_includes.find(params[:id])
     @observation = Observation.strict_loading.
-                   includes(:occurrence, external_links: :external_site).
+                   includes(:occurrence, external_links: show_link_includes).
                    find(@external_link.observation.id)
     @site = @external_link.external_site
     @siblings = load_siblings_with_external_links(@observation)
+  end
+
+  # `external_site: { project: :user_group }` -- not just `:external_site`
+  # -- because `InfoFrame` calls `link.can_edit?(user)` on every own
+  # link now (for the inline edit/destroy affordance), which reads
+  # `external_site.project.member?(user)`. Strict loading raises if
+  # that association isn't eager-loaded already.
+  def show_link_includes
+    { external_site: { project: :user_group } }
   end
 
   # Sibling observations (same Occurrence) with their external_links
@@ -38,7 +47,7 @@ module Observations::ExternalLinksController::Show
     return [] unless obs.occurrence
 
     obs.occurrence.observations.where.not(id: obs.id).
-      includes(external_links: :external_site)
+      includes(external_links: show_link_includes)
   end
 
   # Sorted by relationship_date, matching the pre-badge external-links
@@ -77,7 +86,9 @@ module Observations::ExternalLinksController::Show
              site_links: site_links,
              sibling_site_links: sibling_links,
              frame_id: "external_link_frame_#{@external_link.id}",
-             site_name: @site.name
+             site_name: @site.name,
+             obs: @observation,
+             user: @user
            ), layout: false)
   end
 
