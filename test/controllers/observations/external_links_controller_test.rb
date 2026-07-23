@@ -58,6 +58,34 @@ module Observations
       assert_select("a[href='#{link.url}']")
     end
 
+    # Own-link edit/destroy affordance (InlineCRUDLinks) inside the
+    # info frame -- a controller test rather than a system test since
+    # it only needs the rendered response, not actual pane visibility.
+    def test_show_turbo_frame_shows_edit_and_destroy_for_own_link
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+
+      login # rolf -- owns the link's target (coprinus_comatus_obs)
+      simulate_turbo_frame_request(link)
+      get(:show, params: { id: link.id })
+
+      assert_response(:success)
+      assert_select("a[data-modal='modal_#{link.type_tag}_#{link.id}']")
+      assert_select("button.destroy_external_link_link_#{link.id}")
+    end
+
+    def test_show_turbo_frame_hides_edit_and_destroy_without_permission
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+
+      login("dick") # neither owns the target nor is a site project member
+      simulate_turbo_frame_request(link)
+      get(:show, params: { id: link.id })
+
+      assert_response(:success)
+      assert_select("a[data-modal='modal_#{link.type_tag}_#{link.id}']",
+                    count: 0)
+      assert_select("button.destroy_external_link_link_#{link.id}", count: 0)
+    end
+
     # A repeat click on a pane that's already been fetched (e.g.
     # re-opening one closed by clicking a sibling badge) comes back as
     # a cheap 304, not a full re-render -- see
