@@ -136,7 +136,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     # No flex/justify-content-between shell with no badges to space
     # against -- the add link sits right after the caption inline,
     # matching the "No fungarium records [ + ]" pattern.
-    assert_no_html(html, ".d-flex.justify-content-between")
+    assert_no_html(html, ".obs-links.d-flex.justify-content-between")
   end
 
   # With both badges AND an addable site, the row DOES use the flex
@@ -149,7 +149,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
 
     html = render(panel_with(obs, sites: sites))
 
-    assert_html(html, "div.d-flex.justify-content-between")
+    assert_html(html, "div.obs-links.d-flex.justify-content-between")
     assert_html(html, "a.badge.badge-id", text: "iNat")
     assert_html(html, "a[data-modal='modal_external_link']")
   end
