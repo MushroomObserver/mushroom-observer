@@ -53,6 +53,42 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_no_html(html, "#observation_external_links")
   end
 
+  # A logged-out viewer can't add a link, so an eligible site with no
+  # existing links renders nothing at all -- not an empty .p-0 wrapper
+  # with a "No external links" caption nobody who's reading it can
+  # act on.
+  def test_does_not_render_external_links_body_for_logged_out_viewer_with_sites
+    obs = observations(:detailed_unknown_obs)
+    assert_empty(obs.external_links)
+    sites = ::ExternalSite.all.to_a
+    skip("Need at least one ExternalSite fixture") if sites.empty?
+
+    html = render(Views::Controllers::Observations::Show::Details.new(
+                    obs: obs, user: nil, sites: sites, siblings: []
+                  ))
+
+    assert_no_html(html, "#observation_external_links")
+  end
+
+  # With nothing to show yet (only an eligible site to add one to),
+  # the external-links body renders AFTER when/where/who, as the last
+  # panel-body -- not leading the panel with an empty-looking "+".
+  def test_renders_external_links_body_last_when_no_links_yet
+    obs = observations(:detailed_unknown_obs)
+    assert_empty(obs.external_links)
+    sites = ::ExternalSite.all.to_a
+    skip("Need at least one ExternalSite fixture") if sites.empty?
+
+    html = render(Views::Controllers::Observations::Show::Details.new(
+                    obs: obs, user: @user, sites: sites, siblings: []
+                  ))
+
+    bodies = Nokogiri::HTML5.fragment(html).css(
+      "#observation_details > .panel-body"
+    )
+    assert_equal("observation_external_links", bodies.last["id"])
+  end
+
   # --- Collector / Entered by (#4211) ---
 
   def test_who_collector_is_creator_no_entered_by

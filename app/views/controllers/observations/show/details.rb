@@ -18,14 +18,9 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     Panel(panel_id: "observation_details") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
-      if show_external_links?
-        panel.with_body(classes: "p-0", id: "observation_external_links",
-                        data: { controller: "section-update",
-                                section_update_user_value: @user&.id }) do
-          render_external_links_section
-        end
-      end
+      with_external_links_body(panel) if show_external_links? && links?
       panel.with_body { render_body }
+      with_external_links_body(panel) if show_external_links? && !links?
     end
   end
 
@@ -208,9 +203,27 @@ class Views::Controllers::Observations::Show::Details < Views::Base
 
   # ---- external links ---------------------------------------------
 
+  # Matches ExternalLinks' own "hides silently" condition -- a
+  # logged-out viewer (or one with no eligible site) gets nothing
+  # rendered at all, not an empty .p-0 wrapper with no content.
   def show_external_links?
-    @obs.external_links.any? || @sites.present? ||
-      sibling_has?(:external_links)
+    links? || (@user && @sites.present?)
+  end
+
+  # Own/sibling links to show as badges -- rendered above when/where/
+  # who. With nothing to show yet (only an eligible site to add one
+  # to), the section instead renders below when/where/who, as the
+  # last item, so the page doesn't lead with an empty-looking "+".
+  def links?
+    @obs.external_links.any? || sibling_has?(:external_links)
+  end
+
+  def with_external_links_body(panel)
+    panel.with_body(classes: "p-0", id: "observation_external_links",
+                    data: { controller: "section-update",
+                            section_update_user_value: @user&.id }) do
+      render_external_links_section
+    end
   end
 
   def render_external_links_section

@@ -119,6 +119,22 @@ class Views::Controllers::Observations::Show::Details::ExternalLinksTest <
     assert_html(html, "a[data-modal='modal_external_link']")
   end
 
+  # No badges yet, but an eligible site to add one to: shows a "No
+  # external links" caption instead of a bare, unlabeled "+".
+  def test_renders_no_links_caption_when_empty_but_addable
+    obs = observations(:detailed_unknown_obs)
+    assert_empty(obs.external_links)
+    sites = ::ExternalSite.all.to_a
+    skip("Need at least one ExternalSite fixture") if sites.empty?
+
+    html = render(panel_with(obs, sites: sites))
+
+    assert_html(html, "div.p-3.border-bottom",
+                text: :no_objects.t(type: :external_link).as_displayed)
+    assert_no_html(html, "a.badge.badge-id")
+    assert_html(html, "a[data-modal='modal_external_link']")
+  end
+
   def test_hides_new_link_when_no_sites
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     obs = link.observation

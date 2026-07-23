@@ -11,7 +11,9 @@
 # own + sibling `ExternalLink` for that site. Only one pane is ever
 # open (native Bootstrap collapse accordion via `data-parent`). Hides
 # silently when there's nothing to show and no eligible site to add a
-# link to. `Details` renders this inside a `.panel-body.p-0` (own id +
+# link to; when there's an eligible site but no badges yet, shows a
+# "No external links" caption alongside the add link instead of an
+# unlabeled "+". `Details` renders this inside a `.panel-body.p-0` (own id +
 # section-update wiring live on that panel-body, not here) so the
 # badge row and the accordion below it can each supply their own
 # padding and be genuinely full-width against the panel edge -- see
@@ -32,7 +34,11 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
     return if visible_sites.empty? && !show_new_link?
 
     div(class: class_names(wrapper_class, "p-3 border-bottom")) do
-      render_badges
+      if visible_sites.any?
+        render_badges
+      else
+        plain(:no_objects.t(type: :external_link))
+      end
       render_new_link if show_new_link?
     end
     render_accordion
@@ -52,8 +58,6 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   end
 
   def render_badges
-    return unless visible_sites.any?
-
     div do
       plain("#{:shared_with.ti}: ")
       visible_sites.each { |site_name, link| render_badge(site_name, link) }
