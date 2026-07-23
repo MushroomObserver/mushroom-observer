@@ -26,24 +26,24 @@ module Views::Controllers::Projects
     private
 
     def render_map_button
-      project_button(:MAP.t, add_q_param(map_observations_path, @query))
+      project_button(:map.ti, add_q_param(map_observations_path, @query))
     end
 
     def render_images_button
       images_url = related_observation_images_url
       return unless images_url
 
-      project_button(:IMAGES.l, images_url)
+      project_button(:images.ti, images_url)
     end
 
     def render_download_button
       project_button(
-        :DOWNLOAD.l, add_q_param(new_observations_download_path, @query)
+        :download.ti, add_q_param(new_observations_download_path, @query)
       )
     end
 
     def render_field_slips_button
-      project_button(:FIELD_SLIPS.t, field_slips_path(project: @project))
+      project_button(:field_slips.ti, field_slips_path(project: @project))
     end
 
     def project_button(name, target)

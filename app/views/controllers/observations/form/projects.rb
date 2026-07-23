@@ -38,7 +38,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
 
   def view_template
     render(panel) do |p|
-      p.with_heading { :PROJECTS.l }
+      p.with_heading { :projects.ti }
       p.with_body(collapse: true) { render_body }
     end
   end

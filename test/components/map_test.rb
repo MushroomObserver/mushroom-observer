@@ -198,7 +198,7 @@ class MapTest < ComponentTestCase
 
     assert_includes(caption, "map-popup-header")
     # "2 Observations" — count first, label after.
-    assert_match(/2\s+#{Regexp.escape(:Observations.t.to_s)}/, caption)
+    assert_match(/2\s+#{Regexp.escape(:observations.ti.to_s)}/, caption)
     assert_includes(caption, "map-popup-btn")
     assert_includes(caption, :show_all.t)
     assert_includes(caption, :map_all.t)

@@ -30,13 +30,11 @@
 #    Rails.root/public/images/320/<id>.jpg
 #    Rails.root/public/images/thumb/<id>.jpg
 #
-#  They are also transferred to a remote image server with more disk space:
-#  (images take up 100 Gb as of Jan 2010)
-#
-#    http://<image_server>/<dir>/<id>.<ext>
-#
-#  After the images are successfully transferred, we remove the originals from
-#  the web server (see scripts/update_images).
+#  They are also transferred to a remote image server with more disk
+#  space. Once every rendition is confirmed present there, the local
+#  copies are deleted -- nothing is kept local
+#  (MO.keep_these_image_sizes_local is empty in production) -- and MO
+#  serves them from the image server.
 #
 #  == Upload
 #
@@ -51,8 +49,8 @@
 #         :notes      => 'close-up of stipe'
 #       )
 #
-#  2. Attach the image itself by setting the +image+ attribute, then save the
-#     Image record:
+#  2. Attach the image itself by setting the +image+ attribute, then save
+#     the Image record:
 #
 #       # via HTTP form:
 #       image.image = params[:image][:upload]
@@ -67,52 +65,23 @@
 #       # Validate and save record.
 #       image.save
 #
-#  3. After the record is saved, it knows the ID so it can finally write out
-#     the original image:
+#  3. After the record is saved it knows its ID, so #process_image writes
+#     the original to public/images/orig/<id>.<ext> and, if GPS hiding was
+#     requested, strips it synchronously first -- the original must never
+#     be exposed with real coordinates (Image::Processor.strip_original_gps).
 #
-#       ::Rails.root.to_s/public/images/orig/<id>.<ext>
+#  4. #process_image runs Image::Processor#process (pure Ruby, via
+#     ImageMagick) synchronously: convert the original to jpeg if needed,
+#     set width/height, generate the five smaller renditions
+#     (thumb/320/640/960/1280), and compute the perceptual hash
+#     (Image::Dhash) inline from the small rendition (#4796).
 #
-#  4. Now it forks off a tiny shell script that takes care of the rest:
-#
-#       script/process_image $id $ext
-#
-#  5. First it fills in all the other size images with a place-holder:
-#
-#       cd ::Rails.root.to_s/public/images
-#       cp place_holder_<size>.jpg <size>/$id.jpg
-#
-#  6. Next it resizes the original using ImageMagick:
-#
-#       jpegresize 160x160 -q 90 --max-size orig/$id.jpg thumb/$id.jpg
-#       jpegresize 320x320 -q 80 --max-size orig/$id.jpg 320/$id.jpg
-#       jpegresize 640x640 -q 70 --max-size orig/$id.jpg 640/$id.jpg
-#       etc.
-#
-#  7. Lastly it transfers all the images to the image server:
-#
-#       scp orig/$id.<ext>  <user>@<image_server>/orig/$id.<ext>
-#       scp orig/$id.jpg    <user>@<image_server>/orig/$id.jpg
-#       scp 1280/$id.jpg    <user>@<image_server>/1280/$id.jpg
-#       etc.
-#
-#     (If any errors occur in +script/process_image+ they get emailed to the
-#     webmasters.)
-#
-#  8. If all is successful, it sets the +transferred+ bit in the db record.
-#     Until this bit is set, MO knows to serve the image off of the web server
-#     instead, however inefficient this may be.
-#
-#  9. A regular process (every 5 minutes?) tries to re-transfer any images
-#     whose transfer failed.  Bailing at the first sign of trouble.
-#
-#  10. A nightly process runs to check for mistakes and remove any images that
-#     have been successfully transferred:
-#
-#       script/update_images --clean
-#
-#     Currently it only removes ones over 320, leaving the rest local.  Note
-#     that images remain on the web server until this verification process
-#     happens.
+#  5. It enqueues TransferImagesJob, which asynchronously copies every
+#     rendition to the configured image server(s), verifies each landed
+#     (present and byte-matching), sets +transferred+, and only then
+#     deletes the local copies. Until +transferred+ is set, MO serves the
+#     image off the web server. Recurring jobs retry any straggler and
+#     alert on files left behind -- see #4791 for the full pipeline.
 #
 #  == Low Level Details
 #
@@ -278,6 +247,81 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
+  # Turbo Stream broadcasts that keep the image-show page (the only
+  # subscriber -- see broadcast_processed_update) live once background
+  # processing (RotateImageJob/TransferImagesJob) finishes, without a
+  # full page reload. Fires only on the columns processing
+  # flips -- an unrelated Image edit (copyright, notes, vote) never
+  # re-renders anything. (gps_stripped currently only changes
+  # synchronously at upload, before any page could be subscribed --
+  # kept as a trigger so the pages catch up if that ever goes async.)
+  # Gated on transferred becoming TRUE (not any flip): processing
+  # starts by setting transferred false (Image::Processor#
+  # update_image_record_width_height_and_transferred) BEFORE the
+  # renditions are regenerated, so broadcasting there would push a
+  # new-token URL at stale files -- and would duplicate the explicit
+  # end-of-processing broadcast RotateImageJob already sends. The two
+  # files-consistent moments are processing completion (explicit, in
+  # the job) and transfer completion (this callback).
+  after_update_commit lambda { |image|
+    became_transferred = image.saved_change_to_transferred? &&
+                         image.transferred
+    if became_transferred || image.saved_change_to_gps_stripped?
+      image.broadcast_processed_update
+    end
+  }
+
+  # Renders for an anonymous viewer -- there's no request-scoped
+  # current_user to reflect here, same limitation Comment's and
+  # InatImport's own broadcasts accept. A call site with heavier
+  # per-user customization (vote highlighting, an admin-only
+  # affordance) catches up on the next real page load, not via this
+  # broadcast.
+  #
+  # The only subscriber is the image-show page
+  # (Views::Controllers::Images::Show::ImagePanel) -- rotate/mirror
+  # only happens there, so only there does a live update make sense.
+  # Index matrix boxes and the obs-show carousel deliberately do NOT
+  # subscribe (cross-tab updates aren't a supported config; those
+  # pages catch up on the next load via the #4808 URL token), which is
+  # also why there is no carousel-slide broadcast here.
+  def broadcast_processed_update
+    broadcast_interactive_sizes
+  end
+
+  # One broadcast per size Interactive might be showing on any given
+  # page (see INTERACTIVE_BROADCAST_SIZES). `media_only: true` limits
+  # the re-render to just the image itself (src/data-src) -- the model
+  # has no way to know which page-specific image_link/votes/
+  # extra_classes/identify props a given subscriber originally
+  # rendered with, so replaying the *whole* Interactive with defaults
+  # would silently change those (e.g. a matrix-box thumbnail's
+  # image_link falls back to the image's own show page instead of the
+  # parent Observation it was actually pointing at). The link/votes/
+  # overlays stay exactly as the page first rendered them; only the
+  # image source needs to catch up once resized copies exist.
+  #
+  # This is a deliberate tradeoff, not an oversight: carrying every
+  # subscriber's original per-page props through the broadcast (rather
+  # than falling back to media_only) isn't possible without threading
+  # that context through the model layer. Whether media_only is the
+  # right long-term answer (vs. e.g. a per-page prop cache) is still
+  # open.
+  def broadcast_interactive_sizes
+    INTERACTIVE_BROADCAST_SIZES.each do |size|
+      html = ApplicationController.renderer.render(
+        Components::InteractiveImage.new(user: nil, image: self,
+                                         size: size, media_only: true),
+        layout: false
+      )
+      broadcast_replace_to(
+        [self, :processed],
+        target: "interactive_image_#{id}_#{size}_media",
+        html: html
+      )
+    end
+  end
+
   # Array of all observations, users and glossary terms using this image.
   def all_subjects
     observations + profile_users + glossary_terms
@@ -365,6 +409,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # Return an Array of all image sizes from +:thumbnail+ to +:full_size+.
   ALL_SIZES = ALL_SIZES_INDEX.keys.freeze
 
+  # Sizes `Components::InteractiveImage` gets broadcast for by
+  # Image#broadcast_processed_update. All non-full_size sizes, not just
+  # one, because the image-show page (the only subscriber) renders at
+  # a size chosen by the viewer's image-size preference -- the
+  # broadcasts for sizes a given page isn't showing have no matching
+  # element in its DOM and are silent no-ops there.
+  INTERACTIVE_BROADCAST_SIZES = (ALL_SIZES - [:full_size]).freeze
+
   # Return an Array of all image sizes as pixels (Integer) instead of Symbol's.
   ALL_SIZES_IN_PIXELS = ALL_SIZES_INDEX.values.freeze
 
@@ -389,7 +441,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: transferred,
-      extension: extension(size)
+      extension: extension(size),
+      version: updated_at&.to_i
     )
   end
 
@@ -398,7 +451,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       size: size,
       id: id,
       transferred: args.fetch(:transferred, true),
-      extension: args.fetch(:extension, "jpg")
+      extension: args.fetch(:extension, "jpg"),
+      version: args[:version]
     )
   end
 
@@ -771,39 +825,75 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     elsif save_to_temp_file
       ext = original_extension
       set_image_size(upload_temp_file) if ext == "jpg"
-      set = width.nil? ? "1" : "0"
-      update_attribute(:gps_stripped, true) if strip
-      strip = strip ? "1" : "0"
+      set_size = width.nil?
       # move_original returns true or raises — never false — so there is no
       # reachable else branch here.
       if move_original
-        cmd = MO.process_image_command.
-              gsub("<id>", id.to_s).
-              gsub("<ext>", ext).
-              gsub("<set>", set).
-              gsub("<strip>", strip)
-        if !Rails.env.test? && !system(cmd)
-          errors.add(:image, :runtime_image_process_failed.t(id: id))
-          result = false
-        else
-          # Only after processing has succeeded (or been skipped in test):
-          # enqueueing earlier would hash an image whose upload ultimately
-          # failed, and could race the resize/strip command writing files.
-          ImageDhashJob.perform_later(id)
-        end
+        # GPS stripping runs synchronously, here, before continuing -- the
+        # original must never be exposed (even to the resize/transfer step
+        # below) with real GPS data still in it. Only marks gps_stripped
+        # once the strip has actually succeeded, unlike the old optimistic
+        # update_attribute(:gps_stripped, true) that fired regardless.
+        result = strip ? strip_original_gps?(ext) : true
+        # Resize/reorient is skipped only if the GPS strip above was
+        # required and failed: an unstripped original must not propagate
+        # into resized copies.
+        result = process_and_enqueue_jobs(ext, set_size) if result
       end
     end
     result
   end
 
+  def strip_original_gps?(ext)
+    error = Image::Processor.strip_original_gps(self, ext: ext)
+    return true unless error
+
+    errors.add(:image, :runtime_failed_to_strip_gps.t(msg: error))
+    false
+  end
+
+  # Runs Image::Processor synchronously (skipped in test, see
+  # test/models/image/processor_test.rb for direct coverage) to produce a
+  # completed set of local files -- #process also computes the perceptual
+  # hash inline from the just-written small rendition, so there is no
+  # separate dhash job to race the transfer (#4796). Then enqueues
+  # TransferImagesJob (gets those files onto the configured image
+  # server(s) -- see #4791, deliberately decoupled from upload success: a
+  # transfer failure alerts asynchronously instead of failing the upload).
+  # Only after resizing has succeeded: enqueueing earlier would transfer
+  # an image whose upload ultimately failed. GPS stripping already
+  # happened synchronously in #process_image above, before this runs --
+  # see Image::Processor.strip_original_gps for why.
+  def process_and_enqueue_jobs(ext, set_size)
+    unless Rails.env.test?
+      Image::Processor.new(image: self, ext: ext, set_size: set_size).process
+      TransferImagesJob.perform_later(image_ids: [id])
+    end
+    true
+  rescue StandardError => e
+    Rails.logger.error("Image::Processor failed for image #{id}: " \
+                       "#{e.full_message(highlight: false)}")
+    fail_image_process
+  end
+
+  def fail_image_process # rubocop:disable Naming/PredicateMethod
+    errors.add(:image, :runtime_image_process_failed.t(id: id))
+    false
+  end
+
   # Move temp file into its final position.  Adds any errors to the :image
   # field and returns false.
+  #
+  # NOT full_filepath(:original) -- that helper's test-env fallback (for
+  # EXIF-reading tests without a real per-image file) would redirect this
+  # WRITE into a committed test/images/ fixture whenever original_name
+  # happens to match one, since the real destination legitimately doesn't
+  # exist yet at this point (we're about to create it). File.rename raises
+  # SystemCallError on failure (never returns falsy), so the rescue below
+  # is the only failure path -- no need to also check its return value.
   def move_original
-    original_image = full_filepath(:original)
-    unless File.rename(upload_temp_file, original_image)
-      raise(SystemCallError.new("Try again."))
-    end
-
+    original_image = image_url(:original).full_filepath(MO.local_image_files)
+    File.rename(upload_temp_file, original_image)
     FileUtils.chmod(0o644, original_image)
     true
   rescue SystemCallError
@@ -835,18 +925,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     else
       raise("Invalid transform operator: #{operator.inspect}")
     end
-    # Rotation invalidates the perceptual hash; rotate_image runs in the
-    # background (fire-and-forget), so schedule the rehash with a delay
-    # rather than chaining it to a completion signal we never receive.
-    ImageDhashJob.set(wait: 5.minutes).perform_later(id) if persisted?
-    return if Rails.env.test?
+    return unless persisted?
 
-    # `operator` is one of the three literals set above (never raw input)
-    # and `id` is this record's integer primary key, so neither can carry
-    # shell syntax. The trailing "&" backgrounds the rotate; the shell form
-    # is what enables it. (Brakeman command-injection warning ignored on
-    # this basis in config/brakeman.ignore.)
-    system("script/rotate_image #{id} #{operator}&")
+    # RotateImageJob re-runs Image::Processor#process, which resizes and
+    # recomputes the perceptual hash inline (#4796).
+    RotateImageJob.perform_later(id, original_extension, operator)
   end
 
   # Compute and store the perceptual hash (Image::Dhash) for this image
@@ -855,9 +938,11 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # serves: hash the small (then medium) local rendition and NEVER the
   # full-size original — decoding a large original with ImageMagick can
   # exhaust the host (a routine 25 MP upload froze the site for ~3.5 min,
-  # #4796). Call only when dhash_source_ready? -- see that method for why
-  # the small rendition is not guaranteed to exist yet when this is
-  # called (#4799).
+  # #4796). Image::Processor#process calls this inline right after it
+  # generates the small rendition, so the local file is present on fresh
+  # uploads and rotations. Batch/backfill callers reach it with no local
+  # rendition (e.g. after the originals are cleaned up), so it falls back
+  # to fetching the transferred small rendition (see local_dhash_source).
   def compute_dhash!
     source = local_dhash_source
     value = if source
@@ -869,19 +954,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     value
   end
 
-  # Is a rendition of this image available to hash yet? `process_image`
-  # backgrounds `script/process_image` (its command string ends in "&"),
-  # so the resize-and-transfer script is often still running when
-  # ImageDhashJob picks up the job it enqueued -- neither a local small/
-  # medium rendition nor the remote transfer may exist yet. Calling
-  # compute_dhash! in that window falls through Image::URL#url to
-  # PLACEHOLDER_URLS (a hostless relative path), and RestClient.get
-  # raises trying to parse it as a URI (#4799). ImageDhashJob checks this
-  # and reschedules itself with backoff instead of hashing prematurely.
-  def dhash_source_ready?
-    local_dhash_source.present? || transferred
-  end
-
+  # The local small (then medium) rendition path for hashing, or nil if
+  # neither is on disk. compute_dhash! prefers it over the full-size
+  # original (#4796) and falls back to the remote small rendition.
   def local_dhash_source
     [:small, :medium].
       map { |size| full_filepath(size) }.
@@ -890,34 +965,60 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Attempt to strip GPS data from original image. Returns error message as
   # string if it fails.
+  #
+  # Runs under the image's row lock, serialized with
+  # Image::Processor::Verifier#transfer_image -- see the GPS-leak
+  # rationale there. Under the lock, `transferred` is the transfer's
+  # settled state: still local means the strip rewrote files the
+  # in-flight/pending upload predates, so re-enqueue TransferImagesJob
+  # (idempotent) to push the stripped set.
   def strip_gps!
     return nil if gps_stripped
 
+    error = nil
+    with_lock do
+      break if gps_stripped # may have flipped while waiting for the lock
+
+      error = run_strip_exif_script
+      unless error
+        update_attribute(:gps_stripped, true)
+        TransferImagesJob.perform_later(image_ids: [id]) unless transferred
+      end
+    end
+    error
+  end
+
+  def run_strip_exif_script
     # Pass the worker-specific image root for parallel testing
     env = { "MO_IMAGE_ROOT" => MO.local_image_files }
     output, status = Open3.capture2e(env, "script/strip_exif", id.to_s,
                                      transferred ? "1" : "0")
-    return output unless status.success?
-
-    update_attribute(:gps_stripped, true)
-    nil
+    status.success? ? nil : output
   end
 
   # Get exif data from image by reading the header straight off the file,
   # remotely. Returns nil if it fails. Costly.
   # @param hide_gps [Boolean, nil] Override GPS hiding. If nil, checks
   #   observations to determine whether to hide GPS.
+  #
+  # No Shellwords.escape needed here -- Open3.capture2e's array form
+  # (`cmd, *flags, path`) execs directly, bypassing the shell entirely,
+  # so nothing ever interprets shell metacharacters. Escaping anyway
+  # used to be harmless (no argument here ever contained one), but
+  # original_url now carries a `?<version>` cache-buster (#4808) --
+  # Shellwords.escape turned that `?` into a literal `\?` in the
+  # argument itself (array form never strips the backslash back out),
+  # so every remote (transferred) EXIF re-read silently 404'd.
   def read_exif_data(flags = [], hide_gps: nil)
     hide_gps = observations.any?(&:gps_hidden) if hide_gps.nil?
 
     if transferred
-      cmd = Shellwords.escape("script/exiftool_remote")
-      path = Shellwords.escape(original_url)
+      cmd = "script/exiftool_remote"
+      path = original_url
     else
-      cmd  = Shellwords.escape("exiftool")
-      path = Shellwords.escape(full_filepath("orig"))
+      cmd = "exiftool"
+      path = full_filepath("orig")
     end
-    flags.map { |flag| Shellwords.escape(flag) }
     result, status = Open3.capture2e(cmd, *flags, path)
 
     data = status.success? ? self.class.parse_exif_data(result, hide_gps) : nil

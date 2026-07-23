@@ -27,12 +27,12 @@ module Views::Controllers::Info
 
       @observations[offset, count].each do |obs|
         div(class: "pb-1") do
-          render(::Components::Image::Interactive.new(
-                   user: current_user,
-                   image: obs.thumb_image,
-                   image_link: observation_path(obs.id),
-                   votes: true
-                 ))
+          InteractiveImage(
+            user: current_user,
+            image: obs.thumb_image,
+            image_link: observation_path(obs.id),
+            votes: true
+          )
           br
           br
         end
@@ -40,7 +40,7 @@ module Views::Controllers::Info
     end
 
     def render_stats_table
-      render(Components::Table.new(show_headers: false)) do |t|
+      Table(show_headers: false) do |t|
         t.body do
           ::SiteData::SITE_WIDE_FIELDS.each do |field|
             label = :"site_stats_#{field}".l

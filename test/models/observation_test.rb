@@ -1198,17 +1198,6 @@ class ObservationTest < UnitTestCase
     assert_in_delta(-118.3521, obs.public_lng)
   end
 
-  def test_place_name_and_coordinates_with_values
-    obs = observations(:amateur_obs)
-    assert_equal("Pasadena, California, USA (34.1622°N 118.3521°W)",
-                 obs.place_name_and_coordinates)
-  end
-
-  def test_place_name_and_coordinates_has_no_values
-    obs = observations(:unknown_with_no_naming)
-    assert_equal("Who knows where", obs.place_name_and_coordinates)
-  end
-
   def test_check_requirements_no_user
     fungi = names(:fungi)
     exception = assert_raise(ActiveRecord::RecordInvalid) do
@@ -2158,16 +2147,6 @@ class ObservationTest < UnitTestCase
     assert_equal(obs.when.strftime("%Y-%m-%d"), obs.when_str)
   end
 
-  # display_alt formats altitude in meters when present (line 579)
-  # and returns "" when nil.
-  def test_display_alt
-    obs = observations(:minimal_unknown_obs)
-    obs.alt = nil
-    assert_equal("", obs.display_alt)
-    obs.alt = 1234
-    assert_equal("1234m", obs.display_alt)
-  end
-
   # other_notes reads the canonical "Other" key (line 673) and
   # other_notes= writes through it (lines 677-678).
   #
@@ -2582,5 +2561,58 @@ class ObservationTest < UnitTestCase
     obs.update!(collector_user_id: rolf.id)
     assert_nil(obs.reload.collector_user_id,
                "inconsistent FK reconciled away from the free-text string")
+  end
+
+  # ---- display_notes / shows_merged_notes? -------------------------
+
+  # The primary of a multi-member occurrence renders the per-key merge
+  # across the occurrence (surfacing sibling notes); everyone else shows
+  # their own notes untouched.
+  def test_display_notes_merges_only_for_the_primary
+    primary, sibling = build_notes_occurrence(
+      { Cap: "red" }, { Substrate: "wood" }
+    )
+
+    assert(primary.shows_merged_notes?)
+    assert_equal("red", primary.display_notes[:Cap])
+    assert_equal("wood", primary.display_notes[:Substrate]) # inherited
+
+    assert_not(sibling.shows_merged_notes?)
+    assert_equal({ Substrate: "wood" }, sibling.display_notes.to_h)
+  end
+
+  def test_display_notes_returns_own_when_not_in_occurrence
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    obs.update!(notes: { Cap: "red" })
+
+    assert_not(obs.shows_merged_notes?)
+    assert_equal({ Cap: "red" }, obs.display_notes.to_h)
+  end
+
+  def test_display_notes_not_merged_for_single_member_occurrence
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    obs.update!(notes: { Cap: "red" })
+    occ = Occurrence.create!(user: rolf, primary_observation: obs)
+    obs.update!(occurrence: occ)
+
+    assert_not(obs.shows_merged_notes?)
+  end
+
+  private
+
+  # Build a two-member occurrence from two obs fixtures with the given
+  # notes; returns [primary, sibling].
+  def build_notes_occurrence(primary_notes, sibling_notes)
+    primary = observations(:minimal_unknown_obs)
+    sibling = observations(:coprinus_comatus_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: primary_notes)
+    sibling.update!(notes: sibling_notes)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    [primary, sibling]
   end
 end

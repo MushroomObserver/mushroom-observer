@@ -171,7 +171,6 @@
 ################################################################################
 
   all_months: January February March April May June July August September October November December
-  all_month_abbrs: Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
 
   # Important examples:
   hello: Hello world
@@ -182,9 +181,7 @@
   one: one
 
   # Yes and No are apparently broken
-  YEP: "Yes"
   yep: "yes"
-  NOPE: "No"
   nope: "no"
 
   # Test with new lines
@@ -223,52 +220,33 @@
   # COMMON WORDS AND PHRASES
 
   # Object titles, all nouns.
-  ACTIONS: Actions
-  ACTIVITY: Activity
+  actions: actions
   activity: activity
-  API_KEY: API Key
   api_key: API key
-  API_KEYS: API Keys
   api_keys: API keys
-  ARTICLE: Article
   article: article
-  ARTICLES: Articles
   articles: articles
-  CHECKLISTS: Checklists
-  CLADE: Clade
+  checklists: checklists
   clade: clade
-  CLADES: Clades
   clades: clades
-  COLLECTION_NUMBER: Collection Number
   collection_number: collection number
-  COLLECTION_NUMBERS: Collection Numbers
   collection_numbers: collection numbers
-  COLLECTOR: Collector
-  COMMENT: Comment
+  collector: collector
   comment: comment
-  COMMENTS: Comments
   comments: comments
-  CONSTRAINTS: Constraints
-  CONTRIBUTORS: Contributors
-  CURATOR: Curator
-  CURATORS: Curators
-  DESCRIPTION: Description
+  constraints: constraints
+  contributors: contributors
+  curator: curator
+  curators: curators
   description: description
-  DESCRIPTIONS: Descriptions
   descriptions: descriptions
-  DONATIONS: Donations
-  DRAFT: Draft
+  donations: donations
   draft: draft
-  DRAFTS: Drafts
   drafts: drafts
-  ENDED: Ended
   ended: ended
   error: error
-  ERRORS: Errors
   errors: errors
-  EXTERNAL_LINK: External Link
   external_link: external link
-  EXTERNAL_LINKS: External Links
   external_links_help: How external links work
   external_links: external links
   external_link_relationship_import: Imported from [site]
@@ -278,408 +256,229 @@
   external_link_relationship_manual: Manual link to [site]
   external_link_relationship_remote_manual: Linked from [site]
   external_link_relationship_unknown: Linked to [site]
-  EXTERNAL_SITE: External Site
   external_site: external site
-  EXTERNAL_ID: External ID
-  RELATIONSHIP: Relationship
-  EXTERNAL_SITES: External Sites
+  external_id: external id
+  relationship: relationship
   external_sites: external sites
-  FIELD_SLIP: Field Slip
   field_slip: field slip
-  FIELD_SLIPS: Field Slips
   field_slips: field slips
-  IDENTIFICATION: Identification
   identification: identification
-  IMAGE: Image
   image: image
-  IMAGES: Images
   images: images
-  IGNORE: Ignore
   ignore: ignore
-  INFO: Info
-  INFORMATION: Information
-  INTERESTS: Interests
-  GEOLOCATION: Geolocation
+  info: info
+  information: information
+  interests: interests
   geolocation: geolocation
-  GLOSSARY: Glossary
   glossary: glossary
-  GLOSSARY_TERM: Glossary Term
   glossary_term: glossary term
-  GLOSSARY_TERMS: Glossary
   glossary_terms: glossary
-  HERBARIUM_RECORD: Fungarium Record
   herbarium_record: fungarium record
-  HERBARIUM_RECORDS: Fungarium Records
   herbarium_records: fungarium records
-  HERBARIA: Fungaria
   herbaria: fungaria
-  HERBARIUM: Fungarium
   herbarium: fungarium
-  HERBARIUMS: Fungaria
   herbariums: fungaria
-  LICENSE: License
   license: license
-  LICENSES: Licenses
   licenses: licenses
-  LICHEN: Lichen
   lichen: lichen
-  LINKS: Links
   links: links
-  LOCALITY: Locality
   locality: locality
-  LOCALITIES: Localities
   localities: localities
-  LOCATION: Location
   location: location
-  LOCATIONS: Locations
   locations: locations
-  LOCATION_DESCRIPTION: Location Description
   location_description: location description
-  LOCATION_DESCRIPTIONS: Location Descriptions
   location_descriptions: location descriptions
-  LOG: Log
   log: log
-  LOGS: Logs
   logs: logs
-  MAP: Map
   map: map
-  MAPS: Maps
   maps: maps
-  NAME: Name
   name: name
-  NAMES: Names
   names: names
-  NAME_DESCRIPTION: Name Description
   name_description: name description
-  NAME_DESCRIPTIONS: Name Descriptions
   name_descriptions: name descriptions
-  NAME_TRACKER: Name Tracker
   name_tracker: name tracker
-  NAME_TRACKERS: Name Trackers
   name_trackers: name trackers
-  NAMING: Proposed Name
   naming: proposed name
-  NAMINGS: Proposed Names
   namings: proposed names
-  NEWS: News
   news: news
-  NOTIFICATION: Notification
   notification: notification
-  NOTIFICATIONS: Notifications
   notifications: notifications
   # generic object
-  OBJECT: Object
   object: object
-  OBJECTS: Objects
   objects: objects
-  OBSERVATION: Observation
   observation: observation
-  OBSERVATIONS: Observations
   observations: observations
-  OBSERVATION_FIELDS: Observation Fields
-  OCCURRENCE: Occurrence
+  observation_fields: observation fields
   occurrence: occurrence
-  OCCURRENCES: Occurrences
   occurrences: occurrences
   of: of
-  PAST_LOCATION: Location Change
-  past_location: location change
-  PAST_LOCATIONS: Location Changes
   past_locations: location changes
-  PAST_NAME: Name Change
   past_name: name change
-  PAST_NAMES: Name Changes
   past_names: name changes
-  PIVOTAL: Pivotal
-  POLICY: Policy
-  PROJECT: Project
+  pivotal: pivotal
+  policy: policy
   project: project
-  PROJECTS: Projects
   projects: projects
-  PROJECT_LISTS: Project Lists
   project_lists: project lists
-  PROJECT_ALIAS: Project Alias
-  PROJECT_ALIASES: Project Aliases
-  PUBLICATION: Publication
+  project_alias: project alias
+  project_aliases: project aliases
   publication: publication
-  PUBLICATIONS: Publications
   publications: publications
-  REGION: Region
   region: region
-  REGIONS: Regions
   regions: regions
-  RSS_LOG: Activity Log
   rss_log: activity log
-  RSS_LOGS: Activity Logs
   rss_logs: activity logs
-  SEQUENCE: Sequence
   sequence: sequence
-  SEQUENCES: Sequences
   sequences: sequences
-  SOURCE: Source
   source: source
-  SOURCES: Sources
   sources: sources
-  SPECIES_LIST: Observation List
   species_list: observation list
-  SPECIES_LISTS: Observation Lists
   species_lists: observation lists
-  SpeciesList: Observation List
-  SPECIMEN: Specimen
   specimen: specimen
-  SPECIMENS: Specimens
   specimens: specimens
-  SUPPORT: Support
   support: support
-  TARGET: Target
   target: target
   target_id: target id
-  TARGET_TYPE: Target Type
-  TEST: Test
-  TEST_PAGES: Test Pages
-  THEME: Theme
-  TRANSLATION: Translation
+  target_type: target type
+  test: test
+  test_pages: test pages
+  theme: theme
   translation: translation
-  TRANSLATIONS: Translations
   translations: translations
-  URL: URL
-  USER: User
+  url: url
   user: user
-  USERS: Users
   users: users
-  USER_GROUP: User Group
   user_group: user group
-  USER_GROUPS: User Groups
   user_groups: user groups
-  VISUAL_GROUP: Visual Group
   visual_group: visual group
-  VISUAL_GROUPS: Visual Groups
   visual_groups: visual groups
-  VISUAL_MODEL: Visual Model
   visual_model: visual model
-  VISUAL_MODELS: Visual Models
   visual_models: visual models
-  WITHIN_LOCATIONS: Within Locations
   within_locations: within locations
-  VOTE: Vote
   vote: vote
-  VOTES: Votes
   votes: votes
 
   # Other common nouns.
-  ACCESSION: Accession
-  ACCESSIONS: Accessions
   accession: accession
   accessions: accessions
-  ACCOUNT: Account
   account: account
-  ACCOUNTS: Accounts
   accounts: accounts
-  ADMIN: Admin
   admin: admin
-  ADMINS: Admins
   admins: admins
-  ADMIN_GROUP: Admin Group
   admin_group: admin group
-  ADMIN_GROUPS: Admin Groups
   admin_groups: admin groups
-  ANNOTATIONS: Annotations
+  annotations: annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
-  AUTHOR: Author
   author: author
-  AUTHORS: Authors
   authors: authors
   # ("Authority" is authority on a scientific name.)
-  ALTITUDE: Elevation
   altitude: elevation
-  ALT: Alt
+  alt: alt
   # online database with nucleotide Sequence data
-  ARCHIVE: Archive
   archive: archive
-  AUTHORITY: Author
   authority: author
-  AUTHORITYS: Authors
   authoritys: authors
   # nucleotide bases of Sequences
-  BASES: Bases
   bases: bases
-  CHANGE: Change
   change: change
-  CHANGES: Changes
   changes: changes
-  CITATION: Citation
   citation: citation
-  CITATIONS: Citations
   citations: citations
-  Confidence: Confidence
-  CONFIDENCE_LEVEL: Confidence Level
+  confidence: confidence
   confidence_level: confidence level
-  CONFIDENCE_LEVELS: Confidence Levels
   confidence_levels: confidence levels
-  CONNECTED_TO: Connected to
-  CONSENSUS: Consensus
-  CONSTRAINT_VIOLATIONS: Constraint Violations
+  connected_to: connected to
+  consensus: consensus
   constraint_violations: constraint violations
-  COORDINATES: Coordinates
   coordinates: coordinates
-  COPYRIGHT_HOLDER: Copyright Holder
   copyright_holder: copyright holder
-  COPYRIGHT_HOLDERS: Copyright Holders
   copyright_holders: copyright holders
-  CORRECT_SPELLING: Correct Spelling
   correct_spelling: correct spelling
-  CORRECT_SPELLINGS: Correct Spellings
   correct_spellings: correct spellings
-  COUNTERPART: Counterpart
-  DATE: Date
+  counterpart: counterpart
   date: date
-  DATES: Dates
   dates: dates
   # deposit of Sequence Bases in an Archive
-  DEPOSIT: Deposit
   deposit: deposit
-  DETAIL: Detail
   detail: detail
   # DQA is iNat-ese for Data Quality Assessment
-  DQA: Quality Grade
-  EDITOR: Editor
+  dqa: quality grade
   editor: editor
-  EDITORS: Editors
   editors: editors
-  EMAIL: Email
   email: email
-  EMAILS: Emails
   emails: emails
-  EMAIL_ADDRESS: Email Address
   email_address: email address
-  EMAIL_ADDRESSS: Email Addresses
   email_addresss: email addresses
-  FIELD_SLIP_PREFIX: Field Slip Prefix
   field_slip_prefix: field slip prefix
-  FILENAME: Filename
-  FULL_NAME: Full Name
+  filename: filename
   full_name: full name
-  FULL_NAMES: Full Names
   full_names: full names
   hidden: hidden
-  ICN_ID: ICN Identifier
   icn_id: ICN Identifier
-  ID: ID
   id: ID
-  IDS: IDs
   ids: IDs
-  IDENTIFIER: Identifier
   identifier: identifier
-  IDENTIFIERS: Identifiers
   identifiers: identifiers
-  ID_BY: ID By
+  id_by: id by
   inaturalist: iNaturalist
   inat: iNat
-  IMPORTED: Imported
   imported: imported
-  INDEX: Index
   index: index
-  INDEXES: Indexes
   indexes: indexes
-  LATITUDE: Latitude
   latitude: latitude
-  LATITUDES: Latitudes
   latitudes: latitudes
-  LAT: Lat
-  LAT_LON: Lat/Lon
-  LOCUS: Locus
+  lat: lat
+  lat_lon: lat/lon
   locus: locus
-  LOGIN_NAME: Login Name
   login_name: login name
-  LOGIN_NAMES: Login Names
   login_names: login names
-  LONGITUDE: Longitude
   longitude: longitude
-  LONGITUDES: Longitudes
   longitudes: longitudes
-  LNG: Lng
-  MEMBER: Member
+  lng: lng
   member: member
-  MEMBERS: Members
   members: members
-  MESSAGE: Message
   message: message
-  MESSAGES: Messages
   messages: messages
-  NOTE: Note
   note: note
-  NOTES: Notes
   notes: notes
-  OBSERVED: Observed
-  OBSERVER: Observer
+  observed: observed
   observer: observer
-  OBSERVERS: Observers
   observers: observers
-  ORIGINAL: Original
-  OWNER: Owner
+  original: original
   owner: owner
-  OWNERS: Owners
   owners: owners
-  PAGES: Pages
-  PASSWORD: Password
+  pages: pages
   password: password
-  PASSWORDS: Passwords
   passwords: passwords
-  PLACE: Place
-  PREFERENCES: Preferences
+  place: place
   preferences: preferences
-  PREFERRED_NAME: Preferred Name
   preferred_name: preferred name
-  PREFERRED_NAMES: Preferred Names
   preferred_names: preferred names
-  PROFILE: Profile
   profile: profile
-  PROFILES: Profiles
   profiles: profiles
-  QUALITY: Quality
   quality: quality
-  RANK: Rank
   rank: rank
-  RANKS: Ranks
   ranks: ranks
-  REVIEWER: Reviewer
   reviewer: reviewer
-  REVIEWERS: Reviewers
   reviewers: reviewers
-  SCOPE: Scope
   scope: scope
-  SECONDS: Seconds
-  SIZE: Size
+  seconds: seconds
   size: size
-  STATUS: Status
   status: status
-  STATUSS: Statuses
   statuss: statuses
-  SUBJECT: Subject
   subject: subject
-  SUBJECTS: Subjects
   subjects: subjects
-  SUMMARY: Summary
   summary: summary
-  SUMMARYS: Summaries
   summarys: summaries
   # ("Tag" refers to a keyword, will be used to tag names and images.)
-  TAG: Tag
   tag: tag
-  TAGS: Tags
   tags: tags
-  TIME: Time
   time: time
-  TIMES: Times
   times: times
-  TITLE: Title
   title: title
-  TITLES: Titles
   titles: titles
-  UNDER_DEVELOPMENT: Under Development
-  VERSION: Version
+  under_development: under development
   version: version
-  VERSIONS: Versions
   versions: versions
 
   # (Only used by validation errors, I think.)
@@ -687,197 +486,122 @@
   password_confirmation: password confirmation
 
   # Common nouns/adjectives used as labels, never pluralized.
-  ALL: All
   all: all
-  NONE: None
   none: none
-  HIGH: High
   high: high
-  LOW: Low
   low: low
-  LESS: Less
   less: less
-  MORE: More
   more: more
-  PREV: Previous
   prev: previous
-  NEXT: Next
   next: next
-  BACK: Back
   back: back
-  FORWARD: Next
   forward: next
-  EAST: East
   east: east
-  NORTH: North
   north: north
-  SOUTH: South
   south: south
-  WEST: West
   west: west
-  PAGE: Page
+  page: page
   by_letter: By letter
-  GOTO: Go
-  MENU: Menu
-  AREA: Area
+  goto: go
+  menu: menu
+  area: area
 
   # Labels for fields answering: "What did you observe?", "When did you observe
   # it?", "Where did you observe it?", and "Who observed it?".
   # "WHERE_GROUP" is used for the whole group of lat/lng and place_name.
-  WHAT: Scientific Name
   what: scientific name
-  WHEN: When
   when: when
-  WHERE_GROUP: Where
-  where_group: where
-  WHERE: Locality
   where: locality
-  WHO: Who
   who: who
-  ENTERED_BY: Entered by
   entered_by: entered by
 
   # Common verbs/actions used as button labels.
-  ADD: Add
   add: add
   # activate an API key
-  ACTIVATE: Activate
   activate: activate
   # apply changes
-  APPLY: Apply
   apply: apply
   # approve a name
-  APPROVE: Approve
   approve: approve
   # attach an observation to a project
-  ATTACH: Attach
   attach: attach
-  CALCULATING: "Calculating ..."
   calculating: "Calculating ..."
-  CANCEL: Cancel
   cancel: cancel
   # clear a search form
-  CLEAR: Clear
   clear: clear
   # close a popup window
-  CLOSE: Close
   close: close
-  COPY_THIS_ID: "Copy this [:ID]"
-  COPY_THIS_NAME: "Copy this [:NAME]"
-  COPY_THIS_SEQUENCE: "Copy this [:SEQUENCE]"
-  COPIED: Copied
-  CREATE: Create
+  copy_this_id: "copy this [:id.ti]"
+  copy_this_name: "copy this [:name.ti]"
+  copy_this_sequence: "copy this [:sequence.ti]"
+  copied: copied
   create: create
-  DEFINE: Define
   define: define
-  DELETE: Delete
   delete: delete
   # deprecate a name
-  DEPRECATE: Deprecate
   deprecate: deprecate
   # destroy an observation or other object
-  DESTROY: Destroy
   destroy: destroy
-  DISABLE: Disable
   disable: disable
   download: download
-  DOWNLOAD: Download
-  EDIT: Edit
   edit: edit
-  ENABLE: Enable
   enable: enable
-  EXCLUDE: Exclude
   exclude: exclude
-  IMPORT: Import
-  INDEX_OBJECT: "[TYPE] [:INDEX]"
+  import: import
+  index_object: "[TYPE] [:index.ti]"
   # merge one object into another
-  MERGE: Merge
   merge: merge
-  NEXT_OBJECT: "[:NEXT] [TYPE]"
-  OKAY: Okay
+  next_object: "[:next.ti] [TYPE]"
   okay: okay
-  OPEN: Open
+  open: open
   pattern: pattern
-  PATTERN: Pattern
   # reload a form
-  PREV_OBJECT: "[:PREV] [TYPE]"
-  RELOAD: Reload
+  prev_object: "[:prev.ti] [TYPE]"
   reload: reload
   # remove an image from an observation, or an observation from a project
-  REMOVE: Remove
   remove: remove
-  SAVE: Save
   save: save
-  SAVE_CHANGES: Save Changes
   save_changes: save changes
-  SAVE_EDITS: Save Edits
   save_edits: save edits
-  SAVING: Saving
-  SEARCH: Search
+  saving: saving
   search: search
-  SEARCHES: Searches
-  SEND: Send
+  searches: searches
   send: send
-  SHOW: Show
   show: show
-  HIDE: Hide
   hide: hide
   # submit a form
-  SUBMIT: Submit
   submit: submit
-  SUBMITTING: Submitting
-  UPDATE: Update
+  submitting: submitting
   update: update
-  UPDATING: Updating
+  updating: updating
   # upload an image or checklist
-  UPLOAD: Upload
   upload: upload
-  USE: Use
   use: use
-  RECORD: Record
-  IDENTIFY: Identify
-  ADD_TO: Add to
-  ADD_ALL: Add All
-  SKIP: Skip
+  record: record
+  identify: identify
+  add_to: add to
+  add_all: add all
+  skip: skip
 
   # Common adjectives.
-  ANONYMOUS: Anonymous
   anonymous: anonymous
-  BY: By
   by: by
-  CREATED: Created
   created: created
-  CREATED_AT: Created at
   created_at: created at
-  DESTROYED: Destroyed
   destroyed: destroyed
-  FILTERED: Filtered
   filtered: filtered
-  IGNORING: Ignoring
   ignoring: ignoring
-  MODIFIED: Modified
   modified: modified
-  NEW: New
   new: new
-  OPTIONAL: Optional
   optional: optional
-  REPORT: Report
   report: report
-  REPORTS: Reports
   reports: reports
-  REQUIRED: Required
   required: required
-  RESULTS: Results
   results: results
-  TRACKING: Tracking
   tracking: tracking
-  UPDATED: Updated
   updated: updated
-  UPDATED_AT: Updated at
   updated_at: updated at
-  VIEWED: Viewed
   viewed: viewed
-  WATCHING: Watching
   watching: watching
 
   # Common adjectives describing species names. (Note: "approved" seems to be
@@ -885,48 +609,35 @@
   # scientific community accepts this name as correct. "Reviewed" on the
   # other hand indicates that a user in the "reviewers" group has looked at
   # an object and didn't see any obvious mistakes.)
-  APPROVED: Approved
   approved: approved
-  ACCEPTED: Accepted
   accepted: accepted
-  DEPRECATED: Deprecated
   deprecated: deprecated
-  MISSPELLED: Misspelt
   misspelled: misspelt
-  NOT_MISSPELLED: Spelled Correctly
   not_misspelled: spelled correctly
-  REVIEWED: Reviewed
   reviewed: reviewed
-  UNKNOWN: Unknown
   unknown: unknown
 
   # Permission states: restricted means access is restricted but the current user
   # has access; private means the current user does not have access; default means
   # this is the default description that shows up on the show_name/location page
   # (synonyms that might work better are "principle" or "main" or "official").
-  PRIVATE: Private
   private: private
-  PUBLIC: Public
   public: public
-  RESTRICTED: Restricted
   restricted: restricted
-  DEFAULT: Default
   default: default
 
   # Common verbs/actions with objects.
   add_object: Add [TYPE]
   add_objects: Add [TYPES]
   all_objects: All [TYPES]
-  cancel_and_create: "[:CANCEL] ([:CREATE] [TYPE])"
+  cancel_and_create: "[:cancel.ti] ([:create.ti] [TYPE])"
   cancel_and_show: Cancel (Show [TYPE])
-  cancel_to_index: "[:CANCEL] ([TYPE] [:INDEX])"
+  cancel_to_index: "[:cancel.ti] ([TYPE] [:index.ti])"
   new_object: New [TYPE]
   create_object: Create [TYPE]
   destroy_object: Destroy [TYPE]
   edit_object: Edit [TYPE]
   list_objects: List [TYPES]
-  remove_object: Remove [TYPE]
-  remove_objects: Remove [TYPES]
   update_object: Update [TYPE]
   show_all: Show All
   map_all: Map All
@@ -937,7 +648,6 @@
   map_legend_tentative: Tentative
   map_legend_disputed: Disputed (≤0%)
   map_legend_mixed: Mixed consensus
-  map_legend_location_only: Location only (no observations)
   map_cap_banner: Showing the first [loaded] of [total] observations. Zoom in or narrow your filter to see the rest.
   show_location: Show [LOCATION]
   show_location_description: Show [DESCRIPTION]
@@ -947,23 +657,20 @@
   show_name_description: Show [DESCRIPTION]
   show_object: Show [TYPE]
   show_objects: Show [TYPES]
-  sort_by_object: Sort by [TYPE]
   search_object: Search [TYPE]
 
   # Other generic phrases.
   added_to_list: Added observation to "[list]".
   attached_to_project: Attached [object] to "[project]".
-  and_num_more: And [num] more...
   are_you_sure: Are you sure?
   opens_in_new_tab: Opens in a new tab
   click_for_map: Click for map
-  CREATED_BY: Created by
-  EDITING: Editing
+  created_by: created by
+  editing: editing
   google_images: Google Images
-  MAXIMUM: Maximum
+  maximum: maximum
   on_mo: On MO
   on_the_web: On the web
-  on_site: On [site]
   project_first_collection: "**First collection of \"[name]\" for \"[project]\". Consider vouchering!**"
   project_count_collections: "[count] collections of \"[name]\" for \"[project]\"."
   show_on_map: Show on map
@@ -974,14 +681,11 @@
   removed_from_project: Removed [object] from "[project]".
   select_file: Select or drop files...
   no_file_selected: No file selected.
-  SEE_MESSAGE_BELOW: See message below.
-  "YES": "Yes"
-  "NO": "No"
+  see_message_below: See message below.
   "yes": "yes"
   "no": "no"
-  TO: To
   to: to
-  OK: OK
+  ok: ok
 
   ##############################################################################
 
@@ -1037,134 +741,88 @@
   # Name/location description types. These are used as page title and in index
   # results -- must include both the type of description and the title of the
   # object ([object]) they're describing.
-  description_full_title_public: Public [:DESCRIPTION] of [object]
-  description_full_title_foreign: "[:DESCRIPTION] of [object] from [text]"
+  description_full_title_public: Public [:description.ti] of [object]
+  description_full_title_foreign: "[:description.ti] of [object] from [text]"
   description_full_title_project: Draft of [object] for [text] by [user]
-  description_full_title_source: "[:DESCRIPTION] of [object] from [text]"
-  description_full_title_user: "[USER]'s [:DESCRIPTION] of [object]"
+  description_full_title_source: "[:description.ti] of [object] from [text]"
+  description_full_title_user: "[USER]'s [:description.ti] of [object]"
 
   # Name/location description types. These are used when listing the available
   # descriptions in the show_name page.
-  description_part_title_public: Public [:DESCRIPTION]
-  description_part_title_user: "[USER]'s [:DESCRIPTION]"
+  description_part_title_public: Public [:description.ti]
+  description_part_title_user: "[USER]'s [:description.ti]"
   description_part_title_project: "[USER]'s Draft"
-  description_part_title_source: "[:DESCRIPTION]"
-  description_part_title_foreign: "[:DESCRIPTION]"
+  description_part_title_source: "[:description.ti]"
+  description_part_title_foreign: "[:description.ti]"
 
   # Name/location description types. These are used when listing the available
   # descriptions in the show_name page, but this time the optional text field was
   # filled in. Note that the text field is not optional for half of the source
   # types.
   description_part_title_public_with_text: "[TEXT]"
-  description_part_title_foreign_with_text: "[:DESCRIPTION] From [TEXT]"
+  description_part_title_foreign_with_text: "[:description.ti] From [TEXT]"
   description_part_title_project_with_text: Draft for [TEXT] by [USER]
-  description_part_title_source_with_text: "[:DESCRIPTION] From [TEXT]"
+  description_part_title_source_with_text: "[:description.ti] From [TEXT]"
   description_part_title_user_with_text: "[TEXT] by [USER]"
 
   # Footers -- "Created: [date]", "By: [user]", "Obs Created: 2008-11-03", etc.
-  footer_created_at: "*[:Created]:* [date]"
-  footer_created_by: "*[:Created]:* [date] *by* [user]"
-  footer_updated_at: "*[:Modified]:* [date]"
-  footer_updated_by: "*[:Modified]:* [date] *by* [user]"
+  footer_created_at: "*[:created.ti]:* [date]"
+  footer_created_by: "*[:created.ti]:* [date] *by* [user]"
+  footer_updated_at: "*[:modified.ti]:* [date]"
+  footer_updated_by: "*[:modified.ti]:* [date] *by* [user]"
   footer_last_updated_at: "*Last [:modified]:* [date]"
   footer_last_updated_by: "*Last [:modified]:* [date] *by* [user]"
-  footer_viewed: "*[:Viewed]:* [times], *last [:viewed]:* [date]"
+  footer_viewed: "*[:viewed.ti]:* [times], *last [:viewed]:* [date]"
   footer_last_you_viewed: "*Last viewed by you:* [date]"
   footer_never: never
-  footer_version_out_of: "*[:Version]:* [num] *of* [total]"
+  footer_version_out_of: "*[:version.ti]:* [num] *of* [total]"
 
   # Taxonomic ranks.
-  RANK_DOMAIN: Domain
   rank_domain: domain
-  RANK_PLURAL_DOMAIN: Domain
   rank_plural_domain: domain
-  RANK_KINGDOM: Kingdom
   rank_kingdom: kingdom
-  RANK_PLURAL_KINGDOM: Kingdoms
   rank_plural_kingdom: kingdoms
-  RANK_PHYLUM: Phylum
   rank_phylum: phylum
-  RANK_PLURAL_PHYLUM: Phyla
   rank_plural_phylum: phyla
-  RANK_SUBPHYLUM: Subphylum
   rank_subphylum: subphylum
-  RANK_PLURAL_SUBPHYLUM: Subphyla
   rank_plural_subphylum: subphyla
-  RANK_CLASS: Class
   rank_class: class
-  RANK_PLURAL_CLASS: Classes
   rank_plural_class: classes
-  RANK_SUBCLASS: Subclass
   rank_subclass: subclass
-  RANK_PLURAL_SUBCLASS: Subclasses
   rank_plural_subclass: subclasses
-  RANK_ORDER: Order
   rank_order: order
-  RANK_PLURAL_ORDER: Orders
   rank_plural_order: orders
-  RANK_SUBORDER: Suborder
   rank_suborder: suborder
-  RANK_PLURAL_SUBORDER: Suborders
   rank_plural_suborder: suborders
-  RANK_FAMILY: Family
   rank_family: family
-  RANK_PLURAL_FAMILY: Families
   rank_plural_family: families
-  RANK_SUBFAMILY: Subfamily
   rank_subfamily: subfamily
-  RANK_PLURAL_SUBFAMILY: Subfamilies
   rank_plural_subfamily: subfamilies
-  RANK_TRIBE: Tribe
   rank_tribe: tribe
-  RANK_PLURAL_TRIBE: Tribes
   rank_plural_tribe: tribes
-  RANK_SUBTRIBE: Subtribe
   rank_subtribe: subtribe
-  RANK_PLURAL_SUBTRIBE: Subtribes
   rank_plural_subtribe: subtribes
-  RANK_GENUS: Genus
   rank_genus: genus
-  RANK_PLURAL_GENUS: Genera
   rank_plural_genus: genera
-  RANK_SUBGENUS: Subgenus
   rank_subgenus: subgenus
-  RANK_PLURAL_SUBGENUS: Subgenera
   rank_plural_subgenus: subgenera
-  RANK_SECTION: Section
   rank_section: section
-  RANK_PLURAL_SECTION: Sections
   rank_plural_section: sections
-  RANK_SUBSECTION: Subsection
   rank_subsection: subsection
-  RANK_PLURAL_SUBSECTION: Subsections
   rank_plural_subsection: subsections
-  RANK_STIRPS: Stirps
   rank_stirps: stirps
-  RANK_PLURAL_STIRPS: Stirpes
   rank_plural_stirps: stirpes
-  RANK_SERIES: Series
   rank_series: series
-  RANK_PLURAL_SERIES: Series
   rank_plural_series: series
-  RANK_SPECIES: Species
   rank_species: species
-  RANK_PLURAL_SPECIES: Species
   rank_plural_species: species
-  RANK_SUBSPECIES: Subspecies
   rank_subspecies: subspecies
-  RANK_PLURAL_SUBSPECIES: Subspecies
   rank_plural_subspecies: subspecies
-  RANK_VARIETY: Variety
   rank_variety: variety
-  RANK_PLURAL_VARIETY: Varieties
   rank_plural_variety: varieties
-  RANK_FORM: Form
   rank_form: form
-  RANK_PLURAL_FORM: Forms
   rank_plural_form: forms
-  RANK_GROUP: Group or Clade
   rank_group: group or clade
-  RANK_PLURAL_GROUP: Groups or Clades
   rank_plural_group: groups or clades
 
   # These two are used when parsing rank, e.g., in name pattern search.
@@ -1172,54 +830,54 @@
   rank_alt_group: group, clade, complex
 
   # User statistics field names.
-  user_stats_comments: "[:COMMENTS]"
+  user_stats_comments: "[:comments.ti]"
   user_stats_contributing_users: ""
-  user_stats_images: "[:IMAGES]"
-  user_stats_location_description_authors: "[:LOCATION_DESCRIPTIONS] Authored"
-  user_stats_location_description_editors: "[:LOCATION_DESCRIPTIONS] Edited"
-  user_stats_locations: "[:LOCATIONS] Created"
-  user_stats_location_versions: "[:LOCATIONS] Edited"
-  user_stats_name_description_authors: "[:NAME_DESCRIPTIONS] Authored"
-  user_stats_name_description_editors: "[:NAME_DESCRIPTIONS] Edited"
-  user_stats_names: "[:NAMES] Created"
-  user_stats_name_versions: "[:NAMES] Edited"
+  user_stats_images: "[:images.ti]"
+  user_stats_location_description_authors: "[:location_descriptions.ti] Authored"
+  user_stats_location_description_editors: "[:location_descriptions.ti] Edited"
+  user_stats_locations: "[:locations.ti] Created"
+  user_stats_location_versions: "[:locations.ti] Edited"
+  user_stats_name_description_authors: "[:name_descriptions.ti] Authored"
+  user_stats_name_description_editors: "[:name_descriptions.ti] Edited"
+  user_stats_names: "[:names.ti] Created"
+  user_stats_name_versions: "[:names.ti] Edited"
   user_stats_namings: Proposed IDs
-  user_stats_observations: "[:OBSERVATIONS]"
+  user_stats_observations: "[:observations.ti]"
   user_stats_observations_with_voucher: Observations with Specimen, Notes and Images
   user_stats_observations_without_voucher: All Other Observations
   user_stats_sequences: ""
   user_stats_sequenced_observations: ""
-  user_stats_species_list_entries: "[:SPECIES_LIST] Entries"
-  user_stats_species_lists: "[:SPECIES_LISTS]"
+  user_stats_species_list_entries: "[:species_list.ti] Entries"
+  user_stats_species_lists: "[:species_lists.ti]"
   user_stats_users: ""
-  user_stats_votes: "[:VOTES]"
-  user_stats_translation_strings: "[:TRANSLATIONS] Authored"
-  user_stats_languages: "[:TRANSLATIONS] By Language"
+  user_stats_votes: "[:votes.ti]"
+  user_stats_translation_strings: "[:translations.ti] Authored"
+  user_stats_languages: "[:translations.ti] By Language"
 
   # Site statistics field names.
-  site_stats_comments: "[:COMMENTS]"
+  site_stats_comments: "[:comments.ti]"
   site_stats_contributing_users: Contributing Users
-  site_stats_images: "[:IMAGES]"
+  site_stats_images: "[:images.ti]"
   site_stats_listed_taxa: Listed Taxa
-  site_stats_location_description_authors: Authored [:LOCATION_DESCRIPTIONS]
+  site_stats_location_description_authors: Authored [:location_descriptions.ti]
   site_stats_location_description_editors: ""
-  site_stats_locations: Defined [:LOCATIONS]
+  site_stats_locations: Defined [:locations.ti]
   site_stats_location_versions: ""
-  site_stats_name_description_authors: Authored [:NAME_DESCRIPTIONS]
+  site_stats_name_description_authors: Authored [:name_descriptions.ti]
   site_stats_name_description_editors: ""
   site_stats_names: ""
   site_stats_name_versions: ""
   site_stats_namings: Proposed IDs
-  site_stats_observations: "[:OBSERVATIONS]"
+  site_stats_observations: "[:observations.ti]"
   site_stats_observations_with_voucher: Observations with Full Data
   site_stats_observations_without_voucher: Other Observations
   site_stats_observed_taxa: Observed Taxa
-  site_stats_sequences: "[:SEQUENCES]"
+  site_stats_sequences: "[:sequences.ti]"
   site_stats_sequenced_observations: Sequenced Observations
-  site_stats_species_list_entries: "[:SPECIES_LIST] Entries"
-  site_stats_species_lists: "[:SPECIES_LISTS]"
+  site_stats_species_list_entries: "[:species_list.ti] Entries"
+  site_stats_species_lists: "[:species_lists.ti]"
   site_stats_users: Users
-  site_stats_votes: "[:VOTES]"
+  site_stats_votes: "[:votes.ti]"
 
   # Vote descriptions.
   vote_no_opinion: No Opinion
@@ -1229,27 +887,8 @@
   vote_confidence_40: Doubtful
   vote_confidence_20: Not Likely
   vote_confidence_0: As If!
-  vote_agreement_100: I'd Call It That
-  vote_agreement_80: Promising
-  vote_agreement_60: Could Be
-  vote_agreement_40: Doubtful
-  vote_agreement_20: Not Likely
-  vote_agreement_0: As If!
 
   # Time quantities.
-  time_just_seconds_ago: seconds ago
-  time_one_minute_ago: a minute ago
-  time_minutes_ago: "[n] minutes ago"
-  time_one_hour_ago: an hour ago
-  time_hours_ago: "[n] hours ago"
-  time_one_day_ago: yesterday
-  time_days_ago: "[n] days ago, [date]"
-  time_one_week_ago: last week, [date]
-  time_weeks_ago: "[n] weeks ago, [date]"
-  time_one_month_ago: last month, [date]
-  time_months_ago: "[n] months ago, [date]"
-  time_one_year_ago: last year, [date]
-  time_years_ago: "[n] years ago, [date]"
 
   # Lifeform "tags".
   lifeform_basidiolichen: Basidiolichen
@@ -1317,16 +956,16 @@
   search_term_west: west
 
   # These are for search forms and should recycle other translations
-  search_term_group_pattern: "[:PATTERN]"
-  search_term_group_search: "[:SEARCH]"
-  search_term_group_dates: "[:DATES]"
-  search_term_group_quality: "[:QUALITY]"
-  search_term_group_scope: "[:SCOPE]"
-  search_term_group_detail: "[:DETAIL]"
-  search_term_group_name: "[:NAME]"
-  search_term_group_location: "[:LOCATION]"
-  search_term_group_connected: "[:CONNECTED_TO]"
-  search_term_group_area: "[:AREA]"
+  search_term_group_pattern: "[:pattern.ti]"
+  search_term_group_search: "[:search.ti]"
+  search_term_group_dates: "[:dates.ti]"
+  search_term_group_quality: "[:quality.ti]"
+  search_term_group_scope: "[:scope.ti]"
+  search_term_group_detail: "[:detail.ti]"
+  search_term_group_name: "[:name.ti]"
+  search_term_group_location: "[:location.ti]"
+  search_term_group_connected: "[:connected_to.ti]"
+  search_term_group_area: "[:area.ti]"
 
   # Words recognized in search bar.
   # e.g. "user:me"
@@ -1506,28 +1145,22 @@
   app_privacy_policy: Privacy Policy
   app_donate: Donate
   app_send_a_comment: Send a Comment
-  app_index_a_z: "[:INDEXES]: [:NAMES]"
   app_list_locations: "[:list_objects(type=:location)]"
   app_list_projects: "[:list_objects(type=:project)]"
   app_latest: Latest
   app_latest_changes: Changes by Users
-  app_newest_images: "[:IMAGES]"
-  app_comments: "[:COMMENTS]"
-  app_observations_left: "[:OBSERVATIONS]"
+  app_newest_images: "[:images.ti]"
+  app_comments: "[:comments.ti]"
+  app_observations_left: "[:observations.ti]"
   app_create_observation: "[:create_object(type=:observation)]"
   app_help_id_obs: Help Identify
-  app_sort_by_date_obs: "[:sort_by_object(type=:date)]"
-  app_sort_by: "[:sort_by_object(type=order)]"
-  app_species_list: "[:SPECIES_LISTS]"
+  app_species_list: "[:species_lists.ti]"
   app_create_list: Create List
-  app_sort_by_date_spl: "[:sort_by_object(type=:date)]"
-  app_sort_by_title: "[:sort_by_object(type=:title)]"
   app_account: Account
   app_all_lists: All Lists
   app_login: Login
   app_login_reminder: Login or create an account to access more fungal content
   app_create_account: Create Account
-  app_current_user: Current User
   app_comments_for_you: Comments for You
   app_mobile: Get Mobile App
   app_qrcode: Enter Field Slip Code
@@ -1538,7 +1171,6 @@
   app_your_summary: Your Summary
   app_preferences: Preferences
   app_life_list: Life List
-  app_checklist: Checklist
   app_join_mailing_list: Join Mailing List
   app_logout: Logout
   app_admin: Admin
@@ -1546,28 +1178,19 @@
   app_blocked_ips: Blocked IPs
   app_switch_users: Switch Users
   app_users: "[:list_objects(type=:user)]"
-  app_email_all_users: Email All Users
-  app_add_to_group: Add to Group
   app_turn_admin_on: Turn on Admin Mode
   app_turn_admin_off: Turn off Admin Mode
   app_languages: Languages
   app_contributors: Contributors
   app_site_stats: Site Stats
-  app_colors_from: Colors from [theme]
-  app_powered_by: Powered by
-  app_preferred_browser: Preferred browser
-  app_feature_tracker: Feature Tracker
   app_publications: Publications
   app_more: More
-  app_other: Other
   app_report_a_bug: Report a Bug
 
   # This is for the search bar at the top of every page.
   app_find: Find
   app_search: Search
   app_search_google: Site (via google)
-  app_timer: "time: [seconds] sec"
-  app_index_timer: "[num] results in [seconds] sec"
   app_context_actions: Actions
 
   # This shows up at the bottom of every page. We recommend something like: \n
@@ -1578,10 +1201,6 @@
   app_edit_translations_on_page: Edit Translations on this Page
 
   # These are general alerts that appear near the top of the page.
-  app_no_ajax: Your Browser Is Out of Date
-  app_no_browser: We Don't Recognize Your Browser
-  app_no_javascript: Javascript Is Disabled
-  app_no_session: You Have Cookies Disabled
 
   # Title of the RSS auto-discovery link in the HTML header section.
   app_rss: "[:app_title] RSS"
@@ -1596,13 +1215,13 @@
 
   # emails/ask_observation_question
   ask_observation_question_title: Question about [name]
-  ask_observation_question_label: Enter your question below. When you hit "[:SEND]" it will be emailed to [user]. The email will automatically include a link to this observation as well as your email address.
+  ask_observation_question_label: Enter your question below. When you hit "[:send.ti]" it will be emailed to [user]. The email will automatically include a link to this observation as well as your email address.
 
   # emails/ask_user_question
   ask_user_question_title: Email Message for [user]
-  ask_user_question_label: Enter your question below. When you hit "[:SEND]" it will be emailed to [user]. The email will include your email address as the 'Reply To' address.
-  ask_user_question_message: "[:Message]"
-  ask_user_question_subject: "[:Subject]"
+  ask_user_question_label: Enter your question below. When you hit "[:send.ti]" it will be emailed to [user]. The email will include your email address as the 'Reply To' address.
+  ask_user_question_message: "[:message.ti]"
+  ask_user_question_subject: "[:subject.ti]"
 
   # admin/emails/webmaster_question
   ask_webmaster_title: Email Question or Comment
@@ -1624,17 +1243,17 @@
 
   # comments/show
   comment_show_title: Comment on [Name]
-  comment_show_created_at: "[:Created]"
-  comment_show_by: "[:By]"
-  comment_show_summary: "[:Summary]"
-  comment_show_comment: "[:Comment]"
+  comment_show_created_at: "[:created.ti]"
+  comment_show_by: "[:by.ti]"
+  comment_show_summary: "[:summary.ti]"
+  comment_show_comment: "[:comment.ti]"
   comment_show_show: "[:show_object]"
-  comment_show_edit: "[:EDIT]"
-  comment_show_destroy: "[:DESTROY]"
+  comment_show_edit: "[:edit.ti]"
+  comment_show_destroy: "[:destroy.ti]"
 
   # emails/commercial_inquiry
   commercial_inquiry_title: Commercial Inquiry About [name]
-  commercial_inquiry_header: Enter your commercial inquiry about this image. When you hit "[:SEND]" it will be emailed to [user]. The email will automatically include a link to this image as well as your email address.
+  commercial_inquiry_header: Enter your commercial inquiry about this image. When you hit "[:send.ti]" it will be emailed to [user]. The email will automatically include a link to this image as well as your email address.
 
   # locations/descriptions/new
   create_location_description_title: "[:create_name_description_title]"
@@ -1646,7 +1265,6 @@
 
   # names/new
   create_name_multiple_names_match: There are already multiple names matching "[str]".
-  create_name_duplicate_identifier: is used by another Name
 
   # sequences/show
   show_sequence_title: "Sequence for Observation #[id]"
@@ -1660,7 +1278,6 @@
   unknown_user_name: "?"
 
   # observations/identify
-  obs_needing_id: Needing Identification
   obs_needing_id_intro: "Here you can quickly scan unidentified observations, propose a name, or vote on a current name. Use the search bar above to filter by location, taxon or user.\n\nIf you feel you can't improve on an identification, \"[:mark_as_reviewed]\" and it won't come up again. (It will still appear for others.)\n\n*\"Lightbox\" shortcuts:*\n&lsqb;&larr;&rsqb; &lsqb;&rarr;&rsqb; move between observations, &lsqb;return&rsqb; propose a name, &lsqb;/&rsqb; mark as reviewed."
   mark_as_reviewed: Mark as reviewed
   marked_as_reviewed: Marked as reviewed
@@ -1673,7 +1290,6 @@
 
   # observations/download_observations
   download_observations_title: Download Observations
-  download_observations_back: Cancel (Back to Index)
   download_observations_format: Choose format
   download_observations_raw: CSV spreadsheet
   download_observations_adolf: The Adolf Special™
@@ -1709,14 +1325,13 @@
   propagate_lifeform_remove: Check boxes of categories to remove from all subtaxa.
 
   # observations/edit_naming
-  edit_naming_title: "Edit [:NAMING] for Observation #[id]"
+  edit_naming_title: "Edit [:naming.ti] for Observation #[id]"
 
   # observations/edit
   edit_observation_turn_off_specimen_with_records_present: You just told us there is no longer a specimen available. Don't forget to remove the corresponding collection numbers, fungarium records and/or sequences below, too, if you need to.
 
   # account/email_new_password
   email_new_password_title: Email New Password
-  email_new_password_login: Login
 
   # observer/email_merge_request
   email_merge_request_title: Send [TYPE] Merge Request
@@ -1730,16 +1345,16 @@
   email_change_name_request_success: Your request has been sent. Thank you!
 
   # comments/_form_comments
-  form_comments_comment: "[:Comment]"
-  form_comments_summary: "[:Summary]"
+  form_comments_comment: "[:comment.ti]"
+  form_comments_summary: "[:summary.ti]"
 
   # shared/_fields_for_description
-  form_description_source: "[:SOURCE]"
+  form_description_source: "[:source.ti]"
   form_description_source_public: Public [:app_title] Description
   form_description_source_foreign: From Another [:app_title] Server
-  form_description_source_project: "[:PROJECT]"
+  form_description_source_project: "[:project.ti]"
   form_description_source_source: Independent Source
-  form_description_source_user: "[:USER]"
+  form_description_source_user: "[:user.ti]"
   form_description_permissions: Permissions
   form_description_public_writable: Modifiable by the general public.
   form_description_public_readable: Visible to the general public.
@@ -1752,7 +1367,7 @@
   form_images_when_help: Date the photograph or drawing was created.
   form_images_notes: Image notes
   form_images_notes_help: Enter notes that are specific to this particular image.
-  form_images_copyright_holder: "[:COPYRIGHT_HOLDER]"
+  form_images_copyright_holder: "[:copyright_holder.ti]"
   form_images_original_name: Original file name
   form_images_license_help: Select "license":/info/how_to_use#license you want to give for this image.
   form_images_project_help: Check any projects you wish to attach this image to.
@@ -1773,7 +1388,7 @@
   form_locations_gen_desc: General Description
   form_locations_ecology: Habitat Description
   form_locations_species: Interesting Species
-  form_locations_notes: "[:Notes]"
+  form_locations_notes: "[:notes.ti]"
   form_locations_refs: "[:form_names_refs]"
   form_locations_refs_help: "[:form_names_refs_help]"
   form_locations_help: Here you can define the place where you observed mushrooms, if a matching place doesn't exist in Mushroom Observer already. Please try to define locations that will be reusable by yourself or others. If you have an idea of the location's name, you can start typing and Google will return its best guess of the place you typed, and draw a box of the approximate boundaries on the map. At this point, you can manually edit both the boundaries and the name of the place. <a href="/locations/help" target="_new">More about Locations on MO.</a>
@@ -1807,8 +1422,8 @@
   form_names_uses: Uses
   form_names_notes: Notes
   form_names_refs: References
-  form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:RANK]</b> “[:RANK_GROUP]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
-  form_names_author_help: "Include the author using <a href=\"https://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:Authority]</b> may also include “sensu” and/or -- for a name that is not a <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/legitimate+name\">legitimate name</a> -- status information. E.g.: <br/>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br/>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
+  form_names_text_name_help: "Unformatted taxon name <i>without</i> author info or status info. E.g.: <br>&nbsp;&nbsp; Amanita muscaria var. flavivolvata <br>For a <b>group or clade</b>, select <b>[:rank.ti]</b> “[:rank_group.ti]” above, and add either “group” or “clade” at the end of <b>[:form_names_text_name]</b>. E.g.: <br>&nbsp;&nbsp; Amanita muscaria group <br>&nbsp;&nbsp; Morchella elata clade"
+  form_names_author_help: "Include the author using <a href=\"https://www.iapt-taxon.org/nomen/main.php?page=art46\" target=\"_new\">ICN</a> format. <b>[:authority.ti]</b> may also include “sensu” and/or -- for a name that is not a <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/legitimate+name\">legitimate name</a> -- status information. E.g.: <br/>&nbsp;&nbsp; (Singer) Jenkins <br>&nbsp;&nbsp; sensu Ginns <br/>&nbsp;&nbsp; N. Siegel & C.F. Schwarz nom. prov."
   form_names_citation_help: "Citation for the <a href=\"https://mushroomobserver.org/lookups/lookup_glossary_term/protologue\">protologue</a> of this name. Include the name of the journal, volume, number, the page where the protologue begins, and year.<br/> Omit “in”, title of the article, author(s).<br>&nbsp;&nbsp; Good: Brittonia 48(4): 489 (1996)<br>&nbsp;&nbsp; Bad: Halling, R.E. 1996. Notes on Collybia. V. Gymnopus section Levipedes in tropical South America with comments on Collybia. Brittonia. 48(4):487-494 <br/>"
   form_names_citation_textilize_note: Citations can be formatted using the <a href="/info/textile_sandbox/new" target="_new">Textile markup system</a>.
   form_names_misspelling_note: If this name is misspelt, please check the box and enter the correct spelling. *NOTE:* Please do not use this to deprecate correctly-spelled synonyms.
@@ -1831,13 +1446,13 @@
   form_naming_valid_synonyms: Preferred synonyms are
   form_naming_deprecated: The name '[name]' is deprecated.
   form_naming_not_recognized: MO does not recognize the name '[name]'.
-  form_naming_what_missing: "[:WHAT] missing"
+  form_naming_what_missing: "[:what.ti] missing"
   form_naming_parent_deprecated: The [rank] [parent] is deprecated.
   form_naming_name_help: The **scientific name** (without author) that identifies this Observation.
   form_naming_name_help_leave_blank: The **scientific name** (without author) that identifies this Observation. **Leave this field blank if you don't know the scientific name.**
-  form_naming_deprecated_help: Select a Prefered synonym, enter another Name, or click '[button]' to use '[name]'.
+  form_naming_deprecated_help: Select a Prefered synonym, enter another Name, or click '[BUTTON]' to use '[name]'.
   form_naming_correct_help: Did you mean one of the following names? [:form_naming_deprecated_help]
-  form_naming_not_recognized_help: "To proceed: Edit the name to be a correctly spelled scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[button]'."
+  form_naming_not_recognized_help: "To proceed: Edit the name to be a correctly spelled scientific name\n(or -- if you are creating an Observation -- erase the name).\nThen click '[BUTTON]'."
   form_naming_multiple_names: Multiple names match '[name]'. Select the one you intended.
   form_naming_multiple_names_help: The number after each name is how many observations are currently using that name.
   form_naming_confidence_help: How confident are you of this identification? Please justify how you arrived at your decision in the boxes below, as well.
@@ -1854,28 +1469,33 @@
   form_observations_uploading_images: Uploading [:images]
   form_observations_upload_another: Upload another...
   form_observations_creating_observation: Creating [:observation]
-  form_observations_edit_image: "[:EDIT] [:image]"
-  form_observations_remove_image: "[:REMOVE] [:image]"
-  form_observations_lat_long_help: "Optional GPS location within **[:WHERE]**. Latitude must be -90.0 to 90.0; longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
+  form_observations_edit_image: "[:edit.ti] [:image]"
+  form_observations_remove_image: "[:remove.ti] [:image]"
+  form_observations_lat_long_help: "Optional GPS location within **[:where.ti]**. Latitude must be -90.0 to 90.0; longitude must be -180.0 to 180.0. Elevation will be converted to meters. If you choose to provide this data please make it as accurate as possible. Examples: \"34.1164\" = \"34°6&apos;59&quot;N\", \"-118.1459\" = \"118 8.754 W\", \"239 m\" = \"784 ft.\""
   form_observations_collector_help: Who collected this specimen. Defaults to you; change it when you are entering an observation on someone else's behalf (e.g. recording foray collections).
   form_observations_log_change: Log Change
   form_observations_is_collection_location_help: Check when the location is where the mushroom was growing. Uncheck when it is only where the mushroom was seen (e.g., mushroom fairs, grocery, foray id table where collection location is unknown etc.).
-  form_observations_open_map: "[:SHOW] [:map]"
-  form_observations_hide_map: "[:HIDE] [:map]"
-  form_observations_clear_map: "[:CLEAR] [:location]"
+  form_observations_open_map: "[:show.ti] [:map]"
+  form_observations_hide_map: "[:hide.ti] [:map]"
+  form_observations_clear_map: "[:clear.ti] [:location]"
   form_observations_click_point: "Tip: select a locality to center the map, then click a point on the map to set a location. If you're defining a new locality, click \"Use these bounds\" so you can select a point within."
-  form_observations_locality_contains: "[:LOCALITIES] containing this point"
-  form_observations_create_locality: "[:NEW] [:locality]"
+  form_observations_locality_contains: "[:localities.ti] containing this point"
+  form_observations_create_locality: "[:new.ti] [:locality]"
   form_observations_use_locality: Use these bounds and select a point within
-  form_observations_edit_locality: "[:EDIT] this [:locality]"
+  form_observations_edit_locality: "[:edit.ti] this [:locality]"
   form_observations_notes_help: Please include any additional information you can think of about this observation that isn't clear from the photographs, e.g., habitat, substrate or nearby trees; distinctive texture, scent, taste, staining or bruising; results of chemical or microscopic analyses, etc.
+  form_observations_notes_inherited_help: Some of these notes are shared with other observations of the same occurrence. For each, click a value to use it — This Observation's own or another observation's — or Inherit to show the value from the others, Hide to show nothing, or All to combine them.
+  form_observations_notes_inherit: Inherit
+  form_observations_notes_hide: Hide
+  form_observations_notes_all: All
+  form_observations_notes_this_observation: This Observation
   form_observations_remove_image_confirm: Are you sure you want to remove this image? This will only remove this image from this observation. If it is attached to other observations, it will remain attached to them.
   form_observations_specimen_available_help: Check when there is a preserved specimen available for further study.
   form_observations_upload_help: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation.
   form_observations_upload_help_multi_select: Use the checkboxes on the left to select the image you would like to use as the thumbnail for this observation. In the file select dialog you can select multiple images at a time. You can also continue to add additional images by clicking the button below.
   form_observations_where_help: "Place where the Observation was made. **In the US this should be at least as precise as the county.**\n&nbsp;\nInclude administrative divisons ordered from smallest to largest, ending with the full name of the country, except use 'USA' for the United States of America.\nExamples:\n&nbsp;&nbsp; [loc1]\n&nbsp;&nbsp; [loc2]"
   form_observations_locate_on_map_help: Use the **[:form_observations_open_map]** button to bring this location up on the map. Then click to add a marker and drag it to the specific Latitude & Longitude.
-  form_observations_dubious_help: Click '[button]' to use this location name or edit the text below to correct any typo.
+  form_observations_dubious_help: Click '[BUTTON]' to use this location name or edit the text below to correct any typo.
   form_observations_project_help: Check any projects you wish to attach this observation to. All images you upload will also automatically be attached to these projects, too.
   form_observations_list_help: Check any observation lists you would like to add this observation to.
   form_observations_edit_specimens_help: Please add, edit and remove specimen data from the main observation page.
@@ -1890,7 +1510,7 @@
   form_observations_herbarium_record_help: If you've sent a specimen to a fungarium, you can enter that here, along with their accession number if you know it. Otherwise let it default to your personal fungarium and leave the accession number blank.
   form_observations_original_name: Original Name
 
-  form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:SEE_MESSAGE_BELOW]+":#project_messages
+  form_observations_there_is_a_problem_with_projects: This observation violates the constraints of one or more selected projects. "+[:see_message_below]+":#project_messages
   form_observations_projects_out_of_range: This observation violates one or more constraints of these checked project(s)
   form_observations_projects_out_of_range_help: "Either:\n- Uncheck the project(s); or\n- Change the observation to align with project requirements"
   form_observations_projects_out_of_range_admin_help: "; or\n- (undesirably) Check [:form_observations_projects_ignore_project_constraints] to ignore the project constraints.\nThen click [button_name]."
@@ -1900,8 +1520,8 @@
   form_observations_projects_kind_target_name: Non-target name
   form_observations_projects_kind_target_location: Non-target location
 
-  form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:SEE_MESSAGE_BELOW]+":#location_messages
-  form_observations_there_is_a_problem_with_name: There is a problem with the name. "+[:SEE_MESSAGE_BELOW]+":#name_messages
+  form_observations_there_is_a_problem_with_location: There is a problem with the location. "+[:see_message_below]+":#location_messages
+  form_observations_there_is_a_problem_with_name: There is a problem with the name. "+[:see_message_below]+":#name_messages
 
   # observations/_form_species_list
   form_species_lists_title: Title
@@ -1930,12 +1550,7 @@
 
   # images/new
   image_set_default: Set as default thumbnail
-  image_add_title: Add an Image for [name]
   image_add_default: Default thumbnail
-  image_add_image: "[:Image]"
-  image_add_optional: "[:optional]"
-  image_add_upload: "[:UPLOAD]"
-  image_add_warning: Please only upload images that you created or which you own the copyright of. By uploading images you are giving us permission to distribute this image to other users ("legalese":https://creativecommons.org/licenses/by-nc-sa/4.0/). You are also giving us permission to display this image along side advertisements or other fund-raising tools that may be used to support this site.
   image_exif_copied: Info copied
   image_use_exif: Use this info
   image_camera_info: Camera info
@@ -1948,7 +1563,6 @@
   image_reuse_just_yours: Only show your images.
 
   # observations/images/edit
-  image_edit_title: "Editing Image: [name]"
 
   # observations/images/remove
   image_remove_remove: Remove
@@ -1965,17 +1579,17 @@
   image_show_rotate_left: Rotate Left
   image_show_rotate_right: Rotate Right
   image_show_mirror: Mirror
-  image_show_edit: "[:EDIT]"
-  image_show_destroy: "[:DESTROY]"
-  image_show_when: "[:WHEN]"
-  image_show_notes: "[:NOTES]"
+  image_show_edit: "[:edit.ti]"
+  image_show_destroy: "[:destroy.ti]"
+  image_show_when: "[:when.ti]"
+  image_show_notes: "[:notes.ti]"
   image_show_copyright: Copyright
   image_show_public_domain: Public Domain by
   image_show_quality: Quality
   image_show_your_vote: Your Vote
-  image_show_vote_and_next: Vote & [:NEXT]
+  image_show_vote_and_next: Vote & [:next.ti]
   image_show_comments: "[num] comment(s)"
-  image_show_observations: "[:OBSERVATIONS]"
+  image_show_observations: "[:observations.ti]"
   image_show_thumbnail: Thumbnail
   image_show_small: Small
   image_show_medium: Medium
@@ -1995,12 +1609,11 @@
   exif_data_for_image: EXIF Data for Image [image]
 
   # observations/list_observations
-  list_observations_location_all: All Locations
   list_observations_location_define: Define This Location
   list_observations_location_merge: Merge With A Defined Location
   list_observations_alternate_spellings: Maybe you meant one of the following names?
   list_observations_suggestions: Other Links
-  list_observation_name: "[:NAME]"
+  list_observation_name: "[:name.ti]"
   list_observation_observations: Observations of
   list_observations_add_to_list: Add To / Remove From Observation List
   list_observations_download_as_csv: Download Observations
@@ -2011,7 +1624,6 @@
   list_place_names_map: Map Locations
   list_place_names_merge: Merge
   list_place_names_parenthetical: Number in parentheses shows Observation count.
-  list_place_names_popularity: "\"[:sort_by_num_views]\" means how many times the page was visited."
   list_place_names_undef: Undefined Locations
   list_place_names_undef_order: "(by frequency)"
 
@@ -2067,8 +1679,8 @@
 
   # name/approve_name
   name_approve_title: Approve [name]
-  name_approve_comment_summary: "[:Approved]"
-  name_approve_comments: "[:Comments]"
+  name_approve_comment_summary: "[:approved.ti]"
+  name_approve_comments: "[:comments.ti]"
   name_approve_comments_help: "Please include any notes about why this name has been approved.\nThis will be added to the notes for [name]."
   name_approve_deprecate: Deprecate the following synonyms
   name_approve_deprecate_help: If you want to split up a set of synonyms, click 'Approve' or 'Cancel' and then click the 'Change Synonyms' link.
@@ -2081,13 +1693,12 @@
   # name/deprecate_name
   name_deprecate_title: Deprecate [name]
   name_deprecate_preferred: Preferred name
-  name_deprecate_comment_summary: "[:Deprecated]"
-  name_deprecate_comments: "[:Comments]"
+  name_deprecate_comment_summary: "[:deprecated.ti]"
+  name_deprecate_comments: "[:comments.ti]"
   name_deprecate_preferred_help: Enter the preferred name. Author citation is recommended but not required.
   name_deprecate_comments_help: "Please say why this Name has been deprecated (e.g, a link to Index Fungorum).\nThis will be added to the Comments for [name]."
 
   # name/name_index (and other actions using same view)
-  name_index_add_name: Add Name
 
   # name/map
   name_map_title: Occurrence Map for [name]
@@ -2140,7 +1751,6 @@
   news_content_pr_208: "<a href=\"https://github.com/MushroomObserver/mushroom-observer/pull/208\">PR #208</a> (December 13, 2015) <u>Rails 4.2.5</u>\n\nAt long last the Mushroom Observer website is up to date with the latest stable version of Ruby on Rails (4.2.5). This has not been true since at least March of 2009. The upgrade process started last August when we were still using the 2.1.1 version of Ruby on Rails.\n\nThis has been a huge team effort by all the volunteer developers on the project. Thanks to every one of you for helping to make this happen.\n\nFor those who are interested in the technical low-down of this specific release, we got to 4.1 last month and the biggest change between 4.1 and 4.2 was a new HTML parsing library that required many minor code changes throughout out code base. There have also been some changes to how email is handled and a variety of other small changes to the code base. You should see no new changes in the site due to this latest upgrade, but of course <a href=\"/admins/emails/webmaster_questions/new\">send us a note</a> if you see anything wrong."
 
   # shared/_observation_list
-  observation_made_confidence: Community confidence
 
   # account/preferences/edit
   prefs_title: Change Preferences
@@ -2157,7 +1767,7 @@
   prefs_location_format: Location Format
   prefs_location_format_postal: Postal (New York, USA)
   prefs_location_format_scientific: Scientific (USA, New York)
-  prefs_hide_authors: "[:AUTHORITYS]"
+  prefs_hide_authors: "[:authoritys.ti]"
   prefs_hide_authors_none: show author for all ranks (default)
   prefs_hide_authors_above_species: hide author for genus and higher ranks
   prefs_thumbnail_size: Thumbnail size
@@ -2229,17 +1839,17 @@
   prefs_email_general_feature: "[:prefs_email_general_features]"
   prefs_email_general_questions: someone wants to send me a question about my observations, etc.
   prefs_email_general_question: "[:prefs_email_general_questions]"
-  prefs_email_comments: "[:Comment] Email"
+  prefs_email_comments: "[:comment.ti] Email"
   prefs_email_comments_owner: someone comments on my observations, names, etc.
   prefs_email_comments_response: someone posts responses to my comments.
-  prefs_email_locations: "[:Location] Email"
+  prefs_email_locations: "[:location.ti] Email"
   prefs_email_locations_admin: someone changes a location I administrate.
   prefs_email_locations_author: someone changes a location I'm author on.
   prefs_email_locations_editor: someone changes a location I've edited.
-  prefs_email_observations: "[:Observation] Email"
+  prefs_email_observations: "[:observation.ti] Email"
   prefs_email_observations_consensus: consensus name changes for one of my observations.
   prefs_email_observations_naming: someone proposes a name for one of my observations.
-  prefs_email_names: "[:Name] Email"
+  prefs_email_names: "[:name.ti] Email"
   prefs_email_names_admin: someone changes a name I administrate.
   prefs_email_names_author: someone changes a name I'm author on.
   prefs_email_names_editor: someone changes a name I've edited.
@@ -2266,7 +1876,6 @@
   image_copyright_warning: Please only upload an image that you created or which you own the copyright of.
 
   # account/reverify
-  reverify_welcome: Reverify Account
   reverify_link: Reverify
   reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
 
@@ -2274,31 +1883,25 @@
   rss_description: List of changes to [:app_title] as they happen.
   rss_log_of_deleted_item: Deleted Item
   rss_log_title: Activity Log
-  rss_by: by [user]
   rss_title: "[:app_title]"
   rss_filtered_mouseover: "[:app_title] has applied filter(s) based on your preferences."
   rss_show: "Show:"
-  rss_hide: "Hide:"
   rss_all: Everything
   rss_all_help: Show all object types.
-  rss_one_observation: "[:OBSERVATIONS]"
-  rss_one_name: "[:NAMES]"
-  rss_one_location: "[:LOCATIONS]"
-  rss_one_species_list: "[:SPECIES_LISTS]"
-  rss_one_project: "[:PROJECTS]"
-  rss_one_glossary_term: "[:GLOSSARY]"
-  rss_one_article: "[:NEWS]"
+  rss_one_observation: "[:observations.ti]"
+  rss_one_name: "[:names.ti]"
+  rss_one_location: "[:locations.ti]"
+  rss_one_species_list: "[:species_lists.ti]"
+  rss_one_project: "[:projects.ti]"
+  rss_one_glossary_term: "[:glossary.ti]"
+  rss_one_article: "[:news.ti]"
   rss_one_help: Show only [types].
   rss_make_default: Make This My Default
-  rss_this_is_default: This Is Your Default
   rss_created_at: "[TYPE] Created"
-  rss_changed: "[TYPE] Changed"
   rss_destroyed: "[TYPE] Destroyed"
-  rss_consensus_reached: Consensus established
 
   # shared/_textile_help
   general_textile_link: Can be formatted with <a href="/info/textile_sandbox/new" target="_new">Textile</a>.
-  shared_textile_link: More details here.
   shared_textile_help: Notes can be formatted using the <a href="/info/textile_sandbox/new" target="_new">Textile markup system</a>.<br/> _Amanita ocreata_, _A. ocreata_ ---> <u><b><i>Amanita ocreata</i></b></u> (linked to name description)<br/> __italic__, **bold** ---> <i>italic</i>, <b>bold</b><br/>
 
   field_textile_link: This field can be formatted with <a href="/info/textile_sandbox/new" target="_new">Textile</a>.
@@ -2309,12 +1912,10 @@
   show_comments_and_more: And [num] more...
 
   # observation/_show_consensus
-  show_consensus_species: Species in [name]
 
   # name/show_name_description or location/show_location_description
   show_description_empty: Nothing has been written for this description yet.
-  show_description_destroy: "[:DESTROY]"
-  show_description_edit: "[:EDIT]"
+  show_description_edit: "[:edit.ti]"
   show_description_clone: Clone
   show_description_merge: Merge With Another
   show_description_move: Move This Description
@@ -2331,11 +1932,9 @@
   show_description_adjust_permissions_help: Change the set of users who are allowed to view, modify or administrate this description.
 
   # observer/_show_images
-  show_images_small_thumbs: "(small thumbnails)"
-  show_images_large_thumbs: "(large thumbnails)"
 
   # observer/_show_lists
-  show_lists_header: "[:SPECIES_LISTS]"
+  show_lists_header: "[:species_lists.ti]"
 
   # location/show_location
   show_location_create: "[:create_object(type=:location)]"
@@ -2345,10 +1944,10 @@
   show_location_highest: Highest Elevation
   show_location_lowest: Lowest Elevation
   show_location_no_descriptions: There are no descriptions for this location yet.
-  show_location_create_description: "[:CREATE]"
+  show_location_create_description: "[:create.ti]"
   show_location_creator: User who defined this location
-  show_location_editor: "[:Editors]"
-  show_location_editors: "[:Editors]"
+  show_location_editor: "[:editors.ti]"
+  show_location_editors: "[:editors.ti]"
   show_location_reverse: Reverse Location
   show_location_locked: This location is locked. If you want to change the location of your observation, please edit the observation instead. Changing a location name or coordinates implicitly changes all the observations at that location, too.
   show_location_hidden: This location is considered hidden either because it is private property whose owners do not want the location revealed or because it contains sensitive habitat. Its coordinates are intentionally imprecise and all associated observations have hidden GPS coordinates.
@@ -2360,42 +1959,37 @@
   show_name_distribution_map: Occurrence Map
   show_name_change_synonyms: Change Synonyms
   show_name_email_tracking: Email Tracking
-  show_name_create_description: "[:CREATE]"
+  show_name_create_description: "[:create.ti]"
   show_name_synonyms: Synonym(s)
   show_name_preferred_synonyms: Preferred Synonyms
   show_name_deprecated_synonyms: Deprecated Synonyms
   show_name_misspelled_synonyms: Misspellings
-  show_name_misspelling: This name is misspelled.
-  show_name_misspelling_correct: "[:CORRECT_SPELLING]"
+  show_name_misspelling_correct: "[:correct_spelling.ti]"
   show_name_refresh_classification: Refresh from Genus
   show_name_propagate_classification: Propagate to Subtaxa
   show_name_lifeform: Lifeform
   show_name_propagate_lifeform: Propagate to Subtaxa
   show_name_notes: "[:form_names_taxonomic_notes]"
-  show_name_descriptions: "[:DESCRIPTIONS]"
+  show_name_descriptions: "[:descriptions.ti]"
   show_name_create_draft: Create New Draft for
   show_name_no_descriptions: There are no descriptions for this name yet.
-  show_name_description_author: "[:Description] author"
-  show_name_description_authors: "[:Description] authors"
-  show_name_description_editor: "[:Description] editor"
-  show_name_description_editors: "[:Description] editors"
-  show_name_author_request: Request Authorship Credit
+  show_name_description_author: "[:description.ti] author"
+  show_name_description_authors: "[:description.ti] authors"
+  show_name_description_editor: "[:description.ti] editor"
+  show_name_description_editors: "[:description.ti] editors"
   show_name_content_status: Description status
   show_name_latest_review: "Latest review: [date] by [user]"
   show_name_most_confident: Most Confident Observations
   show_name_previous_version: Previous Version
-  show_name_other_versions: Other Versions
   show_name_creator: First person to use this name on MO
-  show_name_editor: "[:Editors]"
-  show_name_editors: "[:Editors]"
-  show_name_other_observations_notes: "(Someone proposed [name] for these observations, but consensus hasn't accepted it. Confidence value is for __this__ name, not the consensus name.)"
+  show_name_editor: "[:editors.ti]"
+  show_name_editors: "[:editors.ti]"
   show_name_nomenclature: Nomenclature
   show_name_classification: Classification
   show_name_general_description: "[:form_names_gen_desc]"
   show_name_see_more: See More
   show_name_icn_id_missing: missing
   google_name_search: Google Search
-  index_fungorum: Index Fungorum
   index_fungorum_search: Index Fungorum search page
   index_fungorum_web_search: Index Fungorum web search
   mycobank: MycoBank
@@ -2404,12 +1998,7 @@
   sf_species_synonymy: SF Species Synonymy
 
   # names - links to observations
-  show_name_observations: More [:OBSERVATIONS]
-  show_name_observations_of: More [:OBSERVATIONS] of [name]
-  show_name_all_observations: More [:OBSERVATIONS] (all synonyms)
-  show_name_synonym_observations: Synonym [:OBSERVATIONS]
-  show_name_other_observations: Similar [:OBSERVATIONS]
-  show_observations_of: "[:OBSERVATIONS] of:"
+  show_observations_of: "[:observations.ti] of:"
   obss_of_this_name: this name
   obss_of_taxon: this taxon, any name
   taxon_obss_other_names: this taxon, other names
@@ -2429,39 +2018,28 @@
   show_name_num_notifications: "*Number of users interested in this name:* [num]"
 
   # observations/_show_namings
-  show_namings_proposed_name: "[:NAMING]"
-  show_namings_proposed_names: "[:NAMINGS]"
+  show_namings_proposed_names: "[:namings.ti]"
   show_namings_no_names_yet: No names have been proposed yet.
   show_namings_propose_new_name: Propose Another Name
   show_namings_eye_help: Observer's choice
   show_namings_eyes_help: Current consensus
-  show_namings_community_favorite: This is the community favorite.
   show_namings_consensus: Community Vote
   show_namings_no_votes: no votes
   show_namings_your_vote: Your Vote
   show_namings_update_votes: Update Votes
   show_namings_suggest_names: Name Suggestions
   show_namings_cast: Cast Vote
-  show_namings_user: "[:User]"
+  show_namings_user: "[:user.ti]"
   show_namings_consensus_help: For each name listed above select your opinion of how well that name applies to this observation. Select '[:show_namings_propose_new_name]' if you want to suggest another option. See the "How to Use":/info/how_to_use#voting page for more details on how the votes are tallied.
   show_namings_lose_changes: You must click '[:show_namings_update_votes]' to save any changes you've made to your votes.
-  show_namings_please_login: Please login to propose your own names and vote on existing names.
 
   # observations/show_observation
   show_observation_site_id: Site ID
   show_observation_owner_id: Observer Preference
-  show_observation_no_clear_preference: no clear preference
-  show_observation_details: "[:DETAIL]"
-  show_observation_details_inat_import: Imported [date] from
-  show_observation_details_inat_export: Copied to iNaturalist as
+  show_observation_details: "[:detail.ti]"
   show_observation_inat_lat_lng: Public lat/lng
   show_observation_inat_suggested_ids: Suggested IDs
   show_observation_edit_observation: "[:edit_object(type=:observation)]"
-  show_observation_propose_new_name: "[:show_namings_propose_new_name]"
-  show_observation_debug_consensus: Debug Consensus
-  show_observation_alternative_names: Alternative Name(s)
-  show_observation_preferred_names: Preferred Name(s)
-  show_observation_observation_created_at: Observation created
   # This is used if this is the location where the thing was growing.
   show_observation_collection_location: Collection location
   # This is used if this is NOT the location where the thing was growing.
@@ -2472,14 +2050,11 @@
   show_observation_specimen_available: Specimen available
   show_observation_specimen_not_available: No specimen available
   show_observation_no_images: No images
-  show_observation_remove_images: "[:remove_objects(type=:image)]"
   show_observation_reuse_image: Reuse Image
   show_observation_add_images: "[:add_objects(type=:image)]"
-  show_observation_species_lists: "[:SPECIES_LISTS]"
   show_observation_manage_species_lists: Manage Observation Lists
   show_observation_add_to_species_list: Add to an Observation List
   show_observation_send_question: Send Observer a Question
-  show_observation_view_notifications: View Notifications
   show_observation_hide_map: Hide thumbnail map.
   show_observation_thumbnail_map_hidden: Thumbnail map hidden. To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
   show_observation_add_link: Add an external link
@@ -2488,7 +2063,7 @@
   show_observation_remove_collection_number: Remove collection number from this observation?
   show_observation_no_herbarium_records: No [:herbarium_records]
   show_observation_remove_herbarium_record: Remove fungarium record from this observation?
-  show_observation_add_sequence: Add [:SEQUENCE]
+  show_observation_add_sequence: Add [:sequence.ti]
   show_observation_dna_sequences: DNA sequences
   show_observation_no_sequences: No DNA sequences
   show_observation_archive_link: Show Archive Record
@@ -2517,22 +2092,20 @@
   suggestions_error: Something went wrong, sorry!
 
   # locations/show_past_location
-  show_past_location_title: "[:VERSION] [num]: [name]"
-  show_past_location_other_versions: Other Versions
+  show_past_location_title: "[:version.ti] [num]: [name]"
   show_past_location_no_version: No version specified
 
   # locations/show_past_location_description
-  show_past_location_description_title: "[:VERSION] [num]: [name]"
+  show_past_location_description_title: "[:version.ti] [num]: [name]"
 
   # names/versions/show
-  show_past_name_title: "[:VERSION] [num]: [name]"
+  show_past_name_title: "[:version.ti] [num]: [name]"
   show_past_name_classification_inherited: "Inherited from [name]'s reclassification on [date] by [user]"
 
   # names/descriptions/versions/show
-  show_past_name_description_title: "[:VERSION] [num]: [name]"
+  show_past_name_description_title: "[:version.ti] [num]: [name]"
 
   # object/show_past_versions
-  show_past_version_merged_with: "(merged with #[id])"
 
   # observer/show_rss_log
   show_rss_log_title: Log for [title]
@@ -2542,43 +2115,34 @@
 
   # observations/_show_votes
   show_votes_title: Show Votes for [name]
-  show_votes_users: "[:Users]"
-  show_votes_vote: "[:Vote]"
+  show_votes_users: "[:users.ti]"
+  show_votes_vote: "[:vote.ti]"
   show_votes_weight: Weight
-  show_votes_average: Average
   show_votes_score: Score
-  show_votes_go_public: Make all of my votes public.
-  show_votes_go_private: Make all of my votes anonymous.
   show_votes_total: "Overall Score\nsum(score * weight) /\n(total weight + 1)"
   show_votes_descript: User's votes are weighted by their contribution to the site (log<small>10</small> contribution). In addition, the user who created the observation gets an extra vote.
-  show_votes_go_public_confirm: This will make all your votes for all observations public, not just your vote for this name. Is this what you want to do?
-  show_votes_go_private_confirm: This will make all your votes for all observations anonymous, not just your vote for this name. Is this what you want to do?
   show_votes_gone_public: Thank you! Your preferences have been updated. Other users can now see your votes.
   show_votes_gone_private: Your preferences have been updated. Other users can no longer see your votes.
 
   # users/show
   show_user_about: About [user]
   show_user_title: Contribution Summary for [user]
-  show_user_contributors: "[:app_contributors]"
   show_user_observations_by: Observations by [name]
   show_user_your_observations: Your Observations
   show_user_comments_for: Comments for [name]
   show_user_comments_for_you: Comments for You
   show_user_your_notifications: Your Email Alerts
-  show_user_edit_profile: Edit Profile
   show_user_email_to: Email [name]
   show_user_joined: Joined
   show_user_mailing_address: Mailing Address for Collections
   show_user_primary_location: Primary Location
   show_user_personal_herbarium: Personal Fungarium
   show_user_total: Total
-  show_user_language_contribution: "Translations: [name]"
   show_user_life_list: "[species] species and [higher] higher-level [taxa_word] observed"
   show_user_life_list_species: "[species] species observed"
   show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
-  sequence_edit_title: Editing [name]
 
   # account/signup
   signup_title: Account signup
@@ -2589,7 +2153,6 @@
   signup_choose_password: Choose password
   signup_confirm_password: Confirm password
   signup_preferred_theme: Preferred Theme (optional)
-  signup_random: Random
   signup_button: Signup
   signup_email_help: "In order to sign up, you must provide a working email address. (One-time addresses will not work. Addresses that block email from mushroomobserver.org will not work.)\n\nWhen you complete this page and click \"Signup\", we will send you an email with account verification information. (This helps us to block spammers.)\n\nOnce you verify your account, you can change your email on your account Preferences page. We will never show your email address on a webpage that others can access unless you choose to display it by including it in your login, your user name, or comments or other text which you input. We will never sell your email address. We will only share your email address if you ask us to (e.g., when you send an email to another member, they will see your email). By default your email address will be used to send you information about changes to the site as well as notifications relevant to your contributions to the site. You can opt out of these uses by changing your Preferences."
 
@@ -2627,7 +2190,6 @@
   species_list_show_save_as_txt: Save as Plain Text
   species_list_show_save_as_rtf: Save as Rich Text
   species_list_show_save_as_csv: Save as Spreadsheet
-  species_list_show_print_labels: Print Labels
   species_list_show_set_source: Save This List for Later
   species_list_show_set_source_help: Save this list for the next time you create or edit an observation list. It will display a list of the species in this list for you to choose from.
   species_list_show_clone_list: Make a Copy of This List
@@ -2641,26 +2203,23 @@
   species_list_show_edit: Edit This List
   species_list_show_clear_list: Clear This List
   species_list_show_destroy: Destroy This List
-  species_list_show_members: Members
   species_list_show_no_members: This list contains no observations.
-  species_list_show_regular_index: Regular Index
   species_list_show_regular_index_help: Show observations in the "regular" index as a table of thumbnails.
 
   # species_list/species_lists_by_title
-  species_list_by_title_title: "[:SPECIES_LISTS] by Title"
-  species_list_by_title_created_at: "[:Created]"
+  species_list_by_title_title: "[:species_lists.ti] by Title"
+  species_list_by_title_created_at: "[:created.ti]"
   species_list_by_title_list_name: List Name
   species_list_by_title_owner: Owner
   species_list_by_title_size: Size
 
   # species_list/upload_species_list
-  species_list_upload_title: "[:UPLOAD] [:SPECIES_LIST]"
-  species_list_upload_label: "[:UPLOAD] [:SPECIES_LIST]"
+  species_list_upload_title: "[:upload.ti] [:species_list.ti]"
+  species_list_upload_label: "[:upload.ti] [:species_list.ti]"
   species_list_upload_help: An observation list should be a simple text file with each name on its own line.
 
   # species_list/download
   species_list_download_title: Observation List Reports and Downloads
-  species_list_download_back: Back to Observation List
   species_list_labels_header: Print Labels for Observation
   species_list_labels_button: Print Labels
   species_list_report_header: Save a Checklist of Names
@@ -2671,15 +2230,13 @@
   species_list_write_in_title: "Add New Observations to [list_title]"
 
   # sequence/add_sequence
-  sequence_add_edit: "[:edit_object(type=:observation)]"
-  sequence_add_owner_id: "[:show_observation_owner_id]"
 
   # sequence/form_sequence
-  form_sequence_locus_help: "Start with a short abbreviation (because the [:OBSERVATION] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp;ITS\n&nbsp;&nbsp;multi-locus\n&nbsp;&nbsp;LSU large subunit ribosomal RNA gene, partial sequence"
-  form_sequence_both_required: "[:BASES] and/or both [:ARCHIVE]/[:ACCESSION] required"
+  form_sequence_locus_help: "Start with a short abbreviation (because the [:observation.ti] displays only the first [locus_width] characters). Examples:\n&nbsp;&nbsp;ITS\n&nbsp;&nbsp;multi-locus\n&nbsp;&nbsp;LSU large subunit ribosomal RNA gene, partial sequence"
+  form_sequence_both_required: "[:bases.ti] and/or both [:archive.ti]/[:accession.ti] required"
   form_sequence_bases_format: FASTA or Bare Sequence format
-  form_sequence_archive_help: On-line, public database with [:sequence] data for this [:OBSERVATION].
-  form_sequence_accession: "[:ACCESSION] number/code"
+  form_sequence_archive_help: On-line, public database with [:sequence] data for this [:observation.ti].
+  form_sequence_accession: "[:accession.ti] number/code"
   form_sequence_accession_help: "Examples:\n&nbsp;&nbsp;KT968655\n&nbsp;&nbsp;UDB024324"
   form_sequence_valid_deposit: "[:deposit] requires both [:archive] and [:accession]"
   form_sequence_bases_or_deposit_required: bases and/or deposit required
@@ -2701,21 +2258,13 @@
   verify_note: "Your account has been verified...\n\nYou should now be able to post observations, upload images, edit name descriptions, define new locations, add comments, and propose and vote on identifications at \"[:app_title]\":[domain].\n\nThanks for joining!"
 
   # account/choose_password
-  account_choose_password_title: Verifying Your Account
-  account_choose_password_warning: You must choose a password before we can verify your account.
 
   # account/welcome
   welcome_no_user_title: User not set in session
-  welcome_logout_link: Logout
   welcome_no_user_note: If you are not a spammer, please report this as an error.
   welcome_note: You are now logged into the system...
 
   # semantic_vernacular/delete
-  delete_svd_not_allowed: Only admins can delete components of Semantic Vernacular Descriptions
-  semantic_vernacular_index: Go to all Semantic Vernacular Descriptions
-  semantic_vernacular_proposed: Proposed by [name] at [date_time]
-  semantic_vernacular_delete: Delete
-  semantic_vernacular_title: "SVD Detail: [name]"
 
   # glossary term fields
   glossary_term_created_at: Created At
@@ -2728,12 +2277,12 @@
   show_glossary_term_reuse_image: Add Example
   show_glossary_term_remove_image: Remove Examples
   show_glossary_term_creator: Creator of this Glossary Term
-  show_glossary_term_editor: "[:Editors]"
-  show_glossary_term_editors: "[:Editors]"
+  show_glossary_term_editor: "[:editors.ti]"
+  show_glossary_term_editors: "[:editors.ti]"
 
 
   # glossary_term#show_past_glossary_term
-  show_past_glossary_term_title: "[:VERSION] [num]: [name]"
+  show_past_glossary_term_title: "[:version.ti] [num]: [name]"
   show_past_glossary_term_no_version: No version specified
 
   # glossary_term#create_glossary_term
@@ -2761,15 +2310,14 @@
   article_body: Body
 
   # article/create_article
-  article_body_required: "[:article_body] [:REQUIRED]"
-  article_title_required: "[:article_title] [:REQUIRED]"
+  article_title_required: "[:article_title] [:required.ti]"
   form_article_title_help: This field will appear in the Activity Feed.
 
   # article/show_article
   show_article: "[:show_object(type=:article)]"
 
   # article/index_article
-  index_article: "[:ARTICLE] Index"
+  index_article: "[:article.ti] Index"
 
   # publication fields
   publication_full: Full Reference
@@ -2780,7 +2328,6 @@
 
   # publication/index
   publication_index: Publication List
-  publication_index_title: List of All Publications
   publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/admin/emails/webmaster_questions/new.
   publication_full_help: When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author.
   publication_legend: "*P* indicates that it is a scientific, peer-reviewed article.\n*M* indicates that the article explicitly mentions or references the Mushroom Observer."
@@ -2803,7 +2350,6 @@
 
   # herbaria/show
   show_herbarium_herbarium_record_count: This fungarium contains [count] fungarium record(s).
-  show_herbarium_mcp_db_missing: Missing
   show_herbarium_add_curator: Add Curator
   show_herbarium_no_user: Unable to find the user '[login]'.
   show_herbarium_curator_request: Request to be a Curator
@@ -2843,7 +2389,6 @@
   herbarium_index_merge_help: Click on the fungarium below that you would like to merge "[name]" into. This will cause "[name]" to be deleted and all of its records and curators to be transferred into the new fungarium. If you do not have permission to perform the merge, it will send a request to the admins. ("+Cancel merge.+":[url])
 
   # herbaria/filtered
-  list_herbaria_title: "[:list_objects(type=:herbarium)]"
 
 
   # herbarium record fields
@@ -2867,12 +2412,10 @@
   # herbarium_record/edit_herbarium_record
   edit_herbarium_record: Edit Fungarium Record
   edit_herbarium_record_back_to_index: Back to Fungarium Record Index
-  edit_herbarium_record_cant_add_or_remove: Only curators or the observer can add or remove an observation to or from a fungarium record.
   edit_herbarium_record_already_used: This fungarium record already exists. If you want to merge records, move the observations from this record to the other, then delete this record.
   edit_affects_multiple_observations: The changes you make here will affect all of the observations shown. If you wish to change a single observation, go to that observation, remove the incorrect [type] from it, then add the correct one. That will leave the [type] unchanged for any other observations associated with it.
 
   # herbarium_record/destroy_herbarium_record
-  delete_herbarium_record: Destroy Fungarium Record
 
   # herbarium_record/herbarium_record_index (not a real page)
   herbarium_record_index_title: "[subject] Fungarium Record Index"
@@ -2895,7 +2438,6 @@
   # collection_number/edit_collection_number
   edit_collection_number: Edit Collection Number
   edit_collection_number_back_to_index: Back to Collection Number Index
-  edit_collection_number_cant_add_or_remove: Only the observer can add or remove a collection number to or from an observation.
   edit_collection_number_already_used: This collection number is shared with another observation. If you need to fix it, remove it from your observation, then add the correct one.
   edit_collection_numbers_merged: Merged [this] into [that]. If this was not what you meant to do, remove the collection number from one of the observations, then add the correct one.
 
@@ -2903,10 +2445,8 @@
   delete_collection_number: Destroy Collection Number
 
   # collection_number/collection_number_index (not a real page)
-  collection_number_index_title: "[subject] Collection Number Index"
 
   # collection_number/list_collection_numbers
-  list_collection_numbers_title: "[:list_objects(type=:collection_number)]"
 
 
 
@@ -2973,33 +2513,31 @@
   visual_group_includes_names: Includes images from these names (at most 10 listed here)
 
   # Links to CRUD pages
-  visual_group_index: "[:VISUAL_GROUP] Index"
-  visual_group_edit: Edit [:VISUAL_GROUP]
-  visual_group_show: Show [:VISUAL_GROUP]
-  visual_group_create: Create [:VISUAL_GROUP]
+  visual_group_index: "[:visual_group.ti] Index"
+  visual_group_edit: Edit [:visual_group.ti]
+  visual_group_show: Show [:visual_group.ti]
+  visual_group_create: Create [:visual_group.ti]
 
   # visual_groups/show
-  definitional_images: Definitional Images
-  show_visual_group_title: "[name] [:VISUAL_GROUP]"
 
   # visual_groups/destroy
-  destroy_visual_group_success: "[:VISUAL_GROUP] [:destroyed]"
+  destroy_visual_group_success: "[:visual_group.ti] [:destroyed]"
 
   # visual_groups/edit
   edit_visual_group_filter_options: Filter Options
   edit_visual_group_update_filter: Update Filter
 
   # visual_groups/update
-  update_visual_group_success: "[:UPDATED] [name] [:VISUAL_GROUP]"
+  update_visual_group_success: "[:updated.ti] [name] [:visual_group.ti]"
 
   # visual_models/show
-  show_visual_model_index: "[:VISUAL_MODEL] [:INDEX]"
+  show_visual_model_index: "[:visual_model.ti] [:index.ti]"
 
   # Visual Models
   visual_model_errors: prohibited this visual_model from being saved
 
   # visual_models/destroy
-  destroy_visual_model_success: "[:VISUAL_MODEL] [:destroyed]"
+  destroy_visual_model_success: "[:visual_model.ti] [:destroyed]"
 
   # Field Slips
   field_slip_add_images: Add Images or Other Data
@@ -3011,14 +2549,11 @@
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
   field_slip_creator: Creator
-  field_slip_destroy: Destroy this field slip
   field_slip_destroyed: Field slip was successfully destroyed.
   field_slip_edit: "[:edit_object(type=:FIELD_SLIP)]"
   field_slip_editing: Editing Field Slip
   field_slip_errors: prohibited this field_slip from being saved
-  field_slip_filter_by: Filter by [:PROJECT]
-  field_slip_index: "[:index_object(type=:FIELD_SLIPS)]"
-  field_slip_job_no_project: No Project with id=[ID]
+  field_slip_filter_by: Filter by [:project.ti]
   field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_keep_obs: Save with Current Observation
   field_slip_last_obs: Switch to Last Observation
@@ -3026,7 +2561,6 @@
   field_slip_no_observation: No Observation found
   field_slip_select_observations: Select Observations to Associate
   field_slip_save_with_observations: Save with Selected Observations
-  field_slip_via_occurrence: via occurrence
   field_slip_no_project: No Project found
   field_slip_nil_project: "(No Project)"
   field_slip_other_codes: Other Codes
@@ -3035,9 +2569,7 @@
   field_slip_project_success: Field Slip will be associated with the [TITLE] Project
   field_slip_qr_intro: This page is primarily intended for scanning "MO Field Slips":https://mushroomobserver.org/articles/37 using a QR code scanner. It should work with QR codes that only contain the field slip code. You can also enter the code by hand into the text box and hit return.
   field_slip_quick_no_location: Quick create requires an existing location
-  field_slip_quick_no_name: Quick create requires an existing name
 
-  field_slip_show: Show [:FIELD_SLIP]
   field_slip_updated: Field slip was successfully updated.
   field_slip_welcome: Welcome to the [TITLE] Project!
   field_slips_max_for_project: You may create up to [MAX] slips for this project.
@@ -3058,14 +2590,9 @@
   naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
   show_observation_add_matching_observations: Add Matching Observations
   show_observation_matching_observations: Matching Observations
-  show_observation_from_sibling: "(MO [id])"
-  show_occurrence_title: Occurrence
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
-  show_occurrence_primary: Primary
   edit_occurrence_submit: Save Changes
-  edit_occurrence_remove: Remove
   edit_occurrence_add_heading: Add Recently Viewed Observations
-  edit_occurrence_add: Add
   edit_occurrence_location: "Location:"
   edit_occurrence_details_heading: Primary Observation Details
   edit_occurrence_no_edit_permission: You don't have permission to edit this observation's details.
@@ -3074,7 +2601,6 @@
   occurrence_not_found: Occurrence not found.
   occurrence_resolve_projects_title: "Add Observations to Projects"
   occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
-  occurrence_resolve_projects_done: "Primary observation added to [count] projects/lists."
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
@@ -3138,7 +2664,6 @@
   account_api_keys_create_success: Sucessfully created a new API Key.
   account_api_keys_create_failed: "Failed to create a new API Key:"
   account_api_keys_removed_some: Successfully removed [num] selected API Key(s).
-  account_api_keys_removed_none: No API Keys were selected.
   account_api_keys_updated: Successfully updated API Key notes.
   account_api_keys_activated: Successfully activated key for [notes].
   account_api_keys_no_notes: You left name/description field empty.
@@ -3146,8 +2671,8 @@
   # description/adjust_permissions
   adjust_permissions_user_header: User or Group
   adjust_permissions_reader_header: View
-  adjust_permissions_writer_header: "[:EDIT]"
-  adjust_permissions_admin_header: "[:ADMIN]"
+  adjust_permissions_writer_header: "[:edit.ti]"
+  adjust_permissions_admin_header: "[:admin.ti]"
   adjust_permissions_all_users: All Users
   adjust_permissions_site_admin: site admin
 
@@ -3167,8 +2692,6 @@
   checklist_for: Checklist for
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
-  checklist_for_project_location_title: Checklist for [project] at [location]
-  checklist_for_project_title: Checklist for [project]
   checklist_for_species_list_title: Checklist for [list]
   checklist_target_summary: "Target names: [total] total, [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
@@ -3206,17 +2729,16 @@
 
   # name/eol_preview
   eol_preview_name_count: "[count] description(s)"
-  eol_preview_image_count: "[count] image(s)"
   eol_preview_title: EOL Preview
   eol_preview_explanation: "This page provides links to or shows the content that is currently scheduled for delivery to the \"Encyclopedia of Life\":https://eol.org (EOL). The features related to this effort are still very new and far from polished since it has been implemented quickly to meet the immediate needs to develop the fungus related content on the EOL. The content delivered from [:app_title] to the EOL will be credited both as coming from the [:app_title] website and the individual content providers.\n\nOn this page each section represents one taxon. The descriptive paragraphs for each listed taxon will be sent with the exception of any paragraphs marked 'Notes'. Both the taxa and the images that are being sent have been at least quickly reviewed by expert members of the [:app_title] community.\n\nThe review status of a specific taxon is given on the page for that taxon and can only be set by a designated expert. Images are selected based on the voting history of specific observations and their quality. Currently only designated experts can set the quality level of an image, but this is expected to become a open voting process for the entire [:app_title] community in the near future.\n\nCurrently the designated experts are either mycology professors that are teaching classes that are planning to provide data to EOL through the [:app_title] or individuals in the [:app_title] community who have shown dedication to the site and are recognized experts in mushroom or fungal identification. All aspect of the process of providing data to EOL are under discussion and open to change so please send any questions or comments you have to the [:app_title] \"webmaster\":/admin/emails/webmaster_questions/new.\n\nThe best way to participate in this amazing opportunity is to find a taxon you care about and work to expand the descriptive paragraphs for this taxon."
 
   # image/license_updater
   image_updater_count: Count
-  image_updater_license: "[:LICENSE]"
-  image_updater_holder: "[:COPYRIGHT_HOLDER]"
+  image_updater_license: "[:license.ti]"
+  image_updater_holder: "[:copyright_holder.ti]"
   image_updater_title: Updating Licenses for [user]
-  image_updater_update: "[:UPDATE]"
-  image_updater_help: Listed below are all the different licenses you've posted images under, along with the number of your images which use that license. Make any changes you want to the license or the name listed as the copyright holder, then click "[:UPDATE]" to submit changes.
+  image_updater_update: "[:update.ti]"
+  image_updater_help: Listed below are all the different licenses you've posted images under, along with the number of your images which use that license. Make any changes you want to the license or the name listed as the copyright holder, then click "[:update.ti]" to submit changes.
 
   # image/vote_anonymity
   image_vote_anonymity_title: Change Anonymity of Your Image Votes
@@ -3227,8 +2749,6 @@
   image_vote_anonymity_invalid_submit_button: Invalid submit button "[label]", please "contact us":/admin/emails/webmaster_questions/new for help.
 
   # interest-related controls in names, observations, etc.
-  interest_watch: Watch
-  interest_ignore: Ignore
   interest_watch_help: Click here if you want us to send you email whenever there is a change in this [object].
   interest_ignore_help: Click here if you want to stop getting any emails about this [object].
   interest_default_help: Click here if you want to go back to the default -- having your account preferences determine whether you get email about this [object].
@@ -3244,13 +2764,11 @@
   # location/list_merge_options
   list_merge_are_you_sure: Assign location? This cannot be undone.
   list_merge_options_near_matches: Near Matches
-  list_merge_options_others: Other Available [:locations]
   list_merge_options_title: Location Matches for [where]
 
   # observation/inat_imports
   inat_import_create_title: Import observations from iNaturalist
   inat_what_to_import: What to import
-  inat_choose_observations: "Inat Observations to Import:"
   inat_import_list: A list of observations
   inat_import_list_help: "List of up to about 384 observation #s (comma- or whitespace-separated; a header row like \"id\" is ignored)"
   inat_import_all: All my iNat observations
@@ -3263,7 +2781,6 @@
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
-  inat_no_imports_designated: You must list the iNat observation(s) to be imported
   inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
   inat_url_label: Observations from an iNat search URL
   inat_url_hint: "On iNat, filter observations by taxon, place, date, quality grade, etc., then copy the URL from your browser and paste it here. Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
@@ -3278,10 +2795,8 @@
   inat_cannot_communicate: Cannot communicate with iNat. Please try again later. If you keep getting this message, please notify webmaster.
   inat_unknown_param: "iNat rejected the request: [error]"
 
-  inat_import_started: Your import has started. Refresh page to update results.
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
-  inat_page_of_obs_failed: Failed to get page of observations from iNat API
 
   inat_leading_id: Leading ID as of
   inat_corrected_spelling: (corrected spelling)
@@ -3289,7 +2804,6 @@
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_not_imported: Not Imported
 
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_requested_caption: Requested Observations
@@ -3322,8 +2836,8 @@
   inat_skipped_images_summary: "[count] image(s) skipped: no iNat license."
 
   # /inat_import_job_tracker
-  INAT_IMPORTS: iNat Imports
-  INAT_IMPORT_JOB_TRACKERS: iNat Import Trackers
+  inat_imports: inat imports
+  inat_import_job_trackers: inat import trackers
   inat_imports_index_title: iNat Imports
   inat_imports_index_when_utc: When (UTC)
   inat_imports_index_skipped: "# Skipped"
@@ -3334,7 +2848,6 @@
   inat_import_tracker_done: "Click [:results] to see imported Observations."
   inat_import_tracker_done_with_errors: "Import finished with errors — see details above."
   inat_import_nothing_imported: Nothing was imported.
-  inat_import_tracker_importable_count: Number of Importable Observations
   inat_import_tracker_imported_count: "# Imported"
   inat_import_tracker_leave_page: You may continue working in MO by opening another tab, or by leaving this page. To return to this page, you can (a) go back in your browser, or (b) click Create Observation, iNat Import; if the import is in progress, this page will be redisplayed.
   inat_import_tracker_pending: Please wait until your pending iNat Import is Done before starting a new one.
@@ -3347,10 +2860,8 @@
   inat_import_tracker_license_added_heading: Observations Imported with MO Default License
   inat_import_tracker_license_added_note: "[count] observation(s) had no iNat license; your default MO license was applied."
   inat_import_tracker_license_added_reimport: "Re-import [count] observation(s) after adding a license on iNat"
-  inat_importables_explanation: "An ??importable?? observation is an iNat observation which: you created, whose iNat identity is a fungus or slime mold, and which was neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script."
 
   # observer/list_notifications
-  list_notifications_title: Email Alerts for [user]
 
   # observer/list_users
   list_users_joined: Joined
@@ -3363,18 +2874,13 @@
   merge_descriptions_title: Merge [object]
   merge_descriptions_merge_header: Merge with another description
   merge_descriptions_move_header: Move / copy to a synonym
-  merge_descriptions_merge: "[:MERGE]"
-  merge_descriptions_move: Move / Copy
-  merge_descriptions_merge_or_move: Merge / Move / Copy
   merge_descriptions_no_others: "(there are no other descriptions)"
   merge_descriptions_delete_after: Delete old description after merge?
   merge_descriptions_merge_help: This will copy any non-blank sections from the source description into the description you select below. If the target description already has text in any of those fields, you will be given an editing form with the text from both descriptions. This will allow you to reconcile any conflicts by hand before saving the form and making the merger official.
   merge_descriptions_move_help: This will move the source description into a synonym. It will just copy it if you elect not to delete the old description. If you wish to merge with an existing description in the other name, you must first move your description into that name, then select [:show_description_merge] again from there.
 
   # species_list/name_lister
-  name_lister_bad_browser: This page will not work on your browser, sorry!
-  name_lister_bad_submit: Invalid commit button '[button]'.
-  name_lister_charset: Character Encoding
+  name_lister_bad_submit: Invalid commit button '[BUTTON]'.
   name_lister_charset_help: "(Try changing this if authors get garbled.)"
   name_lister_genera: Genera
   name_lister_help: "*Create List:* Click a genus in the first column to pull up a list of species in that genus. Select any of these taxa and press return or double-click to add species to your list. Accepted names are in boldface; deprecated names are followed by one or more accepted alternatives. You may choose any. To remove a name, select it in the third column, and press delete or double-click. (You may also use arrows to navigate, or type partial names to search within a column.)\n\n*Save List:* When you are finished, click any of the buttons at the bottom of the page. \"Create [:species_list]\" takes you back to the old creation form, where you will be able to enter date, location, notes, etc. before saving the list.\n\n*Reports :* The plain text report gives you a simple list of taxa with no formatting. Rich text can be used to import the list into Microsoft Word complete with authors and all the formatting intact. Spreadsheet produces a CSV file, with name, author, citation, and accepted columns. Common names are not available yet. Reports should automatically download in a separate tab or window; if not, go to your browser's File menu and click 'Save As'."
@@ -3389,17 +2895,10 @@
 
   # name/needed_descriptions
   needed_descriptions_help: The following species names are the ones that have the most [:observations], but do not have a general description in the [:app_title]. Adding a general description to these common species would be a big help.
-  needed_descriptions_title: Top 100 Needed Species [:descriptions]
 
   # observer/no_ajax
-  no_ajax_body: It looks like your browser is out of date. You still have access to all of the capabilities of this site, however unless you upgrade your browser we will not be able to make use of some very useful javascript features that modern browsers support. This includes dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.
-  no_ajax_browsers: "Browsers that we recommend (and test the site on regularly) are:\n\n* Firefox / Iceweasel 1.0 or higher\n\n* Internet Explorer 5.5 or higher\n\n* Netscape 7.0 or higher\n\n* Safari 1.2 or higher\n\n* Opera (we know 8.0 works)\n\n* Chrome\n\nIf you know that your browser supports AJAX but it's not listed here, please \"send us an e-mail\":/admin/emails/webmaster_questions/new."
-  no_ajax_dont_care: If you don't care and you're tired of seeing the "Your Browser is Out of Date" tab at the top of every page, "please click here":/javascript/turn_javascript_off. (Login and go to preferences to re-enable auto-detection.)
-  no_ajax_title: Your Browser is Out of Date
 
   # observer/no_browser
-  no_browser_body: "We have not seen your browser before. This means we don't know if it supports the full capabilities of this site. Since there are pages that won't work if we guess wrong (like voting on [:observation] names), we have to assume the worst. However this means that a number of useful features are not available, like dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.\n\nIf you would like to override this decision, \"click here to turn javascript on\":/javascript/turn_javascript_on. If you are tired of seeing the \"We Don't Recognize Your Browser\" tab at the top of every page, please \"click here to turn javascript off\":/javascript/turn_javascript_off. (Login and go to preferences to re-enable auto-detection.)"
-  no_browser_title: We Don't Recognize Your Browser
 
   # account/no_email
   no_email_how_to_reenable: Go to your "Preferences":/account/preferences/edit page to re-enable this feature.
@@ -3434,13 +2933,8 @@
   no_email_general_question_success: Question email disabled for [name].
 
   # observer/no_javascript
-  no_javascript_body: "It looks like you have javascript disabled on your browser. You will still have access to all of the capabilities of this site, however unless you enable javascript we will not be able to make use of some very useful features that modern browsers support. This includes dynamic forms, auto-completion of scientific names and locations, the new version of the [:species_list] creator, and more.\n\nIf you would like to turn Javascript on, but aren't sure how, try looking it up on google with this search: \"How do I enable JavaScript in my browser?\":https://www.google.com/search?hl=en&q=How+do+I+enable+Javascript+in+my+browser%3F&btnG=Google+Search"
-  no_javascript_dont_care: If you *do* have javascript enabled, but our auto-detection algorithm is failing to detect it correctly, "please click here":/javascript/turn_javascript_on. If you don't care and you're tired of seeing the "Javascript Disabled" tab at the top of every page, "please click here":/javascript/turn_javascript_off. (Login and go to preferences to re-enable auto-detection.)
-  no_javascript_title: You Have Javascript Disabled
 
   # observer/no_session
-  no_session_body: "It looks like your browser is refusing cookies. Without cookies, our site has no way of remembering who you are from one page to the next. This means that you will not be able to create an account and login, and therefore you will not be able to create [:observations], upload [:images], make [:comments], and much more. You will still be able to view everything that the general public has access to, but you will just be an observer, you will not be able to participate actively.\n\nAll we will do is store a big long number on your computer. Next time you go to our site, we will look up that number and use it to keep track of who you are. (We get multiple requests every second from around the world -- without this ID we wouldn't stand a chance of keeping everyone straight!) This ID is encrypted and keeps no sensitive information in it.\n\nIf you would like to turn cookies on, but aren't sure how, try looking it up on google with this search: \"How do I enable cookies in my browser?\":https://www.google.com/search?hl=en&q=How+do+I+enable+cookies+on+my+browser%3F&btnG=Google+Search Note that most browsers will let you enable cookies for individual sites, allowing you to protect your privacy everywhere else. For example, in Firefox, go into Edit -> Preferences -> Privacy Tab -> Exceptions."
-  no_session_title: You Have Cookies Disabled
 
   # info/textile
   sandbox_enter: Enter Textile you wish to test here
@@ -3470,15 +2964,9 @@
   set_interest_user_mismatch: Another [:user] is logged on at this machine. Please log them off, log back in as you, and try again.
 
   # observer/show_notifications
-  show_notifications_title: New Notifications for [user]
 
   # species_list/bulk_editor
-  species_list_bulk_editor_title: Observation List Bulk Editor
-  species_list_bulk_editor_another: Another
-  species_list_bulk_editor_reuse: Reuse
   species_list_bulk_editor_success: Successfully updated [n] observation(s).
-  species_list_bulk_editor_you_own_no_observations: You don't own any observations in this observation list.
-  species_list_bulk_editor_ambiguous_namings: "The proposed names are confusing for observation [id]: [name]. Please \"go to that observation\":/[id] and make your changes there."
   species_list_bulk_editor_help: "Hold your mouse over any of the fields in the table below to see what the field is supposed to be. The text fields are, in order: notes (top right), date, location, latitude, longitude, elevation (second row). Check boxes indicate, respectively, if location is where collected, and specimen. All links open in new tabs."
 
   # observer/<Theme>
@@ -3513,11 +3001,11 @@
   theme_switch: To select this as your theme, go to your "preferences":/account/preferences/edit and select [theme] as your Preferred Theme
 
   # Theme names.
-  Agaricus: Agaricus
-  Amanita: Amanita
-  Cantharellaceae: Cantharellaceae
-  Hygrocybe: Hygrocybe
-  BlackOnWhite: Black on White
+  agaricus: Agaricus
+  amanita: Amanita
+  cantharellaceae: Cantharellaceae
+  hygrocybe: Hygrocybe
+  black_on_white: Black on White
 
   # info/translators_note
   translators_note: "Please help us make this website available around the world! It's easy.\n\nThere are approximately 3000 lines with 25000 words of text on this site at the moment, but don't let that scare you. We've organized it so someone with limited time can concentrate on the most important text. Then as time and energy permits, they or someone else can continue working down the list until one day it is all finished.\n\nThere are several ways to get started. You can pick up a copy of the entire \"translation file\":[repo] and start translating it into any language you wish. \"Send us an email\":/admin/emails/webmaster_questions/new to learn more about this approach.\n\nIt's even easier to work on existing translations. Just look for \"[:app_edit_translations]\" at the bottom of any page. You can see immediately how your changes look in the context of the page. If your language is not available, \"send us an email\":/admin/emails/webmaster_questions/new and we can create a \"beta\" version for you to work on.\n\nYou will, of course, receive credit and contribution bonus for each line you translate, in addition to the gratitude of countless users."
@@ -3528,35 +3016,25 @@
   edit_translations_bad_locale: "Invalid locale code: [locale]"
   edit_translations_login_required: Must be logged in to edit translations.
   edit_translations_reviewer_required: Only reviewers have permission to edit the English translations.
-  edit_translations_created_at: Created translation for [tag].
-  edit_translations_changed: Changed translation for [tag].
-  edit_translations_no_changes: Nothing changed.
   edit_translations_saving: Saving...
   edit_translations_loading: Loading...
   edit_translations_will_lose_changes: There are unsaved changes. Would you like to continue anyway?
-  edit_translations_switch_language: Switch Language
-  edit_translations_original_text: Original Text
   edit_translations_old_versions: Old Versions
-  edit_translations_full_text: full text
-  edit_translations_no_versions: No old versions.
   edit_translations_singular: singular form
   edit_translations_plural: plural form
   edit_translations_lowercase: all lowercase as for end of sentence
   edit_translations_uppercase: all uppercase as for title
   edit_translations_page_expired: The page you were working on has expired. Please go back and reload it, then click on "[:app_edit_translations_on_page]" again.
-  edit_translations_help: On the left is a list of translation strings, arranged thematically according to how they appear in the main translation file. If you click on one of the underlined labels, it will allow you to edit the corresponding string in the panel on the right. Click "[:SAVE]" to save your changes.
+  edit_translations_help: On the left is a list of translation strings, arranged thematically according to how they appear in the main translation file. If you click on one of the underlined labels, it will allow you to edit the corresponding string in the panel on the right. Click "[:save.ti]" to save your changes.
 
   # observer/turn_javascript_nil
   turn_javascript_nil_body: We will resume auto-detection of the state of javascript.
-  turn_javascript_nil_title: Auto-Detect Javascript
 
   # observer/turn_javascript_off
   turn_javascript_off_body: We will now ignore javascript.
-  turn_javascript_off_title: Turn Javascript Off
 
   # observer/turn_javascript_on
   turn_javascript_on_body: We will now assume javascript is on.
-  turn_javascript_on_title: Turn Javascript On
 
   ##############################################################################
 
@@ -3578,7 +3056,6 @@
   add_members_already_removed_member: Already removed [user] from members.
 
   # project/<id>/members
-  index_members_title: Members of
 
   # project/add_project
   add_project_already_exists: A project named '[title]' already exists.
@@ -3588,27 +3065,17 @@
   add_project_need_title: Projects must have a title.
   add_project_success: Project was successfully created.
 
-  # account/add_user_to_group
-  add_user_to_group_already: "[user] is already a member of [group]."
-  add_user_to_group_group: Group name
-  add_user_to_group_no_group: Unable to find the group, '[group]'.
-  add_user_to_group_no_user: Unable to find the [:user], '[user]'.
-  add_user_to_group_success: "[user] added to [group]."
-  add_user_to_group_title: Add [:user] to Group
-  add_user_to_group_user: "[:USER] name"
-
   # admin_request/author_request emails
   admin_request_change_member_status: Change [:user]'s status
   admin_request_success: Successfully sent admin request for [title]
   admin_request_title: Admin Request for [title]
-  admin_request_note: Enter your request below. When you hit "[:SEND]" it will be emailed to to project admins. The email will include your email address so that they can respond to your request.
+  admin_request_note: Enter your request below. When you hit "[:send.ti]" it will be emailed to to project admins. The email will include your email address so that they can respond to your request.
   project_administration_promoted_flash: You are now an admin of [title].
   project_administration_already_admin_flash: You are already an admin of this project.
   author_request_add_author: Make sender an author
   author_request_title: Authorship Request for [title]
   author_request_note: "[:admin_request_note]"
   request_message: Message
-  request_show_user: Show details on sender
   request_subject: Subject
   request_success: Delivered email.
 
@@ -3652,25 +3119,23 @@
 
   # observer/send_feature_email
   send_feature_email_success: Delivered feature mail.
-  send_feature_email_denied: Only the admin can send feature mail.
 
   # project/destroy_project
   destroy_project_failed: Failed to destroy project.
   destroy_project_success: Project destroyed.
 
   # project/edit_project
-  edit_project_destroy: "[:destroy_object(type=:project)]"
   alphanumerics_only: must only contain ASCII alphanumerics and dashes
 
   # project/_form_projects
   form_projects_any: Any
   form_projects_date_range: Date Range
   form_projects_date_fixed: Use above date
-  form_projects_dates_explain: Default earliest and latest dates for [:OBSERVATIONS]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning.
+  form_projects_dates_explain: Default earliest and latest dates for [:observations.ti]. Users will be warned if trying to add an Observation outside of this range, but they can override the warning.
   form_projects_end_date: Project End Date
   form_projects_range: Range
   form_projects_start_date: Project Start Date
-  form_projects_title: "[:Title]"
+  form_projects_title: "[:title.ti]"
   form_projects_open_membership: Enable users to add themselves and disable shared editing
   form_projects_where: Optional Project Location
   form_projects_image_upload: Upload photo
@@ -3678,11 +3143,9 @@
   form_projects_use_date_range: Use above dates
 
   # project/list_projects
-  list_projects_title: "[:list_objects(type=:project)]"
   list_projects_add_project: "[:add_object(type=:project)]"
 
   # draft/publish_draft
-  publish_draft_denied: "Permission denied: Only the creator of a draft or a project admin can publish a draft."
 
   # project/review_authors
   review_authors_add_author: Add
@@ -3696,25 +3159,16 @@
 
   # project/show_project
   show_project_add_members: Add Members
-  show_project_admin_group: Admin Group
   show_project_admin_request: Admin Request
   show_project_administer: Administer Project
-  show_project_by: Owned By
   show_project_created_at: Created
-  show_project_destroy: Destroy Project
   show_project_drafts: Drafts
-  show_project_edit: Edit Project
   show_project_field_slip_create: Create Field Slip PDF
   show_project_field_slip_no_prefix: This project has no field slip prefix yet, which is required before field slips can be created.
   show_project_field_slip_prefix: Field Slip Prefix
   show_project_field_slip_set_prefix: Set a field slip prefix
   show_project_join: Join Project
-  show_project_location: Location
   show_project_leave: Leave Project
-  show_project_published: Reviewed Published Names
-  show_project_summary: Summary
-  show_project_user_group: User Group
-  show_project_violation_count: Project has [count] constraint violation(s)
   show_project_admin_title: Project Admin
   show_project_admin_tab: Admin
   show_project_admin_details_tab: Details
@@ -3733,9 +3187,8 @@
 
   # project/violations/index
   form_violations_help: Each row shows an Observation that fails one or more of this Project's constraints. Use the per-row actions to bring it into compliance.
-  violations_index_title: "[:CONSTRAINT_VIOLATIONS]"
   form_violations_latitude_none: "Lat: Any"
-  form_violations_location_none: "[:LOCATION]: Any"
+  form_violations_location_none: "[:location.ti]: Any"
   form_violations_longitude_none: "Lon: Any"
   form_violations_remove_selected: Remove Selected
   form_violations_show_project: Show Project
@@ -3758,7 +3211,6 @@
   form_violations_modal_target_location_submit: Add Target
 
   # users/by_name
-  users_by_name_title: Users by Name
   users_by_name_created_at: Created
   users_by_name_groups: Groups
   users_by_name_id: ID
@@ -3774,9 +3226,7 @@
   index_license_header: Licenses
 
   # licenses/show
-  show_license_header: License
   index_license: Index
-  license_default: Default License
 
   # licenses/form
   create_license_title: Create License
@@ -3789,7 +3239,6 @@
 
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation
-  create_donation_not_allowed: Only admins can record donations
   create_donation_add: Add
   create_donation_tab: Record Donation
 
@@ -3846,29 +3295,24 @@
 
   # Subject lines.
   email_subject_add_herbarium_record_not_curator: Fungarium Record Added to [herbarium_name]
-  email_subject_comment: "[:COMMENT] About [name]"
+  email_subject_comment: "[:comment.ti] About [name]"
   email_subject_commercial_inquiry: Commercial Inquiry About [Name]
   email_subject_consensus_change: Consensus Changed from [old] to [new]
-  email_subject_denied: "[:USER] Creation Blocked"
-  email_subject_features: New [:app_title] Features
   email_subject_location_change: "[name] Has Been Changed"
   email_subject_naming_for_observer: Research Request
   email_subject_naming_for_tracker: Naming Notification - [name]
   email_subject_name_change: "[name] Has Been Changed"
-  email_subject_name_proposal: "[:OBSERVATION] #[id] May Be [name]"
+  email_subject_name_proposal: "[:observation.ti] #[id] May Be [name]"
   email_subject_inat_import_digest: "[count] new iNaturalist [:observations] matching your interests"
   email_subject_name_tracker_approval: Research Request Emails Approved for [name]
   email_subject_new_password: New Password
-  email_subject_occurrence_added: "[:OBSERVATION] Added to [:OCCURRENCE], [name]"
-  email_subject_occurrence_removed: "[:OBSERVATION] Removed from [:OCCURRENCE], [name]"
-  email_occurrence_added_intro: "Your observation [name] has been added to an [:OCCURRENCE] by [user]."
-  email_occurrence_removed_intro: "Your observation [name] has been removed from an [:OCCURRENCE] by [user]."
-  email_subject_observation_change: "[:OBSERVATION] Changed, [name]"
-  email_subject_observation_destroy: "[:OBSERVATION] Destroyed, [name]"
+  email_subject_occurrence_added: "[:observation.ti] Added to [:occurrence.ti], [name]"
+  email_subject_occurrence_removed: "[:observation.ti] Removed from [:occurrence.ti], [name]"
+  email_occurrence_added_intro: "Your observation [name] has been added to an [:occurrence.ti] by [user]."
+  email_occurrence_removed_intro: "Your observation [name] has been removed from an [:occurrence.ti] by [user]."
+  email_subject_observation_change: "[:observation.ti] Changed, [name]"
+  email_subject_observation_destroy: "[:observation.ti] Destroyed, [name]"
   email_subject_observation_question: Question About [name]
-  email_subject_publish_name: Name Published
-  email_subject_registration: "[name] Registration Verification"
-  email_subject_update_registration: "[name] Registration Update"
   email_subject_verify: Email Verification
   email_subject_verify_api_key: Activate API Key
   email_subject_webmaster_question: Question From [user]
@@ -3878,17 +3322,16 @@
   email_field_changed_thumbnail: Changed thumbnail
   email_field_collection_location: Specimen _was_ collected at this location
   email_field_collection_not_location: Specimen _was not_ collected at this location
-  email_field_east: "[:East] edge"
-  email_field_image_count: "[:Image] count"
+  email_field_east: "[:east.ti] edge"
+  email_field_image_count: "[:image.ti] count"
   email_field_new_name: New [:name]
   email_field_no_specimen_available: Specimen is no longer available
-  email_field_north: "[:North] edge"
+  email_field_north: "[:north.ti] edge"
   email_field_old_name: Old [:name]
-  email_field_published: Published by
   email_field_removed_images: Removed image(s)
-  email_field_south: "[:South] edge"
+  email_field_south: "[:south.ti] edge"
   email_field_specimen_available: Specimen is now available
-  email_field_west: "[:West] edge"
+  email_field_west: "[:west.ti] edge"
 
   # This is used like this: "<Label>: <old_value> changed to <new_value>"
   email_field_is_now: changed to
@@ -3896,7 +3339,6 @@
   # "Helpful" links at the bottom of the email.
   email_links_change_prefs: Change your preferences
   email_links_disable_tracking: Disable tracking for this [type]
-  email_links_email_publisher: Send email to the publisher
   email_links_latest_changes: Latest changes at [:app_title]
   email_links_not_interested: I'm not interested in this [type]
   email_links_post_comment: Post a [:comment]
@@ -3927,7 +3369,6 @@
   email_commercial_intro: "h2. *Commercial Inquiry*\n\n[user] ([email]) asked the [:app_title] website to forward the following commercial inquiry to you about your image [image]:"
   email_consensus_change_intro: "h2. *Consensus Change*\n\nConsensus has changed for observation #[id]:"
   email_add_herbarium_record_not_curator_intro: "h2. *Fungarium Record Added By Non-Curator*\n\nThe user, [login], added the fungarium record, [herbarium_label], to the fungarium, [herbarium_name], which you curate."
-  email_features_intro: "h2. *New Features*\n\nThe following new features have been released at the [:app_title] website:"
   email_name_change: "User made nontrivial change to a name:\n\nuser : [user]\nold identifier : [old_identifier]\nnew identifier : [new_identifier]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nnamings : [namings]\nshow name : [show_url]\nedit name : [edit_url]"
   email_location_change: "User made nontrivial change to a location:\n\nuser : [user]\nold name : [old]\nnew name : [new]\nobservations : [observations]\nshow location : [show_url]\nedit location : [edit_url]"
   email_merger_icn_id_conflict: "User merged names; one icn_id discarded:\n\nname : [name]\nsurviving icn_id : [surviving_icn_id]\ndeleted icn_id : [deleted_icn_id]\nuser : [user]\nshow url : [show_url]\nedit url : [edit_url]"
@@ -3950,9 +3391,6 @@
   email_object_change_reason_interest: You received this email because you expressed interest in this [type].
   email_observation_destroyed_intro: h2. *Observation Destroyed*
   email_observation_question_intro: "h2. *Question from Another User*\n\n[user] ([email]) asked the [:app_title] website to forward the following question to you about your observation <u>[name]</u>:"
-  email_publish_name_intro: "h2. *Draft of Name Has Been Published*\n\nA description of a name has been published on the [:app_title] website. You are receiving this email since you are listed as either an author for this taxon or as a reviewer on the site."
-  email_registration_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and intended to register [how_many] attendee(s) for the [name]:\n\n[link]"
-  email_update_registration_intro: "h2. *Hello [user]*\n\nYour registration for the [name] has been updated from\n\n[before]\n\n\nto\n\n\n[after]"
   email_user_question_intro: "h2. *Question from Another User*\n\n[user] ([email]) asked the [:app_title] website to forward the following email to you:"
   email_verify_intro: "h2. *Hello [user]*\n\nPlease click the following link to verify that you received this email and activate your [:app_title] account:\n\n[link]"
   email_verify_api_key_intro: "h2. *Hello [user]*\n\nThe application \"[app]\" (associated with user \"[app_user]\") has requested access to your [:app_title] account. If you recognize this application and wish to give them permission to post observations, etc. in your name, all you have to do is click on the activation link below to activate the API key they just created. Note that you can review your list of API keys at any time by visiting the [:account_api_keys_title] from your \"[:app_preferences]\" page.\n\nActivate Key: [activate_link]\n[:account_api_keys_link]: [manager_link]\n\nTo report a suspicious access request, just respond to this email."
@@ -3985,24 +3423,22 @@
   how_glossary: Concepts Glossary
   how_intro: This page provides some short descriptions of common uses of this website followed by an overview of the basic concepts used.
   how_keeping_up: "*Keeping Up with Changes* - The default page for [:app_title] is the '[:rss_log_title]', it is also accessible through the '\"Latest Changes\":/' link in the left-hand panel. This page shows you the most recent changes on the site. It lists new \"Observations\":#observation and \"Observation Lists\":#species_list as well as significant changes to any already existing ones. Additions of \"Images\":#image and \"Comments\":#comment are considered significant changes to the relevant observations. Changes to \"Names\":#name are also listed. Click the page numbers at the top and bottom of the page to browse through older changes. Observations and names created as a side effect of other changes are not listed separately.\n\nNote : The latest changes can be tracked using our \"RSS feed\":/activity_logs/rss. See this \"wikipedia article\":https://en.wikipedia.org/wiki/Rss for more information about RSS feeds."
-  how_searching: "*Searching* - There are several interesting ways to search for information on the site. The simplest is to type a search string into the search box near the top of each page and click one of the buttons next to it. This will give you a list of all the \"Observations\":#observation, \"Images\":#image, \"Names\":#name or \"Locations\":#location that contain fields matching the given string. If you need a little more control over the search, try the '[:search_bar_more_options]' button next to the search bar.\n\nYou may also browse the site using the links in the left-hand panel. For example, clicking on 'Names' under 'Indexes' on the left of the page shows all the species that have observations, listed alphabetically. You can page through this list, or skip directly to the letter of a name you are interested in by clicking the appropriate page number or letter along the top or bottom of the list. Click a name from this list to see a description of the species and a list of observations of that species. If you click a genus like 'Agaricus', it will also show a list of species in that genus. Note, however, that in this case it will only show observations that have been identified to the genus level, not ones that have been identified as a species in that genus. On the other hand, if two names are considered synonyms, you will see observations for either name on this page. (*NOTE*: If you do a search on 'Agaricus', it _will_ show all the observations whose name contains that string, so you get all the observations that belong to that genus.)\n\nWhenever you click an observation or other result on an index page, it will take you to a page showing that result. At the top of the page you will see '[:PREV]', '[:NEXT]', and '[:INDEX]' links. These let you browse forward or backward through the results or return to the index. At the top of the index page you will often see links allowing you to sort the results by different criteria, such as by date, name or user. In the same place you will sometimes find links that let you turn an index of observations into an index of names or images of those same observations. For example, if you click '[:app_your_observations]', it will show you a list of observations you have posted. Click '[:show_objects(types=:names)]' at the top of the page to see a list of the species you have seen, or click '[:show_objects(types=:locations)]' to see a list of all the locations you've gone mushrooming in.\n\nPower users may also be interested in our new API providing direct access to our database back-end. This can be used to mine our database for images or species descriptions for inclusion in wikipedia or other public websites. You can also use it to upload observations and images and much more. Please contact the \"webmaster\":/admin/emails/webmaster_questions/new for more information."
-  how_unknown_help: "*Getting Help with an Unknown* - In order to get help with an unknown, you need to have a user account. These can be created easily by selecting '[:app_create_account]' from the left-hand panel. See the discussion of \"Users\":#user below for more details.\n\nOnce you are logged in, create a new \"Observation\":#observation by selecting '[:app_create_observation]' in the left-hand panel. Enter all the details you can into the resulting form. You can leave the '[:WHAT]' field blank call it '[:unknown]', or if you think you know the genus or family or other group, give that \"Name\":#name followed by 'sp.', e.g., 'Russula sp.'. In the '[:NOTES]' field provide information about habitat, odor, smell and anything else not clear from the photos. Once the form is as complete as you can make it, click '[:CREATE]'.\n\nYou should now be looking at a page showing you the information you just entered. However, if you used a name that is not currently in the database, you will be asked if you want to add the name. This also gives you a chance to catch and fix typos. In addition, if you use a name that is considered deprecated, you will be given the option of using a preferred synonym.\n\nOnce you have created the new observation, you can upload any \"Images\":#image you have by selecting the '[:show_observation_add_images]' link on the right-side of the page. It is very important either that it be an image you took or that you have the explicit permission of the person who created the image to upload it to the site. If you did not take the image, please update the '[:form_images_copyright_holder]' field to reflect the actual owner. This page also allows you to select the \"License\":#license you want to release the image under.\n\nWhen you add unknowns, the community will generally \"propose one or more names\":#proposing_names for it within 24-hours. If you find any of the suggested names compelling, you should not hesitate to revisit your observation and \"Vote\":#vote on them. Please see the discussion below on \"voting\":#voting, as well. Members of the community may also post feedback via \"Comments\":#comment. By default your account is set up to deliver comments posted about your observations to you by email. If you are asked to provide more details on the collection, we prefer that you select '[:show_observation_edit_observation]' (at the top of the observation page) and add them to the '[:NOTES]' field than to just post another comment."
-  how_adding_observations: "*Adding Observations You Have Identified* - Use the same process as \"Getting Help with an Unknown\":#unknown_help, except this time provide your identification in the '[:WHAT]' field. You are strongly encouraged to say something about how you arrived at the identification. We've provided a small set of checkboxes to make this easy ('[:naming_reason_label_1]', '[:naming_reason_label_3]', etc.), but you are encouraged to elaborate on them in the provided text fields (e.g., list the references you used, or enter 'sequenced the DNA and compared it against the data in GenBank'!). Community members will often post \"Comments\":#comment if there is some question about the collection or if they would like clarification as to why you ruled out other \"Names\":#name. Roy Halling has provided beautifully illustrated presentations describing <a href=\"https://mushroomobserver.org/pdf/macro-features.pdf\">macroscopic</a> and <a href=\"https://mushroomobserver.org/pdf/micro-features.pdf\">microscopic</a> features. More documentation on creating scientifically valuable collections is available from the <a href=\"https://www.mycoportal.org/portal/misc/links.php\">MycoPortal Links Page</a>."
-  how_proposing_names: "*Proposing Names* - Any member of the community can propose \"Names\":#name for any \"Observations\":#observation. Click an observation (e.g., from the '[:rss_log_title]' page) and scroll down below the observation notes. There should be a list of \"Proposed Names\":#proposed_name enclosed in a thin outlined box. Most observations will already have at least one proposed name (by the owner). From here you may either click '[:show_namings_propose_new_name]' or \"Vote\":#voting on existing names. In either case you will have to log in before you are allowed to do so.\n\nWhen you click '[:show_namings_propose_new_name]' you will be presented with a form much like the one used to create an observation. In addition to the name, you are required to choose a confidence level. This is your \"Vote\":#vote, and you may change it on the '[:show_object(type=:observation)]' page at any time you like. As with creating an observation, you are strongly encouraged to give some explanation as to why you think your Name applies to this Observation (and why other names don't). When you are finished, click '[:CREATE]'. You will be given a chance to correct typos or to choose an accepted name if you entered a deprecated one.\n\nUsers are not allowed to propose a name if someone else has already done so. The only reason to do so would be to describe alternative reasons for reaching the same conclusion. Instead use the discussion forum provided by comments to do this."
+  how_searching: "*Searching* - There are several interesting ways to search for information on the site. The simplest is to type a search string into the search box near the top of each page and click one of the buttons next to it. This will give you a list of all the \"Observations\":#observation, \"Images\":#image, \"Names\":#name or \"Locations\":#location that contain fields matching the given string. If you need a little more control over the search, try the '[:search_bar_more_options]' button next to the search bar.\n\nYou may also browse the site using the links in the left-hand panel. For example, clicking on 'Names' under 'Indexes' on the left of the page shows all the species that have observations, listed alphabetically. You can page through this list, or skip directly to the letter of a name you are interested in by clicking the appropriate page number or letter along the top or bottom of the list. Click a name from this list to see a description of the species and a list of observations of that species. If you click a genus like 'Agaricus', it will also show a list of species in that genus. Note, however, that in this case it will only show observations that have been identified to the genus level, not ones that have been identified as a species in that genus. On the other hand, if two names are considered synonyms, you will see observations for either name on this page. (*NOTE*: If you do a search on 'Agaricus', it _will_ show all the observations whose name contains that string, so you get all the observations that belong to that genus.)\n\nWhenever you click an observation or other result on an index page, it will take you to a page showing that result. At the top of the page you will see '[:prev.ti]', '[:next.ti]', and '[:index.ti]' links. These let you browse forward or backward through the results or return to the index. At the top of the index page you will often see links allowing you to sort the results by different criteria, such as by date, name or user. In the same place you will sometimes find links that let you turn an index of observations into an index of names or images of those same observations. For example, if you click '[:app_your_observations]', it will show you a list of observations you have posted. Click '[:show_objects(types=:names)]' at the top of the page to see a list of the species you have seen, or click '[:show_objects(types=:locations)]' to see a list of all the locations you've gone mushrooming in.\n\nPower users may also be interested in our new API providing direct access to our database back-end. This can be used to mine our database for images or species descriptions for inclusion in wikipedia or other public websites. You can also use it to upload observations and images and much more. Please contact the \"webmaster\":/admin/emails/webmaster_questions/new for more information."
+  how_unknown_help: "*Getting Help with an Unknown* - In order to get help with an unknown, you need to have a user account. These can be created easily by selecting '[:app_create_account]' from the left-hand panel. See the discussion of \"Users\":#user below for more details.\n\nOnce you are logged in, create a new \"Observation\":#observation by selecting '[:app_create_observation]' in the left-hand panel. Enter all the details you can into the resulting form. You can leave the '[:what.ti]' field blank call it '[:unknown]', or if you think you know the genus or family or other group, give that \"Name\":#name followed by 'sp.', e.g., 'Russula sp.'. In the '[:notes.ti]' field provide information about habitat, odor, smell and anything else not clear from the photos. Once the form is as complete as you can make it, click '[:create.ti]'.\n\nYou should now be looking at a page showing you the information you just entered. However, if you used a name that is not currently in the database, you will be asked if you want to add the name. This also gives you a chance to catch and fix typos. In addition, if you use a name that is considered deprecated, you will be given the option of using a preferred synonym.\n\nOnce you have created the new observation, you can upload any \"Images\":#image you have by selecting the '[:show_observation_add_images]' link on the right-side of the page. It is very important either that it be an image you took or that you have the explicit permission of the person who created the image to upload it to the site. If you did not take the image, please update the '[:form_images_copyright_holder]' field to reflect the actual owner. This page also allows you to select the \"License\":#license you want to release the image under.\n\nWhen you add unknowns, the community will generally \"propose one or more names\":#proposing_names for it within 24-hours. If you find any of the suggested names compelling, you should not hesitate to revisit your observation and \"Vote\":#vote on them. Please see the discussion below on \"voting\":#voting, as well. Members of the community may also post feedback via \"Comments\":#comment. By default your account is set up to deliver comments posted about your observations to you by email. If you are asked to provide more details on the collection, we prefer that you select '[:show_observation_edit_observation]' (at the top of the observation page) and add them to the '[:notes.ti]' field than to just post another comment."
+  how_adding_observations: "*Adding Observations You Have Identified* - Use the same process as \"Getting Help with an Unknown\":#unknown_help, except this time provide your identification in the '[:what.ti]' field. You are strongly encouraged to say something about how you arrived at the identification. We've provided a small set of checkboxes to make this easy ('[:naming_reason_label_1]', '[:naming_reason_label_3]', etc.), but you are encouraged to elaborate on them in the provided text fields (e.g., list the references you used, or enter 'sequenced the DNA and compared it against the data in GenBank'!). Community members will often post \"Comments\":#comment if there is some question about the collection or if they would like clarification as to why you ruled out other \"Names\":#name. Roy Halling has provided beautifully illustrated presentations describing <a href=\"https://mushroomobserver.org/pdf/macro-features.pdf\">macroscopic</a> and <a href=\"https://mushroomobserver.org/pdf/micro-features.pdf\">microscopic</a> features. More documentation on creating scientifically valuable collections is available from the <a href=\"https://www.mycoportal.org/portal/misc/links.php\">MycoPortal Links Page</a>."
+  how_proposing_names: "*Proposing Names* - Any member of the community can propose \"Names\":#name for any \"Observations\":#observation. Click an observation (e.g., from the '[:rss_log_title]' page) and scroll down below the observation notes. There should be a list of \"Proposed Names\":#proposed_name enclosed in a thin outlined box. Most observations will already have at least one proposed name (by the owner). From here you may either click '[:show_namings_propose_new_name]' or \"Vote\":#voting on existing names. In either case you will have to log in before you are allowed to do so.\n\nWhen you click '[:show_namings_propose_new_name]' you will be presented with a form much like the one used to create an observation. In addition to the name, you are required to choose a confidence level. This is your \"Vote\":#vote, and you may change it on the '[:show_object(type=:observation)]' page at any time you like. As with creating an observation, you are strongly encouraged to give some explanation as to why you think your Name applies to this Observation (and why other names don't). When you are finished, click '[:create.ti]'. You will be given a chance to correct typos or to choose an accepted name if you entered a deprecated one.\n\nUsers are not allowed to propose a name if someone else has already done so. The only reason to do so would be to describe alternative reasons for reaching the same conclusion. Instead use the discussion forum provided by comments to do this."
   how_voting: "*Voting on Proposed Names* - Click an \"Observation\":#observation, e.g., from the '[:rss_log_title]' page, and scroll down to the '[:show_namings_proposed_names]' box. Note that you must login before you can see or change any of your \"Votes\":#vote. Once you have logged in, you should see pulldown menus next to each \"Proposed Name\":#proposed_name. Your vote expresses the degree of confidence or agreement you have with placing that name on that observation. Everything above '[min_neg_vote]' is considered a positive vote, everything below '[min_pos_vote]' negative. Choose '[no_opinion]' to tell it to delete your vote. When you've changed all the votes you want to, be sure to click '[:show_namings_update_votes]' to record your votes. Don't worry, if you forget and try to navigate away without casting your votes it will complain (unless you have Javascript disabled).\n\nRoughly speaking, votes for a name are weighted, summed and then divided by the number of votes for that name. The name with the highest score wins, and that name will be applied to that observation throughout the site. In the case where multiple synonyms are proposed for an observation it lumps the votes together, choosing each user's strongest vote within that group of synonyms. In the end, assuming that group of synonyms wins, the currently accepted name is used as the community consensus. If there is still debate in the scientific community about which name is appropriate for a given taxon, then it will use votes the best it can to decide between multiple accepted names. Note that the owner's vote automatically carries a little more weight, as do the votes of users who have made a large \"Contribution\":#contribution to [:app_title] or who are considered experts. Click '[:app_contributors]' or click a user's name to see the contribution and expert status. (We use the log base 10 of users' contributions.)"
   how_adding_comments: "*Adding Comments* - When you are looking at an \"Observation\":#observation, if you would like to post or respond to a \"Comment\":#comment, select the '[:show_comments_add_comment]' link near the top of the page. If you are not currently logged in to a \"User\":#user account, you will be asked to log in. Once you are logged in, you will be given a form asking for a summary and your comment. Note that you can do some simple formatting in the comment section. This is briefly documented below the text field with a link to detailed documentation. You can also add links within a comment using standard HTML formatting. The HTML gets automatically cleaned to avoid security problems like script injection, so try not to get too fancy."
-  how_tracking_species: "*Tracking a Particular Species or Genus Through Email* - [:app_title] allows you to request an email any time a particular \"Name\":#name is given to an \"Observation\":#observation. If that name is a genus or species it will also send you an email whenever a species or subspecies is observed. To turn this feature on, go to the page for a Name you are interested in (see \"Searching\":#searching) and click '[:show_name_email_tracking]'. You can configure it so that the person who made the observation that was given that name will be sent a customized email to let them know you are interested in their observation. If you don't provide any instructions, they will not be sent an email. If the observer gives the name at the time the observation is created, they will be shown your message immediately through the website. You can modify or disable your request for a particular name by going back to that name and again selecting '[:show_name_email_tracking]' and clicking the '[:DISABLE]' button on the page that comes up."
+  how_tracking_species: "*Tracking a Particular Species or Genus Through Email* - [:app_title] allows you to request an email any time a particular \"Name\":#name is given to an \"Observation\":#observation. If that name is a genus or species it will also send you an email whenever a species or subspecies is observed. To turn this feature on, go to the page for a Name you are interested in (see \"Searching\":#searching) and click '[:show_name_email_tracking]'. You can configure it so that the person who made the observation that was given that name will be sent a customized email to let them know you are interested in their observation. If you don't provide any instructions, they will not be sent an email. If the observer gives the name at the time the observation is created, they will be shown your message immediately through the website. You can modify or disable your request for a particular name by going back to that name and again selecting '[:show_name_email_tracking]' and clicking the '[:disable.ti]' button on the page that comes up."
   how_describing_species: "*Describing Species* - Click any \"Name\":#name link you see throughout the site. For example, click on 'Names' under 'Indexes' on the left side of the page then click on any of the results, or search for a name in the search bar, or click the 'About &lt;&#110;ame&gt;...' link at the top of any \"Observation\":#observation page. These all take you to a page summarizing everything we know about this taxon. If you are familiar with this species and there is something you would like to add, click '[:show_name_edit_name]' and add your notes. You are encouraged to cite references including field guides and scientific papers. Short quotes from references are fine, but please don't make extensive quotes without obtaining permission from the original author."
   how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it. The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'. The person who creates the project is always a member and an administrator for that project. An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page. Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages. Any User can send requests to the admins for a project. These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species. Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators. When a description is published it will become the official description if no official description exists yet."
-  how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/names/284/map), Location Maps (e.g., \"Salt Point State Park\":/locations/4) and the \"[:map_locations_global_map]\":/locations/map.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:NAMES]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name. The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location. Note, however, that auto-completion for the '[:WHERE]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map. This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected. When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'. By default it is checked. If you uncheck it, that observation will not appear in any occurrence maps."
-  how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location. These observations will not appear in our \"occurrence maps\":#maps. An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'. Undefined location names will be followed by a link labeled '[:SEARCH]'. If you click the link for an undefined location, it will show a list of observations reported for that location. The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'. Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location. Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined. Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all locations in use by clicking on '\"[:app_list_locations]\":/locations' in the left-hand panel. This page lists both the defined locations (first column, sorted alphabetically) and the undefined locations (second column, sorted by the number of observations reported from that location). In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park'). You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/locations/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users). If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's. This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details. Merging defined locations is restricted since it can cause significant data loss."
+  how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/names/284/map), Location Maps (e.g., \"Salt Point State Park\":/locations/4) and the \"[:map_locations_global_map]\":/locations/map.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:names.ti]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name. The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location. Note, however, that auto-completion for the '[:where.ti]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map. This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected. When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'. By default it is checked. If you uncheck it, that observation will not appear in any occurrence maps."
+  how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location. These observations will not appear in our \"occurrence maps\":#maps. An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'. Undefined location names will be followed by a link labeled '[:search.ti]'. If you click the link for an undefined location, it will show a list of observations reported for that location. The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'. Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location. Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined. Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all locations in use by clicking on '\"[:app_list_locations]\":/locations' in the left-hand panel. This page lists both the defined locations (first column, sorted alphabetically) and the undefined locations (second column, sorted by the number of observations reported from that location). In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park'). You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/locations/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users). If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's. This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details. Merging defined locations is restricted since it can cause significant data loss."
   how_creating_species_lists: "*Creating Observation Lists* - To create an \"Observation List\":#species_list, click '\"[:app_create_list]\":/species_lists/new' in the left-hand panel. Fill out the various fields.\n\nThere are several methods of collecting a set of existing observations into a new list. In the simplest method, first create an empty observation list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'. This will give you the opportunity to add that observation to any observation list you own. (Note, you can add anyone's observations to an observation list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names. For example, you may use the search bar at the top of the page (toggle the '[:search_bar_more_options]' button for the full search form) to request all observations from Michigan. When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel).\n\nLastly, when you are viewing an existing observation list, you may click '[:species_list_show_clone_list]' which will take you to a new observation list form, with all the information of the existing list already filled in."
   how_write_in: "*Write In New Observation* - Historically, the Create Observation List workflow allowed you to enter a set of 'Write-In-Species'. This feature was rarely used and added a lot of complication to the process of creating a new Observation List. The functionality is still available after you create a list by selecting '[:species_list_show_write_in]'. When you go to add the list, each line is checked to see if there is a match in the database. If there is no matching name, you will be asked if you want to add the unknown names to the database. This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names. Each name given in the 'Write-In Species' field will be used to create a completely new \"Observation\":#observation. The other fields in this form are set for all these new observations."
 
   # Note, glossary terms should appear in alphabetical order.
   how_comment: "*Comment* - Comments are the standard way to discuss an \"Observation\":#observation or its associated \"Images\":#image. Each comment is owned by a particular \"User\":#user. A comment may only be edited or deleted by the owner or a site administrator. You can look up all comments that have been made about your observations by clicking on '\"[:show_user_comments_for_you]\":/comments' in the upper right of the page (the 'inbox' icon)."
-  how_contribution: "*Contribution* - A number or score that measures the quantity and quality of contributions a \"User\":#user has made to [:app_title]. Click '[:app_your_summary]' to see a break-down of your own contribution. You earn points for every \"Observation\":#observation, \"Image\":#image, \"Comment\":#comment, etc. you have posted. \"Describing Species\":#describing_species and \"Defining Locations\":defining_locations are some of the most important contributions a user can make. (See \"How To Help\":/info/how_to_help for a list of other ways to help out.) Currently, contribution is used only in weighting your \"Votes\":#vote when voting on \"Proposed Names\":#proposed_names for observations."
-  how_description: "*Species Description* - A collection of text describing a \"Name\":#name. Every name automatically gets one official description that everyone in the community is allowed to read and modify. Additional descriptions may be created by any \"User\":#user, including project members. The owner of a description may choose any level of read or write permissions, and can control who is given authorship credit. Since descriptions, especially the official one, are often collaborative efforts, modifications by a user are subject to community review, and past versions are kept to facilitate this process. The content of a description includes a set list of sections, including things like '[:form_names_gen_desc]', '[:form_names_diag_desc]', '[:form_names_look_alikes]', '[:form_names_refs]' and other notes."
   how_image: "*Image* - A photograph or illustration of one or more mushroom species. Images are associated with one or more \"Observations\":#observation. A given Image is owned by a particular \"User\":#user who may or may not be the copyright holder. Only the owner or a site administrator can remove an image or edit the associated information. All images in the site are required to be released under one of the \"Creative Commons licenses\":https://creativecommons.org or in the public domain. If you dispute the given copyright or the licensing of an image you are the copyright holder of, send mail to the \"webmaster\":/admin/emails/webmaster_questions/new."
 
   how_license: "**License** – When you post an image or other content on Mushroom Observer (“your Work’), you grant one of the following \"CC (Creative Commons) Licenses\":https://creativecommons.org/licenses/ for others to use your Work:\n-  \"CC-BY-SA - Attribution-ShareAlike\":https://creativecommons.org/licenses/by-sa/4.0/ (Wikipedia compatible): MO's default license. Others can use your Work, however they must credit any new creations based on your Work the same as the original.\n- \"CC-BY - Attribution\":https://creativecommons.org/licenses/by/ (Wikipedia compatible): Others can use your Work as long as they credit you. Others can create new material based on your work.\n- \"CC-BY-NC - Attribution-NonCommercial\":https://creativecommons.org/licenses/by-nc/4.0/: Others can use your Work, and create new material based on it, however they can’t profit from the new material.\n- \"CC-BY-NC-SA - Attribution-NonCommercial-ShareAlike\":https://creativecommons.org/licenses/by-nc-sa/4.0: Others can use your Work, so long as they don’t profit off it and use identical credits for new creations.\n- \"CC-BY-ND - Attribution-NoDerivs\":https://creativecommons.org/licenses/by-nd/4.0/: Others can use your Work, however they can’t alter your Work to create new materials.\n- \"CC-BY-NC-ND - Attribution-NonCommercial-NoDerivs\":https://creativecommons.org/licenses/by-nc-nd/4.0: Others can use your Work, however they can’t profit off it or change it.\n- \"CC0 - No Copyright/Public Domain\":https://creativecommons.org/publicdomain/zero/ (Wikipedia compatible): You waive your rights to your Work. Others can use it without crediting you, and can create new material based on it.\nYou can change your default license by selecting the 'License' on \"your Preferences\":/account/preferences/edit and clicking on ‘Save Changes’. You can also set licenses on a per image basis."
@@ -4107,7 +3543,7 @@
   observation_term_lichen: "\"no\" = exclude lichens, \"yes\" = include only lichens."
   observation_term_has_name: Has a name? (other than "Fungi sp.")
   observation_term_has_notes: "[:query_term_has_notes]"
-  observation_term_has_public_lat_lng: Are the [:OBSERVATION]'s [:LATITUDE] and [:LONGITUDE] fields filled in, and public?
+  observation_term_has_public_lat_lng: Are the [:observation.ti]'s [:latitude.ti] and [:longitude.ti] fields filled in, and public?
   observation_term_has_field: Has a given notes template field filled in.
   observation_term_has_notes_fields: "[:observation_term_has_field]"
   observation_term_has_comments: "[:query_term_has_comments]"
@@ -4116,8 +3552,8 @@
   # We're borrowing these for the help popups on the search forms, thus the
   # similar entries. In the case of apparent duplicates, one will be the
   # pattern search keyword, the other the query param.
-  name_term_names: "[:NAMES]"
-  name_term_pattern: "[:PATTERN]"
+  name_term_names: "[:names.ti]"
+  name_term_pattern: "[:pattern.ti]"
   name_term_created: "[:name_term_created_at]"
   name_term_created_at: "[:query_term_created_at(type=:LOCATION)]"
   name_term_modified: "[:name_term_updated_at]"
@@ -4155,7 +3591,7 @@
   location_term_region: The Location's name includes this string. Partial match anchored at end, including country at least, e.g., "California, USA".
   location_term_by_editor: Location edited by this user.
   location_term_by_users: "[:query_term_by_users(type=:LOCATION)]"
-  location_term_pattern: "[:PATTERN]"
+  location_term_pattern: "[:pattern.ti]"
   location_term_regexp: "The Location's name includes this string."
   location_term_created: Date location was first posted.
   location_term_created_at: "[:location_term_created]"
@@ -4185,10 +3621,10 @@
   project_term_has_observations: "[:query_term_has_observations]"
   project_term_has_species_lists: "Has [:species_lists]?"
   project_term_has_images: "[:query_term_has_images]"
-  project_term_pattern: "[:PATTERN]"
+  project_term_pattern: "[:pattern.ti]"
   project_term_title_has: "[:query_term_title_has(type=:PROJECT)]"
-  project_term_has_summary: "[:PROJECT] has summary."
-  project_term_summary_has: "[:PROJECT] summary has these words."
+  project_term_has_summary: "[:project.ti] has summary."
+  project_term_summary_has: "[:project.ti] summary has these words."
   project_term_has_comments: "[:query_term_has_comments(type=:PROJECT)]"
   project_term_comments_has: "[:query_term_comments_has(type=:PROJECT)]"
   project_term_created_at: "[:query_term_created_at(type=:project)]"
@@ -4213,10 +3649,10 @@
 
   herbarium_term_nonpersonal: "Institutional [:herbaria]."
   herbarium_term_by_users: "[:query_term_by_users(type=:HERBARIUM)]"
-  herbarium_term_mailing_address_has: "[:HERBARIUM] mailing address in this region."
-  herbarium_term_code_has: "[:HERBARIUM] code contains this string."
-  herbarium_term_name_has: "[:HERBARIUM] name contains these words."
-  herbarium_term_description_has: "[:HERBARIUM] description contains these words."
+  herbarium_term_mailing_address_has: "[:herbarium.ti] mailing address in this region."
+  herbarium_term_code_has: "[:herbarium.ti] code contains this string."
+  herbarium_term_name_has: "[:herbarium.ti] name contains these words."
+  herbarium_term_description_has: "[:herbarium.ti] description contains these words."
   herbarium_term_created_at: "[:query_term_created_at(type=:HERBARIUM)]"
   herbarium_term_updated_at: "[:query_term_updated_at(type=:HERBARIUM)]"
 
@@ -4227,7 +3663,7 @@
   search_bar_help_title: Search Bar Help
 
   # Search titles
-  search_form_title: "[:SEARCH] [type]"
+  search_form_title: "[:search.ti] [TYPE]"
 
   # Privacy policy
   privacy_title: The Mushroom Observer Privacy Policy
@@ -4303,7 +3739,6 @@
 
   # ActiveRecord validation error messages.
   validate_confirmation_mismatch: "[Field] doesn't match confirmation."
-  validate_invalid: Invalid [field].
   validate_invalid_url: Invalid URL.
   validate_missing: Missing [field].
   validate_not_a_number: "[Field] is not a number."
@@ -4314,20 +3749,16 @@
   validate_too_long: "[Field] must be less than [max] characters long."
   validate_too_long_or_short: "[Field] must be [min] to [max] characters long."
   validate_too_many_characters: "[Field] has too many characters."
-  validate_too_short: "[Field] must be at least [min] characters long."
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
   validate_user_selection: You selected
   validate_today: today is
 
   # One-time-use error messages.
-  validate_image_content_type_images_only: You can only upload [:images].
-  validate_image_file_missing: Had problems uploading [:image].
   validate_image_file_too_big: We can't handle [:images] that big. Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right. Please try uploading your image again.
   validate_invalid_year: Year is invalid. Should be between 1500 and present.
   validate_future_time: Time travel is not allowed; use a past date or the current date.
-  validate_observation_thumb_image_id_invalid: Unable to find a corresponding [:image] for thumbnail.
   validate_observation_where_missing: Please tell us where it was seen or collected.
   validate_user_email_missing: Please give us a valid email address so we can verify your [:account].
   validate_user_email_mismatch: Your email addresses don't match. Please check for a typo.
@@ -4341,11 +3772,8 @@
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
   validate_comment_duplicate: Duplicate comment. This comment was already submitted.
   validate_comment_user_missing: "[:validate_missing(field=:user)]"
-  validate_image_content_type_too_long: "[:validate_too_long(field=''content_type'',max=100)]"
-  validate_image_copyright_holder_too_long: "[:validate_too_long(field=:copyright_holder,max=100)]"
   validate_image_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_image_user_missing: "[:validate_missing(field=:user)]"
-  validate_image_when_missing: "[:validate_missing(field=:date)]"
   validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_interest_user_missing: "[:validate_missing(field=:user)]"
   validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
@@ -4353,12 +3781,10 @@
   validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
   validate_location_north_less_than_south: "[:validate_this_more_than_that(this=:south,that=:north)]"
   validate_location_north_too_high: "[:validate_too_large(field=:latitude,max=90)]"
-  validate_location_search_name_too_long: "[:validate_too_long(field=''search_name'',max=200)]"
   validate_location_south_too_low: "[:validate_too_small(field=:latitude,min=-90)]"
   validate_location_user_missing: "[:validate_missing(field=:user)]"
   validate_location_west_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
   validate_name_author_too_long: "[:validate_too_many_characters(field=:authority)]"
-  validate_name_shorten: Shorten [:form_names_text_name] and/or [:AUTHORITY].
   validate_name_text_name_too_long: "[:validate_too_many_characters(field=:form_names_text_name)]"
   validate_name_use_first_author: Use the first author followed by “et al.” per <a href="https://www.iapt-taxon.org/nomen/main.php?page=art46" target="_new">ICN Recommendation 46C.2</a>
   validate_name_user_missing: "[:validate_missing(field=:user)]"
@@ -4368,27 +3794,20 @@
   validate_name_equivalent_exists: "Equivalent Name already exists"
   validate_naming_name_missing: "[:validate_missing(field=:name)]"
   validate_naming_observation_missing: "[:validate_missing(field=:observation)]"
-  validate_naming_reason_naming_missing: "[:validate_missing(field=:naming)]"
-  validate_naming_reason_reason_invalid: "[:validate_invalid(field=''reason_code'')]"
   validate_naming_user_missing: "[:validate_missing(field=:user)]"
   validate_notification_user_missing: "[:validate_missing(field=:user)]"
   validate_observation_user_missing: "[:validate_missing(field=:user)]"
-  validate_observation_when_missing: "[:validate_missing(field=:date)]"
   validate_observation_where_too_long: "[:validate_too_long(field=:location,max=1024)]"
-  validate_project_admin_group_missing: "[:validate_missing(field=:admin_group)]"
-  validate_project_ends_before_start: End date is before the start date
   validate_project_title_missing: "[:validate_missing(field=:title)]"
   validate_project_title_too_long: "[:validate_too_long(field=:title,max=100)]"
-  validate_project_user_group_missing: "[:validate_missing(field=:user_group)]"
-  validate_project_user_missing: "[:validate_missing(field=:user)]"
   validate_publication_ref_missing: "[:validate_missing(field=:publication_full)]"
   validate_species_list_title_missing: "[:validate_missing(field=:title)]"
-  validate_sequence_accession_unique: "[:ACCESSIONS] for an [:OBSERVATION] must be unique"
-  validate_sequence_bases_or_archive: Must have [:BASES] or [:DEPOSIT]
-  validate_sequence_bases_blank_lines: "[:BASES] cannot contain blank lines in middle"
-  validate_sequence_bases_bad_codes: "[:BASES] contain invalid code(s)"
-  validate_sequence_bases_unique: "[:BASES] for an [:OBSERVATION] must be unique"
-  validate_sequence_deposit_complete: "[:DEPOSIT] must have both [:ARCHIVE] and [:ACCESSION], or neither [:ARCHIVE] nor [:ACCESSION]."
+  validate_sequence_accession_unique: "[:accessions.ti] for an [:observation.ti] must be unique"
+  validate_sequence_bases_or_archive: Must have [:bases.ti] or [:deposit.ti]
+  validate_sequence_bases_blank_lines: "[:bases.ti] cannot contain blank lines in middle"
+  validate_sequence_bases_bad_codes: "[:bases.ti] contain invalid code(s)"
+  validate_sequence_bases_unique: "[:bases.ti] for an [:observation.ti] must be unique"
+  validate_sequence_deposit_complete: "[:deposit.ti] must have both [:archive.ti] and [:accession.ti], or neither [:archive.ti] nor [:accession.ti]."
   validate_species_list_title_too_long: "[:validate_too_long(field=:title,max=100)]"
   validate_species_list_user_missing: "[:validate_missing(field=:user)]"
   validate_species_list_where_missing: "[:validate_missing(field=:location)]"
@@ -4410,15 +3829,12 @@
   validate_vote_value_out_of_bounds: "[:validate_not_in_range(field=:vote)]"
 
   # Runtime error and success messages.
-  runtime_added: Successfully added [type].
   runtime_added_id: "Successfully added [type] #[value]."
   runtime_added_id_to: "Successfully added [type] #[value] to [name]."
   runtime_added_name: Successfully added [type] '[value]'.
-  runtime_added_name_to: Successfully added [type] '[value]' to [name].
   runtime_added_to: Successfully added [type] to [name].
   runtime_admin_only: That operation is restricted to site admins.
   runtime_already_exists: "[Type] already exists: '[value]'"
-  runtime_already_used: "[Type] is already in use: '[value]'"
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
   runtime_created_name: Successfully created [type] '[value]'.
@@ -4426,10 +3842,8 @@
   runtime_date_should_be_yyyymmdd: Date should be in year-month-day format.
   runtime_delivered_message: Successfully delivered message.
   runtime_delivered_question: Successfully delivered question.
-  runtime_delivered_request: Successfully delivered request.
   runtime_destroyed: Successfully destroyed [type].
   runtime_destroyed_id: "Successfully destroyed [type] #[value]."
-  runtime_destroyed_name: Successfully destroyed [type] '[value]'.
   runtime_failed_to_strip_gps: "Failed to strip GPS data from full-size image's EXIF header: [msg]"
   runtime_invalid: "[Type] is invalid: '[value]'"
   runtime_lat_long_error: "Latitude and longitude must be real numbers between -90 and 90, and -180 and 180 respectively. Use decimal notation or degrees/minutes/seconds. Examples:\n-123.4567\n123.4567 W\n123 27.402 W\n123 24 24.12 W\n123° 24’ 24.12” W\n123deg 24min 24.12sec W"
@@ -4437,50 +3851,31 @@
   runtime_merge_success: Successfully merged [type] [src] into [dest].
   runtime_missing: Missing [field].
   runtime_no_changes: No changes made.
-  runtime_no_create: Unable to create [type].
-  runtime_no_create_id: "Unable to create [type] #[value]."
   runtime_no_create_name: Unable to create [type] '[value]'.
   runtime_no_destroy: Unable to destroy [type].
   runtime_no_destroy_id: "Unable to destroy [type] #[value]."
-  runtime_no_destroy_name: Unable to destroy [type] '[value]'.
-  runtime_no_match: Can't find [type].
   runtime_no_match_id: "Can't find [type] #[value]."
   runtime_no_match_name: Can't find [type] matching '[value]'.
   runtime_no_matches: No matching [types] found.
-  runtime_no_matches_pattern: No [types] matching '[value]' found.
-  runtime_no_matches_regexp: No [types] matching '[value]' found.
   runtime_no_more: There are no more [types].
   runtime_search_string_too_long: "Search string too long ([length] characters). Maximum is [max] characters."
-  runtime_no_objects: There are no [types].
   runtime_no_parse: "Unable to parse: '[value]'"
   runtime_no_save: Unable to save [type].
   runtime_no_update: Unable to update [type].
-  runtime_no_update_id: "Unable to update [type] #[value]."
-  runtime_no_update_name: Unable to update [type] '[value]'.
-  runtime_not_owner: You are not the owner of [type] '[value]'.
   runtime_not_owner_id: "You are not the owner of [type] #[value]."
   runtime_removed: Successfully removed [type].
   runtime_removed_from: Successfully removed [type] from [name].
   runtime_removed_id: "Successfully removed [type] #[value]."
   runtime_removed_id_from: "Successfully removed [type] #[value] from [name]."
-  runtime_removed_name: Successfully removed [type] '[value]'.
-  runtime_removed_name_from: Successfully removed [type] '[value]' from [name].
   runtime_spiders_begone: Spiders Begone! Please login (mushroomobserver.org/account/login/new) to access this page.
   runtime_updated_at: Successfully updated [type].
   runtime_updated_id: "Successfully updated [type] #[value]."
   runtime_updated_name: Successfully updated [type] '[value]'.
-  runtime_uploaded: Successfully uploaded [type].
-  runtime_uploaded_id: "Successfully uploaded [type] #[value]."
   runtime_uploaded_name: Successfully uploaded [type] '[value]'.
-  runtime_user_hasnt_authored: "[user] hasn't written any [types]."
-  runtime_user_hasnt_created: "[user] hasn't created any [types]."
-  runtime_user_hasnt_edited: "[user] hasn't edited any [types]."
 
   # One-time-use messages.
-  runtime_api_key_notes_cannot_be_blank: Notes field cannot be blank.
   runtime_bad_qr_code: "Bad QR code: [code]."
   runtime_bad_use_of_imageless: The special name _Imageless_ was not intended for observations that were created as part of observation lists or which have good documentation. Please read the discussion under "_Imageless_":/names/31080.
-  runtime_dates_must_be_same_format: If you give two dates, they must be the same format.
   runtime_description_added_admin: Gave admin permission to [name].
   runtime_description_added_reader: Gave view permission to [name].
   runtime_description_added_writer: Gave edit permission to [name].
@@ -4495,27 +3890,14 @@
   runtime_description_removed_writer: Revoked edit permission for [name].
   runtime_destroy_description_not_admin: Only a description's admins can delete that description.
   runtime_duplicate_rank: "Rank appears twice: '[rank]'"
-  runtime_herbarium_record_already_exists: Fungarium record [number] at [herbarium] already used by someone else.
   runtime_image_updated_notes: "Updated notes on image #[id]."
   runtime_image_uploaded: Uploaded image '[name]'.
-  runtime_index_no_at_location: No [types] at [location].
-  runtime_index_no_by_rss_log: No [types] have had any recent activity.
-  runtime_index_no_for_object: No [types] for this object.
-  runtime_index_no_for_user: No [types] for [user].
-  runtime_index_no_in_species_list: No [types] in [name].
-  runtime_index_no_inside_observation: "Observation #[id] has no [types]."
-  runtime_index_no_of_children: There are no [types] for children of [name].
-  runtime_index_no_of_name: There are no [types] of [name].
-  runtime_index_no_of_parents: There are no [types] for parents of [name].
-  runtime_index_no_with: There are no [types] with [attachments].
   runtime_invalid_for_rank: "Name is invalid for the rank [rank]: '[name]'"
   runtime_invalid_rank: "Ranks are out of order: '[line_rank]' is the same as or below '[rank]'"
   runtime_location_merge_failed: Failed to merge observation [name].
   runtime_login_failed: Login unsuccessful.
   runtime_login_success: Login successful.
   runtime_map_nothing_to_map: Nothing to map.
-  runtime_name_in_use_with_notes: The name '[name]' is already in use and [other] has notes.
-  runtime_no_conditions: You didn't specify any conditions!
   runtime_no_upload_image: Had problems uploading image '[name]'.
   runtime_object_deleted: This object has been deleted.
   runtime_object_not_in_index: "Can't find [type] #[id] in the results of the current search or index."
@@ -4526,7 +3908,6 @@
   runtime_species_list_clear_success: Successfully removed all observations from list.
   runtime_suggest_one_alternate: No [types] match "[match]", maybe you meant this?
   runtime_suggest_multiple_alternates: No [types] match "[match]", maybe you meant one of these?
-  runtime_unable_to_transfer_name: Unable to transfer [name] to another synonym.
   runtime_wrong_rank: Wrong rank for [name]; expected [expect], but got [actual].
   runtime_wrong_rank_admin: "Wrong rank for [name]; suffix implies [expect], not [actual]. Submit again to create [name] with rank [actual]."
 
@@ -4542,7 +3923,6 @@
   runtime_create_name_success: "[:runtime_created_name(type=:name,value=name)]"
   runtime_description_adjust_permissions_denied: "[:runtime_description_must_be_admin]"
   runtime_description_adjust_permissions_no_changes: "[:runtime_no_changes]"
-  runtime_description_publish_denied: "[:runtime_description_must_be_admin]"
   runtime_destroy_description_success: "[:runtime_destroyed(type=:description)]"
   runtime_destroy_naming_denied: "[:runtime_not_owner_id(type=:naming,value=id)]"
   runtime_destroy_naming_failed: "[:runtime_no_destroy_id(type=:naming,value=id)]"
@@ -4566,43 +3946,25 @@
   runtime_form_comments_destroy_failed: "[:runtime_no_destroy_id(type=:comment,value=id)]"
   runtime_form_comments_destroy_success: "[:runtime_destroyed_id(type=:comment,value=id)]"
   runtime_form_comments_edit_success: "[:runtime_updated_id(type=:comment,value=id)]"
-  runtime_image_destroy_failed: "[:runtime_no_destroy_id(type=:image,value=id)]"
   runtime_image_destroy_success: "[:runtime_destroyed_id(type=:image,value=id)]"
   runtime_image_edit_success: "[:runtime_updated_id(type=:image,value=id)]"
   runtime_image_invalid_image: "[:runtime_invalid(type=:image,value=name)]"
   runtime_image_remove_success: "[:runtime_removed_id(type=:image,value=id)]"
-  runtime_image_resize_denied: "[:runtime_admin_only]"
   runtime_image_reuse_invalid_id: "[:runtime_no_match_id(type=:image,value=id)]"
   runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
   runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
   runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
-  runtime_invalid_name: "[:runtime_invalid(type=:name,value=name)]"
   runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
   runtime_license_duplicate_attributed: Duplicate display_name, form_name, or url
-  runtime_list_location_no_matches: "[:runtime_no_matches(type=:location)]"
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"
-  runtime_location_description_index_no_matches: "[:runtime_no_matches(type=:location_description)]"
   runtime_location_description_success: "[:runtime_created_id(type=:location_description,value=id)]"
-  runtime_location_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:location_description)]"
-  runtime_location_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:location_description)]"
   runtime_location_merge_success: "[:runtime_merge_success(type=:location,src=this,dest=that)]"
   runtime_location_success: "[:runtime_created_id(type=:location,value=id)]"
-  runtime_merge_locations_warning: "[:runtime_merge_warning(type=:location)]"
-  runtime_merge_names_warning: "[:runtime_merge_warning(type=:name)]"
-  runtime_name_already_used: "[:runtime_already_used(type=:name,value=name)]"
   runtime_name_create_already_exists: "[:runtime_already_exists(type=:name,value=name)]"
   runtime_name_deprecate_must_choose: "[:runtime_missing(field=:preferred_name)]"
-  runtime_name_description_index_no_matches: "[:runtime_no_matches(type=:name_description)]"
   runtime_name_description_success: "[:runtime_created_id(type=:name_description,value=id)]"
-  runtime_name_descriptions_by_author_error: "[:runtime_user_hasnt_authored(type=:name_description)]"
-  runtime_name_descriptions_by_editor_error: "[:runtime_user_hasnt_edited(type=:name_description)]"
-  runtime_name_index_no_matches: "[:runtime_no_matches(type=:name)]"
-  runtime_names_by_editor_error: "[:runtime_user_hasnt_edited(type=:name)]"
-  runtime_names_by_user_error: "[:runtime_user_hasnt_created(type=:name)]"
-  runtime_naming_created_at: "[:runtime_created_at(type=:naming)]"
   runtime_naming_updated_at: "[:runtime_updated_at(type=:naming)]"
   runtime_no_more_search_objects: "[:runtime_no_more]"
-  runtime_no_save_naming: "[:runtime_no_save(type=:naming)]"
   runtime_no_save_observation: "[:runtime_no_save(type=:observation)]"
   runtime_object_no_match: "[:runtime_no_match_name(value=match)]"
   runtime_observation_success: "[:runtime_created_id(type=:observation,value=id)]"
@@ -4620,7 +3982,6 @@
   runtime_species_list_remove_observation_success: "[:runtime_removed_id_from(type=:observation,value=id)]"
   runtime_unable_to_create_name: "[:runtime_no_create_name(type=:name,value=name)]"
   runtime_unable_to_save_changes: "[:runtime_no_save(type=:changes)]"
-  runtime_unrecognized_rank: "[:runtime_invalid(type=rank,value=rank)]"
   runtime_user_bad_rank: "Invalid rank: '[rank]'"
   runtime_visual_group_created_at: "[:runtime_created_at(type=:visual_group)]"
   runtime_visual_model_created_at: "[:runtime_created_at(type=:visual_model)]"
@@ -4635,7 +3996,6 @@
   runtime_description_foreign_write_wrong: Descriptions from other servers must be read-only.
   runtime_description_make_default_only_public: You are only allowed to make public descriptions the default. All users must be allowed at least to read it.
   runtime_description_merge_conflict: There is a conflict. Please merge the two descriptions by hand. (Look at the text fields below. Where there is a conflict both descriptions have been entered one on top of the other separated by a line.) You may cancel the operation at any time without making any changes. When you are finished, be sure to destroy the old description.
-  runtime_description_move_invalid_classification: The classification has incorrect syntax. We can't save a new description with it like this, so we've temporarily blanked out the classification field until you correct it.
   runtime_description_must_be_admin: You must be an admin for a description to use this feature.
   runtime_description_permissions_fixed: This type of description has fixed permissions.
   runtime_description_public_read_wrong: Public descriptions must be readable by the general public.
@@ -4650,9 +4010,6 @@
   runtime_image_changed_your_image: "Changed your profile image to image #[id]."
   runtime_image_move_failed: "Something went wrong on the server and we failed to save image #[id]. Please try again."
   runtime_image_process_failed: "Something went wrong on the server and we failed to process image #[id]. Please try again."
-  runtime_image_remove_denied: You do not have permission to remove images from this observation.
-  runtime_image_remove_missing: This observation doesn't have that image!
-  runtime_merge_warning: Because it can be destructive, only the admin can merge existing [types]. An email requesting the proposed merge has been sent to the admins.
   runtime_name_for_description_not_found: Sorry, the name this description belongs to no longer exists.
   runtime_object_not_found: "Sorry, the [type] you tried to display (id #[id]) does not exist. Someone may have deleted it or merged it into another."
   runtime_profile_must_define: You must define this location before we can make it your primary location. Any other changes to your profile have been saved.
@@ -4738,6 +4095,7 @@
   api_file_missing: File "[file]" is missing.
   api_help_message: "Usage: [help]"
   api_herbarium_record_already_exists: There is already a record for [number] at [herbarium].
+  api_image_dhash_mismatch: Image [id] already has dhash [existing]; refusing to overwrite with [submitted].
   api_image_upload_failed: "Failed to upload image: [error]"
   api_incorrect_password: Incorrect password.
   api_lat_long_must_both_be_set: Must supply both latitude and longitude, or neither.
@@ -4752,6 +4110,7 @@
   api_must_be_member: You are not a member of [type] "[name]".
   api_must_be_only_editor: You can only edit [types] if you are the only editor.
   api_must_be_owner: You must be the owner of the [type] "[name]" to do this.
+  api_must_be_site_admin: This action requires a site administrator's API key.
   api_must_have_edit_permission: You do not have permission to edit [type] "[name]".
   api_must_have_view_permission: You do not have permission to view [type] "[name]".
   api_must_not_have_any_herbaria: You can't edit this [:location] because there is an [:herbarium] there.
@@ -4994,16 +4353,14 @@
 
   # Sorting criteria.
   sort_by_accession_number: "[:herbarium_record_accession_number]"
-  sort_by_activity: "[:ACTIVITY]"
+  sort_by_activity: "[:activity.ti]"
   sort_by_box_area: Area
   sort_by_code: Code
-  sort_by_code_then_name: Code and Name
-  sort_by_confidence: "[:CONFIDENCE_LEVEL]"
+  sort_by_confidence: "[:confidence_level.ti]"
   sort_by_contribution: Contribution
-  sort_by_copyright_holder: "[:COPYRIGHT_HOLDER]"
   sort_by_created_at: Date Created
-  sort_by_curator: "[:CURATOR]"
-  sort_by_date: "[:DATE]"
+  sort_by_curator: "[:curator.ti]"
+  sort_by_date: "[:date.ti]"
   sort_by_filename: File Name
   sort_by_header: "Sort by"
   sort_by_herbarium_label: Label
@@ -5012,36 +4369,25 @@
   sort_by_image_quality: Image Quality
   sort_by_initial_det: Taxon
   sort_by_last_login: Last Login
-  sort_by_location: "[:LOCATION]"
-  sort_by_login: "[:LOGIN_NAME]"
-  sort_by_name: "[:NAME]"
+  sort_by_location: "[:location.ti]"
+  sort_by_login: "[:login_name.ti]"
+  sort_by_name: "[:name.ti]"
   sort_by_num_views: Popularity
   sort_by_number: Number
-  sort_by_observation: "[:OBSERVATION]"
-  sort_by_owners_quality: Owner's Quality
   sort_by_posted: Date Posted
   sort_by_records: "#Records"
   sort_by_reverse: Reverse Order
   sort_by_rss_log: Recent Activity
-  sort_by_summary: "[:SUMMARY]"
+  sort_by_summary: "[:summary.ti]"
   sort_by_thumbnail_quality: Thumbnail Quality
-  sort_by_title: "[:TITLE]"
+  sort_by_title: "[:title.ti]"
   sort_by_updated_at: Time Last Modified
-  sort_by_user: "[:USER]"
-  sort_by_where: "[:LOCATION]"
+  sort_by_user: "[:user.ti]"
 
   ##############################################################################
 
   # DEBUGGING STUFF -- this doesn't need translating
 
   # observations/recalc
-  observer_recalc_old_name: "old_name: [name]"
-  observer_recalc_new_name: "new_name: [name]"
-  observer_recalc_caught_error: "Caught exception: [error]"
 
   # observer/status
-  system_status_browser_status_size: Browser status cache size
-  system_status_clear_caches: Clear Caches
-  system_status_gc: GC
-  system_status_textile_name_size: Textile name cache size
-  system_status_title: Server Status

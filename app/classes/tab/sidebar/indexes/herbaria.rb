@@ -3,7 +3,7 @@
 # Sidebar indexes nav: herbaria index.
 class Tab::Sidebar::Indexes::Herbaria < Tab::Base
   def title
-    :HERBARIA.t
+    :herbaria.ti
   end
 
   def path

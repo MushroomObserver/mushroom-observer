@@ -27,14 +27,81 @@ module Views::Controllers::Observations
                ))
       end
 
+      # The plain notes parts (template + orphaned + Other keys not shared
+      # with the occurrence), followed by one value-source part per notes
+      # key ANY occurrence sibling holds (Occurrence#sibling_note_keys) --
+      # every shared key gets the row, whether or not the values currently
+      # differ, so the UI is consistent rather than depending on the
+      # current/sibling values agreeing.
       def observation_form_note_parts
-        observation_notes_form_parts.map do |part|
+        shared = shared_note_keys
+        plain_note_parts(shared) + occurrence_note_parts(shared)
+      end
+
+      # Notes keys shared with the occurrence's other members, or [] when
+      # this isn't the primary of a multi-member occurrence.
+      def shared_note_keys
+        return [] unless model.shows_merged_notes?
+
+        model.occurrence.sibling_note_keys
+      end
+
+      # Template / orphaned / Other parts whose keys aren't shared with
+      # the occurrence -- rendered as ordinary textareas.
+      def plain_note_parts(shared_keys)
+        observation_notes_form_parts.filter_map do |part|
+          key = model.notes_normalized_key(part)
+          next if shared_keys.include?(key)
+
           Components::Form::Notes::Part.new(
-            key: model.notes_normalized_key(part),
+            key: key,
             value: model.notes_part_value(part),
-            label: single_notes_part? ? :NOTES : part
+            label: single_notes_part? ? :notes : part
           )
         end
+      end
+
+      # One value-source part per shared key: notes_state (:set/:hide/
+      # :inherit) from what the primary stores, plus any distinct
+      # differing sibling values as adopt options (empty when they agree).
+      def occurrence_note_parts(shared_keys)
+        adopt = shared_adopt_options
+        inherited = shared_inherited_values
+        shared_keys.map do |key|
+          Components::Form::Notes::Part.new(
+            key: key, value: model.notes[key].to_s,
+            label: key.to_s.tr("_", " "),
+            adopt_options: adopt[key] || [],
+            notes_state: notes_state_for(key),
+            inherited_value: inherited[key]
+          )
+        end
+      end
+
+      # Differing-sibling adopt options per key (empty for agreeing keys);
+      # {} when not the primary of a multi-member occurrence.
+      def shared_adopt_options
+        return {} unless model.shows_merged_notes?
+
+        model.occurrence.adopt_options_by_key
+      end
+
+      # The value each shared key inherits (most-recent sibling's) so the
+      # form's :inherit state can show it greyed; {} when not the primary
+      # of a multi-member occurrence.
+      def shared_inherited_values
+        return {} unless model.shows_merged_notes?
+
+        model.occurrence.inherited_values_by_key
+      end
+
+      # What the primary currently shows for a shared key: a stored value
+      # (:set), a stored blank that suppresses the inherited value
+      # (:hide), or no stored key at all, so it inherits (:inherit).
+      def notes_state_for(key)
+        return :inherit unless model.notes.key?(key)
+
+        model.notes[key].present? ? :set : :hide
       end
 
       def observation_notes_form_parts

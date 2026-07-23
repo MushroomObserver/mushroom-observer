@@ -89,14 +89,14 @@ module Views::Controllers::Occurrences::Projects
       projects = @gaps[:projects]
       return unless projects&.any?
 
-      strong { "#{:PROJECTS.l}:" }
+      strong { "#{:projects.ti}:" }
       # `list-unstyled` drops the bullet + left padding. Each row is a
       # flex container so the id badge (button) sits inline with the
       # project-title link.
       ul(class: "list-unstyled mt-2") do
         projects.each do |project|
           li(class: "d-flex align-items-center mb-1") do
-            IdBadge(object: project, extra_class: "rss-id mr-3")
+            IDBadge(object: project, extra_class: "rss-id mr-3")
             a(href: project_path(project)) { plain(project.title) }
           end
         end
@@ -137,11 +137,11 @@ module Views::Controllers::Occurrences::Projects
       # `Occurrences::ProjectsController#update`) only act on
       # `value="add_all"`, so any other present value (here "skip") is
       # treated as "create/keep the occurrence, leave projects alone".
-      submit(:SKIP.l,
+      submit(:skip.ti,
              as: :button, value: "skip",
              name: "occurrence_projects[resolution]")
       whitespace
-      submit(:ADD_ALL.l,
+      submit(:add_all.ti,
              as: :button, variant: :primary, value: "add_all",
              name: "occurrence_projects[resolution]")
     end

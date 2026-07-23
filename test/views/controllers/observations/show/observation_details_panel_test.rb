@@ -77,10 +77,10 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     html = render(panel_with(@obs))
     text = who_text(html)
 
-    assert_includes(text, :COLLECTOR.l)
+    assert_includes(text, :collector.ti)
     assert_html(html,
                 "#observation_who a[href='#{routes.user_path(@obs.user_id)}']")
-    assert_not_includes(text, :ENTERED_BY.l)
+    assert_not_includes(text, :entered_by.ti)
   end
 
   def test_who_free_text_collector_shows_entered_by
@@ -90,7 +90,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     text = who_text(render(panel_with(@obs)))
 
     assert_includes(text, "Jane Forager")
-    assert_includes(text, :ENTERED_BY.l)
+    assert_includes(text, :entered_by.ti)
   end
 
   def test_who_collector_user_links_and_entered_by
@@ -104,7 +104,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     assert_html(
       html, "#observation_who a[href='#{routes.user_path(collector.id)}']"
     )
-    assert_includes(who_text(html), :ENTERED_BY.l)
+    assert_includes(who_text(html), :entered_by.ti)
   end
 
   def test_who_plain_text_when_logged_out
@@ -124,8 +124,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
 
     text = who_text(render(panel_with(obs)))
 
-    assert_not_includes(text, :COLLECTOR.l)
-    assert_includes(text, :ENTERED_BY.l)
+    assert_not_includes(text, :collector.ti)
+    assert_includes(text, :entered_by.ti)
     assert_includes(text, obs.user.unique_text_name)
   end
 
@@ -169,6 +169,26 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanelTest <
     assert_operator(notes.css("p").length, :>=, 4,
                     "Blank lines should render as separate paragraphs")
     assert_includes(notes.text, "wood")
+  end
+
+  # The primary observation of a multi-member occurrence renders the
+  # per-key notes merge, so a sibling's note value appears on the
+  # primary's panel alongside the primary's own.
+  def test_notes_merge_surfaces_sibling_values_for_primary
+    primary = observations(:detailed_unknown_obs)
+    sibling = observations(:coprinus_comatus_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    primary.update!(notes: { Cap: "red cap" })
+    sibling.update!(notes: { Substrate: "on oak wood" })
+    occ = Occurrence.create!(user: @user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+
+    html = render(panel_with(primary))
+    notes = Nokogiri::HTML.fragment(html).at_css("#observation_notes").text
+
+    assert_includes(notes, "red cap")      # primary's own value
+    assert_includes(notes, "on oak wood")  # inherited from the sibling
   end
 
   private

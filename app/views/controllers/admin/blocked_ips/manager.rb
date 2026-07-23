@@ -35,12 +35,12 @@ module Views::Controllers::Admin::BlockedIps
 
     def around_template(&block)
       turbo_frame_tag("#{@type}_ips_list") do
-        render(Components::Panel.new(
-                 panel_class: "my-3",
-                 collapsible: true,
-                 collapse_target: "##{@type}_ips_body",
-                 expanded: true
-               )) do |panel|
+        Panel(
+          panel_class: "my-3",
+          collapsible: true,
+          collapse_target: "##{@type}_ips_body",
+          expanded: true
+        ) do |panel|
           panel.with_heading { title }
           panel.with_heading_links { render_showing_message }
           panel.with_body(wrapper: false, collapse: true) do
@@ -132,7 +132,7 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_add_button
-      submit(:ADD.l, as: :button, class: "mr-3")
+      submit(:add.ti, as: :button, class: "mr-3")
     end
 
     def render_clear_button
@@ -148,11 +148,11 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_ips_table
-      render(Components::Table.new(@list.ips,
-                                   id: "#{@type}_ips",
-                                   show_headers: false,
-                                   class: "ips align-middle border-top",
-                                   attributes: { style: "order: 3" })) do |t|
+      Table(@list.ips,
+            id: "#{@type}_ips",
+            show_headers: false,
+            class: "ips align-middle border-top",
+            attributes: { style: "order: 3" }) do |t|
         t.column("ip", &:t)
         t.column("actions", class: "text-right") do |ip|
           render_remove_button(ip)
@@ -161,11 +161,11 @@ module Views::Controllers::Admin::BlockedIps
     end
 
     def render_remove_button(ip)
-      submit(:REMOVE.l, as: :button,
-                        name: remove_param, value: ip,
-                        id: "remove_#{@type}_ip_#{ip}",
-                        variant: :link, size: :sm,
-                        class: "font-weight-bold")
+      submit(:remove.ti, as: :button,
+                         name: remove_param, value: ip,
+                         id: "remove_#{@type}_ip_#{ip}",
+                         variant: :link, size: :sm,
+                         class: "font-weight-bold")
     end
 
     def remove_param

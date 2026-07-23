@@ -74,7 +74,7 @@ module Views::Layouts
       assert_includes(html, :app_latest.t)
 
       # Should have indexes section (for logged-in users)
-      assert_includes(html, :INDEXES.t)
+      assert_includes(html, :indexes.ti)
 
       # Should have info section
       assert_includes(html, :app_more.t)
@@ -87,7 +87,7 @@ module Views::Layouts
       html = render_component(user: nil)
 
       # Should NOT have indexes section
-      assert_not_includes(html, :INDEXES.t)
+      assert_not_includes(html, :indexes.ti)
     end
 
     def test_has_nav_active_controller

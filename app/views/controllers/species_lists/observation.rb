@@ -35,12 +35,12 @@ module Views::Controllers::SpeciesLists
 
     def render_image_column
       Column(sm: 4, md: 3) do
-        render(Components::Image::Interactive.new(
-                 user: @user,
-                 image: @observation.thumb_image,
-                 image_link: observation_path(id: @observation.id),
-                 votes: true
-               ))
+        InteractiveImage(
+          user: @user,
+          image: @observation.thumb_image,
+          image_link: observation_path(id: @observation.id),
+          votes: true
+        )
       end
     end
 
@@ -91,7 +91,7 @@ module Views::Controllers::SpeciesLists
       Button(
         type: :put,
         variant: :strip,
-        name: :REMOVE.t,
+        name: :remove.ti,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id,

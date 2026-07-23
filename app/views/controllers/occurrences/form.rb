@@ -174,7 +174,7 @@ module Views::Controllers::Occurrences
 
     def render_date_field(attrs_ns)
       render(attrs_ns.field(:when).date(
-               wrapper_options: { label: :WHEN, inline: true }
+               wrapper_options: { label: :when.ti, inline: true }
              ))
     end
 

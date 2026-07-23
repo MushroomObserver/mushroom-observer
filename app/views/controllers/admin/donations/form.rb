@@ -9,9 +9,9 @@ module Views::Controllers::Admin::Donations
       super do
         text_field(:amount, size: 7, label: :confirm_amount,
                             inline: true)
-        text_field(:who, size: 50, label: :WHO, inline: true)
+        text_field(:who, size: 50, label: :who.ti, inline: true)
         checkbox_field(:anonymous, label: :donate_anonymous)
-        text_field(:email, size: 50, label: :EMAIL, inline: true)
+        text_field(:email, size: 50, label: :email.ti, inline: true)
         submit(:create_donation_add.l, center: true)
       end
     end

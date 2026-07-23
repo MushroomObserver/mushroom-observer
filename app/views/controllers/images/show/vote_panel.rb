@@ -10,9 +10,9 @@ module Views::Controllers::Images
       prop :default_size, _Nilable(_Union(::Symbol, ::String)), default: nil
 
       def view_template
-        render(::Components::Panel.new(
-                 panel_id: "image_vote_content"
-               )) do |panel|
+        Panel(
+          panel_id: "image_vote_content"
+        ) do |panel|
           panel.with_heading { render_current_vote_heading }
           render_user_vote_body(panel) if current_user
           panel.with_body(classes: "p-0") { render_vote_table_container }
@@ -127,8 +127,8 @@ module Views::Controllers::Images
         Table(sorted_votes,
               variant: :striped, identifier: "show-votes",
               class: "mt-3 mb-0") do |t|
-          t.column(:USER.t) { |vote| render_vote_user_cell(vote) }
-          t.column(:VOTE.t) { |vote| image_vote_as_short_string(vote.value) }
+          t.column(:user.ti) { |vote| render_vote_user_cell(vote) }
+          t.column(:vote.ti) { |vote| image_vote_as_short_string(vote.value) }
         end
       end
 

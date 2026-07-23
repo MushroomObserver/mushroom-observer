@@ -40,10 +40,10 @@ module Views::Controllers::Projects::Admin
     end
 
     def render_danger_zone
-      render(Components::Panel.new(
-               panel_class: "panel-danger mt-4",
-               panel_id: "project_danger_zone"
-             )) do |panel|
+      Panel(
+        panel_class: "panel-danger mt-4",
+        panel_id: "project_danger_zone"
+      ) do |panel|
         panel.with_heading do
           strong { plain(:show_project_admin_danger_zone.l) }
         end

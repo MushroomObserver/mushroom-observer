@@ -32,7 +32,7 @@ class API2::ErrorTest < UnitTestCase
   def test_error_message_interpolation
     assert_includes(API2::BadMethod.new("frobnicate").to_s, "frobnicate")
     assert_includes(API2::MissingParameter.new("name").to_s, "name")
-    assert_includes(API2::ObjectNotFoundById.new(42, Observation).to_s, "42")
+    assert_includes(API2::ObjectNotFoundByID.new(42, Observation).to_s, "42")
     # Also exercise the textile renderer (Error#t), not just to_s (Error#l).
     assert_kind_of(String, API2::BadMethod.new("frobnicate").t)
   end
@@ -99,7 +99,7 @@ class API2::ErrorTest < UnitTestCase
       API2::CouldntDownloadURL => ["http://x/y.jpg", RuntimeError.new("boom")],
       API2::NameWrongForRank => %w[Agaricus Genus],
       API2::NoMethodForAction => %w[get frobnicate],
-      API2::ObjectNotFoundById => [42, Observation],
+      API2::ObjectNotFoundByID => [42, Observation],
       API2::ObjectNotFoundByString => ["Foo", Observation],
       API2::QueryError => [RuntimeError.new("bad query")],
       API2::RenderFailed => [raised_exception],
@@ -115,6 +115,7 @@ class API2::ErrorTest < UnitTestCase
       API2::FieldSlipInUse => [field_slips(:field_slip_one)],
       API2::HerbariumRecordAlreadyExists =>
         [herbarium_records(:interesting_unknown)],
+      API2::ImageDhashMismatch => [images(:in_situ_image), 12_345],
       API2::ImageUploadFailed => [Image.new],
       API2::MustBeAdmin => [projects(:eol_project)],
       API2::UserAccountBlocked => [users(:rolf)],

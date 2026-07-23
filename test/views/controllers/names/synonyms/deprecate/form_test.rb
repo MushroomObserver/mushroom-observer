@@ -11,7 +11,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
       # Form structure and action
       assert_html(html, "form#name_synonym_deprecate_form")
       assert_html(html, "form[action*='/names/#{name.id}/synonyms/deprecate']")
-      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
+      assert_html(html, "button[type='submit']", text: :submit.ti)
 
       # Proposed name autocompleter
       assert_html(html, "input[name='deprecate_synonym[proposed_name]']")

@@ -15,13 +15,13 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    render(Components::Panel.new(
-             panel_class: "name-section",
-             panel_id: "name_classification",
-             attributes: { data: {
-               name_panels_target: "classification"
-             } }
-           )) do |panel|
+    Panel(
+      panel_class: "name-section",
+      panel_id: "name_classification",
+      attributes: { data: {
+        name_panels_target: "classification"
+      } }
+    ) do |panel|
       panel.with_heading { plain(:show_name_classification.l) }
       panel.with_heading_links { render_edit_link } if @user
       panel.with_body { render_body }

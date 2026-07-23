@@ -12,7 +12,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     visit(projects_path)
     click_on(:list_projects_add_project.l, match: :first)
     fill_in("project_title", with: title)
-    fill_in(:WHERE.l, with: locations(:unknown_location).name)
+    fill_in(:where.ti, with: locations(:unknown_location).name)
     assert_selector(
       "input[type='radio'][id='project_dates_any_true'][checked='checked']"
     )
@@ -32,7 +32,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     visit(projects_path)
     click_on(:list_projects_add_project.l, match: :first)
     fill_in("project_title", with: title)
-    fill_in(:WHERE.l, with: locations(:unknown_location).name)
+    fill_in(:where.ti, with: locations(:unknown_location).name)
     choose("project_dates_any_false")
     assert_selector(
       "input[type='radio'][id='project_dates_any_false'][checked='checked']"
@@ -62,7 +62,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     assert_selector(
       "input[type='radio'][id='project_dates_any_true'][checked='checked']"
     )
-    click_on(:SAVE_EDITS.l)
+    click_on(:save_edits.ti)
 
     project = Project.find_by_title(project.title)
     assert_nil(project.start_date, "Project Start Date should be nil")
@@ -79,7 +79,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
 
     visit(project_path(project))
     click_on(:show_project_admin_tab.l)
-    click_on(:SAVE_EDITS.l)
+    click_on(:save_edits.ti)
 
     project.reload
     assert_equal(start_date, project.start_date,
@@ -94,6 +94,6 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     login(project.user.login)
     visit(project_path(project))
 
-    click_on(:CONSTRAINT_VIOLATIONS.l)
+    click_on(:constraint_violations.ti)
   end
 end

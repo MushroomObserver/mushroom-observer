@@ -21,13 +21,13 @@ module Views::Controllers::InatImports
       html = render_index(imports: InatImport.where(user: @user).to_a,
                           admin: false)
 
-      assert_no_html(html, "th", text: :USER.t)
+      assert_no_html(html, "th", text: :user.ti)
     end
 
     def test_admin_index_shows_user_column
       html = render_index(imports: InatImport.all.to_a, admin: true)
 
-      assert_html(html, "th", text: :USER.t)
+      assert_html(html, "th", text: :user.ti)
     end
 
     def test_results_link_shown_when_import_has_results
@@ -67,9 +67,9 @@ module Views::Controllers::InatImports
     def test_report_column_links_to_show_page
       html = render_index(imports: [@import])
 
-      assert_html(html, "th", text: :REPORTS.l)
+      assert_html(html, "th", text: :reports.ti)
       assert_html(html, "a[href='#{routes.inat_import_path(@import)}']",
-                  text: :REPORT.l)
+                  text: :report.ti)
     end
 
     private

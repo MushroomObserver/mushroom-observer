@@ -23,8 +23,8 @@ module Views::Controllers::Observations::Identify
       super do
         render_autocompleter_wrap
         render_type_select_group
-        submit(:SEARCH.l, variant: :outline, class: "px-2")
-        submit(:CLEAR.l, variant: :outline, class: "px-2")
+        submit(:search.ti, variant: :outline, class: "px-2")
+        submit(:clear.ti, variant: :outline, class: "px-2")
       end
     end
 
@@ -82,7 +82,7 @@ module Views::Controllers::Observations::Identify
 
     def render_search_icon
       Icon(type: :search,
-           title: :SEARCH.l,
+           title: :search.ti,
            class: "form-control-feedback")
     end
 
@@ -133,7 +133,7 @@ module Views::Controllers::Observations::Identify
     end
 
     def type_options
-      [[:CLADE.l, :clade], [:REGION.l, :region]]
+      [[:clade.ti, :clade], [:region.ti, :region]]
     end
 
     # --- Dual-target helpers ---

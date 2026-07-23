@@ -35,7 +35,7 @@ module Views::Controllers::Users::Emails
     end
 
     def test_renders_submit_button
-      assert_html(@html, "button[type='submit']", text: :SEND.l)
+      assert_html(@html, "button[type='submit']", text: :send.ti)
       assert_html(@html, ".center-block")
     end
 

@@ -79,7 +79,7 @@ module Views::Controllers::Locations
     end
 
     def render_display_name_field
-      text_field(:display_name, value: @display_name, label: :WHERE,
+      text_field(:display_name, value: @display_name, label: :where.ti,
                                 data: display_name_data,
                                 help: :form_locations_help.t,
                                 help_collapse: true,
@@ -117,7 +117,7 @@ module Views::Controllers::Locations
         p { :form_locations_notes_help.t }
         p { trusted_html(:shared_textile_help.l) }
       end
-      textarea_field(:notes, label: :NOTES, help: notes_help,
+      textarea_field(:notes, label: :notes.ti, help: notes_help,
                              help_collapse: true)
     end
 
@@ -161,7 +161,7 @@ module Views::Controllers::Locations
 
     def render_locked_field_display(_field, value)
       div(class: "mb-0") do
-        strong { "#{:WHERE.l}:" }
+        strong { "#{:where.ti}:" }
         whitespace
         plain(value)
       end
@@ -171,7 +171,7 @@ module Views::Controllers::Locations
       value = model.send(direction)
       hidden_field(direction, value: value.to_s)
       div(class: "mb-0") do
-        strong { "#{direction.upcase.to_sym.l}:" }
+        strong { "#{direction.to_sym.ti}:" }
         whitespace
         plain("#{value}°")
       end
@@ -190,7 +190,7 @@ module Views::Controllers::Locations
     end
 
     def submit_text
-      create? ? :CREATE.l : :UPDATE.l
+      create? ? :create.ti : :update.ti
     end
 
     def create?

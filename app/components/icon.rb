@@ -8,7 +8,7 @@
 #   # => <span class="glyphicon glyphicon-globe link-icon"></span>
 #
 # @example With tooltip + screen-reader title + extra CSS
-#   Icon(type: :edit, title: :EDIT.l, class: "text-primary")
+#   Icon(type: :edit, title: :edit.ti, class: "text-primary")
 #   # => <span class="glyphicon glyphicon-edit link-icon text-primary"
 #   #          title="Edit" data-toggle="tooltip">
 #   #      <span class="sr-only">Edit</span>

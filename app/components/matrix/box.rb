@@ -62,6 +62,14 @@ class Components::Matrix::Box < Components::Base
       id: "box_#{@data[:id]}",
       class: class_names("matrix-box", @columns, @extra_class)
     ) do
+      # Deliberately NOT subscribed to [image, :processed] broadcasts:
+      # rotate/mirror only happens on the image-show page, so only
+      # that page (Views::Controllers::Images::Show::ImagePanel)
+      # live-updates. An index page
+      # with dozens of boxes would otherwise open a websocket
+      # subscription (plus a solid_cable MAX(id) query) per thumbnail
+      # for an event that can't happen from this page; it catches up
+      # on the next load via the #4808 cache-busting URL token.
       Panel(sizing: true) do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)
@@ -99,16 +107,16 @@ class Components::Matrix::Box < Components::Base
     return unless @data[:image]
 
     panel.with_thumbnail do
-      render(Components::Image::Interactive.new(
-               user: @user,
-               image: @data[:image],
-               image_link: @data[:image_link],
-               obs: @data[:obs] || {},
-               votes: @votes && @data.fetch(:votes, true),
-               full_width: @data.fetch(:full_width, true),
-               identify: @identify,
-               observation_view: @observation_view
-             ))
+      InteractiveImage(
+        user: @user,
+        image: @data[:image],
+        image_link: @data[:image_link],
+        obs: @data[:obs] || {},
+        votes: @votes && @data.fetch(:votes, true),
+        full_width: @data.fetch(:full_width, true),
+        identify: @identify,
+        observation_view: @observation_view
+      )
     end
   end
 
@@ -148,7 +156,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_id_badge(obj)
     whitespace
-    IdBadge(object: obj, extra_class: "rss-id")
+    IDBadge(object: obj, extra_class: "rss-id")
   end
 
   def render_occurrence_link

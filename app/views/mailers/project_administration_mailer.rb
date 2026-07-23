@@ -49,7 +49,7 @@ class Views::Mailers::ProjectAdministrationMailer < Views::Mailers::Base
   def handy_links = :email_handy_links.l
 
   def links
-    [[:email_links_show_object.t(type: :Project.l),
+    [[:email_links_show_object.t(type: :project.ti),
       "#{MO.http_domain}/projects/#{@project.id}"],
      [:email_links_show_user.t,
       "#{MO.http_domain}/users/#{@site_admin.id}"]]

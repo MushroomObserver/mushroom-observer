@@ -12,7 +12,7 @@ class Tab::Project::AliasNew < Tab::Base
   end
 
   def title
-    :ADD.t
+    :add.ti
   end
 
   def path

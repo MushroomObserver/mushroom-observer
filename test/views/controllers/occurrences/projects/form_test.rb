@@ -23,7 +23,7 @@ module Views::Controllers::Occurrences::Projects
                   text: :occurrence_resolve_projects_intro.l)
 
       # Project list heading
-      assert_html(html, ".modal-body > strong", text: "#{:PROJECTS.l}:")
+      assert_html(html, ".modal-body > strong", text: "#{:projects.ti}:")
       assert_html(html, "a[href='/projects/#{@project.id}']",
                   text: @project.title)
 
@@ -61,7 +61,7 @@ module Views::Controllers::Occurrences::Projects
         html,
         "a.btn[href='/occurrences/new" \
         "?observation_id=#{@obs1.id}']",
-        text: :CANCEL.l
+        text: :cancel.ti
       )
 
       # Skip button — proceed without backfilling projects
@@ -69,14 +69,14 @@ module Views::Controllers::Occurrences::Projects
                   "button[type='submit']" \
                   "[name='occurrence_projects[resolution]']" \
                   "[value='skip']",
-                  text: :SKIP.l)
+                  text: :skip.ti)
 
       # Add All button
       assert_html(html,
                   "button[type='submit']" \
                   "[name='occurrence_projects[resolution]']" \
                   "[value='add_all']",
-                  text: :ADD_ALL.l)
+                  text: :add_all.ti)
     end
 
     def test_edit_flow
@@ -103,7 +103,7 @@ module Views::Controllers::Occurrences::Projects
       # Cancel link points to occurrence show page
       assert_html(
         html, "a.btn[href='/occurrences/#{occ.id}']",
-        text: :CANCEL.l
+        text: :cancel.ti
       )
 
       # Skip button — leave projects alone, redirect to occurrence show
@@ -111,14 +111,14 @@ module Views::Controllers::Occurrences::Projects
                   "button[type='submit']" \
                   "[name='occurrence_projects[resolution]']" \
                   "[value='skip']",
-                  text: :SKIP.l)
+                  text: :skip.ti)
 
       # Add All button
       assert_html(html,
                   "button[type='submit']" \
                   "[name='occurrence_projects[resolution]']" \
                   "[value='add_all']",
-                  text: :ADD_ALL.l)
+                  text: :add_all.ti)
     end
 
     def test_no_project_list_when_empty
@@ -219,12 +219,12 @@ module Views::Controllers::Occurrences::Projects
                   text: @project.title)
       assert_html(html,
                   "form > .modal-footer > button[value='add_all']",
-                  text: :ADD_ALL.l)
+                  text: :add_all.ti)
       assert_html(html,
                   "form > .modal-footer > button[value='skip']",
-                  text: :SKIP.l)
+                  text: :skip.ti)
       assert_html(html, "form > .modal-footer > a[data-dismiss='modal']",
-                  text: :CANCEL.l)
+                  text: :cancel.ti)
     end
 
     def test_owns_modal_sections_class_method_returns_true
@@ -265,7 +265,7 @@ module Views::Controllers::Occurrences::Projects
 
     def test_cancel_link_parity
       path = "/occurrences/new?observation_id=1"
-      name = :CANCEL.l
+      name = :cancel.ti
 
       old_html = render(OldCancelLink.new(path: path, name: name))
       new_html = render(Components::Button::Get.new(

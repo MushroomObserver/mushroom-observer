@@ -19,7 +19,7 @@ module Views::Controllers::Comments
     end
 
     def test_renders_submit_button_for_new_record
-      assert_html(@html, "button[type='submit']", text: :CREATE.l)
+      assert_html(@html, "button[type='submit']", text: :create.ti)
     end
 
     def test_enables_turbo_by_default
@@ -30,7 +30,7 @@ module Views::Controllers::Comments
       @comment = comments(:minimal_unknown_obs_comment_1)
       html = render_form
 
-      assert_html(html, "button[type='submit']", text: :SAVE_EDITS.l)
+      assert_html(html, "button[type='submit']", text: :save_edits.ti)
     end
 
     def test_omits_turbo_when_local_true

@@ -3,7 +3,7 @@
 # Sidebar indexes nav: glossary terms.
 class Tab::Sidebar::Indexes::Glossary < Tab::Base
   def title
-    :GLOSSARY.t
+    :glossary.ti
   end
 
   def path

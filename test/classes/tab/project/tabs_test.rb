@@ -27,7 +27,7 @@ module Tab::Project
     def test_summary
       tab = Tab::Project::Summary.new(project: @project)
 
-      assert_equal(:SUMMARY.t, tab.title)
+      assert_equal(:summary.ti, tab.title)
       assert_equal(routes.project_path(id: @project.id), tab.path)
       assert_equal("summary", tab.alt_title)
       assert_equal("summary_link", link_class(tab))
@@ -157,7 +157,7 @@ module Tab::Project
     def test_index_action_nav_tab
       tab = Tab::Project::Index.new
 
-      assert_equal(:cancel_to_index.t(type: :PROJECT), tab.title)
+      assert_equal(:cancel_to_index.t(type: :project), tab.title)
       assert_equal(routes.projects_path, tab.path)
     end
 
@@ -199,7 +199,7 @@ module Tab::Project
       assert_equal(routes.edit_project_alias_path(project_id: @project.id,
                                                   id: 42),
                    tab.path)
-      assert_equal(:EDIT.t, tab.alt_title)
+      assert_equal(:edit.ti, tab.alt_title)
 
       link_class = tab.html_options[:class]
       assert_includes(link_class, "edit_link")
@@ -211,7 +211,7 @@ module Tab::Project
         project_id: @project.id, target_id: 5, target_type: "Location"
       )
 
-      assert_equal(:ADD.t, tab.title)
+      assert_equal(:add.ti, tab.title)
       assert_equal(
         routes.new_project_alias_path(project_id: @project.id,
                                       target_id: 5, target_type: "Location"),

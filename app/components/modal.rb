@@ -20,21 +20,21 @@
 # focus on the modal's content.
 #
 # @example simple modal with body + footer
-#   render(Components::Modal.new(
+#   Modal(
 #     id: "modal_thing", title: "Pick a thing", user: @user
-#   )) do |m|
+#   ) do |m|
 #     m.with_body { p { "..." } }
 #     m.with_footer do
 #       button(type: "submit", class: "btn btn-primary") { "OK" }
 #       button(type: "button", class: "btn btn-default",
-#              data: { dismiss: "modal" }) { :CANCEL.l }
+#              data: { dismiss: "modal" }) { :cancel.ti }
 #     end
 #   end
 #
 # @example auto-opening modal (e.g. server-rendered for an action)
-#   render(Components::Modal.new(
+#   Modal(
 #     id: "modal_resolve", title: "Confirm", user: @user, auto_open: true
-#   )) do |m|
+#   ) do |m|
 #     m.with_body { render(...) }
 #   end
 #
@@ -55,9 +55,9 @@
 #         </form>
 #       </div>
 #
-#   render(Components::Modal.new(
+#   Modal(
 #     id: "modal_x", title: "Edit thing", user: @user
-#   )) do |m|
+#   ) do |m|
 #     m.with_form_content { render(Components::ThingForm.new(@thing)) }
 #   end
 class Components::Modal < Components::Base
@@ -204,7 +204,7 @@ class Components::Modal < Components::Base
       variant: :strip,
       class: "close",
       data: { dismiss: "modal" },
-      aria: { label: :CLOSE.l }
+      aria: { label: :close.ti }
     ) do
       span(aria: { hidden: "true" }) { "×" }
     end

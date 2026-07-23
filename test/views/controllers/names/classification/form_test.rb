@@ -11,7 +11,7 @@ module Views::Controllers::Names::Classification
       # Form structure and action
       assert_html(html, "form#name_classification_form")
       assert_html(html, "form[action*='/names/#{name.id}/classification']")
-      assert_html(html, "button[type='submit']", text: :SAVE.l)
+      assert_html(html, "button[type='submit']", text: :save.ti)
 
       # Classification textarea
       assert_html(html, "textarea[name='name[classification]']")

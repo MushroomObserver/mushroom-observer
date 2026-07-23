@@ -47,7 +47,7 @@ module Locations
       login
       get(:index)
 
-      assert_page_title(:LOCATION_DESCRIPTIONS.l)
+      assert_page_title(:location_descriptions.ti)
     end
 
     def test_index_with_id
@@ -56,7 +56,7 @@ module Locations
       login
       get(:index, params: { id: desc.id })
 
-      assert_page_title(:LOCATION_DESCRIPTIONS.l)
+      assert_page_title(:location_descriptions.ti)
       assert_select("body.descriptions__index", true)
     end
 
@@ -100,7 +100,7 @@ module Locations
       get(:index, params: { by_author: user.id })
 
       assert_select("body.descriptions__index")
-      assert_page_title(:LOCATION_DESCRIPTIONS.l)
+      assert_page_title(:location_descriptions.ti)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_equal(
         assert_select("#results .list-group-item").count,
@@ -166,7 +166,7 @@ module Locations
       get(:index, params: { by_editor: user.id })
 
       assert_select("body.descriptions__index")
-      assert_page_title(:LOCATION_DESCRIPTIONS.l)
+      assert_page_title(:location_descriptions.ti)
       assert_displayed_filters("#{:query_by_editor.l}: #{user.name}")
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
                     { count: descs_edited_by_user_count },

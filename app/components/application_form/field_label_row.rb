@@ -31,19 +31,21 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # Resolves `wrapper_options[:label]` to display text: an explicit
-    # String wins as-is, a Symbol is translated via `.t` (the common
-    # case -- callers just pass `label: :SOME_KEY`, no need to spell
-    # out `.t`/`.l` themselves), otherwise the field's key, humanized.
-    # Shared by every field type that takes a `label:` option --
-    # previously duplicated near-identically across text_field.rb,
-    # textarea_field.rb, select_field.rb, and file_field.rb.
+    # String wins as-is, a Symbol is translated via `.t`, otherwise the
+    # field's key, humanized. Shared by every field type that takes a
+    # `label:` option -- previously duplicated near-identically across
+    # text_field.rb, textarea_field.rb, select_field.rb, and
+    # file_field.rb.
     #
-    # `.t` (not `.l`) deliberately: some translations carry real
+    # Most callers now pass an already-resolved String via `.ti`
+    # (`label: :name.ti`) when they want a title-cased field-prompt
+    # label -- `.ti` title-cases mechanically, so there's no longer a
+    # separate ALL-CAPS twin tag to spell out. Passing a bare lowercase
+    # Symbol (`label: :prefs_no_emails`) still works and goes through
+    # this method's `.t` branch instead: some translations carry real
     # bold/italic textile markup (e.g. `prefs_no_emails`, "Opt out of
-    # _all_ email from MO.") that needs textile rendering to display
-    # correctly rather than as literal asterisks/underscores -- for
-    # plain-text labels (the vast majority) `.t` and `.l` render
-    # identically, so this is strictly safer with no downside.
+    # _all_ email from MO.") that needs textile rendering, not
+    # title-casing, to display correctly.
     def resolved_label_text
       label_option = wrapper_options[:label]
       case label_option

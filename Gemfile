@@ -38,6 +38,9 @@ end
 # See https://github.com/trilogy-libraries/trilogy/tree/main/contrib/ruby
 gem("trilogy")
 
+# Scrubs invalid UTF-8 from incoming requests; wired in config/application.rb.
+gem("rack-utf8_sanitizer", require: "rack/utf8_sanitizer")
+
 # solid_cache for cache store db
 gem("solid_cache")
 # add locale to cache key
@@ -132,6 +135,16 @@ gem("xmlrpc")
 gem("fastimage")
 # for detecting file type of uploaded images
 gem("mimemagic")
+# An interface between Ruby and ImageMagick/Vips, used to resize/reorient
+# uploaded images
+gem("image_processing")
+gem("mini_magick", "~> 5.0")
+# Reads and writes EXIF/GPS data; "vendors" a recent exiftool so we don't
+# depend on a system install
+gem("mini_exiftool_vendored")
+# Wraps the rsync binary, used to transfer processed images to the image
+# server(s)
+gem("rsync")
 
 # Gems used for iNat import
 gem("oauth2")

@@ -115,8 +115,8 @@ class UserManagementService
 
   def display_user_success(user)
     output_handler.puts(:user_add_success.t(login: user.login).unescape_html)
-    output_handler.puts("  #{:NAME.t}: #{user.name}")
-    output_handler.puts("  #{:EMAIL.t}: #{user.email}")
+    output_handler.puts("  #{:name.ti}: #{user.name}")
+    output_handler.puts("  #{:email.ti}: #{user.email}")
     output_handler.puts("  #{:user_add_verified.t}: #{user.verified}")
   end
 

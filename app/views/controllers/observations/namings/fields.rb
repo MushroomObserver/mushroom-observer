@@ -46,7 +46,7 @@ class Views::Controllers::Observations::Namings::Fields < Views::Base
     @naming_ns = naming_ns
     name_field = naming_ns.field(:name).autocompleter(
       type: :name,
-      wrapper_options: { label: :WHAT },
+      wrapper_options: { label: :what.ti },
       value: @given_name,
       autofocus: focus_on_name?
     )

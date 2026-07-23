@@ -34,6 +34,36 @@ production:
   discard_stale_jobs:
     class: DiscardStaleJobsJob
     schedule: every day at 12:32am
+  # Transfer itself is event-driven now (TransferImagesJob, started when
+  # processing/an iNat batch finishes -- see #4791's target design) --
+  # nothing here polls for untransferred images anymore. This is the
+  # safety net: local image files older than ~1 hour mean a transfer
+  # never happened or didn't finish. Alert-only, never auto-retries (see
+  # StaleImageFilesJob) -- checking hourly is enough since the staleness
+  # threshold itself is an hour.
+  stale_image_files:
+    class: StaleImageFilesJob
+    schedule: every hour
+  # Occasional full-listing reconciliation (#4791's target design, part
+  # 4): catches server-side drift on already-transferred images once
+  # their local copies are cleaned up, which the per-image checks above
+  # can't see. Heavier than the per-image checks (lists every file on
+  # every server), so weekly, not frequent -- staggered 20 minutes off
+  # check_for_broken_references below, same :maintenance-queue reasoning
+  # as the stagger comment further down.
+  image_gap_detector:
+    class: ImageGapDetectorJob
+    schedule: every day at 7:33am
+  # Weekly GPS-leak tripwire (#4859): scans the last two weeks'
+  # gps_hidden originals on the image server for GPS tags that survived
+  # stripping. History -- three separate mechanisms silently re-leaked
+  # ~9,700 images over 2019-2026 while every DB flag read clean -- says
+  # only a periodic check of the actual served bytes catches the class.
+  # Staggered off the other maintenance slots and the every-3-minutes
+  # marks, same reasoning as above.
+  gps_leak_detector:
+    class: GpsLeakDetectorJob
+    schedule: every monday at 4:43am
   check_for_broken_references:
     class: CheckForBrokenReferencesJob
     schedule: every sunday at 7:13am

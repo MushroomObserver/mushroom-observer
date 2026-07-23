@@ -30,7 +30,7 @@ module Views::Controllers::Projects::FieldSlips
         capture do
           Link(type: :object, object: @project)
         end,
-        :PROJECT.t
+        :project.ti
       ].safe_join(" ")
     end
 
@@ -84,11 +84,11 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def define_tracker_columns(table)
-      table.column(:FILENAME.l, scope: "col")
-      table.column(:USER.l, scope: "col", class: "text-center")
-      table.column(:SECONDS.l, scope: "col", class: "text-center")
-      table.column(:PAGES.l, scope: "col", class: "text-center")
-      table.column(:STATUS.l, scope: "col", class: "text-right")
+      table.column(:filename.ti, scope: "col")
+      table.column(:user.ti, scope: "col", class: "text-center")
+      table.column(:seconds.ti, scope: "col", class: "text-center")
+      table.column(:pages.ti, scope: "col", class: "text-center")
+      table.column(:status.ti, scope: "col", class: "text-right")
     end
   end
 end

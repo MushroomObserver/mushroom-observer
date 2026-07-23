@@ -25,7 +25,7 @@ class Components::Link::Edit < Components::Link::Get
 
   def default_name(target)
     if target.is_a?(String) || target.is_a?(Hash)
-      :EDIT.l
+      :edit.ti
     else
       :edit_object.t(type: target.type_tag)
     end

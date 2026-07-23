@@ -11,7 +11,13 @@ module Views::Controllers::Images
       prop :size, _Nilable(_Union(::Symbol, ::String)), default: nil
 
       def view_template
-        render(::Components::Panel.new(panel_id: "image_panel")) do |panel|
+        # Subscribes this page to Image#broadcast_processed_update's
+        # interactive-size broadcast (rendered as a plain top-level
+        # statement, not inside the Panel(...) block below -- see
+        # Components::Matrix::Box for why that placement would
+        # silently never emit anything).
+        turbo_stream_from([@image, :processed])
+        Panel(panel_id: "image_panel") do |panel|
           panel.with_heading(
             classes:
               "text-center small font-weight-normal image-controls"
@@ -53,11 +59,11 @@ module Views::Controllers::Images
       # --- Body: interactive image + vote + original filename ------
 
       def render_body
-        render(::Components::Image::Interactive.new(
-                 user: current_user, image: @image,
-                 size: :huge, image_link: "#",
-                 extra_classes: "huge-image", votes: false
-               ))
+        InteractiveImage(
+          user: current_user, image: @image,
+          size: :huge, image_link: "#",
+          extra_classes: "huge-image", votes: false
+        )
         div(class: "mt-3 text-center") do
           render_vote_interface if current_user
           render_original_name if show_original_name?

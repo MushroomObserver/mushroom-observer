@@ -8,7 +8,7 @@ class Tab::ExternalLink::Edit < Tab::Base
   end
 
   def title
-    :EDIT.l
+    :edit.ti
   end
 
   def path

@@ -31,7 +31,7 @@ class Components::Link::User < Components::Link::Object
 
   def resolve_label_and_id
     if @user.is_a?(Integer)
-      [@name || "#{:USER.t} ##{@user}", @user]
+      [@name || "#{:user.ti} ##{@user}", @user]
     else
       [@name || @user.unique_text_name, @user.id]
     end

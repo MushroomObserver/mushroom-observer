@@ -40,7 +40,7 @@ module Views::Controllers::Descriptions::Moves
       assert_includes(html, :merge_descriptions_delete_after.t)
 
       # Submit button
-      assert_html(html, "button[type='submit']", text: :SUBMIT.l)
+      assert_html(html, "button[type='submit']", text: :submit.ti)
     end
 
     def test_name_description_without_synonyms

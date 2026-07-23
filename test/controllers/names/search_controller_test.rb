@@ -16,7 +16,7 @@ module Names
       # Search-help block: the `Help` Phlex view emits a
       # `<p>NAMES SEARCHES</p>` header followed by textilized help.
       assert_select("body.search__show p",
-                    { text: /#{:NAMES.t}.*#{:SEARCHES.t}/i, minimum: 1 },
+                    { text: /#{:names.ti}.*#{:searches.ti}/i, minimum: 1 },
                     "Search help block did not render")
     end
 

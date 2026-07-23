@@ -155,7 +155,7 @@ module Views::Controllers::Projects::Violations
                   text: :form_violations_modal_target_location_submit.l)
       assert_html(html,
                   ".modal-footer button[type='button'][data-dismiss='modal']",
-                  text: :CANCEL.l)
+                  text: :cancel.ti)
     end
 
     # ---------- per-radio Create link (#4304) ----------

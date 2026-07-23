@@ -59,7 +59,7 @@ module Views::Controllers::SpeciesLists::WriteIn
 
     def view_template
       super do
-        submit(@button.l, center: true)
+        submit(@button.ti, center: true)
         render(ListFeedback.new(
                  new_names: @new_names,
                  deprecated_names: @deprecated_names,
@@ -73,7 +73,7 @@ module Views::Controllers::SpeciesLists::WriteIn
                ))
         render_place_name_field
         render_member_fields_section
-        submit(@button.l, center: true)
+        submit(@button.ti, center: true)
       end
     end
 
@@ -109,7 +109,7 @@ module Views::Controllers::SpeciesLists::WriteIn
       autocompleter_field(:place_name,
                           type: :location,
                           value: model.place_name(current_user),
-                          label: :WHERE)
+                          label: :where.ti)
     end
 
     def render_member_fields_section
@@ -162,9 +162,9 @@ module Views::Controllers::SpeciesLists::WriteIn
 
     def render_coord_fields
       div(class: "form-group form-inline") do
-        render_coord_field(:lat, @member_lat, :LATITUDE, 8)
-        render_coord_field(:lng, @member_lng, :LONGITUDE, 8)
-        render_coord_field(:alt, @member_alt, :ALTITUDE, 6)
+        render_coord_field(:lat, @member_lat, :latitude.ti, 8)
+        render_coord_field(:lng, @member_lng, :longitude.ti, 8)
+        render_coord_field(:alt, @member_alt, :altitude.ti, 6)
       end
     end
 

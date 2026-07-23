@@ -16,11 +16,11 @@ module Views::Controllers::Licenses
     private
 
     def render_table
-      render(::Components::Table.new(@objects)) { |tbl| add_columns(tbl) }
+      Table(@objects) { |tbl| add_columns(tbl) }
     end
 
     def add_columns(tbl)
-      tbl.column("#{:ID.l}:") { |lic| lic.id.to_s }
+      tbl.column("#{:id.ti}:") { |lic| lic.id.to_s }
       tbl.column(:license_display_name.l) do |lic|
         link_to(lic.display_name, lic)
       end

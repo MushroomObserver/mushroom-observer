@@ -9,7 +9,7 @@ class Views::Layouts::Sidebar
   #
   # @example Direct usage
   #   render(Views::Layouts::Sidebar::Section.new(
-  #     heading_key: :INDEXES,
+  #     heading_key: :indexes,
   #     tabs: Tab::Sidebar::IndexesActions.new.map(&:to_a),
   #     classes: Views::Layouts::Sidebar::CSS_CLASSES
   #   ))
@@ -21,7 +21,7 @@ class Views::Layouts::Sidebar
 
     def view_template
       render(Components::ListGroup::Item.new(class: @classes[:heading])) do
-        plain("#{@heading_key.t}:")
+        plain("#{@heading_key.ti}:")
       end
 
       @tabs.compact.each do |link|

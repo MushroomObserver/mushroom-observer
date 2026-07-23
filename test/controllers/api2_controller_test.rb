@@ -319,6 +319,23 @@ class API2ControllerTest < FunctionalTestCase
     assert_equal(checksum, checksum_returned, "Didn't get the right checksum.")
   end
 
+  # Pins the `files` field's exact shape/order - the mobile app (mo-mobile)
+  # indexes into this array positionally (files[0], files[1],
+  # files[-3], etc.), not by key, so a change to Image::ALL_SIZES's order
+  # or count is a breaking API change for that client. See #4735.
+  def test_get_image_files_array_matches_all_sizes_order
+    img = images(:in_situ_image)
+
+    get(:images, params: { id: img.id, detail: :high, format: :json })
+
+    assert_no_api_errors
+    files = response.parsed_body["results"][0]["files"]
+    expected = (Image::ALL_SIZES + [:original]).map do |size|
+      img.send(:"#{size}_url")
+    end
+    assert_equal(expected, files)
+  end
+
   def test_post_corrupt_image
     setup_image_dirs
     count = Image.count

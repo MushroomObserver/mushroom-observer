@@ -15,10 +15,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    render(Components::Panel.new(
-             panel_id: "observation_details",
-             panel_class: "name-section"
-           )) do |panel|
+    Panel(panel_id: "observation_details",
+          panel_class: "name-section") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
       panel.with_body { render_body }
@@ -60,7 +58,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_when
     p(class: "obs-when", id: "observation_when") do
-      plain("#{:WHEN.t}: ")
+      plain("#{:when.ti}: ")
       b { @obs.when.web_date }
     end
   end
@@ -111,8 +109,8 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   def render_gps_display_link
     a(href: map_observation_path(id: @obs.id)) do
       trusted_html(
-        [@obs.display_lat_lng.t, @obs.display_alt.t,
-         "[#{:click_for_map.t}]"].join(" ")
+        [display_lat_lng(@obs.lat, @obs.lng).t, display_alt(@obs.alt).t,
+         "[#{:click_for_map.t}]"].compact_blank.join(" ")
       )
     end
   end
@@ -142,7 +140,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   # collector is the entering user; when they differ it moves to the
   # "Entered by:" line (you email the MO account, not a free-text name).
   def render_collector
-    plain("#{:COLLECTOR.t}: ")
+    plain("#{:collector.ti}: ")
     render_collector_identity
     return if @obs.collector_differs_from_creator?
 
@@ -150,7 +148,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   end
 
   def render_entered_by
-    plain("#{:ENTERED_BY.t}: ")
+    plain("#{:entered_by.ti}: ")
     render_user_link(@obs.user)
     render_send_question_link if show_send_question?
   end
@@ -209,14 +207,14 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
   # would otherwise be interpreted as textile bold-emphasis across
   # subsequent lines.
   def render_notes
-    notes = @obs.notes
+    notes = @obs.display_notes
     return if notes == ::Observation.no_notes
 
     div(class: "obs-notes textile", id: "observation_notes") do
       # ApplicationController resets the per-request Textile cache
       # before every action; this only needs to prime it.
       ::Textile.register_name(@obs.name)
-      trusted_html("#{:NOTES.t}:".t)
+      trusted_html("#{:notes.ti}:".t)
       div(class: "indent") { render_note_values(notes) }
     end
   end
@@ -241,7 +239,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_projects
     div(class: "obs-projects", id: "observation_projects") do
-      span { plain("#{:PROJECTS.t}:") }
+      span { plain("#{:projects.ti}:") }
       br
       @obs.projects.each do |project|
         div(class: "indent") do
@@ -253,7 +251,7 @@ class Views::Controllers::Observations::Show::ObservationDetailsPanel < Views::B
 
   def render_field_slip
     div(class: "obs-field-slips", id: "observation_field_slips") do
-      span { plain("#{:FIELD_SLIP.t}: ") }
+      span { plain("#{:field_slip.ti}: ") }
       Link(type: :object, object: @obs.field_slip)
     end
   end

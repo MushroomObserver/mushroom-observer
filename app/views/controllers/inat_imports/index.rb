@@ -13,7 +13,7 @@ module Views::Controllers::InatImports
       container_class(:wide)
       add_page_title(:inat_imports_index_title.l)
       add_context_nav(Tab::InatImport::Actions.new(include_index: false))
-      render(Components::Table.new(@imports, class: "table-striped")) do |t|
+      Table(@imports, class: "table-striped") do |t|
         render_columns(t)
       end
     end
@@ -23,17 +23,17 @@ module Views::Controllers::InatImports
         plain(when_text(imp))
       end
       if @admin
-        tbl.column(:USER.t) do |imp|
+        tbl.column(:user.ti) do |imp|
           render(Components::Link::User.new(user: imp.user))
         end
       end
       render_count_columns(tbl)
-      tbl.column(:RESULTS.l) { |imp| results_link(imp) }
-      tbl.column(:REPORTS.l) { |imp| report_link(imp) }
+      tbl.column(:results.ti) { |imp| results_link(imp) }
+      tbl.column(:reports.ti) { |imp| report_link(imp) }
     end
 
     def render_count_columns(tbl)
-      tbl.column(:STATUS.l) { |imp| plain(imp.state.to_s) }
+      tbl.column(:status.ti) { |imp| plain(imp.state.to_s) }
       tbl.column(:inat_import_tracker_imported_count.l) do |imp|
         plain(imp.imported_count.to_s)
       end
@@ -47,7 +47,7 @@ module Views::Controllers::InatImports
     def results_link(import)
       return unless result_ids.include?(import.id)
 
-      link_to(:RESULTS.l, results_inat_import_path(import))
+      link_to(:results.ti, results_inat_import_path(import))
     end
 
     def result_ids
@@ -55,7 +55,7 @@ module Views::Controllers::InatImports
     end
 
     def report_link(import)
-      link_to(:REPORT.l, inat_import_path(import))
+      link_to(:report.ti, inat_import_path(import))
     end
 
     def when_text(import)

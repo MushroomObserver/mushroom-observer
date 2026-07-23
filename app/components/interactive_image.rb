@@ -4,22 +4,30 @@
 #
 # This Phlex component renders an interactive image with lazy loading,
 # lightbox support, voting, and other features. It inherits shared
-# functionality from BaseImage.
+# functionality from Image::Base.
 #
 # @example
-#   render Components::Image::Interactive.new(
+#   InteractiveImage(
 #     user: @user,
 #     image: @image,
 #     size: :thumbnail,
 #     votes: true
 #   )
-class Components::Image::Interactive < Components::Image::Base
+class Components::InteractiveImage < Components::Image::Base
   # Override :image prop to only accept Image instances (not Integer IDs).
   # InteractiveImage is for displaying existing, persisted images.
   # Form components like `Form::UploadGallery::Item` inherit from
   # `BaseImage` instead, which accepts Integer IDs for newly uploaded
   # images with provisional IDs.
   prop :image, _Nilable(::Image)
+
+  # Image#broadcast_processed_update re-renders with this true, to
+  # refresh only the image itself (src/data-src, once resized copies
+  # exist) -- never the link/votes/overlays, which are page-specific
+  # (image_link, votes, extra_classes, identify all vary by call site;
+  # the model has no way to know which page's props to replay). See
+  # the comment on Image::INTERACTIVE_BROADCAST_SIZES.
+  prop :media_only, _Boolean, default: false
 
   def view_template
     return if @upload && @image.blank?
@@ -30,8 +38,11 @@ class Components::Image::Interactive < Components::Image::Base
     # Build render data
     @data = build_render_data(@img_instance, @img_id)
 
-    # Render the interactive image
-    render_interactive_image
+    if @media_only
+      render_image_container
+    else
+      render_interactive_image
+    end
   end
 
   private
@@ -56,8 +67,17 @@ class Components::Image::Interactive < Components::Image::Base
 
   def render_image_container
     div(
+      id: "#{@data[:html_id]}_media",
       class: "image-lazy-sizer overflow-hidden",
-      style: "padding-bottom: #{@data[:proportion]}%;"
+      style: "padding-bottom: #{@data[:proportion]}%;",
+      # The lazyload Stimulus controller (re-)runs
+      # window.lazyLoadInstance.update() on connect. The layout-level
+      # instance only fires on full page loads, so the img.lazy inside
+      # a fragment swapped in by Image#broadcast_processed_update's
+      # Turbo Stream would otherwise stay stuck on placeholder.svg.
+      # Only needed on the broadcast variant -- initial page renders
+      # are covered by the layout.
+      data: (@media_only ? { controller: "lazyload" } : {})
     ) do
       render_lazy_image
       render_noscript_image

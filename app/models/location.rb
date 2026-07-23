@@ -122,7 +122,9 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     center_lng
   ].freeze
 
-  acts_as_versioned(if_changed: VERSIONED_COLUMNS)
+  # See Name: delete_all the versions on destroy so they don't dangle.
+  acts_as_versioned(if_changed: VERSIONED_COLUMNS,
+                    association_options: { dependent: :delete_all })
   non_versioned_columns.push(
     "created_at",
     "updated_at",
@@ -431,7 +433,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Info to include about each location in merge requests.
   def merge_info
     num_obs = observations.count
-    "#{:LOCATION.l} ##{id}: #{name} [o=#{num_obs}]"
+    "#{:location.ti} ##{id}: #{name} [o=#{num_obs}]"
   end
 
   # Strip out special characters, punctuation, and small words from a name.

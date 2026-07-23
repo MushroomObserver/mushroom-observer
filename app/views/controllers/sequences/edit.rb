@@ -27,7 +27,7 @@ module Views::Controllers::Sequences
       render(ObservationTitle.new(observation: obs))
       render(Form.new(@sequence, back: @back))
       div(class: "small") do
-        span(class: "font-weight-bold") { "#{:CREATED_BY.l}:" }
+        span(class: "font-weight-bold") { "#{:created_by.ti}:" }
         whitespace
         Link(type: :user, user: @sequence.user)
       end

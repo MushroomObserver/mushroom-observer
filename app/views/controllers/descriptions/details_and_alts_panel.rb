@@ -23,9 +23,7 @@ module Views::Controllers::Descriptions
     prop :review, _Boolean, default: false
 
     def view_template
-      render(Components::Panel.new(
-               panel_id: "description_details_and_alts"
-             )) do |panel|
+      Panel(panel_id: "description_details_and_alts") do |panel|
         panel.with_heading { :show_observation_details.l }
         panel.with_heading_links do
           render(Components::Description::ModLinks.new(
@@ -65,13 +63,13 @@ module Views::Controllers::Descriptions
     end
 
     def render_title_row
-      plain("#{:TITLE.l}: ")
+      plain("#{:title.ti}: ")
       trusted_html(description_title)
     end
 
     def render_parent_row
       parent = @description.parent
-      plain("#{parent.type_tag.to_s.upcase.to_sym.t}: ")
+      plain("#{parent.type_tag.ti}: ")
       a(href: url_for(parent.show_link_args)) do
         trusted_html(parent.format_name.t)
       end
@@ -208,7 +206,7 @@ module Views::Controllers::Descriptions
     end
 
     def latest_review_date
-      @description.last_review&.web_time || :UNKNOWN.l
+      @description.last_review&.web_time || :unknown.ti
     end
 
     def reviewer_link

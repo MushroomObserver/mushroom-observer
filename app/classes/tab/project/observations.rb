@@ -7,7 +7,7 @@ class Tab::Project::Observations < Tab::Base
   end
 
   def title
-    "#{@project.visible_observations.count} #{:OBSERVATIONS.l}"
+    "#{@project.visible_observations.count} #{:observations.ti}"
   end
 
   def path

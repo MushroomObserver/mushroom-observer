@@ -7,7 +7,7 @@ class Tab::Project::AdminAliases < Tab::Base
   end
 
   def title
-    "#{@project.aliases.count} #{:PROJECT_ALIASES.l}"
+    "#{@project.aliases.count} #{:project_aliases.ti}"
   end
 
   def path

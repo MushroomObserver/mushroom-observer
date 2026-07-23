@@ -6,7 +6,7 @@ module Views::Controllers::Publications
     prop :publication, ::Publication
 
     def view_template
-      add_page_title(:PUBLICATION.l)
+      add_page_title(:publication.ti)
       add_edit_icons(@publication, current_user) if current_user
 
       render_full

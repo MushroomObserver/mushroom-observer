@@ -126,7 +126,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { id: obs.id })
 
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_select("body.observations__index", true)
     assert_select(
       "#results .rss-heading a[href ^= '/obs/#{obs.id}'] .rss-name",
@@ -171,7 +171,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
   end
 
   def test_index_useless_param_page2
@@ -180,7 +180,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_select(".pagination_numbers a", { text: "Previous" },
                   "Wrong page or display is missing a link to Previous page")
   end
@@ -238,7 +238,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params:)
 
     # Pattern search guesses this is a name query
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     count = Observation.pattern(pattern).count
@@ -253,7 +253,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params:)
 
     # Pattern search guesses this is a name query
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     count = Observation.pattern(pattern).count
@@ -269,7 +269,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params:)
 
     # Pattern search guesses this is a name query
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     assert_not_empty(css_select('[id="context_nav"]').text, "Tabset is empty")
@@ -284,7 +284,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     setup_rolfs_index
     # This is what search_controller sends for that pattern:
     get(:index, params:)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_names.l}: #{pattern}")
 
     modifiers = "#{:query_include_synonyms.l}, #{:query_include_subtaxa.l}"
@@ -312,7 +312,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_empty(css_select('[id="context_nav"]').text,
                  "RH tabset should be empty when search has no hits")
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
   end
 
   def test_index_pattern_one_hit
@@ -336,7 +336,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     setup_rolfs_index
     get(:index, params: { look_alikes: "1", name: name.id })
 
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
     assert_results(count: look_alikes)
   end
@@ -353,7 +353,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { look_alikes: "1", name: name.id })
 
     assert_response(:success)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_results(count: look_alikes)
   end
 
@@ -369,7 +369,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     setup_rolfs_index
     get(:index, params: { related_taxa: "1", name: name.text_name })
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_names.l}: #{parent.text_name}")
     assert_results(count: obss_of_related_taxa.count)
   end
@@ -384,7 +384,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
     ids.each do |id|
       assert_select(
@@ -410,7 +410,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login(user.login)
     get(:index, params: { by_user: user.id })
 
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
 
     assert_select(
@@ -448,7 +448,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: params)
 
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters(
       "#{:query_within_locations.l}: #{location.display_name}"
     )
@@ -468,7 +468,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_flash(flash_matcher)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
   end
 
   def test_index_location_with_nonexistent_location
@@ -494,7 +494,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { q: q_param })
 
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters(
       "#{:query_within_locations.l}: #{location.display_name}"
     )
@@ -522,7 +522,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_response(:success,
                     "Expected success — Integer NoMethodError means " \
                     "symbolize_keys is missing in query_from_q_param_hash")
-    assert_page_title(:OBSERVATIONS.l, "Should be on the observations index")
+    assert_page_title(:observations.ti, "Should be on the observations index")
     assert_displayed_filters(location.display_name,
                              "Location filter should appear in #filters")
     assert_results(count: Observation.locations(location).count)
@@ -533,7 +533,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params: { where: location.name })
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"
     )
@@ -548,7 +548,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { where: location.name, page: 2 })
     assert_select(".pagination_numbers a", { text: "Previous" },
                   "Wrong page or display is missing a link to Previous page")
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters(
       "#{:query_search_where.l}: #{location.display_name}"
     )
@@ -633,7 +633,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
   end
 
   # Covers the `return unless (project = find_or_goto_index(...))`
@@ -665,7 +665,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     assert_response(:success)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_flash_text(:runtime_no_matches.l(type: :observation))
   end
 
@@ -676,7 +676,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { species_list: spl.id })
 
     assert_response(:success)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_displayed_filters("#{:species_lists.l}: #{spl.title}")
   end
 
@@ -696,7 +696,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { species_list: spl.id })
 
     assert_response(:success)
-    assert_page_title(:OBSERVATIONS.l)
+    assert_page_title(:observations.ti)
     assert_flash_text(:runtime_no_matches.l(type: :observation))
   end
 
@@ -753,6 +753,63 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     query = @controller.create_query(:Observation, **NERFC_QUERY_PARAMS)
     get(:index, params: { q: query.q_param })
     assert_nil(session["return-to"])
+  end
+
+  # `uncached_object_ids` batches the MatrixBox cache-key pre-check
+  # into one `read_multi` instead of one `Rails.cache.exist?` per
+  # object -- verify it still resolves each object correctly (one
+  # already cached, one not, one uncacheable) with a single round trip.
+  def test_uncached_object_ids_batches_the_cache_precheck
+    login
+    cached_obs = observations(:coprinus_comatus_obs)
+    uncached_obs = observations(:agaricus_campestris_obs)
+    cached_obs.thumb_image.update_column(:transferred, true)
+    uncached_obs.thumb_image.update_column(:transferred, true)
+    untransferred_obs = observations(:detailed_unknown_obs)
+    untransferred_obs.thumb_image&.update_column(:transferred, false)
+
+    locale = I18n.locale
+    cached_key = Components::Matrix::Table.cache_key_for(cached_obs, locale)
+
+    real_store = ActiveSupport::Cache::MemoryStore.new
+    real_store.write(cached_key, ["<li>already cached</li>", {}])
+    spy = CountingCacheStoreForIndexes.new(real_store)
+
+    original_cache = Rails.cache
+    ids = begin
+            Rails.cache = spy
+            @controller.send(
+              :uncached_object_ids,
+              [cached_obs, uncached_obs, untransferred_obs], locale
+            )
+          ensure
+            # Must run even if the call above raises, or a broken spy cache
+            # store leaks into every other test in this worker process.
+            Rails.cache = original_cache
+          end
+
+    assert_equal(1, spy.read_multi_calls,
+                 "expected one batched read regardless of object count")
+    assert_equal([uncached_obs.id, untransferred_obs.id].sort, ids.sort,
+                 "the cached object should be excluded; the genuine " \
+                 "miss and the uncacheable object should both need " \
+                 "eager-loading")
+  end
+
+  # Counts read_multi calls so the test above can assert one round
+  # trip regardless of object count.
+  class CountingCacheStoreForIndexes
+    attr_reader :read_multi_calls
+
+    def initialize(real_store)
+      @real_store = real_store
+      @read_multi_calls = 0
+    end
+
+    def read_multi(*keys)
+      @read_multi_calls += 1
+      @real_store.read_multi(*keys)
+    end
   end
 
   PARAMS_UNDER_LIMIT =

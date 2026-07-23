@@ -74,6 +74,69 @@ class Occurrence < AbstractModel
     Observation::NamingConsensus.new(obs).calc_consensus(user)
   end
 
+  # Per-key merge of the member observations' notes, for display on the
+  # primary observation's show page (Observation#display_notes). The
+  # primary's own value wins for any key it holds; a *blank* value on
+  # the primary suppresses that key entirely (an explicit deletion of an
+  # otherwise-inherited value); for a key the primary doesn't hold, the
+  # most-recently-updated sibling with a non-blank value supplies it.
+  #
+  # Display-time only: the members' stored notes are never modified, so
+  # each observation keeps its own notes intact on its own show page.
+  # Returns a plain Hash shaped like Observation#notes.
+  def merged_notes
+    primary, siblings = primary_and_ranked_siblings
+    return {} unless primary
+
+    merged_notes_keys(primary, siblings).each_with_object({}) do |key, out|
+      merge_notes_key(out, key, primary, siblings)
+    end
+  end
+
+  # For the primary's EDIT form: per notes key, the sibling values worth
+  # offering as "adopt" choices -- DISTINCT (whitespace-trimmed) non-blank
+  # sibling values that DIFFER from the primary's own value, winner-first
+  # (most-recent sibling), each as [source_observation_id, value]. Only
+  # keys with at least one such option are included. This covers both keys
+  # the primary doesn't own (every sibling value differs from nothing) and
+  # keys it owns where a sibling disagrees. The id lets the dropdown label
+  # a long value by its source obs; the value is copied on adopt. Ordered
+  # hash; keys in primary-then-most-recent-sibling order.
+  def adopt_options_by_key
+    primary, siblings = primary_and_ranked_siblings
+    return {} unless primary
+
+    all_notes_keys(primary, siblings).each_with_object({}) do |key, out|
+      options = differing_sibling_options(key, primary, siblings)
+      out[key] = options if options.any?
+    end
+  end
+
+  # Notes keys any non-primary member holds a NON-BLANK value for. A
+  # blank value the primary submits for one of these is a deliberate
+  # suppression of the otherwise-inherited value (see merged_notes), so
+  # the edit path must preserve it rather than compact it away. Keys
+  # whose sibling values are all blank inherit nothing, so a blank there
+  # is just an empty field and should be compacted as usual.
+  def sibling_note_keys
+    _primary, siblings = primary_and_ranked_siblings
+    siblings.flat_map do |sib|
+      sib.notes.keys.select { |key| sib.notes[key].to_s.strip.present? }
+    end.uniq
+  end
+
+  # For the primary's EDIT form: per shared notes key, the value that
+  # would be inherited if the primary held none of its own -- the
+  # most-recent sibling's non-blank value (the same one merge_notes_key
+  # picks). Lets the form's "Inherit" state show what it resolves to.
+  def inherited_values_by_key
+    _primary, siblings = primary_and_ranked_siblings
+    sibling_note_keys.index_with do |key|
+      siblings.find { |sib| sib.notes[key].to_s.strip.present? }&.
+        notes&.[](key)
+    end
+  end
+
   # Auto-destroy if reduced to fewer than 2 observations,
   # unless linked to a field slip (which needs the occurrence).
   def destroy_if_incomplete!
@@ -257,6 +320,65 @@ class Occurrence < AbstractModel
     detached.each do |obs|
       Occurrence.log_observation_removed(obs, nil, user)
       Observation::NamingConsensus.new(obs).calc_consensus(user)
+    end
+  end
+
+  # The primary observation and the siblings ordered most-recent-first,
+  # resolved from the (eager-loaded) members rather than the
+  # primary_observation association, which the show page's strict-loading
+  # scope does not preload. Returns [nil, []] if the primary isn't among
+  # the members (shouldn't happen given the belongs-to validation).
+  def primary_and_ranked_siblings
+    members = observations.to_a
+    primary = members.find { |obs| obs.id == primary_observation_id }
+    return [nil, []] unless primary
+
+    siblings = members.
+               reject { |obs| obs.id == primary_observation_id }.
+               sort_by { |obs| [obs.updated_at, obs.id] }.reverse
+    [primary, siblings]
+  end
+
+  # Every notes key on any member, primary's first then sibling-only.
+  def all_notes_keys(primary, siblings)
+    (primary.notes.keys + siblings.flat_map { |sib| sib.notes.keys }).uniq
+  end
+
+  # Distinct trimmed non-blank sibling values for `key` that differ from
+  # the primary's own value, winner-first, as [observation_id, value].
+  # Adopting copies a sibling's value verbatim, so return the RAW value;
+  # trim only for the blank/agreement checks and de-duping, so the exact
+  # stored text (incl. leading/trailing whitespace) survives an adopt.
+  def differing_sibling_options(key, primary, siblings)
+    own = primary.notes[key].to_s.strip
+    seen = Set.new
+    siblings.filter_map do |sib|
+      raw = sib.notes[key].to_s
+      normalized = raw.strip
+      next if normalized.blank? || normalized == own || !seen.add?(normalized)
+
+      [sib.id, raw]
+    end
+  end
+
+  # Primary's keys first, in its own order, then any keys only siblings
+  # carry (most-recent sibling first). Keys are already space-normalized
+  # symbols (Observation.notes_normalized_key), so direct comparison
+  # matches the same way the rest of the app treats notes keys.
+  def merged_notes_keys(primary, siblings)
+    keys = primary.notes.keys.dup
+    siblings.each do |sib|
+      sib.notes.each_key { |key| keys << key unless keys.include?(key) }
+    end
+    keys
+  end
+
+  def merge_notes_key(out, key, primary, siblings)
+    if primary.notes.key?(key)
+      # Primary holds the key: its value wins, but a blank suppresses.
+      out[key] = primary.notes[key] if primary.notes[key].present?
+    elsif (sib = siblings.find { |obs| obs.notes[key].present? })
+      out[key] = sib.notes[key]
     end
   end
 end

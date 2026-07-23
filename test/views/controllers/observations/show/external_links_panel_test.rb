@@ -45,7 +45,7 @@ class Views::Controllers::Observations::Show::ExternalLinksPanelTest <
     # Generic sibling link (mycoportal): relationship is the link text.
     mycoportal = external_links(:coprinus_comatus_obs_mycoportal_link)
     assert_html(html, "a[href='#{mycoportal.url}']",
-                text: "Manual link to MycoPortal")
+                text: "Manual link to MyCoPortal")
     # iNaturalist sibling link: "<relationship> (<id>)"
     inat = external_links(:coprinus_comatus_obs_inaturalist_link)
     assert_html(html, "a[href='#{inat.url}']",

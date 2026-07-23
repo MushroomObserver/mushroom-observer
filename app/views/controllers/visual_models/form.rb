@@ -10,7 +10,7 @@ module Views::Controllers::VisualModels
       super do
         render_errors if model.errors.any?
         render_name_field
-        submit(:SUBMIT.t, center: true)
+        submit(:submit.ti, center: true)
       end
     end
 
@@ -33,7 +33,7 @@ module Views::Controllers::VisualModels
       div(class: "form-group field") do
         text_field(:name, class: "form-control", label: false)
         whitespace
-        plain(:VISUAL_MODEL.t)
+        plain(:visual_model.ti)
       end
     end
   end

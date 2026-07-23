@@ -438,7 +438,7 @@ class LocationsController < ApplicationController
     # defining a given location. (e.g., clicking on "define this location",
     # or after create_observation with unknown location)
     # Note: names are in user's preferred order unless explicitly otherwise.)
-    @original_name = params[:where]
+    @original_name = string_param(:where)
 
     # Previous value of place name: ignore warnings if unchanged
     # (i.e., resubmit same name).
@@ -617,7 +617,7 @@ class LocationsController < ApplicationController
   def modal_title
     case action_name
     when "new", "create"
-      :create_object.t(type: :LOCATION)
+      :create_object.t(type: :location)
     when "edit", "update"
       render_to_string(Views::Layouts::Header::ObjectTitle.new(
                          object: @location, mode: :edit,

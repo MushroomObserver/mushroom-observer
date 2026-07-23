@@ -41,13 +41,13 @@ module Views::Controllers::Projects::Members
     # per-column class (the redundant `.align-middle` on single-line
     # thead rows is invisible in standard Bootstrap).
     def define_columns(table)
-      table.column(:Login_name.t,
+      table.column(:login_name.ti,
                    class: "text-center") { |u| render_avatar(u) }
-      table.column(:Full_name.t, class: "align-middle") { |u| plain(u.name) }
-      table.column(:PROJECT_ALIASES.t, class: "align-middle") do |u|
+      table.column(:full_name.ti, class: "align-middle") { |u| plain(u.name) }
+      table.column(:project_aliases.ti, class: "align-middle") do |u|
         render_aliases(u)
       end
-      table.column(:Status.t, class: "align-middle") do |u|
+      table.column(:status.ti, class: "align-middle") do |u|
         plain(@project.member_status(u))
       end
       table.column(nil, class: "align-middle") { |u| render_edit_link(u) }
@@ -59,12 +59,12 @@ module Views::Controllers::Projects::Members
     end
 
     def render_user_image(user)
-      render(Components::Image::Interactive.new(
-               user: user,
-               image: user.image,
-               votes: false,
-               size: :thumbnail
-             ))
+      InteractiveImage(
+        user: user,
+        image: user.image,
+        votes: false,
+        size: :thumbnail
+      )
     end
 
     def render_aliases(user)

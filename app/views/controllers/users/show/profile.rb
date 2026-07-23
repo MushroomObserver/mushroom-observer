@@ -10,7 +10,7 @@ module Views::Controllers::Users
       prop :life_list, ::Checklist::ForUser
 
       def view_template
-        render(::Components::Panel.new(panel_id: "user_profile")) do |panel|
+        Panel(panel_id: "user_profile") do |panel|
           panel.with_heading { render_heading }
           links = capture { render_heading_links }
           panel.with_heading_links { trusted_html(links) } if links.present?
@@ -57,10 +57,10 @@ module Views::Controllers::Users
 
       def render_profile_image
         div(class: "float-left mr-5 mb-3") do
-          render(::Components::Image::Interactive.new(
-                   user: @user, image: @show_user.image, size: :small,
-                   votes: false, id_prefix: "profile_image"
-                 ))
+          InteractiveImage(
+            user: @user, image: @show_user.image, size: :small,
+            votes: false, id_prefix: "profile_image"
+          )
         end
       end
 

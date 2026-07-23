@@ -48,9 +48,9 @@ module Observations
     end
 
     def download_observations_switch
-      if params[:commit] == :CANCEL.l
+      if params[:commit] == :cancel.ti
         redirect_with_query(observations_path(always_index: true))
-      elsif params[:commit] == :DOWNLOAD.l
+      elsif params[:commit] == :download.ti
         create_and_render_report
       elsif params[:commit] == :download_observations_print_labels.l
         render_report(ObservationLabels.new(@user, @query))
@@ -62,6 +62,7 @@ module Observations
         query: @query, format: @format, encoding: @encoding, user: @user
       )
       render_report(report)
+      report.mark_exported! if report.respond_to?(:mark_exported!)
     end
 
     FORMATS = %w[

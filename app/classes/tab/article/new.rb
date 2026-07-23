@@ -3,7 +3,7 @@
 # "Create article" link.
 class Tab::Article::New < Tab::Base
   def title
-    :create_object.t(type: :ARTICLE)
+    :create_object.t(type: :article)
   end
 
   def path

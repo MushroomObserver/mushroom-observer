@@ -18,9 +18,9 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   def view_template
     return unless render_panel?
 
-    render(Components::Panel.new(
-             panel_id: "observation_species_lists"
-           )) do |panel|
+    Panel(
+      panel_id: "observation_species_lists"
+    ) do |panel|
       if @obs.species_lists.any?
         panel.with_heading { plain(:show_lists_header.t) }
         panel.with_heading_links { manage_link } if manage_link?
@@ -81,7 +81,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
       variant: :strip,
       icon: :remove,
       icon_class: "text-danger",
-      name: :REMOVE.t,
+      name: :remove.ti,
       target: remove_path,
       confirm: :are_you_sure.l
     )

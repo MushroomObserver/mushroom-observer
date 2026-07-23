@@ -30,7 +30,7 @@ module Tab::Naming
     def test_edit
       tab = Tab::Naming::Edit.new(naming: @naming)
 
-      assert_equal(:EDIT.l, tab.title)
+      assert_equal(:edit.ti, tab.title)
       assert_equal(
         routes.edit_observation_naming_path(
           observation_id: @naming.observation_id, id: @naming.id

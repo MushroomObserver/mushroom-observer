@@ -10,7 +10,7 @@
 module Components::Localization
   # `Name#rank` → singular translation, e.g. `:genus` → "Genus".
   def rank_as_string(rank)
-    :"RANK_#{rank.to_s.upcase}".l
+    :"rank_#{rank.to_s.downcase}".ti
   end
 
   # `Image#vote_cache` → longer translation including the "good

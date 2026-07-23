@@ -35,6 +35,20 @@ Turbo.StreamActions.remove_class = function () {
     target.classList.remove(this.templateContent.textContent)
   });
 }
+// Guards against duplicate inserts when both a controller's
+// synchronous turbo_stream response and a model's async broadcast
+// try to prepend the same new record (see CommentsController#create).
+// Whichever arrives first wins; the second becomes a no-op instead of
+// inserting a second copy.
+Turbo.StreamActions.prepend_once = function () {
+  const newElement = this.templateContent.firstElementChild
+  if (newElement && newElement.id && document.getElementById(newElement.id)) {
+    return
+  }
+  this.targetElements.forEach((target) => {
+    target.prepend(this.templateContent.cloneNode(true))
+  });
+}
 
 import "@rails/request.js"
 

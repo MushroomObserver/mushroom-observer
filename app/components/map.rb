@@ -36,18 +36,18 @@
 # props on the host class.
 #
 # @example Basic usage
-#   render(Components::Map.new(objects: [@location]))
+#   Map(objects: [@location])
 #
 # @example Editable map for forms
-#   render(Components::Map.new(
+#   Map(
 #     objects: [@location],
 #     editable: true,
 #     map_type: "location",
 #     controller: nil  # form has the controller
-#   ))
+#   )
 #
 # @example Clustered observations map with cap banner
-#   render(Components::Map.new(
+#   Map(
 #     objects: @observations,
 #     clustering: true,
 #     capped: @observations_capped,
@@ -56,7 +56,7 @@
 #     zoom: 2,
 #     observations_loaded_count: @observations_loaded_count,
 #     observations_total_count: @observations_total_count
-#   ))
+#   )
 #
 class Components::Map < Components::Base
   # Upper bound on points for client-side dynamic clustering
@@ -224,8 +224,8 @@ class Components::Map < Components::Base
   def localization_data
     {
       nothing_to_map: nothing_to_map_text,
-      observations: :Observations.t,
-      locations: :Locations.t,
+      observations: :observations.ti,
+      locations: :locations.ti,
       show_all: :show_all.t,
       map_all: :map_all.t,
       map_cap_banner: I18n.t("#{MO.locale_namespace}.map_cap_banner")
@@ -269,34 +269,9 @@ class Components::Map < Components::Base
     end
   end
 
-  # The query the user is navigating — explicit `@query` prop when
-  # given, otherwise the controller's `current_query` (session +
-  # `params[:q]`-derived). Memoized so popup builders don't re-ask
-  # per mapset.
-  def effective_query
-    @effective_query ||= @query || current_query
-  end
-
   # The URL `q=` Hash, derived from `effective_query.q_param`.
   def effective_query_param
     @effective_query_param ||= effective_query&.q_param
-  end
-
-  # Plain-text coordinate formatters for marker titles. The popup
-  # uses the same shape via `Components::Map::Popup`; kept here too
-  # so the marker title computed by `mapset_marker_title` doesn't
-  # need the popup class loaded.
-  def format_latitude(val)
-    format_coordinate(val, "N", "S")
-  end
-
-  def format_longitude(val)
-    format_coordinate(val, "E", "W")
-  end
-
-  def format_coordinate(val, positive_dir, negative_dir)
-    deg = val.abs.round(4)
-    "#{deg}°#{val.negative? ? negative_dir : positive_dir}"
   end
 
   # Rendering modules live in their own files (`app/components/map/`).
@@ -305,4 +280,5 @@ class Components::Map < Components::Base
   # first execute.
   include Clustering
   include Legend
+  include EffectiveQuery
 end

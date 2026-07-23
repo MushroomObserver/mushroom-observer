@@ -36,7 +36,7 @@
 #  herbarium_label::  Initial determination + accession number.
 #  format_name::      Same as herbarium_label.
 #  accession_at_herbarium:: Format as "spec #nnnn @ Herbarium".
-#  mcp_url::          URL for corresponding MycoPortal record
+#  mcp_url::          URL for corresponding MyCoPortal record
 #
 #  == Callbacks
 #

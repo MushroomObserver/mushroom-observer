@@ -232,7 +232,7 @@ class SpeciesListTest < UnitTestCase
   def test_unique_format_name_blank_title
     spl = species_lists(:first_species_list)
     spl.title = ""
-    assert_equal("#{:SPECIES_LIST.l} ##{spl.id}", spl.unique_format_name)
+    assert_equal("#{:species_list.ti} ##{spl.id}", spl.unique_format_name)
   end
 
   def test_file_assignment_rejects_unrecognized_content_type

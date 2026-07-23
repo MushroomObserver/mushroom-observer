@@ -8,7 +8,7 @@ module Views::Controllers::Theme
       add_context_nav(::Tab::Theme::ShowActions.new)
 
       trusted_html(build_description)
-      trusted_html(:theme_switch.tp(theme: :BlackOnWhite.l))
+      trusted_html(:theme_switch.tp(theme: :black_on_white.l))
     end
 
     private

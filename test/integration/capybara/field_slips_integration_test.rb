@@ -11,7 +11,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
   def test_visiting_the_index
     login!(mary)
     visit(field_slips_url)
-    assert_match(:FIELD_SLIP.t, page.title)
+    assert_match(:field_slip.ti, page.title)
   end
 
   def test_navigating_to_show_field_slip
@@ -29,8 +29,8 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     click_on(:field_slip_edit.t, match: :first)
 
     fill_in(:field_slip_code.t, with: @field_slip.code)
-    select(@field_slip.project.title, from: :PROJECT.t)
-    click_on(:SAVE_EDITS.t)
+    select(@field_slip.project.title, from: :project.ti)
+    click_on(:save_edits.ti)
 
     assert_selector(class: "alert", text: :field_slip_updated.t)
   end
@@ -38,7 +38,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
   def test_destroying_a_field_slip
     login!(mary)
     visit(field_slip_url(@field_slip))
-    click_on(:DESTROY_OBJECT.t(type: :field_slip), match: :first)
+    click_on(:destroy_object.t(type: :field_slip), match: :first)
 
     assert_selector(class: "alert", text: :field_slip_destroyed.t)
   end
@@ -57,7 +57,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
     project_checkbox = "observation_project_ids_#{project.id}"
     check(project_checkbox)
     assert_selector("##{project_checkbox}[checked='checked']")
-    fill_in(:WHERE.l, with: wrong_location.name, visible: :any)
+    fill_in(:where.ti, with: wrong_location.name, visible: :any)
     # this is what counts, would be handled by js
     find_field(id: "observation_location_id",
                type: :hidden).set(wrong_location.id)

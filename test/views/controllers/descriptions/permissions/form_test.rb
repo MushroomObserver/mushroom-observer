@@ -65,7 +65,7 @@ module Views::Controllers::Descriptions::Permissions
 
       # Standard group names translated
       assert_includes(html, :adjust_permissions_all_users.t)
-      assert_includes(html, :REVIEWERS.t)
+      assert_includes(html, :reviewers.ti)
     end
 
     def test_with_writein_data_populated

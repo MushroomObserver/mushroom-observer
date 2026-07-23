@@ -51,7 +51,7 @@ class Views::Controllers::Account::Preferences::Form <
     password_field(:password, label: :prefs_password_new)
     password_field(:password_confirmation,
                    label: :prefs_password_confirm)
-    submit(:SAVE_EDITS.l, center: true)
+    submit(:save_edits.ti, center: true)
   end
 
   # ====================================================================
@@ -73,7 +73,7 @@ class Views::Controllers::Account::Preferences::Form <
     render_votes_anonymous_select
     render_keep_filenames_select
     render_license_id_select
-    submit(:SAVE_EDITS.l, center: true)
+    submit(:save_edits.ti, center: true)
   end
 
   def render_votes_anonymous_select
@@ -105,7 +105,7 @@ class Views::Controllers::Account::Preferences::Form <
     addon = external_addon(:prefs_apply_to_images.t,
                            images_edit_licenses_path)
     select_field(:license_id, @licenses,
-                 label: :LICENSE, **addon) do |f|
+                 label: :license.ti, **addon) do |f|
       f.with_between { render_license_note }
     end
   end
@@ -164,7 +164,7 @@ class Views::Controllers::Account::Preferences::Form <
     render_appearance_text_selects
     render_appearance_obs_options
     render_appearance_image_selects
-    submit(:SAVE_EDITS.l, center: true)
+    submit(:save_edits.ti, center: true)
   end
 
   def render_appearance_text_selects
@@ -206,7 +206,8 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def theme_values
-    [[:theme_random.l, "RANDOM"]] + MO.themes.map { |t| [t.to_sym.l, t] }
+    [[:theme_random.l, "RANDOM"]] +
+      MO.themes.map { |t| [t.underscore.to_sym.l, t] }
   end
 
   def render_theme_about_link
@@ -254,7 +255,7 @@ class Views::Controllers::Account::Preferences::Form <
     Query::Filter.all.each do |filter| # rubocop:disable Rails/FindEach
       render_filter_field(filter)
     end
-    submit(:SAVE_EDITS.l, center: true)
+    submit(:save_edits.ti, center: true)
   end
 
   # Renders one content-filter field. Branches on the filter's
@@ -319,7 +320,7 @@ class Views::Controllers::Account::Preferences::Form <
     textarea_field(:notes_template, prefs: true, rows: 1) do |f|
       f.with_between { render_notes_help }
     end
-    submit(:SAVE_EDITS.l, center: true)
+    submit(:save_edits.ti, center: true)
   end
 
   def render_notes_help

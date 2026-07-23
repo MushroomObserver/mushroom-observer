@@ -8,7 +8,7 @@ module Views::Controllers::Sequences
 
     def view_template
       container_class(:full)
-      add_new_title(:add_object, :SEQUENCE)
+      add_new_title(:add_object, :sequence)
       add_context_nav(::Tab::Sequence::Form.new(back_object: @observation))
 
       Row do

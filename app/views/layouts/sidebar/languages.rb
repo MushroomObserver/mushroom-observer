@@ -84,9 +84,9 @@ class Views::Layouts::Sidebar
           whitespace
           span(class: "lang-flag-emoji") { plain(flag_for(I18n.locale)) }
           whitespace
-          Icon(type: :chevron_down, title: :OPEN.l,
+          Icon(type: :chevron_down, title: :open.ti,
                class: "active-icon")
-          Icon(type: :chevron_up, title: :CLOSE.l)
+          Icon(type: :chevron_up, title: :close.ti)
         end
       end
     end

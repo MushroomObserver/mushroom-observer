@@ -37,9 +37,9 @@ module Views::Controllers::Projects
     end
 
     def render_summary_panel
-      render(Components::Panel.new(
-               panel_id: "project_summary"
-             )) do |panel|
+      Panel(
+        panel_id: "project_summary"
+      ) do |panel|
         panel.with_body do
           render_summary_body
         end
@@ -191,7 +191,7 @@ module Views::Controllers::Projects
       count = @project.count_violations
       Button(
         type: :get,
-        name: "#{count} #{:CONSTRAINT_VIOLATIONS.l}",
+        name: "#{count} #{:constraint_violations.ti}",
         target: project_violations_path(project_id: @project.id),
         variant: count.positive? ? :warning : nil,
         size: :lg,

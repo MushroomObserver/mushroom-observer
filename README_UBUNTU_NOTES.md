@@ -71,3 +71,29 @@ doing that.
 
 at the end of this script it runs the entire test suite which should
 pass with no errors or failures.
+
+# Fragment caching in development
+
+Rails' fragment/low-level caching is off by default in development
+(`config.action_controller.perform_caching = false`) so that editing
+a view always shows your latest change instead of a stale cached
+fragment. Run `bin/rails dev:cache` to toggle it on (creates
+`tmp/caching-dev.txt`); run it again to toggle back off.
+
+When it's on, the cache store is Solid Cache (the `cache_development`
+database), matching production — not an in-process memory store — so
+a cache read/write costs a real query locally too, same as prod.
+
+MO's fragment-caching call site, `Components::Matrix::Table` (the
+observations/images grid), keys its fragments on a hand-maintained
+`CACHE_VERSION` string (see `app/components/matrix/table.rb`), not
+automatic template-digest busting. If you're editing `Matrix::Box`'s
+rendering with caching toggled on, remember to bump `CACHE_VERSION`
+or you'll see stale HTML for previously-cached rows.
+
+Because the store is a real database table now, neither restarting
+the server nor toggling `bin/rails dev:cache` off and back on clears
+it (`dev:cache`'s only side effect is `tmp:clear`, which doesn't touch
+`cache_development`). If you need a clean slate -- e.g. you forgot to
+bump `CACHE_VERSION` and want to confirm that's really the cause --
+run `Rails.cache.clear` from `bin/rails console`.

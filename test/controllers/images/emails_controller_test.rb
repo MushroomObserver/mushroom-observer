@@ -53,6 +53,9 @@ module Images
       assert_response(:success)
     end
 
+    # Regression test for #3791: on success the modal must close (not
+    # stay open looking frozen) and the flash must land in the page's
+    # own #page_flash, not the modal's own in-body flash slot.
     def test_create_turbo_stream
       image = images(:commercial_inquiry_image)
       params = {
@@ -65,6 +68,13 @@ module Images
         post(:create, params: params, as: :turbo_stream)
       end
       assert_response(:success)
+      assert_select("turbo-stream[action='close_modal']",
+                    text: "modal_commercial_inquiry_email")
+      assert_select(
+        "turbo-stream[action='remove']" \
+        "[target='modal_commercial_inquiry_email']"
+      )
+      assert_select("turbo-stream[action='update'][target='page_flash']")
     end
   end
 end

@@ -4,7 +4,7 @@
 # See http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 mycoportal:
-  name:     MycoPortal
+  name:     MyCoPortal
   project:  empty_project # mary is only member and admin
   base_url: "https://mycoportal.org/portal/collections/"
   url_template: "https://mycoportal.org/portal/collections/individual/index.php?occid={id}"

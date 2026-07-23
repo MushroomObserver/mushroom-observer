@@ -21,7 +21,7 @@ class FormNotesTest < ComponentTestCase
     assert_html(html, "div#test_notes")
     # Heading slot is filled with the localized NOTES label and
     # nothing else — no help icon or collapse trigger in the heading.
-    assert_includes(html, :NOTES.l)
+    assert_includes(html, :notes.ti)
     assert_no_html(html, ".panel-heading a.info-collapse-trigger",
                    "no in-header help trigger — help is inline in body")
     # Body collapse target is derived from panel_id.
@@ -110,9 +110,102 @@ class FormNotesTest < ComponentTestCase
     assert_includes(children.last["class"] || "", "help-block",
                     "last child should be the textile help block")
   end
+
+  # --- Occurrence value-source buttons ---
+
+  # For each shared key the primary shows value + action buttons: a
+  # button per available value (its own, then each sibling's, carrying
+  # the raw value beside the shown preview), then Inherit / Hide / All.
+  # The button for the current state is active; the textarea reflects it.
+  def test_occurrence_rows_render_value_and_action_buttons
+    html = render(OccurrenceFormNotes.new(Observation.new, action: "/t"))
+
+    assert_html(html, "[data-controller='notes-adopt']")
+
+    # Textarea states: :set editable, :inherit disabled, :hide readonly.
+    assert_no_html(html, "textarea[name='observation[notes][cap]'][disabled]")
+    assert_html(html, "[data-notes-row] " \
+                      "textarea[name='observation[notes][substrate]']" \
+                      "[disabled][data-notes-adopt-target='value']")
+    assert_html(html, "textarea[name='observation[notes][odor]'][readonly]")
+
+    # :inherit shows the inherited value greyed (disabled), and the row
+    # carries it so a click can restore it.
+    assert_html(html, "textarea[name='observation[notes][substrate]']",
+                text: "wood")
+    assert_html(html,
+                "[data-notes-row][data-notes-inherited-value='wood']")
+
+    # "This Observation" button only where the primary stores a value
+    # (cap), active, carrying the raw value; siblings carry theirs.
+    assert_html(html, "button[data-notes-action='current']" \
+                      "[data-notes-value='red'].active",
+                text: :form_observations_notes_this_observation.l, count: 1)
+    assert_html(html, "button[data-notes-action='adopt']" \
+                      "[data-notes-value='brown']", text: "Obs 5")
+    # Screen readers announce the value via the button's aria-label,
+    # since the shown value lives in a separate span.
+    assert_html(html, "button[data-notes-action='adopt']" \
+                      "[aria-label='Obs 5: brown']")
+    assert_html(html, "button[data-notes-action='adopt']" \
+                      "[data-notes-value='wood']", text: "Obs 123")
+
+    # Active state per row: cap -> current, substrate -> inherit,
+    # odor -> hide.
+    assert_html(html, "button[data-notes-action='inherit'].active", count: 1)
+    assert_html(html, "button[data-notes-action='hide'].active", count: 1)
+
+    # "All" only where there are 2+ values: cap (own + brown) and
+    # substrate (wood + bark), not odor (one sibling value).
+    assert_html(html, "button[data-notes-action='concatenate']",
+                text: :form_observations_notes_all.l, count: 2)
+
+    # The label still associates with the textarea.
+    assert_html(html, "label[for='observation_notes_cap']", text: "Cap")
+  end
+
+  def test_no_adopt_controller_without_adopt_options
+    html = render(MultiPartFormNotes.new(Observation.new, action: "/t"))
+
+    assert_no_html(html, "[data-controller='notes-adopt']")
+  end
+
+  # A shared key whose value agrees across observations (empty
+  # adopt_options) still gets the buttons -- This Observation (active)
+  # plus Inherit/Hide -- but no sibling to adopt and no All (one value).
+  def test_agreeing_shared_key_still_renders_buttons
+    html = render(AgreeingKeyFormNotes.new(Observation.new, action: "/t"))
+
+    assert_html(html, "[data-controller='notes-adopt']")
+    assert_html(html, "button[data-notes-action='current']" \
+                      "[data-notes-value='white'].active")
+    assert_html(html, "button[data-notes-action='inherit']")
+    assert_html(html, "button[data-notes-action='hide']")
+    assert_no_html(html, "button[data-notes-action='adopt']")
+    assert_no_html(html, "button[data-notes-action='concatenate']")
+  end
 end
 
 # --- Test form classes -------------------------------------------------
+
+# One shared key whose values agree: :set with empty adopt_options.
+class AgreeingKeyFormNotes < Components::ApplicationForm
+  def view_template
+    super do
+      render(Components::Form::Notes.new(
+               form: self,
+               parts: [
+                 Components::Form::Notes::Part.new(
+                   key: :gills, value: "white", label: "gills",
+                   adopt_options: [], notes_state: :set
+                 )
+               ],
+               panel_id: "test_notes",
+               expanded: true
+             ))
+    end
+  end
+end
 
 class MultiPartFormNotes < Components::ApplicationForm
   def view_template
@@ -148,6 +241,35 @@ class SinglePartFormNotes < Components::ApplicationForm
                expanded: true,
                single_part_mode: true,
                above_help: "ABOVE_HELP_MARKER".html_safe
+             ))
+    end
+  end
+end
+
+# One of each occurrence value-source state: :set (cap, owns a value),
+# :inherit (substrate, owns nothing), :hide (odor, owns a blank).
+class OccurrenceFormNotes < Components::ApplicationForm
+  def view_template
+    super do
+      render(Components::Form::Notes.new(
+               form: self,
+               parts: [
+                 Components::Form::Notes::Part.new(
+                   key: :cap, value: "red", label: "Cap",
+                   adopt_options: [[5, "brown"]], notes_state: :set
+                 ),
+                 Components::Form::Notes::Part.new(
+                   key: :substrate, value: "", label: "substrate",
+                   adopt_options: [[123, "wood"], [124, "bark"]],
+                   notes_state: :inherit, inherited_value: "wood"
+                 ),
+                 Components::Form::Notes::Part.new(
+                   key: :odor, value: "", label: "odor",
+                   adopt_options: [[7, "pungent"]], notes_state: :hide
+                 )
+               ],
+               panel_id: "test_notes",
+               expanded: true
              ))
     end
   end

@@ -2,10 +2,10 @@
 
 require("test_helper")
 
-class IdBadgeTest < ComponentTestCase
+class IDBadgeTest < ComponentTestCase
   def test_renders_object_id_in_clipboard_button
     obs = observations(:minimal_unknown_obs)
-    html = render(Components::IdBadge.new(object: obs))
+    html = render(Components::IDBadge.new(object: obs))
 
     # The badge is a `<button>` whose visible content is the object id.
     assert_html(html, "button[type='button']", text: obs.id.to_s)
@@ -20,14 +20,14 @@ class IdBadgeTest < ComponentTestCase
   def test_renders_question_mark_when_object_id_nil
     # Newly-built (unpersisted) model has no id — fall back to "?"
     # so the badge still renders without a NoMethodError.
-    html = render(Components::IdBadge.new(object: Observation.new))
+    html = render(Components::IDBadge.new(object: Observation.new))
 
     assert_html(html, "button", text: "?")
   end
 
   def test_extra_class_overrides_default_spacing
     obs = observations(:minimal_unknown_obs)
-    html = render(Components::IdBadge.new(
+    html = render(Components::IDBadge.new(
                     object: obs, extra_class: "rss-id mr-4"
                   ))
 

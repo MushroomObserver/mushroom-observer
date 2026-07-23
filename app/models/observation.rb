@@ -688,22 +688,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       will_save_change_to_attribute?(:location_id)
   end
 
-  def place_name_and_coordinates(user = nil)
-    if lat.present? && lng.present?
-      lat_string = format_coordinate(lat, "N", "S")
-      lng_string = format_coordinate(lng, "E", "W")
-      "#{place_name(user)} (#{lat_string} #{lng_string})"
-    else
-      place_name(user)
-    end
-  end
-
-  def format_coordinate(value, positive_point, negative_point)
-    return "#{-value.round(4)}°#{negative_point}" if value.negative?
-
-    "#{value.round(4)}°#{positive_point}"
-  end
-
   # Returns latitude if public or if the current user owns the observation.
   # The user should also be able to see hidden latitudes if they are an admin
   # or they are members of a project that the observation belongs to, but
@@ -718,19 +702,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def reveal_location?(user)
     !gps_hidden || can_edit?(user) || project_admin?(user)
-  end
-
-  def display_lat_lng
-    return "" unless lat
-
-    "#{lat.abs}°#{lat.negative? ? "S" : "N"} " \
-      "#{lng.abs}°#{lng.negative? ? "W" : "E"}"
-  end
-
-  def display_alt
-    return "" unless alt
-
-    "#{alt.round}m"
   end
 
   def saved_change_to_place?
@@ -804,6 +775,26 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return Observation.no_notes unless value.is_a?(Hash)
 
     NormalizedHash.new(value)
+  end
+
+  # Notes to render on this observation's show page. For the primary
+  # observation of a multi-member occurrence this is the per-key merge
+  # across the occurrence (Occurrence#merged_notes), so the primary
+  # surfaces its siblings' notes rather than only its own. Every other
+  # case -- a non-primary sibling, or an observation not in an
+  # occurrence -- shows its own notes unchanged.
+  def display_notes
+    return notes unless shows_merged_notes?
+
+    occurrence.merged_notes
+  end
+
+  # True only for the primary observation of an occurrence that has more
+  # than one member -- the one case where the show page merges notes.
+  def shows_merged_notes?
+    occ = occurrence
+    occ.present? && occ.primary_observation_id == id &&
+      occ.observations.many?
   end
 
   # Key used for general Observation.notes

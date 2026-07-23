@@ -68,7 +68,7 @@ module Name::Validation
 
     errors.add(
       :text_name,
-      "#{:validate_name_text_name_too_long.t} #{:MAXIMUM.t}: " \
+      "#{:validate_name_text_name_too_long.t} #{:maximum.ti}: " \
       "#{Name.text_name_limit}"
     )
   end
@@ -78,7 +78,7 @@ module Name::Validation
 
     errors.add(
       :author,
-      "#{:validate_name_author_too_long.t} #{:MAXIMUM.t}: " \
+      "#{:validate_name_author_too_long.t} #{:maximum.ti}: " \
       "#{Name.author_limit}. #{:validate_name_use_first_author.t}."
     )
   end
@@ -120,7 +120,7 @@ module Name::Validation
     )
 
     errors.add(:base,
-               :name_error_field_start.t(field: :CITATION.t, start: start))
+               :name_error_field_start.t(field: :citation.ti, start: start))
   end
 
   # prevent assigning ICN registration identifier to unregistrable Name

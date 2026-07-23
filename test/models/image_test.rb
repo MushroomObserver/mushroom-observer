@@ -3,6 +3,9 @@
 require("test_helper")
 
 class ImageTest < UnitTestCase
+  include ActiveJob::TestHelper
+  include ActionCable::TestHelper
+
   # log_update/log_destroy/log_create_for/log_reuse_for/log_remove_from
   # attribute to `current_user` (the acting/editing user), not `user`
   # (the image's owner) - an admin editing/removing someone else's image
@@ -156,31 +159,90 @@ class ImageTest < UnitTestCase
   def test_presence_of_critical_external_scripts
     assert_not(Rails.root.join("script/bogus_script").exist?,
                "script/bogus_script should not exist!")
-    assert(Rails.root.join("script/process_image").exist?,
-           "Missing script/process_image!")
-    assert(Rails.root.join("script/rotate_image").exist?,
-           "Missing script/rotate_image!")
-    assert(Rails.root.join("script/retransfer_images").exist?,
-           "Missing script/retransfer_images!")
+    # strip_exif is still shelled out to by Image#strip_gps! (the image
+    # resize/transfer scripts are all Ruby now -- see Image::Processor).
+    assert(Rails.root.join("script/strip_exif").exist?,
+           "Missing script/strip_exif!")
   end
 
   def test_transform
     img = Image.new
-    assert_nil(img.transform(:mirror))
+    assert_no_enqueued_jobs { assert_nil(img.transform(:mirror)) }
     assert_raises(RuntimeError) { img.transform(:edible) }
   end
 
-  # Outside the test env the guard clause is skipped and transform shells
-  # out to script/rotate_image with the mapped operator.
-  def test_transform_shells_out_when_not_in_test_env
+  def test_transform_enqueues_rotate_image_job
     img = images(:in_situ_image)
-    commands = []
-    img.stub(:system, ->(cmd) { commands << cmd }) do
-      Rails.env.stub(:test?, false) do
-        img.transform(:rotate_left)
+    assert_enqueued_with(job: RotateImageJob,
+                         args: [img.id, img.original_extension, "-90"]) do
+      img.transform(:rotate_left)
+    end
+  end
+
+  # A local strip rewrites files that any in-flight/pending upload
+  # predates (see Image::Processor::Verifier#transfer_image for the
+  # race), so it must re-enqueue the transfer to push the stripped set.
+  def test_strip_gps_local_image_strips_and_reenqueues_transfer
+    img = images(:in_situ_image)
+    captured = nil
+    fake_capture2e = lambda do |_env, *args|
+      captured = args
+      ["", stub_status(true)]
+    end
+
+    Open3.stub(:capture2e, fake_capture2e) do
+      assert_enqueued_with(job: TransferImagesJob,
+                           args: [{ image_ids: [img.id] }]) do
+        assert_nil(img.strip_gps!)
       end
     end
-    assert_equal(["script/rotate_image #{img.id} -90&"], commands)
+
+    assert_equal(["script/strip_exif", img.id.to_s, "0"], captured)
+    assert_true(img.reload.gps_stripped)
+  end
+
+  # An already-transferred image is stripped server-side -- nothing
+  # local to push, so no transfer job.
+  def test_strip_gps_transferred_image_strips_remotely_without_enqueue
+    img = images(:in_situ_image)
+    img.update_columns(transferred: true)
+    captured = nil
+    fake_capture2e = lambda do |_env, *args|
+      captured = args
+      ["", stub_status(true)]
+    end
+
+    Open3.stub(:capture2e, fake_capture2e) do
+      assert_no_enqueued_jobs { assert_nil(img.strip_gps!) }
+    end
+
+    assert_equal(["script/strip_exif", img.id.to_s, "1"], captured)
+    assert_true(img.reload.gps_stripped)
+  end
+
+  def test_strip_gps_failure_marks_nothing_and_enqueues_nothing
+    img = images(:in_situ_image)
+
+    Open3.stub(:capture2e, ["boom", stub_status(false)]) do
+      assert_no_enqueued_jobs { assert_equal("boom", img.strip_gps!) }
+    end
+
+    assert_false(img.reload.gps_stripped)
+  end
+
+  def test_strip_gps_noop_when_already_stripped
+    img = images(:in_situ_image)
+    img.update_columns(gps_stripped: true)
+
+    Open3.stub(:capture2e, ->(*) { raise("must not shell out") }) do
+      assert_no_enqueued_jobs { assert_nil(img.strip_gps!) }
+    end
+  end
+
+  def stub_status(success)
+    status = Object.new
+    status.define_singleton_method(:success?) { success }
+    status
   end
 
   # dHash is computed from the small local rendition — never the full-size
@@ -217,38 +279,6 @@ class ImageTest < UnitTestCase
     end
     assert_equal(img.small_url, fetched)
     assert_equal(123, img.reload.dhash)
-  end
-
-  # ImageDhashJob's readiness gate (#4799): a local small/medium
-  # rendition is a ready source, whether or not the transfer to the
-  # remote image server(s) has happened yet.
-  def test_dhash_source_ready_when_local_file_exists
-    img = images(:in_situ_image) # transferred: false
-    small = img.full_filepath(:small)
-    File.stub(:exist?, ->(path) { path == small }) do
-      assert(img.dhash_source_ready?)
-    end
-  end
-
-  # A `transferred` image is ready even with no local rendition -- the
-  # small rendition can be fetched remotely (#4799).
-  def test_dhash_source_ready_when_transferred_with_no_local_file
-    # transferred: true (fixture default -- unlike in_situ_image/
-    # turned_over_image, which both explicitly override it to false)
-    img = images(:connected_coprinus_comatus_image)
-    img.stub(:full_filepath, "/no/such/file.jpg") do
-      assert(img.dhash_source_ready?)
-    end
-  end
-
-  # Neither a local rendition nor a completed transfer -- process_image's
-  # backgrounded resize/transfer script (script/process_image) may still
-  # be running. Not ready; ImageDhashJob must not hash this yet (#4799).
-  def test_dhash_source_not_ready_without_local_file_or_transfer
-    img = images(:in_situ_image) # transferred: false
-    img.stub(:full_filepath, "/no/such/file.jpg") do
-      assert_not(img.dhash_source_ready?)
-    end
   end
 
   def test_validate_vote_rescues_non_numeric
@@ -367,18 +397,80 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
   end
 
+  # A failed GPS strip must stop before Image::Processor#process is ever
+  # reached -- an unstripped original must not propagate into resized/
+  # transferred copies or get hashed (dhash is now computed inside
+  # #process, #4796). See Image::Processor.strip_original_gps.
+  def test_process_image_strip_failure_skips_processing
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+
+    processed = false
+    processor = Object.new
+    processor.define_singleton_method(:process) { processed = true }
+
+    img.stub(:move_original, true) do
+      Image::Processor.stub(:strip_original_gps, "boom") do
+        Image::Processor.stub(:new, processor) do
+          Rails.env.stub(:test?, false) do
+            assert_not(img.process_image(strip: true))
+          end
+        end
+      end
+    end
+    assert_not(processed, "strip failure must skip processing (and hashing)")
+    assert(img.errors[:image].any?)
+  end
+
   def test_process_image_command_failure
     img = images(:in_situ_image)
     img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
 
+    failing_processor = Object.new
+    def failing_processor.process
+      raise("boom")
+    end
+
+    # Capture the rescue's Rails.logger.error call instead of letting it
+    # through -- the test logger writes to $stdout, so the deliberate
+    # "boom" backtrace otherwise dumps into the suite's console output
+    # looking like a real failure. Capturing also pins the logging
+    # contract itself, which the old passthrough never asserted.
+    logged = nil
     img.stub(:move_original, true) do
-      img.stub(:system, false) do
+      Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
-          assert_not(img.process_image)
+          Rails.logger.stub(:error, ->(msg) { logged = msg }) do
+            assert_not(img.process_image)
+          end
         end
       end
     end
     assert(img.errors[:image].any?)
+    assert_includes(logged, "Image::Processor failed for image #{img.id}")
+    assert_includes(logged, "boom")
+  end
+
+  # Transfer-to-image-server is no longer part of Image::Processor#process
+  # (see #4791 -- TransferImagesJob owns that now, asynchronously), and
+  # the perceptual hash is computed inline in #process (#4796, no separate
+  # job), so a successful resize enqueues only TransferImagesJob.
+  def test_process_image_enqueues_transfer_job
+    img = images(:in_situ_image)
+    img.upload_temp_file = "already-staged" # save_to_temp_file short-circuits
+    succeeding_processor = Object.new
+    def succeeding_processor.process; end
+
+    img.stub(:move_original, true) do
+      Image::Processor.stub(:new, succeeding_processor) do
+        Rails.env.stub(:test?, false) do
+          assert_enqueued_with(job: TransferImagesJob,
+                               args: [{ image_ids: [img.id] }]) do
+            assert(img.process_image)
+          end
+        end
+      end
+    end
   end
 
   def test_move_original_system_fail
@@ -528,6 +620,130 @@ class ImageTest < UnitTestCase
     assert_not_equal("/place_holder_320.jpg", url.url)
   end
 
+  # Rendition URLs are cache-busted with an updated_at token (#4808):
+  # reprocessing (rotate/mirror) rewrites file contents under an
+  # otherwise-stable path, so without the token browsers/CDNs keep
+  # serving the old bytes until a hard refresh.
+  def test_url_includes_updated_at_cache_busting_token
+    img = images(:in_situ_image)
+    img.transferred = true
+    token = img.updated_at.to_i
+
+    Image::ALL_SIZES.each do |size|
+      url = img.url(size)
+      assert(url.end_with?("/#{img.id}.jpg?#{token}"),
+             "Expected #{size} URL #{url.inspect} to end with " \
+             "cache-busting token ?#{token}")
+    end
+  end
+
+  def test_url_cache_busting_token_changes_when_image_is_updated
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    old_url = img.reload.url(:medium)
+
+    img.update_column(:updated_at, img.updated_at + 1.hour)
+
+    assert_not_equal(old_url, img.reload.url(:medium),
+                     "Expected URL to change when updated_at changes")
+  end
+
+  def test_url_placeholders_never_get_a_cache_busting_token
+    url = Image::URL.new(size: :thumbnail, id: 999_999, transferred: false,
+                         extension: "jpg", version: 123)
+
+    assert_equal("/place_holder_thumb.jpg", url.url)
+  end
+
+  # Class-level Image.url (id-only call sites: textile embeds, map
+  # popups, data exports) has no record to read updated_at from --
+  # no token unless the caller passes one. Reports in particular
+  # depend on these URLs staying stable.
+  def test_class_level_url_has_no_token_unless_version_passed
+    img = images(:in_situ_image)
+
+    assert_not_includes(Image.url(:full_size, img.id, transferred: true), "?")
+    assert(Image.url(:full_size, img.id,
+                     transferred: true, version: 123).end_with?("?123"))
+  end
+
+  def test_broadcast_processed_update_fires_on_transferred_change
+    image = images(:in_situ_image)
+    image.update_column(:transferred, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    # `capture_broadcasts` JSON-decodes each message back to the raw
+    # `<turbo-stream ...>` HTML string ActionCable stores it as.
+    messages = capture_broadcasts(stream) { image.update(transferred: true) }
+
+    # One broadcast_replace_to per INTERACTIVE_BROADCAST_SIZES entry --
+    # and nothing else (the carousel-slide broadcast was removed along
+    # with the obs-show carousel's subscription; only the image-show
+    # page subscribes).
+    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length,
+                 messages.length)
+    Image::INTERACTIVE_BROADCAST_SIZES.each do |size|
+      target = "interactive_image_#{image.id}_#{size}_media"
+      assert(messages.any? { |m| m.include?(%(target="#{target}")) },
+             "Expected a broadcast targeting #{target}")
+    end
+  end
+
+  # Processing STARTS by flipping transferred true->false, BEFORE the
+  # renditions are regenerated -- broadcasting at that moment would
+  # push a new-token URL at stale files, and would duplicate
+  # RotateImageJob's explicit end-of-processing broadcast (Copilot
+  # review finding on #4825). Only the completion flip (false->true)
+  # broadcasts.
+  def test_broadcast_does_not_fire_when_transferred_becomes_false
+    image = images(:in_situ_image)
+    image.update_column(:transferred, true)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_no_broadcasts(stream) { image.update(transferred: false) }
+  end
+
+  # The broadcast must not replay a page-specific image_link/votes/
+  # extra_classes/identify combination -- it only knows the model, not
+  # which page's props a given subscriber originally rendered with (a
+  # matrix-box thumbnail's real image_link, votes: false on the
+  # image-show page, etc). Confirms the fix for the bug where
+  # rebroadcasting the *whole* Interactive component with defaults
+  # would silently swap a thumbnail's link target to the image's own
+  # show page, or make hidden votes reappear.
+  def test_broadcast_interactive_sizes_omits_link_and_votes_markup
+    image = images(:in_situ_image)
+    image.update_column(:transferred, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    messages = capture_broadcasts(stream) { image.update(transferred: true) }
+
+    media_messages = messages.select { |m| m.include?("_media") }
+    assert_equal(Image::INTERACTIVE_BROADCAST_SIZES.length,
+                 media_messages.length)
+    media_messages.each do |m|
+      assert_not_includes(m, "stretched-link")
+      assert_not_includes(m, "image-vote-section")
+    end
+  end
+
+  def test_broadcast_processed_update_fires_on_gps_stripped_change
+    image = images(:in_situ_image)
+    image.update_column(:gps_stripped, false)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_broadcasts(stream, Image::INTERACTIVE_BROADCAST_SIZES.length) do
+      image.update(gps_stripped: true)
+    end
+  end
+
+  def test_broadcast_processed_update_does_not_fire_on_unrelated_changes
+    image = images(:in_situ_image)
+    stream = Turbo::StreamsChannel.send(:stream_name_from, [image, :processed])
+
+    assert_no_broadcasts(stream) { image.update(notes: "new notes") }
+  end
+
   def test_import_link
     img = images(:in_situ_image)
     assert_nil(img.import_link, "Image starts with no import link")
@@ -546,5 +762,57 @@ class ImageTest < UnitTestCase
     img.external_links.load
     assert(img.external_links.loaded?)
     assert_equal(link, img.import_link)
+  end
+
+  # ---- EXIF geocode reading (local file vs. remote via curl+exiftool) --
+
+  # The image geotagged.jpg has this data (see also
+  # ObservationFormSystemTest::GEOTAGGED_EXIF).
+  GEOTAGGED_EXIF_GPS = { lat: 25.7582, lng: -80.3731, alt: 4 }.freeze
+
+  def test_read_exif_geocode_local_file
+    img = images(:in_situ_image)
+    stage_geotagged_file(img.full_filepath("orig"))
+
+    data = img.read_exif_geocode(hide_gps: false)
+
+    assert_equal(GEOTAGGED_EXIF_GPS[:lat], data[:lat])
+    assert_equal(GEOTAGGED_EXIF_GPS[:lng], data[:lng])
+    assert_equal(GEOTAGGED_EXIF_GPS[:alt], data[:alt])
+  ensure
+    FileUtils.rm_f(img.full_filepath("orig"))
+  end
+
+  # Regression test: `script/exiftool_remote` used to only read `$1`
+  # as a bare URL (fetched via `wget`), but `Image#read_exif_data`
+  # calls it with `flags..., url` -- the same `cmd, *flags, path`
+  # shape it uses for the local `exiftool` binary directly. That
+  # argument-shape mismatch (compounded by `wget` not being installed
+  # on every dev machine, unlike `curl`) silently broke EXIF re-reads
+  # for any already-transferred image -- `read_exif_geocode` always
+  # returned nil. See the corrected `curl [flags] url`-forwarding
+  # shape in `script/exiftool_remote`.
+  def test_read_exif_geocode_transferred_image
+    img = images(:in_situ_image)
+    img.update_column(:transferred, true)
+    # original_url carries a `?<version>` cache-buster (#4808) that
+    # curl correctly strips when resolving a `file://` URL -- but it's
+    # not part of the real filesystem path, so strip it here too
+    # before using this to stage the fixture file.
+    remote_path = img.original_url.delete_prefix("file://").sub(/\?.*\z/, "")
+    stage_geotagged_file(remote_path)
+
+    data = img.read_exif_geocode(hide_gps: false)
+
+    assert_equal(GEOTAGGED_EXIF_GPS[:lat], data[:lat])
+    assert_equal(GEOTAGGED_EXIF_GPS[:lng], data[:lng])
+    assert_equal(GEOTAGGED_EXIF_GPS[:alt], data[:alt])
+  ensure
+    FileUtils.rm_f(remote_path)
+  end
+
+  def stage_geotagged_file(path)
+    FileUtils.mkdir_p(File.dirname(path))
+    FileUtils.cp(Rails.root.join("test/images/geotagged.jpg"), path)
   end
 end

@@ -72,9 +72,9 @@ module Views::Controllers::SpeciesLists::Projects
 
     def render_submit_buttons
       div(class: "text-center mt-3") do
-        submit(:ATTACH.l)
+        submit(:attach.ti)
         whitespace
-        submit(:REMOVE.l)
+        submit(:remove.ti)
       end
     end
 

@@ -17,7 +17,7 @@ class Query::ExternalSitesTest < UnitTestCase
   end
 
   def test_external_link_name_has
-    expects = ExternalSite.name_has("MycoPortal")
-    assert_query(expects, :ExternalSite, name_has: "MycoPortal")
+    expects = ExternalSite.name_has("MyCoPortal")
+    assert_query(expects, :ExternalSite, name_has: "MyCoPortal")
   end
 end

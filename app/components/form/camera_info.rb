@@ -59,7 +59,7 @@ class Components::Form::CameraInfo < Components::Base
 
   def render_date_field
     div do
-      strong { "#{:DATE.l}: " }
+      strong { "#{:date.ti}: " }
       exif_to_image_date_button
     end
   end

@@ -145,7 +145,7 @@ class Views::Layouts::Sidebar < Views::Base
     # This cache depends on user status and locale
     cache([I18n.locale, user_status_string(@user), "links"]) do
       render_section(:app_latest, latest_tabs)
-      render_section(:INDEXES, indexes_tabs) if @user
+      render_section(:indexes, indexes_tabs) if @user
       render_section(:app_more, info_tabs)
       render_languages_section
     end

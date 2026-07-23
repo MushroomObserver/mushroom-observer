@@ -144,6 +144,22 @@ module GeneralExtensions
     FileUtils.cp_r(setup_images, image_dir)
   end
 
+  # Seeds a real (non-square) source file for `image` so
+  # Image::Processor can actually rotate/resize it, for tests that
+  # need real dimensions rather than just a flash message. Source
+  # files live in public/setup_images/orig/ (1.jpg-6.jpg).
+  def seed_real_image_file(image, source_name = "1.jpg")
+    setup_image_dirs
+    Image::URL::SUBDIRECTORIES.each_value do |subdir|
+      FileUtils.mkdir_p("#{MO.local_image_files}/#{subdir}")
+    end
+    source = Rails.root.join("public/setup_images/orig/#{source_name}")
+    dest = Rails.root.join(
+      "#{MO.local_image_files}/orig/#{image.id}.#{image.original_extension}"
+    )
+    FileUtils.cp(source, dest)
+  end
+
   # This seems to have disappeared from rails.
   def build_message(msg, add)
     msg ? "#{msg}\n#{add}" : add
@@ -294,10 +310,14 @@ module GeneralExtensions
     end
   end
 
-  @@fixture_labels = {}
+  class << self
+    attr_accessor :fixture_labels
+  end
+  self.fixture_labels = {}
+
   def get_fixture_label(table, idx)
-    @@fixture_labels[table] ||= read_fixture_labels(table) || []
-    @@fixture_labels[table][idx]
+    GeneralExtensions.fixture_labels[table] ||= read_fixture_labels(table) || []
+    GeneralExtensions.fixture_labels[table][idx]
   end
 
   def read_fixture_labels(table)

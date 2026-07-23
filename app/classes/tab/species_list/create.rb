@@ -2,7 +2,7 @@
 
 class Tab::SpeciesList::Create < Tab::Base
   def title
-    :create_object.t(type: :SPECIES_LIST)
+    :create_object.t(type: :species_list)
   end
 
   def path

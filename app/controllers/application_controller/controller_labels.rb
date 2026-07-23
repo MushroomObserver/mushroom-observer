@@ -40,10 +40,10 @@ module ApplicationController::ControllerLabels
   # Returns a translation string.
   def rubric
     if (parent = parent_controller_module)
-      return parent.underscore.upcase.to_sym.t
+      return parent.underscore.to_sym.ti
     end
 
-    controller_name.upcase.to_sym.t
+    controller_name.to_sym.ti
   end
 
   # `gotcha` — `Object` is the module_parent of a top-level

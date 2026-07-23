@@ -22,7 +22,7 @@ module Views::Controllers::Images::Emails
         render_image_preview
         render_user_label
         render_message_field
-        submit(:SEND.l, center: true)
+        submit(:send.ti, center: true)
       end
     end
 
@@ -30,12 +30,12 @@ module Views::Controllers::Images::Emails
 
     def render_image_preview
       div(class: "mb-4") do
-        render(Components::Image::Interactive.new(
-                 user: @user,
-                 image: @image,
-                 size: :medium,
-                 votes: false
-               ))
+        InteractiveImage(
+          user: @user,
+          image: @image,
+          size: :medium,
+          votes: false
+        )
       end
     end
 

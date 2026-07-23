@@ -6,13 +6,13 @@
 #
 # @example
 #   render(Components::Link::Download.new(
-#     name: :DOWNLOAD.t,
+#     name: :download.ti,
 #     target: new_download_species_list_path(id: @sl.id)
 #   ))
 class Components::Link::Download < Components::Link::Get
   def initialize(target:, name: nil, icon: :download, **)
     super(target: target,
-          name: name.presence || :DOWNLOAD.t,
+          name: name.presence || :download.ti,
           action: :download,
           icon: icon,
           **)

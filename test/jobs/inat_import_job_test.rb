@@ -74,7 +74,7 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_match(suggestion_date, proposed_name_notes)
 
     assert_not(obs.specimen, "Obs should not have a specimen")
-    assert(obs.notes.to_s.include?("Observation Fields: none"),
+    assert(obs.notes.to_s.include?("Observation fields: none"),
            "Notes should indicate if there were no iNat 'Observation Fields'")
 
     assert(obs.collector.present?, "Import should populate the collector")
@@ -1575,9 +1575,11 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.notes.key?(snapshot_key),
            "Observation Notes missing #{snapshot_key}")
     [
-      :USER.l, :OBSERVED.l, :show_observation_inat_lat_lng.l, :PLACE.l,
-      :ID.l, :DQA.l, :show_observation_inat_suggested_ids.l,
-      :OBSERVATION_FIELDS.l
+      :user.l.upcase_first, :observed.l.upcase_first,
+      :show_observation_inat_lat_lng.l, :place.l.upcase_first,
+      :id.l.upcase_first, :dqa.l.upcase_first,
+      :show_observation_inat_suggested_ids.l,
+      :observation_fields.l.upcase_first
     ].each do |caption|
       assert_match(
         /#{caption}/, obs.notes.to_s,
@@ -1786,6 +1788,50 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.send(:remove_const, :BATCH_SIZE)
       InatImportJob.const_set(:BATCH_SIZE, saved_batch_size)
     end
+  end
+
+  # -------- enqueue_batch_transfer tests (#4791's target design: one
+  # TransferImagesJob per import batch, not per image)
+
+  def test_enqueue_batch_transfer_enqueues_job_for_created_images
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    fake_importer = Object.new
+    fake_importer.define_singleton_method(:image_ids) { [111, 222] }
+    job.stub(:observation_importer, fake_importer) do
+      assert_enqueued_with(job: TransferImagesJob,
+                           args: [{ image_ids: [111, 222] }]) do
+        job.send(:enqueue_batch_transfer)
+      end
+    end
+  end
+
+  def test_enqueue_batch_transfer_noop_when_no_images_created
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    fake_importer = Object.new
+    fake_importer.define_singleton_method(:image_ids) { [] }
+    job.stub(:observation_importer, fake_importer) do
+      assert_no_enqueued_jobs(only: TransferImagesJob) do
+        job.send(:enqueue_batch_transfer)
+      end
+    end
+  end
+
+  # -------- send_import_digest tests (best-effort: a digest failure
+  # must not fail/retry the job, since that would resend digests)
+
+  def test_send_import_digest_swallows_delivery_failure
+    job = InatImportJob.new
+    job.instance_variable_set(:@inat_import, @inat_import)
+    logged = []
+    job.define_singleton_method(:log) { |msg| logged << msg }
+
+    Inat::ImportDigest.stub(:deliver_for, ->(*) { raise("boom") }) do
+      assert_nothing_raised { job.send(:send_import_digest) }
+    end
+
+    assert(logged.any? { |msg| msg.include?("Import digest failed") })
   end
 
   # -------- Other Utilities

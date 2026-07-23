@@ -41,7 +41,7 @@ module Views::Controllers::Descriptions
     end
 
     def render_panel(field, value)
-      render(Components::Panel.new) do |panel|
+      Panel do |panel|
         panel.with_heading { :"form_#{parent_type}s_#{field}".l }
         panel.with_body { trusted_html(value.tpl) }
       end
