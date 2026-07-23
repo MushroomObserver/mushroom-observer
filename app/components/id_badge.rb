@@ -31,7 +31,7 @@ class Components::IDBadge < Components::Base
       class: class_names("badge badge-id", SIZE_CLASSES[@size], @extra_class),
       role: "button",
       data: {
-        trigger: "tooltip", placement: "bottom",
+        tooltip_target: "trigger", placement: "bottom",
         title: :copy_this_id.ti,
         controller: "clipboard", clipboard_target: "source",
         action: "clipboard#copy",

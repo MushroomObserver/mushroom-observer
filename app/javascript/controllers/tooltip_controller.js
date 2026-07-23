@@ -1,31 +1,22 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Connects to data-controller="tooltip"
-// BS3/BS4 tooltips are "opt-in", so they require on-page activation.
-// We use our own data-trigger="tooltip" marker rather than
-// data-toggle="tooltip" -- data-toggle is the attribute Bootstrap's
-// own plugins (collapse, dropdown, tab, modal, ...) key off of via
-// an exact-string selector, so an element that needs both a
-// Bootstrap trigger and a tooltip can't share the two on one
-// data-toggle value. data-trigger is entirely ours.
+// Connects to data-controller="tooltip", once, on <body> -- every
+// tooltip trigger on the page is a `trigger` TARGET of this one
+// instance, not its own controller. BS3 tooltips are "opt-in" and
+// need per-element activation; Stimulus's own target tracking (a
+// MutationObserver scoped to this.element) calls triggerTargetConnected
+// for every matching element automatically, whether it's present at
+// initial page load or added later by any means (a turbo-frame fetch,
+// a Turbo Stream, raw JS) -- no manual sweep or extra event listener
+// needed for the dynamic case.
 export default class extends Controller {
+  static targets = ["trigger"]
 
   connect() {
     this.element.dataset.tooltip = "connected";
-    this.activateTooltips(this.element);
-    // Content added later via a turbo-frame fetch (e.g. the external
-    // links "Shared with" pane) never gets this controller's one-time
-    // connect() sweep -- turbo:frame-load fires once per frame
-    // navigation, scoped to just that frame's new content.
-    this.frameLoadListener = (event) => this.activateTooltips(event.target);
-    document.addEventListener("turbo:frame-load", this.frameLoadListener);
   }
 
-  disconnect() {
-    document.removeEventListener("turbo:frame-load", this.frameLoadListener);
-  }
-
-  activateTooltips(scope) {
-    $(scope).find('[data-trigger="tooltip"]').tooltip()
+  triggerTargetConnected(element) {
+    $(element).tooltip()
   }
 }

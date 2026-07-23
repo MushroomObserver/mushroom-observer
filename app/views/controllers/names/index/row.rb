@@ -59,7 +59,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
       variant: :link,
       class: "py-0 link-normal opacity-75",
       role: "button",
-      data: { trigger: "tooltip", placement: "bottom",
+      data: { tooltip_target: "trigger", placement: "bottom",
               title: :copy_this_name.ti,
               action: "clipboard#copy" }
     ) { Icon(type: :copy) }

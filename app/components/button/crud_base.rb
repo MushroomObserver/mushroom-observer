@@ -59,7 +59,7 @@ class Components::Button::CRUDBase < Components::Button
     form_data = { turbo: true }
     form_data[:turbo_confirm] = @confirm if @confirm
 
-    button_data = { trigger: "tooltip", placement: "top", title: @name }
+    button_data = { tooltip_target: "trigger", placement: "top", title: @name }
     if @confirm
       button_data[:turbo_confirm_title] = @confirm
       button_data[:turbo_confirm_button] = @name
