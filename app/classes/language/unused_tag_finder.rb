@@ -39,9 +39,18 @@ class Language::UnusedTagFinder
   Result = Struct.new(:total, :protected_tags, :confirmed_unused,
                       :files_scanned, keyword_init: true)
 
+  # .claude is AI-assistant tooling/config, not application code or
+  # even human-facing app documentation -- a tag name mentioned in a
+  # rule file or scratch note isn't real usage evidence. Excluding it
+  # also matters for a reason beyond accuracy: .claude/local/ is
+  # gitignored, so any locally-present file there (a prior audit's
+  # notes, say) is invisible to CI. Scanning it made local runs and CI
+  # runs of this exact tool disagree -- local was silently masking
+  # genuinely dead tags whenever a scratch note happened to mention
+  # their name in prose.
   EXCLUDE_DIR_NAMES = %w[
-    .git .bundle .ruby-lsp .vscode .qlty coverage log tmp vendor
-    node_modules
+    .git .bundle .ruby-lsp .vscode .qlty .claude coverage log tmp
+    vendor node_modules
   ].freeze
 
   EXCLUDE_PATH_SUBSTRINGS = %w[

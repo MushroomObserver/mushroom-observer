@@ -15,7 +15,8 @@ class Language::UnusedTagFinderTest < UnitTestCase
 
     assert_empty(
       result.confirmed_unused,
-      "Found en.txt tag(s) with no remaining reference anywhere: " \
+      "Found #{result.confirmed_unused.size} en.txt tag(s) with no " \
+      "remaining reference anywhere: " \
       "#{result.confirmed_unused.join(", ")}. Delete them from en.txt " \
       "(then run `bin/rails lang:update`), or if this is a false " \
       "positive from a new dynamic tag-construction pattern, add it " \
