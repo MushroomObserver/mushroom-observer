@@ -281,11 +281,17 @@ class BackfillMycoportalExportLinks
   def create_export_link(row)
     if @apply
       begin
-        ExternalLink.create!(user: @admin, target_type: "Image",
-                             target_id: row[:image_id], external_site: @site,
-                             relationship: :export,
-                             external_created_on: row[:metadata_date],
-                             last_synced_at: Time.current)
+        ExternalLink.create!(
+          user: @admin, target_type: "Image",
+          # images do not live on MCP. Instead they links to other sites.
+          # However, an ExternalLink url must target the external site
+          # Therefore, do not populate url
+          # url: nil
+          target_id: row[:image_id], external_site: @site,
+          relationship: :export,
+          external_created_on: row[:metadata_date],
+          last_synced_at: Time.current
+        )
       rescue ActiveRecord::RecordInvalid => e
         warn("  Image #{row[:image_id]}: #{e.message}")
         return (@stats[:invalid] += 1)
