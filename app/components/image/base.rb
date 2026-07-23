@@ -197,8 +197,7 @@ class Components::Image::Base < Components::Base
                image_id: lightbox_data[:image_id],
                obs: lightbox_data[:obs],
                identify: lightbox_data[:identify],
-               observation_view: lightbox_data[:observation_view],
-               votes: @votes
+               observation_view: lightbox_data[:observation_view]
              ))
     end
   end

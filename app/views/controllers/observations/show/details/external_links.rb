@@ -96,7 +96,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
          data: {
            parent: "#external_links_accordion",
            turbo_frame: "external_link_frame_#{link.id}",
-           tooltip_target: "tip", placement: "bottom",
+           tooltip_target: "tip", placement: "top",
            title: :show_observation_shared_with_tooltip.l(
              site: site_name
            )
