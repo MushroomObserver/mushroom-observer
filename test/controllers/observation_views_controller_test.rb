@@ -106,4 +106,29 @@ class ObservationViewsControllerTest < FunctionalTestCase
     # Verify lightbox caption is rendered with the identify UI
     assert_select("div#observation_identify_#{obs.id}")
   end
+
+  # Regression: `lightbox_caption_stream` must pass the observation's
+  # thumb image through to `ImageFragment(type: :lightbox_caption,
+  # ...)` -- without it, `@image` is nil inside the refreshed caption,
+  # which breaks the original/EXIF links (empty `/images//original`)
+  # and silently drops the vote section (gated on `@image`).
+  def test_update_turbo_stream_lightbox_caption_keeps_image_and_votes
+    login("mary")
+    obs = observations(:coprinus_comatus_obs)
+    assert_not_nil(obs.thumb_image, "fixture needs a thumb image")
+
+    put(:update,
+        params: { id: obs.id, observation_view: { reviewed: "1" } },
+        format: :turbo_stream)
+
+    assert_response(:success)
+    assert_select(
+      "turbo-stream[action='update_lightbox_caption'] " \
+      "a[href='/images/#{obs.thumb_image.id}/original']"
+    )
+    assert_select(
+      "turbo-stream[action='update_lightbox_caption'] " \
+      ".vote-section-inline#lightbox_image_vote_#{obs.thumb_image.id}"
+    )
+  end
 end

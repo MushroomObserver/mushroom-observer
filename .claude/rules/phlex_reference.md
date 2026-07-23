@@ -275,11 +275,17 @@ the top-level AR model rather than a same-named nested constant.
 
 `Components::ImageFragment` is the other worked example — same
 dispatcher shape, `DISPATCH` holds `Copyright`, `EXIFLink`,
-`LicenseBadge`, `Lightbox::Caption`, `Lightbox::ObservationTitle`,
-`MarkAsReviewedToggle`, `OriginalLink`, `ReuseForm`, `VoteInterface`.
+`LightboxCaption`, `OriginalLink`, `ReuseForm`, `VoteInterface`.
 `Components::Image::Base` is a separate, untouched class — inheritance
 infrastructure for `InteractiveImage` and other image-rendering
 components, not one of `ImageFragment`'s dispatched types.
+Two more moved out of `Components::Image::*` in the same pass but
+landed elsewhere, since neither is actually `Image`-specific:
+`Components::LicenseBadge` (flat, no `Fragment` — it takes a bare
+`::License`, already shared with description show pages) and
+`Components::ObservationFragment::MarkAsReviewedToggle` /
+`::LightboxTitle` (both take an `observation_view:`/`obs:`, nothing
+image-specific in their bodies).
 
 Both inherit from `Phlex::HTML` via `Components::Base` (`Views::Base` is
 a thin subclass). The split is for organization and intent, not
