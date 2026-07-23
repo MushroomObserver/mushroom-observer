@@ -60,6 +60,79 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
   end
 
+  def test_created_link_stores_metadata_date_as_external_created_on
+    image = images(:in_situ_image)
+    multimedia_csv = write_csv(
+      %w[coreid identifier MetadataDate],
+      [{ "coreid" => "1", "identifier" => image_url(image.id),
+         "MetadataDate" => "2019-07-22 17:05:18" }]
+    )
+    occurrences_csv = write_csv(%w[id catalogNumber],
+                                [occurrence_row(1, "MUOB 1")])
+    @missing_out = Tempfile.new(["missing", ".csv"]).path
+    subject = BackfillMycoportalExportLinks.new(
+      dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
+      apply: true, keep_csvs: false, missing_out: @missing_out
+    )
+
+    capture_io { subject.run }
+
+    link = link_for(image)
+    assert_not_nil(link, "Expected an export ExternalLink for the image")
+    assert_equal(Date.new(2019, 7, 22), link.external_created_on)
+  end
+
+  def test_created_link_leaves_url_nil
+    image = images(:in_situ_image)
+
+    run_script([occurrence_row(1, "MUOB 1")],
+               [multimedia_row(1, image_url(image.id))])
+
+    assert_nil(
+      link_for(image).url,
+      "Image export links have no reliable external URL to store " \
+      "(see plan doc) -- url should stay nil"
+    )
+  end
+
+  def test_created_link_sets_last_synced_at
+    image = images(:in_situ_image)
+    before = Time.current
+
+    run_script([occurrence_row(1, "MUOB 1")],
+               [multimedia_row(1, image_url(image.id))])
+
+    link = link_for(image)
+    assert_not_nil(link, "Expected an export ExternalLink for the image")
+    assert(link.last_synced_at >= before,
+           "last_synced_at should be set when the link is created")
+  end
+
+  def test_already_present_touches_last_synced_at_when_applying
+    image = images(:in_situ_image)
+    link = make_link(image)
+    link.update_column(:last_synced_at, 1.year.ago)
+
+    run_script([occurrence_row(1, "MUOB 1")],
+               [multimedia_row(1, image_url(image.id))])
+
+    assert(link.reload.last_synced_at > 1.day.ago,
+           "Re-running with --apply should bump last_synced_at on an " \
+           "already-linked image")
+  end
+
+  def test_already_present_not_touched_in_dry_run
+    image = images(:in_situ_image)
+    link = make_link(image)
+    link.update_column(:last_synced_at, 1.year.ago)
+
+    run_script([occurrence_row(1, "MUOB 1")],
+               [multimedia_row(1, image_url(image.id))], apply: false)
+
+    assert(link.reload.last_synced_at < 1.day.ago,
+           "A dry run should not write last_synced_at")
+  end
+
   def test_image_not_found_locally_is_reported
     bogus_id = Image.maximum(:id).to_i + 1000
 

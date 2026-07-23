@@ -240,7 +240,11 @@ class BackfillMycoportalExportLinks
   end
 
   def parse_row(row)
-    { occid: row["coreid"], image_id: image_id_from(row["identifier"]) }
+    { occid: row["coreid"], image_id: image_id_from(row["identifier"]),
+      # MetadataDate is the closest available proxy for when MCP created
+      # this media record -- not a guaranteed creation date, but the best
+      # the DwC-A dump exposes.
+      metadata_date: row["MetadataDate"].presence }
   end
 
   def image_id_from(identifier)
@@ -250,12 +254,20 @@ class BackfillMycoportalExportLinks
   def process_batch(batch)
     ids = batch.filter_map { |r| r[:image_id] }
     known_ids = Image.where(id: ids).pluck(:id).to_set
-    existing = ExternalLink.where(target_type: "Image", target_id: ids,
-                                  external_site: @site, relationship: :export).
-               pluck(:target_id).to_set
-    batch.each { |row| process_row(row, known_ids, existing) }
+    existing = existing_image_links(ids)
+    batch.each { |row| process_row(row, known_ids, existing.to_set) }
     @seen += batch.size
     warn("  #{@seen} images processed") if (@seen % PROGRESS_EVERY).zero?
+  end
+
+  # Bumps last_synced_at on already-linked images in this batch, so the
+  # field reflects the most recent confirmed sync rather than only the
+  # first one -- useful for the reconciliation-check use case.
+  def existing_image_links(ids)
+    scope = ExternalLink.where(target_type: "Image", target_id: ids,
+                               external_site: @site, relationship: :export)
+    scope.update_all(last_synced_at: Time.current) if @apply
+    scope.pluck(:target_id)
   end
 
   def process_row(row, known_ids, existing)
@@ -263,17 +275,19 @@ class BackfillMycoportalExportLinks
     return record_missing(row) unless known_ids.include?(row[:image_id])
     return (@stats[:already_present] += 1) if existing.include?(row[:image_id])
 
-    create_export_link(row[:image_id])
+    create_export_link(row)
   end
 
-  def create_export_link(image_id)
+  def create_export_link(row)
     if @apply
       begin
         ExternalLink.create!(user: @admin, target_type: "Image",
-                             target_id: image_id, external_site: @site,
-                             relationship: :export)
+                             target_id: row[:image_id], external_site: @site,
+                             relationship: :export,
+                             external_created_on: row[:metadata_date],
+                             last_synced_at: Time.current)
       rescue ActiveRecord::RecordInvalid => e
-        warn("  Image #{image_id}: #{e.message}")
+        warn("  Image #{row[:image_id]}: #{e.message}")
         return (@stats[:invalid] += 1)
       end
     end
