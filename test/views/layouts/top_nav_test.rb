@@ -43,7 +43,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     full_label = "#{:new.ti} #{:observation.ti}"
     assert_html(html, "a.btn-success[aria-label='#{full_label}']")
     assert_html(html, "a.btn-success[title='#{full_label}']")
-    assert_html(html, "a.btn-success[data-toggle='tooltip']")
+    assert_html(html, "a.btn-success[data-tooltip-target='trigger']")
     # Responsive content: the word "Add" appears in a span hidden at
     # xs width and shown at sm and up.
     assert_html(html, "a.btn-success span.d-none.d-sm-inline",

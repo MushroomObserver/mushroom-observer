@@ -69,7 +69,7 @@ class DropdownTest < ComponentTestCase
     assert_no_html(html, "button.btn")
   end
 
-  # Tooltip data attrs (`data-toggle="tooltip"`, `data-title`,
+  # Tooltip data attrs (`data-tooltip-target="trigger"`, `data-title`,
   # `data-placement`) are stripped from dropdown items. They're
   # redundant inside a menu (the label is already visible) and
   # Bootstrap's tooltip JS can interfere with dropdown click handling.
@@ -80,13 +80,13 @@ class DropdownTest < ComponentTestCase
                     label: "Menu"
                   )) do |menu|
       menu.section([["Edit", "/edit",
-                     { data: { toggle: "tooltip",
+                     { data: { tooltip_target: "trigger",
                                title: "Edit this",
                                placement: "top" } }]])
     end
 
     assert_html(html, "li a[href='/edit']")
-    assert_no_html(html, "[data-toggle='tooltip']")
+    assert_no_html(html, "[data-tooltip-target='trigger']")
     assert_no_html(html, "[data-title]")
     assert_no_html(html, "[data-placement]")
   end

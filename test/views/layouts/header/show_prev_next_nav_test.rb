@@ -208,7 +208,7 @@ module Views::Layouts
                     ))
 
       # All links should have tooltip data attributes
-      assert_includes(html, 'data-toggle="tooltip"')
+      assert_html(html, "a[data-tooltip-target='trigger']")
     end
 
     def test_link_nesting_structure

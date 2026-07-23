@@ -71,7 +71,8 @@ module Views::Controllers::Publications
 
       str = pub.link.sub(%r{^.*://+}, "").sub(%r{(/|\?).*}, "")
       capture do
-        link_to(str, pub.link, title: pub.link, data: { toggle: "tooltip" })
+        link_to(str, pub.link, title: pub.link,
+                               data: { tooltip_target: "trigger" })
       end
     end
 
