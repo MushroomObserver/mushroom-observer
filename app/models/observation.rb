@@ -271,7 +271,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Eager-load tree every `Components::Matrix::Box` render of an
   # observation reaches into — image with vote/license/project/user
-  # for `can_edit?`, location, name, namings (+ votes for
+  # for `can_edit?`, collector_user (lightbox caption's who line),
+  # location, name, namings (+ votes for
   # `Observation::NamingConsensus`), occurrence (+ observations for
   # the multi-obs occurrence link), projects, rss_log, user.
   # Shared by observations#index, field_slips show/index,
@@ -286,6 +287,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
      # for matrix_box_carousels:
      # { images: [:image_votes, :license, :projects, :user] },
+     :collector_user,
      { external_links: :external_site }, :location, :name,
      { namings: :votes },
      { occurrence: :observations }, :projects, :rss_log, :user]

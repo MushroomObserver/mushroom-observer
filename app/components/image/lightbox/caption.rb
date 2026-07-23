@@ -184,41 +184,9 @@ class Components::Image::Lightbox::Caption < Components::Base
   end
 
   def render_obs_who
-    obs_user = @obs.user
-
     p(class: "obs-who", id: "observation_who") do
-      plain("#{:who.ti}: ")
-      render_obs_user(obs_user)
-      render_contact_link(obs_user) if show_contact_link?(obs_user)
+      ObservationWho(obs: @obs, user: @user)
     end
-  end
-
-  def render_obs_user(obs_user)
-    if @user
-      Link(type: :user, user: obs_user)
-    else
-      plain(obs_user.unique_text_name)
-    end
-  end
-
-  def show_contact_link?(obs_user)
-    @user && obs_user != @user && !obs_user&.no_emails &&
-      obs_user&.email_general_question
-  end
-
-  def render_contact_link(_obs_user)
-    InlineLinkBlock(items: [contact_button])
-  end
-
-  def contact_button
-    Components::Button.new(
-      type: :modal,
-      name: :show_observation_send_question.l,
-      target: new_question_for_observation_path(@obs.id),
-      modal_id: "observation_email",
-      variant: :strip, icon: :email,
-      class: Components::InlineLinkBlock.item_class
-    )
   end
 
   def render_truncated_notes

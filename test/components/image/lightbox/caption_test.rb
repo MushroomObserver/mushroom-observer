@@ -128,6 +128,24 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, :show_observation_seen_at.l)
   end
 
+  # #4884: the who line mirrors the obs show page's Collector /
+  # Entered-by semantics (via Components::ObservationWho) instead of
+  # the old "Who:" label. Branch coverage lives in ObservationWhoTest;
+  # this pins the caption's wiring.
+  def test_who_line_uses_collector_entered_by_semantics
+    obs = observations(:detailed_unknown_obs)
+    obs.collector = "Jane Forager"
+    obs.collector_user_id = nil
+
+    html = render_caption(obs: obs, image: nil)
+    text = Nokogiri::HTML.fragment(html).at_css("#observation_who").text
+
+    assert_includes(text, :collector.ti)
+    assert_includes(text, "Jane Forager")
+    assert_includes(text, :entered_by.ti)
+    assert_not_includes(text, "#{:who.ti}: ")
+  end
+
   def test_renders_contact_link_when_owner_accepts_general_questions
     obs = observations(:owner_accepts_general_questions)
     viewer = users(:rolf)
