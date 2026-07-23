@@ -16,4 +16,27 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
     assert_nil(link.reload.last_synced_at,
                "a non-reflection is left untouched (guard, no fetch)")
   end
+
+  # The triggering viewer (nil for the future batch job) is what the
+  # completion broadcast renders its panel updates from -- confirm the
+  # job actually threads it through rather than silently dropping it.
+  def test_perform_passes_user_through_to_resyncer
+    obs = observations(:imported_inat_obs)
+    user = users(:rolf)
+    received = nil
+    fake_resyncer = Object.new
+    def fake_resyncer.resync; end
+
+    Inat::ObservationResyncer.stub(
+      :new,
+      lambda { |observation, **kwargs|
+        received = [observation, kwargs[:user]]
+        fake_resyncer
+      }
+    ) do
+      InatObservationResyncJob.perform_now(obs, user)
+    end
+
+    assert_equal([obs, user], received)
+  end
 end

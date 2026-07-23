@@ -1131,8 +1131,13 @@
   source_credit_help_link: About imported observations
   observation_reflection_read_only_note: Read-only reflection of its imported source. To change it, edit it at the source and resync.
   observation_resync_button: Sync now
+  observation_resync_confirm: If you recently edited this observation on iNaturalist, it may take up to 10 seconds for those changes to appear there. Ready to sync now, or would you rather wait?
   observation_resync_started: Syncing this observation from its source. This may take a moment.
   observation_resync_denied: You do not have permission to sync this observation.
+  observation_resync_synced: Synced with iNaturalist.
+  observation_resync_unchanged: Already up to date with iNaturalist.
+  observation_resync_source_deleted: This observation's iNaturalist source could not be found. It may have been deleted.
+  observation_resync_failed: Couldn't sync with iNaturalist right now. Please try again later.
 
   ##############################################################################
 

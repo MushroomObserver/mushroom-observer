@@ -22,8 +22,20 @@ class Inat
     # :not_a_reflection.
     Result = Data.define(:status, :observation)
 
-    def initialize(observation, fetcher: ObsFetcher.new)
+    FLASH_BY_STATUS = {
+      synced: [:success, :observation_resync_synced],
+      unchanged: [:success, :observation_resync_unchanged],
+      source_deleted: [:warning, :observation_resync_source_deleted],
+      fetch_failed: [:danger, :observation_resync_failed]
+    }.freeze
+
+    # `user:` is the viewer who triggered the resync (nil for a future
+    # batch job with no single triggering viewer) -- used only to render
+    # the completion broadcast's panel updates from that viewer's
+    # permissions (which external sites they may still add a link to).
+    def initialize(observation, user: nil, fetcher: ObsFetcher.new)
       @observation = observation
+      @user = user
       @fetcher = fetcher
     end
 
@@ -31,10 +43,10 @@ class Inat
       return result(:not_a_reflection) unless resyncable?
 
       by_id, failed = @fetcher.fetch_batch([inat_id])
-      return result(:fetch_failed) if failed
+      return broadcast(result(:fetch_failed)) if failed
 
       raw = by_id[inat_id.to_s]
-      raw ? apply(Inat::Obs.new(JSON.generate(raw))) : handle_deleted
+      broadcast(raw ? apply(Inat::Obs.new(JSON.generate(raw))) : handle_deleted)
     end
 
     private
@@ -103,6 +115,80 @@ class Inat
 
     def result(status)
       Result.new(status: status, observation: @observation)
+    end
+
+    # Turbo Stream broadcast so "Sync now" updates the page live, no
+    # reload (#4215) -- see Observations::InatResyncsController#create
+    # for why the controller response itself is flash-only. Channel is
+    # scoped to the observation (not a user, unlike InatImport's own
+    # broadcast) since anyone viewing the observation's page should see
+    # the same result -- rendered from the triggering @user's own
+    # permissions (nil, the safe logged-out-equivalent view, when there
+    # isn't one), same simplification `InatImport`'s per-user channel
+    # sidesteps by only ever having one relevant viewer (the importer).
+    def broadcast(result)
+      channel = [result.observation, :external_link_sync]
+      Turbo::StreamsChannel.broadcast_update_to(
+        channel, target: "page_flash", html: render_flash(result.status)
+      )
+      broadcast_panels(channel, result.observation) if result.status == :synced
+      result
+    end
+
+    # MessageAlert (not a bare Components::Alert) -- see
+    # .claude/rules/phlex_reference.md's "Rendering Phlex outside a
+    # request": a block passed to ApplicationController.renderer.render
+    # never reaches the component, so Alert's trusted block form can't
+    # be used directly here, and Alert#message always escapes via
+    # plain() (MO's translations store HTML entities literally, e.g. a
+    # typographic apostrophe as &#8217;, so plain() would double-escape
+    # them).
+    def render_flash(status)
+      level, tag = FLASH_BY_STATUS.fetch(status)
+      ApplicationController.renderer.render(
+        Views::Layouts::App::MessageAlert.new(message: tag.t, level: level),
+        layout: false
+      )
+    end
+
+    # Only `:synced` changes anything these panels display (when /
+    # location / GPS / notes) -- `:unchanged`/`:source_deleted`/
+    # `:fetch_failed` leave the observation's own data untouched, so
+    # there's nothing to re-render there.
+    def broadcast_panels(channel, observation)
+      broadcast_replace(channel, "observation_details",
+                        Views::Controllers::Observations::Show::Details.new(
+                          obs: observation, user: @user,
+                          sites: addable_sites(observation),
+                          siblings: siblings_of(observation)
+                        ))
+      broadcast_replace(channel, "observation_notes",
+                        Views::Controllers::Observations::Show::NotesPanel.new(
+                          obs: observation, user: @user
+                        ))
+    end
+
+    # Same lookup `Observations::ExternalLinksController::Show` uses for
+    # the same panel's own turbo-stream re-render -- which external
+    # sites the viewer may still add a link to.
+    def addable_sites(observation)
+      ExternalSite.sites_user_can_add_links_to_for_obs(@user, observation).
+        to_a
+    end
+
+    def siblings_of(observation)
+      return [] unless observation.occurrence
+
+      observation.occurrence.observations.where.not(id: observation.id).
+        includes(:external_links)
+    end
+
+    def broadcast_replace(channel, target, component)
+      Turbo::StreamsChannel.broadcast_replace_to(
+        channel, target: target,
+                 html: ApplicationController.renderer.render(component,
+                                                             layout: false)
+      )
     end
   end
 end

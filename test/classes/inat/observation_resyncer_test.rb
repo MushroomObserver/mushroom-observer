@@ -7,6 +7,8 @@ require("json")
 # a fake so the tests exercise the resync logic (update / no-op / deleted
 # source / transient failure / non-reflection) without hitting the API.
 class Inat::ObservationResyncerTest < UnitTestCase
+  include ActionCable::TestHelper
+
   # Stands in for Inat::ObsFetcher — returns a canned [by_id, failed?].
   FakeFetcher = Struct.new(:batch) do
     def fetch_batch(_ids)
@@ -80,7 +82,61 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_nil(@link.reload.last_synced_at)
   end
 
+  # A real change: one flash broadcast plus a replace of each panel that
+  # actually displays resynced fields (Details: when/location/GPS;
+  # NotesPanel: notes).
+  def test_synced_broadcasts_flash_and_panel_updates
+    messages = capture_broadcasts(stream) { resync(found: { @id => @raw }) }
+
+    assert_equal(3, messages.length)
+    assert(messages.any? { |m| m.include?('target="page_flash"') })
+    assert(
+      messages.any? { |m| m.include?('target="observation_details"') }
+    )
+    assert(messages.any? { |m| m.include?('target="observation_notes"') })
+    flash = messages.find { |m| m.include?('target="page_flash"') }
+    assert_includes(flash, :observation_resync_synced.t)
+  end
+
+  # No real change: just the flash, no point re-rendering panels whose
+  # content didn't move.
+  def test_unchanged_broadcasts_flash_only
+    resync(found: { @id => @raw }) # first sync, becomes the baseline
+    @obs = Observation.find(@obs.id)
+
+    messages = capture_broadcasts(stream) { resync(found: { @id => @raw }) }
+
+    assert_equal(1, messages.length)
+    assert_includes(messages.first, :observation_resync_unchanged.t)
+  end
+
+  def test_source_deleted_broadcasts_warning_flash_only
+    @obs.rss_log.update_columns(notes: "20250101000000\n")
+
+    messages = capture_broadcasts(stream) { resync(found: {}) }
+
+    assert_equal(1, messages.length)
+    assert_includes(messages.first, :observation_resync_source_deleted.t)
+  end
+
+  def test_fetch_failed_broadcasts_danger_flash_only
+    messages = capture_broadcasts(stream) { resync(found: {}, failed: true) }
+
+    assert_equal(1, messages.length)
+    assert_includes(messages.first, :observation_resync_failed.t)
+  end
+
+  def test_non_reflection_broadcasts_nothing
+    @obs.update_column(:reflected_at, nil)
+
+    assert_no_broadcasts(stream) { resync(found: { @id => @raw }) }
+  end
+
   private
+
+  def stream
+    Turbo::StreamsChannel.send(:stream_name_from, [@obs, :external_link_sync])
+  end
 
   def resync(found:, failed: false)
     fetcher = FakeFetcher.new([found, failed])

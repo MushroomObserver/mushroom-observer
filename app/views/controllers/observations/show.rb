@@ -43,6 +43,10 @@ module Views::Controllers::Observations
 
     def view_template
       add_chrome
+      # Only a reflection ever gets a resync broadcast (#4215) -- see
+      # Inat::ObservationResyncer#broadcast.
+      turbo_stream_from([@observation, :external_link_sync]) if
+        @observation.reflection?
       render_main_row
       render_secondary_row
       render_footer if @user

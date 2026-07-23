@@ -8,7 +8,8 @@
 # `InlineCRUDLinks` (self-gated on `link.can_edit?(user)`), EXCEPT when
 # `@obs` is a read-only reflection (#4214) -- its own external link is
 # the sync source, so no edit/destroy affordance at all, just a note
-# pointing at the source. Sibling rows never get InlineCRUDLinks
+# pointing at the source, plus a "Sync now" button (#4215) when the
+# viewer may trigger a resync. Sibling rows never get InlineCRUDLinks
 # either way. Otherwise purely informational, not a form.
 module Views::Controllers::Observations::ExternalLinks
   class InfoFrame < Views::Base
@@ -51,6 +52,7 @@ module Views::Controllers::Observations::ExternalLinks
         Link(type: :external, link: link)
         if @obs.reflection?
           render_read_only_note
+          render_sync_button if @obs.resyncable_by?(@user)
         else
           whitespace
           InlineCRUDLinks(target: link, observation: @obs, user: @user)
@@ -64,6 +66,20 @@ module Views::Controllers::Observations::ExternalLinks
       div(class: "reflection-read-only-note text-muted small mt-1") do
         plain(:observation_reflection_read_only_note.l)
       end
+    end
+
+    # "Sync now" -- enqueues a background refresh from the source (#4215).
+    # Recent edits at the source can take a few seconds to propagate, so
+    # a Turbo confirm dialog gives the user the option to wait instead.
+    def render_sync_button
+      Button(
+        type: :post,
+        name: :observation_resync_button.l,
+        target: resync_observation_path(@obs.id),
+        size: :sm,
+        class: "reflection-sync-button mt-1",
+        data: { turbo_confirm: :observation_resync_confirm.l }
+      )
     end
 
     def render_sibling_row(sib_link)
