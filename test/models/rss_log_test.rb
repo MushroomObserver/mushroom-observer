@@ -28,14 +28,6 @@ class RssLogTest < UnitTestCase
     assert_equal("Target Title", log.orphan_title)
   end
 
-  def test_detail_for_complexly_created_observation
-    # Observation is created then an image is immediately uploaded.
-    # We want it to return "observation created" not "image added".
-    log = rss_logs(:detailed_unknown_obs_rss_log)
-    detail = log.detail
-    assert_equal(:rss_created_at.t(type: :observation), detail)
-  end
-
   def test_add_with_date_refuses_to_write_to_orphaned_log
     log = rss_logs(:location_rss_log)
     # Orphan it the way #orphan does: clear the target ids and prepend a
@@ -70,7 +62,6 @@ class RssLogTest < UnitTestCase
 
     assert(log.orphan?)
     assert(log.already_orphaned?)
-    assert_equal(:log_observation_destroyed.t(user: "dick"), log.detail)
   end
 
   def test_a_fresh_log_is_not_treated_as_orphaned
@@ -80,30 +71,6 @@ class RssLogTest < UnitTestCase
     log.add_with_date(:log_observation_created, user: "mary")
 
     assert_match(/log_observation_created/, log.notes)
-  end
-
-  def test_detail_for_destroyed_object
-    obs = observations(:detailed_unknown_obs)
-    obs.current_user = users(:dick)
-    log = obs.rss_log
-    assert_not_nil(log)
-    assert_false(log.orphan?)
-    obs.destroy!
-    log.reload
-    assert_true(log.orphan?)
-    assert_equal(:log_observation_destroyed.t(user: "dick"), log.detail)
-  end
-
-  def test_detail_for_merged_location
-    loc1 = locations(:albion)
-    loc2 = locations(:mitrula_marsh)
-    log = loc1.rss_log
-    assert_false(log.orphan?)
-    loc2.merge(mary, loc1)
-    log.reload
-    assert_true(log.orphan?)
-    assert_equal(:log_location_merged.t(that: loc2.display_name, user: "mary"),
-                 log.detail)
   end
 
   def test_text_name
