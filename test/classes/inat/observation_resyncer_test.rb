@@ -36,6 +36,31 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_not_nil(@link.reload.last_synced_at, "should stamp last_synced_at")
   end
 
+  # The log message names a user ("Resynced ... by [user]"), so it has to
+  # be whoever pressed Sync now -- not the owner, who may have had nothing
+  # to do with it.
+  def test_resync_is_logged_against_the_triggering_user
+    @obs.rss_log.update_columns(notes: "20250101000000\n")
+    syncer = users(:katrina)
+    assert_not_equal(@obs.user_id, syncer.id)
+
+    resync(found: { @id => @raw }, user: syncer)
+
+    assert_match(/#{syncer.login}/, @obs.rss_log.reload.notes.to_s,
+                 "the resync should be logged against whoever triggered it")
+  end
+
+  # The daily batch (a later slice) passes no user; those runs are
+  # credited to the admin account rather than to the owner.
+  def test_resync_without_a_user_is_logged_against_the_admin
+    @obs.rss_log.update_columns(notes: "20250101000000\n")
+
+    resync(found: { @id => @raw })
+
+    assert_match(/#{User.admin.login}/, @obs.rss_log.reload.notes.to_s,
+                 "an unattributed resync should log as the admin user")
+  end
+
   def test_second_resync_with_same_data_is_unchanged
     assert_equal(:synced, resync(found: { @id => @raw }).status)
     # Reload as the background job would (fresh GlobalID deserialization);
@@ -138,9 +163,9 @@ class Inat::ObservationResyncerTest < UnitTestCase
     Turbo::StreamsChannel.send(:stream_name_from, [@obs, :external_link_sync])
   end
 
-  def resync(found:, failed: false)
+  def resync(found:, failed: false, user: nil)
     fetcher = FakeFetcher.new([found, failed])
-    Inat::ObservationResyncer.new(@obs, fetcher: fetcher).resync
+    Inat::ObservationResyncer.new(@obs, user: user, fetcher: fetcher).resync
   end
 
   def mock_raw(filename)

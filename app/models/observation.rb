@@ -1129,11 +1129,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # True when this observation is a read-only reflection of an imported
-  # source (#4214): its scalar core (date/location/notes/name) mirrors
-  # the source and is kept current by resync (#4215), so MO-side edits to
-  # those fields are blocked. `reflected_at` is stamped at import time for
-  # new imports (clean by construction) and by the #4585 resolution engine
-  # for the verified backlog; NULL means editable (not a reflection).
+  # source (#4214): its scalar core (date/location/GPS/notes) mirrors the
+  # source and is refreshed from it by resync (#4215), so MO-side edits to
+  # those fields are blocked. The name is deliberately not in that list --
+  # iNat's identifications are mirrored at import time only, and tracking
+  # them afterwards waits on the identification-sync slice of #4215.
+  # `reflected_at` is stamped at import time for new imports (clean by
+  # construction) and by the #4585 resolution engine for the verified
+  # backlog; NULL means editable (not a reflection).
   def reflection?
     reflected_at.present?
   end

@@ -100,8 +100,7 @@ class Inat
     # the activity log, and still stamp last_synced_at so the check ran.
     def handle_deleted
       mark_synced
-      @observation.log(:log_observation_source_deleted,
-                       user: @observation.user)
+      @observation.log(:log_observation_source_deleted, user: logging_user)
       result(:source_deleted)
     end
 
@@ -110,7 +109,17 @@ class Inat
     end
 
     def log_resync
-      @observation.log(:log_observation_resynced, user: @observation.user)
+      @observation.log(:log_observation_resynced, user: logging_user)
+    end
+
+    # Both log messages name a user ("Resynced ... by [user]"), so this
+    # has to be whoever triggered the sync -- attributing an admin's
+    # resync to the owner states something untrue in a public log. The
+    # daily batch (a later slice) passes no user; credit that to the
+    # admin account, the same system-actor fallback Location and
+    # NameDescription use, rather than to the owner.
+    def logging_user
+      @user || User.admin
     end
 
     def result(status)
