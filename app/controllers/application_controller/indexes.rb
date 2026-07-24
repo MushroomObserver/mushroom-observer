@@ -424,7 +424,13 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     # the full eager loads anyway — the two-query pre-check shape
     # (paginate simple, re-fetch with includes) is strictly more
     # work than just paginating with the includes the first time.
-    unless matrix_caches_in_this_request?
+    #
+    # Same story when `perform_caching` is off (the dev default):
+    # low_level_cache then always executes its block, ignoring
+    # cache_store -- so skipping eager-load here for "assumed cached"
+    # objects triggers per-object N+1 fallbacks (e.g.
+    # NamingConsensus#use_local_namings) for every one of them.
+    unless matrix_caches_in_this_request? && perform_caching?
       return query.paginate(@pagination_data, include: include)
     end
 
@@ -501,6 +507,12 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # without an admin-viewable project uses caching.
   def matrix_caches_in_this_request?
     true
+  end
+
+  # Whether low_level_cache will actually consult cache_store --
+  # phlex-rails gates it on this exact flag.
+  def perform_caching?
+    Rails.application.config.action_controller.perform_caching
   end
 
   def users_content_filters
