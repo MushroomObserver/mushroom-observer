@@ -855,6 +855,34 @@ class ObservationsControllerIndexTest < FunctionalTestCase
            "a genuine cache miss must still be eager-loaded")
   end
 
+  # ApplicationController::Indexes#render_index_view is an abstract
+  # guard -- every real controller (including ObservationsController)
+  # overrides it, so call the module method directly to exercise it.
+  def test_render_index_view_raises_when_not_overridden
+    method = ApplicationController::Indexes.instance_method(:render_index_view)
+
+    error = assert_raises(NotImplementedError) do
+      method.bind_call(@controller)
+    end
+    assert_equal(
+      "ObservationsController#render_index_view must render a Phlex view",
+      error.message
+    )
+  end
+
+  # `keys_by_object.empty?` branch: no object in the batch is
+  # cacheable, so there's nothing to `read_multi` -- every object
+  # must still come back as needing eager-load.
+  def test_uncached_object_ids_with_no_cacheable_objects
+    login
+    obs = observations(:detailed_unknown_obs)
+    obs.thumb_image&.update_column(:transferred, false)
+
+    ids = @controller.send(:uncached_object_ids, [obs], I18n.locale)
+
+    assert_equal([obs.id], ids)
+  end
+
   # `uncached_object_ids` batches the MatrixBox cache-key pre-check
   # into one `read_multi` instead of one `Rails.cache.exist?` per
   # object -- verify it still resolves each object correctly (one

@@ -515,10 +515,6 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     Rails.application.config.action_controller.perform_caching
   end
 
-  def users_content_filters
-    @user ? @user.content_filter : MO.default_content_filter
-  end
-
   public ##########
 
   # Lookup a given object, displaying a warm-fuzzy error and redirecting to the
