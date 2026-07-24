@@ -304,14 +304,10 @@ class BackfillMycoportalExportLinks
                    link_id: existing[row[:image_id]])
   end
 
-  # Bumps last_synced_at on already-linked records in this batch, so the
-  # field reflects the most recent confirmed sync rather than only the
-  # first one -- useful for the reconciliation-check use case.
   def existing_links(target_type:, ids:)
-    scope = ExternalLink.where(target_type: target_type, target_id: ids,
-                               external_site: @site, relationship: :export)
-    scope.update_all(last_synced_at: Time.current) if @apply
-    scope.pluck(:target_id, :id).to_h
+    ExternalLink.where(target_type: target_type, target_id: ids,
+                       external_site: @site, relationship: :export).
+      pluck(:target_id, :id).to_h
   end
 
   def create_export_link(target_type:, target_id:, external_id: nil,
@@ -321,8 +317,7 @@ class BackfillMycoportalExportLinks
         ExternalLink.create!(user: @admin, target_type: target_type,
                              target_id: target_id, external_site: @site,
                              relationship: :export, external_id: external_id,
-                             external_created_on: external_created_on,
-                             last_synced_at: Time.current)
+                             external_created_on: external_created_on)
       rescue ActiveRecord::RecordInvalid => e
         warn("  #{target_type} #{target_id}: #{e.message}")
         return increment_stat(target_type, :invalid)
