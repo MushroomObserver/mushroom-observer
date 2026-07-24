@@ -116,6 +116,16 @@ module Images
       assert_select("turbo-frame#image_vote_#{image.id}")
     end
 
+    # A plain 404, not `find_or_goto_index`'s flash+redirect-to-index
+    # -- this is a frame-only fetch, so a redirect would try to swap
+    # a full index page into the tiny vote frame instead of just
+    # leaving it empty.
+    def test_show_with_missing_image_is_not_found
+      get(:show, params: { image_id: -1 })
+
+      assert_response(:not_found)
+    end
+
     # These try to test the results of ajax calls.
     # AJAX now renders image_vote_links helper inline to avoid nested partial
     # def test_image_vote_renders_partial

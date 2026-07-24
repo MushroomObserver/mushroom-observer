@@ -11,9 +11,16 @@ module Images
     # shared fragment cache (#4895). Anonymous viewers can load this
     # too (`.require-user` CSS-hides it), matching the overlay copy's
     # existing render-regardless-of-`@user` behavior.
+    #
+    # Deliberately not `find_or_goto_index` -- that flashes an error
+    # and redirects to the model's index, which is right for a normal
+    # page load but wrong for a frame-only fetch: the frame would try
+    # to swap in a full index page's markup (or just break), and the
+    # flash would linger to surprise the user on their next real
+    # navigation. A plain 404 leaves the frame empty and leaks nothing.
     def show
-      @image = find_or_goto_index(Image, params[:image_id])
-      return unless @image
+      @image = Image.find_by(id: params[:image_id])
+      return head(:not_found) unless @image
 
       @context = params[:context]&.to_sym || :overlay
       render(Views::Controllers::Images::Votes::Show.new(
