@@ -92,7 +92,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
-      apply: true, keep_csvs: false, missing_out: @missing_out,
+      apply: true, missing_out: @missing_out,
       skipped_out: @skipped_out
     )
 
@@ -208,7 +208,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
-      apply: true, keep_csvs: false, missing_out: @missing_out,
+      apply: true, missing_out: @missing_out,
       skipped_out: @skipped_out
     )
 
@@ -349,7 +349,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv, multimedia: multimedia_csv,
-      apply: false, keep_csvs: false, missing_out: @missing_out,
+      apply: false, missing_out: @missing_out,
       skipped_out: @skipped_out
     )
 
@@ -360,11 +360,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
 
   def test_parse_options_defaults_and_overrides
     defaults = BackfillMycoportalExportLinks::Options.parse([])
-    assert_nil(defaults[:occurrences], "Nil by default -- looks for a zip")
-    assert_nil(defaults[:multimedia], "Nil by default -- looks for a zip")
     assert_equal(BackfillMycoportalExportLinks::Options::DEFAULT_DWCA_DIR,
                  defaults[:dwca_dir])
-    assert_equal(false, defaults[:keep_csvs])
     assert_equal(
       File.join(BackfillMycoportalExportLinks::Options::DEFAULT_DWCA_DIR,
                 "mycoportal_backfill_missing.csv"),
@@ -379,16 +376,22 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     )
 
     opts = BackfillMycoportalExportLinks::Options.parse(
-      ["--dwca-dir", "/tmp/somewhere",
-       "--occurrences", "o.csv", "--multimedia", "m.csv",
-       "--keep-csvs", "--missing-out", "n.csv", "--skipped-out", "s.csv"]
+      ["--dwca-dir", "/tmp/somewhere"]
     )
     assert_equal("/tmp/somewhere", opts[:dwca_dir])
-    assert_equal("o.csv", opts[:occurrences])
-    assert_equal("m.csv", opts[:multimedia])
-    assert_equal(true, opts[:keep_csvs])
-    assert_equal("n.csv", opts[:missing_out])
-    assert_equal("s.csv", opts[:skipped_out])
+  end
+
+  # --occurrences/--multimedia/--keep-csvs/--missing-out/--skipped-out
+  # were deliberately removed from the CLI surface -- only --dwca-dir is
+  # left. OptionParser raises on any unrecognized flag, so this doubles as
+  # a regression test against silently reintroducing one of them.
+  def test_parse_options_rejects_removed_flags
+    %w[--occurrences --multimedia --keep-csvs --missing-out --skipped-out].
+      each do |flag|
+      assert_raises(OptionParser::InvalidOption) do
+        BackfillMycoportalExportLinks::Options.parse([flag, "x"])
+      end
+    end
   end
 
   def test_parse_options_reports_default_relative_to_custom_dwca_dir
@@ -413,7 +416,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   def test_initialize_requires_both_occurrences_and_multimedia_or_neither
     assert_raises(RuntimeError) do
       BackfillMycoportalExportLinks.new(
-        dwca_dir: "d", apply: false, keep_csvs: false,
+        dwca_dir: "d", apply: false,
         occurrences: "o.csv", multimedia: nil, missing_out: "n.csv"
       )
     end
@@ -429,7 +432,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv,
-      multimedia: multimedia_csv, apply: true, keep_csvs: false,
+      multimedia: multimedia_csv, apply: true,
       missing_out: @missing_out, skipped_out: @skipped_out
     )
 
@@ -441,43 +444,27 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                        "Caller-provided multimedia.csv must never be deleted")
   end
 
-  def test_run_extracts_from_a_real_zip_and_cleans_up_the_csvs
+  # The zip, and everything extracted from it, are always retained now --
+  # there is no more --keep-csvs toggle (or delete-by-default behavior to
+  # toggle away from).
+  def test_run_extracts_from_a_real_zip_and_retains_the_csvs
     image = images(:in_situ_image)
     dwca_dir = Dir.mktmpdir("test_dwca")
     build_dwca_zip(dwca_dir, "MUOB_backup_2026-01-01_000000_DwC-A.zip",
                    [occurrence_row(1, "MUOB 1")],
                    [multimedia_row(1, image_url(image.id))])
 
-    run_against_zip_dir(dwca_dir, keep_csvs: false)
+    run_against_zip_dir(dwca_dir)
 
     assert(link_for(image), "Expected an export ExternalLink for the image")
-    assert_not(File.exist?(File.join(dwca_dir, "occurrences.csv")),
-               "Extracted occurrences.csv should be cleaned up")
-    assert_not(File.exist?(File.join(dwca_dir, "multimedia.csv")),
-               "Extracted multimedia.csv should be cleaned up")
+    assert_path_exists(File.join(dwca_dir, "occurrences.csv"),
+                       "Extracted occurrences.csv should be retained")
+    assert_path_exists(File.join(dwca_dir, "multimedia.csv"),
+                       "Extracted multimedia.csv should be retained")
     assert_path_exists(
       File.join(dwca_dir, "MUOB_backup_2026-01-01_000000_DwC-A.zip"),
       "The zip itself should never be deleted"
     )
-  ensure
-    FileUtils.remove_entry(dwca_dir) if dwca_dir && Dir.exist?(dwca_dir)
-  end
-
-  def test_keep_csvs_option_retains_extracted_files
-    image = images(:in_situ_image)
-    dwca_dir = Dir.mktmpdir("test_dwca")
-    build_dwca_zip(dwca_dir, "MUOB_backup_2026-01-01_000000_DwC-A.zip",
-                   [occurrence_row(1, "MUOB 1")],
-                   [multimedia_row(1, image_url(image.id))])
-
-    run_against_zip_dir(dwca_dir, keep_csvs: true)
-
-    assert_path_exists(File.join(dwca_dir, "occurrences.csv"),
-                       "occurrences.csv should be kept when --keep-csvs " \
-                       "is set")
-    assert_path_exists(File.join(dwca_dir, "multimedia.csv"),
-                       "multimedia.csv should be kept when --keep-csvs " \
-                       "is set")
   ensure
     FileUtils.remove_entry(dwca_dir) if dwca_dir && Dir.exist?(dwca_dir)
   end
@@ -496,7 +483,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
                    [occurrence_row(1, "MUOB 1")],
                    [multimedia_row(1, image_url(image.id))])
 
-    run_against_zip_dir(dwca_dir, keep_csvs: false)
+    run_against_zip_dir(dwca_dir)
 
     assert(link_for(image),
            "Should have processed the newer zip's image, not the older one's")
@@ -522,7 +509,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       end
     end
 
-    run_against_zip_dir(dwca_dir, keep_csvs: false)
+    run_against_zip_dir(dwca_dir)
 
     assert(link_for(image),
            "Expected extraction to find the nested entries by basename")
@@ -587,7 +574,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: dwca_dir, occurrences: nil, multimedia: nil,
-      apply: true, keep_csvs: false, missing_out: @missing_out,
+      apply: true, missing_out: @missing_out,
       skipped_out: @skipped_out
     )
 
@@ -610,7 +597,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
   def build
     BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: "o.csv",
-      multimedia: "m.csv", apply: false, keep_csvs: false,
+      multimedia: "m.csv", apply: false,
       missing_out: "n.csv", skipped_out: "s.csv"
     )
   end
@@ -651,7 +638,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: "d", occurrences: occurrences_csv,
-      multimedia: multimedia_csv, apply: apply, keep_csvs: false,
+      multimedia: multimedia_csv, apply: apply,
       missing_out: @missing_out, skipped_out: @skipped_out
     )
     capture_io { subject.run }
@@ -673,12 +660,12 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
 
   # Runs the backfill against a real dwca_dir (no --occurrences/
   # --multimedia given), so #run really globs for a zip and extracts it.
-  def run_against_zip_dir(dwca_dir, keep_csvs:)
+  def run_against_zip_dir(dwca_dir)
     @missing_out = temp_csv_path("missing")
     @skipped_out = temp_csv_path("skipped")
     subject = BackfillMycoportalExportLinks.new(
       dwca_dir: dwca_dir, occurrences: nil, multimedia: nil,
-      apply: true, keep_csvs: keep_csvs, missing_out: @missing_out,
+      apply: true, missing_out: @missing_out,
       skipped_out: @skipped_out
     )
     capture_io { subject.run }

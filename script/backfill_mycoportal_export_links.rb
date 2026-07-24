@@ -5,24 +5,17 @@
 # Observation and Image already present in MyCoPortal (MCP)
 # (Based on a Darwin Core Archive (DwC-A) backup of the MUOB collection)
 
-# The backup must be downloaded manually first (see USAGE below)
-# and placed in DEFAULT_DWCA_DIR (tmp/mycoportal_dwca/).
-
-# This script finds the newest such zip and extracts
-# occurrences.csv / multimedia.csv
-# The extracted CSVs are deleted by default once the run finishes;
-# Pass --keep-csvs to retain them
-# Pass --occurrences/--multimedia to skip the zip entirely and use
-# already-extracted files instead.
+# The backup must be downloaded manually first (see USAGE below) and
+# placed in DEFAULT_DWCA_DIR (tmp/mycoportal_dwca/). This script finds the
+# newest such zip there, extracts occurrences.csv / multimedia.csv, and
+# always keeps them (they are not deleted after the run).
 #
-# Observations/Images MCP has that don't exist in MO are written to a report,
-# by default <dwca-dir>/mycoportal_backfill_missing.csv
-# Pass --missing-out to override.
+# Observations/Images MCP has that don't exist in MO are written to
+# <dwca-dir>/mycoportal_backfill_missing.csv
 #
 # Observations/Images already linked (skipped, not recreated) are written
-# to a second report, by default <dwca-dir>/mycoportal_backfill_skipped.csv
-# (columns include the existing ExternalLink's id, for traceability)
-# Pass --skipped-out to override.
+# to <dwca-dir>/mycoportal_backfill_skipped.csv (columns include the
+# existing ExternalLink's id, for traceability)
 #
 # occurrences.csv's "catalogNumber" ("MUOB <id>") is the MO Observation id;
 # its own "id" column is MCP's internal occid. multimedia.csv's "coreid"
@@ -43,7 +36,7 @@
 #   download it to tmp/mycoportal_dwca/
 #   using the instructions at
 #   https://docs.symbiota.org/Collection_Manager_Guide/Downloading/downloading_copy
-#   (The download will have a name like MUOB_backup_2026-07-22_190455_DwC-A.zip
+#   (The download will have a name like MUOB_backup_2026-07-22_190455_DwC-A.zip)
 #
 #   # Dry run by default
 #   bin/rails runner script/backfill_mycoportal_export_links.rb
@@ -51,13 +44,9 @@
 #   # Write to the database (Idempotent)
 #   APPLY=1 bin/rails runner script/backfill_mycoportal_export_links.rb
 #
-#   # Skip the zip, e.g. against a snapshot already on disk:
+#   # Use a different DwC-A download location:
 #   bin/rails runner script/backfill_mycoportal_export_links.rb \
-#     --occurrences tmp/MUOB_DwC-A/occurrences.csv \
-#     --multimedia tmp/MUOB_DwC-A/multimedia.csv
-#
-#   # Keep the CSVs instead of deleting them after the run:
-#   bin/rails runner script/backfill_mycoportal_export_links.rb --keep-csvs
+#     --dwca-dir /path/to/dir
 #
 #   # List all options:
 #   bin/rails runner script/backfill_mycoportal_export_links.rb -h
@@ -83,62 +72,25 @@ class BackfillMycoportalExportLinks
         OptionParser.new do |parser|
           parser.banner = "Usage: bin/rails runner " \
                           "script/backfill_mycoportal_export_links.rb"
-          add_dwca_options(parser, opts)
-          add_report_options(parser, opts)
+          parser.on("--dwca-dir DIR",
+                    "Where to find the downloaded DwC-A zip and extract " \
+                    "it (default: #{DEFAULT_DWCA_DIR})") do |val|
+            opts[:dwca_dir] = val
+          end
         end.parse!(argv)
-        opts[:missing_out] ||= default_report_path(opts[:dwca_dir],
-                                                   "missing")
-        opts[:skipped_out] ||= default_report_path(opts[:dwca_dir],
-                                                   "skipped")
+        opts[:missing_out] = default_report_path(opts[:dwca_dir], "missing")
+        opts[:skipped_out] = default_report_path(opts[:dwca_dir], "skipped")
         opts
       end
 
       private
 
       def default_options
-        { apply: ENV["APPLY"] == "1", dwca_dir: DEFAULT_DWCA_DIR,
-          occurrences: nil, multimedia: nil, keep_csvs: false,
-          missing_out: nil, skipped_out: nil }
+        { apply: ENV["APPLY"] == "1", dwca_dir: DEFAULT_DWCA_DIR }
       end
 
       def default_report_path(dwca_dir, name)
         File.join(dwca_dir, "mycoportal_backfill_#{name}.csv")
-      end
-
-      def add_report_options(parser, opts)
-        parser.on("--missing-out FILE",
-                  "Missing report path (default: " \
-                  "<dwca-dir>/mycoportal_backfill_missing.csv)") do |val|
-          opts[:missing_out] = val
-        end
-        parser.on("--skipped-out FILE",
-                  "Already-present report path (default: " \
-                  "<dwca-dir>/mycoportal_backfill_skipped.csv)") do |val|
-          opts[:skipped_out] = val
-        end
-      end
-
-      def add_dwca_options(parser, opts)
-        parser.on("--dwca-dir DIR",
-                  "Where to find the downloaded DwC-A zip and extract " \
-                  "it (default: #{DEFAULT_DWCA_DIR})") do |val|
-          opts[:dwca_dir] = val
-        end
-        parser.on("--occurrences FILE",
-                  "Skip the zip; use an already-extracted " \
-                  "occurrences.csv (requires --multimedia too)") do |val|
-          opts[:occurrences] = val
-        end
-        parser.on("--multimedia FILE",
-                  "Skip the zip; use an already-extracted multimedia.csv " \
-                  "(requires --occurrences too)") do |val|
-          opts[:multimedia] = val
-        end
-        parser.on("--keep-csvs",
-                  "Keep the extracted occurrences.csv/multimedia.csv " \
-                  "after the run instead of deleting them") do
-          opts[:keep_csvs] = true
-        end
       end
     end
   end
@@ -153,6 +105,10 @@ class BackfillMycoportalExportLinks
   }x
   CATALOG_NUMBER_REGEXP = /\AMUOB (\d+)\z/
 
+  # occurrences:/multimedia: are not CLI-exposed (Options doesn't parse
+  # them) -- they exist purely so tests can inject synthetic CSVs directly
+  # instead of building a real zip for every scenario. Real runs always go
+  # through extract_dwca_zip! (see #run).
   def initialize(opts)
     @dwca_dir = opts.fetch(:dwca_dir)
     @occurrences_csv = opts[:occurrences]
@@ -160,7 +116,6 @@ class BackfillMycoportalExportLinks
     validate_occurrences_and_multimedia!
 
     @apply = opts.fetch(:apply)
-    @keep_csvs = opts.fetch(:keep_csvs)
     @missing_out = opts.fetch(:missing_out)
     @skipped_out = opts.fetch(:skipped_out)
     @site = ExternalSite.mycoportal
@@ -186,7 +141,6 @@ class BackfillMycoportalExportLinks
     print_summary
   ensure
     @reports&.close
-    cleanup_extracted_files
   end
 
   private
@@ -199,12 +153,11 @@ class BackfillMycoportalExportLinks
 
   # Find the newest manually-downloaded DwC-A zip in @dwca_dir and extract
   # occurrences.csv / multimedia.csv there, populating @occurrences_csv /
-  # @multimedia_csv.
+  # @multimedia_csv. They are never deleted afterward.
   def extract_dwca_zip!
     zip_path = newest_dwca_zip
     warn("Extracting occurrences.csv, multimedia.csv from #{zip_path} ...")
     extract_dwca(zip_path)
-    @extracted = true
   end
 
   def newest_dwca_zip
@@ -239,15 +192,6 @@ class BackfillMycoportalExportLinks
     FileUtils.mkdir_p(File.dirname(dest))
     entry.extract(destination_directory: @dwca_dir) { true }
     dest
-  end
-
-  # Remove files extracted in this run, unless --keep-csvs was given.
-  def cleanup_extracted_files
-    return unless @extracted
-    return if @keep_csvs
-
-    FileUtils.rm_f(@occurrences_csv)
-    FileUtils.rm_f(@multimedia_csv)
   end
 
   # Single streamed pass over occurrences.csv: builds @mo_id_by_occid (used
