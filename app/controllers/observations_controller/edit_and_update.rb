@@ -48,17 +48,23 @@ module ObservationsController::EditAndUpdate
                    flash_error_and_goto_index(Observation, params[:id])
   end
 
-  # Both edit and update bail early on a missing obs, a read-only
-  # reflection (#4214 — change it at the source and resync), or a
-  # permission failure. Returns true only when the request may proceed;
-  # each guard performs its own redirect when it stops the request.
+  # Both edit and update bail early on a missing obs, a permission
+  # failure, or a read-only reflection (#4214 — change it at the source
+  # and resync). Permission is checked first so a non-owner gets the
+  # standard permission-denied error; only users who could otherwise
+  # edit see the reflection warning. Returns true only when the request
+  # may proceed; each guard performs its own redirect when it stops the
+  # request.
   def editable_or_redirect?
     return false unless find_observation!
-    return false if redirect_if_reflection!
-    return true if permission!(@observation)
 
-    redirect_to(action: :show, id: @observation.id)
-    false
+    unless permission!(@observation)
+      redirect_to(action: :show, id: @observation.id)
+      return false
+    end
+    return false if redirect_if_reflection!
+
+    true
   end
 
   # A read-only reflection can't have its scalar core edited on MO.

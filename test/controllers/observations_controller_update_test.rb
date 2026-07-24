@@ -169,9 +169,9 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
   end
 
   # A read-only reflection (#4214) can't be edited on MO even by its
-  # owner — the edit form redirects with a warning. The guard sits ahead
-  # of the permission check, so the owner (who would otherwise pass) is
-  # still blocked.
+  # owner — the edit form redirects with a warning. The permission check
+  # runs first, so only the owner (who would otherwise pass) sees the
+  # reflection warning.
   def test_edit_reflection_redirects_with_warning
     obs = observations(:imported_inat_obs)
     obs.update_column(:reflected_at, Time.zone.now)
@@ -181,6 +181,22 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
 
     assert_redirected_to(action: :show, id: obs.id)
     assert_flash_warning
+  end
+
+  # A non-owner hitting edit on a reflection gets the same
+  # permission-denied error as on any observation they can't edit —
+  # not the reflection warning (Copilot review on #4852).
+  def test_edit_reflection_as_non_owner_gets_permission_error
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    non_owner = users(:mary)
+    assert_not_equal(obs.user_id, non_owner.id)
+    login(non_owner.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_error
   end
 
   def test_update_reflection_is_blocked
