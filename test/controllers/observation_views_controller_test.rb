@@ -135,10 +135,13 @@ class ObservationViewsControllerTest < FunctionalTestCase
       "[target='lightbox_caption_#{obs.thumb_image.id}'] " \
       "a[href='/images/#{obs.thumb_image.id}/original']"
     )
+    # The vote section is a lazy-loading Turbo Frame now, not rendered
+    # inline (#4895) -- assert the frame shell targets the right image.
     assert_select(
       "turbo-stream[action='update']" \
       "[target='lightbox_caption_#{obs.thumb_image.id}'] " \
-      ".vote-section-inline#lightbox_image_vote_#{obs.thumb_image.id}"
+      "turbo-frame#lightbox_image_vote_#{obs.thumb_image.id}" \
+      "[src*='/images/#{obs.thumb_image.id}/vote']"
     )
   end
 end

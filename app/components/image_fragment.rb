@@ -12,6 +12,7 @@ class Components::ImageFragment < Components::Base
   DISPATCH = {
     copyright: :Copyright,
     exif_link: :EXIFLink,
+    lazy_vote_interface: :LazyVoteInterface,
     lightbox_caption: :LightboxCaption,
     original_link: :OriginalLink,
     reuse_form: :ReuseForm,

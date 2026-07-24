@@ -76,6 +76,46 @@ module Images
                     "[target='lightbox_image_vote_#{image.id}']")
     end
 
+    # #4895: renders the vote interface fresh, uncached, for one
+    # image -- the endpoint a lazy Turbo Frame fetches instead of
+    # rendering vote state inline inside Matrix::Box's shared
+    # fragment-cached HTML.
+    def test_show_renders_vote_interface
+      image = images(:in_situ_image)
+      login(users(:mary).login)
+
+      get(:show, params: { image_id: image.id })
+
+      assert_response(:success)
+      assert_select("turbo-frame#image_vote_#{image.id}")
+      assert_select("turbo-frame .vote-section#image_vote_#{image.id}")
+    end
+
+    def test_show_lightbox_context
+      image = images(:in_situ_image)
+      login(users(:mary).login)
+
+      get(:show, params: { image_id: image.id, context: "lightbox" })
+
+      assert_response(:success)
+      assert_select("turbo-frame#lightbox_image_vote_#{image.id}")
+      assert_select("turbo-frame .vote-section-inline" \
+                    "#lightbox_image_vote_#{image.id}")
+    end
+
+    # Anonymous viewers can load the frame too (`.require-user`
+    # CSS-hides voting for them) -- `login_required` is skipped for
+    # `show` specifically, unlike every other action on this
+    # controller.
+    def test_show_does_not_require_login
+      image = images(:in_situ_image)
+
+      get(:show, params: { image_id: image.id })
+
+      assert_response(:success)
+      assert_select("turbo-frame#image_vote_#{image.id}")
+    end
+
     # These try to test the results of ajax calls.
     # AJAX now renders image_vote_links helper inline to avoid nested partial
     # def test_image_vote_renders_partial

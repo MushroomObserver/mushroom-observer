@@ -46,6 +46,22 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
     assert_html(html, "#lightbox_image_vote_links_#{@image.id}")
   end
 
+  # `.frame_id` is the single source of truth `LazyVoteInterface`'s
+  # Turbo Frame id must match so a Turbo Stream vote update can find
+  # and swap it -- pins it against the id `#view_template` actually
+  # renders (via `#vote_html_id`).
+  def test_frame_id_matches_rendered_root_id
+    overlay_id = Components::ImageFragment::VoteInterface.frame_id(
+      image_id: @image.id
+    )
+    lightbox_id = Components::ImageFragment::VoteInterface.frame_id(
+      image_id: @image.id, context: :lightbox
+    )
+
+    assert_html(render_component, "##{overlay_id}")
+    assert_html(render_component(context: :lightbox), "##{lightbox_id}")
+  end
+
   private
 
   def render_component(votes: true, context: :overlay)

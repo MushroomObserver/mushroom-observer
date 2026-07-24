@@ -207,39 +207,43 @@ class ImageFragmentLightboxCaptionTest < ComponentTestCase
   # `.image-sizer` ancestor here to reveal it on hover), and every id
   # prefixed so this copy can't collide with the in-page vote section
   # once the lightbox is open and both are live in the DOM at once.
+  # #4895: the vote section is a lazy-loading Turbo Frame now, not
+  # rendered inline -- Matrix::Box's fragment cache has no user
+  # component in its key, so rendering VoteInterface directly here
+  # would bake whichever viewer wrote the cache entry's vote state
+  # into the shared HTML for everyone. The frame fetches fresh, per
+  # viewer, from Images::VotesController#show.
   def test_renders_lightbox_vote_section
     html = render_caption
 
-    assert_html(html,
-                ".vote-section-inline#lightbox_image_vote_#{@image.id}")
-    assert_no_html(html, ".vote-section#image_vote_#{@image.id}")
-    assert_html(html, "#lightbox_vote_meter_bar_#{@image.id}")
+    assert_html(html, "turbo-frame#lightbox_image_vote_#{@image.id}" \
+                      "[loading='lazy']")
+    assert_no_html(html, ".vote-section-inline")
   end
 
-  # Anonymous viewers can't vote, so the section is suppressed
-  # entirely (matches the in-page vote section's own gate).
-  def test_does_not_render_vote_section_for_logged_out_user
+  # Anonymous viewers still get the frame shell (matches the in-page
+  # vote section's own render-regardless-of-user behavior) -- per-
+  # viewer hiding (`.require-user`) happens in the fetched content,
+  # not at caption-render time.
+  def test_renders_vote_frame_for_logged_out_user
     html = render_caption(user: nil)
 
-    assert_no_html(html, ".vote-section-inline")
+    assert_html(html, "turbo-frame#lightbox_image_vote_#{@image.id}")
   end
 
   # No image in scope (e.g. obs-only pre-render contexts) -> no votes.
   def test_does_not_render_vote_section_without_image
     html = render_caption(image: nil)
 
-    assert_no_html(html, ".vote-section-inline")
+    assert_no_html(html, "turbo-frame")
   end
 
   # `votes: false` propagates from the parent `BaseImage` and
-  # suppresses the lightbox vote section too -- needed on pages that
-  # don't pre-load `:image_votes` (e.g. account/profile/images reuse
-  # page), otherwise `Image#users_vote(@user)` triggers a Bullet N+1
-  # inside the vote interface.
+  # suppresses the lightbox vote section too.
   def test_does_not_render_vote_section_when_votes_disabled
     html = render_caption(votes: false)
 
-    assert_no_html(html, ".vote-section-inline")
+    assert_no_html(html, "turbo-frame")
   end
 
   private

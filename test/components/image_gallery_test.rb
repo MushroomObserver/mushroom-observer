@@ -71,6 +71,9 @@ class ImageGalleryTest < ComponentTestCase
   # `render(Components::ImageFragment::VoteInterface.new(...))` was
   # malformed Phlex and silently no-op'd so the lightbox / carousel never
   # showed votes.
+  # #4895: the vote section is a lazy-loading Turbo Frame now (not
+  # rendered inline), so Matrix::Box's fragment cache (no user in its
+  # key) can't bake one viewer's vote state into shared HTML.
   def test_carousel_item_renders_vote_section
     image = @images.first
     component = Components::ImageGallery.new(
@@ -78,9 +81,9 @@ class ImageGalleryTest < ComponentTestCase
     )
     html = render(component)
 
-    assert_html(html, ".carousel-item .vote-section#image_vote_#{image.id}")
-    assert_html(html, ".carousel-item .vote-meter.progress")
-    assert_html(html, ".carousel-item .image-vote-links")
+    assert_html(html,
+                ".carousel-item turbo-frame#image_vote_#{image.id}" \
+                "[loading='lazy']")
   end
 
   def test_renders_single_image_without_controls
@@ -314,8 +317,8 @@ class ImageGalleryTest < ComponentTestCase
                     user: @user, images: [leak_image], object: leak_obs
                   ))
 
-    # Vote bar IS in the carousel-caption.
-    assert_html(html, ".carousel-caption .vote-section")
+    # Vote bar IS in the carousel-caption (a lazy Turbo Frame -- #4895).
+    assert_html(html, ".carousel-caption turbo-frame")
 
     # Copyright + notes are NOT in the carousel-caption. (They are
     # in the lightbox's hidden `.lightbox-caption` element instead.)

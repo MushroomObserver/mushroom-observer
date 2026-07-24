@@ -46,6 +46,16 @@ class Components::ImageFragment::VoteInterface < Components::Base
   # prefixed ids after a vote so both copies stay in sync.
   prop :context, Symbol, default: :overlay
 
+  # The root element's own id -- also what a lazy-loading Turbo Frame
+  # wrapper (see #4895) must be given so Turbo can find and swap this
+  # component's response out of it. Single source of truth for both
+  # `#vote_html_id("image_vote")` below and any external caller that
+  # needs the id before the component itself has rendered.
+  def self.frame_id(image_id:, context: :overlay)
+    prefix = context == :lightbox ? "lightbox_" : ""
+    "#{prefix}image_vote_#{image_id}"
+  end
+
   def view_template
     return unless @votes && @image
 
@@ -67,6 +77,9 @@ class Components::ImageFragment::VoteInterface < Components::Base
   end
 
   def vote_html_id(base)
+    return self.class.frame_id(image_id: @image.id, context: @context) if
+      base == "image_vote"
+
     prefix = @context == :lightbox ? "lightbox_" : ""
     "#{prefix}#{base}_#{@image.id}"
   end

@@ -225,8 +225,7 @@ class Components::Image::Base < Components::Base
   def render_image_vote_section
     return unless @votes && @img_instance
 
-    ImageFragment(type: :vote_interface,
-                  user: @user, image: @img_instance, votes: @votes)
+    ImageFragment(type: :lazy_vote_interface, image: @img_instance)
   end
 
   # Render original filename if applicable

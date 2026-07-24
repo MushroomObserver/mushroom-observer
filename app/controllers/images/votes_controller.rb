@@ -3,6 +3,23 @@
 module Images
   class VotesController < ApplicationController
     before_action :login_required
+    skip_before_action :login_required, only: [:show]
+
+    # Renders just the vote interface for one image, fresh and
+    # uncached -- meant to be fetched via a lazy Turbo Frame so a
+    # viewer's own vote state never gets baked into `Matrix::Box`'s
+    # shared fragment cache (#4895). Anonymous viewers can load this
+    # too (`.require-user` CSS-hides it), matching the overlay copy's
+    # existing render-regardless-of-`@user` behavior.
+    def show
+      @image = find_or_goto_index(Image, params[:image_id])
+      return unless @image
+
+      @context = params[:context]&.to_sym || :overlay
+      render(Views::Controllers::Images::Votes::Show.new(
+               image: @image, user: @user, context: @context
+             ), layout: false)
+    end
 
     def update
       @id = params[:image_id]
@@ -46,6 +63,15 @@ module Images
     # IS the full `<div id="...">` wrapper, so `update` (which swaps
     # inner content only) would nest a duplicate-id div inside the
     # original instead of swapping it.
+    #
+    # The target may currently be the lazy `<turbo-frame>` (#4895) --
+    # its content hasn't loaded, or has loaded and the div underneath
+    # shares the same id (Turbo's own `getElementById`-based lookup
+    # returns whichever is first in document order, i.e. the frame,
+    # its ancestor). Either way `replace` swaps the frame for a plain
+    # `VoteInterface` div, same id -- correct: once voted, that
+    # instance has fresh, correct data and no longer needs to be
+    # lazily reloadable.
     def vote_interface_streams
       [
         turbo_stream.replace("image_vote_#{@image.id}",

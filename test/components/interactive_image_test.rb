@@ -30,14 +30,15 @@ class InteractiveImageTest < ComponentTestCase
   # the dispatch actually happens (the previous version of this test only
   # asserted the unrelated `image-sizer` and missed a regression where
   # the sub-component call was malformed and silently no-op'd).
+  # #4895: the vote section is a lazy-loading Turbo Frame now, not
+  # rendered inline -- Matrix::Box's fragment cache has no user
+  # component in its key, so rendering vote state directly here would
+  # bake one viewer's votes into the shared cached HTML for everyone.
   def test_renders_with_votes_enabled
     html = render_image(votes: true)
 
     assert_includes(html, "image-sizer")
-    assert_html(html, "div.vote-section#image_vote_#{@image.id}")
-    assert_html(html, ".vote-meter.progress")
-    assert_html(html, ".vote-buttons")
-    assert_html(html, ".image-vote-links#image_vote_links_#{@image.id}")
+    assert_html(html, "turbo-frame#image_vote_#{@image.id}[loading='lazy']")
   end
 
   def test_renders_with_votes_disabled
@@ -93,8 +94,8 @@ class InteractiveImageTest < ComponentTestCase
 
     caption_html =
       Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption").to_html
-    assert_includes(caption_html, "vote-section-inline")
     assert_includes(caption_html, "lightbox_image_vote_#{@image.id}")
+    assert_includes(caption_html, "turbo-frame")
   end
 
   def test_theater_button_caption_omits_vote_section_when_votes_disabled
@@ -102,7 +103,7 @@ class InteractiveImageTest < ComponentTestCase
 
     caption_html =
       Nokogiri::HTML5.fragment(html).at_css(".lightbox-caption").to_html
-    assert_not_includes(caption_html, "vote-section-inline")
+    assert_not_includes(caption_html, "turbo-frame")
   end
 
   # Image#broadcast_interactive_sizes renders with media_only: true so a

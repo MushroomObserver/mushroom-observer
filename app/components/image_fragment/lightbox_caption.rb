@@ -107,10 +107,10 @@ class Components::ImageFragment::LightboxCaption < Components::Base
   # in-page vote section that's also live in the DOM once the
   # lightbox is open. See `Components::ImageFragment::VoteInterface`.
   def render_vote_section
-    return unless @votes && @user && @image
+    return unless @votes && @image
 
-    ImageFragment(type: :vote_interface, user: @user, image: @image,
-                  votes: true, context: :lightbox)
+    ImageFragment(type: :lazy_vote_interface, image: @image,
+                  context: :lightbox)
   end
 
   def render_image_links
