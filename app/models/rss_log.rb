@@ -135,7 +135,6 @@
 #  unique_format_name:: (same, with id tacked on to make unique)
 #  url::                Return "show_blah/id" URL for associated object.
 #  parse_log::          Parse log, see method for description of return value.
-#  detail::             Figure out a message for most recent update.
 #
 #  == Callbacks
 #
@@ -390,50 +389,6 @@ class RssLog < AbstractModel
 
   def decode_orphan_title(line)
     [:log_orphan, { title: unescape(line) }, updated_at]
-  end
-
-  public
-
-  # Figure out a message for most recent update.
-  def detail
-    log = parse_log
-    if orphan?
-      penultimate_message(log)
-    elsif target_recently_created?(log)
-      creation_message(log)
-    else
-      latest_message(log)
-    end
-  rescue StandardError => e
-    Rails.env.production? ? raise(e) : ""
-  end
-
-  private
-
-  def target_recently_created?(log)
-    _latest_tag, _latest_args, latest_time = log.first
-    first_time = created_at || log.last[2]
-    latest_time && first_time && latest_time < first_time + 1.minute
-  end
-
-  def latest_message(log)
-    tag, args = log.first
-    tag.t(args)
-  end
-
-  def penultimate_message(log)
-    tag, args = log[1]
-    tag.present? ? tag.t(args) : :rss_destroyed.t(type: target_type)
-  end
-
-  def creation_message(log)
-    if [:observation, :species_list].include?(target_type)
-      :rss_created_at.t(type: target_type) # user would be redundant
-    else
-      # Creation should be first action logged.
-      tag, args = log.last
-      tag.t(args)
-    end
   end
 
   ##############################################################################

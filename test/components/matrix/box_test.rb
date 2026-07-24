@@ -232,6 +232,27 @@ class MatrixBoxTest < ComponentTestCase
     )
   end
 
+  # Selection logic moved from RssLog#detail to
+  # Components::Matrix::Box::RenderData#rss_log_detail_tag (#4868) --
+  # this exercises the orphan/penultimate-message branch end to end,
+  # matching what used to be test_detail_for_merged_location in
+  # rss_log_test.rb.
+  def test_rss_log_footer_shows_resolved_detail_for_orphaned_merge
+    loc1 = locations(:albion)
+    loc2 = locations(:mitrula_marsh)
+    log = loc1.rss_log
+    loc2.merge(mary, loc1)
+    log.reload
+    assert(log.orphan?)
+
+    component = Components::Matrix::Box.new(user: @user, object: log)
+    html = render(component)
+
+    assert_html(html, ".rss-detail",
+                text: :log_location_merged.t(that: loc2.display_name,
+                                             user: "mary").as_displayed)
+  end
+
   # NOTE: identify mode tests require permission? helper which needs
   # complex test setup. These features are tested in integration tests.
 
@@ -325,5 +346,22 @@ class MatrixBoxTest < ComponentTestCase
     expected_url = obs.import_link.link_url
     assert_html(html, "a[href='#{expected_url}'][target='_blank']" \
                       "[rel='noopener noreferrer']")
+  end
+
+  # Enum-credit branch (no import_link) -- Observation#source_credit
+  # was deleted (#4868); this exercises the replacement tag directly
+  # in app/components/matrix/box.rb#render_source_credit_inner.
+  # mo_website specifically is excluded by source_noteworthy? (it's
+  # the default, not worth calling out), so this needs a fixture with
+  # a different source -- mo_iphone_app.
+  def test_enum_source_credit_renders_credit_text
+    obs = observations(:amateur_obs)
+    assert_equal("mo_iphone_app", obs.source)
+    assert(obs.source_noteworthy?)
+    component = Components::Matrix::Box.new(user: @user, object: obs)
+    html = render(component)
+
+    assert_html(html, ".source-credit",
+                text: :source_credit_mo_iphone_app.l.tpl.as_displayed)
   end
 end

@@ -50,7 +50,7 @@ class Components::Matrix::Box
         location: @object.location,
         occurrence: @object.occurrence,
         consensus: Observation::NamingConsensus.new(@object),
-        detail: @object.rss_log&.detail,
+        detail: rss_log_detail_tag(@object.rss_log),
         time: @object.rss_log&.updated_at
       }
 
@@ -73,7 +73,7 @@ class Components::Matrix::Box
         when: target.respond_to?(:when) ? target.when&.web_date : nil,
         who: target&.user,
         what: target || @object,
-        detail: @object.detail,
+        detail: rss_log_detail_tag(@object),
         time: @object.updated_at
       }
 
@@ -81,6 +81,55 @@ class Components::Matrix::Box
       add_rss_log_location_data(data, target)
       add_rss_log_image_data(data, target)
       data
+    end
+
+    # The [tag, args] pair identifying an RssLog's most recent update,
+    # unresolved -- Footer#render_rss_detail resolves it at render
+    # time (was RssLog#detail/#latest_message/etc., moved here since
+    # picking which log entry to summarize is a data decision, not a
+    # model concern -- RssLog#parse_log/#orphan?/#target_type/
+    # #created_at are all it needs, all already public).
+    def rss_log_detail_tag(rss_log)
+      return nil unless rss_log
+
+      log = rss_log.parse_log
+      if rss_log.orphan?
+        penultimate_message_tag(rss_log, log)
+      elsif target_recently_created?(rss_log, log)
+        creation_message_tag(rss_log, log)
+      else
+        latest_message_tag(log)
+      end
+    end
+
+    def target_recently_created?(rss_log, log)
+      _latest_tag, _latest_args, latest_time = log.first
+      first_time = rss_log.created_at || log.last[2]
+      latest_time && first_time && latest_time < first_time + 1.minute
+    end
+
+    def latest_message_tag(log)
+      tag, args = log.first
+      [tag, args]
+    end
+
+    def penultimate_message_tag(rss_log, log)
+      tag, args = log[1]
+      if tag.present?
+        [tag,
+         args]
+      else
+        [:rss_destroyed, { type: rss_log.target_type }]
+      end
+    end
+
+    def creation_message_tag(rss_log, log)
+      if [:observation, :species_list].include?(rss_log.target_type)
+        [:rss_created_at, { type: rss_log.target_type }]
+      else
+        tag, args = log.last
+        [tag, args]
+      end
     end
 
     def extract_rss_log_name(target)

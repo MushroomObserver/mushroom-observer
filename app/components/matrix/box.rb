@@ -237,7 +237,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_source_credit
     target = @data[:what]
-    return unless target.respond_to?(:source_credit) &&
+    return unless target.respond_to?(:source_noteworthy?) &&
                   target.source_noteworthy?
 
     div(class: "small mt-3") do
@@ -250,18 +250,22 @@ class Components::Matrix::Box < Components::Base
   # External imports get a Phlex-rendered link so we can set
   # target="_blank" / rel="noopener" — textile has no syntax for
   # those attributes. Enum credits keep going through .tpl.
+  # `source_noteworthy?` (the caller's guard) guarantees `source` is
+  # present whenever `import_link` isn't, so the enum branch is safe
+  # without its own presence check.
   def render_source_credit_inner(target)
-    if target.respond_to?(:external_credit_link) &&
-       (link = target.external_credit_link)
+    if (link = target.import_link)
       render_external_credit_link(link)
     else
-      target.source_credit.tpl
+      :"source_credit_#{target.source}".l.tpl
     end
   end
 
   # An import link's URL always resolves (stored override or derived from the
   # site template via link_url), so the credit always renders as a link.
   def render_external_credit_link(link)
-    Link(type: :external, content: link[:text], path: link[:url])
+    Link(type: :external,
+         content: :source_credit_external_text.l(name: link.external_site.name),
+         path: link.link_url)
   end
 end

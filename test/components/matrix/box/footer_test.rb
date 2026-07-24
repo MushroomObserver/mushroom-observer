@@ -31,10 +31,18 @@ class MatrixBoxFooterTest < ComponentTestCase
     assert_equal("", render_detail(""))
   end
 
-  def test_footer_detail_string_renders_detail_div
-    html = render_detail("Some log detail text")
+  # detail is an [tag, args] pair from RenderData#rss_log_detail_tag
+  # (#4868 -- moved off RssLog#detail), resolved via
+  # Footer#resolve_rss_detail at render time.
+  def test_footer_detail_array_renders_resolved_tag
+    html = render_detail([:rss_created_at, { type: :observation }])
 
-    assert_html(html, "div.rss-detail.small", text: "Some log detail text")
+    assert_html(html, "div.rss-detail.small",
+                text: :rss_created_at.t(type: :observation).as_displayed)
+  end
+
+  def test_footer_detail_array_with_nil_tag_renders_nothing
+    assert_equal("", render_detail([nil, nil]))
   end
 
   def test_footer_detail_user_renders_user_info
