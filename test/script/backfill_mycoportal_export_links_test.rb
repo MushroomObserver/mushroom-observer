@@ -101,7 +101,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     link = link_for(image)
     assert_not_nil(link, "Expected an export ExternalLink for the image")
     assert_equal(Date.new(2019, 7, 22), link.external_created_on)
-  end``
+  end
 
   def test_created_link_leaves_url_nil
     image = images(:in_situ_image)
