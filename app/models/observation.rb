@@ -1128,6 +1128,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # True when this observation is a read-only reflection of an imported
+  # source (#4214): its scalar core (date/location/notes/name) mirrors
+  # the source and is kept current by resync (#4215), so MO-side edits to
+  # those fields are blocked. `reflected_at` is stamped at import time for
+  # new imports (clean by construction) and by the #4585 resolution engine
+  # for the verified backlog; NULL means editable (not a reflection).
+  def reflection?
+    reflected_at.present?
+  end
+
   # Structured form of source_credit for external imports — returns
   # { text:, url: } so renderers can build the link element with
   # whatever attributes they need (e.g. target="_blank" for off-site).

@@ -168,6 +168,39 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # A read-only reflection (#4214) can't be edited on MO even by its
+  # owner — the edit form redirects with a warning. The guard sits ahead
+  # of the permission check, so the owner (who would otherwise pass) is
+  # still blocked.
+  def test_edit_reflection_redirects_with_warning
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_warning
+  end
+
+  def test_update_reflection_is_blocked
+    obs = observations(:imported_inat_obs)
+    original_notes = obs.notes
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+
+    put(:update, params: {
+          id: obs.id,
+          observation: { place_name: "Somewhere Else, Japan",
+                         notes: { other: "changed on MO" } }
+        })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_warning
+    assert_equal(original_notes, obs.reload.notes,
+                 "a reflection's notes must not change through update")
+  end
+
   def test_update_observation
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at

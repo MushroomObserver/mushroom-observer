@@ -1127,6 +1127,7 @@
   source_credit_external: '"Imported from [name]":[url]'
   source_credit_external_text: Imported from [name]
   source_credit_help_link: About imported observations
+  observation_reflection_read_only_note: Read-only reflection of its imported source. To change it, edit it at the source and resync.
 
   ##############################################################################
 
@@ -1464,6 +1465,7 @@
   form_observations_field_code: for field slip
   form_observations_field_slip_code: Field Slip Code
   edit_observation_field_slip_invalid: 'Invalid field slip code "[code]".'
+  edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
@@ -4108,6 +4110,7 @@
   api_must_be_owner: You must be the owner of the [type] "[name]" to do this.
   api_must_be_site_admin: This action requires a site administrator's API key.
   api_must_have_edit_permission: You do not have permission to edit [type] "[name]".
+  api_observation_is_read_only: '[type] "[name]" is a read-only reflection of an imported source. Edit it at the source and resync instead.'
   api_must_have_view_permission: You do not have permission to view [type] "[name]".
   api_must_not_have_any_herbaria: You can't edit this [:location] because there is an [:herbarium] there.
   api_must_own_all_descriptions: You can only edit [types] if you own all the [:descriptions].

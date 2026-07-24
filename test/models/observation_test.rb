@@ -2110,6 +2110,21 @@ class ObservationTest < UnitTestCase
     assert(obs.source_noteworthy?)
   end
 
+  # reflection? is driven solely by reflected_at (#4214) — an import
+  # link alone doesn't lock an obs, so the existing editable backlog
+  # stays editable until the resolution engine stamps it.
+  def test_reflection_predicate
+    obs = observations(:imported_inat_obs)
+    assert_not(obs.reflection?,
+               "an import without reflected_at is still editable")
+
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert(obs.reflection?, "reflected_at present marks a read-only reflection")
+
+    obs.update_column(:reflected_at, nil)
+    assert_not(obs.reflection?)
+  end
+
   # ----- Coverage gap tests for app/models/observation.rb -----
 
   # field_slip= is a no-op when the slip arg is nil — the early

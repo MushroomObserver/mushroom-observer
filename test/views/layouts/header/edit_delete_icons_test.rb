@@ -37,5 +37,16 @@ module Views::Layouts
 
       assert_html(html, "ul.object_edit li", count: 2)
     end
+
+    # A read-only reflection (#4214) drops the edit icon (its scalar core
+    # can't be edited on MO) but keeps delete — a separate lifecycle.
+    def test_reflection_suppresses_edit_icon_but_keeps_delete
+      @obs.update_column(:reflected_at, Time.zone.now)
+      html = render(Header::EditDeleteIcons.new(object: @obs, user: @owner))
+
+      assert_html(html, "ul.object_edit li", count: 1)
+      assert_no_html(html, "a[href$='/edit']",
+                     "a reflection should have no edit-form link")
+    end
   end
 end
