@@ -80,12 +80,27 @@ svg.placeholder {
 
 // Non-overlay `Components::ImageFragment::VoteInterface` contexts
 // (`context:` other than `:overlay`, e.g. the lightbox caption) --
-// no absolute positioning, no hover-to-reveal, no forced white text.
-// Just a plain always-visible block using the surrounding context's
-// own text color.
+// no absolute positioning, no hover-to-reveal. `.lg-sub-html`'s own
+// background is dark (see lightgallery theme), and `<button>` text
+// doesn't reliably inherit ambient `color` from ancestors in every
+// browser (Safari in particular), so the vote links need the same
+// explicit white-on-dark treatment `.vote-section` gives its own
+// links/buttons, not just ambient inheritance.
 .vote-section-inline {
   text-align: center;
   padding: 0.5em 0.25em;
+
+  a,
+  button[type=submit]:not(.btn) {
+    color: white !important;
+    transition: color 0.3s ease;
+
+    &:hover,
+    &:focus {
+      color: lighten($link-color, 21%) !important;
+      text-decoration: none;
+    }
+  }
 }
 
 .matrix-box {
@@ -115,11 +130,13 @@ svg.placeholder {
   max-width: 200px;
   height: 7px;
   margin-bottom: 0;
+  background-color: white;
 
   .progress-bar {
     font-size: 12px;
     line-height: 5px;
     color: #FFF;
+    background-color: $link-color;
   }
 }
 

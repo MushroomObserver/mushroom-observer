@@ -47,13 +47,22 @@ export default class extends Controller {
   maybeRefreshOnStream(event) {
     const target = event.target.target;
     if (target && /^(lightbox_caption_|lightbox_image_vote_)/.test(target)) {
-      this.refresh();
+      this.refreshCaption();
     }
   }
 
-  refresh() {
-    if (this.gallery) {
-      this.gallery.refresh();
+  // `gallery.refresh()` does NOT re-copy the caption -- it only
+  // rebuilds the item list and re-binds click handlers. lightGallery
+  // copies `.lightbox-caption`'s innerHTML into `.lg-sub-html` (a
+  // separate DOM subtree, not a live reference) only on initial slide
+  // insertion or slide transitions -- `addHtml(index)` is the actual
+  // method that does that copy, and it re-resolves the selector fresh
+  // from the live DOM every time it's called. Call it directly for
+  // the currently-open slide so a Turbo Stream update (e.g. a vote,
+  // or the reviewed toggle) shows up without navigating away and back.
+  refreshCaption() {
+    if (this.gallery && this.gallery.lgOpened) {
+      this.gallery.addHtml(this.gallery.index);
     }
   }
 }

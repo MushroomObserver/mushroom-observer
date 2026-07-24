@@ -27,7 +27,7 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
       whitespace
       render_link
       whitespace
-      @obs.format_name(@user).t.small_author
+      trusted_html(@obs.format_name(@user).t.small_author)
     end
   end
 
