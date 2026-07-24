@@ -853,14 +853,33 @@ module Observations
       assert_flash_error
     end
 
-    # NOTE: `destroy_if_we_can`'s `!naming.destroy` branch (the
-    # "Unable to destroy" flash) requires forcing `naming.destroy`
-    # to return false on a specific AR instance fetched by the
-    # controller. MO doesn't pull in Mocha (no `any_instance`
-    # stubbing), and Minitest's `stub` can't reach the
-    # `Naming.includes(:votes).find(id)` chain cleanly — the
-    # branch is defensive against the impossible-in-practice case
-    # of a callback abort. Left uncovered intentionally.
+    # `destroy_if_we_can`'s `!naming.destroy` branch (the "Unable to
+    # destroy" flash) guards against a callback abort inside
+    # `ActiveRecord::Base#destroy` -- not reachable through any real
+    # Naming callback today, so force it by redefining `#destroy` on
+    # the class for the scope of this test (no Mocha in this repo;
+    # the controller fetches its own instance internally, so a
+    # per-object stub can't reach it).
+    def test_destroy_naming_failure_flashes_error
+      nmg = namings(:coprinus_comatus_naming) # owned by rolf
+      mary = users(:mary)
+
+      # `deletable?` requires no one else's strongest positive vote --
+      # clear mary's vote first so the flow reaches `naming.destroy`.
+      login("mary")
+      ::Observation::NamingConsensus.new(nmg.observation).
+        change_vote(nmg, Vote.delete_vote, mary)
+
+      login("rolf")
+      Naming.define_method(:destroy) { false }
+      assert_no_difference("Naming.count") do
+        get(:destroy,
+            params: { observation_id: nmg.observation_id, id: nmg.id })
+      end
+      assert_flash_error
+    ensure
+      Naming.remove_method(:destroy)
+    end
 
     # `destroy_sibling_namings` is gated on
     # `@observation.occurrence_id`. Hitting any destroy on an

@@ -7,17 +7,18 @@
 # as a link along with the author attribution.
 #
 # @example Basic usage
-#   render LightboxObservationTitle.new(obs: @observation, user: @user)
+#   ObservationFragment(type: :lightbox_title, obs: @observation, user: @user)
 #
 # @example With identify mode (shows "OBSERVATION:" label)
-#   render LightboxObservationTitle.new(
+#   ObservationFragment(
+#     type: :lightbox_title,
 #     obs: @observation,
 #     user: @user,
 #     identify: true
 #   )
-class Components::Image::Lightbox::ObservationTitle < Components::Base
-  prop :obs, Observation
-  prop :user, _Nilable(User), default: nil
+class Components::ObservationFragment::LightboxTitle < Components::Base
+  prop :obs, ::Observation
+  prop :user, _Nilable(::User), default: nil
   prop :identify, _Boolean, default: false
 
   def view_template
@@ -26,7 +27,7 @@ class Components::Image::Lightbox::ObservationTitle < Components::Base
       whitespace
       render_link
       whitespace
-      @obs.format_name(@user).t.small_author
+      trusted_html(@obs.format_name(@user).t.small_author)
     end
   end
 

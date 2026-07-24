@@ -3,21 +3,15 @@
 # Component for displaying image copyright information.
 #
 # @example Basic usage
-#   render Components::Image::Copyright.new(
-#     user: @user,
-#     image: @image
-#   )
+#   ImageFragment(type: :copyright, user: @user, image: @image)
 #
 # @example With context object
-#   render Components::Image::Copyright.new(
-#     user: @user,
-#     image: @image,
-#     object: @observation
-#   )
-class Components::Image::Copyright < Components::Base
-  prop :user, _Nilable(User)
+#   ImageFragment(type: :copyright, user: @user, image: @image,
+#                 object: @observation)
+class Components::ImageFragment::Copyright < Components::Base
+  prop :user, _Nilable(::User)
   prop :image, _Nilable(::Image)
-  prop :object, _Nilable(AbstractModel), default: nil
+  prop :object, _Nilable(::AbstractModel), default: nil
 
   def view_template
     return "" unless @image && show_copyright?

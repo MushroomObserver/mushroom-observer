@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class LightboxCaptionTest < ComponentTestCase
+class ImageFragmentLightboxCaptionTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -17,9 +17,6 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, "obs-when")
     assert_includes(html, "obs-where")
     assert_includes(html, "obs-who")
-    assert_includes(html, "observation_when")
-    assert_includes(html, "observation_where")
-    assert_includes(html, "observation_who")
 
     # Should have image links
     assert_includes(html, "caption-image-links")
@@ -63,7 +60,6 @@ class LightboxCaptionTest < ComponentTestCase
 
     # Should have GPS section
     assert_includes(html, "obs-where-gps")
-    assert_includes(html, "observation_where_gps")
     # Owner can reveal → GPS link rendered
     assert_html(html, "a[href*='/observations/#{obs_with_gps.id}/map']")
   end
@@ -129,16 +125,16 @@ class LightboxCaptionTest < ComponentTestCase
   end
 
   # #4884: the who line mirrors the obs show page's Collector /
-  # Entered-by semantics (via Components::ObservationWho) instead of
-  # the old "Who:" label. Branch coverage lives in ObservationWhoTest;
-  # this pins the caption's wiring.
+  # Entered-by semantics (via Components::ObservationFragment::Who)
+  # instead of the old "Who:" label. Branch coverage lives in
+  # ObservationFragmentWhoTest; this pins the caption's wiring.
   def test_who_line_uses_collector_entered_by_semantics
     obs = observations(:detailed_unknown_obs)
     obs.collector = "Jane Forager"
     obs.collector_user_id = nil
 
     html = render_caption(obs: obs, image: nil)
-    text = Nokogiri::HTML.fragment(html).at_css("#observation_who").text
+    text = Nokogiri::HTML.fragment(html).at_css(".obs-who").text
 
     assert_includes(text, :collector.ti)
     assert_includes(text, "Jane Forager")
@@ -153,7 +149,7 @@ class LightboxCaptionTest < ComponentTestCase
 
     html = render_caption(user: viewer, obs: obs)
 
-    assert_html(html, "#observation_who a[data-controller='modal-toggle']")
+    assert_html(html, ".obs-who a[data-controller='modal-toggle']")
   end
 
   def test_does_not_render_contact_link_for_own_observation
@@ -161,7 +157,7 @@ class LightboxCaptionTest < ComponentTestCase
 
     html = render_caption(user: obs.user, obs: obs)
 
-    assert_no_html(html, "#observation_who [data-controller='modal-toggle']")
+    assert_no_html(html, ".obs-who [data-controller='modal-toggle']")
   end
 
   def test_always_renders_image_links
@@ -203,58 +199,58 @@ class LightboxCaptionTest < ComponentTestCase
     assert_includes(html, "caption-image-links")
   end
 
-  # No vote UI in the lightbox caption (#4884). The global
-  # `.vote-section` styling is an absolute bottom-pinned, opacity-0
-  # thumbnail hover-overlay; inside `.lg-sub-html` it becomes an
-  # invisible strip covering the caption's bottom links row and
-  # swallowing clicks. Vote updates also can't sync to the caption
-  # (it's a clone stored in `data-sub-html`), so the caption skips
-  # the vote interface entirely.
-  def test_does_not_render_vote_section
+  # #4886: the lightbox gets its own copy of the vote UI, rendered
+  # with `context: :lightbox` (see
+  # Components::ImageFragment::VoteInterface) -- same dark
+  # background/link treatment as `.vote-section` (the hover-overlay
+  # class matrix-box/InteractiveImage thumbnails use), minus the
+  # absolute positioning -- always visible, since there's no
+  # `.image-sizer` ancestor here to reveal it on hover -- and every id
+  # prefixed so this copy can't collide with the in-page vote section
+  # once the lightbox is open and both are live in the DOM at once.
+  # #4895: the vote section is a lazy-loading Turbo Frame now, not
+  # rendered inline -- Matrix::Box's fragment cache has no user
+  # component in its key, so rendering VoteInterface directly here
+  # would bake whichever viewer wrote the cache entry's vote state
+  # into the shared HTML for everyone. The frame fetches fresh, per
+  # viewer, from Images::VotesController#show.
+  def test_renders_lightbox_vote_section
     html = render_caption
 
-    assert_no_html(html, ".vote-section")
-    assert_no_html(html, ".vote-meter")
+    assert_html(html, "turbo-frame#lightbox_image_vote_#{@image.id}" \
+                      "[loading='lazy']")
+    assert_no_html(html, ".vote-section-lightbox")
   end
 
-  # Regression test for the #4741/#4772 matrix-box cache-leak bug:
-  # this component renders once per observation on a matrix/index
-  # page (Matrix::Box -> Image::Interactive -> lightbox_caption_html),
-  # not once per request, so ApplicationController's per-request
-  # Textile-cache reset alone doesn't isolate sequential renders in
-  # the same page load. `prepare_textile_cache` must explicitly clear
-  # before registering the current observation's name.
-  #
-  # agaricus_campestris_obs (genus "Agaricus", letter "A") renders
-  # first and registers "A" => "Agaricus" in Textile's cache.
-  # boletus_edulis_obs (genus "Boletus") renders second, with notes
-  # containing a bare "_A. campestris_" abbreviation it never
-  # registered itself. Textile keeps the abbreviated form as the link
-  # *text* either way, so the tell is the link's *href*: leaked state
-  # resolves it to lookup_name/Agaricus+campestris (wrong genus);
-  # correctly isolated, "A. campestris" can't resolve as a name at
-  # all and falls through to a lookup_glossary_term href instead.
-  def test_does_not_leak_name_lookup_across_sequential_renders
-    agaricus_obs = observations(:agaricus_campestris_obs)
-    boletus_obs = observations(:boletus_edulis_obs)
-    boletus_obs.notes = { Other: "_A. campestris_ was not seen here" }
+  # Anonymous viewers still get the frame shell (matches the in-page
+  # vote section's own render-regardless-of-user behavior) -- per-
+  # viewer hiding (`.require-user`) happens in the fetched content,
+  # not at caption-render time.
+  def test_renders_vote_frame_for_logged_out_user
+    html = render_caption(user: nil)
 
-    render_caption(obs: agaricus_obs, image: nil)
-    html = render_caption(obs: boletus_obs, image: nil)
+    assert_html(html, "turbo-frame#lightbox_image_vote_#{@image.id}")
+  end
 
-    assert_no_html(
-      html,
-      "#observation_#{boletus_obs.id}_notes a[href*='lookup_name/Agaricus']",
-      "Boletus caption's bare abbreviation resolved against the prior " \
-      "render's leftover Agaricus registration -- Textile's " \
-      "name-lookup cache leaked across sequential renders"
-    )
+  # No image in scope (e.g. obs-only pre-render contexts) -> no votes.
+  def test_does_not_render_vote_section_without_image
+    html = render_caption(image: nil)
+
+    assert_no_html(html, "turbo-frame")
+  end
+
+  # `votes: false` propagates from the parent `BaseImage` and
+  # suppresses the lightbox vote section too.
+  def test_does_not_render_vote_section_when_votes_disabled
+    html = render_caption(votes: false)
+
+    assert_no_html(html, "turbo-frame")
   end
 
   private
 
   def render_caption(user: @user, image: @image, obs: @obs, **)
-    render(Components::Image::Lightbox::Caption.new(
+    render(Components::ImageFragment::LightboxCaption.new(
              user: user, image: image,
              image_id: (image || @image).id,
              obs: obs, **

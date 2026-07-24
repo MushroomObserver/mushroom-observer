@@ -15,10 +15,9 @@
 # subject and don't have to know any routing details.
 #
 # @example
-#   render(Components::Image::ReuseForm.new(
-#            target: @observation, all_users: @all_users
-#          ))
-class Components::Image::ReuseForm < Components::ApplicationForm
+#   ImageFragment(type: :reuse_form, target: @observation,
+#                 all_users: @all_users)
+class Components::ImageFragment::ReuseForm < Components::ApplicationForm
   CONTROLLERS = {
     ::Observation => "/observations/images",
     ::User => "/account/profile/images",

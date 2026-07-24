@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Components::Image::ReuseFormTest < ComponentTestCase
+class ImageFragmentReuseFormTest < ComponentTestCase
   def setup
     super
     @obs = observations(:minimal_unknown_obs)
@@ -18,7 +18,7 @@ class Components::Image::ReuseFormTest < ComponentTestCase
   private
 
   def render_reuse_form(target:, all_users: false)
-    render(Components::Image::ReuseForm.new(target: target,
-                                            all_users: all_users))
+    render(Components::ImageFragment::ReuseForm.new(target: target,
+                                                    all_users: all_users))
   end
 end

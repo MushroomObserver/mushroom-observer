@@ -5,7 +5,7 @@ require("test_helper")
 # Collector / Entered-by identity lines (#4211), shared by the obs show
 # Details panel and the lightbox caption. Details/Caption tests cover
 # their wrapper wiring; branch coverage of the line contents lives here.
-class ObservationWhoTest < ComponentTestCase
+class ObservationFragmentWhoTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -97,6 +97,6 @@ class ObservationWhoTest < ComponentTestCase
   end
 
   def render_who(obs, user: @user)
-    render(Components::ObservationWho.new(obs: obs, user: user))
+    render(Components::ObservationFragment::Who.new(obs: obs, user: user))
   end
 end

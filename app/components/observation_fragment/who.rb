@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # The "Collector:" / "Entered by:" identity line(s) for an observation
-# (#4211 semantics). Renders the line *contents* only — callers supply
-# their own wrapper element (the obs show page's Details panel uses an
-# `li.obs-who`; the lightbox caption uses a `p.obs-who`).
-class Components::ObservationWho < Components::Base
+# (#4211 semantics). Owns its own `li.obs-who` wrapper -- callers render
+# it as a list item, not build the wrapper themselves, so every caller
+# stays identical by construction instead of drifting independently.
+class Components::ObservationFragment::Who < Components::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
 
@@ -12,13 +12,15 @@ class Components::ObservationWho < Components::Base
   # "Entered by:" — we don't claim the entering recorder as the
   # collector.
   def view_template
-    if @obs.collector_unrecorded?
-      render_entered_by
-    else
-      render_collector
-      if @obs.collector_differs_from_creator?
-        br
+    li(class: "obs-who hanging-indent") do
+      if @obs.collector_unrecorded?
         render_entered_by
+      else
+        render_collector
+        if @obs.collector_differs_from_creator?
+          br
+          render_entered_by
+        end
       end
     end
   end

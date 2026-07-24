@@ -171,34 +171,57 @@ class Components::Image::Base < Components::Base
     }
   end
 
-  # Render lightbox link button
+  # Render lightbox link button. `div`, not `a` -- the caption sibling
+  # rendered inside it (see `render_lightbox_caption`) contains real
+  # interactive content (vote buttons, propose-naming modal trigger),
+  # and HTML forbids nesting interactive content inside an `<a>`.
+  # lightGallery binds its click listener directly to whatever element
+  # matches its `selector` config (still `.theater-btn`) and reads
+  # `href` off that same element for the full-size image URL --
+  # `convertToData` in the vendored lightgallery.js maps a literal
+  # `href` attribute (not just `data-href`) to `src` -- so this still
+  # works as both the click target and the image-URL source despite no
+  # longer being an anchor. See issue #4894.
   def render_lightbox_link
     lightbox_data = @data&.[](:lightbox_data)
     return unless lightbox_data
 
-    a(
+    div(
       href: lightbox_data[:url],
       class: "theater-btn",
-      data: { sub_html: lightbox_caption_html(lightbox_data) }
+      role: "button",
+      tabindex: "0",
+      data: { sub_html: ".lightbox-caption" }
     ) do
       Icon(type: :fullscreen)
+      render_lightbox_caption(lightbox_data)
     end
   end
 
-  # Build lightbox caption HTML using LightboxCaption component
-  # Returns an HTML string for use in data-sub-html attribute
-  def lightbox_caption_html(lightbox_data)
-    return unless lightbox_data
-
-    capture do
-      render(Components::Image::Lightbox::Caption.new(
-               user: @user,
-               image: lightbox_data[:image],
-               image_id: lightbox_data[:image_id],
-               obs: lightbox_data[:obs],
-               identify: lightbox_data[:identify],
-               observation_view: lightbox_data[:observation_view]
-             ))
+  # The caption itself: hidden, and nested inside the theater-btn so
+  # lightGallery's `subHtmlSelectorRelative: true` (see
+  # lightgallery_controller.js) scopes its `.lightbox-caption` lookup
+  # to *this* item specifically (`$LG(items).eq(e).find(...)`) instead
+  # of grabbing the first `.lightbox-caption` anywhere on the page. A
+  # real, stably-`id`'d DOM element -- not a captured-HTML string --
+  # means Turbo Streams can target it directly and lightGallery re-reads
+  # it fresh from the DOM on every slide open, so ordinary
+  # `turbo_stream.replace`/`update` calls just work, open or closed.
+  def render_lightbox_caption(lightbox_data)
+    # `hidden`, not just `.d-none` -- Capybara's non-JS integration
+    # tests don't honor CSS classes, only the `hidden` attribute.
+    div(class: "lightbox-caption d-none", hidden: true,
+        id: "lightbox_caption_#{lightbox_data[:image_id]}") do
+      ImageFragment(
+        type: :lightbox_caption,
+        user: @user,
+        image: lightbox_data[:image],
+        image_id: lightbox_data[:image_id],
+        obs: lightbox_data[:obs],
+        identify: lightbox_data[:identify],
+        observation_view: lightbox_data[:observation_view],
+        votes: @votes
+      )
     end
   end
 
@@ -206,11 +229,7 @@ class Components::Image::Base < Components::Base
   def render_image_vote_section
     return unless @votes && @img_instance
 
-    render(Components::Image::VoteInterface.new(
-             user: @user,
-             image: @img_instance,
-             votes: @votes
-           ))
+    ImageFragment(type: :lazy_vote_interface, image: @img_instance)
   end
 
   # Render original filename if applicable

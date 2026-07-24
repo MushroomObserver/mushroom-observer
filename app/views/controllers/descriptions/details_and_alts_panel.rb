@@ -11,7 +11,7 @@
 # `Components::Description::ModLinks` (sibling-in-spirit to
 # `Components::InlineCRUDLinks`). The "Version: N / Previous Version" line
 # is `Components::Description::PreviousVersion`. The license-badge block
-# (used by `AuthorsAndEditorsPanel`) is `Components::Image::LicenseBadge`.
+# (used by `AuthorsAndEditorsPanel`) is `Components::LicenseBadge`.
 module Views::Controllers::Descriptions
   class DetailsAndAltsPanel < Views::Base
     prop :description, ::Description
