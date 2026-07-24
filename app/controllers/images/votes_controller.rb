@@ -41,12 +41,17 @@ module Images
     # (see `VoteInterface#vote_html_id`) inside the hidden caption
     # element that's always in the DOM now (#4894), so this update
     # reaches it whether the lightbox is open or closed.
+    #
+    # `replace`, not `update` -- `VoteInterface`'s own render output
+    # IS the full `<div id="...">` wrapper, so `update` (which swaps
+    # inner content only) would nest a duplicate-id div inside the
+    # original instead of swapping it.
     def vote_interface_streams
       [
-        turbo_stream.update("image_vote_#{@image.id}",
-                            vote_interface),
-        turbo_stream.update("lightbox_image_vote_#{@image.id}",
-                            vote_interface(context: :lightbox))
+        turbo_stream.replace("image_vote_#{@image.id}",
+                             vote_interface),
+        turbo_stream.replace("lightbox_image_vote_#{@image.id}",
+                             vote_interface(context: :lightbox))
       ]
     end
 

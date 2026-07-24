@@ -70,9 +70,9 @@ module Images
                    format: :turbo_stream)
 
       assert_response(:success)
-      assert_select("turbo-stream[action='update']" \
+      assert_select("turbo-stream[action='replace']" \
                     "[target='image_vote_#{image.id}']")
-      assert_select("turbo-stream[action='update']" \
+      assert_select("turbo-stream[action='replace']" \
                     "[target='lightbox_image_vote_#{image.id}']")
     end
 

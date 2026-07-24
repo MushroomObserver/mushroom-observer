@@ -44,11 +44,23 @@ export default class extends Controller {
     );
   }
 
+  // `turbo:before-stream-render` fires BEFORE Turbo actually applies
+  // the stream's DOM change (Turbo calls `event.detail.render(...)`,
+  // itself async, after dispatching this event) -- calling
+  // `refreshCaption` synchronously here would copy the caption's
+  // stale, pre-update content. Wrap `render` so the refresh runs
+  // after the real DOM mutation completes.
   maybeRefreshOnStream(event) {
     const target = event.target.target;
-    if (target && /^(lightbox_caption_|lightbox_image_vote_)/.test(target)) {
-      this.refreshCaption();
+    if (!target || !/^(lightbox_caption_|lightbox_image_vote_)/.test(target)) {
+      return;
     }
+
+    const originalRender = event.detail.render;
+    event.detail.render = async (streamElement) => {
+      await originalRender(streamElement);
+      this.refreshCaption();
+    };
   }
 
   // `gallery.refresh()` does NOT re-copy the caption -- it only
