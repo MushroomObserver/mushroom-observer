@@ -67,7 +67,7 @@ svg.placeholder {
 // (`.image-vote`, plain text) share this -- both need to read on the
 // vote section's dark background while still corresponding to the
 // vote-meter's `$link-color` fill.
-$vote-link-lightened-color: color.adjust($link-color, $lightness: 21%);
+$vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
 
 .vote-section,
 .vote-section-lightbox {
