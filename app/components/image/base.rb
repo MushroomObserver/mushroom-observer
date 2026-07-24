@@ -189,6 +189,8 @@ class Components::Image::Base < Components::Base
     div(
       href: lightbox_data[:url],
       class: "theater-btn",
+      role: "button",
+      tabindex: "0",
       data: { sub_html: ".lightbox-caption" }
     ) do
       Icon(type: :fullscreen)

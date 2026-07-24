@@ -33,6 +33,17 @@ export default class extends Controller {
     document.addEventListener(
       'turbo:before-stream-render', this.boundMaybeRefresh
     );
+
+    // `.theater-btn` is a <div> now, not an <a> (#4894 -- it nests
+    // interactive content an <a> can't legally contain), so it lost
+    // native keyboard activation. lightGallery binds its own click
+    // listener directly to each `.theater-btn`; translate Enter/Space
+    // into a click on it rather than reimplementing gallery-opening
+    // logic. Only when `.theater-btn` itself is the event target --
+    // not when focus is on a button/link nested inside it (vote,
+    // propose-naming), which should keep its own Enter/Space behavior.
+    this.boundActivateOnKey = this.activateTheaterBtnOnKey.bind(this);
+    this.element.addEventListener('keydown', this.boundActivateOnKey);
   }
 
   disconnect() {
@@ -42,6 +53,15 @@ export default class extends Controller {
     document.removeEventListener(
       'turbo:before-stream-render', this.boundMaybeRefresh
     );
+    this.element.removeEventListener('keydown', this.boundActivateOnKey);
+  }
+
+  activateTheaterBtnOnKey(event) {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    if (!event.target.classList.contains('theater-btn')) return;
+
+    event.preventDefault();
+    event.target.click();
   }
 
   // `turbo:before-stream-render` fires BEFORE Turbo actually applies
