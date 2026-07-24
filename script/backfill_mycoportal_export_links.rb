@@ -1,14 +1,15 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# One-time backfill of ExternalLink (relationship: :export) rows for every
-# Observation and Image already present in MyCoPortal (MCP)
+# One-time backfill of ExternalLink (relationship: :export) rows for
+# Observations and Images already present in MyCoPortal (MCP)
 # (Based on a Darwin Core Archive (DwC-A) backup of the MUOB collection)
 
 # The backup must be downloaded manually first (see USAGE below) and
-# placed in DEFAULT_DWCA_DIR (tmp/mycoportal_dwca/). This script finds the
-# newest such zip there, extracts occurrences.csv / multimedia.csv, and
-# always keeps them (they are not deleted after the run).
+# placed in DEFAULT_DWCA_DIR (tmp/mycoportal_dwca/).
+#
+# This script finds the newest such zip and
+# extracts occurrences.csv / multimedia.csv.
 #
 # Observations/Images MCP has that don't exist in MO are written to
 # <dwca-dir>/mycoportal_backfill_missing.csv
@@ -17,19 +18,10 @@
 # to <dwca-dir>/mycoportal_backfill_skipped.csv (columns include the
 # existing ExternalLink's id, for traceability)
 #
-# occurrences.csv's "catalogNumber" ("MUOB <id>") is the MO Observation id;
-# its own "id" column is MCP's internal occid. multimedia.csv's "coreid"
-# joins to that occid.
-#
-# Images do not live on MCP -- they link out to other sites (MO itself, or
-# a mirror). An ExternalLink's url must target the external site itself,
-# so Image links get no url and no external_id (no per-image id exists in
-# the dump either -- see the plan doc for why).
-#
 # Re-running this script doubles as a reconciliation check:
 # in a dry run, a nonzero "would create" count means MCP has
 # observations/images MO doesn't think it exported.
-#
+
 # USAGE:
 #
 #   Before running the script, create a backup of the MUOB data and
@@ -57,12 +49,8 @@ require "fileutils"
 require "zip"
 
 class BackfillMycoportalExportLinks
-  # CLI option parsing, kept in its own nested class rather than a bare
-  # top-level `def parse_options` -- other scripts in this directory
-  # define exactly that name, and two top-level defs with the same name
-  # silently collide if both scripts are ever `require`d into one process
-  # (confirmed: this script's own test suite would collide with
-  # materialize_external_links.rb's if both defined a top-level method).
+  # CLI option parsing, in its own nested class to avoid method collisions
+  # with scripts which define top-level `parse`
   class Options
     DEFAULT_DWCA_DIR = Rails.root.join("tmp/mycoportal_dwca").to_s
 
@@ -151,9 +139,9 @@ class BackfillMycoportalExportLinks
     raise("--occurrences and --multimedia must both be given, or neither")
   end
 
-  # Find the newest manually-downloaded DwC-A zip in @dwca_dir and extract
+  # Find the newest downloaded DwC-A zip in @dwca_dir and extract
   # occurrences.csv / multimedia.csv there, populating @occurrences_csv /
-  # @multimedia_csv. They are never deleted afterward.
+  # @multimedia_csv.
   def extract_dwca_zip!
     zip_path = newest_dwca_zip
     warn("Extracting occurrences.csv, multimedia.csv from #{zip_path} ...")
@@ -177,7 +165,7 @@ class BackfillMycoportalExportLinks
     end
   end
 
-  # Matches by basename, not a fixed path, in case MCP's archive nests
+  # Match by basename, not a fixed path, in case MCP's archive nests
   # these under a subdirectory rather than at the zip root.
   def extract_entry(zip, filename)
     entry = zip.find_entry(filename) ||
@@ -214,7 +202,9 @@ class BackfillMycoportalExportLinks
   end
 
   def parse_occurrence_row(row)
+    # occurrences.csv's "catalogNumber" ("MUOB <id>") is the MO Observation id
     match = CATALOG_NUMBER_REGEXP.match(row["catalogNumber"].to_s.strip)
+    # "id" is MCP's occid. multimedia.csv's "coreid" joins to that occid.
     { occid: row["id"], mo_id: match && match[1].to_i,
       date_entered: row["dateEntered"].presence }
   end
@@ -287,6 +277,9 @@ class BackfillMycoportalExportLinks
       (@images_seen % PROGRESS_EVERY).zero?
   end
 
+  # NOTE: Images do not live on MCP. They link out to other sites (MO itself, or
+  # a mirror). An ExternalLink's url must target the ExternalSite. Therefore,
+  # Image links cannot have a url or an external_id.
   def process_image_row(row, known_ids, existing)
     return increment_stat("Image", :unparseable) unless row[:image_id]
     return record_missing_image(row) unless
