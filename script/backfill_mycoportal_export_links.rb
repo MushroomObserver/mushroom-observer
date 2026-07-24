@@ -136,7 +136,7 @@ class BackfillMycoportalExportLinks
   def validate_occurrences_and_multimedia!
     return if @occurrences_csv.nil? == @multimedia_csv.nil?
 
-    raise("--occurrences and --multimedia must both be given, or neither")
+    raise("occurrences and multimedia CSV paths must both be provided, or neither")
   end
 
   # Find the newest downloaded DwC-A zip in @dwca_dir and extract
