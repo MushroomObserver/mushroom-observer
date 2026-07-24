@@ -76,6 +76,13 @@ svg.placeholder {
       text-decoration: none;
     }
   }
+
+  // The user's own already-cast vote, shown as plain text -- lighten
+  // $link-color (the vote-meter fill) so it reads on the dark
+  // background while still corresponding to the meter's color.
+  .image-vote {
+    color: lighten($link-color, 21%);
+  }
 }
 
 .vote-section {
