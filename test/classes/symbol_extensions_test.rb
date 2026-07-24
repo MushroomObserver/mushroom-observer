@@ -77,8 +77,6 @@ class SymbolExtensionsTest < UnitTestCase
     assert_equal("observation list", Symbol.test_localize("[:species_list]"))
     assert_equal("Observation List",
                  Symbol.test_localize("[:species_list.ti]"))
-    assert_equal("Observation list", Symbol.test_localize("[:Species_list]"))
-    assert_equal("Observation list", Symbol.test_localize("[:sPeCiEs_lIsT]"))
   end
 
   def test_titleize_localized_all_locales

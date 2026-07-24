@@ -70,10 +70,15 @@ class TranslationString < AbstractModel
     result
   end
 
+  # DB-based (#4807) rather than reaching into I18n.backend's internals --
+  # Chain/KeyValue don't expose a Simple-style raw translations Hash the
+  # way the old file-based backend did, and this is always correct
+  # (never depends on the backend's cache-warming state). Mirrors
+  # Language#localization_strings' official-locale fallback merge, so a
+  # tag not yet overridden in `locale` still resolves (to English's
+  # text) exactly as the old YAML-based fallback did.
   def self.translations(locale)
-    do_init = I18n.backend.translations.empty?
-    I18n.backend.
-      translations(do_init: do_init)[locale.to_sym][MO.locale_namespace.to_sym]
+    Language.for_locale(locale)&.localization_strings&.transform_keys(&:to_sym)
   end
 
   # Check if tag exists before storing nonsense in the I18n backend

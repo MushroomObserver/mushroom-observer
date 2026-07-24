@@ -26,6 +26,14 @@
 module Language::Exporter
   extend ActiveSupport::Concern
 
+  # Bare (unquoted) values/keys matching this are parsed as YAML booleans
+  # rather than strings -- e.g. `query_target: on` round-trips back as
+  # `true`, not the string "on" (found via #4807's fixture generation,
+  # which for the first time round-trips en.txt's full real tag/value
+  # set -- e.g. the "YES"/"NO"/"yes"/"no" tags and the query_target
+  # tag's "on" value -- through this export format at test scale).
+  BOOLEAN_LIKE_STRING = /^(no|yes|on|off|true|false)$/i
+
   class_methods do
     attr_accessor :verbose, :safe_mode
     attr_reader :locales_path
@@ -143,7 +151,10 @@ module Language::Exporter
     any_changes = obsolete.any?
     if any_changes
       obsolete.each { |str| verbose("  deleting :#{str.tag}") }
-      delete_translation_strings(obsolete) unless safe_mode
+      unless safe_mode
+        delete_translation_strings(obsolete)
+        obsolete.each { |str| evict_cached_translation(str.tag) }
+      end
     end
     any_changes
   end
@@ -214,7 +225,9 @@ module Language::Exporter
   end
 
   def write_hash(hash)
-    write_export_file_lines(hash.map { |k, v| "  #{k}: #{format_string(v)}" })
+    write_export_file_lines(
+      hash.map { |k, v| "  #{format_export_key(k)}: #{format_string(v)}" }
+    )
   end
 
   ##############################################################################
@@ -229,6 +242,16 @@ module Language::Exporter
     ids = strs.map(&:id)
     TranslationString::Version.where(translation_string_id: ids).delete_all
     TranslationString.where(id: ids).delete_all
+  end
+
+  # Solid Cache has no delete_matched (#4807) -- strip already knows
+  # exactly which tag it's removing, so evict that one exact cache entry
+  # rather than leaving a stale value reachable after the DB row is gone.
+  def evict_cached_translation(tag)
+    cache_backend = I18n.backend.backends.first
+    return unless cache_backend.respond_to?(:delete_translation)
+
+    cache_backend.delete_translation(locale, tag)
   end
 
   def merge_localization_strings_into(data)
@@ -247,6 +270,12 @@ module Language::Exporter
     str = translation_strings.new(tag: tag, text: new_val)
     str.current_user = user
     str.save
+    # DB write alone isn't enough (#4807): unlike the old file-based
+    # backend, Solid Cache persists across deploys/restarts, so a stale
+    # cached value for this tag would otherwise survive indefinitely --
+    # a normal restart used to be what made an `en.txt`-driven `lang:
+    # update` visible, but that's no longer a cache-invalidation event.
+    str.store_localization
   end
 
   def update_string(str, new_val, _old_val, user)
@@ -259,6 +288,7 @@ module Language::Exporter
     str.update(
       text: new_val
     )
+    str.store_localization
   end
 
   # ----------------------------
@@ -301,13 +331,24 @@ module Language::Exporter
     if /\\n|\n/.match?(val)
       val = format_multiline_string(escape_string(val))
     elsif /:(\s|$)| #/.match?(val) ||
-          /^(no|yes)$/i.match?(val) ||
+          BOOLEAN_LIKE_STRING.match?(val) ||
           (/^\W/.match?(val) && val[0].is_ascii_character?)
       val = escape_string(val)
     elsif val == ""
       val = '""'
     end
     "#{val}\n"
+  end
+
+  # write_hash (test-only helper, simulating a hand-edited export file)
+  # writes tag keys bare -- unlike #format_string above, which already
+  # guards values. A tag literally named "yes"/"no"/etc needs the same
+  # quoting a real hand-maintained en.txt already gives it (see
+  # config/locales/en.txt's `"YES": "Yes"` etc), or it collides with
+  # every other boolean-like key once parsed back as YAML.
+  def format_export_key(key)
+    key = key.to_s
+    BOOLEAN_LIKE_STRING.match?(key) ? escape_string(key) : key
   end
 
   def format_multiline_string(val)

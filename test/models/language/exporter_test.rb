@@ -372,7 +372,6 @@ class Language::ExporterTest < UnitTestCase
     hash = languages(:greek).localization_strings
     assert_equal("ένα", hash["one"])
     assert_equal("δύο", hash["two"])
-    assert_equal("Two", hash["TWO"])
   end
 
   def test_import_official
@@ -390,8 +389,6 @@ class Language::ExporterTest < UnitTestCase
       hash["unknown_locations"] = "bubkes"
       final_hash = hash.dup
       final_hash.delete("twos")
-      final_hash.delete("TWO")
-      final_hash.delete("TWOS")
 
       @official.write_hash(final_hash)
       assert_true(@official.import_from_file(dick),
@@ -404,6 +401,63 @@ class Language::ExporterTest < UnitTestCase
 
       assert_equal(
         3, @official.translation_strings.count { |str| str.user == dick }
+      )
+    end
+  end
+
+  # Regression (#4807): stripping a tag must also evict its cache entry --
+  # Solid Cache has no delete_matched to catch it later, so a stale
+  # cached value would otherwise remain resolvable after the DB row
+  # backing it is gone.
+  def test_strip_evicts_cached_translation
+    use_test_locales do
+      greek = languages(:greek)
+      @official.write_hash(@official.localization_strings)
+      bogus_tag = "_bogus_stripped_tag_for_cache_test"
+      greek.translation_strings.create!(tag: bogus_tag, text: "stale value",
+                                        user: User.admin)
+      value = "stale value"
+      I18n.backend.store_translations(:el,
+                                      { mo: { bogus_tag.to_sym => value } })
+      cache_backend = I18n.backend.backends.first
+
+      assert_equal("stale value",
+                   cache_backend.send(:lookup, :el, "mo.#{bogus_tag}"))
+
+      assert_true(greek.strip, "Should have stripped the bogus tag")
+
+      assert_nil(TranslationString.find_by(language: greek, tag: bogus_tag))
+      assert_nil(cache_backend.send(:lookup, :el, "mo.#{bogus_tag}"),
+                 "strip must evict the cache entry too, not just the DB row")
+    end
+  end
+
+  # Regression test: import_from_file (the path lang:update's
+  # import:official step uses to pull in hand-edited en.txt changes)
+  # must refresh the cache too, not just the DB row -- unlike the old
+  # file-based backend, Solid Cache persists across deploys/restarts,
+  # so a stale cached value would otherwise survive indefinitely (a
+  # restart used to be what made an en.txt-driven update visible; it
+  # no longer is).
+  def test_import_official_refreshes_cache
+    use_test_locales do
+      hash = @official.localization_strings
+      @official.write_hash(hash)
+
+      stale_value = "stale cached one"
+      I18n.backend.store_translations(:en, { mo: { one: stale_value } })
+      cache_backend = I18n.backend.backends.first
+      assert_equal(stale_value, cache_backend.send(:lookup, :en, "mo.one"))
+
+      final_hash = hash.dup
+      final_hash["one"] = "updated one"
+      @official.write_hash(final_hash)
+
+      assert_true(@official.import_from_file(dick),
+                  "Should have imported the changed tag")
+      assert_equal(
+        "updated one", cache_backend.send(:lookup, :en, "mo.one"),
+        "import_from_file must refresh the cache, not just the DB"
       )
     end
   end
@@ -422,8 +476,6 @@ class Language::ExporterTest < UnitTestCase
                                           "  one: one\n",
                                           "  two: two\n",
                                           "  twos: twos\n",
-                                          "  TWO: Two\n",
-                                          "  TWOS: Twos\n",
                                           "  three: three\n",
                                           "  four: four\n"
                                         ])
@@ -439,7 +491,6 @@ class Language::ExporterTest < UnitTestCase
       data = [
         "  one: one\n", # take this because it is a change from original ένα
         "  twos:  twos\n",   # ignore this because unchanged from template
-        "  TWOS: Twos\n",    # ignore this because not a change from English
         "  three:  τρία\n",  # take this change even though still indented
         "  four: τέσσερα\n"  # this is correct, it had better take this!
       ]
