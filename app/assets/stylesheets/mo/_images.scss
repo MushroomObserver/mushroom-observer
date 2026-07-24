@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .thumbnail-container {
   background-color: rgba(0,0,0, 0.33);
   // background-color: rgba(0,0,0, 0.12); // for matrix_box_carousels
@@ -61,6 +63,12 @@ svg.placeholder {
   }
 }
 
+// Vote-link hover/focus color and the user's own already-cast vote
+// (`.image-vote`, plain text) share this -- both need to read on the
+// vote section's dark background while still corresponding to the
+// vote-meter's `$link-color` fill.
+$vote-link-lightened-color: color.adjust($link-color, $lightness: 21%);
+
 .vote-section,
 .vote-section-lightbox {
   padding: 0.5em 0.25em;
@@ -72,16 +80,13 @@ svg.placeholder {
 
     &:hover,
     &:focus {
-      color: lighten($link-color, 21%) !important;
+      color: $vote-link-lightened-color !important;
       text-decoration: none;
     }
   }
 
-  // The user's own already-cast vote, shown as plain text -- lighten
-  // $link-color (the vote-meter fill) so it reads on the dark
-  // background while still corresponding to the meter's color.
   .image-vote {
-    color: lighten($link-color, 21%);
+    color: $vote-link-lightened-color;
   }
 }
 
