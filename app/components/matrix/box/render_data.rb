@@ -100,6 +100,13 @@ class Components::Matrix::Box
       else
         latest_message_tag(log)
       end
+    # log can be [] when notes is blank (e.g. an unsaved/edge-case
+    # RssLog), which makes the indexing above (log.last[2], log[1],
+    # etc.) raise -- RssLog#detail used to rescue exactly this same
+    # logic; restore the same dev-safe/production-raise protection
+    # now that it's here instead.
+    rescue StandardError => e
+      Rails.env.production? ? raise(e) : nil
     end
 
     def target_recently_created?(rss_log, log)
