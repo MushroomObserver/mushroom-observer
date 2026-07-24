@@ -9,7 +9,7 @@ require("application_system_test_case")
 # bottom-pinned, opacity 0) leaked into `.lg-sub-html`, leaving an
 # invisible strip covering the links row and swallowing every click.
 # The caption's own vote UI (restored properly in #4886/#4892) uses a
-# distinct `.vote-section-inline` class -- plain, always-visible, no
+# distinct `.vote-section-lightbox` class -- dark background, no
 # absolute positioning -- specifically so this can't recur; clicking
 # each link here fails with Cuprite's "another element would receive
 # the click" error if the unsafe `.vote-section` flavor ever comes
@@ -30,7 +30,7 @@ class LightboxImageLinksSystemTest < ApplicationSystemTestCase
     first(".theater-btn", visible: :all).trigger("click")
     assert_selector(".lg-sub-html")
 
-    # The caption's own vote UI is `.vote-section-inline`, not the
+    # The caption's own vote UI is `.vote-section-lightbox`, not the
     # unsafe hover-overlay `.vote-section` — see class comment.
     within(".lg-sub-html") do
       assert_no_selector(".vote-section", visible: :all)

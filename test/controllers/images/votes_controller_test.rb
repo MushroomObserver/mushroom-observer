@@ -99,7 +99,7 @@ module Images
 
       assert_response(:success)
       assert_select("turbo-frame#lightbox_image_vote_#{image.id}")
-      assert_select("turbo-frame .vote-section-inline" \
+      assert_select("turbo-frame .vote-section-lightbox" \
                     "#lightbox_image_vote_#{image.id}")
     end
 

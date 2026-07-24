@@ -201,10 +201,11 @@ class ImageFragmentLightboxCaptionTest < ComponentTestCase
 
   # #4886: the lightbox gets its own copy of the vote UI, rendered
   # with `context: :lightbox` (see
-  # Components::ImageFragment::VoteInterface) -- plain always-visible
-  # styling, not the `.vote-section` absolute hover-overlay treatment
-  # matrix-box/InteractiveImage thumbnails use (there's no
-  # `.image-sizer` ancestor here to reveal it on hover), and every id
+  # Components::ImageFragment::VoteInterface) -- same dark
+  # background/link treatment as `.vote-section` (the hover-overlay
+  # class matrix-box/InteractiveImage thumbnails use), minus the
+  # absolute positioning -- always visible, since there's no
+  # `.image-sizer` ancestor here to reveal it on hover -- and every id
   # prefixed so this copy can't collide with the in-page vote section
   # once the lightbox is open and both are live in the DOM at once.
   # #4895: the vote section is a lazy-loading Turbo Frame now, not
@@ -218,7 +219,7 @@ class ImageFragmentLightboxCaptionTest < ComponentTestCase
 
     assert_html(html, "turbo-frame#lightbox_image_vote_#{@image.id}" \
                       "[loading='lazy']")
-    assert_no_html(html, ".vote-section-inline")
+    assert_no_html(html, ".vote-section-lightbox")
   end
 
   # Anonymous viewers still get the frame shell (matches the in-page

@@ -23,7 +23,7 @@ module Views::Controllers::Images::Votes
 
       assert_html(html, "turbo-frame#lightbox_image_vote_#{@image.id}")
       assert_html(html,
-                  "turbo-frame .vote-section-inline" \
+                  "turbo-frame .vote-section-lightbox" \
                   "#lightbox_image_vote_#{@image.id}")
     end
 

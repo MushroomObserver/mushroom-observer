@@ -25,14 +25,15 @@ class Components::ImageFragment::VoteInterface < Components::Base
   # Where this is being rendered -- two independent concerns hang off
   # it, deliberately not conflated:
   #
-  # Styling: only `:overlay` (the default) gets the absolutely
-  # positioned, hover-revealed treatment (`.vote-section`, see
-  # mo/_images.scss) meant for sitting on top of a thumbnail inside an
-  # `.image-sizer` ancestor (InteractiveImage/matrix-box). Every other
-  # context gets the plain, always-visible `.vote-section-inline`
-  # block -- e.g. `:lightbox`, or a future non-lightbox inline caller
-  # (the image show page has been mentioned) that still isn't an
-  # overlay.
+  # Styling: `:overlay` (the default) gets the absolutely positioned,
+  # hover-revealed treatment (`.vote-section`, see mo/_images.scss)
+  # meant for sitting on top of a thumbnail inside an `.image-sizer`
+  # ancestor (InteractiveImage/matrix-box). `:lightbox` gets the same
+  # dark background/link colors via `.vote-section-lightbox`, minus
+  # the absolute positioning -- always visible, not hover-revealed.
+  # Any other context falls back to `.vote-section-inline`, which has
+  # no styling yet -- a future non-lightbox inline caller (the image
+  # show page has been mentioned) that isn't designed yet.
   #
   # Element ids: only `:lightbox` gets every id this component emits
   # (`vote_html_id`) prefixed. That's not a styling concern -- it's
@@ -71,7 +72,11 @@ class Components::ImageFragment::VoteInterface < Components::Base
 
   def section_classes
     class_names(
-      @context == :overlay ? "vote-section" : "vote-section-inline",
+      case @context
+      when :overlay then "vote-section"
+      when :lightbox then "vote-section-lightbox"
+      else "vote-section-inline"
+      end,
       "require-user"
     )
   end

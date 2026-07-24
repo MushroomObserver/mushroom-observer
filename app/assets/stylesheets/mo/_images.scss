@@ -61,47 +61,41 @@ svg.placeholder {
   }
 }
 
+.vote-section,
+.vote-section-lightbox {
+  padding: 0.5em 0.25em;
+
+  a,
+  button[type=submit]:not(.btn) {
+    color: white !important;
+    transition: color 0.3s ease;
+
+    &:hover,
+    &:focus {
+      color: lighten($link-color, 21%) !important;
+      text-decoration: none;
+    }
+  }
+}
+
 .vote-section {
   @extend .ab-bottom, .text-center;
-  padding: 0.5em 0.25em;
-
-  a,
-  button[type=submit]:not(.btn) {
-    color: white !important;
-    transition: color 0.3s ease;
-
-    &:hover,
-    &:focus {
-      color: lighten($link-color, 21%) !important;
-      text-decoration: none;
-    }
-  }
 }
 
-// Non-overlay `Components::ImageFragment::VoteInterface` contexts
-// (`context:` other than `:overlay`, e.g. the lightbox caption) --
-// no absolute positioning, no hover-to-reveal. `.lg-sub-html`'s own
-// background is dark (see lightgallery theme), and `<button>` text
-// doesn't reliably inherit ambient `color` from ancestors in every
-// browser (Safari in particular), so the vote links need the same
-// explicit white-on-dark treatment `.vote-section` gives its own
-// links/buttons, not just ambient inheritance.
-.vote-section-inline {
+// `context: :lightbox` (`Components::ImageFragment::VoteInterface`) --
+// same dark background/link treatment as `.vote-section`, minus the
+// absolute positioning: it's laid out inline in the caption, not
+// overlaying a thumbnail, and always visible rather than
+// hover-revealed.
+.vote-section-lightbox {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
   text-align: center;
-  padding: 0.5em 0.25em;
-
-  a,
-  button[type=submit]:not(.btn) {
-    color: white !important;
-    transition: color 0.3s ease;
-
-    &:hover,
-    &:focus {
-      color: lighten($link-color, 21%) !important;
-      text-decoration: none;
-    }
-  }
 }
+
+// `.vote-section-inline` (a not-yet-designed third `VoteInterface`
+// context -- a plain inline caller that isn't the lightbox, e.g. the
+// image show page) intentionally has no styling here yet.
 
 .matrix-box {
   .vote-buttons {
