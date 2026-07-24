@@ -38,6 +38,20 @@ class InatObsExtractTest < UnitTestCase
     assert_not_includes(photo["url"], "square")
   end
 
+  # Unidentified iNat observations have no :taxon. The importer never sees
+  # these, but the extract builder walks every linked obs, so from_raw must
+  # not raise on a nil/absent taxon.
+  def test_from_raw_handles_missing_taxon
+    raw = raw_obs("somion_unicolor").merge(taxon: nil)
+
+    extract = InatObsExtract.from_raw(raw, fetched_at: Time.current)
+
+    assert_nil(extract.taxon_name)
+    assert_nil(extract.taxon_rank)
+    # Other fields still populate.
+    assert_equal(Date.new(2023, 3, 23), extract.observed_on)
+  end
+
   def test_upsert_is_idempotent_and_updates
     raw = raw_obs("somion_unicolor")
     first = InatObsExtract.upsert_from_raw(raw, fetched_at: Time.current)

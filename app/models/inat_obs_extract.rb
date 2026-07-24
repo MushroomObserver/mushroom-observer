@@ -48,8 +48,12 @@ class InatObsExtract < ApplicationRecord
       lng: obs.lng,
       public_accuracy: raw[:public_positional_accuracy],
       obscured: raw[:obscured] || false,
-      taxon_name: obs.inat_taxon_name,
-      taxon_rank: obs.inat_taxon_rank,
+      # Read the taxon straight from raw (equivalent to Inat::Obs's
+      # #inat_taxon_name/#inat_taxon_rank) so an unidentified iNat obs — one
+      # with no :taxon, which the importer never sees but the extract builder
+      # must handle — yields nil instead of raising a delegation error.
+      taxon_name: raw.dig(:taxon, :name),
+      taxon_rank: raw.dig(:taxon, :rank),
       place_guess: obs.where,
       description: raw[:description],
       photos: photos_from(raw),

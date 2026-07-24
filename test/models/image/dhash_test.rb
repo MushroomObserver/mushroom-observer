@@ -45,6 +45,28 @@ class Image::DhashTest < UnitTestCase
     assert_equal(64, Image::Dhash.distance(0, (2**64) - 1))
   end
 
+  def test_min_distance
+    assert_equal(0, Image::Dhash.min_distance(0b1010, [0b0000, 0b1010]))
+    assert_equal(1, Image::Dhash.min_distance(0b1010, [0b1110, 0b0000]))
+    # A bare hash is treated as a one-element candidate set.
+    assert_equal(2, Image::Dhash.min_distance(0b1010, 0b0110))
+  end
+
+  def test_rotation_invariant_matching
+    # A 90-degree-rotated copy does not match the original directly...
+    original = Image::Dhash.from_file(FIXTURE)
+    rotated = Image::Dhash.from_file(FIXTURE, rotate: 90)
+
+    assert_operator(Image::Dhash.distance(original, rotated), :>, 5)
+
+    # ...but matches the original's four-rotation set (rotating back).
+    set = Image::Dhash::ROTATIONS.map do |deg|
+      Image::Dhash.from_file(FIXTURE, rotate: deg)
+    end
+
+    assert_equal(0, Image::Dhash.min_distance(rotated, set))
+  end
+
   def test_from_file_error
     assert_raises(Image::Dhash::Error) do
       Image::Dhash.from_file("no_such_file.jpg")

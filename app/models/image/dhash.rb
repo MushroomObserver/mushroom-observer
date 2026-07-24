@@ -18,6 +18,12 @@ class Image
     HEIGHT = 8
     USER_AGENT = "MushroomObserver (+https://mushroomobserver.org)"
 
+    # dHash is not rotation-invariant: a 90/180/270 rotation (common between
+    # an MO copy and its iNat copy) yields a completely different hash. To
+    # match rotated copies, hash a photo at all four rotations and compare
+    # against the whole set.
+    ROTATIONS = [0, 90, 180, 270].freeze
+
     # Raised when ImageMagick fails or produces unexpected output.
     # (Multi-line, not `class Error < ...; end` on one line, so the
     # localization_files_test class/end nesting scanner stays balanced.)
@@ -25,16 +31,20 @@ class Image
     end
 
     class << self
-      def from_file(path)
-        bits_from(grayscale_pixels(path))
+      def from_file(path, rotate: 0)
+        bits_from(grayscale_pixels(path, rotate: rotate))
       end
 
       # Fetch a remote rendition to a tempfile and hash it.
       def from_url(url)
-        Tempfile.create(["dhash", ".img"], binmode: true) do |file|
-          file.write(RestClient.get(url, user_agent: USER_AGENT).body)
-          file.flush
-          from_file(file.path)
+        with_downloaded(url) { |path| from_file(path) }
+      end
+
+      # The image's dHash at each of the four rotations (downloaded once),
+      # for rotation-invariant matching.
+      def rotations_from_url(url)
+        with_downloaded(url) do |path|
+          ROTATIONS.map { |deg| from_file(path, rotate: deg) }
         end
       end
 
@@ -43,7 +53,21 @@ class Image
         (hash_a ^ hash_b).to_s(2).count("1")
       end
 
+      # Smallest Hamming distance between a hash and any of a set of
+      # candidate hashes (e.g. the rotations of another image).
+      def min_distance(hash, candidates)
+        Array(candidates).map { |c| distance(hash, c) }.min
+      end
+
       private
+
+      def with_downloaded(url)
+        Tempfile.create(["dhash", ".img"], binmode: true) do |file|
+          file.write(RestClient.get(url, user_agent: USER_AGENT).body)
+          file.flush
+          yield(file.path)
+        end
+      end
 
       # Each bit records whether a pixel is brighter than its right-hand
       # neighbor, row by row: 8 rows x 8 comparisons = 64 bits.
@@ -70,11 +94,12 @@ class Image
       # (Image#full_filepath, or a Tempfile) so it can't begin with "-"
       # and be mistaken for an option. (Brakeman command-injection warning
       # ignored on this basis in config/brakeman.ignore.)
-      def grayscale_pixels(path)
-        out, err, status = Open3.capture3(
-          "convert", "#{path}[0]", "-auto-orient", "-colorspace", "Gray",
-          "-resize", "#{WIDTH}x#{HEIGHT}!", "-depth", "8", "gray:-"
-        )
+      def grayscale_pixels(path, rotate: 0)
+        args = ["convert", "#{path}[0]", "-auto-orient"]
+        args += ["-rotate", rotate.to_s] unless rotate.zero?
+        args += ["-colorspace", "Gray", "-resize", "#{WIDTH}x#{HEIGHT}!",
+                 "-depth", "8", "gray:-"]
+        out, err, status = Open3.capture3(*args)
         unless status.success? && out.bytesize == WIDTH * HEIGHT
           raise(Error.new("ImageMagick failed for #{path} " \
                           "(status #{status.exitstatus}): #{err.strip}"))
