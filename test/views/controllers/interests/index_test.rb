@@ -42,6 +42,30 @@ module Views::Controllers::Interests
       assert_no_html(html, "a[href*='type=']")
     end
 
+    # Was Interest#summary -- moved here (#4901) since its only
+    # caller was this render.
+    def test_summary_column_for_non_name_tracker_target
+      interest = interests(:detailed_unknown_obs_interest)
+      html = render_index(types: ["Observation"], selected_type: nil,
+                          interests: [interest])
+
+      expected = "#{:watching.ti} #{:observation.l}: " \
+                 "#{interest.target_format_name}"
+      assert_html(html, "table strong", text: expected.t.as_displayed)
+    end
+
+    # NameTracker#summary itself is unchanged (stays on the model --
+    # it has a second, non-render caller), just confirming the render
+    # still dispatches to it correctly.
+    def test_summary_column_for_name_tracker_target
+      interest = interests(:coprinus_comatus_name_tracker_interest)
+      html = render_index(types: ["NameTracker"], selected_type: nil,
+                          interests: [interest])
+
+      assert_html(html, "table strong",
+                  text: interest.target.summary.t.as_displayed)
+    end
+
     private
 
     def render_index(types:, selected_type:, interests: [])

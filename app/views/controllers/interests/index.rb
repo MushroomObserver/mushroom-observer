@@ -59,10 +59,23 @@ module Views::Controllers::Interests
       Table(rows, class: "table-striped",
                   show_headers: false) do |t|
         t.column("summary") do |item|
-          capture { strong { trusted_html(item.summary.t) } }
+          capture { strong { trusted_html(item_summary(item).t) } }
         end
         t.column("actions") { |item| actions_cell(item) }
       end
+    end
+
+    # Was Interest#summary -- moved here (#4901) since its only
+    # caller was this render. NameTracker#summary (the target.summary
+    # branch) stays on the model unchanged: it has a second, non-render
+    # caller (InterestsController#find_relevant_interests sorts by
+    # target.text_name, an alias of summary, for NameTracker targets).
+    def item_summary(item)
+      return item.target.summary if item.target_type == "NameTracker"
+
+      "#{item.state ? :watching.ti : :ignoring.ti} " \
+      "#{item.target_type.underscore.to_sym.l}: " \
+      "#{item.target ? item.target_format_name : "--"}"
     end
 
     def actions_cell(item)
