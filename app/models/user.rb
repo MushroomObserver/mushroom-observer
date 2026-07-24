@@ -359,6 +359,7 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     @projects_member = nil
     @all_editable_species_lists = nil
     @interests = nil
+    @user_group_names = nil
     super
   end
 
@@ -544,12 +545,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   #   user.in_group?('reviewers')
   #
+  # Memoized per-instance (#4896) -- checking more than one group on
+  # the same User used to re-query once per group.
   def in_group?(group)
-    if group.is_a?(UserGroup)
-      user_groups.include?(group)
-    else
-      user_groups.any? { |g| g.name == group.to_s }
-    end
+    name = group.is_a?(UserGroup) ? group.name : group.to_s
+    user_group_names.include?(name)
   end
 
   # Return an Array of Project's that this User is an admin for.
@@ -1045,6 +1045,10 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   ##############################################################################
 
   private
+
+  def user_group_names
+    @user_group_names ||= user_groups.map(&:name)
+  end
 
   validate :user_requirements
   validate :check_password, on: :create

@@ -134,6 +134,32 @@ class UserTest < UnitTestCase
     assert_user_arrays_equal([], group2.users, :sort)
   end
 
+  def test_in_group_by_name
+    assert(rolf.in_group?("reviewers"))
+    assert(rolf.in_group?(:reviewers))
+    assert_not(rolf.in_group?("no_such_group"))
+  end
+
+  def test_in_group_by_user_group_object
+    assert(rolf.in_group?(user_groups(:reviewers)))
+    assert_not(rolf.in_group?(user_groups(:mary_only)))
+  end
+
+  # #4896: `in_group?` memoizes user_groups per-instance -- a group
+  # change made after the first call shouldn't affect a second call
+  # on the same (now-stale) User instance.
+  def test_in_group_memoizes_per_instance
+    user = users(:mary)
+    assert_not(user.in_group?("reviewers"))
+
+    UserGroup.reviewers.users << user
+    assert_not(user.in_group?("reviewers"),
+               "in_group? should reuse the cached result, not re-query")
+
+    assert(user.reload.in_group?("reviewers"),
+           "a fresh reload should see the new membership")
+  end
+
   # Bug seen in the wild: myxomop created a username which was just under 80
   # characters long, but which had a few accents, so it was > 80 *bytes* long,
   # and it truncated right in the middle of a utf-8 sequence.  Broke the front
