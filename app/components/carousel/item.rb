@@ -21,8 +21,8 @@
 #
 # Image **copyright** and **notes** belong on the LIGHTBOX caption
 # (the `data-sub-html` attribute of the lightbox link, built by
-# `Components::Image::Lightbox::Caption`). They are NOT emitted in
-# the visible carousel-caption overlay.
+# `Components::ImageFragment::LightboxCaption`). They are NOT emitted
+# in the visible carousel-caption overlay.
 #
 # Image **original filename** IS visible in the carousel-caption
 # (inside the `.image-info.d-none.d-sm-block` wrapper, hidden on xs
@@ -43,6 +43,16 @@ class Components::Carousel::Item < Components::Image::Base
   def initialize(**props)
     props[:fit] ||= :contain
     props[:extra_classes] ||= "carousel-image"
+    # `object:` is this class's own prop (any `AbstractModel` --
+    # `ImageGallery` renders carousels for names/locations/users too,
+    # not just observations). `Image::Base#obs` is a narrower,
+    # separate prop the lightbox caption actually reads to decide
+    # between the full observation-detail caption and the image-only
+    # one -- thread `object:` into it when it IS an Observation, or
+    # the caption silently falls back to image-only on every
+    # carousel-driven lightbox (observation show page, matrix-box
+    # mini-carousel) regardless of caller intent.
+    props[:obs] = props[:object] if props[:object].is_a?(::Observation)
     super
   end
 

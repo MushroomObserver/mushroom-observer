@@ -54,16 +54,14 @@ module Views::Controllers::Images
           dates: "#{from} → #{Time.zone.now.web_date}",
           license_link: license_link_html(@image.license),
           holder: capture do
-            render(::Components::Image::Copyright.new(
-                     user: current_user, image: @image
-                   ))
+            ImageFragment(type: :copyright, user: current_user, image: @image)
           end
         }
       end
 
       def license_link_html(license)
         capture do
-          link_to(license.display_name.t, license.url)
+          Link(type: :get, name: license.display_name.t, target: license.url)
         end
       end
     end

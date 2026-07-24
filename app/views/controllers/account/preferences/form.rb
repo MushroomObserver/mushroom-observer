@@ -211,8 +211,8 @@ class Views::Controllers::Account::Preferences::Form <
   end
 
   def render_theme_about_link
-    link_to(:prefs_themes_about.t, theme_color_themes_path,
-            class: "ml-4")
+    Link(type: :get, name: :prefs_themes_about.t,
+         target: theme_color_themes_path, class: "ml-4")
   end
 
   def locale_values

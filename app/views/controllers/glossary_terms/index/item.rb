@@ -19,8 +19,8 @@ module Views::Controllers::GlossaryTerms
 
       def render_left
         h4 do
-          link_to(@glossary_term.name,
-                  glossary_term_path(@glossary_term.id))
+          Link(type: :get, name: @glossary_term.name,
+               target: glossary_term_path(@glossary_term.id))
           plain(":")
         end
         trusted_html(@glossary_term.description.tpl)

@@ -3,21 +3,15 @@
 # Component for rendering a link to view the original image.
 #
 # @example Basic usage with an image instance
-#   render Components::Image::OriginalLink.new(
-#     image: @image
-#   )
+#   ImageFragment(type: :original_link, image: @image)
 #
 # @example With an image ID
-#   render Components::Image::OriginalLink.new(
-#     image_id: @image.id
-#   )
+#   ImageFragment(type: :original_link, image_id: @image.id)
 #
 # @example With custom CSS class
-#   render Components::Image::OriginalLink.new(
-#     image: @image,
-#     link_class: "custom-link-class"
-#   )
-class Components::Image::OriginalLink < Components::Base
+#   ImageFragment(type: :original_link, image: @image,
+#                 link_class: "custom-link-class")
+class Components::ImageFragment::OriginalLink < Components::Base
   prop :image, _Nilable(::Image), default: nil
   prop :image_id, _Nilable(Integer), default: nil
   prop :link_class, String, default: ""

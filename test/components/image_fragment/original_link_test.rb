@@ -2,14 +2,14 @@
 
 require("test_helper")
 
-class ImageOriginalLinkTest < ComponentTestCase
+class ImageFragmentOriginalLinkTest < ComponentTestCase
   def setup
     super
     @image = images(:in_situ_image)
   end
 
   def test_renders_link_to_original_with_image_instance
-    html = render(Components::Image::OriginalLink.new(image: @image))
+    html = render(Components::ImageFragment::OriginalLink.new(image: @image))
 
     assert_html(html, "a[href='/images/#{@image.id}/original']",
                 text: :image_show_original.l)
@@ -33,14 +33,19 @@ class ImageOriginalLinkTest < ComponentTestCase
   end
 
   def test_renders_link_with_image_id
-    html = render(Components::Image::OriginalLink.new(image_id: @image.id))
+    html = render(
+      Components::ImageFragment::OriginalLink.new(image_id: @image.id)
+    )
 
     assert_html(html, "a[href='/images/#{@image.id}/original']")
   end
 
   def test_applies_custom_link_class
-    html = render(Components::Image::OriginalLink.new(image: @image,
-                                                      link_class: "my-custom"))
+    html = render(
+      Components::ImageFragment::OriginalLink.new(
+        image: @image, link_class: "my-custom"
+      )
+    )
 
     assert_html(html, "a.my-custom")
   end

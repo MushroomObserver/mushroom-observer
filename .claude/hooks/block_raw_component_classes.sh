@@ -215,14 +215,16 @@ check \
   'modal-(body|footer|header|title|sm|lg|xl|open)'
 
 # alert — any "alert" or "alert-*" class signals a raw Bootstrap alert.
-# alert-link is the one modifier that looks like an exception but isn't —
-# use Components::Alert::Link instead (it delegates to Link::Get with the
-# class mixed in). alert-dismissible is part of the component itself.
+# alert-dismissible and alert-link are excluded: alert-dismissible is
+# part of the component itself, and alert-link is a plain CSS modifier
+# class (not a structural component the way modal/panel/table are) —
+# it doesn't warrant blocking a commit the way hand-rolling a whole
+# alert/modal/panel structure does.
 check \
   'raw alert class' \
-  'Components::Alert.new(level: :info/:warning/:danger/:success); alert-link → Components::Alert::Link.new(text, path)' \
+  'Components::Alert.new(level: :info/:warning/:danger/:success)' \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\balert\b' \
-  'alert-dismissible'
+  'alert-dismissible|alert-link'
 
 # link-icon (glyphicon hand-rolled without Icon component)
 check \

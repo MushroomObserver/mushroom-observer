@@ -32,9 +32,9 @@ module Views::Controllers::Images
 
       def render_controls
         render_transform_controls if permission?(@image)
-        render(::Components::Image::OriginalLink.new(image: @image))
+        ImageFragment(type: :original_link, image: @image)
         plain(" | ")
-        render(::Components::Image::EXIFLink.new(image_id: @image.id))
+        ImageFragment(type: :exif_link, image_id: @image.id)
       end
 
       def render_transform_controls
@@ -71,9 +71,8 @@ module Views::Controllers::Images
       end
 
       def render_vote_interface
-        render(::Components::Image::VoteInterface.new(
-                 user: current_user, image: @image, votes: true
-               ))
+        ImageFragment(type: :vote_interface,
+                      user: current_user, image: @image, votes: true)
       end
 
       def show_original_name?

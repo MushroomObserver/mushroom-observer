@@ -66,5 +66,18 @@ module Images
       assert_response(:internal_server_error)
       assert_not_empty(response.body)
     end
+
+    # turbo_stream format of the same failure wraps the captured
+    # exiftool output in the modal's error branch (a `<pre>`).
+    def test_exif_show_turbo_stream_unreadable
+      image = images(:in_situ_image)
+      FileUtils.rm_f(image.full_filepath("orig"))
+
+      login
+      get(:show, params: { id: image.id }, format: :turbo_stream)
+
+      assert_response(:internal_server_error)
+      assert_select("#modal_image_exif_#{image.id} pre")
+    end
   end
 end

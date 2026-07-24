@@ -49,8 +49,9 @@ module Views::Controllers::Sequences
       p do
         strong { "#{:observation.ti}:" }
         whitespace
-        link_to(obs.show_link_args) do
-          trusted_html(obs.name.display_name(current_user).t)
+        obs_name = obs.name.display_name(current_user).t
+        Link(type: :get, name: obs_name, target: obs.show_link_args) do
+          trusted_html(obs_name)
         end
         plain(" (#{obs.id})")
       end

@@ -5,8 +5,8 @@
 # and `GlossaryTerms::ImagesController`.
 #
 # Two parts:
-# - `Components::Image::ReuseForm` — the small form that takes an Image
-#   id and POSTs to `<target_domain>/images#attach`.
+# - `Components::ImageFragment::ReuseForm` — the small form that takes
+#   an Image id and POSTs to `<target_domain>/images#attach`.
 # - A `paginated_results`-wrapped `Components::Matrix::Table` of
 #   clickable thumbnails (each wrapping `Components::InteractiveImage`
 #   in a POST link to `attach` so a click attaches that image
@@ -26,9 +26,8 @@ module Views::Controllers::Shared
     prop :all_users, _Boolean, default: false
 
     def view_template
-      render(::Components::Image::ReuseForm.new(
-               target: @target, all_users: @all_users
-             ))
+      ImageFragment(type: :reuse_form, target: @target,
+                    all_users: @all_users)
       render_image_matrix
     end
 
@@ -68,7 +67,7 @@ module Views::Controllers::Shared
     end
 
     def target_controller
-      ::Components::Image::ReuseForm::CONTROLLERS.fetch(@target.class)
+      ::Components::ImageFragment::ReuseForm::CONTROLLERS.fetch(@target.class)
     end
   end
 end

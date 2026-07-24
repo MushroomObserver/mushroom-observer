@@ -33,8 +33,9 @@ module Views::Controllers::Observations
       # uses `.small_author` for the author bit, but on this line
       # the legacy behavior (matched on production) keeps everything
       # at the normal size.
-      link_to(name_path(id: owner_name.id),
-              class: "obs_owner_naming_link_#{owner_name.id}") do
+      Link(type: :get, name: owner_name.text_name,
+           target: name_path(id: owner_name.id),
+           class: "obs_owner_naming_link_#{owner_name.id}") do
         trusted_html(owner_name.display_name_brief_authors(@user).t)
       end
       whitespace

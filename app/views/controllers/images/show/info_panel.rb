@@ -53,21 +53,24 @@ module Views::Controllers::Images
       def observation_row(obs)
         div do
           plain("#{:observation.ti}: ")
-          link_to(viewer_aware_unique_format_name(obs).t, obs.show_link_args)
+          Link(type: :get, name: viewer_aware_unique_format_name(obs).t,
+               target: obs.show_link_args)
         end
       end
 
       def profile_user_row(user)
         div do
           plain("#{:user.ti}: ")
-          link_to(user.format_name.t, user.show_link_args)
+          Link(type: :get, name: user.format_name.t,
+               target: user.show_link_args)
         end
       end
 
       def glossary_term_row(term)
         div do
           plain("#{:glossary_term.ti}: ")
-          link_to(term.format_name.t, term.show_link_args)
+          Link(type: :get, name: term.format_name.t,
+               target: term.show_link_args)
         end
       end
 

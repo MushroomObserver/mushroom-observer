@@ -32,7 +32,8 @@ module Views::Controllers::Names::Descriptions
             variant: :striped, identifier: "name-descriptions",
             show_headers: false) do |tbl|
         tbl.column("") do |desc|
-          link_to(name_description_path(desc.id)) do
+          Link(type: :get, name: desc.format_name.t,
+               target: name_description_path(desc.id)) do
             trusted_html(desc.format_name.t)
           end
         end

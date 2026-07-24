@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class LightboxObservationTitleTest < ComponentTestCase
+class ObservationFragmentLightboxTitleTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -24,6 +24,12 @@ class LightboxObservationTitleTest < ComponentTestCase
     assert_includes(html, "caption_obs_link_#{@obs.id}")
     assert_includes(html, "/obs/#{@obs.id}")
     assert_includes(html, @obs.id.to_s)
+
+    # Should have the formatted name -- a bare trailing expression
+    # (no `plain`/`trusted_html`) is dead code in Phlex and silently
+    # renders nothing; this pins that the name text actually appears.
+    title_text = Nokogiri::HTML5.fragment(html).at_css("h4").text
+    assert_includes(title_text, @obs.name.text_name)
   end
 
   def test_renders_with_identify_mode
@@ -62,7 +68,7 @@ class LightboxObservationTitleTest < ComponentTestCase
   private
 
   def render_title(user: @user, identify: false)
-    render(Components::Image::Lightbox::ObservationTitle.new(
+    render(Components::ObservationFragment::LightboxTitle.new(
              obs: @obs,
              user: user,
              identify: identify

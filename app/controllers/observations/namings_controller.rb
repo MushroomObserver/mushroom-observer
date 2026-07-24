@@ -200,7 +200,8 @@ module Observations
       render(turbo_stream: [
                turbo_stream.replace(
                  "observation_what_#{obs_id}",
-                 Components::Image::Lightbox::ObservationTitle.new(
+                 Components::ObservationFragment.new(
+                   type: :lightbox_title,
                    obs: @observation, user: @user, identify: false
                  )
                ),

@@ -179,9 +179,9 @@ class Views::Layouts::TopNav < Views::Base
     ctrlr = nav_linkable_controller
     return plain(rubric_text) unless ctrlr
 
-    link_to(
-      rubric_text,
-      { controller: "/#{ctrlr.controller_path}", action: :index },
+    Link(
+      type: :get, name: rubric_text,
+      target: { controller: "/#{ctrlr.controller_path}", action: :index },
       class: "#{ctrlr.controller_name}_index_link",
       data: { tooltip_target: "tip", placement: :bottom,
               title: :index_object.ti(type: ctrlr.controller_name.to_sym) }

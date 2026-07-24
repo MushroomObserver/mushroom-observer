@@ -133,8 +133,10 @@ class Components::Form::CameraInfo < Components::Base
   end
 
   def exif_to_image_date_button
-    link_to(
-      "#",
+    Link(
+      type: :get,
+      name: @date,
+      target: "#",
       data: { action: "form-exif#exifToImageDate:prevent" }
     ) do
       span(class: "exif_date") { @date }

@@ -92,7 +92,9 @@ module Views::Controllers::Users
       def render_link_or_label(row)
         url = field_path(row[:field])
         if url
-          link_to(url) { render_label(row[:label]) }
+          Link(type: :get, name: row[:label].to_s, target: url) do
+            render_label(row[:label])
+          end
         else
           render_label(row[:label])
         end

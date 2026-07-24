@@ -305,9 +305,10 @@ class Components::ApplicationForm < Superform::Rails::Form
            data: { target_attr_key => "list" }) do
           10.times do |i|
             li(class: "dropdown-item") do
-              link_to(
-                "",
-                "#",
+              Link(
+                type: :get,
+                name: "",
+                target: "#",
                 data: {
                   row: i,
                   action: "click->#{stimulus_controller_name}#selectRow:prevent"

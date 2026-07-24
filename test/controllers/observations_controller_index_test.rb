@@ -755,6 +755,134 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_nil(session["return-to"])
   end
 
+  # perform_caching = false means low_level_cache never checks the
+  # cache (table_test.rb:479), so "already cached" objects still get
+  # rendered fresh -- they need eager-loading too, not just genuine
+  # misses, or they hit per-object N+1 fallbacks (e.g.
+  # NamingConsensus#use_local_namings).
+  def test_objects_with_only_needed_eager_loads_eager_loads_all_when_caching_off
+    login
+    cached_obs = observations(:coprinus_comatus_obs)
+    cached_obs.thumb_image.update_column(:transferred, true)
+    uncached_obs = observations(:agaricus_campestris_obs)
+    uncached_obs.thumb_image.update_column(:transferred, true)
+
+    query = @controller.create_query(
+      :Observation, id_in_set: [cached_obs.id, uncached_obs.id]
+    )
+    @controller.instance_variable_set(
+      :@pagination_data, @controller.send(:number_pagination_data)
+    )
+
+    # Test env's cache_store is :null_store -- swap in a real store so
+    # `cached_obs` is a genuine hit, proving the fix (not NullStore's
+    # everything-is-a-miss behavior) is what eager-loads it anyway.
+    real_store = ActiveSupport::Cache::MemoryStore.new
+    real_store.write(
+      Components::Matrix::Table.cache_key_for(cached_obs, I18n.locale),
+      ["<li>already cached</li>", {}]
+    )
+
+    original_cache = Rails.cache
+    original_perform_caching =
+      Rails.application.config.action_controller.perform_caching
+    objects = begin
+                Rails.cache = real_store
+                Rails.application.config.action_controller.perform_caching =
+                  false
+                @controller.send(
+                  :objects_with_only_needed_eager_loads,
+                  query, Observation.matrix_box_includes
+                )
+              ensure
+                Rails.cache = original_cache
+                Rails.application.config.action_controller.perform_caching =
+                  original_perform_caching
+              end
+
+    assert(objects.all? { |obj| obj.namings.loaded? },
+           "every object must be eager-loaded when perform_caching is " \
+           "off, not just the ones the cache pre-check thinks are misses")
+  end
+
+  # Companion to the test above: confirm perform_caching = true still
+  # takes the cheaper two-tier path (only genuine misses eager-loaded).
+  def test_objects_with_only_needed_eager_loads_still_splits_when_caching_is_on
+    login
+    cached_obs = observations(:coprinus_comatus_obs)
+    cached_obs.thumb_image.update_column(:transferred, true)
+    uncached_obs = observations(:agaricus_campestris_obs)
+    uncached_obs.thumb_image.update_column(:transferred, true)
+
+    query = @controller.create_query(
+      :Observation, id_in_set: [cached_obs.id, uncached_obs.id]
+    )
+    @controller.instance_variable_set(
+      :@pagination_data, @controller.send(:number_pagination_data)
+    )
+
+    # Test env's cache_store is :null_store (config/environments/test.rb)
+    # -- writes are no-ops, so swap in a real store to actually observe
+    # a hit/miss split.
+    real_store = ActiveSupport::Cache::MemoryStore.new
+    real_store.write(
+      Components::Matrix::Table.cache_key_for(cached_obs, I18n.locale),
+      ["<li>already cached</li>", {}]
+    )
+
+    original_cache = Rails.cache
+    original_perform_caching =
+      Rails.application.config.action_controller.perform_caching
+    objects = begin
+                Rails.cache = real_store
+                Rails.application.config.action_controller.perform_caching =
+                  true
+                @controller.send(
+                  :objects_with_only_needed_eager_loads,
+                  query, Observation.matrix_box_includes
+                )
+              ensure
+                Rails.cache = original_cache
+                Rails.application.config.action_controller.perform_caching =
+                  original_perform_caching
+              end
+    by_id = objects.index_by(&:id)
+
+    assert_not(by_id[cached_obs.id].namings.loaded?,
+               "a genuine cache hit should be skipped, per the " \
+               "existing optimization")
+    assert(by_id[uncached_obs.id].namings.loaded?,
+           "a genuine cache miss must still be eager-loaded")
+  end
+
+  # ApplicationController::Indexes#render_index_view is an abstract
+  # guard -- every real controller (including ObservationsController)
+  # overrides it, so call the module method directly to exercise it.
+  def test_render_index_view_raises_when_not_overridden
+    method = ApplicationController::Indexes.instance_method(:render_index_view)
+
+    error = assert_raises(NotImplementedError) do
+      method.bind_call(@controller)
+    end
+    assert_equal(
+      "ObservationsController#render_index_view must render a Phlex view",
+      error.message
+    )
+  end
+
+  # `keys_by_object.empty?` branch: no object in the batch is
+  # cacheable, so there's nothing to `read_multi` -- every object
+  # must still come back as needing eager-load.
+  def test_uncached_object_ids_with_no_cacheable_objects
+    login
+    obs = observations(:detailed_unknown_obs)
+    obs.thumb_image&.update_column(:transferred, false)
+
+    ids = @controller.send(:uncached_object_ids, [obs], I18n.locale)
+
+    assert_equal([obs.id], ids)
+  end
+
   # `uncached_object_ids` batches the MatrixBox cache-key pre-check
   # into one `read_multi` instead of one `Rails.cache.exist?` per
   # object -- verify it still resolves each object correctly (one

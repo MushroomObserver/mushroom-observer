@@ -10,7 +10,8 @@ module Views::Controllers::VisualGroups
       add_new_title(:new_object, :visual_group)
 
       render(Form.new(@visual_group, visual_model: @visual_model))
-      link_to("Back", visual_model_visual_groups_path(@visual_model))
+      Link(type: :get, name: "Back",
+           target: visual_model_visual_groups_path(@visual_model))
     end
   end
 end
