@@ -8,3 +8,17 @@
   margin-right: auto;
   max-width: $screen-md-min;
 }
+
+// lightgallery-core.scss's own rule builds this from $lg-path-images
+// (default '../images', meant for a plain css/ + images/ sibling
+// directory layout) interpolated into a bare url() -- under Sprockets
+// that resolves relative to the compiled stylesheet's own fingerprinted
+// /assets/... URL, not to any real asset, so the browser requests
+// /images/loading.gif. Rails' resources :images then parses "loading"
+// as the :id param and "gif" as the format, 404s, and flashes
+// "the image you tried to display (id #loading) does not exist" --
+// on the *next* page the user visits, since flash messages persist
+// across a request. Override with the asset-pipeline-aware path.
+.lg-outer .lg-item:not(.lg-start-end-progress) {
+  background-image: image-url("loading.gif");
+}
