@@ -31,7 +31,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
 
   def render_id_badge
     span do
-      IDBadge(object: @name, extra_class: "rss-id mr-4")
+      IDBadge(object: @name, size: :md)
     end
   end
 
@@ -59,7 +59,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
       variant: :link,
       class: "py-0 link-normal opacity-75",
       role: "button",
-      data: { toggle: "tooltip", placement: "bottom",
+      data: { tooltip_target: "tip", placement: "bottom",
               title: :copy_this_name.ti,
               action: "clipboard#copy" }
     ) { Icon(type: :copy) }

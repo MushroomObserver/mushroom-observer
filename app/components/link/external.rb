@@ -11,9 +11,12 @@
 # ExternalLink AR record form (observation external-links panel):
 #   render(Components::Link::External.new(link: external_link))
 #   # The link text leads with the relationship date, then the relationship:
-#   # "<date>: <relationship> (<id>)" for iNaturalist (e.g.
-#   # "2025-05-04: Imported from iNaturalist (12345)"), "<date>: <relationship>"
-#   # for other sites. The whole string is the link.
+#   # "<date>: <relationship>" (e.g. "2025-05-04: Imported from
+#   # iNaturalist"). For sites with an id accessor on ExternalLink
+#   # (iNaturalist, MyCoPortal), that id follows as a sibling
+#   # copy-to-clipboard IDBadge, not part of the link text -- a
+#   # <button> nested inside the <a> would be invalid HTML and would
+#   # double-fire the link's own navigation on a badge click.
 #
 # Via context-nav dispatcher:
 #   # Tab sets html_options: { external: true }; dispatcher routes here.
@@ -24,12 +27,16 @@ class Components::Link::External < Components::Base
   def initialize(content: nil, path: nil, tab: nil, link: nil, **opts)
     super()
     @link = link
+    @site_record_id = nil
+    @site_name = nil
     if tab
       @content = tab.title
       @path = tab.path
       @opts = tab.html_options.except(*NON_HTML_OPTS).merge(opts)
     elsif link
-      @content = link_content
+      @content = relationship_text
+      @site_record_id = link.site_record_id
+      @site_name = link.site_name
       @path = link.link_url
       @opts = opts
     else
@@ -46,28 +53,31 @@ class Components::Link::External < Components::Base
             **@opts) do
       plain(@content)
     end
+    return unless @site_record_id
+
+    whitespace
+    IDBadge(value: @site_record_id, size: :lg,
+            title: :copy_this_site_id.ti(site: @site_name))
   end
 
   private
 
-  # For an ExternalLink the text leads with the relationship date, then the
-  # relationship — "<date>: <relationship> (<id>)" — so rows read and sort by
-  # date. The whole string is the link.
-  def link_content
+  # "<date>: <relationship>" so rows read and sort by date.
+  def relationship_text
     date = @link.relationship_date
-    date ? "#{date.web_date}: #{relationship_label}" : relationship_label
+    if date
+      "#{date.web_date}: #{relationship_description}"
+    else
+      relationship_description
+    end
   end
 
-  # link_url resolves both import links (external_id, derived url) and manual
-  # links (stored url), so strip the base_url off it to get the bare iNat id.
-  def relationship_label
-    return @link.relationship_description unless inaturalist?
-
-    id = @link.link_url.delete_prefix(@link.external_site.base_url)
-    "#{@link.relationship_description} (#{id})"
-  end
-
-  def inaturalist?
-    @link.external_site.name == "iNaturalist"
+  # Presentational text built here (not on ExternalLink) since this is
+  # its only caller -- e.g. "Copied by iNaturalist" / "Imported from
+  # iNaturalist".
+  def relationship_description
+    :"external_link_relationship_#{@link.relationship}".l(
+      site: @link.site_name
+    )
   end
 end

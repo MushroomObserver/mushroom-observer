@@ -4,10 +4,7 @@
 # text `<span>` that's `.sr-only` (hidden, default) or visible (at
 # `sm+`) when `show_text:` is truthy. Included by both
 # `Components::Button::Content` (Button / Link::Get family) and
-# `Components::Link::Icon`, which previously hand-rolled two
-# slightly different versions of the same rendering (and disagreed
-# on the visible-text spacing class: `ml-1` vs `pl-2` — standardized
-# here on `pl-2`).
+# `Components::Link::Icon`.
 #
 # Callers that need multiple icon/text pairs in a specific order
 # (e.g. `Link::Icon`'s stateful icon + active-icon swap) call
@@ -15,14 +12,18 @@
 # the fused `render_icon_with_text`, so the icons and text spans can
 # still be grouped icon-then-icon, text-then-text.
 module Components::IconWithText
-  TEXT_VISIBLE_CLASSES = "d-none d-sm-inline pl-2"
+  # `icon-text-gap`, not a `.pl-*` rem-based utility -- the gap needs
+  # to scale with the surrounding font-size (a `.panel-title` heading's
+  # bold type needs visibly more gap than small body text), which only
+  # an em-based value does. See `_icons.scss` for the rule.
+  TEXT_VISIBLE_CLASSES = "d-none d-sm-inline icon-text-gap"
 
   private
 
-  # `render(...)`, not Kit sugar -- this module is included at varying
+  # `render(...)`, not Kit syntax -- this module is included at varying
   # nesting depths (Components::Button::Content, itself included by
   # deeply-nested dispatched subclasses like Components::Button::Edit),
-  # and Kit sugar's bare `Icon(...)` isn't reliably available that far
+  # and Kit syntax's bare `Icon(...)` isn't reliably available that far
   # down the chain.
   def render_icon_glyph(icon, html_class: nil, title: nil)
     render(Components::Icon.new(type: icon, class: html_class,

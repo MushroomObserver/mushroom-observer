@@ -55,11 +55,12 @@ module Views::Controllers::Herbaria
 
     def render_records_link
       div(class: "mt-3") do
-        link_to(
-          :show_herbarium_herbarium_record_count.t(
+        Link(
+          type: :get,
+          name: :show_herbarium_herbarium_record_count.t(
             count: @herbarium.herbarium_records.length
           ),
-          herbarium_records_path(herbarium: @herbarium.id),
+          target: herbarium_records_path(herbarium: @herbarium.id),
           class: "herbarium_records_for_herbarium_link"
         )
       end
@@ -109,9 +110,9 @@ module Views::Controllers::Herbaria
     end
 
     def render_curator_request_link
-      link_to(:show_herbarium_curator_request.t,
-              new_herbaria_curator_request_path(id: @herbarium.id),
-              class: "new_herbaria_curator_request_link")
+      Link(type: :get, name: :show_herbarium_curator_request.t,
+           target: new_herbaria_curator_request_path(id: @herbarium.id),
+           class: "new_herbaria_curator_request_link")
     end
 
     def render_notes

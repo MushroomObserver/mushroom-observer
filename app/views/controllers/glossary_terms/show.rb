@@ -47,7 +47,7 @@ module Views::Controllers::GlossaryTerms
       text, url = ::Tab::ExternalSearch.new(
         site: :Wikipedia, query: @glossary_term.name
       ).to_a
-      link_to(text, url)
+      Link(type: :get, name: text, target: url)
     end
 
     def render_right_column
@@ -64,11 +64,11 @@ module Views::Controllers::GlossaryTerms
 
     def render_image_action_links
       ContentPadded(class: "mb-3") do
-        link_to(:show_glossary_term_reuse_image.t,
-                reuse_images_for_glossary_term_path(@glossary_term.id))
+        Link(type: :get, name: :show_glossary_term_reuse_image.t,
+             target: reuse_images_for_glossary_term_path(@glossary_term.id))
         br
-        link_to(:show_glossary_term_remove_image.t,
-                remove_images_from_glossary_term_path(@glossary_term.id))
+        Link(type: :get, name: :show_glossary_term_remove_image.t,
+             target: remove_images_from_glossary_term_path(@glossary_term.id))
         br
       end
     end

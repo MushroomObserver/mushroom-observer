@@ -121,13 +121,31 @@ class Components::Base < Phlex::HTML
     end
   end
 
+  # Built via `SafeBuffer.new`, not a String -- `trusted_html` only
+  # skips escaping for an `ActiveSupport::SafeBuffer`, so an
+  # un-flagged String here would render the literal, visible text
+  # "&nbsp;" instead of a non-breaking space.
   def nbsp
-    trusted_html("&nbsp;")
+    trusted_html(ActiveSupport::SafeBuffer.new("&nbsp;"))
   end
 
   # ViewerAwareFormat's default `user` arg.
   def default_viewer
     current_user
+  end
+
+  # Picks the singular or plural translation tag for `tag` based on
+  # `countable` (an Integer, or anything responding to `#size`).
+  # `tag` must be the *singular* en.txt tag; the plural is derived via
+  # Rails' pluralize (irregulars like "taxon"/"taxa" are registered in
+  # config/initializers/inflections.rb -- if a new tag's plural isn't
+  # regular `+s`, register it there rather than special-casing it here).
+  # Returns a bare Symbol, not a rendered string -- callers still pick
+  # .ti vs .l vs .t themselves, since that depends on context (a
+  # standalone label heading vs. inline sentence text).
+  def pluralize_tag(tag, countable)
+    count = countable.is_a?(Numeric) ? countable : countable.size
+    count == 1 ? tag : tag.to_s.pluralize.to_sym
   end
 
   def before_template

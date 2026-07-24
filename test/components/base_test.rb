@@ -73,7 +73,12 @@ class BaseTest < ComponentTestCase
                     def view_template = span { nbsp }
                   end.new)
 
-    assert_html(html, "span", text: "&nbsp;".as_displayed)
+    # Regression: `nbsp` previously emitted the literal, visible text
+    # "&nbsp;" (double-escaped) instead of a real non-breaking space
+    # -- assert against the actual U+00A0 character a browser would
+    # render, not the raw entity string.
+    assert_html(html, "span", text: "\u00A0")
+    assert_not_includes(html, "&amp;nbsp;")
   end
 
   def test_cache_store_returns_rails_cache
@@ -215,5 +220,45 @@ class BaseTest < ComponentTestCase
 
     assert_includes(result, "target=#{obs.id}",
                     "ActiveRecord value should be serialized as its id")
+  end
+
+  # ----- pluralize_tag --------------------------------------------------
+  #
+  # :collection_number/:collection_numbers below is just an illustrative
+  # regular (+s) tag pair for exercising the mechanism -- not a claim
+  # that any current call site switches on it (collection_numbers_section
+  # hardcodes the plural tag; see that file's own comment for why).
+  # checklist_taxon/checklist_taxa (below) is the real, current call
+  # site, and also exercises the irregular-inflection path.
+
+  def test_pluralize_tag_singular_count
+    assert_equal(:collection_number, adder.pluralize_tag(:collection_number, 1))
+  end
+
+  def test_pluralize_tag_plural_count
+    assert_equal(:collection_numbers,
+                 adder.pluralize_tag(:collection_number, 2))
+  end
+
+  # 0 reads as plural ("0 collection numbers"), matching Rails' own
+  # count-based pluralize convention.
+  def test_pluralize_tag_zero_count
+    assert_equal(:collection_numbers,
+                 adder.pluralize_tag(:collection_number, 0))
+  end
+
+  def test_pluralize_tag_accepts_a_collection_instead_of_a_count
+    assert_equal(:collection_number,
+                 adder.pluralize_tag(:collection_number, [1]))
+    assert_equal(:collection_numbers,
+                 adder.pluralize_tag(:collection_number, [1, 2]))
+  end
+
+  # "taxon"/"taxa" is an irregular plural registered in
+  # config/initializers/inflections.rb -- confirms pluralize_tag relies
+  # on the app's inflector rather than a naive "+s".
+  def test_pluralize_tag_uses_irregular_inflections
+    assert_equal(:checklist_taxon, adder.pluralize_tag(:checklist_taxon, 1))
+    assert_equal(:checklist_taxa, adder.pluralize_tag(:checklist_taxon, 2))
   end
 end

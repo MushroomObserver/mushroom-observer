@@ -100,11 +100,11 @@ module Views::Controllers::Projects::Locations
       td(class: "align-middle") do
         render_chevron(collapse_id) if subs.any?
         whitespace if subs.any?
-        link_to(
-          target.display_name,
-          checklist_path(project_id: @project.id,
-                         location_id: target.id,
-                         sub_locations: 1)
+        Link(
+          type: :get, name: target.display_name,
+          target: checklist_path(project_id: @project.id,
+                                 location_id: target.id,
+                                 sub_locations: 1)
         )
       end
     end
@@ -167,10 +167,10 @@ module Views::Controllers::Projects::Locations
     def render_location_name_cell(loc, indent: false)
       style = indent ? "padding-left: 2em" : nil
       td(class: "align-middle", style: style) do
-        link_to(
-          loc.display_name,
-          checklist_path(project_id: @project.id,
-                         location_id: loc.id)
+        Link(
+          type: :get, name: loc.display_name,
+          target: checklist_path(project_id: @project.id,
+                                 location_id: loc.id)
         )
       end
     end

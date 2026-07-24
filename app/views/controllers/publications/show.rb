@@ -30,7 +30,7 @@ module Views::Controllers::Publications
       p(style: "word-break:break-all") do
         b { "#{:publication_link.l}:" }
         br
-        link_to(@publication.link, @publication.link)
+        Link(type: :get, name: @publication.link, target: @publication.link)
       end
     end
 

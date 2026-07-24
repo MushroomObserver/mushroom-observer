@@ -3,22 +3,52 @@
 require("test_helper")
 
 class ExternalLinkTest < UnitTestCase
-  def test_relationship_description
-    # import link to iNaturalist
+  def test_inaturalist_id
+    # manual link -- no external_id column, id lives only in the url
     assert_equal(
-      "Imported from iNaturalist",
-      external_links(:imported_inat_obs_inat_link).relationship_description
+      "234723",
+      external_links(:coprinus_comatus_obs_inaturalist_link).inaturalist_id
     )
-    # default (manual) relationship, interpolates a non-iNat site name
+    # import link -- has external_id, link_url derives the same id
     assert_equal(
-      "Manual link to MyCoPortal",
-      external_links(:coprinus_comatus_obs_mycoportal_link).
-        relationship_description
+      "12345",
+      external_links(:imported_inat_obs_inat_link).inaturalist_id
     )
-    # every relationship has a phrase
-    link = external_links(:coprinus_comatus_obs_inaturalist_link)
-    link.relationship = :copy
-    assert_equal("Copied by iNaturalist", link.relationship_description)
+    # non-iNat site -- nil, regardless of what its url contains
+    assert_nil(
+      external_links(:coprinus_comatus_obs_mycoportal_link).inaturalist_id
+    )
+  end
+
+  def test_mycoportal_id
+    # MyCoPortal's id lives in a query param, not appended to base_url --
+    # id_from_url has to reverse url_template's "?occid={id}" shape.
+    assert_equal(
+      "1950183",
+      external_links(:coprinus_comatus_obs_mycoportal_link).mycoportal_id
+    )
+    # non-MyCoPortal site -- nil, regardless of what its url contains
+    assert_nil(
+      external_links(:coprinus_comatus_obs_inaturalist_link).mycoportal_id
+    )
+  end
+
+  def test_site_record_id
+    assert_equal(
+      "234723",
+      external_links(:coprinus_comatus_obs_inaturalist_link).site_record_id
+    )
+    assert_equal(
+      "1950183",
+      external_links(:coprinus_comatus_obs_mycoportal_link).site_record_id
+    )
+
+    # A site with neither accessor -- nil, not an error.
+    other_site = ExternalSite.new(name: "GenBank",
+                                  base_url: "https://genbank.example/")
+    link = ExternalLink.new(external_site: other_site,
+                            url: "https://genbank.example/123")
+    assert_nil(link.site_record_id)
   end
 
   def test_normalize_external_id_and_url

@@ -61,8 +61,9 @@ module Views::Controllers::SpeciesLists
 
     def render_observation_name_link
       div(class: "font-weight-bold") do
-        link_to(viewer_aware_unique_format_name(@observation).t,
-                observation_path(id: @observation.id))
+        Link(type: :get,
+             name: viewer_aware_unique_format_name(@observation).t,
+             target: observation_path(id: @observation.id))
       end
     end
 

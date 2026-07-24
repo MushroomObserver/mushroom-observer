@@ -56,7 +56,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     get(:show, params: { id: obs1.id })
     assert_response(:success)
-    assert_select("#associated_observations")
+    assert_select("#matching_observations")
     assert_select("a[href*='occurrences/#{occ.id}']")
   end
 
@@ -90,10 +90,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login
     obs = observations(:coprinus_comatus_obs)
     get(:show, params: { id: obs.id })
-    # Other-only notes render the "Notes:" caption with the value as an
-    # indented textile paragraph beneath it.
-    assert_select("#observation_notes", text: /Notes:/)
-    assert_select("#observation_notes .indent .textile p",
+    # Other-only notes render under a "Notes" panel heading, with the
+    # value as a textile paragraph in the panel body.
+    assert_select("#observation_notes .panel-title", text: :notes.ti)
+    assert_select("#observation_notes .textile p",
                   text: "Second fruiting in bark chips")
   end
 
@@ -121,21 +121,19 @@ class ObservationsControllerShowTest < FunctionalTestCase
     vague_re = /#{Regexp.escape(:show_observation_vague_location.l)}/
     improve_re = /#{Regexp.escape(:show_observation_improve_location.l)}/
     get(:show, params: { id: obs1.id })
-    # Nested <p> inside #observation_where gets hoisted out by the
-    # HTML5 parser; assert on the <em> within the ml-3 paragraph.
-    assert_select("p.ml-3 em", text: vague_re)
-    assert_select("p.ml-3 em", text: improve_re, count: 0)
+    assert_select(".vague-location-notice", text: vague_re)
+    assert_select(".vague-location-notice", text: improve_re, count: 0)
 
     # Make sure it suggests choosing a better location if owner is current user
     login("dick")
     get(:show, params: { id: obs1.id })
-    assert_select("p.ml-3 em", text: vague_re)
-    assert_select("p.ml-3 em", text: improve_re)
+    assert_select(".vague-location-notice", text: vague_re)
+    assert_select(".vague-location-notice", text: improve_re)
 
     # Make sure it doesn't show for observations with non-vague location
     obs2 = observations(:amateur_obs)
     get(:show, params: { id: obs2.id })
-    assert_select("p.ml-3 em", text: vague_re, count: 0)
+    assert_select(".vague-location-notice", text: vague_re, count: 0)
   end
 
   def test_show_observation_hidden_gps
@@ -145,29 +143,29 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     login
     get(:show, params: { id: obs.id })
-    assert_select("#observation_where_gps", text: gps_re)
+    assert_select(".obs-where-gps", text: gps_re)
 
     obs.update(gps_hidden: true)
     get(:show, params: { id: obs.id })
-    assert_select("#observation_where_gps", text: gps_re, count: 0)
+    assert_select(".obs-where-gps", text: gps_re, count: 0)
 
     login("mary")
     get(:show, params: { id: obs.id })
-    assert_select("#observation_where_gps", text: gps_re)
-    assert_select("#observation_where_gps i", text: hidden_re)
+    assert_select(".obs-where-gps", text: gps_re)
+    assert_select(".obs-where-gps i", text: hidden_re)
 
     # roy admins current_project (which contains this obs). Per #4439, a
     # project admin can reveal hidden GPS only when the owner is a
     # trusting member — not when the owner (mary) is a non-member.
     login("roy")
     get(:show, params: { id: obs.id })
-    assert_select("#observation_where_gps", text: gps_re, count: 0)
+    assert_select(".obs-where-gps", text: gps_re, count: 0)
 
     ProjectMember.create!(project: projects(:current_project),
                           user: obs.user, trust_level: "hidden_gps")
     get(:show, params: { id: obs.id })
-    assert_select("#observation_where_gps", text: gps_re)
-    assert_select("#observation_where_gps i", text: hidden_re)
+    assert_select(".obs-where-gps", text: gps_re)
+    assert_select(".obs-where-gps i", text: hidden_re)
   end
 
   def test_show_obs_view_stats
@@ -314,12 +312,12 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("#comments_for_object")
     # Phlex panels — assert against their stable IDs (no template
     # lookup): _name_info / _observation_details / _namings /
-    # _thumbnail_map / _associated_observations / _species_lists.
+    # _thumbnail_map / _matching_observations / _species_lists.
     assert_select("#observation_name_info")
     assert_select("#observation_details")
     assert_select("#observation_namings")
     assert_select("#observation_thumbnail_map")
-    assert_select("#associated_observations")
+    assert_select("#matching_observations")
     assert_select("#observation_species_lists")
   end
   private :assert_show_observation
@@ -463,12 +461,16 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs_id })
 
     assert_select("a[href *= 'images.google.com']")
-    assert_select("a[href *= 'mycoportal.org']")
 
     # There is a MycoBank link which includes taxon name and MycoBank language
     assert_select("a[href *= 'mycobank.org']") do
       assert_select("a[href *= '/Coprinus%20comatus']")
     end
+
+    # MycoPortal link now lives behind the "Shared with" MCP badge's info
+    # modal, not inline on the page -- see external_links_controller_test.rb
+    # for coverage of the modal's own content.
+    assert_select("#observation_external_links a.badge", text: "MCP")
   end
 
   def test_show_observation_edit_links

@@ -79,12 +79,10 @@ module Views::Controllers::Images
     def render_left_footer
       div(class: "small text-center") do
         div do
-          render(::Components::Image::Copyright.new(
-                   user: current_user, image: @image
-                 ))
+          ImageFragment(type: :copyright, user: current_user, image: @image)
         end
         div(class: "py-5px mb-3") do
-          render(::Components::Image::LicenseBadge.new(license: @image.license))
+          LicenseBadge(license: @image.license)
         end
       end
     end

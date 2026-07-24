@@ -73,9 +73,10 @@ module Views::Controllers::FieldSlips
           id: "field_slip_no_prefix_nudge") do
         plain(:show_project_field_slip_no_prefix.t)
         whitespace
-        link_to(:show_project_field_slip_set_prefix.t,
-                project_admin_path(project_id: @project.id),
-                class: "alert-link")
+        render(Components::Alert::Link.new(
+                 :show_project_field_slip_set_prefix.t,
+                 project_admin_path(project_id: @project.id)
+               ))
       end
     end
 
@@ -115,8 +116,8 @@ module Views::Controllers::FieldSlips
       capture do
         h4 do
           strong { plain("#{:field_slip_code.l}: ") }
-          link_to(field_slip.code, field_slip,
-                  class: "field_slip_link_#{field_slip.id}")
+          Link(type: :get, name: field_slip.code, target: field_slip,
+               class: "field_slip_link_#{field_slip.id}")
           br
         end
       end

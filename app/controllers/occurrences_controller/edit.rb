@@ -177,7 +177,7 @@ module OccurrencesController::Edit
       where.not(observation_id: current_ids).
       order(last_view: :desc).
       limit(3).
-      includes(observation: [:name, :user, :location,
+      includes(observation: [:name, :user, :collector_user, :location,
                              :thumb_image,
                              { occurrence: :field_slip }]).
       filter_map(&:observation)

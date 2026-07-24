@@ -8,7 +8,7 @@ class Tab::Sequence::New < Tab::Base
   end
 
   def title
-    :show_observation_add_sequence.t
+    :add_object.t(type: :sequence)
   end
 
   def path

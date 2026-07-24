@@ -63,9 +63,11 @@ module Views::Controllers::GlossaryTerms
     end
 
     def glossary_doc_link
-      link_to(
-        :glossary_term_index_documentation.t,
-        "https://github.com/MushroomObserver/mushroom-observer/blob/main/doc/glossary.md"
+      Link(
+        type: :get,
+        name: :glossary_term_index_documentation.t,
+        target: "https://github.com/MushroomObserver/mushroom-observer/" \
+                "blob/main/doc/glossary.md"
       )
     end
 

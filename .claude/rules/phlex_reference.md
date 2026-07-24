@@ -79,9 +79,8 @@ Link(type: :active, content: title, path: url)
 Link(type: :get, name: "Show", target: url)
 
 # Good — nested view, no Kit sugar exists, no dispatcher
-render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(
-  obs: @obs, user: @user
-))
+render(Views::Controllers::Observations::Show::SpecimenPanel::
+       CollectionNumbersSection.new(obs: @obs, user: @user))
 
 # Bad — verbose full-namespace render() for something with Kit sugar
 render(Components::Icon.new(type: :edit))
@@ -218,6 +217,76 @@ If they'd say "that's the `whatever_controller`'s `show` page",
   regardless of current caller count, OR for non-primitive classes
   that already have a concrete second caller.
 
+### Non-primitive, concrete second caller across namespaces → `Components::<Model>Fragment`
+
+When the "concrete second caller" case above spans a View and a
+Component (or two Components in different subtrees), it's domain-specific
+business logic, not a generic primitive — it doesn't belong flat at
+`Components::<Name>` alongside `Icon`/`Link`/`Button`. Use a
+`type:`-dispatched component, one per model, named `Components::
+<Model>Fragment` — the same shape as `Components::Link` /
+`Components::Button` / `Components::Help` (see "Writing a new dispatcher
+component" above):
+
+```ruby
+# app/components/observation_fragment.rb
+class Components::ObservationFragment < Components::Base
+  DISPATCH = { who: :Who }.freeze
+
+  def self.new(**kwargs, &block)
+    type_sym = kwargs[:type]&.to_sym
+    if (klass_name = DISPATCH[type_sym])
+      kwargs.delete(:type)
+      return const_get(klass_name).new(**kwargs, &block)
+    end
+
+    raise(ArgumentError.new(
+            "Unknown ObservationFragment type: #{kwargs[:type].inspect}. " \
+            "Valid types: #{DISPATCH.keys.join(", ")}."
+          ))
+  end
+end
+```
+
+```ruby
+# app/components/observation_fragment/who.rb
+class Components::ObservationFragment::Who < Components::Base
+  # ... the actual "Collector:" / "Entered by:" rendering
+end
+```
+
+Called from anywhere as `ObservationFragment(type: :who, obs: @obs, user:
+@user)`. A plain nested class with no dispatcher loses bare Kit-call
+syntax entirely — Kit sugar only fires for classes exactly one level
+under `Components` (see "Kit syntax" above).
+
+Unlike `Link`/`Button`, there's no meaningful generic variant of a
+`<Model>Fragment` — `self.new` raises when `type:` is missing or
+unrecognized, rather than falling through to `super`.
+
+The `Fragment` suffix keeps the dispatcher's name distinct from a bare
+model reference (`Components::ObservationFragment` is never literally
+`Components::Observation`) and reads identically across every model. Use
+the compact class-definition form throughout (`class Components::
+ObservationFragment::Who < Components::Base`, not the expanded `module`/
+`module`/`class` form — see "Collapse deep namespaces" below) so a bare
+reference to the model itself, wherever one is needed, still resolves to
+the top-level AR model rather than a same-named nested constant.
+
+`Components::ImageFragment` is the other worked example — same
+dispatcher shape, `DISPATCH` holds `Copyright`, `EXIFLink`,
+`LightboxCaption`, `OriginalLink`, `ReuseForm`, `VoteInterface`.
+`Components::Image::Base` is a separate, untouched class — inheritance
+infrastructure for `InteractiveImage` and other image-rendering
+components, not one of `ImageFragment`'s dispatched types.
+Two more moved out of `Components::Image::*` in the same pass but
+landed elsewhere, since neither is actually `Image`-specific:
+`Components::LicenseBadge` (flat, no `Fragment` — it takes a bare
+`::License`, already shared with description show pages) and
+`Components::ObservationFragment::MarkAsReviewedToggle` /
+`::LightboxTitle` (both take an `observation_view:`/`obs:`, nothing
+image-specific in their bodies).
+
 Both inherit from `Phlex::HTML` via `Components::Base` (`Views::Base` is
 a thin subclass). The split is for organization and intent, not
 capability — they can do the same things.
@@ -252,10 +321,12 @@ constants under a class just as under a module). File layout:
 app/views/controllers/observations/
   show.rb                          # class Views::Controllers::Observations::Show
   show/
-    observation_details_panel.rb   # class Show::ObservationDetailsPanel
+    details.rb                     # class Show::Details
     name_info_panel.rb             # class Show::NameInfoPanel
-    collection_numbers_panel.rb    # class Show::CollectionNumbersPanel
-    sibling_records.rb             # module Show::SiblingRecords (mixin)
+    specimen_panel.rb              # class Show::SpecimenPanel
+    specimen_panel/
+      collection_numbers_section.rb  # class Show::SpecimenPanel::CollectionNumbersSection
+      sibling_records.rb             # module Show::SpecimenPanel::SiblingRecords (mixin)
     …
 ```
 
@@ -269,12 +340,13 @@ When an action class renders a sub-view, qualify the constant from
 the namespace root when referencing it inside another sub-view:
 
 ```ruby
-# In Show::ObservationDetailsPanel:
-render(Views::Controllers::Observations::Show::CollectionNumbersPanel.new(...))
+# In Show::Details:
+render(Views::Controllers::Observations::Show::SpecimenPanel::
+       CollectionNumbersSection.new(...))
 ```
 
-The bare `CollectionNumbersPanel` form would resolve via Ruby's
-lexical scope from `Show::ObservationDetailsPanel`, but
+The bare `CollectionNumbersSection` form would resolve via Ruby's
+lexical scope from `Show::Details`, but
 Zeitwerk's autoload-on-undefined-constant doesn't fire on
 unqualified references inside another constant's body —
 preferring the qualified form keeps things robust.
@@ -415,10 +487,6 @@ class ListGroupTest < ComponentTestCase
   end
 end
 ```
-
-See `test/views/controllers/comments/index_test.rb`
-(`LegacyCommentList` / `NewCommentList`, nested inside `IndexTest`)
-for the established pattern.
 
 ## `register_value_helper` is a code smell — ask before you reach for it
 

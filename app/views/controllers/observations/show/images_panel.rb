@@ -15,9 +15,7 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    Panel(
-      panel_class: "show_images list-group text-center m-0"
-    ) do |panel|
+    Panel(panel_class: "show_images list-group text-center m-0") do |panel|
       panel.with_heading { :images.ti }
       panel.with_heading_links { heading_links }
       panel.with_body { render_body }
@@ -70,8 +68,6 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   end
 
   def render_copyright(image)
-    render(Components::Image::Copyright.new(
-             user: @user, image: image, object: @obs
-           ))
+    ImageFragment(type: :copyright, user: @user, image: image, object: @obs)
   end
 end

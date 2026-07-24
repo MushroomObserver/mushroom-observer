@@ -57,6 +57,11 @@ module Images
       end
     end
 
+    # Two turbo-stream targets, not one: the in-page vote section
+    # (:overlay context) and the lightbox caption's copy (:lightbox
+    # context, a `lightbox_`-prefixed id) -- both can be live in the
+    # DOM at once once the lightbox is open. See
+    # Components::ImageFragment::VoteInterface#vote_html_id.
     def test_cast_vote_turbo_stream
       image = images(:in_situ_image)
       login(users(:mary).login)
@@ -65,8 +70,60 @@ module Images
                    format: :turbo_stream)
 
       assert_response(:success)
-      assert_select("turbo-stream[action='update']" \
+      assert_select("turbo-stream[action='replace']" \
                     "[target='image_vote_#{image.id}']")
+      assert_select("turbo-stream[action='replace']" \
+                    "[target='lightbox_image_vote_#{image.id}']")
+    end
+
+    # #4895: renders the vote interface fresh, uncached, for one
+    # image -- the endpoint a lazy Turbo Frame fetches instead of
+    # rendering vote state inline inside Matrix::Box's shared
+    # fragment-cached HTML.
+    def test_show_renders_vote_interface
+      image = images(:in_situ_image)
+      login(users(:mary).login)
+
+      get(:show, params: { image_id: image.id })
+
+      assert_response(:success)
+      assert_select("turbo-frame#image_vote_#{image.id}")
+      assert_select("turbo-frame .vote-section#image_vote_#{image.id}")
+    end
+
+    def test_show_lightbox_context
+      image = images(:in_situ_image)
+      login(users(:mary).login)
+
+      get(:show, params: { image_id: image.id, context: "lightbox" })
+
+      assert_response(:success)
+      assert_select("turbo-frame#lightbox_image_vote_#{image.id}")
+      assert_select("turbo-frame .vote-section-lightbox" \
+                    "#lightbox_image_vote_#{image.id}")
+    end
+
+    # Anonymous viewers can load the frame too (`.require-user`
+    # CSS-hides voting for them) -- `login_required` is skipped for
+    # `show` specifically, unlike every other action on this
+    # controller.
+    def test_show_does_not_require_login
+      image = images(:in_situ_image)
+
+      get(:show, params: { image_id: image.id })
+
+      assert_response(:success)
+      assert_select("turbo-frame#image_vote_#{image.id}")
+    end
+
+    # A plain 404, not `find_or_goto_index`'s flash+redirect-to-index
+    # -- this is a frame-only fetch, so a redirect would try to swap
+    # a full index page into the tiny vote frame instead of just
+    # leaving it empty.
+    def test_show_with_missing_image_is_not_found
+      get(:show, params: { image_id: -1 })
+
+      assert_response(:not_found)
     end
 
     # These try to test the results of ajax calls.

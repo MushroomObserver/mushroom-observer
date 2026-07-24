@@ -38,7 +38,8 @@ module Views::Controllers::RssLogs
       target = @rss_log.target
       return unless target
 
-      link_to(:show_object.l(type: target.type_tag), target.show_link_args)
+      Link(type: :get, name: :show_object.l(type: target.type_tag),
+           target: target.show_link_args)
     end
   end
 end

@@ -432,6 +432,7 @@ MushroomObserver::Application.routes.draw do
                      as: "send_commercial_inquiry_for")
     end
     put("/vote", to: "images/votes#update", as: "vote")
+    get("/vote", to: "images/votes#show", as: "vote_interface")
   end
   resources :images, only: [:show] do
     member do
@@ -621,7 +622,7 @@ MushroomObserver::Application.routes.draw do
 
     member do
       resources :external_links,
-                only: [:new, :create, :edit, :update, :destroy],
+                only: [:show, :new, :create, :edit, :update, :destroy],
                 shallow: true, controller: "observations/external_links"
 
       get("map", to: "observations/maps#show")

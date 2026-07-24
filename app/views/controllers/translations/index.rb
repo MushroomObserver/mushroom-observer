@@ -83,8 +83,9 @@ module Views::Controllers::Translations
     def render_tag_field(ttag)
       str = preview_string(@strings[ttag])
       p(class: "tag_field") do
-        link_to(edit_translation_path(id: ttag, locale: @lang.locale),
-                data: { tag: ttag, role: "show_tag", turbo_stream: true }) do
+        Link(type: :get, name: "#{ttag}:",
+             target: edit_translation_path(id: ttag, locale: @lang.locale),
+             data: { tag: ttag, role: "show_tag", turbo_stream: true }) do
           span(class: "tag") { "#{ttag}:" }
         end
         whitespace

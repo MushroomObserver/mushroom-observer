@@ -12,7 +12,7 @@ module Views::Controllers::Projects::Aliases
     TABLE_ID = "index_project_alias_table"
 
     # Callers must eager-load `:target` so the per-row
-    # `link_to(alias_.target.try(:format_name), alias_.target)` cell
+    # `Link(type: :get, name: ..., target: alias_.target)` cell
     # doesn't trigger N+1 queries. The `Projects::AliasesController`
     # paths supply that.
     def initialize(project_aliases:)
@@ -50,7 +50,7 @@ module Views::Controllers::Projects::Aliases
              else
                target.try(:format_name)
              end
-      link_to(name, target)
+      Link(type: :get, name: name, target: target)
     end
 
     def render_actions_cell(alias_)

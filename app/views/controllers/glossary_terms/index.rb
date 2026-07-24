@@ -21,10 +21,11 @@ module Views::Controllers::GlossaryTerms
     private
 
     def documentation_link
-      link_to(
-        :glossary_term_index_documentation.tp,
-        "https://github.com/MushroomObserver/mushroom-observer/" \
-        "blob/main/doc/glossary.md"
+      Link(
+        type: :get,
+        name: :glossary_term_index_documentation.tp,
+        target: "https://github.com/MushroomObserver/mushroom-observer/" \
+                "blob/main/doc/glossary.md"
       )
     end
 

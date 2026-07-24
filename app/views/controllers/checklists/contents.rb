@@ -59,7 +59,7 @@ module Views::Controllers::Checklists
     def observed_summary_text
       species = @data.num_species_observed
       higher = @data.num_higher_level_observed
-      taxa_word = higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
+      taxa_word = pluralize_tag(:checklist_taxon, higher).l
       if species.positive? && higher.positive?
         :checklist_observed_summary.t(species: species, higher: higher,
                                       taxa_word: taxa_word)

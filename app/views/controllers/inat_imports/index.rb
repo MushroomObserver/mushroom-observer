@@ -47,7 +47,8 @@ module Views::Controllers::InatImports
     def results_link(import)
       return unless result_ids.include?(import.id)
 
-      link_to(:results.ti, results_inat_import_path(import))
+      Link(type: :get, name: :results.ti,
+           target: results_inat_import_path(import))
     end
 
     def result_ids
@@ -55,7 +56,7 @@ module Views::Controllers::InatImports
     end
 
     def report_link(import)
-      link_to(:report.ti, inat_import_path(import))
+      Link(type: :get, name: :report.ti, target: inat_import_path(import))
     end
 
     def when_text(import)

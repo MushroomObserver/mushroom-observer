@@ -83,10 +83,10 @@ module Views::Controllers::Comments
     end
 
     def render_and_more_link
-      link_to(:show_comments_and_more.t(num: and_more),
-              comments_path(target: @object.id,
-                            type: @object.class.name),
-              class: "float-right")
+      Link(type: :get, name: :show_comments_and_more.t(num: and_more),
+           target: comments_path(target: @object.id,
+                                 type: @object.class.name),
+           class: "float-right")
     end
 
     # ---- comment list slicing ------------------------------------

@@ -89,10 +89,11 @@ module Views::Controllers::Images
         help = image_vote_as_help_string(value)
         text = value.zero? ? help : short
         div(class: "pt-2") do
-          link_to(text, vote_link_args.merge(vote: value),
-                  class: css, title: help,
-                  data: { toggle: "tooltip", placement: "left",
-                          role: "image_vote", val: value, id: @image.id })
+          Link(type: :get, name: text,
+               target: vote_link_args.merge(vote: value),
+               class: css, title: help,
+               data: { tooltip_target: "tip", placement: "left",
+                       role: "image_vote", val: value, id: @image.id })
         end
       end
 
@@ -101,9 +102,10 @@ module Views::Controllers::Images
         help = image_vote_as_help_string(value)
         text = :image_show_vote_and_next.t(value: short)
         div(class: "pt-2") do
-          link_to(text, vote_link_args.merge(vote: value, next: true),
-                  class: css, title: help,
-                  data: { toggle: "tooltip" })
+          Link(type: :get, name: text,
+               target: vote_link_args.merge(vote: value, next: true),
+               class: css, title: help,
+               data: { tooltip_target: "tip" })
         end
       end
 

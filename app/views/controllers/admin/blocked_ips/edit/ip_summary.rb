@@ -48,7 +48,8 @@ module Views::Controllers::Admin::BlockedIps
       end
 
       def render_ip_link(ip)
-        link_to(ip, edit_admin_blocked_ips_path(report: ip))
+        Link(type: :get, name: ip,
+             target: edit_admin_blocked_ips_path(report: ip))
       end
 
       def render_block_button(ip)

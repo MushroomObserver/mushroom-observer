@@ -106,12 +106,6 @@ module Observations::Namings
         before&.id
     end
 
-    def find_merged_naming
-      @consensus.merged_namings.find do |mn|
-        mn.name_id == @naming.name_id
-      end
-    end
-
     def propagate_vote_to_siblings(naming, value, consensus)
       return unless naming.observation.occurrence_id
 
@@ -174,7 +168,8 @@ module Observations::Namings
       render(turbo_stream: [
                turbo_stream.replace(
                  "observation_what_#{obs_id}",
-                 Components::Image::Lightbox::ObservationTitle.new(
+                 Components::ObservationFragment.new(
+                   type: :lightbox_title,
                    obs: @observation, user: @user, identify: false
                  )
                ),

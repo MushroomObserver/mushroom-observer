@@ -31,9 +31,9 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
 
     scroll_to(find_by_id("observation_collection_numbers"), align: :center)
     within("#observation_collection_numbers") do
-      assert_link(:create_collection_number.l)
+      assert_link(:add_object.t(type: :collection_number))
       # Link is too small to click normally, use trigger
-      find_link(:create_collection_number.l).trigger("click")
+      find_link(:add_object.t(type: :collection_number)).trigger("click")
     end
 
     assert_selector("#modal_collection_number", wait: 6)
@@ -176,9 +176,12 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
-    # new sequence
-    assert_link(:show_observation_add_sequence.l)
-    find_link(:show_observation_add_sequence.l).trigger("click")
+    # new sequence -- scope to the sequences section, since several
+    # other sub-panels also show their own add-link on this page.
+    within("#observation_sequences") do
+      assert_link(:add_object.t(type: :sequence))
+      find_link(:add_object.t(type: :sequence)).trigger("click")
+    end
 
     assert_selector("#modal_sequence", wait: 6)
 
@@ -243,15 +246,20 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     assert_no_link(text: /LSU/)
   end
 
-  def test_add_and_edit_external_links
+  # Add flow lives in the "Shared with" badge line now; edit/destroy of
+  # an individual link are no longer reachable from the obs page (only
+  # the read-only accordion info pane is) -- edit/update/destroy are
+  # still covered at the controller-test level in
+  # observations/external_links_controller_test.rb.
+  def test_add_external_link_and_view_shared_with_badge
     login!(users("mary"))
     visit(observation_path(@obs))
     assert_selector("body.observations__show")
 
     site = external_sites(:mycoportal)
     within("#observation_external_links") do
-      assert_link(text: :add.ti)
-      find_link(:add.ti).trigger("click")
+      assert_link(text: :add_object.t(type: :external_link))
+      find_link(:add_object.t(type: :external_link)).trigger("click")
     end
 
     # external_id is active by default; the url field is grayed (readonly)
@@ -266,35 +274,38 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
     sleep(1)
     assert_no_selector("#modal_external_link")
 
-    link = ExternalLink.last
-    assert_equal("12212326", link.external_id)
-    assert_nil(link.url, "an external_id link stores no url")
+    mcp_link = ExternalLink.last
+    assert_equal("12212326", mcp_link.external_id)
+    assert_nil(mcp_link.url, "an external_id link stores no url")
+
+    # A second site's link, created directly (not via the UI) so the
+    # accordion has two badges to switch between.
+    inat = external_sites(:inaturalist)
+    inat_link = ExternalLink.create!(
+      user: users("mary"), target: @obs, external_site: inat,
+      external_id: "99887766"
+    )
+    visit(observation_path(@obs))
 
     within("#observation_external_links") do
-      assert_link(text: /MyCoPortal/)
-      find_link(:edit.ti).trigger("click")
+      assert_link(text: "MCP")
+      # CSS `.text-uppercase` renders the "iNat" badge text as "INAT" --
+      # match the visible rendering, not the source-code casing.
+      assert_link(text: "INAT")
+      find("a[data-target='#pane_#{inat_link.id}']").trigger("click")
     end
 
-    # edit: change the external_id
-    within("#modal_external_link_#{link.id}") do
-      fill_in("external_link_external_id", with: "13629347")
-      click_commit
-    end
-    assert_no_selector("#modal_external_link_#{link.id}")
-    assert_equal("13629347", link.reload.external_id)
+    # Clicking iNat opens its pane, Turbo-fetching the frame content.
+    assert_selector("#pane_#{inat_link.id}.in", wait: 6)
+    within("#pane_#{inat_link.id}") { assert_text(/iNaturalist/) }
 
-    # remove (turbo_confirm modal)
     within("#observation_external_links") do
-      assert_button(text: :destroy_object.t(type: :external_link))
-      find(:css, ".destroy_external_link_link_#{link.id}").click
+      find("a[data-target='#pane_#{mcp_link.id}']").trigger("click")
     end
-    assert_selector("#mo_confirm", visible: true)
-    within("#mo_confirm") do
-      click_button(class: "btn-danger")
-    end
-    assert_no_selector("#mo_confirm", visible: true)
-    within("#observation_external_links") do
-      assert_no_link(text: /MyCoPortal/)
-    end
+
+    # Clicking MCP closes iNat's pane (accordion) and opens MCP's own.
+    assert_selector("#pane_#{mcp_link.id}.in", wait: 6)
+    within("#pane_#{mcp_link.id}") { assert_text(/MyCoPortal/) }
+    assert_no_selector("#pane_#{inat_link.id}.in")
   end
 end

@@ -34,7 +34,7 @@ module Tab::HerbariumRecord
     def test_new
       tab = Tab::HerbariumRecord::New.new(observation: @observation)
 
-      assert_equal(:create_herbarium_record.l, tab.title)
+      assert_equal(:add_object.t(type: :herbarium_record), tab.title)
       assert_equal(
         routes.new_herbarium_record_path(observation_id: @observation.id),
         tab.path

@@ -83,7 +83,8 @@ module Views::Controllers::Users
         p do
           strong { "#{:show_user_personal_herbarium.l}:" }
           whitespace
-          link_to(@show_user.personal_herbarium.show_link_args) do
+          Link(type: :get, name: @show_user.personal_herbarium.name,
+               target: @show_user.personal_herbarium.show_link_args) do
             trusted_html(@show_user.personal_herbarium.name.t)
           end
         end
@@ -126,7 +127,8 @@ module Views::Controllers::Users
       def render_footer
         return unless @life_list.num_taxa.positive?
 
-        link_to(checklist_path(id: @show_user.id)) do
+        Link(type: :get, name: :app_life_list.l,
+             target: checklist_path(id: @show_user.id)) do
           strong { :app_life_list.l }
         end
         plain(": ")
@@ -136,7 +138,7 @@ module Views::Controllers::Users
       def life_list_text
         species = @life_list.num_species_observed
         higher = @life_list.num_higher_level_observed
-        taxa_word = higher == 1 ? :checklist_taxon.l : :checklist_taxa.l
+        taxa_word = pluralize_tag(:checklist_taxon, higher).l
         if species.positive? && higher.positive?
           :show_user_life_list.t(species: species, higher: higher,
                                  taxa_word: taxa_word)

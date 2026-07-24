@@ -45,7 +45,7 @@ module Views::Controllers::SpeciesLists
     def render_info
       div(class: "list_info d-flex align-items-start") do
         div(class: "text-larger") do
-          IDBadge(object: @species_list, extra_class: "rss-id mr-4")
+          IDBadge(object: @species_list, size: :md)
         end
         div do
           render_title_row
@@ -56,7 +56,8 @@ module Views::Controllers::SpeciesLists
 
     def render_title_row
       div do
-        link_to(@species_list.show_link_with_project(@project)) do
+        Link(type: :get, name: @species_list.text_name.t,
+             target: @species_list.show_link_with_project(@project)) do
           span(class: "list_what h4") do
             trusted_html(@species_list.text_name.t)
           end
