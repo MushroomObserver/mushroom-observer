@@ -206,7 +206,9 @@ class Components::Image::Base < Components::Base
   # it fresh from the DOM on every slide open, so ordinary
   # `turbo_stream.replace`/`update` calls just work, open or closed.
   def render_lightbox_caption(lightbox_data)
-    div(class: "lightbox-caption d-none",
+    # `hidden`, not just `.d-none` -- Capybara's non-JS integration
+    # tests don't honor CSS classes, only the `hidden` attribute.
+    div(class: "lightbox-caption d-none", hidden: true,
         id: "lightbox_caption_#{lightbox_data[:image_id]}") do
       ImageFragment(
         type: :lightbox_caption,
