@@ -10,6 +10,7 @@ development:
     username: <%= ENV.fetch("DATABASE_USERNAME", "mo") %>
     password: <%= ENV.fetch("DATABASE_PASSWORD", "mo") %>
     port: 3306
+    pool: 10
   cache:
     database: cache_development
     host: <%= ENV.fetch("DATABASE_HOST", "db") %>
