@@ -60,8 +60,13 @@ class RssLog::Title
 
   private
 
+  # Memoized: RssLog#target isn't memoized on the model itself (fresh
+  # find_by when the association isn't preloaded), and every title
+  # method above calls this 2-3 times.
   def target
-    @rss_log.target
+    return @target if defined?(@target)
+
+    @target = @rss_log.target
   end
 
   # The top line of log should be the old object's name after it is
