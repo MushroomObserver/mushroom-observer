@@ -58,7 +58,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   def render_status_line
     li(class: "hanging-indent") do
       plain("#{:status.ti}: ")
-      plain(@name.status)
+      plain(name_deprecation_status)
       plain(" (#{:misspelled.ti})") if @name.is_misspelling?
       if approve_link || deprecate_link
         span(class: "text-nowrap ml-3") do
@@ -66,6 +66,15 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
         end
       end
     end
+  end
+
+  # Was Name::Synonymy#status -- moved here (#4901) since its only
+  # real caller was this line (a second, inert `name.status` call in
+  # names_controller_create_test.rb built a form param the controller
+  # never actually reads -- permitted_name_params doesn't include
+  # :status -- so it wasn't a real consumer).
+  def name_deprecation_status
+    @name.deprecated ? :deprecated.ti : :accepted.ti
   end
 
   # Inline emit (the Phlex idiom) — `render` flushes each

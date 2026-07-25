@@ -313,14 +313,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     user && user_group.users.member?(user) && user.id != user_id
   end
 
-  def member_status(user)
-    return :owner.ti if user == self.user
-    return :admin.ti if is_admin?(user)
-    return :member.ti if member?(user)
-
-    nil
-  end
-
   def user_can_add_observation?(obs, user)
     obs.user == user || member?(user)
   end

@@ -150,8 +150,7 @@ class NamesControllerCreateTest < FunctionalTestCase
       name: {
         text_name: name.text_name,
         author: "Author",
-        rank: name.rank,
-        status: name.status
+        rank: name.rank
       }
     }
     user = users(:rolf)
@@ -176,8 +175,7 @@ class NamesControllerCreateTest < FunctionalTestCase
       name: {
         text_name: name.text_name,
         author: "",
-        rank: name.rank,
-        status: name.status
+        rank: name.rank
       }
     }
     post(:create, params: params)

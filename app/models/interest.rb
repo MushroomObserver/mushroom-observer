@@ -87,25 +87,11 @@ class Interest < AbstractModel
     where(target_type: obj.class.to_s, target_id: obj.id)
   end
 
-  # To be compatible with NameTracker need to have summary string:
-  #
-  #   "Watching Observation: Amanita virosa"
-  #   "Ignoring Location: Albion, California, USA"
-  #
-  def summary
-    return target.summary if target && (target_type == "NameTracker")
-
-    "#{state ? :watching.ti : :ignoring.ti} " \
-    "#{target_type.underscore.to_sym.l}: " \
-    "#{target ? target_format_name : "--"}"
-  end
-
   # `user` (this Interest's owner) is the only one who ever sees this,
   # via their own Interests index page.
   def target_format_name
     target.unique_format_name(user)
   end
-  alias text_name summary
 
   ##############################################################################
 
