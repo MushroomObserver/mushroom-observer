@@ -113,15 +113,6 @@ class ProjectTest < UnitTestCase
     assert_not(projects(:future_project).current?)
   end
 
-  def test_date_strings
-    proj = projects(:pinned_date_range_project)
-    assert_equal("#{proj.start_date} to #{proj.end_date}",
-                 proj.date_range, "Wrong date range string")
-
-    assert_equal(:form_projects_any.l, projects(:unlimited_project).date_range,
-                 "Wrong date range string")
-  end
-
   def test_out_of_range_observations
     assert_out_of_range_observations(projects(:current_project), expect: 0)
     assert_out_of_range_observations(projects(:unlimited_project), expect: 0)

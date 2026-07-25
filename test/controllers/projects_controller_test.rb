@@ -219,8 +219,10 @@ class ProjectsControllerTest < FunctionalTestCase
     login
     get(:show, params: { id: project.id })
     assert_response(:success)
+    expected_range = "#{project.start_date.strftime("%Y-%m-%d")} to " \
+                      "#{project.end_date.strftime("%Y-%m-%d")}"
     # NOTE: this project has no banner_image
-    assert_select("#header", { text: /#{project.date_range}/ },
+    assert_select("#header", { text: /#{expected_range}/ },
                   "Date range missing from Project header")
   end
 
