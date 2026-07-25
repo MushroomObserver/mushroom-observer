@@ -25,15 +25,21 @@ class Components::ImageFragment::Copyright < Components::Base
   # view_template logic) since license_history_panel.rb needs the same
   # text for historical license/holder combos that don't necessarily
   # match the current @image.
+  # rubocop:disable Style/StringConcatenation -- `+` (not interpolation)
+  # is load-bearing: chaining off a SafeBuffer HTML-escapes `name`
+  # (untrusted DB text) while leaving the trusted tag/entity fragments
+  # alone. The cop's autocorrect would flatten this to interpolation
+  # and silently drop the escaping.
   def self.text_for(license:, year:, name:)
+    safe = ActiveSupport::SafeBuffer.new("")
     if license.url.match?(%r{/(publicdomain|cc0)/?})
-      ActiveSupport::SafeBuffer.new("#{:image_show_public_domain.t} #{name}")
+      safe + :image_show_public_domain.t + " " + name
     else
-      ActiveSupport::SafeBuffer.new(
-        "#{:image_show_copyright.t} &copy; #{year} #{name}"
-      )
+      safe + :image_show_copyright.t +
+        ActiveSupport::SafeBuffer.new(" &copy; ") + "#{year} " + name
     end
   end
+  # rubocop:enable Style/StringConcatenation
 
   private
 
