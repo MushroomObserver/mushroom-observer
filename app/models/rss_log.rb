@@ -126,9 +126,9 @@
 #
 #  add_with_date::      Same, but adds timestamp.
 #  orphan::             About to delete object: add object title and notes.
-#  orphan_title::       Get old title from top line of orphaned log.
 #  orphan?::            Has rss_log been orphaned? (i.e., target destroyed?)
 #  target::             Return owner object: Observation, Name, etc.
+#  title::              RssLog::Title instance (text_name/format_name/etc.).
 #  text_name::          Return title string of associated object.
 #  format_name::        Return formatted title string of associated object.
 #  unique_text_name::   (same, with id tacked on to make unique)
@@ -215,68 +215,24 @@ class RssLog < AbstractModel
     self
   end
 
-  # The top line of log should be the old object's name after it is destroyed.
-  def orphan_title
-    name = notes.to_s.split("\n", 2).first
-    if /^\d{14}/.match?(name)
-      # This is an occasional error, when a log wasn't orphaned properly.
-      _tag, args, _time = parse_log.first
-      args[:this] || :rss_log_of_deleted_item.l
-    else
-      unescape(name)
-    end
-  end
-
   # Has target been destroyed (orphaning this log)?  Top line of log should be
   # the old object's name after it is destroyed.
   def orphan?
     !target_type || !notes.match?(/\A\d{14}/)
   end
 
-  # Returns plain text title of the associated object.
-  def text_name
-    if target
-      if target.respond_to?(:real_text_name)
-        target.real_text_name
-      else
-        target.text_name
-      end
-    else
-      orphan_title.t.html_to_ascii.sub(/ (\d+)$/, "")
-    end
+  # text_name/unique_text_name/format_name/unique_format_name/url all
+  # live on RssLog::Title (#4901) -- delegated here so every existing
+  # caller keeps working unchanged.
+  def title
+    @title ||= RssLog::Title.new(self)
   end
+  delegate :text_name, :unique_text_name, :format_name,
+           :unique_format_name, :url, to: :title
 
-  # Returns plain text title of the associated object, with id tacked on.
-  def unique_text_name
-    if target
-      target.unique_text_name
-    else
-      orphan_title.t.html_to_ascii
-    end
-  end
-
-  # Returns formatted title of the associated object.
-  def format_name(user = nil)
-    if target
-      target.format_name(user)
-    else
-      orphan_title.sub(/ (\d+)$/, "")
-    end
-  end
-
-  # Returns formatted title of the associated object, with id tacked on.
-  def unique_format_name(user = nil)
-    if target
-      target.unique_format_name(user)
-    else
-      orphan_title
-    end
-  end
-
-  # Returns URL of <tt>show_#{object}</tt> action for the associated object.
-  # The time thing might have something to do with RSS log requirements?
-  def url
-    "#{(target || self).show_url}?time=#{updated_at.tv_sec}"
+  # Public so RssLog::Title#orphan_title can reach it too.
+  def self.unescape(str)
+    str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
   end
 
   # Add entry to top of notes and save.  Pass in a localization key and a hash
@@ -446,7 +402,7 @@ class RssLog < AbstractModel
 
   # Reverse protection of special characters in string for log encoder/decoder.
   def unescape(str)
-    str.to_s.gsub(/%(..)/) { Regexp.last_match(1).hex.chr }
+    self.class.unescape(str)
   end
 
   # Add line to top of notes field, truncating it to keep it within the MySQL

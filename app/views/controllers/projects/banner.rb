@@ -118,8 +118,15 @@ module Views::Controllers::Projects
                      end
 
       div(class: date_classes) do
-        b { @project.date_range }
+        b { project_date_range }
       end
+    end
+
+    # Only called when both dates are present (see the guard above),
+    # so no ":form_projects_any.l" fallback is needed here (#4901).
+    def project_date_range
+      "#{@project.start_date.strftime("%Y-%m-%d")} to " \
+        "#{@project.end_date.strftime("%Y-%m-%d")}"
     end
   end
 end
