@@ -625,16 +625,22 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     dubious_name?(db_name, true) || []
   end
 
+  # Each check_* method below returns an Array of [tag, args] pairs
+  # (unresolved) rather than resolved strings -- the two consumers
+  # (Components::Form::LocationFeedback, API2::Helpers#make_sure_
+  # location_isnt_dubious!) need different final forms (HTML-safe
+  # per-line text vs. a joined API error message), so resolution via
+  # `tag.t(**args)` happens at each consumer instead of here (#4901).
   def self.check_for_empty_name(name)
     return [] if name.present?
 
-    [:location_dubious_empty.l]
+    [[:location_dubious_empty, {}]]
   end
 
   def self.check_for_dubious_commas(name)
     return [] unless comma_test(name)
 
-    [:location_dubious_commas.l]
+    [[:location_dubious_commas, {}]]
   end
 
   def self.check_for_bad_country_or_state(name)
@@ -650,15 +656,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.check_country_validity(real_country, this_country)
     return [] if real_country
 
-    [:location_dubious_unknown_country.t(country: this_country)]
+    [[:location_dubious_unknown_country, { country: this_country }]]
   end
 
   def self.check_state_validity(real_country, this_country, this_state)
     if real_country && has_known_states?(real_country)
       check_known_state_validity(real_country, this_country, this_state)
     elsif this_state && understood_country?(this_state)
-      [:location_dubious_redundant_state.t(country: real_country,
-                                           state: this_state)]
+      [[:location_dubious_redundant_state,
+        { country: real_country, state: this_state }]]
     else
       []
     end
@@ -670,11 +676,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     if this_state
       return [] unless understood_state?(this_state, real_country).nil?
 
-      [:location_dubious_unknown_state.t(country: real_country,
-                                         state: this_state)]
+      [[:location_dubious_unknown_state,
+        { country: real_country, state: this_state }]]
     elsif this_country != real_country &&
           understood_state?(this_country, real_country)
-      [:location_dubious_ambiguous_country.t(country: this_country)]
+      [[:location_dubious_ambiguous_country, { country: this_country }]]
     else
       []
     end
@@ -687,7 +693,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     BAD_TERMS.each_key do |key|
       next unless name.index(key)
 
-      reasons << :location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key])
+      reasons << [:location_dubious_bad_term,
+                  { bad: key, good: BAD_TERMS[key] }]
     end
     reasons
   end
@@ -699,7 +706,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     # For some reason BAD_CHARS.chars.each doesn't work
     count = 0
     while (c = BAD_CHARS[count])
-      reasons << :location_dubious_bad_char.t(char: c) if name.index(c)
+      reasons << [:location_dubious_bad_char, { char: c }] if name.index(c)
       count += 1
     end
     reasons
