@@ -410,12 +410,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name(user)
   end
 
-  # Page heading + browser tab title. `display_name` is plain text
-  # for the visible heading (place name; no textile); `text_name` is
-  # the ASCII form for the doc title.
-  alias page_title display_name
-  alias document_title text_name
-
   def textile_name(user = nil)
     display_name(user)
   end

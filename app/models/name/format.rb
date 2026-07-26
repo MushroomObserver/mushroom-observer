@@ -85,21 +85,6 @@ module Name::Format
     Name.display_to_real_search(self, user)
   end
 
-  # Page heading (rendered HTML — textile applied + author wrapping).
-  # `user` arg lets us respect hide_authors prefs. When nil we use the
-  # raw display_name (no user-specific transforms).
-  def page_title(user = nil)
-    display_name(user).t.small_author
-  end
-
-  # Plain-text title for the browser tab `<title>`. Helper prepends
-  # the type-tag + id; `text_name` is the binomial-only column.
-  # (Can't `alias` to AR column from a module — accessor not in
-  # scope at class-load.)
-  def document_title
-    text_name
-  end
-
   def sensu_stricto
     text_name.sub(GROUP_AT_END_OF_TEXT_NAME, "")
   end
