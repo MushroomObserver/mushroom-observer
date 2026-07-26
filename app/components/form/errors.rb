@@ -16,7 +16,11 @@ class Components::Form::Errors < Components::Base
     Alert(level: :danger, id: "error_explanation") do
       h2 { error_count_message }
       ul do
-        @model.errors.each { |error| li { error.full_message } }
+        @model.errors.each do |error|
+          li do
+            @model.resolved_full_message(error)
+          end
+        end
       end
     end
   end

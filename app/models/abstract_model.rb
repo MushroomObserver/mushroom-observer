@@ -65,6 +65,7 @@
 class AbstractModel < ApplicationRecord
   include Scopes
   include OrderingScopes
+  include ErrorResolution
 
   self.abstract_class = true
 
@@ -303,7 +304,7 @@ class AbstractModel < ApplicationRecord
     out = []
     errors.each do |error|
       attribute = error.attribute
-      message = error.message
+      message = resolved_error_message(error)
       if /^[A-Z]/.match?(message)
         out << message
       else
