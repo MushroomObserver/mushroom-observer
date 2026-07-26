@@ -165,6 +165,37 @@ module Views::Controllers::InatImports
       assert_html(html, "a[href='#{reimport_path}']")
     end
 
+    def test_skeleton_imported_section_absent_when_no_skeletons
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: 3
+      )
+      html = render_status
+
+      assert_no_html(
+        html,
+        "*",
+        text: :inat_import_tracker_skeleton_imported_heading.l.as_displayed
+      )
+    end
+
+    def test_skeleton_imported_section_shown_with_count
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: 2,
+        ignored_not_importable_count: 1,
+        skeleton_imported_count: 2
+      )
+      html = render_status
+
+      assert_html(
+        html, "h5",
+        text: :inat_import_tracker_skeleton_imported_heading.l.as_displayed
+      )
+    end
+
     private
 
     def render_status

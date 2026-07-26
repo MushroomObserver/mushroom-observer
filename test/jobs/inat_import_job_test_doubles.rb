@@ -86,7 +86,10 @@ module InatImportJobTestDoubles
       query_args.merge!(BASE_FILTER_PARAMS)
     end
     if @inat_import.import_others
-      query_args.merge!(LICENSED_FILTER)
+      # Mirrors PageParser#add_ownership_filter: no `licensed` filter when
+      # create_skeletons is on (the default, #4828) — unlicensed obs are
+      # still imported, as skeletons, so nothing should be trimmed out.
+      query_args.merge!(LICENSED_FILTER) unless @inat_import.create_skeletons?
     else
       query_args[:user_login] = @inat_import.inat_username
     end

@@ -158,6 +158,7 @@ module Views::Controllers::InatImports
         render_date_missing_row
       end
       render_license_added_section
+      render_skeleton_imported_section
     end
 
     def render_ignored_row(caption_key, count)
@@ -210,6 +211,21 @@ module Views::Controllers::InatImports
                name: label,
                target: new_inat_import_path(inat_ids: ids.join(","))
              ))
+    end
+
+    # Reports how many of this import's obs were built as minimal skeleton
+    # counterparts (#4828) rather than full copies, because the source iNat
+    # obs was unlicensed.
+    def render_skeleton_imported_section
+      count = @inat_import.skeleton_imported_count.to_i
+      return unless count.positive?
+
+      Alert(level: :info, class: "mt-3") do
+        h5 { plain(:inat_import_tracker_skeleton_imported_heading.l) }
+        div do
+          plain(:inat_import_tracker_skeleton_imported_note.t(count: count))
+        end
+      end
     end
 
     def render_error_alert

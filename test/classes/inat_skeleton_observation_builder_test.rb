@@ -1,0 +1,119 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+# Unit tests for Inat::SkeletonObservationBuilder (#4828): the minimal
+# "counterpart" Observation built for an unlicensed import-others obs.
+# Integration coverage against a real recorded iNat fixture (create_mo_name
+# via the API, end-to-end job behavior) lives in
+# test/jobs/inat_import_job_test.rb
+# (test_job_creates_skeleton_for_unlicensed_obs_for_not_own_import); this
+# file isolates the builder's own logic with an already-existing MO Name,
+# so no Names API call is involved.
+class InatSkeletonObservationBuilderTest < UnitTestCase
+  include ActiveJob::TestHelper
+
+  # Minimal stand-in for an ::Inat::Obs, exposing only what
+  # Inat::SkeletonObservationBuilder and Inat::LeadNameResolver read.
+  class FakeInatObs
+    FAKE_INAT_ID = 87_654_321
+
+    def initialize(name:, quality_grade: "needs_id", collector: "A Collector",
+                   owner_login: "danmorton", owner_name: "Daniel Morton")
+      @name = name
+      @quality_grade = quality_grade
+      @collector = collector
+      @owner_login = owner_login
+      @owner_name = owner_name
+    end
+
+    attr_reader :name, :collector
+
+    def provisional_name = nil
+    def name_override = nil
+
+    def when = Date.new(2024, 4, 29)
+    def location = ::Location.find_by(name: "Albion, California, USA")
+    def where = "Albion, California, USA"
+    def lat = 44.0
+    def lng = -123.0
+    def gps_hidden = false # rubocop:disable Naming/PredicateMethod
+
+    def [](key)
+      { id: FAKE_INAT_ID, quality_grade: @quality_grade, license_code: nil,
+        identifications: [],
+        user: { login: @owner_login, name: @owner_name } }[key]
+    end
+  end
+
+  def test_mo_observation_builds_minimal_skeleton
+    name = names(:peltigera)
+    builder = builder_for(name: name)
+
+    obs = builder.mo_observation
+
+    assert_equal(name.id, obs.name_id, "Wrong Name")
+    assert_equal(Date.new(2024, 4, 29), obs.when, "Wrong date")
+    assert_equal("Albion, California, USA", obs.where, "Wrong location")
+    assert_equal("A Collector", obs.collector, "Wrong collector")
+    assert_equal(0, obs.images.length, "Skeleton should have no images")
+    assert_equal(1, obs.namings.length, "Skeleton should have 1 naming")
+    assert_equal(users(:rolf), obs.namings.first.user,
+                 "Skeleton's naming should always be attributed to importer")
+    assert_placeholder_notes(obs)
+    assert(
+      ExternalLink.exists?(target: obs, external_site: ExternalSite.inaturalist,
+                           external_id: FakeInatObs::FAKE_INAT_ID.to_s,
+                           relationship: :import),
+      "Skeleton should have an import ExternalLink to the iNat obs"
+    )
+    assert_equal(0, builder.unlicensed_obs)
+    assert_equal(0, builder.skipped_images)
+    assert_equal([], builder.created_image_ids)
+  end
+
+  def assert_placeholder_notes(obs)
+    notes = obs.notes_part_value(Observation.other_notes_part)
+    assert(
+      notes.start_with?("Placeholder for iNat ##{FakeInatObs::FAKE_INAT_ID},"),
+      "Notes should be the placeholder text, not iNat's actual notes"
+    )
+    assert_includes(notes, "Daniel Morton",
+                    "Placeholder notes should credit the iNat obs's owner")
+  end
+
+  # Unlike Inat::MoObservationBuilder (which wraps naming creation in
+  # Naming.suppress_notifications so the import job can send one digest
+  # per user instead), a skeleton naming fires its email notification
+  # immediately (#4828) — Inat::ImportDigest excludes it from the
+  # end-of-import digest to avoid double-notifying (see
+  # inat_import_digest_test.rb).
+  def test_mo_observation_does_not_suppress_notifications
+    NameTracker.create!(name: names(:peltigera), user: users(:mary))
+
+    assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob) do
+      builder_for(name: names(:peltigera)).mo_observation
+    end
+  end
+
+  def test_naming_vote_research_grade_is_promising
+    builder = builder_for(name: names(:peltigera), quality_grade: "research")
+    assert_equal(Vote::NEXT_BEST_VOTE, builder.send(:naming_vote))
+  end
+
+  def test_naming_vote_non_research_is_could_be
+    builder = builder_for(name: names(:peltigera), quality_grade: "needs_id")
+    assert_equal(Vote::MIN_POS_VOTE, builder.send(:naming_vote))
+
+    builder = builder_for(name: names(:peltigera), quality_grade: "casual")
+    assert_equal(Vote::MIN_POS_VOTE, builder.send(:naming_vote))
+  end
+
+  def builder_for(name:, quality_grade: "needs_id")
+    fake = FakeInatObs.new(name: name, quality_grade: quality_grade)
+    Inat::SkeletonObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf),
+      external_site: ExternalSite.inaturalist
+    )
+  end
+end

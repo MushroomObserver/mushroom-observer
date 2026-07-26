@@ -34,6 +34,14 @@
 #                          reset in InatImportsController#authorization_response
 #                          and in Job after each observation import
 #  cancel/canceled::       Did the user requested canceling the Job
+#  create_skeletons::      import-others: build a minimal counterpart
+#                          Observation for an unlicensed obs instead of
+#                          skipping it entirely. Defaults true.
+#  skeleton_imported_count:: count of this import's skeleton observations
+#  skeleton_observation_ids:: ids of this import's skeleton Observations,
+#                          so Inat::ImportDigest can exclude them (their
+#                          namings notify immediately, unlike a full
+#                          import's suppressed-then-digested namings)
 #
 # == Class Methods
 #  super_importers         users who can import other users' iNat obss
@@ -73,6 +81,7 @@ class InatImport < ApplicationRecord
   serialize :log, type: Array, coder: YAML
   serialize :date_missing_inat_ids, coder: JSON
   serialize :license_added_inat_ids, coder: JSON
+  serialize :skeleton_observation_ids, coder: JSON
 
   after_update_commit lambda { |inat_import|
     html = ApplicationController.renderer.render(
@@ -150,6 +159,16 @@ class InatImport < ApplicationRecord
   def add_license_added_obs(inat_id:)
     reload
     update!(license_added_inat_ids: license_added_inat_ids + [inat_id])
+  end
+
+  # Records a skeleton-imported Observation's id so Inat::ImportDigest can
+  # exclude it: skeleton namings notify immediately (not suppressed like a
+  # full import's), so including them in the end-of-import digest too would
+  # double-notify interested users.
+  def add_skeleton_observation(observation_id)
+    reload
+    update!(skeleton_observation_ids: skeleton_observation_ids +
+                                       [observation_id])
   end
 
   def reached_import_cap?
@@ -260,6 +279,7 @@ class InatImport < ApplicationRecord
     self.response_errors ||= ""
     self.date_missing_inat_ids ||= []
     self.license_added_inat_ids ||= []
+    self.skeleton_observation_ids ||= []
   end
 
   def append_date_missing(inat_id)

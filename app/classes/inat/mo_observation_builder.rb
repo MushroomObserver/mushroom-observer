@@ -9,8 +9,6 @@ class Inat
     attr_reader :inat_obs, :user, :skipped_images, :unlicensed_obs,
                 :created_image_ids
 
-    MO_API_KEY_NOTES = InatImportsController::MO_API_KEY_NOTES
-
     def initialize(inat_obs:, user:, import_others: false,
                    external_site: nil, inat_import: nil)
       @inat_obs = inat_obs
@@ -53,6 +51,14 @@ class Inat
       @observation.log(:log_observation_created, user: user)
     end
 
+    # Resolves community/provisional/override/lead names, and creates MO
+    # Names via the API when needed (#4828 — shared with
+    # Inat::SkeletonObservationBuilder).
+    def name_resolver
+      @name_resolver ||= Inat::LeadNameResolver.new(inat_obs: inat_obs,
+                                                    user: user)
+    end
+
     def new_obs_params # rubocop:disable Metrics/AbcSize
       { user: user,
         when: inat_obs.when,
@@ -77,78 +83,23 @@ class Inat
     end
 
     # The MO name for the iNat Observation Taxon, creating it if needed.
-    def community_name
-      resolved_obs_name
-    end
+    def community_name = name_resolver.community_name
 
     # The MO name for the iNat provisional-name observation field, or nil.
-    # iNat can't use a provisional name as its own identification, so it is a
-    # separate proposal from the Observation Taxon. Creates the MO name if
-    # absent.
-    # NOTE: iNat users seem to add a prov name only when there's a sequence.
-    def prov_name
-      return nil if inat_obs.provisional_name.blank?
+    def prov_name = name_resolver.prov_name
 
-      @prov_name ||= find_or_create_prov_name
-    end
-
-    def find_or_create_prov_name
-      find_or_create_name(Name.parse_name(inat_obs.provisional_name))
-    end
-
-    # The MO name for the iNat "Species Name Override" obs field, or nil. The
-    # override outranks the provisional name and the Observation Taxon as the
-    # lead (#4533). Returns nil - falling back to the provisional/Community
-    # lead - when the override value can't be parsed or created as an MO Name.
-    def override_name
-      return @override_name if defined?(@override_name)
-
-      @override_name =
-        inat_obs.name_override.blank? ? nil : find_or_create_override_name
-    end
-
-    def find_or_create_override_name
-      find_or_create_name(Name.parse_name(inat_obs.name_override)) ||
-        log_ignored_override("unparseable or uncreatable name")
-    rescue StandardError => e
-      log_ignored_override(e.message)
-    end
-
-    # Logs why an override was dropped (so a fall-back isn't silent) and
-    # returns nil for the override lead. (#4533)
-    def log_ignored_override(reason)
-      Rails.logger.warn("InatImport: ignoring Species Name Override " \
-                        "#{inat_obs.name_override.inspect}: #{reason}")
-      nil
-    end
-
-    # Existing MO Name for the parsed name, else create it via the API (iNat
-    # taxa/provisional names lack ICN ids). nil when the name won't parse.
-    def find_or_create_name(parsed)
-      return nil if parsed.nil? || parsed.text_name.blank?
-
-      if Name.where(text_name: parsed.text_name).none?
-        add_provisional_name(parsed)
-      else
-        best_mo_homonym(parsed.text_name)
-      end
-    end
+    # The MO name for the iNat "Species Name Override" obs field, or nil.
+    def override_name = name_resolver.override_name
 
     # The name proposed as the obs's consensus: the override name when present,
     # else the provisional name, else the Observation Taxon, corrected to its
     # preferred synonym when deprecated in MO. calc_consensus confirms it from
     # the votes, where it carries the highest weight. (#4212, #4533)
-    def lead_name
-      @lead_name ||= preferred(override_name || prov_name || community_name)
-    end
+    def lead_name = name_resolver.lead_name
 
     # A deprecated name's best preferred synonym, else the name itself
     # (falling back to itself when a deprecated name has no approved synonym).
-    def preferred(name)
-      return name unless name.deprecated?
-
-      name.best_preferred_synonym.presence || name
-    end
+    def preferred(name) = name_resolver.preferred(name)
 
     # Pure: the namings to create as [name, vote] for the given Observation
     # Taxon name, provisional name (or nil), override name (or nil), and the
@@ -199,54 +150,11 @@ class Inat
         next unless taxon.importable?
         next if taxon.name.present?
 
-        create_mo_name(taxon)
+        name_resolver.create_mo_name(taxon)
       end
     end
 
-    def resolved_obs_name
-      @resolved_obs_name ||=
-        inat_obs.name ||
-        create_mo_name(Inat::Taxon.new(inat_obs[:taxon])) ||
-        Name.unknown
-    end
-
-    def create_mo_name(taxon)
-      # iNat "complex" rank needs special treatment because
-      # The equivalent MO rank is a one-off, requiring special handling
-      complex = taxon[:rank] == "complex"
-      rank_str = complex ? "Group" : taxon[:rank].titleize
-      name_str = if complex
-                   # append "complex" to prevent parsing it as a Species
-                   "#{taxon.full_name_string} complex"
-                 else
-                   taxon.full_name_string
-                 end
-
-      # There's no author or ICN ID because iNat taxa lack those.
-      post_name(name: name_str, rank: rank_str)
-    end
-
-    def add_provisional_name(parsed_prov_name)
-      post_name(name: parsed_prov_name.search_name, rank: parsed_prov_name.rank)
-    end
-
-    def post_name(name:, rank:)
-      params = { method: :post, action: :name,
-                 api_key: user_api_key,
-                 name: name,
-                 rank: rank }
-      api = API2.execute(params)
-      if api.errors.any?
-        raise("Failed to create name #{name.inspect}: " \
-              "#{api.errors.join(", ")}")
-      end
-
-      api.results.first
-    end
-
-    def user_api_key
-      APIKey.find_by(user: user, notes: MO_API_KEY_NOTES).key
-    end
+    def user_api_key = name_resolver.api_key
 
     def update_names_and_proposals
       Observation::NamingConsensus.new(@observation).calc_consensus(user)
@@ -288,12 +196,6 @@ class Inat
     # iNat login of the iNat user who suggested the id on iNat
     def suggester(suggestion)
       suggestion[:user][:login]
-    end
-
-    def best_mo_homonym(text_name)
-      Name.where(text_name: text_name).
-        order(deprecated: :asc, created_at: :desc).
-        first
     end
 
     # Confidence weight for the importer's lead (consensus) naming, set

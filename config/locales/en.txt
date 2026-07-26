@@ -2771,6 +2771,8 @@
   inat_recheck_all: "Re-check observations already linked to Mushroom Observer"
   inat_recheck_all_help: "\"All\" and URL imports normally skip iNat observations that already have a \"Mushroom Observer URL\" field. Check this to re-examine them — for example, to re-import observations whose MO observation was deleted. Slower for large accounts. Observations listed by ID are always re-checked."
   inat_import_others: "Import other users' observations"
+  inat_create_skeletons: "Create skeleton records for unlicensed observations"
+  inat_create_skeletons_help: "When checked (default), an unlicensed observation is imported as a minimal counterpart — iNat observation ID, date, location, collector, and a single proposed name only, no photo, notes, or other suggested identifications. When unchecked, unlicensed observations are skipped entirely."
   inat_skip_writeback: "Skip writing the MO link back to iNaturalist (admin)"
   inat_import_consent: "(Required) I consent to importing my iNaturalist observations into Mushroom Observer, including any unlicensed observations and images, with my default MO license applied to any unlicensed images."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
@@ -2800,6 +2802,7 @@
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
+  inat_skeleton_placeholder_notes: "Placeholder for iNat #[inat_id], ©[name] All Rights Reserved"
 
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_requested_caption: Requested Observations
@@ -2815,6 +2818,8 @@
   inat_import_confirm_unlicensed_obs_caption: Unlicensed observations
   inat_import_confirm_unlicensed_obs_note: "(your default MO license will be applied to images)"
   inat_import_confirm_unlicensed_others_note: "(will not be imported — no iNat license)"
+  inat_import_confirm_skeleton_obs_caption: Unlicensed observations (imported as skeletons)
+  inat_import_confirm_skeleton_obs_note: "(will be imported as minimal skeleton observations — no photo, notes, or suggested IDs)"
   inat_import_confirm_time_estimate_caption: Estimated time
   inat_import_confirm_explanation: "MO will import your iNat observations that are identified as a fungus or slime mold and that were neither previously imported by MO, imported by iNat, nor \"mirrored\" to iNat with Jacob Kalichman's Mirror script. Unlicensed images will be imported with your default MO license. You can work on other things while the import is proceeding."
   inat_import_confirm_prompt: Would you like to proceed with the import?
@@ -2830,6 +2835,7 @@
   inat_details_location_name: "The MO Location is a rectangle with an MO-style name, rather than the iNat Place name."
   inat_unlicensed_obs_summary: "[count] observation(s) had no iNat license; images were imported with your default MO license."
   inat_skipped_images_summary: "[count] image(s) skipped: no iNat license."
+  inat_skeleton_obs_summary: "[count] unlicensed observation(s) were imported as minimal skeleton records (no photos, notes, or suggested IDs)."
 
   # /inat_import_job_tracker
   inat_imports: inat imports
@@ -2856,6 +2862,8 @@
   inat_import_tracker_license_added_heading: Observations Imported with MO Default License
   inat_import_tracker_license_added_note: "[count] observation(s) had no iNat license; your default MO license was applied."
   inat_import_tracker_license_added_reimport: "Re-import [count] observation(s) after adding a license on iNat"
+  inat_import_tracker_skeleton_imported_heading: Skeleton Observations Imported
+  inat_import_tracker_skeleton_imported_note: "[count] unlicensed observation(s) were imported as minimal skeleton records (no photos, notes, or suggested IDs)."
 
   # observer/list_notifications
 

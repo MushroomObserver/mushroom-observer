@@ -683,6 +683,73 @@ class InatImportsControllerTest < FunctionalTestCase
            "recheck_all should flatten from namespaced confirm params")
   end
 
+  def test_create_skeletons_checked_persists_true
+    user = users(:dick) # Dick is a super_importer
+    assert(InatImport.super_importer?(user), "Test requires a super_importer")
+    login(user.login)
+
+    post(:create,
+         params: { all: "1", inat_username: user.inat_username,
+                   consent: 1, confirmed: 1, import_others: "1",
+                   create_skeletons: "1" })
+
+    import = created_import(user)
+    assert(import.create_skeletons,
+           "Checking the box should persist create_skeletons: true")
+  end
+
+  def test_create_skeletons_unchecked_persists_false
+    user = users(:dick) # Dick is a super_importer
+    assert(InatImport.super_importer?(user), "Test requires a super_importer")
+    login(user.login)
+
+    post(:create,
+         params: { all: "1", inat_username: user.inat_username,
+                   consent: 1, confirmed: 1, import_others: "1",
+                   create_skeletons: "0" })
+
+    import = created_import(user)
+    assert_not(import.create_skeletons,
+               "Unchecking the box should persist create_skeletons: false")
+  end
+
+  def test_create_skeletons_survives_confirm_round_trip
+    user = users(:dick) # Dick is a super_importer
+    assert(InatImport.super_importer?(user), "Test requires a super_importer")
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: user.inat_username, inat_ids: "123,456",
+             import_all: "", consent: "1", import_others: "1",
+             create_skeletons: "1"
+           }
+         })
+
+    import = created_import(user)
+    assert(import.create_skeletons,
+           "create_skeletons should flatten from namespaced confirm params")
+  end
+
+  def test_create_skeletons_checkbox_superimporter_only
+    login(users(:rolf).login)
+    get(:new)
+    assert_select(
+      "input[type=checkbox][id=inat_import_create_skeletons]", false,
+      "Non-superimporter should not see the create_skeletons checkbox"
+    )
+
+    login(users(:dick).login) # Dick is a super_importer
+    get(:new)
+    assert_select(
+      "input[type=checkbox]" \
+      "[id=inat_import_create_skeletons][checked]", true,
+      "Superimporter should see create_skeletons, checked by default"
+    )
+  end
+
   def test_skip_writeback_checkbox_admin_only
     login(users(:rolf).login)
     get(:new)

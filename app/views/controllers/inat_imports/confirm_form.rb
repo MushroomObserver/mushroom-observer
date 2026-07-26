@@ -43,7 +43,7 @@ module Views::Controllers::InatImports
           count_expected_line
           render_nothing_to_import_notice
           br
-          unlicensed_obs_line unless import_others?
+          render_unlicensed_line
           br
           time_estimate_line
         end
@@ -90,17 +90,26 @@ module Views::Controllers::InatImports
         ignored_row_data.each do |row|
           render_ignored_row(row[:key], row[:count], row[:url])
         end
-        unlicensed_ignored_row if import_others?
+        unlicensed_ignored_row if skip_unlicensed_others?
       end
       br
     end
 
     def show_ignored_section?
       ignored_row_data.any? ||
-        # Import-others' unlicensed obs are never imported. So they
-        # belong here rather than own-import's informational-only line.
-        import_others?
+        # Import-others' unlicensed obs, when create_skeletons is off, are
+        # never imported. So they belong here rather than in a skeleton/
+        # own-import informational-only line (#4828).
+        skip_unlicensed_others?
     end
+
+    def create_skeletons? = model.create_skeletons == "1"
+
+    # True only when import-others' unlicensed obs will genuinely be
+    # skipped — i.e. the superimporter unchecked create_skeletons (#4828).
+    # When it's checked (the default), those obs are imported as skeleton
+    # counterparts, so they don't belong in the ignored breakdown.
+    def skip_unlicensed_others? = import_others? && !create_skeletons?
 
     def ignored_row_data
       [not_importable_row, already_imported_row, no_date_row].compact
@@ -163,7 +172,7 @@ module Views::Controllers::InatImports
     end
 
     def ignored_rows_count
-      ignored_row_data.size + (import_others? ? 1 : 0)
+      ignored_row_data.size + (skip_unlicensed_others? ? 1 : 0)
     end
 
     def render_ignored_row(caption_key, count, url)
@@ -178,12 +187,12 @@ module Views::Controllers::InatImports
       end
     end
 
-    # Import-others' unlicensed obs are never imported, so this renders inside
-    # the Total Ignored Observations breakdown rather than as its own
-    # always-visible line. Import execution defaults `licensed` to true unless
-    # the stored URL explicitly sets it (see PageParser#add_ownership_filter).
-    # Rendered unconditionally (even when the count is blank/zero) so a failed
-    # estimate is visible as blank, distinguishable from a genuine zero.
+    # Only rendered when create_skeletons is off (skip_unlicensed_others?) —
+    # in that case import-others' unlicensed obs are never imported, so this
+    # lives inside the Total Ignored Observations breakdown rather than as
+    # its own always-visible line. Rendered unconditionally within that case
+    # (even when the count is blank/zero) so a failed estimate is visible as
+    # blank, distinguishable from a genuine zero.
     def unlicensed_ignored_row
       div(class: "mb-1") do
         b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
@@ -239,6 +248,20 @@ module Views::Controllers::InatImports
       p { plain(:inat_import_confirm_nothing_to_import.l) }
     end
 
+    # Own-imports: an informational line about unlicensed obs (default MO
+    # license applied to their images). Import-others with create_skeletons
+    # off: nothing here — that count lives in the ignored-total breakdown
+    # instead (see unlicensed_ignored_row). Import-others with
+    # create_skeletons on (the default, #4828): a skeleton-specific line,
+    # since those obs are genuinely imported, just as lighter records.
+    def render_unlicensed_line
+      if import_others?
+        skeleton_obs_line if create_skeletons?
+      else
+        unlicensed_obs_line
+      end
+    end
+
     def unlicensed_obs_line
       b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
       plain(": ")
@@ -247,6 +270,16 @@ module Views::Controllers::InatImports
 
       whitespace
       plain(unlicensed_note_key.l)
+    end
+
+    def skeleton_obs_line
+      b { plain(:inat_import_confirm_skeleton_obs_caption.l) }
+      plain(": ")
+      span(id: "unlicensed_obs_count") { render_unlicensed_count }
+      return unless @unlicensed_obs.to_i.positive?
+
+      whitespace
+      plain(:inat_import_confirm_skeleton_obs_note.l)
     end
 
     def time_estimate_line
@@ -275,7 +308,7 @@ module Views::Controllers::InatImports
 
     def render_hidden_fields
       [:inat_username, :inat_ids, :import_all, :consent, :import_others,
-       :inat_url, :original_inat_url, :recheck_all,
+       :create_skeletons, :inat_url, :original_inat_url, :recheck_all,
        :skip_inat_writeback].each do |f|
         hidden_field(f)
       end

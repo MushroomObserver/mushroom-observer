@@ -46,4 +46,16 @@ class Inat::ImportDigestTest < UnitTestCase
       Inat::ImportDigest.deliver_for(@import)
     end
   end
+
+  # Skeleton observations (#4828) never suppress their naming's
+  # notification — it fires immediately, so including them here too
+  # would notify interested users twice.
+  def test_excludes_skeleton_observations
+    Interest.create!(target: @name, user: katrina, state: true)
+    @import.update!(skeleton_observation_ids: [@obs.id])
+
+    assert_no_enqueued_jobs do
+      Inat::ImportDigest.deliver_for(@import)
+    end
+  end
 end

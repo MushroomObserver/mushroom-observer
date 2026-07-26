@@ -43,9 +43,13 @@ class Inat
       by_uid
     end
 
+    # Excludes skeleton observations (#4828): their namings are never
+    # suppressed, so they already sent their own immediate notification —
+    # including them here too would notify interested users twice.
     def import_namings
       Naming.joins(:observation).
         where(observations: { inat_import_id: @inat_import.id }).
+        where.not(observation_id: @inat_import.skeleton_observation_ids).
         includes(:observation, :name)
     end
   end

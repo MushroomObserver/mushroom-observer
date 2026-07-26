@@ -4,7 +4,7 @@ module InatImportsController::FormBuilders
   # Params carried verbatim from the new form through the confirm page.
   PASSTHROUGH_PARAM_KEYS = [
     :inat_username, :inat_ids, :inat_url, :original_inat_url, :consent,
-    :recheck_all, :skip_inat_writeback
+    :recheck_all, :skip_inat_writeback, :create_skeletons
   ].freeze
 
   private
@@ -30,6 +30,7 @@ module InatImportsController::FormBuilders
       username: params[:inat_username],
       consent: params[:consent],
       import_others: params[:import_others],
+      create_skeletons: params[:create_skeletons],
       recheck_all: params[:recheck_all],
       skip_writeback: params[:skip_inat_writeback]
     }
@@ -65,6 +66,7 @@ module InatImportsController::FormBuilders
                      derive_choose_method(submitted),
       consent: ("1" if submitted[:consent] == "1"),
       import_others: ("1" if submitted[:import_others] == "1"),
+      create_skeletons: initial_create_skeletons(submitted),
       recheck_all: ("1" if submitted[:recheck_all] == "1"),
       skip_inat_writeback: initial_skip_writeback(submitted)
     )
@@ -87,6 +89,15 @@ module InatImportsController::FormBuilders
       submitted.key?(:skip_writeback)
 
     ("1" if submitted[:skip_writeback] == "1")
+  end
+
+  # The fresh form (no :create_skeletons key) pre-checks the box — building
+  # a skeleton counterpart for an unlicensed import-others obs is the
+  # default (#4828). On reload, honor the submitted state.
+  def initial_create_skeletons(submitted)
+    return "1" unless submitted.key?(:create_skeletons)
+
+    ("1" if submitted[:create_skeletons] == "1")
   end
 
   # Superform namespaces hidden fields under the model key.

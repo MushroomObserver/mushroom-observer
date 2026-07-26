@@ -111,6 +111,23 @@ module Views::Controllers::InatImports
       assert_html(html, "input[name='inat_import[import_others]']")
     end
 
+    def test_create_skeletons_field_hidden_by_default
+      html = render_form(super_importer: false)
+
+      assert_no_html(html, "input[name='inat_import[create_skeletons]']")
+    end
+
+    def test_create_skeletons_field_shown_and_checked_when_enabled
+      html = render_form(super_importer: true)
+
+      assert_html(
+        html,
+        "input[type='checkbox'][name='inat_import[create_skeletons]']" \
+        "[checked]"
+      )
+      assert_includes(html, :inat_create_skeletons.l)
+    end
+
     def test_submit_posts_to_inat_imports_path
       html = render_form
 
@@ -120,13 +137,14 @@ module Views::Controllers::InatImports
 
     private
 
-    def render_form(choose_method: "all", inat_ids: nil,
-                    inat_url: nil, super_importer: false)
+    def render_form(choose_method: "all", inat_ids: nil, inat_url: nil,
+                    super_importer: false, create_skeletons: "1")
       model = FormObject::InatImport.new(
         inat_username: @user.inat_username,
         choose_method: choose_method,
         inat_ids: inat_ids,
-        inat_url: inat_url
+        inat_url: inat_url,
+        create_skeletons: create_skeletons
       )
       render(Form.new(model, super_importer: super_importer,
                              local: true))
