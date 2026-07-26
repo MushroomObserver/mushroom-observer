@@ -254,5 +254,34 @@ module ActiveSupport
       end
       ActiveSupport::TestCase.cleared_logs = true
     end
+
+    # I18n.available_locales only reflects locales with a generated
+    # config/locales/*.yml, which `rails lang:update` only creates for
+    # locales that have a Language row in whatever DB it ran against --
+    # CI's test DB only has the fixture Language set, so a locale
+    # available on a full local dev DB may not be available there. Use
+    # these when a test needs I18n.with_locale(:xx)/available_locales
+    # to include a locale outside the fixture set, purely to exercise
+    # "the ambient locale differs from the one under test" -- not to
+    # assert on that locale's actual translated content, since the
+    # locale's real translation file may not even be present.
+    def expand_available_locales(*locales)
+      @original_available_locales ||= I18n.available_locales
+      I18n.available_locales = (I18n.available_locales + locales).uniq
+    end
+
+    def restore_available_locales
+      return unless @original_available_locales
+
+      I18n.available_locales = @original_available_locales
+      @original_available_locales = nil
+    end
+
+    def with_expanded_locales(*locales)
+      expand_available_locales(*locales)
+      yield
+    ensure
+      restore_available_locales
+    end
   end
 end

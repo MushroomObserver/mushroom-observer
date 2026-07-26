@@ -117,17 +117,6 @@ module Name::Format
     text_name == "Imageless"
   end
 
-  ##### Miscellaneous #########################################################
-
-  # Info to include about each name in merge requests.
-  def merge_info
-    num_obs     = observations.count
-    num_namings = namings.count
-    num_notify  = interests.count # includes name_trackers
-    "#{:name.ti} ##{id}: #{real_search_name} [#obs: #{num_obs}, " \
-      "#namings: #{num_namings}, #users_with_interest: #{num_notify}]"
-  end
-
   #############################################################################
 
   private

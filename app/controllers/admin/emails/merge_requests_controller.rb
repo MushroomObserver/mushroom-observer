@@ -3,8 +3,6 @@
 module Admin
   module Emails
     class MergeRequestsController < ApplicationController
-      include ::Emailable
-
       before_action :login_required
 
       def new
@@ -75,31 +73,20 @@ module Admin
 
       def send_merge_request
         # Migrated from QueuedEmail::Webmaster to ActionMailer + ActiveJob.
-        temporarily_set_locale(MO.default_locale) do
-          message = WebmasterMailer.prepend_user(@user, merge_request_content)
-          WebmasterMailer.build(
-            sender_email: @user.email,
-            subject: "#{@model.name} Merge Request",
-            message:
-          ).deliver_later
-        end
+        # No temporarily_set_locale wrapper needed here (unlike the
+        # sibling email controllers) -- MergeRequestMailer#build sets
+        # the locale itself, since the tag resolution now happens in
+        # its Phlex view, not eagerly in this action.
+        notes = params.dig(:email, :message)
+        MergeRequestMailer.build(
+          sender_email: @user.email,
+          old_obj: @old_obj,
+          new_obj: @new_obj,
+          user: @user,
+          notes: notes.to_s.strip_html.strip_squeeze
+        ).deliver_later
         flash_notice(:email_merge_request_success.t)
         redirect_to(@old_obj.show_link_args)
-      end
-
-      def merge_request_content
-        notes = params.dig(:email, :message)
-        :email_merge_objects.l(
-          user: @user.login,
-          type: @model.type_tag,
-          this: @old_obj.merge_info,
-          that: @new_obj.merge_info,
-          show_this_url: @old_obj.show_url,
-          show_that_url: @new_obj.show_url,
-          edit_this_url: @old_obj.edit_url,
-          edit_that_url: @new_obj.edit_url,
-          notes: notes.to_s.strip_html.strip_squeeze
-        )
       end
     end
   end
