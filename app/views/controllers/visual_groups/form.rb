@@ -13,7 +13,7 @@ module Views::Controllers::VisualGroups
 
     def view_template
       super do
-        render_errors if model.errors.any?
+        render(Components::Form::Errors.new(model: model))
         render_name_field
         textarea_field(:description, cols: 60, rows: 10,
                                      label: :description.ti)
@@ -23,19 +23,6 @@ module Views::Controllers::VisualGroups
     end
 
     private
-
-    def render_errors
-      count = pluralize(model.errors.count, :error.l, plural: :errors.l)
-
-      Alert(level: :danger, id: "error_explanation") do
-        h2 { "#{count} prohibited this visual_group from being saved:" }
-        ul do
-          model.errors.each do |error|
-            li { error.full_message }
-          end
-        end
-      end
-    end
 
     def render_name_field
       div(class: "form-group") do
