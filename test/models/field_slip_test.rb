@@ -54,4 +54,76 @@ class FieldSlipTest < UnitTestCase
     assert_not(slip.can_edit?(rolf),
                "Project admin must not edit a non-member's field slip")
   end
+
+  # ---------- default location (issue #4907) ----------
+  # mary's slips in eol_project: field_slip_one (obs minimal_unknown_obs),
+  # field_slip_two (obs owner_accepts_general_questions), field_slip_no_obs
+  # (no occurrence). eol_project has no location fixture.
+
+  def test_location_uses_latest_project_slip_with_located_obs
+    observations(:minimal_unknown_obs).
+      update_columns(location_id: locations(:albion).id)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: locations(:burbank).id)
+    field_slips(:field_slip_one).update_columns(updated_at: 2.days.ago)
+    field_slips(:field_slip_two).update_columns(updated_at: 1.day.ago)
+
+    # Newest slip has no observation: it must be skipped, not end the
+    # search. And the result must be the newest located slip's location,
+    # not the oldest's (the old `order(...desc).last` bug).
+    slip = field_slips(:field_slip_no_obs)
+    slip.update_columns(updated_at: 1.hour.ago)
+    slip.current_user = mary
+
+    assert_equal(locations(:burbank), slip.location)
+  end
+
+  def test_location_falls_back_to_project_location
+    observations(:minimal_unknown_obs).update_columns(location_id: nil)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: nil)
+    projects(:eol_project).update_columns(location_id: locations(:albion).id)
+
+    slip = field_slips(:field_slip_no_obs)
+    slip.current_user = mary
+
+    assert_equal(locations(:albion), slip.location)
+  end
+
+  def test_location_falls_back_to_users_latest_located_observation
+    observations(:minimal_unknown_obs).update_columns(location_id: nil)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: nil)
+    latest = observations(:detailed_unknown_obs)
+    latest.update_columns(location_id: locations(:burbank).id,
+                          created_at: Time.zone.now)
+
+    slip = field_slips(:field_slip_no_obs)
+    slip.current_user = mary
+
+    assert_equal(locations(:burbank), slip.location)
+  end
+
+  def test_location_nil_when_no_signal_available
+    slip = field_slips(:field_slip_no_obs)
+    slip.current_user = users(:zero_user)
+
+    assert_nil(slip.location)
+  end
+
+  def test_location_prefers_own_observation
+    observations(:minimal_unknown_obs).
+      update_columns(location_id: locations(:albion).id)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: locations(:burbank).id)
+    field_slips(:field_slip_two).update_columns(updated_at: 1.hour.ago)
+
+    # field_slip_one's own observation wins even though another slip in
+    # the project is more recent.
+    slip = field_slips(:field_slip_one)
+    slip.update_columns(updated_at: 2.days.ago)
+    slip.current_user = mary
+
+    assert_equal(locations(:albion), slip.location)
+  end
 end
