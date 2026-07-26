@@ -66,21 +66,15 @@ module Name::Validation
   def text_name_length
     return if text_name.to_s.size <= Name.text_name_limit
 
-    errors.add(
-      :text_name,
-      "#{:validate_name_text_name_too_long.t} #{:maximum.ti}: " \
-      "#{Name.text_name_limit}"
-    )
+    errors.add(:text_name, :validate_name_text_name_too_long,
+               maximum: Name.text_name_limit)
   end
 
   def author_length
     return if author.to_s.size <= Name.author_limit
 
-    errors.add(
-      :author,
-      "#{:validate_name_author_too_long.t} #{:maximum.ti}: " \
-      "#{Name.author_limit}. #{:validate_name_use_first_author.t}."
-    )
+    errors.add(:author, :validate_name_author_too_long,
+               maximum: Name.author_limit)
   end
 
   def normalize_author_characters!
@@ -96,11 +90,8 @@ module Name::Validation
       cleaned_homonym_search_name = cleaned_search_name(homonym.search_name)
       next unless cleaned_search_name == cleaned_homonym_search_name
 
-      errors.add(
-        :search_name,
-        "#{:validate_name_equivalent_exists.t}: " \
-        "#{homonym.display_name(current_user).t} (#{homonym.id})"
-      )
+      errors.add(:search_name, :validate_name_equivalent_exists,
+                 name: homonym.display_name(current_user).t, id: homonym.id)
     end
   end
 
