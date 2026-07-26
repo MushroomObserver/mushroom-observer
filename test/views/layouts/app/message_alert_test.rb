@@ -9,7 +9,7 @@ module Views::Layouts::App
     # apostrophe for comparison against Nokogiri's own decoded .text.
     # This fails if the entity gets double-escaped (an earlier bug).
     def test_renders_trusted_message_not_double_escaped
-      message = :observation_resync_failed.t(site: "iNaturalist")
+      message = :observation_resync_failed.t
       html = render(MessageAlert.new(message: message, level: :danger))
 
       assert_html(html, "div.alert.alert-danger#flash_notices",

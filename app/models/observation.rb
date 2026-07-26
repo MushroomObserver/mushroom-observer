@@ -1113,13 +1113,22 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     reflected_at.present?
   end
 
-  # Who may trigger a resync of a reflection from its source (#4215):
-  # the owner or anyone who could otherwise edit it. Admins are allowed
-  # too, but that's request context, so the controller adds it.
-  def resyncable_by?(user)
-    return false unless reflection? && user
+  # All read-only reflections in this observation's occurrence -- the
+  # set an occurrence-wide resync (#4215) refreshes. Sync is an
+  # occurrence-level event: users want every mirrored record current at
+  # once, not per-record control. An observation with no occurrence is
+  # treated as an occurrence of one.
+  def sync_reflections
+    members = occurrence ? occurrence.observations : [self]
+    members.select(&:reflection?)
+  end
 
-    user_id == user.id || can_edit?(user)
+  # Whether this observation's page offers a Sync button. Any logged-in
+  # user may trigger a sync -- it applies no user input, converging on
+  # source-canonical data, the same refresh the scheduled batch performs
+  # with no user at all (#4215).
+  def syncable?
+    sync_reflections.any?
   end
 
   # Do we want to prominently advertise the source of this observation?

@@ -43,10 +43,11 @@ module Views::Controllers::Observations
 
     def view_template
       add_chrome
-      # Only a reflection ever gets a resync broadcast (#4215) -- see
-      # Inat::ObservationResyncer#broadcast.
+      # Any member of an occurrence with a reflection can get a resync
+      # broadcast (#4215) -- the aggregate flash goes to every member's
+      # channel. See Inat::ObservationResyncer#broadcast.
       turbo_stream_from([@observation, :external_link_sync]) if
-        @observation.reflection?
+        @observation.syncable?
       render_main_row
       render_secondary_row
       render_footer if @user

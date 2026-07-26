@@ -2128,18 +2128,33 @@ class ObservationTest < UnitTestCase
     assert_not(obs.reflection?)
   end
 
-  # Only the owner (or someone who could edit it) may resync a reflection
-  # from its source (#4215); a non-reflection is never resyncable.
-  def test_resyncable_by
+  # Sync is occurrence-wide (#4215): sync_reflections is the set of
+  # read-only reflections in the observation's occurrence (an
+  # observation with no occurrence is an occurrence of one), and
+  # syncable? gates the Sync button on every member's page.
+  def test_sync_reflections_and_syncable
     obs = observations(:imported_inat_obs)
-    assert_not(obs.resyncable_by?(obs.user),
-               "a non-reflection is not resyncable")
+    assert_empty(obs.sync_reflections,
+                 "an editable import has nothing to sync")
+    assert_not(obs.syncable?)
 
     obs.update_column(:reflected_at, Time.zone.now)
-    assert(obs.resyncable_by?(obs.user), "owner can resync a reflection")
-    assert_not(obs.resyncable_by?(users(:mary)),
-               "an unrelated user cannot resync")
-    assert_not(obs.resyncable_by?(nil), "a nil user cannot resync")
+    assert_equal([obs], obs.sync_reflections,
+                 "a standalone reflection is an occurrence of one")
+    assert(obs.syncable?)
+
+    # Grouped into an occurrence, every member sees the reflections.
+    primary = observations(:minimal_unknown_obs)
+    [primary, obs].each { |o| o.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user,
+                             primary_observation: primary)
+    primary.update!(occurrence: occ)
+    obs.update!(occurrence: occ)
+
+    assert_equal([obs], primary.reload.sync_reflections,
+                 "a non-reflection member sees the occurrence's reflections")
+    assert(primary.syncable?,
+           "every member of an occurrence with a reflection is syncable")
   end
 
   # ----- Coverage gap tests for app/models/observation.rb -----

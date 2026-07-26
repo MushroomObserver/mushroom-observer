@@ -88,15 +88,14 @@ module Views::Controllers::Observations::ExternalLinks
       )
     end
 
-    # A reflection's owner (or anyone who could otherwise edit it) sees
-    # a "Sync now" button alongside the read-only note (#4215).
-    def test_reflection_shows_sync_button_when_resyncable
+    # ONE occurrence-wide "Sync now" button (#4215), shown to any
+    # logged-in viewer -- sync applies no user input, so there is no
+    # permission gate beyond login.
+    def test_reflection_pane_shows_sync_button_to_any_logged_in_user
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
       obs = link.observation
-      user = users(:rolf)
+      user = users(:dick) # no edit permission on this observation
       obs.update_column(:reflected_at, Time.zone.now)
-      assert(obs.resyncable_by?(user),
-             "Need a user fixture who may resync this reflection")
       path = routes.resync_observation_path(obs.id)
 
       html = render(frame_with(obs: obs, site_links: [link], user: user))
@@ -106,27 +105,51 @@ module Views::Controllers::Observations::ExternalLinks
                   text: :sync_now.ti)
       # Recent source-side edits can take a moment to propagate -- the
       # Turbo confirm dialog lets the user choose to wait instead.
-      confirm = :observation_resync_confirm.l(site: "iNaturalist")
       assert_html(
         html,
         "button.reflection-sync-button" \
-        "[data-turbo-confirm='#{confirm}']"
+        "[data-turbo-confirm='#{:observation_resync_confirm.l}']"
+      )
+      assert_equal(
+        1, Nokogiri::HTML5.fragment(html).
+             css("button.reflection-sync-button").size,
+        "one occurrence-wide button, not one per row"
       )
     end
 
-    # A viewer without edit permission may not trigger a resync, even
-    # though the observation itself is a reflection.
-    def test_reflection_hides_sync_button_when_not_resyncable
+    def test_reflection_pane_hides_sync_button_when_logged_out
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
       obs = link.observation
-      user = users(:dick)
       obs.update_column(:reflected_at, Time.zone.now)
-      assert_not(obs.resyncable_by?(user),
-                 "Need a user fixture who may NOT resync this reflection")
 
-      html = render(frame_with(obs: obs, site_links: [link], user: user))
+      html = render(frame_with(obs: obs, site_links: [link], user: nil))
 
       assert_no_html(html, ".reflection-sync-button")
+    end
+
+    # From a non-reflection member's page, a sibling reflection's row
+    # carries the read-only note, and the pane still offers the
+    # occurrence-wide Sync button, posting to THIS page's observation
+    # (the job resolves the occurrence's reflections from any member).
+    def test_sibling_reflection_gets_note_and_pane_gets_sync_button
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      sibling = link.observation
+      sibling.update_column(:reflected_at, Time.zone.now)
+      obs = observations(:detailed_unknown_obs)
+      [sibling, obs].each { |o| o.update_column(:occurrence_id, nil) }
+      occ = Occurrence.create!(user: obs.user, primary_observation: obs)
+      obs.update!(occurrence: occ)
+      sibling.update!(occurrence: occ)
+      path = routes.resync_observation_path(obs.id)
+
+      html = render(
+        frame_with(obs: obs, site_links: [], user: users(:mary),
+                   sibling_site_links: [sibling_link(link, sibling)])
+      )
+
+      assert_html(html, "li .reflection-read-only-note",
+                  text: :observation_reflection_read_only_note.l)
+      assert_html(html, "form[action='#{path}'][method='post']")
     end
 
     private

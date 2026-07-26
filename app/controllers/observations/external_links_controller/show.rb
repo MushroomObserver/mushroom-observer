@@ -22,8 +22,13 @@ module Observations::ExternalLinksController::Show
 
   def set_ivars_for_show
     @external_link = ExternalLink.show_includes.find(params[:id])
+    # `occurrence: :observations` (not just `:occurrence`) -- InfoFrame's
+    # occurrence-wide Sync button calls `@obs.syncable?`, which walks the
+    # occurrence's member observations (#4215); strict loading raises if
+    # they aren't eager-loaded already.
     @observation = Observation.strict_loading.
-                   includes(:occurrence, external_links: show_link_includes).
+                   includes({ occurrence: :observations },
+                            external_links: show_link_includes).
                    find(@external_link.observation.id)
     @site = @external_link.external_site
     @siblings = load_siblings_with_external_links(@observation)

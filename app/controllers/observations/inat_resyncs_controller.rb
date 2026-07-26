@@ -1,30 +1,42 @@
 # frozen_string_literal: true
 
-# User-initiated "Sync now" for a read-only reflection observation
-# (#4215): enqueues a background resync of the observation from its
+# User-initiated "Sync now" (#4215): enqueues a background refresh of
+# every read-only reflection in the observation's occurrence from its
 # iNaturalist source. The fetch is rate-limited, so the actual refresh
-# runs in `InatObservationResyncJob`, not in the request.
+# runs in `InatObservationResyncJob`, not in the request. Any logged-in
+# user may trigger a sync — it applies no user input, converging on
+# source-canonical data, the same refresh the scheduled batch performs.
 module Observations
   class InatResyncsController < ApplicationController
     before_action :login_required
+
+    # Clicks while every reflection was synced this recently skip the
+    # fetch entirely — long enough to swallow double-clicks and
+    # pile-ons, short enough to be invisible in normal use.
+    SYNC_GUARD_PERIOD = 10.seconds
 
     # POST /observations/:id/resync
     def create
       observation = find_or_goto_index(Observation, params[:id].to_s)
       return unless observation
-      unless can_resync?(observation)
-        return respond(observation, :observation_resync_denied, error: true)
-      end
 
-      InatObservationResyncJob.perform_later(observation, @user)
+      reflections = observation.sync_reflections
+      if reflections.empty?
+        return respond(observation, :observation_resync_nothing, error: true)
+      end
+      return respond(observation, :observation_resync_recent) if
+        recently_synced?(reflections)
+
+      InatObservationResyncJob.perform_later(observation)
       respond(observation, :observation_resync_started)
     end
 
     private
 
-    def can_resync?(observation)
-      observation.resyncable_by?(@user) ||
-        (observation.reflection? && in_admin_mode?)
+    def recently_synced?(reflections)
+      links = reflections.filter_map(&:import_link)
+      links.any? &&
+        links.all? { |l| l.last_synced_at&.after?(SYNC_GUARD_PERIOD.ago) }
     end
 
     # A full-page redirect would tear down and re-subscribe the

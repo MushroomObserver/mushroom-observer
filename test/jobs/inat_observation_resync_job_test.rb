@@ -17,12 +17,10 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
                "a non-reflection is left untouched (guard, no fetch)")
   end
 
-  # The triggering viewer (nil for the future batch job) is what the
-  # completion broadcast renders its panel updates from -- confirm the
-  # job actually threads it through rather than silently dropping it.
-  def test_perform_passes_user_through_to_resyncer
+  # Sync is owned by the admin account (#4215) -- the job carries no
+  # user, so it hands the resyncer just the observation.
+  def test_perform_hands_resyncer_the_observation_only
     obs = observations(:imported_inat_obs)
-    user = users(:rolf)
     received = nil
     fake_resyncer = Object.new
     def fake_resyncer.resync; end
@@ -30,13 +28,13 @@ class InatObservationResyncJobTest < ActiveJob::TestCase
     Inat::ObservationResyncer.stub(
       :new,
       lambda { |observation, **kwargs|
-        received = [observation, kwargs[:user]]
+        received = [observation, kwargs]
         fake_resyncer
       }
     ) do
-      InatObservationResyncJob.perform_now(obs, user)
+      InatObservationResyncJob.perform_now(obs)
     end
 
-    assert_equal([obs, user], received)
+    assert_equal([obs, {}], received)
   end
 end
