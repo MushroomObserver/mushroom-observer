@@ -74,11 +74,12 @@ module Views::Controllers::Observations::ExternalLinks
     def render_sync_button
       Button(
         type: :post,
-        name: :observation_resync_button.l,
+        name: :sync_now.ti,
         target: resync_observation_path(@obs.id),
         size: :sm,
         class: "reflection-sync-button mt-1",
-        data: { turbo_confirm: :observation_resync_confirm.l }
+        data: { turbo_confirm:
+                  :observation_resync_confirm.l(site: @site_name) }
       )
     end
 

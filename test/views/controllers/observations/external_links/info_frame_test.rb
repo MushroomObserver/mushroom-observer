@@ -103,13 +103,14 @@ module Views::Controllers::Observations::ExternalLinks
 
       assert_html(html, "form[action='#{path}'][method='post']")
       assert_html(html, "form button.reflection-sync-button",
-                  text: :observation_resync_button.l)
+                  text: :sync_now.ti)
       # Recent source-side edits can take a moment to propagate -- the
       # Turbo confirm dialog lets the user choose to wait instead.
+      confirm = :observation_resync_confirm.l(site: "iNaturalist")
       assert_html(
         html,
         "button.reflection-sync-button" \
-        "[data-turbo-confirm='#{:observation_resync_confirm.l}']"
+        "[data-turbo-confirm='#{confirm}']"
       )
     end
 

@@ -154,8 +154,9 @@ class Inat
     # them).
     def render_flash(status)
       level, tag = FLASH_BY_STATUS.fetch(status)
+      message = tag.t(site: ExternalSite::INATURALIST_NAME)
       ApplicationController.renderer.render(
-        Views::Layouts::App::MessageAlert.new(message: tag.t, level: level),
+        Views::Layouts::App::MessageAlert.new(message: message, level: level),
         layout: false
       )
     end

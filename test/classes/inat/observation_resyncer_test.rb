@@ -120,7 +120,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     )
     assert(messages.any? { |m| m.include?('target="observation_notes"') })
     flash = messages.find { |m| m.include?('target="page_flash"') }
-    assert_includes(flash, :observation_resync_synced.t)
+    assert_includes(flash, :observation_resync_synced.t(site: "iNaturalist"))
   end
 
   # No real change: just the flash, no point re-rendering panels whose
@@ -132,7 +132,8 @@ class Inat::ObservationResyncerTest < UnitTestCase
     messages = capture_broadcasts(stream) { resync(found: { @id => @raw }) }
 
     assert_equal(1, messages.length)
-    assert_includes(messages.first, :observation_resync_unchanged.t)
+    assert_includes(messages.first,
+                    :observation_resync_unchanged.t(site: "iNaturalist"))
   end
 
   def test_source_deleted_broadcasts_warning_flash_only
@@ -141,14 +142,16 @@ class Inat::ObservationResyncerTest < UnitTestCase
     messages = capture_broadcasts(stream) { resync(found: {}) }
 
     assert_equal(1, messages.length)
-    assert_includes(messages.first, :observation_resync_source_deleted.t)
+    assert_includes(messages.first,
+                    :observation_resync_source_deleted.t(site: "iNaturalist"))
   end
 
   def test_fetch_failed_broadcasts_danger_flash_only
     messages = capture_broadcasts(stream) { resync(found: {}, failed: true) }
 
     assert_equal(1, messages.length)
-    assert_includes(messages.first, :observation_resync_failed.t)
+    assert_includes(messages.first,
+                    :observation_resync_failed.t(site: "iNaturalist"))
   end
 
   def test_non_reflection_broadcasts_nothing
