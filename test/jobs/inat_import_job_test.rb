@@ -534,10 +534,9 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
-  # iNat's declared rank for a taxon can conflict with MO's rank-guessing
-  # suffix heuristic: "Leucocoprineae" ends in "-ineae", which MO's
-  # heuristic guesses as Suborder, but is actually a Tribe.
-  # MO should create the Name at iNat's  rank rather than fail the import.
+  # Use iNat's rank if it conflicts with MO's rank-guessing heuristic.
+  # MO's rank-guessing suffix-based heuristic can give an incorrect rank
+  # for Names ending in `eae`.
   def test_import_job_ambiguous_rank_suffix
     create_ivars_from_filename("leucocoprineae")
     stub_inat_interactions
