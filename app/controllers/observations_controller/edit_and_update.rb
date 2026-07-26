@@ -112,6 +112,7 @@ module ObservationsController::EditAndUpdate
     validate_projects
     detach_removed_images
     try_to_upload_images
+    ensure_thumb_image
     try_to_save_location_if_new(@observation)
     try_to_update_observation_if_there_are_changes
   end
@@ -140,12 +141,14 @@ module ObservationsController::EditAndUpdate
       img.log_remove_from(@observation)
       flash_notice(:runtime_image_remove_success.t(id: img.id))
     end
-    ensure_thumb_image
   end
 
   # Fix for issue #3995: update_permitted_observation_attributes runs before
   # detach_removed_images, so the form's blank thumb_image_id overwrites the
   # real value before remove_image can detect it needs reassignment.
+  # Must run after attach_good_images: a just-uploaded image isn't in
+  # image_ids until then, and validating earlier discarded it as the
+  # chosen thumbnail (issue #4737).
   def ensure_thumb_image
     return if @observation.thumb_image_id.present? &&
               valid_thumb_image_ids.include?(@observation.thumb_image_id)
