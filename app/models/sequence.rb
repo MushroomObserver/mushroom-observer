@@ -124,14 +124,6 @@ class Sequence < AbstractModel
     locus.truncate(locus_width, separator: " ")
   end
 
-  # Page heading + browser tab title. The locus is shown in the
-  # page body ("Locus: …") so the title identifies the sequence
-  # by its observation instead.
-  def page_title
-    :show_sequence_title.l(id: observation_id)
-  end
-  alias document_title page_title
-
   # used in views and by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name(_user = nil)
     format_name + " (Sequence #{id || "?"})"

@@ -87,16 +87,6 @@ class GlossaryTerm < AbstractModel
     name
   end
 
-  # Page heading + browser tab title — both just `name` (plain text).
-  # (Can't `alias` to AR column — accessor not defined at class-load.)
-  def page_title(_user = nil)
-    name
-  end
-
-  def document_title
-    name
-  end
-
   def unique_format_name(_user = nil)
     unique_text_name
   end
