@@ -48,9 +48,9 @@ class Components::ApplicationForm < Superform::Rails::Form
         render_label_row(label_text, inline?) if show_label?
         render(prepend_slot) if prepend_present?
         yield
-        render_help_after_field
         render(append_slot) if append_present?
       end
+      render_help_after_field
     end
   end
 end
