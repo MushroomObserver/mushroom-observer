@@ -310,14 +310,3 @@ form {
     }
   }
 }
-
-// .help-block now renders as a sibling after .form-group (#4911)
-// instead of as its last child. .form-group's own margin-bottom
-// ($form-group-margin-bottom, 15px) used to apply *after* the help
-// text (between the whole field box and whatever follows); now it
-// collapses against .help-block's margin-top (5px) and lands between
-// the field and its own help text instead, widening that specific gap
-// by 10px. Pull it back down to match the pre-#4911 spacing.
-.form-group + .help-block {
-  margin-top: -10px;
-}
