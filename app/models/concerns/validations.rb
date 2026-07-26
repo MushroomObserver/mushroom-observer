@@ -20,7 +20,7 @@ module Validations
     errors.add(
       :when, when_message(when_date, " #{:validate_today.t} #{Time.zone.today}")
     )
-    errors.add(:when, :validate_future_time.t)
+    errors.add(:when, :validate_future_time)
     false
   end
 
@@ -30,7 +30,7 @@ module Validations
     # As of July 5, 2020 these statements appear to be unreachable
     # because 'when' is a 'date' in the database.
     errors.add(:when, when_message(when_date, "Time.now=#{6.hours.from_now}"))
-    errors.add(:when, :validate_future_time.t)
+    errors.add(:when, :validate_future_time)
     false
   end
 
@@ -39,7 +39,7 @@ module Validations
                        when_date.year > 1.day.from_now.year
 
     errors.add(:when, when_message(when_date))
-    errors.add(:when, :validate_invalid_year.t)
+    errors.add(:when, :validate_invalid_year)
     false
   end
 

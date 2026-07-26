@@ -59,7 +59,7 @@ module Name::Validation
   private
 
   def user_presence
-    errors.add(:user, :validate_name_user_missing.t) \
+    errors.add(:user, :validate_name_user_missing) \
       if !user_id && !current_user
   end
 
@@ -119,20 +119,17 @@ module Name::Validation
       start = %r{\A[\s!#%&)*+,\-./:;<=>@\[\]^{|}~]+}.match(citation)
     )
 
-    errors.add(:base,
-               :name_error_field_start.t(
-                 field: :citation.ti, start: ERB::Util.html_escape(start.to_s)
-               ))
+    errors.add(:base, :name_error_field_start,
+               field: :citation.ti, start: ERB::Util.html_escape(start.to_s))
   end
 
   # prevent assigning ICN registration identifier to unregistrable Name
   def icn_id_registrable
     return if icn_id.blank? || registrable?
 
-    errors.add(:base, :name_error_unregistrable.t(
-                        rank: rank.to_s,
-                        name: ERB::Util.html_escape(real_search_name(nil))
-                      ))
+    errors.add(:base, :name_error_unregistrable,
+               rank: rank.to_s,
+               name: ERB::Util.html_escape(real_search_name(nil)))
   end
 
   # Require icn_id to be unique
@@ -142,12 +139,11 @@ module Name::Validation
     return if icn_id.nil?
     return if (conflicting_name = other_names_with_same_icn_id.first).blank?
 
-    errors.add(:base, :name_error_icn_id_in_use.t(
-                        number: icn_id,
-                        name: ERB::Util.html_escape(
-                          conflicting_name.real_search_name(nil)
-                        )
-                      ))
+    errors.add(:base, :name_error_icn_id_in_use,
+               number: icn_id,
+               name: ERB::Util.html_escape(
+                 conflicting_name.real_search_name(nil)
+               ))
   end
 
   def other_names_with_same_icn_id
