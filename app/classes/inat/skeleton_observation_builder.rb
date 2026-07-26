@@ -1,4 +1,4 @@
-g # frozen_string_literal: true
+# frozen_string_literal: true
 
 class Inat
   # Builds a minimal "counterpart" MO Observation from an unlicensed
