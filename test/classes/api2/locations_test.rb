@@ -115,6 +115,28 @@ class API2::LocationsTest < UnitTestCase
     assert_last_location_correct
   end
 
+  # Location.check_for_* return unresolved [tag, args] pairs (#4901);
+  # API2::Helpers#make_sure_location_isnt_dubious! resolves them into
+  # the DubiousLocationName error text. Confirm the resolved text
+  # actually made it through, not just that the request failed.
+  def test_posting_location_with_dubious_name_reports_resolved_reason
+    params = {
+      method: :post,
+      action: :location,
+      api_key: @api_key.key,
+      name: "Evil Lair, Latveria",
+      north: 39.64,
+      south: 39.39,
+      east: -119.70,
+      west: -119.94
+    }
+
+    assert_api_fail(params)
+    message = @api.errors.first.to_s
+    assert_match(/Latveria/, message)
+    assert_match(/Unknown country/, message)
+  end
+
   def test_patching_locations
     albion = locations(:albion)
     burbank = locations(:burbank)
