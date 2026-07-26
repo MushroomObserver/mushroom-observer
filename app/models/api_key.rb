@@ -56,6 +56,6 @@ class APIKey < AbstractModel
       # This should never happen.
       errors.add(:key, "api keys must be unique")
     end
-    errors.add(:notes, :account_api_keys_no_notes.t) if notes.blank?
+    errors.add(:notes, :account_api_keys_no_notes) if notes.blank?
   end
 end

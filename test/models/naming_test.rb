@@ -48,10 +48,12 @@ class NamingTest < UnitTestCase
     naming = Naming.new
     assert_not(naming.save)
     assert_equal(3, naming.errors.count)
-    assert_equal(:validate_naming_name_missing.t, naming.errors[:name].first)
+    assert_equal(:validate_naming_name_missing.t,
+                 resolved_error_message(naming, :name))
     assert_equal(:validate_naming_observation_missing.t,
-                 naming.errors[:observation].first)
-    assert_equal(:validate_naming_user_missing.t, naming.errors[:user].first)
+                 resolved_error_message(naming, :observation))
+    assert_equal(:validate_naming_user_missing.t,
+                 resolved_error_message(naming, :user))
   end
 
   # Destroy one.

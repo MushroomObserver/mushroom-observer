@@ -386,10 +386,10 @@ class Naming < AbstractModel
   validate :check_requirements
   def check_requirements # :nodoc:
     unless observation
-      errors.add(:observation, :validate_naming_observation_missing.t)
+      errors.add(:observation, :validate_naming_observation_missing)
     end
-    errors.add(:name, :validate_naming_name_missing.t) unless name
-    errors.add(:user, :validate_naming_user_missing.t) if !user_id &&
-                                                          !@current_user
+    errors.add(:name, :validate_naming_name_missing) unless name
+    errors.add(:user, :validate_naming_user_missing) if !user_id &&
+                                                        !@current_user
   end
 end

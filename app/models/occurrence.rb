@@ -231,10 +231,8 @@ class Occurrence < AbstractModel
 
     occ = new
     occ.errors.add(
-      :base,
-      :occurrence_field_slip_conflict.t(
-        codes: ERB::Util.html_escape(codes.join(", "))
-      )
+      :base, :occurrence_field_slip_conflict,
+      codes: ERB::Util.html_escape(codes.join(", "))
     )
     raise(ActiveRecord::RecordInvalid.new(occ))
   end

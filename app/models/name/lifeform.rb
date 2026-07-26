@@ -47,10 +47,8 @@ module Name::Lifeform
     return unless unknown_words.any?
 
     unknown_words = unknown_words.map(&:inspect).join(", ")
-    errors.add(:lifeform,
-               :validate_invalid_lifeform.t(
-                 words: ERB::Util.html_escape(unknown_words)
-               ))
+    errors.add(:lifeform, :validate_invalid_lifeform,
+               words: ERB::Util.html_escape(unknown_words))
   end
 
   # Add lifeform (one word only) to all children.

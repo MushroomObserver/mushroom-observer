@@ -283,5 +283,27 @@ module ActiveSupport
     ensure
       restore_available_locales
     end
+
+    # Rails' own `errors[:attr]`/`error.message` resolves a bare
+    # `errors.add(:attr, :some_mo_tag)` in the wrong (Rails, not mo.*)
+    # i18n scope -- see AbstractModel::ErrorResolution. Tests asserting
+    # on a specific validation's text need to go through the resolver
+    # the same way display code does, not probe `errors[:attr]` directly.
+    #
+    # Use the plural form when more than one validation can add an
+    # error to the same attribute (e.g. a `validates ... inclusion:`
+    # alongside a custom `validate` callback) - `.find` on the
+    # singular form would silently grab whichever came first.
+    def resolved_error_message(model, attribute)
+      error = model.errors.find { |err| err.attribute == attribute }
+      return nil unless error
+
+      model.resolved_error_message(error)
+    end
+
+    def resolved_error_messages(model, attribute)
+      model.errors.select { |err| err.attribute == attribute }.
+        map { |err| model.resolved_error_message(err) }
+    end
   end
 end

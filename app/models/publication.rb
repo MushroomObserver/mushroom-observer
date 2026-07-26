@@ -40,6 +40,6 @@ class Publication < AbstractModel
       errors.add(:user, "missing user") # sign of internal error,
       # should never happen
     end
-    errors.add(:full, :validate_publication_ref_missing.t) if full.blank?
+    errors.add(:full, :validate_publication_ref_missing) if full.blank?
   end
 end

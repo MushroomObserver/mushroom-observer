@@ -57,8 +57,8 @@ class InterestTest < UnitTestCase
     )
 
     assert_not(interest.save)
-    assert_includes(interest.errors[:user],
-                    :validate_interest_user_missing.t)
+    assert_equal(:validate_interest_user_missing.t,
+                 resolved_error_message(interest, :user))
   end
 
   def test_validate_target_type_too_long
@@ -70,7 +70,7 @@ class InterestTest < UnitTestCase
     interest.target_type = "A" * 31
 
     assert_not(interest.save)
-    assert_includes(interest.errors[:target_type],
+    assert_includes(resolved_error_messages(interest, :target_type),
                     :validate_interest_object_type_too_long.t)
   end
 
