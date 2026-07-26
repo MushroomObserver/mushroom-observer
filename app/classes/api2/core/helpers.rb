@@ -39,15 +39,23 @@ module API2::Helpers
   def make_sure_location_isnt_dubious!(name)
     return if name.blank? || Location.where(name: name).any?
 
-    citations =
+    citations = dubious_location_citations(name)
+    return if citations.none?
+
+    raise(API2::DubiousLocationName.new(citations))
+  end
+
+  # [tag, args] pairs from Location's check_* methods, resolved here
+  # (rather than on the model) into the plain strings
+  # API2::DubiousLocationName expects (#4901).
+  def dubious_location_citations(name)
+    reasons =
       Location.check_for_empty_name(name) +
       Location.check_for_dubious_commas(name) +
       Location.check_for_bad_country_or_state(name) +
       Location.check_for_bad_terms(name) +
       Location.check_for_bad_chars(name)
-    return if citations.none?
-
-    raise(API2::DubiousLocationName.new(citations))
+    reasons.map { |tag, args| tag.t(**args) }
   end
 
   def parse_bounding_box!
