@@ -24,9 +24,8 @@
 
 # USAGE:
 #
-#   Before running the script, create a backup of the MUOB data and
-#   download it to tmp/mycoportal_dwca/
-#   using the instructions at
+#   Before running the script, download a backup of MUOB in UTF-8 format
+#   to tmp/mycoportal_dwca/ using the instructions at
 #   https://docs.symbiota.org/Collection_Manager_Guide/Downloading/downloading_copy
 #   (The download will have a name like MUOB_backup_2026-07-22_190455_DwC-A.zip)
 #
