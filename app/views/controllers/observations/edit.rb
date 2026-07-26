@@ -12,7 +12,8 @@ module Views::Controllers::Observations
     prop :good_images, _Array(::Image), default: -> { [] }
     prop :sibling_images, _Array(::Image), default: -> { [] }
     prop :exif_data, Hash, default: -> { {} }
-    prop :dubious_where_reasons, _Nilable(Array), default: nil
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
     prop :projects, _Array(::Project), default: -> { [] }
     prop :submitted_project_ids, _Nilable(Array), default: nil
     prop :lists, _Array(::SpeciesList), default: -> { [] }

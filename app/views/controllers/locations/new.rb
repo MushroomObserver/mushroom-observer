@@ -15,7 +15,8 @@ module Views::Controllers::Locations
          _Nilable(_Union(::String, ::Integer)), default: nil
     prop :set_herbarium,
          _Nilable(_Union(::String, ::Integer)), default: nil
-    prop :dubious_where_reasons, _Nilable(_Array(::String)), default: nil
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
     def view_template
       container_class(:full)
       add_new_title(:create_object, :location)

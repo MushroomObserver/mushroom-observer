@@ -93,17 +93,20 @@ module Views::Controllers::Locations
     end
 
     def test_renders_dubious_location_warning_container_when_provided
+      reasons = [[:location_dubious_empty, {}], [:location_dubious_commas, {}]]
       html = render(Form.new(
                       @location,
                       display_name: "test",
                       original_name: "test",
-                      dubious_where_reasons: ["Reason 1", "Reason 2"],
+                      dubious_where_reasons: reasons,
                       local: true
                     ))
 
       assert_html(html, "#dubious_location_messages.alert-warning")
-      assert_html(html, "#dubious_location_messages", text: "Reason 1")
-      assert_html(html, "#dubious_location_messages", text: "Reason 2")
+      reasons.each do |tag, args|
+        assert_html(html, "#dubious_location_messages",
+                    text: tag.t(**args).as_displayed)
+      end
     end
 
     def test_renders_locked_display_for_locked_location
