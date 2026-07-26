@@ -55,7 +55,7 @@ module API2::Helpers
       Location.check_for_bad_country_or_state(name) +
       Location.check_for_bad_terms(name) +
       Location.check_for_bad_chars(name)
-    reasons.map { |tag, args| tag.t(**(args || {})) }
+    reasons.map { |tag, args| tag.t(**args) }
   end
 
   def parse_bounding_box!

@@ -3,7 +3,7 @@
 # Displays feedback about dubious location reasons when creating/editing
 # observations, species lists, or locations.
 #
-# @param dubious_where_reasons [Array<Array(Symbol, Hash)>, nil] unresolved
+# @param dubious_where_reasons [Array<[Symbol, Hash]>, nil] unresolved
 #   [tag, args] pairs from Location.dubious_reasons_for -- resolved here,
 #   not on the model, since API2::Helpers needs the same data in a
 #   different final form (#4901).
@@ -27,7 +27,7 @@ class Components::Form::LocationFeedback < Components::Base
         @dubious_where_reasons.each_with_index do |reason, index|
           br if index.positive?
           tag, args = reason
-          trusted_html(tag.t(**(args || {})))
+          trusted_html(tag.t(**args))
         end
       end
       Help(element: :span,
