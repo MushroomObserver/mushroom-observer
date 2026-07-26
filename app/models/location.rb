@@ -430,12 +430,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     string_with_id(format_name(user))
   end
 
-  # Info to include about each location in merge requests.
-  def merge_info
-    num_obs = observations.count
-    "#{:location.ti} ##{id}: #{name} [o=#{num_obs}]"
-  end
-
   # Strip out special characters, punctuation, and small words from a name.
   # This is supposed to make it easier to search for a name if you don't know
   # how it is worded.  I'm not so sure anymore...

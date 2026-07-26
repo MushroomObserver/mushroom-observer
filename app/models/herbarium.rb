@@ -194,13 +194,6 @@ class Herbarium < AbstractModel
     herbarium_records.all? { |r| r.user_id == user.id }
   end
 
-  # Info to include about each herbarium in merge requests.
-  def merge_info
-    num_cur = curators.count
-    num_rec = herbarium_records.count
-    "#{:herbarium.ti} ##{id}: #{name} [#{num_cur} curators, #{num_rec} records]"
-  end
-
   def merge(src)
     return src if src == self
 

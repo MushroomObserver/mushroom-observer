@@ -3,26 +3,17 @@
 require("test_helper")
 
 class SymbolExtensionsTest < UnitTestCase
-  # Symbol.titleize_localized (and I18n.with_locale generally) is a
-  # pure function of I18n.locale -- it never touches
-  # TranslationString/Language. But I18n.available_locales is derived
-  # from whichever config/locales/*.yml files exist, which `rails
-  # lang:update` generates only for locales with a Language row in
-  # whatever DB it ran against. CI's test DB only has the 6 languages
-  # fixtures.yml defines, so I18n.with_locale(:pl) (etc.) would raise
-  # I18n::InvalidLocale there even though the fixture set has nothing
-  # to do with what these tests are actually exercising. Widened once
-  # for the whole class rather than per-test, since multiple tests in
-  # this file need locales outside the fixture set.
+  # See expand_available_locales in test_helper.rb for why this is
+  # needed. Widened once for the whole class rather than per-test,
+  # since multiple tests in this file need locales outside the
+  # fixture set.
   def setup
     super
-    @original_locales = I18n.available_locales
-    I18n.available_locales =
-      (@original_locales + TI_TEST_STRINGS.keys).uniq
+    expand_available_locales(*TI_TEST_STRINGS.keys)
   end
 
   def teardown
-    I18n.available_locales = @original_locales
+    restore_available_locales
     super
   end
 
