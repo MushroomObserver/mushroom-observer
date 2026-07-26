@@ -795,6 +795,8 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Should count the skeleton import")
     assert_equal([obs.id], @inat_import.skeleton_observation_ids,
                  "Should record the skeleton observation's id")
+    assert_equal("", @inat_import.response_errors,
+                 "Skeleton imports must not populate response_errors")
   end
 
   # Not-own superimporter import: a *licensed* obs still imports even when

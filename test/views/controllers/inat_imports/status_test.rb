@@ -68,6 +68,33 @@ module Views::Controllers::InatImports
       assert_includes(html, :errors.ti)
     end
 
+    def test_final_alert_is_warning_when_genuine_error_present
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: 3,
+        response_errors: "Something went wrong\n"
+      )
+      html = render_status
+
+      # A genuine error should trigger the "done with errors" flash.
+      assert_html(html, "#inat_import_final_alert.alert-warning")
+    end
+
+    def test_no_errors_caption_or_warning_when_only_skeletons_imported
+      @import.update_columns(
+        state: InatImport.states[:Done],
+        ended_at: Time.zone.now,
+        imported_count: 3,
+        skeleton_imported_count: 3
+      )
+      html = render_status
+
+      assert_no_html(html, "*", text: "#{:errors.ti}: ".as_displayed)
+      assert_html(html, "#inat_import_final_alert.alert-success")
+      assert_no_html(html, "#inat_import_final_alert.alert-warning")
+    end
+
     def test_results_button_absent_when_not_done
       # katrina_inat_import is in Importing state
       html = render_status
@@ -191,7 +218,7 @@ module Views::Controllers::InatImports
       html = render_status
 
       assert_html(
-        html, "h5",
+        html, ".alert-success h5",
         text: :inat_import_tracker_skeleton_imported_heading.l.as_displayed
       )
     end

@@ -220,12 +220,12 @@ class InatImportJob < ApplicationJob
       ::Inat::ObservationImporter.new(inat_import, user, self)
   end
 
+  # Report Skeleton-import counts via their own success alert
   def log_unlicensed_summary
     unlicensed_obs = observation_importer.unlicensed_obs_count
     skipped_images = observation_importer.skipped_images_count
 
     if inat_import.import_others
-      log_skeleton_summary
       if skipped_images.positive?
         inat_import.add_response_error(
           :inat_skipped_images_summary.t(count: skipped_images)
@@ -242,13 +242,6 @@ class InatImportJob < ApplicationJob
     inat_import.add_response_error(
       :inat_unlicensed_obs_summary.t(count: unlicensed_obs)
     )
-  end
-
-  def log_skeleton_summary
-    count = inat_import.skeleton_imported_count
-    return unless count.positive?
-
-    inat_import.add_response_error(:inat_skeleton_obs_summary.t(count: count))
   end
 
   def non_rescuable?(error)

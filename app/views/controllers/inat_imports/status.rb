@@ -213,14 +213,13 @@ module Views::Controllers::InatImports
              ))
     end
 
-    # Reports how many of this import's obs were built as minimal skeleton
-    # counterparts (#4828) rather than full copies, because the source iNat
-    # obs was unlicensed.
+    # Report how many obs were built as minimal placeholders
+    # because the source iNat observerion is All Rights Reserved
     def render_skeleton_imported_section
       count = @inat_import.skeleton_imported_count.to_i
       return unless count.positive?
 
-      Alert(level: :info, class: "mt-3") do
+      Alert(level: :success, class: "mt-3") do
         h5 { plain(:inat_import_tracker_skeleton_imported_heading.l) }
         div do
           plain(:inat_import_tracker_skeleton_imported_note.t(count: count))
@@ -229,7 +228,7 @@ module Views::Controllers::InatImports
     end
 
     def render_error_alert
-      errors = @inat_import.response_errors.to_s.split("\n").compact_blank
+      errors = response_error_lines
       return if errors.empty?
 
       Alert(level: :warning) do
@@ -241,7 +240,8 @@ module Views::Controllers::InatImports
     end
 
     def render_alert
-      Alert(message: alert_message, level: alert_level, class: "mt-3")
+      Alert(message: alert_message, level: alert_level, class: "mt-3",
+            id: "inat_import_final_alert")
     end
 
     def alert_message
@@ -264,6 +264,10 @@ module Views::Controllers::InatImports
 
     def errors?
       @inat_import.response_errors.present?
+    end
+
+    def response_error_lines
+      @inat_import.response_errors.to_s.split("\n").compact_blank
     end
 
     def remaining_time
