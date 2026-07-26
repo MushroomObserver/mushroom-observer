@@ -40,6 +40,13 @@ class Publication < AbstractModel
       errors.add(:user, "missing user") # sign of internal error,
       # should never happen
     end
-    errors.add(:full, :validate_publication_ref_missing) if full.blank?
+    # Not converted to a bare deferred tag like its Phase 2 siblings:
+    # publications_controller.rb's XML actions render @publication.errors
+    # directly (render(xml: @publication.errors, ...)), which resolves
+    # via Rails' own (wrong-scope) message generation, not this model's
+    # AbstractModel::ErrorResolution - a bare tag here would render as
+    # untranslated "Translation missing" text on that response, not the
+    # flash/HTML paths. See #4901 Phase 2 note on raw API rendering.
+    errors.add(:full, :validate_publication_ref_missing.t) if full.blank?
   end
 end

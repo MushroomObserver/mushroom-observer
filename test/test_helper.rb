@@ -305,5 +305,16 @@ module ActiveSupport
       model.errors.select { |err| err.attribute == attribute }.
         map { |err| model.resolved_error_message(err) }
     end
+
+    # `errors[:attr]` (Rails' native accessor) computes every matching
+    # error's `.message` just to build the array, even for a bare
+    # `.any?`/`.empty?` presence check - so it crashes outright once an
+    # attribute (e.g. Image's `:image`, a UI label rather than a real
+    # column) has a deferred MO-tag error and isn't independently
+    # readable via `read_attribute_for_validation`. Check presence
+    # without ever resolving a message.
+    def error_on?(model, attribute)
+      model.errors.any? { |err| err.attribute == attribute }
+    end
   end
 end

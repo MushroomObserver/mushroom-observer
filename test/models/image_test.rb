@@ -369,7 +369,7 @@ class ImageTest < UnitTestCase
     img.upload_length = MO.image_upload_max_size + 1
 
     assert_not(img.validate_image_length)
-    assert(img.errors[:image].any?)
+    assert(error_on?(img, :image))
   end
 
   def test_save_to_temp_file_rescues_copy_error
@@ -379,7 +379,7 @@ class ImageTest < UnitTestCase
     Tempfile.stub(:new, ->(*) { raise("boom") }) do
       assert_not(img.save_to_temp_file)
     end
-    assert(img.errors[:image].any?)
+    assert(error_on?(img, :image))
   end
 
   def test_save_to_temp_file_rejects_invalid_upload_handle
@@ -387,14 +387,14 @@ class ImageTest < UnitTestCase
     img.upload_handle = Object.new # not an IO/StringIO/TeeInput
 
     assert_not(img.save_to_temp_file)
-    assert(img.errors[:image].any?)
+    assert(error_on?(img, :image))
   end
 
   def test_process_image_before_save
     img = Image.new
 
     assert_not(img.process_image)
-    assert(img.errors[:image].any?)
+    assert(error_on?(img, :image))
   end
 
   # A failed GPS strip must stop before Image::Processor#process is ever
@@ -419,7 +419,7 @@ class ImageTest < UnitTestCase
       end
     end
     assert_not(processed, "strip failure must skip processing (and hashing)")
-    assert(img.errors[:image].any?)
+    assert(error_on?(img, :image))
   end
 
   def test_process_image_command_failure
@@ -446,7 +446,7 @@ class ImageTest < UnitTestCase
         end
       end
     end
-    assert(img.errors[:image].any?)
+    assert(error_on?(img, :image))
     assert_includes(logged, "Image::Processor failed for image #{img.id}")
     assert_includes(logged, "boom")
   end
