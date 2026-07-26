@@ -53,6 +53,9 @@ module ObservationsController::New
     @good_images = []
     @field_code        = params[:field_code]
     @field_code_locked = @field_code.present?
+    # A field slip almost always means a physical specimen, and users
+    # coming from the slip form often miss the checkbox (#4916).
+    @observation.specimen = true if @field_code_locked
     init_specimen_vars
     init_project_vars_for_new
     init_list_vars
