@@ -53,13 +53,17 @@ class MergeRequestMailerTest < MailerTestCase
   # resolution (the Phlex view render happens inside build's own call,
   # not synchronously in whatever locale the caller happened to be in) --
   # confirm it resolves in MO.default_locale even under a different
-  # ambient locale.
+  # ambient locale. :de may not be I18n-available on CI (see
+  # with_expanded_locales in test_helper.rb), hence the wrapper.
   def test_build_resolves_in_default_locale_regardless_of_ambient_locale
     loc1 = locations(:albion)
     loc2 = locations(:burbank)
 
-    mail = I18n.with_locale(:de) do
-      build_mail(old_obj: loc1, new_obj: loc2, user: users(:mary), notes: "x")
+    mail = with_expanded_locales(:de) do
+      I18n.with_locale(:de) do
+        build_mail(old_obj: loc1, new_obj: loc2, user: users(:mary),
+                   notes: "x")
+      end
     end
 
     expected_label = I18n.with_locale(MO.default_locale) { :location.ti }
