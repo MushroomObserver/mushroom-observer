@@ -728,6 +728,8 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
   def test_update_observation_new_image_can_be_thumbnail
     obs = observations(:detailed_unknown_obs)
     new_image = images(:disconnected_coprinus_comatus_image)
+    # The JS uploader creates the image as the logged-in user.
+    new_image.update_columns(user_id: obs.user_id)
     assert_not_includes(obs.image_ids, new_image.id)
 
     login(obs.user.login)
