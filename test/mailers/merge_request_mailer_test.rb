@@ -49,6 +49,15 @@ class MergeRequestMailerTest < MailerTestCase
     assert_includes(body, "herb merge")
   end
 
+  def test_merge_summary_raises_for_unsupported_type
+    loc = locations(:albion)
+    view = Views::Mailers::MergeRequestMailer.new(
+      old_obj: loc, new_obj: loc, user: users(:mary)
+    )
+
+    assert_raises(ArgumentError) { view.send(:merge_summary, loc.user) }
+  end
+
   # MergeRequestMailer#build's I18n.locale line is what actually governs
   # resolution (the Phlex view render happens inside build's own call,
   # not synchronously in whatever locale the caller happened to be in) --

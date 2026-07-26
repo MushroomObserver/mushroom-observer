@@ -40,6 +40,11 @@ class Views::Mailers::MergeRequestMailer < Views::Mailers::Base
     when ::Location then location_merge_summary(obj)
     when ::Herbarium then herbarium_merge_summary(obj)
     when ::Name then name_merge_summary(obj)
+    else
+      raise(ArgumentError.new(
+              "Unknown MergeRequestMailer merge type: #{obj.class}. " \
+              "Valid types: Location, Herbarium, Name."
+            ))
     end
   end
 
