@@ -151,12 +151,6 @@ class Description < AbstractModel
     put_together_name(:full)
   end
 
-  # Page heading: textilized parent-inclusive name. Doc title: plain.
-  def page_title(_user = nil)
-    format_name.t
-  end
-  alias document_title text_name
-
   # Same as +format_name+ but with id tacked on.
   def unique_format_name(_user = nil)
     string_with_id(format_name)
