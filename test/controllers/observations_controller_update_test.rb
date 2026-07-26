@@ -721,6 +721,37 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     )
   end
 
+  # Issue #4737: the JS uploader creates the Image before the form
+  # submits, so at update time the chosen thumb_image_id is a real image
+  # that isn't attached to the observation yet. It must survive the
+  # update instead of being reverted to an already-attached image.
+  def test_update_observation_new_image_can_be_thumbnail
+    obs = observations(:detailed_unknown_obs)
+    new_image = images(:disconnected_coprinus_comatus_image)
+    # The JS uploader creates the image as the logged-in user.
+    new_image.update_columns(user_id: obs.user_id)
+    assert_not_includes(obs.image_ids, new_image.id)
+
+    login(obs.user.login)
+    put(:update, params: {
+          id: obs.id,
+          observation: {
+            place_name: obs.place_name,
+            when: obs.when,
+            notes: obs.notes.to_h,
+            specimen: obs.specimen,
+            thumb_image_id: new_image.id.to_s,
+            good_image_ids: (obs.image_ids + [new_image.id]).join(" ")
+          }
+        })
+
+    obs.reload
+    assert_includes(obs.image_ids, new_image.id,
+                    "New image should be attached to the observation")
+    assert_equal(new_image.id, obs.thumb_image_id,
+                 "Newly uploaded image chosen as thumbnail should stick")
+  end
+
   # ---------- field slip code on update ----------
 
   def test_update_adds_field_slip_code

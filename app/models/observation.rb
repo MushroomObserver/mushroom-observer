@@ -993,7 +993,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def add_image(img)
     unless images.include?(img)
       images << img
-      self.thumb_image = img unless thumb_image
+      # Check the FK, not the association: reading `thumb_image` after
+      # the form assigned a new thumb_image_id would lazy-load, which
+      # strict_loading (edit_includes) forbids.
+      self.thumb_image = img unless thumb_image_id
       self.updated_at = Time.zone.now
       track_change(:added_image)
       save
