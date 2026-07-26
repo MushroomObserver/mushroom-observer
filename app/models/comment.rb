@@ -344,21 +344,21 @@ class Comment < AbstractModel
   def check_user # :nodoc:
     return if user || current_user
 
-    errors.add(:user, :validate_comment_user_missing.t)
+    errors.add(:user, :validate_comment_user_missing)
   end
 
   def check_summary # :nodoc:
     if summary.to_s.blank?
-      errors.add(:summary, :validate_comment_summary_missing.t)
+      errors.add(:summary, :validate_comment_summary_missing)
     elsif summary.size > 100
-      errors.add(:summary, :validate_comment_summary_too_long.t)
+      errors.add(:summary, :validate_comment_summary_too_long)
     end
   end
 
   def check_target # :nodoc:
     return unless target_type.to_s.size > 30
 
-    errors.add(:target_type, :validate_comment_object_type_too_long.t)
+    errors.add(:target_type, :validate_comment_object_type_too_long)
   end
 
   def no_recent_duplicate
@@ -369,7 +369,7 @@ class Comment < AbstractModel
     return unless effective_user && target
     return unless recent_identical_comment?(effective_user)
 
-    errors.add(:base, :validate_comment_duplicate.t)
+    errors.add(:base, :validate_comment_duplicate)
   end
 
   def recent_identical_comment?(effective_user)

@@ -37,9 +37,12 @@ class VoteTest < UnitTestCase
   def test_validate
     vote = Vote.new
     assert_not(vote.save)
-    assert_equal(:validate_vote_naming_missing.t, vote.errors[:naming].first)
-    assert_equal(:validate_vote_user_missing.t, vote.errors[:user].first)
-    assert_equal(:validate_vote_value_missing.t, vote.errors[:value].first)
+    assert_equal(:validate_vote_naming_missing.t,
+                 resolved_error_message(vote, :naming))
+    assert_equal(:validate_vote_user_missing.t,
+                 resolved_error_message(vote, :user))
+    assert_equal(:validate_vote_value_missing.t,
+                 resolved_error_message(vote, :value))
     assert_equal(3, vote.errors.count)
 
     vote = Vote.new(
@@ -48,7 +51,8 @@ class VoteTest < UnitTestCase
       value: "blah"
     )
     assert_not(vote.save)
-    assert_equal(:validate_vote_value_not_integer.t, vote.errors[:value].first)
+    assert_equal(:validate_vote_value_not_integer.t,
+                 resolved_error_message(vote, :value))
     assert_equal(1, vote.errors.count)
 
     vote = Vote.new(
@@ -58,7 +62,7 @@ class VoteTest < UnitTestCase
     )
     assert_not(vote.save)
     assert_equal(:validate_vote_value_out_of_bounds.t,
-                 vote.errors[:value].first)
+                 resolved_error_message(vote, :value))
     assert_equal(1, vote.errors.count)
   end
 

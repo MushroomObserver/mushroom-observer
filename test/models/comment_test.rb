@@ -245,15 +245,16 @@ class CommentTest < UnitTestCase
     comment = Comment.new(target: observations(:minimal_unknown_obs),
                           summary: "no user")
     assert_not(comment.valid?)
-    assert_includes(comment.errors[:user], :validate_comment_user_missing.t)
+    assert_equal(:validate_comment_user_missing.t,
+                 resolved_error_message(comment, :user))
   end
 
   def test_validate_summary_too_long
     comment = Comment.new(target: observations(:minimal_unknown_obs),
                           current_user: rolf, summary: "x" * 101)
     assert_not(comment.valid?)
-    assert_includes(comment.errors[:summary],
-                    :validate_comment_summary_too_long.t)
+    assert_equal(:validate_comment_summary_too_long.t,
+                 resolved_error_message(comment, :summary))
   end
 
   def test_validate_target_type_too_long
@@ -264,7 +265,7 @@ class CommentTest < UnitTestCase
     comment = Comment.new(current_user: rolf, summary: "valid")
     comment.target_type = "A" * 31
     comment.send(:check_target)
-    assert_includes(comment.errors[:target_type],
-                    :validate_comment_object_type_too_long.t)
+    assert_equal(:validate_comment_object_type_too_long.t,
+                 resolved_error_message(comment, :target_type))
   end
 end

@@ -285,7 +285,7 @@ class SpeciesListTest < UnitTestCase
 
     assert_not(spl.valid?)
     assert_equal(:validate_species_list_title_too_long.t,
-                 spl.errors[:title].first)
+                 resolved_error_message(spl, :title))
   end
 
   def test_validate_place_name_missing
@@ -293,7 +293,7 @@ class SpeciesListTest < UnitTestCase
 
     assert_not(spl.valid?)
     assert_equal(:validate_species_list_where_missing.t,
-                 spl.errors[:place_name].first)
+                 resolved_error_message(spl, :place_name))
   end
 
   def test_validate_place_name_too_long
@@ -301,7 +301,7 @@ class SpeciesListTest < UnitTestCase
 
     assert_not(spl.valid?)
     assert_equal(:validate_species_list_where_too_long.t,
-                 spl.errors[:place_name].first)
+                 resolved_error_message(spl, :place_name))
   end
 
   def test_validate_user_missing
@@ -309,6 +309,6 @@ class SpeciesListTest < UnitTestCase
 
     assert_not(spl.valid?)
     assert_equal(:validate_species_list_user_missing.t,
-                 spl.errors[:user].first)
+                 resolved_error_message(spl, :user))
   end
 end
