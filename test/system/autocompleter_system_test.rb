@@ -250,6 +250,36 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_match(/\n/, final_value, "Locations should be separated by newline")
   end
 
+  # The pulldown must open flush under the input. The `.dropdown`
+  # positioning context is the whole form-group, and the locality field
+  # renders a help block between the input and the menu, so Bootstrap's
+  # default top:100% would open the menu below the help text (#4909).
+  def test_locality_pulldown_opens_under_the_input
+    login!(@roy)
+    visit("/observations/new")
+    assert_selector("body.observations__new")
+
+    field = find_field("observation_place_name")
+    field.click
+    field.set("")
+    @browser.keyboard.type("burbank")
+    within("#observation_location_autocompleter") do
+      assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 3)
+    end
+
+    input_bottom = evaluate_script(
+      "document.getElementById('observation_place_name')" \
+      ".getBoundingClientRect().bottom"
+    )
+    menu_top = evaluate_script(
+      "document.querySelector('#observation_location_autocompleter " \
+      ".auto_complete').getBoundingClientRect().top"
+    )
+    assert_in_delta(input_bottom, menu_top, 2,
+                    "pulldown should open flush under the locality input, " \
+                    "not below its help text")
+  end
+
   def test_autocompleter_in_naming_modal
     browser = page.driver.browser
     rolf = users("rolf")

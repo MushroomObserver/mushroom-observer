@@ -789,6 +789,7 @@ export default class BaseAutocompleterController extends Controller {
 
       this.setWidth();
       this.updateWidth();
+      this.positionPulldown();
 
       if (matches.length > 1 || this.getSearchToken() != matches[0]['name']) {
         this.clearHide();
@@ -805,6 +806,18 @@ export default class BaseAutocompleterController extends Controller {
   hidePulldown() {
     this.wrapTarget?.classList?.remove('open');
     this.menu_up = false;
+  }
+
+  // Anchor the menu to the input's bottom edge. The `.dropdown`
+  // positioning context is the whole form-group, so Bootstrap's default
+  // `top: 100%` opens the menu below anything rendered under the input —
+  // e.g. the locality field's help block on the observation form (#4909).
+  positionPulldown() {
+    if (!this.hasWrapTarget) return;
+
+    const wrap_top = this.wrapTarget.getBoundingClientRect().top,
+      input_bottom = this.inputTarget.getBoundingClientRect().bottom;
+    this.pulldownTarget.style.top = (input_bottom - wrap_top) + "px";
   }
 
   updateWidth() {
