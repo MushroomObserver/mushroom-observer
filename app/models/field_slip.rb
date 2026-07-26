@@ -226,21 +226,35 @@ class FieldSlip < AbstractModel
     location&.id
   end
 
+  # Default location, strongest signal first: this slip's own
+  # observation, then the user's latest slip in this project, then the
+  # project location, then their latest located observation. The
+  # project outranks the observation because a user traveling to a
+  # foray likely hasn't entered anything located at the foray site
+  # yet, while the project location should contain it (issue #4907).
   def calc_location
-    result = observation&.location || users_last_location
-    return result if result
-
-    project&.location
+    observation&.location || users_last_location ||
+      project&.location || users_last_observation_location
   end
 
+  # Location of the user's most recently updated field slip in this
+  # project that has a located observation (slips without one are
+  # skipped).
   def users_last_location
-    user = @current_user
-    return nil unless user
+    return nil unless @current_user
 
-    field_slip = user.field_slips.where(project:).
-                 order(updated_at: :desc).last
-    obs = field_slip&.observation
-    obs&.location
+    Location.joins(observations: { occurrence: :field_slip }).
+      where(field_slips: { user_id: @current_user.id,
+                           project_id: project&.id }).
+      order(FieldSlip.arel_table[:updated_at].desc,
+            FieldSlip.arel_table[:id].desc).first
+  end
+
+  def users_last_observation_location
+    return nil unless @current_user
+
+    @current_user.observations.where.not(location_id: nil).
+      order(created_at: :desc, id: :desc).first&.location
   end
 
   # Plain collector string for the form's autocompleter input (the
