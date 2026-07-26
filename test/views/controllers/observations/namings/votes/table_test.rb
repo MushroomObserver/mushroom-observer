@@ -44,6 +44,21 @@ module Views::Controllers::Observations::Namings::Votes
                    "totals-row spacer cell must hold U+00A0")
     end
 
+    # #4901: the table is keyed by canonical numeric value, and each
+    # row resolves its own tag via `.t` at render time -- confirm the
+    # displayed label actually matches that resolution (not, say, a
+    # leftover pre-resolved string from before the refactor).
+    def test_renders_resolved_confidence_label_per_row
+      html = render(Table.new(naming: @naming))
+
+      @naming.votes.map(&:value).uniq.each do |val|
+        next if val.zero?
+
+        expected_label = Vote.confidence_tag(val).t
+        assert_includes(html, expected_label)
+      end
+    end
+
     def test_renders_voter_user_links_for_non_anonymous_votes
       html = render(Table.new(naming: @naming))
 

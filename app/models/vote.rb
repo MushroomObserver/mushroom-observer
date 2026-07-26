@@ -34,7 +34,9 @@
 #  ==== Vote labels
 #  confidence_menu::    Structure used by form helper +select+
 #                       to create pulldown menu.
-#  confidence::         Classify value as confidence level, String.
+#  confidence_string::  Classify value as confidence level, String.
+#  confidence_value::   Classify value as confidence level, canonical Float.
+#  confidence_tag::     Classify value as confidence level, tag Symbol.
 #
 #  == Instance methods
 #
@@ -178,10 +180,29 @@ class Vote < AbstractModel
 
   # Find label of closest value in the "confidence" menu.
   # Special case: 0 returns "No Opinion"
-  def self.confidence(val)
+  def self.confidence_string(val)
     return no_opinion if val.to_f.zero?
 
-    lookup_value(val, confidence_menu)
+    lookup_value(val, confidence_menu)[0]
+  end
+
+  # Like `confidence_string`, but returns the canonical numeric value instead
+  # of resolved text -- for callers needing a stable, locale-independent
+  # identity (e.g. NamingConsensus's internal vote-tallying table),
+  # not display text.
+  def self.confidence_value(val)
+    return NO_OPINION_VAL[1] if val.to_f.zero?
+
+    lookup_value(val, CONFIDENCE_VALS)[1]
+  end
+
+  # Like `confidence_value`, but returns the untranslated tag Symbol --
+  # for callers that need to resolve display text themselves, later,
+  # in whatever locale is current at render time.
+  def self.confidence_tag(val)
+    return NO_OPINION_VAL[0] if val.to_f.zero?
+
+    lookup_value(val, CONFIDENCE_VALS)[0]
   end
 
   # ----------------------------
@@ -289,17 +310,19 @@ class Vote < AbstractModel
   protected
 
   # Find label of closest value in a given enumerated lists.
+  # Returns the whole winning [tag, value] pair (not just one field),
+  # so callers can extract whichever they need -- resolved text
+  # (`confidence`), the canonical value (`confidence_value`), or the
+  # tag (`confidence_tag`).
   def self.lookup_value(val, list) # :nodoc:
     last_pair = nil
     list.each do |pair|
       next unless pair[1] != 0
-      if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
-        return last_pair[0]
-      end
+      return last_pair if !last_pair.nil? && val > (last_pair[1] + pair[1]) / 2
 
       last_pair = pair
     end
-    last_pair[0]
+    last_pair
   end
 
   validate :check_requirements

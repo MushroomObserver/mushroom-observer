@@ -143,16 +143,38 @@ class VoteTest < UnitTestCase
     end
   end
 
-  def test_confidence_returns_no_opinion_for_zero
-    # Bug: Vote.confidence(0) was returning "Doubtful" instead of "No Opinion"
-    assert_equal("No Opinion", Vote.confidence(0))
-    assert_equal("No Opinion", Vote.confidence(0.0))
+  def test_confidence_string_returns_no_opinion_for_zero
+    # Bug: Vote.confidence_string(0) returned "Doubtful" not "No Opinion"
+    assert_equal("No Opinion", Vote.confidence_string(0))
+    assert_equal("No Opinion", Vote.confidence_string(0.0))
   end
 
-  def test_confidence_returns_labels_for_nonzero_values
-    assert_equal("I'd Call It That", Vote.confidence(3.0))
-    assert_equal("Doubtful", Vote.confidence(-1.0))
-    assert_equal("As If!", Vote.confidence(-3.0))
+  def test_confidence_string_returns_labels_for_nonzero_values
+    assert_equal("I'd Call It That", Vote.confidence_string(3.0))
+    assert_equal("Doubtful", Vote.confidence_string(-1.0))
+    assert_equal("As If!", Vote.confidence_string(-3.0))
+  end
+
+  def test_confidence_value_returns_zero_for_zero
+    assert_equal(0, Vote.confidence_value(0))
+    assert_equal(0, Vote.confidence_value(0.0))
+  end
+
+  def test_confidence_value_returns_canonical_values
+    assert_in_delta(3.0, Vote.confidence_value(3.0))
+    assert_in_delta(-1.0, Vote.confidence_value(-1.0))
+    assert_in_delta(-3.0, Vote.confidence_value(-3.0))
+  end
+
+  def test_confidence_tag_returns_no_opinion_for_zero
+    assert_equal(:vote_no_opinion, Vote.confidence_tag(0))
+    assert_equal(:vote_no_opinion, Vote.confidence_tag(0.0))
+  end
+
+  def test_confidence_tag_returns_tags_for_nonzero_values
+    assert_equal(:vote_confidence_100, Vote.confidence_tag(3.0))
+    assert_equal(:vote_confidence_40, Vote.confidence_tag(-1.0))
+    assert_equal(:vote_confidence_0, Vote.confidence_tag(-3.0))
   end
 
   def test_show_controller
