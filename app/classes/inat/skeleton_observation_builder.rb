@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+g # frozen_string_literal: true
 
 class Inat
   # Builds a minimal "counterpart" MO Observation from an unlicensed
@@ -134,7 +134,7 @@ class Inat
 
       vote = Vote.create(naming: naming, observation: @observation,
                          user: user, value: value)
-      # We need an ObservationView, but noone has actually viewed this Obs.
+      # We need an ObservationView, but no one has actually viewed this Obs.
       ObservationView.create!(observation: @observation, user: user,
                               last_view: vote.updated_at, reviewed: 1)
     end

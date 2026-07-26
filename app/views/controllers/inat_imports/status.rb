@@ -214,7 +214,7 @@ module Views::Controllers::InatImports
     end
 
     # Report how many obs were built as minimal placeholders
-    # because the source iNat observerion is All Rights Reserved
+    # because the source iNat observation is All Rights Reserved
     def render_skeleton_imported_section
       count = @inat_import.skeleton_imported_count.to_i
       return unless count.positive?
