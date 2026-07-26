@@ -134,7 +134,7 @@ module Views::Layouts
                                               confidence: [2.0]))
 
       assert_html(html, "#caption-truncated .small b",
-                  text: Vote.confidence(2.0))
+                  text: Vote.confidence_string(2.0))
     end
 
     def test_confidence_range_joins_two_labels
@@ -143,7 +143,7 @@ module Views::Layouts
 
       assert_html(
         html, "#caption-truncated .small b",
-        text: "#{Vote.confidence(-1.0)} – #{Vote.confidence(2.0)}"
+        text: "#{Vote.confidence_string(-1.0)} – #{Vote.confidence_string(2.0)}"
       )
     end
 
