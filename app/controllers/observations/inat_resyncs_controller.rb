@@ -10,9 +10,13 @@ module Observations
   class InatResyncsController < ApplicationController
     before_action :login_required
 
-    # Clicks while every reflection was synced this recently skip the
-    # fetch entirely — long enough to swallow double-clicks and
-    # pile-ons, short enough to be invisible in normal use.
+    # Debounce for the Sync button, keyed on INITIATION, not completion
+    # — a just-clicked sync hasn't stamped anything yet (last_synced_at
+    # is written by the job when it finishes), so enqueueing writes a
+    # short-lived cache key instead, swallowing re-clicks even while
+    # the job is still queued or fetching. Long enough to soak up
+    # double-clicks and pile-ons, short enough to be invisible in
+    # normal use.
     SYNC_GUARD_PERIOD = 10.seconds
 
     # POST /observations/:id/resync
@@ -24,19 +28,31 @@ module Observations
       if reflections.empty?
         return respond(observation, :observation_resync_nothing, error: true)
       end
-      return respond(observation, :observation_resync_recent) if
-        recently_synced?(reflections)
+      if sync_pending?(reflections)
+        return respond(observation, :observation_resync_pending)
+      end
 
-      InatObservationResyncJob.perform_later(observation)
+      start_sync(observation, reflections)
       respond(observation, :observation_resync_started)
     end
 
     private
 
-    def recently_synced?(reflections)
-      links = reflections.filter_map(&:import_link)
-      links.any? &&
-        links.all? { |l| l.last_synced_at&.after?(SYNC_GUARD_PERIOD.ago) }
+    def sync_pending?(reflections)
+      Rails.cache.exist?(guard_key(reflections))
+    end
+
+    def start_sync(observation, reflections)
+      Rails.cache.write(guard_key(reflections), true,
+                        expires_in: SYNC_GUARD_PERIOD)
+      InatObservationResyncJob.perform_later(observation)
+    end
+
+    # Keyed on the sorted reflection ids, not the clicked member, so
+    # pressing Sync from different member pages of the same occurrence
+    # debounces together.
+    def guard_key(reflections)
+      "inat_resync_guard/#{reflections.map(&:id).sort.join("-")}"
     end
 
     # A full-page redirect would tear down and re-subscribe the

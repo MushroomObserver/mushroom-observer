@@ -1133,7 +1133,7 @@
   observation_reflection_read_only_note: Read-only reflection of its imported source. To change it, edit it at the source and resync.
   observation_resync_confirm: If you recently edited at the source, those changes may take up to 10 seconds to appear there. Ready to sync now, or would you rather wait?
   observation_resync_started: Syncing imported data from the source. This may take a moment.
-  observation_resync_recent: Just synced. Imported data is already up to date.
+  observation_resync_pending: A sync is already underway. Results will appear shortly.
   observation_resync_nothing: This observation has no imported data to sync.
   observation_resync_synced: Refreshed [count] imported observation(s) from the source.
   observation_resync_unchanged: Imported data is already up to date.

@@ -52,30 +52,59 @@ module Observations
       assert_flash_success
     end
 
-    # The spam guard: when every reflection in the occurrence was synced
-    # within the last SYNC_GUARD_PERIOD, the click reports "just synced"
-    # and skips the fetch entirely.
-    def test_recently_synced_occurrence_skips_the_fetch
+    # The bounce guard debounces on INITIATION, not completion: the
+    # second click lands while the first job is still queued — nothing
+    # has stamped last_synced_at — and must be swallowed anyway. (The
+    # test env cache is a :null_store, so the guard's cache key needs a
+    # real store stubbed in; the other tests run guard-free.)
+    def test_second_click_while_sync_pending_is_swallowed
       obs = reflection
-      obs.import_link.update!(last_synced_at: 2.seconds.ago)
       login(obs.user.login)
 
-      assert_no_enqueued_jobs do
-        post(:create, params: { id: obs.id })
+      Rails.stub(:cache, ActiveSupport::Cache::MemoryStore.new) do
+        assert_enqueued_jobs(1, only: InatObservationResyncJob) do
+          post(:create, params: { id: obs.id })
+          post(:create, params: { id: obs.id })
+        end
       end
-      assert_redirected_to(permanent_observation_path(obs.id))
+      assert_nil(obs.import_link.reload.last_synced_at,
+                 "the guard must not depend on a completed sync")
       assert_flash_success
     end
 
-    def test_stale_last_synced_at_does_not_block_a_resync
+    # The guard key is the occurrence's reflection set, not the clicked
+    # member, so bouncing between member pages debounces together.
+    def test_guard_debounces_across_occurrence_member_pages
       obs = reflection
-      obs.import_link.update!(last_synced_at: 1.minute.ago)
-      login(obs.user.login)
+      primary = observations(:minimal_unknown_obs)
+      [primary, obs].each { |o| o.update_column(:occurrence_id, nil) }
+      occ = Occurrence.create!(user: primary.user,
+                               primary_observation: primary)
+      primary.update!(occurrence: occ)
+      obs.update!(occurrence: occ)
+      login("mary")
 
-      assert_enqueued_with(job: InatObservationResyncJob) do
-        post(:create, params: { id: obs.id })
+      Rails.stub(:cache, ActiveSupport::Cache::MemoryStore.new) do
+        assert_enqueued_jobs(1, only: InatObservationResyncJob) do
+          post(:create, params: { id: obs.id })
+          post(:create, params: { id: primary.id })
+        end
       end
-      assert_flash_success
+    end
+
+    def test_guard_expires_and_allows_a_fresh_sync
+      obs = reflection
+      login(obs.user.login)
+      guard = Observations::InatResyncsController::SYNC_GUARD_PERIOD
+
+      Rails.stub(:cache, ActiveSupport::Cache::MemoryStore.new) do
+        assert_enqueued_jobs(2, only: InatObservationResyncJob) do
+          post(:create, params: { id: obs.id })
+          travel(guard + 1.second) do
+            post(:create, params: { id: obs.id })
+          end
+        end
+      end
     end
 
     # A full-page redirect would tear down and re-subscribe the
