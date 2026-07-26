@@ -1,13 +1,19 @@
 # frozen_string_literal: true
 
-# RssLog's text_name/format_name family, split out of the model (#4901).
-# Real non-Phlex consumers -- the RSS/Atom feed
-# (app/views/controllers/rss_logs/rss.xml.builder) and the shared
-# text_name/format_name polymorphic contract other models implement,
-# reachable generically via ViewerAwareFormat from non-render controller
-# code -- meant this couldn't just move into the view layer outright.
 # RssLog delegates its public text_name/unique_text_name/format_name/
-# unique_format_name/url methods here.
+# unique_format_name/url methods here, but also may render the translated
+# orphan_title.
+#
+# Split out of RssLog into its own object, unlike other models. RssLog
+# usually just forwards to `target`, and only computes anything of its own
+# when orphaned (target destroyed) -- that path resolves a
+# translation tag (:rss_log_of_deleted_item.l) plus textile cleanup,
+# work that doesn't belong in the model.
+#
+# Has callers outside of views:
+# - RSS/Atom feed template (app/views/controllers/rss_logs/rss.xml.builder)
+# - ViewerAwareFormat's generic dispatch, reachable from non-render controller
+#   code for the shared text_name/format_name contract other models implement.
 class RssLog::Title
   def initialize(rss_log)
     @rss_log = rss_log
