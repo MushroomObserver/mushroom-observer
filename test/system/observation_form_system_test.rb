@@ -618,10 +618,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_field("observation_naming_name", with: "Agaricus campestris")
     # Vote/reasons collapse should expand when name is filled
     assert_selector("[data-autocompleter--name-target='collapseFields'].in")
-    select(Vote.confidence(Vote.next_best_vote),
+    select(Vote.confidence_string(Vote.next_best_vote),
            from: "observation_naming_vote_value")
     assert_select("observation_naming_vote_value",
-                  selected: Vote.confidence(Vote.next_best_vote))
+                  selected: Vote.confidence_string(Vote.next_best_vote))
 
     within("#observation_form") { click_commit }
 

@@ -68,6 +68,16 @@ class API2::LocationsTest < UnitTestCase
     assert_api_results(locs)
   end
 
+  # All four edges present (passes all_edges?) but geometrically invalid
+  # (south > north) -- Mappable::Box#valid? rejects it, hitting the
+  # second NeedAllFourEdges raise in parse_bounding_box!, distinct from
+  # the missing-edge case above.
+  def test_getting_locations_in_invalid_box
+    assert_api_fail(
+      params_get(north: 39, south: 40, east: -123, west: -124)
+    )
+  end
+
   def test_posting_locations
     name1  = "Reno, Nevada, USA"
     name2  = "Sparks, Nevada, USA"
@@ -113,6 +123,28 @@ class API2::LocationsTest < UnitTestCase
     assert_api_pass(params.except(:high, :low, :notes))
     @high = @low = @notes = nil
     assert_last_location_correct
+  end
+
+  # Location.check_for_* return unresolved [tag, args] pairs (#4901);
+  # API2::Helpers#make_sure_location_isnt_dubious! resolves them into
+  # the DubiousLocationName error text. Confirm the resolved text
+  # actually made it through, not just that the request failed.
+  def test_posting_location_with_dubious_name_reports_resolved_reason
+    params = {
+      method: :post,
+      action: :location,
+      api_key: @api_key.key,
+      name: "Evil Lair, Latveria",
+      north: 39.64,
+      south: 39.39,
+      east: -119.70,
+      west: -119.94
+    }
+
+    assert_api_fail(params)
+    message = @api.errors.first.to_s
+    assert_match(/Latveria/, message)
+    assert_match(/Unknown country/, message)
   end
 
   def test_patching_locations

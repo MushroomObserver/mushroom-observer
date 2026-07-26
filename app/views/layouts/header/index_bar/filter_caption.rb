@@ -224,7 +224,7 @@ module Views::Layouts
     # the array form (`[2.0]`) at validation time, so the array
     # branch is always taken; no scalar fallback needed.
     def confidence_val_as_label(val)
-      val.map { |v| Vote.confidence(v.to_f) }.join(" – ")
+      val.map { |v| Vote.confidence_string(v.to_f) }.join(" – ")
     end
 
     def param_val_itself(key, val, truncate:)

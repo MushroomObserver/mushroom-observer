@@ -110,13 +110,12 @@ module Views::FullPageBase::Title
 
   private
 
-  # Models without `document_title` fall back to their localized type
-  # tag (`observation`, `location`, etc.). The browser-tab text renders
-  # as plain text, so textile / HTML must NOT leak through.
+  # Models with no `Title::` subclass (see app/classes/title.rb) fall
+  # back to their localized type tag (`observation`, `location`, etc.).
+  # The browser-tab text renders as plain text, so textile / HTML must
+  # NOT leak through.
   def document_title_for(object)
-    return object.type_tag.ti unless object.respond_to?(:document_title)
-
-    object.document_title
+    Title.for(object).document_title
   end
 
   # `Observation 23435: Amanita novinupta`

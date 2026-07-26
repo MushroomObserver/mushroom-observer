@@ -233,13 +233,16 @@ class Observation
 
     # Generate a table the number of User's who cast each level of Vote for a
     # single Naming. (This refreshes the naming.vote_cache while it's at it.)
+    # Keyed by the vote level's canonical numeric value (a stable,
+    # locale-independent identity) rather than resolved text -- resolve
+    # `tag` yourself, in whatever locale you need, at render time.
     #
     #   table = consensus.calc_vote_table(naming)
-    #   for key, record in table
-    #     str    = key.l
+    #   for value, record in table
+    #     tag    = record[:tag]    # Translation tag for this vote level
+    #     str    = tag.l
     #     num    = record[:num]    # Number of users who voted near this level.
     #     weight = record[:wgt]    # Sum of users' weights.
-    #     value  = record[:value]  # Value of this vote level (arbitrary scale)
     #     votes  = record[:votes]  # List of actual votes.
     #   end
     #
@@ -363,19 +366,19 @@ class Observation
 
     def init_vote_table
       table = {}
-      Vote.opinion_menu.each do |str, val|
-        table[str] = { num: 0, wgt: 0.0, value: val, votes: [] }
+      ([Vote::NO_OPINION_VAL] + Vote::CONFIDENCE_VALS).each do |tag, val|
+        table[val] = { num: 0, wgt: 0.0, tag: tag, votes: [] }
       end
       table
     end
 
     def populate_vote_table(table, vote_list)
       vote_list.each do |v|
-        str = Vote.confidence(v.value)
+        val = Vote.confidence_value(v.value)
         wgt = v.user_weight
-        table[str][:num] += 1
-        table[str][:wgt] += wgt
-        table[str][:votes] << v
+        table[val][:num] += 1
+        table[val][:wgt] += wgt
+        table[val][:votes] << v
       end
     end
 

@@ -57,29 +57,27 @@ module Views::Controllers::Observations::Namings::Votes
     end
 
     # Sort by descending vote value so "I'd Call It That" rows
-    # rise to the top. Zero-value rows are skipped.
+    # rise to the top. Zero-value rows are skipped. The table is keyed
+    # by the vote level's canonical numeric value (#4901).
     def sorted_vote_keys
-      @vote_table.keys.sort do |x, y|
-        @vote_table[y][:value] <=> @vote_table[x][:value]
-      end
+      @vote_table.keys.sort.reverse
     end
 
     def render_value_rows
-      sorted_vote_keys.each do |str|
-        row = @vote_table[str]
-        next if row[:value].zero?
+      sorted_vote_keys.each do |value|
+        next if value.zero?
 
-        render_value_row(str, row)
+        render_value_row(value, @vote_table[value])
       end
     end
 
     # `String#%` (rather than `Kernel#format`) is used throughout
     # because `format` resolves to Phlex's `<format>` HTML element
     # method inside a view's render scope.
-    def render_value_row(str, row) # rubocop:disable Metrics/AbcSize
+    def render_value_row(value, row) # rubocop:disable Metrics/AbcSize
       tr(class: "text-nowrap") do
-        td { trusted_html(str.t) }
-        td(align: "center") { plain(row[:value].to_s) }
+        td { trusted_html(row[:tag].t) }
+        td(align: "center") { plain(value.to_s) }
         td(align: "center") { plain("%.2f" % row[:wgt]) }
         td(align: "center") { plain(row[:num].to_s) }
         td(align: "left") { small { render_voter_links(row[:votes]) } }

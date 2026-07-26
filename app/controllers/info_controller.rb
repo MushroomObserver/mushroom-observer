@@ -23,9 +23,9 @@ class InfoController < ApplicationController
 
   # Help page.
   def how_to_use
-    @min_pos_vote = Vote.confidence(Vote.min_pos_vote)
-    @min_neg_vote = Vote.confidence(Vote.min_neg_vote)
-    @maximum_vote = Vote.confidence(Vote.maximum_vote)
+    @min_pos_vote = Vote.confidence_string(Vote.min_pos_vote)
+    @min_neg_vote = Vote.confidence_string(Vote.min_neg_vote)
+    @maximum_vote = Vote.confidence_string(Vote.maximum_vote)
     render(Views::Controllers::Info::HowToUse.new(
              min_pos_vote: @min_pos_vote,
              min_neg_vote: @min_neg_vote,
