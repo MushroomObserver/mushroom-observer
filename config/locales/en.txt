@@ -312,6 +312,7 @@
   observation_fields: observation fields
   occurrence: occurrence
   occurrences: occurrences
+  primary_observation: primary observation
   of: of
   past_locations: location changes
   past_name: name change
