@@ -309,10 +309,10 @@ class Vote < AbstractModel
 
   protected
 
-  # Find label of closest value in a given enumerated lists.
+  # Find label of closest value in a given enumerated list.
   # Returns the whole winning [tag, value] pair (not just one field),
   # so callers can extract whichever they need -- resolved text
-  # (`confidence`), the canonical value (`confidence_value`), or the
+  # (`confidence_string`), the canonical value (`confidence_value`), or the
   # tag (`confidence_tag`).
   def self.lookup_value(val, list) # :nodoc:
     last_pair = nil
