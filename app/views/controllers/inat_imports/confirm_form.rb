@@ -276,10 +276,6 @@ module Views::Controllers::InatImports
       b { plain(:inat_import_confirm_skeleton_obs_caption.l) }
       plain(": ")
       span(id: "unlicensed_obs_count") { render_unlicensed_count }
-      return unless @unlicensed_obs.to_i.positive?
-
-      whitespace
-      plain(:inat_import_confirm_skeleton_obs_note.l)
     end
 
     def time_estimate_line
