@@ -5,13 +5,6 @@ module Project::Date
     !future? && !past?
   end
 
-  # convenience method for date range display
-  def date_range(format = "%Y-%m-%d")
-    return :form_projects_any.l unless start_date.present? && end_date.present?
-
-    "#{start_date.strftime(format)} to #{end_date.strftime(format)}"
-  end
-
   ####################################################################
 
   private

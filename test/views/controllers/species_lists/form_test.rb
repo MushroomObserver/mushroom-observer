@@ -236,7 +236,7 @@ module Views::Controllers::SpeciesLists
       # `dubious_where_reasons` through.
       html = render_form(
         species_list: SpeciesList.new,
-        dubious_where_reasons: ["dubious_county_unrecognized"]
+        dubious_where_reasons: [[:location_dubious_empty, {}]]
       )
       assert_html(html, "#dubious_location_messages")
     end

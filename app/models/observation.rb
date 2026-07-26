@@ -952,18 +952,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     name.observation_name(user)
   end
 
-  # Plain-text title for the browser tab `<title>`. `text_name` is
-  # the denormalized binomial-only column — no author, no id, no
-  # markup. The title helper prepends "OBSERVATION <id>:" so we
-  # don't need those here. (The visible page heading is built by
-  # `header/title_helper#page_title_for` via
-  # `Observations::ConsensusNameLink` — wraps the consensus name
-  # in a link, which is view-layer work that can't live cleanly on
-  # the model.)
-  def document_title
-    text_name
-  end
-
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name(user = nil)
     string_with_id(name.observation_name(user))
@@ -1100,22 +1088,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     mo_api: 4
   }
 
-  # Message to use to credit the source of this observation.
-  # External imports take precedence over the entry agent: an obs
-  # synced from iNat surfaces as "Imported from iNaturalist" even if
-  # the user originally created it via mo_website. Returns nil only
-  # when neither an import_link nor a source enum value is present.
-  # Intended for use with .tpl to render as HTML:
-  #   <%= observation.source_credit.tpl %>
-  def source_credit
-    if (link = import_link)
-      :source_credit_external.l(name: link.external_site.name,
-                                url: link.link_url)
-    elsif source.present?
-      :"source_credit_#{source}"
-    end
-  end
-
   # The ExternalLink (if any) recording where this observation was imported
   # from — the external-source axis of #4208 (#4299). At most one per obs.
   # Uses the loaded `external_links` association when present (matrix box,
@@ -1148,21 +1120,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     return false unless reflection? && user
 
     user_id == user.id || can_edit?(user)
-  end
-
-  # Structured form of source_credit for external imports — returns
-  # { text:, url: } so renderers can build the link element with
-  # whatever attributes they need (e.g. target="_blank" for off-site).
-  # Returns nil for non-imported observations; callers fall back to
-  # source_credit (textile / enum) in that case.
-  def external_credit_link
-    return nil unless (link = import_link)
-
-    {
-      text: :source_credit_external_text.l(name: link.external_site.name),
-      url: link.link_url,
-      external_id: link.external_id
-    }
   end
 
   # Do we want to prominently advertise the source of this observation?

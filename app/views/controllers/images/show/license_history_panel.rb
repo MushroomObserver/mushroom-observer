@@ -44,7 +44,9 @@ module Views::Controllers::Images
         {
           dates: "#{from.web_date} → #{chg.updated_at.web_date}",
           license_link: license_link_html(chg.license),
-          holder: chg.license.copyright_text(chg.year, chg.name)
+          holder: Components::ImageFragment::Copyright.text_for(
+            license: chg.license, year: chg.year, name: chg.name
+          )
         }
       end
 

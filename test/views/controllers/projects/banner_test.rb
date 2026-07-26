@@ -99,7 +99,7 @@ module Views::Controllers::Projects
       # past_project has no image, so no banner-image-text class
       assert_html(html, ".project_date_range")
       assert_no_html(html, ".banner-image-text")
-      assert_includes(html, project.date_range)
+      assert_includes(html, expected_date_range(project))
     end
 
     def test_renders_both_location_and_date_range_when_both_present
@@ -111,7 +111,7 @@ module Views::Controllers::Projects
       assert_html(html, ".project_date_range")
       assert_no_html(html, ".banner-image-text")
       assert_includes(html, project.place_name)
-      assert_includes(html, project.date_range)
+      assert_includes(html, expected_date_range(project))
     end
 
     def test_renders_project_tabs_when_project_has_observations
@@ -195,6 +195,11 @@ module Views::Controllers::Projects
       render(Banner.new(project: project,
                         user: user,
                         current_tab: current_tab))
+    end
+
+    def expected_date_range(project)
+      "#{project.start_date.strftime("%Y-%m-%d")} to " \
+        "#{project.end_date.strftime("%Y-%m-%d")}"
     end
   end
 end

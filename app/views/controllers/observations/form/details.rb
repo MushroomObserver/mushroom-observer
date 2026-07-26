@@ -18,7 +18,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   prop :button_name, String
   prop :location, _Nilable(Location), default: nil
   prop :default_place_name, _Nilable(String), default: nil
-  prop :dubious_where_reasons, _Nilable(_Array(String)), default: nil
+  prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+       default: nil
 
   def view_template
     Row do

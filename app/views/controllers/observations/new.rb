@@ -14,7 +14,8 @@ module Views::Controllers::Observations
     prop :given_name, _Nilable(String), default: nil
     prop :place_name, _Nilable(String), default: nil
     prop :default_place_name, _Nilable(String), default: nil
-    prop :dubious_where_reasons, _Nilable(Array), default: nil
+    prop :dubious_where_reasons, _Nilable(_Array(_Tuple(Symbol, Hash))),
+         default: nil
     prop :vote, _Nilable(::Vote), default: nil
     prop :names, _Nilable(Array), default: nil
     prop :valid_names, _Nilable(Array), default: nil

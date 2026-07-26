@@ -782,6 +782,51 @@ end
 **When NOT to use `trusted_html()`:**
 - For rendering components - use `render(component)` instead
 - For registered output helpers - they already return safe HTML
+
+### Building a safe HTML string to *return*, not render
+
+`trusted_html()` only works inside an active Phlex render buffer
+(`view_template`, an instance method called from it). A `self.`
+class method that has to *return* an HTML-safe `String` — because
+two unrelated call sites need the same value — has no buffer to
+write into, so `trusted_html()` doesn't apply.
+
+Never build it with string interpolation
+(`"#{safe_tag} #{untrusted_name}"`) — interpolation doesn't escape
+anything, so any untrusted piece (DB text, params) rides along
+unescaped inside the resulting `html_safe` string. And `.html_safe`
+itself is blocked in `app/components/`/`app/views/` files by
+`.claude/hooks/check_any_phlex_props_on_save.sh` — use
+`ActiveSupport::SafeBuffer.new("")` as the safe starting point
+instead, then build via `+`. `SafeBuffer#+` HTML-escapes any
+non-safe operand as it's concatenated, so untrusted pieces get
+escaped while already-safe pieces (translated tags, hand-written
+HTML entities wrapped in their own `SafeBuffer.new`) pass through:
+
+```ruby
+# Good — untrusted `name` gets escaped by the `+` chain
+def self.text_for(license:, year:, name:)
+  safe = ActiveSupport::SafeBuffer.new("")
+  safe + :image_show_copyright.t +
+    ActiveSupport::SafeBuffer.new(" &copy; ") + "#{year} " + name
+end
+
+# Bad — interpolation never escapes; untrusted `name` passes through raw
+def self.text_for(license:, year:, name:)
+  ActiveSupport::SafeBuffer.new("#{:image_show_copyright.t} &copy; #{year} #{name}")
+end
+```
+
+`Style/StringConcatenation` is enabled in this repo and its
+autocorrect (`--autocorrect-all`) rewrites `+` chains back into
+interpolation — which silently drops the escaping. Wrap the method
+in `# rubocop:disable Style/StringConcatenation` /
+`# rubocop:enable Style/StringConcatenation` with a one-line comment
+explaining why, so the pattern survives a future autocorrect pass.
+See `app/components/image_fragment/copyright.rb#text_for` for the
+worked example (found via a Copilot review comment on PR #4902 —
+the original interpolated form allowed HTML injection via an
+unsanitized `CopyrightChange#name` DB column).
 - For Phlex HTML methods - they handle safety automatically
 
 ### Using `plain()` vs Direct Output

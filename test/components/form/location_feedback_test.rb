@@ -9,12 +9,13 @@ class FormLocationFeedbackTest < ComponentTestCase
   end
 
   def test_renders_warning_alert_with_reasons
-    html = render_feedback(["Location not found".html_safe])
+    html = render_feedback([[:location_dubious_empty, {}]])
 
     # `#dubious_location_messages` is the durable identifier; the
     # `.alert-warning` / `.my-3` Bootstrap classes are pure paint.
     assert_html(html, "#dubious_location_messages")
-    assert_html(html, "body", text: "Location not found")
+    assert_html(html, "#dubious_location_messages",
+                text: :location_dubious_empty.t.as_displayed)
     assert_html(html, ".help-note")
     # Help text should include the button name
     help_note = Nokogiri::HTML(html).at_css(".help-note")
@@ -22,15 +23,26 @@ class FormLocationFeedbackTest < ComponentTestCase
   end
 
   def test_renders_multiple_reasons_with_br_tags
-    reasons = ["First reason", "Second reason", "Third reason"].map(&:html_safe)
+    reasons = [
+      [:location_dubious_empty, {}],
+      [:location_dubious_commas, {}],
+      [:location_dubious_bad_char, { char: "@" }]
+    ]
     html = render_feedback(reasons)
 
-    reasons.each { |r| assert_html(html, "body", text: r) }
+    reasons.each do |tag, args|
+      assert_html(html, "#dubious_location_messages",
+                  text: tag.t(**args).as_displayed)
+    end
     assert_html(html, "br", count: 2)
   end
 
   def test_renders_html_entities_without_double_escaping
-    html = render_feedback(["Unknown country &#8216;Test&#8217;".html_safe])
+    # Textile turns the straight quotes in location_dubious_unknown_country
+    # ("Unknown country '[country]'") into smart-quote entities.
+    html = render_feedback(
+      [[:location_dubious_unknown_country, { country: "Test" }]]
+    )
 
     assert_includes(html, "&#8216;")
     assert_not_includes(html, "&amp;#8216;")
@@ -38,7 +50,7 @@ class FormLocationFeedbackTest < ComponentTestCase
 
   def test_accepts_symbol_button_parameter
     html = render(Components::Form::LocationFeedback.new(
-                    dubious_where_reasons: ["Reason".html_safe],
+                    dubious_where_reasons: [[:location_dubious_empty, {}]],
                     button: :create
                   ))
 

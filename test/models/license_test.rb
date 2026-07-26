@@ -115,14 +115,4 @@ class LicenseTest < UnitTestCase
       "rights_string should use CC0 and canonical url for legacy public domain"
     )
   end
-
-  def test_copyright_text
-    year = 2024
-    name = "Jan Borovicka"
-
-    assert_equal(licenses(:ccnc25).copyright_text(year, name),
-                 "Copyright &copy; #{year} #{name}")
-    assert_equal(licenses(:publicdomain).copyright_text(year, name),
-                 "Public Domain by #{name}")
-  end
 end

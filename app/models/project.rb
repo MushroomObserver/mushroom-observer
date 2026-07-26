@@ -237,17 +237,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     unique_text_name
   end
 
-  # Page heading + browser tab title — both plain `title`. (Can't
-  # `alias` to `title` — the AR column accessor isn't defined yet
-  # at class-load time.)
-  def page_title(_user = nil)
-    title
-  end
-
-  def document_title
-    title
-  end
-
   # Is +user+ a member of this Project? Reflects actual user_group
   # membership only — Site Admins (user.admin == true) get no implicit
   # membership; they self-promote via the Administer Project button.
@@ -311,14 +300,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def can_leave?(user)
     user && user_group.users.member?(user) && user.id != user_id
-  end
-
-  def member_status(user)
-    return :owner.ti if user == self.user
-    return :admin.ti if is_admin?(user)
-    return :member.ti if member?(user)
-
-    nil
   end
 
   def user_can_add_observation?(obs, user)

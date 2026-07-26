@@ -113,15 +113,6 @@ class ProjectTest < UnitTestCase
     assert_not(projects(:future_project).current?)
   end
 
-  def test_date_strings
-    proj = projects(:pinned_date_range_project)
-    assert_equal("#{proj.start_date} to #{proj.end_date}",
-                 proj.date_range, "Wrong date range string")
-
-    assert_equal(:form_projects_any.l, projects(:unlimited_project).date_range,
-                 "Wrong date range string")
-  end
-
   def test_out_of_range_observations
     assert_out_of_range_observations(projects(:current_project), expect: 0)
     assert_out_of_range_observations(projects(:unlimited_project), expect: 0)
@@ -877,17 +868,6 @@ class ProjectTest < UnitTestCase
     obs, = obs_in_eol_owned_by_member
 
     assert_not(Project.admin_power?(obs, nil))
-  end
-
-  def test_member_status
-    project = projects(:eol_project)
-
-    assert_equal(:owner.ti, project.member_status(project.user))
-    admin = (project.admin_group.users - [project.user]).first
-    assert_equal(:admin.ti, project.member_status(admin))
-    member = (project.user_group.users - project.admin_group.users).first
-    assert_equal(:member.ti, project.member_status(member))
-    assert_nil(project.member_status(users(:zero_user)))
   end
 
   private

@@ -152,8 +152,11 @@ module Views::Controllers::Observations
       @observation.source_noteworthy? && !@observation.import_link
     end
 
+    # show_source_credit? (above) guarantees no import_link, so
+    # @observation.source is guaranteed present here (source_noteworthy?
+    # requires import_link.present? || source.present?).
     def render_source_credit
-      trusted_html(@observation.source_credit.tpl)
+      trusted_html(:"source_credit_#{@observation.source}".l.tpl)
     end
 
     def render_footer
