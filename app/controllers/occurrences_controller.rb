@@ -30,7 +30,7 @@ class OccurrencesController < ApplicationController
 
     create_occurrence(selected)
   rescue ActiveRecord::RecordInvalid => e
-    flash_error(e.record.formatted_errors.join("; "))
+    flash_error(e.message)
     redirect_to(new_occurrence_path(observation_id: @source_obs.id))
   end
 

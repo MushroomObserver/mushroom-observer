@@ -229,7 +229,7 @@ module FieldSlipsController::ObservationHandling
     occ.recalculate_consensus!(@user)
     check_field_slip_project_gaps(occ)
   rescue ActiveRecord::RecordInvalid => e
-    flash_error(e.record.formatted_errors.join("; "))
+    flash_error(e.message)
   end
 
   def add_to_existing_field_slip_occ(occ, selected)

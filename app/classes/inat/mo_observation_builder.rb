@@ -189,8 +189,7 @@ class Inat
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.warn(
         "InatImport: failed to create ExternalLink for " \
-        "#{target.class} #{target.id} (iNat #{external_id}): " \
-        "#{e.record.formatted_errors.join("; ")}"
+        "#{target.class} #{target.id} (iNat #{external_id}): #{e.message}"
       )
     end
 

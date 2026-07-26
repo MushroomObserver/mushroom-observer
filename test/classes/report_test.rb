@@ -968,7 +968,7 @@ class ReportTest < UnitTestCase
     warnings = []
     stubbed_error = lambda do |*|
       link = ExternalLink.new
-      link.errors.add(:base, "Stubbed failure")
+      link.errors.add(:base, "stubbed failure")
       raise(ActiveRecord::RecordInvalid.new(link))
     end
 

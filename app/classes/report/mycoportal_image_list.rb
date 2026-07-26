@@ -120,8 +120,7 @@ module Report
                            relationship: :export)
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.warn(
-        "MyCoPortal export link failed for Image #{image_id}: " \
-        "#{e.record.formatted_errors.join("; ")}"
+        "MyCoPortal export link failed for Image #{image_id}: #{e.message}"
       )
     end
 

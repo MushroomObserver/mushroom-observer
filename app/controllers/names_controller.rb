@@ -360,12 +360,7 @@ class NamesController < ApplicationController
   end
 
   def reload_name_form_on_error(err)
-    # RecordInvalid#to_s is Rails' own (wrong-scope) error message
-    # generation and duplicates flash_object_errors below - skip it
-    # for that case, keep it for any other RuntimeError.
-    if err.present? && !err.is_a?(ActiveRecord::RecordInvalid)
-      flash_error(err.to_s)
-    end
+    flash_error(err.to_s) if err.present?
     flash_object_errors(@name)
     reload_name_form
   end

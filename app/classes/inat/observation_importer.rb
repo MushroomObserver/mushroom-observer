@@ -134,8 +134,7 @@ class Inat
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.warn(
         "InatImport: failed to create remote_manual ExternalLink for " \
-        "Observation #{mo_obs.id} (iNat #{@inat_obs[:id]}): " \
-        "#{e.record.formatted_errors.join("; ")}"
+        "Observation #{mo_obs.id} (iNat #{@inat_obs[:id]}): #{e.message}"
       )
       nil
     end

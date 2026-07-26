@@ -24,7 +24,7 @@ module OccurrencesController::Edit
     recalculate_occurrence_consensus
     redirect_after_update(primary_obs)
   rescue ActiveRecord::RecordInvalid => e
-    flash_error(e.record.formatted_errors.join("; "))
+    flash_error(e.message)
     redirect_to(edit_occurrence_path(@occurrence))
   end
 

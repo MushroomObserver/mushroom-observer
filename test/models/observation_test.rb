@@ -51,7 +51,7 @@ class ObservationTest < UnitTestCase
     assert_not(@cc_obs.save)
     assert_equal(1, @cc_obs.errors.count)
     assert_equal(:validate_observation_user_missing.t,
-                 resolved_error_message(@cc_obs, :user))
+                 @cc_obs.errors[:user].first)
   end
 
   def test_destroy
@@ -1203,8 +1203,7 @@ class ObservationTest < UnitTestCase
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id)
     end
-    assert_match(:validate_observation_user_missing.t,
-                 exception.record.formatted_errors.join("; "))
+    assert_match(:validate_observation_user_missing.t, exception.message)
   end
 
   def test_check_requirements_future_date
@@ -1241,8 +1240,7 @@ class ObservationTest < UnitTestCase
       Observation.create!(name_id: fungi.id, where: "X" * 1025,
                           user: mary)
     end
-    assert_match(:validate_observation_where_too_long.t,
-                 exception.record.formatted_errors.join("; "))
+    assert_match(:validate_observation_where_too_long.t, exception.message)
   end
 
   def test_check_requirements_where_no_latitude
@@ -1250,8 +1248,7 @@ class ObservationTest < UnitTestCase
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, lng: 90.0, user: mary)
     end
-    assert_match(:runtime_lat_long_error.t,
-                 exception.record.formatted_errors.join("; "))
+    assert_match(:runtime_lat_long_error.t, exception.message)
   end
 
   def test_check_requirements_where_no_longitude
@@ -1259,8 +1256,7 @@ class ObservationTest < UnitTestCase
     exception = assert_raise(ActiveRecord::RecordInvalid) do
       Observation.create!(name_id: fungi.id, lat: 90.0, user: mary)
     end
-    assert_match(:runtime_lat_long_error.t,
-                 exception.record.formatted_errors.join("; "))
+    assert_match(:runtime_lat_long_error.t, exception.message)
   end
 
   def test_check_requirements_where_bad_altitude
@@ -1286,8 +1282,7 @@ class ObservationTest < UnitTestCase
       Observation.create!(name_id: fungi.id, when_str: "0000-00-00",
                           user: mary)
     end
-    assert_match(:runtime_date_invalid.t,
-                 exception.record.formatted_errors.join("; "))
+    assert_match(:runtime_date_invalid.t, exception.message)
   end
 
   def test_check_requirements_with_invalid_when_str
@@ -1296,8 +1291,7 @@ class ObservationTest < UnitTestCase
       Observation.create!(name_id: fungi.id, when_str: "This is not a date",
                           user: mary)
     end
-    assert_match(:runtime_date_should_be_yyyymmdd.t,
-                 exception.record.formatted_errors.join("; "))
+    assert_match(:runtime_date_should_be_yyyymmdd.t, exception.message)
   end
 
   def test_update_view_stats

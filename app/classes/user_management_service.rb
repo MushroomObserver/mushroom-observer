@@ -122,7 +122,7 @@ class UserManagementService
 
   def display_user_errors(user)
     output_handler.puts(:user_add_error_header.t)
-    user.formatted_errors.each do |error|
+    user.errors.full_messages.each do |error|
       output_handler.puts("  - #{error}")
     end
   end

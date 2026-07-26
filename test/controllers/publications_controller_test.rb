@@ -170,6 +170,9 @@ class PublicationsControllerTest < FunctionalTestCase
       post(:create, params: { publication: { full: "" } }, format: :xml)
     end
     assert_response(:unprocessable_content)
+    doc = REXML::Document.new(@response.body)
+    assert_equal(:validate_publication_ref_missing.t,
+                 doc.get_text("//errors/error").to_s)
   end
 
   def test_should_not_update_publication_without_permission_xml
@@ -186,6 +189,9 @@ class PublicationsControllerTest < FunctionalTestCase
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "" } }, format: :xml)
     assert_response(:unprocessable_content)
+    doc = REXML::Document.new(@response.body)
+    assert_equal(:validate_publication_ref_missing.t,
+                 doc.get_text("//errors/error").to_s)
   end
 
   def test_should_not_destroy_publication_without_permission_xml
