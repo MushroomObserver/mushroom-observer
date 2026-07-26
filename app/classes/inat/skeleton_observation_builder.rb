@@ -75,10 +75,25 @@ class Inat
       { Observation.other_notes_key => placeholder_text }
     end
 
+    # Notes store raw Textile source (rendered later at display time via
+    # String#tl), so use `.l` (interpolate only) rather than `.t`
+    # (interpolate + render) -- `.t` would bake the link into HTML now,
+    # leaving un-renderable markup sitting in the Notes column.
     def placeholder_text
-      :inat_skeleton_placeholder_notes.t(
-        inat_id: inat_obs[:id], name: inat_obs_owner_name
+      :inat_skeleton_placeholder_notes.l(
+        inat_link: inat_obs_link, name: inat_obs_owner_name
       ).to_str
+    end
+
+    # Textile link ("text":url) so the placeholder links back to the
+    # source iNat observation instead of just naming its id (#4828) --
+    # same textile-link syntax as FieldSlipNotesBuilder#other_codes.
+    def inat_obs_link
+      "\"iNat ##{inat_obs[:id]}\":#{inat_obs_url}"
+    end
+
+    def inat_obs_url
+      "#{Inat::Constants::SITE}/observations/#{inat_obs[:id]}"
     end
 
     # Same fallback Inat::Obs#copyright uses internally (obs's display
@@ -128,8 +143,7 @@ class Inat
     # community (unlike Inat::MoObservationBuilder::NamingReasons) since
     # there's only ever one, un-attributed lead naming here.
     def naming_reason
-      inat_link = "<a href=\"#{Inat::Constants::SITE}/observations/" \
-                  "#{inat_obs[:id]}\">iNat #{inat_obs[:id]}</a>"
+      inat_link = "<a href=\"#{inat_obs_url}\">iNat #{inat_obs[:id]}</a>"
       "#{inat_link}, #{:inat_leading_id.l} " \
         "#{Time.zone.today.strftime("%Y-%m-%d")}"
     end

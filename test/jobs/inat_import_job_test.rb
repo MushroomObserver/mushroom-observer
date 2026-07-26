@@ -778,10 +778,12 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal(0, obs.images.length, "Skeleton obs should have no images")
     assert_equal(1, obs.namings.length, "Skeleton obs should have 1 naming")
+    inat_link = "\"iNat ##{inat_id}\":" \
+                "#{Inat::Constants::SITE}/observations/#{inat_id}"
     assert(
       obs.notes_part_value(Observation.other_notes_part).
-        start_with?("Placeholder for iNat ##{inat_id},"),
-      "Skeleton obs notes should be the placeholder text"
+        start_with?("Placeholder for #{inat_link},"),
+      "Skeleton obs notes should be the placeholder text, linking to iNat"
     )
     assert(
       ExternalLink.exists?(target: obs, external_site: ExternalSite.inaturalist,

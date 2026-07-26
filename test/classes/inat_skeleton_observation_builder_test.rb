@@ -74,9 +74,12 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
 
   def assert_placeholder_notes(obs)
     notes = obs.notes_part_value(Observation.other_notes_part)
+    inat_link = "\"iNat ##{FakeInatObs::FAKE_INAT_ID}\":" \
+                "#{Inat::Constants::SITE}/observations/" \
+                "#{FakeInatObs::FAKE_INAT_ID}"
     assert(
-      notes.start_with?("Placeholder for iNat ##{FakeInatObs::FAKE_INAT_ID},"),
-      "Notes should be the placeholder text, not iNat's actual notes"
+      notes.start_with?("Placeholder for #{inat_link},"),
+      "Notes should be the placeholder text, linking to the iNat obs"
     )
     assert_includes(notes, "Daniel Morton",
                     "Placeholder notes should credit the iNat obs's owner")
