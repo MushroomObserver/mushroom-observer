@@ -1104,7 +1104,10 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def notes_template_forbid_other
     notes_template_bad_parts.each do |part|
-      errors.add(:notes_template, :prefs_notes_template_no_other.t(part: part))
+      errors.add(:notes_template,
+                 :prefs_notes_template_no_other.t(
+                   part: ERB::Util.html_escape(part)
+                 ))
     end
   end
 
@@ -1118,7 +1121,9 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
       next unless part.squish == "Collector"
 
       errors.add(:notes_template,
-                 :prefs_notes_template_no_collector.t(part: part.squish))
+                 :prefs_notes_template_no_collector.t(
+                   part: ERB::Util.html_escape(part.squish)
+                 ))
     end
   end
 
@@ -1128,7 +1133,10 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     squished = notes_template.split(",").map { |s| s.squish.downcase }
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
     dups.each do |dup|
-      errors.add(:notes_template, :prefs_notes_template_no_dups.t(part: dup))
+      errors.add(:notes_template,
+                 :prefs_notes_template_no_dups.t(
+                   part: ERB::Util.html_escape(dup)
+                 ))
     end
   end
 
