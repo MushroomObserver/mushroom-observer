@@ -68,6 +68,16 @@ class API2::LocationsTest < UnitTestCase
     assert_api_results(locs)
   end
 
+  # All four edges present (passes all_edges?) but geometrically invalid
+  # (south > north) -- Mappable::Box#valid? rejects it, hitting the
+  # second NeedAllFourEdges raise in parse_bounding_box!, distinct from
+  # the missing-edge case above.
+  def test_getting_locations_in_invalid_box
+    assert_api_fail(
+      params_get(north: 39, south: 40, east: -123, west: -124)
+    )
+  end
+
   def test_posting_locations
     name1  = "Reno, Nevada, USA"
     name2  = "Sparks, Nevada, USA"
