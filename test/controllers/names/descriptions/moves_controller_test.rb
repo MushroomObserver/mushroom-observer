@@ -169,7 +169,7 @@ module Names::Descriptions
 
       # Create a mock description that fails save
       desc = NameDescription.new(name: names(:coprinus), user: rolf)
-      desc.errors.add(:base, "Test validation error")
+      desc.errors.add(:base, :invalid, message: "Test validation error")
 
       desc.stub(:save, false) do
         NameDescription.stub(:new, desc) do

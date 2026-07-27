@@ -21,7 +21,7 @@ module Views::Controllers::VisualModels
     end
 
     def test_renders_errors_when_model_has_errors
-      @visual_model.errors.add(:name, "can't be blank")
+      @visual_model.errors.add(:name, :blank)
       html = render_form
 
       assert_html(html, "#error_explanation")

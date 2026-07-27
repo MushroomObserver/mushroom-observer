@@ -1444,7 +1444,7 @@ class InatImportJobTest < ActiveJob::TestCase
     warnings = []
     stubbed_error = lambda do |*|
       link = ExternalLink.new
-      link.errors.add(:base, "stubbed failure")
+      link.errors.add(:base, :invalid)
       raise(ActiveRecord::RecordInvalid.new(link))
     end
     Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do
