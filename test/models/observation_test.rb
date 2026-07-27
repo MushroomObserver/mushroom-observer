@@ -2113,6 +2113,50 @@ class ObservationTest < UnitTestCase
     assert(obs.source_noteworthy?)
   end
 
+  # reflection? is driven solely by reflected_at (#4214) — an import
+  # link alone doesn't lock an obs, so the existing editable backlog
+  # stays editable until the resolution engine stamps it.
+  def test_reflection_predicate
+    obs = observations(:imported_inat_obs)
+    assert_not(obs.reflection?,
+               "an import without reflected_at is still editable")
+
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert(obs.reflection?, "reflected_at present marks a read-only reflection")
+
+    obs.update_column(:reflected_at, nil)
+    assert_not(obs.reflection?)
+  end
+
+  # Sync is occurrence-wide (#4215): sync_reflections is the set of
+  # read-only reflections in the observation's occurrence (an
+  # observation with no occurrence is an occurrence of one), and
+  # syncable? gates the Sync button on every member's page.
+  def test_sync_reflections_and_syncable
+    obs = observations(:imported_inat_obs)
+    assert_empty(obs.sync_reflections,
+                 "an editable import has nothing to sync")
+    assert_not(obs.syncable?)
+
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert_equal([obs], obs.sync_reflections,
+                 "a standalone reflection is an occurrence of one")
+    assert(obs.syncable?)
+
+    # Grouped into an occurrence, every member sees the reflections.
+    primary = observations(:minimal_unknown_obs)
+    [primary, obs].each { |o| o.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user,
+                             primary_observation: primary)
+    primary.update!(occurrence: occ)
+    obs.update!(occurrence: occ)
+
+    assert_equal([obs], primary.reload.sync_reflections,
+                 "a non-reflection member sees the occurrence's reflections")
+    assert(primary.syncable?,
+           "every member of an occurrence with a reflection is syncable")
+  end
+
   # ----- Coverage gap tests for app/models/observation.rb -----
 
   # field_slip= is a no-op when the slip arg is nil — the early

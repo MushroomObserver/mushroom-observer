@@ -86,6 +86,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(@user.unique_text_name, obs.collector)
     assert_equal(@user.id, obs.collector_user_id)
 
+    # New imports are read-only reflections (#4214): reflected_at is
+    # stamped at creation, so scalar-core edits are blocked until the
+    # value is changed at the source and resynced (#4215).
+    assert_not_nil(obs.reflected_at, "Import should stamp reflected_at")
+    assert(obs.reflection?, "A new import should be a read-only reflection")
+
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")
