@@ -1,19 +1,16 @@
 # frozen_string_literal: true
 
-# Lets errors.add(:field, :some_mo_tag, **interpolation_args) defer tag
-# resolution to display time instead of pre-resolving via .t/.l/.ti/.tl
-# at validation time. MO's tags live in a flat `mo.*` i18n scope
-# (MO.locale_namespace) that Rails' own ActiveModel::Error#message ->
-# generate_message resolution chain has no path to - no model sets
-# i18n_scope, and generate_message only ever probes
-# <i18n_scope>.errors.* / top-level errors.*, never mo.*.
+# Renders errors.add(:field, :tag, **args) translation :tag at display
+# time, instead of resolving eagerly via .t/.l at validation time.
 #
-# Overriding #message (rather than adding a separate resolver method
-# elsewhere that callers have to remember to use) means every other
-# Rails/ActiveModel entry point built on top of it - full_message,
-# full_messages, to_hash/as_json, errors[:attr], even
-# ActiveRecord::RecordInvalid#message - resolves MO tags correctly for
-# free, with nothing for a future caller to get wrong.
+# MO's tags live in a flat `mo.*` i18n scope. Rails' own
+# generate_message never looks there - it only checks
+# <i18n_scope>.errors.* and top-level errors.*.
+#
+# This overrides #message, not a separate resolver method. Every
+# other entry point built on #message - full_message, full_messages,
+# to_hash/as_json, errors[:attr], ActiveRecord::RecordInvalid#message
+# - resolves MO tags correctly too, automatically.
 ActiveModel::Error.prepend(
   Module.new do
     def message
@@ -26,6 +23,34 @@ ActiveModel::Error.prepend(
         # newlines only become <br /> via Textile's paragraph
         # handling), so resolution can't skip it tag-by-tag.
         return raw_type.t(**options.except(:message))
+      end
+
+      super
+    end
+
+    # Rails' own full_message rebuilds "attribute message" via a plain
+    # I18n.t call that drops html_safe, even when #message above was
+    # Textile-safe -- re-mark it so consumers like Components::Form::
+    # Errors don't double-escape it.
+    def full_message
+      msg = message
+      result = super
+      msg.html_safe? ? result.html_safe : result # rubocop:disable Rails/OutputSafety
+    end
+  end
+)
+
+# errors.add's type should be a Symbol tag, like Rails internal error types.
+# On MO, that means a translation string. To keep the API simple, there are no
+# exceptions allowed. For internal/defensive errors, pass a :message kwarg.
+ActiveModel::Errors.prepend(
+  Module.new do
+    def add(attribute, type = :invalid, **options)
+      unless type.is_a?(Symbol)
+        raise(ArgumentError.new("errors.add's type must be a Symbol tag, not " \
+              "#{type.class} (#{type.inspect}) for :#{attribute} -- " \
+              "resolution happens lazily at display time via " \
+              "ActiveModel::Error#message, not eagerly here."))
       end
 
       super
