@@ -43,6 +43,14 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     assign_attributes(**@params) if @params.present?
   end
 
+  # `validation_errors` holds [tag, args] pairs so resolution stays
+  # deferred until display time -- flash-facing consumers (index/
+  # search controllers) that need resolved text call this instead of
+  # joining the raw array.
+  def validation_error_messages
+    validation_errors.map { |tag, args| tag.t(**(args || {})) }
+  end
+
   # Pin the `order_by` param against what the model can actually
   # honor. The `AbstractModel::OrderingScopes#order_by` dispatcher
   # silently falls back to `all` (effectively `id: :desc`) when the
@@ -64,10 +72,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     base = key.to_s.delete_prefix("reverse_")
     return if model.private_methods(false).include?(:"order_by_#{base}")
 
-    @validation_errors << "Query::#{model.name.pluralize} does not " \
-                          "accept order_by: `#{key}` — no " \
-                          "`#{model}.order_by_#{base}` scope is " \
-                          "defined."
+    @validation_errors << [:query_validation_order_by_unsupported,
+                           { models: model.name.pluralize, key:, model:,
+                             base: }]
   end
 
   private
@@ -110,9 +117,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     when Hash
       validate_hash_param(param, val, param_type)
     else
-      @validation_errors <<
-        "Invalid declaration of :#{param} for #{model} " \
-        "query! (invalid type: #{param_type.class.name})"
+      @validation_errors << [:query_validation_invalid_declaration,
+                             { param: param.to_s, model:,
+                               type_class: param_type.class.name }]
       nil
     end
   end
@@ -121,8 +128,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     if param_type.respond_to?(:descends_from_active_record?)
       validate_record(param, val, param_type)
     else
-      @validation_errors <<
-        "Don't know how to parse #{param_type} :#{param} for #{model} query."
+      @validation_errors << [:query_validation_unknown_class_param,
+                             { param_type:, param: param.to_s, model: }]
       nil
     end
   end
@@ -150,9 +157,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   # and save it in @subqueries to facilitate access
   def validate_subquery(param, val, param_type)
     if param_type.keys.length != 1
-      @validation_errors <<
-        "Invalid subquery declaration for :#{param} for #{model} " \
-        "query! (wrong number of keys in hash)"
+      @validation_errors << [:query_validation_invalid_subquery,
+                             { param: param.to_s, model: }]
       return nil
     end
     submodel = param_type.values.first
@@ -164,18 +170,16 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
 
   def validate_enum(param, val, hash)
     if hash.keys.length != 1
-      @validation_errors <<
-        "Invalid enum declaration for :#{param} for #{model} " \
-        "query! (wrong number of keys in hash)"
+      @validation_errors << [:query_validation_invalid_enum_keys,
+                             { param: param.to_s, model: }]
       return nil
     end
 
     arg_type = hash.keys.first
     set = hash.values.first
     unless set.is_a?(Array)
-      @validation_errors <<
-        "Invalid enum declaration for :#{param} for #{model} " \
-        "query! (expected value to be an array of allowed values)"
+      @validation_errors << [:query_validation_invalid_enum_not_array,
+                             { param: param.to_s, model: }]
       return nil
     end
 
@@ -183,8 +187,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     if (arg_type == :string) && set.include?(val2.to_s.to_sym)
       val2 = val2.to_s.to_sym
     elsif set.exclude?(val2)
-      @validation_errors <<
-        :query_validation_param_not_in_set.t(param:, set: set.inspect)
+      @validation_errors << [:query_validation_param_not_in_set,
+                             { param: param.to_s, set: set.inspect }]
       val2 = nil
     end
     val2
@@ -201,7 +205,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     when nil
       nil
     else
-      @validation_errors << :query_validation_boolean.t(param:, val:)
+      @validation_errors << [:query_validation_boolean,
+                             { param: param.to_s, val: }]
       nil
     end
   end
@@ -224,7 +229,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
        (val.is_a?(String) && val.match(/^-?(\d+(\.\d+)?|\.\d+)$/))
       val.to_f
     else
-      @validation_errors << :query_validation_float.t(param:, val: val.inspect)
+      @validation_errors << [:query_validation_float,
+                             { param: param.to_s, val: val.inspect }]
       nil
     end
   end
@@ -234,7 +240,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def validate_record(param, val, type = ActiveRecord::Base)
     if val.is_a?(type)
       unless val.id
-        @validation_errors << :query_validation_record_unsaved.t(param:, type:)
+        @validation_errors << [:query_validation_record_unsaved,
+                               { param: param.to_s, type: }]
         return nil
       end
 
@@ -245,8 +252,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif val.is_a?(String)
       validate_string_for_record(param, val, type)
     else
-      @validation_errors <<
-        :query_validation_record.t(param:, type:, val: val.inspect)
+      @validation_errors << [:query_validation_record,
+                             { param: param.to_s, type:, val: val.inspect }]
       nil
     end
   end
@@ -254,7 +261,7 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
   def validate_string_for_record(param, val, type)
     return val unless param == :id_in_set
 
-    @validation_errors << :query_validation_id_in_set.t(type:, val:)
+    @validation_errors << [:query_validation_id_in_set, { type:, val: }]
     nil
   end
 
@@ -262,8 +269,9 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     if val.is_any?(Integer, Float, String, Symbol)
       val.to_s
     else
-      @validation_errors <<
-        :query_validation_string.t(param:, class: val.class, val: val.inspect)
+      @validation_errors << [:query_validation_string,
+                             { param: param.to_s, class: val.class,
+                               val: val.inspect }]
       nil
     end
   end
@@ -279,7 +287,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif (val2 = parse_date(val)).acts_like?(:date)
       format_date(val2)
     else
-      @validation_errors << :query_validation_date.t(param:, val:)
+      @validation_errors << [:query_validation_date,
+                             { param: param.to_s, val: }]
       nil
     end
   end
@@ -304,8 +313,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
     elsif (val2 = parse_time(val)).acts_like?(:time)
       format_time(val2)
     else
-      @validation_errors <<
-        :query_validation_time.t(param:, class: val.class.name, val:)
+      @validation_errors << [:query_validation_time,
+                             { param: param.to_s, class: val.class.name, val: }]
       nil
     end
   end
@@ -354,7 +363,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
 
     results = lookup.new(val).send(method)
     unless results
-      @validation_errors << :query_validation_lookup_id.t(val: val.inspect)
+      @validation_errors << [:query_validation_lookup_id,
+                             { val: val.inspect }]
     end
 
     results.first
@@ -370,8 +380,8 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
                "Lookup::#{type}".constantize
              end
     unless defined?(lookup)
-      @validation_errors <<
-        :query_validation_lookup.t(type:, val: val.inspect)
+      @validation_errors << [:query_validation_lookup,
+                             { type:, val: val.inspect }]
     end
     lookup
   end

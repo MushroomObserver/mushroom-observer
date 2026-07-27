@@ -231,7 +231,7 @@ module Searchable
       @search = Query.create_query(query_model, @query_params)
       return true unless @search.invalid?
 
-      messages = @search.validation_errors.compact_blank
+      messages = @search.validation_error_messages.compact_blank
       flash_error(messages) if messages
       false
     end

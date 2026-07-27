@@ -308,7 +308,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def flash_query_validation_errors(query)
     return if query.valid || query.validation_errors.empty?
 
-    flash_warning(query.validation_errors.join("\n"))
+    flash_warning(query.validation_error_messages.join("\n"))
   end
 
   # Set some ivars used in all index views.
