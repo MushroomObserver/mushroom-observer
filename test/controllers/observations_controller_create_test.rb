@@ -1491,12 +1491,14 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     login("rolf")
 
     get(:new, params: { field_code: "TEST-001" })
+    assert_response(:success)
     assert_select("input[type='checkbox'][name='observation[specimen]']" \
                   "[checked]", count: 1,
                                message: "field-slip path should pre-check " \
-                                         "the specimen checkbox")
+                                        "the specimen checkbox")
 
     get(:new)
+    assert_response(:success)
     assert_select("input[type='checkbox'][name='observation[specimen]']" \
                   "[checked]", count: 0,
                                message: "plain create form should leave " \
