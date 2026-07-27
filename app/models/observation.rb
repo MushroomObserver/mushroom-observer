@@ -1103,6 +1103,37 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # True when this observation is a read-only reflection of an imported
+  # source (#4214): its scalar core (date/location/GPS/notes) mirrors the
+  # source and is refreshed from it by resync (#4215), so MO-side edits to
+  # those fields are blocked. The name is deliberately not in that list --
+  # iNat's identifications are mirrored at import time only, and tracking
+  # them afterwards waits on the identification-sync slice of #4215.
+  # `reflected_at` is stamped at import time for new imports (clean by
+  # construction) and by the #4585 resolution engine for the verified
+  # backlog; NULL means editable (not a reflection).
+  def reflection?
+    reflected_at.present?
+  end
+
+  # All read-only reflections in this observation's occurrence -- the
+  # set an occurrence-wide resync (#4215) refreshes. Sync is an
+  # occurrence-level event: users want every mirrored record current at
+  # once, not per-record control. An observation with no occurrence is
+  # treated as an occurrence of one.
+  def sync_reflections
+    members = occurrence ? occurrence.observations : [self]
+    members.select(&:reflection?)
+  end
+
+  # Whether this observation's page offers a Sync button. Any logged-in
+  # user may trigger a sync -- it applies no user input, converging on
+  # source-canonical data, the same refresh the scheduled batch performs
+  # with no user at all (#4215).
+  def syncable?
+    sync_reflections.any?
+  end
+
   # Do we want to prominently advertise the source of this observation?
   # An import link makes it noteworthy; otherwise a non-website entry agent.
   def source_noteworthy?

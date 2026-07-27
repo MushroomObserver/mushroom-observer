@@ -65,7 +65,10 @@ class Inat
         specimen: inat_obs.specimen?,
         text_name: lead_name.text_name,
         notes: inat_obs.notes,
-        inat_import_id: @inat_import&.id }.merge(collector_attrs)
+        inat_import_id: @inat_import&.id,
+        # A fresh import is a clean reflection by construction, so mark it
+        # read-only now (#4214). The #4585 engine stamps the backlog later.
+        reflected_at: Time.zone.now }.merge(collector_attrs)
     end
 
     # Link the collector to an MO user when the iNat collector (a custom

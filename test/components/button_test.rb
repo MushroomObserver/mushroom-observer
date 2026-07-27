@@ -292,6 +292,36 @@ class Components::ButtonDispatcherTest < ComponentTestCase
                 "button span.collapse-toggle-closed", text: "Open map")
   end
 
+  # Regression: the map-toggle button's icon rendered flush against its
+  # text with no gap (icon-text-gap was only wired up in
+  # Components::IconWithText's own render_icon_text, never in
+  # CollapseContent's spans).
+  def test_type_collapse_toggle_with_icon_has_text_gap
+    html = render(Components::Button.new(
+                    type: :collapse_toggle,
+                    target_id: "map_div",
+                    open_text: "Hide map",
+                    closed_text: "Show map",
+                    icon: :globe,
+                    collapsed: true
+                  ))
+
+    assert_html(html, "button span.collapse-toggle-open.icon-text-gap")
+    assert_html(html, "button span.collapse-toggle-closed.icon-text-gap")
+  end
+
+  def test_type_collapse_toggle_without_icon_has_no_text_gap
+    html = render(Components::Button.new(
+                    type: :collapse_toggle,
+                    target_id: "map_div",
+                    open_text: "Hide map",
+                    closed_text: "Show map",
+                    collapsed: true
+                  ))
+
+    assert_no_html(html, ".icon-text-gap")
+  end
+
   # ---- type: :project --------------------------------------------------
 
   def test_type_project_dispatches_to_project_with_lg_size
