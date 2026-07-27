@@ -54,7 +54,7 @@ class APIKey < AbstractModel
     other = self.class.find_by(key: key)
     if other && other.id != id
       # This should never happen.
-      errors.add(:key, "api keys must be unique")
+      errors.add(:key, :account_api_keys_duplicate_key)
     end
     errors.add(:notes, :account_api_keys_no_notes) if notes.blank?
   end

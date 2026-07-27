@@ -2674,6 +2674,7 @@
   account_api_keys_updated: Successfully updated API Key notes.
   account_api_keys_activated: Successfully activated key for [notes].
   account_api_keys_no_notes: You left name/description field empty.
+  account_api_keys_duplicate_key: This API Key already exists.
 
   # description/adjust_permissions
   adjust_permissions_user_header: User or Group
