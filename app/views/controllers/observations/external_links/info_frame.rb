@@ -82,7 +82,7 @@ module Views::Controllers::Observations::ExternalLinks
         name: :sync_now.ti,
         target: resync_observation_path(@obs.id),
         size: :sm,
-        class: "reflection-sync-button mt-2",
+        class: "reflection-sync-button mt-3",
         data: { turbo_confirm: :observation_resync_confirm.l }
       )
     end
