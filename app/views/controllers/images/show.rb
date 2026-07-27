@@ -81,7 +81,7 @@ module Views::Controllers::Images
         div do
           ImageFragment(type: :copyright, user: current_user, image: @image)
         end
-        div(class: "py-5px mb-3") do
+        div(class: "py-2 mb-3") do
           LicenseBadge(license: @image.license)
         end
       end
