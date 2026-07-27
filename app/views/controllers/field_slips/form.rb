@@ -61,7 +61,7 @@ module Views::Controllers::FieldSlips
     # --- Main form: full field-slip editing.
 
     def render_main_form
-      render_errors if model.errors.any?
+      render(Components::Form::Errors.new(model: model))
       # Width-cap the texty fields to a comfortable reading width
       # (`.container-text`), but keep the observation matrix full-
       # width. Both must live inside the same `<form>` so the matrix
@@ -89,18 +89,6 @@ module Views::Controllers::FieldSlips
     # validation failure leaves persistence state unchanged.
     def new_record?
       model.new_record?
-    end
-
-    # --- Errors ---
-
-    def render_errors
-      count = pluralize(model.errors.count, :error.t, plural: :errors.t)
-      Alert(level: :danger) do
-        ul do
-          model.errors.each { |error| li { error.full_message } }
-        end
-      end
-      p { "#{count} #{:field_slip_errors.t}:" }
     end
 
     # --- Left-column field-slip attribute fields ---

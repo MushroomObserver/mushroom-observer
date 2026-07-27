@@ -29,7 +29,10 @@ module Views::Controllers::VisualModels
       assert_html(html, "li")
       error_text = Nokogiri::HTML(html).at_css("#error_explanation").text
       assert_includes(error_text, "1 #{:error.t}")
-      assert_includes(error_text, :visual_model_errors.t)
+      assert_includes(
+        error_text,
+        :errors_prohibited_save.t(type: @visual_model.type_tag.ti)
+      )
       assert_match(/Name can.{1,6}t be blank/, error_text)
     end
 
