@@ -46,8 +46,10 @@ module Observations::ExternalLinksController::Show
   def load_siblings_with_external_links(obs)
     return [] unless obs.occurrence
 
+    # .to_a: render_external_links_section_update hands this to the
+    # panel's typed _Array(Observation) prop, which rejects a relation.
     obs.occurrence.observations.where.not(id: obs.id).
-      includes(external_links: show_link_includes)
+      includes(external_links: show_link_includes).to_a
   end
 
   # Sorted by relationship_date, matching the pre-badge external-links
