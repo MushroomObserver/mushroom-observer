@@ -2802,7 +2802,7 @@
   inat_dqa_casual: Casual
   inat_dqa_needs_id: Needs ID
   inat_dqa_research: Research Grade
-  inat_skeleton_placeholder_notes: "Placeholder for [inat_link], © [name] All Rights Reserved"
+  inat_skeleton_placeholder_notes: "Placeholder for [inat_link], © [name] · all rights reserved"
 
   inat_import_confirm_title: Confirm iNat Import
   inat_import_confirm_requested_caption: Requested Observations
