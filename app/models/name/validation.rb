@@ -120,7 +120,9 @@ module Name::Validation
     )
 
     errors.add(:base,
-               :name_error_field_start.t(field: :citation.ti, start: start))
+               :name_error_field_start.t(
+                 field: :citation.ti, start: ERB::Util.html_escape(start.to_s)
+               ))
   end
 
   # prevent assigning ICN registration identifier to unregistrable Name
@@ -128,7 +130,8 @@ module Name::Validation
     return if icn_id.blank? || registrable?
 
     errors.add(:base, :name_error_unregistrable.t(
-                        rank: rank.to_s, name: real_search_name(nil)
+                        rank: rank.to_s,
+                        name: ERB::Util.html_escape(real_search_name(nil))
                       ))
   end
 
@@ -141,7 +144,9 @@ module Name::Validation
 
     errors.add(:base, :name_error_icn_id_in_use.t(
                         number: icn_id,
-                        name: conflicting_name.real_search_name(nil)
+                        name: ERB::Util.html_escape(
+                          conflicting_name.real_search_name(nil)
+                        )
                       ))
   end
 

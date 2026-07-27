@@ -711,7 +711,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
         file = upload_original_name.to_s
         file = "?" if file.blank?
         errors.add(:image,
-                   :validate_image_wrong_type.t(type: upload_type, file: file))
+                   :validate_image_wrong_type.t(
+                     type: upload_type, file: ERB::Util.html_escape(file)
+                   ))
         result = false
       end
     end
@@ -834,7 +836,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     error = Image::Processor.strip_original_gps(self, ext: ext)
     return true unless error
 
-    errors.add(:image, :runtime_failed_to_strip_gps.t(msg: error))
+    errors.add(:image,
+               :runtime_failed_to_strip_gps.t(msg: ERB::Util.html_escape(error)))
     false
   end
 
