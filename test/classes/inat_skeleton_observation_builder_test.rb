@@ -72,6 +72,17 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
     assert_equal([], builder.created_image_ids)
   end
 
+  def test_mo_observation_destroys_persisted_observation_on_later_failure
+    builder = builder_for(name: names(:peltigera))
+
+    assert_no_difference("Observation.count",
+                         "Failed to destroy incomplete Observation") do
+      ObservationView.stub(:create!, ->(*) { raise("boom") }) do
+        assert_raises(RuntimeError) { builder.mo_observation }
+      end
+    end
+  end
+
   def assert_placeholder_notes(obs)
     notes = obs.notes_part_value(Observation.other_notes_part)
     inat_link = "\"iNat ##{FakeInatObs::FAKE_INAT_ID}\":" \
