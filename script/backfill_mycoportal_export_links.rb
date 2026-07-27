@@ -41,6 +41,12 @@
 #
 #   # List all options:
 #   bin/rails runner script/backfill_mycoportal_export_links.rb -h
+#
+#   To avoid running this script's DwC-A parse against production (the
+#   CSVs are ~300MB), run it locally with APPLY=1, then move the
+#   resulting ExternalLinks to production with
+#   script/transfer_mycoportal_export_links.rb instead of re-running
+#   this script there.
 
 require "csv"
 require "optparse"
