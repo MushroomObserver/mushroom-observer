@@ -3760,7 +3760,7 @@
   validate_too_small: "[Field] should be at least [min]."
   validate_too_small_or_large: "[Field] should be between [min] and [max]."
   validate_when_selected: "You selected: [when]"
-  validate_when_future: "You selected: [when]  today is [today]"
+  validate_when_future: "You selected: [when] today is [today]"
   validate_when_future_debug: "You selected: [when] [detail]"
 
   # Rails' own built-in validation types (bare `validates :x, presence:

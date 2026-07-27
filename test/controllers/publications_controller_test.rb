@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("rexml/document")
 
 class PublicationsControllerTest < FunctionalTestCase
   def test_should_get_index
