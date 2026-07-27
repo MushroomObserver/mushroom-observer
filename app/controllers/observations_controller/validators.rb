@@ -22,7 +22,7 @@ module ObservationsController::Validators
       @naming.name = @name
     elsif !success
       @naming.errors.add(:name,
-                         :form_observations_there_is_a_problem_with_name.t)
+                         :form_observations_there_is_a_problem_with_name)
       flash_object_errors(@naming)
     end
     return true if success

@@ -19,6 +19,7 @@ ActiveModel::Error.prepend(
     def message
       if raw_type.is_a?(Symbol) && raw_type.has_translation?
         return options[:message] if options[:message].is_a?(String)
+        return super if options[:message].is_a?(Proc)
 
         return raw_type.t(**options.except(:message))
       end

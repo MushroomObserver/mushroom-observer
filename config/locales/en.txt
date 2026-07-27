@@ -3749,6 +3749,22 @@
   validate_when_future: "You selected: [when]  today is [today]"
   validate_when_future_debug: "You selected: [when] [detail]"
 
+  # Rails' own built-in validation types (bare `validates :x, presence:
+  # true` etc., not a custom mo.* tag) -- ActiveModel::ErrorTagResolution
+  # (config/initializers/active_model_error_tag_resolution.rb) picks
+  # these up automatically once defined here, the same way it resolves
+  # any other tag, so a Rails-native validation is translatable exactly
+  # like a hand-written one instead of staying stuck on Rails' own
+  # English-only bundled default. Text matches Rails' bundled English
+  # default exactly, so defining these doesn't change existing English
+  # output anywhere in the app -- only unlocks translation into MO's
+  # other locales going forward.
+  blank: can't be blank
+  taken: has already been taken
+  not_a_number: is not a number
+  inclusion: is not included in the list
+  too_long: "is too long (maximum is [count] characters)"
+
   # One-time-use error messages.
   validate_image_file_too_big: We can't handle [:images] that big. Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right. Please try uploading your image again.
