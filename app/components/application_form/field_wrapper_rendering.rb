@@ -32,6 +32,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       classes = base
       classes += " form-inline" if inline && base == "form-group"
       classes += " #{wrap_class}" if wrap_class.present?
+      # Help renders as a sibling right after this div, not inside it
+      # (see below) -- .help-block's own top margin already spaces it
+      # from the field, so drop this div's own bottom margin to avoid
+      # doubling up.
+      classes += " mb-0" if help_present?
       classes
     end
 
@@ -41,6 +46,10 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def append_present?
       respond_to?(:append_slot) && append_slot
+    end
+
+    def help_present?
+      respond_to?(:help_slot) && help_slot
     end
 
     def render_with_wrapper

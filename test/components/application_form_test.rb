@@ -782,6 +782,63 @@ class ApplicationFormTest < ComponentTestCase
     assert_no_html(form, "span.form-between")
   end
 
+  # Help renders as a sibling after .form-group, not inside it (#4911)
+  # -- .form-group gets mb-0 so its own bottom margin doesn't double up
+  # with .help-block's own top margin.
+  def test_form_group_has_mb_0_when_field_has_help
+    form = render_form do
+      text_field(:name, label: "Name:", help: "Help text")
+    end
+
+    assert_html(form, "div.form-group.mb-0")
+    assert_html(form, "div.form-group + div.help-block")
+  end
+
+  def test_form_group_has_no_mb_0_without_help
+    form = render_form do
+      text_field(:name, label: "Name:")
+    end
+
+    assert_html(form, "div.form-group")
+    assert_no_html(form, "div.form-group.mb-0")
+  end
+
+  # Regression: SelectRangeField's two select fields sit in separate
+  # d-inline-block columns meant to stay on one line (e.g. the
+  # observation search form's Confidence range). Help used to render
+  # nested inside the first field's own .form-group; after #4911 it
+  # renders as a sibling instead, and if left inside the first
+  # d-inline-block column, that block-level .help-block forces a
+  # line-break within that column and pushes the second column
+  # ("to" + second select) onto its own line. Help must render outside
+  # both columns, and both .form-groups need mb-0 explicitly (neither
+  # carries its own help_slot anymore for the automatic mb-0 in
+  # FieldWrapperRendering to key off).
+  def test_select_range_field_help_renders_outside_both_columns
+    form = render_form do
+      render(Components::ApplicationForm::SelectRangeField.new(
+               form: self, field_name: :confidence,
+               options: [["", nil], ["Sure", 3]],
+               value: nil, range_value: nil,
+               label: "Confidence"
+             )) do |f|
+        f.with_help { plain("Confidence is in this range.") }
+      end
+    end
+
+    assert_no_html(form, ".d-inline-block .help-block")
+    assert_html(form, ".d-inline-block .form-group.mb-0", count: 2)
+
+    # .help-block is a sibling of the div wrapping both columns, not
+    # nested inside either one.
+    columns_row = Nokogiri::HTML5.fragment(form).at_css(".d-inline-block").
+                  parent
+    assert_equal("help-block",
+                 columns_row.next_element["class"],
+                 "help-block should immediately follow the row " \
+                 "containing both d-inline-block columns")
+  end
+
   def test_submit_with_custom_data_attributes
     form = render_form do
       submit("Save", data: { confirm: "Are you sure?" })
