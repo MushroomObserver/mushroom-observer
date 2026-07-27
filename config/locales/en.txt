@@ -246,6 +246,7 @@
   ended: ended
   error: error
   errors: errors
+  errors_prohibited_save: prohibited this [type] from being saved
   external_link: external link
   external_links_help: How external links work
   external_links: external links
@@ -2529,9 +2530,6 @@
   # visual_models/show
   show_visual_model_index: "[:visual_model.ti] [:index.ti]"
 
-  # Visual Models
-  visual_model_errors: prohibited this visual_model from being saved
-
   # visual_models/destroy
   destroy_visual_model_success: "[:visual_model.ti] [:destroyed]"
 
@@ -2548,7 +2546,6 @@
   field_slip_destroyed: Field slip was successfully destroyed.
   field_slip_edit: "[:edit_object(type=:FIELD_SLIP)]"
   field_slip_editing: Editing Field Slip
-  field_slip_errors: prohibited this field_slip from being saved
   field_slip_filter_by: Filter by [:project.ti]
   field_slip_job_no_tracker: No Field Slip Tracker found
   field_slip_keep_obs: Save with Current Observation

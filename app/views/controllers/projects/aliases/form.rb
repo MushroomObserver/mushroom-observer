@@ -20,7 +20,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def view_template
-      render_errors if model.errors.any?
+      render(Components::Form::Errors.new(model: model))
       render_name_and_type_row
       render_user_autocompleter
       render_location_autocompleter
@@ -28,23 +28,6 @@ module Views::Controllers::Projects::Aliases
     end
 
     private
-
-    def render_errors
-      Alert(level: :danger, id: "error_explanation") do
-        h2 { error_count_message }
-        ul do
-          model.errors.full_messages.each do |message|
-            li { message }
-          end
-        end
-      end
-    end
-
-    def error_count_message
-      count = model.errors.count
-      "#{count} #{count == 1 ? "error" : "errors"} prohibited this " \
-        "project alias from being saved:"
-    end
 
     def render_name_and_type_row
       Row do
