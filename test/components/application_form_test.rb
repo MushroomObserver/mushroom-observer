@@ -803,6 +803,19 @@ class ApplicationFormTest < ComponentTestCase
     assert_no_html(form, "div.form-group.mb-0")
   end
 
+  # Regression (Copilot review on #4922): help_collapse: true renders
+  # a Collapsible that's hidden by default, not an always-visible
+  # .help-block sibling -- mb-0 must not fire for it, or the gap to
+  # whatever field comes next shrinks with nothing visible to justify it.
+  def test_form_group_has_no_mb_0_with_collapsed_help
+    form = render_form do
+      text_field(:name, label: "Name:", help: "Help text",
+                        help_collapse: true)
+    end
+
+    assert_no_html(form, "div.form-group.mb-0")
+  end
+
   # Regression: SelectRangeField's two select fields sit in separate
   # d-inline-block columns meant to stay on one line (e.g. the
   # observation search form's Confidence range). Help used to render

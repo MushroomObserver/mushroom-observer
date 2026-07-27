@@ -48,8 +48,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
+    # Only plain help renders an always-visible .help-block sibling
+    # right after this div (what mb-0, above, is compensating for).
+    # help_collapse: true renders a Collapsible that's hidden by
+    # default -- dropping this div's own bottom margin there would
+    # shrink the gap to whatever field comes next, with no visible
+    # help-block to justify it.
     def help_present?
-      respond_to?(:help_slot) && help_slot
+      respond_to?(:help_slot) && help_slot && !wrapper_options[:help_collapse]
     end
 
     def render_with_wrapper
