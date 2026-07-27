@@ -2593,6 +2593,10 @@
   create_occurrence_submit: Create Occurrence
   in_existing_occurrence: In existing occurrence
   occurrence_field_slip_conflict: "Field slip code conflict: [codes]"
+  occurrence_max_observations_exceeded: "Cannot exceed [max] observations"
+  occurrence_multiple_existing: "Cannot combine observations from multiple existing occurrences (IDs: [ids])"
+  occurrence_observations_max: "must have at most [max] observations"
+  occurrence_primary_observation_must_belong: must belong to this occurrence
   matrix_box_occurrence: See matching observations
   naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
   show_observation_add_matching_observations: Add Matching Observations
@@ -3782,6 +3786,9 @@
   # One-time-use error messages.
   validate_image_file_too_big: We can't handle [:images] that big. Please reduce it to less than [max] before uploading.
   validate_image_md5_mismatch: The MD5 sum did not come out right. Please try uploading your image again.
+  validate_image_invalid_upload_stream: "Unexpected error: did not receive a valid upload stream from the webserver (we got an instance of [klass]). Send this to the webmaster, please.  Backtrace: [backtrace]..."
+  validate_image_process_before_save: Called process_image before saving image record.
+  validate_image_copy_error: "Unexpected error while copying attached file to temp file. Error class [klass]: [error]"
   validate_invalid_year: Year is invalid. Should be between 1500 and present.
   validate_future_time: Time travel is not allowed; use a past date or the current date.
   validate_observation_where_missing: Please tell us where it was seen or collected.
@@ -3792,6 +3799,7 @@
   validate_invalid_lifeform: "Invalid lifeform word(s): [words]. We are strictly enforcing which types are allowed. If you would like us to add support to additional lifeforms, please contact the admins and make your case."
 
   # These shouldn't need translating, but you are free to override if you need to.
+  validate_box_invalid_boundaries: Box must have valid boundaries.
   validate_comment_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_comment_summary_missing: "[:validate_missing(field=:summary)]"
   validate_comment_summary_too_long: "[:validate_too_long(field=:summary,max=100)]"
@@ -3801,6 +3809,7 @@
   validate_image_user_missing: "[:validate_missing(field=:user)]"
   validate_interest_object_type_too_long: "[:validate_too_long(field=''object_type'',max=30)]"
   validate_interest_user_missing: "[:validate_missing(field=:user)]"
+  validate_license_in_use: Cannot delete License that's in use
   validate_location_name_too_long: "[:validate_too_long(field=''name'',max=1024)]"
   validate_location_east_out_of_bounds: "[:validate_too_small_or_large(field=:longitude,min=-180,max=180)]"
   validate_location_high_less_than_low: "[:validate_this_more_than_that(this=:low,that=:high)]"
@@ -4228,17 +4237,23 @@
   api_help_when_taken: when photo taken
 
   # Query validation.
-  query_validation_param_not_in_set: "Value for ':#{param}' should be one of the following: [set]."
-  query_validation_boolean: "Value for ':#{param}' should be boolean, got: [val]."
-  query_validation_float: "Value for ':#{param}' should be a float, got: [val]."
-  query_validation_record_unsaved: "Value for ':#{param}' is an unsaved :[type] instance."
-  query_validation_record: "Value for ':#{param}' should be id, string or :[type] instance, got: [val]."
+  query_validation_param_not_in_set: "Value for ':[param]' should be one of the following: [set]."
+  query_validation_boolean: "Value for ':[param]' should be boolean, got: [val]."
+  query_validation_float: "Value for ':[param]' should be a float, got: [val]."
+  query_validation_record_unsaved: "Value for ':[param]' is an unsaved :[type] instance."
+  query_validation_record: "Value for ':[param]' should be id, string or :[type] instance, got: [val]."
   query_validation_id_in_set: "Value for :id_in_set should be an array of ids or :[type] instances, got: [val]."
-  query_validation_string: "Value for ':#{param}' should be a string or symbol, got a :[class] : [val]."
-  query_validation_date: "Value for ':#{param}' should be a date (YYYY-MM-DD or MM-DD), got: [val]."
-  query_validation_time: "Value for ':#{param}' should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: :[class] : [val]."
+  query_validation_string: "Value for ':[param]' should be a string or symbol, got a :[class] : [val]."
+  query_validation_date: "Value for ':[param]' should be a date (YYYY-MM-DD or MM-DD), got: [val]."
+  query_validation_time: "Value for ':[param]' should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: :[class] : [val]."
   query_validation_lookup_id: "Couldn't find an id for: [val]."
   query_validation_lookup: "Couldn't look up :[type] by: [val]."
+  query_validation_order_by_unsupported: "Query::[models] does not accept order_by: `[key]` — no [model].order_by_[base] scope is defined."
+  query_validation_invalid_declaration: "Invalid declaration of :[param] for [model] query! (invalid type: [type_class])"
+  query_validation_unknown_class_param: "Don't know how to parse [param_type] :[param] for [model] query."
+  query_validation_invalid_subquery: "Invalid subquery declaration for :[param] for [model] query! (wrong number of keys in hash)"
+  query_validation_invalid_enum_keys: "Invalid enum declaration for :[param] for [model] query! (wrong number of keys in hash)"
+  query_validation_invalid_enum_not_array: "Invalid enum declaration for :[param] for [model] query! (expected value to be an array of allowed values)"
 
   # Query filters.
   query_created_at: "[:created]"

@@ -331,7 +331,7 @@ module Observations
       return false if @name && @given_name.present?
 
       @naming.errors.
-        add(:name, :form_observations_there_is_a_problem_with_name.t)
+        add(:name, :form_observations_there_is_a_problem_with_name)
       true
     end
 
