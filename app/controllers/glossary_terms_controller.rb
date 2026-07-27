@@ -157,7 +157,7 @@ class GlossaryTermsController < ApplicationController
   end
 
   def reload_form(form)
-    add_glossary_term_error_messages_to_flash
+    flash_object_errors(@glossary_term)
     assign_image_form_ivars
     case form
     when "new"  then render(new_form_view)
@@ -179,13 +179,6 @@ class GlossaryTermsController < ApplicationController
     Views::Controllers::GlossaryTerms::Edit.new(
       glossary_term: @glossary_term
     )
-  end
-
-  def add_glossary_term_error_messages_to_flash
-    @glossary_term.errors.messages.each_value do |val|
-      # flash_error takes a string; val is an array of size 1, e.g. ["message"]
-      flash_error(val.first)
-    end
   end
 
   # Process any image together with @glossary_term,

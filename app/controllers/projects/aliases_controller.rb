@@ -90,7 +90,7 @@ module Projects
 
     def flash_and_reload(format, action, error: false)
       flash_error(error) if error
-      @project_alias.errors.each { |err| flash_error(err.full_message) }
+      flash_object_errors(@project_alias)
       format.turbo_stream { reload_modal_project_alias_form }
       format.html { send(:"render_alias_#{action}") }
     end

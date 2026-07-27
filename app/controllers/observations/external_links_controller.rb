@@ -133,7 +133,7 @@ module Observations
                         end
       redirect_params = redirect_params.merge({ back: @back }) if @back.present?
 
-      flash_error(@external_link.formatted_errors.join("\n").strip_html)
+      flash_object_errors(@external_link)
       respond_to do |format|
         format.turbo_stream { reload_external_link_modal_form_and_flash }
         format.html { redirect_to(redirect_params) and return true }
