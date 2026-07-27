@@ -21,6 +21,10 @@ ActiveModel::Error.prepend(
         return options[:message] if options[:message].is_a?(String)
         return super if options[:message].is_a?(Proc)
 
+        # .t, not .l: several mo.* error tags rely on Textile
+        # formatting (e.g. runtime_lat_long_error's embedded
+        # newlines only become <br /> via Textile's paragraph
+        # handling), so resolution can't skip it tag-by-tag.
         return raw_type.t(**options.except(:message))
       end
 
