@@ -16,24 +16,42 @@ class Views::Controllers::Observations::Show::SpecimenPanelTest <
     assert_html(html, "#observation_specimen")
   end
 
-  def test_title_and_body_when_specimen_present
+  def test_heading_when_specimen_present
     @obs.specimen = true
 
     html = render(panel_with(@obs))
 
-    assert_html(html, "#observation_specimen .panel-title", text: :specimen.ti)
-    assert_html(html, "#observation_specimen_available",
+    assert_html(html, "#observation_specimen .panel-title",
                 text: :show_observation_specimen_available.t)
   end
 
-  def test_title_and_body_when_no_specimen
+  def test_heading_when_no_specimen
     @obs.specimen = false
 
     html = render(panel_with(@obs))
 
-    assert_html(html, "#observation_specimen .panel-title", text: :specimen.ti)
-    assert_html(html, "#observation_specimen_available",
+    assert_html(html, "#observation_specimen .panel-title",
                 text: :show_observation_specimen_not_available.t)
+  end
+
+  def test_expanded_when_records_present
+    # detailed_unknown_obs has collection numbers and herbarium
+    # records fixtures attached.
+    html = render(panel_with(@obs))
+
+    assert_html(html, "a.panel-collapse-trigger[aria-expanded='true']")
+  end
+
+  def test_collapsed_when_no_records_regardless_of_specimen_flag
+    obs = observations(:imageless_unvouchered_obs)
+    assert_empty(obs.collection_numbers)
+    assert_empty(obs.herbarium_records)
+    assert_empty(obs.sequences)
+
+    obs.specimen = true
+    html = render(panel_with(obs))
+
+    assert_html(html, "a.panel-collapse-trigger[aria-expanded='false']")
   end
 
   # Sibling records: when a sibling carries a Sequence with a
