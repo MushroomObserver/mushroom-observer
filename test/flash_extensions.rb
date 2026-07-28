@@ -53,12 +53,34 @@ module FlashExtensions
   # (each entry either a bare Symbol or a [Symbol, args_hash] pair).
   # on_fail: description shown by MiniTest if the assertion fails --
   # not the expected flash content itself (that's `expect`/`args`).
-  def assert_flash(expect, on_fail: "", **args)
+  #
+  # object_error_type/object_error_attribute: pass BOTH together, and
+  # ONLY when asserting a flash_object_errors(record) validation
+  # message -- AbstractModel#formatted_errors composes those as
+  # "<Type> <attribute> <message>." (see its source) rather than just
+  # resolving one tag, so `expect` alone can't express them. Here
+  # they mark the WHOLE `expect` (a bare Symbol) as one object error.
+  # For a flash that combines a plain tag with an object error (e.g.
+  # a generic "Unable to save changes." followed by the specific
+  # field error -- the common flash_object_errors shape), put these
+  # same two keys in that one Array entry's own args hash instead:
+  # assert_flash([:runtime_unable_to_save_changes,
+  #               [:not_a_number, { object_error_type: :name,
+  #                                object_error_attribute: :icn_id }]])
+  # Leave both nil/omitted for every other call -- the vast majority
+  # of flash_notice/flash_warning/flash_error sites need nothing
+  # beyond expect/**args.
+  def assert_flash(expect, on_fail: "", object_error_type: nil,
+                   object_error_attribute: nil, **args)
     if (got = get_last_flash)
       lvl = got[0, 1].to_i
       got = got[1..].gsub(/(\n|<br.?>)+/, "\n")
     end
     on_fail = on_fail.to_s.sub(/\n*$/, "\n")
+    args[:object_error_type] = object_error_type if object_error_type
+    if object_error_attribute
+      args[:object_error_attribute] = object_error_attribute
+    end
 
     if !expect && !got
       # Expected no flash, got no flash — the `assert_no_flash` happy
@@ -109,8 +131,26 @@ module FlashExtensions
     entries = expect.is_a?(Array) ? expect : [[expect, top_level_args]]
     entries.map do |entry|
       tag, tag_args = entry.is_a?(Array) ? entry : [entry, {}]
-      "<p>#{tag.t(**(tag_args || {}))}</p>"
+      tag_args = (tag_args || {}).dup
+      type = tag_args.delete(:object_error_type)
+      attribute = tag_args.delete(:object_error_attribute)
+      if type && attribute
+        object_error_text(type, attribute, tag, tag_args)
+      else
+        "<p>#{tag.t(**tag_args)}</p>"
+      end
     end.join
+  end
+
+  # Mirrors AbstractModel#formatted_errors' exact formula for a single
+  # validation error: a complete-sentence message (starts uppercase,
+  # e.g. from `errors.add(:base, :some_tag)`) stands alone; otherwise
+  # it's prefixed with the object type and attribute name.
+  def object_error_text(type, attribute, tag, tag_args)
+    message = tag.t(**(tag_args || {}))
+    message = "#{type.ti} #{attribute.l} #{message}." unless
+      /^[A-Z]/.match?(message)
+    "<p>#{message}</p>"
   end
 
   def raise_bad_flash_expectation(expect)
