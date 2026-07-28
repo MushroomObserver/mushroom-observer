@@ -26,7 +26,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_selector("body.login__new")
-    assert_flash_text(:runtime_login_failed)
+    assert_flash(:runtime_login_failed)
 
     # Try again with incorrect password.
     within("#account_login_form") do
@@ -38,7 +38,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_selector("body.login__new")
-    assert_flash_text(:runtime_login_failed)
+    assert_flash(:runtime_login_failed)
 
     # Try yet again with correct password.
     within("#account_login_form") do
@@ -175,8 +175,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       # We ought to be back at the form
       assert_flash_error
-      assert_flash_text(:validate_user_password_no_match)
-      assert_flash_text(:validate_user_email_missing)
+      assert_flash(:validate_user_password_no_match)
+      assert_flash(:validate_user_email_missing)
       # This time, do it right
       within("#account_signup_form") do
         fill_in("new_user_login", with: "Dumbledore")
@@ -187,8 +187,8 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       # Ah, but we didn't give an email address.
       assert_flash_error
-      assert_no_flash_text(:validate_user_password_no_match)
-      assert_flash_text(:validate_user_email_missing)
+      assert_no_flash(:validate_user_password_no_match)
+      assert_flash(:validate_user_email_missing)
       within("#account_signup_form") do
         fill_in("new_user_login", with: "Dumbledore")
         fill_in("new_user_password", with: "Hagrid_24!")
@@ -199,7 +199,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       # That's not an email address.
       assert_flash_error
-      assert_flash_text(:validate_user_email_confirmation_missing)
+      assert_flash(:validate_user_email_confirmation_missing)
       within("#account_signup_form") do
         fill_in("new_user_login", with: "Dumbledore")
         fill_in("new_user_password", with: "Hagrid_24!")
@@ -211,7 +211,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
       # That's still not an email address.
       assert_flash_error
-      assert_flash_text(:validate_user_email_missing)
+      assert_flash(:validate_user_email_missing)
       user_count_before = User.count
       mail_count_before = ActionMailer::Base.deliveries.size
 
@@ -329,7 +329,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     end
 
     assert_flash_error
-    assert_flash_text(:validate_user_email_missing)
+    assert_flash(:validate_user_email_missing)
     within("#account_preferences_form") do
       fill_in("user_region", with: "Canada")
       fill_in("user_email", with: "valid@seemingly.com")
@@ -364,7 +364,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    assert_flash_text(:validate_user_email_missing)
+    assert_flash(:validate_user_email_missing)
 
     within("#account_preferences_form") do
       fill_in("user_email", with: "yabba@dabba.doo")
@@ -378,7 +378,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    assert_flash_text(:runtime_prefs_password_no_match)
+    assert_flash(:runtime_prefs_password_no_match)
 
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
@@ -386,7 +386,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    assert_flash_text(:runtime_prefs_password_no_match)
+    assert_flash(:runtime_prefs_password_no_match)
 
     within("#account_preferences_form") do
       fill_in("user_password", with: "wanda")
@@ -444,7 +444,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    assert_flash_text(:advanced_search_filter_region)
+    assert_flash(:advanced_search_filter_region)
 
     within("#account_preferences_form") do
       fill_in("user_region", with: "Massachusetts, USA")
@@ -468,7 +468,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
       click_commit
     end
     assert_flash_error
-    assert_flash_text(:prefs_notes_template_no_other, part: "Other")
+    assert_flash(:prefs_notes_template_no_other, part: "Other")
 
     within("#account_preferences_form") do
       fill_in("user_notes_template", with: "Smells, Textures, Impressions")
@@ -526,7 +526,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
 
     # Don't forget to reload the record after updating!
     mary.reload
-    assert_flash_text(:runtime_profile_success)
+    assert_flash(:runtime_profile_success)
     assert_equal("Merula Marshwell", mary.name)
     assert_equal(locations(:mitrula_marsh), mary.location)
 
@@ -540,7 +540,7 @@ class AccountIntegrationTest < CapybaraIntegrationTestCase
     # Click the button on user profile edit page to remove image
     visit(edit_account_profile_path)
     click_button(:profile_image_remove.t)
-    assert_flash_text(:runtime_profile_removed_image)
+    assert_flash(:runtime_profile_removed_image)
     assert_nil(mary.reload.image_id)
   end
 end

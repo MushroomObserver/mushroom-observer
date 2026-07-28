@@ -11,7 +11,7 @@ class InatImportsTest < CapybaraIntegrationTestCase
     page.check("inat_import_consent")
     click_on("Submit")
 
-    assert_flash_text(:inat_missing_username)
+    assert_flash(:inat_missing_username)
     assert_selector("#title", text: :inat_import_create_title.l)
   end
 end

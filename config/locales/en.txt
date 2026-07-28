@@ -2793,7 +2793,7 @@
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
-  inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
+  inat_list_xor_all: "Choose exactly one: (1) list observation IDs, (2) supply a URL, or (3) check \"[:inat_import_all]\""
   inat_url_label: Observations from an iNat search URL
   inat_url_hint: "On iNat, filter observations by taxon, place, date, quality grade, etc., then copy the URL from your browser and paste it here. Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
   inat_invalid_url: "URL must be a filtered iNat observations URL or iNat API observation search URL"
