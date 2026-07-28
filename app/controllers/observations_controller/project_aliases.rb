@@ -25,6 +25,42 @@ module ObservationsController::ProjectAliases
   def resolve_project_aliases
     resolve_alias_place_name
     resolve_alias_collector
+    resolve_field_slip_notes
+  end
+
+  # The two field-slip note fields that aren't plain text. Both are stored
+  # in the shape `FieldSlipNotesBuilder` writes from the slip form, so an
+  # observation reads back the same whichever form entered it.
+  def resolve_field_slip_notes
+    return if @observation.notes.blank?
+
+    resolve_id_by_note
+    resolve_other_codes_note
+  end
+
+  # "Id by" stores a textile user name, resolved through project aliases
+  # and then a unique-name lookup. Unmatched text is kept verbatim — the
+  # person who identified a collection is not always an MO user.
+  def resolve_id_by_note
+    typed = @observation.notes[:Field_Slip_ID_By].to_s.strip
+    return if typed.blank?
+
+    user = alias_target(typed, User) || User.lookup_unique_text_name(typed)
+    return unless user.is_a?(User)
+
+    @observation.notes[:Field_Slip_ID_By] = user.textile_name
+  end
+
+  # "Other Codes" becomes a link to iNaturalist when flagged as an iNat
+  # id. Skips a value that is already a link, so editing a saved
+  # observation with the box still ticked doesn't nest one link in
+  # another.
+  def resolve_other_codes_note
+    codes = @observation.notes[:Other_Codes].to_s.strip
+    return if codes.blank? || params[:inat] != "1"
+    return if FieldSlipNotesBuilder.inat_link?(codes)
+
+    @observation.notes[:Other_Codes] = FieldSlipNotesBuilder.inat_link(codes)
   end
 
   def resolve_alias_place_name

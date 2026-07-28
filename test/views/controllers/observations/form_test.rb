@@ -145,6 +145,28 @@ module Views::Controllers::Observations
                   count: 1)
     end
 
+    # "Id by" and "Other Codes" move into the notes area with a field code
+    # in play, and only then. The iNat checkbox is a transform flag rather
+    # than a note, so it submits top-level.
+    def test_field_code_adds_id_by_and_other_codes
+      user = users(:rolf)
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create,
+                         field_code: "NEMF-1234")
+
+      assert_html(html, "input[name='observation[notes][Field_Slip_ID_By]']")
+      assert_html(html, "input[name='observation[notes][Other_Codes]']")
+      assert_html(html, "input[type='checkbox'][name='inat']")
+
+      plain = render_form(observation: obs, user: user, mode: :create)
+
+      assert_no_html(plain,
+                     "input[name='observation[notes][Field_Slip_ID_By]']")
+      assert_no_html(plain, "input[name='observation[notes][Other_Codes]']")
+      assert_no_html(plain, "input[type='checkbox'][name='inat']")
+    end
+
     def test_edit_form_shows_field_slip_code_from_model
       user = users(:rolf)
       obs = observations(:minimal_unknown_obs)

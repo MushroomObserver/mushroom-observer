@@ -238,6 +238,78 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(locations(:albion), assigns(:observation).location)
   end
 
+  # "Id by" resolves through project aliases to a textile user name, the
+  # same shape FieldSlipNotesBuilder stores from the slip form, so an
+  # observation reads back the same whichever form entered it.
+  def test_create_resolves_id_by_note_through_alias
+    user_alias = project_aliases(:one) # "RS" -> rolf
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: {
+                     place_name: locations.first.name,
+                     notes: { Field_Slip_ID_By: user_alias.name }
+                   } })
+
+    assert_equal(rolf.textile_name,
+                 assigns(:observation).notes[:Field_Slip_ID_By])
+  end
+
+  # Unmatched text stays verbatim — whoever identified a collection is not
+  # necessarily an MO user.
+  def test_id_by_note_keeps_unmatched_text
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   observation: {
+                     place_name: locations.first.name,
+                     notes: { Field_Slip_ID_By: "Some Stranger" }
+                   } })
+
+    assert_equal("Some Stranger",
+                 assigns(:observation).notes[:Field_Slip_ID_By])
+  end
+
+  def test_other_codes_becomes_an_inat_link_when_flagged
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   inat: "1",
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: "12345" } } })
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("12345"),
+                 assigns(:observation).notes[:Other_Codes])
+  end
+
+  def test_other_codes_left_alone_when_not_flagged
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: "12345" } } })
+
+    assert_equal("12345", assigns(:observation).notes[:Other_Codes])
+  end
+
+  # Editing a saved observation with the box still ticked must not wrap a
+  # link inside another link.
+  def test_other_codes_link_is_not_wrapped_twice
+    already = FieldSlipNotesBuilder.inat_link("12345")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   inat: "1",
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: already } } })
+
+    assert_equal(already, assigns(:observation).notes[:Other_Codes])
+  end
+
   # Two targeted projects defining the same alias: newest wins, loudly.
   def test_ambiguous_project_alias_warns_and_prefers_newest
     place_alias = project_aliases(:two) # "Walk 1" -> albion, eol_project

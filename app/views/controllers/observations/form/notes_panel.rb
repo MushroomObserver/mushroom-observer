@@ -23,8 +23,36 @@ module Views::Controllers::Observations
                  panel_id: "observation_notes",
                  expanded: notes_panel_expanded?,
                  single_part_mode: single_notes_part?,
-                 above_help: above_notes_help
+                 above_help: above_notes_help,
+                 extra_fields: field_slip_note_fields
                ))
+      end
+
+      # "Id by" and "Other Codes" — the two field-slip note fields that
+      # aren't plain text. Id by is a user autocompleter (it resolves to a
+      # user through project aliases on save) and Other Codes carries the
+      # "this is an iNat id" checkbox that turns it into a link. Both live
+      # in the notes area per #4932; the Scientific Name field already
+      # covers what the slip form called "ID", so that one doesn't move.
+      #
+      # `instance_exec`'d by the Notes component inside its `:notes`
+      # namespace, so `notes_ns` fields submit as
+      # `observation[notes][<key>]` alongside the parts. The iNat checkbox
+      # is not a note — it is a transform flag — so it goes through
+      # `@form` as a top-level `inat` param, the same shape the slip form
+      # uses.
+      def field_slip_note_fields
+        return nil if editable_field_code.blank?
+
+        proc do |notes_ns|
+          render(notes_ns.field(:Field_Slip_ID_By).autocompleter(
+                   type: :user, wrapper_options: { label: :id_by }
+                 ))
+          render(notes_ns.field(:Other_Codes).text(
+                   wrapper_options: { label: :field_slip_other_codes }
+                 ))
+          @form.checkbox_field("inat", label: :field_slip_other_inat)
+        end
       end
 
       # The plain notes parts (template + orphaned + Other keys not shared
