@@ -131,13 +131,15 @@ module Projects
     end
 
     def test_add_all
+      count = @project.new_candidate_observations.count
+
       post(:add_all, params: { project_id: @project.id })
 
       assert_redirected_to(
         project_updates_path(project_id: @project.id,
                              show_excluded: false)
       )
-      assert_flash(/Added/)
+      assert_flash(:project_updates_added_all, count: count)
     end
 
     def test_add_all_with_show_excluded
