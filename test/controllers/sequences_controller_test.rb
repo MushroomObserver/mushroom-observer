@@ -598,7 +598,7 @@ class SequencesControllerTest < FunctionalTestCase
     patch(:update, params: params)
 
     assert_not_equal(changed_notes, sequence.reload.notes)
-    assert_flash_text(:permission_denied.t)
+    assert_flash(:permission_denied)
   end
 
   def test_update_no_locus
@@ -747,7 +747,7 @@ class SequencesControllerTest < FunctionalTestCase
       delete(:destroy, params: { id: sequence.id })
     end
     assert_redirected_to(obs.show_link_args)
-    assert_flash_text(:permission_denied.t)
+    assert_flash(:permission_denied)
   end
 
   def test_destroy_admin
