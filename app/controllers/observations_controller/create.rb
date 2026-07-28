@@ -248,8 +248,7 @@ module ObservationsController::Create
     @reasons         = @naming.init_reasons(reasons)
     @images          = @bad_images
     @new_image.when  = @observation.when
-    @field_code        = params[:field_code]
-    @field_code_locked = params[:field_code_locked] == "1"
+    @field_code = params[:field_code]
     init_location_var_for_reload
     init_specimen_vars_for_reload
     init_project_vars

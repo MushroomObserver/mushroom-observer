@@ -139,6 +139,31 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                    "Observation should have log_updated_at time")
   end
 
+  # Arriving from a field slip leaves Collector blank: the person at the
+  # keyboard is usually a foray recorder entering someone else's
+  # collection, and a blank collector on a field-slip observation renders
+  # as "Entered by:" alone rather than falsely naming them. See #3283.
+  def test_new_from_field_slip_leaves_collector_blank
+    login("rolf")
+
+    get(:new, params: { field_code: field_slips(:field_slip_no_obs).code })
+
+    assert_select("input[name='observation[collector]']")
+    assert_select("input[name='observation[collector]'][value=?]",
+                  users(:rolf).unique_text_name, count: 0)
+  end
+
+  # A collector carried in from the field-slip form still wins.
+  def test_new_from_field_slip_keeps_supplied_collector
+    login("rolf")
+
+    get(:new, params: { field_code: field_slips(:field_slip_no_obs).code,
+                        collector: "Jane Forager" })
+
+    assert_select("input[name='observation[collector]'][value=?]",
+                  "Jane Forager")
+  end
+
   def test_create_observation_with_explicit_collector
     params = {
       naming: { name: "", vote: { value: "" } },

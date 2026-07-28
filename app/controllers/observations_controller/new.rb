@@ -40,19 +40,14 @@ module ObservationsController::New
     end
     @observation.current_user = @user
     @observation.place_name = params[:place_name]
-    # Prefill the editable collector: the field-slip collector when one
-    # came through (the redirect carries it), else the entering user, who
-    # records someone else here when entering on a collector's behalf.
-    @observation.collector = params[:collector].presence ||
-                             @user.unique_text_name
+    @observation.collector = params[:collector].presence || default_collector
     init_naming_and_vote
     @names       = nil
     @valid_names = nil
     @reasons     = @naming.init_reasons
     @images      = []
     @good_images = []
-    @field_code        = params[:field_code]
-    @field_code_locked = @field_code.present?
+    @field_code = params[:field_code]
     init_specimen_vars
     init_project_vars_for_new
     init_list_vars
@@ -75,8 +70,7 @@ module ObservationsController::New
   def new_view_attrs
     new_view_obs_attrs.merge(new_view_naming_attrs).
       merge(new_view_specimen_attrs).merge(new_view_project_attrs).
-      merge(field_code: @field_code,
-            field_code_locked: @field_code_locked || false)
+      merge(field_code: @field_code)
   end
 
   def new_view_obs_attrs
@@ -115,6 +109,19 @@ module ObservationsController::New
       error_checked_projects: @error_checked_projects || [],
       suspect_checked_projects: @suspect_checked_projects || []
     }
+  end
+
+  # Blank when a field slip is in play: the person at the keyboard is
+  # usually a foray recorder entering someone else's collection, and
+  # `ObservationFragment::Who` renders a blank collector on a field-slip
+  # observation as "Entered by:" alone rather than falsely naming them.
+  # Prefilling would make a missed edit silently misattribute the
+  # collection. See #3283. Without a field slip, keep defaulting to the
+  # entering user.
+  def default_collector
+    return nil if params[:field_code].present?
+
+    @user.unique_text_name
   end
 
   def init_naming_and_vote

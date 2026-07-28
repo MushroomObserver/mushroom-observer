@@ -17,7 +17,6 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   prop :observation, Observation
   prop :mode, _Nilable(_Union(:create, :update)), default: :create
   prop :field_code, _Nilable(String), default: nil
-  prop :field_code_locked, _Boolean, default: false
   prop :collectors_name, _Nilable(String), default: nil
   prop :collectors_number, _Nilable(String), default: nil
   prop :herbarium_name, _Nilable(String), default: nil
@@ -26,11 +25,7 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
 
   def view_template
     div(id: "observation_specimen_section") do
-      if @field_code_locked
-        render_locked_field_code
-      else
-        render_field_slip_code
-      end
+      render_field_slip_code
       render_specimen_checkbox
       render_edit_help if update?
       render_specimen_fields if create?
@@ -132,22 +127,14 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
            ))
   end
 
-  def render_locked_field_code
-    p { "#{:form_observations_field_code.t} #{@field_code}" }
-    input(type: "hidden", name: "field_code",
-          value: @field_code)
-    input(type: "hidden", name: "field_code_locked",
-          value: "1")
-  end
-
+  # Always editable, including when a scanned QR code supplied the value
+  # — a mis-scan has to be correctable on the form. String field name
+  # because `field_code` is a top-level param, not an Observation
+  # attribute, so it must not be namespaced under `observation[...]`.
   def render_field_slip_code
-    div(class: "form-group") do
-      label(for: "field_code") do
-        plain("#{:form_observations_field_slip_code.l}:")
-      end
-      input(type: "text", name: "field_code", id: "field_code",
-            value: @field_code, class: "form-control")
-    end
+    @form.text_field("field_code",
+                     label: :form_observations_field_slip_code,
+                     value: @field_code)
   end
 
   def create?
