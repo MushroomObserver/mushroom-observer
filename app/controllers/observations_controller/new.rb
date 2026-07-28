@@ -48,6 +48,12 @@ module ObservationsController::New
     @images      = []
     @good_images = []
     @field_code = params[:field_code]
+    # A field slip almost always means a physical specimen, and users
+    # coming from the slip form often miss the checkbox (#4916). The
+    # `specimen` Stimulus controller reads this on load: a box that
+    # arrives already checked leaves the controller disarmed, so editing
+    # the code can't undo a deliberate uncheck.
+    @observation.specimen = true if @field_code.present?
     init_specimen_vars
     init_project_vars_for_new
     init_list_vars

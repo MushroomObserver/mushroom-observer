@@ -1556,6 +1556,27 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_select("#name_messages", count: 0)
   end
 
+  # A field slip almost always means a physical specimen, so arriving
+  # from the slip form pre-checks the specimen checkbox (#4916); the
+  # plain create form leaves it unchecked.
+  def test_new_from_field_slip_checks_specimen_by_default
+    login("rolf")
+
+    get(:new, params: { field_code: "TEST-001" })
+    assert_response(:success)
+    assert_select("input[type='checkbox'][name='observation[specimen]']" \
+                  "[checked]", count: 1,
+                               message: "field-slip path should pre-check " \
+                                        "the specimen checkbox")
+
+    get(:new)
+    assert_response(:success)
+    assert_select("input[type='checkbox'][name='observation[specimen]']" \
+                  "[checked]", count: 0,
+                               message: "plain create form should leave " \
+                                        "the specimen checkbox unchecked")
+  end
+
   # Stub-based regression coverage for the
   # `validate_observation` / `validate_naming` / `validate_vote`
   # failure branches (`@any_errors = true; false`). Observation,
