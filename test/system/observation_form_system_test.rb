@@ -736,7 +736,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     new_obs = Observation.last
     assert_selector("body.observations__show")
     click_and_confirm(find(".destroy_observation_link_#{new_obs.id}"))
-    assert_flash_for_destroy_observation
+    assert_flash_for_destroy_observation(new_obs.id)
     assert_selector("body.observations__index")
 
     # Make sure observation is not in log index
