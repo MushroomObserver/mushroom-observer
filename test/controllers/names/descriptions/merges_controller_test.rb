@@ -48,7 +48,7 @@ module Names::Descriptions
         description_move_or_merge: { target: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/You have not been given permission/)
+      assert_flash(:runtime_edit_description_denied)
     end
 
     def test_merge_descriptions_notes_conflict
@@ -59,7 +59,7 @@ module Names::Descriptions
       }
       post(:create, params: params)
       # shouldn't work, there is a conflict. requires manual resolution
-      assert_flash_text(/Please merge the two descriptions/)
+      assert_flash(:runtime_description_merge_conflict)
       # dick didn't delete, so the original desc should still be there.
       assert(rolf_desc.reload)
 
@@ -69,7 +69,7 @@ module Names::Descriptions
         description_move_or_merge: { target: mary_desc.id, delete: 1 }
       }
       post(:create, params: params)
-      assert_flash_text(/Please merge the two descriptions/)
+      assert_flash(:runtime_description_merge_conflict)
       assert(rolf_desc.reload)
 
       # Blank the first gen_desc to avoid conflict.
@@ -84,22 +84,35 @@ module Names::Descriptions
         description_move_or_merge: { target: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/Successfully merged the descriptions/)
+      assert_flash(:runtime_description_merge_success,
+                   old: rolf_desc.format_name, new: mary_desc.format_name)
       assert_equal(rolf_desc.reload, NameDescription.find(rd_id))
 
-      # Delete after merge will not work even if specified. dick is not an admin
+      # Delete after merge will not work even if specified. dick is not an
+      # admin -- delete_denied fires alongside merge_success
       params = {
         id: rolf_desc.id,
         description_move_or_merge: { target: mary_desc.id, delete: 1 }
       }
       post(:create, params: params)
-      assert_flash_text(/Successfully merged the descriptions/)
+      assert_flash(
+        [:runtime_description_merge_delete_denied,
+         [:runtime_description_merge_success,
+          { old: rolf_desc.format_name, new: mary_desc.format_name }]]
+      )
       assert_equal(rolf_desc.reload, NameDescription.find(rd_id))
 
       # To merge with delete, make dick an admin in_admin_mode
       make_admin("dick")
+      old_format_name = rolf_desc.format_name
+      new_format_name = mary_desc.format_name
+      old_unique_partial_name = rolf_desc.unique_partial_format_name
       post(:create, params: params)
-      assert_flash_text(/Successfully merged the descriptions/)
+      assert_flash(
+        [[:runtime_description_merge_deleted, { old: old_unique_partial_name }],
+         [:runtime_description_merge_success,
+          { old: old_format_name, new: new_format_name }]]
+      )
       assert_raises(ActiveRecord::RecordNotFound) do
         NameDescription.find(rd_id)
       end
@@ -112,7 +125,11 @@ module Names::Descriptions
         description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/Sorry, the name description you tried to display/)
+      assert_flash(
+        [[:runtime_object_not_found,
+          { id: "bogus", type: :name_description }],
+         [:runtime_invalid, { type: '"target"', value: "bogus" }]]
+      )
     end
 
     # Cover delete_src_description_and_update_parent when src was default
@@ -147,9 +164,16 @@ module Names::Descriptions
         id: src_desc.id,
         description_move_or_merge: { target: dest_desc.id, delete: "1" }
       }
+      old_format_name = src_desc.format_name
+      new_format_name = dest_desc.format_name
+      old_unique_partial_name = src_desc.unique_partial_format_name
       post(:create, params: params)
 
-      assert_flash(/Successfully merged/)
+      assert_flash(
+        [[:runtime_description_merge_deleted, { old: old_unique_partial_name }],
+         [:runtime_description_merge_success,
+          { old: old_format_name, new: new_format_name }]]
+      )
       # Source should be deleted
       assert_nil(NameDescription.safe_find(src_desc.id))
       # Destination should be the new default
@@ -168,7 +192,7 @@ module Names::Descriptions
         description_move_or_merge: { target: rolf_desc.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_error(:runtime_description_private.t)
+      assert_flash(:runtime_description_private)
       assert_redirected_to(name_path(mary_desc.parent_id))
     end
 
