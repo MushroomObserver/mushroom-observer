@@ -20,10 +20,13 @@ module Images
     end
 
     def test_transform_bad_op
-      run_transform(opr: "bad_op", flash: %(Invalid operation "bad_op"))
+      run_transform(opr: "bad_op",
+                    flash_tag: :runtime_invalid,
+                    flash_args: { type: '"operation"', value: "bad_op" })
     end
 
-    def run_transform(opr:, flash: :image_show_transform_note.l)
+    def run_transform(opr:, flash_tag: :image_show_transform_note,
+                      flash_args: {})
       image = images(:in_situ_image)
       user = image.user
       params = { id: image.id, op: opr, size: user.image_size }
@@ -33,7 +36,7 @@ module Images
 
       # Asserting the flash text is the best I can do because Image.transform
       # does not transform images in the text environment. 2022-08-19 JDC
-      assert_flash_text(flash)
+      assert_flash(flash_tag, **flash_args)
       assert_redirected_to(image_path(image.id))
     end
 
