@@ -117,7 +117,7 @@ module Locations
       login
       get(:index, params: { by_author: user.id })
 
-      assert_flash_text("No matching location descriptions found.")
+      assert_flash(:runtime_no_matches, type: :location_description)
       assert_select("body.descriptions__index")
     end
 
@@ -128,9 +128,7 @@ module Locations
       login
       get(:index, params: { by_author: bad_user_id })
 
-      assert_flash_text(
-        :runtime_object_not_found.l(type: "user", id: bad_user_id)
-      )
+      assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
       assert_redirected_to(location_descriptions_index_path)
     end
 
@@ -179,7 +177,7 @@ module Locations
       login
       get(:index, params: { by_editor: user.id })
 
-      assert_flash_text("No matching location descriptions found.")
+      assert_flash(:runtime_no_matches, type: :location_description)
       assert_select("body.descriptions__index")
     end
 
@@ -191,9 +189,7 @@ module Locations
       login
       get(:index, params: { by_editor: bad_user_id })
 
-      assert_flash_text(
-        :runtime_object_not_found.l(type: "user", id: bad_user_id)
-      )
+      assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
       assert_redirected_to(location_descriptions_index_path)
     end
 
@@ -319,7 +315,7 @@ module Locations
 
       delete(:destroy, params: { id: desc.id })
 
-      assert_flash_error(:runtime_destroy_description_not_admin.t)
+      assert_flash(:runtime_destroy_description_not_admin)
       assert(LocationDescription.safe_find(desc.id))
     end
 
@@ -335,7 +331,10 @@ module Locations
         }
       }
       put(:update, params: params)
-      assert_flash_warning(:runtime_edit_location_description_no_change.t)
+      assert_flash(
+        [:runtime_description_public_write_wrong,
+         [:runtime_edit_location_description_success, { id: desc.id }]]
+      )
     end
 
     # Cover create with project source type
