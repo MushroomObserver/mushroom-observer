@@ -3991,6 +3991,7 @@
   runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
   runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
   runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
+  runtime_invalid_sort_order: "Can't figure out how to sort [types] by :[order_by]."
   runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
   runtime_license_duplicate_attributed: Duplicate display_name, form_name, or url
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"

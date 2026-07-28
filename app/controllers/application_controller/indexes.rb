@@ -167,8 +167,9 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     return order_by if AbstractModel.private_methods(false).include?(scope)
 
     flash_error(
-      "Can't figure out how to sort #{controller_model_name.pluralize} " \
-      "by :#{order_by}."
+      :runtime_invalid_sort_order.t(
+        type: controller_model_name.underscore.to_sym, order_by: order_by
+      )
     )
     default_sort_order
   end

@@ -117,7 +117,8 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     login
 
     get(:index, params: { by: by })
-    assert_flash_text("Can't figure out how to sort Observations by :#{by}.")
+    assert_flash(:runtime_invalid_sort_order, type: :observation,
+                                              order_by: by)
   end
 
   def test_index_with_id
@@ -143,7 +144,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params:)
-    assert_flash_error(:runtime_no_matches.t(type: :observation))
+    assert_flash(:runtime_no_matches, type: :observation)
   end
 
   # `?page=999` on a result set with fewer than 999 pages should
@@ -438,7 +439,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: { by_user: user })
 
     assert_equal(users_url, redirect_to_url, "Wrong page")
-    assert_flash_text(:runtime_object_not_found.l(type: :user.l, id: user.id))
+    assert_flash(:runtime_object_not_found, type: :user, id: user.id)
   end
 
   def test_index_location_with_observations
@@ -457,33 +458,23 @@ class ObservationsControllerIndexTest < FunctionalTestCase
   def test_index_location_without_observations
     location = locations(:unused_location)
     params = { location: location }
-    flash_matcher = Regexp.new(
-      Regexp.escape_except_spaces(
-        :runtime_no_matches.t(type: :observation)
-      )
-    )
 
     login
     get(:index, params: params)
 
     assert_response(:success)
-    assert_flash(flash_matcher)
+    assert_flash(:runtime_no_matches, type: :observation)
     assert_page_title(:observations.ti)
   end
 
   def test_index_location_with_nonexistent_location
     location = "non-existent"
     params = { location: location }
-    flash_matcher = Regexp.new(
-      Regexp.escape_except_spaces(
-        :runtime_object_not_found.t(type: :location, id: location)
-      )
-    )
 
     login
     get(:index, params: params)
 
-    assert_flash(flash_matcher)
+    assert_flash(:runtime_object_not_found, type: :location, id: location)
     assert_redirected_to(locations_path)
   end
 
@@ -666,7 +657,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_flash_text(:runtime_no_matches.l(type: :observation))
+    assert_flash(:runtime_no_matches, type: :observation)
   end
 
   def test_index_species_list
@@ -697,7 +688,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_flash_text(:runtime_no_matches.l(type: :observation))
+    assert_flash(:runtime_no_matches, type: :observation)
   end
 
   # Prove that lichen content_filter works on observations
