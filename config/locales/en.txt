@@ -1456,7 +1456,6 @@
   name_error_unregistrable: The [rank] '[name]' is not eligible for an ICN identifier.
   name_error_icn_id_in_use: An ICN identifier number may be used by only one Name. '[number]' is already used by '[name]'.
   name_error_field_start: "[field] must not start with '[start]'."
-  name_error_field_end: "[field] must not end with '[end]'."
 
   # observations/_form_naming
   form_naming_confidence: Confidence

@@ -64,8 +64,9 @@ module Herbaria
         herbarium.reload
       end
       assert_flash(
-        /#{:show_herbarium_no_user.t(login: "non-user")}/,
-        "Error should be flashed if trying to add non-user as curator"
+        :show_herbarium_no_user,
+        login: "non-user",
+        on_fail: "Should flash error for non-user curator"
       )
     end
 
