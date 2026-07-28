@@ -56,6 +56,7 @@ class InatSkeletonObservationBuilderTest < UnitTestCase
     assert_equal(Date.new(2024, 4, 29), obs.when, "Wrong date")
     assert_equal("Albion, California, USA", obs.where, "Wrong location")
     assert_equal("A Collector", obs.collector, "Wrong collector")
+    assert(obs.placeholder?, "Skeleton obs should be flagged placeholder")
     assert_equal(0, obs.images.length, "Skeleton should have no images")
     assert_equal(1, obs.namings.length, "Skeleton should have 1 naming")
     assert_equal(users(:rolf), obs.namings.first.user,

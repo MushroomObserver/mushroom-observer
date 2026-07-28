@@ -44,7 +44,7 @@ class Inat
     end
 
     def new_obs_params
-      { user: user, notes: placeholder_notes,
+      { user: user, notes: placeholder_notes, placeholder: true,
         inat_import_id: @inat_import&.id }.
         merge(location_attrs).merge(name_attrs).merge(collector_attrs)
     end

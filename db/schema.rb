@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_07_26_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_07_28_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb3", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -623,6 +623,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_07_26_120000) do
     t.integer "collector_user_id"
     t.integer "inat_import_id"
     t.datetime "reflected_at"
+    t.boolean "placeholder", default: false, null: false
     t.index ["collector_user_id"], name: "index_observations_on_collector_user_id"
     t.index ["inat_import_id"], name: "index_observations_on_inat_import_id"
     t.index ["location_id"], name: "index_observations_on_location_id"

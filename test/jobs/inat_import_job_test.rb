@@ -52,6 +52,8 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.last
     name = Name.find_by(text_name: "Calostoma lutescens", rank: "Species")
     assert_equal(loc, obs.location)
+    assert_not(obs.placeholder?,
+               "A full (non-skeleton) import must not be a placeholder")
     # casual grade, no sequence, no provisional name -> Could Be
     standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
@@ -802,6 +804,7 @@ class InatImportJobTest < ActiveJob::TestCase
     obs = Observation.find_by(inat_import_id: @inat_import.id)
     assert_not_nil(obs, "Cannot find skeleton-imported Observation")
 
+    assert(obs.placeholder?, "Skeleton obs should be flagged placeholder")
     assert_equal(0, obs.images.length, "Skeleton obs should have no images")
     assert_equal(1, obs.namings.length, "Skeleton obs should have 1 naming")
     inat_link = "\"iNat ##{inat_id}\":" \
