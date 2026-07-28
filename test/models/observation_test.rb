@@ -1068,6 +1068,40 @@ class ObservationTest < UnitTestCase
     )
   end
 
+  # `extra:` headings (the field-slip headings on the observation form)
+  # land after the template, before "Other", and never duplicate a
+  # heading an earlier part already claims. See #4932.
+  def test_form_notes_parts_with_extra_headings
+    user = users(:rolf)
+    obs = observations(:minimal_unknown_obs)
+    extra = FieldSlip::NOTE_HEADINGS.map(&:to_s)
+
+    user.update!(notes_template: "")
+    assert_equal(["Odor/Taste", "Trees/Shrubs", "Substrate", "Habit", "Other"],
+                 obs.form_notes_parts(user, extra: extra),
+                 "Other must appear once, last")
+
+    user.update!(notes_template: "Cap, Substrate")
+    assert_equal(["Cap", "Substrate", "Odor/Taste", "Trees/Shrubs",
+                  "Habit", "Other"],
+                 obs.form_notes_parts(user, extra: extra),
+                 "a templated heading keeps its own position")
+  end
+
+  # Heading comparison ignores case, so a differently-cased template
+  # heading still claims the field-slip one rather than doubling it.
+  def test_form_notes_parts_extra_dedup_ignores_case
+    user = users(:rolf)
+    obs = observations(:minimal_unknown_obs)
+    user.update!(notes_template: "substrate, odor/taste")
+
+    parts = obs.form_notes_parts(user,
+                                 extra: FieldSlip::NOTE_HEADINGS.map(&:to_s))
+
+    assert_equal(["substrate", "odor/taste", "Trees/Shrubs", "Habit", "Other"],
+                 parts)
+  end
+
   # Prove that notes parts for Views are assembled in this order
   #   - notes_template parts, in order listed in notes_template
   #   - orphaned parts, in order that they appear in Observation

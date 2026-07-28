@@ -200,9 +200,15 @@ class FieldSlip < AbstractModel
   # Used by Mycoportal report
   TREES_SHRUBS = :"Trees/Shrubs"
 
+  # The standard headings printed on a field slip, in slip order. The
+  # observation form injects these too whenever a field code is in play,
+  # so a slip's data has somewhere to go there (#4932).
+  # Should we figure out a way to internationalize these tags?
+  NOTE_HEADINGS = [:"Odor/Taste", TREES_SHRUBS, :Substrate, :Habit,
+                   :Other].freeze
+
   def notes_fields
-    # Should we figure out a way to internationalize these tags?
-    [:"Odor/Taste", TREES_SHRUBS, :Substrate, :Habit, :Other].map do |field|
+    NOTE_HEADINGS.map do |field|
       NoteField.new(name: field, value: field_value(field))
     end
   end

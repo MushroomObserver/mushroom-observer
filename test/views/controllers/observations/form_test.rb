@@ -81,6 +81,42 @@ module Views::Controllers::Observations
       assert_no_html(html, "input[name='field_code_locked']")
     end
 
+    # --- Field Slip Notes ---
+
+    # With a field code in play the form grows the slip's standard
+    # headings, so slip data has somewhere to go. Without one it doesn't.
+    def test_field_code_adds_field_slip_note_headings
+      user = users(:rolf)
+      user.update!(notes_template: "")
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create,
+                         field_code: "NEMF-1234")
+
+      FieldSlip::NOTE_HEADINGS.each do |heading|
+        assert_html(html, "textarea[name='observation[notes][#{heading}]']")
+      end
+
+      plain = render_form(observation: obs, user: user, mode: :create)
+
+      assert_no_html(plain, "textarea[name='observation[notes][Substrate]']")
+      assert_html(plain, "textarea[name='observation[notes][Other]']")
+    end
+
+    # A heading the user already has in their notes_template renders once,
+    # in the template's position — not a second time from the slip set.
+    def test_templated_heading_is_not_duplicated_by_field_slip
+      user = users(:rolf)
+      user.update!(notes_template: "Substrate")
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create,
+                         field_code: "NEMF-1234")
+
+      assert_html(html, "textarea[name='observation[notes][Substrate]']",
+                  count: 1)
+    end
+
     def test_edit_form_shows_field_slip_code_from_model
       user = users(:rolf)
       obs = observations(:minimal_unknown_obs)

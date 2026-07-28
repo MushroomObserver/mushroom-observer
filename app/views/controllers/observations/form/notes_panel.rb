@@ -105,7 +105,21 @@ module Views::Controllers::Observations
       end
 
       def observation_notes_form_parts
-        @observation_notes_form_parts ||= model.form_notes_parts(@user)
+        @observation_notes_form_parts ||=
+          model.form_notes_parts(@user, extra: field_slip_note_headings)
+      end
+
+      # The field slip's standard headings, shown whenever a field code is
+      # in play so slip data has somewhere to go on this form.
+      #
+      # Driven by the code rather than by what `notes` already holds:
+      # `notes_to_sym_and_compact` drops blank values, so keying off
+      # content would make every heading the user left empty disappear
+      # from a validation-failure re-render.
+      def field_slip_note_headings
+        return [] if editable_field_code.blank?
+
+        FieldSlip::NOTE_HEADINGS.map(&:to_s)
       end
 
       def single_notes_part?
