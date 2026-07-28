@@ -104,7 +104,13 @@ class QueryTest < UnitTestCase
       [nil],
       Query.lookup(:Observation, created_at: "0").params[:created_at]
     )
-    assert_validation_errors(Query.lookup(:Observation, date: "fi"))
+    assert_validation_errors(Query.lookup(:Observation, created_at: "fi"))
+  end
+
+  def test_validate_params_order_by_unsupported
+    assert_validation_errors(
+      Query.lookup(:Name, order_by: "totally_bogus_sort_key")
+    )
   end
 
   def test_validate_params_instances_users
@@ -184,6 +190,47 @@ class QueryTest < UnitTestCase
     assert_validation_errors(Query.lookup(:Location, in_box: box))
     box = { south: 48.558, east: -123.4307, west: -123.4763 }
     assert_validation_errors(Query.lookup(:Location, in_box: box))
+  end
+
+  # The following exercise defensive checks against malformed
+  # attribute_type declarations on a Query subclass itself -- not
+  # reachable through ordinary user-supplied params, since every real
+  # Query class declares its attribute_types correctly. Call the
+  # private validators directly to cover the "this should never
+  # happen" branches.
+  def test_scalar_validate_rejects_unrecognized_param_type
+    query = Query.lookup(:Name)
+    query.send(:scalar_validate, :some_param, "val", 42)
+    assert_includes(query.validation_errors.map(&:first),
+                    :query_validation_invalid_declaration)
+  end
+
+  def test_validate_class_param_rejects_non_active_record_class
+    query = Query.lookup(:Name)
+    query.send(:validate_class_param, :some_param, "val", String)
+    assert_includes(query.validation_errors.map(&:first),
+                    :query_validation_unknown_class_param)
+  end
+
+  def test_validate_subquery_rejects_wrong_key_count
+    query = Query.lookup(:Name)
+    query.send(:validate_subquery, :some_param, {}, { a: 1, b: 2 })
+    assert_includes(query.validation_errors.map(&:first),
+                    :query_validation_invalid_subquery)
+  end
+
+  def test_validate_enum_rejects_wrong_key_count
+    query = Query.lookup(:Name)
+    query.send(:validate_enum, :some_param, "val", { a: 1, b: 2 })
+    assert_includes(query.validation_errors.map(&:first),
+                    :query_validation_invalid_enum_keys)
+  end
+
+  def test_validate_enum_rejects_non_array_set
+    query = Query.lookup(:Name)
+    query.send(:validate_enum, :some_param, "val", { string: "nope" })
+    assert_includes(query.validation_errors.map(&:first),
+                    :query_validation_invalid_enum_not_array)
   end
 
   def test_google_parse

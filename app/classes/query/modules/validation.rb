@@ -25,7 +25,7 @@
 #
 #  Private methods described below.
 #
-module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
+module Query::Modules::Validation
   attr_accessor :params, :params_cache, :subqueries, :valid, :validation_errors
 
   def clean_and_validate_params
@@ -330,18 +330,6 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
            val.year, val.mon, val.day, val.hour, val.min, val.sec)
   end
 
-  def find_cached_parameter_instance(model, param)
-    return @params_cache[param] if @params_cache && @params_cache[param]
-
-    val = params[param]
-    instance = if could_be_record_id?(param, val)
-                 model.find(val)
-               elsif val.present?
-                 lookup_record_by_name(param, val, model)
-               end
-    set_cached_parameter_instance(param, instance)
-  end
-
   # Cache the instance for later use, in case we both instantiate and
   # execute query in the same action.
   def set_cached_parameter_instance(param, instance)
@@ -354,35 +342,5 @@ module Query::Modules::Validation # rubocop:disable Metrics/ModuleLength
       val.is_a?(String) && val.match(/^[1-9]\d*$/) ||
       # (blasted admin user has id = 0!)
       val.is_a?(String) && (val == "0") && (param == :user)
-  end
-
-  # Requires a unique identifying string and will return [only_one_record].
-  def lookup_record_by_name(param, val, type, **args)
-    method = args[:method] || :instances
-    lookup = lookup_class(param, val, type)
-
-    results = lookup.new(val).send(method)
-    unless results
-      @validation_errors << [:query_validation_lookup_id,
-                             { val: val.inspect }]
-    end
-
-    results.first
-  end
-
-  def lookup_class(param, val, type)
-    # We're only validating the projects passed as the param.
-    # Projects' species_lists will be looked up later.
-    type = type.name.pluralize
-    lookup = if param == :project_lists
-               Lookup::Projects
-             else
-               "Lookup::#{type}".constantize
-             end
-    unless defined?(lookup)
-      @validation_errors << [:query_validation_lookup,
-                             { type:, val: val.inspect }]
-    end
-    lookup
   end
 end

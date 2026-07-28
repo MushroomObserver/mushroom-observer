@@ -4246,8 +4246,6 @@
   query_validation_string: "Value for ':[param]' should be a string or symbol, got a :[class] : [val]."
   query_validation_date: "Value for ':[param]' should be a date (YYYY-MM-DD or MM-DD), got: [val]."
   query_validation_time: "Value for ':[param]' should be a UTC time (YYYY-MM-DD-HH-MM-SS), got: :[class] : [val]."
-  query_validation_lookup_id: "Couldn't find an id for: [val]."
-  query_validation_lookup: "Couldn't look up :[type] by: [val]."
   query_validation_order_by_unsupported: "Query::[models] does not accept order_by: `[key]` — no [model].order_by_[base] scope is defined."
   query_validation_invalid_declaration: "Invalid declaration of :[param] for [model] query! (invalid type: [type_class])"
   query_validation_unknown_class_param: "Don't know how to parse [param_type] :[param] for [model] query."
