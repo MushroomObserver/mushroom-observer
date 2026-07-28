@@ -273,7 +273,7 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     image = images(:in_situ_image)
     stubbed_error = lambda do |*|
       link = ExternalLink.new
-      link.errors.add(:base, "stubbed failure")
+      link.errors.add(:base, :invalid)
       raise(ActiveRecord::RecordInvalid.new(link))
     end
 
