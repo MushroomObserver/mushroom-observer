@@ -14,7 +14,7 @@ module Images
       # # Prove that it won't email someone who has opted out of all emails.
       mary.update(no_emails: true)
       requires_login(:new, id: id)
-      assert_flash_text(:permission_denied.t)
+      assert_flash(:permission_denied)
     end
 
     def test_send_commercial_inquiry
