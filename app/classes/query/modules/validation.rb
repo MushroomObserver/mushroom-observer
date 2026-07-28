@@ -97,7 +97,15 @@ module Query::Modules::Validation
   def array_validate(param, val, param_type)
     case val
     when Array
-      val[0, MO.query_max_array].map! do |val2|
+      # Drop elements that failed validation (scalar_validate returns
+      # nil) rather than leaving nil placeholders in the array -- a
+      # nil left in place gets serialized into q[] params and
+      # re-validated on the next request as if it were real user
+      # input, producing a second, confusing validation error for
+      # what was already reported once. `compact`, not `filter_map`,
+      # since a valid `false` (e.g. from validate_boolean) must
+      # survive -- only `nil` means "failed".
+      val[0, MO.query_max_array].filter_map do |val2|
         scalar_validate(param, val2, param_type)
       end
     when ::API2::OrderedRange
