@@ -523,12 +523,60 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(observation_url(@field_slip.observation))
   end
 
-  def test_should_redirect_to_get_new
+  # A code with no field slip goes straight to the observation form with
+  # the code prefilled — the user scanned a slip to record an observation,
+  # and the slip row is created lazily when that observation is saved.
+  def test_unused_code_redirects_to_new_observation
     login
     project = projects(:bolete_project)
     code = "#{project.field_slip_prefix}-1235"
+
     get(:show, params: { id: code })
-    assert_redirected_to(new_field_slip_url(code: code, id: code))
+
+    assert_redirected_to(new_observation_url(field_code: code))
+  end
+
+  # Same destination when a FieldSlip row exists but holds no
+  # observations: from the scanner's side that is indistinguishable from
+  # an unused code, and the slip's own show page would be a dead end
+  # ("No Observation found" plus an edit icon).
+  def test_code_with_slip_but_no_observations_redirects_to_new_observation
+    login
+    slip = field_slips(:field_slip_no_obs)
+    assert_empty(slip.observations, "fixture must have no observations")
+
+    get(:show, params: { id: slip.code })
+
+    assert_redirected_to(new_observation_url(field_code: slip.code))
+  end
+
+  # A lower-case scan still resolves and hands the form the canonical
+  # upper-case code.
+  def test_code_is_upcased_into_the_observation_form
+    login
+    slip = field_slips(:field_slip_no_obs)
+
+    get(:show, params: { id: slip.code.downcase })
+
+    assert_redirected_to(new_observation_url(field_code: slip.code))
+  end
+
+  # AddDispatchController is what puts these on a /qr/ URL (the "Add"
+  # button on project and species-list pages); they have to survive the
+  # hop into the observation form.
+  def test_add_dispatch_context_survives_redirect_to_new_observation
+    login
+    project = projects(:bolete_project)
+    list = species_lists(:first_species_list)
+    code = "#{project.field_slip_prefix}-1236"
+
+    get(:show, params: { id: code, project: project.id,
+                         species_list: list.id, name: "Agaricus" })
+
+    assert_redirected_to(
+      new_observation_url(field_code: code, project: project.id,
+                          species_list: list.id, name: "Agaricus")
+    )
   end
 
   def test_show_project_prphan_has_edit_link

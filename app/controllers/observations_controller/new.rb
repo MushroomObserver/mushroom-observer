@@ -170,8 +170,13 @@ module ObservationsController::New
   # checked projects, keep them checked UNLESS they have their own
   # field_slip_prefix (in which case adding a new field-slip project
   # supersedes them — original ERB had this exclusive behavior).
+  #
+  # An explicit `?project=` wins over the project derived from the code
+  # prefix: `AddDispatchController` sends it precisely so the page the
+  # user pressed "Add" on can override the slip's own project.
   def add_field_slip_project(code)
-    project = FieldSlip.find_by(code: code)&.project
+    project = Project.safe_find(params[:project]) ||
+              FieldSlip.find_by(code: code)&.project
     return unless project&.current? || project&.admin?(@user)
     return unless project&.member?(@user)
 
