@@ -587,7 +587,7 @@ class String
     return self if !ind || !offset || (length <= (ind + offset))
 
     insert(length, "</small>".html_safe)
-    insert(ind + offset, "<small>".html_safe)
+    insert(ind + offset, '<small class="text-nowrap">'.html_safe)
   end
 
   # Strip leading and trailing spaces, and squeeze embedded spaces.
