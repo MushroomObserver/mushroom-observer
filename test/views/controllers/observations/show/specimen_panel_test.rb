@@ -63,6 +63,28 @@ class Views::Controllers::Observations::Show::SpecimenPanelTest <
     assert_html(html, "a.panel-collapse-trigger[aria-expanded='false']")
   end
 
+  # Specimen panel omitted (not collapsed) for Placeholder without records
+  def test_omitted_for_placeholder_obs_with_no_records
+    obs = observations(:imageless_unvouchered_obs)
+    assert_empty(obs.collection_numbers)
+    assert_empty(obs.herbarium_records)
+    assert_empty(obs.sequences)
+    obs.placeholder = true
+
+    html = render(panel_with(obs))
+
+    assert_no_html(html, "#observation_specimen")
+  end
+
+  # Panel displayed for Placeholder with real records
+  def test_shown_for_placeholder_obs_with_records
+    @obs.placeholder = true
+
+    html = render(panel_with(@obs))
+
+    assert_html(html, "#observation_specimen")
+  end
+
   def test_expanded_when_no_own_records_but_sibling_has_records
     obs = observations(:imageless_unvouchered_obs)
     assert_empty(obs.collection_numbers)
