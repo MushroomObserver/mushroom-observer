@@ -841,8 +841,27 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #   notes: { Other: abc }
   #   observation.notes_part_value("Other") #=> "abc"
   #   observation.notes_part_value(:Other)  #=> "abc"
+  #
+  # Falls back to a case-insensitive match on the stored key.
+  # `notes_orphaned_parts` dedups case-insensitively, so a template
+  # heading legitimately owns a stored key differing only in case (a
+  # user with "odor/taste" in their template and a field slip's stored
+  # :"Odor/Taste"). Without the fallback that part renders blank and
+  # the stored value is silently dropped.
   def notes_part_value(part)
-    notes.blank? ? "" : notes[notes_normalized_key(part)]
+    return "" if notes.blank?
+
+    key = notes_normalized_key(part)
+    return notes[key] if notes.key?(key)
+
+    other = notes_key_matching(key)
+    other ? notes[other] : nil
+  end
+
+  # The stored notes key equal to `key` ignoring case, if any.
+  def notes_key_matching(key)
+    target = key.to_s.downcase
+    notes.keys.find { |stored| stored.to_s.downcase == target }
   end
 
   # Change spaces to underscores in keys

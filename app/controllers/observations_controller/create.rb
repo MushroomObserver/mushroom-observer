@@ -260,11 +260,17 @@ module ObservationsController::Create
   end
 
   # The observation is already saved by the time the field slip is applied,
-  # so an invalid code can't abort creation — warn and keep the observation.
+  # so a code we can't use can't abort creation — warn and keep the
+  # observation.
   def update_field_slip_or_warn
-    return unless update_field_slip == :invalid
-
-    flash_warning(:create_observation_field_slip_invalid.t(code: field_code))
+    case update_field_slip
+    when :invalid
+      flash_warning(:create_observation_field_slip_invalid.t(code: field_code))
+    when :too_many
+      flash_warning(:create_observation_field_slip_full.t(
+                      code: field_code, max: Occurrence::MAX_OBSERVATIONS
+                    ))
+    end
   end
 
   def init_location_var_for_reload

@@ -44,16 +44,50 @@ module ObservationsController::FieldSlips
 
   # Creates/reuses the field slip and links it to @observation via an
   # occurrence (Observation#field_slip= creates the occurrence). Returns
-  # :invalid when the code fails FieldSlip validation.
+  # :invalid when the code fails FieldSlip validation, :too_many when the
+  # slip's occurrence is already at capacity.
   def assign_field_slip(code)
     existed = FieldSlip.exists?(code: code)
     field_slip = FieldSlip.find_or_create_by_code(code, @user)
     return :invalid unless field_slip
+    return :too_many if field_slip_occurrence_full?(field_slip)
 
+    # Read before the assignment below, which is what creates the
+    # occurrence when the slip doesn't have one yet.
+    joined = field_slip.occurrence.present?
     flash_notice(:field_slip_created.t(code: field_slip.code)) unless existed
     @observation.field_slip = field_slip
     @observation.save!
     field_slip.adopt_user_from(@observation)
+    sync_occurrence_after_attach(joined)
     :assigned
+  end
+
+  # `Occurrence#observation_count_within_limits` is `on: :update` for
+  # Occurrence, but attaching updates the *Observation*, so the cap never
+  # fires on this path and has to be checked here.
+  def field_slip_occurrence_full?(field_slip)
+    occ = field_slip.occurrence
+    return false unless occ
+
+    occ.observations.count >= Occurrence::MAX_OBSERVATIONS
+  end
+
+  # The occurrence-edit and field-slip forms do this bookkeeping every
+  # time they attach an observation; this path did none of it.
+  #
+  # Logging fires only when the observation joined an occurrence that
+  # already existed. For a freshly created slip the occurrence holds just
+  # this observation, whose own creation entry already says everything
+  # there is to say, and a second entry would double every QR-created
+  # observation in the activity feed.
+  def sync_occurrence_after_attach(joined)
+    occ = @observation.occurrence
+    return unless occ
+
+    Occurrence.log_field_slip_added([@observation], @user) if joined
+    occ.reload
+    occ.recompute_has_specimen!
+    occ.recalculate_consensus!(@user)
   end
 end

@@ -1139,6 +1139,20 @@ class ObservationTest < UnitTestCase
     assert_equal("pine", obs.notes_part_value("Nearby trees"))
   end
 
+  # A template heading that differs from the stored key only in case
+  # owns that key (notes_orphaned_parts dedups case-insensitively), so
+  # it must render the stored value rather than blank.
+  def test_notes_part_value_matches_stored_key_case_insensitively
+    user = users(:rolf)
+    user.update!(notes_template: "odor/taste")
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(notes: { "Odor/Taste": "farinaceous" })
+
+    assert_equal(["odor/taste", "Other"], obs.form_notes_parts(user),
+                 "template heading should own the stored key, not duplicate it")
+    assert_equal("farinaceous", obs.notes_part_value("odor/taste"))
+  end
+
   # nil notes were seen in the wild
   def test_notes_nil
     obs = Observation.create!(name_id: names(:fungi).id, when_str: "2020-07-05",

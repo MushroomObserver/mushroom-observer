@@ -227,12 +227,19 @@ module ObservationsController::EditAndUpdate
     end
   end
 
-  # On edit, an invalid field-slip code halts the save and re-renders the
-  # form so the user can correct it.
+  # On edit, a field-slip code we can't use halts the save and re-renders
+  # the form so the user can correct it.
   def update_field_slip_or_flag_error
-    return unless update_field_slip == :invalid
-
-    flash_error(:edit_observation_field_slip_invalid.t(code: field_code))
+    case update_field_slip
+    when :invalid
+      flash_error(:edit_observation_field_slip_invalid.t(code: field_code))
+    when :too_many
+      flash_error(:edit_observation_field_slip_full.t(
+                    code: field_code, max: Occurrence::MAX_OBSERVATIONS
+                  ))
+    else
+      return
+    end
     @any_errors = true
   end
 

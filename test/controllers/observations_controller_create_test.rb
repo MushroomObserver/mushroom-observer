@@ -246,6 +246,53 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(slip, obs.field_slip)
   end
 
+  # has_specimen is a cache on the occurrence. The observation is saved
+  # with specimen: true *before* the occurrence exists, so the
+  # saved_change_to_specimen? hook can't fire — assign_field_slip has to
+  # recompute it or the cache stays false until the nightly repair job.
+  def test_create_observation_with_field_slip_sets_occurrence_has_specimen
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: "OPEN-77778",
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0
+    )
+    obs = assigns(:observation)
+
+    assert(obs.occurrence.has_specimen,
+           "occurrence has_specimen cache must be recomputed on attach")
+  end
+
+  # An occurrence caps at Occurrence::MAX_OBSERVATIONS. The cap's model
+  # validation is `on: :update` for Occurrence, so attaching (which
+  # updates the Observation) slips past it without an explicit check.
+  def test_create_observation_with_full_field_slip
+    slip = field_slips(:field_slip_one)
+    occ = slip.occurrence
+    fill_occurrence_to_capacity(occ)
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: slip.code,
+        naming: { name: "Coprinus comatus" } },
+      1, 1, 0, 0
+    )
+    obs = assigns(:observation)
+
+    assert_nil(obs.field_slip, "must not attach past the observation cap")
+    assert_flash_warning
+    assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
+  end
+
+  # `where.not(occurrence_id: occ.id)` would drop the unattached rows —
+  # SQL `NULL != x` is NULL, not true — so select them explicitly.
+  def fill_occurrence_to_capacity(occ)
+    needed = Occurrence::MAX_OBSERVATIONS - occ.observations.count
+    Observation.where(occurrence_id: nil).limit(needed).
+      each { |o| o.update!(occurrence: occ) }
+    assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
+  end
+
   # An invalid field-slip code cannot abort creation (the observation is
   # already saved); it warns and keeps the observation without a field slip.
   def test_create_observation_with_invalid_field_slip
