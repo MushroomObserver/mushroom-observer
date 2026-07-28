@@ -28,7 +28,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
       end
 
       # Should redirect with success message
-      assert_flash_text(:runtime_ask_webmaster_success.l)
+      assert_flash_text(:runtime_ask_webmaster_success)
     end
 
     # Verify email was sent
@@ -57,7 +57,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
       end
 
       # Should redirect with success message
-      assert_flash_text(:runtime_ask_webmaster_success.l)
+      assert_flash_text(:runtime_ask_webmaster_success)
     end
 
     # Verify email was sent
@@ -80,7 +80,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Should show error message
-    assert_flash_text(:runtime_ask_webmaster_need_address.l)
+    assert_flash_text(:runtime_ask_webmaster_need_address)
   end
 
   def test_validation_error_missing_content
@@ -94,7 +94,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Should show error message
-    assert_flash_text(:runtime_ask_webmaster_need_content.l)
+    assert_flash_text(:runtime_ask_webmaster_need_content)
   end
 
   def test_spam_protection_for_anonymous_users
@@ -110,7 +110,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
     end
 
     # Should show antispam error
-    assert_flash_text(/robot spam/)
+    assert_flash_text(:runtime_ask_webmaster_antispam)
   end
 
   def test_logged_in_users_can_include_urls
@@ -131,7 +131,7 @@ class WebmasterQuestionIntegrationTest < CapybaraIntegrationTestCase
       end
 
       # Should succeed for logged-in users
-      assert_flash_text(:runtime_ask_webmaster_success.l)
+      assert_flash_text(:runtime_ask_webmaster_success)
     end
 
     # Verify email was sent

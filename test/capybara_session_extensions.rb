@@ -176,9 +176,9 @@ module CapybaraSessionExtensions
                                      "#flash_notices.alert-danger")
   end
 
-  def assert_flash_warning(text = "", session: self)
+  def assert_flash_warning(expect = nil, session: self, **args)
     session.assert_selector("#flash_notices.alert-warning")
-    assert_flash_text(text, session: session) if text
+    assert_flash_text(expect, session:, **args) if expect
   end
 
   # Capybara has built-in go_back and go_forward methods for js-enabled drivers

@@ -177,7 +177,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
       new_observations_search_path(advanced_retired: 1),
       @response.request.fullpath
     )
-    assert_flash_text(:search_advanced_retired_notice.t)
+    assert_flash_text(:search_advanced_retired_notice)
   end
 
   def test_observer_advanced_search_form_redirects_through_to_search_new

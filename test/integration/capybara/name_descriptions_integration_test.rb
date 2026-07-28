@@ -695,7 +695,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
                     "Katrina should be added to writer groups")
 
     # Should see a flash notice about the change
-    # The system says "Gave edit permission to Katrina"
-    assert_flash_text(/edit.*katrina/i)
+    assert_flash_text(:runtime_description_added_writer,
+                      name: users(:katrina).legal_name)
   end
 end

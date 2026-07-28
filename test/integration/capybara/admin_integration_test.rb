@@ -31,7 +31,7 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
   # Should test somebody making a donation, admin reviews.
   def test_review_donations
     visit("/admin/donations/edit")
-    assert_flash_text(:permission_denied.t)
+    assert_flash_text(:permission_denied)
 
     put_user_in_admin_mode(rolf)
 
@@ -55,13 +55,14 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
       fill_in("admin_session_user", with: "something unlikely and bogus")
       click_commit
     end
-    assert_flash_text("Play again?")
+    assert_flash_text(:runtime_admin_switch_users_not_found,
+                      id: "something unlikely and bogus")
 
     within("#admin_switch_users_form") do
       fill_in("admin_session_user", with: "unverified")
       click_commit
     end
-    assert_flash_text("This user is not verified yet!")
+    assert_flash_text(:runtime_admin_switch_users_not_verified)
 
     within("#admin_switch_users_form") do
       fill_in("admin_session_user", with: "mary")
@@ -111,7 +112,7 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
       fill_in("okay_ips[add_okay]", with: "not.an.ip")
       click_commit
     end
-    assert_flash_text("Invalid IP address")
+    assert_flash_text(:runtime_admin_invalid_ip, ip: "not.an.ip")
 
     # Test both IP list types with shared logic
     [

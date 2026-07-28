@@ -3867,7 +3867,10 @@
   runtime_added_id_to: "Successfully added [type] #[value] to [name]."
   runtime_added_name: Successfully added [type] '[value]'.
   runtime_added_to: Successfully added [type] to [name].
+  runtime_admin_invalid_ip: "Invalid IP address: \"[ip]\""
   runtime_admin_only: That operation is restricted to site admins.
+  runtime_admin_switch_users_not_found: "Couldn't find \"[id]\".  Play again?"
+  runtime_admin_switch_users_not_verified: This user is not verified yet!
   runtime_already_exists: "[Type] already exists: '[value]'"
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."

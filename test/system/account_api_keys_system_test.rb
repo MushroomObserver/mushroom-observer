@@ -32,7 +32,7 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
 
     # Should re-render the index
     assert_selector("body.api_keys__index")
-    assert_flash_success(:account_api_keys_create_success.t.as_displayed)
+    assert_flash_success(:account_api_keys_create_success)
 
     new_api_key = APIKey.last
     within("#account_api_keys_table") do
@@ -53,7 +53,7 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
 
     # Should re-render the index
     assert_selector("body.api_keys__index")
-    assert_flash_success(:account_api_keys_updated.t.as_displayed)
+    assert_flash_success(:account_api_keys_updated)
 
     within("#account_api_keys_table") do
       assert_selector("#api_key_#{new_api_key.id}")
@@ -65,7 +65,7 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
 
     # Should re-render the index
     assert_selector("body.api_keys__index")
-    assert_flash_success(:account_api_keys_removed_some.t(num: 1).as_displayed)
+    assert_flash_success(:account_api_keys_removed_some, num: 1)
 
     within("#account_api_keys_table") do
       refute_selector("#api_key_#{marys_api_key.id}")
@@ -83,8 +83,6 @@ class AccountAPIKeysSystemTest < ApplicationSystemTestCase
 
     sleep(5)
     assert_selector("body.api_keys__index")
-    assert_flash_success(
-      :account_api_keys_activated.t(notes: unverified.notes).as_displayed
-    )
+    assert_flash_success(:account_api_keys_activated, notes: unverified.notes)
   end
 end

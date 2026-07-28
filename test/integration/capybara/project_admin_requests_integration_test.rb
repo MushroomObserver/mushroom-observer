@@ -54,6 +54,6 @@ class ProjectAdminRequestsIntegrationTest < CapybaraIntegrationTestCase
 
     # Should re-render the form with error (body class is create, not new)
     assert_selector("#project_admin_request_form")
-    assert_flash_text(:runtime_missing.l(field: :request_message.l))
+    assert_flash_text(:runtime_missing, field: :request_message.l)
   end
 end

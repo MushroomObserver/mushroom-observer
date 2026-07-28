@@ -302,7 +302,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
 
     # UGH. The localized string can't be compared cause of a damn smart quote
     # :show_herbarium_request_sent.t
-    assert_flash_text("Request has been sent to admins")
+    assert_flash_text(:show_herbarium_request_sent)
     assert_selector("#title", text: nybg.format_name)
   end
 
