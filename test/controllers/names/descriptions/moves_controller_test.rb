@@ -116,7 +116,10 @@ module Names::Descriptions
         description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/Sorry, the name you tried to display/)
+      assert_flash(
+        [[:runtime_object_not_found, { id: "bogus", type: :name }],
+         [:runtime_invalid, { type: '"target"', value: "bogus" }]]
+      )
     end
 
     # if @delete_after & src_was_default
@@ -142,7 +145,7 @@ module Names::Descriptions
         description_move_or_merge: { target: coprinus_name.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_error(:runtime_description_private.t)
+      assert_flash(:runtime_description_private)
       assert_redirected_to(name_path(mary_desc.parent_id))
     end
 
