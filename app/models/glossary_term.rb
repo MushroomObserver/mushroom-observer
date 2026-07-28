@@ -87,16 +87,6 @@ class GlossaryTerm < AbstractModel
     name
   end
 
-  # Page heading + browser tab title — both just `name` (plain text).
-  # (Can't `alias` to AR column — accessor not defined at class-load.)
-  def page_title(_user = nil)
-    name
-  end
-
-  def document_title
-    name
-  end
-
   def unique_format_name(_user = nil)
     unique_text_name
   end
@@ -136,6 +126,6 @@ class GlossaryTerm < AbstractModel
   def must_have_description_or_image
     return if description.present? || thumb_image.present?
 
-    errors.add(:base, :glossary_error_description_or_image.t)
+    errors.add(:base, :glossary_error_description_or_image)
   end
 end

@@ -93,8 +93,8 @@ module Views::Controllers::Comments
     end
 
     def target_name_link
-      link_to(@comment.target.unique_format_name(@user).t,
-              @comment.target.show_link_args)
+      Link(type: :get, name: @comment.target.unique_format_name(@user).t,
+           target: @comment.target.show_link_args)
     rescue StandardError
       plain(:comment_list_deleted.t)
     end

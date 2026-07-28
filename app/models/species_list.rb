@@ -270,17 +270,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     title
   end
 
-  # Page heading + browser tab title — both plain `title`. (Can't
-  # `alias` to `title` — the AR column accessor isn't defined yet
-  # at class-load time.)
-  def page_title(_user = nil)
-    title
-  end
-
-  def document_title
-    title
-  end
-
   # Return formatted title with id appended to make unique.
   def unique_format_name(_user = nil)
     title = self.title
@@ -544,20 +533,20 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
     self.where = nil if where == ""
 
     if title.to_s.blank?
-      errors.add(:title, :validate_species_list_title_missing.t)
+      errors.add(:title, :validate_species_list_title_missing)
     elsif title.size > 100
-      errors.add(:title, :validate_species_list_title_too_long.t)
+      errors.add(:title, :validate_species_list_title_too_long)
     end
 
     if place_name.to_s.blank? && !location
-      errors.add(:place_name, :validate_species_list_where_missing.t)
+      errors.add(:place_name, :validate_species_list_where_missing)
     elsif where.to_s.size > 1024
-      errors.add(:place_name, :validate_species_list_where_too_long.t)
+      errors.add(:place_name, :validate_species_list_where_too_long)
     end
 
     return if user || current_user
 
-    errors.add(:user, :validate_species_list_user_missing.t)
+    errors.add(:user, :validate_species_list_user_missing)
   end
 
   def check_when

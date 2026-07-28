@@ -432,6 +432,7 @@ MushroomObserver::Application.routes.draw do
                      as: "send_commercial_inquiry_for")
     end
     put("/vote", to: "images/votes#update", as: "vote")
+    get("/vote", to: "images/votes#show", as: "vote_interface")
   end
   resources :images, only: [:show] do
     member do
@@ -636,6 +637,7 @@ MushroomObserver::Application.routes.draw do
                           as: "reuse_images_for")
       post("images/attach", to: "observations/images#attach",
                             as: "attach_image_to")
+      post("resync", to: "observations/inat_resyncs#create", as: "resync")
     end
 
     collection do

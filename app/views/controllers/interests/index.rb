@@ -48,7 +48,8 @@ module Views::Controllers::Interests
         if active
           plain(label)
         else
-          link_to(add_q_param(url)) { plain(label) }
+          Link(type: :get, name: label,
+               target: add_q_param(url)) { plain(label) }
         end
       end
     end
@@ -58,10 +59,23 @@ module Views::Controllers::Interests
       Table(rows, class: "table-striped",
                   show_headers: false) do |t|
         t.column("summary") do |item|
-          capture { strong { trusted_html(item.summary.t) } }
+          capture { strong { trusted_html(item_summary(item).t) } }
         end
         t.column("actions") { |item| actions_cell(item) }
       end
+    end
+
+    # Was Interest#summary -- moved here (#4901) since its only
+    # caller was this render. NameTracker#summary (the target.summary
+    # branch) stays on the model unchanged: it has a second, non-render
+    # caller (InterestsController#find_relevant_interests sorts by
+    # target.text_name, an alias of summary, for NameTracker targets).
+    def item_summary(item)
+      return item.target.summary if item.target_type == "NameTracker"
+
+      "#{item.state ? :watching.ti : :ignoring.ti} " \
+      "#{item.target_type.underscore.to_sym.l}: " \
+      "#{item.target ? item.target_format_name : "--"}"
     end
 
     def actions_cell(item)
@@ -76,18 +90,19 @@ module Views::Controllers::Interests
     end
 
     def render_destroy_link(item)
-      link_to(:destroy.ti,
-              set_interest_path(type: item.target_type,
-                                id: item.target_id, state: 0))
+      Link(type: :get, name: :destroy.ti,
+           target: set_interest_path(type: item.target_type,
+                                     id: item.target_id, state: 0))
     end
 
     def render_show_link(item)
       target = item.target
       label = :show_object.l(type: target.type_tag)
       if item.target_type == "NameTracker"
-        link_to(label, new_tracker_of_name_path(target.name_id))
+        Link(type: :get, name: label,
+             target: new_tracker_of_name_path(target.name_id))
       else
-        link_to(label, target.show_link_args)
+        Link(type: :get, name: label, target: target.show_link_args)
       end
     end
 
@@ -97,10 +112,10 @@ module Views::Controllers::Interests
               else
                 :list_interests_turn_on.l
               end
-      link_to(label,
-              set_interest_path(type: item.target_type,
-                                id: item.target_id,
-                                state: item.state ? -1 : 1))
+      Link(type: :get, name: label,
+           target: set_interest_path(type: item.target_type,
+                                     id: item.target_id,
+                                     state: item.state ? -1 : 1))
     end
 
     def render_pending_notice(item)

@@ -100,7 +100,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
 
     assert_includes(text, :collector.ti)
     assert_html(html,
-                "#observation_who a[href='#{routes.user_path(@obs.user_id)}']")
+                ".obs-who a[href='#{routes.user_path(@obs.user_id)}']")
     assert_not_includes(text, :entered_by.ti)
   end
 
@@ -123,7 +123,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     html = render(panel_with(@obs))
 
     assert_html(
-      html, "#observation_who a[href='#{routes.user_path(collector.id)}']"
+      html, ".obs-who a[href='#{routes.user_path(collector.id)}']"
     )
     assert_includes(who_text(html), :entered_by.ti)
   end
@@ -158,13 +158,13 @@ class Views::Controllers::Observations::Show::DetailsTest <
     html = render(panel_with(obs, viewer))
 
     # The "[" ... "]" send-question modal link rides the who line.
-    assert_html(html, "#observation_who a[data-controller='modal-toggle']")
+    assert_html(html, ".obs-who a[data-controller='modal-toggle']")
   end
 
   private
 
   def who_text(html)
-    Nokogiri::HTML.fragment(html).at_css("#observation_who").text
+    Nokogiri::HTML.fragment(html).at_css(".obs-who").text
   end
 
   def panel_with(obs, user = @user)

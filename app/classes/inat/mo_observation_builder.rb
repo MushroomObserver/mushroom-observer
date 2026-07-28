@@ -65,7 +65,10 @@ class Inat
         specimen: inat_obs.specimen?,
         text_name: lead_name.text_name,
         notes: inat_obs.notes,
-        inat_import_id: @inat_import&.id }.merge(collector_attrs)
+        inat_import_id: @inat_import&.id,
+        # A fresh import is a clean reflection by construction, so mark it
+        # read-only now (#4214). The #4585 engine stamps the backlog later.
+        reflected_at: Time.zone.now }.merge(collector_attrs)
     end
 
     # Link the collector to an MO user when the iNat collector (a custom
@@ -236,12 +239,28 @@ class Inat
                  name: name,
                  rank: rank }
       api = API2.execute(params)
-      if api.errors.any?
-        raise("Failed to create name #{name.inspect}: " \
-              "#{api.errors.join(", ")}")
-      end
+      return api.results.first unless api.errors.any?
+      return name_with_trusted_rank(name, rank) if rank_parse_error?(api)
 
-      api.results.first
+      raise("Failed to create name #{name.inspect}: " \
+            "#{api.errors.join(", ")}")
+    end
+
+    def rank_parse_error?(api)
+      api.errors.any? do |e|
+        e.is_a?(API2::NameDoesntParse) || e.is_a?(API2::NameWrongForRank)
+      end
+    end
+
+    # iNat's declared rank is authoritative even when the name string
+    # conflicts with MO's rank-guessing heuristic (e.g. suffix collisions
+    # like "-ineae" matching Suborder before Tribe, as with
+    # "Leucocoprineae"). This bypasses only this internal fallback; the
+    # public Name-creation API's parse check is unchanged for other
+    # callers.
+    def name_with_trusted_rank(name, rank)
+      Name.create_with_trusted_rank(user, name, rank) ||
+        raise("Failed to create name #{name.inspect} at rank #{rank}")
     end
 
     def user_api_key

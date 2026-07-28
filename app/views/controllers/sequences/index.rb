@@ -34,10 +34,13 @@ module Views::Controllers::Sequences
     end
 
     def render_top_links(seq)
-      link_to(seq.unique_format_name, seq.show_link_args)
+      Link(type: :get, name: seq.unique_format_name,
+           target: seq.show_link_args)
       br
-      link_to(seq.observation.show_link_args) do
-        trusted_html(viewer_aware_unique_format_name(seq.observation).t)
+      obs_name = viewer_aware_unique_format_name(seq.observation).t
+      Link(type: :get, name: obs_name,
+           target: seq.observation.show_link_args) do
+        trusted_html(obs_name)
       end
       br
     end

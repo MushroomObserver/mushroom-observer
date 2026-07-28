@@ -124,14 +124,6 @@ class Sequence < AbstractModel
     locus.truncate(locus_width, separator: " ")
   end
 
-  # Page heading + browser tab title. The locus is shown in the
-  # page body ("Locus: …") so the title identifies the sequence
-  # by its observation instead.
-  def page_title
-    :show_sequence_title.l(id: observation_id)
-  end
-  alias document_title page_title
-
   # used in views and by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name(_user = nil)
     format_name + " (Sequence #{id || "?"})"
@@ -274,7 +266,7 @@ class Sequence < AbstractModel
   def bases_or_deposit
     return if bases? || deposit?
 
-    errors.add(:bases, :validate_sequence_bases_or_archive.t)
+    errors.add(:bases, :validate_sequence_bases_or_archive)
   end
 
   # Valid deposit must have both archive && accession or neither.
@@ -282,7 +274,7 @@ class Sequence < AbstractModel
   def deposit_complete_or_absent
     return if archive.present? == accession.present?
 
-    errors.add(:archive, :validate_sequence_deposit_complete.t)
+    errors.add(:archive, :validate_sequence_deposit_complete)
   end
 
   # Valid Sequence should have unique bases
@@ -292,7 +284,7 @@ class Sequence < AbstractModel
       other_sequence.bases_nucleotides == bases_nucleotides
     end
 
-    errors.add(:bases, :validate_sequence_bases_unique.t)
+    errors.add(:bases, :validate_sequence_bases_unique)
   end
 
   # array of other Sequences in same Observation
@@ -307,11 +299,11 @@ class Sequence < AbstractModel
   # full url in WebSequenceArchive::blast_format_help
   def bases_blastable
     if blank_line_in_middle?
-      errors.add(:bases, :validate_sequence_bases_blank_lines.t)
+      errors.add(:bases, :validate_sequence_bases_blank_lines)
     end
     return unless bad_code_in_data?
 
-    errors.add(:bases, :validate_sequence_bases_bad_codes.t)
+    errors.add(:bases, :validate_sequence_bases_bad_codes)
   end
 
   def blank_line_in_middle?
@@ -332,6 +324,6 @@ class Sequence < AbstractModel
       sequence.accession == accession
     end
 
-    errors.add(:bases, :validate_sequence_accession_unique.t)
+    errors.add(:bases, :validate_sequence_accession_unique)
   end
 end

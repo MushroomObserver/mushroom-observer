@@ -2085,29 +2085,76 @@ class ObservationTest < UnitTestCase
     end
   end
 
+  # source_credit/external_credit_link were deleted (#4868) -- the
+  # tag/args they used to build now live directly at the render call
+  # sites (Matrix::Box#render_source_credit_inner,
+  # Views::Controllers::Observations::Show#render_source_credit).
+  # This test covers what's left on the model: source, import_link,
+  # source_noteworthy?. Rendered-text coverage for the moved logic is
+  # in test/components/matrix/box_test.rb
+  # (test_enum_source_credit_renders_credit_text,
+  # test_external_source_credit_renders_new_tab_link).
   def test_source_credit
     obs = observations(:coprinus_comatus_obs)
     assert_nil(obs.source)
-    assert_nil(obs.source_credit)
+    assert_not(obs.source_noteworthy?)
 
     obs = observations(:detailed_unknown_obs)
     assert_equal("mo_website", obs.source)
-    assert_equal(:source_credit_mo_website, obs.source_credit)
 
     obs = observations(:amateur_obs)
     assert_equal("mo_iphone_app", obs.source)
-    assert_equal(:source_credit_mo_iphone_app, obs.source_credit)
+    assert(obs.source_noteworthy?)
 
     obs = observations(:imported_inat_obs)
     assert_nil(obs.source)
     link = obs.import_link
     assert_equal(external_links(:imported_inat_obs_inat_link), link)
-    assert_match(/"Imported from iNaturalist":/, obs.source_credit,
-                 "Whole phrase should be the link text")
-    assert_match(%r{www\.inaturalist\.org/observations/#{link.external_id}},
-                 obs.source_credit,
-                 "Link should target the per-observation iNat URL")
     assert(obs.source_noteworthy?)
+  end
+
+  # reflection? is driven solely by reflected_at (#4214) — an import
+  # link alone doesn't lock an obs, so the existing editable backlog
+  # stays editable until the resolution engine stamps it.
+  def test_reflection_predicate
+    obs = observations(:imported_inat_obs)
+    assert_not(obs.reflection?,
+               "an import without reflected_at is still editable")
+
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert(obs.reflection?, "reflected_at present marks a read-only reflection")
+
+    obs.update_column(:reflected_at, nil)
+    assert_not(obs.reflection?)
+  end
+
+  # Sync is occurrence-wide (#4215): sync_reflections is the set of
+  # read-only reflections in the observation's occurrence (an
+  # observation with no occurrence is an occurrence of one), and
+  # syncable? gates the Sync button on every member's page.
+  def test_sync_reflections_and_syncable
+    obs = observations(:imported_inat_obs)
+    assert_empty(obs.sync_reflections,
+                 "an editable import has nothing to sync")
+    assert_not(obs.syncable?)
+
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert_equal([obs], obs.sync_reflections,
+                 "a standalone reflection is an occurrence of one")
+    assert(obs.syncable?)
+
+    # Grouped into an occurrence, every member sees the reflections.
+    primary = observations(:minimal_unknown_obs)
+    [primary, obs].each { |o| o.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user,
+                             primary_observation: primary)
+    primary.update!(occurrence: occ)
+    obs.update!(occurrence: occ)
+
+    assert_equal([obs], primary.reload.sync_reflections,
+                 "a non-reflection member sees the occurrence's reflections")
+    assert(primary.syncable?,
+           "every member of an occurrence with a reflection is syncable")
   end
 
   # ----- Coverage gap tests for app/models/observation.rb -----

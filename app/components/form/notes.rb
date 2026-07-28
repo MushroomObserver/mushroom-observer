@@ -184,10 +184,10 @@ class Components::Form::Notes < Components::Base
   def render_value_button(action, label, value, active:)
     button_aria = "#{label}: #{value.squish.truncate(100)}"
     div(class: "d-flex align-items-center mb-1") do
-      button(type: "button", class: button_class(active),
+      Button(name: label, variant: :default, class: button_class(active),
              aria: { label: button_aria },
              data: { notes_action: action, notes_value: value,
-                     action: "notes-adopt#choose" }) { label }
+                     action: "notes-adopt#choose" })
       span(class: "ml-2", style: VALUE_PREVIEW_STYLE) do
         shared_value_preview(value)
       end
@@ -208,14 +208,12 @@ class Components::Form::Notes < Components::Base
   end
 
   def action_button(action, label, active:)
-    button(type: "button", class: button_class(active),
-           data: { notes_action: action, action: "notes-adopt#choose" }) do
-      label
-    end
+    Button(name: label, variant: :default, class: button_class(active),
+           data: { notes_action: action, action: "notes-adopt#choose" })
   end
 
   def button_class(active)
-    class_names("btn btn-default mr-2 mb-1", "active" => active)
+    class_names("mr-2 mb-1", "active" => active)
   end
 
   def shared_value_preview(value)

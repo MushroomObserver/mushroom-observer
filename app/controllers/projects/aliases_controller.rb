@@ -59,24 +59,38 @@ module Projects
 
     def create
       @project_alias = ProjectAlias.new(project_alias_params)
-      err = @project_alias.verify_target(params[:project_alias][:term])
+      err = resolve_verify_target_error(
+        @project_alias.verify_target(params[:project_alias][:term])
+      )
       respond_to do |format|
         if err.nil? && @project_alias.save
-          format.turbo_stream do
-            render_project_alias_target_change(@project_alias.project)
-          end
-          format.html do
-            project_aliases_redirect(@project_alias.project_id)
-          end
+          render_project_alias_created(format)
         else
           flash_and_reload(format, :new, error: err)
         end
       end
     end
 
+    def render_project_alias_created(format)
+      format.turbo_stream do
+        render_project_alias_target_change(@project_alias.project)
+      end
+      format.html { project_aliases_redirect(@project_alias.project_id) }
+    end
+
+    # ProjectAlias#verify_target returns an unresolved [tag, args]
+    # pair (or nil) so a render-facing concern doesn't live on the
+    # model -- resolve it here before it gets flashed.
+    def resolve_verify_target_error(tag_and_args)
+      return nil unless tag_and_args
+
+      tag, args = tag_and_args
+      tag.t(**args)
+    end
+
     def flash_and_reload(format, action, error: false)
       flash_error(error) if error
-      @project_alias.errors.each { |err| flash_error(err.full_message) }
+      flash_object_errors(@project_alias)
       format.turbo_stream { reload_modal_project_alias_form }
       format.html { send(:"render_alias_#{action}") }
     end

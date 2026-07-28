@@ -10,8 +10,8 @@ module Views::Controllers::Articles
 
       def view_template
         div do
-          link_to(@article.title.t, article_path(@article),
-                  class: "text-larger")
+          Link(type: :get, name: @article.title.t,
+               target: article_path(@article), class: "text-larger")
         end
         div { render_byline }
         trusted_html(truncate(strip_tags(@article.body), length: 80).tpl)

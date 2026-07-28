@@ -21,7 +21,7 @@ module Views::Controllers::Descriptions
     private
 
     def render_license_badge
-      render(Components::Image::LicenseBadge.new(license: @description.license))
+      LicenseBadge(license: @description.license)
     end
   end
 end

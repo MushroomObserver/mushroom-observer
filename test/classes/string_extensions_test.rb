@@ -99,4 +99,21 @@ class StringExtensionsTest < UnitTestCase
     assert_false(str.valid_encoding?)
     assert_true(str.fix_utf8.valid_encoding?)
   end
+
+  def test_small_author
+    str = "<b><i>Abeliella xanthoconium</i></b> Lehman-Haupt nom. prov."
+    expected = "<b><i>Abeliella xanthoconium</i></b>" \
+               '<small class="text-nowrap"> Lehman-Haupt nom. prov.</small>'
+    assert_equal(expected, str.dup.small_author)
+  end
+
+  def test_small_author_no_matching_tag
+    str = "Plain text with no formatting"
+    assert_equal(str, str.dup.small_author)
+  end
+
+  def test_small_author_tag_at_end_with_nothing_after
+    str = "<b><i>Abeliella xanthoconium</i></b>"
+    assert_equal(str, str.dup.small_author)
+  end
 end

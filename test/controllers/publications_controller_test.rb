@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require("test_helper")
+require("rexml/document")
 
 class PublicationsControllerTest < FunctionalTestCase
   def test_should_get_index
@@ -16,7 +17,16 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_not_nil(assigns(:publications))
     assert_link_in_html("Edit", action: :edit, id: pub_id)
-    assert_link_in_html("Destroy", action: :destroy, id: pub_id)
+    # `Button(type: :delete, ...)` renders a POST form (with a hidden
+    # `_method=delete` field), not an `<a>` link, so this checks the
+    # form/button shape rather than `assert_link_in_html`.
+    assert_select(
+      "form[action='#{publication_path(pub_id)}'][method='post']"
+    )
+    assert_select(
+      "form[action='#{publication_path(pub_id)}'] " \
+      "input[type='hidden'][name='_method'][value='delete']"
+    )
   end
 
   # Covers the `link_cell` branch in
@@ -161,6 +171,9 @@ class PublicationsControllerTest < FunctionalTestCase
       post(:create, params: { publication: { full: "" } }, format: :xml)
     end
     assert_response(:unprocessable_content)
+    doc = REXML::Document.new(@response.body)
+    assert_equal(:validate_publication_ref_missing.t,
+                 doc.get_text("//errors/error").to_s)
   end
 
   def test_should_not_update_publication_without_permission_xml
@@ -177,6 +190,9 @@ class PublicationsControllerTest < FunctionalTestCase
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "" } }, format: :xml)
     assert_response(:unprocessable_content)
+    doc = REXML::Document.new(@response.body)
+    assert_equal(:validate_publication_ref_missing.t,
+                 doc.get_text("//errors/error").to_s)
   end
 
   def test_should_not_destroy_publication_without_permission_xml

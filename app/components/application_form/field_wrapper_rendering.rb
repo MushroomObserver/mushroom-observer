@@ -32,6 +32,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       classes = base
       classes += " form-inline" if inline && base == "form-group"
       classes += " #{wrap_class}" if wrap_class.present?
+      # Help renders as a sibling right after this div, not inside it
+      # (see below) -- .help-block's own top margin already spaces it
+      # from the field, so drop this div's own bottom margin to avoid
+      # doubling up.
+      classes += " mb-0" if help_present?
       classes
     end
 
@@ -43,14 +48,24 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
+    # Only plain help renders an always-visible .help-block sibling
+    # right after this div (what mb-0, above, is compensating for).
+    # help_collapse: true renders a Collapsible that's hidden by
+    # default -- dropping this div's own bottom margin there would
+    # shrink the gap to whatever field comes next, with no visible
+    # help-block to justify it.
+    def help_present?
+      respond_to?(:help_slot) && help_slot && !wrapper_options[:help_collapse]
+    end
+
     def render_with_wrapper
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
         render(prepend_slot) if prepend_present?
         yield
-        render_help_after_field
         render(append_slot) if append_present?
       end
+      render_help_after_field
     end
   end
 end

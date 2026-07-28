@@ -17,7 +17,8 @@ module Views::Controllers::Observations
     end
 
     def view_template
-      link_to(name_path(id: @name.id), **@attributes) do
+      Link(type: :get, name: @name.text_name,
+           target: name_path(id: @name.id), **@attributes) do
         trusted_html(@name.display_name_without_authors(@user).t)
       end
     end

@@ -21,11 +21,30 @@ class Components::Matrix::Box
     def render_footer_detail(detail)
       return if detail.blank?
 
-      if detail.is_a?(User)
-        render_user_detail(detail)
-      else
-        div(class: "rss-detail small") { detail }
+      case detail
+      when User then render_user_detail(detail)
+      when Array then render_rss_detail(detail)
       end
+    end
+
+    # `detail` is an [tag, args] pair from RenderData#rss_log_detail_tag,
+    # unresolved until now.
+    def render_rss_detail(detail)
+      tag, args = detail
+      return unless tag
+
+      div(class: "rss-detail small") do
+        trusted_html(resolve_rss_detail(tag, args))
+      end
+    end
+
+    # RssLog#detail used to wrap this same resolution in a dev/
+    # production-aware rescue before this logic moved to the view
+    # layer; keep the same protection here.
+    def resolve_rss_detail(tag, args)
+      tag.t(args || {})
+    rescue StandardError => e
+      Rails.env.production? ? raise(e) : ""
     end
 
     def render_footer_time(time)
@@ -46,7 +65,8 @@ class Components::Matrix::Box
         br
         plain("#{:list_users_contribution.l}: #{user.contribution}")
         br
-        link_to(:observations.ti, observations_path(by_user: user.id))
+        Link(type: :get, name: :observations.ti,
+             target: observations_path(by_user: user.id))
       end
     end
 
@@ -56,11 +76,12 @@ class Components::Matrix::Box
       panel.with_footer(
         classes: "panel-active text-center position-relative"
       ) do
-        render(Components::Image::MarkAsReviewedToggle.new(
-                 observation_view: @observation_view,
-                 selector: "box_reviewed",
-                 label_class: "stretched-link"
-               ))
+        ObservationFragment(
+          type: :mark_as_reviewed_toggle,
+          observation_view: @observation_view,
+          selector: "box_reviewed",
+          label_class: "stretched-link"
+        )
       end
     end
 

@@ -63,7 +63,8 @@ module Views::Controllers::Locations
           plain(country)
         else
           str = count ? "#{country}: #{count}" : country
-          link_to(str, locations_path(country: country))
+          Link(type: :get, name: str,
+               target: locations_path(country: country))
         end
         br
       end

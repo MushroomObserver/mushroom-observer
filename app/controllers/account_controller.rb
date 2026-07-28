@@ -207,7 +207,7 @@ class AccountController < ApplicationController
   def make_sure_password_present!
     return if @new_user.password.present?
 
-    @new_user.errors.add(:password, :validate_user_password_missing.t)
+    @new_user.errors.add(:password, :validate_user_password_missing)
   end
 
   # Same with this.  When I moved this to User validates, all hell broke
@@ -217,9 +217,9 @@ class AccountController < ApplicationController
     if @new_user.email.blank?
       # Already complained about this in User validates.
     elsif @new_user.email_confirmation.blank?
-      @new_user.errors.add(:email, :validate_user_email_confirmation_missing.t)
+      @new_user.errors.add(:email, :validate_user_email_confirmation_missing)
     elsif @new_user.email != @new_user.email_confirmation
-      @new_user.errors.add(:email, :validate_user_email_mismatch.t)
+      @new_user.errors.add(:email, :validate_user_email_mismatch)
     end
   end
 end

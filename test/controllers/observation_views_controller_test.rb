@@ -81,9 +81,17 @@ class ObservationViewsControllerTest < FunctionalTestCase
     assert_equal(false, ov.reviewed)
   end
 
+  # `minimal_unknown_obs` has no images -- `lightbox_caption_stream`
+  # deliberately skips the whole lightbox stream for imageless
+  # observations (there's no `.theater-btn`/caption element anywhere
+  # in the DOM to target; `render_lightbox_link` already no-ops
+  # without an image on the normal show/matrix-box render path
+  # either). Use an obs with a thumb image so the caption-rendering
+  # path under test actually runs.
   def test_update_turbo_stream_renders_caption_components
     login("mary")
-    obs = observations(:minimal_unknown_obs)
+    obs = observations(:coprinus_comatus_obs)
+    assert_not_nil(obs.thumb_image, "fixture needs a thumb image")
 
     put(:update,
         params: { id: obs.id, observation_view: { reviewed: "1" } },
@@ -96,8 +104,8 @@ class ObservationViewsControllerTest < FunctionalTestCase
                   "[target='caption_reviewed_toggle_#{obs.id}']")
     assert_select("turbo-stream[action='replace']" \
                   "[target='box_reviewed_toggle_#{obs.id}']")
-    assert_select("turbo-stream[action='update_lightbox_caption']" \
-                  "[obs-id='#{obs.id}']")
+    assert_select("turbo-stream[action='update']" \
+                  "[target='lightbox_caption_#{obs.thumb_image.id}']")
 
     # Verify the toggle checkboxes are rendered in the turbo streams
     assert_select("input[type='checkbox'][id='caption_reviewed_#{obs.id}']")
@@ -105,5 +113,35 @@ class ObservationViewsControllerTest < FunctionalTestCase
 
     # Verify lightbox caption is rendered with the identify UI
     assert_select("div#observation_identify_#{obs.id}")
+  end
+
+  # Regression: `lightbox_caption_stream` must pass the observation's
+  # thumb image through to `ImageFragment(type: :lightbox_caption,
+  # ...)` -- without it, `@image` is nil inside the refreshed caption,
+  # which breaks the original/EXIF links (empty `/images//original`)
+  # and silently drops the vote section (gated on `@image`).
+  def test_update_turbo_stream_lightbox_caption_keeps_image_and_votes
+    login("mary")
+    obs = observations(:coprinus_comatus_obs)
+    assert_not_nil(obs.thumb_image, "fixture needs a thumb image")
+
+    put(:update,
+        params: { id: obs.id, observation_view: { reviewed: "1" } },
+        format: :turbo_stream)
+
+    assert_response(:success)
+    assert_select(
+      "turbo-stream[action='update']" \
+      "[target='lightbox_caption_#{obs.thumb_image.id}'] " \
+      "a[href='/images/#{obs.thumb_image.id}/original']"
+    )
+    # The vote section is a lazy-loading Turbo Frame now, not rendered
+    # inline (#4895) -- assert the frame shell targets the right image.
+    assert_select(
+      "turbo-stream[action='update']" \
+      "[target='lightbox_caption_#{obs.thumb_image.id}'] " \
+      "turbo-frame#lightbox_image_vote_#{obs.thumb_image.id}" \
+      "[src*='/images/#{obs.thumb_image.id}/vote']"
+    )
   end
 end

@@ -952,18 +952,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     name.observation_name(user)
   end
 
-  # Plain-text title for the browser tab `<title>`. `text_name` is
-  # the denormalized binomial-only column — no author, no id, no
-  # markup. The title helper prepends "OBSERVATION <id>:" so we
-  # don't need those here. (The visible page heading is built by
-  # `header/title_helper#page_title_for` via
-  # `Observations::ConsensusNameLink` — wraps the consensus name
-  # in a link, which is view-layer work that can't live cleanly on
-  # the model.)
-  def document_title
-    text_name
-  end
-
   # Textile-marked-up name with id to make it unique, never nil.
   def unique_format_name(user = nil)
     string_with_id(name.observation_name(user))
@@ -1005,7 +993,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def add_image(img)
     unless images.include?(img)
       images << img
-      self.thumb_image = img unless thumb_image
+      # Check the FK, not the association: reading `thumb_image` after
+      # the form assigned a new thumb_image_id would lazy-load, which
+      # strict_loading (edit_includes) forbids.
+      self.thumb_image = img unless thumb_image_id
       self.updated_at = Time.zone.now
       track_change(:added_image)
       save
@@ -1100,22 +1091,6 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     mo_api: 4
   }
 
-  # Message to use to credit the source of this observation.
-  # External imports take precedence over the entry agent: an obs
-  # synced from iNat surfaces as "Imported from iNaturalist" even if
-  # the user originally created it via mo_website. Returns nil only
-  # when neither an import_link nor a source enum value is present.
-  # Intended for use with .tpl to render as HTML:
-  #   <%= observation.source_credit.tpl %>
-  def source_credit
-    if (link = import_link)
-      :source_credit_external.l(name: link.external_site.name,
-                                url: link.link_url)
-    elsif source.present?
-      :"source_credit_#{source}"
-    end
-  end
-
   # The ExternalLink (if any) recording where this observation was imported
   # from — the external-source axis of #4208 (#4299). At most one per obs.
   # Uses the loaded `external_links` association when present (matrix box,
@@ -1128,19 +1103,35 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # Structured form of source_credit for external imports — returns
-  # { text:, url: } so renderers can build the link element with
-  # whatever attributes they need (e.g. target="_blank" for off-site).
-  # Returns nil for non-imported observations; callers fall back to
-  # source_credit (textile / enum) in that case.
-  def external_credit_link
-    return nil unless (link = import_link)
+  # True when this observation is a read-only reflection of an imported
+  # source (#4214): its scalar core (date/location/GPS/notes) mirrors the
+  # source and is refreshed from it by resync (#4215), so MO-side edits to
+  # those fields are blocked. The name is deliberately not in that list --
+  # iNat's identifications are mirrored at import time only, and tracking
+  # them afterwards waits on the identification-sync slice of #4215.
+  # `reflected_at` is stamped at import time for new imports (clean by
+  # construction) and by the #4585 resolution engine for the verified
+  # backlog; NULL means editable (not a reflection).
+  def reflection?
+    reflected_at.present?
+  end
 
-    {
-      text: :source_credit_external_text.l(name: link.external_site.name),
-      url: link.link_url,
-      external_id: link.external_id
-    }
+  # All read-only reflections in this observation's occurrence -- the
+  # set an occurrence-wide resync (#4215) refreshes. Sync is an
+  # occurrence-level event: users want every mirrored record current at
+  # once, not per-record control. An observation with no occurrence is
+  # treated as an occurrence of one.
+  def sync_reflections
+    members = occurrence ? occurrence.observations : [self]
+    members.select(&:reflection?)
+  end
+
+  # Whether this observation's page offers a Sync button. Any logged-in
+  # user may trigger a sync -- it applies no user input, converging on
+  # source-canonical data, the same refresh the scheduled batch performs
+  # with no user at all (#4215).
+  def syncable?
+    sync_reflections.any?
   end
 
   # Do we want to prominently advertise the source of this observation?
@@ -1470,9 +1461,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       Date.parse(@when_str)
     rescue ArgumentError
       if /^\d{4}-\d{1,2}-\d{1,2}$/.match?(@when_str)
-        errors.add(:when_str, :runtime_date_invalid.t)
+        errors.add(:when_str, :runtime_date_invalid)
       else
-        errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
+        errors.add(:when_str, :runtime_date_should_be_yyyymmdd)
       end
     end
   end
@@ -1484,16 +1475,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     if where.to_s.blank? && !location_id
       self.location = Location.unknown
-      # errors.add(:where, :validate_observation_where_missing.t)
+      # errors.add(:where, :validate_observation_where_missing)
     elsif where.to_s.size > 1024
-      errors.add(:where, :validate_observation_where_too_long.t)
+      errors.add(:where, :validate_observation_where_too_long)
     end
   end
 
   def check_user
     return if user || @current_user
 
-    errors.add(:user, :validate_observation_user_missing.t)
+    errors.add(:user, :validate_observation_user_missing)
   end
 
   def check_coordinates
@@ -1505,14 +1496,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def check_latitude
     if lat.blank? && lng.present? ||
        lat.present? && !Location.parse_latitude(lat)
-      errors.add(:lat, :runtime_lat_long_error.t)
+      errors.add(:lat, :runtime_lat_long_error)
     end
   end
 
   def check_longitude
     if lat.present? && lng.blank? ||
        lng.present? && !Location.parse_longitude(lng)
-      errors.add(:lng, :runtime_lat_long_error.t)
+      errors.add(:lng, :runtime_lat_long_error)
     end
   end
 
@@ -1521,7 +1512,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # As of July 5, 2020 this statement appears to be unreachable
     # because .to_i returns 0 for unparsable strings.
-    errors.add(:alt, :runtime_altitude_error.t)
+    errors.add(:alt, :runtime_altitude_error)
   end
 
   def check_hidden

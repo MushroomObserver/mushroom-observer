@@ -1,3 +1,5 @@
+@use "sass:color";
+
 .thumbnail-container {
   background-color: rgba(0,0,0, 0.33);
   // background-color: rgba(0,0,0, 0.12); // for matrix_box_carousels
@@ -44,6 +46,10 @@ svg.placeholder {
 .theater-btn {
   @extend .top-right, .text-center, .mr-2, .mt-2;
   padding: 0.125em;
+  // `.theater-btn` is a `div` now, not an `a` (#4894 -- an `a` can't
+  // legally contain the caption's interactive content nested inside
+  // it), so the pointer cursor needs to be explicit.
+  cursor: pointer;
 
   &:hover {
     color: rgba(white, 0.75);
@@ -57,8 +63,14 @@ svg.placeholder {
   }
 }
 
-.vote-section {
-  @extend .ab-bottom, .text-center;
+// Vote-link hover/focus color and the user's own already-cast vote
+// (`.image-vote`, plain text) share this -- both need to read on the
+// vote section's dark background while still corresponding to the
+// vote-meter's `$link-color` fill.
+$vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
+
+.vote-section,
+.vote-section-lightbox {
   padding: 0.5em 0.25em;
 
   a,
@@ -68,11 +80,34 @@ svg.placeholder {
 
     &:hover,
     &:focus {
-      color: lighten($link-color, 21%) !important;
+      color: $vote-link-lightened-color !important;
       text-decoration: none;
     }
   }
+
+  .image-vote {
+    color: $vote-link-lightened-color;
+  }
 }
+
+.vote-section {
+  @extend .ab-bottom, .text-center;
+}
+
+// `context: :lightbox` (`Components::ImageFragment::VoteInterface`) --
+// same dark background/link treatment as `.vote-section`, minus the
+// absolute positioning: it's laid out inline in the caption, not
+// overlaying a thumbnail, and always visible rather than
+// hover-revealed.
+.vote-section-lightbox {
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  text-align: center;
+}
+
+// `.vote-section-inline` (a not-yet-designed third `VoteInterface`
+// context -- a plain inline caller that isn't the lightbox, e.g. the
+// image show page) intentionally has no styling here yet.
 
 .matrix-box {
   .vote-buttons {
@@ -101,11 +136,13 @@ svg.placeholder {
   max-width: 200px;
   height: 7px;
   margin-bottom: 0;
+  background-color: white;
 
   .progress-bar {
     font-size: 12px;
     line-height: 5px;
     color: #FFF;
+    background-color: $link-color;
   }
 }
 

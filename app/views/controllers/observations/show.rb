@@ -43,6 +43,11 @@ module Views::Controllers::Observations
 
     def view_template
       add_chrome
+      # Any member of an occurrence with a reflection can get a resync
+      # broadcast (#4215) -- the aggregate flash goes to every member's
+      # channel. See Inat::ObservationResyncer#broadcast.
+      turbo_stream_from([@observation, :external_link_sync]) if
+        @observation.syncable?
       render_main_row
       render_secondary_row
       render_footer if @user
@@ -148,8 +153,11 @@ module Views::Controllers::Observations
       @observation.source_noteworthy? && !@observation.import_link
     end
 
+    # show_source_credit? (above) guarantees no import_link, so
+    # @observation.source is guaranteed present here (source_noteworthy?
+    # requires import_link.present? || source.present?).
     def render_source_credit
-      trusted_html(@observation.source_credit.tpl)
+      trusted_html(:"source_credit_#{@observation.source}".l.tpl)
     end
 
     def render_footer

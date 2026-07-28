@@ -65,12 +65,15 @@ class ImageGalleryTest < ComponentTestCase
   end
 
   # Carousel items embed `Components::ImageGallery::Item`, which inherits from
-  # `BaseImage` and dispatches to `Components::Image::VoteInterface` via
-  # `render_image_vote_section`. Asserts the dispatch actually emits
+  # `BaseImage` and dispatches to `Components::ImageFragment::VoteInterface`
+  # via `render_image_vote_section`. Asserts the dispatch actually emits
   # the vote section markers — a previous version of the dispatch
-  # `render(Components::Image::VoteInterface.new(...))` was malformed
-  # Phlex and silently no-op'd
-  # so the lightbox / carousel never showed votes.
+  # `render(Components::ImageFragment::VoteInterface.new(...))` was
+  # malformed Phlex and silently no-op'd so the lightbox / carousel never
+  # showed votes.
+  # #4895: the vote section is a lazy-loading Turbo Frame now (not
+  # rendered inline), so Matrix::Box's fragment cache (no user in its
+  # key) can't bake one viewer's vote state into shared HTML.
   def test_carousel_item_renders_vote_section
     image = @images.first
     component = Components::ImageGallery.new(
@@ -78,9 +81,9 @@ class ImageGalleryTest < ComponentTestCase
     )
     html = render(component)
 
-    assert_html(html, ".carousel-item .vote-section#image_vote_#{image.id}")
-    assert_html(html, ".carousel-item .vote-meter.progress")
-    assert_html(html, ".carousel-item .image-vote-links")
+    assert_html(html,
+                ".carousel-item turbo-frame#image_vote_#{image.id}" \
+                "[loading='lazy']")
   end
 
   def test_renders_single_image_without_controls
@@ -283,8 +286,9 @@ class ImageGalleryTest < ComponentTestCase
 
   # Regression: the visible `.carousel-caption` overlay must NEVER
   # contain image copyright or notes. Those belong on the lightbox
-  # caption (`data-sub-html` on the lightbox link, built by
-  # `Components::Image::Lightbox::Caption`). Image *original
+  # caption (the hidden `.lightbox-caption` element nested in the
+  # theater-btn, built by `Components::ImageFragment::LightboxCaption`
+  # -- see #4894). Image *original
   # filename* IS allowed in the carousel-caption (inside the
   # `.image-info.d-none.d-sm-block` wrapper, hidden on xs and
   # visible from sm+) when the owner's `keep_filenames` opt-in
@@ -313,11 +317,11 @@ class ImageGalleryTest < ComponentTestCase
                     user: @user, images: [leak_image], object: leak_obs
                   ))
 
-    # Vote bar IS in the carousel-caption.
-    assert_html(html, ".carousel-caption .vote-section")
+    # Vote bar IS in the carousel-caption (a lazy Turbo Frame -- #4895).
+    assert_html(html, ".carousel-caption turbo-frame")
 
     # Copyright + notes are NOT in the carousel-caption. (They are
-    # in the lightbox `data-sub-html` instead.)
+    # in the lightbox's hidden `.lightbox-caption` element instead.)
     assert_no_html(html, ".carousel-caption .image-copyright")
     assert_no_html(html, ".carousel-caption .image-notes")
   end

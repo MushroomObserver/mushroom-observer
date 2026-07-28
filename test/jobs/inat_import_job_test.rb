@@ -86,6 +86,12 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(@user.unique_text_name, obs.collector)
     assert_equal(@user.id, obs.collector_user_id)
 
+    # New imports are read-only reflections (#4214): reflected_at is
+    # stamped at creation, so scalar-core edits are blocked until the
+    # value is changed at the source and resynced (#4215).
+    assert_not_nil(obs.reflected_at, "Import should stamp reflected_at")
+    assert(obs.reflection?, "A new import should be a read-only reflection")
+
     assert_equal(before_total_imported_count + 1,
                  @inat_import.reload.total_imported_count,
                  "Failed to update user's inat_import count")
@@ -532,6 +538,26 @@ class InatImportJobTest < ActiveJob::TestCase
     standard_assertions(obs: obs, name: name,
                         expected_vote: Vote::MIN_POS_VOTE)
     assert(obs.sequences.none?)
+  end
+
+  # Use iNat's rank if it conflicts with MO's rank-guessing heuristic.
+  # MO's rank-guessing suffix-based heuristic can give an incorrect rank
+  # for Names ending in `eae`.
+  def test_import_job_ambiguous_rank_suffix
+    create_ivars_from_filename("leucocoprineae")
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    name = Name.find_by(text_name: "Leucocoprineae", rank: "Tribe")
+    assert_not_nil(
+      name, "Failed to create Name at iNat's declared rank Tribe"
+    )
+    assert_equal(name, obs.name, "Wrong consensus id")
   end
 
   # Prove that Namings, Votes, Identification are correct
@@ -1438,7 +1464,7 @@ class InatImportJobTest < ActiveJob::TestCase
     warnings = []
     stubbed_error = lambda do |*|
       link = ExternalLink.new
-      link.errors.add(:base, "stubbed failure")
+      link.errors.add(:base, :invalid)
       raise(ActiveRecord::RecordInvalid.new(link))
     end
     Rails.logger.stub(:warn, ->(msg) { warnings << msg }) do

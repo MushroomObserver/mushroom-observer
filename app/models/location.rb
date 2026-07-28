@@ -410,12 +410,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     display_name(user)
   end
 
-  # Page heading + browser tab title. `display_name` is plain text
-  # for the visible heading (place name; no textile); `text_name` is
-  # the ASCII form for the doc title.
-  alias page_title display_name
-  alias document_title text_name
-
   def textile_name(user = nil)
     display_name(user)
   end
@@ -428,12 +422,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Same as +format_name+ but with id tacked on.
   def unique_format_name(user = nil)
     string_with_id(format_name(user))
-  end
-
-  # Info to include about each location in merge requests.
-  def merge_info
-    num_obs = observations.count
-    "#{:location.ti} ##{id}: #{name} [o=#{num_obs}]"
   end
 
   # Strip out special characters, punctuation, and small words from a name.
@@ -631,16 +619,22 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     dubious_name?(db_name, true) || []
   end
 
+  # Each check_* method below returns an Array of [tag, args] pairs
+  # (unresolved) rather than resolved strings -- the two consumers
+  # (Components::Form::LocationFeedback, API2::Helpers#make_sure_
+  # location_isnt_dubious!) need different final forms (HTML-safe
+  # per-line text vs. a joined API error message), so resolution via
+  # `tag.t(**args)` happens at each consumer instead of here (#4901).
   def self.check_for_empty_name(name)
     return [] if name.present?
 
-    [:location_dubious_empty.l]
+    [[:location_dubious_empty, {}]]
   end
 
   def self.check_for_dubious_commas(name)
     return [] unless comma_test(name)
 
-    [:location_dubious_commas.l]
+    [[:location_dubious_commas, {}]]
   end
 
   def self.check_for_bad_country_or_state(name)
@@ -656,15 +650,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   def self.check_country_validity(real_country, this_country)
     return [] if real_country
 
-    [:location_dubious_unknown_country.t(country: this_country)]
+    [[:location_dubious_unknown_country, { country: this_country }]]
   end
 
   def self.check_state_validity(real_country, this_country, this_state)
     if real_country && has_known_states?(real_country)
       check_known_state_validity(real_country, this_country, this_state)
     elsif this_state && understood_country?(this_state)
-      [:location_dubious_redundant_state.t(country: real_country,
-                                           state: this_state)]
+      [[:location_dubious_redundant_state,
+        { country: real_country, state: this_state }]]
     else
       []
     end
@@ -676,11 +670,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     if this_state
       return [] unless understood_state?(this_state, real_country).nil?
 
-      [:location_dubious_unknown_state.t(country: real_country,
-                                         state: this_state)]
+      [[:location_dubious_unknown_state,
+        { country: real_country, state: this_state }]]
     elsif this_country != real_country &&
           understood_state?(this_country, real_country)
-      [:location_dubious_ambiguous_country.t(country: this_country)]
+      [[:location_dubious_ambiguous_country, { country: this_country }]]
     else
       []
     end
@@ -693,7 +687,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     BAD_TERMS.each_key do |key|
       next unless name.index(key)
 
-      reasons << :location_dubious_bad_term.t(bad: key, good: BAD_TERMS[key])
+      reasons << [:location_dubious_bad_term,
+                  { bad: key, good: BAD_TERMS[key] }]
     end
     reasons
   end
@@ -705,7 +700,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     # For some reason BAD_CHARS.chars.each doesn't work
     count = 0
     while (c = BAD_CHARS[count])
-      reasons << :location_dubious_bad_char.t(char: c) if name.index(c)
+      reasons << [:location_dubious_bad_char, { char: c }] if name.index(c)
       count += 1
     end
     reasons
@@ -1003,42 +998,42 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def validate_latitude
     if !north || north > 90
-      errors.add(:north, :validate_location_north_too_high.t)
+      errors.add(:north, :validate_location_north_too_high)
     end
     if !south || south < -90
-      errors.add(:south, :validate_location_south_too_low.t)
+      errors.add(:south, :validate_location_south_too_low)
     end
     return unless north && south && north < south
 
-    errors.add(:north, :validate_location_north_less_than_south.t)
+    errors.add(:north, :validate_location_north_less_than_south)
   end
 
   def validate_longitude
     if !east || east < -180 || east > 180
-      errors.add(:east, :validate_location_east_out_of_bounds.t)
+      errors.add(:east, :validate_location_east_out_of_bounds)
     end
     return unless !west || west < -180 || west > 180
 
-    errors.add(:west, :validate_location_west_out_of_bounds.t)
+    errors.add(:west, :validate_location_west_out_of_bounds)
   end
 
   def validate_elevation
     return unless high && low && high < low
 
-    errors.add(:high, :validate_location_high_less_than_low.t)
+    errors.add(:high, :validate_location_high_less_than_low)
   end
 
   def validate_user
     return if user || current_user
 
-    errors.add(:user, :validate_location_user_missing.t)
+    errors.add(:user, :validate_location_user_missing)
   end
 
   def validate_name
     if name.to_s.size > 1024
-      errors.add(:name, :validate_location_name_too_long.t)
+      errors.add(:name, :validate_location_name_too_long)
     elsif name.empty?
-      errors.add(:name, :validate_missing.t(field: :name))
+      errors.add(:name, :validate_missing, field: :name)
     end
   end
 end

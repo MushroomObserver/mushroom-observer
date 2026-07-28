@@ -168,6 +168,55 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_response(:redirect)
   end
 
+  # A read-only reflection (#4214) can't be edited on MO even by its
+  # owner — the edit form redirects with a warning. The permission check
+  # runs first, so only the owner (who would otherwise pass) sees the
+  # reflection warning.
+  def test_edit_reflection_redirects_with_warning
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_warning
+  end
+
+  # A non-owner hitting edit on a reflection gets the same
+  # permission-denied error as on any observation they can't edit —
+  # not the reflection warning (Copilot review on #4852).
+  def test_edit_reflection_as_non_owner_gets_permission_error
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    non_owner = users(:mary)
+    assert_not_equal(obs.user_id, non_owner.id)
+    login(non_owner.login)
+
+    get(:edit, params: { id: obs.id })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_error
+  end
+
+  def test_update_reflection_is_blocked
+    obs = observations(:imported_inat_obs)
+    original_notes = obs.notes
+    obs.update_column(:reflected_at, Time.zone.now)
+    login(obs.user.login)
+
+    put(:update, params: {
+          id: obs.id,
+          observation: { place_name: "Somewhere Else, Japan",
+                         notes: { other: "changed on MO" } }
+        })
+
+    assert_redirected_to(action: :show, id: obs.id)
+    assert_flash_warning
+    assert_equal(original_notes, obs.reload.notes,
+                 "a reflection's notes must not change through update")
+  end
+
   def test_update_observation
     obs = observations(:detailed_unknown_obs)
     updated_at = obs.rss_log.updated_at
@@ -719,6 +768,37 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       obs.thumb_image_id,
       "thumb should be a sibling occurrence image"
     )
+  end
+
+  # Issue #4737: the JS uploader creates the Image before the form
+  # submits, so at update time the chosen thumb_image_id is a real image
+  # that isn't attached to the observation yet. It must survive the
+  # update instead of being reverted to an already-attached image.
+  def test_update_observation_new_image_can_be_thumbnail
+    obs = observations(:detailed_unknown_obs)
+    new_image = images(:disconnected_coprinus_comatus_image)
+    # The JS uploader creates the image as the logged-in user.
+    new_image.update_columns(user_id: obs.user_id)
+    assert_not_includes(obs.image_ids, new_image.id)
+
+    login(obs.user.login)
+    put(:update, params: {
+          id: obs.id,
+          observation: {
+            place_name: obs.place_name,
+            when: obs.when,
+            notes: obs.notes.to_h,
+            specimen: obs.specimen,
+            thumb_image_id: new_image.id.to_s,
+            good_image_ids: (obs.image_ids + [new_image.id]).join(" ")
+          }
+        })
+
+    obs.reload
+    assert_includes(obs.image_ids, new_image.id,
+                    "New image should be attached to the observation")
+    assert_equal(new_image.id, obs.thumb_image_id,
+                 "Newly uploaded image chosen as thumbnail should stick")
   end
 
   # ---------- field slip code on update ----------

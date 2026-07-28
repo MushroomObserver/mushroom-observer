@@ -119,7 +119,7 @@ module Locations::Descriptions
       desc = LocationDescription.new(
         location: burbank_location, user: dick
       )
-      desc.errors.add(:base, "Test validation error")
+      desc.errors.add(:base, :invalid, message: "Test validation error")
 
       desc.stub(:save, false) do
         LocationDescription.stub(:new, desc) do
