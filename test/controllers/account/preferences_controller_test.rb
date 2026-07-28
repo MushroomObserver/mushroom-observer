@@ -136,7 +136,7 @@ module Account
 
       # Now do it correctly, and make sure changes were made.
       patch(:update, params: { user: params })
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       user = rolf.reload
       assert_equal("new@email.com", user.email)
       assert_equal(true, user.email_comments_owner)
@@ -222,7 +222,7 @@ module Account
       # I don't know if we need all the PARAMS, but
       patch(:update, params: { user: params })
 
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       assert_equal("new@email.com", user.reload.email)
     end
 
@@ -231,7 +231,7 @@ module Account
       login("rolf")
 
       patch(:update, params: { user: params })
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       assert_equal("trim@this.com", rolf.reload.email)
     end
 
@@ -250,7 +250,7 @@ module Account
       # I don't know if we need all the PARAMS, but
       patch(:update, params: { user: params })
 
-      assert_flash_text(:runtime_prefs_success.t)
+      assert_flash(:runtime_prefs_success)
       assert_equal("California, USA", user.reload.content_filter[:region])
     end
 
