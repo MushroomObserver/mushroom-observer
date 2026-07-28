@@ -126,6 +126,7 @@ module ObservationsController::EditAndUpdate
 
   def apply_observation_changes
     update_permitted_observation_attributes
+    resolve_project_aliases
     create_location_object_if_new(@observation)
     @observation.notes = notes_to_sym_and_compact
     warn_if_unchecking_specimen_with_records_present!

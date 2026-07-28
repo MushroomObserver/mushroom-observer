@@ -1477,6 +1477,7 @@
   # observations/_form_observations
   form_observations_field_code: for field slip
   form_observations_field_slip_code: Field Slip Code
+  form_observations_ambiguous_alias: 'The alias "[name]" is defined by more than one project for this observation. Used the [project] one because it was updated most recently. Also defined by: [others].'
   edit_observation_field_slip_invalid: 'Invalid field slip code "[code]".'
   edit_observation_field_slip_full: 'Field slip "[code]" already has [max] observations, the most allowed.'
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.

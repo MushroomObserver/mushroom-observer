@@ -38,6 +38,9 @@ module ObservationsController::Create
     init_new_image_var(Time.zone.now)
 
     rough_cut
+    # Before create_location_object_if_new, which would otherwise offer to
+    # create a Location named after the alias, and before validate_place_name.
+    resolve_project_aliases
     create_location_object_if_new(@observation) # may set @location
 
     @any_errors = false

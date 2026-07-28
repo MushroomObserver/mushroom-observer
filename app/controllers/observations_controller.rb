@@ -7,6 +7,7 @@ class ObservationsController < ApplicationController
   include Create
   include EditAndUpdate
   include FieldSlips
+  include ProjectAliases
   include Destroy
 
   # Disable cop: all these methods are defined in files included above.

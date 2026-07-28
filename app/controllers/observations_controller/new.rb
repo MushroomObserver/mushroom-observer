@@ -150,17 +150,10 @@ module ObservationsController::New
     @location = location
   end
 
-  # Reuses `FieldSlip#calc_location` rather than restating the
-  # precedence. When the code has no row yet the chain still applies, so
-  # build an unsaved slip for it — assigning `code` derives the project
-  # from the prefix, which is what the project-location step reads.
+  # Reuses `FieldSlip#calc_location` rather than restating the precedence,
+  # so a future change to #4907's ordering moves both forms at once.
   def field_slip_default_location(code)
-    return nil if code.blank?
-
-    slip = FieldSlip.find_by(code: code) || FieldSlip.new
-    slip.current_user = @user
-    slip.code = code if slip.new_record?
-    slip.location
+    field_slip_for_code(code)&.location
   end
 
   def init_naming_and_vote

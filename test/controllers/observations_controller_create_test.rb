@@ -198,6 +198,66 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                   "Jane Forager")
   end
 
+  # A project alias typed into Locality or Collector resolves on save.
+  # "Walk 1" is not a plausible place name, so this also proves the
+  # resolution beats validate_place_name's dubious-name check to the punch.
+  def test_create_resolves_project_aliases
+    place_alias = project_aliases(:two)  # "Walk 1" -> albion
+    user_alias = project_aliases(:one)   # "RS" -> rolf
+    slip = field_slips(:field_slip_no_obs)
+    assert_equal(place_alias.project, slip.project)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  collector: user_alias.name } })
+
+    obs = assigns(:observation)
+    assert_predicate(obs, :persisted?, "alias should not block the save")
+    assert_equal(locations(:albion), obs.location)
+    assert_equal(rolf.unique_text_name, obs.collector)
+    assert_equal(rolf.id, obs.collector_user_id)
+  end
+
+  # A stale hidden location_id must not beat the typed alias. The
+  # autocompleter clears it client-side, but the form still supports
+  # non-JS submission, so the server has to win this on its own.
+  def test_alias_beats_stale_location_id
+    place_alias = project_aliases(:two)
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  location_id: locations(:burbank).id } })
+
+    assert_equal(locations(:albion), assigns(:observation).location)
+  end
+
+  # Two targeted projects defining the same alias: newest wins, loudly.
+  def test_ambiguous_project_alias_warns_and_prefers_newest
+    place_alias = project_aliases(:two) # "Walk 1" -> albion, eol_project
+    other = projects(:bolete_project)
+    ProjectAlias.create!(project: other, target: locations(:burbank),
+                         name: place_alias.name)
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  project_ids: [other.id] } })
+
+    assert_equal(locations(:burbank), assigns(:observation).location,
+                 "most recently updated alias should win")
+    assert_flash_warning
+  end
+
   def test_create_observation_with_explicit_collector
     params = {
       naming: { name: "", vote: { value: "" } },

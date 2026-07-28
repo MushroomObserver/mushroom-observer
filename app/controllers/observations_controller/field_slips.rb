@@ -18,6 +18,24 @@ module ObservationsController::FieldSlips
     params[:field_code].to_s.strip.upcase
   end
 
+  # The slip a code names: the persisted row when there is one, else an
+  # unsaved slip whose project is derived from the code prefix (assigning
+  # `code` is what runs `update_project`). Callers need the project and
+  # its defaults before any slip exists — the observation form reads it
+  # for the Locality default and for which projects' aliases apply.
+  def field_slip_for_code(code)
+    code = code.to_s.strip.upcase
+    return nil if code.blank?
+
+    existing = FieldSlip.find_by(code: code)
+    return existing if existing
+
+    slip = FieldSlip.new
+    slip.current_user = @user
+    slip.code = code
+    slip
+  end
+
   def update_field_slip
     return :unchanged unless params.key?(:field_code)
 
