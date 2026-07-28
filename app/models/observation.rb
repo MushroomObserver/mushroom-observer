@@ -1461,9 +1461,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       Date.parse(@when_str)
     rescue ArgumentError
       if /^\d{4}-\d{1,2}-\d{1,2}$/.match?(@when_str)
-        errors.add(:when_str, :runtime_date_invalid.t)
+        errors.add(:when_str, :runtime_date_invalid)
       else
-        errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
+        errors.add(:when_str, :runtime_date_should_be_yyyymmdd)
       end
     end
   end
@@ -1475,16 +1475,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     if where.to_s.blank? && !location_id
       self.location = Location.unknown
-      # errors.add(:where, :validate_observation_where_missing.t)
+      # errors.add(:where, :validate_observation_where_missing)
     elsif where.to_s.size > 1024
-      errors.add(:where, :validate_observation_where_too_long.t)
+      errors.add(:where, :validate_observation_where_too_long)
     end
   end
 
   def check_user
     return if user || @current_user
 
-    errors.add(:user, :validate_observation_user_missing.t)
+    errors.add(:user, :validate_observation_user_missing)
   end
 
   def check_coordinates
@@ -1496,14 +1496,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def check_latitude
     if lat.blank? && lng.present? ||
        lat.present? && !Location.parse_latitude(lat)
-      errors.add(:lat, :runtime_lat_long_error.t)
+      errors.add(:lat, :runtime_lat_long_error)
     end
   end
 
   def check_longitude
     if lat.present? && lng.blank? ||
        lng.present? && !Location.parse_longitude(lng)
-      errors.add(:lng, :runtime_lat_long_error.t)
+      errors.add(:lng, :runtime_lat_long_error)
     end
   end
 
@@ -1512,7 +1512,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # As of July 5, 2020 this statement appears to be unreachable
     # because .to_i returns 0 for unparsable strings.
-    errors.add(:alt, :runtime_altitude_error.t)
+    errors.add(:alt, :runtime_altitude_error)
   end
 
   def check_hidden

@@ -15,8 +15,8 @@ class Query::Validator < ActiveModel::Validator
   def validate(params)
     return if params.validation_errors.blank?
 
-    [params.validation_errors].flatten.each do |msg|
-      params.errors.add(:base, msg)
+    params.validation_errors.each do |tag, args|
+      params.errors.add(:base, tag, **(args || {}))
     end
   end
 end

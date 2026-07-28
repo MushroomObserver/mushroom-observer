@@ -11,7 +11,7 @@ class FormErrorsTest < ComponentTestCase
 
   def test_renders_error_count_and_messages
     term = GlossaryTerm.new
-    term.errors.add(:name, "can't be blank")
+    term.errors.add(:name, :blank)
     html = render(Components::Form::Errors.new(model: term))
 
     assert_html(html, "#error_explanation.alert-danger")
@@ -27,8 +27,8 @@ class FormErrorsTest < ComponentTestCase
 
   def test_pluralizes_error_count_for_multiple_errors
     term = GlossaryTerm.new
-    term.errors.add(:name, "can't be blank")
-    term.errors.add(:base, "second problem")
+    term.errors.add(:name, :blank)
+    term.errors.add(:base, :invalid)
     html = render(Components::Form::Errors.new(model: term))
 
     error_text = Nokogiri::HTML(html).at_css("#error_explanation").text

@@ -684,11 +684,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def validate_image_length
     if upload_length || save_to_temp_file
       if upload_length > MO.image_upload_max_size
-        errors.add(:image,
-                   :validate_image_file_too_big.t(
-                     size: upload_length,
-                     max: MO.image_upload_max_size.to_s.sub(/\d{6}$/, "Mb")
-                   ))
+        errors.add(:image, :validate_image_file_too_big,
+                   size: upload_length,
+                   max: MO.image_upload_max_size.to_s.sub(/\d{6}$/, "Mb"))
         result = false
       else
         result = true
@@ -710,10 +708,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       else
         file = upload_original_name.to_s
         file = "?" if file.blank?
-        errors.add(:image,
-                   :validate_image_wrong_type.t(
-                     type: upload_type, file: ERB::Util.html_escape(file)
-                   ))
+        errors.add(:image, :validate_image_wrong_type,
+                   type: upload_type, file: ERB::Util.html_escape(file))
         result = false
       end
     end
@@ -732,8 +728,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       if sum == upload_md5sum
         result = true
       else
-        errors.add(:image, :validate_image_md5_mismatch.
-          t(actual: sum.split.first, expect: upload_md5sum))
+        errors.add(:image, :validate_image_md5_mismatch,
+                   actual: sum.split.first, expect: upload_md5sum)
         result = false
       end
     end
@@ -783,18 +779,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
           self.upload_length = @file.size
           result = true
         rescue StandardError => e
-          errors.add(:image,
-                     "Unexpected error while copying attached file " \
-                     "to temp file. Error class #{e.class}: #{e}")
+          errors.add(:image, :validate_image_copy_error,
+                     klass: e.class, error: e)
           result = false
         end
 
       # It should never reach here.
       else
-        errors.add(:image, "Unexpected error: did not receive a valid upload " \
-                           "stream from the webserver (we got an instance of " \
-                           "#{upload_handle.class.name}). Send this to the " \
-                           "webmaster, please.  Backtrace: #{caller[0..20]}...")
+        errors.add(:image, :validate_image_invalid_upload_stream,
+                   klass: upload_handle.class.name, backtrace: caller[0..20])
         result = false
       end
     end
@@ -808,7 +801,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   def process_image(strip: false)
     result = true
     if new_record?
-      errors.add(:image, "Called process_image before saving image record.")
+      errors.add(:image, :validate_image_process_before_save)
       result = false
     elsif save_to_temp_file
       ext = original_extension
@@ -836,8 +829,8 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     error = Image::Processor.strip_original_gps(self, ext: ext)
     return true unless error
 
-    errors.add(:image,
-               :runtime_failed_to_strip_gps.t(msg: ERB::Util.html_escape(error)))
+    errors.add(:image, :runtime_failed_to_strip_gps,
+               msg: ERB::Util.html_escape(error))
     false
   end
 
@@ -866,7 +859,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def fail_image_process # rubocop:disable Naming/PredicateMethod
-    errors.add(:image, :runtime_image_process_failed.t(id: id))
+    errors.add(:image, :runtime_image_process_failed, id: id)
     false
   end
 
@@ -1384,7 +1377,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     validate_upload if upload_handle && new_record?
 
     # I guess this is kind of serious -- uploading with no one logged in??!
-    errors.add(:user, :validate_image_user_missing.t) if !user && !current_user
+    errors.add(:user, :validate_image_user_missing) if !user && !current_user
 
     # Try everything in our power to make uploads succeed.  Let the user worry
     # about correcting the date later if need be.

@@ -298,7 +298,7 @@ class AbstractModel < ApplicationRecord
   # "is missing" becomes "Object attribute is missing." Errors are created
   # via validates (magically) or by explicit calls to
   #
-  #   obj.errors.add(:attr, "message").
+  #   obj.errors.add(:attr, :some_tag).
   def formatted_errors
     out = []
     errors.each do |error|

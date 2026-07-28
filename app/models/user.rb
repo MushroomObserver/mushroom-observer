@@ -1060,11 +1060,11 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def user_login_requirements
     if login.to_s.blank?
-      errors.add(:login, :validate_user_login_missing.t)
+      errors.add(:login, :validate_user_login_missing)
     elsif login.length < 3 || login.size > 40
-      errors.add(:login, :validate_user_login_too_long.t)
+      errors.add(:login, :validate_user_login_too_long)
     elsif login_already_taken?
-      errors.add(:login, :validate_user_login_taken.t)
+      errors.add(:login, :validate_user_login_taken)
     end
   end
 
@@ -1075,39 +1075,37 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def user_password_requirements
-    errors.add(:password, :validate_user_password_too_long.t) \
+    errors.add(:password, :validate_user_password_too_long) \
       if password.to_s.present? && (password.length < 5 || password.size > 40)
   end
 
   def user_email_requirements
     if email.to_s.blank? || !ApplicationMailer.valid_email_address?(email.to_s)
-      errors.add(:email, :validate_user_email_missing.t)
+      errors.add(:email, :validate_user_email_missing)
     elsif email.size > 80
-      errors.add(:email, :validate_user_email_too_long.t)
+      errors.add(:email, :validate_user_email_too_long)
     end
   end
 
   def user_other_requirements
-    errors.add(:theme, :validate_user_theme_too_long.t) if theme.to_s.size > 40
-    errors.add(:name, :validate_user_name_too_long.t) if name.to_s.size > 80
+    errors.add(:theme, :validate_user_theme_too_long) if theme.to_s.size > 40
+    errors.add(:name, :validate_user_name_too_long) if name.to_s.size > 80
   end
 
   def check_password
     return if password.blank?
 
     if password_confirmation.to_s.blank?
-      errors.add(:password, :validate_user_password_confirmation_missing.t)
+      errors.add(:password, :validate_user_password_confirmation_missing)
     elsif password != password_confirmation
-      errors.add(:password, :validate_user_password_no_match.t)
+      errors.add(:password, :validate_user_password_no_match)
     end
   end
 
   def notes_template_forbid_other
     notes_template_bad_parts.each do |part|
-      errors.add(:notes_template,
-                 :prefs_notes_template_no_other.t(
-                   part: ERB::Util.html_escape(part)
-                 ))
+      errors.add(:notes_template, :prefs_notes_template_no_other,
+                 part: ERB::Util.html_escape(part))
     end
   end
 
@@ -1120,10 +1118,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     notes_template.split(",").each do |part|
       next unless part.squish == "Collector"
 
-      errors.add(:notes_template,
-                 :prefs_notes_template_no_collector.t(
-                   part: ERB::Util.html_escape(part.squish)
-                 ))
+      errors.add(:notes_template, :prefs_notes_template_no_collector,
+                 part: ERB::Util.html_escape(part.squish))
     end
   end
 
@@ -1133,10 +1129,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     squished = notes_template.split(",").map { |s| s.squish.downcase }
     dups = squished.uniq.select { |part| squished.count(part) > 1 }
     dups.each do |dup|
-      errors.add(:notes_template,
-                 :prefs_notes_template_no_dups.t(
-                   part: ERB::Util.html_escape(dup)
-                 ))
+      errors.add(:notes_template, :prefs_notes_template_no_dups,
+                 part: ERB::Util.html_escape(dup))
     end
   end
 
@@ -1171,6 +1165,6 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     return if Location.region(content_filter[:region]).any?
 
     # If we're here, there are no MO locations in that region.
-    errors.add(:region, :advanced_search_filter_region.t)
+    errors.add(:region, :advanced_search_filter_region)
   end
 end

@@ -327,15 +327,15 @@ class Vote < AbstractModel
 
   validate :check_requirements
   def check_requirements # :nodoc:
-    errors.add(:naming, :validate_vote_naming_missing.t) unless naming
-    errors.add(:user, :validate_vote_user_missing.t) if !user && !current_user
+    errors.add(:naming, :validate_vote_naming_missing) unless naming
+    errors.add(:user, :validate_vote_user_missing) if !user && !current_user
 
     if value.nil?
-      errors.add(:value, :validate_vote_value_missing.t)
+      errors.add(:value, :validate_vote_value_missing)
     elsif !/^[+-]?\d+(\.\d+)?$/.match?(value_before_type_cast.to_s)
-      errors.add(:value, :validate_vote_value_not_integer.t)
+      errors.add(:value, :validate_vote_value_not_integer)
     elsif value < MINIMUM_VOTE || value > MAXIMUM_VOTE
-      errors.add(:value, :validate_vote_value_out_of_bounds.t)
+      errors.add(:value, :validate_vote_value_out_of_bounds)
     end
   end
 

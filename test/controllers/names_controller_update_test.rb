@@ -954,11 +954,10 @@ class NamesControllerUpdateTest < FunctionalTestCase
         icn_id: "MB12345"
       }
     }
-    default_validates_numericality_of_error_message = "is not a number"
     login
     put(:update, params: params)
 
-    assert_flash_text(/#{default_validates_numericality_of_error_message}/)
+    assert_flash_text(/#{:not_a_number.t}/)
   end
 
   def test_update_name_admin_rank_warning_then_force

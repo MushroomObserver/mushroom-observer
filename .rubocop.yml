@@ -15,6 +15,7 @@ plugins:
 require:
   - ./lib/rubocop/cop/mo/lowercase_translation_tag
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
+  - ./lib/rubocop/cop/mo/no_resolved_errors_add_type
 
 AllCops:
   NewCops: enable
@@ -45,6 +46,14 @@ MO/LowercaseTranslationTag:
     Translation tag symbols (used with .l/.t/.tl/.tp/.tpl/.ti) must be
     lowercase -- see lib/rubocop/cop/mo/lowercase_translation_tag.rb
     and GH issue #4843.
+  Enabled: true
+
+MO/NoResolvedErrorsAddType:
+  Description: >-
+    errors.add's type argument must be a bare tag symbol, resolved
+    lazily at display time -- not an eagerly-resolved .t/.l/.tl/.tp/
+    .tpl call -- see lib/rubocop/cop/mo/no_resolved_errors_add_type.rb
+    and #4901/#4920.
   Enabled: true
 
 MO/NoRawLinkOrButtonTo:

@@ -109,6 +109,13 @@ class LocalizationFilesTest < UnitTestCase
 
   # Array of error msgs for tags in +file+ that we don't have translations for.
   def missing_tags_in_file(file, tags)
+    dot_call_tag_errors_in_file(file, tags) +
+      errors_add_tag_errors_in_file(file, tags)
+  end
+
+  # Array of error msgs for `:tag.t`/`.l`/`.tl`/`.tp`/`.tpl` refs in +file+
+  # that we don't have translations for.
+  def dot_call_tag_errors_in_file(file, tags)
     errors = []
     n = 0
     File.readlines(file).each do |line|
@@ -120,6 +127,58 @@ class LocalizationFilesTest < UnitTestCase
           errors << "#{file} line #{n} [:#{tag}]\n"
         end
       end
+    end
+    errors
+  end
+
+  # Rails' own built-in ActiveModel/ActiveRecord validation types --
+  # allowed in errors.add whether or not they have an mo.* translation
+  # (see ActiveModel::Error#message's has_translation? check,
+  # config/initializers/active_model_error_tag_resolution.rb). Some
+  # (blank, taken, not_a_number, inclusion, too_long) do have an mo.*
+  # tag matching Rails' bundled default, so they're translatable; the
+  # rest fall through to Rails' own English-only message generation.
+  RAILS_NATIVE_ERROR_TYPES = %w[
+    blank invalid confirmation accepted empty present too_long
+    password_too_long too_short wrong_length not_a_number
+    not_an_integer greater_than greater_than_or_equal_to equal_to
+    less_than less_than_or_equal_to other_than in odd even inclusion
+    exclusion required taken model_invalid record_invalid
+    restrict_dependent_destroy
+  ].freeze
+
+  # A bare deferred-tag call has no dot-call suffix for the scan above
+  # to catch -- resolution is deferred to display time (see
+  # config/initializers/active_model_error_tag_resolution.rb), so a
+  # typo'd or undefined tag here would otherwise pass this test
+  # silently and only surface as "Translation missing" garbage text at
+  # runtime. Scans each errors.add call (which may span multiple
+  # lines) for its tag (second positional) arg.
+  def errors_add_tag_errors_in_file(file, tags)
+    errors = []
+    buffer = nil
+    start_line = nil
+    depth = 0
+    File.readlines(file).each_with_index do |line, idx|
+      line = line.sub(/(^#| # ).*/, "")
+      unless buffer
+        next unless line.match?(/errors\.add\(/)
+
+        buffer = ""
+        start_line = idx + 1
+        depth = 0
+      end
+      buffer += line
+      depth += line.count("(") - line.count(")")
+      next if depth.positive?
+
+      if buffer =~ /errors\.add\(\s*:\w+,\s*:(\w+)/
+        tag = Regexp.last_match(1)
+        unless tags.key?(tag.downcase) || RAILS_NATIVE_ERROR_TYPES.include?(tag)
+          errors << "#{file} line #{start_line} [:#{tag}]\n"
+        end
+      end
+      buffer = nil
     end
     errors
   end

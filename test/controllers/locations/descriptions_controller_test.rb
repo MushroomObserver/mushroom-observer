@@ -395,7 +395,7 @@ module Locations
 
       # Create a description object that fails validation
       desc = LocationDescription.new(location: loc, user: users(:dick))
-      desc.errors.add(:base, "Test error")
+      desc.errors.add(:base, :invalid, message: "Test error")
 
       params = {
         location_id: loc.id,
@@ -427,7 +427,7 @@ module Locations
         }
       }
 
-      desc.errors.add(:base, "Save error")
+      desc.errors.add(:base, :invalid, message: "Save error")
 
       desc.stub(:save, false) do
         LocationDescription.stub(:safe_find, desc) do

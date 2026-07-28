@@ -67,7 +67,7 @@ class PublicationsController < ApplicationController
         flash_object_errors(@publication)
         format.html { render_new_view }
         format.xml  do
-          render(xml: @publication.errors,
+          render(xml: { errors: @publication.formatted_errors },
                  status: :unprocessable_content)
         end
       end
@@ -92,7 +92,7 @@ class PublicationsController < ApplicationController
         flash_object_errors(@publication)
         format.html { render_edit_view }
         format.xml  do
-          render(xml: @publication.errors,
+          render(xml: { errors: @publication.formatted_errors },
                  status: :unprocessable_content)
         end
       end
