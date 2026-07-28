@@ -211,7 +211,7 @@ module Names::Synonyms
       }
       login("rolf")
       post(:create, params: params)
-      assert_flash_error(:runtime_name_deprecate_must_choose.t)
+      assert_flash(:runtime_name_deprecate_must_choose)
 
       # Name should remain unchanged
       assert_not(old_name.reload.deprecated)
