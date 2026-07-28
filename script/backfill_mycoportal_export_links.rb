@@ -29,11 +29,11 @@
 #   https://docs.symbiota.org/Collection_Manager_Guide/Downloading/downloading_copy
 #   (The download will have a name like MUOB_backup_2026-07-22_190455_DwC-A.zip)
 #
-#   # Dry run by default
+#   # Dry run by default -- nothing is written
 #   bin/rails runner script/backfill_mycoportal_export_links.rb
 #
-#   # Write to the database (Idempotent)
-#   APPLY=1 bin/rails runner script/backfill_mycoportal_export_links.rb
+#   # Write to the database (idempotent)
+#   bin/rails runner script/backfill_mycoportal_export_links.rb --apply
 #
 #   # Use a different DwC-A download location:
 #   bin/rails runner script/backfill_mycoportal_export_links.rb \
@@ -43,7 +43,7 @@
 #   bin/rails runner script/backfill_mycoportal_export_links.rb -h
 #
 #   To avoid running this script's DwC-A parse against production (the
-#   CSVs are ~300MB), run it locally with APPLY=1, then move the
+#   CSVs are ~300MB), run it locally with --apply, then move the
 #   resulting ExternalLinks to production with
 #   script/transfer_mycoportal_export_links.rb instead of re-running
 #   this script there.
@@ -62,15 +62,9 @@ class BackfillMycoportalExportLinks
     class << self
       def parse(argv)
         opts = default_options
-        OptionParser.new do |parser|
-          parser.banner = "Usage: bin/rails runner " \
-                          "script/backfill_mycoportal_export_links.rb"
-          parser.on("--dwca-dir DIR",
-                    "Where to find the downloaded DwC-A zip and extract " \
-                    "it (default: #{DEFAULT_DWCA_DIR})") do |val|
-            opts[:dwca_dir] = val
-          end
-        end.parse!(argv)
+        build_parser(opts).parse!(argv)
+        raise("Unrecognized argument(s): #{argv.join(" ")}") if argv.any?
+
         opts[:missing_out] = default_report_path(opts[:dwca_dir], "missing")
         opts[:skipped_out] = default_report_path(opts[:dwca_dir], "skipped")
         opts
@@ -78,8 +72,23 @@ class BackfillMycoportalExportLinks
 
       private
 
+      def build_parser(opts)
+        OptionParser.new do |parser|
+          parser.banner = "Usage: bin/rails runner " \
+                          "script/backfill_mycoportal_export_links.rb"
+          parser.on("--apply", "Write changes (default: dry run)") do
+            opts[:apply] = true
+          end
+          parser.on("--dwca-dir DIR",
+                    "Where to find the downloaded DwC-A zip and extract " \
+                    "it (default: #{DEFAULT_DWCA_DIR})") do |val|
+            opts[:dwca_dir] = val
+          end
+        end
+      end
+
       def default_options
-        { apply: ENV["APPLY"] == "1", dwca_dir: DEFAULT_DWCA_DIR }
+        { apply: false, dwca_dir: DEFAULT_DWCA_DIR }
       end
 
       def default_report_path(dwca_dir, name)
@@ -364,7 +373,15 @@ class BackfillMycoportalExportLinks
     puts("  skipped report: -> #{@skipped_out}")
     puts("  elapsed: #{@stopwatch}")
     puts
-    puts(@apply ? "APPLIED." : "Dry run. Re-run with APPLY=1 to write.")
+    puts(@apply ? "APPLIED." : "Dry run -- nothing was written. Re-run " \
+                               "with:\n  #{reapply_command}")
+  end
+
+  def reapply_command
+    cmd = "bin/rails runner script/backfill_mycoportal_export_links.rb " \
+          "--apply"
+    cmd += " --dwca-dir #{@dwca_dir}" if @dwca_dir != Options::DEFAULT_DWCA_DIR
+    cmd
   end
 
   def print_entity_summary(label, stats)

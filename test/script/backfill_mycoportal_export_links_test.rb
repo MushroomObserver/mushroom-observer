@@ -346,8 +346,46 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     assert_match(/elapsed: (\d+h )?(\d+m )?\d+s/, out)
   end
 
+  def test_dry_run_summary_states_nothing_written_and_echoes_apply_command
+    occurrences_csv = write_csv(%w[id catalogNumber],
+                                [occurrence_row(1, "MUOB 1")])
+    multimedia_csv = write_csv(%w[coreid identifier], [])
+    @missing_out = temp_csv_path("missing")
+    @skipped_out = temp_csv_path("skipped")
+    subject = BackfillMycoportalExportLinks.new(
+      dwca_dir: "/tmp/custom-dwca", occurrences: occurrences_csv,
+      multimedia: multimedia_csv, apply: false,
+      missing_out: @missing_out, skipped_out: @skipped_out
+    )
+
+    out, = capture_io { subject.run }
+
+    assert_match(/nothing was written/i, out)
+    assert_includes(
+      out,
+      "bin/rails runner script/backfill_mycoportal_export_links.rb " \
+      "--apply --dwca-dir /tmp/custom-dwca"
+    )
+  end
+
+  def test_reapply_command_omits_dwca_dir_flag_when_default
+    subject = BackfillMycoportalExportLinks.new(
+      dwca_dir: BackfillMycoportalExportLinks::Options::DEFAULT_DWCA_DIR,
+      occurrences: "o.csv", multimedia: "m.csv", apply: false,
+      missing_out: "n.csv", skipped_out: "s.csv"
+    )
+
+    command = subject.send(:reapply_command)
+
+    assert_equal(
+      "bin/rails runner script/backfill_mycoportal_export_links.rb --apply",
+      command
+    )
+  end
+
   def test_parse_options_defaults_and_overrides
     defaults = BackfillMycoportalExportLinks::Options.parse([])
+    assert_equal(false, defaults[:apply], "apply should default to false")
     assert_equal(BackfillMycoportalExportLinks::Options::DEFAULT_DWCA_DIR,
                  defaults[:dwca_dir])
     assert_equal(
@@ -379,6 +417,14 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
       assert_raises(OptionParser::InvalidOption) do
         BackfillMycoportalExportLinks::Options.parse([flag, "x"])
       end
+    end
+  end
+
+  # A typo'd positional argument (not recognized by any --flag) must abort
+  # rather than silently fall through to a dry run (#4877 review).
+  def test_parse_options_rejects_unrecognized_positional_argument
+    assert_raises(RuntimeError) do
+      BackfillMycoportalExportLinks::Options.parse(["bogus"])
     end
   end
 
@@ -573,11 +619,8 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     FileUtils.remove_entry(dwca_dir) if dwca_dir && Dir.exist?(dwca_dir)
   end
 
-  def test_parse_options_apply_from_env
-    ENV["APPLY"] = "1"
-    assert(BackfillMycoportalExportLinks::Options.parse([])[:apply])
-  ensure
-    ENV.delete("APPLY")
+  def test_parse_options_apply_flag
+    assert(BackfillMycoportalExportLinks::Options.parse(["--apply"])[:apply])
   end
 
   private

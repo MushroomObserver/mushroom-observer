@@ -150,6 +150,14 @@ class TransferMycoportalExportLinksTest < UnitTestCase
     assert_nil(apply_opts[:export])
   end
 
+  # A typo'd positional argument (not recognized by any --flag) must abort
+  # rather than silently proceeding with nothing to do (#4877 review).
+  def test_parse_argv_rejects_unrecognized_positional_argument
+    assert_raises(RuntimeError) do
+      TransferMycoportalExportLinks.parse_argv(["--apply", "in.csv", "extra"])
+    end
+  end
+
   def test_run_requires_exactly_one_of_export_or_apply
     assert_raises(SystemExit) { TransferMycoportalExportLinks.new({}).run }
     assert_raises(SystemExit) do

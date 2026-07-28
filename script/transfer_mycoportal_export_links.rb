@@ -56,6 +56,8 @@ class TransferMycoportalExportLinks
           options[:apply] = f
         end
       end.parse!(argv)
+      raise("Unrecognized argument(s): #{argv.join(" ")}") if argv.any?
+
       options
     end
   end
