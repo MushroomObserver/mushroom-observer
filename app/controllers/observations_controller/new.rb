@@ -58,6 +58,9 @@ module ObservationsController::New
     init_project_vars_for_new
     init_list_vars
     defaults_from_last_observation_created
+    # Must follow defaults_from_last_observation_created, which copies the
+    # user's last observation's location unconditionally.
+    apply_field_slip_location(@field_code)
     add_list(SpeciesList.safe_find(params[:species_list]))
     @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
@@ -128,6 +131,36 @@ module ObservationsController::New
     return nil if params[:field_code].present?
 
     @user.unique_text_name
+  end
+
+  # A slip arrival defaults Locality the way the field slip form does,
+  # not the way a plain new-observation form does. The chain (#4907) is
+  # the user's most recent slip in this project, then the project's own
+  # location, then their last located observation — deliberately ranking
+  # the project above the last observation, because someone who has
+  # travelled to a foray hasn't entered anything at the site yet, while
+  # the project's location contains it. `defaults_from_last_observation_
+  # created` alone gets the first slip of every foray wrong.
+  def apply_field_slip_location(code)
+    location = field_slip_default_location(code)
+    return unless location
+
+    @observation.location = location
+    @observation.where = location.name
+    @location = location
+  end
+
+  # Reuses `FieldSlip#calc_location` rather than restating the
+  # precedence. When the code has no row yet the chain still applies, so
+  # build an unsaved slip for it — assigning `code` derives the project
+  # from the prefix, which is what the project-location step reads.
+  def field_slip_default_location(code)
+    return nil if code.blank?
+
+    slip = FieldSlip.find_by(code: code) || FieldSlip.new
+    slip.current_user = @user
+    slip.code = code if slip.new_record?
+    slip.location
   end
 
   def init_naming_and_vote

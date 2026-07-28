@@ -153,6 +153,40 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                   users(:rolf).unique_text_name, count: 0)
   end
 
+  # Arriving with a field code defaults Locality the way the field slip
+  # form does: the project's own location outranks the user's last
+  # observation, because a forayer who has travelled to the site hasn't
+  # entered anything there yet. See #4907.
+  def test_new_from_field_slip_prefers_project_location
+    project = projects(:current_project)
+    user = users(:mary)
+    assert_equal(locations(:burbank), project.location)
+    assert_empty(FieldSlip.where(user: user, project: project),
+                 "Test needs a user with no prior slip in this project")
+
+    # Park the user's last observation elsewhere, so only the precedence
+    # rule can put the project's location on the form.
+    Observation.recent_by_user(user).last.
+      update_columns(location_id: locations(:albion).id)
+
+    login("mary")
+    get(:new, params: { field_code: "#{project.field_slip_prefix}-9999" })
+
+    assert_equal(project.location, assigns(:observation).location)
+  end
+
+  # Without a field code the plain last-observation default still applies.
+  def test_new_without_field_slip_keeps_last_observation_location
+    user = users(:rolf)
+    last = Observation.recent_by_user(user).last
+    assert_not_nil(last&.location, "Test needs a located last observation")
+
+    login("rolf")
+    get(:new)
+
+    assert_equal(last.location, assigns(:observation).location)
+  end
+
   # A collector carried in from the field-slip form still wins.
   def test_new_from_field_slip_keeps_supplied_collector
     login("rolf")
