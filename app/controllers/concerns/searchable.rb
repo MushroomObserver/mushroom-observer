@@ -232,7 +232,7 @@ module Searchable
       return true unless @search.invalid?
 
       messages = @search.validation_error_messages.compact_blank
-      flash_error(messages) if messages
+      flash_error(*messages) if messages.present?
       false
     end
 

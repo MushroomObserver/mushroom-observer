@@ -132,10 +132,12 @@ class LocalizationFilesTest < UnitTestCase
   end
 
   # Rails' own built-in ActiveModel/ActiveRecord validation types --
-  # deliberately have no mo.* translation (see
-  # ActiveModel::ErrorTagResolution#message's has_translation? check,
-  # config/initializers/active_model_error_tag_resolution.rb) and fall
-  # through to Rails' own message generation instead of `.t`.
+  # allowed in errors.add whether or not they have an mo.* translation
+  # (see ActiveModel::Error#message's has_translation? check,
+  # config/initializers/active_model_error_tag_resolution.rb). Some
+  # (blank, taken, not_a_number, inclusion, too_long) do have an mo.*
+  # tag matching Rails' bundled default, so they're translatable; the
+  # rest fall through to Rails' own English-only message generation.
   RAILS_NATIVE_ERROR_TYPES = %w[
     blank invalid confirmation accepted empty present too_long
     password_too_long too_short wrong_length not_a_number
