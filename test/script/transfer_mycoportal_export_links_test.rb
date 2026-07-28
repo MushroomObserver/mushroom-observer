@@ -93,21 +93,30 @@ class TransferMycoportalExportLinksTest < UnitTestCase
     )
   end
 
-  def test_apply_invalid_record_is_logged_and_skipped
-    image = images(:in_situ_image)
-    stubbed_error = lambda do |*|
-      link = ExternalLink.new
-      link.errors.add(:base, "stubbed failure")
-      raise(ActiveRecord::RecordInvalid.new(link))
-    end
+  def test_apply_missing_target_is_logged_and_skipped
+    bogus_id = Image.maximum(:id).to_i + 1000
 
-    subject = nil
-    ExternalLink.stub(:create!, stubbed_error) do
-      subject = run_apply([export_row(target: image)])
-    end
+    subject = run_apply(
+      [{ "target_type" => "Image", "target_id" => bogus_id.to_s,
+         "external_id" => nil, "external_created_on" => nil }]
+    )
 
     assert_equal(1, subject.instance_variable_get(:@stats)[:invalid])
-    assert_nil(ExternalLink.find_by(target: image, external_site: @site,
+    assert_nil(ExternalLink.find_by(target_type: "Image",
+                                    target_id: bogus_id,
+                                    external_site: @site,
+                                    relationship: :export))
+  end
+
+  def test_apply_unknown_target_type_is_logged_and_skipped
+    subject = run_apply(
+      [{ "target_type" => "User", "target_id" => "1",
+         "external_id" => nil, "external_created_on" => nil }]
+    )
+
+    assert_equal(1, subject.instance_variable_get(:@stats)[:invalid])
+    assert_nil(ExternalLink.find_by(target_type: "User", target_id: 1,
+                                    external_site: @site,
                                     relationship: :export))
   end
 

@@ -29,14 +29,18 @@
 #    external_site/relationship key the backfill script itself uses to
 #    detect "already present") are left untouched and counted as
 #    already_present. Idempotent and resumable -- re-running the same
-#    CSV is harmless. Lookups and inserts are batched (BATCH rows/query)
-#    to keep production DB load low.
+#    CSV is harmless. Lookups are batched (BATCH rows/query) and new
+#    rows are validated in memory, then written with a single insert_all
+#    per batch rather than one ExternalLink.create! per row (#4877
+#    review) -- keeps production DB round trips to a handful per BATCH
+#    instead of one per row.
 
 require "optparse"
 require "csv"
 
 class TransferMycoportalExportLinks
   BATCH = 2000
+  TARGET_CLASSES = { "Observation" => Observation, "Image" => Image }.freeze
 
   class << self
     def parse_argv(argv)
@@ -104,39 +108,87 @@ class TransferMycoportalExportLinks
 
   def apply_batch(batch)
     existing = existing_keys(batch)
-    batch.each { |row| apply_one(row, existing) }
+    candidates = batch.reject { |row| existing.include?(row_key(row)) }
+    @stats[:already_present] += batch.size - candidates.size
+    return if candidates.empty?
+
+    valid, invalid = build_links(candidates).partition(&:valid?)
+    invalid.each { |link| log_invalid(link) }
+    insert_links(valid)
+  end
+
+  def row_key(row)
+    [row[:target_type], row[:target_id]]
+  end
+
+  def ids_by_type(rows)
+    rows.group_by { |row| row[:target_type] }.
+      transform_values { |type_rows| type_rows.map { |row| row[:target_id] } }
   end
 
   # One batched query per target_type present in the batch, rather than
   # one exists? query per row -- keeps production round trips low.
   def existing_keys(batch)
-    batch.group_by { |row| row[:target_type] }.
-      each_with_object(Set.new) do |(type, rows), keys|
-        ids = rows.map { |row| row[:target_id] }
-        ExternalLink.where(target_type: type, target_id: ids,
-                           external_site: @site, relationship: :export).
-          pluck(:target_type, :target_id).each { |key| keys << key }
-      end
+    ids_by_type(batch).each_with_object(Set.new) do |(type, ids), keys|
+      ExternalLink.where(target_type: type, target_id: ids,
+                         external_site: @site, relationship: :export).
+        pluck(:target_type, :target_id).each { |key| keys << key }
+    end
   end
 
-  def apply_one(row, existing)
-    key = [row[:target_type], row[:target_id]]
-    return @stats[:already_present] += 1 if existing.include?(key)
-
-    create_link(row)
+  # Loads the real target records (not just ids), one query per
+  # target_type in the batch, so #build_link can cache each row's target
+  # directly on the association below -- otherwise #valid?'s
+  # target-presence check would issue its own query per row, right back
+  # to the per-row cost this batching is meant to avoid.
+  def preload_targets(candidates)
+    ids_by_type(candidates).each_with_object({}) do |(type, ids), targets|
+      klass = TARGET_CLASSES[type]
+      targets[type] = klass ? klass.where(id: ids).index_by(&:id) : {}
+    end
   end
 
-  def create_link(row)
-    ExternalLink.create!(
-      user: @admin, target_type: row[:target_type],
-      target_id: row[:target_id], external_site: @site,
-      relationship: :export, external_id: row[:external_id],
+  def build_links(candidates)
+    targets = preload_targets(candidates)
+    candidates.map { |row| build_link(row, targets) }
+  end
+
+  def build_link(row, targets)
+    link = ExternalLink.new(
+      target_type: row[:target_type], target_id: row[:target_id],
+      user: @admin, external_site: @site, relationship: :export,
+      external_id: row[:external_id],
       external_created_on: row[:external_created_on]
     )
-    @stats[:created] += 1
-  rescue ActiveRecord::RecordInvalid => e
-    warn("  #{row[:target_type]} #{row[:target_id]}: #{e.message}")
+    target_association = link.association(:target)
+    target_association.target =
+      targets.dig(row[:target_type], row[:target_id])
+    target_association.loaded!
+    link
+  end
+
+  def log_invalid(link)
+    warn("  #{link.target_type} #{link.target_id}: " \
+         "#{link.errors.full_messages.join(", ")}")
     @stats[:invalid] += 1
+  end
+
+  def insert_links(links)
+    return if links.empty?
+
+    now = Time.current
+    rows = links.map { |link| insert_attributes(link, now) }
+    ExternalLink.insert_all(rows)
+    @stats[:created] += rows.size
+  end
+
+  def insert_attributes(link, now)
+    { user_id: @admin.id, target_type: link.target_type,
+      target_id: link.target_id, external_site_id: @site.id,
+      relationship: ExternalLink.relationships[:export],
+      external_id: link.external_id,
+      external_created_on: link.external_created_on,
+      created_at: now, updated_at: now }
   end
 
   def summarize
