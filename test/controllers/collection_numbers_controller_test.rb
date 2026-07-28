@@ -76,7 +76,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:index, params: { observation: obs.id })
 
     assert_page_title(:collection_numbers.ti)
-    assert_flash_text(/no matching collection numbers found/i)
+    assert_flash(:runtime_no_matches, type: :collection_number)
   end
 
   def test_index_pattern_str_matching_multiple_collection_numbers
@@ -242,18 +242,18 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_flash_text(/permission denied/i)
+    assert_flash(:permission_denied)
 
     login("rolf")
     post(:create,
          params: { observation_id: obs.id,
                    collection_number: params.except(:name) })
-    assert_flash_text(/missing.*name/i)
+    assert_flash(:create_collection_number_missing_name)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create,
          params: { observation_id: obs.id,
                    collection_number: params.except(:number) })
-    assert_flash_text(/missing.*number/i)
+    assert_flash(:create_collection_number_missing_number)
     assert_equal(collection_number_count, CollectionNumber.count)
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
@@ -327,7 +327,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs.id, collection_number: params })
     assert_equal(collection_number_count + 1, CollectionNumber.count)
-    assert_flash_text(/shared/i)
+    assert_flash(:edit_collection_number_already_used)
     assert_obj_arrays_equal([number], obs.reload.collection_numbers)
   end
 
@@ -348,7 +348,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     post(:create,
          params: { observation_id: obs2.id, collection_number: params })
     assert_equal(collection_number_count, CollectionNumber.count)
-    assert_flash_text(/shared/i)
+    assert_flash(:edit_collection_number_already_used)
     assert_equal(1, obs1.reload.collection_numbers.count)
     assert_equal(3, obs2.reload.collection_numbers.count)
     assert_equal(2, number.reload.observations.count)
@@ -409,20 +409,20 @@ class CollectionNumbersControllerTest < FunctionalTestCase
 
     login("mary")
     patch(:update, params:)
-    assert_flash_text(/permission denied/i)
+    assert_flash(:permission_denied)
 
     # Test turbo shows flash warning
     patch(:update, params:, format: :turbo_stream)
-    assert_flash_text(/permission denied/i)
+    assert_flash(:permission_denied)
     assert_select("turbo-stream[action='update'][target$='_flash']")
 
     login("rolf")
     patch(:update, params: params.deep_merge(collection_number: { name: "" }))
-    assert_flash_text(/missing.*name/i)
+    assert_flash(:create_collection_number_missing_name)
     assert_not_equal("new number", number.reload.number)
 
     patch(:update, params: params.deep_merge(collection_number: { number: "" }))
-    assert_flash_text(/missing.*number/i)
+    assert_flash(:create_collection_number_missing_number)
     assert_not_equal("New Name", number.reload.name)
 
     patch(:update, params:)
@@ -482,7 +482,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     login("rolf")
     patch(:update,
           params: { id: num2.id, collection_number: params })
-    assert_flash_text(/Merged Rolf Singer 1 into Joe Schmoe 07-123a./)
+    assert_flash(:edit_collection_numbers_merged,
+                 this: num2.format_name, that: num1.format_name)
     assert_equal(collection_number_count - 1, CollectionNumber.count)
     new_num = obs1.reload.collection_numbers.first
     assert_obj_arrays_equal([new_num], obs1.collection_numbers)
