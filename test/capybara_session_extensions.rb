@@ -142,24 +142,33 @@ module CapybaraSessionExtensions
     session.assert_no_selector("#flash_notices")
   end
 
-  def assert_flash_text(text = "", session: self)
+  # expect: nil (presence only, no text check), a bare Symbol tag
+  # (resolved via .t, with **args as its interpolation args), or an
+  # Array of tags for a message built from more than one (each entry
+  # either a bare Symbol or a [Symbol, args_hash] pair).
+  def assert_flash_text(expect = nil, session: self, **args)
     session.assert_selector("#flash_notices")
-    session.assert_selector("#flash_notices", text: text)
+    return if expect.nil?
+
+    session.assert_selector("#flash_notices",
+                            text: resolve_flash_tags(expect, args).as_displayed)
   end
 
-  def assert_no_flash_text(text = "", session: self)
-    session.assert_no_selector("#flash_notices", text: text)
+  def assert_no_flash_text(expect, session: self, **args)
+    session.assert_no_selector(
+      "#flash_notices", text: resolve_flash_tags(expect, args).as_displayed
+    )
   end
 
-  def assert_flash_success(text = "", session: self)
+  def assert_flash_success(expect = nil, session: self, **args)
     session.assert_selector("#flash_notices.alert-success")
-    assert_flash_text(text, session: session) if text
+    assert_flash_text(expect, session:, **args) if expect
   end
 
-  def assert_flash_error(text = "", session: self)
+  def assert_flash_error(expect = nil, session: self, **args)
     session.assert_any_of_selectors("#flash_notices.alert-error",
                                     "#flash_notices.alert-danger")
-    assert_flash_text(text, session: session) if text
+    assert_flash_text(expect, session:, **args) if expect
   end
 
   def assert_no_flash_errors(session: self)

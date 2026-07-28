@@ -68,7 +68,7 @@ module SessionExtensions
   # Login the given user, testing to make sure it was successful.
   def login!(user, *)
     login(user, *)
-    assert_flash(/success/i)
+    assert_flash_success
     user = User.find_by(login: user) if user.is_a?(String)
     assert_users_equal(user, assigns(:user), "Wrong user ended up logged in!")
   end
