@@ -81,6 +81,34 @@ module Views::Controllers::Observations
       assert_no_html(html, "input[name='field_code_locked']")
     end
 
+    # The specimen controller checks "Specimen Available" when a code is
+    # typed into an empty box. Assert the wiring, since the controller is
+    # invisible to a rendering test and silently does nothing if a target
+    # or action is dropped.
+    def test_specimen_section_wires_up_the_specimen_controller
+      user = users(:rolf)
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create)
+
+      assert_html(html, "#observation_specimen_section[data-controller~=" \
+                        "'specimen']")
+      assert_html(html, "input[name='field_code']" \
+                        "[data-specimen-target='code']" \
+                        "[data-action~='input->specimen#codeChanged']")
+      assert_html(html, "input[name='observation[specimen]']" \
+                        "[data-specimen-target='checkbox']" \
+                        "[data-action~='change->specimen#checkboxChanged']")
+      assert_html(html, "#specimen_fields[data-specimen-target='fields']")
+      # The collection-number and accession-number inputs drive the same
+      # controller; their data-actions predate it and were dead until now.
+      assert_html(html, "input[name='observation[collection_number][number]']" \
+                        "[data-action~='specimen#checkCheckbox']")
+      assert_html(html,
+                  "input[name='observation[herbarium_record]" \
+                  "[accession_number]'][data-action~='specimen#checkCheckbox']")
+    end
+
     # --- Field Slip Notes ---
 
     # With a field code in play the form grows the slip's standard

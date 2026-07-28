@@ -3,6 +3,51 @@
 require("application_system_test_case")
 
 class ObservationFormSystemTest < ApplicationSystemTestCase
+  # The specimen controller is browser-only behavior — a rendering test
+  # can assert the wiring but not that it fires. See #4932.
+  def test_field_slip_code_checks_specimen_available
+    login!(users(:zero_user))
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    assert_no_selector("#observation_specimen[checked]")
+    assert_not_predicate(find_by_id("observation_specimen"), :checked?)
+
+    fill_in("field_code", with: "NEMF-1234")
+
+    assert(find_by_id("observation_specimen").checked?,
+           "typing a code into an empty box checks Specimen Available")
+    # CheckboxCollapse's Bootstrap toggle sits on the label, so the
+    # controller has to open the section itself.
+    assert_selector("#specimen_fields.in")
+  end
+
+  # An explicit uncheck sticks while the code is being edited, and only a
+  # full blanking of the field re-arms the automation.
+  def test_specimen_uncheck_survives_further_code_edits
+    login!(users(:zero_user))
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+
+    fill_in("field_code", with: "NEMF-1234")
+    assert(find_by_id("observation_specimen").checked?)
+
+    uncheck("observation_specimen")
+    fill_in("field_code", with: "NEMF-12345")
+
+    assert_not_predicate(find_by_id("observation_specimen"), :checked?,
+                         "editing the code must not undo a deliberate uncheck")
+
+    # Backspace to empty rather than fill_in(with: ""), which Cuprite
+    # applies without emitting the input events a real user generates.
+    fill_in("field_code", with: "N")
+    find_by_id("field_code").send_keys(:backspace)
+    fill_in("field_code", with: "NEMF-9999")
+
+    assert(find_by_id("observation_specimen").checked?,
+           "blanking the code and retyping re-arms the automation")
+  end
+
   def test_create_minimal_observation
     browser = page.driver.browser
     user = users(:zero_user)

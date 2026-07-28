@@ -24,7 +24,8 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   prop :accession_number, _Nilable(String), default: nil
 
   def view_template
-    div(id: "observation_specimen_section") do
+    div(id: "observation_specimen_section",
+        data: { controller: "specimen" }) do
       render_field_slip_code
       render_specimen_checkbox
       render_edit_help if update?
@@ -44,7 +45,9 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
              attributes: {
                wrap_class: "mt-0",
                help: :form_observations_specimen_available_help.t,
-               help_collapse: true
+               help_collapse: true,
+               data: { specimen_target: "checkbox",
+                       action: "change->specimen#checkboxChanged" }
              }
            ))
   end
@@ -54,7 +57,8 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   end
 
   def render_specimen_fields
-    Collapsible(id: "specimen_fields", expanded: @observation.specimen) do
+    Collapsible(id: "specimen_fields", expanded: @observation.specimen,
+                data: { specimen_target: "fields" }) do
       render_collection_number_fields
       render_herbarium_record_fields
     end
@@ -134,7 +138,9 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   def render_field_slip_code
     @form.text_field("field_code",
                      label: :form_observations_field_slip_code,
-                     value: @field_code)
+                     value: @field_code,
+                     data: { specimen_target: "code",
+                             action: "input->specimen#codeChanged" })
   end
 
   def create?
