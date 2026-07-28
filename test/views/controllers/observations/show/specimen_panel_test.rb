@@ -42,6 +42,15 @@ class Views::Controllers::Observations::Show::SpecimenPanelTest <
     assert_html(html, "a.panel-collapse-trigger[aria-expanded='true']")
   end
 
+  def test_expanded_when_records_present_even_without_specimen_flag
+    assert_not_empty(@obs.collection_numbers)
+    @obs.specimen = false
+
+    html = render(panel_with(@obs))
+
+    assert_html(html, "a.panel-collapse-trigger[aria-expanded='true']")
+  end
+
   def test_collapsed_when_no_records_regardless_of_specimen_flag
     obs = observations(:imageless_unvouchered_obs)
     assert_empty(obs.collection_numbers)
