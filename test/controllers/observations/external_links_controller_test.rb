@@ -472,6 +472,27 @@ module Observations
       assert_select("turbo-stream[target='observation_external_links']")
     end
 
+    # Same, but the observation belongs to an occurrence: the sibling
+    # list handed to the re-rendered panel must be a real Array — a raw
+    # AssociationRelation trips the panel's typed prop and 500s the
+    # delete (seen in prod-data testing on #4853).
+    def test_remove_external_link_turbo_on_occurrence_member
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      obs = link.observation
+      sibling = observations(:detailed_unknown_obs)
+      [obs, sibling].each { |o| o.update_column(:occurrence_id, nil) }
+      occ = Occurrence.create!(user: obs.user, primary_observation: obs)
+      obs.update!(occurrence: occ)
+      sibling.update!(occurrence: occ)
+
+      login("mary")
+      delete(:destroy, params: { id: link.id }, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_nil(ExternalLink.safe_find(link.id))
+      assert_select("turbo-stream[target='observation_external_links']")
+    end
+
     def test_remove_external_link_not_logged_in
       # obs owned by rolf, mary created link and is member of site's project
       link = external_links(:coprinus_comatus_obs_inaturalist_link)

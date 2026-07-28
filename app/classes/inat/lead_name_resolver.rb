@@ -87,12 +87,11 @@ class Inat
                  name: name,
                  rank: rank }
       api = API2.execute(params)
-      if api.errors.any?
-        raise("Failed to create name #{name.inspect}: " \
-              "#{api.errors.join(", ")}")
-      end
+      return api.results.first unless api.errors.any?
+      return name_with_trusted_rank(name, rank) if rank_parse_error?(api)
 
-      api.results.first
+      raise("Failed to create name #{name.inspect}: " \
+            "#{api.errors.join(", ")}")
     end
 
     def api_key
@@ -100,6 +99,23 @@ class Inat
     end
 
     private
+
+    def rank_parse_error?(api)
+      api.errors.any? do |e|
+        e.is_a?(API2::NameDoesntParse) || e.is_a?(API2::NameWrongForRank)
+      end
+    end
+
+    # iNat's declared rank is authoritative even when the name string
+    # conflicts with MO's rank-guessing heuristic (e.g. suffix collisions
+    # like "-ineae" matching Suborder before Tribe, as with
+    # "Leucocoprineae"). This bypasses only this internal fallback; the
+    # public Name-creation API's parse check is unchanged for other
+    # callers.
+    def name_with_trusted_rank(name, rank)
+      Name.create_with_trusted_rank(user, name, rank) ||
+        raise("Failed to create name #{name.inspect} at rank #{rank}")
+    end
 
     def find_or_create_override_name
       find_or_create_name(Name.parse_name(inat_obs.name_override)) ||

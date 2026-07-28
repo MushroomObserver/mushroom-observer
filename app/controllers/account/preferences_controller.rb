@@ -89,7 +89,7 @@ module Account
       if password == params[:user][:password_confirmation]
         @user.change_password(password)
       else
-        @user.errors.add(:password, :runtime_prefs_password_no_match.t)
+        @user.errors.add(:password, :runtime_prefs_password_no_match)
       end
     end
 

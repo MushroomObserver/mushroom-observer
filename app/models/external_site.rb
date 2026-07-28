@@ -38,7 +38,7 @@ class ExternalSite < AbstractModel
   def check_url_syntax
     return if format_base_url
 
-    errors.add(:base_url, :validate_invalid_url.t)
+    errors.add(:base_url, :validate_invalid_url)
   end
 
   def format_base_url

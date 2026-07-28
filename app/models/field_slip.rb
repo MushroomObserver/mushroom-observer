@@ -15,7 +15,7 @@ class FieldSlip < AbstractModel
   validates :code, presence: true
   validate do |field_slip|
     unless field_slip.code.match?(/[^\d.-]/)
-      errors.add(:code, :format, message: :field_slip_code_format_error.t)
+      errors.add(:code, :field_slip_code_format_error)
     end
   end
 

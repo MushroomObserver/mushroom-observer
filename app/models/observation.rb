@@ -1103,6 +1103,37 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # True when this observation is a read-only reflection of an imported
+  # source (#4214): its scalar core (date/location/GPS/notes) mirrors the
+  # source and is refreshed from it by resync (#4215), so MO-side edits to
+  # those fields are blocked. The name is deliberately not in that list --
+  # iNat's identifications are mirrored at import time only, and tracking
+  # them afterwards waits on the identification-sync slice of #4215.
+  # `reflected_at` is stamped at import time for new imports (clean by
+  # construction) and by the #4585 resolution engine for the verified
+  # backlog; NULL means editable (not a reflection).
+  def reflection?
+    reflected_at.present?
+  end
+
+  # All read-only reflections in this observation's occurrence -- the
+  # set an occurrence-wide resync (#4215) refreshes. Sync is an
+  # occurrence-level event: users want every mirrored record current at
+  # once, not per-record control. An observation with no occurrence is
+  # treated as an occurrence of one.
+  def sync_reflections
+    members = occurrence ? occurrence.observations : [self]
+    members.select(&:reflection?)
+  end
+
+  # Whether this observation's page offers a Sync button. Any logged-in
+  # user may trigger a sync -- it applies no user input, converging on
+  # source-canonical data, the same refresh the scheduled batch performs
+  # with no user at all (#4215).
+  def syncable?
+    sync_reflections.any?
+  end
+
   # Do we want to prominently advertise the source of this observation?
   # An import link makes it noteworthy; otherwise a non-website entry agent.
   def source_noteworthy?
@@ -1430,9 +1461,9 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
       Date.parse(@when_str)
     rescue ArgumentError
       if /^\d{4}-\d{1,2}-\d{1,2}$/.match?(@when_str)
-        errors.add(:when_str, :runtime_date_invalid.t)
+        errors.add(:when_str, :runtime_date_invalid)
       else
-        errors.add(:when_str, :runtime_date_should_be_yyyymmdd.t)
+        errors.add(:when_str, :runtime_date_should_be_yyyymmdd)
       end
     end
   end
@@ -1444,16 +1475,16 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     if where.to_s.blank? && !location_id
       self.location = Location.unknown
-      # errors.add(:where, :validate_observation_where_missing.t)
+      # errors.add(:where, :validate_observation_where_missing)
     elsif where.to_s.size > 1024
-      errors.add(:where, :validate_observation_where_too_long.t)
+      errors.add(:where, :validate_observation_where_too_long)
     end
   end
 
   def check_user
     return if user || @current_user
 
-    errors.add(:user, :validate_observation_user_missing.t)
+    errors.add(:user, :validate_observation_user_missing)
   end
 
   def check_coordinates
@@ -1465,14 +1496,14 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def check_latitude
     if lat.blank? && lng.present? ||
        lat.present? && !Location.parse_latitude(lat)
-      errors.add(:lat, :runtime_lat_long_error.t)
+      errors.add(:lat, :runtime_lat_long_error)
     end
   end
 
   def check_longitude
     if lat.present? && lng.blank? ||
        lng.present? && !Location.parse_longitude(lng)
-      errors.add(:lng, :runtime_lat_long_error.t)
+      errors.add(:lng, :runtime_lat_long_error)
     end
   end
 
@@ -1481,7 +1512,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # As of July 5, 2020 this statement appears to be unreachable
     # because .to_i returns 0 for unparsable strings.
-    errors.add(:alt, :runtime_altitude_error.t)
+    errors.add(:alt, :runtime_altitude_error)
   end
 
   def check_hidden

@@ -25,12 +25,7 @@ module ObservationsController::EditAndUpdate
   #   @good_images                      list of images already attached
   #
   def edit
-    return unless find_observation!
-
-    # Make sure user owns this observation!
-    unless permission!(@observation)
-      redirect_to(action: :show, id: @observation.id) and return
-    end
+    return unless editable_or_redirect?
 
     init_license_var
     init_new_image_var(@observation.when)
@@ -51,6 +46,36 @@ module ObservationsController::EditAndUpdate
   def find_observation!
     @observation = Observation.edit_includes.safe_find(params[:id]) ||
                    flash_error_and_goto_index(Observation, params[:id])
+  end
+
+  # Both edit and update bail early on a missing obs, a permission
+  # failure, or a read-only reflection (#4214 — change it at the source
+  # and resync). Permission is checked first so a non-owner gets the
+  # standard permission-denied error; only users who could otherwise
+  # edit see the reflection warning. Returns true only when the request
+  # may proceed; each guard performs its own redirect when it stops the
+  # request.
+  def editable_or_redirect?
+    return false unless find_observation!
+
+    unless permission!(@observation)
+      redirect_to(action: :show, id: @observation.id)
+      return false
+    end
+    return false if redirect_if_reflection!
+
+    true
+  end
+
+  # A read-only reflection can't have its scalar core edited on MO.
+  # Adding namings/comments/images is still allowed, so the guard is on
+  # the edit form itself, not a blanket record lock. Returns the redirect
+  # (truthy) when it stops the request, nil otherwise.
+  def redirect_if_reflection!
+    return unless @observation.reflection?
+
+    flash_warning(:edit_observation_is_reflection.t)
+    redirect_to(action: :show, id: @observation.id)
   end
 
   # Edit-mode: just build the union of projects to display. The
@@ -75,9 +100,7 @@ module ObservationsController::EditAndUpdate
   public
 
   def update
-    return unless find_observation!
-    return redirect_to(action: :show, id: @observation.id) \
-      unless permission!(@observation)
+    return unless editable_or_redirect?
 
     init_update
     apply_observation_changes

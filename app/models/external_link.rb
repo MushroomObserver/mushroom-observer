@@ -98,7 +98,7 @@ class ExternalLink < AbstractModel
   def check_url_syntax
     return if url.blank? || format_url_for_external_site
 
-    errors.add(:url, :validate_invalid_url.t)
+    errors.add(:url, :validate_invalid_url)
   end
 
   # A target has at most one import link (its authoritative external
@@ -110,7 +110,7 @@ class ExternalLink < AbstractModel
     others = others.where.not(id: id) if id
     return unless others.exists?
 
-    errors.add(:relationship, :validate_one_import_per_target.t)
+    errors.add(:relationship, :validate_one_import_per_target)
   end
 
   # Enforce the external_id XOR url invariant: a blank external_id is stored as

@@ -201,11 +201,8 @@ class Occurrence < AbstractModel
     return if occurrences.size <= 1
 
     occ = new
-    occ.errors.add(
-      :base,
-      "Cannot combine observations from multiple existing " \
-      "occurrences (IDs: #{occurrences.map(&:id).join(", ")})"
-    )
+    occ.errors.add(:base, :occurrence_multiple_existing,
+                   ids: occurrences.map(&:id).join(", "))
     raise(ActiveRecord::RecordInvalid.new(occ))
   end
 
@@ -231,8 +228,8 @@ class Occurrence < AbstractModel
 
     occ = new
     occ.errors.add(
-      :base,
-      :occurrence_field_slip_conflict.t(codes: codes.join(", "))
+      :base, :occurrence_field_slip_conflict,
+      codes: ERB::Util.html_escape(codes.join(", "))
     )
     raise(ActiveRecord::RecordInvalid.new(occ))
   end
@@ -242,7 +239,8 @@ class Occurrence < AbstractModel
     return if obs_list.size <= MAX_OBSERVATIONS
 
     occ = new
-    occ.errors.add(:base, "Cannot exceed #{MAX_OBSERVATIONS} observations")
+    occ.errors.add(:base, :occurrence_max_observations_exceeded,
+                   max: MAX_OBSERVATIONS)
     raise(ActiveRecord::RecordInvalid.new(occ))
   end
 
@@ -284,7 +282,7 @@ class Occurrence < AbstractModel
     return if primary_observation_belongs?
 
     errors.add(:primary_observation,
-               "must belong to this occurrence")
+               :occurrence_primary_observation_must_belong)
   end
 
   def primary_observation_belongs?
@@ -298,8 +296,8 @@ class Occurrence < AbstractModel
   def observation_count_within_limits
     return if observations.count <= MAX_OBSERVATIONS
 
-    errors.add(:observations,
-               "must have at most #{MAX_OBSERVATIONS} observations")
+    errors.add(:observations, :occurrence_observations_max,
+               max: MAX_OBSERVATIONS)
   end
 
   def dissolve_transaction(non_primary)

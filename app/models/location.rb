@@ -998,42 +998,42 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def validate_latitude
     if !north || north > 90
-      errors.add(:north, :validate_location_north_too_high.t)
+      errors.add(:north, :validate_location_north_too_high)
     end
     if !south || south < -90
-      errors.add(:south, :validate_location_south_too_low.t)
+      errors.add(:south, :validate_location_south_too_low)
     end
     return unless north && south && north < south
 
-    errors.add(:north, :validate_location_north_less_than_south.t)
+    errors.add(:north, :validate_location_north_less_than_south)
   end
 
   def validate_longitude
     if !east || east < -180 || east > 180
-      errors.add(:east, :validate_location_east_out_of_bounds.t)
+      errors.add(:east, :validate_location_east_out_of_bounds)
     end
     return unless !west || west < -180 || west > 180
 
-    errors.add(:west, :validate_location_west_out_of_bounds.t)
+    errors.add(:west, :validate_location_west_out_of_bounds)
   end
 
   def validate_elevation
     return unless high && low && high < low
 
-    errors.add(:high, :validate_location_high_less_than_low.t)
+    errors.add(:high, :validate_location_high_less_than_low)
   end
 
   def validate_user
     return if user || current_user
 
-    errors.add(:user, :validate_location_user_missing.t)
+    errors.add(:user, :validate_location_user_missing)
   end
 
   def validate_name
     if name.to_s.size > 1024
-      errors.add(:name, :validate_location_name_too_long.t)
+      errors.add(:name, :validate_location_name_too_long)
     elsif name.empty?
-      errors.add(:name, :validate_missing.t(field: :name))
+      errors.add(:name, :validate_missing, field: :name)
     end
   end
 end
