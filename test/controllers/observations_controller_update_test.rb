@@ -862,7 +862,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       end
     end
 
-    assert_flash_text(:runtime_no_save_observation.t)
+    assert_flash(:runtime_no_save_observation)
     # Re-renders the edit form rather than redirecting.
     assert_response(:success)
   end
