@@ -63,6 +63,20 @@ class Views::Controllers::Observations::Show::SpecimenPanelTest <
     assert_html(html, "a.panel-collapse-trigger[aria-expanded='false']")
   end
 
+  def test_expanded_when_no_own_records_but_sibling_has_records
+    obs = observations(:imageless_unvouchered_obs)
+    assert_empty(obs.collection_numbers)
+    assert_empty(obs.herbarium_records)
+    assert_empty(obs.sequences)
+
+    sibling = sequences(:deposited_sequence).observation
+    assert_not_empty(sibling.sequences)
+
+    html = render(panel_with(obs, siblings: [sibling]))
+
+    assert_html(html, "a.panel-collapse-trigger[aria-expanded='true']")
+  end
+
   # Sibling records: when a sibling carries a Sequence with a
   # deposit URL, the panel renders the sibling sequence row +
   # the `[archive]` link from `SiblingRecords`. Covers the

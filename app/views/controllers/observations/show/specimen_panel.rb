@@ -28,9 +28,14 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
     @obs.occurrence&.has_specimen || @obs.specimen
   end
 
+  # Own records or a sibling's -- render_collection_numbers/
+  # render_herbarium_records/render_sequences all render sibling rows
+  # too, so the default expanded/collapsed state has to account for
+  # them as well, not just @obs's own associations.
   def specimen_records?
-    @obs.collection_numbers.any? || @obs.herbarium_records.any? ||
-      @obs.sequences.any?
+    [:collection_numbers, :herbarium_records, :sequences].any? do |assoc|
+      @obs.send(assoc).any? || sibling_has?(assoc)
+    end
   end
 
   def render_heading
