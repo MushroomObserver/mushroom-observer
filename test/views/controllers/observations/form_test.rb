@@ -53,6 +53,22 @@ module Views::Controllers::Observations
       assert_html(html, "input[type='file'][accept='image/*']")
     end
 
+    # #4687 moved colon-appending into the field helper, but these two
+    # labels were still being built with a trailing colon by hand, so they
+    # rendered "Fungarium Name::" / "Accession Number::".
+    def test_specimen_labels_have_a_single_colon
+      user = users(:rolf)
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create)
+
+      [:herbarium_record_herbarium_name,
+       :herbarium_record_accession_number].each do |key|
+        assert_html(html, "label", text: "#{key.l}:")
+        assert_no_html(html, "label", text: "#{key.l}::")
+      end
+    end
+
     # --- Field Slip Code ---
 
     def test_new_form_shows_editable_field_slip_code
