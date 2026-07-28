@@ -540,6 +540,26 @@ class InatImportJobTest < ActiveJob::TestCase
     assert(obs.sequences.none?)
   end
 
+  # Use iNat's rank if it conflicts with MO's rank-guessing heuristic.
+  # MO's rank-guessing suffix-based heuristic can give an incorrect rank
+  # for Names ending in `eae`.
+  def test_import_job_ambiguous_rank_suffix
+    create_ivars_from_filename("leucocoprineae")
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    name = Name.find_by(text_name: "Leucocoprineae", rank: "Tribe")
+    assert_not_nil(
+      name, "Failed to create Name at iNat's declared rank Tribe"
+    )
+    assert_equal(name, obs.name, "Wrong consensus id")
+  end
+
   # Prove that Namings, Votes, Identification are correct
   # when iNat obs has provisional name that wasn't in MO
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
