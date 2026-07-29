@@ -20,7 +20,7 @@ module Account
         }
       }
       patch(:update, params: params)
-      assert_flash_text(:runtime_profile_success.t)
+      assert_flash(:runtime_profile_success)
 
       # Make sure changes were made.
       user = rolf.reload
@@ -46,7 +46,7 @@ module Account
               }
             })
 
-      assert_flash_text(:runtime_no_changes.t)
+      assert_flash(:runtime_no_changes)
     end
 
     # place_name doesn't match any Location → @need_location = true →
@@ -65,7 +65,7 @@ module Account
               }
             })
 
-      assert_flash_text(:runtime_profile_must_define.t)
+      assert_flash(:runtime_profile_must_define)
       assert_redirected_to(new_location_path(where: unknown,
                                              set_user: rolf.id))
     end

@@ -15,12 +15,12 @@ module Users
       # redirects to that user's page (instead of an email form).
       user = users(:no_general_questions_user)
       requires_login(:new, id: user.id)
-      assert_flash_text(:permission_denied.t)
+      assert_flash(:permission_denied)
 
       # Prove that it won't email someone who has opted out of all emails.
       mary.update(no_emails: true)
       requires_login(:new, id: mary.id)
-      assert_flash_text(:permission_denied.t)
+      assert_flash(:permission_denied)
     end
 
     def test_send_user_question
@@ -45,7 +45,7 @@ module Users
       end
 
       assert_redirected_to(user_path(mary.id))
-      assert_flash_text(:runtime_ask_user_question_success.t)
+      assert_flash(:runtime_ask_user_question_success)
     end
 
     def test_send_user_question_missing_subject
@@ -59,7 +59,7 @@ module Users
       }
       post(:create, params: params)
       assert_redirected_to(user_path(mary.id))
-      assert_flash_text(:runtime_ask_user_question_missing_fields.t)
+      assert_flash(:runtime_ask_user_question_missing_fields)
     end
 
     def test_send_user_question_missing_message
@@ -73,7 +73,7 @@ module Users
       }
       post(:create, params: params)
       assert_redirected_to(user_path(mary.id))
-      assert_flash_text(:runtime_ask_user_question_missing_fields.t)
+      assert_flash(:runtime_ask_user_question_missing_fields)
     end
 
     def test_new_turbo_stream

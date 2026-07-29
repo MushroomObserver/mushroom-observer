@@ -912,7 +912,7 @@ class OccurrencesControllerTest < FunctionalTestCase
     assert_equal(1, occ.observations.count)
     # redirect_after_dissolve field_slip path
     assert_redirected_to(occurrence_path(occ))
-    assert_flash(/updated/i)
+    assert_flash(:occurrence_updated)
   end
 
   def test_destroy_missing_occurrence

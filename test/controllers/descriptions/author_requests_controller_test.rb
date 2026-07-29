@@ -37,7 +37,7 @@ module Descriptions
         post(:create, params: params)
       end
       assert_redirected_to(name_description_path(desc.id))
-      assert_flash_text(:request_success.t)
+      assert_flash(:request_success)
     end
 
     def test_create_location_description
@@ -58,7 +58,7 @@ module Descriptions
         post(:create, params: params)
       end
       assert_redirected_to(location_description_path(desc.id))
-      assert_flash_text(:request_success.t)
+      assert_flash(:request_success)
     end
   end
 end

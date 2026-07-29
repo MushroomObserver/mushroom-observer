@@ -114,8 +114,9 @@ module Observations
       put(:update, params: params)
 
       assert_flash_error(
-        "Flash error should display if trying to remove an Observation " \
-        "from a SpeciesList with an invalid `commit` mode"
+        on_fail: "Flash error should display if trying to remove an " \
+                 "Observation from a SpeciesList with an invalid " \
+                 "`commit` mode"
       )
       assert(spl.reload.observations.member?(obs),
              "Observation should remain in Observation List")

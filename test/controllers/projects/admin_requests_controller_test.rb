@@ -15,7 +15,7 @@ module Projects
       }
       post_requires_login(:create, params)
       assert_redirected_to(project_path(eol_project.id))
-      assert_flash_text(:admin_request_success.t(title: eol_project.title))
+      assert_flash(:admin_request_success, title: eol_project.title)
     end
 
     def test_admin_request

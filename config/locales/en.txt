@@ -1457,7 +1457,6 @@
   name_error_unregistrable: The [rank] '[name]' is not eligible for an ICN identifier.
   name_error_icn_id_in_use: An ICN identifier number may be used by only one Name. '[number]' is already used by '[name]'.
   name_error_field_start: "[field] must not start with '[start]'."
-  name_error_field_end: "[field] must not end with '[end]'."
 
   # observations/_form_naming
   form_naming_confidence: Confidence
@@ -2803,7 +2802,7 @@
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
-  inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
+  inat_list_xor_all: "Choose exactly one: (1) list observation IDs, (2) supply a URL, or (3) check \"[:inat_import_all]\""
   inat_url_label: Observations from an iNat search URL
   inat_url_hint: "On iNat, filter observations by taxon, place, date, quality grade, etc., then copy the URL from your browser and paste it here. Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
   inat_invalid_url: "URL must be a filtered iNat observations URL or iNat API observation search URL"
@@ -3877,7 +3876,10 @@
   runtime_added_id_to: "Successfully added [type] #[value] to [name]."
   runtime_added_name: Successfully added [type] '[value]'.
   runtime_added_to: Successfully added [type] to [name].
+  runtime_admin_invalid_ip: "Invalid IP address: \"[ip]\""
   runtime_admin_only: That operation is restricted to site admins.
+  runtime_admin_switch_users_not_found: "Couldn't find \"[id]\".  Play again?"
+  runtime_admin_switch_users_not_verified: This user is not verified yet!
   runtime_already_exists: "[Type] already exists: '[value]'"
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
@@ -3998,6 +4000,7 @@
   runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
   runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
   runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
+  runtime_invalid_sort_order: "Can't figure out how to sort [types] by :[order_by]."
   runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
   runtime_license_duplicate_attributed: Duplicate display_name, form_name, or url
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"

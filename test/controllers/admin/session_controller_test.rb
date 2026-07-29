@@ -35,7 +35,7 @@ module Admin
       assert_users_equal(rolf, logged_in_user)
       put(:update, params: { id: "unverified" })
       assert_users_equal(rolf, logged_in_user)
-      assert_flash(/not verified yet/)
+      assert_flash(:runtime_admin_switch_users_not_verified)
       put(:update, params: { id: "Frosted Flake" })
       assert_users_equal(rolf, logged_in_user)
       put(:update, params: { id: mary.id })

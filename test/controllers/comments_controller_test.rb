@@ -41,7 +41,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_target_invalid_target_type
@@ -50,8 +50,8 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
+    assert_flash(:runtime_invalid, type: '"type"',
+                                   value: params[:type].to_s)
   end
 
   def test_index_target_for_non_model
@@ -59,8 +59,8 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_flash_text(:runtime_invalid.t(type: '"type"',
-                                         value: params[:type].to_s))
+    assert_flash(:runtime_invalid, type: '"type"',
+                                   value: params[:type].to_s)
   end
 
   def test_index_pattern_search_str
@@ -117,7 +117,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_by_user_nonexistent_user
@@ -126,7 +126,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: id })
 
-    assert_flash_text(:runtime_object_not_found.l(type: :user, id: id))
+    assert_flash(:runtime_object_not_found, type: :user, id: id)
     assert_redirected_to(comments_path)
   end
 
@@ -164,7 +164,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: user.id })
 
-    assert_flash_text(:runtime_no_matches.l(types: "comments"))
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_for_user_nonexistent_user
@@ -173,7 +173,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: id })
 
-    assert_flash_text(:runtime_object_not_found.l(type: :user, id: id))
+    assert_flash(:runtime_object_not_found, type: :user, id: id)
     assert_redirected_to(comments_path)
   end
 
@@ -265,8 +265,10 @@ class CommentsControllerTest < FunctionalTestCase
     login(:katrina)
 
     get(:new, params:)
-    assert_flash_error("MO should flash if trying to comment on object" \
-                       "for which user lacks read privileges")
+    assert_flash_error(
+      on_fail: "MO should flash if trying to comment on object" \
+               "for which user lacks read privileges"
+    )
 
     # Test turbo shows flash error
     get(:new, params:, format: :turbo_stream)
@@ -341,7 +343,7 @@ class CommentsControllerTest < FunctionalTestCase
                           comment: comment.comment } }
     login("rolf")
     put(:update, params: params)
-    assert_flash_text(:runtime_no_changes.t)
+    assert_flash(:runtime_no_changes)
   end
 
   def test_update_comment_with_invalid_params_re_renders_form

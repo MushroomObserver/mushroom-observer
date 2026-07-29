@@ -199,8 +199,8 @@ class LocationsControllerTest < FunctionalTestCase
     get(:show, params: { id: loc.id, desc: bad_desc_id })
 
     assert_select("body.locations__show")
-    assert_flash_text(:runtime_object_not_found.t(type: :description,
-                                                  id: bad_desc_id))
+    assert_flash(:runtime_object_not_found, type: :description,
+                                            id: bad_desc_id)
   end
 
   def test_show_location_with_unreadable_description
@@ -414,7 +414,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { country: country })
 
     assert_select("body.locations__index")
-    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_flash(:runtime_no_matches, type: :location)
     assert_select(
       "#content a:match('href', ?)", %r{#{locations_path}/\d+},
       { count: matches.count }, "Wrong number of Locations"
@@ -456,7 +456,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_select("body.locations__index")
-    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_flash(:runtime_no_matches, type: :location)
   end
 
   def test_index_by_user_bad_user_id
@@ -465,9 +465,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(locations_path)
   end
 
@@ -509,7 +507,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { by_editor: user.id })
 
     assert_select("body.locations__index")
-    assert_flash_text(:runtime_no_matches.l(type: :locations.l))
+    assert_flash(:runtime_no_matches, type: :location)
   end
 
   def test_index_by_editor_bad_user_i
@@ -518,9 +516,7 @@ class LocationsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(locations_path)
   end
 
@@ -757,9 +753,8 @@ class LocationsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_flash_warning(:runtime_location_already_exists.t(
-                           name: existing_loc.display_name
-                         ))
+    assert_flash_warning(:runtime_location_already_exists,
+                         name: existing_loc.display_name)
     # Should redirect to observation if set_observation, else to location
     assert_redirected_to(location_path(existing_loc.id))
   end
@@ -1157,7 +1152,7 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     put(:update, params: params)
 
-    assert_flash_warning(:runtime_edit_location_no_change.t)
+    assert_flash_warning(:runtime_edit_location_no_change)
     assert_redirected_to(location_path(loc.id))
   end
 

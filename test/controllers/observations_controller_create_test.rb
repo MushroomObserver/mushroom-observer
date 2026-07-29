@@ -390,7 +390,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post_requires_login(:create, params)
 
     assert_flash_success(
-      "Omitting Scientific Name should not cause flash error or warning."
+      on_fail: "Omitting Scientific Name should not cause flash error " \
+               "or warning."
     )
     assert_equal(
       fungi, Observation.last.name,

@@ -264,7 +264,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("GlossaryTerm.count") do
       post(:create, params: params)
     end
-    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_flash(:glossary_error_name_blank)
     assert_response(:success)
   end
 
@@ -276,7 +276,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("GlossaryTerm.count") do
       post(:create, params: params)
     end
-    assert_flash(/#{:glossary_error_description_or_image.t}/)
+    assert_flash(:glossary_error_description_or_image)
   end
 
   def test_create_glossary_term_duplicate_name
@@ -288,10 +288,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_no_difference("GlossaryTerm.count") do
       post(:create, params: params)
     end
-    assert_flash(
-      # Must be quoted because it contains Regexp metacharacters "(" and ")"
-      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
-    )
+    assert_flash(:glossary_error_duplicate_name)
   end
 
   def test_create_glossary_term_invalid_name_with_image
@@ -304,7 +301,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
         post(:create, params: params)
       end
     end
-    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_flash(:glossary_error_name_blank)
   end
 
   def test_create_glossary_term_image_save_failure
@@ -396,7 +393,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
 
     post(:create, params: params)
-    assert_flash(/#{:glossary_error_name_blank.t}/)
+    assert_flash(:glossary_error_name_blank)
   end
 
   def test_update_glossary_term_no_description_or_image
@@ -405,7 +402,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
 
     post(:create, params: params)
-    assert_flash(/#{:glossary_error_description_or_image.t}/)
+    assert_flash(:glossary_error_description_or_image)
   end
 
   def test_update_glossary_term_duplicate_name
@@ -415,10 +412,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login
 
     post(:update, params: params)
-    assert_flash(
-      # Must be quoted because it contains Regexp metacharacters "(" and ")"
-      Regexp.new(Regexp.quote(:glossary_error_duplicate_name.t))
-    )
+    assert_flash(:glossary_error_duplicate_name)
   end
 
   # ***** destroy *****
@@ -462,7 +456,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
     delete(:destroy, params: { id: term.id })
 
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert_response(:redirect)
     assert(GlossaryTerm.exists?(term.id),
            "Non-admin should not be able to destroy glossary term")

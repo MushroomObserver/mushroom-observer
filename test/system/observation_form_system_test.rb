@@ -37,9 +37,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     within("#observation_form") { click_commit }
 
-    assert_flash_error(
-      :form_observations_there_is_a_problem_with_name.t.html_to_ascii
-    )
+    assert_flash_error(:form_observations_there_is_a_problem_with_name)
     assert_selector("#observation_form")
 
     # hard to test the internals of map, but this will pick up map load errors
@@ -104,10 +102,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within("#observation_form") { click_commit }
 
     assert_selector("body.observations__show")
-    assert_flash_success(/created observation/i)
+    new_obs = Observation.last
+    assert_flash_success(:runtime_observation_success, id: new_obs.id)
 
     # Verify reason 2 was NOT stored (checkbox was unchecked before submit)
-    new_obs = Observation.last
     new_naming = new_obs.namings.last
     assert_not_nil(new_naming, "Observation should have a naming")
     assert_not(new_naming.reasons.key?(2),
@@ -156,10 +154,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within("#observation_form") { click_commit }
 
     # Observation should have saved with the existing location_id for U.P.
-    assert_flash_success(/created observation/i)
     assert_selector("body.observations__show")
-
     obs = Observation.last
+    assert_flash_success(:runtime_observation_success, id: obs.id)
+
     assert_equal(existing_loc.name, obs.where)
     assert_equal(existing_loc.id, obs.location_id)
     assert_not_equal(Location.last.id, obs.location_id)
@@ -567,7 +565,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     # rejected, but images uploaded
     assert_selector("body.observations__new", wait: 12)
-    assert_flash_for_images_uploaded
+    assert_flash_for_images_uploaded("Coprinus_comatus.jpg")
     assert_has_location_warning(/Unknown country/)
 
     # check form values after first changes
@@ -761,7 +759,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     new_obs = Observation.last
     assert_selector("body.observations__show")
     click_and_confirm(find(".destroy_observation_link_#{new_obs.id}"))
-    assert_flash_for_destroy_observation
+    assert_flash_for_destroy_observation(new_obs.id)
     assert_selector("body.observations__index")
 
     # Make sure observation is not in log index
@@ -1363,30 +1361,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :assert_show_observation_page_has_important_info
 
-  def review_flash(patterns)
-    patterns.each { |pat| assert_flash_success(pat) }
+  def assert_flash_for_images_uploaded(filename)
+    assert_flash_success(:runtime_image_uploaded, name: filename)
   end
 
-  def assert_flash_for_images_uploaded
-    review_flash([/uploaded image/i])
-  end
-
-  def assert_flash_for_create_observation
-    review_flash([/success/i, /created observation/i,
-                  /created proposed name/i])
-  end
-
-  def assert_flash_for_create_location
-    review_flash([/success/i, /created location/i])
-  end
-
-  def assert_flash_for_edit_observation
-    review_flash([/success/i, /updated observation/i,
-                  /updated notes on image/i])
-  end
-
-  def assert_flash_for_destroy_observation
-    review_flash([/success/i, /destroyed/i])
+  def assert_flash_for_destroy_observation(id)
+    assert_flash_success(:runtime_destroy_observation_success, id: id)
   end
 
   def assert_has_location_warning(regex)
