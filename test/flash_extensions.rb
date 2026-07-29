@@ -55,20 +55,18 @@ module FlashExtensions
   # not the expected flash content itself (that's `expect`/`args`).
   #
   # object_error_type/object_error_attribute: pass BOTH together, and
-  # ONLY when asserting a flash_object_errors(record) validation
-  # message -- AbstractModel#formatted_errors composes those as
-  # "<Type> <attribute> <message>." (see its source) rather than just
-  # resolving one tag, so `expect` alone can't express them:
+  # ONLY on a bare-Symbol `expect` asserting a flash_object_errors(record)
+  # validation message -- AbstractModel#formatted_errors composes those
+  # as "<Type> <attribute> <message>." (see its source) rather than
+  # just resolving one tag, so `expect` alone can't express them:
   # assert_flash(:not_a_number, object_error_type: :name,
   #                             object_error_attribute: :icn_id)
-  # A controller that flashes a separate generic message ahead of the
-  # object error would need these nested in that Array entry's own
-  # args hash instead -- but don't add one to work around this: that
-  # shape means the generic message is redundant with the specific
-  # one that follows it (see NamesController#reload_name_form_on_error
-  # for the fix when this comes up). Leave both nil/omitted for every
-  # other call -- the vast majority of flash_notice/flash_warning/
-  # flash_error sites need nothing beyond expect/**args.
+  # wrapped_flash_text raises if these show up inside an Array entry --
+  # that shape means a generic tag is being flashed alongside the
+  # object error, which is a production redundancy to fix, not a case
+  # to encode here. Leave both nil/omitted for every other call -- the
+  # vast majority of flash_notice/flash_warning/flash_error sites need
+  # nothing beyond expect/**args.
   def assert_flash(expect, on_fail: "", object_error_type: nil,
                    object_error_attribute: nil, **args)
     if (got = get_last_flash)
@@ -127,18 +125,40 @@ module FlashExtensions
   # account_controller.rb's signup flash -- not currently asserted
   # against by any test).
   def wrapped_flash_text(expect, top_level_args)
-    entries = expect.is_a?(Array) ? expect : [[expect, top_level_args]]
+    is_array = expect.is_a?(Array)
+    entries = is_array ? expect : [[expect, top_level_args]]
     entries.map do |entry|
       tag, tag_args = entry.is_a?(Array) ? entry : [entry, {}]
       tag_args = (tag_args || {}).dup
       type = tag_args.delete(:object_error_type)
       attribute = tag_args.delete(:object_error_attribute)
       if type && attribute
+        raise_object_error_combined_with_array if is_array
         object_error_text(type, attribute, tag, tag_args)
       else
         "<p>#{tag.t(**tag_args)}</p>"
       end
     end.join
+  end
+
+  # object_error_type:/object_error_attribute: only make sense on the
+  # WHOLE expected flash (a bare Symbol `expect`) -- see this record's
+  # own validation errors, in full, with nothing else. Seeing them
+  # inside an Array entry means a generic tag is being flashed
+  # alongside a flash_object_errors(record) message, which is always a
+  # production redundancy (the specific error already says everything
+  # the generic one implied) -- fix the controller's rescue/flash
+  # handler instead, the way NamesController#reload_name_form_on_error
+  # was fixed, rather than encoding the redundancy here.
+  def raise_object_error_combined_with_array
+    raise(
+      "object_error_type:/object_error_attribute: inside an assert_flash " \
+      "Array entry usually means a generic tag is being flashed " \
+      "alongside a flash_object_errors(record) validation message -- " \
+      "that's a production bug to fix (see " \
+      "NamesController#reload_name_form_on_error for the fix), not " \
+      "something to encode in the test."
+    )
   end
 
   # Mirrors AbstractModel#formatted_errors' exact formula for a single
