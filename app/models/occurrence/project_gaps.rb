@@ -41,7 +41,48 @@ module Occurrence::ProjectGaps
     end
   end
 
+  # The other way to resolve a gap: instead of unioning the memberships,
+  # back out of the mix. Detaches every non-primary observation whose
+  # project membership differs from the primary's, leaving what remains
+  # consistent. Returns the detached observations.
+  #
+  # Those differing observations are what created the mix — attaching one
+  # that belongs to different projects is the only way an occurrence's
+  # members diverge — so detaching them undoes it without the controller
+  # having to remember which click did it. See #4932.
+  def detach_mismatched_observations(user = nil)
+    mismatched = mismatched_observations
+    return [] if mismatched.empty?
+
+    mismatched.each { |obs| detach_mismatched(obs, user) }
+    reload
+    recompute_has_specimen!
+    recalculate_consensus!(user)
+    destroy_if_incomplete!
+    mismatched
+  end
+
   private
+
+  # Re-queried rather than read off the association: callers reach this
+  # from strict-loading scopes, where `projects` won't lazily load.
+  def mismatched_observations
+    members = Observation.where(occurrence_id: id).includes(:projects).to_a
+    primary = members.find { |obs| obs.id == primary_observation_id }
+    return [] unless primary
+
+    wanted = primary.project_ids.sort
+    members.reject do |obs|
+      obs.id == primary_observation_id || obs.project_ids.sort == wanted
+    end
+  end
+
+  def detach_mismatched(obs, user)
+    reassign_thumbnails_from(obs)
+    obs.update!(occurrence: nil)
+    Occurrence.log_observation_removed(obs, self, user)
+    Observation::NamingConsensus.new(obs).calc_consensus(user)
+  end
 
   def all_observation_projects(obs_list)
     Project.joins(:project_observations).

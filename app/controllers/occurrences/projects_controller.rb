@@ -40,13 +40,29 @@ module Occurrences
     end
 
     def apply_resolution(gaps)
-      return unless params.dig(:occurrence_projects,
-                               :resolution) == "add_all"
+      case params.dig(:occurrence_projects, :resolution)
+      when "add_all" then add_all(gaps)
+      when "cancel" then cancel_mix
+      end
+    end
 
+    def add_all(gaps)
       projects = gaps[:projects] || []
       @occurrence.add_all_to_collections(projects: projects)
       flash_notice(:occurrence_resolve_projects_all_done.t(
                      count: projects.size
+                   ))
+    end
+
+    # Backs out the attach that created the mix, rather than leaving the
+    # occurrence's members with different project memberships — a state
+    # they aren't allowed to be in. See #4932.
+    def cancel_mix
+      detached = @occurrence.detach_mismatched_observations(@user)
+      return if detached.empty?
+
+      flash_notice(:occurrence_resolve_projects_cancelled.t(
+                     count: detached.size
                    ))
     end
   end

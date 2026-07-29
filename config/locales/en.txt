@@ -2619,6 +2619,8 @@
   occurrence_resolve_projects_title: "Add Observations to Projects"
   occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
+  occurrence_resolve_projects_cancelled: "Detached [count] observations whose projects differed, leaving the rest of the collection unchanged."
+  occurrence_not_created: The collection was not created.
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
   field_slips_project_update_fail: Unable to update [TITLE] Project
