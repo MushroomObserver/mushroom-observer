@@ -1787,25 +1787,29 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_select("#name_messages", count: 0)
   end
 
-  # A field slip almost always means a physical specimen, so arriving
-  # from the slip form pre-checks the specimen checkbox (#4916); the
-  # plain create form leaves it unchecked.
-  def test_new_from_field_slip_checks_specimen_by_default
+  # Specimen Available follows what this user did last, not whether a
+  # field code is present. A code meant a specimen for some users and not
+  # others; what the same user did last predicts it better. See #4932.
+  def test_specimen_default_follows_the_users_last_observation
     login("rolf")
+    last = Observation.recent_by_user(rolf).last
+    assert_not_nil(last, "fixture: rolf needs a prior observation")
 
+    last.update!(specimen: true)
     get(:new, params: { field_code: "TEST-001" })
-    assert_response(:success)
-    assert_select("input[type='checkbox'][name='observation[specimen]']" \
-                  "[checked]", count: 1,
-                               message: "field-slip path should pre-check " \
-                                        "the specimen checkbox")
-
+    assert_specimen_checked(1, "should follow a specimen-bearing last obs")
     get(:new)
+    assert_specimen_checked(1, "and does so without a field code too")
+
+    last.update!(specimen: false)
+    get(:new, params: { field_code: "TEST-001" })
+    assert_specimen_checked(0, "a code alone must not check it")
+  end
+
+  def assert_specimen_checked(count, message)
     assert_response(:success)
     assert_select("input[type='checkbox'][name='observation[specimen]']" \
-                  "[checked]", count: 0,
-                               message: "plain create form should leave " \
-                                        "the specimen checkbox unchecked")
+                  "[checked]", count: count, message: message)
   end
 
   # Stub-based regression coverage for the

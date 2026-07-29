@@ -22,16 +22,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("#specimen_fields.in")
   end
 
-  # A scanned code arrives with the box already checked server-side
-  # (#4916), which must leave the controller disarmed — otherwise editing
-  # the scanned code would undo a deliberate uncheck.
+  # When the box arrives already checked — because this user's last
+  # observation had a specimen — the controller must start disarmed, or
+  # editing the scanned code would undo a deliberate uncheck.
   def test_scanned_code_arrives_checked_and_disarmed
-    login!(users(:zero_user))
+    user = users(:rolf)
+    Observation.recent_by_user(user).last.update!(specimen: true)
+    login!(user)
     visit(new_observation_path(field_code: "NEMF-1234"))
     assert_selector("body.observations__new")
 
     assert(find_by_id("observation_specimen").checked?,
-           "arriving with a code pre-checks Specimen Available")
+           "specimen default follows the user's last observation")
 
     uncheck("observation_specimen")
     fill_in("field_code", with: "NEMF-5678")
