@@ -12,19 +12,27 @@ class FieldSlipNotesBuilder
     "\"iNat #{codes}\":#{INAT_OBSERVATION_URL}#{codes}"
   end
 
-  # Whether a value is already in that stored form. Guards against
+  # Anchored on the whole value, not a substring search for the iNat URL:
+  # "Other Codes" is free text, so a value like
+  # `https://evil.example/?u=https://www.inaturalist.org/observations/1`
+  # contains that URL without being one of ours. Both callers really mean
+  # "did we generate this?", which is exactly what matching our own shape
+  # end to end answers. Flagged by CodeQL as
+  # rb/incomplete-url-substring-sanitization.
+  INAT_LINK_RE =
+    /\A"iNat .+":#{Regexp.escape(INAT_OBSERVATION_URL)}(.+)\z/
+
+  # Whether a value is already in the stored form above. Guards against
   # wrapping a link inside another link when an already-saved observation
   # is edited with the checkbox still ticked.
   def self.inat_link?(codes)
-    codes.to_s.include?(INAT_OBSERVATION_URL)
+    codes.to_s.match?(INAT_LINK_RE)
   end
 
   # The bare id inside a stored iNat link, so an edit form can show what
   # the user typed rather than the markup generated from it.
   def self.inat_code(codes)
-    return codes unless inat_link?(codes)
-
-    codes.to_s[/#{Regexp.escape(INAT_OBSERVATION_URL)}(.+)\z/o, 1] || codes
+    codes.to_s[INAT_LINK_RE, 1] || codes
   end
 
   def initialize(params, field_slip)
