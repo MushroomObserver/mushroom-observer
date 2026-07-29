@@ -1059,6 +1059,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # already a member — so adding a prefix can't silently claim a
   # non-member's field slips and hand admins edit rights over them.
   # Returns the slips actually adopted. Idempotent. See #4436.
+  #
+  # Adoption also brings the slip's observations into the project, and
+  # declines any slip whose observations don't meet the constraints —
+  # both halves of "a slip's project implies its observations are in that
+  # project". See #4932.
   def adopt_matching_field_slips
     prefix = field_slip_prefix
     return [] if prefix.blank?
@@ -1066,8 +1071,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     FieldSlip.orphaned_with_code_prefix(prefix).select do |slip|
       next false unless FieldSlip.prefix_for_code(slip.code) == prefix
       next false unless member?(slip.user)
+      next false if slip_violates_constraints?(slip)
 
       slip.update_column(:project_id, id)
+      adopt_slip_observations(slip)
+      true
     end
   end
 
@@ -1084,6 +1092,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private ###############################
+
+  # A slip whose observations don't meet this project's constraints was
+  # used outside the project's context — a spare slip, a mis-scanned
+  # code, a foray slip used months later. Claiming it would put a
+  # constraint-violating observation in the project, which only an admin
+  # may do, and would assert a membership nobody chose.
+  def slip_violates_constraints?(slip)
+    slip_observations(slip).any? { |obs| violates_constraints?(obs) }
+  end
+
+  def adopt_slip_observations(slip)
+    slip_observations(slip).each { |obs| add_observation(obs) }
+  end
+
+  def slip_observations(slip)
+    slip.occurrence&.observations || []
+  end
 
   def target_alias_details(target_type)
     aliases.

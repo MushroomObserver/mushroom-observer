@@ -823,6 +823,42 @@ class ProjectTest < UnitTestCase
     assert_nil(slip.reload.project_id)
   end
 
+  # Adoption is the other half of "a slip's project implies its
+  # observations are in that project" — claiming the slip has to bring
+  # its observations along. See #4932.
+  def test_adopt_brings_the_slips_observations_into_the_project
+    project = projects(:eol_project)
+    slip = orphan_field_slip("EOL-9004", mary)
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(occurrence: nil)
+    obs.field_slip = slip
+    obs.save!
+    assert_not(project.violates_constraints?(obs), "fixture must be clean")
+
+    project.adopt_matching_field_slips
+
+    assert_includes(project.reload.observations, obs)
+  end
+
+  # A slip whose observations violate the constraints was used outside
+  # the project's context, so claiming it would both assert a membership
+  # nobody chose and put a violating observation in the project.
+  def test_adopt_skips_slips_whose_observations_violate_constraints
+    project = projects(:eol_project)
+    project.update!(start_date: Date.parse("1990-01-01"),
+                    end_date: Date.parse("1990-12-31"))
+    slip = orphan_field_slip("EOL-9005", mary)
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(occurrence: nil)
+    obs.field_slip = slip
+    obs.save!
+    assert(project.violates_constraints?(obs), "fixture must violate")
+
+    assert_empty(project.adopt_matching_field_slips)
+    assert_nil(slip.reload.project_id)
+    assert_not_includes(project.reload.observations, obs)
+  end
+
   def test_setting_prefix_adopts_member_orphans
     project = projects(:bolete_project) # mary is editing member
     slip = orphan_field_slip("BOLNEW-1", mary)
