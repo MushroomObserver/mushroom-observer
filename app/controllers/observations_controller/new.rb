@@ -48,12 +48,6 @@ module ObservationsController::New
     @images      = []
     @good_images = []
     @field_code = params[:field_code]
-    # A field slip almost always means a physical specimen, and users
-    # coming from the slip form often miss the checkbox (#4916). The
-    # `specimen` Stimulus controller reads this on load: a box that
-    # arrives already checked leaves the controller disarmed, so editing
-    # the code can't undo a deliberate uncheck.
-    @observation.specimen = true if @field_code.present?
     init_specimen_vars
     init_project_vars_for_new
     init_list_vars
@@ -180,7 +174,14 @@ module ObservationsController::New
     last_observation = Observation.recent_by_user(@user).last
     return unless last_observation
 
-    %w[where location_id is_collection_location gps_hidden].each do |attr|
+    # `specimen` is sticky like the rest: a field slip was originally
+    # taken to mean a specimen (#4916), but that is only true of some
+    # users. Someone recording a foray without collecting had to uncheck
+    # it every time, while someone out collecting for the day had to
+    # check it every time. What the same user did last is a better
+    # predictor than the presence of a code. See #4932.
+    %w[where location_id is_collection_location gps_hidden
+       specimen].each do |attr|
       @observation.send(:"#{attr}=", last_observation.send(attr))
     end
     @location = @observation.location
