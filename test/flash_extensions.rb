@@ -28,21 +28,51 @@ module FlashExtensions
     assert_flash(nil, on_fail:)
   end
 
-  # Assert that there was a notice but no warning or error.
-  def assert_flash_success(on_fail: "Should be flash success (level 0).")
-    assert_flash(0, on_fail:)
+  # Assert that there was a notice but no warning or error, optionally
+  # also asserting its content (same `expect`/**args as assert_flash).
+  def assert_flash_success(expect = nil,
+                           on_fail: "Should be flash success (level 0).",
+                           **args)
+    assert_flash_at_level(0, expect, on_fail:, **args)
   end
 
-  # Assert that there was warning but no error.
+  # Assert that there was warning but no error, optionally also
+  # asserting its content (same `expect`/**args as assert_flash).
   def assert_flash_warning(
-    on_fail: "Should be a flash warning but no error (level 1)"
+    expect = nil,
+    on_fail: "Should be a flash warning but no error (level 1)", **args
   )
-    assert_flash(1, on_fail:)
+    assert_flash_at_level(1, expect, on_fail:, **args)
   end
 
-  # Assert that there was a error.
-  def assert_flash_error(on_fail: "Should be a flash error (level 2).")
-    assert_flash(2, on_fail:)
+  # Assert that there was an error, optionally also asserting its
+  # content (same `expect`/**args as assert_flash).
+  def assert_flash_error(expect = nil,
+                         on_fail: "Should be a flash error (level 2).",
+                         **args)
+    assert_flash_at_level(2, expect, on_fail:, **args)
+  end
+
+  # Shared by assert_flash_success/warning/error. Checks the level
+  # directly (without consuming the flash) so a subsequent content
+  # check can still see it -- assert_flash(expect, ...) itself calls
+  # clear_flash at the end, so chaining two full assert_flash calls
+  # would have the first one wipe the flash before the second could
+  # read it.
+  def assert_flash_at_level(level, expect, on_fail:, **args)
+    if expect
+      if (got = get_last_flash)
+        lvl = got[0, 1].to_i
+        assert_equal(
+          level, lvl,
+          "#{on_fail}Wrong flash level. Message: level #{lvl}, " \
+          "#{got.inspect}."
+        )
+      end
+      assert_flash(expect, on_fail:, **args)
+    else
+      assert_flash(level, on_fail:)
+    end
   end
 
   # Assert that an error was rendered or is pending.
