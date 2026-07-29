@@ -41,7 +41,7 @@ class CommentsControllerTest < FunctionalTestCase
 
     login
     get(:index, params: params)
-    assert_flash(:runtime_no_matches, types: "comments")
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_target_invalid_target_type
@@ -117,7 +117,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: user.id })
 
-    assert_flash(:runtime_no_matches, types: "comments")
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_by_user_nonexistent_user
@@ -164,7 +164,7 @@ class CommentsControllerTest < FunctionalTestCase
     login
     get(:index, params: { for_user: user.id })
 
-    assert_flash(:runtime_no_matches, types: "comments")
+    assert_flash(:runtime_no_matches, type: :comment)
   end
 
   def test_index_for_user_nonexistent_user
