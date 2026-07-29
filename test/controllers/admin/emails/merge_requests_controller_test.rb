@@ -24,12 +24,12 @@ module Admin
         login("rolf")
         get(:new, params: params.except(:type))
         assert_response(:redirect)
-        assert_flash(:runtime_invalid, type: '"type"', value: "")
+        assert_flash_error(:runtime_invalid, type: '"type"', value: "")
 
         # Test 3: Logged in but type param is invalid
         get(:new, params: params.merge(type: :Bogus))
         assert_response(:redirect)
-        assert_flash(:runtime_invalid, type: '"type"', value: "Bogus")
+        assert_flash_error(:runtime_invalid, type: '"type"', value: "Bogus")
 
         # Test 4: Valid type but missing required params
         get(:new, params: params.except(:old_id))
@@ -72,14 +72,14 @@ module Admin
         login("rolf")
         post(:create, params: params.except(:type))
         assert_response(:redirect)
-        assert_flash(:runtime_invalid, type: '"type"', value: "")
+        assert_flash_error(:runtime_invalid, type: '"type"', value: "")
         assert_equal(email_count, ActionMailer::Base.deliveries.count)
 
         # Test 3: Logged in with invalid type
         # Should show type error and not send email
         post(:create, params: params.merge(type: :Bogus))
         assert_response(:redirect)
-        assert_flash(:runtime_invalid, type: '"type"', value: "Bogus")
+        assert_flash_error(:runtime_invalid, type: '"type"', value: "Bogus")
         assert_equal(email_count, ActionMailer::Base.deliveries.count)
 
         # Test 4: Valid request - should send email

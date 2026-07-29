@@ -937,7 +937,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     login
     put(:update, params: params)
 
-    assert_flash(
+    assert_flash_error(
       :name_error_unregistrable,
       rank: name.rank.to_s,
       name: ERB::Util.html_escape(name.real_search_name(nil))
@@ -962,7 +962,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     login
     put(:update, params: params)
 
-    assert_flash(
+    assert_flash_error(
       :not_a_number,
       object_error_type: :name,
       object_error_attribute: :icn_id
@@ -1020,7 +1020,7 @@ class NamesControllerUpdateTest < FunctionalTestCase
     login
     put(:update, params: params)
 
-    assert_flash(
+    assert_flash_error(
       :name_error_icn_id_in_use,
       number: name_with_icn_id.icn_id,
       name: ERB::Util.html_escape(name_with_icn_id.real_search_name(nil))

@@ -923,7 +923,8 @@ class NamesControllerUpdateMergeTest < FunctionalTestCase
       put(:update, params: params)
     end
     assert_response(:success) # form reloaded
-    assert_flash(:edit_name_multiple_names_match,
-                 str: new_name.real_search_name(rolf), matches: matches)
+    assert_flash_error(:edit_name_multiple_names_match,
+                       str: new_name.real_search_name(rolf),
+                       matches: matches)
   end
 end

@@ -753,8 +753,8 @@ class LocationsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_flash(:runtime_location_already_exists,
-                 name: existing_loc.display_name)
+    assert_flash_warning(:runtime_location_already_exists,
+                         name: existing_loc.display_name)
     # Should redirect to observation if set_observation, else to location
     assert_redirected_to(location_path(existing_loc.id))
   end
@@ -1152,7 +1152,7 @@ class LocationsControllerTest < FunctionalTestCase
     login("rolf")
     put(:update, params: params)
 
-    assert_flash(:runtime_edit_location_no_change)
+    assert_flash_warning(:runtime_edit_location_no_change)
     assert_redirected_to(location_path(loc.id))
   end
 

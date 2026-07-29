@@ -52,7 +52,7 @@ module Account::Profile
       post(:attach, params: { id: rolf.id, img_id: "99999999" })
 
       assert_response(:success)
-      assert_flash(:runtime_image_reuse_invalid_id, id: "99999999")
+      assert_flash_error(:runtime_image_reuse_invalid_id, id: "99999999")
     end
   end
 end

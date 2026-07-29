@@ -144,7 +144,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     login
     get(:index, params:)
-    assert_flash(:runtime_no_matches, type: :observation)
+    assert_flash_error(:runtime_no_matches, type: :observation)
   end
 
   # `?page=999` on a result set with fewer than 999 pages should
@@ -463,7 +463,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     get(:index, params: params)
 
     assert_response(:success)
-    assert_flash(:runtime_no_matches, type: :observation)
+    assert_flash_error(:runtime_no_matches, type: :observation)
     assert_page_title(:observations.ti)
   end
 
@@ -657,7 +657,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_flash(:runtime_no_matches, type: :observation)
+    assert_flash_error(:runtime_no_matches, type: :observation)
   end
 
   def test_index_species_list
@@ -688,7 +688,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
 
     assert_response(:success)
     assert_page_title(:observations.ti)
-    assert_flash(:runtime_no_matches, type: :observation)
+    assert_flash_error(:runtime_no_matches, type: :observation)
   end
 
   # Prove that lichen content_filter works on observations

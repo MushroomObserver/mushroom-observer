@@ -240,6 +240,6 @@ class AddDispatchControllerTest < FunctionalTestCase
 
     assert_redirected_to(expected_full_url)
 
-    assert_flash(:bad_dispatch_code, code: field_slip)
+    assert_flash_warning(:bad_dispatch_code, code: field_slip)
   end
 end

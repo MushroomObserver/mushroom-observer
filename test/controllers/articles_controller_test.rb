@@ -37,7 +37,7 @@ class ArticlesControllerTest < FunctionalTestCase
     query = Query.lookup(:Article, id_in_set: "one")
     params = { q: @controller.q_param(query) }
     get(:index, params:)
-    assert_flash(:runtime_no_matches, type: :article)
+    assert_flash_error(:runtime_no_matches, type: :article)
   end
 
   # A scanner probing q[model] with an injection payload used to 500

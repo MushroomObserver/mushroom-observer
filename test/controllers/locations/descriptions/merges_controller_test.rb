@@ -88,7 +88,7 @@ module Locations::Descriptions
         description_move_or_merge: { target: public_desc.id, delete: 0 }
       }
       post(:create, params: params)
-      assert_flash(:runtime_description_private)
+      assert_flash_error(:runtime_description_private)
       assert_redirected_to(location_path(private_desc.parent_id))
     end
 

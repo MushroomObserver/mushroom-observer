@@ -315,7 +315,7 @@ module Locations
 
       delete(:destroy, params: { id: desc.id })
 
-      assert_flash(:runtime_destroy_description_not_admin)
+      assert_flash_error(:runtime_destroy_description_not_admin)
       assert(LocationDescription.safe_find(desc.id))
     end
 
@@ -331,7 +331,7 @@ module Locations
         }
       }
       put(:update, params: params)
-      assert_flash(
+      assert_flash_warning(
         [:runtime_description_public_write_wrong,
          [:runtime_edit_location_description_success, { id: desc.id }]]
       )

@@ -62,7 +62,7 @@ module Names::Descriptions
       login(draft.user.login)
       put(:update, params: { id: draft.id })
 
-      assert_flash(:runtime_description_already_default)
+      assert_flash_error(:runtime_description_already_default)
       assert_redirected_to(name_description_path(draft.id))
     end
 

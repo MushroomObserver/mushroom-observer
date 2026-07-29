@@ -105,7 +105,7 @@ module Locations::Descriptions
         }
       }
       post(:create, params: params)
-      assert_flash(:runtime_description_private)
+      assert_flash_error(:runtime_description_private)
       assert_redirected_to(location_path(private_desc.parent_id))
     end
 

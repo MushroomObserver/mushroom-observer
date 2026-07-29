@@ -247,7 +247,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     ) do
       post(:create, params: params)
     end
-    assert_flash(
+    assert_flash_error(
       :validate_name_author_ending,
       object_error_type: :name,
       object_error_attribute: :author
@@ -274,7 +274,7 @@ class NamesControllerCreateTest < FunctionalTestCase
     ) do
       post(:create, params: params)
     end
-    assert_flash(
+    assert_flash_error(
       :name_error_field_start,
       field: :citation.ti, start: ERB::Util.html_escape(", ")
     )
