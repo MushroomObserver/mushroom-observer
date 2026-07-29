@@ -195,11 +195,38 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_equal(422, response.status)
   end
 
-  def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints
+  # Owning the observation no longer lets you put it in a project you
+  # don't belong to, and the refusal says so rather than failing silently.
+  # See #4932.
+  def test_should_not_create_field_slip_with_last_viewed_obs_when_not_member
     login(@field_slip.user.login)
     ObservationView.update_view_stats(@field_slip.observation&.id,
                                       @field_slip.user_id)
     proj = projects(:falmouth_2023_09_project)
+    assert_not(proj.member?(@field_slip.user), "fixture: owner is not a member")
+    code = "#{proj.field_slip_prefix}-1234"
+    assert_difference("FieldSlip.count", 0) do
+      post(:create,
+           params: {
+             commit: :field_slip_last_obs.t,
+             field_slip: { code: code, project_id: proj.id }
+           })
+    end
+
+    assert_flash_error
+    assert_nil(FieldSlip.find_by(code: code))
+    assert_equal(422, response.status)
+  end
+
+  def test_should_not_create_field_slip_with_last_viewed_obs_due_to_constraints
+    login(@field_slip.user.login)
+    ObservationView.update_view_stats(@field_slip.observation&.id,
+                                      @field_slip.user_id)
+    # A project the user IS in, so the constraint check is what refuses.
+    proj = projects(:eol_project)
+    assert(proj.member?(@field_slip.user), "fixture: owner is a member")
+    proj.update!(start_date: Date.parse("1990-01-01"),
+                 end_date: Date.parse("1990-12-31"))
     code = "#{proj.field_slip_prefix}-1234"
     assert_difference("FieldSlip.count", 0) do
       post(:create,

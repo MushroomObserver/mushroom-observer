@@ -823,6 +823,106 @@ class ProjectTest < UnitTestCase
     assert_nil(slip.reload.project_id)
   end
 
+  # --- removal cascade (#4932) ---
+
+  # An occurrence's observations are one collection, so a project
+  # membership that stops holding for one cannot hold for the rest.
+  def test_removing_one_occurrence_member_removes_them_all
+    project = projects(:eol_project)
+    slip = field_slips(:field_slip_one)
+    members = share_an_occurrence(slip, observations(:detailed_unknown_obs))
+    assert_equal(2, members.size)
+    members.each { |o| project.add_observation(o) }
+
+    removed = project.remove_observation(members.first)
+
+    assert_equal(members.map(&:id).sort, removed.map(&:id).sort)
+    members.each do |o|
+      assert_not_includes(project.reload.observations, o)
+    end
+  end
+
+  # And the slip cannot go on claiming a project its observations left.
+  def test_removing_an_occurrence_member_releases_the_field_slip
+    project = projects(:eol_project)
+    slip = field_slips(:field_slip_one)
+    assert_equal(project.id, slip.project_id, "fixture: slip is in project")
+    obs = slip.occurrence.observations.first
+    project.add_observation(obs)
+
+    project.remove_observation(obs)
+
+    assert_nil(slip.reload.project_id)
+  end
+
+  # An observation with no occurrence is still just itself.
+  def test_removing_a_lone_observation_touches_nothing_else
+    project = projects(:eol_project)
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(occurrence: nil)
+    project.add_observation(obs)
+    before = project.reload.observations.count
+
+    removed = project.remove_observation(obs)
+
+    assert_equal([obs.id], removed.map(&:id))
+    assert_equal(before - 1, project.reload.observations.count)
+  end
+
+  # --- user_can_change_membership? (#4932) ---
+
+  # Entering an observation does not confer control over which projects
+  # reference it. Membership in the project is the whole test, in both
+  # directions — the checkbox that reads this disables adding and
+  # removing alike.
+  def test_membership_change_requires_project_membership
+    project = projects(:falmouth_2023_09_project)
+    obs = observations(:minimal_unknown_obs)
+    owner = obs.user
+    assert_not(project.member?(owner), "fixture: owner is not a member")
+    assert(project.member?(roy), "fixture: roy is a member")
+
+    assert_not(project.user_can_change_membership?(obs, owner),
+               "owning the observation must not confer control over it")
+    assert(project.user_can_change_membership?(obs, roy))
+  end
+
+  # Adoption is the other half of "a slip's project implies its
+  # observations are in that project" — claiming the slip has to bring
+  # its observations along. See #4932.
+  def test_adopt_brings_the_slips_observations_into_the_project
+    project = projects(:eol_project)
+    slip = orphan_field_slip("EOL-9004", mary)
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(occurrence: nil)
+    obs.field_slip = slip
+    obs.save!
+    assert_not(project.violates_constraints?(obs), "fixture must be clean")
+
+    project.adopt_matching_field_slips
+
+    assert_includes(project.reload.observations, obs)
+  end
+
+  # A slip whose observations violate the constraints was used outside
+  # the project's context, so claiming it would both assert a membership
+  # nobody chose and put a violating observation in the project.
+  def test_adopt_skips_slips_whose_observations_violate_constraints
+    project = projects(:eol_project)
+    project.update!(start_date: Date.parse("1990-01-01"),
+                    end_date: Date.parse("1990-12-31"))
+    slip = orphan_field_slip("EOL-9005", mary)
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(occurrence: nil)
+    obs.field_slip = slip
+    obs.save!
+    assert(project.violates_constraints?(obs), "fixture must violate")
+
+    assert_empty(project.adopt_matching_field_slips)
+    assert_nil(slip.reload.project_id)
+    assert_not_includes(project.reload.observations, obs)
+  end
+
   def test_setting_prefix_adopts_member_orphans
     project = projects(:bolete_project) # mary is editing member
     slip = orphan_field_slip("BOLNEW-1", mary)
@@ -882,6 +982,14 @@ class ProjectTest < UnitTestCase
   end
 
   # A field slip with no project, regardless of prefix matching.
+  # Every occurrence fixture holds a single observation, so a test that
+  # needs a shared one has to build it.
+  def share_an_occurrence(slip, extra)
+    extra.update!(occurrence: nil)
+    extra.update!(occurrence: slip.occurrence)
+    slip.occurrence.reload.observations.to_a
+  end
+
   def orphan_field_slip(code, owner)
     slip = FieldSlip.create!(code: code, user: owner)
     slip.update_column(:project_id, nil)

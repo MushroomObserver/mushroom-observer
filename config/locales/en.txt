@@ -685,6 +685,7 @@
   permission_denied: Permission denied.
   removed_from_list: Removed observation from "[list]".
   removed_from_project: Removed [object] from "[project]".
+  removed_from_project_with_siblings: 'Removed all [count] observations of this collection from "[project]".'
   select_file: Select or drop files...
   no_file_selected: No file selected.
   see_message_below: See message below.
@@ -2557,6 +2558,7 @@
   field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
   field_slip_constraint_violation: The selected observation violates one or more project constraints
+  field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
@@ -2617,6 +2619,10 @@
   occurrence_resolve_projects_title: "Add Observations to Projects"
   occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
+  occurrence_resolve_projects_cancelled: "Detached [count] observations whose projects differed, leaving the rest of the collection unchanged."
+  occurrence_not_created: The collection was not created.
+  occurrence_resolve_projects_refused: 'Could not add the collection to [projects]. Either you are not a member, or an observation violates the project constraints and only a project admin can add it.'
+  occurrence_resolve_projects_forced: 'Added the collection to [projects] even though an observation violates the project constraints. You can do this as an admin, but check that it is what you want.'
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
   field_slips_project_update_fail: Unable to update [TITLE] Project
