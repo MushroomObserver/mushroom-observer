@@ -32,7 +32,7 @@
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
 #  current?::       Project (based on dates) has started and hasn't ended
-#  user_can_add_observation?:: Can user add observation to this Project
+#  user_can_change_membership?:: Can user add/remove obs to/from Project
 #  violates_constraints?:: Does a given obs violate the Project constraints
 #  count_violations    # of project Observations which violate constraints
 #  text_name::         Alias for +title+ for debugging.
@@ -302,8 +302,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     user && user_group.users.member?(user) && user.id != user_id
   end
 
-  def user_can_add_observation?(obs, user)
-    obs.user == user || member?(user)
+  # Whether `user` may change whether `obs` is in this project — both
+  # adding and removing, since the checkbox that reads this disables in
+  # both directions.
+  #
+  # Membership in the project is the whole test. Entering an observation
+  # does not confer control over which projects reference it: an
+  # observation is a fact, and the person who stated it does not decide
+  # who uses it in their work. They can still delete the observation
+  # outright, which is a different thing. See #4932.
+  def user_can_change_membership?(_obs, user)
+    member?(user)
   end
 
   # SQL-based count over the four violation kinds (#4136). Each branch

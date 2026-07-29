@@ -823,6 +823,24 @@ class ProjectTest < UnitTestCase
     assert_nil(slip.reload.project_id)
   end
 
+  # --- user_can_change_membership? (#4932) ---
+
+  # Entering an observation does not confer control over which projects
+  # reference it. Membership in the project is the whole test, in both
+  # directions — the checkbox that reads this disables adding and
+  # removing alike.
+  def test_membership_change_requires_project_membership
+    project = projects(:falmouth_2023_09_project)
+    obs = observations(:minimal_unknown_obs)
+    owner = obs.user
+    assert_not(project.member?(owner), "fixture: owner is not a member")
+    assert(project.member?(roy), "fixture: roy is a member")
+
+    assert_not(project.user_can_change_membership?(obs, owner),
+               "owning the observation must not confer control over it")
+    assert(project.user_can_change_membership?(obs, roy))
+  end
+
   # Adoption is the other half of "a slip's project implies its
   # observations are in that project" — claiming the slip has to bring
   # its observations along. See #4932.

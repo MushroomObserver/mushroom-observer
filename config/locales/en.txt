@@ -2557,6 +2557,7 @@
   field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
   field_slip_constraint_violation: The selected observation violates one or more project constraints
+  field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
