@@ -70,6 +70,8 @@ module FlashExtensions
   # nothing beyond expect/**args.
   def assert_flash(expect, on_fail: "", object_error_type: nil,
                    object_error_attribute: nil, **args)
+    validate_object_error_kwargs(expect, object_error_type,
+                                 object_error_attribute)
     if (got = get_last_flash)
       lvl = got[0, 1].to_i
       got = got[1..].gsub(/(\n|<br.?>)+/, "\n")
@@ -115,6 +117,29 @@ module FlashExtensions
   end
 
   private
+
+  # object_error_type:/object_error_attribute: must be passed together
+  # (a lone one silently degrades to a plain-tag comparison instead of
+  # the intended composite -- fail fast instead) and only make sense
+  # on a bare-Symbol `expect` (top-level kwargs are otherwise silently
+  # dropped, since an Array's entries carry their own args).
+  def validate_object_error_kwargs(expect, type, attribute)
+    if type.nil? ^ attribute.nil?
+      raise(
+        "object_error_type: and object_error_attribute: must be " \
+        "passed together, or not at all."
+      )
+    end
+    return unless expect.is_a?(Array) && (type || attribute)
+
+    raise(
+      "object_error_type:/object_error_attribute: only apply to a " \
+      "bare-Symbol expect -- an Array expect can't express them (that " \
+      "shape means a generic tag is being flashed alongside the " \
+      "object error, which is a production bug to fix, not something " \
+      "to assert -- see wrapped_flash_text's own raise)."
+    )
+  end
 
   # flash_notice/flash_warning/flash_error each wrap every message they're
   # given in its own "<p>...</p>" -- whether from one call with several
