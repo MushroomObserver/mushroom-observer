@@ -474,6 +474,48 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
   end
 
+  # A printed prefix is an invitation: using a slip for an
+  # open-membership project enrolls the user and puts the observation in
+  # the project, the way the field slip form has always done.
+  def test_create_with_open_project_slip_joins_and_adds
+    project = projects(:open_membership_project)
+    user = users(:mary)
+    assert(project.can_join?(user), "Test needs a joinable non-member")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: "#{project.field_slip_prefix}-70001",
+                   observation: { place_name: locations.first.name } })
+    obs = assigns(:observation)
+
+    assert(project.reload.member?(user), "slip should enroll the user")
+    assert_includes(project.observations, obs)
+  end
+
+  # The one blocking case: an existing slip in a project the user can
+  # neither join nor belong to. The observation still saves — just
+  # without the code — so nothing they typed is lost.
+  def test_create_with_closed_project_slip_saves_without_the_code
+    slip = field_slips(:field_slip_falmouth_one)
+    project = slip.project
+    user = users(:mary)
+    assert_not(project.member?(user), "Test needs a non-member")
+    assert_not(project.can_join?(user), "Test needs a closed project")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: locations.first.name } })
+    obs = assigns(:observation)
+
+    assert_predicate(obs, :persisted?, "observation must still save")
+    assert_nil(obs.field_slip, "barred code must not attach")
+    assert_not_includes(project.reload.observations, obs)
+    assert_flash_warning
+  end
+
   # `where.not(occurrence_id: occ.id)` would drop the unattached rows —
   # SQL `NULL != x` is NULL, not true — so select them explicitly.
   def fill_occurrence_to_capacity(occ)

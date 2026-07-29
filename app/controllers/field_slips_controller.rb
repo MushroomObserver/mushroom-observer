@@ -4,6 +4,7 @@ class FieldSlipsController < ApplicationController
   include Show
   include Index
   include ObservationHandling
+  include FieldSlipProjectJoinable
 
   before_action :login_required
   # Disable cop: all these methods are defined in files included above.
@@ -282,15 +283,6 @@ class FieldSlipsController < ApplicationController
   end
 
   def check_project_membership
-    project = @field_slip&.project
-    return unless project&.can_join?(@user)
-
-    project.user_group.users << @user
-    flash_notice(:field_slip_welcome.t(title: project.title))
-    return if ProjectMember.find_by(project:, user: @user)
-
-    ProjectMember.create(project:, user: @user,
-                         trust_level: "editing")
-    flash_notice(:add_members_with_editing.l)
+    join_field_slip_project(@field_slip&.project)
   end
 end
