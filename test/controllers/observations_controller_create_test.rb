@@ -513,6 +513,10 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_predicate(obs, :persisted?, "observation must still save")
     assert_nil(obs.field_slip, "barred code must not attach")
     assert_not_includes(project.reload.observations, obs)
+    # Captured before the assertion below, which consumes the flash.
+    # The message has to be actionable, not just an explanation.
+    assert_includes(get_last_flash.to_s,
+                    new_project_admin_request_path(project_id: project.id))
     assert_flash_warning
   end
 
