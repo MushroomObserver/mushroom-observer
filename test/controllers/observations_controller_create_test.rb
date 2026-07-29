@@ -187,6 +187,20 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(last.location, assigns(:observation).location)
   end
 
+  # The field slip form's "Add Images" / "Create Observation" redirects
+  # carry a resolved place_name, which `check_location` turns back into
+  # the Location rather than leaving as free text.
+  def test_new_with_place_name_param_resolves_the_location
+    location = locations(:albion)
+
+    login("rolf")
+    get(:new, params: { place_name: location.name })
+
+    assert_equal(location, assigns(:location))
+    assert_select("input[name='observation[place_name]'][value=?]",
+                  location.name)
+  end
+
   # A collector carried in from the field-slip form still wins.
   def test_new_from_field_slip_keeps_supplied_collector
     login("rolf")
@@ -325,6 +339,12 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                    observation: { place_name: place_alias.name,
                                   project_ids: [other.id] } })
 
+    # Naming the resolved value is the point — the user has to be able to
+    # see whether the winner is the one they meant.
+    flash = get_last_flash.to_s
+    assert_includes(flash, locations(:burbank).format_name)
+    assert_includes(flash, place_alias.name)
+    assert_includes(flash, other.title)
     assert_equal(locations(:burbank), assigns(:observation).location,
                  "most recently updated alias should win")
     assert_flash_warning
@@ -1854,7 +1874,37 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_not_equal("Forced change", img.reload.notes)
   end
 
+  # `validate_field_slip` rejects both of these before the save, so the
+  # post-save branches only fire when the slip changed underneath us
+  # between validation and application. A real race can't be staged, so
+  # the status is stubbed — the point is that the branch reports rather
+  # than failing silently.
+  def test_create_warns_when_field_slip_turns_invalid_after_validation
+    login("rolf")
+    stub_update_field_slip(:invalid) do
+      post(:create, params: create_params_with_name)
+    end
+
+    assert_flash_warning
+  end
+
+  def test_create_warns_when_field_slip_fills_after_validation
+    login("rolf")
+    stub_update_field_slip(:too_many) do
+      post(:create, params: create_params_with_name)
+    end
+
+    assert_flash_warning
+  end
+
   private
+
+  def stub_update_field_slip(status)
+    @controller.define_singleton_method(:update_field_slip) { |*| status }
+    yield
+  ensure
+    @controller.singleton_class.remove_method(:update_field_slip)
+  end
 
   def create_params_with_name
     {

@@ -100,11 +100,16 @@ module ObservationsController::ProjectAliases
     matches.first.target
   end
 
+  # Names the value it resolved to, not just the project it came from —
+  # the point of the warning is to let the user see whether the winner is
+  # the one they meant.
   def flash_ambiguous_alias(typed, matches)
+    winner = matches.first
     flash_warning(
       :form_observations_ambiguous_alias.t(
+        value: winner.target.format_name,
         name: typed,
-        project: matches.first.project.title,
+        project: winner.project.title,
         others: matches.drop(1).map { |a| a.project.title }.join(", ")
       )
     )

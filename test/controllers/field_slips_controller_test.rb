@@ -536,6 +536,19 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(new_observation_url(field_code: code))
   end
 
+  # A numeric id is looked up by id, not by code, so a missing one can't
+  # go to the observation form — there is no code to prefill. It falls
+  # back to the field slip form, which is the only branch of `show` a
+  # code no longer reaches.
+  def test_missing_numeric_id_falls_back_to_new_field_slip
+    login
+
+    get(:show, params: { id: "999999999" })
+
+    assert_redirected_to(new_field_slip_url(code: "999999999",
+                                            id: "999999999"))
+  end
+
   # Same destination when a FieldSlip row exists but holds no
   # observations: from the scanner's side that is indistinguishable from
   # an unused code, and the slip's own show page would be a dead end
