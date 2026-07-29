@@ -465,11 +465,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     post(:update, params: { id: nybg.id })
     assert_redirected_to(action: :edit)
+    assert_flash(:create_herbarium_record_missing_herbarium_name)
 
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
-    assert_flash([:create_herbarium_record_missing_herbarium_name,
-                  :create_herbarium_record_missing_herbarium_name])
+    assert_flash(:create_herbarium_record_missing_herbarium_name)
     assert_select("turbo-stream[action='replace'][target$='_form']")
   end
 
@@ -479,10 +479,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     post(:update, params: { id: nybg.id })
     assert_redirected_to(controller: "/observations", action: :show, id: obs.id)
+    assert_flash(:permission_denied)
 
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
-    assert_flash([:permission_denied, :permission_denied])
+    assert_flash(:permission_denied)
     assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 

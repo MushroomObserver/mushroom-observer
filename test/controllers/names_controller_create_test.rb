@@ -248,9 +248,9 @@ class NamesControllerCreateTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash(
-      [:runtime_unable_to_save_changes,
-       [:validate_name_author_ending, { object_error_type: :name,
-                                        object_error_attribute: :author }]]
+      :validate_name_author_ending,
+      object_error_type: :name,
+      object_error_attribute: :author
     )
   end
 
@@ -275,9 +275,8 @@ class NamesControllerCreateTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash(
-      [:runtime_unable_to_save_changes,
-       [:name_error_field_start,
-        { field: :citation.ti, start: ERB::Util.html_escape(", ") }]]
+      :name_error_field_start,
+      field: :citation.ti, start: ERB::Util.html_escape(", ")
     )
   end
 

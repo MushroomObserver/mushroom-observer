@@ -360,8 +360,11 @@ class NamesController < ApplicationController
   end
 
   def reload_name_form_on_error(err)
-    flash_error(err.to_s) if err.present?
-    flash_object_errors(@name)
+    if @name.errors.any?
+      flash_object_errors(@name)
+    elsif err.present?
+      flash_error(err.to_s)
+    end
     reload_name_form
   end
 

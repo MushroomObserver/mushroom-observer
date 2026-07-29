@@ -58,18 +58,17 @@ module FlashExtensions
   # ONLY when asserting a flash_object_errors(record) validation
   # message -- AbstractModel#formatted_errors composes those as
   # "<Type> <attribute> <message>." (see its source) rather than just
-  # resolving one tag, so `expect` alone can't express them. Here
-  # they mark the WHOLE `expect` (a bare Symbol) as one object error.
-  # For a flash that combines a plain tag with an object error (e.g.
-  # a generic "Unable to save changes." followed by the specific
-  # field error -- the common flash_object_errors shape), put these
-  # same two keys in that one Array entry's own args hash instead:
-  # assert_flash([:runtime_unable_to_save_changes,
-  #               [:not_a_number, { object_error_type: :name,
-  #                                object_error_attribute: :icn_id }]])
-  # Leave both nil/omitted for every other call -- the vast majority
-  # of flash_notice/flash_warning/flash_error sites need nothing
-  # beyond expect/**args.
+  # resolving one tag, so `expect` alone can't express them:
+  # assert_flash(:not_a_number, object_error_type: :name,
+  #                             object_error_attribute: :icn_id)
+  # A controller that flashes a separate generic message ahead of the
+  # object error would need these nested in that Array entry's own
+  # args hash instead -- but don't add one to work around this: that
+  # shape means the generic message is redundant with the specific
+  # one that follows it (see NamesController#reload_name_form_on_error
+  # for the fix when this comes up). Leave both nil/omitted for every
+  # other call -- the vast majority of flash_notice/flash_warning/
+  # flash_error sites need nothing beyond expect/**args.
   def assert_flash(expect, on_fail: "", object_error_type: nil,
                    object_error_attribute: nil, **args)
     if (got = get_last_flash)

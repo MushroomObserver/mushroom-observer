@@ -938,10 +938,9 @@ class NamesControllerUpdateTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_flash(
-      [:runtime_unable_to_save_changes,
-       [:name_error_unregistrable,
-        { rank: name.rank.to_s,
-          name: ERB::Util.html_escape(name.real_search_name(nil)) }]]
+      :name_error_unregistrable,
+      rank: name.rank.to_s,
+      name: ERB::Util.html_escape(name.real_search_name(nil))
     )
   end
 
@@ -964,9 +963,9 @@ class NamesControllerUpdateTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_flash(
-      [:runtime_unable_to_save_changes,
-       [:not_a_number, { object_error_type: :name,
-                         object_error_attribute: :icn_id }]]
+      :not_a_number,
+      object_error_type: :name,
+      object_error_attribute: :icn_id
     )
   end
 
@@ -1022,12 +1021,9 @@ class NamesControllerUpdateTest < FunctionalTestCase
     put(:update, params: params)
 
     assert_flash(
-      [:runtime_unable_to_save_changes,
-       [:name_error_icn_id_in_use,
-        { number: name_with_icn_id.icn_id,
-          name: ERB::Util.html_escape(
-            name_with_icn_id.real_search_name(nil)
-          ) }]]
+      :name_error_icn_id_in_use,
+      number: name_with_icn_id.icn_id,
+      name: ERB::Util.html_escape(name_with_icn_id.real_search_name(nil))
     )
   end
 end
