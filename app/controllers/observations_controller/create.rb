@@ -48,6 +48,7 @@ module ObservationsController::Create
     validate_place_name
     validate_observation
     validate_projects
+    validate_field_slip
     validate_naming if @name
     validate_vote if @name
     validate_images

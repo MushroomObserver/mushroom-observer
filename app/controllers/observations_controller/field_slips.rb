@@ -36,6 +36,35 @@ module ObservationsController::FieldSlips
     slip
   end
 
+  # A field-slip problem has to surface *before* the observation is
+  # saved, so the form comes back with the user's input intact and
+  # nothing has been written. Applying the slip still happens after the
+  # save — linking needs a persisted observation to hang the occurrence
+  # on — but by then the code is known good.
+  #
+  # Sets `@any_errors` like the other validators, so it slots into the
+  # same block on both create and update.
+  def validate_field_slip
+    return unless params.key?(:field_code)
+
+    code = field_code
+    return if code.blank?
+
+    slip = field_slip_for_code(code)
+    if !slip&.valid?
+      add_field_slip_error(:observation_field_slip_invalid.t(code: code))
+    elsif field_slip_occurrence_full?(slip)
+      add_field_slip_error(:observation_field_slip_full.t(
+                             code: code, max: Occurrence::MAX_OBSERVATIONS
+                           ))
+    end
+  end
+
+  def add_field_slip_error(message)
+    @any_errors = true
+    flash_error(message)
+  end
+
   def update_field_slip
     return :unchanged unless params.key?(:field_code)
 

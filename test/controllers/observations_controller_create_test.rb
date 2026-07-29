@@ -457,6 +457,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
   # An occurrence caps at Occurrence::MAX_OBSERVATIONS. The cap's model
   # validation is `on: :update` for Occurrence, so attaching (which
   # updates the Observation) slips past it without an explicit check.
+  # Rejected before the save, so nothing is written at all.
   def test_create_observation_with_full_field_slip
     slip = field_slips(:field_slip_one)
     occ = slip.occurrence
@@ -466,12 +467,10 @@ class ObservationsControllerCreateTest < FunctionalTestCase
       { observation: { specimen: "1" },
         field_code: slip.code,
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0, 0
+      0, 0, 0, 0
     )
-    obs = assigns(:observation)
 
-    assert_nil(obs.field_slip, "must not attach past the observation cap")
-    assert_flash_warning
+    assert_flash_error
     assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
   end
 
@@ -484,20 +483,20 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
   end
 
-  # An invalid field-slip code cannot abort creation (the observation is
-  # already saved); it warns and keeps the observation without a field slip.
+  # An invalid code now blocks the save and re-renders the form, rather
+  # than creating the observation and warning after the fact — the user
+  # gets their input back and can fix the code. See #4932.
   def test_create_observation_with_invalid_field_slip
     generic_construct_observation(
       { observation: { specimen: "1" },
         field_code: "12345", # digits-only fails FieldSlip validation
         naming: { name: "Coprinus comatus" } },
-      1, 1, 0, 0
+      0, 0, 0, 0
     )
-    obs = assigns(:observation)
 
-    assert_nil(obs.field_slip, "Invalid code must not attach a field slip")
-    assert_nil(obs.occurrence, "Invalid code must not create an occurrence")
-    assert_flash_warning
+    assert_flash_error
+    assert_nil(FieldSlip.find_by(code: "12345"),
+               "Invalid code must not create a field slip")
   end
 
   # update_field_slip lives in the shared FieldSlips concern. It used to be
