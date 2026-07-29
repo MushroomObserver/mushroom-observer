@@ -101,12 +101,11 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   end
 
   def render_herbarium_autocompleter(hr_ns)
-    label = "#{:herbarium_record_herbarium_name.l}:"
     help = :form_observations_herbarium_record_help.t
     render(hr_ns.field(:herbarium_name).autocompleter(
              type: :herbarium,
-             wrapper_options: { label: label, help: help,
-                                help_collapse: true },
+             wrapper_options: { label: :herbarium_record_herbarium_name,
+                                help: help, help_collapse: true },
              value: @herbarium_name,
              hidden_value: @herbarium_id,
              create_text: :create_herbarium.l,
@@ -116,9 +115,8 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
   end
 
   def render_accession_number(hr_ns)
-    label = "#{:herbarium_record_accession_number.l}:"
     render(hr_ns.field(:accession_number).text(
-             wrapper_options: { label: label },
+             wrapper_options: { label: :herbarium_record_accession_number },
              value: @accession_number,
              data: { action: "specimen#checkCheckbox" }
            ))
