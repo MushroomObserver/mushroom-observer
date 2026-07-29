@@ -41,17 +41,35 @@ module Views::Controllers::Observations
       # is not a note — it is a transform flag — so it goes through
       # `@form` as a top-level `inat` param, the same shape the slip form
       # uses.
+      #
+      # Values are read here and captured by the closure, exactly as the
+      # ordinary parts pass `part.value`. Superform can't resolve them
+      # from the model on its own — `notes` is a Hash, not an association
+      # — and a field that renders empty submits empty, which
+      # `notes_to_sym_and_compact` then drops. Editing an observation
+      # would silently delete both values.
+      #
+      # An iNat-flagged code shows as the bare id with the box ticked,
+      # rather than as the generated markup, so the pair round-trips.
       def field_slip_note_fields
         return nil if editable_field_code.blank?
 
+        id_by = model.notes_part_value(:Field_Slip_ID_By)
+        stored_codes = model.notes_part_value(:Other_Codes)
+        codes = FieldSlipNotesBuilder.inat_code(stored_codes)
+        inat = FieldSlipNotesBuilder.inat_link?(stored_codes)
+
         proc do |notes_ns|
           render(notes_ns.field(:Field_Slip_ID_By).autocompleter(
-                   type: :user, wrapper_options: { label: :id_by }
+                   type: :user, wrapper_options: { label: :id_by },
+                   value: id_by
                  ))
           render(notes_ns.field(:Other_Codes).text(
-                   wrapper_options: { label: :field_slip_other_codes }
+                   wrapper_options: { label: :field_slip_other_codes },
+                   value: codes
                  ))
-          @form.checkbox_field("inat", label: :field_slip_other_inat)
+          @form.checkbox_field("inat", label: :field_slip_other_inat,
+                                       checked: inat)
         end
       end
 

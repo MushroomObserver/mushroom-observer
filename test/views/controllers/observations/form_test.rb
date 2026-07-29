@@ -167,6 +167,38 @@ module Views::Controllers::Observations
       assert_no_html(plain, "input[type='checkbox'][name='inat']")
     end
 
+    # A field rendering empty submits empty, and notes_to_sym_and_compact
+    # drops blank values — so failing to prefill these would silently
+    # delete them on any edit.
+    def test_edit_form_shows_stored_id_by_and_other_codes
+      user = users(:rolf)
+      obs = edit_obs_with_notes(Other_Codes: "12345",
+                                Field_Slip_ID_By: "_user rolf_")
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(html, "input[name='observation[notes][Other_Codes]']" \
+                        "[value='12345']")
+      assert_html(html, "input[name='observation[notes][Field_Slip_ID_By]']" \
+                        "[value='_user rolf_']")
+      assert_no_html(html, "input[type='checkbox'][name='inat'][checked]")
+    end
+
+    # A stored iNat link shows as the bare id with the box ticked, so the
+    # pair round-trips instead of the user seeing generated markup.
+    def test_edit_form_unwraps_a_stored_inat_link
+      user = users(:rolf)
+      obs = edit_obs_with_notes(
+        Other_Codes: FieldSlipNotesBuilder.inat_link("12345")
+      )
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(html, "input[name='observation[notes][Other_Codes]']" \
+                        "[value='12345']")
+      assert_html(html, "input[type='checkbox'][name='inat'][checked]")
+    end
+
     def test_edit_form_shows_field_slip_code_from_model
       user = users(:rolf)
       obs = observations(:minimal_unknown_obs)
@@ -266,6 +298,15 @@ module Views::Controllers::Observations
     private
 
     def rolf = users(:rolf)
+
+    def edit_obs_with_notes(notes)
+      obs = observations(:minimal_unknown_obs)
+      obs.update!(occurrence: nil)
+      obs.field_slip = field_slips(:field_slip_no_obs)
+      obs.notes = notes
+      obs.save!
+      obs
+    end
 
     def render_form(observation:, user:, mode: :create, **extras)
       render(Form.new(

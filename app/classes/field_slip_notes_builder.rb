@@ -19,6 +19,14 @@ class FieldSlipNotesBuilder
     codes.to_s.include?(INAT_OBSERVATION_URL)
   end
 
+  # The bare id inside a stored iNat link, so an edit form can show what
+  # the user typed rather than the markup generated from it.
+  def self.inat_code(codes)
+    return codes unless inat_link?(codes)
+
+    codes.to_s[/#{Regexp.escape(INAT_OBSERVATION_URL)}(.+)\z/o, 1] || codes
+  end
+
   def initialize(params, field_slip)
     @params = params
     @field_slip = field_slip
