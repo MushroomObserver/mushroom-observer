@@ -190,6 +190,12 @@ class OccurrencesController < ApplicationController
     return if gaps.empty?
     return unless project_resolution_param == "add_all"
 
-    occ.add_all_to_collections(projects: gaps[:projects] || [])
+    refused = occ.add_all_to_collections(projects: gaps[:projects] || [],
+                                         user: @user)
+    return if refused.empty?
+
+    flash_warning(:occurrence_resolve_projects_refused.t(
+                    projects: refused.map(&:title).join(", ")
+                  ))
   end
 end

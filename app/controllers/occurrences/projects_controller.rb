@@ -48,10 +48,16 @@ module Occurrences
 
     def add_all(gaps)
       projects = gaps[:projects] || []
-      @occurrence.add_all_to_collections(projects: projects)
+      refused = @occurrence.add_all_to_collections(projects: projects,
+                                                   user: @user)
       flash_notice(:occurrence_resolve_projects_all_done.t(
-                     count: projects.size
+                     count: projects.size - refused.size
                    ))
+      return if refused.empty?
+
+      flash_warning(:occurrence_resolve_projects_refused.t(
+                      projects: refused.map(&:title).join(", ")
+                    ))
     end
 
     # Backs out the attach that created the mix, rather than leaving the

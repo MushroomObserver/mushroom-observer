@@ -15,7 +15,7 @@ module Occurrences
     end
 
     def test_update_add_all_resolves_gaps
-      login("rolf")
+      login("mary") # bolete member; unioning requires membership (#4932)
       occ = create_occurrence(@obs1, @obs3)
       project = projects(:bolete_project)
 

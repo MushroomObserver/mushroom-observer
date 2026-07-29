@@ -10,6 +10,12 @@ class FieldSlip < AbstractModel
   belongs_to :project
   belongs_to :user
 
+  # A slip's project implies its observations are in that project, so
+  # changing the project has to move them. Both `code=` (which re-derives
+  # the project from the new prefix) and the form's project dropdown get
+  # here. See #4932.
+  after_update :cascade_project_change, if: :saved_change_to_project_id?
+
   validates :user_id, presence: true
   validates :code, uniqueness: true
   validates :code, presence: true
@@ -288,6 +294,31 @@ class FieldSlip < AbstractModel
 
   def other_codes
     observation&.other_codes || ""
+  end
+
+  # Leaving a project takes the observations out; joining one brings them
+  # in, minus any the project's constraints exclude — those would need a
+  # project admin, and this runs as whoever edited the slip.
+  #
+  # `Project#remove_observation` also clears a slip's project, but only
+  # when the slip still points at *that* project, so the value we just
+  # saved survives. It uses `update_all`, which skips callbacks, so this
+  # can't re-enter.
+  def cascade_project_change
+    members = occurrence&.observations&.to_a
+    return if members.blank?
+
+    old_id, new_id = saved_change_to_project_id
+    Project.find_by(id: old_id)&.remove_observation(members.first)
+    add_members_to_project(Project.find_by(id: new_id), members)
+  end
+
+  def add_members_to_project(project, members)
+    return unless project
+
+    members.each do |obs|
+      project.add_observation(obs) unless project.violates_constraints?(obs)
+    end
   end
 
   def can_edit?(editor)

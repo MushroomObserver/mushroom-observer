@@ -26,19 +26,19 @@ module Occurrence::ProjectGaps
   end
 
   # Add all occurrence observations to the given projects/lists.
-  def add_all_to_collections(projects: [], species_lists: [])
+  #
+  # Returns the projects it refused: ones `user` doesn't belong to, and
+  # ones holding an observation that violates their constraints, which
+  # only a project admin may add. Routed through `Project#add_observation`
+  # rather than creating the join rows directly, so images come along and
+  # exclusions are cleared. See #4932.
+  def add_all_to_collections(projects: [], species_lists: [], user: nil)
+    allowed, refused = projects.partition { |proj| may_add_all?(proj, user) }
     observations.each do |obs|
-      projects.each do |project|
-        ProjectObservation.find_or_create_by!(
-          project: project, observation: obs
-        )
-      end
-      species_lists.each do |list|
-        SpeciesListObservation.find_or_create_by!(
-          species_list: list, observation: obs
-        )
-      end
+      allowed.each { |project| project.add_observation(obs) }
+      species_lists.each { |list| list.add_observation(obs) }
     end
+    refused
   end
 
   # The other way to resolve a gap: instead of unioning the memberships,
@@ -63,6 +63,15 @@ module Occurrence::ProjectGaps
   end
 
   private
+
+  def may_add_all?(project, user)
+    return false unless project.member?(user)
+    return true unless observations.any? do |o|
+      project.violates_constraints?(o)
+    end
+
+    project.is_admin?(user)
+  end
 
   # Re-queried rather than read off the association: callers reach this
   # from strict-loading scopes, where `projects` won't lazily load.

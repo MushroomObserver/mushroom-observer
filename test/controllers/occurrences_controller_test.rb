@@ -56,7 +56,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   end
 
   def test_create_success
-    login("rolf")
+    login("mary") # bolete member
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
     params[:occurrence_projects] = { resolution: "add_all" }
@@ -175,7 +175,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   end
 
   def test_create_no_warning_if_locations_match
-    login("rolf")
+    login("mary") # bolete member
     obs3 = observations(:detailed_unknown_obs) # same location as obs1
     params = create_params(@obs1, [@obs1, obs3])
     params[:occurrence_projects] = { resolution: "add_all" }
@@ -221,7 +221,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   end
 
   def test_create_with_project_resolution_add_all
-    login("rolf")
+    login("mary") # bolete member
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, @obs3])
     params[:occurrence_projects] = { resolution: "add_all" }
@@ -297,7 +297,7 @@ class OccurrencesControllerTest < FunctionalTestCase
   end
 
   def test_create_with_add_all_adds_to_projects
-    login("rolf")
+    login("mary") # bolete member
     obs3 = observations(:detailed_unknown_obs) # in bolete_project
     project = projects(:bolete_project)
     params = create_params(@obs1, [@obs1, obs3])
