@@ -24,7 +24,6 @@
 #  first_link_in_mail
 #  assert_no_flash
 #  assert_flash
-#  assert_no_flash_text
 #  assert_flash_success
 #  assert_flash_error
 #  assert_no_flash_errors
