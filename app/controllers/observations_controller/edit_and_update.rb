@@ -126,6 +126,7 @@ module ObservationsController::EditAndUpdate
 
   def apply_observation_changes
     update_permitted_observation_attributes
+    resolve_project_aliases
     create_location_object_if_new(@observation)
     @observation.notes = notes_to_sym_and_compact
     warn_if_unchecking_specimen_with_records_present!
@@ -133,6 +134,7 @@ module ObservationsController::EditAndUpdate
 
     validate_place_name
     validate_projects
+    validate_field_slip
     detach_removed_images
     try_to_upload_images
     ensure_thumb_image
@@ -227,12 +229,21 @@ module ObservationsController::EditAndUpdate
     end
   end
 
-  # On edit, an invalid field-slip code halts the save and re-renders the
-  # form so the user can correct it.
+  # `validate_field_slip` has already rejected a code we can't use, so
+  # reaching either branch here means the slip changed underneath us
+  # between validation and application. Rare, but it would otherwise fail
+  # silently.
   def update_field_slip_or_flag_error
-    return unless update_field_slip == :invalid
-
-    flash_error(:edit_observation_field_slip_invalid.t(code: field_code))
+    case update_field_slip
+    when :invalid
+      flash_error(:observation_field_slip_invalid.t(code: field_code))
+    when :too_many
+      flash_error(:observation_field_slip_full.t(
+                    code: field_code, max: Occurrence::MAX_OBSERVATIONS
+                  ))
+    else
+      return
+    end
     @any_errors = true
   end
 

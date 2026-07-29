@@ -46,8 +46,7 @@ module Views::Controllers::Observations
       submitted_list_ids: nil,
       error_checked_projects: [],
       suspect_checked_projects: [],
-      field_code: nil,
-      field_code_locked: false
+      field_code: nil
     }.freeze
 
     def initialize(model, **attrs)
@@ -239,14 +238,12 @@ module Views::Controllers::Observations
     end
 
     def render_specimen_column
-      code = @field_code_locked ? @field_code : editable_field_code
       Column(xs: 12, md: 6) do
         render(Specimen.new(
                  form: self,
                  observation: model,
                  mode: @mode,
-                 field_code: code,
-                 field_code_locked: @field_code_locked,
+                 field_code: editable_field_code,
                  collectors_name: @collectors_name,
                  collectors_number: @collectors_number,
                  herbarium_name: @herbarium_name,
@@ -256,10 +253,9 @@ module Views::Controllers::Observations
       end
     end
 
-    # Field code for the editable input. Nil when locked (QR workflow).
+    # Value for the field-code input: the incoming param (a QR scan, or a
+    # failed submit being re-rendered) else the slip already on the record.
     def editable_field_code
-      return nil if @field_code_locked
-
       @field_code || (model.persisted? ? model.field_slip&.code : nil)
     end
 

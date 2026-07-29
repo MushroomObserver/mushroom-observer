@@ -884,7 +884,35 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
                  "Observation should remain unchanged")
   end
 
+  # `validate_field_slip` rejects both of these before the save, so the
+  # post-save branches only fire when the slip changed underneath us
+  # between validation and application. A real race can't be staged, so
+  # the status is stubbed — the point is that the branch reports rather
+  # than failing silently.
+  def test_update_flags_field_slip_that_turns_invalid_after_validation
+    assert_field_slip_race_reported(:invalid)
+  end
+
+  def test_update_flags_field_slip_that_fills_after_validation
+    assert_field_slip_race_reported(:too_many)
+  end
+
   private
+
+  def assert_field_slip_race_reported(status)
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+
+    @controller.define_singleton_method(:update_field_slip) { |*| status }
+    begin
+      put(:update,
+          params: { id: obs.id, observation: obs_params(obs) })
+    ensure
+      @controller.singleton_class.remove_method(:update_field_slip)
+    end
+
+    assert_flash_error
+  end
 
   def obs_params(obs)
     {

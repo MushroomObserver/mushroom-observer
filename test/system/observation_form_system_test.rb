@@ -165,6 +165,29 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_not_equal(Location.last.id, obs.location_id)
   end
 
+  # A Locality the user entered outranks an image's GPS, and the date
+  # rides along with the location rather than moving on its own. The
+  # override is still one click away. See #4917 / #4932.
+  def test_typed_locality_survives_a_geotagged_image
+    setup_image_dirs # in general_extensions
+    login!(katrina)
+    visit(new_observation_path)
+    assert_selector("body.observations__new")
+    assert_selector("#observation_place_name", wait: 6)
+    sleep(0.5)
+
+    typed = locations(:albion).name
+    fill_in("observation_place_name", with: typed)
+
+    click_attach_file("geotagged.jpg")
+    sleep(1)
+
+    assert_field("observation_place_name", with: typed)
+    assert_geolocation_is_empty
+    assert_date_is_now
+    assert_button(:image_use_exif.l)
+  end
+
   def test_autofill_location_from_geotagged_image
     # Combined test: First test when no MO location matches (Google
     # autocompleter), then create a matching location and test that it

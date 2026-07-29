@@ -841,8 +841,27 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #   notes: { Other: abc }
   #   observation.notes_part_value("Other") #=> "abc"
   #   observation.notes_part_value(:Other)  #=> "abc"
+  #
+  # Falls back to a case-insensitive match on the stored key.
+  # `notes_orphaned_parts` dedups case-insensitively, so a template
+  # heading legitimately owns a stored key differing only in case (a
+  # user with "odor/taste" in their template and a field slip's stored
+  # :"Odor/Taste"). Without the fallback that part renders blank and
+  # the stored value is silently dropped.
   def notes_part_value(part)
-    notes.blank? ? "" : notes[notes_normalized_key(part)]
+    return "" if notes.blank?
+
+    key = notes_normalized_key(part)
+    return notes[key] if notes.key?(key)
+
+    other = notes_key_matching(key)
+    other ? notes[other] : nil
+  end
+
+  # The stored notes key equal to `key` ignoring case, if any.
+  def notes_key_matching(key)
+    target = key.to_s.downcase
+    notes.keys.find { |stored| stored.to_s.downcase == target }
   end
 
   # Change spaces to underscores in keys
@@ -864,11 +883,38 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   #   ["orphaned_part", "Other"]
   #   ["template_1st_part", "template_2nd_part", "Other"]
   #   ["template_1st_part", "template_2nd_part", "orphaned_part", "Other"]
-  def form_notes_parts(user)
-    return user.notes_template_parts + [other_notes_part] if notes.blank?
+  #
+  # `extra` holds headings a caller wants shown whether or not this
+  # observation has values for them yet — the field-slip headings on the
+  # observation form (#4932). They sit after the template and orphaned
+  # parts, and drop out entirely when an earlier part already claims the
+  # same heading, so one the user configured keeps its own position.
+  def form_notes_parts(user, extra: [])
+    parts = user.notes_template_parts
+    parts += notes_orphaned_parts(user) if notes.present?
+    parts + unclaimed_notes_parts(extra, parts) + [other_notes_part]
+  end
 
-    user.notes_template_parts + notes_orphaned_parts(user) +
-      [other_notes_part]
+  # Those of `extra` no earlier part (or "Other") already claims.
+  def unclaimed_notes_parts(extra, existing)
+    return [] if extra.blank?
+
+    seen = (existing + [other_notes_part]).
+           to_set { |part| notes_comparison_key(part) }
+    extra.each_with_object([]) do |part, result|
+      key = notes_comparison_key(part)
+      next if seen.include?(key)
+
+      result << part
+      seen << key
+    end
+  end
+
+  # How two note headings are told apart: underscores and spaces are
+  # interchangeable, case is not significant. Shared by every dedup below
+  # so they can't drift out of agreement.
+  def notes_comparison_key(part)
+    normalize_for_display(part).downcase
   end
 
   # Array of notes parts (Strings) which are
@@ -877,14 +923,10 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   def notes_orphaned_parts(user)
     return [] if notes.blank?
 
-    # Normalization for comparison (lowercase)
-    normalize_for_comparison = ->(key) { normalize_for_display(key).downcase }
-
     known_keys = (user.notes_template_parts + [other_notes_part]).
-                 map(&normalize_for_comparison).
-                 to_set
+                 to_set { |part| notes_comparison_key(part) }
     notes.keys.each_with_object([]) do |key, result|
-      normalized_key = normalize_for_comparison.call(key)
+      normalized_key = notes_comparison_key(key)
       next if known_keys.include?(normalized_key)
 
       result << normalize_for_display(key)

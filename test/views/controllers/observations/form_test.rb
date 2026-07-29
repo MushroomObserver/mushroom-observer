@@ -81,37 +81,110 @@ module Views::Controllers::Observations
       assert_no_html(html, "input[name='field_code'][type='hidden']")
     end
 
-    def test_new_form_locked_field_code_shows_static_display
+    # A code supplied by the URL (a QR scan) is prefilled but still
+    # editable, so a mis-scan can be corrected on the form. There is no
+    # longer a locked/static variant. See #4932.
+    def test_new_form_prefilled_field_code_stays_editable
       user = users(:rolf)
       obs = Observation.new(when: Time.zone.today)
 
       html = render_form(observation: obs, user: user, mode: :create,
-                         field_code: "NEMF-1234",
-                         field_code_locked: true)
+                         field_code: "NEMF-1234")
 
-      # Static display + hidden inputs
-      assert_includes(html, "NEMF-1234")
-      assert_html(html, "input[name='field_code'][type='hidden']" \
+      assert_html(html, "input[name='field_code'][type='text']" \
                         "[value='NEMF-1234']")
-      assert_html(html, "input[name='field_code_locked']" \
-                        "[value='1']")
-      # No editable text input for field_code
-      assert_no_html(html, "input[name='field_code'][type='text']")
+      assert_no_html(html, "input[name='field_code'][type='hidden']")
+      assert_no_html(html, "input[name='field_code_locked']")
     end
 
-    def test_new_form_preserves_user_entered_field_code
+    # --- Field Slip Notes ---
+
+    # With a field code in play the form grows the slip's standard
+    # headings, so slip data has somewhere to go. Without one it doesn't.
+    def test_field_code_adds_field_slip_note_headings
+      user = users(:rolf)
+      user.update!(notes_template: "")
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create,
+                         field_code: "NEMF-1234")
+
+      FieldSlip::NOTE_HEADINGS.each do |heading|
+        assert_html(html, "textarea[name='observation[notes][#{heading}]']")
+      end
+
+      plain = render_form(observation: obs, user: user, mode: :create)
+
+      assert_no_html(plain, "textarea[name='observation[notes][Substrate]']")
+      assert_html(plain, "textarea[name='observation[notes][Other]']")
+    end
+
+    # A heading the user already has in their notes_template renders once,
+    # in the template's position — not a second time from the slip set.
+    def test_templated_heading_is_not_duplicated_by_field_slip
+      user = users(:rolf)
+      user.update!(notes_template: "Substrate")
+      obs = Observation.new(when: Time.zone.today)
+
+      html = render_form(observation: obs, user: user, mode: :create,
+                         field_code: "NEMF-1234")
+
+      assert_html(html, "textarea[name='observation[notes][Substrate]']",
+                  count: 1)
+    end
+
+    # "Id by" and "Other Codes" move into the notes area with a field code
+    # in play, and only then. The iNat checkbox is a transform flag rather
+    # than a note, so it submits top-level.
+    def test_field_code_adds_id_by_and_other_codes
       user = users(:rolf)
       obs = Observation.new(when: Time.zone.today)
 
       html = render_form(observation: obs, user: user, mode: :create,
-                         field_code: "NEMF-5678",
-                         field_code_locked: false)
+                         field_code: "NEMF-1234")
 
-      # Editable input pre-populated
-      assert_html(html, "input[name='field_code'][type='text']" \
-                        "[value='NEMF-5678']")
-      # No locked display
-      assert_no_html(html, "input[name='field_code_locked']")
+      assert_html(html, "input[name='observation[notes][Field_Slip_ID_By]']")
+      assert_html(html, "input[name='observation[notes][Other_Codes]']")
+      assert_html(html, "input[type='checkbox'][name='inat']")
+
+      plain = render_form(observation: obs, user: user, mode: :create)
+
+      assert_no_html(plain,
+                     "input[name='observation[notes][Field_Slip_ID_By]']")
+      assert_no_html(plain, "input[name='observation[notes][Other_Codes]']")
+      assert_no_html(plain, "input[type='checkbox'][name='inat']")
+    end
+
+    # A field rendering empty submits empty, and notes_to_sym_and_compact
+    # drops blank values — so failing to prefill these would silently
+    # delete them on any edit.
+    def test_edit_form_shows_stored_id_by_and_other_codes
+      user = users(:rolf)
+      obs = edit_obs_with_notes(Other_Codes: "12345",
+                                Field_Slip_ID_By: "_user rolf_")
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(html, "input[name='observation[notes][Other_Codes]']" \
+                        "[value='12345']")
+      assert_html(html, "input[name='observation[notes][Field_Slip_ID_By]']" \
+                        "[value='_user rolf_']")
+      assert_no_html(html, "input[type='checkbox'][name='inat'][checked]")
+    end
+
+    # A stored iNat link shows as the bare id with the box ticked, so the
+    # pair round-trips instead of the user seeing generated markup.
+    def test_edit_form_unwraps_a_stored_inat_link
+      user = users(:rolf)
+      obs = edit_obs_with_notes(
+        Other_Codes: FieldSlipNotesBuilder.inat_link("12345")
+      )
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(html, "input[name='observation[notes][Other_Codes]']" \
+                        "[value='12345']")
+      assert_html(html, "input[type='checkbox'][name='inat'][checked]")
     end
 
     def test_edit_form_shows_field_slip_code_from_model
@@ -213,6 +286,15 @@ module Views::Controllers::Observations
     private
 
     def rolf = users(:rolf)
+
+    def edit_obs_with_notes(notes)
+      obs = observations(:minimal_unknown_obs)
+      obs.update!(occurrence: nil)
+      obs.field_slip = field_slips(:field_slip_no_obs)
+      obs.notes = notes
+      obs.save!
+      obs
+    end
 
     def render_form(observation:, user:, mode: :create, **extras)
       render(Form.new(
