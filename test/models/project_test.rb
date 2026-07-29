@@ -823,6 +823,52 @@ class ProjectTest < UnitTestCase
     assert_nil(slip.reload.project_id)
   end
 
+  # --- removal cascade (#4932) ---
+
+  # An occurrence's observations are one collection, so a project
+  # membership that stops holding for one cannot hold for the rest.
+  def test_removing_one_occurrence_member_removes_them_all
+    project = projects(:eol_project)
+    slip = field_slips(:field_slip_one)
+    members = share_an_occurrence(slip, observations(:detailed_unknown_obs))
+    assert_equal(2, members.size)
+    members.each { |o| project.add_observation(o) }
+
+    removed = project.remove_observation(members.first)
+
+    assert_equal(members.map(&:id).sort, removed.map(&:id).sort)
+    members.each do |o|
+      assert_not_includes(project.reload.observations, o)
+    end
+  end
+
+  # And the slip cannot go on claiming a project its observations left.
+  def test_removing_an_occurrence_member_releases_the_field_slip
+    project = projects(:eol_project)
+    slip = field_slips(:field_slip_one)
+    assert_equal(project.id, slip.project_id, "fixture: slip is in project")
+    obs = slip.occurrence.observations.first
+    project.add_observation(obs)
+
+    project.remove_observation(obs)
+
+    assert_nil(slip.reload.project_id)
+  end
+
+  # An observation with no occurrence is still just itself.
+  def test_removing_a_lone_observation_touches_nothing_else
+    project = projects(:eol_project)
+    obs = observations(:minimal_unknown_obs)
+    obs.update!(occurrence: nil)
+    project.add_observation(obs)
+    before = project.reload.observations.count
+
+    removed = project.remove_observation(obs)
+
+    assert_equal([obs.id], removed.map(&:id))
+    assert_equal(before - 1, project.reload.observations.count)
+  end
+
   # --- user_can_change_membership? (#4932) ---
 
   # Entering an observation does not confer control over which projects
@@ -936,6 +982,14 @@ class ProjectTest < UnitTestCase
   end
 
   # A field slip with no project, regardless of prefix matching.
+  # Every occurrence fixture holds a single observation, so a test that
+  # needs a shared one has to build it.
+  def share_an_occurrence(slip, extra)
+    extra.update!(occurrence: nil)
+    extra.update!(occurrence: slip.occurrence)
+    slip.occurrence.reload.observations.to_a
+  end
+
   def orphan_field_slip(code, owner)
     slip = FieldSlip.create!(code: code, user: owner)
     slip.update_column(:project_id, nil)

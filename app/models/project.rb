@@ -493,12 +493,25 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   private :insert_project_observations, :insert_project_images_for
 
   # Remove observation (and its images) from this project. Saves it.
+  # Removing one observation of an occurrence removes them all, and drops
+  # the occurrence's field slip from this project too. An occurrence's
+  # observations are one collection sharing a single project membership,
+  # so a membership that stops holding for one cannot hold for the rest,
+  # and a slip cannot claim a project its observations have left.
+  #
+  # Returns the observations actually removed, so callers can report how
+  # many moved. See #4932.
   def remove_observation(obs)
-    return unless observations.include?(obs)
+    removed = occurrence_members(obs).select { |m| observations.include?(m) }
+    return removed if removed.empty?
 
-    imgs_to_delete(obs).each { |img| images.delete(img) }
-    observations.delete(obs)
+    removed.each do |member|
+      imgs_to_delete(member).each { |img| images.delete(img) }
+      observations.delete(member)
+    end
+    release_field_slip(obs)
     touch
+    removed
   end
 
   # Exclude observation from this project's Updates tab candidate list.
@@ -1101,6 +1114,29 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private ###############################
+
+  # An observation on its own when it has no occurrence.
+  #
+  # Re-queried rather than walked through `obs.occurrence.observations`:
+  # callers reach this from strict-loading scopes, and `imgs_to_delete`
+  # needs each member's images, which that association won't lazily load.
+  def occurrence_members(obs)
+    return [obs] unless obs.occurrence_id
+
+    Observation.where(occurrence_id: obs.occurrence_id).includes(:images).to_a
+  end
+
+  # Queried by id for the same strict-loading reason as
+  # `occurrence_members`. `update_all` matches the callback-free
+  # `update_column` this replaced.
+  def release_field_slip(obs)
+    return unless obs.occurrence_id
+
+    slip_id = Occurrence.where(id: obs.occurrence_id).pick(:field_slip_id)
+    return unless slip_id
+
+    FieldSlip.where(id: slip_id, project_id: id).update_all(project_id: nil)
+  end
 
   # A slip whose observations don't meet this project's constraints was
   # used outside the project's context — a spare slip, a mis-scanned
