@@ -56,9 +56,10 @@ module FlashExtensions
   #
   # object_error_type/object_error_attribute: pass BOTH together, and
   # ONLY on a bare-Symbol `expect` asserting a flash_object_errors(record)
-  # validation message -- AbstractModel#formatted_errors composes those
-  # as "<Type> <attribute> <message>." (see its source) rather than
-  # just resolving one tag, so `expect` alone can't express them:
+  # validation message whose tag doesn't already read as a complete
+  # sentence -- AbstractModel#formatted_errors then composes it as
+  # "<Type> <attribute> <message>." (see its source) instead of using
+  # the resolved tag as-is, so `expect` alone can't express it:
   # assert_flash(:not_a_number, object_error_type: :name,
   #                             object_error_attribute: :icn_id)
   # wrapped_flash_text raises if these show up inside an Array entry --
