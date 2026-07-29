@@ -956,9 +956,9 @@ class OccurrenceTest < UnitTestCase
     assert_not(project.member?(rolf), "fixture: rolf is not a member")
     occ = create_occurrence(@obs1, @obs2)
 
-    refused = occ.add_all_to_collections(projects: [project], user: rolf)
+    result = occ.add_all_to_collections(projects: [project], user: rolf)
 
-    assert_equal([project], refused)
+    assert_equal([project], result[:refused])
     assert_not_includes(@obs1.reload.projects, project)
   end
 
@@ -972,10 +972,27 @@ class OccurrenceTest < UnitTestCase
     assert_not(project.is_admin?(mary))
     occ = create_occurrence(@obs1, @obs2)
 
-    refused = occ.add_all_to_collections(projects: [project], user: mary)
+    result = occ.add_all_to_collections(projects: [project], user: mary)
 
-    assert_equal([project], refused)
+    assert_equal([project], result[:refused])
     assert_not_includes(@obs1.reload.projects, project)
+  end
+
+  # A project or site admin may force a constraint violation, but has to
+  # be told they just did — it should not be something they discover
+  # later. See #4932.
+  def test_add_all_reports_a_forced_constraint_violation
+    project = projects(:bolete_project)
+    project.update!(start_date: Date.parse("1990-01-01"),
+                    end_date: Date.parse("1990-12-31"))
+    occ = create_occurrence(@obs1, @obs2)
+
+    result = occ.add_all_to_collections(projects: [project], user: mary,
+                                        site_admin: true)
+
+    assert_empty(result[:refused])
+    assert_equal([project], result[:forced])
+    assert_includes(@obs1.reload.projects, project)
   end
 
   def test_add_all_to_projects_and_species_lists

@@ -78,6 +78,37 @@ class FieldSlipTest < UnitTestCase
     assert_equal(locations(:burbank), slip.location)
   end
 
+  # Changing a slip's project moves its observations with it.
+  def test_project_change_moves_the_observations
+    slip = field_slips(:field_slip_one)
+    obs = slip.occurrence.observations.first
+    joined = projects(:bolete_project)
+    slip.current_user = mary # FieldSlip#project= gates on can_add_field_slip?
+    assert_not_includes(joined.observations, obs)
+
+    slip.update!(project: joined)
+
+    assert_includes(joined.reload.observations, obs)
+  end
+
+  # All or nothing: a project that can't take every member would leave
+  # the slip claiming a project some of its observations aren't in, so it
+  # declines the project instead and comes out project-less. See #4932.
+  def test_project_change_declines_a_project_that_excludes_a_member
+    slip = field_slips(:field_slip_one)
+    obs = slip.occurrence.observations.first
+    joined = projects(:bolete_project)
+    slip.current_user = mary # FieldSlip#project= gates on can_add_field_slip?
+    joined.update!(start_date: Date.parse("1990-01-01"),
+                   end_date: Date.parse("1990-12-31"))
+    assert(joined.violates_constraints?(obs), "fixture must violate")
+
+    slip.update!(project: joined)
+
+    assert_nil(slip.reload.project_id)
+    assert_not_includes(joined.reload.observations, obs)
+  end
+
   def test_location_falls_back_to_project_location
     observations(:minimal_unknown_obs).update_columns(location_id: nil)
     observations(:owner_accepts_general_questions).

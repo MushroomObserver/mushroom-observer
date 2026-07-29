@@ -32,13 +32,20 @@ module Occurrence::ProjectGaps
   # only a project admin may add. Routed through `Project#add_observation`
   # rather than creating the join rows directly, so images come along and
   # exclusions are cleared. See #4932.
-  def add_all_to_collections(projects: [], species_lists: [], user: nil)
-    allowed, refused = projects.partition { |proj| may_add_all?(proj, user) }
+  # Returns `{ refused:, forced: }` — the projects it declined, and the
+  # ones it added to despite a constraint violation, which an admin is
+  # entitled to do but must be told about.
+  def add_all_to_collections(projects: [], species_lists: [], user: nil,
+                             site_admin: false)
+    allowed, refused = projects.partition do |proj|
+      may_add_all?(proj, user, site_admin)
+    end
+    forced = allowed.select { |proj| any_member_violates?(proj) }
     observations.each do |obs|
       allowed.each { |project| project.add_observation(obs) }
       species_lists.each { |list| list.add_observation(obs) }
     end
-    refused
+    { refused: refused, forced: forced }
   end
 
   # The other way to resolve a gap: instead of unioning the memberships,
@@ -64,13 +71,19 @@ module Occurrence::ProjectGaps
 
   private
 
-  def may_add_all?(project, user)
+  # Membership is required of everyone. Forcing a constraint violation on
+  # top of that is a project-or-site-admin power; `site_admin` comes from
+  # the caller's admin *mode*, which is how MO expresses that elsewhere,
+  # rather than the bare `User#admin` flag.
+  def may_add_all?(project, user, site_admin)
     return false unless project.member?(user)
-    return true unless observations.any? do |o|
-      project.violates_constraints?(o)
-    end
+    return true unless any_member_violates?(project)
 
-    project.is_admin?(user)
+    site_admin || project.is_admin?(user)
+  end
+
+  def any_member_violates?(project)
+    observations.any? { |obs| project.violates_constraints?(obs) }
   end
 
   # Re-queried rather than read off the association: callers reach this

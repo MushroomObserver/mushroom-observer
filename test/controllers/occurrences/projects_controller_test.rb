@@ -47,7 +47,11 @@ module Occurrences
             params: { occurrence_id: occ.id,
                       occurrence_projects: { resolution: "cancel" } })
 
-      assert_redirected_to(occurrence_path(occ))
+      # Detaching leaves one observation and no field slip, so
+      # destroy_if_incomplete! removes the occurrence — there is no
+      # occurrence page left to redirect to.
+      assert_not(Occurrence.exists?(occ.id))
+      assert_redirected_to(permanent_observation_path(@obs1.id))
       mismatched.each do |obs|
         assert_nil(obs.reload.occurrence_id, "should have been detached")
       end

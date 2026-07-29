@@ -297,8 +297,7 @@ class FieldSlip < AbstractModel
   end
 
   # Leaving a project takes the observations out; joining one brings them
-  # in, minus any the project's constraints exclude — those would need a
-  # project admin, and this runs as whoever edited the slip.
+  # in.
   #
   # `Project#remove_observation` also clears a slip's project, but only
   # when the slip still points at *that* project, so the value we just
@@ -310,15 +309,25 @@ class FieldSlip < AbstractModel
 
     old_id, new_id = saved_change_to_project_id
     Project.find_by(id: old_id)&.remove_observation(members.first)
-    add_members_to_project(Project.find_by(id: new_id), members)
+    join_project(Project.find_by(id: new_id), members)
   end
 
-  def add_members_to_project(project, members)
+  # All or nothing. Adding only the members a project's constraints
+  # accept would leave the slip claiming a project some of its own
+  # observations aren't in — the exact gap this cascade exists to
+  # prevent. A project that can't take every member is declined instead,
+  # which leaves the slip project-less, and a project-less slip confers
+  # nothing. `update_column` skips callbacks, so declining can't
+  # re-enter this.
+  def join_project(project, members)
     return unless project
 
-    members.each do |obs|
-      project.add_observation(obs) unless project.violates_constraints?(obs)
+    if members.any? { |obs| project.violates_constraints?(obs) }
+      update_column(:project_id, nil)
+      return
     end
+
+    members.each { |obs| project.add_observation(obs) }
   end
 
   def can_edit?(editor)

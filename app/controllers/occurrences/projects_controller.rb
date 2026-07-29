@@ -14,6 +14,8 @@
 # standard CRUD routing rather than a bespoke action.
 module Occurrences
   class ProjectsController < ApplicationController
+    include OccurrenceProjectResolvable
+
     before_action :login_required
     before_action :find_occurrence!
 
@@ -24,8 +26,9 @@ module Occurrences
         return
       end
 
+      primary = @occurrence.primary_observation
       apply_resolution(gaps)
-      redirect_to(occurrence_path(@occurrence))
+      redirect_after_resolution(primary)
     end
 
     private
@@ -46,18 +49,26 @@ module Occurrences
       end
     end
 
+    # Cancel can leave the occurrence with a single observation and no
+    # field slip, in which case `destroy_if_incomplete!` removes it —
+    # there is no occurrence page left to return to.
+    def redirect_after_resolution(primary)
+      if @occurrence.destroyed?
+        redirect_to(permanent_observation_path(primary.id))
+      else
+        redirect_to(occurrence_path(@occurrence))
+      end
+    end
+
     def add_all(gaps)
       projects = gaps[:projects] || []
-      refused = @occurrence.add_all_to_collections(projects: projects,
-                                                   user: @user)
+      result = @occurrence.add_all_to_collections(
+        projects: projects, user: @user, site_admin: in_admin_mode?
+      )
       flash_notice(:occurrence_resolve_projects_all_done.t(
-                     count: projects.size - refused.size
+                     count: projects.size - result[:refused].size
                    ))
-      return if refused.empty?
-
-      flash_warning(:occurrence_resolve_projects_refused.t(
-                      projects: refused.map(&:title).join(", ")
-                    ))
+      flash_add_all_result(result)
     end
 
     # Backs out the attach that created the mix, rather than leaving the

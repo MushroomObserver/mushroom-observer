@@ -5,6 +5,7 @@
 class OccurrencesController < ApplicationController
   include Show
   include Edit
+  include OccurrenceProjectResolvable
 
   before_action :login_required
 
@@ -190,12 +191,9 @@ class OccurrencesController < ApplicationController
     return if gaps.empty?
     return unless project_resolution_param == "add_all"
 
-    refused = occ.add_all_to_collections(projects: gaps[:projects] || [],
-                                         user: @user)
-    return if refused.empty?
-
-    flash_warning(:occurrence_resolve_projects_refused.t(
-                    projects: refused.map(&:title).join(", ")
-                  ))
+    flash_add_all_result(
+      occ.add_all_to_collections(projects: gaps[:projects] || [],
+                                 user: @user, site_admin: in_admin_mode?)
+    )
   end
 end
