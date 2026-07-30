@@ -192,7 +192,7 @@ module Views::Controllers::Names
     end
 
     def rank_options
-      Name.all_ranks.map { |r| [rank_as_string(r), r] }
+      Name.all_ranks.reverse.map { |r| [rank_as_string(r), r] }
     end
 
     def status_options
