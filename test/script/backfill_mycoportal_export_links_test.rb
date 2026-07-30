@@ -142,6 +142,48 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
            "linked record")
   end
 
+  # An MO image can legitimately be attached to more than one MCP
+  # occurrence record (confirmed in real MCP data, #4819 follow-up) --
+  # each occid it's seen under should get its own export link.
+  def test_image_attached_to_two_occurrences_creates_two_links
+    image = images(:in_situ_image)
+
+    subject = run_script([], [multimedia_row(101, image_url(image.id)),
+                              multimedia_row(102, image_url(image.id))])
+
+    assert_equal(
+      2, subject.instance_variable_get(:@stats)[:images][:created]
+    )
+    assert_equal(
+      0, subject.instance_variable_get(:@stats)[:images][:already_present]
+    )
+    links = ExternalLink.where(target: image, external_site: @site,
+                               relationship: :export).order(:external_id)
+    assert_equal(%w[101 102], links.map(&:external_id))
+  end
+
+  def test_reprocessing_same_image_and_occid_pair_is_idempotent
+    image = images(:in_situ_image)
+    multimedia_rows = [multimedia_row(101, image_url(image.id)),
+                       multimedia_row(102, image_url(image.id))]
+    run_script([], multimedia_rows)
+
+    subject = run_script([], multimedia_rows)
+
+    assert_equal(
+      0, subject.instance_variable_get(:@stats)[:images][:created]
+    )
+    assert_equal(
+      2, subject.instance_variable_get(:@stats)[:images][:already_present]
+    )
+    assert_equal(
+      2,
+      ExternalLink.where(target: image, external_site: @site,
+                         relationship: :export).count,
+      "Re-running with the same two occids should not create duplicates"
+    )
+  end
+
   def test_image_not_found_locally_is_reported
     bogus_id = Image.maximum(:id).to_i + 1000
 
@@ -645,14 +687,25 @@ class BackfillMycoportalExportLinksTest < UnitTestCase
     "https://mushroomobserver.org/images/1280/#{image_id}.jpg"
   end
 
-  def make_link(image)
+  # Defaults external_id to "1" -- the occid every image test's
+  # multimedia_row(1, ...) uses -- so existing already-present-style
+  # tests keep working unchanged while still setting a real, matching
+  # external_id on the pre-made link.
+  def make_link(image, external_id: "1")
     ExternalLink.create!(user: User.admin, target: image,
-                         external_site: @site, relationship: :export)
+                         external_site: @site, relationship: :export,
+                         external_id: external_id)
   end
 
-  def link_for(image)
-    ExternalLink.find_by(target: image, external_site: @site,
-                         relationship: :export)
+  # An image can now carry more than one export link (one per MCP
+  # occid it's attached to, #4819 follow-up) -- pass external_id to
+  # scope to a specific one; omit it to find any (unchanged default
+  # behavior for tests that only ever create a single link).
+  def link_for(image, external_id: nil)
+    scope = ExternalLink.where(target: image, external_site: @site,
+                               relationship: :export)
+    scope = scope.where(external_id: external_id) if external_id
+    scope.first
   end
 
   # Runs the backfill against temp CSVs (output suppressed) and returns the

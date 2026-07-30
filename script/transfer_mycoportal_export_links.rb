@@ -119,8 +119,12 @@ class TransferMycoportalExportLinks
     insert_links(valid)
   end
 
+  # Includes external_id (the MCP occid) in the key -- a target can
+  # legitimately carry more than one export link when it's attached to
+  # multiple distinct MCP occurrence records (#4819 follow-up), so
+  # dedup can't collapse down to [target_type, target_id] alone.
   def row_key(row)
-    [row[:target_type], row[:target_id]]
+    [row[:target_type], row[:target_id], row[:external_id]]
   end
 
   def ids_by_type(rows)
@@ -134,7 +138,8 @@ class TransferMycoportalExportLinks
     ids_by_type(batch).each_with_object(Set.new) do |(type, ids), keys|
       ExternalLink.where(target_type: type, target_id: ids,
                          external_site: @site, relationship: :export).
-        pluck(:target_type, :target_id).each { |key| keys << key }
+        pluck(:target_type, :target_id, :external_id).
+        each { |key| keys << key }
     end
   end
 

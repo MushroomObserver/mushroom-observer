@@ -93,6 +93,29 @@ class TransferMycoportalExportLinksTest < UnitTestCase
     )
   end
 
+  # An image can carry more than one export link -- one per MCP occid
+  # it's attached to (#4819 follow-up). Applying a CSV with two rows
+  # for the same image but different external_ids must keep both, not
+  # collapse them down to whichever one already exists locally.
+  def test_apply_keeps_separate_links_for_same_target_different_external_id
+    image = images(:in_situ_image)
+    make_link(target: image, external_id: "101")
+
+    subject = run_apply([export_row(target: image, external_id: "101"),
+                         export_row(target: image, external_id: "102")])
+
+    assert_equal(
+      1, subject.instance_variable_get(:@stats)[:already_present]
+    )
+    assert_equal(1, subject.instance_variable_get(:@stats)[:created])
+    assert_equal(
+      2,
+      ExternalLink.where(target: image, external_site: @site,
+                         relationship: :export).count,
+      "Different external_ids for the same target should both be kept"
+    )
+  end
+
   def test_apply_missing_target_is_logged_and_skipped
     bogus_id = Image.maximum(:id).to_i + 1000
 

@@ -241,7 +241,7 @@ class BackfillMycoportalExportLinks
     return record_missing_observation(row) unless
       known_ids.include?(row[:mo_id])
     return record_skipped_observation(row, existing) if
-      existing.key?(row[:mo_id])
+      existing.key?([row[:mo_id], row[:occid]])
 
     create_export_link(target_type: "Observation", target_id: row[:mo_id],
                        external_id: row[:occid],
@@ -255,7 +255,8 @@ class BackfillMycoportalExportLinks
 
   def record_skipped_observation(row, existing)
     record_skipped(target_type: "Observation", occid: row[:occid],
-                   mo_id: row[:mo_id], link_id: existing[row[:mo_id]])
+                   mo_id: row[:mo_id],
+                   link_id: existing[[row[:mo_id], row[:occid]]])
   end
 
   # stream in batches, never CSV.read the whole file because it's huge.
@@ -293,17 +294,21 @@ class BackfillMycoportalExportLinks
       (@images_seen % PROGRESS_EVERY).zero?
   end
 
-  # NOTE: Images do not live on MCP. They link out to other sites (MO itself, or
-  # a mirror). An ExternalLink's url must target the ExternalSite. Therefore,
-  # Image links cannot have a url or an external_id.
+  # NOTE: Images do not live on MCP -- they link out to other sites (MO
+  # itself, or a mirror), so an Image link's url always stays nil (an
+  # ExternalLink's url must target the ExternalSite). external_id
+  # instead holds the MCP occid the image was attached to -- the same
+  # image can be attached to more than one occurrence record on MCP, so
+  # it may carry more than one export link, one per occid (#4819).
   def process_image_row(row, known_ids, existing)
     return increment_stat("Image", :unparseable) unless row[:image_id]
     return record_missing_image(row) unless
       known_ids.include?(row[:image_id])
     return record_skipped_image(row, existing) if
-      existing.key?(row[:image_id])
+      existing.key?([row[:image_id], row[:occid]])
 
     create_export_link(target_type: "Image", target_id: row[:image_id],
+                       external_id: row[:occid],
                        external_created_on: row[:metadata_date])
   end
 
@@ -317,13 +322,18 @@ class BackfillMycoportalExportLinks
     record_skipped(target_type: "Image", occid: row[:occid],
                    mo_id: @mo_id_by_occid[row[:occid]],
                    image_id: row[:image_id],
-                   link_id: existing[row[:image_id]])
+                   link_id: existing[[row[:image_id], row[:occid]]])
   end
 
+  # Keyed by [target_id, external_id] (the MCP occid), not just target_id
+  # -- the same target can legitimately have more than one export link
+  # when it's attached to multiple distinct MCP occurrence records (an
+  # image can appear under two different occids; #4819 follow-up).
   def existing_links(target_type:, ids:)
     ExternalLink.where(target_type: target_type, target_id: ids,
                        external_site: @site, relationship: :export).
-      pluck(:target_id, :id).to_h
+      pluck(:target_id, :external_id, :id).
+      each_with_object({}) { |(tid, eid, id), h| h[[tid, eid]] = id }
   end
 
   def create_export_link(target_type:, target_id:, external_id: nil,
