@@ -198,9 +198,10 @@ class TransferMycoportalExportLinks
       created_at: now, updated_at: now }
   end
 
-def summarize
-  totals = @stats.sort.map { |k, v| "#{k}: #{v}" }.join(", ")
-  puts("Totals: #{totals}")
+  def summarize
+    totals = @stats.sort.map { |k, v| "#{k}: #{v}" }.join(", ")
+    puts("Totals: #{totals}")
+  end
 end
 
 if $PROGRAM_NAME == __FILE__
