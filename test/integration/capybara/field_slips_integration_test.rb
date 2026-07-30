@@ -51,8 +51,10 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
            "Test needs user who is member of #{project.title} Project")
 
     login(user)
+    # Scanning an unused code lands on the observation form directly —
+    # no intervening Create Field Slip page to click through (#4932).
     visit("/qr/NFAL-0001")
-    click_on(:field_slip_add_images.l)
+    assert_selector("body.observations__new")
 
     project_checkbox = "observation_project_ids_#{project.id}"
     check(project_checkbox)

@@ -934,7 +934,7 @@ class OccurrenceTest < UnitTestCase
   def test_add_all_to_collections
     project = projects(:bolete_project)
     occ = create_occurrence(@obs1, @obs2, @obs3)
-    occ.add_all_to_collections(projects: [project])
+    occ.add_all_to_collections(projects: [project], user: mary)
     assert_includes(@obs1.reload.projects, project)
     assert_includes(@obs2.reload.projects, project)
     assert_includes(@obs3.reload.projects, project)
@@ -948,12 +948,59 @@ class OccurrenceTest < UnitTestCase
     assert_includes(@obs2.reload.species_lists, spl)
   end
 
+  # Unioning puts observations into a project, so the person doing it has
+  # to belong to that project. Refused projects come back to the caller
+  # rather than failing silently. See #4932.
+  def test_add_all_refuses_projects_the_user_is_not_in
+    project = projects(:bolete_project)
+    assert_not(project.member?(rolf), "fixture: rolf is not a member")
+    occ = create_occurrence(@obs1, @obs2)
+
+    result = occ.add_all_to_collections(projects: [project], user: rolf)
+
+    assert_equal([project], result[:refused])
+    assert_not_includes(@obs1.reload.projects, project)
+  end
+
+  # And only a project admin may pull in an observation the project's own
+  # constraints exclude.
+  def test_add_all_refuses_constraint_violating_observations
+    project = projects(:bolete_project)
+    project.update!(start_date: Date.parse("1990-01-01"),
+                    end_date: Date.parse("1990-12-31"))
+    assert(project.member?(mary), "fixture: mary is a member, not an admin")
+    assert_not(project.is_admin?(mary))
+    occ = create_occurrence(@obs1, @obs2)
+
+    result = occ.add_all_to_collections(projects: [project], user: mary)
+
+    assert_equal([project], result[:refused])
+    assert_not_includes(@obs1.reload.projects, project)
+  end
+
+  # A project or site admin may force a constraint violation, but has to
+  # be told they just did — it should not be something they discover
+  # later. See #4932.
+  def test_add_all_reports_a_forced_constraint_violation
+    project = projects(:bolete_project)
+    project.update!(start_date: Date.parse("1990-01-01"),
+                    end_date: Date.parse("1990-12-31"))
+    occ = create_occurrence(@obs1, @obs2)
+
+    result = occ.add_all_to_collections(projects: [project], user: mary,
+                                        site_admin: true)
+
+    assert_empty(result[:refused])
+    assert_equal([project], result[:forced])
+    assert_includes(@obs1.reload.projects, project)
+  end
+
   def test_add_all_to_projects_and_species_lists
     project = projects(:bolete_project)
     spl = species_lists(:first_species_list)
     occ = create_occurrence(@obs1, @obs2, @obs3)
     occ.add_all_to_collections(
-      projects: [project], species_lists: [spl]
+      projects: [project], species_lists: [spl], user: mary
     )
     [@obs1, @obs2, @obs3].each do |obs|
       assert_includes(obs.reload.projects, project)

@@ -139,6 +139,217 @@ class ObservationsControllerCreateTest < FunctionalTestCase
                    "Observation should have log_updated_at time")
   end
 
+  # Arriving from a field slip leaves Collector blank: the person at the
+  # keyboard is usually a foray recorder entering someone else's
+  # collection, and a blank collector on a field-slip observation renders
+  # as "Entered by:" alone rather than falsely naming them. See #3283.
+  def test_new_from_field_slip_leaves_collector_blank
+    login("rolf")
+
+    get(:new, params: { field_code: field_slips(:field_slip_no_obs).code })
+
+    assert_select("input[name='observation[collector]']")
+    assert_select("input[name='observation[collector]'][value=?]",
+                  users(:rolf).unique_text_name, count: 0)
+  end
+
+  # Arriving with a field code defaults Locality the way the field slip
+  # form does: the project's own location outranks the user's last
+  # observation, because a forayer who has travelled to the site hasn't
+  # entered anything there yet. See #4907.
+  def test_new_from_field_slip_prefers_project_location
+    project = projects(:current_project)
+    user = users(:mary)
+    assert_equal(locations(:burbank), project.location)
+    assert_empty(FieldSlip.where(user: user, project: project),
+                 "Test needs a user with no prior slip in this project")
+
+    # Park the user's last observation elsewhere, so only the precedence
+    # rule can put the project's location on the form.
+    Observation.recent_by_user(user).last.
+      update_columns(location_id: locations(:albion).id)
+
+    login("mary")
+    get(:new, params: { field_code: "#{project.field_slip_prefix}-9999" })
+
+    assert_equal(project.location, assigns(:observation).location)
+  end
+
+  # Without a field code the plain last-observation default still applies.
+  def test_new_without_field_slip_keeps_last_observation_location
+    user = users(:rolf)
+    last = Observation.recent_by_user(user).last
+    assert_not_nil(last&.location, "Test needs a located last observation")
+
+    login("rolf")
+    get(:new)
+
+    assert_equal(last.location, assigns(:observation).location)
+  end
+
+  # The field slip form's "Add Images" / "Create Observation" redirects
+  # carry a resolved place_name, which `check_location` turns back into
+  # the Location rather than leaving as free text.
+  def test_new_with_place_name_param_resolves_the_location
+    location = locations(:albion)
+
+    login("rolf")
+    get(:new, params: { place_name: location.name })
+
+    assert_equal(location, assigns(:location))
+    assert_select("input[name='observation[place_name]'][value=?]",
+                  location.name)
+  end
+
+  # A collector carried in from the field-slip form still wins.
+  def test_new_from_field_slip_keeps_supplied_collector
+    login("rolf")
+
+    get(:new, params: { field_code: field_slips(:field_slip_no_obs).code,
+                        collector: "Jane Forager" })
+
+    assert_select("input[name='observation[collector]'][value=?]",
+                  "Jane Forager")
+  end
+
+  # A project alias typed into Locality or Collector resolves on save.
+  # "Walk 1" is not a plausible place name, so this also proves the
+  # resolution beats validate_place_name's dubious-name check to the punch.
+  def test_create_resolves_project_aliases
+    place_alias = project_aliases(:two)  # "Walk 1" -> albion
+    user_alias = project_aliases(:one)   # "RS" -> rolf
+    slip = field_slips(:field_slip_no_obs)
+    assert_equal(place_alias.project, slip.project)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  collector: user_alias.name } })
+
+    obs = assigns(:observation)
+    assert_predicate(obs, :persisted?, "alias should not block the save")
+    assert_equal(locations(:albion), obs.location)
+    assert_equal(rolf.unique_text_name, obs.collector)
+    assert_equal(rolf.id, obs.collector_user_id)
+  end
+
+  # A stale hidden location_id must not beat the typed alias. The
+  # autocompleter clears it client-side, but the form still supports
+  # non-JS submission, so the server has to win this on its own.
+  def test_alias_beats_stale_location_id
+    place_alias = project_aliases(:two)
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  location_id: locations(:burbank).id } })
+
+    assert_equal(locations(:albion), assigns(:observation).location)
+  end
+
+  # "Id by" resolves through project aliases to a textile user name, the
+  # same shape FieldSlipNotesBuilder stores from the slip form, so an
+  # observation reads back the same whichever form entered it.
+  def test_create_resolves_id_by_note_through_alias
+    user_alias = project_aliases(:one) # "RS" -> rolf
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: {
+                     place_name: locations.first.name,
+                     notes: { Field_Slip_ID_By: user_alias.name }
+                   } })
+
+    assert_equal(rolf.textile_name,
+                 assigns(:observation).notes[:Field_Slip_ID_By])
+  end
+
+  # Unmatched text stays verbatim — whoever identified a collection is not
+  # necessarily an MO user.
+  def test_id_by_note_keeps_unmatched_text
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   observation: {
+                     place_name: locations.first.name,
+                     notes: { Field_Slip_ID_By: "Some Stranger" }
+                   } })
+
+    assert_equal("Some Stranger",
+                 assigns(:observation).notes[:Field_Slip_ID_By])
+  end
+
+  def test_other_codes_becomes_an_inat_link_when_flagged
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   inat: "1",
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: "12345" } } })
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("12345"),
+                 assigns(:observation).notes[:Other_Codes])
+  end
+
+  def test_other_codes_left_alone_when_not_flagged
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: "12345" } } })
+
+    assert_equal("12345", assigns(:observation).notes[:Other_Codes])
+  end
+
+  # Editing a saved observation with the box still ticked must not wrap a
+  # link inside another link.
+  def test_other_codes_link_is_not_wrapped_twice
+    already = FieldSlipNotesBuilder.inat_link("12345")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   inat: "1",
+                   observation: { place_name: locations.first.name,
+                                  notes: { Other_Codes: already } } })
+
+    assert_equal(already, assigns(:observation).notes[:Other_Codes])
+  end
+
+  # Two targeted projects defining the same alias: newest wins, loudly.
+  def test_ambiguous_project_alias_warns_and_prefers_newest
+    place_alias = project_aliases(:two) # "Walk 1" -> albion, eol_project
+    other = projects(:bolete_project)
+    ProjectAlias.create!(project: other, target: locations(:burbank),
+                         name: place_alias.name)
+    slip = field_slips(:field_slip_no_obs)
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: place_alias.name,
+                                  project_ids: [other.id] } })
+
+    # Naming the resolved value is the point — the user has to be able to
+    # see whether the winner is the one they meant.
+    flash = get_last_flash.to_s
+    assert_includes(flash, locations(:burbank).format_name)
+    assert_includes(flash, place_alias.name)
+    assert_includes(flash, other.title)
+    assert_equal(locations(:burbank), assigns(:observation).location,
+                 "most recently updated alias should win")
+    assert_flash_warning
+  end
+
   def test_create_observation_with_explicit_collector
     params = {
       naming: { name: "", vote: { value: "" } },
@@ -179,7 +390,8 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post_requires_login(:create, params)
 
     assert_flash_success(
-      "Omitting Scientific Name should not cause flash error or warning."
+      on_fail: "Omitting Scientific Name should not cause flash error " \
+               "or warning."
     )
     assert_equal(
       fungi, Observation.last.name,
@@ -246,20 +458,112 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(slip, obs.field_slip)
   end
 
-  # An invalid field-slip code cannot abort creation (the observation is
-  # already saved); it warns and keeps the observation without a field slip.
-  def test_create_observation_with_invalid_field_slip
+  # has_specimen is a cache on the occurrence. The observation is saved
+  # with specimen: true *before* the occurrence exists, so the
+  # saved_change_to_specimen? hook can't fire — assign_field_slip has to
+  # recompute it or the cache stays false until the nightly repair job.
+  def test_create_observation_with_field_slip_sets_occurrence_has_specimen
     generic_construct_observation(
       { observation: { specimen: "1" },
-        field_code: "12345", # digits-only fails FieldSlip validation
+        field_code: "OPEN-77778",
         naming: { name: "Coprinus comatus" } },
       1, 1, 0, 0
     )
     obs = assigns(:observation)
 
-    assert_nil(obs.field_slip, "Invalid code must not attach a field slip")
-    assert_nil(obs.occurrence, "Invalid code must not create an occurrence")
+    assert(obs.occurrence.has_specimen,
+           "occurrence has_specimen cache must be recomputed on attach")
+  end
+
+  # An occurrence caps at Occurrence::MAX_OBSERVATIONS. The cap's model
+  # validation is `on: :update` for Occurrence, so attaching (which
+  # updates the Observation) slips past it without an explicit check.
+  # Rejected before the save, so nothing is written at all.
+  def test_create_observation_with_full_field_slip
+    slip = field_slips(:field_slip_one)
+    occ = slip.occurrence
+    fill_occurrence_to_capacity(occ)
+
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: slip.code,
+        naming: { name: "Coprinus comatus" } },
+      0, 0, 0, 0
+    )
+
+    assert_flash_error
+    assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
+  end
+
+  # A printed prefix is an invitation: using a slip for an
+  # open-membership project enrolls the user and puts the observation in
+  # the project, the way the field slip form has always done.
+  def test_create_with_open_project_slip_joins_and_adds
+    project = projects(:open_membership_project)
+    user = users(:mary)
+    assert(project.can_join?(user), "Test needs a joinable non-member")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: "#{project.field_slip_prefix}-70001",
+                   observation: { place_name: locations.first.name } })
+    obs = assigns(:observation)
+
+    assert(project.reload.member?(user), "slip should enroll the user")
+    assert_includes(project.observations, obs)
+  end
+
+  # The one blocking case: an existing slip in a project the user can
+  # neither join nor belong to. The observation still saves — just
+  # without the code — so nothing they typed is lost.
+  def test_create_with_closed_project_slip_saves_without_the_code
+    slip = field_slips(:field_slip_falmouth_one)
+    project = slip.project
+    user = users(:mary)
+    assert_not(project.member?(user), "Test needs a non-member")
+    assert_not(project.can_join?(user), "Test needs a closed project")
+
+    login("mary")
+    post(:create,
+         params: { naming: { name: "", vote: { value: "" } },
+                   field_code: slip.code,
+                   observation: { place_name: locations.first.name } })
+    obs = assigns(:observation)
+
+    assert_predicate(obs, :persisted?, "observation must still save")
+    assert_nil(obs.field_slip, "barred code must not attach")
+    assert_not_includes(project.reload.observations, obs)
+    # Captured before the assertion below, which consumes the flash.
+    # The message has to be actionable, not just an explanation.
+    assert_includes(get_last_flash.to_s,
+                    new_project_admin_request_path(project_id: project.id))
     assert_flash_warning
+  end
+
+  # `where.not(occurrence_id: occ.id)` would drop the unattached rows —
+  # SQL `NULL != x` is NULL, not true — so select them explicitly.
+  def fill_occurrence_to_capacity(occ)
+    needed = Occurrence::MAX_OBSERVATIONS - occ.observations.count
+    Observation.where(occurrence_id: nil).limit(needed).
+      each { |o| o.update!(occurrence: occ) }
+    assert_equal(Occurrence::MAX_OBSERVATIONS, occ.reload.observations.count)
+  end
+
+  # An invalid code now blocks the save and re-renders the form, rather
+  # than creating the observation and warning after the fact — the user
+  # gets their input back and can fix the code. See #4932.
+  def test_create_observation_with_invalid_field_slip
+    generic_construct_observation(
+      { observation: { specimen: "1" },
+        field_code: "12345", # digits-only fails FieldSlip validation
+        naming: { name: "Coprinus comatus" } },
+      0, 0, 0, 0
+    )
+
+    assert_flash_error
+    assert_nil(FieldSlip.find_by(code: "12345"),
+               "Invalid code must not create a field slip")
   end
 
   # update_field_slip lives in the shared FieldSlips concern. It used to be
@@ -1484,6 +1788,31 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_select("#name_messages", count: 0)
   end
 
+  # Specimen Available follows what this user did last, not whether a
+  # field code is present. A code meant a specimen for some users and not
+  # others; what the same user did last predicts it better. See #4932.
+  def test_specimen_default_follows_the_users_last_observation
+    login("rolf")
+    last = Observation.recent_by_user(rolf).last
+    assert_not_nil(last, "fixture: rolf needs a prior observation")
+
+    last.update!(specimen: true)
+    get(:new, params: { field_code: "TEST-001" })
+    assert_specimen_checked(1, "should follow a specimen-bearing last obs")
+    get(:new)
+    assert_specimen_checked(1, "and does so without a field code too")
+
+    last.update!(specimen: false)
+    get(:new, params: { field_code: "TEST-001" })
+    assert_specimen_checked(0, "a code alone must not check it")
+  end
+
+  def assert_specimen_checked(count, message)
+    assert_response(:success)
+    assert_select("input[type='checkbox'][name='observation[specimen]']" \
+                  "[checked]", count: count, message: message)
+  end
+
   # Stub-based regression coverage for the
   # `validate_observation` / `validate_naming` / `validate_vote`
   # failure branches (`@any_errors = true; false`). Observation,
@@ -1550,7 +1879,37 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_not_equal("Forced change", img.reload.notes)
   end
 
+  # `validate_field_slip` rejects both of these before the save, so the
+  # post-save branches only fire when the slip changed underneath us
+  # between validation and application. A real race can't be staged, so
+  # the status is stubbed — the point is that the branch reports rather
+  # than failing silently.
+  def test_create_warns_when_field_slip_turns_invalid_after_validation
+    login("rolf")
+    stub_update_field_slip(:invalid) do
+      post(:create, params: create_params_with_name)
+    end
+
+    assert_flash_warning
+  end
+
+  def test_create_warns_when_field_slip_fills_after_validation
+    login("rolf")
+    stub_update_field_slip(:too_many) do
+      post(:create, params: create_params_with_name)
+    end
+
+    assert_flash_warning
+  end
+
   private
+
+  def stub_update_field_slip(status)
+    @controller.define_singleton_method(:update_field_slip) { |*| status }
+    yield
+  ensure
+    @controller.singleton_class.remove_method(:update_field_slip)
+  end
 
   def create_params_with_name
     {

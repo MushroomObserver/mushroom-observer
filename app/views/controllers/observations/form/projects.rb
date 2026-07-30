@@ -141,7 +141,7 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
     @form.checkbox_field(
       :project_ids,
       label: false,
-      disabled: !project.user_can_add_observation?(@observation, @user)
+      disabled: !project.user_can_change_membership?(@observation, @user)
     ) do |cb|
       cb.option(project.id, checked: project_checked?(project.id)) do
         whitespace

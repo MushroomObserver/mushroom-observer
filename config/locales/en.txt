@@ -685,6 +685,7 @@
   permission_denied: Permission denied.
   removed_from_list: Removed observation from "[list]".
   removed_from_project: Removed [object] from "[project]".
+  removed_from_project_with_siblings: 'Removed all [count] observations of this collection from "[project]".'
   select_file: Select or drop files...
   no_file_selected: No file selected.
   see_message_below: See message below.
@@ -1456,7 +1457,6 @@
   name_error_unregistrable: The [rank] '[name]' is not eligible for an ICN identifier.
   name_error_icn_id_in_use: An ICN identifier number may be used by only one Name. '[number]' is already used by '[name]'.
   name_error_field_start: "[field] must not start with '[start]'."
-  name_error_field_end: "[field] must not end with '[end]'."
 
   # observations/_form_naming
   form_naming_confidence: Confidence
@@ -1477,9 +1477,13 @@
   # observations/_form_observations
   form_observations_field_code: for field slip
   form_observations_field_slip_code: Field Slip Code
-  edit_observation_field_slip_invalid: 'Invalid field slip code "[code]".'
+  form_observations_ambiguous_alias: 'Used "[value]" for the alias "[name]" from [project], because it was updated most recently. That alias is also defined by: [others].'
+  observation_field_slip_invalid: 'Invalid field slip code "[code]".'
+  observation_field_slip_full: 'Field slip "[code]" already has [max] observations, the maximum allowed.'
+  observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
   edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
+  create_observation_field_slip_full: 'Observation created, but field slip "[code]" already has [max] observations, the maximum allowed, so it was not attached.'
   form_observations_specimen_available: Specimen Available
   form_observations_is_collection_location: Is this location where it was collected?
   form_observations_gps_hidden: Hide exact coordinates?
@@ -2553,6 +2557,7 @@
   field_slip_code: Field Slip Code
   field_slip_code_format_error: code must have non-numeric characters other than period (.) and dash (-)
   field_slip_constraint_violation: The selected observation violates one or more project constraints
+  field_slip_project_not_member: You are not a member of the [title] project, so you cannot change which observations it contains.
   field_slip_created: Field slip [code] was successfully created.
   field_slip_create_obs: Create New Observation
   field_slip_quick_create_obs: Quick Create
@@ -2613,6 +2618,10 @@
   occurrence_resolve_projects_title: "Add Observations to Projects"
   occurrence_resolve_projects_intro: "Not all observations in this occurrence are in the same projects. Would you like to add all observations to all the projects listed below?"
   occurrence_resolve_projects_all_done: "All occurrence observations added to [count] projects/lists."
+  occurrence_resolve_projects_cancelled: "Detached [count] observations whose projects differed, leaving the rest of the collection unchanged."
+  occurrence_not_created: The collection was not created.
+  occurrence_resolve_projects_refused: 'Could not add the collection to [projects]. Either you are not a member, or an observation violates the project constraints and only a project admin can add it.'
+  occurrence_resolve_projects_forced: 'Added the collection to [projects] even though an observation violates the project constraints. You can do this as an admin, but check that it is what you want.'
   field_slips_created_job: Created job for [filename]
   field_slips_must_be_member: You must be a project member to create field slips
   field_slips_project_update_fail: Unable to update [TITLE] Project
@@ -2793,7 +2802,7 @@
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
   inat_missing_username: Missing your iNat Username
-  inat_list_xor_all: "Choose exactly one: (a) list observation IDs, (b) supply a URL, or (c) check \"Import all ...\""
+  inat_list_xor_all: "Choose exactly one: (1) list observation IDs, (2) supply a URL, or (3) check \"[:inat_import_all]\""
   inat_url_label: Observations from an iNat search URL
   inat_url_hint: "On iNat, filter observations by taxon, place, date, quality grade, etc., then copy the URL from your browser and paste it here. Accepted forms: https://www.inaturalist.org/observations?... or https://api.inaturalist.org/v1/observations?..."
   inat_invalid_url: "URL must be a filtered iNat observations URL or iNat API observation search URL"
@@ -3867,7 +3876,10 @@
   runtime_added_id_to: "Successfully added [type] #[value] to [name]."
   runtime_added_name: Successfully added [type] '[value]'.
   runtime_added_to: Successfully added [type] to [name].
+  runtime_admin_invalid_ip: "Invalid IP address: \"[ip]\""
   runtime_admin_only: That operation is restricted to site admins.
+  runtime_admin_switch_users_not_found: "Couldn't find \"[id]\".  Play again?"
+  runtime_admin_switch_users_not_verified: This user is not verified yet!
   runtime_already_exists: "[Type] already exists: '[value]'"
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
@@ -3988,6 +4000,7 @@
   runtime_image_reuse_success: "[:runtime_added_id(type=:image,value=id)]"
   runtime_image_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
   runtime_invalid_classification: "[:runtime_no_parse(value=text)]"
+  runtime_invalid_sort_order: "Can't figure out how to sort [types] by :[order_by]."
   runtime_invalid_source_type: "[:runtime_invalid(type=:source)]"
   runtime_license_duplicate_attributed: Duplicate display_name, form_name, or url
   runtime_location_already_exists: "[:runtime_already_exists(type=:location,value=name)]"

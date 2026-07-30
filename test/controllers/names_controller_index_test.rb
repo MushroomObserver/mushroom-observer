@@ -200,7 +200,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_select("body.names__index")
-    assert_flash_text(:runtime_no_matches.l(type: :names.l))
+    assert_flash(:runtime_no_matches, type: :name)
   end
 
   def test_index_by_user_bad_user_id
@@ -209,9 +209,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(names_path)
   end
 
@@ -263,9 +261,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:index, params: { by_editor: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(names_path)
   end
 

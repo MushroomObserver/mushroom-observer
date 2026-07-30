@@ -493,7 +493,7 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_redirected_to(name_path(name4.id, params:))
     get(:show, params: params.merge(id: name4.id, flow: :next))
     assert_redirected_to(name_path(name4.id, params:))
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :name)
 
     get(:show, params: params.merge(id: name4.id, flow: :prev))
     assert_redirected_to(name_path(name3.id, params:))
@@ -501,6 +501,6 @@ class NamesControllerShowTest < FunctionalTestCase
     assert_redirected_to(name_path(name1.id, params:))
     get(:show, params: params.merge(id: name1.id, flow: :prev))
     assert_redirected_to(name_path(name1.id, params:))
-    assert_flash_text(/no more/i)
+    assert_flash(:runtime_no_more_search_objects, type: :name)
   end
 end

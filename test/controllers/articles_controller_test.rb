@@ -37,7 +37,7 @@ class ArticlesControllerTest < FunctionalTestCase
     query = Query.lookup(:Article, id_in_set: "one")
     params = { q: @controller.q_param(query) }
     get(:index, params:)
-    assert_flash_error(:runtime_no_matches.t(type: :article))
+    assert_flash_error(:runtime_no_matches, type: :article)
   end
 
   # A scanner probing q[model] with an injection payload used to 500
@@ -99,7 +99,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove unathorized user cannot see create_article form
     login(users(:zero_user).login)
     get(:new)
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert_redirected_to(articles_path)
 
     # Prove authorized user can go to create_article form
@@ -111,7 +111,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove that if News Articles project doesn't exist, there's no error.
     Project.destroy(Article.news_articles_project.id)
     get(:new)
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert_redirected_to(articles_path)
   end
 
@@ -122,7 +122,7 @@ class ArticlesControllerTest < FunctionalTestCase
 
     login(users(:zero_user).login)
     get(:edit, params: params)
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert_redirected_to(articles_path)
 
     # Prove authorized user can create article
@@ -147,7 +147,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_no_difference("Article.count") do
       post(:create, params: params)
     end
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert_redirected_to(articles_path)
 
     # Prove authorized user cannot create title-less Article
@@ -158,7 +158,7 @@ class ArticlesControllerTest < FunctionalTestCase
     assert_no_difference("Article.count") do
       post(:create, params: params)
     end
-    assert_flash_text(:article_title_required.l)
+    assert_flash(:article_title_required)
     # Phlex `Articles::New` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")
@@ -191,7 +191,7 @@ class ArticlesControllerTest < FunctionalTestCase
     login(users(:zero_user).login)
     post(:update, params: params)
 
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert_redirected_to(articles_path)
 
     # Prove authorized user can edit article
@@ -214,7 +214,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove removing title provokes warning
     params[:article][:title] = ""
     post(:update, params: params)
-    assert_flash_text(:article_title_required.l)
+    assert_flash(:article_title_required)
     # Phlex `Articles::Edit` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")
@@ -228,7 +228,7 @@ class ArticlesControllerTest < FunctionalTestCase
     # Prove unauthorized user cannot destroy article
     login(users(:zero_user).login)
     delete(:destroy, params: params)
-    assert_flash_text(:permission_denied.l)
+    assert_flash(:permission_denied)
     assert(Article.exists?(article.id))
 
     # Prove authorized user can destroy article

@@ -32,7 +32,7 @@
 #  can_join?::      Can the current user join this Project?
 #  can_leave?::     Can the current user leave this Project?
 #  current?::       Project (based on dates) has started and hasn't ended
-#  user_can_add_observation?:: Can user add observation to this Project
+#  user_can_change_membership?:: Can user add/remove obs to/from Project
 #  violates_constraints?:: Does a given obs violate the Project constraints
 #  count_violations    # of project Observations which violate constraints
 #  text_name::         Alias for +title+ for debugging.
@@ -302,8 +302,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     user && user_group.users.member?(user) && user.id != user_id
   end
 
-  def user_can_add_observation?(obs, user)
-    obs.user == user || member?(user)
+  # Whether `user` may change whether `obs` is in this project — both
+  # adding and removing, since the checkbox that reads this disables in
+  # both directions.
+  #
+  # Membership in the project is the whole test. Entering an observation
+  # does not confer control over which projects reference it: an
+  # observation is a fact, and the person who stated it does not decide
+  # who uses it in their work. They can still delete the observation
+  # outright, which is a different thing. See #4932.
+  def user_can_change_membership?(_obs, user)
+    member?(user)
   end
 
   # SQL-based count over the four violation kinds (#4136). Each branch
@@ -484,12 +493,25 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   private :insert_project_observations, :insert_project_images_for
 
   # Remove observation (and its images) from this project. Saves it.
+  # Removing one observation of an occurrence removes them all, and drops
+  # the occurrence's field slip from this project too. An occurrence's
+  # observations are one collection sharing a single project membership,
+  # so a membership that stops holding for one cannot hold for the rest,
+  # and a slip cannot claim a project its observations have left.
+  #
+  # Returns the observations actually removed, so callers can report how
+  # many moved. See #4932.
   def remove_observation(obs)
-    return unless observations.include?(obs)
+    removed = occurrence_members(obs).select { |m| observations.include?(m) }
+    return removed if removed.empty?
 
-    imgs_to_delete(obs).each { |img| images.delete(img) }
-    observations.delete(obs)
+    removed.each do |member|
+      imgs_to_delete(member).each { |img| images.delete(img) }
+      observations.delete(member)
+    end
+    release_field_slip(obs)
     touch
+    removed
   end
 
   # Exclude observation from this project's Updates tab candidate list.
@@ -1059,6 +1081,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # already a member — so adding a prefix can't silently claim a
   # non-member's field slips and hand admins edit rights over them.
   # Returns the slips actually adopted. Idempotent. See #4436.
+  #
+  # Adoption also brings the slip's observations into the project, and
+  # declines any slip whose observations don't meet the constraints —
+  # both halves of "a slip's project implies its observations are in that
+  # project". See #4932.
   def adopt_matching_field_slips
     prefix = field_slip_prefix
     return [] if prefix.blank?
@@ -1066,8 +1093,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     FieldSlip.orphaned_with_code_prefix(prefix).select do |slip|
       next false unless FieldSlip.prefix_for_code(slip.code) == prefix
       next false unless member?(slip.user)
+      next false if slip_violates_constraints?(slip)
 
       slip.update_column(:project_id, id)
+      adopt_slip_observations(slip)
+      true
     end
   end
 
@@ -1084,6 +1114,46 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private ###############################
+
+  # An observation on its own when it has no occurrence.
+  #
+  # Re-queried rather than walked through `obs.occurrence.observations`:
+  # callers reach this from strict-loading scopes, and `imgs_to_delete`
+  # needs each member's images, which that association won't lazily load.
+  def occurrence_members(obs)
+    return [obs] unless obs.occurrence_id
+
+    Observation.where(occurrence_id: obs.occurrence_id).includes(:images).to_a
+  end
+
+  # Queried by id for the same strict-loading reason as
+  # `occurrence_members`. `update_all` matches the callback-free
+  # `update_column` this replaced.
+  def release_field_slip(obs)
+    return unless obs.occurrence_id
+
+    slip_id = Occurrence.where(id: obs.occurrence_id).pick(:field_slip_id)
+    return unless slip_id
+
+    FieldSlip.where(id: slip_id, project_id: id).update_all(project_id: nil)
+  end
+
+  # A slip whose observations don't meet this project's constraints was
+  # used outside the project's context — a spare slip, a mis-scanned
+  # code, a foray slip used months later. Claiming it would put a
+  # constraint-violating observation in the project, which only an admin
+  # may do, and would assert a membership nobody chose.
+  def slip_violates_constraints?(slip)
+    slip_observations(slip).any? { |obs| violates_constraints?(obs) }
+  end
+
+  def adopt_slip_observations(slip)
+    slip_observations(slip).each { |obs| add_observation(obs) }
+  end
+
+  def slip_observations(slip)
+    slip.occurrence&.observations || []
+  end
 
   def target_alias_details(target_type)
     aliases.

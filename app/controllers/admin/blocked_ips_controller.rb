@@ -169,7 +169,7 @@ module Admin
                      valid_ip_num?(match[3]) &&
                      valid_ip_num?(match[4])
 
-      flash_error("Invalid IP address: \"#{ip}\"")
+      flash_error(:runtime_admin_invalid_ip.t(ip: ip))
     end
 
     def valid_ip_num?(num)

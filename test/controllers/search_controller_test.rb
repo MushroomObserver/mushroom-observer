@@ -120,7 +120,13 @@ class SearchControllerTest < FunctionalTestCase
     params = { pattern_search: { pattern: "help:me", type: :names } }
     get(:pattern, params:)
     assert_redirected_to(names_path(q: { model: :Name }))
-    assert_flash_error("Unexpected term")
+    # BadTermError#to_s: args[:term].var.to_s.inspect
+    assert_flash_error(
+      :pattern_search_bad_term_error,
+      type: :name,
+      term: '"help"',
+      help: :pattern_search_terms_short_help.l
+    )
   end
 
   def test_index_pattern_blank_pattern
@@ -144,7 +150,12 @@ class SearchControllerTest < FunctionalTestCase
       observations_path(q: { model: :Observation }),
       "Bad pattern in obs search should render obs index with query"
     )
-    assert_flash_error("Unexpected term")
+    assert_flash_error(
+      :pattern_search_bad_term_error,
+      type: :observation,
+      term: '"help"',
+      help: :pattern_search_terms_short_help.l
+    )
   end
 
   def test_pattern_search_from_needs_naming
@@ -186,7 +197,12 @@ class SearchControllerTest < FunctionalTestCase
       "Bad pattern from obs_needing_ids should render " \
       "obs_needing_ids with query"
     )
-    assert_flash_error("Unexpected term")
+    assert_flash_error(
+      :pattern_search_bad_term_error,
+      type: :observation,
+      term: '"help"',
+      help: :pattern_search_terms_short_help.l
+    )
   end
 
   def test_pattern_search_redirects_to_google

@@ -60,4 +60,22 @@ class Name::CreateTest < UnitTestCase
     assert_equal("", result[1].author)
     assert_equal("(With) Another Author", result[2].author)
   end
+
+  def test_make_name_returns_existing_match
+    name = names(:agaricus)
+    result = Name.make_name(
+      text_name: name.text_name,
+      search_name: name.search_name,
+      sort_name: name.sort_name,
+      display_name: name.display_name,
+      author: name.author,
+      rank: name.rank
+    )
+    assert_equal(name.id, result.id)
+  end
+
+  def test_find_or_create_name_and_parents_unknown
+    result = Name.find_or_create_name_and_parents(rolf, "Unknown")
+    assert_equal([Name.unknown], result)
+  end
 end

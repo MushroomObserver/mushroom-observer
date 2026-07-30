@@ -862,7 +862,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       end
     end
 
-    assert_flash_text(:runtime_no_save_observation.t)
+    assert_flash(:runtime_no_save_observation)
     # Re-renders the edit form rather than redirecting.
     assert_response(:success)
   end
@@ -884,7 +884,85 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
                  "Observation should remain unchanged")
   end
 
+  # `validate_field_slip` rejects both of these before the save, so the
+  # post-save branches only fire when the slip changed underneath us
+  # between validation and application. A real race can't be staged, so
+  # the status is stubbed — the point is that the branch reports rather
+  # than failing silently.
+  def test_update_flags_field_slip_that_turns_invalid_after_validation
+    assert_field_slip_race_reported(:invalid)
+  end
+
+  def test_update_flags_field_slip_that_fills_after_validation
+    assert_field_slip_race_reported(:too_many)
+  end
+
+  # Unchecking one project box moves every observation of the occurrence,
+  # so the flash has to say how many rather than letting the rest go
+  # unmentioned. See #4932.
+  def test_unchecking_a_project_reports_the_whole_collection
+    project = projects(:bolete_project)
+    obs = observations(:minimal_unknown_obs)
+    sibling = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: mary, primary_observation: obs)
+    [obs, sibling].each do |o|
+      o.update!(occurrence: occ)
+      project.add_observation(o)
+    end
+
+    login("mary") # a bolete member, so the checkbox is hers to change
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(project_ids: [""]) })
+
+    assert_not_includes(project.reload.observations, obs)
+    assert_not_includes(project.observations, sibling)
+    assert_includes(get_last_flash.to_s.as_displayed,
+                    :removed_from_project_with_siblings.t(
+                      count: 2, project: project.title
+                    ).as_displayed)
+  end
+
+  # An image edit that fails to save reports the image's own errors
+  # rather than silently dropping the edit. Image validations are
+  # self-correcting (they truncate rather than reject), so the failure
+  # has to be forced.
+  def test_failed_image_edit_reports_the_images_errors
+    obs = observations(:coprinus_comatus_obs)
+    image = obs.images.first
+    image.define_singleton_method(:save) do |*|
+      errors.add(:base, :validate_image_user_missing)
+      false
+    end
+    login(obs.user.login)
+
+    Image.stub(:safe_find, image) do
+      put(:update,
+          params: { id: obs.id,
+                    observation: obs_params(obs).merge(
+                      good_image: { image.id.to_s => { notes: "revised" } }
+                    ) })
+    end
+
+    assert_flash_error
+  end
+
   private
+
+  def assert_field_slip_race_reported(status)
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+
+    @controller.define_singleton_method(:update_field_slip) { |*| status }
+    begin
+      put(:update,
+          params: { id: obs.id, observation: obs_params(obs) })
+    ensure
+      @controller.singleton_class.remove_method(:update_field_slip)
+    end
+
+    assert_flash_error
+  end
 
   def obs_params(obs)
     {

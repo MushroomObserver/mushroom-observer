@@ -132,13 +132,12 @@ module Views::Controllers::Occurrences::Projects
     def render_buttons
       render(Components::Modal::CloseButton.new(target: cancel_path))
       whitespace
-      # Skip = proceed without backfilling projects. Both controllers
-      # (`OccurrencesController#create` and
-      # `Occurrences::ProjectsController#update`) only act on
-      # `value="add_all"`, so any other present value (here "skip") is
-      # treated as "create/keep the occurrence, leave projects alone".
-      submit(:skip.ti,
-             as: :button, value: "skip",
+      # Cancel backs out rather than leaving the occurrence's members with
+      # different project memberships, which is a state they aren't
+      # allowed to be in. On create that means not creating the
+      # occurrence; on edit it detaches the observations that differ.
+      submit(:cancel.ti,
+             as: :button, value: "cancel",
              name: "occurrence_projects[resolution]")
       whitespace
       submit(:add_all.ti,

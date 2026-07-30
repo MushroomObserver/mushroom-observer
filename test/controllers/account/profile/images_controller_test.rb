@@ -15,7 +15,7 @@ module Account::Profile
       post(:attach, params: params)
 
       assert_equal(img, user.image)
-      assert_flash_text(:runtime_no_changes.l)
+      assert_flash(:runtime_no_changes)
     end
 
     # This is what would happen when user first opens form.
@@ -52,7 +52,7 @@ module Account::Profile
       post(:attach, params: { id: rolf.id, img_id: "99999999" })
 
       assert_response(:success)
-      assert_flash_error(:runtime_image_reuse_invalid_id.t(id: "99999999"))
+      assert_flash_error(:runtime_image_reuse_invalid_id, id: "99999999")
     end
   end
 end

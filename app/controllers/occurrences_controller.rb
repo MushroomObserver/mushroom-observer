@@ -5,6 +5,7 @@
 class OccurrencesController < ApplicationController
   include Show
   include Edit
+  include OccurrenceProjectResolvable
 
   before_action :login_required
 
@@ -98,8 +99,15 @@ class OccurrencesController < ApplicationController
       render_project_confirmation(gaps, selected, primary_obs)
       return
     end
+    # Nothing exists yet here, so backing out is simply not creating it.
+    return cancel_occurrence_creation if project_resolution_param == "cancel"
 
     commit_occurrence(primary_obs, selected, gaps)
+  end
+
+  def cancel_occurrence_creation
+    flash_notice(:occurrence_not_created.t)
+    redirect_to(permanent_observation_path(@source_obs.id))
   end
 
   def commit_occurrence(primary_obs, selected, gaps)
@@ -183,6 +191,9 @@ class OccurrencesController < ApplicationController
     return if gaps.empty?
     return unless project_resolution_param == "add_all"
 
-    occ.add_all_to_collections(projects: gaps[:projects] || [])
+    flash_add_all_result(
+      occ.add_all_to_collections(projects: gaps[:projects] || [],
+                                 user: @user, site_admin: in_admin_mode?)
+    )
   end
 end

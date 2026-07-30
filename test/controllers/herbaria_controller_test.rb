@@ -375,7 +375,7 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_not(nybg.curator?(mary))
     get(:edit, params: { id: nybg.id })
 
-    assert_flash_text(/Permission denied/i)
+    assert_flash(:permission_denied)
     assert_response(:redirect)
   end
 
@@ -460,7 +460,7 @@ class HerbariaControllerTest < FunctionalTestCase
     post(:create, params: { herbarium: params })
 
     assert_equal(herbarium_count, Herbarium.count)
-    assert_flash_text(:create_herbarium_name_blank.t)
+    assert_flash(:create_herbarium_name_blank)
     assert_response(:success) # Back to form for creating herbarium
   end
 
@@ -512,7 +512,7 @@ class HerbariaControllerTest < FunctionalTestCase
     post(:create, params: { herbarium: params })
 
     assert_equal(herbarium_count, Herbarium.count)
-    assert_flash_text(/already exists/i)
+    assert_flash(:create_herbarium_duplicate_name, name: nybg.name)
     assert_response(:success) # Back to form with creating herbarium
     herbarium = assigns(:herbarium)
     assert_equal(nybg.name, herbarium.name)
@@ -533,7 +533,7 @@ class HerbariaControllerTest < FunctionalTestCase
     )
     post(:create, params: { herbarium: params })
 
-    assert_flash_text(/must define this location/i)
+    assert_flash(:create_herbarium_must_define_location)
     assert_equal(herbarium_count + 1, Herbarium.count)
     assert_response(:redirect)
     herbarium = Herbarium.find_by(name: "New Herbarium")
@@ -583,7 +583,8 @@ class HerbariaControllerTest < FunctionalTestCase
     assert_not_nil(rolf.personal_herbarium)
     post(:create, params: { herbarium: params })
 
-    assert_flash_text(/already.*created.*personal herbarium/i)
+    assert_flash(:create_herbarium_personal_already_exists,
+                 name: rolf.personal_herbarium.name)
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success) # Back to the form
   end
@@ -627,7 +628,7 @@ class HerbariaControllerTest < FunctionalTestCase
     ) })
 
     # Should flash error and stay on form (not redirect with nil id)
-    assert_flash_text(/already exists/i)
+    assert_flash(:create_herbarium_duplicate_name, name: existing.name)
     assert_equal(herbarium_count, Herbarium.count)
     assert_response(:success) # Back to the form, not a redirect
   end
@@ -650,7 +651,8 @@ class HerbariaControllerTest < FunctionalTestCase
       "should be 'success' (re-displaying form), not redirect to new herbarium"
     )
     assert_flash_error(
-      "Trying to create second personal herbarium for user should flash error"
+      on_fail: "Trying to create second personal herbarium for user " \
+               "should flash error"
     )
   end
 
@@ -670,7 +672,7 @@ class HerbariaControllerTest < FunctionalTestCase
       "should be 'success' (re-displaying form), not redirect to new herbarium"
     )
     assert_flash_error(
-      ":create with invalid personal_user_name should flash error"
+      on_fail: ":create with invalid personal_user_name should flash error"
     )
   end
 
@@ -728,7 +730,7 @@ class HerbariaControllerTest < FunctionalTestCase
     patch(:update, params: { herbarium: params, id: nybg.id })
 
     assert_redirected_to(herbarium_path(nybg))
-    assert_flash_text(/Permission denied/)
+    assert_flash(:permission_denied)
     assert_equal(last_update, nybg.reload.updated_at)
   end
 
@@ -858,8 +860,9 @@ class HerbariaControllerTest < FunctionalTestCase
       "(re-display form), not redirect to new herbarium"
     )
     assert_flash_error(
-      "Trying to edit unowned herbarium to make it personal herbarium " \
-      "of user who doesn't own all its records should flash error"
+      on_fail: "Trying to edit unowned herbarium to make it personal " \
+               "herbarium of user who doesn't own all its records " \
+               "should flash error"
     )
   end
 

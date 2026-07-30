@@ -65,7 +65,10 @@ module Locations::Descriptions
         description_move_or_merge: { target: "bogus", delete: 0 }
       }
       post(:create, params: params)
-      assert_flash_text(/Sorry, the location you tried to display/)
+      assert_flash(
+        [[:runtime_object_not_found, { id: "bogus", type: :location }],
+         [:runtime_invalid, { type: '"target"', value: "bogus" }]]
+      )
     end
 
     def test_move_description_replacing_default
@@ -102,7 +105,7 @@ module Locations::Descriptions
         }
       }
       post(:create, params: params)
-      assert_flash_error(:runtime_description_private.t)
+      assert_flash_error(:runtime_description_private)
       assert_redirected_to(location_path(private_desc.parent_id))
     end
 

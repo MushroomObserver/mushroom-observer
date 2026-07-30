@@ -68,13 +68,13 @@ module Names::Descriptions
       # Dick is not permitted to edit.
       login("dick")
       put(:update, params: params)
-      assert_flash_text(/You must be an admin for a description/)
+      assert_flash(:runtime_description_adjust_permissions_denied)
 
       # Rolf is permitted to edit.
       login("rolf")
       # Try to edit a different, public description: no dice
       put(:update, params: params.merge(id: peltigera_desc.id))
-      assert_flash_text(/This type of description has fixed permissions/)
+      assert_flash(:runtime_description_permissions_fixed)
 
       # Edit this description's permissions.
       put(:update, params: params)
@@ -102,7 +102,7 @@ module Names::Descriptions
       }
       put(:update, params: params)
       assert_redirected_to(name_description_path(desc.id))
-      assert_flash(/Gave view permission to Tricky Dick/)
+      assert_flash(:runtime_description_added_reader, name: dick.legal_name)
     end
 
     # Cover writein with invalid user - should flash error and re-render form
@@ -120,7 +120,11 @@ module Names::Descriptions
         )
       }
       put(:update, params: params)
-      assert_flash(/not found/)
+      assert_flash(
+        [[:runtime_description_user_not_found,
+          { name: "nonexistent_user_xyz" }],
+         :runtime_description_adjust_permissions_no_changes]
+      )
       assert_select("form")
     end
 
@@ -138,7 +142,7 @@ module Names::Descriptions
       }
       put(:update, params: params)
       assert_redirected_to(name_description_path(desc.id))
-      assert_flash(/No changes/)
+      assert_flash(:runtime_description_adjust_permissions_no_changes)
     end
 
     # With array format, invalid group IDs are simply ignored (not in @groups)

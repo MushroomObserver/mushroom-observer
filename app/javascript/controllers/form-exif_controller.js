@@ -24,6 +24,27 @@ export default class extends Controller {
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
       JSON.parse(this.element.dataset.localization));
+
+    // Baseline for localityUntouched(): whatever the server rendered,
+    // which on a field slip arrival is the slip/project default.
+    this.initialPlaceName = this.placeNameValue();
+  }
+
+  placeNameValue() {
+    return document.getElementById('observation_place_name')?.value.trim() ?? "";
+  }
+
+  // A Locality the user entered outranks an image's GPS. "Untouched"
+  // covers blank as well as still-the-default: someone who types a
+  // locality, thinks better of it and clears the box has not chosen a
+  // locality, so the image should still fill it.
+  //
+  // Only gates the *automatic* transfer. Clicking "Use this info" is an
+  // explicit override and applies whatever is in the box.
+  localityUntouched() {
+    const current = this.placeNameValue();
+
+    return current === "" || current === this.initialPlaceName;
   }
 
   // Stimulus "target callback" on carousel item added.
@@ -83,8 +104,12 @@ export default class extends Controller {
 
     // If this is the first one, transfer the exif data to the obs fields
     // and set a flag so we don't do it again. Here because it's async.
+    // Gated on the Locality being untouched -- the date rides along with
+    // the geocode in one call, so this keeps the date from moving when
+    // the location doesn't.
     if (this.element.dataset?.exifUsed !== "true" &&
-      itemElement.dataset?.geocode !== "") {
+      itemElement.dataset?.geocode !== "" &&
+      this.localityUntouched()) {
       this.transferExifToObsFields(itemElement);
       this.element.dataset.exifUsed = "true";
     }

@@ -52,7 +52,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:index, params: { herbarium: herbarium.id })
 
     assert_page_title(:herbarium_records.ti)
-    assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
+    assert_flash(:runtime_no_matches, type: :herbarium_record)
   end
 
   def test_index_observation_id
@@ -74,7 +74,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     get(:index, params: { observation: obs.id })
 
     assert_page_title(:herbarium_records.ti)
-    assert_flash_text(:runtime_no_matches.l(type: :herbarium_records.l))
+    assert_flash(:runtime_no_matches, type: :herbarium_record)
   end
 
   ##############################################################################
@@ -207,7 +207,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
 
     login("mary") # Non-curator
     get(:edit, params: { id: nybg.id })
-    assert_flash_text(/permission denied/i)
+    assert_flash(:permission_denied)
     assert_response(:redirect)
 
     login("rolf")
@@ -324,13 +324,13 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     params[:herbarium_record][:accession_number] = existing.accession_number
     post(:create, params:)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
-    assert_flash_text(/already exists/i)
+    assert_flash(:create_herbarium_record_already_used)
     assert_response(:redirect)
 
     # Do the same via Turbo
     post(:create, params:, format: :turbo_stream)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
-    assert_flash_text(/already exists/i)
+    assert_flash(:create_herbarium_record_already_used)
     assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 
@@ -351,7 +351,7 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     post(:create, params:)
     assert_equal(herbarium_record_count, HerbariumRecord.count)
     assert_response(:redirect)
-    assert_flash_text(/only curators can/i)
+    assert_flash(:create_herbarium_record_only_curator_or_owner)
 
     login("dick")
     assert_not(nybg.curators.member?(dick))
@@ -465,10 +465,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)
     post(:update, params: { id: nybg.id })
     assert_redirected_to(action: :edit)
+    assert_flash(:create_herbarium_record_missing_herbarium_name)
 
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
-    assert_flash_text(/missing/i)
+    assert_flash(:create_herbarium_record_missing_herbarium_name)
     assert_select("turbo-stream[action='replace'][target$='_form']")
   end
 
@@ -478,10 +479,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     obs = observations(:coprinus_comatus_obs)
     post(:update, params: { id: nybg.id })
     assert_redirected_to(controller: "/observations", action: :show, id: obs.id)
+    assert_flash(:permission_denied)
 
     # Test turbo shows flash
     post(:update, params: { id: nybg.id }, format: :turbo_stream)
-    assert_flash_text(/permission denied/i)
+    assert_flash(:permission_denied)
     assert_select("turbo-stream[action='update'][target$='_flash']")
   end
 

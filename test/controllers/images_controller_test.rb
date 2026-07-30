@@ -41,9 +41,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params: { by_user: bad_user_id })
 
-    assert_flash_text(
-      :runtime_object_not_found.l(type: "user", id: bad_user_id)
-    )
+    assert_flash(:runtime_object_not_found, type: :user, id: bad_user_id)
     assert_redirected_to(images_path)
   end
 
@@ -101,7 +99,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_flash(:runtime_no_matches, type: :image)
     assert_select("body.images__index")
   end
 
@@ -132,7 +130,7 @@ class ImagesControllerTest < FunctionalTestCase
 
     # Zero matching Observations → zero matching Images → "no matches"
     # flash, not a silent fall-back to the unfiltered Image index.
-    assert_flash_text(:runtime_no_matches.l(type: :images.l))
+    assert_flash(:runtime_no_matches, type: :image)
     assert_select("body.images__index")
   end
 

@@ -11,7 +11,8 @@ module Observations
 
       get(:index, params: params)
       assert_no_flash(
-        "User should be able to access the no-js namings table for their obs"
+        on_fail: "User should be able to access the no-js namings table " \
+                 "for their obs"
       )
     end
 
@@ -390,7 +391,8 @@ module Observations
       params = edit_form_test_setup
       get(:edit, params:)
       assert_no_flash(
-        "User should be able to edit his own Naming without warning or error"
+        on_fail: "User should be able to edit his own Naming without " \
+                 "warning or error"
       )
       # Naming reasons fields should be present
       assert_select("input[id^='naming_reasons_'][id$='_check']")
@@ -402,7 +404,8 @@ module Observations
       get(:edit, params:, format: :turbo_stream)
       assert_select("#modal_obs_#{nam.observation_id}_naming_#{nam.id}")
       assert_no_flash(
-        "User should be able to edit his own Naming without warning or error"
+        on_fail: "User should be able to edit his own Naming without " \
+                 "warning or error"
       )
     end
 

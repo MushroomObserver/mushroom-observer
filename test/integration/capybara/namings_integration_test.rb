@@ -51,7 +51,7 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     end
 
     namer_session.assert_selector("body.namings__new")
-    assert_flash_text(:form_naming_what_missing.l, session: namer_session)
+    assert_flash(:form_naming_what_missing, session: namer_session)
     namer_session.
       # see https://github.com/MushroomObserver/mushroom-observer/issues/1796
       assert_no_selector("#flash_notices", text: :see_message_below.l)
@@ -160,7 +160,8 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
     # namer tries to delete
     # namer_session.failed_delete(obs)
     namer_session.click_button(class: "destroy_naming_link_#{naming.id}")
-    assert_flash_text("Sorry", session: namer_session)
+    assert_flash(:runtime_destroy_naming_someone_else,
+                 session: namer_session)
 
     # voter_session.change_mind(obs, naming)
     voter_session.visit("/#{obs.id}")

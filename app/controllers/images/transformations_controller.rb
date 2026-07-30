@@ -33,7 +33,7 @@ module Images
         image.transform(params[:op].to_sym)
         flash_notice(:image_show_transform_note.t)
       else
-        flash_error("Invalid operation #{params[:op].inspect}")
+        flash_error(:runtime_invalid.t(type: '"operation"', value: params[:op]))
       end
     end
   end
