@@ -90,13 +90,16 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
 
   # ---------- conflict and the tick default ----------
 
-  def test_conflict_when_both_sides_differ
+  # A conflict is marked in the table but still ticks: on the
+  # observations this exists for, the "existing" value is the form's own
+  # default rather than anything a person chose.
+  def test_conflict_is_flagged_but_still_ticks
     @obs.update!(collector: "Someone Else")
     row = row_for(build(fields: { "Collector" => "Scott Shapiro" }),
                   "Collector")
 
     assert_predicate(row, :conflict?)
-    assert_not(row.default_use?, "a conflict must not tick itself")
+    assert(row.default_use?)
   end
 
   def test_no_conflict_when_the_observation_is_empty

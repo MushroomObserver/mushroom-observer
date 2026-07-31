@@ -86,15 +86,26 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_no_html(html, "#field_slip_extract_name")
     end
 
-    # A field the observation already has starts unticked, so applying
-    # the form cannot silently overwrite a person's entry.
-    def test_conflicting_row_starts_unticked
+    # Everything ticks, including a row that disagrees with what the
+    # observation holds -- but the disagreement is marked, since that is
+    # the one place a reviewer skimming the table needs to slow down.
+    def test_conflicting_row_ticks_but_is_marked
       @obs.update!(collector: "Someone Else")
 
       html = render_page(fields: { "Collector" => "Scott Shapiro" })
 
-      assert_no_html(html, "input[name='use[Collector]'][checked]")
+      assert_html(html, "input[name='use[Collector]'][checked]")
+      assert_html(html, ".field-slip-extract-conflict")
       assert_includes(html, "Someone Else")
+    end
+
+    def test_agreeing_row_is_not_marked_as_a_conflict
+      @obs.update!(collector: "Scott Shapiro")
+
+      html = render_page(fields: { "Collector" => "Scott Shapiro" })
+
+      assert_html(html, "input[name='use[Collector]'][checked]")
+      assert_no_html(html, ".field-slip-extract-conflict")
     end
 
     def test_empty_current_value_ticks_by_default

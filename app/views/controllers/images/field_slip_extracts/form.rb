@@ -95,10 +95,18 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
+    # Every row ticks by default, so a real disagreement is marked here
+    # instead of being signalled by an empty box -- it is the one place
+    # a reviewer skimming the table needs to slow down.
     def render_current_cell(row)
       current = row.current.to_s
       if current.blank?
         small { plain(:field_slip_extract_empty.l) }
+      elsif row.conflict?
+        div(class: "field-slip-extract-conflict") do
+          plain(current)
+          div { small { plain(:field_slip_extract_replacing.l) } }
+        end
       else
         plain(current)
       end
