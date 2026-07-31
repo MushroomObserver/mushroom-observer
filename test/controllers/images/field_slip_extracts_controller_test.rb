@@ -272,6 +272,20 @@ module Images
       assert_equal("Scott Shapiro", @obs.reload.collector)
     end
 
+    # A placeholder is no opinion, not a name to create: the save must
+    # complete rather than bouncing to a confirmation page whose
+    # feedback panel would render empty.
+    def test_update_completes_when_the_id_is_a_placeholder
+      record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
+                               "unknown" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id, use: { "ID" => "1" },
+                             value: { "ID" => "unknown" } })
+
+      assert_redirected_to(permanent_observation_path(@obs.id))
+    end
+
     def test_update_creates_the_name_once_approved
       record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
                                "Lumpysomething bracketii" })

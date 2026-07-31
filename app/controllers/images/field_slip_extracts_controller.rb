@@ -125,9 +125,6 @@ module Images
     end
 
     def rerender_for_name_approval(outcome)
-      outcome.feedback.each do |ivar, value|
-        instance_variable_set(:"@#{ivar}", value)
-      end
       flash_warning(:field_slip_extract_name_needs_approval.t)
       render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
                extract: @extract, observation: @observation, user: @user,

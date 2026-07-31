@@ -6,10 +6,11 @@ class FieldSlip
   # `Extractor.for(:gemini)` returns a provider adapter; every adapter
   # answers `#extract(image, context:)` with an `Extractor::Result`, so
   # swapping providers -- or A/B-ing a new one against Gemini -- touches
-  # nothing but this registry. Providers do the HTTP call and hand back
-  # whatever JSON they produced; turning that into MO fields is
-  # `Extractor::Normalizer`'s job, so a new provider never reimplements
-  # the mapping.
+  # nothing but this registry. An adapter owns its own request and
+  # response parsing, and is asked -- through the shared `Prompt` -- for
+  # values keyed by the `FIELDS` labels below. Where each label lands on
+  # the Observation is `FIELDS`' business and `Applier`'s, so a new
+  # provider never restates the mapping.
   module Extractor
     PROVIDERS = { gemini: "FieldSlip::Extractor::Gemini" }.freeze
 

@@ -81,6 +81,11 @@ class FieldSlipExtract < AbstractModel
   def unknown_location_alias
     written = value_for("Location").to_s.strip
     return nil if written.blank?
+    # A full MO location name is not an unknown abbreviation, whether or
+    # not the project happens to alias it -- warning about one and
+    # offering to define an alias would be telling the reviewer that
+    # something MO already knows is unrecognized.
+    return nil if Location.exists?(name: written)
     return nil if known_location_names.any? { |n| n.casecmp?(written) }
 
     written

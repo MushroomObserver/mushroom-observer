@@ -36,9 +36,16 @@ class FieldSlip
         return none if @given_name.blank?
 
         resolver = resolve
-        return needs_approval(resolver) unless resolver.success && resolver.name
+        # Three outcomes, not two. The resolver returns early on a
+        # placeholder like "unknown" -- success stays true and no name
+        # comes back -- which means there is nothing to propose, NOT
+        # that a name needs creating. Collapsing that into
+        # needs_approval sent the reviewer to a confirmation page whose
+        # feedback panel renders empty: a dead end with no way forward.
+        return propose_naming(resolver.name) if resolver.name
+        return none if resolver.success
 
-        propose_naming(resolver.name)
+        needs_approval(resolver)
       end
 
       private

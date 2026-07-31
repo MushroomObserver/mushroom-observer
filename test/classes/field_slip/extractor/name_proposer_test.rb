@@ -118,17 +118,19 @@ class FieldSlip::Extractor::NameProposerTest < UnitTestCase
     assert_equal(name, outcome.naming.name)
   end
 
-  # The resolver treats "unknown" as no opinion, so it neither resolves
-  # nor asks to create anything. Note "Fungi" is NOT one of these: it is
-  # a real Name and proposing it is legitimate, if uninformative.
+  # The resolver treats "unknown" as no opinion: it returns early with
+  # success and no name. That means nothing to propose -- NOT a name
+  # needing creation, which would send the reviewer to a confirmation
+  # page whose feedback panel renders empty. Note "Fungi" is not one of
+  # these: it is a real Name and proposing it is legitimate.
   def test_placeholder_names_propose_nothing
     names_before = Name.count
 
     Name.names_for_unknown.compact_blank.uniq.each do |placeholder|
       outcome = propose(placeholder)
 
-      assert_predicate(outcome, :needs_approval?,
-                       "#{placeholder.inspect} should not resolve")
+      assert_equal(:none, outcome.status,
+                   "#{placeholder.inspect} is no opinion, not a new name")
     end
     assert_equal(names_before, Name.count)
   end

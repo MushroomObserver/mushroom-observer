@@ -132,6 +132,17 @@ class FieldSlipExtractTest < UnitTestCase
     assert_nil(record(fields: {}).unknown_location_alias)
   end
 
+  # A full MO location name is not an unknown abbreviation, alias or no
+  # alias -- warning about one would tell the reviewer that something MO
+  # already knows is unrecognized, and offer to define an alias for it.
+  def test_unknown_location_alias_nil_for_a_real_location_name
+    other = locations(:albion)
+
+    assert_not_equal(other, @obs.location, "premise: not this obs's location")
+    assert_nil(record(fields: { "Location" => other.name }).
+               unknown_location_alias)
+  end
+
   # ---------- location suggestion ----------
 
   # "Fulton, Co" against a project already sitting in "Fulton Co.,
