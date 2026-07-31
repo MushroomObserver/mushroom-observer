@@ -190,6 +190,31 @@ module Images
       assert_redirected_to(permanent_observation_path(@obs.id))
     end
 
+    # The flag rides along as a top-level param, the same shape the
+    # observation form uses for the same decision.
+    def test_update_stores_a_flagged_code_as_an_inat_link
+      record_extract(fields: { "Other Codes" => "386717373" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id, inat: "1",
+                             use: { "Other Codes" => "1" },
+                             value: { "Other Codes" => "386717373" } })
+
+      assert_equal(FieldSlipNotesBuilder.inat_link("386717373"),
+                   @obs.reload.notes[:Other_Codes])
+    end
+
+    def test_update_stores_an_unflagged_code_verbatim
+      record_extract(fields: { "Other Codes" => "386717373" })
+      login_as_site_admin
+
+      put(:update, params: { image_id: @image.id, inat: "0",
+                             use: { "Other Codes" => "1" },
+                             value: { "Other Codes" => "386717373" } })
+
+      assert_equal("386717373", @obs.reload.notes[:Other_Codes])
+    end
+
     def test_update_proposes_a_ticked_known_name
       record_extract(fields: { FieldSlip::Extractor::NAME_FIELD =>
                                "Coprinus comatus" })

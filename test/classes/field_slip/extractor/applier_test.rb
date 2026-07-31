@@ -9,9 +9,10 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     @project.observations << @obs unless @project.observations.include?(@obs)
   end
 
-  def apply_fields(chosen, user: rolf)
+  def apply_fields(chosen, user: rolf, inat_code: false)
     FieldSlip::Extractor::Applier.new(observation: @obs, chosen: chosen,
-                                      user: user).apply
+                                      user: user,
+                                      inat_code: inat_code).apply
     @obs.reload
   end
 
@@ -100,6 +101,40 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
 
     assert_nil(@obs.location)
     assert_equal("Behind the barn", @obs.where)
+  end
+
+  # A numeric "Other Codes" is an iNat observation id in practice, and
+  # is stored as the link the field slip form writes, so an observation
+  # reads back the same whichever route entered it.
+  def test_numeric_other_codes_stored_as_an_inat_link
+    apply_fields({ "Other Codes" => "386717373" }, inat_code: true)
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("386717373"),
+                 @obs.notes[:Other_Codes])
+  end
+
+  def test_other_codes_left_bare_when_not_flagged
+    apply_fields({ "Other Codes" => "386717373" })
+
+    assert_equal("386717373", @obs.notes[:Other_Codes])
+  end
+
+  # Editing a value that is already a link must not nest one link in
+  # another.
+  def test_an_existing_inat_link_is_not_wrapped_twice
+    already = FieldSlipNotesBuilder.inat_link("386717373")
+
+    apply_fields({ "Other Codes" => already }, inat_code: true)
+
+    assert_equal(already, @obs.notes[:Other_Codes])
+  end
+
+  # The flag is specific to Other Codes; a numeric value elsewhere is
+  # just a value.
+  def test_the_inat_flag_does_not_touch_other_fields
+    apply_fields({ "MycoMap Voucher Number" => "12345" }, inat_code: true)
+
+    assert_equal("12345", @obs.notes[:MycoMap_Voucher_Number])
   end
 
   def test_blank_values_are_not_applied

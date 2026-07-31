@@ -44,10 +44,15 @@ class FormObject::FieldSlipReview < FormObject::Base
   # The Location the written abbreviation obviously means, when the
   # project is already using exactly one that matches.
   attribute :location_suggestion, default: nil
+  # Whether "Other Codes" looks like an iNaturalist observation id.
+  attribute :inat_code, default: false
 
   def self.build(extract:, observation:, user: nil)
     new(name_known: name_known?(extract, user),
         location_suggestion: extract.location_suggestion,
+        inat_code: FieldSlip::Extractor.inat_code?(
+          extract.value_for(FieldSlip::Extractor::OTHER_CODES_FIELD)
+        ),
         rows: FieldSlip::Extractor::FIELDS.map do |field, target|
           Row.new(field: field, extracted: extract.value_for(field),
                   current: current_value(observation, target),

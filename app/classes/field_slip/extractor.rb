@@ -50,6 +50,18 @@ class FieldSlip
     # a location autocompleter, which needs a real label to work.
     LOCATION_FIELD = "Location"
 
+    # "Other Codes" is free text, but in practice a purely numeric one
+    # is an iNaturalist observation id -- that is what collectors write
+    # in that box. Numeric values therefore default to being stored as
+    # an iNat link, the same shape the field slip form writes, with the
+    # reviewer able to untick it.
+    OTHER_CODES_FIELD = "Other Codes"
+    INAT_CODE_RE = /\A\d+\z/
+
+    def self.inat_code?(value)
+      value.to_s.strip.match?(INAT_CODE_RE)
+    end
+
     CONFIDENCE_LEVELS = %w[high medium low].freeze
 
     # What one provider run produced: the raw response (stored verbatim

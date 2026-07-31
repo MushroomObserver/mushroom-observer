@@ -139,7 +139,8 @@ module Images
 
     def apply_chosen_fields
       FieldSlip::Extractor::Applier.new(
-        observation: @observation, chosen: chosen_fields, user: @user
+        observation: @observation, chosen: chosen_fields, user: @user,
+        inat_code: params[:inat] == "1"
       ).apply
     end
 

@@ -157,6 +157,31 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_includes(html, "low")
     end
 
+    # ---------- other codes ----------
+
+    # A purely numeric Other Codes is an iNat observation id in
+    # practice, so the flag ticks itself.
+    def test_numeric_other_codes_ticks_the_inat_flag
+      html = render_page(fields: { "Other Codes" => "386717373" })
+
+      assert_html(html, "input[name='inat'][checked]")
+    end
+
+    # Free text goes in that box too, so the flag stays clear for
+    # anything that isn't a bare number.
+    def test_non_numeric_other_codes_leaves_the_flag_clear
+      html = render_page(fields: { "Other Codes" => "Herbarium 42-A" })
+
+      assert_html(html, "input[name='inat']")
+      assert_no_html(html, "input[name='inat'][checked]")
+    end
+
+    def test_no_inat_flag_without_other_codes
+      html = render_page(fields: { "Collector" => "Scott Shapiro" })
+
+      assert_no_html(html, "input[name='inat']")
+    end
+
     # ---------- locality ----------
 
     # Corrected through an autocompleter, like the ID: a table cell has

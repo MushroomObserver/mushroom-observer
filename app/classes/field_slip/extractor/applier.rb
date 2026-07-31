@@ -12,10 +12,14 @@ class FieldSlip
     # name-creation and voting rules, so it is left to the caller.
     class Applier
       # `chosen` is {slip field => edited value} for the ticked fields.
-      def initialize(observation:, chosen:, user:)
+      # `inat_code` says whether "Other Codes" holds an iNaturalist
+      # observation id, which is stored as a link rather than as the
+      # bare number.
+      def initialize(observation:, chosen:, user:, inat_code: false)
         @observation = observation
         @chosen = chosen
         @user = user
+        @inat_code = inat_code
       end
 
       def apply
@@ -30,8 +34,20 @@ class FieldSlip
       def targets
         @targets ||= @chosen.filter_map do |field, value|
           target = Extractor::FIELDS[field]
-          [target, value.to_s.strip] if target && value.present?
+          [target, value_for(field, value)] if target && value.present?
         end
+      end
+
+      # An iNat id is stored as the link the field slip form writes, so
+      # an observation reads back the same whichever route entered it.
+      # Already-linked values pass through rather than nesting.
+      def value_for(field, value)
+        text = value.to_s.strip
+        return text unless field == Extractor::OTHER_CODES_FIELD
+        return text unless @inat_code
+        return text if FieldSlipNotesBuilder.inat_link?(text)
+
+        FieldSlipNotesBuilder.inat_link(text)
       end
 
       def assign_columns
