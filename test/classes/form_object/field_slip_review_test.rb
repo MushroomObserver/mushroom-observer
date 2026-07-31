@@ -90,9 +90,7 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
 
   # ---------- conflict and the tick default ----------
 
-  # A conflict is marked in the table but still ticks: on the
-  # observations this exists for, the "existing" value is the form's own
-  # default rather than anything a person chose.
+  # Marked, but still ticked -- see `Row#default_use?`.
   def test_conflict_is_flagged_but_still_ticks
     @obs.update!(collector: "Someone Else")
     row = row_for(build(fields: { "Collector" => "Scott Shapiro" }),

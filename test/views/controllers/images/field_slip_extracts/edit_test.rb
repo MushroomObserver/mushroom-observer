@@ -73,10 +73,8 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_no_html(html, "input[name='use[ID]'][checked]")
     end
 
-    # The menu's values are Floats, so an Integer default matched no
-    # option and the browser silently fell back to the first one --
-    # "I'd Call It That", the strongest vote. Pin the selection, not
-    # just the menu's presence.
+    # Pins the SELECTED option, not just the menu's presence: a
+    # type mismatch once left none selected (see `render_vote_field`).
     def test_name_section_defaults_the_vote_to_promising
       html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
                                    "Coprinus comatus" })
@@ -93,9 +91,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_no_html(html, "#field_slip_extract_name")
     end
 
-    # Everything ticks, including a row that disagrees with what the
-    # observation holds -- but the disagreement is marked, since that is
-    # the one place a reviewer skimming the table needs to slow down.
+    # Marked, but still ticked -- see `Row#default_use?`.
     def test_conflicting_row_ticks_but_is_marked
       @obs.update!(collector: "Someone Else")
 
