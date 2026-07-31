@@ -52,6 +52,10 @@ class CheckForBrokenReferencesJob
       [ExternalSite,                 :project,              :alert],
       [FieldSlip,                    :project,              :nil],
       [FieldSlip,                    :user,                 :alert],
+      # An extract describes one image; without it there is nothing left
+      # to review, so it goes rather than lingering as an orphan.
+      [FieldSlipExtract,             :image,                :delete],
+      [FieldSlipExtract,             :user,                 :alert],
       [FieldSlipJobTracker,          :user,                 :alert],
       [GlossaryTerm,                 :rss_log,              :nil],
       [GlossaryTerm,                 :thumb_image,          :alert],

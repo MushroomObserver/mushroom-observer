@@ -431,6 +431,9 @@ MushroomObserver::Application.routes.draw do
       post("emails", to: "images/emails#create",
                      as: "send_commercial_inquiry_for")
     end
+    # Singular: one field slip extract per image, replaced on re-run.
+    resource(:field_slip_extract, only: [:create, :edit, :update],
+                                  controller: "images/field_slip_extracts")
     put("/vote", to: "images/votes#update", as: "vote")
     get("/vote", to: "images/votes#show", as: "vote_interface")
   end
