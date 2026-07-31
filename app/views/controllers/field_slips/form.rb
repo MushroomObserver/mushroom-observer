@@ -148,7 +148,7 @@ module Views::Controllers::FieldSlips
     def render_field_slip_id_by_field
       autocompleter_field(:field_slip_id_by,
                           type: :user,
-                          label: :id_by.ti)
+                          label: :id_by.t)
     end
 
     # --- Notes ---

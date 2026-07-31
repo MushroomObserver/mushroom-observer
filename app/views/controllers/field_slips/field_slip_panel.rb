@@ -69,15 +69,23 @@ module Views::Controllers::FieldSlips
 
     def render_observation_id_lines(obs)
       labeled(:id) { trusted_html(obs.field_slip_name.tl) }
-      labeled(:id_by) { trusted_html(obs.field_slip_id_by.tl) }
+      labeled(:id_by.t) { trusted_html(obs.field_slip_id_by.tl) }
+      render_other_codes_line(obs)
+    end
+
+    def render_other_codes_line(obs)
       return if obs.other_codes.to_s.empty?
 
-      labeled(:field_slip_other_codes) { trusted_html(obs.other_codes.tl) }
+      labeled(:field_slip_other_codes.t) { trusted_html(obs.other_codes.tl) }
     end
 
     # Emits `<strong>Label: </strong>` + the block's content + `<br>`.
+    # A Symbol is title-cased (most of these tags are lowercase prose:
+    # `date`, `location`, `collector`). Already-cased tags -- `ID By`,
+    # `Other Codes` -- must come in pre-resolved as Strings, because
+    # `.ti` would flatten them to "ID by" / "Other codes".
     def labeled(key)
-      strong { plain("#{key.ti}: ") }
+      strong { plain("#{key.is_a?(Symbol) ? key.ti : key}: ") }
       yield
       br
     end
