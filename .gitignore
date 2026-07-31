@@ -77,3 +77,9 @@ public/test_images-*
 
 # iNat import audit (#4213) CSV outputs — data, not code
 inat_import_audit*.csv
+
+/config/credentials/development.key
+
+# Each developer keeps their own; the dev key is not shared, so a
+# committed dev credentials file would be undecryptable for everyone else.
+/config/credentials/development.yml.enc

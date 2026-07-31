@@ -2576,6 +2576,24 @@
   field_slip_no_project: No Project found
   field_slip_nil_project: "(No Project)"
   field_slip_other_codes: Other Codes
+  field_slip_extract_button: Read Field Slip
+  field_slip_extract_title: "Field Slip Data for Observation [id]"
+  field_slip_extract_field: Field
+  field_slip_extract_read: Read from slip
+  field_slip_extract_current: Currently on observation
+  field_slip_extract_use: Save
+  field_slip_extract_empty: (empty)
+  field_slip_extract_review_only: review only
+  field_slip_extract_confidence: "[level] confidence"
+  field_slip_extract_save: Save to Observation
+  field_slip_extract_saved: Saved the selected field slip values.
+  field_slip_extract_missing: That image has no field slip data to review yet.
+  field_slip_extract_failed: "Could not read the field slip: [error]"
+  field_slip_extract_add_alias: Add this abbreviation
+  field_slip_extract_code_mismatch: "The slip in this photo reads [read], but the observation is attached to field slip [attached]. Check that this is the right photo before saving."
+  field_slip_extract_unknown_alias: "No project abbreviation is defined for [name], so the location was left as written."
+  field_slip_extract_id_help: The ID is shown for review but is not saved here. Propose it as a name on the observation itself.
+  field_slip_extract_provenance: "Read by [provider] [model], prompt v[version], [time]."
   field_slip_other_example: e.g., iNat ID
   field_slip_other_inat: Check if [:field_slip_other_codes] is an iNat ID
   field_slip_project_success: Field Slip will be associated with the [TITLE] Project

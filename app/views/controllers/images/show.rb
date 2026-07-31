@@ -47,10 +47,25 @@ module Views::Controllers::Images
 
     def render_right_column
       render(InfoPanel.new(image: @image))
+      render_field_slip_extract_button if in_admin_mode?
       render_reviewer_export_controls if reviewer?
       div(id: "image_votes_container") do
         render(VotePanel.new(image: @image,
                              size: @size, default_size: @default_size))
+      end
+    end
+
+    # Offered on every image rather than only where a slip looks likely:
+    # a plausibility test that guessed wrong would hide the button on
+    # exactly the slips someone wants to read (#4932 follow-up).
+    # Admin-only for now -- each press costs an API call and the result
+    # needs a human before it reaches the observation.
+    def render_field_slip_extract_button
+      return if @image.observations.empty?
+
+      div(class: "mb-3 text-center") do
+        Button(type: :post, name: :field_slip_extract_button.l,
+               target: image_field_slip_extract_path(@image.id))
       end
     end
 
