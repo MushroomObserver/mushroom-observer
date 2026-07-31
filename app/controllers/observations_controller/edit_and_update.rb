@@ -126,9 +126,15 @@ module ObservationsController::EditAndUpdate
 
   def apply_observation_changes
     update_permitted_observation_attributes
+    # Notes first: `notes_to_sym_and_compact` rebuilds the hash from the
+    # raw params, so anything `resolve_project_aliases` writes into
+    # `notes` has to come after it or it is silently discarded. Create
+    # already assigns notes before resolving (see `rough_cut`); update
+    # did not, which cost the iNat-link wrap and the Id-by resolution on
+    # every edit. See #4932.
+    @observation.notes = notes_to_sym_and_compact
     resolve_project_aliases
     create_location_object_if_new(@observation)
-    @observation.notes = notes_to_sym_and_compact
     warn_if_unchecking_specimen_with_records_present!
     strip_images! if @observation.gps_hidden
 

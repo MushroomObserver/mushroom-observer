@@ -422,7 +422,7 @@
   ids: IDs
   identifier: identifier
   identifiers: identifiers
-  id_by: id by
+  id_by: ID By
   inaturalist: iNaturalist
   inat: iNat
   imported: imported

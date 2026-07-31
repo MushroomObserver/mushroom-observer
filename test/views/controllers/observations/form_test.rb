@@ -172,6 +172,47 @@ module Views::Controllers::Observations
       assert_no_html(html, "input[type='checkbox'][name='inat'][checked]")
     end
 
+    # Once stored, these two keys are also "orphaned" notes keys, so they
+    # were rendered twice -- a plain textarea from the parts loop AND the
+    # dedicated field. The dedicated field came second and won the
+    # submitted value, so editing unwrapped a stored link. See #4932.
+    def test_edit_form_renders_field_slip_notes_once
+      user = users(:rolf)
+      obs = edit_obs_with_notes(Other_Codes: "12345",
+                                Field_Slip_ID_By: "_user rolf_")
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(html, "[name='observation[notes][Other_Codes]']", count: 1)
+      assert_html(html, "[name='observation[notes][Field_Slip_ID_By]']",
+                  count: 1)
+      # The dedicated field is the input, not a textarea.
+      assert_no_html(html, "textarea[name='observation[notes][Other_Codes]']")
+    end
+
+    # Without a field code the dedicated fields aren't rendered, so the
+    # keys still need their ordinary parts or they'd be uneditable.
+    def test_edit_form_without_code_keeps_plain_note_parts
+      user = users(:rolf)
+      obs = observations(:minimal_unknown_obs)
+      obs.update!(occurrence: nil, notes: { Other_Codes: "12345" })
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(html, "textarea[name='observation[notes][Other_Codes]']")
+      assert_no_html(html, "input[type='checkbox'][name='inat']")
+    end
+
+    def test_id_by_label_is_title_cased
+      user = users(:rolf)
+      obs = edit_obs_with_notes(Field_Slip_ID_By: "_user rolf_")
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_includes(html, :id_by.t)
+      assert_equal("ID By", :id_by.t)
+    end
+
     # A stored iNat link shows as the bare id with the box ticked, so the
     # pair round-trips instead of the user seeing generated markup.
     def test_edit_form_unwraps_a_stored_inat_link

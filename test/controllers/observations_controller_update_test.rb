@@ -947,6 +947,75 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     assert_flash_error
   end
 
+  # Update assigned `notes` from the raw params AFTER resolving them, so
+  # every field-slip note resolution was computed and then thrown away.
+  # Create never had the bug (it assigns notes first). See #4932.
+  def test_update_wraps_other_codes_when_flagged
+    obs = observations(:minimal_unknown_obs)
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id, inat: "1",
+                  observation: obs_params(obs).merge(
+                    notes: { Other_Codes: "123456" }
+                  ) })
+
+    assert_equal(FieldSlipNotesBuilder.inat_link("123456"),
+                 obs.reload.notes[:Other_Codes])
+  end
+
+  # The checkbox submits "0" when unticked (its hidden sidecar), which
+  # has to put the value back to the bare code -- otherwise unticking
+  # looks broken, since the box re-renders checked off a stored link.
+  def test_update_unwraps_other_codes_when_unflagged
+    obs = observations(:minimal_unknown_obs)
+    stored = FieldSlipNotesBuilder.inat_link("123456")
+    obs.update!(notes: { Other_Codes: stored })
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id, inat: "0",
+                  observation: obs_params(obs).merge(
+                    notes: { Other_Codes: stored }
+                  ) })
+
+    assert_equal("123456", obs.reload.notes[:Other_Codes])
+  end
+
+  # No `inat` param at all means the checkbox was never rendered (no
+  # field code in play); a stored link must survive untouched.
+  def test_update_without_inat_param_leaves_other_codes_alone
+    obs = observations(:minimal_unknown_obs)
+    stored = FieldSlipNotesBuilder.inat_link("123456")
+    obs.update!(notes: { Other_Codes: stored })
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    notes: { Other_Codes: stored }
+                  ) })
+
+    assert_equal(stored, obs.reload.notes[:Other_Codes])
+  end
+
+  # "Id by" resolves through the project's aliases on edit, not just on
+  # create -- "RS" is an eol_project alias for rolf.
+  def test_update_resolves_id_by_through_project_aliases
+    obs = observations(:minimal_unknown_obs)
+    project = projects(:eol_project)
+    login(obs.user.login)
+
+    put(:update,
+        params: { id: obs.id,
+                  observation: obs_params(obs).merge(
+                    project_ids: [project.id.to_s],
+                    notes: { Field_Slip_ID_By: "RS" }
+                  ) })
+
+    assert_equal(rolf.textile_name, obs.reload.notes[:Field_Slip_ID_By])
+  end
+
   private
 
   def assert_field_slip_race_reported(status)

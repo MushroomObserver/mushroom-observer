@@ -52,12 +52,27 @@ module ObservationsController::ProjectAliases
   end
 
   # "Other Codes" becomes a link to iNaturalist when flagged as an iNat
-  # id. Skips a value that is already a link, so editing a saved
-  # observation with the box still ticked doesn't nest one link in
-  # another.
+  # id, and goes back to the bare code when the flag is cleared.
+  #
+  # Three states, not two. The checkbox submits "1" ticked and "0"
+  # unticked (its hidden sidecar), while an absent `inat` param means the
+  # checkbox was never rendered -- a form with no field code in play.
+  # Absent must leave the value alone: unwrapping there would strip a
+  # link off observations whose form never offered the box.
   def resolve_other_codes_note
     codes = @observation.notes[:Other_Codes].to_s.strip
-    return if codes.blank? || params[:inat] != "1"
+    return if codes.blank?
+
+    case params[:inat]
+    when "1" then wrap_inat_code(codes)
+    when "0" then @observation.notes[:Other_Codes] =
+                    FieldSlipNotesBuilder.inat_code(codes)
+    end
+  end
+
+  # Skips a value that is already a link, so editing a saved observation
+  # with the box still ticked doesn't nest one link in another.
+  def wrap_inat_code(codes)
     return if FieldSlipNotesBuilder.inat_link?(codes)
 
     @observation.notes[:Other_Codes] = FieldSlipNotesBuilder.inat_link(codes)
