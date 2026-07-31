@@ -220,6 +220,13 @@ module ActiveSupport
     # Standard teardown to run after every test.  Just makes sure any
     # images that might have been uploaded are cleared out.
     def teardown
+      # Otherwise WebMock accumulates every request made anywhere in
+      # this worker process, so `assert_requested`/`assert_not_requested`
+      # answer "did ANY test make that call?" rather than "did this
+      # one?" -- passing or failing on test order. The REGISTRY only,
+      # not `WebMock.reset!`, which would also drop stubs a test
+      # registered in `setup`.
+      WebMock::RequestRegistry.instance.reset!
       assert_equal([], Symbol.missing_tags,
                    "Language tag(s) are missing. Run `bin/rails " \
                    "lang:update` and re-run this test before concluding " \
