@@ -13,10 +13,14 @@ module Views::Controllers::Images::FieldSlipExtracts
     # Superform wants the form's data object as the first positional
     # arg; the review IS that object, so it goes to `super` rather than
     # being held as a plain prop.
-    def initialize(image:, extract:, review:, **attrs)
+    # `approved_name` is set only on the confirmation round-trip: it is
+    # the name the reviewer is being asked to create, and carrying it
+    # back on the form action is what turns the resubmit into approval.
+    def initialize(image:, extract:, review:, approved_name: nil, **attrs)
       @image = image
       @extract = extract
       @review = review
+      @approved_name = approved_name
       super(review, **attrs)
     end
 
@@ -30,7 +34,10 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     def form_action
-      image_field_slip_extract_path(@image.id)
+      path = image_field_slip_extract_path(@image.id)
+      return path if @approved_name.blank?
+
+      "#{path}?#{{ approved_name: @approved_name }.to_query}"
     end
 
     private
@@ -55,9 +62,16 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     # Editable: the model's reading is a starting point, and a reviewer
-    # correcting a misread here is the whole point of the step.
+    # correcting it is the whole point of the step. The name row gets an
+    # autocompleter rather than a plain box -- a slip saying "Lumpy
+    # Bracket" is not a misreading to fix but a common name to look up,
+    # and that is a search, not a retype.
     def render_extracted_cell(row)
-      if row.savable
+      if row.name_row?
+        autocompleter_field("value[#{row.field}]", type: :name,
+                                                   value: row.extracted,
+                                                   label: false)
+      elsif row.editable
         text_field("value[#{row.field}]", value: row.extracted, label: false)
       else
         plain(row.extracted.to_s)
@@ -85,21 +99,27 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     def render_use_cell(row)
-      unless row.savable
-        small { plain(:field_slip_extract_review_only.l) }
-        return
+      if row.name_row?
+        small { plain(:field_slip_extract_name_only.l) }
+      elsif row.savable
+        checkbox_field("use[#{row.field}]", checked: row.default_use?,
+                                            label: false)
+      else
+        small { plain(:field_slip_extract_check_only.l) }
       end
-
-      checkbox_field("use[#{row.field}]", checked: row.default_use?,
-                                          label: false)
     end
 
-    # The ID is shown but never written here: proposing a name creates a
-    # naming and a vote, which is a different act with its own rules.
+    # The ID becomes a proposed naming rather than an attribute, so it
+    # needs a confidence to vote at. Defaults to the weakest positive
+    # value: the reviewer is relaying what a slip says, not asserting
+    # their own determination.
     def render_id_note
-      return if @extract.value_for("ID").blank?
+      return if @extract.value_for(::FieldSlip::Extractor::NAME_FIELD).blank?
 
       Help(content: :field_slip_extract_id_help.l)
+      select_field("vote", Vote.confidence_menu,
+                   label: :field_slip_extract_vote.l,
+                   value: Vote::MIN_POS_VOTE)
     end
   end
 end

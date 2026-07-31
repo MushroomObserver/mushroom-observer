@@ -11,7 +11,8 @@
 # attributes of anything, and keying the params by them keeps the
 # controller's read a straight lookup against `Extractor::FIELDS`.
 class FormObject::FieldSlipReview < FormObject::Base
-  Row = Data.define(:field, :extracted, :current, :confidence, :savable) do
+  Row = Data.define(:field, :extracted, :current, :confidence, :savable,
+                    :editable) do
     # Nothing to decide when the model read nothing.
     def blank? = extracted.to_s.strip.empty?
 
@@ -25,6 +26,10 @@ class FormObject::FieldSlipReview < FormObject::Base
     end
 
     def default_use? = savable && present? && !conflict?
+
+    # The name row is editable but carries no tick box: it isn't applied
+    # as an attribute, so there is nothing for one to decide.
+    def name_row? = editable && !savable
   end
 
   attribute :rows, default: -> { [] }
@@ -34,7 +39,9 @@ class FormObject::FieldSlipReview < FormObject::Base
       Row.new(field: field, extracted: extract.value_for(field),
               current: current_value(observation, target),
               confidence: extract.confidence_for(field),
-              savable: !target.nil?)
+              savable: !target.nil?,
+              editable: !target.nil? ||
+                        field == FieldSlip::Extractor::NAME_FIELD)
     end)
   end
 

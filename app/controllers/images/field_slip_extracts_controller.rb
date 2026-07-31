@@ -41,7 +41,15 @@ module Images
       return unless extract_or_redirect!
 
       apply_chosen_fields
-      flash_notice(:field_slip_extract_saved.t)
+      outcome = propose_name
+      # An unrecognized or ambiguous name needs the reviewer to confirm
+      # before a Name is created, so the page comes back with the
+      # resolver's feedback. The field writes above already landed --
+      # re-running them on the resubmit is a no-op, since the values are
+      # then identical.
+      return rerender_for_name_approval(outcome) if outcome.needs_approval?
+
+      flash_extract_saved(outcome)
       redirect_to(permanent_observation_path(@observation.id))
     end
 
@@ -81,6 +89,39 @@ module Images
       nil
     end
 
+    def propose_name
+      FieldSlip::Extractor::NameProposer.new(
+        observation: @observation, user: @user, vote: params[:vote],
+        name_params: {
+          given_name: params.dig(:value, FieldSlip::Extractor::NAME_FIELD),
+          approved_name: params[:approved_name],
+          chosen_name: params.dig(:chosen_name, :name_id)
+        }
+      ).propose
+    end
+
+    def flash_extract_saved(outcome)
+      flash_notice(:field_slip_extract_saved.t)
+      return unless outcome.proposed?
+
+      flash_notice(:field_slip_extract_name_proposed.t(
+                     name: outcome.naming.name.text_name
+                   ))
+    end
+
+    def rerender_for_name_approval(outcome)
+      outcome.feedback.each do |ivar, value|
+        instance_variable_set(:"@#{ivar}", value)
+      end
+      flash_warning(:field_slip_extract_name_needs_approval.t)
+      render(Views::Controllers::Images::FieldSlipExtracts::Edit.new(
+               extract: @extract, observation: @observation, user: @user,
+               name_feedback: outcome.feedback,
+               given_name: params.dig(:value,
+                                      FieldSlip::Extractor::NAME_FIELD).to_s
+             ))
+    end
+
     def apply_chosen_fields
       FieldSlip::Extractor::Applier.new(
         observation: @observation, chosen: chosen_fields, user: @user
@@ -89,8 +130,11 @@ module Images
 
     # Only the ticked rows, keyed by slip field, holding whatever text
     # the reviewer left in the input.
+    # Both hashes can be absent entirely -- Rails drops an empty one, so
+    # a form submitted with nothing ticked arrives without `use` at all.
     def chosen_fields
-      ticked = params[:use].to_unsafe_h.select { |_k, v| v == "1" }.keys
+      ticked = (params[:use]&.to_unsafe_h || {}).
+               select { |_k, v| v == "1" }.keys
       values = params[:value]&.to_unsafe_h || {}
       ticked.index_with { |field| values[field] }
     end

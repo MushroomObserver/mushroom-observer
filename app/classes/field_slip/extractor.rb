@@ -38,6 +38,14 @@ class FieldSlip
       "MycoMap Voucher Number" => :"notes.MycoMap_Voucher_Number"
     }.freeze
 
+    # The slip's ID, which has no target column: it becomes a proposed
+    # naming, not an attribute. Editable all the same, and through a
+    # name autocompleter rather than a plain box -- what collectors
+    # write is often a common name ("Lumpy Bracket") or a genus, so the
+    # reviewer's job is to look up what it actually means rather than
+    # to correct a misreading.
+    NAME_FIELD = "ID"
+
     CONFIDENCE_LEVELS = %w[high medium low].freeze
 
     # What one provider run produced: the raw response (stored verbatim

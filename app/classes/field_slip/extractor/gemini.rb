@@ -72,16 +72,40 @@ class FieldSlip
                               response_mime_type: "application/json" } }
       end
 
-      # Base64 of the served JPEG. Read over HTTP rather than off disk:
-      # originals live on the image server, and the size we want is a
-      # derivative that only exists there.
+      # Base64 of the JPEG, from disk when MO holds a copy. Production
+      # writes local files before transferring them, and development's
+      # image precedence puts `:local` first, so going over the network
+      # for a file already on disk would be both slower and a needless
+      # dependency -- this feature shouldn't need DNS to read an image
+      # MO already has.
       def image_data(image)
-        url = image.image_url(IMAGE_SIZE).url
-        Base64.strict_encode64(
-          RestClient::Request.execute(method: :get, url: url,
-                                      timeout: TIMEOUT,
-                                      raw_response: true).file.read
-        )
+        Base64.strict_encode64(image_bytes(image))
+      end
+
+      def image_bytes(image)
+        url = image.image_url(IMAGE_SIZE)
+        path = local_path(url)
+        return File.binread(path) if path
+
+        RestClient::Request.execute(method: :get, url: url.url,
+                                    timeout: TIMEOUT,
+                                    raw_response: true).file.read
+      end
+
+      # `Image::URL#url` resolves through `MO.image_precedence` and
+      # returns the local source as a ROOT-RELATIVE path ("/images/1280/
+      # 42.jpg?v") rather than a file:// URL -- the local source's
+      # `read` spec is a web path, and only its `test` spec is a
+      # filesystem one. So map the web prefix onto the local root rather
+      # than looking for a scheme that never appears.
+      def local_path(url)
+        resolved = url.url.sub(/\?\d+\z/, "")
+        prefix = MO.image_sources.dig(:local, :read).to_s
+        return nil if prefix.blank? || !resolved.start_with?("#{prefix}/")
+
+        path = File.join(MO.local_image_files,
+                         resolved.delete_prefix("#{prefix}/"))
+        File.exist?(path) ? path : nil
       end
 
       # The model is asked for JSON and told not to fence it, but a

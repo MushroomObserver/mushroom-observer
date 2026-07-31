@@ -8,12 +8,17 @@ module Views::Controllers::Images::FieldSlipExtracts
     prop :extract, ::FieldSlipExtract
     prop :observation, ::Observation
     prop :user, ::User
+    # Set only on the confirmation round-trip, when the reviewed ID
+    # needs a Name created or disambiguated before it can be proposed.
+    prop :name_feedback, _Nilable(Hash), default: nil
+    prop :given_name, _Nilable(String), default: nil
 
     def view_template
       add_page_title(:field_slip_extract_title.t(id: @observation.id))
       container_class(:full)
 
       render_flags
+      render_name_feedback if @name_feedback.present?
       Row do
         Column(xs: 12, md: 5) { render_slip_photo }
         Column(xs: 12, md: 7) { render_form }
@@ -62,6 +67,22 @@ module Views::Controllers::Images::FieldSlipExtracts
            target: new_project_alias_path(project_id: project.id))
     end
 
+    # The resolver's own feedback UI -- "create this name?", the
+    # ambiguous-author list, the deprecated-name alternatives -- reused
+    # rather than restated, so approving here behaves as it does on the
+    # observation form.
+    def render_name_feedback
+      render(Components::Form::NameFeedback.new(
+               button_name: :field_slip_extract_save.l,
+               given_name: @given_name.to_s,
+               names: @name_feedback[:names],
+               valid_names: @name_feedback[:valid_names],
+               suggest_corrections:
+                 @name_feedback[:suggest_corrections].present?,
+               parent_deprecated: @name_feedback[:parent_deprecated].presence
+             ))
+    end
+
     def render_slip_photo
       render(Components::InteractiveImage.new(
                image: @extract.image, user: @user, votes: false
@@ -70,6 +91,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
     def render_form
       render(Form.new(image: @extract.image, extract: @extract,
+                      approved_name: (@given_name if @name_feedback.present?),
                       review: FormObject::FieldSlipReview.build(
                         extract: @extract, observation: @observation
                       )))
