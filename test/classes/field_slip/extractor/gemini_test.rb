@@ -5,6 +5,11 @@ require("test_helper")
 class FieldSlip::Extractor::GeminiTest < UnitTestCase
   API = %r{generativelanguage\.googleapis\.com/v1beta/models/}
   KEY = "test-key"
+  # Distinct payloads so a test can tell WHICH source the adapter read
+  # from by looking at what it sent, rather than asking WebMock whether
+  # a fetch happened -- see `assert_sent_image`.
+  REMOTE_BYTES = "\xFF\xD8jpegbytes".b
+  LOCAL_BYTES = "\xFF\xD8localbytes".b
 
   def setup
     @obs = observations(:minimal_unknown_obs)
@@ -22,7 +27,7 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
 
   def stub_image_fetch
     stub_request(:get, /images\.mushroomobserver\.org/).
-      to_return(status: 200, body: "\xFF\xD8jpegbytes".b)
+      to_return(status: 200, body: REMOTE_BYTES)
   end
 
   # The test environment resolves an image to a `file://` URL and the
@@ -30,7 +35,7 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
   # disk is also the production path whenever MO holds the file.
   def write_local_image
     FileUtils.mkdir_p(File.dirname(local_image_path))
-    File.binwrite(local_image_path, "\xFF\xD8localbytes".b)
+    File.binwrite(local_image_path, LOCAL_BYTES)
   end
 
   def stub_gemini(payload, model_version: "gemini-3.6-flash", status: 200)
@@ -93,7 +98,8 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
 
     extract(model: "gemini-3-flash-preview")
 
-    assert_requested(:post, %r{models/gemini-3-flash-preview:generateContent})
+    assert_includes(@request.uri.to_s,
+                    "models/gemini-3-flash-preview:generateContent")
   end
 
   def test_sends_the_key_as_a_header_not_a_query_param
@@ -152,7 +158,7 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
     stub_gemini(json_payload(fields: { "ID" => "Local" }))
 
     assert_equal("Local", extract.value_for("ID"))
-    assert_not_requested(:get, /images\.mushroomobserver\.org/)
+    assert_sent_image(LOCAL_BYTES)
   end
 
   # A local path MO does not actually hold gets a named error rather
@@ -181,7 +187,7 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
         extract(@image, context: @context)
     end
 
-    assert_requested(:get, /images\.mushroomobserver\.org/)
+    assert_sent_image(REMOTE_BYTES)
   end
 
   # Credentials supply both key and model when the caller passes neither.
@@ -195,10 +201,23 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
       FieldSlip::Extractor::Gemini.new.extract(@image, context: @context)
     end
 
-    assert_requested(:post, %r{models/gemini-from-credentials:generateContent})
+    assert_includes(@request.uri.to_s,
+                    "models/gemini-from-credentials:generateContent")
   end
 
   private
+
+  # Which bytes reached the provider, read off THIS test's captured
+  # request. WebMock's registry is never reset in this suite, so
+  # `assert_requested`/`assert_not_requested` answer "did any test in
+  # this process make that call?" -- which passed locally and failed on
+  # CI purely on test order.
+  def assert_sent_image(bytes)
+    sent = JSON.parse(@request.body).
+           dig("contents", 0, "parts", 1, "inline_data", "data")
+
+    assert_equal(Base64.strict_encode64(bytes), sent)
+  end
 
   # `Rails.application.credentials` answers `gemini` through
   # method_missing, which Minitest's `stub` cannot alias, so define the
