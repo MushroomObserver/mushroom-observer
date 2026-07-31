@@ -46,6 +46,10 @@ class FieldSlip
     # to correct a misreading.
     NAME_FIELD = "ID"
 
+    # Also its own section, for the same reason: it is corrected through
+    # a location autocompleter, which needs a real label to work.
+    LOCATION_FIELD = "Location"
+
     CONFIDENCE_LEVELS = %w[high medium low].freeze
 
     # What one provider run produced: the raw response (stored verbatim

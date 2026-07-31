@@ -1,0 +1,225 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+class FieldSlip::Extractor::GeminiTest < UnitTestCase
+  API = %r{generativelanguage\.googleapis\.com/v1beta/models/}
+  KEY = "test-key"
+
+  def setup
+    @obs = observations(:minimal_unknown_obs)
+    @image = images(:in_situ_image)
+    @obs.images << @image unless @obs.images.include?(@image)
+    @context = FieldSlip::Extractor::Context.new(observation: @obs)
+    stub_image_fetch
+    write_local_image
+  end
+
+  def teardown
+    FileUtils.rm_f(local_image_path)
+    super
+  end
+
+  def stub_image_fetch
+    stub_request(:get, /images\.mushroomobserver\.org/).
+      to_return(status: 200, body: "\xFF\xD8jpegbytes".b)
+  end
+
+  # The test environment resolves an image to a `file://` URL and the
+  # fixtures have nothing behind it, so put a file there. Reading from
+  # disk is also the production path whenever MO holds the file.
+  def write_local_image
+    FileUtils.mkdir_p(File.dirname(local_image_path))
+    File.binwrite(local_image_path, "\xFF\xD8localbytes".b)
+  end
+
+  def stub_gemini(payload, model_version: "gemini-3.6-flash", status: 200)
+    body = { "candidates" => [{ "content" => { "parts" =>
+               [{ "text" => payload }] } }],
+             "modelVersion" => model_version }
+    stub_request(:post, API).
+      with { |req| @request = req }.
+      to_return(status: status, body: body.to_json,
+                headers: { "Content-Type" => "application/json" })
+  end
+
+  def json_payload(fields: {}, confidence: {})
+    { fields: fields, confidence: confidence }.to_json
+  end
+
+  def extract(api_key: KEY, **)
+    FieldSlip::Extractor::Gemini.new(api_key: api_key, **).
+      extract(@image, context: @context)
+  end
+
+  def test_missing_key_raises_a_named_error
+    with_gemini_credentials(nil) do
+      error = assert_raises(FieldSlip::Extractor::Gemini::MissingKey) do
+        FieldSlip::Extractor::Gemini.new.extract(@image, context: @context)
+      end
+
+      assert_match(/credentials\.gemini\.key/, error.message)
+    end
+  end
+
+  def test_returns_fields_and_confidence
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" },
+                             confidence: { "Collector" => "high" }))
+
+    result = extract
+
+    assert_equal("Scott Shapiro", result.value_for("Collector"))
+    assert_equal("high", result.confidence_for("Collector"))
+    assert_equal("gemini", result.provider)
+  end
+
+  # The alias is what gets requested; the concrete model the API reports
+  # is what gets recorded, so provenance survives the indirection.
+  def test_records_the_model_the_api_actually_ran
+    stub_gemini(json_payload, model_version: "gemini-3.6-flash")
+
+    assert_equal("gemini-3.6-flash",
+                 extract(model: "gemini-flash-latest").model)
+  end
+
+  def test_falls_back_to_the_requested_model_when_none_reported
+    stub_gemini(json_payload, model_version: nil)
+
+    assert_equal("some-model", extract(model: "some-model").model)
+  end
+
+  def test_requests_the_configured_model
+    stub_gemini(json_payload)
+
+    extract(model: "gemini-3-flash-preview")
+
+    assert_requested(:post, %r{models/gemini-3-flash-preview:generateContent})
+  end
+
+  def test_sends_the_key_as_a_header_not_a_query_param
+    stub_gemini(json_payload)
+
+    extract
+
+    assert_equal(KEY, @request.headers["X-Goog-Api-Key"])
+    assert_not_includes(@request.uri.query.to_s, KEY)
+  end
+
+  def test_sends_the_prompt_and_the_image
+    stub_gemini(json_payload)
+
+    extract
+
+    parts = JSON.parse(@request.body).dig("contents", 0, "parts")
+
+    assert_includes(parts.first["text"], "Field Slip Code")
+    assert_equal("image/jpeg", parts.last.dig("inline_data", "mime_type"))
+    assert(parts.last.dig("inline_data", "data").present?)
+  end
+
+  # Asking for JSON doesn't stop a model fencing it; unwrapping is the
+  # difference between a working read and a hard failure.
+  def test_unwraps_a_fenced_json_response
+    stub_gemini("```json\n#{json_payload(fields: { "ID" => "Boletus" })}\n```")
+
+    assert_equal("Boletus", extract.value_for("ID"))
+  end
+
+  def test_non_json_response_raises_bad_response
+    stub_gemini("I'm afraid I can't do that")
+
+    assert_raises(FieldSlip::Extractor::Gemini::BadResponse) { extract }
+  end
+
+  def test_missing_fields_key_yields_an_empty_result
+    stub_gemini({ notes: "nothing legible" }.to_json)
+
+    result = extract
+
+    assert_nil(result.value_for("Collector"))
+    assert_equal("low", result.confidence_for("Collector"))
+  end
+
+  def test_http_error_propagates
+    stub_request(:post, API).to_return(status: 404, body: "{}")
+
+    assert_raises(RestClient::NotFound) { extract }
+  end
+
+  # Reading a file MO already holds beats going out to the network --
+  # faster, and it means this doesn't need DNS for a local image.
+  def test_reads_the_local_file_when_one_exists
+    stub_gemini(json_payload(fields: { "ID" => "Local" }))
+
+    assert_equal("Local", extract.value_for("ID"))
+    assert_not_requested(:get, /images\.mushroomobserver\.org/)
+  end
+
+  # A local path MO does not actually hold gets a named error rather
+  # than RestClient rejecting a file:// URL as "not an HTTP URI".
+  def test_missing_local_file_raises_a_named_error
+    stub_gemini(json_payload)
+    # A different fixture, deliberately: tests share a filesystem, so
+    # deleting the file THIS test's image resolves to would pull it out
+    # from under another test running in parallel.
+    other = images(:turned_over_image)
+
+    assert_raises(FieldSlip::Extractor::Gemini::MissingImage) do
+      FieldSlip::Extractor::Gemini.new(api_key: KEY).
+        extract(other, context: @context)
+    end
+  end
+
+  def test_fetches_remotely_when_the_url_is_http
+    stub_gemini(json_payload)
+    remote = Struct.new(:url).new(
+      "https://images.mushroomobserver.org/1280/#{@image.id}.jpg"
+    )
+
+    @image.stub(:image_url, remote) do
+      FieldSlip::Extractor::Gemini.new(api_key: KEY).
+        extract(@image, context: @context)
+    end
+
+    assert_requested(:get, /images\.mushroomobserver\.org/)
+  end
+
+  # Credentials supply both key and model when the caller passes neither.
+  def test_reads_key_and_model_from_credentials
+    stub_gemini(json_payload)
+    creds = ActiveSupport::OrderedOptions.new
+    creds[:key] = KEY
+    creds[:model] = "gemini-from-credentials"
+
+    with_gemini_credentials(creds) do
+      FieldSlip::Extractor::Gemini.new.extract(@image, context: @context)
+    end
+
+    assert_requested(:post, %r{models/gemini-from-credentials:generateContent})
+  end
+
+  private
+
+  # `Rails.application.credentials` answers `gemini` through
+  # method_missing, which Minitest's `stub` cannot alias, so define the
+  # singleton outright and take it away again.
+  def with_gemini_credentials(value)
+    creds = Rails.application.credentials
+    creds.define_singleton_method(:gemini) { value }
+    yield
+  ensure
+    creds.singleton_class.remove_method(:gemini)
+  end
+
+  # Wherever the environment's image precedence actually resolves to --
+  # `file://` in test, a root-relative web path in development -- mapped
+  # to disk the same way the adapter does it.
+  def local_image_path
+    resolved = @image.image_url(FieldSlip::Extractor::Gemini::IMAGE_SIZE).
+               url.sub(/\?\d+\z/, "")
+    return resolved.delete_prefix("file://") if resolved.start_with?("file://")
+
+    prefix = MO.image_sources.dig(:local, :read).to_s
+    File.join(MO.local_image_files, resolved.delete_prefix("#{prefix}/"))
+  end
+end

@@ -5,15 +5,16 @@ module Images
   # result before any of it reaches the observation (see
   # FieldSlip::Extractor).
   #
-  # Admin-only for now, and not because of permissions: every call costs
-  # money and roughly a third of fields need correcting, so this wants a
-  # small number of people who know what a slip should say. `create`
-  # always re-reads -- extraction changes over time and a fresh read is
-  # the point of pressing the button again.
+  # Open to site admins and to admins of a project the image's
+  # observations belong to (see `FieldSlipExtract.permitted?`), not to
+  # everyone: each call costs money and roughly a third of fields need
+  # correcting, so this wants people who know what a slip should say.
+  # `create` always re-reads -- extraction changes over time and a fresh
+  # read is the point of pressing the button again.
   class FieldSlipExtractsController < ApplicationController
     before_action :login_required
-    before_action :admin_required
     before_action :find_image!
+    before_action :permission_required
 
     def create
       result = FieldSlip::Extractor.default.extract(@image, context: context)
@@ -57,18 +58,23 @@ module Images
 
     # No return value: a `before_action` halts the chain when it
     # redirects, so signalling with true/false would be decoration.
-    def admin_required
-      return if in_admin_mode?
+    # Runs after `find_image!` because the permission depends on the
+    # image's observations, not just on the user.
+    def permission_required
+      return unless @image
+      return if FieldSlipExtract.permitted?(image: @image, user: @user,
+                                            site_admin: in_admin_mode?)
 
       flash_error(:permission_denied.t)
-      redirect_to(image_path(params[:image_id]))
+      redirect_to(image_path(@image.id))
     end
 
     def find_image!
       @image = Image.safe_find(params[:image_id])
       return @image if @image
 
-      flash_error(:runtime_image_not_found.t(id: params[:image_id]))
+      flash_error(:runtime_object_not_found.t(type: :image,
+                                              id: params[:image_id]))
       redirect_to(images_path)
       nil
     end
@@ -89,7 +95,16 @@ module Images
       nil
     end
 
+    # Only when the reviewer ticked it. Unticked means "the slip says
+    # this, don't propose it" -- the box starts clear for a name MO
+    # doesn't hold, so creating one is always a deliberate choice.
     def propose_name
+      unless params.dig(:use, FieldSlip::Extractor::NAME_FIELD) == "1"
+        return FieldSlip::Extractor::NameProposer::Outcome.new(
+          status: :none, naming: nil, feedback: {}
+        )
+      end
+
       FieldSlip::Extractor::NameProposer.new(
         observation: @observation, user: @user, vote: params[:vote],
         name_params: {
@@ -134,7 +149,8 @@ module Images
     # a form submitted with nothing ticked arrives without `use` at all.
     def chosen_fields
       ticked = (params[:use]&.to_unsafe_h || {}).
-               select { |_k, v| v == "1" }.keys
+               select { |_k, v| v == "1" }.keys -
+               [FieldSlip::Extractor::NAME_FIELD]
       values = params[:value]&.to_unsafe_h || {}
       ticked.index_with { |field| values[field] }
     end

@@ -52,10 +52,17 @@ module Views::Controllers::Images::FieldSlipExtracts
       written = @extract.unknown_location_alias
       return unless written
 
+      suggestion = @extract.location_suggestion
       Alert(level: :warning) do
-        plain(:field_slip_extract_unknown_alias.t(name: written))
-        whitespace
-        render_alias_link
+        if suggestion
+          plain(:field_slip_extract_location_guess.t(
+                  written: written, suggestion: suggestion.name
+                ))
+        else
+          plain(:field_slip_extract_unknown_alias.t(name: written))
+          whitespace
+          render_alias_link
+        end
       end
     end
 
@@ -93,7 +100,8 @@ module Views::Controllers::Images::FieldSlipExtracts
       render(Form.new(image: @extract.image, extract: @extract,
                       approved_name: (@given_name if @name_feedback.present?),
                       review: FormObject::FieldSlipReview.build(
-                        extract: @extract, observation: @observation
+                        extract: @extract, observation: @observation,
+                        user: @user
                       )))
     end
 

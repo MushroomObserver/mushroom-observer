@@ -71,8 +71,16 @@ class FieldSlip
       # Attributed to the reviewer, not the observation's owner: an
       # admin reading someone else's slip is stating their own reading
       # of it, and the vote weight should be theirs to own.
+      # `Vote.validate_value` runs `to_f` first, so it answers 0.0 -- not
+      # nil -- for a missing or unparseable value. 0 is DELETE_VOTE, and
+      # `change_vote` reads it as "remove this vote", so relying on `||`
+      # here left a proposed naming with no vote at all: present on the
+      # observation, supporting nothing. Treat anything that lands on
+      # DELETE_VOTE as absent, since the form's confidence menu never
+      # offers it.
       def cast_vote(naming)
-        value = Vote.validate_value(@vote) || Vote::MIN_POS_VOTE
+        value = Vote.validate_value(@vote)
+        value = Vote::MIN_POS_VOTE if value.nil? || value == Vote::DELETE_VOTE
         Observation::NamingConsensus.new(@observation).
           change_vote(naming, value, @user)
       end

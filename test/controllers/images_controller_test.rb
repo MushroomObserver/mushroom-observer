@@ -150,6 +150,43 @@ class ImagesControllerTest < FunctionalTestCase
     end
   end
 
+  # The Read Field Slip button is offered on every image with an
+  # observation -- a plausibility test that guessed wrong would hide it
+  # on exactly the slips someone wants to read -- but only to people
+  # who may press it (FieldSlipExtract.permitted?).
+  def test_show_hides_field_slip_button_from_ordinary_users
+    image = images(:in_situ_image)
+    login("katrina")
+
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]",
+                  image_field_slip_extract_path(image.id), count: 0)
+  end
+
+  def test_show_offers_field_slip_button_to_site_admin
+    image = images(:in_situ_image)
+    login("rolf")
+    make_admin
+
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]", image_field_slip_extract_path(image.id))
+  end
+
+  def test_show_offers_field_slip_button_to_project_admin
+    image = images(:in_situ_image)
+    obs = image.observations.first
+    project = projects(:eol_project)
+    project.observations << obs unless project.observations.include?(obs)
+    login(mary.login)
+
+    assert(project.is_admin?(mary), "premise: mary administers it")
+    get(:show, params: { id: image.id })
+
+    assert_select("form[action=?]", image_field_slip_extract_path(image.id))
+  end
+
   def test_show_image_info_panel_heading
     image = images(:peltigera_image)
     login

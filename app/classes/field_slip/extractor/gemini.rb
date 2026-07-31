@@ -47,6 +47,13 @@ class FieldSlip
 
       class BadResponse < StandardError; end
 
+      # The image resolved to a local path MO doesn't actually hold.
+      class MissingImage < StandardError
+        def initialize(url)
+          super("No image file at #{url}")
+        end
+      end
+
       private
 
       def credentials
@@ -87,25 +94,43 @@ class FieldSlip
         path = local_path(url)
         return File.binread(path) if path
 
-        RestClient::Request.execute(method: :get, url: url.url,
+        resolved = url.url
+        # A file:// URL that got past `local_path` means the file MO
+        # expects is not there. Say so, rather than handing RestClient
+        # something it rejects with a bare "not an HTTP URI".
+        raise(MissingImage.new(resolved)) unless resolved.start_with?("http")
+
+        RestClient::Request.execute(method: :get, url: resolved,
                                     timeout: TIMEOUT,
                                     raw_response: true).file.read
       end
 
-      # `Image::URL#url` resolves through `MO.image_precedence` and
-      # returns the local source as a ROOT-RELATIVE path ("/images/1280/
-      # 42.jpg?v") rather than a file:// URL -- the local source's
-      # `read` spec is a web path, and only its `test` spec is a
-      # filesystem one. So map the web prefix onto the local root rather
-      # than looking for a scheme that never appears.
+      # A resolved image URL is on disk in two different shapes, and
+      # both have to be recognized or RestClient is handed something
+      # that isn't an HTTP URI and raises.
+      #
+      #   "/images/1280/42.jpg?v"   the local source's `read` spec is a
+      #                             WEB path, not a filesystem one, so
+      #                             it maps onto MO.local_image_files.
+      #   "file:///…/42.jpg?v"      other sources (the test env's
+      #                             `remote1`) do use a file:// URL.
       def local_path(url)
         resolved = url.url.sub(/\?\d+\z/, "")
+        path = file_url_path(resolved) || web_path_on_disk(resolved)
+        path if path && File.exist?(path)
+      end
+
+      def file_url_path(resolved)
+        return nil unless resolved.start_with?("file://")
+
+        resolved.delete_prefix("file://")
+      end
+
+      def web_path_on_disk(resolved)
         prefix = MO.image_sources.dig(:local, :read).to_s
         return nil if prefix.blank? || !resolved.start_with?("#{prefix}/")
 
-        path = File.join(MO.local_image_files,
-                         resolved.delete_prefix("#{prefix}/"))
-        File.exist?(path) ? path : nil
+        File.join(MO.local_image_files, resolved.delete_prefix("#{prefix}/"))
       end
 
       # The model is asked for JSON and told not to fence it, but a

@@ -28,7 +28,8 @@ module Views::Controllers::Images::FieldSlipExtracts
       super do
         hidden_field("_method", value: "patch")
         div(class: "table-responsive") { render_table }
-        render_id_note
+        render_location_section
+        render_name_section
         submit(:field_slip_extract_save.l)
       end
     end
@@ -62,16 +63,9 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     # Editable: the model's reading is a starting point, and a reviewer
-    # correcting it is the whole point of the step. The name row gets an
-    # autocompleter rather than a plain box -- a slip saying "Lumpy
-    # Bracket" is not a misreading to fix but a common name to look up,
-    # and that is a search, not a retype.
+    # correcting it is the whole point of the step.
     def render_extracted_cell(row)
-      if row.name_row?
-        autocompleter_field("value[#{row.field}]", type: :name,
-                                                   value: row.extracted,
-                                                   label: false)
-      elsif row.editable
+      if row.editable
         text_field("value[#{row.field}]", value: row.extracted, label: false)
       else
         plain(row.extracted.to_s)
@@ -99,9 +93,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     def render_use_cell(row)
-      if row.name_row?
-        small { plain(:field_slip_extract_name_only.l) }
-      elsif row.savable
+      if row.savable
         checkbox_field("use[#{row.field}]", checked: row.default_use?,
                                             label: false)
       else
@@ -109,14 +101,77 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
-    # The ID becomes a proposed naming rather than an attribute, so it
-    # needs a confidence to vote at. Defaults to the weakest positive
-    # value: the reviewer is relaying what a slip says, not asserting
-    # their own determination.
-    def render_id_note
-      return if @extract.value_for(::FieldSlip::Extractor::NAME_FIELD).blank?
+    # Locality, like the ID, is corrected through an autocompleter and
+    # so needs a real label -- but unlike the ID it is an ordinary
+    # attribute write, so it keeps its tick box. The box is prefilled
+    # with the suggested full name when the project already uses a
+    # location the abbreviation obviously means; the flag above says
+    # what the slip actually read.
+    def render_location_section
+      row = @review.location_row
+      return if row.nil? || row.blank?
 
-      Help(content: :field_slip_extract_id_help.l)
+      panel = Components::Panel.new(panel_id: "field_slip_extract_location")
+      render(panel) do |p|
+        p.with_body do
+          autocompleter_field("value[#{row.field}]",
+                              type: :location, value: @review.location_value,
+                              label: :field_slip_extract_locality.l)
+          render_current_note(row)
+          checkbox_field("use[#{row.field}]",
+                         checked: row.default_use?,
+                         label: :field_slip_extract_apply.l)
+        end
+      end
+    end
+
+    def render_current_note(row)
+      return if row.current.to_s.blank?
+
+      div do
+        small { plain(:field_slip_extract_currently.l(value: row.current)) }
+      end
+    end
+
+    # The ID gets its own section rather than a table cell. Two reasons,
+    # both load-bearing: a name autocompleter only renders its dropdown
+    # and hidden id field when it has a real label (`label: false`
+    # silently drops the append slot they live in), and unlike every
+    # other field this one creates a Naming and a Vote rather than
+    # writing an attribute.
+    def render_name_section
+      row = @review.name_row
+      return if row.nil? || row.blank?
+
+      # `with_body`, not a bare block: Panel is slot-based, and content
+      # passed straight to it is discarded rather than rendered.
+      render(Components::Panel.new(panel_id: "field_slip_extract_name")) do |p|
+        p.with_body do
+          render_name_field(row)
+          render_name_use(row)
+          render_vote_field
+          Help(content: :field_slip_extract_id_help.l)
+        end
+      end
+    end
+
+    def render_name_field(row)
+      autocompleter_field("value[#{row.field}]",
+                          type: :name, value: row.extracted,
+                          label: :field_slip_extract_id.l)
+    end
+
+    # Ticked by default only when the ID already resolves to a name MO
+    # holds. An unrecognized one -- "Lumpy Bracket" -- starts clear, so
+    # creating a Name is always something the reviewer chose to do.
+    def render_name_use(row)
+      checkbox_field("use[#{row.field}]", checked: @review.name_known,
+                                          label: :field_slip_extract_propose.l)
+    end
+
+    # Defaults to the weakest positive value: relaying what a slip says
+    # is not asserting the reviewer's own determination.
+    def render_vote_field
       select_field("vote", Vote.confidence_menu,
                    label: :field_slip_extract_vote.l,
                    value: Vote::MIN_POS_VOTE)

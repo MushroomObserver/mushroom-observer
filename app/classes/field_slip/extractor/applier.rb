@@ -59,11 +59,16 @@ class FieldSlip
         @observation.collector_user_id = attrs[:collector_user_id]
       end
 
+      # ISO only, deliberately. `Date.parse` is far too permissive to
+      # trust here -- it reads "sometime in July" as July 1st of the
+      # current year and raises nothing, so a garbage value would
+      # silently set a wrong date rather than being skipped. The prompt
+      # asks for YYYY-MM-DD and the field is prefilled with it, so
+      # anything else is a typo and gets left alone.
       def assign_when(value)
-        parsed = Date.parse(value)
-        @observation.when = parsed
+        @observation.when = Date.strptime(value, "%Y-%m-%d")
       rescue Date::Error
-        nil # a date the reviewer left unparseable is skipped, not fatal
+        nil
       end
 
       # A location the project aliases (or MO itself) know becomes a real

@@ -231,6 +231,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # glossary unused-image cleanup).
   has_many :external_links, as: :target, dependent: :delete_all
 
+  # The machine-read of a field slip photo (#4932) describes this image
+  # specifically, so it goes with it. delete_all for the same reason as
+  # external_links above: no destroy callbacks, and a bulk DELETE avoids
+  # loading the association under strict loading.
+  has_many :field_slip_extracts, dependent: :delete_all
+
   # The import ExternalLink for this image (its source photo), if any.
   def import_link
     if external_links.loaded?
