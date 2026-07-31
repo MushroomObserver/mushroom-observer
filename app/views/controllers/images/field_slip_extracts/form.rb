@@ -191,10 +191,17 @@ module Views::Controllers::Images::FieldSlipExtracts
 
     # Defaults to the weakest positive value: relaying what a slip says
     # is not asserting the reviewer's own determination.
+    # "Promising" -- a slip's ID is the collector's determination, worth
+    # more than a guess and less than the reviewer's own certainty.
+    #
+    # `to_f` is load-bearing: `Vote.confidence_menu`'s values are Floats
+    # ("2.0"), so passing the Integer constant matched no option and the
+    # browser fell back to the FIRST one -- "I'd Call It That", the
+    # strongest vote and the opposite of the intended default.
     def render_vote_field
       select_field("vote", Vote.confidence_menu,
                    label: :field_slip_extract_vote.l,
-                   value: Vote::MIN_POS_VOTE)
+                   value: Vote::NEXT_BEST_VOTE.to_f)
     end
   end
 end

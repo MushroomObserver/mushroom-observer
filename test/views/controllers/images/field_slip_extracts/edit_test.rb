@@ -73,11 +73,18 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_no_html(html, "input[name='use[ID]'][checked]")
     end
 
-    def test_name_section_offers_a_confidence_menu
+    # The menu's values are Floats, so an Integer default matched no
+    # option and the browser silently fell back to the first one --
+    # "I'd Call It That", the strongest vote. Pin the selection, not
+    # just the menu's presence.
+    def test_name_section_defaults_the_vote_to_promising
       html = render_page(fields: { FieldSlip::Extractor::NAME_FIELD =>
                                    "Coprinus comatus" })
 
       assert_html(html, "select[name='vote']")
+      assert_html(html,
+                  "select[name='vote'] option[selected][value='2.0']")
+      assert_html(html, "select[name='vote'] option[selected]", count: 1)
     end
 
     def test_no_name_section_when_nothing_was_read_for_it

@@ -12,6 +12,12 @@ class FieldSlip
     # created exactly as it would there, including the confirmation step
     # rather than silently minting a Name from a machine reading.
     class NameProposer
+      # "Promising": a slip's ID is the collector's determination,
+      # worth more than a guess and less than the reviewer's own
+      # certainty. Matches the form's default; this is the fallback for
+      # a submission that carries no vote at all.
+      DEFAULT_VOTE = Vote::NEXT_BEST_VOTE
+
       # :none    nothing to propose
       # :needs_approval  resolver wants a confirmation round-trip
       # :proposed        naming + vote created
@@ -78,6 +84,7 @@ class FieldSlip
       # Attributed to the reviewer, not the observation's owner: an
       # admin reading someone else's slip is stating their own reading
       # of it, and the vote weight should be theirs to own.
+      #
       # `Vote.validate_value` runs `to_f` first, so it answers 0.0 -- not
       # nil -- for a missing or unparseable value. 0 is DELETE_VOTE, and
       # `change_vote` reads it as "remove this vote", so relying on `||`
@@ -87,7 +94,7 @@ class FieldSlip
       # offers it.
       def cast_vote(naming)
         value = Vote.validate_value(@vote)
-        value = Vote::MIN_POS_VOTE if value.nil? || value == Vote::DELETE_VOTE
+        value = DEFAULT_VOTE if value.nil? || value == Vote::DELETE_VOTE
         Observation::NamingConsensus.new(@observation).
           change_vote(naming, value, @user)
       end
