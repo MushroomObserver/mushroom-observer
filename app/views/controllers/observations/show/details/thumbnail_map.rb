@@ -1,39 +1,31 @@
 # frozen_string_literal: true
 
-# "Map" panel on the observation show page. Displays a small static
-# globe image with a red pin at the observation's lat/long (and a
-# bounding box for the location footprint when available), all
-# wired to the `thumbnail-map` Stimulus controller — the controller
-# zooms / pans the image client-side. Heading link toggles the
-# panel off via a user-pref endpoint.
+# Small static globe map with a red pin at the observation's lat/long
+# (and a bounding box for the location footprint when available),
+# rendered as a line of the "Observation details" panel just under the
+# location info. Wired to the `thumbnail-map` Stimulus controller,
+# which zooms / pans the image client-side.
 #
 # `coordinates` computes the (n, s, e, w, lat, long, x, y) tuple
 # for the map marker.
-class Views::Controllers::Observations::Show::ThumbnailMapPanel < Views::Base
+class Views::Controllers::Observations::Show::Details::ThumbnailMap <
+  Views::Base
   include Phlex::Rails::Helpers::ImageTag
   include Phlex::Rails::Helpers::ImageURL
 
   prop :obs, ::Observation
 
   def view_template
-    Panel(panel_id: "observation_thumbnail_map",
-          attributes: {
-            data: { controller: "thumbnail-map",
-                    coordinates: { x: x, y: y }.to_json,
-                    map_url: map_observation_path(id: @obs.id) }
-          }) do |panel|
-      panel.with_heading { :map.ti }
-      panel.with_heading_links { heading_links }
-      panel.with_body { render_body }
+    li(id: "observation_thumbnail_map",
+       class: "obs-thumbnail-map",
+       data: { controller: "thumbnail-map",
+               coordinates: { x: x, y: y }.to_json,
+               map_url: map_observation_path(id: @obs.id) }) do
+      render_body
     end
   end
 
   private
-
-  def heading_links
-    Link(type: :icon,
-         tab: ::Tab::Observation::HideThumbnailMap.new(observation: @obs))
-  end
 
   def render_body
     div(class: "thumbnail-map-container",

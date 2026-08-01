@@ -2079,8 +2079,6 @@
   show_observation_manage_species_lists: Manage Observation Lists
   show_observation_add_to_species_list: Add to an Observation List
   show_observation_send_question: Send Observer a Question
-  show_observation_hide_map: Hide thumbnail map.
-  show_observation_thumbnail_map_hidden: Thumbnail map hidden. To re-enable this feature, go to your "[:app_preferences]":/account/preferences/edit page.
   show_observation_add_link_dialog: "Enter a link here to this observation on another website. Use the full URL, including \"https://\":"
   remove_object_confirm: Remove [type] from this [association]?
   show_observation_archive_link: Show Archive Record
