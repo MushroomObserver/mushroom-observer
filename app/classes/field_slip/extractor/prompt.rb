@@ -73,14 +73,20 @@ class FieldSlip
       # Initials for Collector / ID By. Same reasoning: return the
       # abbreviation verbatim when it is not in the table, so the
       # reviewer sees an unknown one rather than a plausible wrong name.
+      # The table is a reading aid, not a substitution rule. Expanding
+      # "dcs" to "Dorothy Smullen" destroys the value: the initials
+      # resolve to a User two ways (this alias table, and a login
+      # lookup) while the expanded display name resolves neither, so MO
+      # can no longer link the note to the person. Transcribe; MO
+      # expands.
       def user_table
         rows = alias_rows("User")
         return nil if rows.empty?
 
         "\"Collector\" and \"ID By\" are often initials. This project " \
           "uses:\n#{rows}\n" \
-          "Expand an entry that appears in the table. Return anything " \
-          "else verbatim."
+          "Use the table only to read the handwriting. Return what is " \
+          "WRITTEN -- the initials, not the expanded name."
       end
 
       def alias_rows(target_type)

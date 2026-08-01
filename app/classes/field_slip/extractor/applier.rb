@@ -11,6 +11,8 @@ class FieldSlip
     # becomes a proposed naming, which is a different act with its own
     # name-creation and voting rules, so it is left to the caller.
     class Applier
+      ID_BY_KEY = :Field_Slip_ID_By
+
       # `chosen` is {slip field => edited value} for the ticked fields.
       # `inat_code` says whether "Other Codes" holds an iNaturalist
       # observation id, which is stored as a link rather than as the
@@ -62,11 +64,25 @@ class FieldSlip
         patch = targets.filter_map do |target, value|
           next unless target.to_s.start_with?("notes.")
 
-          [target.to_s.delete_prefix("notes.").to_sym, value]
+          key = target.to_s.delete_prefix("notes.").to_sym
+          [key, note_value(key, value)]
         end.to_h
         return if patch.empty?
 
         @observation.notes = @observation.notes.to_h.merge(patch)
+      end
+
+      # "Id by" names a person, and MO stores that as a textile user
+      # link rather than as bare text -- the same shape
+      # `ObservationsController::ProjectAliases#resolve_id_by_note`
+      # writes, so an observation reads back the same whichever route
+      # entered it. Unmatched text is kept verbatim: whoever identified
+      # a collection is not always an MO user.
+      def note_value(key, value)
+        return value unless key == ID_BY_KEY
+
+        user = resolved_user(value) || User.lookup_unique_text_name(value)
+        user.is_a?(User) ? user.textile_name : value
       end
 
       def assign_collector(value)
