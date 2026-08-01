@@ -15,8 +15,15 @@ class FieldSlip
     PROVIDERS = { gemini: "FieldSlip::Extractor::Gemini" }.freeze
 
     # Bump when the prompt changes in a way that could change results.
-    # Stored on the extract so a stale read is identifiable later.
-    PROMPT_VERSION = "1"
+    # Stored on the extract so a stale read is identifiable later --
+    # which only works if this actually moves, so treat editing
+    # `Prompt` and bumping this as one act.
+    #
+    #   1  initial
+    #   2  user aliases transcribed rather than expanded, so "dcs" stays
+    #      resolvable to a User (extracts at v1 may hold an expanded
+    #      display name that resolves to nobody)
+    PROMPT_VERSION = "2"
 
     # The slip's fields, in the order they appear on the printed form,
     # mapped to where each one lands on the Observation. `nil` means the
