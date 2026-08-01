@@ -66,7 +66,7 @@ svg.placeholder {
 // Vote-link hover/focus color and the user's own already-cast vote
 // (`.image-vote`, plain text) share this -- both need to read on the
 // vote section's dark background while still corresponding to the
-// vote-meter's `$link-color` fill.
+// vote-meter's link-colored default fill (`$VOTE_METER_BAR_COLOR`).
 $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
 
 .vote-section,
@@ -129,6 +129,12 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
 // image vote meter bar
 // --------------------------------------------------
 
+// Track/fill colors are per-theme (`$VOTE_METER_*`, see
+// variables/_template.scss) because the meter sits on the vote
+// section's dark overlay, not the theme's body background -- the
+// white-track default (the #4894 contrast fix) works for most
+// themes, but a theme whose link color is too close to white can
+// invert them instead (Amanita does, #4971).
 .progress.vote-meter {
   margin-left: auto;
   margin-right: auto;
@@ -136,13 +142,13 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
   max-width: 200px;
   height: 7px;
   margin-bottom: 0;
-  background-color: white;
+  background-color: $VOTE_METER_BG_COLOR;
 
   .progress-bar {
     font-size: 12px;
     line-height: 5px;
     color: #FFF;
-    background-color: $link-color;
+    background-color: $VOTE_METER_BAR_COLOR;
   }
 }
 
