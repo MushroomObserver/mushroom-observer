@@ -47,6 +47,16 @@ class FieldSlip::Extractor::PromptTest < UnitTestCase
     assert_includes(text, "#{fixture.name} = ")
   end
 
+  # The user table is a reading aid, not a substitution rule. Expanding
+  # "dcs" to "Dorothy Smullen" destroys the value: the initials resolve
+  # to a User two ways, the expanded display name resolves neither.
+  def test_asks_for_initials_verbatim_not_expanded
+    text = prompt
+
+    assert_match(/Return what is WRITTEN/, text)
+    assert_no_match(/Expand an entry/, text)
+  end
+
   # An abbreviation the project hasn't defined must come back verbatim
   # rather than guessed at -- that is what surfaces it for an admin to
   # add, instead of silently resolving to a plausible wrong site.

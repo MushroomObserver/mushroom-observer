@@ -99,6 +99,10 @@ module Images
 
       assert_equal("Scott Shapiro", extract.value_for("Collector"))
       assert_equal("gemini-3.6-flash", extract.model)
+      # Stamped from the constant, not a literal: a read is only
+      # attributable to the prompt that produced it if these agree.
+      assert_equal(FieldSlip::Extractor::PROMPT_VERSION,
+                   extract.prompt_version)
     end
 
     # A provider failure has to land as a flash, not a 500 -- the button
