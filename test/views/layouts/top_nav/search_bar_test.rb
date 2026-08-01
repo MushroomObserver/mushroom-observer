@@ -9,7 +9,11 @@ class Views::Layouts::TopNav
       @user = users(:rolf)
       viewer = @user
       controller.define_singleton_method(:current_user) { viewer }
-      session = { search_type: "observations" }
+      stub_session(search_type: "observations")
+    end
+
+    def stub_session(search_type:)
+      session = { search_type: search_type }
       controller.define_singleton_method(:session) { session }
     end
 
@@ -71,6 +75,28 @@ class Views::Layouts::TopNav
       assert_html(html,
                   "a[data-toggle='collapse']" \
                   "[data-search-type-target='formToggle'].d-none")
+    end
+
+    # `session[:search_type]` from a query-backed index can hold a
+    # type the select has no option for (e.g. `rss_logs` from the
+    # Activity Log) -- without a fallback the browser would display
+    # the first alphabetical option, "Comments" (#4969).
+    def test_type_select_falls_back_to_observations_for_unselectable_type
+      stub_session(search_type: "rss_logs")
+
+      html = render_bar
+
+      assert_html(html, "select[name='pattern_search[type]'] " \
+                        "option[selected][value='observations']")
+    end
+
+    def test_type_select_keeps_selectable_stored_type
+      stub_session(search_type: "comments")
+
+      html = render_bar
+
+      assert_html(html, "select[name='pattern_search[type]'] " \
+                        "option[selected][value='comments']")
     end
 
     def test_renders_login_reminder_when_no_user
