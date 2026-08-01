@@ -2583,6 +2583,7 @@
   field_slip_extract_current: Currently on observation
   field_slip_extract_use: Save
   field_slip_extract_empty: (empty)
+  field_slip_extract_replacing: will be replaced
   field_slip_extract_check_only: cross-check only
   field_slip_extract_vote: Confidence for the proposed name
   field_slip_extract_id: ID written on the slip

@@ -16,16 +16,24 @@ class FormObject::FieldSlipReview < FormObject::Base
     # Nothing to decide when the model read nothing.
     def blank? = extracted.to_s.strip.empty?
 
-    # A real disagreement -- both sides present and different. This is
-    # what makes the row default to OFF: applying it would overwrite
-    # something a person already entered.
+    # Both sides present and different. Marked in the table so the eye
+    # lands on it, but NOT unticked -- see `default_use?`.
     def conflict?
       return false if blank? || current.to_s.strip.empty?
 
       current.to_s.strip != extracted.to_s.strip
     end
 
-    def default_use? = savable && present? && !conflict?
+    # Everything the model read ticks. Conflicts used to start clear, on
+    # the reasoning that applying the form shouldn't overwrite what a
+    # person entered -- but on the observations this exists for, the
+    # "existing" values are the form's own defaults: today's date, the
+    # owner's name as collector, the project's catch-all location (289
+    # of project 404's 401 observations sit on it). Guarding those made
+    # the common case three clicks per slip to undo defaults nobody
+    # chose. Reviewers read every row anyway, and both values stay on
+    # screen, so the decision is still in front of them.
+    def default_use? = savable && present?
 
     def name_row? = field == FieldSlip::Extractor::NAME_FIELD
     def location_row? = field == FieldSlip::Extractor::LOCATION_FIELD

@@ -2,12 +2,8 @@
 
 # Review form for a machine-read field slip: one row per field the
 # model read, showing what it read next to what the observation already
-# holds, with a tick box deciding whether to apply it.
-#
-# Rows default to ticked only where there is nothing to lose -- a field
-# the observation has no value for. Where the two disagree the box
-# starts clear, so applying the whole form can never silently overwrite
-# something a person entered; the reviewer has to say so.
+# holds, with a tick box deciding whether to apply it. Ticking defaults
+# live in `FormObject::FieldSlipReview::Row`.
 module Views::Controllers::Images::FieldSlipExtracts
   class Form < ::Components::ApplicationForm
     # Superform wants the form's data object as the first positional
@@ -95,10 +91,18 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
+    # Every row ticks by default (see `FieldSlipReview::Row#default_use?`
+    # for why), so a disagreement is marked here rather than signalled by
+    # an empty box.
     def render_current_cell(row)
       current = row.current.to_s
       if current.blank?
         small { plain(:field_slip_extract_empty.l) }
+      elsif row.conflict?
+        div(class: "field-slip-extract-conflict") do
+          plain(current)
+          div { small { plain(:field_slip_extract_replacing.l) } }
+        end
       else
         plain(current)
       end
@@ -181,12 +185,17 @@ module Views::Controllers::Images::FieldSlipExtracts
                                           label: :field_slip_extract_propose.l)
     end
 
-    # Defaults to the weakest positive value: relaying what a slip says
-    # is not asserting the reviewer's own determination.
+    # "Promising" -- a slip's ID is the collector's determination, worth
+    # more than a guess and less than the reviewer's own certainty.
+    #
+    # `to_f` is load-bearing: `Vote.confidence_menu`'s values are Floats
+    # ("2.0"), so passing the Integer constant matched no option and the
+    # browser fell back to the FIRST one -- "I'd Call It That", the
+    # strongest vote and the opposite of the intended default.
     def render_vote_field
       select_field("vote", Vote.confidence_menu,
                    label: :field_slip_extract_vote.l,
-                   value: Vote::MIN_POS_VOTE)
+                   value: Vote::NEXT_BEST_VOTE.to_f)
     end
   end
 end
