@@ -66,6 +66,11 @@ class FieldSlip
     OTHER_CODES_FIELD = "Other Codes"
     INAT_CODE_RE = /\A\d+\z/
 
+    # These four are Notes checkbox fields where a blank carries no signal worth
+    # a reviewer's attention
+    HIDE_WHEN_BLANK_FIELDS = ["Odor/Taste", "Trees/Shrubs", "Substrate",
+                              "Habit"].freeze
+
     def self.inat_code?(value)
       value.to_s.strip.match?(INAT_CODE_RE)
     end

@@ -42,6 +42,11 @@ class FormObject::FieldSlipReview < FormObject::Base
     # autocompleter only renders its dropdown and hidden id field when
     # it has a real label.
     def own_section? = name_row? || location_row?
+
+    # Note fields carry no signal when blank
+    def hide_when_blank?
+      FieldSlip::Extractor::HIDE_WHEN_BLANK_FIELDS.include?(field)
+    end
   end
 
   attribute :rows, default: -> { [] }
@@ -96,7 +101,11 @@ class FormObject::FieldSlipReview < FormObject::Base
     observation.send(target == :place_name ? :where : target)
   end
 
-  def rows_to_show = rows.reject(&:own_section?)
+  def rows_to_show
+    rows.reject(&:own_section?).reject do |row|
+      row.hide_when_blank? && row.blank?
+    end
+  end
 
   def name_row = rows.find(&:name_row?)
   def location_row = rows.find(&:location_row?)

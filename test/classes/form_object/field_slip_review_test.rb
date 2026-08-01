@@ -31,16 +31,30 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     assert_equal(FieldSlip::Extractor::FIELDS.keys, review.rows.map(&:field))
   end
 
-  # A reviewer needs to see which fields the model found nothing for,
-  # not just the ones it read -- so blank rows stay in the table
-  # rather than disappearing.
+  # A reviewer needs the ability to complete fields the model found nothing for
   def test_rows_to_show_includes_blank_rows
     review = build(fields: { "Collector" => "Scott Shapiro" })
 
     assert_equal(FieldSlip::Extractor::FIELDS.keys -
                  [FieldSlip::Extractor::NAME_FIELD,
-                  FieldSlip::Extractor::LOCATION_FIELD],
+                  FieldSlip::Extractor::LOCATION_FIELD] -
+                 FieldSlip::Extractor::HIDE_WHEN_BLANK_FIELDS,
                  review.rows_to_show.map(&:field))
+  end
+
+  # Note checkbox fields stay hidden until the model actually reads them.
+  def test_rows_to_show_drops_blank_checkbox_grid_fields
+    review = build(fields: { "Collector" => "Scott Shapiro" })
+
+    FieldSlip::Extractor::HIDE_WHEN_BLANK_FIELDS.each do |field|
+      assert_not_includes(review.rows_to_show.map(&:field), field)
+    end
+  end
+
+  def test_rows_to_show_includes_a_read_checkbox_grid_field
+    review = build(fields: { "Substrate" => "wood" })
+
+    assert_includes(review.rows_to_show.map(&:field), "Substrate")
   end
 
   # The ID needs a real label to render its autocompleter, which a table

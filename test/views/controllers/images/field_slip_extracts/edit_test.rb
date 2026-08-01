@@ -42,7 +42,16 @@ module Views::Controllers::Images::FieldSlipExtracts
     def test_shows_fields_the_model_read_nothing_for
       html = render_page(fields: { "Collector" => "Scott Shapiro" })
 
-      assert_html(html, "input[name='value[Substrate]']")
+      assert_html(html, "input[name='value[Date]']")
+    end
+
+    def test_hides_blank_checkbox_grid_fields
+      html = render_page(fields: { "Collector" => "Scott Shapiro" })
+
+      assert_no_html(html, "input[name='value[Odor/Taste]']")
+      assert_no_html(html, "input[name='value[Trees/Shrubs]']")
+      assert_no_html(html, "input[name='value[Substrate]']")
+      assert_no_html(html, "input[name='value[Habit]']")
     end
 
     # The name gets an autocompleter, which only renders its dropdown
