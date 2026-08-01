@@ -31,7 +31,7 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     assert_equal(FieldSlip::Extractor::FIELDS.keys, review.rows.map(&:field))
   end
 
-  # A reviewer needs the ability to complete fields the model found nothing for
+  # Reviewer must be able to complete fields the model found nothing for
   def test_rows_to_show_includes_blank_rows
     review = build(fields: { "Collector" => "Scott Shapiro" })
 
