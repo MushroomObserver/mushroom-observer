@@ -37,10 +37,12 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(html, "input[name='use[Collector]']")
     end
 
-    def test_omits_fields_the_model_read_nothing_for
+    # A reviewer needs to see which fields the model found nothing
+    # for, not just the ones it read.
+    def test_shows_fields_the_model_read_nothing_for
       html = render_page(fields: { "Collector" => "Scott Shapiro" })
 
-      assert_no_html(html, "input[name='value[Substrate]']")
+      assert_html(html, "input[name='value[Substrate]']")
     end
 
     # The name gets an autocompleter, which only renders its dropdown
@@ -85,10 +87,21 @@ module Views::Controllers::Images::FieldSlipExtracts
       assert_html(html, "select[name='vote'] option[selected]", count: 1)
     end
 
-    def test_no_name_section_when_nothing_was_read_for_it
+    # The reviewer needs to be able to add an ID by hand even when the
+    # model read nothing, so the section still renders (empty).
+    def test_name_section_renders_when_nothing_was_read_for_it
       html = render_page(fields: { "Collector" => "Scott Shapiro" })
 
-      assert_no_html(html, "#field_slip_extract_name")
+      assert_html(html, "#field_slip_extract_name")
+      assert_html(html, "[name='value[ID]']")
+    end
+
+    # Same reasoning as the name section: a reviewer needs to be able
+    # to fill in Locality by hand even when the model read nothing.
+    def test_location_section_renders_when_nothing_was_read_for_it
+      html = render_page(fields: { "Collector" => "Scott Shapiro" })
+
+      assert_html(html, "#field_slip_extract_location")
     end
 
     # Marked, but still ticked -- see `Row#default_use?`.

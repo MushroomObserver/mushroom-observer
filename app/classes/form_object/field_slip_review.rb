@@ -96,7 +96,7 @@ class FormObject::FieldSlipReview < FormObject::Base
     observation.send(target == :place_name ? :where : target)
   end
 
-  def rows_to_show = rows.compact_blank.reject(&:own_section?)
+  def rows_to_show = rows.reject(&:own_section?)
 
   def name_row = rows.find(&:name_row?)
   def location_row = rows.find(&:location_row?)

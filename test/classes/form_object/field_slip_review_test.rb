@@ -31,11 +31,16 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     assert_equal(FieldSlip::Extractor::FIELDS.keys, review.rows.map(&:field))
   end
 
-  # Nothing read means nothing to review, so the table stays short.
-  def test_rows_to_show_drops_blank_rows
+  # A reviewer needs to see which fields the model found nothing for,
+  # not just the ones it read -- so blank rows stay in the table
+  # rather than disappearing.
+  def test_rows_to_show_includes_blank_rows
     review = build(fields: { "Collector" => "Scott Shapiro" })
 
-    assert_equal(["Collector"], review.rows_to_show.map(&:field))
+    assert_equal(FieldSlip::Extractor::FIELDS.keys -
+                 [FieldSlip::Extractor::NAME_FIELD,
+                  FieldSlip::Extractor::LOCATION_FIELD],
+                 review.rows_to_show.map(&:field))
   end
 
   # The ID needs a real label to render its autocompleter, which a table
@@ -47,6 +52,16 @@ class FormObject::FieldSlipReviewTest < UnitTestCase
     assert_not_includes(review.rows_to_show.map(&:field),
                         FieldSlip::Extractor::NAME_FIELD)
     assert_equal(FieldSlip::Extractor::NAME_FIELD, review.name_row.field)
+  end
+
+  # The name and location sections render even when the model read
+  # nothing for them -- a reviewer still needs to be able to fill
+  # them in by hand.
+  def test_name_and_location_rows_present_even_when_blank
+    review = build(fields: { "Collector" => "Scott Shapiro" })
+
+    assert_predicate(review.name_row, :blank?)
+    assert_predicate(review.location_row, :blank?)
   end
 
   def test_name_row_is_editable_but_not_savable

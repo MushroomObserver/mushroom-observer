@@ -75,6 +75,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # and overridable rather than silent, since the box is free text and
     # someone will eventually write a herbarium number in it.
     def render_inat_flag(row)
+      return if row.blank?
       return unless row.field == ::FieldSlip::Extractor::OTHER_CODES_FIELD
 
       checkbox_field("inat", checked: @review.inat_code,
@@ -82,7 +83,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     def render_confidence(row)
-      return if row.confidence == "high"
+      return if row.blank? || row.confidence == "high"
 
       div do
         small do
@@ -125,7 +126,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # what the slip actually read.
     def render_location_section
       row = @review.location_row
-      return if row.nil? || row.blank?
+      return if row.nil?
 
       panel = Components::Panel.new(panel_id: "field_slip_extract_location")
       render(panel) do |p|
@@ -157,7 +158,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # writing an attribute.
     def render_name_section
       row = @review.name_row
-      return if row.nil? || row.blank?
+      return if row.nil?
 
       # `with_body`, not a bare block: Panel is slot-based, and content
       # passed straight to it is discarded rather than rendered.
