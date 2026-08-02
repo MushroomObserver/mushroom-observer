@@ -356,14 +356,15 @@ mo> ssh images.mushroomobserver.org echo hello world
 # was never released without a restart, which is how the postrotate
 # escalated to a full restart in the first place.
 mo> exit
-# `su mo mo` is required: log/ is owned by mo and group-writable, and
-# logrotate refuses to rotate as root inside a directory a non-root
-# user can write to (symlink-attack guard) -- without it every log is
-# skipped with "parent directory has insecure permissions" and rotation
-# silently never happens. The directory must also not be world-writable
-# (su only vouches for the named user/group):
-root> chown mo:mo /var/web/mushroom-observer/log
-root> chmod 0755 /var/web/mushroom-observer/log
+# `su mo mo`: nightly runs go through /etc/logrotate.conf, whose global
+# `su root adm` (Ubuntu default) already satisfies logrotate's guard
+# against rotating as root in a non-root-writable directory -- rotation
+# works without any su here. But a standalone check of just this file
+# (`logrotate -d /etc/logrotate.d/puma`) lacks the global directive and
+# skips every log with "parent directory has insecure permissions"
+# (log/ is mo-owned and group-writable). Declaring `su mo mo` makes the
+# stanza self-sufficient, and rotated copies come out mo-owned instead
+# of root:adm.
 root> vi /etc/logrotate.d/puma
   /var/web/mushroom-observer/log/*.log {
     su mo mo
