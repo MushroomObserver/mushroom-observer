@@ -77,6 +77,29 @@ class TransferImagesJobTest < ActiveJob::TestCase
     end
   end
 
+  # When a run has both stuck and failed entries, the UploadFailure
+  # retries re-run the whole job -- but the stuck state can't change
+  # between retries, so only the first execution alerts it (Copilot
+  # review on PR #4977).
+  def test_does_not_re_alert_stuck_images_on_retry_executions
+    result = { uploaded: [], deleted: [], completed: [],
+               failed: [[1, :remote1, "640/1.jpg"]], stuck: [5] }
+
+    Image::Processor.stub(:transfer_images, result) do
+      first_run_alerts = capture_alerts do
+        TransferImagesJob.perform_now(image_ids: [1, 5])
+      end
+      assert_equal(1, first_run_alerts.size,
+                   "first execution should alert the stuck image")
+      assert_includes(first_run_alerts.first.message, "processing died?")
+
+      retry_run = TransferImagesJob.new(image_ids: [1, 5])
+      retry_run.executions = 1 # perform_now increments to 2 (a retry)
+      retry_alerts = capture_alerts { retry_run.perform_now }
+      assert_empty(retry_alerts, "retries must not re-emit the stuck alert")
+    end
+  end
+
   private
 
   # Records the exceptions handed to the #alerts pipeline while alerting is

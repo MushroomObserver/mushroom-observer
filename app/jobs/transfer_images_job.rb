@@ -61,8 +61,11 @@ class TransferImagesJob < ApplicationJob
   # Retrying the transfer can't help a stuck image -- its derivative
   # sizes were never generated (processing died mid-#process, #4974) --
   # so don't raise UploadFailure for it; advise reprocessing instead.
+  # First execution only: UploadFailure retries re-run the whole job,
+  # and the stuck state can't change between retries, so re-alerting
+  # on each of the 8 attempts would just spam #alerts.
   def alert_stuck(stuck)
-    return if stuck.blank?
+    return if stuck.blank? || executions > 1
 
     alert("#{stuck.size} image(s) have missing local sizes past " \
           "#{StaleImageFilesJob::STALE_THRESHOLD.inspect} - processing " \
