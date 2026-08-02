@@ -347,6 +347,14 @@ mo> ssh-keygen -t rsa
 mo> ssh images.mushroomobserver.org echo hello world
 
 # Set up logrotate to archive puma and rails logs.
+# copytruncate, NOT a puma signal/restart: puma and rails keep their log
+# file descriptors, so no restart is needed to release the files, and a
+# rotation can never kill an in-flight request (#4974: a daily
+# `service puma restart` here SIGTERMed an image resize mid-`convert`,
+# stranding a half-processed image). The old `kill -HUP` variant only
+# reopened puma's own stdout/stderr logs anyway -- rails' production.log
+# was never released without a restart, which is how the postrotate
+# escalated to a full restart in the first place.
 mo> exit
 root> vi /etc/logrotate.d/puma
   /var/web/mushroom-observer/log/*.log {
@@ -356,9 +364,9 @@ root> vi /etc/logrotate.d/puma
     dateext
     compress
     delaycompress
+    copytruncate
     sharedscripts
     postrotate
-      kill -HUP `cat /var/web/mushroom-observer/tmp/pids/puma.pid`
       mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }
