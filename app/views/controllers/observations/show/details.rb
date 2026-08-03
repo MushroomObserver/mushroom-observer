@@ -57,7 +57,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   end
 
   def render_thumbnail_map
-    render(Views::Controllers::Observations::Show::Details::ThumbnailMap.new(
+    render(Views::Controllers::Observations::Show::ThumbnailMap.new(
              obs: @obs, user: @user
            ))
   end

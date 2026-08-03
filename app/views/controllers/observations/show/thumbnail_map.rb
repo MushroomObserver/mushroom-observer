@@ -10,8 +10,7 @@
 #
 # `coordinates` computes the (n, s, e, w, lat, long, x, y) tuple
 # for the map marker.
-class Views::Controllers::Observations::Show::Details::ThumbnailMap <
-  Views::Base
+class Views::Controllers::Observations::Show::ThumbnailMap < Views::Base
   include Phlex::Rails::Helpers::ImageTag
   include Phlex::Rails::Helpers::ImageURL
 

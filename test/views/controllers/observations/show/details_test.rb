@@ -94,16 +94,24 @@ class Views::Controllers::Observations::Show::DetailsTest <
   # The map renders as a line of the details panel, under the location
   # info (after the where/GPS lines, before "Who:").
   def test_renders_thumbnail_map_under_location_info
+    @obs.lat = 34.1622
+    @obs.lng = -118.3444
+
     html = render(panel_with(@obs))
 
     lis = Nokogiri::HTML5.fragment(html).css("#observation_details li")
-    ids_and_classes = lis.map { |li| li["id"] || li["class"] }
-    map_index = ids_and_classes.index("observation_thumbnail_map")
-    who_index = ids_and_classes.index { |c| c.to_s.include?("obs-who") }
-    where_index = ids_and_classes.index { |c| c.to_s.include?("obs-where") }
+    class_tokens = lis.map { |li| (li["id"] || li["class"]).to_s.split }
+    where_index = class_tokens.index { |c| c.include?("obs-where") }
+    gps_index = class_tokens.index { |c| c.include?("obs-where-gps") }
+    map_index = class_tokens.index do |c|
+      c.include?("observation_thumbnail_map")
+    end
+    who_index = class_tokens.index { |c| c.include?("obs-who") }
 
+    assert_not_nil(gps_index, "expected the GPS line in the panel")
     assert_not_nil(map_index, "expected the thumbnail map in the panel")
-    assert_operator(where_index, :<, map_index)
+    assert_operator(where_index, :<, gps_index)
+    assert_operator(gps_index, :<, map_index)
     assert_operator(map_index, :<, who_index)
   end
 

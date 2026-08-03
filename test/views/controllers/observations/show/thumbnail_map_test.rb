@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Views::Controllers::Observations::Show::Details::ThumbnailMapTest <
+class Views::Controllers::Observations::Show::ThumbnailMapTest <
   ComponentTestCase
   def setup
     super
@@ -41,7 +41,7 @@ class Views::Controllers::Observations::Show::Details::ThumbnailMapTest <
   private
 
   def map_with(obs, user)
-    Views::Controllers::Observations::Show::Details::ThumbnailMap.new(
+    Views::Controllers::Observations::Show::ThumbnailMap.new(
       obs: obs, user: user
     )
   end
