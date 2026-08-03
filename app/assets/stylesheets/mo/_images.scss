@@ -1,5 +1,3 @@
-@use "sass:color";
-
 .thumbnail-container {
   background-color: rgba(0,0,0, 0.33);
   // background-color: rgba(0,0,0, 0.12); // for matrix_box_carousels
@@ -63,31 +61,9 @@ svg.placeholder {
   }
 }
 
-// Vote-link hover/focus color and the user's own already-cast vote
-// (`.image-vote`, plain text) share this -- both need to read on the
-// vote section's dark background while still corresponding to the
-// vote-meter's `$link-color` fill.
-$vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
-
 .vote-section,
 .vote-section-lightbox {
   padding: 0.5em 0.25em;
-
-  a,
-  button[type=submit]:not(.btn) {
-    color: white !important;
-    transition: color 0.3s ease;
-
-    &:hover,
-    &:focus {
-      color: $vote-link-lightened-color !important;
-      text-decoration: none;
-    }
-  }
-
-  .image-vote {
-    color: $vote-link-lightened-color;
-  }
 }
 
 .vote-section {
@@ -109,9 +85,42 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
 // context -- a plain inline caller that isn't the lightbox, e.g. the
 // image show page) intentionally has no styling here yet.
 
-.matrix-box {
-  .vote-buttons {
-    font-size: 0.875em;
+// Members carry no `.btn` class (`variant: :strip`), so
+// `.btn-group-xs > .btn` sizing never applies -- padding/font-size
+// are custom instead.
+.vote-btn-group {
+  font-size: 1.1rem;
+
+  > form.button_to,
+  > .image-vote {
+    display: inline-block;
+    margin: 0;
+
+    &:not(:first-child) {
+      border-left: 1px solid rgba($white, 0.5);
+    }
+  }
+
+  > .image-vote {
+    padding: 0.25rem 0.5rem;
+    border-top: 1px solid rgba($white, 0.5);
+    border-bottom: 1px solid rgba($white, 0.5);
+  }
+
+  // Padding/color/hover live on the inner <button>, not the
+  // <form.button_to> wrapper.
+  form.button_to button[type=submit].image-vote-link {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    color: white !important;
+    transition: color 0.3s ease, background-color 0.3s ease;
+
+    &:hover,
+    &:focus {
+      color: $black !important;
+      background-color: $white;
+      text-decoration: none;
+    }
   }
 }
 
@@ -129,6 +138,8 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
 // image vote meter bar
 // --------------------------------------------------
 
+// Half-opacity track (rather than a solid theme color) so the solid
+// `$white` fill always shows up against it.
 .progress.vote-meter {
   margin-left: auto;
   margin-right: auto;
@@ -136,13 +147,13 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
   max-width: 200px;
   height: 7px;
   margin-bottom: 0;
-  background-color: white;
+  background-color: rgba($white, 0.5);
 
   .progress-bar {
     font-size: 12px;
     line-height: 5px;
-    color: #FFF;
-    background-color: $link-color;
+    color: $white;
+    background-color: $white;
   }
 }
 
