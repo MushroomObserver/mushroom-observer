@@ -52,13 +52,13 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     ObservationFragment(type: :when, obs: @obs)
     ObservationFragment(type: :where, obs: @obs, user: @user)
     ObservationFragment(type: :where_gps, obs: @obs, user: @user)
-    render_thumbnail_map if @user&.thumbnail_maps
+    render_thumbnail_map
     ObservationFragment(type: :who, obs: @obs, user: @user)
   end
 
   def render_thumbnail_map
     render(Views::Controllers::Observations::Show::Details::ThumbnailMap.new(
-             obs: @obs
+             obs: @obs, user: @user
            ))
   end
 

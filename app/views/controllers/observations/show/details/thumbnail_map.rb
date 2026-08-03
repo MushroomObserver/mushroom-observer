@@ -4,7 +4,9 @@
 # (and a bounding box for the location footprint when available),
 # rendered as a line of the "Observation details" panel just under the
 # location info. Wired to the `thumbnail-map` Stimulus controller,
-# which zooms / pans the image client-side.
+# which zooms / pans the image client-side. Renders nothing without a
+# logged-in viewer with the `thumbnail_maps` preference on -- callers
+# can render this unconditionally.
 #
 # `coordinates` computes the (n, s, e, w, lat, long, x, y) tuple
 # for the map marker.
@@ -14,8 +16,11 @@ class Views::Controllers::Observations::Show::Details::ThumbnailMap <
   include Phlex::Rails::Helpers::ImageURL
 
   prop :obs, ::Observation
+  prop :user, _Nilable(::User), default: nil
 
   def view_template
+    return unless @user&.thumbnail_maps
+
     li(id: "observation_thumbnail_map",
        class: "obs-thumbnail-map",
        data: { controller: "thumbnail-map",

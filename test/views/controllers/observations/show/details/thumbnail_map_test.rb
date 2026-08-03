@@ -7,10 +7,11 @@ class Views::Controllers::Observations::Show::Details::ThumbnailMapTest <
   def setup
     super
     @obs = observations(:detailed_unknown_obs)
+    @user = users(:rolf)
   end
 
   def test_renders_thumbnail_map
-    html = render(map_with(@obs))
+    html = render(map_with(@obs, @user))
 
     assert_html(html, "li#observation_thumbnail_map" \
                       "[data-controller='thumbnail-map']" \
@@ -23,11 +24,25 @@ class Views::Controllers::Observations::Show::Details::ThumbnailMapTest <
     assert_html(html, "img#globe_image[data-thumbnail-map-target='globe']")
   end
 
+  def test_renders_nothing_when_pref_off
+    @user.thumbnail_maps = false
+
+    html = render(map_with(@obs, @user))
+
+    assert_equal("", html)
+  end
+
+  def test_renders_nothing_for_logged_out_viewer
+    html = render(map_with(@obs, nil))
+
+    assert_equal("", html)
+  end
+
   private
 
-  def map_with(obs)
+  def map_with(obs, user)
     Views::Controllers::Observations::Show::Details::ThumbnailMap.new(
-      obs: obs
+      obs: obs, user: user
     )
   end
 end
