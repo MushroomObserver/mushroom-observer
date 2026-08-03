@@ -20,11 +20,12 @@ export default class extends Controller {
   // Bootstrap's own `container: false`, which inserts the tooltip as
   // the trigger's next DOM sibling. clipboard_controller.js depends on
   // that default to find and rewrite its own tooltip text, so this
-  // must never become the global default. Pass a CSS selector (e.g.
-  // ".panel") to append the tooltip to the trigger's closest matching
-  // ancestor instead -- needed when the trigger sits inside a tightly
-  // sized container (e.g. the image vote button group) that clips or
-  // misplaces a sibling-inserted tooltip.
+  // must never become the global default. Pass a CSS selector to
+  // append the tooltip to the trigger's closest matching ancestor
+  // instead -- needed when the trigger sits inside a tightly sized
+  // container (e.g. the image vote button group) that clips or
+  // misplaces a sibling-inserted tooltip. `closest()` accepts a
+  // comma-separated selector list.
   tipTargetConnected(element) {
     const containerSelector = element.dataset.tooltipContainer
     const container = containerSelector

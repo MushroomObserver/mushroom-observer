@@ -175,7 +175,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
       target: image_vote_path(image_id: @image.id, value: vote),
       title: image_vote_as_help_string(vote),
       data: { image_id: @image.id, value: vote, placement: "bottom",
-              tooltip_container: ".panel" }
+              tooltip_container: ".vote-section, .vote-section-lightbox" }
     )
   end
 end
