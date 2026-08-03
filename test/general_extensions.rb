@@ -647,6 +647,21 @@ module GeneralExtensions
     ActiveJob::Base.logger = old_job_logger
   end
 
+  # Minitest 5's own assert_equal(nil, ...) deprecation warning
+  # doesn't include a caller location in this app's test output, so a
+  # stray leftover call is unfindable by grep -- its nil-ness only
+  # shows up at runtime. Preview Minitest 6's actual future behavior
+  # now (fails outright via refute_nil -- see minitest/assertions.rb)
+  # instead of Minitest 5's silent warning: a real assertion failure
+  # comes with a full backtrace automatically, pointing straight at
+  # the offending call site.
+  def assert_equal(exp, act, msg = nil)
+    return assert_not_nil(exp, msg || "Use assert_nil if expecting nil.") if
+      exp.nil?
+
+    super
+  end
+
   # assert_equal raises a deprecation warning in Minitest 5 when the
   # expected value is nil. Use this instead of assert_equal when the
   # expected value may legitimately be nil.
