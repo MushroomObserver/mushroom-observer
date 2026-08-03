@@ -190,7 +190,7 @@ module Images
 
       put(:update, params: { image_id: @image.id })
 
-      assert_equal(was, @obs.reload.collector)
+      assert_equal_even_if_nil(was, @obs.reload.collector)
       assert_redirected_to(permanent_observation_path(@obs.id))
     end
 
