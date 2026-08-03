@@ -437,11 +437,19 @@ class ImageTest < UnitTestCase
     # looking like a real failure. Capturing also pins the logging
     # contract itself, which the old passthrough never asserted.
     logged = nil
+    notified = []
     img.stub(:move_original, true) do
       Image::Processor.stub(:new, failing_processor) do
         Rails.env.stub(:test?, false) do
           Rails.logger.stub(:error, ->(msg) { logged = msg }) do
-            assert_not(img.process_image)
+            ExceptionNotifier.stub(:notifiers, [:slack]) do
+              ExceptionNotifier.stub(
+                :notify_exception,
+                ->(exception, **_o) { notified << exception }
+              ) do
+                assert_not(img.process_image)
+              end
+            end
           end
         end
       end
@@ -449,6 +457,10 @@ class ImageTest < UnitTestCase
     assert(img.errors[:image].any?)
     assert_includes(logged, "Image::Processor failed for image #{img.id}")
     assert_includes(logged, "boom")
+    # A processing failure happens while a user is watching, yet used to
+    # alert nobody (#4974) -- it must reach the same pipeline job
+    # failures do.
+    assert_equal(["boom"], notified.map(&:message))
   end
 
   # Transfer-to-image-server is no longer part of Image::Processor#process

@@ -347,18 +347,36 @@ mo> ssh-keygen -t rsa
 mo> ssh images.mushroomobserver.org echo hello world
 
 # Set up logrotate to archive puma and rails logs.
+# copytruncate, NOT a puma signal/restart: puma and rails keep their log
+# file descriptors, so no restart is needed to release the files, and a
+# rotation can never kill an in-flight request (#4974: a daily
+# `service puma restart` here SIGTERMed an image resize mid-`convert`,
+# stranding a half-processed image). The old `kill -HUP` variant only
+# reopened puma's own stdout/stderr logs anyway -- rails' production.log
+# was never released without a restart, which is how the postrotate
+# escalated to a full restart in the first place.
 mo> exit
+# `su mo mo`: nightly runs go through /etc/logrotate.conf, whose global
+# `su root adm` (Ubuntu default) already satisfies logrotate's guard
+# against rotating as root in a non-root-writable directory -- rotation
+# works without any su here. But a standalone check of just this file
+# (`logrotate -d /etc/logrotate.d/puma`) lacks the global directive and
+# skips every log with "parent directory has insecure permissions"
+# (log/ is mo-owned and group-writable). Declaring `su mo mo` makes the
+# stanza self-sufficient, and rotated copies come out mo-owned instead
+# of root:adm.
 root> vi /etc/logrotate.d/puma
   /var/web/mushroom-observer/log/*.log {
+    su mo mo
     daily
     missingok
     rotate 7
     dateext
     compress
     delaycompress
+    copytruncate
     sharedscripts
     postrotate
-      kill -HUP `cat /var/web/mushroom-observer/tmp/pids/puma.pid`
       mv /var/web/mushroom-observer/log/*.gz /var/web/mushroom-observer/log/old/
     endscript
   }

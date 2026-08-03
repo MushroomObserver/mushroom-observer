@@ -136,10 +136,10 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "rss-what") do
       h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-        a(href: url_for(@data[:what].show_link_args)) do
-          render_title
-        end
-        render_id_badge(@data[:what])
+        Link(type: :get, name: @data[:name],
+             target: @data[:what].show_link_args) { render_title }
+        whitespace
+        IDBadge(object: @data[:what], size: :md, extra_class: nil)
       end
 
       render_identify_ui if @identify
@@ -152,11 +152,6 @@ class Components::Matrix::Box < Components::Base
              name: @data[:name],
              type: @data[:type]
            ))
-  end
-
-  def render_id_badge(obj)
-    whitespace
-    IDBadge(object: obj, size: :md, extra_class: nil)
   end
 
   def render_occurrence_link
