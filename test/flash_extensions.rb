@@ -112,33 +112,37 @@ module FlashExtensions
       args[:object_error_attribute] = object_error_attribute
     end
 
+    expected, actual, msg = flash_comparison(expect, got, lvl, on_fail, args)
+    assert_equal_even_if_nil(expected, actual, msg)
+
+    clear_flash
+  end
+
+  # The four `assert_flash` cases don't all compare `expect` against
+  # the same thing (an Integer means "compare to the flash level", a
+  # Symbol/Array means "compare to the rendered text") -- so pick the
+  # right (expected, actual, message) triple here, then the caller
+  # runs one nil-aware `assert_equal_even_if_nil` for all of them.
+  def flash_comparison(expect, got, lvl, on_fail, args)
     if !expect && !got
-      # Expected no flash, got no flash — the `assert_no_flash` happy
-      # path. No assertion needed; falling through to the `else`
-      # branch below ran `assert_equal(nil, nil)` and tripped
-      # Minitest's `assert_equal nil, …` deprecation.
-      pass
+      [expect, got, nil] # both nil -- the assert_no_flash happy path
     elsif !expect && got
-      assert_nil(
-        got,
-        "#{on_fail}Shouldn't have been any flash errors. Got #{got.inspect}."
-      )
+      [expect, got,
+       "#{on_fail}Shouldn't have been any flash errors. Got #{got.inspect}."]
     elsif expect && !got
-      assert_nil(expect, "#{on_fail}Expected a flash error.  Got nothing.")
+      [expect, got, "#{on_fail}Expected a flash error.  Got nothing."]
     elsif expect.is_a?(Integer)
-      assert_equal(expect, lvl,
-                   "#{on_fail}Wrong flash error level. " \
-                   "Message: level #{lvl}, #{got.inspect}.")
+      [expect, lvl,
+       "#{on_fail}Wrong flash error level. " \
+       "Message: level #{lvl}, #{got.inspect}."]
     elsif expect.is_a?(Symbol) || expect.is_a?(Array)
       text = wrapped_flash_text(expect, args)
-      assert_equal(text, got,
-                   "#{on_fail}Got the wrong flash error(s). " \
-                   "Expected: #{text.inspect}.  Got: #{got.inspect}.")
+      [text, got,
+       "#{on_fail}Got the wrong flash error(s). " \
+       "Expected: #{text.inspect}.  Got: #{got.inspect}."]
     else
       raise_bad_flash_expectation(expect)
     end
-
-    clear_flash
   end
 
   def clear_flash
