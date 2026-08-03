@@ -3,16 +3,15 @@
 # Main observation show page — the parent that composes every
 # obs-show sub-panel (`Components::ImageGallery`,
 # `Details`, `NameInfoPanel`, `SpeciesListsPanel`, `ProjectsPanel`,
-# `MatchingObservationsPanel`, `ThumbnailMapPanel`, namings
-# partial, comments partial, `Views::Layouts::ObjectFooter`) into a
-# two-column layout.
+# `MatchingObservationsPanel`, namings partial, comments partial,
+# `Views::Layouts::ObjectFooter`) into a two-column layout.
 #
 # Renders `add_show_title` + owner-naming line + pager / interest /
 # edit icons (logged-in only) into the page chrome, then a `.row`
 # with the carousel on the left and observation details / name
 # info / species lists / projects / matching obs on the right.
 # Second `.row` below: namings table + comments on the left,
-# thumbnail map on the right (logged-in only).
+# notes panel on the right.
 #
 # `owner_naming_line` is now `Observations::OwnerNamingLine`;
 # `link_to_display_name_brief_authors` is now
@@ -115,7 +114,7 @@ module Views::Controllers::Observations
              ))
     end
 
-    # ---- secondary row: namings + comments | thumbnail map ----
+    # ---- secondary row: namings + comments | notes ----
 
     def render_secondary_row
       Row do
@@ -123,9 +122,6 @@ module Views::Controllers::Observations
           render_namings_and_comments
         end
         div(class: content_for(:right_columns)) do
-          if @user&.thumbnail_maps
-            render(ThumbnailMapPanel.new(obs: @observation))
-          end
           render(NotesPanel.new(obs: @observation, user: @user))
         end
       end

@@ -476,7 +476,6 @@ MushroomObserver::Application.routes.draw do
   get("/javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
-  get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   resources :licenses, id: /\d+/
 

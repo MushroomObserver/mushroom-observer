@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # "Observation details" panel — an optional external-links "Shared
-# with" badge line, when / where / who, optional GPS, and field slip.
+# with" badge line, when / where / who, optional GPS, a thumbnail map
+# under the location info (logged-in viewers with the `thumbnail_maps`
+# pref on), and field slip.
 # The center column of the obs show page (and also rendered into the
 # naming form pages). Specimen-available status + collection-numbers /
 # herbarium-records / sequences live in the separate `SpecimenPanel`,
@@ -50,7 +52,14 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     ObservationFragment(type: :when, obs: @obs)
     ObservationFragment(type: :where, obs: @obs, user: @user)
     ObservationFragment(type: :where_gps, obs: @obs, user: @user)
+    render_thumbnail_map
     ObservationFragment(type: :who, obs: @obs, user: @user)
+  end
+
+  def render_thumbnail_map
+    render(Views::Controllers::Observations::Show::ThumbnailMap.new(
+             obs: @obs, user: @user
+           ))
   end
 
   # ---- field slip -----------------------------------------------
