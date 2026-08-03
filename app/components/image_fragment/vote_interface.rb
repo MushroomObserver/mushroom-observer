@@ -174,7 +174,8 @@ class Components::ImageFragment::VoteInterface < Components::Base
       class: "image-vote-link",
       target: image_vote_path(image_id: @image.id, value: vote),
       title: image_vote_as_help_string(vote),
-      data: { image_id: @image.id, value: vote, placement: "bottom" }
+      data: { image_id: @image.id, value: vote, placement: "bottom",
+              tooltip_container: ".panel" }
     )
   end
 end
