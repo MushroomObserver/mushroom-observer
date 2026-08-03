@@ -165,7 +165,7 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     was = @obs.collector
     apply_fields({ "Collector" => "   " })
 
-    assert_equal(was, @obs.collector)
+    assert_equal_even_if_nil(was, @obs.collector)
   end
 
   # The two review-only fields have no target, so they can never be
@@ -177,7 +177,7 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     apply_fields({ "Field Slip Code" => "NEMF-99999",
                    FieldSlip::Extractor::NAME_FIELD => "Coprinus comatus" })
 
-    assert_equal(slip_before, @obs.field_slip&.code)
+    assert_equal_even_if_nil(slip_before, @obs.field_slip&.code)
     assert_equal(namings_before, @obs.namings.count,
                  "the ID is proposed elsewhere, never applied here")
   end
@@ -186,7 +186,7 @@ class FieldSlip::Extractor::ApplierTest < UnitTestCase
     before = @obs.attributes.dup
     apply_fields({})
 
-    assert_equal(before["collector"], @obs.collector)
+    assert_equal_even_if_nil(before["collector"], @obs.collector)
     assert_equal(before["when"], @obs.when)
   end
 end
