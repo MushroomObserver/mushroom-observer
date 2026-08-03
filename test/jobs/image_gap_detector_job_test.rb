@@ -4,7 +4,7 @@ require("test_helper")
 
 class ImageGapDetectorJobTest < ActiveJob::TestCase
   def test_no_alert_when_no_gaps_found
-    result = { gaps: [], regenerated: [], unregenerable: [] }
+    result = { gaps: [], regenerated: [], unregenerable: [], unchecked: [] }
 
     Image::Processor.stub(:detect_gaps, result) do
       alerts = capture_alerts { ImageGapDetectorJob.perform_now }
@@ -17,7 +17,8 @@ class ImageGapDetectorJobTest < ActiveJob::TestCase
       gaps: [[1, :remote1, "960/1.jpg"], [1, :remote2, "640/1.jpg"],
              [2, :remote1, "orig/2.jpg"]],
       regenerated: [1],
-      unregenerable: [2]
+      unregenerable: [2],
+      unchecked: []
     }
 
     Image::Processor.stub(:detect_gaps, result) do
@@ -29,6 +30,21 @@ class ImageGapDetectorJobTest < ActiveJob::TestCase
       assert_includes(alerts.first.message, "1 regenerated")
       assert_includes(alerts.first.message, "1 could not be regenerated")
       assert_includes(alerts.first.message, "[1, 2]")
+    end
+  end
+
+  # A run that could not list a server verified nothing for those images
+  # -- it must say so (#4974), not read as a clean run.
+  def test_alerts_when_images_could_not_be_checked
+    result = { gaps: [], regenerated: [], unregenerable: [],
+               unchecked: [3, 4] }
+
+    Image::Processor.stub(:detect_gaps, result) do
+      alerts = capture_alerts { ImageGapDetectorJob.perform_now }
+
+      assert_equal(1, alerts.size)
+      assert_includes(alerts.first.message, "Could not check 2 image(s)")
+      assert_includes(alerts.first.message, "[3, 4]")
     end
   end
 

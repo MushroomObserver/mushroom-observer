@@ -861,7 +861,21 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   rescue StandardError => e
     Rails.logger.error("Image::Processor failed for image #{id}: " \
                        "#{e.full_message(highlight: false)}")
+    notify_image_process_failure(e)
     fail_image_process
+  end
+
+  # Same Slack routing (and gating) job failures get via ApplicationJob's
+  # rescue_from. Processing runs synchronously in the web request and its
+  # failure is rescued into a validation error above, so without this the
+  # exception never reaches exception_notification's middleware and
+  # nothing but production.log records it (#4974) -- while every
+  # neighbouring pipeline step (TransferImagesJob, StaleImageFilesJob,
+  # GpsLeakDetectorJob) alerts on failure.
+  def notify_image_process_failure(error)
+    return unless ExceptionNotifier.notifiers.any?
+
+    ExceptionNotifier.notify_exception(error, data: { image: id })
   end
 
   def fail_image_process # rubocop:disable Naming/PredicateMethod
