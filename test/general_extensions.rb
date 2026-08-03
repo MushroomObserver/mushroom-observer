@@ -623,10 +623,18 @@ module GeneralExtensions
     str == template
   end
 
+  # ActiveJob::Base.logger holds its own reference, copied from
+  # Rails.logger once at boot -- it's not a live delegate, so a
+  # job's log output (e.g. ActiveJob::LogSubscriber's own
+  # retry-exhaustion/discard messages) wouldn't be captured by
+  # swapping Rails.logger alone.
   def with_captured_logger
     log_output = StringIO.new
+    new_logger = Logger.new(log_output)
     old_logger = Rails.logger
-    Rails.logger = Logger.new(log_output)
+    old_job_logger = ActiveJob::Base.logger
+    Rails.logger = new_logger
+    ActiveJob::Base.logger = new_logger
 
     yield
 
@@ -634,6 +642,7 @@ module GeneralExtensions
     log_output.string
   ensure
     Rails.logger = old_logger
+    ActiveJob::Base.logger = old_job_logger
   end
 
   # assert_equal raises a deprecation warning in Minitest 5 when the

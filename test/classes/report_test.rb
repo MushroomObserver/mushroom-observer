@@ -998,11 +998,18 @@ class ReportTest < UnitTestCase
     report.body
 
     site_lookup_fails = -> { raise(ActiveRecord::RecordNotFound) }
-    ExternalSite.stub(:mycoportal, site_lookup_fails) do
-      assert_nothing_raised do
-        report.mark_exported!
+    log = with_captured_logger do
+      ExternalSite.stub(:mycoportal, site_lookup_fails) do
+        assert_nothing_raised do
+          report.mark_exported!
+        end
       end
     end
+
+    assert_includes(
+      log, "MyCoPortal export-tracking failed: ActiveRecord::RecordNotFound",
+      "mark_exported! should log the swallowed lookup failure"
+    )
   end
 
   def hashed_expect(obs)
