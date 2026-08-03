@@ -65,9 +65,10 @@ svg.placeholder {
 
 // Vote-link hover/focus color and the user's own already-cast vote
 // (`.image-vote`, plain text) share this -- both need to read on the
-// vote section's dark background while still corresponding to the
-// vote-meter's link-colored default fill (`$VOTE_METER_BAR_COLOR`).
-$vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
+// vote section's dark background while still carrying the theme's
+// link color (the vote-meter fill itself is a fixed `$white`, not
+// theme-dependent -- see below).
+$vote-link-highlight-color: color.scale($link-color, $lightness: 66%);
 
 .vote-section,
 .vote-section-lightbox {
@@ -80,13 +81,14 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
 
     &:hover,
     &:focus {
-      color: $vote-link-lightened-color !important;
+      color: $vote-link-highlight-color !important;
       text-decoration: none;
     }
   }
 
   .image-vote {
-    color: $vote-link-lightened-color;
+    color: $black;
+    background-color: $white;
   }
 }
 
@@ -115,6 +117,35 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
   }
 }
 
+// Vote links as a real Components::ButtonGroup (`.btn-group`), but
+// deliberately not styled with Bootstrap's own `.btn`/`.btn-sm`/
+// `.btn-xs` -- those are all too large/padded for this strip, and
+// `variant: :strip` (see VoteInterface) already omits `.btn` framing.
+// `font-size: 85%` replaces the old `.small` utility class that used
+// to wrap these links (same value, just baked in here instead of a
+// wrapper div) so the visible text size is unchanged. Divider borders
+// between members replace the old literal "|" text separator.
+.vote-btn-group {
+  font-size: 85%;
+
+  // Named explicitly, not `> *` -- `form.button_to`
+  // (`_form_elements.scss`) resets every button_to form to `display:
+  // inline; margin: 0; padding: 0;` with selector specificity (0,1,1).
+  // A bare `.vote-btn-group > *` is only (0,1,0), so it would lose to
+  // that reset and silently no-op on every clickable vote link; naming
+  // `form.button_to` here raises us to (0,2,1).
+  > form.button_to,
+  > .image-vote {
+    display: inline-block;
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+
+    &:not(:first-child) {
+      border-left: 1px solid rgba($white, 0.5);
+    }
+  }
+}
+
 .image-sizer:hover,
 .image-sizer:focus {
   .vote-section,
@@ -129,12 +160,10 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
 // image vote meter bar
 // --------------------------------------------------
 
-// Track/fill colors are per-theme (`$VOTE_METER_*`, see
-// variables/_template.scss) because the meter sits on the vote
-// section's dark overlay, not the theme's body background -- the
-// white-track default (the #4894 contrast fix) works for most
-// themes, but a theme whose link color is too close to white can
-// invert them instead (Amanita does, #4971).
+// Half-opacity track (rather than a solid theme color) so the solid
+// `$white` fill always shows up against it, on every theme, with no
+// per-theme override needed -- it composites against the vote
+// section's dark overlay behind it (#4971).
 .progress.vote-meter {
   margin-left: auto;
   margin-right: auto;
@@ -142,13 +171,13 @@ $vote-link-lightened-color: color.scale($link-color, $lightness: 66%);
   max-width: 200px;
   height: 7px;
   margin-bottom: 0;
-  background-color: $VOTE_METER_BG_COLOR;
+  background-color: rgba($white, 0.5);
 
   .progress-bar {
     font-size: 12px;
     line-height: 5px;
-    color: #FFF;
-    background-color: $VOTE_METER_BAR_COLOR;
+    color: $white;
+    background-color: $white;
   }
 }
 

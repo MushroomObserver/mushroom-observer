@@ -72,6 +72,6 @@ class Components::Button::CRUDBase < Components::Button
       data: button_data
     }
     opts[:params] = @params if @params
-    opts.merge(@html_attrs.except(:class))
+    opts.deep_merge(@html_attrs.except(:class))
   end
 end

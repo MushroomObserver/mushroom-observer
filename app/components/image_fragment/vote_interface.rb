@@ -121,23 +121,21 @@ class Components::ImageFragment::VoteInterface < Components::Base
 
   def render_vote_buttons(vote_percentage)
     div(class: "vote-buttons mt-2") do
-      div(
-        class: "image-vote-links",
+      ButtonGroup(
+        class: "vote-btn-group",
         id: vote_html_id("image_vote_links")
       ) do
-        div(class: "text-center small") do
-          render_user_vote_link
-          render_image_vote_links
-        end
-
-        span(
-          class: "hidden data_container",
-          data: {
-            id: @image.id,
-            percentage: vote_percentage.to_s
-          }
-        )
+        render_user_vote_link
+        render_image_vote_links
       end
+
+      span(
+        class: "hidden data_container",
+        data: {
+          id: @image.id,
+          percentage: vote_percentage.to_s
+        }
+      )
     end
   end
 
@@ -145,14 +143,10 @@ class Components::ImageFragment::VoteInterface < Components::Base
     return unless @user && @image.users_vote(@user).present?
 
     render_vote_link(0)
-    whitespace
   end
 
   def render_image_vote_links
-    ::Image.all_votes.each_with_index do |vote, index|
-      plain("|") if index.positive?
-      render_vote_link(vote)
-    end
+    ::Image.all_votes.each { |vote| render_vote_link(vote) }
   end
 
   def render_vote_link(vote)
@@ -166,20 +160,21 @@ class Components::ImageFragment::VoteInterface < Components::Base
   end
 
   def render_current_vote(vote)
-    span(class: "image-vote") { image_vote_as_short_string(vote) }
+    Button(
+      tag: :span, variant: :strip, class: "image-vote active"
+    ) { plain(image_vote_as_short_string(vote)) }
   end
 
   def render_vote_button(vote)
-    vote_text = vote.zero? ? "(x)" : image_vote_as_short_string(vote)
-
     Button(
       type: :put,
       variant: :strip,
-      name: vote_text,
+      icon: (:x if vote.zero?),
+      name: vote.zero? ? :clear.ti : image_vote_as_short_string(vote),
       class: "image-vote-link",
       target: image_vote_path(image_id: @image.id, value: vote),
       title: image_vote_as_help_string(vote),
-      data: { image_id: @image.id, value: vote }
+      data: { image_id: @image.id, value: vote, placement: "bottom" }
     )
   end
 end
