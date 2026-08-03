@@ -118,6 +118,8 @@ module FlashExtensions
     clear_flash
   end
 
+  private
+
   # The four `assert_flash` cases don't all compare `expect` against
   # the same thing (an Integer means "compare to the flash level", a
   # Symbol/Array means "compare to the rendered text") -- so pick the
@@ -149,8 +151,6 @@ module FlashExtensions
     @controller.instance_variable_set(:@last_notice, nil)
     session[:notice] = nil
   end
-
-  private
 
   # object_error_type:/object_error_attribute: must be passed together
   # (a lone one silently degrades to a plain-tag comparison instead of

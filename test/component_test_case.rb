@@ -152,8 +152,8 @@ class ComponentTestCase < UnitTestCase
       actual_value = element[attr_name.to_s]
       assert_equal_even_if_nil(
         expected_value, actual_value,
-        "Expected #{attr_name}='#{expected_value}', " \
-        "got #{attr_name}='#{actual_value}'"
+        "Expected #{attr_name}=#{expected_value.inspect}, " \
+        "got #{attr_name}=#{actual_value.inspect}"
       )
     end
   end
