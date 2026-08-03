@@ -3,6 +3,8 @@
 require("test_helper")
 
 class TransferImagesJobTest < ActiveJob::TestCase
+  include GeneralExtensions
+
   def test_calls_processor_transfer_images_and_logs_summary
     result = { uploaded: ["320/1.jpg"], deleted: ["960/1.jpg"],
                completed: [1], failed: [], stuck: [] }
@@ -44,17 +46,21 @@ class TransferImagesJobTest < ActiveJob::TestCase
     job.executions = 7 # perform_now increments to 8
     job.exception_executions = { "[TransferImagesJob::UploadFailure]" => 7 }
 
-    Image::Processor.stub(:transfer_images, result) do
-      alerts = capture_alerts { job.perform_now }
-
-      assert_equal(1, alerts.size)
-      assert_instance_of(JobAlert, alerts.first)
-      assert_includes(alerts.first.message,
-                      "Transfer failed for 1 file(s) after 8 attempts")
-      assert_includes(alerts.first.message,
-                      "TransferImagesJob.perform_now(image_ids: [1])")
-      assert_no_enqueued_jobs(only: TransferImagesJob)
+    alerts = nil
+    log = with_captured_logger do
+      Image::Processor.stub(:transfer_images, result) do
+        alerts = capture_alerts { job.perform_now }
+      end
     end
+
+    assert_equal(1, alerts.size)
+    assert_instance_of(JobAlert, alerts.first)
+    assert_includes(alerts.first.message,
+                    "Transfer failed for 1 file(s) after 8 attempts")
+    assert_includes(alerts.first.message,
+                    "TransferImagesJob.perform_now(image_ids: [1])")
+    assert_includes(log, "Stopped retrying TransferImagesJob")
+    assert_no_enqueued_jobs(only: TransferImagesJob)
   end
 
   # A stuck image (derivative sizes never generated -- processing died,
