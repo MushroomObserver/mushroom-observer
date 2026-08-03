@@ -630,9 +630,11 @@ module GeneralExtensions
   # swapping Rails.logger alone.
   def with_captured_logger
     log_output = StringIO.new
-    new_logger = Logger.new(log_output)
     old_logger = Rails.logger
     old_job_logger = ActiveJob::Base.logger
+    new_logger = Logger.new(log_output)
+    new_logger.level = old_logger.level
+    new_logger.formatter = old_logger.formatter
     Rails.logger = new_logger
     ActiveJob::Base.logger = new_logger
 
