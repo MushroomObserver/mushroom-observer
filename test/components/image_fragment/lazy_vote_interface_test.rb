@@ -8,7 +8,7 @@ class ImageFragmentLazyVoteInterfaceTest < ComponentTestCase
     @image = images(:connected_coprinus_comatus_image)
   end
 
-  def test_renders_lazy_turbo_frame_for_overlay_context
+  def test_renders_lazy_turbo_frame_for_matrix_context
     html = render(Components::ImageFragment::LazyVoteInterface.new(
                     image: @image
                   ))
@@ -17,7 +17,7 @@ class ImageFragmentLazyVoteInterfaceTest < ComponentTestCase
                       "[loading='lazy'][src]")
     frame_src = Nokogiri::HTML5.fragment(html).at_css("turbo-frame")["src"]
     assert_includes(frame_src, "/images/#{@image.id}/vote")
-    assert_includes(frame_src, "context=overlay")
+    assert_includes(frame_src, "context=matrix")
   end
 
   def test_renders_lazy_turbo_frame_for_lightbox_context

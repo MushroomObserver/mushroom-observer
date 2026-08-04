@@ -173,13 +173,23 @@ tbody.collapse.in {
 }
 
 .glyphicon {
-  top: 3px;
+  // Cancels Bootstrap's own .glyphicon { top: 1px; } base rule --
+  // MO's default (outside a .btn, see below) is flush, not offset.
+  top: 0;
   font-size: 112%;
 
   // &.link-icon {
   //   background-color: white;
   //   border-radius: 50%;
   // }
+}
+
+// top: 3px is a .btn-specific baseline correction, not a general
+// glyphicon offset -- scoped here instead of on the bare .glyphicon
+// selector above so it doesn't push every non-button icon (inline
+// links, standalone icons, etc.) down by 3px too.
+.btn > .glyphicon {
+  top: 3px;
 }
 
 .spinner-right {
