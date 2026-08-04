@@ -79,8 +79,10 @@ class ImageTest < UnitTestCase
 
     assert_equal(3, img.reload.users_vote(mary))
     assert_equal(original.to_i, img.updated_at.to_i)
+    assert(img.record_timestamps,
+           "instance record_timestamps must be restored after the vote")
     assert(Image.record_timestamps,
-           "record_timestamps must be restored after the vote")
+           "class-level record_timestamps must never be touched")
   end
 
   def test_copyright_logging

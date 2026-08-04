@@ -1147,12 +1147,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     # we don't need to do it twice).  vote_cache is derived data: keep
     # updated_at (and the cache-busting URL token derived from it, which
     # would invalidate every browser's cached renditions) stable.
+    # Suppressed on this instance only -- the class-level flag is shared
+    # across threads and would leak into unrelated concurrent saves.
     if save_changes
       begin
-        self.class.record_timestamps = false
+        self.record_timestamps = false
         save_without_our_callbacks
       ensure
-        self.class.record_timestamps = true
+        self.record_timestamps = true
       end
     end
     # update +updated_at+ for any associated observations, in order to update
