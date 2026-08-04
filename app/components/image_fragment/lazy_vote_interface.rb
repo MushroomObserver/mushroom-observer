@@ -12,10 +12,10 @@
 # many matrix boxes doesn't fire a request per box on load. See #4895.
 #
 # @example
-#   ImageFragment(type: :lazy_vote_interface, image: @image, context: :overlay)
+#   ImageFragment(type: :lazy_vote_interface, image: @image, context: :matrix)
 class Components::ImageFragment::LazyVoteInterface < Components::Base
   prop :image, ::Image
-  prop :context, Symbol, default: :overlay
+  prop :context, Symbol, default: :matrix
 
   def view_template
     turbo_frame_tag(
