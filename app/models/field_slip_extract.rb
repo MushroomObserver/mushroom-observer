@@ -43,13 +43,18 @@ class FieldSlipExtract < AbstractModel
       user: user, provider: result.provider, model: result.model,
       prompt_version: prompt_version,
       data: { "fields" => result.fields, "confidence" => result.confidence,
-              "raw" => result.raw }
+              "slip_present" => result.slip_present, "raw" => result.raw }
     )
     extract
   end
 
   def fields = data.to_h["fields"] || {}
   def confidence = data.to_h["confidence"] || {}
+
+  # True only when the read explicitly reported no slip in the image.
+  # Reads stored before the provider reported it answer false, same as
+  # a read that did see one -- absence of the flag is not evidence.
+  def no_slip? = data.to_h["slip_present"] == false
 
   def value_for(slip_field) = fields[slip_field]
 

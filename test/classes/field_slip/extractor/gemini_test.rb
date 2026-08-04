@@ -48,8 +48,8 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
                 headers: { "Content-Type" => "application/json" })
   end
 
-  def json_payload(fields: {}, confidence: {})
-    { fields: fields, confidence: confidence }.to_json
+  def json_payload(fields: {}, confidence: {}, **extra)
+    { fields: fields, confidence: confidence, **extra }.to_json
   end
 
   def extract(api_key: KEY, **)
@@ -76,6 +76,35 @@ class FieldSlip::Extractor::GeminiTest < UnitTestCase
     assert_equal("Scott Shapiro", result.value_for("Collector"))
     assert_equal("high", result.confidence_for("Collector"))
     assert_equal("gemini", result.provider)
+  end
+
+  def test_reports_when_the_image_holds_no_slip
+    stub_gemini(json_payload(fields: { "Collector" => nil },
+                             confidence: {}, slip_present: false))
+
+    result = extract
+
+    assert(result.no_slip?)
+    assert_equal(false, result.slip_present)
+  end
+
+  def test_a_read_that_saw_a_slip_is_not_flagged
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" },
+                             confidence: { "Collector" => "high" },
+                             slip_present: true))
+
+    assert_not(extract.no_slip?)
+  end
+
+  # A provider (or prompt version) that never reported the flag must not
+  # read as "no slip here" -- absence is not evidence.
+  def test_missing_slip_present_is_not_treated_as_absent
+    stub_gemini(json_payload(fields: { "Collector" => "Scott Shapiro" }))
+
+    result = extract
+
+    assert_not(result.no_slip?)
+    assert_nil(result.slip_present)
   end
 
   # The alias is what gets requested; the concrete model the API reports

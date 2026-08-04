@@ -23,7 +23,10 @@ class FieldSlip
     #   2  user aliases transcribed rather than expanded, so "dcs" stays
     #      resolvable to a User (extracts at v1 may hold an expanded
     #      display name that resolves to nobody)
-    PROMPT_VERSION = "2"
+    #   3  an image with no slip in it answers slip_present false and
+    #      all-null fields (extracts at v2 or earlier may hold values
+    #      invented from the prompt's own alias tables)
+    PROMPT_VERSION = "3"
 
     # The slip's fields, in the order they appear on the printed form,
     # mapped to where each one lands on the Observation. `nil` means the
@@ -73,15 +76,24 @@ class FieldSlip
     CONFIDENCE_LEVELS = %w[high medium low].freeze
 
     # What one provider run produced: the raw response (stored verbatim
-    # for provenance), the per-field values, and the per-field
-    # confidence the model reported.
-    Result = Data.define(:provider, :model, :raw, :fields, :confidence) do
+    # for provenance), the per-field values, the per-field confidence
+    # the model reported, and whether it saw a slip at all.
+    Result = Data.define(:provider, :model, :raw, :fields, :confidence,
+                         :slip_present) do
+      def initialize(slip_present: nil, **)
+        super
+      end
+
       def value_for(slip_field) = fields[slip_field]
 
       def confidence_for(slip_field)
         level = confidence[slip_field].to_s.downcase
         CONFIDENCE_LEVELS.include?(level) ? level : "low"
       end
+
+      # Nil for a read from a provider (or a prompt version) that never
+      # reported it -- only an explicit false means "no slip here".
+      def no_slip? = slip_present == false
     end
 
     def self.for(provider)

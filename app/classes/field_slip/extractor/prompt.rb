@@ -24,11 +24,23 @@ class FieldSlip
 
       private
 
+      # The image may be a specimen photo rather than a slip: an
+      # observation carries several photos and only some show one.
+      # Without the escape hatch below, an image with no slip in it is
+      # still answered field by field, and the tables further down --
+      # there to help read handwriting -- become the source of the
+      # answer: a run has already returned a full location name lifted
+      # verbatim out of the location table for a photo containing no
+      # slip at all.
       def preamble
         "Extract the data written on this mushroom field slip. The slip " \
           "is a printed form; most values are handwritten. Ignore the " \
           "specimen photographed beside it -- do not identify the " \
-          "mushroom yourself, only transcribe what the slip says."
+          "mushroom yourself, only transcribe what the slip says.\n\n" \
+          "If this image does not show a field slip, set \"slip_present\" " \
+          "to false and every field to null. Do not infer any value from " \
+          "the tables below -- they are reading aids for handwriting that " \
+          "is actually in the image, never a source of answers."
       end
 
       def field_rules
@@ -112,6 +124,7 @@ class FieldSlip
           Return ONLY a JSON object, with no markdown fence, of the form:
 
           {
+            "slip_present": true | false,
             "fields": { <each key above>: <string or null> },
             "confidence": { <each key above>: "high" | "medium" | "low" },
             "notes": "anything about readability worth a reviewer knowing"

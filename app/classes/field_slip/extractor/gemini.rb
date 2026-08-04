@@ -38,7 +38,8 @@ class FieldSlip
         Result.new(provider: "gemini",
                    model: raw["modelVersion"].presence || @model, raw: raw,
                    fields: payload["fields"] || {},
-                   confidence: payload["confidence"] || {})
+                   confidence: payload["confidence"] || {},
+                   slip_present: payload["slip_present"])
       end
 
       class MissingKey < StandardError
