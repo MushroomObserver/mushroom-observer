@@ -20,11 +20,8 @@ class DropdownTest < ComponentTestCase
   # without wrapping it in a Collection). Exercises the
   # `when ::Tab::Base then [section.to_a]` branch.
   def test_renders_single_tab_base_section
-    html = render(Components::Dropdown.new(
-                    id: "single_tab_toggle",
-                    menu_id: "single_tab_menu",
-                    label: "Menu"
-                  )) do |menu|
+    html = render_dropdown(id: "single_tab_toggle",
+                           menu_id: "single_tab_menu") do |menu|
       menu.section(Tab::Project::Summary.new(project: @project))
     end
 
@@ -74,11 +71,7 @@ class DropdownTest < ComponentTestCase
   # redundant inside a menu (the label is already visible) and
   # Bootstrap's tooltip JS can interfere with dropdown click handling.
   def test_tooltip_data_stripped_from_link
-    html = render(Components::Dropdown.new(
-                    id: "tip_toggle",
-                    menu_id: "tip_menu",
-                    label: "Menu"
-                  )) do |menu|
+    html = render_dropdown(id: "tip_toggle", menu_id: "tip_menu") do |menu|
       menu.section([["Edit", "/edit",
                      { data: { tooltip_target: "tip",
                                title: "Edit this",
@@ -97,11 +90,8 @@ class DropdownTest < ComponentTestCase
   # Exercises the `else []` branch + the early-return in
   # `view_template`.
   def test_nil_section_renders_nothing
-    html = render(Components::Dropdown.new(
-                    id: "empty_toggle",
-                    menu_id: "empty_menu",
-                    label: "Empty"
-                  )) do |menu|
+    html = render_dropdown(id: "empty_toggle", menu_id: "empty_menu",
+                           label: "Empty") do |menu|
       menu.section(nil)
     end
 
@@ -110,12 +100,13 @@ class DropdownTest < ComponentTestCase
 
   private
 
+  def render_dropdown(id:, menu_id:, label: "Menu", &block)
+    render(Components::Dropdown.new(id: id, menu_id: menu_id, label: label),
+           &block)
+  end
+
   def render_dropdown_with_button(button:)
-    render(Components::Dropdown.new(
-             id: "test_toggle",
-             menu_id: "test_menu",
-             label: "Menu"
-           )) do |menu|
+    render_dropdown(id: "test_toggle", menu_id: "test_menu") do |menu|
       menu.section([["Action", "/some/path", { button: button }]])
     end
   end
