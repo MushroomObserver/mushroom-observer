@@ -89,6 +89,46 @@ class Views::Controllers::Observations::Show::DetailsTest <
     assert_equal("observation_external_links", bodies.last["id"])
   end
 
+  # --- Thumbnail map (#4967) ---
+
+  # The map renders as a line of the details panel, under the location
+  # info (after the where/GPS lines, before "Who:").
+  def test_renders_thumbnail_map_under_location_info
+    @obs.lat = 34.1622
+    @obs.lng = -118.3444
+
+    html = render(panel_with(@obs))
+
+    lis = Nokogiri::HTML5.fragment(html).css("#observation_details li")
+    class_tokens = lis.map { |li| (li["id"] || li["class"]).to_s.split }
+    where_index = class_tokens.index { |c| c.include?("obs-where") }
+    gps_index = class_tokens.index { |c| c.include?("obs-where-gps") }
+    map_index = class_tokens.index do |c|
+      c.include?("observation_thumbnail_map")
+    end
+    who_index = class_tokens.index { |c| c.include?("obs-who") }
+
+    assert_not_nil(gps_index, "expected the GPS line in the panel")
+    assert_not_nil(map_index, "expected the thumbnail map in the panel")
+    assert_operator(where_index, :<, gps_index)
+    assert_operator(gps_index, :<, map_index)
+    assert_operator(map_index, :<, who_index)
+  end
+
+  def test_does_not_render_thumbnail_map_when_pref_off
+    @user.thumbnail_maps = false
+
+    html = render(panel_with(@obs))
+
+    assert_no_html(html, "#observation_thumbnail_map")
+  end
+
+  def test_does_not_render_thumbnail_map_for_logged_out_viewer
+    html = render(panel_with(@obs, nil))
+
+    assert_no_html(html, "#observation_thumbnail_map")
+  end
+
   # --- Collector / Entered by (#4211) ---
 
   def test_who_collector_is_creator_no_entered_by
