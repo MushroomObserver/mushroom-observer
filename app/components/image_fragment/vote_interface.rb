@@ -14,45 +14,37 @@
 #   ImageFragment(type: :vote_interface, user: @user, image: @image,
 #                 votes: true)
 #
-# @example Lightbox caption (always visible, no hover ancestor, and a
-# second live copy can coexist in the DOM alongside the in-page one)
+# @example Show-page / matrix-box carousel
+#   ImageFragment(type: :vote_interface, user: @user, image: @image,
+#                 votes: true, context: :carousel)
+#
+# @example Lightbox caption (a second live copy can coexist in the DOM
+# alongside the in-page one)
 #   ImageFragment(type: :vote_interface, user: @user, image: @image,
 #                 votes: true, context: :lightbox)
 class Components::ImageFragment::VoteInterface < Components::Base
   prop :user, _Nilable(::User)
   prop :image, ::Image
   prop :votes, _Boolean, default: true
-  # Where this is being rendered -- two independent concerns hang off
-  # it, deliberately not conflated:
-  #
-  # Styling: `:overlay` (the default) gets the absolutely positioned,
-  # hover-revealed treatment (`.vote-section`, see mo/_images.scss)
-  # meant for sitting on top of a thumbnail inside an `.image-sizer`
-  # ancestor (InteractiveImage/matrix-box). `:lightbox` gets the same
-  # dark background/link colors via `.vote-section-lightbox`, minus
-  # the absolute positioning -- always visible, not hover-revealed.
-  # Any other context falls back to `.vote-section-inline`, which has
-  # no styling yet -- a future non-lightbox inline caller (the image
-  # show page has been mentioned) that isn't designed yet.
-  #
-  # Element ids: only `:lightbox` gets every id this component emits
-  # (`vote_html_id`) prefixed. That's not a styling concern -- it's
-  # because the lightbox is the one context where a *second* live copy
-  # of the same image's vote UI can end up in the DOM simultaneously
-  # (opening the lightbox injects its caption's copy alongside the
-  # original in-page one), which would otherwise collide on id. A
-  # future inline-but-not-lightbox context with only ever one copy on
-  # the page doesn't need the prefix. `Images::VotesController#update`'s
-  # turbo-stream response updates both the plain and `lightbox_`-
-  # prefixed ids after a vote so both copies stay in sync.
-  prop :context, Symbol, default: :overlay
+  # Which surface this renders on -- governs styling class, tooltip
+  # container, and id prefixing. `:matrix`/`:carousel` are both
+  # overlay-styled (`.vote-section`) and both point tooltips up; only
+  # the container differs -- `:carousel` targets the full-width
+  # `.carousel-caption` instead of `.vote-section` itself, since a
+  # carousel's `.vote-section` is narrower (auto-width, centered) and
+  # would crowd a wide tooltip at the edges. `:lightbox` gets
+  # `.vote-section-lightbox`, keeps the downward tooltip (nothing
+  # below it to collide with), and is the only context whose ids get
+  # `lightbox_`-prefixed, since it's the only one where a second live
+  # copy can coexist in the DOM.
+  prop :context, Symbol, default: :matrix
 
   # The root element's own id -- also what a lazy-loading Turbo Frame
   # wrapper (see #4895) must be given so Turbo can find and swap this
   # component's response out of it. Single source of truth for both
   # `#vote_html_id("image_vote")` below and any external caller that
   # needs the id before the component itself has rendered.
-  def self.frame_id(image_id:, context: :overlay)
+  def self.frame_id(image_id:, context: :matrix)
     prefix = context == :lightbox ? "lightbox_" : ""
     "#{prefix}image_vote_#{image_id}"
   end
@@ -73,7 +65,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
   def section_classes
     class_names(
       case @context
-      when :overlay then "vote-section"
+      when :matrix, :carousel then "vote-section"
       when :lightbox then "vote-section-lightbox"
       else "vote-section-inline"
       end,
@@ -172,10 +164,20 @@ class Components::ImageFragment::VoteInterface < Components::Base
       icon: (:x if vote.zero?),
       name: vote.zero? ? :clear.ti : image_vote_as_short_string(vote),
       class: "image-vote-link",
-      target: image_vote_path(image_id: @image.id, value: vote),
+      target: image_vote_path(image_id: @image.id, value: vote,
+                              context: @context),
       title: image_vote_as_help_string(vote),
-      data: { image_id: @image.id, value: vote, placement: "bottom",
-              tooltip_container: ".vote-section, .vote-section-lightbox" }
+      data: { image_id: @image.id, value: vote,
+              placement: @context == :lightbox ? "bottom" : "top",
+              tooltip_container: tooltip_container }
     )
+  end
+
+  def tooltip_container
+    case @context
+    when :carousel then ".carousel-caption"
+    when :lightbox then ".vote-section-lightbox"
+    else ".vote-section"
+    end
   end
 end
