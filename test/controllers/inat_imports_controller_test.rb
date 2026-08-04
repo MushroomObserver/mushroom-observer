@@ -466,6 +466,54 @@ class InatImportsControllerTest < FunctionalTestCase
       count: 1,
       on_fail: "Confirmation page should warn about previously imported IDs"
     )
+    assert_select(
+      "#expected_count", "0",
+      "Expected imports should exclude an id already linked to a live " \
+      "MO Observation, not just count iNat's raw total_results"
+    )
+    assert_select(
+      "div.ml-3 b",
+      text: "#{:inat_import_confirm_already_imported_caption.l}:",
+      count: 1
+    )
+  end
+
+  # Regression: with an explicit id list, the "Expected imports" count and
+  # the "Already imported" breakdown row must reflect MO's own ExternalLink
+  # bookkeeping, not just iNat's (skipped-for-id-lists) without_field filter.
+  def test_confirm_expected_count_excludes_previously_imported_id
+    user = users(:rolf)
+    linked_id = "1123456"
+    fresh_id = "1123457"
+    site = ExternalSite.inaturalist
+    obs = Observation.create(
+      where: "North Falmouth, Massachusetts, USA",
+      user: user,
+      when: "2024-09-08"
+    )
+    ExternalLink.create!(
+      user: user, observation: obs, external_site: site,
+      relationship: :import, external_id: linked_id,
+      url: "#{site.base_url}#{linked_id}"
+    )
+    stub_request(
+      :get, %r{api\.inaturalist\.org/v1/observations}
+    ).to_return(status: 200, body: { total_results: 2 }.to_json)
+    login(user.login)
+
+    post(:create,
+         params: { inat_ids: "#{linked_id},#{fresh_id}",
+                   inat_username: "anything", consent: 1 })
+
+    assert_response(:success)
+    assert_select("#requested_count", "2",
+                  "Requested should be the raw count of listed ids")
+    assert_select(
+      "#expected_count", "1",
+      "Expected should drop the id already linked to a live MO Observation"
+    )
+    assert_select("#total_ignored_count", "1",
+                  "Total ignored should count the previously imported id")
   end
 
   def test_create_previously_imported
@@ -868,7 +916,10 @@ class InatImportsControllerTest < FunctionalTestCase
 
   def test_confirm_shows_unlicensed_obs_count
     user = users(:rolf)
-    inat_ids = "12345"
+    # Not "12345" -- that id collides with the imported_inat_obs_inat_link
+    # fixture's external_id, an unrelated previously-imported id that would
+    # otherwise get (correctly) subtracted from the estimate.
+    inat_ids = "912345"
 
     # All queries return 1 (1 obs in scope, which is unlicensed)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).

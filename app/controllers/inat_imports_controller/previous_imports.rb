@@ -18,9 +18,20 @@ module InatImportsController::PreviousImports
   def previously_imported_links
     return ExternalLink.none if inat_id_list.blank?
 
-    ExternalLink.import.where(target_type: "Observation",
-                              external_site: inat_site,
-                              external_id: inat_id_list.map(&:to_s))
+    @previously_imported_links ||= ExternalLink.import.where(
+      target_type: "Observation", external_site: inat_site,
+      external_id: inat_id_list.map(&:to_s)
+    )
+  end
+
+  # Count of listed ids already linked to a live MO Observation. Used by
+  # Estimators to keep the Confirm page's counts in sync with the dedup
+  # check InatImportsController::PreviousImports and Inat::ObservationImporter
+  # both rely on -- iNat's own without_field filter is skipped for id lists
+  # (see estimate_without_field_filter), so this local check is the only
+  # thing that knows about them at estimate time.
+  def previously_imported_count
+    @previously_imported_count ||= previously_imported_links.count
   end
 
   def inat_site
