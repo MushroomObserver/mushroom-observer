@@ -147,9 +147,14 @@ module Views::Layouts
     # its own import-provenance UI (Observation#source_noteworthy?,
     # #import_link). Duck-typed since most models ObjectFooter renders
     # for have no concept of "source" at all.
+    #
+    # Checks import_link before source_noteworthy? (which also reads
+    # import_link internally) so an imported observation short-circuits
+    # on one import_link lookup instead of two.
     def show_source_credit?
-      @obj.respond_to?(:source_noteworthy?) && @obj.source_noteworthy? &&
-        !(@obj.respond_to?(:import_link) && @obj.import_link)
+      return false if @obj.respond_to?(:import_link) && @obj.import_link
+
+      @obj.respond_to?(:source_noteworthy?) && @obj.source_noteworthy?
     end
 
     def render_source_credit
